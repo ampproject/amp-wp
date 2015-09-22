@@ -1,4 +1,11 @@
 <?php
+/**
+ * Name: AMP
+ * Description: Add AMP support to your WordPress site.
+ * Author: Automattic
+ * Version: 0.1
+ * License: GPLv2
+ */
 
 define( 'AMP_QUERY_VAR', 'amp' );
 
