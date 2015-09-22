@@ -30,7 +30,7 @@ function wpcom_amp_add_blavatar( $metadata, $post ) {
 		return $metadata;
 	}
 
-	$size = 200;
+	$size = 60;
 	$blavatar_domain = blavatar_domain( site_url() );
 	if ( blavatar_exists( $blavatar_domain ) ) {
 		$metadata['logo'] = array(
