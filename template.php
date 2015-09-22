@@ -5,6 +5,7 @@
 	<meta charset="utf-8">
 	<link rel="canonical" href="<?php echo esc_url( $amp_post->get_canonical_url() ); ?>" />
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 	<?php foreach ( $amp_post->get_scripts() as $element => $script ) : ?>
 		<script element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
 	<?php endforeach; ?>	
@@ -12,6 +13,12 @@
 	<script type="application/ld+json"><?php echo json_encode( $amp_post->get_metadata() ); ?></script>
 	<?php do_action( 'amp_head', $amp_post ); ?>
 	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+	<style amp-custom>
+	body {
+		margin: 0;
+		font-family: 'Open Sans', Sans-serif;
+	}
+	</style>
 </head>
 <body>
 <h1><?php echo esc_html( $amp_post->get_title() ); ?></h1>
