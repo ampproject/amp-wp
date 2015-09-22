@@ -4,6 +4,7 @@
 
 add_action( 'pre_amp_render', function() {
 	add_filter( 'post_flair_disable', '__return_true', 99 );
+	remove_filter( 'the_title', 'widont' );
 } );
 
 add_action( 'amp_head', function( $amp_post ) {
