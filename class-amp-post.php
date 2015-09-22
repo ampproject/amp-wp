@@ -3,6 +3,7 @@
 class AMP_Post {
 	private $ID;
 	private $post;
+	private $author;
 	private $content;
 	private $metadata;
 	private $scripts;
@@ -10,6 +11,7 @@ class AMP_Post {
 	function __construct( $post_id ) {
 		$this->ID = $post_id;
 		$this->post = get_post( $post_id );
+		$this->author = get_userdata( $this->post->post_author );
 
 		$this->scripts = array();
 
@@ -29,12 +31,20 @@ class AMP_Post {
 		return $this->metadata;
 	}
 
+	function get_author_avatar( $size = 24 ) {
+		return get_avatar( $this->author->user_email, 24 );
+	}
+
+	function get_author_name() {
+		return $this->metadata['author']['name'];
+	}
+
 	function get_machine_date() {
 		return $this->metadata['datePublished'];
 	}
 
 	function get_human_date() {
-		return get_the_date( '', $this->ID );
+		return sprintf( _x( 'Posted %s ago', '%s = human-readable time difference', 'amp' ), human_time_diff( get_the_date( 'U', $this->ID ) ) );
 	}
 
 	function get_content() {
@@ -46,8 +56,6 @@ class AMP_Post {
 	}
 
 	private function build_metadata() {
-		$author = get_userdata( $this->post->post_author );
-
 		$data = array(
 			'@context' => 'http://schema.org',
 			'@type' => 'BlogPosting', // TODO: change this for pages
@@ -56,7 +64,7 @@ class AMP_Post {
 			'datePublished' => get_the_date( 'c', $this->ID ),
 			'author' => array(
 				'@type' => 'Person',
-				'name' => $author->display_name,
+				'name' => $this->author->display_name,
 			),
 			'publisher' => array(
 				'@type' => 'Organization',
