@@ -11,6 +11,7 @@
 	<script src="https://www.gstatic.com/amphtml/v0.js"></script>
 	<script type="application/ld+json"><?php echo json_encode( $amp_post->get_metadata() ); ?></script>
 	<?php do_action( 'amp_head', $amp_post ); ?>
+	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 </head>
 <body>
 <h1><?php echo esc_html( $amp_post->get_title() ); ?></h1>
