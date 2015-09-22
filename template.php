@@ -17,5 +17,6 @@
 <h1><?php echo esc_html( $amp_post->get_title() ); ?></h1>
 <time datetime="<?php echo esc_attr( $amp_post->get_machine_date() ); ?>"><?php echo esc_html( $amp_post->get_human_date() ); ?></time>
 <?php echo $amp_post->get_content(); ?>
+<!-- <?php printf( 'Generated in %ss', timer_stop() ); ?> -->
 </body>
 </html>
