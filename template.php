@@ -8,7 +8,7 @@
 	<?php foreach ( $amp_post->get_scripts() as $element => $script ) : ?>
 		<script element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
 	<?php endforeach; ?>	
-	<script src="https://www.gstatic.com/amphtml/v0.js"></script>
+	<script src="https://cdn.ampproject.org/v0.js" async></script>
 	<script type="application/ld+json"><?php echo json_encode( $amp_post->get_metadata() ); ?></script>
 	<?php do_action( 'amp_head', $amp_post ); ?>
 	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
