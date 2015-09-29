@@ -1,5 +1,7 @@
 <?php
 
+require( dirname( __FILE__ ) . '/class-amp-content.php' );
+
 class AMP_Post {
 	private $ID;
 	private $post;
@@ -76,9 +78,8 @@ class AMP_Post {
 	}
 
 	private function build_content() {
-		$content = apply_filters( 'the_content', $this->post->post_content );
-		// TODO: convert HTML to AMP (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
-		return $content;
+		$content = new AMP_Content( $this->post->post_content );
+		return $content->transform();
 	}
 
 	private function add_script( $element, $script ) {
