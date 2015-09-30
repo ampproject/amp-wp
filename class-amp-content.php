@@ -17,15 +17,6 @@ class AMP_Content {
 
 		$content = $this->img_to_amp_img( $content );
 
-		// TODO: gallery => amp-carousel
-		// TODO: <audio /> and [audio] to amp-audio
-		// TODO: <video /> and VideoPress to amp-video
-		// TODO: YouTube to amp-youtube
-		// TODO: Tweets to amp-twitter
-		// TODO: Instagram to amp-instagram
-		// TODO: <iframe /> to amp-iframe 
-		// TODO: strip all <script> <noscript> <style> and anything else not covered
- 
 		return $content;
 	}
 
