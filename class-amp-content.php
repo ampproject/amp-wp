@@ -15,17 +15,34 @@ class AMP_Content {
 		// Convert HTML to AMP
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
 
-		$content = $this->img_to_amp_img( $content );
+		$content = ( new AMP_Img_Converter )->convert( $content );
 
 		return $content;
 	}
+}
 
-	public function img_to_amp_img( $content ) {
-		if ( false === stripos( $content, '<img' ) ) {
+abstract class AMP_Converter {
+	abstract public function convert( $content );
+
+	public function has_tag( $content, $tag ) {
+		return false !== stripos( $content, sprintf( '<%s', $tag ) );
+	}
+
+	public function get_tags( $content, $tag ) {
+		preg_match_all( '#<' . $tag . '[^>]+?[\/]?>#i', $content, $tags, PREG_SET_ORDER );
+		return $tags;
+	}
+}
+
+class AMP_Img_Converter extends AMP_Converter {
+	public static $tag = 'img';
+
+	public function convert( $content ) {
+		if ( ! $this->has_tag( $content, self::$tag ) ) {
 			return $content;
 		}
 
-		preg_match_all( '#<img[^>]+?[\/]?>#i', $content, $images, PREG_SET_ORDER );
+		$images = $this->get_tags( $content, self::$tag );
 		if ( empty( $images ) ) {
 			return $content;
 		}
@@ -38,9 +55,6 @@ class AMP_Content {
 			foreach ( $attributes as $attribute ) {
 				$name = $attribute['name'];
 				$value = $attribute['value'];
-
-				// TODO: srcset
-				// TODO: handle when width and height are missing
 
 				switch ( $name ) {
 					case 'src':
@@ -55,9 +69,9 @@ class AMP_Content {
 
 			}
 
-			$new_img .= ' />';
+			$new_img .= '></amp-img>';
 
-			$old_img_pattern = '#' . preg_quote( $old_img ) . '#';
+			$old_img_pattern = '~' . preg_quote( $old_img, '~' ) . '~';
 			$content = preg_replace( $old_img_pattern, $new_img, $content, 1 );
 		}
 

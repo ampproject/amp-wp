@@ -50,7 +50,7 @@
 	a:focus {
 		color: #33bbe3;
 	}
-	.avatar {
+	.byline amp-img {
 		border-radius: 50%;
 		border: 0;
 		background: #f3f6f8;
