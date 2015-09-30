@@ -29,7 +29,7 @@ abstract class AMP_Converter {
 	}
 
 	public function get_tags( $content, $tag ) {
-		preg_match_all( '#<' . $tag . '[^>]+?[\/]?>#i', $content, $tags, PREG_SET_ORDER );
+		preg_match_all( '#<' . $tag . '([^>]+?)(></' . $tag . '>|[\/]?>)#i', $content, $tags, PREG_SET_ORDER );
 		return $tags;
 	}
 }
@@ -49,9 +49,10 @@ class AMP_Img_Converter extends AMP_Converter {
 
 		foreach ( $images as $image ) {
 			$old_img = $image[0];
+			$old_img_attr = isset( $image[1] ) ? $image[1] : '';
 			$new_img = '<amp-img';
 
-			$attributes = wp_kses_hair( $old_img,  array( 'http', 'https' ) );
+			$attributes = wp_kses_hair( $old_img_attr,  array( 'http', 'https' ) );
 			foreach ( $attributes as $attribute ) {
 				$name = $attribute['name'];
 				$value = $attribute['value'];
