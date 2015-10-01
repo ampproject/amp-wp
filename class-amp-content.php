@@ -86,6 +86,7 @@ class AMP_Img_Converter extends AMP_Converter {
 				case 'alt':
 				case 'width':
 				case 'height':
+				case 'class':
 					$out[ $name ] = $value;
 					break;
 				default;
