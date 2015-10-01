@@ -32,6 +32,14 @@ abstract class AMP_Converter {
 		preg_match_all( '#<' . $tag . '([^>]+?)(></' . $tag . '>|[\/]?>)#i', $content, $tags, PREG_SET_ORDER );
 		return $tags;
 	}
+
+	protected function build_attributes_string( $attributes ) {
+		$string = '';
+		foreach ( $attributes as $name => $value ) {
+			$string .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
+		}
+		return $string;
+	}
 }
 
 class AMP_Img_Converter extends AMP_Converter {
@@ -50,32 +58,41 @@ class AMP_Img_Converter extends AMP_Converter {
 		foreach ( $images as $image ) {
 			$old_img = $image[0];
 			$old_img_attr = isset( $image[1] ) ? $image[1] : '';
-			$new_img = '<amp-img';
+			$new_img = '';
 
 			$attributes = wp_kses_hair( $old_img_attr,  array( 'http', 'https' ) );
-			foreach ( $attributes as $attribute ) {
-				$name = $attribute['name'];
-				$value = $attribute['value'];
 
-				switch ( $name ) {
-					case 'src':
-					case 'alt':
-					case 'width':
-					case 'height':
-						$new_img .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
-						break;
-					default;
-						break;
-				}
+			if ( ! empty( $attributes['src'] ) ) {
+				$attributes = $this->filter_attributes( $attributes );
 
+				$new_img .= sprintf( '<amp-img %s></amp-img>', $this->build_attributes_string( $attributes ) );
 			}
-
-			$new_img .= '></amp-img>';
 
 			$old_img_pattern = '~' . preg_quote( $old_img, '~' ) . '~';
 			$content = preg_replace( $old_img_pattern, $new_img, $content, 1 );
 		}
 
 		return $content;
+	}
+
+	private function filter_attributes( $attributes ) {
+		$out = array();
+		foreach ( $attributes as $attribute ) {
+			$name = $attribute['name'];
+			$value = $attribute['value'];
+
+			switch ( $name ) {
+				case 'src':
+				case 'alt':
+				case 'width':
+				case 'height':
+					$out[ $name ] = $value;
+					break;
+				default;
+					break;
+			}
+
+		}
+		return $out;
 	}
 }
