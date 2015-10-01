@@ -68,6 +68,17 @@ class AMP_Img_Converter extends AMP_Converter {
 				$attributes = $this->filter_attributes( $attributes );
 				$attributes = array_merge( $attributes, $amp_attributes );
 
+				// Workaround for https://github.com/Automattic/amp-wp/issues/20
+				// responsive + float don't mix
+				if ( isset( $attributes['class'] )
+					&& (
+						false !== strpos( $attributes['class'], 'alignleft' )
+						|| false !== strpos( $attributes['class'], 'alignright' )
+					)
+				) {
+					unset( $attributes['layout'] );
+				}
+
 				$new_img .= sprintf( '<amp-img %s></amp-img>', $this->build_attributes_string( $attributes ) );
 			}
 
