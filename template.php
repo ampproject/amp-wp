@@ -66,6 +66,9 @@
 		top: 6px;
 		margin: 1px 6px 1px 0;
 	}
+	amp-img {
+		background-color: #c8d7e1;
+	}
 	</style>
 </head>
 <body>
