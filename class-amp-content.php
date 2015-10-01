@@ -85,7 +85,7 @@ class AMP_Img_Converter extends AMP_Converter {
 					unset( $attributes['layout'] );
 				}
 
-				$new_img .= sprintf( '<amp-img %s></amp-img>', $this->build_attributes_string( $attributes ) );
+				$new_img .= sprintf( '<amp-img%s></amp-img>', $this->build_attributes_string( $attributes ) );
 			}
 
 			$old_img_pattern = '~' . preg_quote( $old_img, '~' ) . '~';
