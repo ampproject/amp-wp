@@ -14,6 +14,14 @@
 	<?php do_action( 'amp_head', $amp_post ); ?>
 	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 	<style amp-custom>
+	/* Generic WP styling */
+	amp-img.alignright { float: right; margin: 0 0 1em 1em; }
+	amp-img.alignleft { float: left; margin: 0 1em 1em 0; }
+	amp-img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
+	.alignright { float: right; }
+	.alignleft { float: left; }
+	.aligncenter { display: block; margin-left: auto; margin-right: auto; }
+	/* WP.com-specific styling */
 	body {
 		font-family: 'Merriweather', Serif;
 		font-size: 16px;
@@ -57,6 +65,9 @@
 		position: relative;
 		top: 6px;
 		margin: 1px 6px 1px 0;
+	}
+	amp-img {
+		background-color: #c8d7e1;
 	}
 	</style>
 </head>
