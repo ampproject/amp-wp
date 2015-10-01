@@ -68,6 +68,14 @@ function wpcom_amp_get_stats_extras_url() {
 add_action( 'pre_amp_render', function() {
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	remove_filter( 'the_title', 'widont' );
+
+	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
+	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
+} );
+
+add_action( 'post_amp_render', function() {
+	add_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
+	add_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
 } );
 
 add_action( 'amp_head', function( $amp_post ) {
