@@ -17,8 +17,8 @@ class AMP_KSES {
 	}
 
 	static private function get_allowed_html() {
-		if ( isset( static::$allowed_html ) ) {
-			return static::$allowed_html;
+		if ( isset( self::$allowed_html ) ) {
+			return self::$allowed_html;
 		}
 
 		$blacklisted_tags = self::get_blacklisted_tags();
@@ -40,13 +40,13 @@ class AMP_KSES {
 			}
 		}
 
-		static::$allowed_html = $allowed_html;
+		self::$allowed_html = $allowed_html;
 		return $allowed_html;
 	}
 
 	static private function get_allowed_protocols() {
-		if ( isset( static::$allowed_protocols ) ) {
-			return static::$allowed_protocols;
+		if ( isset( self::$allowed_protocols ) ) {
+			return self::$allowed_protocols;
 		}
 
 		$blacklisted_protocols = self::get_blacklisted_protocols();
@@ -54,7 +54,7 @@ class AMP_KSES {
 		$allowed_protocols = wp_allowed_protocols();
 		$allowed_protocols = array_diff_key( $allowed_protocols, array_fill_keys( $blacklisted_protocols, false ) );
 
-		static::$allowed_protocols = $allowed_protocols;
+		self::$allowed_protocols = $allowed_protocols;
 		return $allowed_protocols;
 	}
 
