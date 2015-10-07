@@ -29,10 +29,6 @@
 		margin: 0 auto;
 	}
 
-	.title-bar {
-		padding: 0 16px;
-	}
-
 	body {
 		font-family: 'Merriweather', Serif;
 		font-size: 16px;
@@ -125,6 +121,7 @@
 	/* Titlebar */
 	nav.title-bar {
 		background: #0a89c0;
+		padding: 0 16px;
 	}
 
 	nav.title-bar div {
