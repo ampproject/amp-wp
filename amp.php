@@ -8,6 +8,9 @@
  */
 
 define( 'AMP_QUERY_VAR', 'amp' );
+if ( ! defined( 'AMP_DEV_MODE' ) ) {
+	define( 'AMP_DEV_MODE', defined( 'WP_DEBUG' ) && WP_DEBUG );
+}
 
 require_once( dirname( __FILE__ ) . '/class-amp-post.php' );
 
