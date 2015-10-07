@@ -8,7 +8,7 @@
 	<link href='https://fonts.googleapis.com/css?family=Merriweather|Open+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 	<?php foreach ( $amp_post->get_scripts() as $element => $script ) : ?>
 		<script element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
-	<?php endforeach; ?>	
+	<?php endforeach; ?>
 	<script src="https://cdn.ampproject.org/v0.js" async <?php echo defined( 'AMP_DEV_MODE' ) && AMP_DEV_MODE ? 'development' : ''; ?>></script>
 	<script type="application/ld+json"><?php echo json_encode( $amp_post->get_metadata() ); ?></script>
 	<?php do_action( 'amp_head', $amp_post ); ?>
@@ -121,6 +121,7 @@
 	/* Titlebar */
 	nav.title-bar {
 		background: #0a89c0;
+		padding: 0 16px;
 	}
 
 	nav.title-bar div {
