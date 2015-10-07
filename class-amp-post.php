@@ -80,8 +80,10 @@ class AMP_Post {
 	}
 
 	private function build_content() {
-		$content = new AMP_Content( $this->post->post_content );
-		return $content->transform();
+		$amp = new AMP_Content( $this->post->post_content );
+		$content = $amp->transform();
+		$this->scripts = $amp->get_queued_scripts();
+		return $content;
 	}
 
 	private function add_script( $element, $script ) {
