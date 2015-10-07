@@ -60,6 +60,8 @@ function amp_canonical() {
 function amp_render( $post_id ) {
 	do_action( 'pre_amp_render', $post_id );
 	$amp_post = new AMP_Post( $post_id );
-	include( dirname( __FILE__ ) . '/template.php' );
+	$template_location = apply_filters( 'amp_template_location', dirname( __FILE__ ) . '/template.php' );
+	include( $template_location );
+
 }
 
