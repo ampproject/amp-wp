@@ -7,7 +7,7 @@ php:
 
 # WordPress version used in first build configuration.
 env:
-    - WP_VERSION=latest WP_MULTISITE=0
+    - WP_VERSION=latest
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
@@ -27,18 +27,18 @@ matrix:
    - php: "nightly"
      env: WP_VERSION=latest
    - php: "nightly"
-     env: WP_VERSION=4.3.0
+     env: WP_VERSION=4.3
    - php: "5.2"
      env: WP_VERSION=latest
    - php: "5.2"
-     env: WP_VERSION=4.2.0
+     env: WP_VERSION=4.2
    - php: "5.2"
-     env: WP_VERSION=4.3.0
+     env: WP_VERSION=4.3
      # 5.6 / latest already included above as first build.
    - php: "5.6"
-     env: WP_VERSION=4.2.0
+     env: WP_VERSION=4.2
    - php: "5.6"
-     env: WP_VERSION=4.3.0
+     env: WP_VERSION=4.3
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION 
