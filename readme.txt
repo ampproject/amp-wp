@@ -7,25 +7,29 @@ Stable tag: 0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create AMP-compatible pages for your WordPress site.
+Enable [Accelerated Mobile Pages](https://www.ampproject.org) on your WordPress site.
 
 == Description ==
 
-This plugin adds a new endpoint for Posts, Pages, and any other supported post types which outputs an AMP-compatible version of your content for better browsing browsing.
+This plugin adds support for the Accelerated Mobile Pages (AMP) Project, which is an an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
 
-Follow along with development of this plugin at https://github.com/Automattic/amp-wp
+With the plugin active, all content on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your permalinks. (If you do not have pretty permalinks enabled, you can do the same thing by appending `?amp=1`.)
+
+Follow along with or contribute to the development of this plugin at https://github.com/Automattic/amp-wp
+
+Developers: please note that this plugin is still in early stages and the underlying APIs (like filters, classes, etc.) may change.
 
 == Installation ==
 
 1. Upload the folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Flush your rewrite rules from Settings > Rewrite and hit "Save"
+1. Flush Rewrite Rules by opening your WordPress Dashboard, going to `Settings > Permalinks`, and then hitting "Save Changes"
 
 == Frequently Asked Questions ==
 
 = How do I customize the AMP output for my site? =
 
-There are a number of filters available in the plugin for modifying the output. Advanced options like custom templates in the works.
+There are a number of filters available in the plugin for modifying the output. Advanced options like custom templates in the works. Note that these are not finalized and may change.
 
 == Changelog ==
 
