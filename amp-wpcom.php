@@ -2,6 +2,8 @@
 
 // WPCOM-specific things
 
+define( 'AMP_DEV_MODE', defined( 'WPCOM_SANDBOXED' ) && WPCOM_SANDBOXED );
+
 // Add stats pixel
 add_filter( 'amp_post_content', function( $content, $post ) {
 	$urls = array(
