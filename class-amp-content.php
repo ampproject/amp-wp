@@ -21,7 +21,8 @@ class AMP_Content {
 
 		// Convert HTML to AMP
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
-		$content = ( new AMP_Img_Converter )->convert( $content, array(
+		$img_converter = new AMP_Img_Converter;
+		$content = $img_converter->convert( $content, array(
 			'layout' => 'responsive',
 		) );
 
