@@ -11,6 +11,8 @@ DB_PASS=$3
 DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 
+[[ $WP_VERSION = "latest" ]] && VERSION_FOLDER="trunk" || VERSION_FOLDER="tags/$WP_VERSION"
+
 WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wordpress-tests-lib/includes}
 WP_CORE_DIR=${WP_CORE_DIR-/tmp/wordpress/}
 
@@ -56,13 +58,13 @@ install_test_suite() {
 	if [ ! "$(ls -A $WP_TESTS_DIR)" ]; then
 		# set up testing suite
 		mkdir -p $WP_TESTS_DIR
-		svn co --quiet http://develop.svn.wordpress.org/trunk/tests/phpunit/includes/ $WP_TESTS_DIR
+		svn co --quiet http://develop.svn.wordpress.org/$VERSION_FOLDER/tests/phpunit/includes/ $WP_TESTS_DIR
 	fi
 
 	cd $WP_TESTS_DIR
 
 	if [ ! -f wp-tests-config.php ]; then
-		download https://develop.svn.wordpress.org/trunk/wp-tests-config-sample.php $(dirname ${WP_TESTS_DIR})/wp-tests-config.php
+		download https://develop.svn.wordpress.org/$VERSION_FOLDER/wp-tests-config-sample.php $(dirname ${WP_TESTS_DIR})/wp-tests-config.php
 		sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR':" $(dirname ${WP_TESTS_DIR})/wp-tests-config.php
 		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" $(dirname ${WP_TESTS_DIR})/wp-tests-config.php
 		sed $ioption "s/yourusernamehere/$DB_USER/" $(dirname ${WP_TESTS_DIR})/wp-tests-config.php
