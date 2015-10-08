@@ -29,7 +29,7 @@ add_action( 'init', 'amp_init' );
 function amp_init() {
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK | EP_PAGES );
 
-	if ( defined( 'JETPACK__VERSION') && JETPACK__VERSION != 'wpcom' ) {
+	if ( defined( 'JETPACK__VERSION' ) ) {
 		require_once( dirname( __FILE__ ) . '/wpcom-helper.php' );
 	}
 }
