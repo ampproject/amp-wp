@@ -36,6 +36,10 @@ function amp_add_actions() {
 		return;
 	}
 
+	if ( class_exists( 'Jetpack' ) ) {
+		require_once( dirname( __FILE__ ) . '/jetpack-helper.php' );
+	}
+
 	if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) {
 		// TODO: check if post_type supports amp
 		add_action( 'template_redirect', 'amp_template_redirect' );
