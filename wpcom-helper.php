@@ -14,11 +14,15 @@ if ( ! defined( 'AMP_DEV_MODE' ) ) {
 add_filter( 'amp_post_content', 'wpcom_helper_amp_post_content', 10, 2 );
 
 function wpcom_helper_amp_post_content( $content, $post ) {
-	$urls = array(
-		wpcom_amp_get_pageview_url(),
-		wpcom_amp_get_mc_url(),
-		wpcom_amp_get_stats_extras_url(),
-	);
+	$urls = array();
+
+	if ( defined( 'IS_WPCOM' ) && IS_WPCOM ) {
+		$urls = array(
+			wpcom_amp_get_pageview_url(),
+			wpcom_amp_get_mc_url(),
+			wpcom_amp_get_stats_extras_url(),
+			);
+	}
 
 	foreach ( $urls as $url ) {
 		if ( ! $url ) {
