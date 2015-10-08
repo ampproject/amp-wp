@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<link rel="canonical" href="<?php echo esc_url( $amp_post->get_canonical_url() ); ?>" />
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-	<link href='https://fonts.googleapis.com/css?family=Merriweather|Open+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Open+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 	<?php foreach ( $amp_post->get_scripts() as $element => $script ) : ?>
 		<script custom-element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
 	<?php endforeach; ?>
