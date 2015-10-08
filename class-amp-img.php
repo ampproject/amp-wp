@@ -5,16 +5,17 @@ require_once( dirname( __FILE__ ) . '/class-amp-converter.php' );
 class AMP_Img_Converter extends AMP_Converter {
 	public static $tag = 'img';
 
-	public function convert( $content, $amp_attributes = array() ) {
-		if ( ! $this->has_tag( $content, self::$tag ) ) {
-			return $content;
+	public function convert( $amp_attributes = array() ) {
+		if ( ! $this->has_tag( self::$tag ) ) {
+			return $this->content;
 		}
 
-		$images = $this->get_tags( $content, self::$tag );
+		$images = $this->get_tags( self::$tag );
 		if ( empty( $images ) ) {
-			return $content;
+			return $this->content;
 		}
 
+		$content = $this->content;
 		foreach ( $images as $image ) {
 			$old_img = $image[0];
 			$old_img_attr = isset( $image[1] ) ? $image[1] : '';

@@ -26,13 +26,13 @@ class AMP_Content {
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
 		$scripts = array();
 
-		$img_converter = new AMP_Img_Converter;
-		$content = $img_converter->convert( $content, array(
+		$img_converter = new AMP_Img_Converter( $content );
+		$content = $img_converter->convert( array(
 			'layout' => 'responsive',
 		) );
 
-		$converter = new AMP_Iframe_Converter;
-		$content = $converter->convert( $content, array(
+		$converter = new AMP_Iframe_Converter( $content );
+		$content = $converter->convert( array(
 			'layout' => 'responsive',
 		) );
 

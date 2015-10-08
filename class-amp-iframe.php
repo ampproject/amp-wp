@@ -6,16 +6,17 @@ class AMP_Iframe_Converter extends AMP_Converter {
 	public static $tag = 'iframe';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
 
-	public function convert( $content, $amp_attributes = array() ) {
-		if ( ! $this->has_tag( $content, self::$tag ) ) {
-			return $content;
+	public function convert( $amp_attributes = array() ) {
+		if ( ! $this->has_tag( self::$tag ) ) {
+			return $this->content;
 		}
 
-		$iframes = $this->get_tags( $content, self::$tag );
+		$iframes = $this->get_tags( self::$tag );
 		if ( empty( $iframes ) ) {
-			return $content;
+			return $this->content;
 		}
 
+		$content = $this->content;
 		foreach ( $iframes as $iframe ) {
 			$old_iframe = $iframe[0];
 			$old_iframe_attr = isset( $iframe[1] ) ? $iframe[1] : '';

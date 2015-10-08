@@ -1,14 +1,20 @@
 <?php
 
 abstract class AMP_Converter {
-	abstract public function convert( $content, $amp_attributes = array() );
+	protected $content;
 
-	public function has_tag( $content, $tag ) {
-		return false !== stripos( $content, sprintf( '<%s', $tag ) );
+	public function __construct( $content ) {
+		$this->content = $content;
 	}
 
-	public function get_tags( $content, $tag ) {
-		preg_match_all( '#<' . $tag . '([^>]+?)(></' . $tag . '>|[\/]?>)#i', $content, $tags, PREG_SET_ORDER );
+	abstract public function convert( $amp_attributes = array() );
+
+	public function has_tag( $tag ) {
+		return false !== stripos( $this->content, sprintf( '<%s', $tag ) );
+	}
+
+	public function get_tags( $tag ) {
+		preg_match_all( '#<' . $tag . '([^>]+?)(></' . $tag . '>|[\/]?>)#i', $this->content, $tags, PREG_SET_ORDER );
 		return $tags;
 	}
 
