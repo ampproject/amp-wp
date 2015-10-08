@@ -13,10 +13,14 @@ abstract class AMP_Converter {
 	}
 
 	protected function build_attributes_string( $attributes ) {
-		$string = '';
+		$string = array();
 		foreach ( $attributes as $name => $value ) {
-			$string .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
+			if ( '' === $value ) {
+				$string[] = sprintf( '%s', $name );
+			} else {
+				$string[] = sprintf( '%s="%s"', $name, esc_attr( $value ) );
+			}
 		}
-		return $string;
+		return implode( ' ', $string );
 	}
 }

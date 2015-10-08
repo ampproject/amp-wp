@@ -27,7 +27,7 @@ class AMP_Iframe_Converter extends AMP_Converter {
 				$attributes = $this->filter_attributes( $attributes );
 				$attributes = array_merge( $attributes, $amp_attributes );
 
-				$new_iframe .= sprintf( '<amp-iframe%s></amp-iframe>', $this->build_attributes_string( $attributes ) );
+				$new_iframe .= sprintf( '<amp-iframe %s></amp-iframe>', $this->build_attributes_string( $attributes ) );
 			}
 
 			$old_iframe_pattern = '~' . preg_quote( $old_iframe, '~' ) . '~';
