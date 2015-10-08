@@ -103,6 +103,13 @@ function wpcom_helper_pre_amp_render() {
 			$jprp = Jetpack_RelatedPosts::init();
 			remove_filter( 'the_content', array( $jprp, 'filter_add_target_to_dom' ), 40 );
 		}
+
+		if ( class_exists( 'Jetpack_Likes' ) ) {
+			$jplikes = Jetpack_Likes::init();
+			remove_filter( 'the_content', array( $jplikes, 'post_likes'), 30 );
+		}
+
+		remove_filter( 'the_content', 'sharing_display', 19 );
 	}
 }
 
