@@ -16,6 +16,7 @@ require_once( dirname( __FILE__ ) . '/class-amp-post.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate(){
+	amp_init();
 	flush_rewrite_rules();
 }
 
