@@ -14,6 +14,16 @@ if ( ! defined( 'AMP_DEV_MODE' ) ) {
 
 require_once( dirname( __FILE__ ) . '/class-amp-post.php' );
 
+register_activation_hook( __FILE__, 'amp_activate' );
+function amp_activate(){
+	flush_rewrite_rules();
+}
+
+register_deactivation_hook( __FILE__, 'amp_deactivate' );
+function amp_deactivate(){
+	flush_rewrite_rules();
+}
+
 add_action( 'init', 'amp_init' );
 function amp_init() {
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK | EP_PAGES );
