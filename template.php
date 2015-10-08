@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 	<link href='https://fonts.googleapis.com/css?family=Merriweather|Open+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 	<?php foreach ( $amp_post->get_scripts() as $element => $script ) : ?>
-		<script element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
+		<script custom-element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
 	<?php endforeach; ?>
 	<script src="https://cdn.ampproject.org/v0.js" async <?php echo defined( 'AMP_DEV_MODE' ) && AMP_DEV_MODE ? 'development' : ''; ?>></script>
 	<script type="application/ld+json"><?php echo json_encode( $amp_post->get_metadata() ); ?></script>

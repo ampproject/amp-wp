@@ -35,8 +35,8 @@ class AMP_Post {
 
 	function get_author_avatar( $size = 24 ) {
 		$avatar_html = get_avatar( $this->author->user_email, 24 );
-		$converter = new AMP_Img_Converter;
-		return $converter->convert( $avatar_html );
+		$converter = new AMP_Img_Converter( $avatar_html );
+		return $converter->convert();
 	}
 
 	function get_author_name() {
@@ -80,8 +80,10 @@ class AMP_Post {
 	}
 
 	private function build_content() {
-		$content = new AMP_Content( $this->post->post_content );
-		return $content->transform();
+		$amp = new AMP_Content( $this->post->post_content );
+		$content = $amp->transform();
+		$this->scripts = $amp->get_scripts();
+		return $content;
 	}
 
 	private function add_script( $element, $script ) {
