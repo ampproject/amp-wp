@@ -6,10 +6,11 @@ require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
 
 class AMP_Content {
 	private $original_content;
-	private $queued_scripts;
+	private $scripts;
 
 	public function __construct( $content ) {
 		$this->original_content = $content;
+		$this->scripts = array();
 	}
 
 	public function transform() {
@@ -26,22 +27,26 @@ class AMP_Content {
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
 		$scripts = array();
 
-		$img_converter = new AMP_Img_Converter( $content );
-		$content = $img_converter->convert( array(
+		$converter = new AMP_Img_Converter( $content );
+		$content = $converter->convert( array(
 			'layout' => 'responsive',
 		) );
+		$this->add_scripts( $converter->get_scripts() );
 
 		$converter = new AMP_Iframe_Converter( $content );
 		$content = $converter->convert( array(
 			'layout' => 'responsive',
 		) );
-
-		$this->queued_scripts = $scripts;
+		$this->add_scripts( $converter->get_scripts() );
 
 		return $content;
 	}
 
-	public function get_queued_scripts() {
-		return $this->queued_scripts;
+	public function add_scripts( $scripts ) {
+		$this->scripts = array_merge( $this->scripts, $scripts );
+	}
+
+	public function get_scripts() {
+		return $this->scripts;
 	}
 }

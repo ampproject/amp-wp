@@ -4,7 +4,13 @@ require_once( dirname( __FILE__ ) . '/class-amp-converter.php' );
 
 class AMP_Iframe_Converter extends AMP_Converter {
 	public static $tag = 'iframe';
+
+	private static $script_slug = 'amp-iframe';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
+
+	public function get_scripts() {
+		return array( self::$script_slug => self::$script_src );
+	}
 
 	public function convert( $amp_attributes = array() ) {
 		if ( ! $this->has_tag( self::$tag ) ) {

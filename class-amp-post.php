@@ -82,7 +82,7 @@ class AMP_Post {
 	private function build_content() {
 		$amp = new AMP_Content( $this->post->post_content );
 		$content = $amp->transform();
-		$this->scripts = $amp->get_queued_scripts();
+		$this->scripts = $amp->get_scripts();
 		return $content;
 	}
 

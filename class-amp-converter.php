@@ -9,6 +9,10 @@ abstract class AMP_Converter {
 
 	abstract public function convert( $amp_attributes = array() );
 
+	public function get_scripts() {
+		return array();
+	}
+
 	public function has_tag( $tag ) {
 		return false !== stripos( $this->content, sprintf( '<%s', $tag ) );
 	}
