@@ -23,7 +23,6 @@ Developers: please note that this plugin is still in early stages and the underl
 
 1. Upload the folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Flush Rewrite Rules by opening your WordPress Dashboard, going to `Settings > Permalinks`, and then hitting "Save Changes"
 
 == Frequently Asked Questions ==
 
