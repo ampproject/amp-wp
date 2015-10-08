@@ -2,8 +2,16 @@
 
 // Jetpack bits.
 
-add_action( 'pre_amp_render', 'amp_jetpack_disable_photon' );
-add_action( 'pre_amp_render', 'amp_jetpack_disable_related_posts' );
+add_action( 'pre_amp_render', 'amp_jetpack_mods' );
+
+/**
+ * Disable Jetpack features that are not compatible with AMP.
+ *
+ **/
+function amp_jetpack_mods() {
+	amp_jetpack_disable_photon();
+	amp_jetpack_disable_related_posts();
+}
 
 /**
  * Disables Photon for all images.
