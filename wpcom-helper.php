@@ -2,7 +2,13 @@
 
 // WPCOM-specific things
 
-define( 'AMP_DEV_MODE', defined( 'WPCOM_SANDBOXED' ) && WPCOM_SANDBOXED );
+if ( ! defined( 'AMP_DEV_MODE' ) ) {
+	if ( defined( 'WPCOM_SANDBOXED' ) && WPCOM_SANDBOXED ) {
+		define( 'AMP_DEV_MODE', true );
+	} elseif ( defined( 'JETPACK_DEV_DEBUG' ) && JETPACK_DEV_DEBUG ) {
+		define( 'AMP_DEV_MODE', true );
+	}
+}
 
 // Add stats pixel
 add_filter( 'amp_post_content', function( $content, $post ) {
@@ -67,13 +73,17 @@ function wpcom_amp_get_stats_extras_url() {
 	return $url;
 }
 
-add_action( 'pre_amp_render', function() {
+add_action( 'pre_amp_render', 'wpcom_helper_pre_amp_render' );
+
+function wpcom_helper_pre_amp_render() {
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	remove_filter( 'the_title', 'widont' );
 
 	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
 	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
-} );
+
+	add_filter( 'jetpack_photon_skip_image', '__return_true' );
+}
 
 add_action( 'post_amp_render', function() {
 	add_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
