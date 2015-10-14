@@ -29,12 +29,13 @@ class AMP_Img_Converter extends AMP_Converter {
 
 				// Workaround for https://github.com/Automattic/amp-wp/issues/20
 				// responsive + float don't mix
-				if ( isset( $attributes['class'] )
-					&& (
-						false !== strpos( $attributes['class'], 'alignleft' )
-						|| false !== strpos( $attributes['class'], 'alignright' )
-					)
-				) {
+				$img_class = isset( $attributes['class'] ) ? $attributes['class'] : '';
+				// alignleft or alignright
+				$pattern = "/alignleft|alignright/";
+				preg_match_all( $pattern, $img_class, $matches );
+				// test if there are any match
+				$is_aligned = count( $matches ) >= 1 && count( $matches[0] ) > 1;
+				if ( $is_aligned ) {
 					unset( $attributes['layout'] );
 				}
 
@@ -55,16 +56,9 @@ class AMP_Img_Converter extends AMP_Converter {
 			$name = $attribute['name'];
 			$value = $attribute['value'];
 
-			switch ( $name ) {
-				case 'src':
-				case 'alt':
-				case 'width':
-				case 'height':
-				case 'class':
-					$out[ $name ] = $value;
-					break;
-				default;
-					break;
+			$names = array( 'src', 'alt', 'width', 'height', 'class' );
+			if ( in_array( $name, $names ) ) {
+				$out[ $name ] = $value;
 			}
 		}
 
