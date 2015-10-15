@@ -25,6 +25,10 @@ class AMP_Post {
 		return $this->metadata['mainEntityOfPage'];
 	}
 
+	function get_id() {
+		return $this->ID;
+	}
+
 	function get_title() {
 		return $this->metadata['headline'];
 	}
