@@ -37,8 +37,8 @@ class AMP_KSES_Test extends WP_UnitTestCase {
 	}
 
 	function test_strip_javascript_protocol() {
-		$source = '<a href="alert(\'Hello\');">Click</a>';
-		$expected = '<a href="">Click</a>';
+		$source = '<a href="javascript:alert(\'Hello\');">Click</a>';
+		$expected = '<a href="alert(\'Hello\');">Click</a>';
 		$content = AMP_KSES::strip( $source );
 		$this->assertEquals( $expected, $content );
 	}
