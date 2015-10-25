@@ -7,10 +7,20 @@ class AMP_KSES {
 	/**
 	 * Strips blacklisted tags and attributes from content.
 	 *
+	 * See following for blacklist:
+	 *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
+	 *
 	 * Note: DO NOT run this on content with amp tags (see #34105-core)
 	 */
 	static public function strip( $content ) {
-		// See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
+		// kses does not strip content inside tags
+		// we want it all gone, so clean it ourselves
+		// borrowed from wp_strip_all_tags
+		$blacklisted_tags = self::get_blacklisted_tags();
+		$blacklisted_pattern = '@<(' . implode( '|', $blacklisted_tags ) . ')[^>]*?>.*?</\\1>@si';
+		$content = preg_replace( $blacklisted_pattern, '', $content );
+
+		// kses to strip bad things in valid tags (on* attributes)
 		$allowed_html = self::get_allowed_html();
 		$allowed_protocols = self::get_allowed_protocols();
 		return wp_kses( $content, $allowed_html, $allowed_protocols );
