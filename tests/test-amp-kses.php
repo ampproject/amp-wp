@@ -8,6 +8,13 @@ class AMP_KSES_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	function test_strip_blacklisted_tags_with_innertext() {
+		$source = '<script>alert("")</script>';
+		$expected = '';
+		$content = AMP_KSES::strip( $source );
+		$this->assertEquals( $expected, $content );
+	}
+
 	function test_strip_blacklisted_tags_only() {
 		$source = '<input type="text" /><script>alert("")</script><style>body{ color: red; }</style>';
 		$expected = '';
@@ -25,6 +32,13 @@ class AMP_KSES_Test extends WP_UnitTestCase {
 	function test_strip_mixed_tags() {
 		$source = '<input type="text" /><p>Text</p><script>alert("")</script><style>body{ color: red; }</style>';
 		$expected = '<p>Text</p>';
+		$content = AMP_KSES::strip( $source );
+		$this->assertEquals( $expected, $content );
+	}
+
+	function test_strip_blacklisted_attributes() {
+		$source = '<img src="/path/to/file.jpg" style="border: 1px solid red;" />';
+		$expected = '<img src="/path/to/file.jpg" />';
 		$content = AMP_KSES::strip( $source );
 		$this->assertEquals( $expected, $content );
 	}
