@@ -26,25 +26,9 @@ class AMP_Content {
 
 		// Convert HTML to AMP
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
-		$scripts = array();
-
-		$converter = new AMP_Img_Converter( $content );
-		$content = $converter->convert( array(
-			'layout' => 'responsive',
-		) );
-		$this->add_scripts( $converter->get_scripts() );
-
-		$converter = new AMP_Video_Converter( $content );
-		$content = $converter->convert( array(
-			'layout' => 'responsive',
-		) );
-		$this->add_scripts( $converter->get_scripts() );
-
-		$converter = new AMP_Iframe_Converter( $content );
-		$content = $converter->convert( array(
-			'layout' => 'responsive',
-		) );
-		$this->add_scripts( $converter->get_scripts() );
+		$content = $this->convert_images( $content );
+		$content = $this->convert_videos( $content );
+		$content = $this->convert_iframes( $content );
 
 		return $content;
 	}
@@ -55,5 +39,35 @@ class AMP_Content {
 
 	public function get_scripts() {
 		return $this->scripts;
+	}
+
+	private function convert_images( $content ) {
+		$converter = new AMP_Img_Converter( $content );
+		$converted = $converter->convert( array(
+			'layout' => 'responsive',
+		) );
+		$this->add_scripts( $converter->get_scripts() );
+
+		return $converted;
+	}
+
+	private function convert_videos( $content ) {
+		$converter = new AMP_Video_Converter( $content );
+		$converted = $converter->convert( array(
+			'layout' => 'responsive',
+		) );
+		$this->add_scripts( $converter->get_scripts() );
+
+		return $converted;
+	}
+
+	private function convert_iframes( $content ) {
+		$converter = new AMP_Iframe_Converter( $content );
+		$converted = $converter->convert( array(
+			'layout' => 'responsive',
+		) );
+		$this->add_scripts( $converter->get_scripts() );
+
+		return $converted;
 	}
 }
