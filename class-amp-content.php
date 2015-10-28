@@ -4,6 +4,7 @@ require_once( dirname( __FILE__ ) . '/class-amp-kses.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-img.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-video.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-audio.php' );
 
 class AMP_Content {
 	private $original_content;
@@ -28,6 +29,7 @@ class AMP_Content {
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
 		$content = $this->convert_images( $content );
 		$content = $this->convert_videos( $content );
+		$content = $this->convert_audios( $content );
 		$content = $this->convert_iframes( $content );
 
 		return $content;
@@ -53,6 +55,16 @@ class AMP_Content {
 
 	private function convert_videos( $content ) {
 		$converter = new AMP_Video_Converter( $content );
+		$converted = $converter->convert( array(
+			'layout' => 'responsive',
+		) );
+		$this->add_scripts( $converter->get_scripts() );
+
+		return $converted;
+	}
+
+	private function convert_audios( $content ) {
+		$converter = new AMP_Audio_Converter( $content );
 		$converted = $converter->convert( array(
 			'layout' => 'responsive',
 		) );
