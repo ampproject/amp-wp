@@ -34,6 +34,12 @@ class AMP_Content {
 		) );
 		$this->add_scripts( $converter->get_scripts() );
 
+		$converter = new AMP_Video_Converter( $content );
+		$content = $converter->convert( array(
+			'layout' => 'responsive',
+		) );
+		$this->add_scripts( $converter->get_scripts() );
+
 		$converter = new AMP_Iframe_Converter( $content );
 		$content = $converter->convert( array(
 			'layout' => 'responsive',
