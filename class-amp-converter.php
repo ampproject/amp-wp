@@ -18,7 +18,8 @@ abstract class AMP_Converter {
 	}
 
 	public function get_tags( $tag ) {
-		preg_match_all( '#<' . $tag . '([^>]+?)(></' . $tag . '>|[\/]?>)#i', $this->content, $tags, PREG_SET_ORDER );
+
+		preg_match_all( '#<(' . $tag . ')([^>]+?)(>(.*?)</\\1>|[\/]?>)#si', $this->content, $tags, PREG_SET_ORDER );
 		return $tags;
 	}
 

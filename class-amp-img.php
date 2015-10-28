@@ -10,15 +10,15 @@ class AMP_Img_Converter extends AMP_Converter {
 			return $this->content;
 		}
 
-		$images = $this->get_tags( self::$tag );
-		if ( empty( $images ) ) {
+		$matches = $this->get_tags( self::$tag );
+		if ( empty( $matches ) ) {
 			return $this->content;
 		}
 
 		$content = $this->content;
-		foreach ( $images as $image ) {
-			$old_img = $image[0];
-			$old_img_attr = isset( $image[1] ) ? $image[1] : '';
+		foreach ( $matches as $match ) {
+			$old_img = $match[0];
+			$old_img_attr = isset( $match[2] ) ? $match[2] : '';
 			$new_img = '';
 
 			$attributes = wp_kses_hair( $old_img_attr,  array( 'http', 'https' ) );
