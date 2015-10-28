@@ -1,6 +1,6 @@
 <?php
 
-class AMP_KSES {
+class AMP_Sanitizer {
 	private static $allowed_html;
 	private static $allowed_protocols;
 
@@ -153,4 +153,3 @@ class AMP_KSES {
 		);
 	}
 }
-
