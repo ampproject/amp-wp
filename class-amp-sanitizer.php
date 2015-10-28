@@ -9,109 +9,77 @@ class AMP_Sanitizer {
 	 *
 	 * See following for blacklist:
 	 *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
-	 *
-	 * Note: DO NOT run this on content with amp tags (see #34105-core)
 	 */
 	static public function strip( $content ) {
-		// kses does not strip content inside tags
-		// we want it all gone, so clean it ourselves
-		// borrowed from wp_strip_all_tags
-		$blacklisted_tags = self::get_blacklisted_tags();
-		$blacklisted_pattern = '@<(' . implode( '|', $blacklisted_tags ) . ')[^>]*?>.*?</\\1>@si';
-		$content = preg_replace( $blacklisted_pattern, '', $content );
-
-		// kses to strip bad things in valid tags (on* attributes)
-		$allowed_html = self::get_allowed_html();
-		$allowed_protocols = self::get_allowed_protocols();
-		return wp_kses( $content, $allowed_html, $allowed_protocols );
-	}
-
-	static private function get_allowed_html() {
-		if ( isset( self::$allowed_html ) ) {
-			return self::$allowed_html;
+		if ( empty( $content ) ) {
+			return $content;
 		}
 
 		$blacklisted_tags = self::get_blacklisted_tags();
 		$blacklisted_attributes = self::get_blacklisted_attributes();
-		$whitelisted_tags = self::get_whitelisted_tags();
+		$blacklisted_protocols = self::get_blacklisted_protocols();
 
-		$allowed_html = wp_kses_allowed_html( 'post' );
+		$dom = new DOMDocument;
+		// Wrap in dummy tags, since XML needs one parent node.
+		// It also makes it easier to loop through nodes.
+		// We can later use this to extract our nodes.
+		$dom->loadXML( '<body>' . $content . '</body>' );
 
-		$allowed_html = array_merge( $allowed_html, $whitelisted_tags );
-		$allowed_html = array_diff_key( $allowed_html, array_fill_keys( $blacklisted_tags, false ) );
-		foreach ( $allowed_html as $tag => $attributes ) {
-			$allowed_html[ $tag ] = array_diff_key( $attributes, array_fill_keys( $blacklisted_attributes, false ) );
-			foreach ( $attributes as $attr => $supported ) {
-				// on* attributes (like onclick) are a special case
-				if ( 0 === stripos( $attr, 'on' ) ) {
-					unset( $allowed_html[ $tag ][ $attr ] );
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		self::strip_tags( $body, $blacklisted_tags );
+		self::strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
+
+		// Only want children of the body tag, since we have a subset of HTML.
+		$out = '';
+		foreach ( $body->childNodes as $node ) {
+			$out .= $dom->saveXML( $node );
+		}
+		return $out;
+	}
+
+	static private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {
+		if ( $node->nodeType !== XML_ELEMENT_NODE ) {
+			return;
+		}
+
+		if ( $node->hasAttributes() ) {
+			foreach ( $node->attributes as $attribute ) {
+				$attribute_name = strtolower( $attribute->name );
+				if ( in_array( $attribute_name, $bad_attributes ) ) {
+					$node->removeAttribute( $attribute_name );
 					continue;
+				}
+
+				// on* attributes (like onclick) are a special case
+				if ( 0 === stripos( $attribute_name, 'on' ) ) {
+					$node->removeAttribute( $attribute_name );
+					continue;
+				}
+
+				if ( 'href' === $attribute_name ) {
+					$protocol = strtok( $attribute->value, ':' );
+					if ( in_array( $protocol, $bad_protocols ) ) {
+						$node->removeAttribute( $attribute_name );
+						continue;
+					}
 				}
 			}
 		}
 
-		self::$allowed_html = $allowed_html;
-		return $allowed_html;
-	}
-
-	static private function get_allowed_protocols() {
-		if ( isset( self::$allowed_protocols ) ) {
-			return self::$allowed_protocols;
+		foreach ( $node->childNodes as $child_node ) {
+			self::strip_attributes_recursive( $child_node, $bad_attributes, $bad_protocols );
 		}
-
-		$blacklisted_protocols = self::get_blacklisted_protocols();
-
-		$allowed_protocols = wp_allowed_protocols();
-		$allowed_protocols = array_diff_key( $allowed_protocols, array_fill_keys( $blacklisted_protocols, false ) );
-
-		self::$allowed_protocols = $allowed_protocols;
-		return $allowed_protocols;
 	}
 
-	/**
- 	 * There are tags that will be converted into amp-specific versions
- 	 */
-	static private function get_whitelisted_tags() {
-		return array(
-			'img' => array(
-				'alt' => true,
-				'height' => true,
-				'src' => true,
-				'width' => true,
-				'class' => true,
-			),
-			'audio' => array(
-				'autoplay' => true,
-				'controls' => true,
-				'loop' => true,
-				'muted' => true,
-				'preload' => true,
-				'src' => true,
-				'class' => true,
-			),
-			'video' => array(
-				'autoplay' => true,
-				'controls' => true,
-				'height' => true,
-				'loop' => true,
-				'muted' => true,
-				'poster' => true,
-				'preload' => true,
-				'src' => true,
-				'width' => true,
-				'class' => true,
-			),
-			'iframe' => array (
-				'src' => true,
-				'sandbox' => true,
-				'frameborder' => true,
-				'allowfullscreen' => true,
-				'allowtransparency' => true,
-				'width' => true,
-				'height' => true,
-				'class' => true,
-			),
-		);
+	static private function strip_tags( $node, $tags ) {
+		foreach ( $tags as $tag_name ) {
+			$elements = $node->getElementsByTagName( $tag_name );
+			if ( $elements->length ) {
+				foreach ( $elements as $element ) {
+					$element->parentNode->removeChild( $element );
+				}
+			}
+		}
 	}
 
 	static private function get_blacklisted_protocols() {
@@ -139,7 +107,7 @@ class AMP_Sanitizer {
 			'link',
 			'meta',
 
-			// We are running kses before AMP conversion due to a kses bug (#34105-core). Technically, conversion should catch the tags and shouldn't be something we need to worry about.
+			// These are converted into amp-* versions
 			//'img',
 			//'video',
 			//'audio',
