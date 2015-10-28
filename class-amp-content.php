@@ -3,6 +3,7 @@
 require_once( dirname( __FILE__ ) . '/class-amp-kses.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-img.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-video.php' );
 
 class AMP_Content {
 	private $original_content;
