@@ -17,15 +17,15 @@ class AMP_Iframe_Converter extends AMP_Converter {
 			return $this->content;
 		}
 
-		$iframes = $this->get_tags( self::$tag );
-		if ( empty( $iframes ) ) {
+		$matches = $this->get_tags( self::$tag );
+		if ( empty( $matches ) ) {
 			return $this->content;
 		}
 
 		$content = $this->content;
-		foreach ( $iframes as $iframe ) {
-			$old_iframe = $iframe[0];
-			$old_iframe_attr = isset( $iframe[1] ) ? $iframe[1] : '';
+		foreach ( $matches as $match ) {
+			$old_iframe = $match[0];
+			$old_iframe_attr = isset( $match[2] ) ? $match[2] : '';
 			$new_iframe = '';
 
 			$attributes = wp_kses_hair( $old_iframe_attr,  array( 'http', 'https' ) );
