@@ -2,6 +2,7 @@
 
 abstract class AMP_Converter {
 	protected $content;
+	protected $did_convert_elements = false;
 
 	public function __construct( $content ) {
 		$this->content = $content;

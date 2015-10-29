@@ -9,6 +9,10 @@ class AMP_Audio_Converter extends AMP_Converter {
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-audio-0.1.js';
 
 	public function get_scripts() {
+		if ( ! $this->did_convert_elements ) {
+			return array();
+		}
+
 		return array( self::$script_slug => self::$script_src );
 	}
 
@@ -21,6 +25,8 @@ class AMP_Audio_Converter extends AMP_Converter {
 		if ( empty( $matches ) ) {
 			return $this->content;
 		}
+
+		$this->did_convert_elements = true;
 
 		$content = $this->content;
 		foreach ( $matches as $match ) {
