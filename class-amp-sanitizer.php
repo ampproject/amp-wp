@@ -19,11 +19,15 @@ class AMP_Sanitizer {
 		$blacklisted_attributes = self::get_blacklisted_attributes();
 		$blacklisted_protocols = self::get_blacklisted_protocols();
 
+		$libxml_previous_state = libxml_use_internal_errors( true );
 		$dom = new DOMDocument;
 		// Wrap in dummy tags, since XML needs one parent node.
 		// It also makes it easier to loop through nodes.
 		// We can later use this to extract our nodes.
 		$result = $dom->loadHTML( '<html><body>' . $content . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
+
 		if ( ! $result ) {
 			return $content;
 		}

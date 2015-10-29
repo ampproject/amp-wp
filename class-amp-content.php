@@ -5,6 +5,8 @@ require_once( dirname( __FILE__ ) . '/class-amp-img.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-video.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-audio.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-twitter-embed.php' );
 
 class AMP_Content {
 	private $original_content;
@@ -18,16 +20,29 @@ class AMP_Content {
 	public function transform() {
 		$content = $this->original_content;
 
+		$twitter = new AMP_Twitter;
 		$content = apply_filters( 'the_content', $content );
+		$this->add_scripts( $twitter->get_scripts() );
 
 		$content = AMP_Sanitizer::strip( $content );
 
 		// Convert HTML to AMP
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
-		$content = $this->convert_images( $content );
-		$content = $this->convert_videos( $content );
-		$content = $this->convert_audios( $content );
-		$content = $this->convert_iframes( $content );
+		$content = $this->convert( new AMP_Img_Converter( $content ), array(
+			'layout' => 'responsive',
+		) );
+
+		$content = $this->convert( new AMP_Video_Converter( $content ), array(
+			'layout' => 'responsive',
+		) );
+
+		$content = $this->convert( new AMP_Audio_Converter( $content ), array(
+			'layout' => 'responsive',
+		) );
+
+		$content = $this->convert( new AMP_Iframe_Converter( $content ), array(
+			'layout' => 'responsive',
+		) );
 
 		return $content;
 	}
@@ -40,43 +55,9 @@ class AMP_Content {
 		return $this->scripts;
 	}
 
-	private function convert_images( $content ) {
-		$converter = new AMP_Img_Converter( $content );
-		$converted = $converter->convert( array(
-			'layout' => 'responsive',
-		) );
+	private function convert( $converter, $attributes ) {
+		$converted = $converter->convert( $attributes );
 		$this->add_scripts( $converter->get_scripts() );
-
-		return $converted;
-	}
-
-	private function convert_videos( $content ) {
-		$converter = new AMP_Video_Converter( $content );
-		$converted = $converter->convert( array(
-			'layout' => 'responsive',
-		) );
-		$this->add_scripts( $converter->get_scripts() );
-
-		return $converted;
-	}
-
-	private function convert_audios( $content ) {
-		$converter = new AMP_Audio_Converter( $content );
-		$converted = $converter->convert( array(
-			'layout' => 'responsive',
-		) );
-		$this->add_scripts( $converter->get_scripts() );
-
-		return $converted;
-	}
-
-	private function convert_iframes( $content ) {
-		$converter = new AMP_Iframe_Converter( $content );
-		$converted = $converter->convert( array(
-			'layout' => 'responsive',
-		) );
-		$this->add_scripts( $converter->get_scripts() );
-
 		return $converted;
 	}
 }
