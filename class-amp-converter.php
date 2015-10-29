@@ -1,5 +1,7 @@
 <?php
 
+require_once( dirname( __FILE__ ) . '/class-amp-html-utils.php' );
+
 abstract class AMP_Converter {
 	protected $content;
 	protected $did_convert_elements = false;
@@ -19,20 +21,11 @@ abstract class AMP_Converter {
 	}
 
 	public function get_tags( $tag ) {
-
 		preg_match_all( '#<(' . $tag . ')([^>]+?)(>(.*?)</\\1>|[\/]?>)#si', $this->content, $tags, PREG_SET_ORDER );
 		return $tags;
 	}
 
 	protected function build_attributes_string( $attributes ) {
-		$string = array();
-		foreach ( $attributes as $name => $value ) {
-			if ( '' === $value ) {
-				$string[] = sprintf( '%s', $name );
-			} else {
-				$string[] = sprintf( '%s="%s"', $name, esc_attr( $value ) );
-			}
-		}
-		return implode( ' ', $string );
+		return AMP_HTML_Utils::build_attributes_string( $attributes );
 	}
 }
