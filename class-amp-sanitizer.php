@@ -23,7 +23,10 @@ class AMP_Sanitizer {
 		// Wrap in dummy tags, since XML needs one parent node.
 		// It also makes it easier to loop through nodes.
 		// We can later use this to extract our nodes.
-		$dom->loadXML( '<body>' . $content . '</body>' );
+		$result = $dom->loadHTML( '<html><body>' . $content . '</body></html>' );
+		if ( ! $result ) {
+			return $content;
+		}
 
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		self::strip_tags( $body, $blacklisted_tags );
