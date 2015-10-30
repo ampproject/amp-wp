@@ -59,8 +59,14 @@ class AMP_Twitter_Embed_Handler extends AMP_Embed_Handler {
 	}
 
 	function oembed( $matches, $attr, $url, $rawattr ) {
+		$id = false;
+
 		if ( isset( $matches[5] ) && intval( $matches[5] ) ) {
 			$id = intval( $matches[5] );
+		}
+
+		if ( ! $id ) {
+			return '';
 		}
 
 		return $this->shortcode( array( 'tweet' => $id ) );
