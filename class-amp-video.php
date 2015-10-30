@@ -61,6 +61,7 @@ class AMP_Video_Converter extends AMP_Converter {
 					break;
 				case 'autoplay':
 					$out[ $name ] = 'desktop tablet mobile';
+					break;
 				default;
 					break;
 			}
