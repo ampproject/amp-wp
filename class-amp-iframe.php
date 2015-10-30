@@ -73,14 +73,6 @@ class AMP_Iframe_Converter extends AMP_Converter {
 			}
 		}
 
-		if ( ! isset( $out['width'] ) || ! isset( $out['height'] ) ) {
-			list( $width, $height ) = AMP_Img_Dimension_Extractor::extract( $out['src'] );
-			if ( $width && $height ) {
-				$out['width'] = $width;
-				$out['height'] = $height;
-			}
-		}
-
 		return $out;
 	}
 }
