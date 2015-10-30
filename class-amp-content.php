@@ -20,7 +20,7 @@ class AMP_Content {
 	public function transform() {
 		$content = $this->original_content;
 
-		$twitter = new AMP_Twitter;
+		$twitter = new AMP_Twitter_Embed_Handler;
 		$content = apply_filters( 'the_content', $content );
 		$this->add_scripts( $twitter->get_scripts() );
 

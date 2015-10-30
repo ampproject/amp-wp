@@ -3,7 +3,7 @@
 require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
 
 // Much of this class is borrowed from Jetpack embeds
-class AMP_Twitter extends AMP_Embed_Handler {
+class AMP_Twitter_Embed_Handler extends AMP_Embed_Handler {
 	const URL_PATTERN = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)#i';
 	const DEFAULT_WIDTH = 600;
 	const DEFAULT_HEIGHT = 400;
