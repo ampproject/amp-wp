@@ -14,10 +14,10 @@ class AMP_Twitter_Embed_Handler extends AMP_Embed_Handler {
 	private $args;
 
 	function __construct( $args = array() ) {
-		$this->args = shortcode_atts( array(
+		$this->args = wp_parse_args( $args, array(
 			'width' => self::DEFAULT_WIDTH,
 			'height' => self::DEFAULT_HEIGHT,
-		), $args );
+		) );
 
 		add_shortcode( 'tweet', array( $this, 'shortcode' ) );
 		wp_embed_register_handler( 'amp-twitter', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
@@ -32,9 +32,9 @@ class AMP_Twitter_Embed_Handler extends AMP_Embed_Handler {
 	}
 
 	function shortcode( $attr ) {
-		$attr = shortcode_atts( array(
-			'tweet' => '',
-		), $attr );
+		$attr = wp_parse_args( $attr, array(
+			'tweet' => false,
+		) );
 
 		$id = false;
 		if ( intval( $attr['tweet'] ) ) {
