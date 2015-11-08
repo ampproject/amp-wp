@@ -3,7 +3,7 @@
 require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
 
 // Much of this class is borrowed from Jetpack embeds
-class AMP_Twitter extends AMP_Embed_Handler {
+class AMP_Twitter_Embed_Handler extends AMP_Embed_Handler {
 	const URL_PATTERN = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)#i';
 	const DEFAULT_WIDTH = 600;
 	const DEFAULT_HEIGHT = 400;
@@ -14,10 +14,10 @@ class AMP_Twitter extends AMP_Embed_Handler {
 	private $args;
 
 	function __construct( $args = array() ) {
-		$this->args = shortcode_atts( array(
+		$this->args = wp_parse_args( $args, array(
 			'width' => self::DEFAULT_WIDTH,
 			'height' => self::DEFAULT_HEIGHT,
-		), $args );
+		) );
 
 		add_shortcode( 'tweet', array( $this, 'shortcode' ) );
 		wp_embed_register_handler( 'amp-twitter', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
@@ -32,9 +32,9 @@ class AMP_Twitter extends AMP_Embed_Handler {
 	}
 
 	function shortcode( $attr ) {
-		$attr = shortcode_atts( array(
-			'tweet' => '',
-		), $attr );
+		$attr = wp_parse_args( $attr, array(
+			'tweet' => false,
+		) );
 
 		$id = false;
 		if ( intval( $attr['tweet'] ) ) {
@@ -59,8 +59,14 @@ class AMP_Twitter extends AMP_Embed_Handler {
 	}
 
 	function oembed( $matches, $attr, $url, $rawattr ) {
+		$id = false;
+
 		if ( isset( $matches[5] ) && intval( $matches[5] ) ) {
 			$id = intval( $matches[5] );
+		}
+
+		if ( ! $id ) {
+			return '';
 		}
 
 		return $this->shortcode( array( 'tweet' => $id ) );
