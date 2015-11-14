@@ -24,7 +24,7 @@ class AMP_Sanitizer_Test extends WP_UnitTestCase {
 
 	function test_strip_whitelisted_tags_only() {
 		$source = '<p>Text</p><img src="/path/to/file.jpg" />';
-		$expected = '<p>Text</p><img src="/path/to/file.jpg"/>';
+		$expected = '<p>Text</p><img src="/path/to/file.jpg"></img>'; // LIBXML_NOEMPTYTAG
 		$content = AMP_Sanitizer::strip( $source );
 		$this->assertEquals( $expected, $content );
 	}
@@ -37,15 +37,15 @@ class AMP_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	function test_strip_blacklisted_attributes() {
-		$source = '<img src="/path/to/file.jpg" style="border: 1px solid red;"/>';
-		$expected = '<img src="/path/to/file.jpg"/>';
+		$source = '<a href="/path/to/file.jpg" style="border: 1px solid red;">Link</a>';
+		$expected = '<a href="/path/to/file.jpg">Link</a>';
 		$content = AMP_Sanitizer::strip( $source );
 		$this->assertEquals( $expected, $content );
 	}
 
 	function test_strip_on_attribute() {
-		$source = '<img src="/path/to/file.jpg" onclick="alert(e);" />';
-		$expected = '<img src="/path/to/file.jpg"/>';
+		$source = '<a href="/path/to/file.jpg" onclick="alert(e);">Link</a>';
+		$expected = '<a href="/path/to/file.jpg">Link</a>';
 		$content = AMP_Sanitizer::strip( $source );
 		$this->assertEquals( $expected, $content );
 	}
@@ -58,8 +58,8 @@ class AMP_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	function test_strip_attribute_recursive() {
-		$source = '<div style="border: 1px solid red;"><img src="/path/to/file.jpg" onclick="alert(e);" />Hello World</div>';
-		$expected = '<div><img src="/path/to/file.jpg"/>Hello World</div>';
+		$source = '<div style="border: 1px solid red;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>';
+		$expected = '<div><a href="/path/to/file.jpg">Hello World</a></div>';
 		$content = AMP_Sanitizer::strip( $source );
 		$this->assertEquals( $expected, $content );
 	}
