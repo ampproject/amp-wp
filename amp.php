@@ -69,7 +69,7 @@ function amp_get_url( $post_id ) {
 }
 
 function amp_canonical() {
-	if ( false === apply_filters( 'show_amp_canonical', true ) ) {
+	if ( false === apply_filters( 'amp_show_canonical', true ) ) {
 		return;
 	}
 
