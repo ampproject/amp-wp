@@ -155,6 +155,11 @@
 	blockquote p:last-child {
 		margin-bottom: 0;
 	}
+
+	/* Other Elements */
+	amp-carousel {
+		background: #000;
+	}
 	</style>
 </head>
 <body>

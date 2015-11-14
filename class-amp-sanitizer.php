@@ -39,7 +39,7 @@ class AMP_Sanitizer {
 		// Only want children of the body tag, since we have a subset of HTML.
 		$out = '';
 		foreach ( $body->childNodes as $node ) {
-			$out .= $dom->saveXML( $node );
+			$out .= $dom->saveXML( $node, LIBXML_NOEMPTYTAG );
 		}
 		return $out;
 	}
