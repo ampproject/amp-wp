@@ -49,7 +49,12 @@ function amp_add_actions() {
 }
 
 function amp_template_redirect() {
-	amp_render( get_queried_object_id() );
+	$post_id = get_queried_object_id();
+	if ( true === apply_filters( 'amp_skip_post', false, $post_id ) ) {
+		return;
+	}
+
+	amp_render( $post_id );
 	exit;
 }
 
@@ -77,4 +82,3 @@ function amp_render( $post_id ) {
 	$amp_post = new AMP_Post( $post_id );
 	include( dirname( __FILE__ ) . '/template.php' );
 }
-
