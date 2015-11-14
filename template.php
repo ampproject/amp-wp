@@ -22,6 +22,9 @@
 	.alignleft { float: left; }
 	.aligncenter { display: block; margin-left: auto; margin-right: auto; }
 
+	.wp-caption.alignleft { margin-right: 1em; }
+	.wp-caption.alignright { margin-left: 1em; }
+
 
 	/* Generic WP.com reader style */
 	.content, .title-bar div {
