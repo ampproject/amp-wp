@@ -8,6 +8,7 @@ require_once( dirname( __FILE__ ) . '/class-amp-audio.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-twitter-embed.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-youtube-embed.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-gallery-embed.php' );
 
 class AMP_Content {
 	private $original_content;
@@ -23,9 +24,11 @@ class AMP_Content {
 
 		$twitter_embed = new AMP_Twitter_Embed_Handler;
 		$youtube_embed = new AMP_YouTube_Embed_Handler;
+		$gallery_embed = new AMP_Gallery_Embed_Handler;
 		$content = apply_filters( 'the_content', $content );
 		$this->add_scripts( $twitter_embed->get_scripts() );
 		$this->add_scripts( $youtube_embed->get_scripts() );
+		$this->add_scripts( $gallery_embed->get_scripts() );
 
 		$content = AMP_Sanitizer::strip( $content );
 
