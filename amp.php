@@ -28,16 +28,16 @@ function amp_deactivate(){
 add_action( 'init', 'amp_init' );
 function amp_init() {
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK | EP_PAGES );
+
+	if ( defined( 'JETPACK__VERSION' ) ) {
+		require_once( dirname( __FILE__ ) . '/wpcom-helper.php' );
+	}
 }
 
 add_action( 'wp', 'amp_add_actions' );
 function amp_add_actions() {
 	if ( ! is_singular() ) {
 		return;
-	}
-
-	if ( class_exists( 'Jetpack' ) ) {
-		require_once( dirname( __FILE__ ) . '/jetpack-helper.php' );
 	}
 
 	if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) {
