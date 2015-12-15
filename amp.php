@@ -27,34 +27,54 @@ function amp_deactivate(){
 
 add_action( 'init', 'amp_init' );
 function amp_init() {
-	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK | EP_PAGES );
-}
+	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
+	add_post_type_support( 'post', AMP_QUERY_VAR );
 
-add_action( 'wp', 'amp_add_actions' );
-function amp_add_actions() {
-	if ( ! is_singular() ) {
-		return;
-	}
+	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	if ( class_exists( 'Jetpack' ) ) {
 		require_once( dirname( __FILE__ ) . '/jetpack-helper.php' );
 	}
-
-	if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) {
-		// TODO: check if post_type supports amp
-		add_action( 'template_redirect', 'amp_template_redirect' );
-	} else {
-		add_action( 'wp_head', 'amp_canonical' );
-	}
 }
 
-function amp_template_redirect() {
-	$post_id = get_queried_object_id();
-	if ( true === apply_filters( 'amp_skip_post', false, $post_id ) ) {
+function amp_maybe_add_actions() {
+	if ( ! is_singular() ) {
 		return;
 	}
 
-	amp_render( $post_id );
+	$is_amp_endpoint = false !== get_query_var( AMP_QUERY_VAR, false );
+
+	$post = get_queried_object();
+	$supports = does_this_post_support_amp( $post );
+
+	if ( ! $supports ) {
+		if ( $is_amp_endpoint ) {
+			wp_safe_redirect( get_permalink( $post->ID ) );
+			exit;
+		}
+		return;
+	}
+
+	if ( $is_amp_endpoint ) {
+		amp_prepare_render();
+	} else {
+		amp_add_template_actions();
+	}
+}
+
+function amp_add_template_actions() {
+	add_action( 'wp_head', 'amp_canonical' );
+}
+
+function amp_prepare_render() {
+	add_action( 'template_redirect', 'amp_render' );
+}
+
+function amp_render() {
+	$post_id = get_queried_object_id();
+	do_action( 'pre_amp_render', $post_id );
+	$amp_post = new AMP_Post( $post_id );
+	include( dirname( __FILE__ ) . '/template.php' );
 	exit;
 }
 
@@ -77,8 +97,15 @@ function amp_canonical() {
 	printf( '<link rel="amphtml" href="%s" />', esc_url( $amp_url ) );
 }
 
-function amp_render( $post_id ) {
-	do_action( 'pre_amp_render', $post_id );
-	$amp_post = new AMP_Post( $post_id );
-	include( dirname( __FILE__ ) . '/template.php' );
+function does_this_post_support_amp( $post ) {
+	// Because `add_rewrite_endpoint` doesn't let us target specific post_types :(
+	if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
+		return false;
+	}
+
+	if ( true === apply_filters( 'amp_skip_post', false, $post->ID ) ) {
+		return false;
+	}
+
+	return true;
 }
