@@ -59,6 +59,7 @@ class AMP_Img_Converter_Test extends WP_UnitTestCase {
 		$expected = array('amp-anim' => 'https://cdn.ampproject.org/v0/amp-anim-0.1.js');
 
 		$converter = new AMP_Img_Converter( $content );
+		$converted = $converter->convert();
 		$scripts = $converter->get_scripts();
 		$this->assertEquals( $expected, $scripts );
 	}
