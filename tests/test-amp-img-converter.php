@@ -45,6 +45,24 @@ class AMP_Img_Converter_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $converted );
 	}
 
+	function test_gif_image_conversion() {
+		$content = '<img src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />';
+		$expected = '<amp-anim src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!"></amp-anim>';
+
+		$converter = new AMP_Img_Converter( $content );
+		$converted = $converter->convert();
+		$this->assertEquals( $expected, $converted );
+	}
+
+	function test_gif_image_scripts() {
+		$content = '<img src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />';
+		$expected = array('amp-anim' => 'https://cdn.ampproject.org/v0/amp-anim-0.1.js');
+
+		$converter = new AMP_Img_Converter( $content );
+		$scripts = $converter->get_scripts();
+		$this->assertEquals( $expected, $scripts );
+	}
+
 	function test_multiple_same_image() {
 		$content = '
 <img src="http://placehold.it/350x150" />
