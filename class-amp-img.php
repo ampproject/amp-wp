@@ -5,6 +5,11 @@ require_once( dirname( __FILE__ ) . '/class-amp-converter.php' );
 class AMP_Img_Converter extends AMP_Converter {
 	public static $tag = 'img';
 
+	private $anim_extensions = '/.(gif|gifv)/';
+
+	private static $script_slug = 'amp-anim';
+	private static $script_src = 'https://cdn.ampproject.org/v0/amp-anim-0.1.js';
+
 	public function convert( $amp_attributes = array() ) {
 		if ( ! $this->has_tag( self::$tag ) ) {
 			return $this->content;
@@ -38,7 +43,12 @@ class AMP_Img_Converter extends AMP_Converter {
 					unset( $attributes['layout'] );
 				}
 
-				$new_img .= sprintf( '<amp-img %s></amp-img>', $this->build_attributes_string( $attributes ) );
+				if(preg_match($this->anim_extensions, $attributes['src'])) {
+					$this->did_convert_elements = true;
+					$new_img .= sprintf( '<amp-anim %s></amp-anim>', $this->build_attributes_string( $attributes ) );
+				} else {
+					$new_img .= sprintf( '<amp-img %s></amp-img>', $this->build_attributes_string( $attributes ) );
+				}
 			}
 
 			$old_img_pattern = '~' . preg_quote( $old_img, '~' ) . '~';
@@ -46,6 +56,14 @@ class AMP_Img_Converter extends AMP_Converter {
 		}
 
 		return $content;
+	}
+
+	public function get_scripts() {
+		if ( ! $this->did_convert_elements ) {
+			return array();
+		}
+
+		return array( self::$script_slug => self::$script_src );
 	}
 
 	private function filter_attributes( $attributes ) {
