@@ -25,8 +25,9 @@ class AMP_Sanitizer {
 		// Wrap in dummy tags, since XML needs one parent node.
 		// It also makes it easier to loop through nodes.
 		// We can later use this to extract our nodes.
-        // Add utf-8 charset so loadHTML does not have problems parsing it. See: http://php.net/manual/en/domdocument.loadhtml.php#78243
-        $result = $dom->loadHTML( '<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>' . $content . '</body></html>' );
+		// Add utf-8 charset so loadHTML does not have problems parsing it. See: http://php.net/manual/en/domdocument.loadhtml.php#78243
+		$result = $dom->loadHTML( '<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>' . $content . '</body></html>' );
+
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
 
