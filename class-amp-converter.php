@@ -29,7 +29,8 @@ abstract class AMP_Converter {
 		return AMP_HTML_Utils::build_attributes_string( $attributes );
 	}
 
-	protected function file_has_extension( $file, $ext ) {
-		return $ext === substr( $file, -strlen( $ext ) );
+	protected function url_has_extension( $url, $ext ) {
+		$path = parse_url( $url, PHP_URL_PATH );
+		return $ext === substr( $path, -strlen( $ext ) );
 	}
 }
