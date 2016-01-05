@@ -8,6 +8,13 @@ class AMP_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	function test_utf8_content() {
+		$source = 'Iñtërnâtiônàlizætiøn';
+		$expected = 'Iñtërnâtiônàlizætiøn';
+		$content = AMP_Sanitizer::strip( $source );
+		$this->assertEquals( $expected, $content );
+	}
+
 	function test_strip_blacklisted_tags_with_innertext() {
 		$source = '<script>alert("")</script>';
 		$expected = '';
