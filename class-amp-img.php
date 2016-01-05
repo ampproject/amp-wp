@@ -5,7 +5,7 @@ require_once( dirname( __FILE__ ) . '/class-amp-converter.php' );
 class AMP_Img_Converter extends AMP_Converter {
 	public static $tag = 'img';
 
-	private $anim_extensions = '/.(gif)/';
+	private static $anim_extension = '.gif';
 
 	private static $script_slug = 'amp-anim';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-anim-0.1.js';
@@ -43,7 +43,7 @@ class AMP_Img_Converter extends AMP_Converter {
 					unset( $attributes['layout'] );
 				}
 
-				if(preg_match($this->anim_extensions, $attributes['src'])) {
+				if ( $this->file_has_extension( $attributes['src'], self::$anim_extension ) ) {
 					$this->did_convert_elements = true;
 					$new_img .= sprintf( '<amp-anim %s></amp-anim>', $this->build_attributes_string( $attributes ) );
 				} else {

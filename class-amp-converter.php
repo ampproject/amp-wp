@@ -28,4 +28,8 @@ abstract class AMP_Converter {
 	protected function build_attributes_string( $attributes ) {
 		return AMP_HTML_Utils::build_attributes_string( $attributes );
 	}
+
+	protected function file_has_extension( $file, $ext ) {
+		return $ext === substr( $file, -strlen( $ext ) );
+	}
 }
