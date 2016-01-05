@@ -5,7 +5,7 @@ require_once( dirname( __FILE__ ) . '/class-amp-converter.php' );
 class AMP_Img_Converter extends AMP_Converter {
 	public static $tag = 'img';
 
-	private $anim_extensions = '/.(gif|gifv)/';
+	private $anim_extensions = '/.(gif)/';
 
 	private static $script_slug = 'amp-anim';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-anim-0.1.js';
