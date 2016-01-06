@@ -47,11 +47,6 @@ class AMP_Sanitizer_Test extends WP_UnitTestCase {
 				'<input type="text" /><p>Text</p><script>alert("")</script><style>body{ color: red; }</style>',
 				'<p>Text</p>'
 			),
-
-			'utf8_content' => array(
-				'Iñtërnâtiônàlizætiøn',
-				'Iñtërnâtiônàlizætiøn'
-			),
 		);
 	}
 
@@ -59,7 +54,9 @@ class AMP_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_sanitizer( $source, $expected ) {
-		$content = AMP_Sanitizer::strip( $source );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom_stripped = AMP_Sanitizer::strip( $dom );
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom_stripped );
 		$this->assertEquals( $expected, $content );
 	}
 }

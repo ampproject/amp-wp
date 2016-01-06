@@ -10,41 +10,16 @@ class AMP_Sanitizer {
 	 * See following for blacklist:
 	 *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
 	 */
-	static public function strip( $content ) {
-		if ( empty( $content ) ) {
-			return $content;
-		}
-
+	static public function strip( $dom ) {
 		$blacklisted_tags = self::get_blacklisted_tags();
 		$blacklisted_attributes = self::get_blacklisted_attributes();
 		$blacklisted_protocols = self::get_blacklisted_protocols();
-
-		$libxml_previous_state = libxml_use_internal_errors( true );
-
-		$dom = new DOMDocument;
-		// Wrap in dummy tags, since XML needs one parent node.
-		// It also makes it easier to loop through nodes.
-		// We can later use this to extract our nodes.
-		// Add utf-8 charset so loadHTML does not have problems parsing it. See: http://php.net/manual/en/domdocument.loadhtml.php#78243
-		$result = $dom->loadHTML( '<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>' . $content . '</body></html>' );
-
-		libxml_clear_errors();
-		libxml_use_internal_errors( $libxml_previous_state );
-
-		if ( ! $result ) {
-			return $content;
-		}
 
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		self::strip_tags( $body, $blacklisted_tags );
 		self::strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
 
-		// Only want children of the body tag, since we have a subset of HTML.
-		$out = '';
-		foreach ( $body->childNodes as $node ) {
-			$out .= $dom->saveXML( $node, LIBXML_NOEMPTYTAG );
-		}
-		return $out;
+		return $dom;
 	}
 
 	static private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {

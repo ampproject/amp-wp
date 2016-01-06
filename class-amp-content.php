@@ -1,5 +1,6 @@
 <?php
 
+require_once( dirname( __FILE__ ) . '/includes/class-amp-dom-utils.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-sanitizer.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-img.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
@@ -30,7 +31,9 @@ class AMP_Content {
 		$this->add_scripts( $youtube_embed->get_scripts() );
 		$this->add_scripts( $gallery_embed->get_scripts() );
 
-		$content = AMP_Sanitizer::strip( $content );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
+		$dom = AMP_Sanitizer::strip( $dom );
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		// Convert HTML to AMP
 		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
