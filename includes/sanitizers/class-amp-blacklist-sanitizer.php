@@ -1,28 +1,23 @@
 <?php
 
-class AMP_Sanitizer {
-	private static $allowed_html;
-	private static $allowed_protocols;
+/**
+ * Strips blacklisted tags and attributes from content.
+ *
+ * See following for blacklist:
+ *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
+ */
+class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
+	public function sanitize( $amp_attributes = array() ) {
+		$blacklisted_tags = $this->get_blacklisted_tags();
+		$blacklisted_attributes = $this->get_blacklisted_attributes();
+		$blacklisted_protocols = $this->get_blacklisted_protocols();
 
-	/**
-	 * Strips blacklisted tags and attributes from content.
-	 *
-	 * See following for blacklist:
-	 *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
-	 */
-	static public function strip( $dom ) {
-		$blacklisted_tags = self::get_blacklisted_tags();
-		$blacklisted_attributes = self::get_blacklisted_attributes();
-		$blacklisted_protocols = self::get_blacklisted_protocols();
-
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-		self::strip_tags( $body, $blacklisted_tags );
-		self::strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
-
-		return $dom;
+		$body = $this->get_body_node();
+		$this->strip_tags( $body, $blacklisted_tags );
+		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
 	}
 
-	static private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {
+	private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {
 		if ( $node->nodeType !== XML_ELEMENT_NODE ) {
 			return;
 		}
@@ -52,11 +47,11 @@ class AMP_Sanitizer {
 		}
 
 		foreach ( $node->childNodes as $child_node ) {
-			self::strip_attributes_recursive( $child_node, $bad_attributes, $bad_protocols );
+			$this->strip_attributes_recursive( $child_node, $bad_attributes, $bad_protocols );
 		}
 	}
 
-	static private function strip_tags( $node, $tags ) {
+	private function strip_tags( $node, $tags ) {
 		foreach ( $tags as $tag_name ) {
 			$elements = $node->getElementsByTagName( $tag_name );
 			if ( $elements->length ) {
@@ -67,13 +62,13 @@ class AMP_Sanitizer {
 		}
 	}
 
-	static private function get_blacklisted_protocols() {
+	private function get_blacklisted_protocols() {
 		return array(
 			'javascript',
 		);
 	}
 
-	static private function get_blacklisted_tags() {
+	private function get_blacklisted_tags() {
 		return array(
 			'script',
 			'noscript',
@@ -100,7 +95,7 @@ class AMP_Sanitizer {
 		);
 	}
 
-	static private function get_blacklisted_attributes() {
+	private function get_blacklisted_attributes() {
 		return array(
 			'style',
 		);

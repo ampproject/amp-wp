@@ -1,7 +1,10 @@
 <?php
 
 require_once( dirname( __FILE__ ) . '/includes/class-amp-dom-utils.php' );
-require_once( dirname( __FILE__ ) . '/class-amp-sanitizer.php' );
+
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
+
 require_once( dirname( __FILE__ ) . '/class-amp-img.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-video.php' );
@@ -32,7 +35,10 @@ class AMP_Content {
 		$this->add_scripts( $gallery_embed->get_scripts() );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
-		$dom = AMP_Sanitizer::strip( $dom );
+
+		$sanitizer = new AMP_Blacklist_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		// Convert HTML to AMP
