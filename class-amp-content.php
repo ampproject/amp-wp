@@ -1,10 +1,14 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-sanitizer.php' );
-require_once( dirname( __FILE__ ) . '/class-amp-img.php' );
-require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
-require_once( dirname( __FILE__ ) . '/class-amp-video.php' );
-require_once( dirname( __FILE__ ) . '/class-amp-audio.php' );
+require_once( dirname( __FILE__ ) . '/includes/class-amp-dom-utils.php' );
+
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-img-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-video-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
+
 require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-twitter-embed.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-youtube-embed.php' );
@@ -30,25 +34,27 @@ class AMP_Content {
 		$this->add_scripts( $youtube_embed->get_scripts() );
 		$this->add_scripts( $gallery_embed->get_scripts() );
 
-		$content = AMP_Sanitizer::strip( $content );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
-		// Convert HTML to AMP
-		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
-		$content = $this->convert( new AMP_Img_Converter( $content ), array(
+		$this->sanitize( new AMP_Blacklist_Sanitizer( $dom ) );
+
+		$this->sanitize( new AMP_Img_Sanitizer( $dom ), array(
 			'layout' => 'responsive',
 		) );
 
-		$content = $this->convert( new AMP_Video_Converter( $content ), array(
+		$this->sanitize( new AMP_Video_Sanitizer( $dom ), array(
 			'layout' => 'responsive',
 		) );
 
-		$content = $this->convert( new AMP_Audio_Converter( $content ), array(
+		$this->sanitize( new AMP_Iframe_Sanitizer( $dom ), array(
 			'layout' => 'responsive',
 		) );
 
-		$content = $this->convert( new AMP_Iframe_Converter( $content ), array(
+		$this->sanitize( new AMP_Audio_Sanitizer( $dom ), array(
 			'layout' => 'responsive',
 		) );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		return $content;
 	}
@@ -59,6 +65,11 @@ class AMP_Content {
 
 	public function get_scripts() {
 		return $this->scripts;
+	}
+
+	private function sanitize( $sanitizer, $attributes = array() ) {
+		$sanitizer->sanitize( $attributes );
+		$this->add_scripts( $sanitizer->get_scripts() );
 	}
 
 	private function convert( $converter, $attributes ) {

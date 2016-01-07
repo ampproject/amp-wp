@@ -37,10 +37,10 @@ class AMP_Post {
 		return $this->metadata;
 	}
 
-	function get_author_avatar( $size = 24 ) {
-		$avatar_html = get_avatar( $this->author->user_email, 24 );
-		$converter = new AMP_Img_Converter( $avatar_html );
-		return $converter->convert();
+	function get_author_avatar_url( $size = 24 ) {
+		return get_avatar_url( $this->author->user_email, array(
+			'size' => $size,
+		) );
 	}
 
 	function get_author_name() {

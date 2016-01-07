@@ -191,7 +191,7 @@
 	<h1 class="title"><?php echo esc_html( $amp_post->get_title() ); ?></h1>
 	<ul class="meta">
 		<li class="byline">
-			<?php echo $amp_post->get_author_avatar(); ?>
+			<amp-img src="<?php echo esc_url( $amp_post->get_author_avatar_url(), 24 ); ?>" width="24" height="24" layout="fixed"></amp-img>
 			<span class="author"><?php echo $amp_post->get_author_name(); ?></span>
 			<span>&nbsp;&nbsp;&bull;</span>
 		</li>

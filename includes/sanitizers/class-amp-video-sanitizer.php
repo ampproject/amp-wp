@@ -1,0 +1,69 @@
+<?php
+
+require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
+
+/**
+ * Converts <video> tags to <amp-video>
+ */
+class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
+	public static $tag = 'video';
+
+	public function sanitize( $amp_attributes = array() ) {
+		$nodes = $this->dom->getElementsByTagName( self::$tag );
+		$num_nodes = $nodes->length;
+		if ( 0 === $num_nodes ) {
+			return;
+		}
+
+		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			$node = $nodes->item( $i );
+			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+
+			$new_attributes = $this->filter_attributes( $old_attributes );
+			$new_attributes = array_merge( $new_attributes, $amp_attributes );
+
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
+
+			// TODO: limit child nodes too (only allowed: `source`; move rest to div+fallback)
+			// TODO: `source` does not have closing tag, and DOMDocument doesn't handle it well.
+			foreach ( $node->childNodes as $child_node ) {
+				$new_child_node = $child_node->cloneNode( true );
+				$new_node->appendChild( $new_child_node );
+			}
+
+			$node->parentNode->replaceChild( $new_node, $node );
+		}
+	}
+
+	private function filter_attributes( $attributes ) {
+		$out = array();
+
+		foreach ( $attributes as $name => $value ) {
+			switch ( $name ) {
+				case 'src':
+				case 'poster':
+				case 'width':
+				case 'height':
+				case 'class':
+					$out[ $name ] = $value;
+					break;
+				case 'controls':
+				case 'loop':
+				case 'muted':
+					if ( 'false' !== $value ) {
+						$out[ $name ] = 'true';
+					}
+					break;
+				case 'autoplay':
+					$out[ $name ] = 'desktop tablet mobile';
+					break;
+				default;
+					break;
+			}
+		}
+
+		// TODO: default width/height
+
+		return $out;
+	}
+}
