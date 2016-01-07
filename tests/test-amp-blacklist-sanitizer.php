@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'empty' => array(
@@ -46,6 +46,11 @@ class AMP_Sanitizer_Test extends WP_UnitTestCase {
 			'mixed_tags' => array(
 				'<input type="text" /><p>Text</p><script>alert("")</script><style>body{ color: red; }</style>',
 				'<p>Text</p>'
+			),
+
+			'no_strip_amp_tags' => array(
+				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>',
+				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>'
 			),
 		);
 	}
