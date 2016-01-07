@@ -9,8 +9,8 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'simple_iframe' => array(
-				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency allowfullscreen></iframe>',
-				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency allowfullscreen sandbox="allow-scripts allow-same-origin"></amp-iframe>',
+				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowfullscreen="true" sandbox="allow-scripts allow-same-origin"></amp-iframe>',
 			),
 
 			'simple_iframe_with_sandbox' => array(
@@ -55,8 +55,34 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
-		$converter = new AMP_Iframe_Converter( $source );
-		$converted = $converter->convert();
-		$this->assertEquals( $expected, $converted );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	public function test_get_scripts__didnt_convert() {
+		$source = '<p>Hello World</p>';
+		$expected = array();
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$scripts = $sanitizer->get_scripts();
+		$this->assertEquals( $expected, $scripts );
+	}
+
+	public function test_get_scripts__did_convert() {
+		$source = '<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281"></iframe>';
+		$expected = array( 'amp-iframe' => 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js' );
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$scripts = $sanitizer->get_scripts();
+
+		$this->assertEquals( $expected, $scripts );
 	}
 }
