@@ -5,9 +5,9 @@ require_once( dirname( __FILE__ ) . '/includes/class-amp-dom-utils.php' );
 require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-base-sanitizer.php' );
 require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
 require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-img-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-video-sanitizer.php' );
 
 require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
-require_once( dirname( __FILE__ ) . '/class-amp-video.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-audio.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-twitter-embed.php' );
@@ -42,11 +42,11 @@ class AMP_Content {
 			'layout' => 'responsive',
 		) );
 
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-
-		$content = $this->convert( new AMP_Video_Converter( $content ), array(
+		$this->sanitize( new AMP_Video_Sanitizer( $dom ), array(
 			'layout' => 'responsive',
 		) );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$content = $this->convert( new AMP_Audio_Converter( $content ), array(
 			'layout' => 'responsive',

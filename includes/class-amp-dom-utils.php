@@ -33,7 +33,7 @@ class AMP_DOM_Utils {
 
 	public static function create_node( $dom, $tag, $attributes ) {
 		$node = $dom->createElement( $tag );
-		self::add_attributes_to_node( $dom, $node, $attributes );
+		self::add_attributes_to_node( $node, $attributes );
 		return $node;
 	}
 
@@ -45,13 +45,9 @@ class AMP_DOM_Utils {
 		return $attributes;
 	}
 
-	public function add_attributes_to_node( $dom, $node, $attributes ) {
+	public function add_attributes_to_node( $node, $attributes ) {
 		foreach ( $attributes as $name => $value ) {
-			$attr = $dom->createAttribute( $name );
-			if ( '' !== $value ) {
-				$attr->value = $value;
-			}
-			$node->appendChild( $attr );
+			$node->setAttribute( $name, $value );
 		}
 	}
 }

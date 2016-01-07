@@ -13,7 +13,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	public function test_add_attributes_to_node__no_attributes() {
 		$dom = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node = $dom->createElement( 'b' );
-		AMP_DOM_Utils::add_attributes_to_node( $dom, $node, array() );
+		AMP_DOM_Utils::add_attributes_to_node( $node, array() );
 		$this->assertFalse( $node->hasAttributes() );
 	}
 
@@ -21,7 +21,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node = $dom->createElement( 'div' );
 		$attributes = array( 'placeholder' => '' );
-		AMP_DOM_Utils::add_attributes_to_node( $dom, $node, $attributes );
+		AMP_DOM_Utils::add_attributes_to_node( $node, $attributes );
 
 		$this->assertTrue( $node->hasAttributes() );
 		$this->check_node_has_attributes( $node, $attributes );
@@ -31,7 +31,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node = $dom->createElement( 'div' );
 		$attributes = array( 'class' => 'myClass', 'id' => 'myId' );
-		AMP_DOM_Utils::add_attributes_to_node( $dom, $node, $attributes );
+		AMP_DOM_Utils::add_attributes_to_node( $node, $attributes );
 
 		$this->assertTrue( $node->hasAttributes() );
 		$this->check_node_has_attributes( $node, $attributes );
