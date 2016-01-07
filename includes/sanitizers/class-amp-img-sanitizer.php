@@ -30,6 +30,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
+			$new_attributes = array_merge( $new_attributes, $amp_attributes );
 
 			// Workaround for https://github.com/Automattic/amp-wp/issues/20
 			// responsive + float don't mix

@@ -87,7 +87,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 	public function test_no_gif_image_scripts() {
 		$source = '<img src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />';
-		$expected = array('amp-anim' => 'https://cdn.ampproject.org/v0/amp-anim-0.1.js');
+		$expected = array( 'amp-anim' => 'https://cdn.ampproject.org/v0/amp-anim-0.1.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
