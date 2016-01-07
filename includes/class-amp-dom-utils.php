@@ -45,7 +45,7 @@ class AMP_DOM_Utils {
 		return $attributes;
 	}
 
-	public function add_attributes_to_node( $node, $attributes ) {
+	public static function add_attributes_to_node( $node, $attributes ) {
 		foreach ( $attributes as $name => $value ) {
 			$node->setAttribute( $name, $value );
 		}
