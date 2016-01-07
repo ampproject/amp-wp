@@ -19,8 +19,8 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'audio_with_whitelisted_attributes' => array(
-				'<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" class="test" loop muted></audio>',
-				'<amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" class="test" loop muted></amp-audio>',
+				'<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" class="test" loop="false" muted></audio>',
+				'<amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" class="test" muted="true"></amp-audio>',
 			),
 
 			'audio_with_blacklisted_attribute' => array(
@@ -29,20 +29,15 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'audio_with_children' => array(
-				'
-<audio width="400" height="300">
+				'<audio width="400" height="300">
 	<source src="https://example.com/foo.wav" type="audio/wav">
 </audio>',
-				'
-<amp-audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</amp-audio>'
+				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio>'
 			),
 
 
 			'multiple_same_audio' => array(
-				'
-<audio width="400" height="300">
+				'<audio width="400" height="300">
 	<source src="https://example.com/foo.wav" type="audio/wav">
 </audio>
 <audio width="400" height="300">
@@ -50,46 +45,19 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 </audio>
 <audio width="400" height="300">
 	<source src="https://example.com/foo.wav" type="audio/wav">
-</audio>
-<audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</audio>
-				',
-				'
-<amp-audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</amp-audio>
-<amp-audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</amp-audio>
-<amp-audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</amp-audio>
-<amp-audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</amp-audio>
-				',
+</audio>',
+				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio><amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio><amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio>',
 			),
 
 			'multiple_different_audio' => array(
-				'
-<audio width="400" height="300">
+				'<audio width="400" height="300">
 	<source src="https://example.com/foo.wav" type="audio/wav">
 </audio>
 <audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></audio>
 <audio height="500" width="300">
 	<source src="https://example.com/foo2.wav" type="audio/wav">
-</audio>
-				',
-				'
-<amp-audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</amp-audio>
-<amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></amp-audio>
-<amp-audio height="500" width="300">
-	<source src="https://example.com/foo2.wav" type="audio/wav">
-</amp-audio>
-				'
+</audio>',
+				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio><amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></amp-audio><amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"></source></amp-audio>'
 			),
 		);
 	}
@@ -98,8 +66,34 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
-		$converter = new AMP_Audio_Converter( $source );
-		$converted = $converter->convert();
-		$this->assertEquals( $expected, $converted );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	public function test_get_scripts__didnt_convert() {
+		$source = '<p>Hello World</p>';
+		$expected = array();
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$scripts = $sanitizer->get_scripts();
+		$this->assertEquals( $expected, $scripts );
+	}
+
+	public function test_get_scripts__did_convert() {
+		$source = '<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></audio>';
+		$expected = array( 'amp-audio' => 'https://cdn.ampproject.org/v0/amp-audio-0.1.js' );
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$scripts = $sanitizer->get_scripts();
+
+		$this->assertEquals( $expected, $scripts );
 	}
 }
