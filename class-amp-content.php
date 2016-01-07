@@ -4,8 +4,8 @@ require_once( dirname( __FILE__ ) . '/includes/class-amp-dom-utils.php' );
 
 require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-base-sanitizer.php' );
 require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-img-sanitizer.php' );
 
-require_once( dirname( __FILE__ ) . '/class-amp-img.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-iframe.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-video.php' );
 require_once( dirname( __FILE__ ) . '/class-amp-audio.php' );
@@ -36,16 +36,13 @@ class AMP_Content {
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
-		$sanitizer = new AMP_Blacklist_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$this->sanitize( new AMP_Blacklist_Sanitizer( $dom ) );
 
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-
-		// Convert HTML to AMP
-		// see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags)
-		$content = $this->convert( new AMP_Img_Converter( $content ), array(
+		$this->sanitize( new AMP_Img_Sanitizer( $dom ), array(
 			'layout' => 'responsive',
 		) );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$content = $this->convert( new AMP_Video_Converter( $content ), array(
 			'layout' => 'responsive',
@@ -68,6 +65,11 @@ class AMP_Content {
 
 	public function get_scripts() {
 		return $this->scripts;
+	}
+
+	private function sanitize( $sanitizer, $attributes = array() ) {
+		$sanitizer->sanitize( $attributes );
+		$this->add_scripts( $sanitizer->get_scripts() );
 	}
 
 	private function convert( $converter, $attributes ) {

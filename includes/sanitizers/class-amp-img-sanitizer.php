@@ -1,8 +1,11 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-converter.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
 
-class AMP_Img_Converter extends AMP_Converter {
+/**
+ * Converts <img> tags to <amp-img> or <amp-anim>
+ */
+class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'img';
 
 	private static $anim_extension = '.gif';
@@ -10,52 +13,45 @@ class AMP_Img_Converter extends AMP_Converter {
 	private static $script_slug = 'amp-anim';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-anim-0.1.js';
 
-	public function convert( $amp_attributes = array() ) {
-		if ( ! $this->has_tag( self::$tag ) ) {
-			return $this->content;
+	public function sanitize( $amp_attributes = array() ) {
+		$nodes = $this->dom->getElementsByTagName( self::$tag );
+		$num_nodes = $nodes->length;
+		if ( 0 === $num_nodes ) {
+			return;
 		}
 
-		$matches = $this->get_tags( self::$tag );
-		if ( empty( $matches ) ) {
-			return $this->content;
-		}
+		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			$node = $nodes->item( $i );
+			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
-		$content = $this->content;
-		foreach ( $matches as $match ) {
-			$old_img = $match[0];
-			$old_img_attr = isset( $match[2] ) ? $match[2] : '';
-			$new_img = '';
-
-			$attributes = wp_kses_hair( $old_img_attr,  array( 'http', 'https' ) );
-
-			if ( ! empty( $attributes['src'] ) ) {
-				$attributes = $this->filter_attributes( $attributes );
-				$attributes = array_merge( $attributes, $amp_attributes );
-
-				// Workaround for https://github.com/Automattic/amp-wp/issues/20
-				// responsive + float don't mix
-				if ( isset( $attributes['class'] )
-					&& (
-						false !== strpos( $attributes['class'], 'alignleft' )
-						|| false !== strpos( $attributes['class'], 'alignright' )
-					)
-				) {
-					unset( $attributes['layout'] );
-				}
-
-				if ( $this->url_has_extension( $attributes['src'], self::$anim_extension ) ) {
-					$this->did_convert_elements = true;
-					$new_img .= sprintf( '<amp-anim %s></amp-anim>', $this->build_attributes_string( $attributes ) );
-				} else {
-					$new_img .= sprintf( '<amp-img %s></amp-img>', $this->build_attributes_string( $attributes ) );
-				}
+			if ( ! array_key_exists( 'src', $old_attributes ) ) {
+				$node->parentNode->removeChild( $node );
+				continue;
 			}
 
-			$old_img_pattern = '~' . preg_quote( $old_img, '~' ) . '~';
-			$content = preg_replace( $old_img_pattern, $new_img, $content, 1 );
-		}
+			$new_attributes = $this->filter_attributes( $old_attributes );
 
-		return $content;
+			// Workaround for https://github.com/Automattic/amp-wp/issues/20
+			// responsive + float don't mix
+			if ( isset( $new_attributes['class'] )
+				&& (
+					false !== strpos( $new_attributes['class'], 'alignleft' )
+					|| false !== strpos( $new_attributes['class'], 'alignright' )
+				)
+			) {
+				unset( $new_attributes['layout'] );
+			}
+
+			if ( $this->url_has_extension( $new_attributes['src'], self::$anim_extension ) ) {
+				$this->did_convert_elements = true;
+				$new_tag = 'amp-anim';
+			} else {
+				$new_tag = 'amp-img';
+			}
+
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
+			$node->parentNode->replaceChild( $new_node, $node );
+		}
 	}
 
 	public function get_scripts() {
@@ -69,10 +65,7 @@ class AMP_Img_Converter extends AMP_Converter {
 	private function filter_attributes( $attributes ) {
 		$out = array();
 
-		foreach ( $attributes as $attribute ) {
-			$name = $attribute['name'];
-			$value = $attribute['value'];
-
+		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'src':
 				case 'alt':

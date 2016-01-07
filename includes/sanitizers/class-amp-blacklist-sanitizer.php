@@ -1,5 +1,7 @@
 <?php
 
+require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
+
 /**
  * Strips blacklisted tags and attributes from content.
  *
@@ -12,7 +14,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
 		$blacklisted_protocols = $this->get_blacklisted_protocols();
 
-		$body = $this->get_body_node();
+		$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 		$this->strip_tags( $body, $blacklisted_tags );
 		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
 	}

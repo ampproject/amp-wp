@@ -30,4 +30,28 @@ class AMP_DOM_Utils {
 		}
 		return $out;
 	}
+
+	public static function create_node( $dom, $tag, $attributes ) {
+		$node = $dom->createElement( $tag );
+		self::add_attributes_to_node( $dom, $node, $attributes );
+		return $node;
+	}
+
+	public static function get_node_attributes_as_assoc_array( $node ) {
+		$attributes = array();
+		foreach ( $node->attributes as $attribute ) {
+			$attributes[ $attribute->nodeName ] = $attribute->nodeValue;
+		}
+		return $attributes;
+	}
+
+	public function add_attributes_to_node( $dom, $node, $attributes ) {
+		foreach ( $attributes as $name => $value ) {
+			$attr = $dom->createAttribute( $name );
+			if ( '' !== $value ) {
+				$attr->value = $value;
+			}
+			$node->appendChild( $attr );
+		}
+	}
 }
