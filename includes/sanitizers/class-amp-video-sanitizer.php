@@ -3,7 +3,7 @@
 require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
 
 /**
- * Converts <img> tags to <amp-img> or <amp-anim>
+ * Converts <video> tags to <amp-video>
  */
 class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';

@@ -69,7 +69,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$expected = array();
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
 		$scripts = $sanitizer->get_scripts();
