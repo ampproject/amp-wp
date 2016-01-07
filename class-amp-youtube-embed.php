@@ -83,9 +83,9 @@ class AMP_YouTube_Embed_Handler extends AMP_Embed_Handler {
 
 		if ( self::SHORT_URL_HOST === substr( $parsed_url['host'], -strlen( self::SHORT_URL_HOST ) ) ) {
 			// youtu.be/{id}
-			$parts = explode( '/', $parsed_url['path'], 1 );
+			$parts = explode( '/', $parsed_url['path'] );
 			if ( ! empty( $parts ) ) {
-				$video_id = $parts[0];
+				$video_id = $parts[1];
 			}
 		} else {
 			// ?v={id} or ?list={id}
@@ -98,10 +98,10 @@ class AMP_YouTube_Embed_Handler extends AMP_Embed_Handler {
 
 		if ( empty( $video_id ) ) {
 			// /(v|e|embed)/{id}
-			$parts = explode( '/', $parsed_url['path'], 1 );
+			$parts = explode( '/', $parsed_url['path'] );
 
-			if ( in_array( $parts[0], array( 'v', 'e', 'embed' ) ) ) {
-				$video_id = $parts[1];
+			if ( in_array( $parts[1], array( 'v', 'e', 'embed' ) ) ) {
+				$video_id = $parts[2];
 			}
 		}
 
