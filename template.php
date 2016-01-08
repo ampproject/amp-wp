@@ -1,16 +1,9 @@
 <!doctype html>
 <html amp>
 <head>
-	<title><?php echo esc_html( $amp_post->get_title() ); ?> | <?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
 	<meta charset="utf-8">
-	<link rel="canonical" href="<?php echo esc_url( $amp_post->get_canonical_url() ); ?>" />
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 	<link href='https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Open+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-	<?php foreach ( $amp_post->get_scripts() as $element => $script ) : ?>
-		<script custom-element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
-	<?php endforeach; ?>
-	<script src="https://cdn.ampproject.org/v0.js" async></script>
-	<script type="application/ld+json"><?php echo json_encode( $amp_post->get_metadata() ); ?></script>
 	<?php do_action( 'amp_head', $amp_post ); ?>
 	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 	<style amp-custom>
@@ -24,7 +17,6 @@
 
 	.wp-caption.alignleft { margin-right: 1em; }
 	.wp-caption.alignright { margin-left: 1em; }
-
 
 	/* Generic WP.com reader style */
 	.content, .title-bar div {

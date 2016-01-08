@@ -71,10 +71,13 @@ function amp_prepare_render() {
 }
 
 function amp_render() {
+	$__DIR__ = dirname( __FILE__ );
+	require( $__DIR__ . '/includes/amp-template-actions.php' );
+
 	$post_id = get_queried_object_id();
 	do_action( 'pre_amp_render', $post_id );
 	$amp_post = new AMP_Post( $post_id );
-	include( dirname( __FILE__ ) . '/template.php' );
+	include( $__DIR__ . '/template.php' );
 	exit;
 }
 
