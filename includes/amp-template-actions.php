@@ -2,7 +2,7 @@
 add_action( 'amp_head', 'amp_head_title' );
 function amp_head_title( $amp_post ) {
 	?>
-	<title><?php echo esc_html( $amp_post->get_title() ); ?> | <?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
+	<title><?php echo wp_get_document_title(); ?></title>
 	<?php
 }
 
