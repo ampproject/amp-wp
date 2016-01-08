@@ -82,11 +82,4 @@ class AMP_Post {
 
 		return $metadata;
 	}
-
-	private function add_script( $element, $script ) {
-		if ( isset( $this->scripts[ $element ] ) ) {
-			return;
-		}
-		$this->scripts[ $element ] = $script;
-	}
 }
