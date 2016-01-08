@@ -15,9 +15,9 @@ class AMP_Post {
 		$this->post = get_post( $post_id );
 		$this->author = get_userdata( $this->post->post_author );
 
-		$this->scripts = array();
-
-		$this->content = apply_filters( 'amp_post_content', $this->build_content(), $this->post );
+		$amp_content = new AMP_Content( $this->post->post_content );
+		$this->content = apply_filters( 'amp_post_content', $amp->transform(), $this->post );
+		$this->scripts = apply_filters( 'amp_post_scripts', $amp->get_scripts(), $this->post );
 		$this->metadata = apply_filters( 'amp_post_metadata', $this->build_metadata(), $this->post );
 	}
 
@@ -64,7 +64,7 @@ class AMP_Post {
 	}
 
 	private function build_metadata() {
-		$data = array(
+		$metadata = array(
 			'@context' => 'http://schema.org',
 			'@type' => 'BlogPosting', // TODO: change this for pages
 			'mainEntityOfPage' => get_permalink( $this->ID ),
@@ -80,14 +80,7 @@ class AMP_Post {
 			),
 		);
 
-		return $data;
-	}
-
-	private function build_content() {
-		$amp = new AMP_Content( $this->post->post_content );
-		$content = $amp->transform();
-		$this->scripts = $amp->get_scripts();
-		return $content;
+		return $metadata;
 	}
 
 	private function add_script( $element, $script ) {
