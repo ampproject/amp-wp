@@ -16,8 +16,8 @@ class AMP_Post {
 		$this->author = get_userdata( $this->post->post_author );
 
 		$amp_content = new AMP_Content( $this->post->post_content );
-		$this->content = apply_filters( 'amp_post_content', $amp->transform(), $this->post );
-		$this->scripts = apply_filters( 'amp_post_scripts', $amp->get_scripts(), $this->post );
+		$this->content = apply_filters( 'amp_post_content', $amp_content->transform(), $this->post );
+		$this->scripts = apply_filters( 'amp_post_scripts', $amp_content->get_scripts(), $this->post );
 		$this->metadata = apply_filters( 'amp_post_metadata', $this->build_metadata(), $this->post );
 	}
 
