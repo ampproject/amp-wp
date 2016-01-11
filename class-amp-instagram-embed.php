@@ -79,9 +79,10 @@ class AMP_Instagram_Embed_Handler extends AMP_Embed_Handler {
 	}
 
 	private function get_instagram_id_from_url( $url ) {
-		$parsed_url = parse_url( $url );
+		$url_path = parse_url( $url, PHP_URL_PATH );
+
 		// /p/{id} on both, short url and normal urls
-		$instagram_id = mb_substr($parsed_url['path'], 3);
+		$instagram_id = mb_substr($url_path, 3);
 
 		if( !empty($instagram_id) ) {
 			return $instagram_id;
