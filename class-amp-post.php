@@ -70,6 +70,7 @@ class AMP_Post {
 			'mainEntityOfPage' => get_permalink( $this->ID ),
 			'headline' => get_the_title( $this->ID ),
 			'datePublished' => get_the_date( 'c', $this->ID ),
+			'dateModified' => get_post_modified_time( 'c', false, $this->post ),
 			'author' => array(
 				'@type' => 'Person',
 				'name' => $this->author->display_name,
