@@ -107,7 +107,7 @@ function wpcom_amp_add_blavatar( $metadata, $post ) {
 	$size = 60;
 	$blavatar_domain = blavatar_domain( site_url() );
 	if ( blavatar_exists( $blavatar_domain ) ) {
-		$metadata['logo'] = array(
+		$metadata['publisher']['logo'] = array(
 			'@type' => 'ImageObject',
 			'url' => blavatar_url( $blavatar_domain, 'img', $size, false, true ),
 			'width' => $size,
