@@ -36,10 +36,8 @@ class AMP_Instagram_Embed_Handler extends AMP_Embed_Handler {
 		$url = false;
 
 		$instagram_id = false;
-		if ( isset( $attr[0] ) ) {
-			$url = ltrim( $attr[0] , '=' );
-		} elseif ( function_exists ( 'shortcode_new_to_old_params' ) ) {
-			$url = shortcode_new_to_old_params( $attr );
+		if ( isset( $attr['url'] ) ) {
+			$url = trim( $attr['url'] );
 		}
 
 		if ( empty( $url ) ) {
@@ -55,17 +53,17 @@ class AMP_Instagram_Embed_Handler extends AMP_Embed_Handler {
 	}
 
 	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->shortcode( array( $url ) );
+		return $this->render( array( 'url' => $url, 'instagram_id' =>  end($matches)) );
 	}
 
 	public function render( $args ) {
 		$this->did_convert_elements = true;
 
 		$args = wp_parse_args( $args, array(
-			'instagram_id' => false,
+			'url' => false,
 		) );
 
-		if ( empty( $args['instagram_id'] ) ) {
+		if ( empty( $args['url'] ) ) {
 			return AMP_HTML_Utils::build_tag( 'a', array( 'href' => $args['url'], 'class' => 'amp-wp-fallback' ), $args['url'] );
 		}
 
