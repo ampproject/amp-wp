@@ -61,9 +61,10 @@ class AMP_Instagram_Embed_Handler extends AMP_Embed_Handler {
 
 		$args = wp_parse_args( $args, array(
 			'url' => false,
+			'instagram_id' => false,
 		) );
 
-		if ( empty( $args['url'] ) ) {
+		if ( empty( $args['instagram_id'] ) ) {
 			return AMP_HTML_Utils::build_tag( 'a', array( 'href' => $args['url'], 'class' => 'amp-wp-fallback' ), $args['url'] );
 		}
 
