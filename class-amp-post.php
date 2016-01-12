@@ -14,7 +14,7 @@ class AMP_Post {
 		$this->ID = $post_id;
 		$this->post = get_post( $post_id );
 
-		$this->author = get_userdata( $this->post->post_author );
+		$this->author = apply_filters( 'amp_post_author', get_userdata( $this->post->post_author ) );
 
 		$amp_content = new AMP_Content( $this->post->post_content );
 		$this->content = apply_filters( 'amp_post_content', $amp_content->transform(), $this->post );
