@@ -202,6 +202,6 @@ $post_author = $amp_post->get_author();
 	</ul>
 	<?php echo $amp_post->get_content(); ?>
 </div>
-<?php do_action( 'amp_footer', $amp_post );
+<?php do_action( 'amp_footer', $amp_post ); ?>
 </body>
 </html>
