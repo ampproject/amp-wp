@@ -53,7 +53,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Embed_Handler {
 	}
 
 	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->render( array( 'url' => $url, 'instagram_id' =>  end($matches)) );
+		return $this->render( array( 'url' => $url, 'instagram_id' =>  end( $matches ) ) );
 	}
 
 	public function render( $args ) {
@@ -81,11 +81,12 @@ class AMP_Instagram_Embed_Handler extends AMP_Embed_Handler {
 		$url_path = parse_url( $url, PHP_URL_PATH );
 
 		// /p/{id} on both, short url and normal urls
-		$instagram_id = mb_substr($url_path, 3);
+		$instagram_id = mb_substr( $url_path, 3 );
 
-		if( !empty($instagram_id) ) {
+		if( ! empty( $instagram_id ) ) {
 			return $instagram_id;
 		}
+
 		return false;
 	}
 }
