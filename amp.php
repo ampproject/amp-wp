@@ -71,10 +71,23 @@ function amp_prepare_render() {
 }
 
 function amp_render() {
+	$__DIR__ = dirname( __FILE__ );
+	require( $__DIR__ . '/includes/amp-template-actions.php' );
+
 	$post_id = get_queried_object_id();
 	do_action( 'pre_amp_render', $post_id );
+
 	$amp_post = new AMP_Post( $post_id );
-	include( dirname( __FILE__ ) . '/template.php' );
+
+	$default_template = $__DIR__ . '/templates/amp-index.php';
+	$template = apply_filters( 'amp_template_file', $default_template );
+
+	if ( 0 !== validate_file( $template ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'Path validation for `amp_template_file` failed.' ), '0.1' );
+		$template = $default_template;
+	}
+
+	include( $template );
 	exit;
 }
 

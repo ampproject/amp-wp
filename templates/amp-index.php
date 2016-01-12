@@ -1,16 +1,14 @@
+<?php
+$post_id = $amp_post->get_ID();
+$post = $amp_post->get_post();
+$post_author = $amp_post->get_author();
+?>
 <!doctype html>
 <html amp>
 <head>
-	<title><?php echo esc_html( $amp_post->get_title() ); ?> | <?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
 	<meta charset="utf-8">
-	<link rel="canonical" href="<?php echo esc_url( $amp_post->get_canonical_url() ); ?>" />
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 	<link href='https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Open+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-	<?php foreach ( $amp_post->get_scripts() as $element => $script ) : ?>
-		<script custom-element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
-	<?php endforeach; ?>
-	<script src="https://cdn.ampproject.org/v0.js" async></script>
-	<script type="application/ld+json"><?php echo json_encode( $amp_post->get_metadata() ); ?></script>
 	<?php do_action( 'amp_head', $amp_post ); ?>
 	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 	<style amp-custom>
@@ -24,7 +22,6 @@
 
 	.wp-caption.alignleft { margin-right: 1em; }
 	.wp-caption.alignright { margin-left: 1em; }
-
 
 	/* Generic WP.com reader style */
 	.content, .title-bar div {
@@ -188,17 +185,23 @@
 	</div>
 </nav>
 <div class="content">
-	<h1 class="title"><?php echo esc_html( $amp_post->get_title() ); ?></h1>
+	<h1 class="title"><?php echo esc_html( get_the_title( $post_id ) ); ?></h1>
 	<ul class="meta">
 		<li class="byline">
-			<amp-img src="<?php echo esc_url( $amp_post->get_author_avatar_url(), 24 ); ?>" width="24" height="24" layout="fixed"></amp-img>
-			<span class="author"><?php echo $amp_post->get_author_name(); ?></span>
+			<amp-img src="<?php echo esc_url( get_avatar_url( $post_author->user_email, array(
+				'size' => 24,
+			) ) ); ?>" width="24" height="24" layout="fixed"></amp-img>
+			<span class="author"><?php echo esc_html( $post_author->display_name ); ?></span>
 			<span>&nbsp;&nbsp;&bull;</span>
 		</li>
-		<li><time datetime="<?php echo esc_attr( $amp_post->get_machine_date() ); ?>"><?php echo esc_html( $amp_post->get_human_date() ); ?></time></li>
+		<li>
+			<time datetime="<?php echo esc_attr( get_the_date( 'c', $post_id ) ); ?>">
+				<?php echo esc_html( sprintf( _x( 'Posted %s ago', '%s = human-readable time difference', 'amp' ), human_time_diff( get_the_date( 'U', $post_id ) ) ) ); ?>
+			</time>
+		</li>
 	</ul>
 	<?php echo $amp_post->get_content(); ?>
 </div>
-<!-- <?php printf( 'Generated in %ss', timer_stop() ); ?> -->
+<?php do_action( 'amp_footer', $amp_post ); ?>
 </body>
 </html>
