@@ -9,7 +9,7 @@ function amp_head_title( $amp_post ) {
 add_action( 'amp_head', 'amp_head_canonical' );
 function amp_head_canonical( $amp_post ) {
 	?>
-	<link rel="canonical" href="<?php echo esc_url( $amp_post->get_canonical_url() ); ?>" />
+	<link rel="canonical" href="<?php echo esc_url( get_permalink() ); ?>" />
 	<?php
 }
 
