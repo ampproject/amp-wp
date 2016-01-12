@@ -2,7 +2,7 @@
 
 class AMP_Image_Dimension_Extractor {
 	static public function extract( $url ) {
-		$dimensions = self::extract_from_filename( parse_url( $url, PHP_URL_PATH ) );
+		$dimensions = self::extract_from_filename( $url );
 		if ( $dimensions ) {
 			return $dimensions;
 		}
@@ -15,13 +15,14 @@ class AMP_Image_Dimension_Extractor {
 		return false;
 	}
 
-	static private function extract_from_filename( $path ) {
+	public static function extract_from_filename( $url ) {
+		$path = parse_url( $url, PHP_URL_PATH );
 		$filename = basename( $path );
 		if ( ! $filename ) {
 			return false;
 		}
 
-		$result = preg_match( '~(\d+)x(\d+)\.~', $filename, $matches );
+		$result = preg_match( '~-(\d+)x(\d+)\.(jpg|jpeg|png)$~i', $filename, $matches );
 		if ( ! $result ) {
 			return false;
 		}
