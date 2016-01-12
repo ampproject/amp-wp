@@ -1,3 +1,8 @@
+<?php
+$post_id = $amp_post->get_ID();
+$post = $amp_post->get_post();
+$post_author = $amp_post->get_author();
+?>
 <!doctype html>
 <html amp>
 <head>
@@ -180,23 +185,23 @@
 	</div>
 </nav>
 <div class="content">
-	<h1 class="title"><?php echo esc_html( get_the_title( $amp_post->get_ID() ) ); ?></h1>
+	<h1 class="title"><?php echo esc_html( get_the_title( $post_id ) ); ?></h1>
 	<ul class="meta">
 		<li class="byline">
-			<amp-img src="<?php echo esc_url( get_avatar_url( $amp_post->get_author()->user_email, array(
+			<amp-img src="<?php echo esc_url( get_avatar_url( $post_author->user_email, array(
 				'size' => 24,
 			) ) ); ?>" width="24" height="24" layout="fixed"></amp-img>
-			<span class="author"><?php echo esc_html( $amp_post->get_author()->display_name ); ?></span>
+			<span class="author"><?php echo esc_html( $post_author->display_name ); ?></span>
 			<span>&nbsp;&nbsp;&bull;</span>
 		</li>
 		<li>
-			<time datetime="<?php echo esc_attr( get_the_date( 'c', $amp_post->get_ID() ) ); ?>">
-				<?php echo esc_html( sprintf( _x( 'Posted %s ago', '%s = human-readable time difference', 'amp' ), human_time_diff( get_the_date( 'U', $amp_post->get_ID() ) ) ) ); ?>
+			<time datetime="<?php echo esc_attr( get_the_date( 'c', $post_id ) ); ?>">
+				<?php echo esc_html( sprintf( _x( 'Posted %s ago', '%s = human-readable time difference', 'amp' ), human_time_diff( get_the_date( 'U', $post_id ) ) ) ); ?>
 			</time>
 		</li>
 	</ul>
 	<?php echo $amp_post->get_content(); ?>
 </div>
-<!-- <?php printf( 'Generated in %ss', timer_stop() ); ?> -->
+<?php do_action( 'amp_footer', $amp_post );
 </body>
 </html>
