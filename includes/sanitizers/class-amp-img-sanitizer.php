@@ -89,9 +89,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function is_aligned_image( $class ) {
-		return false !== strpos( $new_attributes['class'], 'alignleft' )
-			|| false !== strpos( $new_attributes['class'], 'alignright' )
-			|| false !== strpos( $new_attributes['class'], 'aligncenter' );
+		return false !== strpos( $class, 'alignleft' )
+			|| false !== strpos( $class, 'alignright' )
+			|| false !== strpos( $class, 'aligncenter' );
 	}
 
 	private function is_gif_url( $url ) {
