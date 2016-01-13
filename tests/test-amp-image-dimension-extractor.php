@@ -29,8 +29,17 @@ class AMP_Image_Dimension_Extractor__From_Filename__Test extends WP_UnitTestCase
 	/**
 	 * @dataProvider get_data
 	 */
-	function test_extractor( $source, $expected ) {
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_filename( $source );
+	function test__no_dimensions_provided( $source_url, $expected ) {
+		$dimensions = AMP_Image_Dimension_Extractor::extract_from_filename( false, $source_url );
+		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__dimensions_already_passed_in() {
+		$source_dimensions = array( 1, 1 );
+		$source_url = '';
+		$expected = array( 1, 1 );
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_from_filename( $source_dimensions, $source_url );
 		$this->assertEquals( $expected, $dimensions );
 	}
 }
@@ -45,11 +54,20 @@ class AMP_Image_Dimension_Extractor__From_Metadata__Test extends WP_UnitTestCase
 		$this->_attachment_id = $this->factory->attachment->create_upload_object( $file_path );
 	}
 
+	function test__dimensions_already_passed_in() {
+		$source_dimensions = array( 1, 1 );
+		$source = wp_get_attachment_url( $this->_attachment_id );
+		$expected = array( 1, 1 );
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata(  $source_dimensions, $source );
+		$this->assertEquals( $expected, $dimensions );
+	}
+
 	function test__invalid_attachment() {
 		$source = 'https://example.com/path/to/file.jpg';
 		$expected = false;
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata(  $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata(  false, $source );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -59,7 +77,7 @@ class AMP_Image_Dimension_Extractor__From_Metadata__Test extends WP_UnitTestCase
 		$expected = false;
 
 		delete_post_meta( $this->_attachment_id, '_wp_attachment_metadata' );
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -68,7 +86,7 @@ class AMP_Image_Dimension_Extractor__From_Metadata__Test extends WP_UnitTestCase
 		$source = wp_get_attachment_url( $this->_attachment_id ) . '?rand=1';
 		$expected = array( 498, 113 );
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -77,7 +95,7 @@ class AMP_Image_Dimension_Extractor__From_Metadata__Test extends WP_UnitTestCase
 		$source = wp_get_attachment_url( $this->_attachment_id );
 		$expected = array( 498, 113 );
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
