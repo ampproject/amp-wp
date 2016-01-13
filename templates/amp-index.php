@@ -143,8 +143,8 @@ $post_author = $amp_post->get_author();
 
 	/* Captions */
 	.wp-caption-text {
-		background: #eaf0f3;
 		padding: 8px 16px;
+		font-style: italic;
 	}
 
 
