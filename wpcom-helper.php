@@ -117,3 +117,45 @@ function wpcom_amp_add_blavatar( $metadata, $post ) {
 
 	return $metadata;
 }
+
+add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions', 9, 2 ); // Hook in before the default extractors
+function wpcom_amp_extract_image_dimensions( $dimensions, $url ) {
+	if ( $dimensions ) {
+		return $dimensions;
+	}
+
+	$host = parse_url( $url, PHP_URL_HOST );
+	if ( ! wp_endswith( $host, '.wp.com' ) || ! wp_endswith( $host, '.files.wordpress.com' ) ) {
+		return false;
+	}
+
+	$query = parse_url( $url, PHP_URL_QUERY );
+	$w = isset( $query['w'] ) ? absint( $query['w'] ) : false;
+	$h = isset( $query['h'] ) ? absint( $query['h'] ) : false;
+
+	if ( false !== $w && false !== $h ) {
+		return array( $w, $h );
+	}
+
+	return false;
+}
+
+
+add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_fallback', 100, 2 ); // Our last resort
+function wpcom_amp_extract_image_dimensions_fallback( $dimensions, $url ) {
+	if ( $dimensions ) {
+		return $dimensions;
+	}
+
+	if ( ! function_exists( 'require_lib' ) ) {
+		return false;
+	}
+
+	require_lib( 'wpcom/imagesize' );
+	$size = wpcom_getimagesize( $url );
+	if ( $size ) {
+		return array( $size[0], $size[1] );
+	}
+
+	return false;
+}
