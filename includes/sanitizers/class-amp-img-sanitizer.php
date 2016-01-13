@@ -36,11 +36,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			// Workaround for https://github.com/Automattic/amp-wp/issues/20
 			// responsive + float don't mix
 			if ( isset( $new_attributes['class'] )
-				&& (
-					false !== strpos( $new_attributes['class'], 'alignleft' )
-					|| false !== strpos( $new_attributes['class'], 'alignright' )
-				)
-			) {
+				&& $this->is_aligned_image( $new_attributes['class'] ) ) {
 				unset( $new_attributes['layout'] );
 			}
 
@@ -90,6 +86,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $out;
+	}
+
+	private function is_aligned_image( $class ) {
+		return false !== strpos( $new_attributes['class'], 'alignleft' )
+			|| false !== strpos( $new_attributes['class'], 'alignright' )
+			|| false !== strpos( $new_attributes['class'], 'aligncenter' );
 	}
 
 	private function is_gif_url( $url ) {
