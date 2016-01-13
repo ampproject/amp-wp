@@ -82,10 +82,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! isset( $out['width'] ) || ! isset( $out['height'] ) ) {
-			list( $width, $height ) = AMP_Image_Dimension_Extractor::extract( $out['src'] );
-			if ( $width && $height ) {
-				$out['width'] = $width;
-				$out['height'] = $height;
+			$dimensions = AMP_Image_Dimension_Extractor::extract( $out['src'] );
+			if ( $dimensions ) {
+				$out['width'] = $dimensions[0];
+				$out['height'] = $dimensions[1];
 			}
 		}
 
