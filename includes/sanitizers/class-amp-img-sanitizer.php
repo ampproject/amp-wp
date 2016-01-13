@@ -44,7 +44,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				unset( $new_attributes['layout'] );
 			}
 
-			if ( $this->url_has_extension( $new_attributes['src'], self::$anim_extension ) ) {
+			if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 				$this->did_convert_elements = true;
 				$new_tag = 'amp-anim';
 			} else {
@@ -90,5 +90,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $out;
+	}
+
+	private function is_gif_url( $url ) {
+		$ext = self::$anim_extension;
+		$path = parse_url( $url, PHP_URL_PATH );
+		return $ext === substr( $path, -strlen( $ext ) );
 	}
 }
