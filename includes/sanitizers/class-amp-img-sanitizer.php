@@ -1,6 +1,7 @@
 <?php
 
 require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
+require_once( dirname( dirname( __FILE__ ) ) . '/utils/class-amp-image-dimension-extractor.php' );
 
 /**
  * Converts <img> tags to <amp-img> or <amp-anim>
@@ -30,20 +31,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
-			$new_attributes = array_merge( $new_attributes, $amp_attributes );
-
-			// Workaround for https://github.com/Automattic/amp-wp/issues/20
-			// responsive + float don't mix
-			if ( isset( $new_attributes['class'] )
-				&& (
-					false !== strpos( $new_attributes['class'], 'alignleft' )
-					|| false !== strpos( $new_attributes['class'], 'alignright' )
-				)
-			) {
-				unset( $new_attributes['layout'] );
+			if ( ! isset( $new_attributes['width'] ) || ! isset( $new_attributes['height'] ) ) {
+				$dimensions = AMP_Image_Dimension_Extractor::extract( $new_attributes['src'] );
+				if ( $dimensions ) {
+					$new_attributes['width'] = $dimensions[0];
+					$new_attributes['height'] = $dimensions[1];
+				}
 			}
 
-			if ( $this->url_has_extension( $new_attributes['src'], self::$anim_extension ) ) {
+			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+			$new_attributes = array_merge( $new_attributes, $amp_attributes );
+
+			if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 				$this->did_convert_elements = true;
 				$new_tag = 'amp-anim';
 			} else {
@@ -73,6 +72,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'width':
 				case 'height':
 				case 'class':
+				case 'srcset':
+				case 'sizes':
 					$out[ $name ] = $value;
 					break;
 				default;
@@ -80,59 +81,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! isset( $out['width'] ) || ! isset( $out['height'] ) ) {
-			list( $width, $height ) = AMP_Img_Dimension_Extractor::extract( $out['src'] );
-			if ( $width && $height ) {
-				$out['width'] = $width;
-				$out['height'] = $height;
-			}
-		}
-
 		return $out;
 	}
-}
 
-class AMP_Img_Dimension_Extractor {
-	static public function extract( $url ) {
-		$dimensions = self::extract_from_filename( parse_url( $url, PHP_URL_PATH ) );
-		if ( $dimensions ) {
-			return $dimensions;
-		}
-
-		$dimensions = self::extract_from_attachment_metadata( $url );
-		if ( $dimensions ) {
-			return $dimensions;
-		}
-
-		return false;
-	}
-
-	static private function extract_from_filename( $path ) {
-		$filename = basename( $path );
-		if ( ! $filename ) {
-			return false;
-		}
-
-		$result = preg_match( '~(\d+)x(\d+)\.~', $filename, $matches );
-		if ( ! $result ) {
-			return false;
-		}
-
-		return array( $matches[1], $matches[2] );
-	}
-
-	public static function extract_from_attachment_metadata( $url ) {
-		$url = strtok( $url, '?' );
-		$attachment_id = attachment_url_to_postid( $url );
-		if ( empty( $attachment_id ) ) {
-			return false;
-		}
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-		if ( ! $metadata ) {
-			return false;
-		}
-
-		return array( $metadata['width'], $metadata['height'] );
+	private function is_gif_url( $url ) {
+		$ext = self::$anim_extension;
+		$path = parse_url( $url, PHP_URL_PATH );
+		return $ext === substr( $path, -strlen( $ext ) );
 	}
 }

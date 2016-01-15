@@ -18,10 +18,12 @@ require_once( dirname( __FILE__ ) . '/class-amp-instagram-embed.php' );
 class AMP_Content {
 	private $original_content;
 	private $scripts;
+	private $args;
 
-	public function __construct( $content ) {
+	public function __construct( $content, $args = array() ) {
 		$this->original_content = $content;
 		$this->scripts = array();
+		$this->args = $args;
 	}
 
 	public function transform() {
@@ -39,23 +41,15 @@ class AMP_Content {
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
-		$this->sanitize( new AMP_Blacklist_Sanitizer( $dom ) );
+		$this->sanitize( new AMP_Blacklist_Sanitizer( $dom, $this->args ) );
 
-		$this->sanitize( new AMP_Img_Sanitizer( $dom ), array(
-			'layout' => 'responsive',
-		) );
+		$this->sanitize( new AMP_Img_Sanitizer( $dom, $this->args ) );
 
-		$this->sanitize( new AMP_Video_Sanitizer( $dom ), array(
-			'layout' => 'responsive',
-		) );
+		$this->sanitize( new AMP_Video_Sanitizer( $dom, $this->args ) );
 
-		$this->sanitize( new AMP_Iframe_Sanitizer( $dom ), array(
-			'layout' => 'responsive',
-		) );
+		$this->sanitize( new AMP_Iframe_Sanitizer( $dom, $this->args ) );
 
-		$this->sanitize( new AMP_Audio_Sanitizer( $dom ), array(
-			'layout' => 'responsive',
-		) );
+		$this->sanitize( new AMP_Audio_Sanitizer( $dom, $this->args ) );
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
