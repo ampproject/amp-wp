@@ -9,6 +9,7 @@ class AMP_Post {
 	private $content;
 	private $metadata;
 	private $scripts;
+	private $content_max_width;
 
 	function __construct( $post_id ) {
 		$this->ID = $post_id;
@@ -16,7 +17,10 @@ class AMP_Post {
 
 		$this->author = apply_filters( 'amp_post_author', get_userdata( $this->post->post_author ) );
 
-		$amp_content = new AMP_Content( $this->post->post_content );
+		$this->content_max_width = apply_filters( 'amp_content_max_width', isset( $GLOBALS['content_width'] ) ? absint( $GLOBALS['content_width'] ) : 600 );
+		$amp_content = new AMP_Content( $this->post->post_content, array(
+			'content_max_width' => $this->content_max_width,
+		) );
 		$this->content = apply_filters( 'amp_post_content', $amp_content->transform(), $this->post );
 		$this->scripts = apply_filters( 'amp_post_scripts', $amp_content->get_scripts(), $this->post );
 		$this->metadata = apply_filters( 'amp_post_metadata', $this->build_metadata(), $this->post );
@@ -44,6 +48,10 @@ class AMP_Post {
 
 	function get_content() {
 		return $this->content;
+	}
+
+	function get_content_max_width() {
+		return $this->content_max_width();
 	}
 
 	private function build_metadata() {

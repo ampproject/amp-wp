@@ -40,6 +40,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$this->did_convert_elements = true;
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
+			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 			$new_attributes = array_merge( $new_attributes, $amp_attributes );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );

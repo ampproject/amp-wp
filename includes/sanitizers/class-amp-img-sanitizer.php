@@ -31,14 +31,16 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
-			$new_attributes = array_merge( $new_attributes, $amp_attributes );
-
-			// Workaround for https://github.com/Automattic/amp-wp/issues/20
-			// responsive + float don't mix
-			if ( isset( $new_attributes['class'] )
-				&& $this->is_aligned_image( $new_attributes['class'] ) ) {
-				unset( $new_attributes['layout'] );
+			if ( ! isset( $new_attributes['width'] ) || ! isset( $new_attributes['height'] ) ) {
+				$dimensions = AMP_Image_Dimension_Extractor::extract( $new_attributes['src'] );
+				if ( $dimensions ) {
+					$new_attributes['width'] = $dimensions[0];
+					$new_attributes['height'] = $dimensions[1];
+				}
 			}
+
+			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+			$new_attributes = array_merge( $new_attributes, $amp_attributes );
 
 			if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 				$this->did_convert_elements = true;
@@ -79,21 +81,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! isset( $out['width'] ) || ! isset( $out['height'] ) ) {
-			$dimensions = AMP_Image_Dimension_Extractor::extract( $out['src'] );
-			if ( $dimensions ) {
-				$out['width'] = $dimensions[0];
-				$out['height'] = $dimensions[1];
-			}
-		}
-
 		return $out;
-	}
-
-	private function is_aligned_image( $class ) {
-		return false !== strpos( $class, 'alignleft' )
-			|| false !== strpos( $class, 'alignright' )
-			|| false !== strpos( $class, 'aligncenter' );
 	}
 
 	private function is_gif_url( $url ) {

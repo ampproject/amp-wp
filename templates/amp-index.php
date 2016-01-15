@@ -2,6 +2,7 @@
 $post_id = $amp_post->get_ID();
 $post = $amp_post->get_post();
 $post_author = $amp_post->get_author();
+$content_max_width = $amp_post->get_content_max_width();
 ?>
 <!doctype html>
 <html amp>
@@ -23,9 +24,15 @@ $post_author = $amp_post->get_author();
 	.wp-caption.alignleft { margin-right: 1em; }
 	.wp-caption.alignright { margin-left: 1em; }
 
+	.wp-amp-enforced-sizes {
+		/** Our sizes fallback is 100vw, and we have a padding on the container; the max-width here prevents the element from overflowing. **/
+		max-width: 100%;
+	}
+
 	/* Generic WP.com reader style */
 	.content, .title-bar div {
-		max-width: 600px;
+		/** TODO: need to pass max_width in **/
+		max-width: <?php echo sprintf( '%dpx', isset( $content_max_width ) ? absint( $content_max_width ) : 600 ) ?>;
 		margin: 0 auto;
 	}
 
