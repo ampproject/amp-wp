@@ -42,7 +42,7 @@ abstract class AMP_Base_Sanitizer {
 
 		$class = 'wp-amp-enforced-sizes';
 		if ( isset( $attributes['class'] ) ) {
-			$attributes['class'] += ' ' . $class;
+			$attributes['class'] .= ' ' . $class;
 		} else {
 			$attributes['class'] = $class;
 		}
