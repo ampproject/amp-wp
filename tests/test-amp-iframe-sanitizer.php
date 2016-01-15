@@ -10,17 +10,19 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 			'simple_iframe' => array(
 				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
-				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowfullscreen="true" sandbox="allow-scripts allow-same-origin"></amp-iframe>',
+				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class wp-amp-enforced-sizes" allowfullscreen="true" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw"></amp-iframe>',
 			),
+
+			// TODO: add test with existing sizes attr
 
 			'simple_iframe_with_sandbox' => array(
 				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-same-origin"></iframe>',
-				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-same-origin"></amp-iframe>',
+				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>',
 			),
 
 			'iframe_with_blacklisted_attribute' => array(
 				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" scrolling="auto"></iframe>',
-				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin"></amp-iframe>',
+				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>',
 			),
 
 			'multiple_same_iframe' => array(
@@ -30,9 +32,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 <iframe src="https://player.vimeo.com/video/132886713" width="500" height="281"></iframe>
 				',
 				'
-<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin"></amp-iframe>
-<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin"></amp-iframe>
-<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin"></amp-iframe>
+<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>
+<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>
+<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>
 				',
 			),
 
@@ -43,9 +45,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 <iframe src="https://player.vimeo.com/video/11111" width="700" height="601"></iframe>
 				',
 				'
-<amp-iframe src="https://player.vimeo.com/video/12345" width="500" height="281" sandbox="allow-scripts allow-same-origin"></amp-iframe>
-<amp-iframe src="https://player.vimeo.com/video/67890" width="280" height="501" sandbox="allow-scripts allow-same-origin"></amp-iframe>
-<amp-iframe src="https://player.vimeo.com/video/11111" width="700" height="601" sandbox="allow-scripts allow-same-origin"></amp-iframe>
+<amp-iframe src="https://player.vimeo.com/video/12345" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>
+<amp-iframe src="https://player.vimeo.com/video/67890" width="280" height="501" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 280px) 280px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>
+<amp-iframe src="https://player.vimeo.com/video/11111" width="700" height="601" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 700px) 700px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>
 				',
 			),
 		);
