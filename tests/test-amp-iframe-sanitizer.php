@@ -13,8 +13,6 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class wp-amp-enforced-sizes" allowfullscreen="true" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw"></amp-iframe>',
 			),
 
-			// TODO: add test with existing sizes attr
-
 			'simple_iframe_with_sandbox' => array(
 				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-same-origin"></iframe>',
 				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>',
@@ -23,6 +21,11 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			'iframe_with_blacklisted_attribute' => array(
 				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" scrolling="auto"></iframe>',
 				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>',
+			),
+
+			'iframe_with_sizes_attribute' => array(
+				'<iframe src="https://example.com/iframe" width="500" height="281" sizes="(min-width: 100px) 300px, 90vw"></iframe>',
+				'<amp-iframe src="https://example.com/iframe" width="500" height="281" sizes="(min-width: 100px) 300px, 90vw" sandbox="allow-scripts allow-same-origin"></amp-iframe>',
 			),
 
 			'multiple_same_iframe' => array(

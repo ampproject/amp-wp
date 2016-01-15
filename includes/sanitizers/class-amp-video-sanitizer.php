@@ -46,6 +46,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				case 'width':
 				case 'height':
 				case 'class':
+				case 'sizes':
 					$out[ $name ] = $value;
 					break;
 				case 'controls':

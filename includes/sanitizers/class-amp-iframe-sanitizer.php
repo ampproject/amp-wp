@@ -60,6 +60,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				case 'height':
 				case 'frameborder':
 				case 'class':
+				case 'sizes':
 					$out[ $name ] = $value;
 					break;
 

@@ -18,7 +18,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" autoplay="desktop tablet mobile" sizes="(min-width: 300px) 300px, 100vw" class="wp-amp-enforced-sizes"></amp-video>',
 			),
 
-			'audio_with_whitelisted_attributes' => array(
+			'video_with_whitelisted_attributes' => array(
 				'<video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" controls loop muted="false"></video>',
 				'<amp-video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" controls="true" loop="true" sizes="(min-width: 300px) 300px, 100vw" class="wp-amp-enforced-sizes"></amp-video>',
 			),
@@ -26,6 +26,11 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			'video_with_blacklisted_attribute' => array(
 				'<video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" style="border-color: red;"></video>',
 				'<amp-video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" sizes="(min-width: 300px) 300px, 100vw" class="wp-amp-enforced-sizes"></amp-video>',
+			),
+
+			'video_with_sizes_attribute' => array(
+				'<video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 100px) 200px, 90vw"></video>',
+				'<amp-video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 100px) 200px, 90vw"></amp-video>',
 			),
 
 			'video_with_children' => array(

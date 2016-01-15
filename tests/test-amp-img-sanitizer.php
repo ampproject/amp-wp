@@ -33,6 +33,11 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/350x150"></amp-img>',
 			),
 
+			'image_with_sizes_attribute' => array(
+				'<img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 100px) 300px, 90vw" />',
+				'<amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 100px) 300px, 90vw"></amp-img>',
+			),
+
 			'gif_image_conversion' => array(
 				'<img src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />',
 				'<amp-anim src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" sizes="(min-width: 350px) 350px, 100vw" class="wp-amp-enforced-sizes"></amp-anim>',
