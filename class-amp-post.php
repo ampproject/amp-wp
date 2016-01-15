@@ -51,7 +51,7 @@ class AMP_Post {
 	}
 
 	function get_content_max_width() {
-		return $this->content_max_width();
+		return $this->content_max_width;
 	}
 
 	private function build_metadata() {
