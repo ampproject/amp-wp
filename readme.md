@@ -29,4 +29,10 @@ There are some requirements for a custom template:
 do_action( 'amp_head', $amp_post );
 ```
 
+* You must trigger the `amp_footer` action right before the `</body>` tag:
+
+```
+do_action( 'amp_footer', $amp_post );
+```
+
 * You must include [all required mark-up](https://www.ampproject.org/docs/get_started/create/basic_markup.html) that isn't already output via the `amp_head` action.
