@@ -42,7 +42,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	$is_amp_endpoint = false !== get_query_var( AMP_QUERY_VAR, false );
+	$is_amp_endpoint = is_amp_endpoint();
 
 	$post = get_queried_object();
 	$supports = does_this_post_support_amp( $post );
@@ -121,6 +121,15 @@ function does_this_post_support_amp( $post ) {
 	}
 
 	return true;
+}
+
+/**
+ * Are we currently on an AMP URL?
+ *
+ * Note: will always return `false` if called before the `parse_query` hook.
+ */
+function is_amp_endpoint() {
+	return false !== get_query_var( AMP_QUERY_VAR, false );
 }
 
 function amp_get_asset_url( $file ) {
