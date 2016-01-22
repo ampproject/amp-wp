@@ -1,24 +1,17 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-base-embed-handler.php' );
 
-class AMP_Gallery_Embed_Handler extends AMP_Embed_Handler {
-	const DEFAULT_WIDTH = 600;
-	const DEFAULT_HEIGHT = 480;
-
+class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	private static $script_slug = 'amp-carousel';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-carousel-0.1.js';
 
-	private $args;
-
-	function __construct( $args = array() ) {
-		$this->args = wp_parse_args( $args, array(
-			'width' => self::DEFAULT_WIDTH,
-			'height' => self::DEFAULT_HEIGHT,
-			'type' => 'slides',
-		) );
-
+	public function register_embed() {
 		add_shortcode( 'gallery', array( $this, 'shortcode' ) );
+	}
+
+	public function unregister_embed() {
+		remove_shortcode( 'gallery' );
 	}
 
 	public function get_scripts() {

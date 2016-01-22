@@ -1,27 +1,23 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-base-embed-handler.php' );
 
 // Much of this class is borrowed from Jetpack embeds
-class AMP_Instagram_Embed_Handler extends AMP_Embed_Handler {
+class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'instagr.am';
 	const URL_PATTERN = '#http(s?)://(www\.)?instagr(\.am|am\.com)/p/([^/?]+)#i';
-	const DEFAULT_WIDTH = 600;
-	const DEFAULT_HEIGHT = 480;
 
 	private static $script_slug = 'amp-instagram';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-instagram-0.1.js';
 
-	private $args;
-
-	function __construct( $args = array() ) {
-		$this->args = wp_parse_args( $args, array(
-			'width' => self::DEFAULT_WIDTH,
-			'height' => self::DEFAULT_HEIGHT,
-		) );
-
+	public function register_embed() {
 		wp_embed_register_handler( 'amp-instagram', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 		add_shortcode( 'instagram', array( $this, 'shortcode' ) );
+	}
+
+	public function unregister_embed() {
+		wp_embed_unregister_handler( 'amp-instagram', -1 );
+		remove_shortcode( 'instagram' );
 	}
 
 	public function get_scripts() {
