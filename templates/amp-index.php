@@ -174,16 +174,9 @@ $content_max_width = $amp_post->get_content_max_width();
 	}
 
 	.amp-wp-iframe-placeholder {
-		background: #e9eff3;
-		position: relative;
-	}
-	.amp-wp-iframe-placeholder amp-img {
-		margin: auto;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		overflow: hidden;
+		background: #f3f6f8 url( <?php echo esc_url( amp_get_asset_url( 'images/placeholder-icon.png' ) ); ?> ) no-repeat center center;
+		background-size: 48px 48px;
+		min-height: 48px;
 	}
 	</style>
 </head>
