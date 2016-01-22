@@ -53,6 +53,10 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 <amp-iframe src="https://player.vimeo.com/video/11111" width="700" height="601" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 700px) 700px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>
 				',
 			),
+			'iframe_in_p_tag' => array(
+				'<p><iframe src="https://example.com/video/132886713" width="500" height="281"></iframe></p>',
+				'<amp-iframe src="https://example.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"></amp-iframe>',
+			),
 		);
 	}
 
@@ -89,5 +93,24 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$scripts = $sanitizer->get_scripts();
 
 		$this->assertEquals( $expected, $scripts );
+	}
+
+	public function test__args__placeholder() {
+		$source = '<iframe src="https://example.com/video/132886713" width="500" height="281"></iframe>';
+		$expected = '<amp-iframe src="https://example.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="wp-amp-enforced-sizes"><div layout="fill" placeholder="" class="amp-wp-iframe-placeholder"><amp-img src="https://example.com/image.jpg" width="50" height="51"></amp-img></div></amp-iframe>';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom, array(
+			'add_placeholder' => true,
+			'placeholder_attributes' => array(
+				'src' => 'https://example.com/image.jpg',
+				'width' => 50,
+				'height' => 51,
+			)
+		) );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEquals( $expected, $content );
 	}
 }

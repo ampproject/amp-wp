@@ -13,6 +13,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-iframe';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
 
+	protected $DEFAULT_ARGS = array(
+		'add_placeholder' => false,
+		'placeholder_attributes' => array(),
+	);
+
 	public function get_scripts() {
 		if ( ! $this->did_convert_elements ) {
 			return array();
@@ -45,7 +50,18 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
 
-			$node->parentNode->replaceChild( $new_node, $node );
+			if ( true === $this->args['add_placeholder'] ) {
+				$placeholder_node = $this->build_placeholder( $new_attributes );
+				$new_node->appendChild( $placeholder_node );
+			}
+
+			$parent_node = $node->parentNode;
+			if ( 'p' === strtolower( $parent_node->tagName ) ) {
+				// AMP does not like iframes in p tags
+				$parent_node->parentNode->replaceChild( $new_node, $parent_node );
+			} else {
+				$parent_node->replaceChild( $new_node, $node );
+			}
 		}
 	}
 
@@ -81,5 +97,18 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $out;
+	}
+
+	private function build_placeholder( $parent_attributes ) {
+		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'div', array(
+			'layout' => 'fill',
+			'placeholder' => '',
+			'class' => 'amp-wp-iframe-placeholder',
+		) );
+
+		$placeholder_img_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-img', $this->args['placeholder_attributes'] );
+		$placeholder_node->appendChild( $placeholder_img_node );
+
+		return $placeholder_node;
 	}
 }

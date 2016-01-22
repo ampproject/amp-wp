@@ -1,13 +1,15 @@
 <?php
 
 abstract class AMP_Base_Sanitizer {
+	protected $DEFAULT_ARGS = array();
+
 	protected $dom;
 	protected $args;
 	protected $did_convert_elements = false;
 
 	public function __construct( $dom, $args = array() ) {
 		$this->dom = $dom;
-		$this->args = $args;
+		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
 	}
 
 	abstract public function sanitize( $amp_attributes = array() );
