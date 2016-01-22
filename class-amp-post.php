@@ -34,10 +34,18 @@ class AMP_Post {
 
 		$amp_content = new AMP_Content( $this->post->post_content,
 			apply_filters( 'amp_content_embed_handlers', array(
-				'AMP_Twitter_Embed_Handler', 'AMP_YouTube_Embed_Handler', 'AMP_Gallery_Embed_Handler', 'AMP_Instagram_Embed_Handler', 'AMP_Vine_Embed_Handler',
+				'AMP_Twitter_Embed_Handler' => array(),
+				'AMP_YouTube_Embed_Handler' => array(),
+				'AMP_Gallery_Embed_Handler' => array(),
+				'AMP_Instagram_Embed_Handler' => array(),
+				'AMP_Vine_Embed_Handler' => array(),
 			), $this->post ),
 			apply_filters( 'amp_content_sanitizers', array(
-				 'AMP_Blacklist_Sanitizer', 'AMP_Img_Sanitizer', 'AMP_Video_Sanitizer', 'AMP_Audio_Sanitizer', 'AMP_Iframe_Sanitizer'
+				 'AMP_Blacklist_Sanitizer' => array(),
+				 'AMP_Img_Sanitizer' => array(),
+				 'AMP_Video_Sanitizer' => array(),
+				 'AMP_Audio_Sanitizer' => array(),
+				 'AMP_Iframe_Sanitizer' => array(),
 			), $this->post ),
 			array(
 				'content_max_width' => $this->content_max_width,
