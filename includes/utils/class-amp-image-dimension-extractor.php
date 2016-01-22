@@ -14,27 +14,7 @@ class AMP_Image_Dimension_Extractor {
 	private static function register_callbacks() {
 		self::$callbacks_registered = true;
 
-		add_filter( 'amp_extract_image_dimensions', array( __CLASS__, 'extract_from_filename' ), 10, 2 );
 		add_filter( 'amp_extract_image_dimensions', array( __CLASS__, 'extract_from_attachment_metadata' ), 10, 2 );
-	}
-
-	public static function extract_from_filename( $dimensions, $url ) {
-		if ( $dimensions ) {
-			return $dimensions;
-		}
-
-		$path = parse_url( $url, PHP_URL_PATH );
-		$filename = basename( $path );
-		if ( ! $filename ) {
-			return false;
-		}
-
-		$result = preg_match( '~-(\d+)x(\d+)\.(jpg|jpeg|png)$~i', $filename, $matches );
-		if ( ! $result ) {
-			return false;
-		}
-
-		return array( $matches[1], $matches[2] );
 	}
 
 	public static function extract_from_attachment_metadata( $dimensions, $url ) {
