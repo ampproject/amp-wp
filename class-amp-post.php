@@ -130,11 +130,19 @@ class AMP_Post {
 		if ( has_post_thumbnail( $this->ID ) ) {
 			$post_image_id = get_post_thumbnail_id( $this->ID );
 		} else {
-			$attached_media = get_attached_media( 'image', $this->ID );
+			$attached_image_ids = get_posts( array(
+				'post_parent' => $this->ID,
+				'post_type' => 'attachment',
+				'post_mime_type' => 'image',
+				'posts_per_page' => 1,
+				'orderby' => 'menu_order',
+				'order' => 'ASC',
+				'fields' => 'ids',
+				'suppress_filters' => false,
+			) );
 
-			if ( $attached_media ) {
-				$first_attachment = array_shift( $attached_media );
-				$post_image_id = $first_attachment->ID;
+			if ( ! empty( $attached_image_ids ) ) {
+				$post_image_id = array_shift( $attached_image_ids );
 			}
 		}
 
