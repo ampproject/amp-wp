@@ -122,3 +122,7 @@ function does_this_post_support_amp( $post ) {
 
 	return true;
 }
+
+function amp_get_asset_url( $file ) {
+	return plugins_url( sprintf( 'assets/%s', $file ), __FILE__ );
+}

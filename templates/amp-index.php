@@ -172,6 +172,19 @@ $content_max_width = $amp_post->get_content_max_width();
 	amp-carousel {
 		background: #000;
 	}
+
+	.amp-wp-iframe-placeholder {
+		background: #e9eff3;
+		position: relative;
+	}
+	.amp-wp-iframe-placeholder amp-img {
+		margin: auto;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		overflow: hidden;
+	}
 	</style>
 </head>
 <body>
