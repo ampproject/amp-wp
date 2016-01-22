@@ -24,7 +24,7 @@ $content_max_width = $amp_post->get_content_max_width();
 	.wp-caption.alignleft { margin-right: 1em; }
 	.wp-caption.alignright { margin-left: 1em; }
 
-	.wp-amp-enforced-sizes {
+	.amp-wp-enforced-sizes {
 		/** Our sizes fallback is 100vw, and we have a padding on the container; the max-width here prevents the element from overflowing. **/
 		max-width: 100%;
 	}

@@ -38,7 +38,7 @@ class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler {
 		) );
 
 		if ( empty( $args['vine_id'] ) ) {
-			return AMP_HTML_Utils::build_tag( 'a', array( 'href' => esc_url( $args['url'] ), 'class' => 'amp-wp-fallback' ), esc_html( $args['url'] ) );
+			return AMP_HTML_Utils::build_tag( 'a', array( 'href' => esc_url( $args['url'] ), 'class' => 'amp-wp-embed-fallback' ), esc_html( $args['url'] ) );
 		}
 
 		$this->did_convert_elements = true;
