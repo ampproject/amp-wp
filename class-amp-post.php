@@ -12,6 +12,7 @@ require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-twitter-embed.ph
 require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-youtube-embed.php' );
 require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-gallery-embed.php' );
 require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-instagram-embed.php' );
+require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-vine-embed.php' );
 
 class AMP_Post {
 	private $ID;
@@ -33,7 +34,7 @@ class AMP_Post {
 
 		$amp_content = new AMP_Content( $this->post->post_content,
 			apply_filters( 'amp_content_embed_handlers', array(
-				'AMP_Twitter_Embed_Handler', 'AMP_YouTube_Embed_Handler', 'AMP_Gallery_Embed_Handler', 'AMP_Instagram_Embed_Handler'
+				'AMP_Twitter_Embed_Handler', 'AMP_YouTube_Embed_Handler', 'AMP_Gallery_Embed_Handler', 'AMP_Instagram_Embed_Handler', 'AMP_Vine_Embed_Handler',
 			), $this->post ),
 			apply_filters( 'amp_content_sanitizers', array(
 				 'AMP_Blacklist_Sanitizer', 'AMP_Img_Sanitizer', 'AMP_Video_Sanitizer', 'AMP_Audio_Sanitizer', 'AMP_Iframe_Sanitizer'
@@ -93,7 +94,7 @@ class AMP_Post {
 				'name' => get_bloginfo( 'name' ),
 			),
 		);
-		
+
 		$post_thumbnail_id = false;
 
 		// Include a reference to either a featured image or the first attached image.
@@ -104,7 +105,7 @@ class AMP_Post {
 			$attached_media = get_attached_media( 'image', $this->ID );
 
 			if ( $attached_media ) {
-				$first_attachment = array_shift( $attached_media ); 
+				$first_attachment = array_shift( $attached_media );
 				$post_thumbnail_id = $first_attachment->ID;
 			}
 		}

@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
+class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return array(
 			'no_embed' => array(
@@ -8,13 +8,9 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello world.</p>' . PHP_EOL
 			),
 			'simple_url' => array(
-				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
-				'<p><amp-instagram width="600" height="480" data-shortcode="7-l0z_p4A4" layout="responsive"></amp-instagram></p>' . PHP_EOL
+				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
+				'<p><amp-vine width="400" height="400" data-vineid="MdKjXez002d" layout="responsive"></amp-vine></p>' . PHP_EOL
 			),
-			'short_url' => array(
-				'https://instagr.am/p/7-l0z_p4A4' . PHP_EOL,
-				'<p><amp-instagram width="600" height="480" data-shortcode="7-l0z_p4A4" layout="responsive"></amp-instagram></p>' . PHP_EOL
-			)
 		);
 	}
 
@@ -22,7 +18,7 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_conversion_data
 	 */
 	public function test__conversion( $source, $expected ) {
-		$embed = new AMP_Instagram_Embed_Handler();
+		$embed = new AMP_Vine_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
 
@@ -36,8 +32,8 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 				array()
 			),
 			'converted' => array(
-				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
-				array( 'amp-instagram' => 'https://cdn.ampproject.org/v0/amp-instagram-0.1.js' )
+				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
+				array( 'amp-vine' => 'https://cdn.ampproject.org/v0/amp-vine-0.1.js' )
 			),
 		);
 	}
@@ -46,7 +42,7 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_scripts_data
 	 */
 	public function test__get_scripts( $source, $expected ) {
-		$embed = new AMP_Instagram_Embed_Handler();
+		$embed = new AMP_Vine_Embed_Handler();
 		$embed->register_embed();
 		apply_filters( 'the_content', $source );
 		$scripts = $embed->get_scripts();
