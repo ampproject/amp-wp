@@ -27,6 +27,10 @@ function amp_deactivate(){
 
 add_action( 'init', 'amp_init' );
 function amp_init() {
+	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+		return;
+	}
+
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
 
