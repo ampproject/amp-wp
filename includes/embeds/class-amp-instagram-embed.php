@@ -53,16 +53,16 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	public function render( $args ) {
-		$this->did_convert_elements = true;
-
 		$args = wp_parse_args( $args, array(
 			'url' => false,
 			'instagram_id' => false,
 		) );
 
 		if ( empty( $args['instagram_id'] ) ) {
-			return AMP_HTML_Utils::build_tag( 'a', array( 'href' => $args['url'], 'class' => 'amp-wp-fallback' ), $args['url'] );
+			return AMP_HTML_Utils::build_tag( 'a', array( 'href' => esc_url( $args['url'] ), 'class' => 'amp-wp-fallback' ), esc_html( $args['url'] ) );
 		}
+
+		$this->did_convert_elements = true;
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-instagram',
