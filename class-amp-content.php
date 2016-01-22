@@ -3,26 +3,18 @@
 require_once( dirname( __FILE__ ) . '/includes/class-amp-dom-utils.php' );
 
 require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-base-sanitizer.php' );
-require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
-require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-img-sanitizer.php' );
-require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-video-sanitizer.php' );
-require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
-require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
-
 require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-base-embed-handler.php' );
-require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-twitter-embed.php' );
-require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-youtube-embed.php' );
-require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-gallery-embed.php' );
-require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-instagram-embed.php' );
 
 class AMP_Content {
 	private $content;
 	private $scripts = array();
 	private $args = array();
 
-	public function __construct( $content, $args = array() ) {
+	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() ) {
 		$this->content = $content;
 		$this->args = $args;
+		$this->embed_handler_classes = $embed_handler_classes;
+		$this->sanitizer_classes = $sanitizer_classes;
 	}
 
 	public function transform() {
@@ -34,9 +26,7 @@ class AMP_Content {
 		$this->unregister_embed_handlers( $embed_handlers );
 
 		// Then, sanitize to strip and/or convert non-amp content
-		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
-		$this->sanitize( $dom );
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = $this->sanitize( $content );
 
 		return $content;
 	}
@@ -51,9 +41,8 @@ class AMP_Content {
 
 	private function register_embed_handlers() {
 		$embed_handlers = array();
-		$embed_handler_classes = apply_filters( 'amp_content_embed_handlers', array( 'AMP_Twitter_Embed_Handler', 'AMP_YouTube_Embed_Handler', 'AMP_Gallery_Embed_Handler', 'AMP_Instagram_Embed_Handler' ) );
 
-		foreach ( $embed_handler_classes as $embed_handler_class ) {
+		foreach ( $this->embed_handler_classes as $embed_handler_class ) {
 			$embed_handler = new $embed_handler_class( $this->args );
 
 			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
@@ -75,10 +64,10 @@ class AMP_Content {
 		}
 	}
 
-	private function sanitize( $dom ) {
-		$sanitizer_classes = apply_filters( 'amp_content_sanitizers', array( 'AMP_Blacklist_Sanitizer', 'AMP_Img_Sanitizer', 'AMP_Video_Sanitizer', 'AMP_Audio_Sanitizer', 'AMP_Iframe_Sanitizer' ) );
+	private function sanitize( $content ) {
+		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
-		foreach ( $sanitizer_classes as $sanitizer_class ) {
+		foreach ( $this->sanitizer_classes as $sanitizer_class ) {
 			$sanitizer = new $sanitizer_class( $dom, $this->args );
 
 			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {
@@ -89,5 +78,7 @@ class AMP_Content {
 			$sanitizer->sanitize();
 			$this->add_scripts( $sanitizer->get_scripts() );
 		}
+
+		return AMP_DOM_Utils::get_content_from_dom( $dom );
 	}
 }
