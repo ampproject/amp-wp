@@ -46,12 +46,12 @@ class AMP_Post {
 				 'AMP_Video_Sanitizer' => array(),
 				 'AMP_Audio_Sanitizer' => array(),
 				 'AMP_Iframe_Sanitizer' => array(
-					 'placeholder_attributes' => apply_filters( 'amp_iframe_placeholder_image_attributes', array(
+					 'add_placeholder' => true,
+					 'placeholder_attributes' => array(
 						'src' => amp_get_asset_url( 'images/admin-media.png' ),
 						'width' => 63,
 						'height' => 63,
-					) ),
-					'add_placeholder' => apply_filters( 'amp_iframe_add_placeholder', true ),
+					),
 				 ),
 			), $this->post ),
 			array(
