@@ -47,11 +47,6 @@ class AMP_Post {
 				 'AMP_Audio_Sanitizer' => array(),
 				 'AMP_Iframe_Sanitizer' => array(
 					 'add_placeholder' => true,
-					 'placeholder_attributes' => array(
-						'src' => amp_get_asset_url( 'images/admin-media.png' ),
-						'width' => 63,
-						'height' => 63,
-					),
 				 ),
 			), $this->post ),
 			array(
