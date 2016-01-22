@@ -1,27 +1,23 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-embed-handler.php' );
+require_once( dirname( __FILE__ ) . '/class-amp-base-embed-handler.php' );
 
 // Much of this class is borrowed from Jetpack embeds
-class AMP_YouTube_Embed_Handler extends AMP_Embed_Handler {
+class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'youtu.be';
 	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|playlist|watch[/\#?])|youtu\.be/).*#i';
-	const DEFAULT_WIDTH = 600;
-	const DEFAULT_HEIGHT = 480;
 
 	private static $script_slug = 'amp-youtube';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-youtube-0.1.js';
 
-	private $args;
-
-	function __construct( $args = array() ) {
-		$this->args = wp_parse_args( $args, array(
-			'width' => self::DEFAULT_WIDTH,
-			'height' => self::DEFAULT_HEIGHT,
-		) );
-
+	function register_embed() {
 		wp_embed_register_handler( 'amp-youtube', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 		add_shortcode( 'youtube', array( $this, 'shortcode' ) );
+	}
+
+	public function unregister_embed() {
+		wp_embed_unregister_handler( 'amp-youtube', -1 );
+		remove_shortcode( 'youtube' );
 	}
 
 	public function get_scripts() {

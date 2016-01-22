@@ -2,6 +2,17 @@
 
 require( dirname( __FILE__ ) . '/class-amp-content.php' );
 
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-img-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-video-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
+require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
+
+require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-twitter-embed.php' );
+require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-youtube-embed.php' );
+require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-gallery-embed.php' );
+require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-instagram-embed.php' );
+
 class AMP_Post {
 	private $ID;
 	private $post;
@@ -15,12 +26,23 @@ class AMP_Post {
 		$this->ID = $post_id;
 		$this->post = get_post( $post_id );
 
-		$this->author = apply_filters( 'amp_post_author', get_userdata( $this->post->post_author ) );
+		$this->author = apply_filters( 'amp_post_author', get_userdata( $this->post->post_author ), $this->post );
 
-		$this->content_max_width = apply_filters( 'amp_content_max_width', isset( $GLOBALS['content_width'] ) ? absint( $GLOBALS['content_width'] ) : 600 );
-		$amp_content = new AMP_Content( $this->post->post_content, array(
-			'content_max_width' => $this->content_max_width,
-		) );
+		$content_width = isset( $GLOBALS['content_width'] ) ? absint( $GLOBALS['content_width'] ) : 600;
+		$this->content_max_width = apply_filters( 'amp_content_max_width', $content_width, $this->post );
+
+		$amp_content = new AMP_Content( $this->post->post_content,
+			apply_filters( 'amp_content_embed_handlers', array(
+				'AMP_Twitter_Embed_Handler', 'AMP_YouTube_Embed_Handler', 'AMP_Gallery_Embed_Handler', 'AMP_Instagram_Embed_Handler'
+			), $this->post ),
+			apply_filters( 'amp_content_sanitizers', array(
+				 'AMP_Blacklist_Sanitizer', 'AMP_Img_Sanitizer', 'AMP_Video_Sanitizer', 'AMP_Audio_Sanitizer', 'AMP_Iframe_Sanitizer'
+			), $this->post ),
+			array(
+				'content_max_width' => $this->content_max_width,
+			)
+		);
+
 		$this->content = apply_filters( 'amp_post_content', $amp_content->transform(), $this->post );
 		$this->scripts = apply_filters( 'amp_post_scripts', $amp_content->get_scripts(), $this->post );
 		$this->metadata = apply_filters( 'amp_post_metadata', $this->build_metadata(), $this->post );
