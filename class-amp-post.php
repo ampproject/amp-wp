@@ -105,34 +105,47 @@ class AMP_Post {
 			),
 		);
 
-		$post_thumbnail_id = false;
+		$post_image_id = $this->get_post_image_id();
 
-		// Include a reference to either a featured image or the first attached image.
-		if ( has_post_thumbnail( $this->ID ) ) {
-			$post_thumbnail_id = get_post_thumbnail_id( $this->ID );
-		}
-		else {
-			$attached_media = get_attached_media( 'image', $this->ID );
+		if ( $post_image_id ) {
+			$post_image = wp_get_attachment_image_src( $post_image_id, 'full' );
 
-			if ( $attached_media ) {
-				$first_attachment = array_shift( $attached_media );
-				$post_thumbnail_id = $first_attachment->ID;
-			}
-		}
-
-		if ( $post_thumbnail_id ) {
-			$post_thumbnail = wp_get_attachment_image_src( $post_thumbnail_id, 'full' );
-
-			if ( $post_thumbnail ) {
+			if ( $post_image ) {
 				$metadata['image'] = array(
 					'@type' => 'ImageObject',
-					'url' => $post_thumbnail[0],
-					'width' => $post_thumbnail[1],
-					'height' => $post_thumbnail[2],
+					'url' => $post_image[0],
+					'width' => $post_image[1],
+					'height' => $post_image[2],
 				);
 			}
 		}
 
 		return $metadata;
+	}
+
+	private function get_post_image_id() {
+		$post_image_id = false;
+
+		// Include a reference to either a featured image or the first attached image.
+		if ( has_post_thumbnail( $this->ID ) ) {
+			$post_image_id = get_post_thumbnail_id( $this->ID );
+		} else {
+			$attached_image_ids = get_posts( array(
+				'post_parent' => $this->ID,
+				'post_type' => 'attachment',
+				'post_mime_type' => 'image',
+				'posts_per_page' => 1,
+				'orderby' => 'menu_order',
+				'order' => 'ASC',
+				'fields' => 'ids',
+				'suppress_filters' => false,
+			) );
+
+			if ( ! empty( $attached_image_ids ) ) {
+				$post_image_id = array_shift( $attached_image_ids );
+			}
+		}
+
+		return $post_image_id;
 	}
 }
