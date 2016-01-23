@@ -40,6 +40,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$node->parentNode->removeChild( $node );
 				continue;
 			}
+			else if ( substr ( trim ( $old_attributes['src'] ), 0, 5 ) !== "https" ) {
+				$node->parentNode->removeChild( $node );
+				continue;
+			}
 
 			$this->did_convert_elements = true;
 
@@ -57,7 +61,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$parent_node = $node->parentNode;
 			if ( 'p' === strtolower( $parent_node->tagName ) ) {
 				// AMP does not like iframes in p tags
-				$parent_node->parentNode->replaceChild( $new_node, $parent_node );
+				$parent_node->removeChild( $node );
+				$parent_node->parentNode->appendChild( $new_node );
 			} else {
 				$parent_node->replaceChild( $new_node, $node );
 			}
