@@ -62,7 +62,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'p' === strtolower( $parent_node->tagName ) ) {
 				// AMP does not like iframes in p tags
 				$parent_node->removeChild( $node );
-				$parent_node->parentNode->appendChild( $new_node );
+				$parent_node->parentNode->insertBefore( $new_node , $parent_node->nextSibling);
+				if( $parent_node->childNodes->length == 0 && empty( $parent_node->textContent ) ) {
+					$parent_node->parentNode->removeChild( $parent_node );
+				}
 			} else {
 				$parent_node->replaceChild( $new_node, $node );
 			}
