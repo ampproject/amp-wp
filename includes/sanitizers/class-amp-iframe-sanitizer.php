@@ -100,7 +100,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 	private function build_placeholder( $parent_attributes ) {
 		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'div', array(
-			'layout' => 'fill',
 			'placeholder' => '',
 			'class' => 'amp-wp-iframe-placeholder',
 		) );
