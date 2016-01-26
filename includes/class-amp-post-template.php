@@ -97,6 +97,7 @@ class AMP_Post_Template {
 
 		$this->add_data( array(
 			'post' => $this->post,
+			'post_id' => $this->ID,
 			'post_title' => $post_title,
 			'post_publish_timestamp' => $post_publish_timestamp,
 			'post_modified_timestamp' => $post_modified_timestamp,
