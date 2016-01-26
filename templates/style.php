@@ -176,7 +176,11 @@ amp-carousel {
 	background: #000;
 }
 
-amp-img {
+amp-img,
+amp-iframe,
+amp-youtube,
+amp-instagram,
+amp-vine {
 	background: #f3f6f8;
 }
 
