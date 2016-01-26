@@ -1,4 +1,6 @@
 <?php
+// Callbacks for adding content to an AMP template
+
 add_action( 'amp_post_template_head', 'amp_post_template_add_title' );
 function amp_post_template_add_title( $amp_template ) {
 	?>

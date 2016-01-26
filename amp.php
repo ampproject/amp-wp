@@ -70,12 +70,12 @@ function amp_maybe_add_actions() {
 	if ( $is_amp_endpoint ) {
 		amp_prepare_render();
 	} else {
-		amp_add_template_actions();
+		amp_add_frontend_actions();
 	}
 }
 
-function amp_add_template_actions() {
-	add_action( 'wp_head', 'amp_canonical' );
+function amp_add_frontend_actions() {
+	require_once( AMP__DIR__ . '/includes/amp-frontend-actions.php' );
 }
 
 function amp_prepare_render() {
@@ -101,15 +101,6 @@ function amp_get_url( $post_id ) {
 	}
 
 	return apply_filters( 'amp_get_url', $amp_url, $post_id );
-}
-
-function amp_canonical() {
-	if ( false === apply_filters( 'amp_show_canonical', true ) ) {
-		return;
-	}
-
-	$amp_url = amp_get_url( get_queried_object_id() );
-	printf( '<link rel="amphtml" href="%s" />', esc_url( $amp_url ) );
 }
 
 function post_supports_amp( $post ) {
