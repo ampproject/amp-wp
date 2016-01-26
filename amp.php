@@ -57,7 +57,7 @@ function amp_maybe_add_actions() {
 	$is_amp_endpoint = is_amp_endpoint();
 
 	$post = get_queried_object();
-	$supports = does_this_post_support_amp( $post );
+	$supports = post_supports_amp( $post );
 
 	if ( ! $supports ) {
 		if ( $is_amp_endpoint ) {
@@ -112,7 +112,7 @@ function amp_canonical() {
 	printf( '<link rel="amphtml" href="%s" />', esc_url( $amp_url ) );
 }
 
-function does_this_post_support_amp( $post ) {
+function post_supports_amp( $post ) {
 	// Because `add_rewrite_endpoint` doesn't let us target specific post_types :(
 	if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
 		return false;
