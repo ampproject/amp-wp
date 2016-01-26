@@ -9,11 +9,11 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 			),
 			'simple_url' => array(
 				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
-				'<p><amp-instagram width="600" height="480" data-shortcode="7-l0z_p4A4" layout="responsive"></amp-instagram></p>' . PHP_EOL
+				'<p><amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL
 			),
 			'short_url' => array(
 				'https://instagr.am/p/7-l0z_p4A4' . PHP_EOL,
-				'<p><amp-instagram width="600" height="480" data-shortcode="7-l0z_p4A4" layout="responsive"></amp-instagram></p>' . PHP_EOL
+				'<p><amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL
 			)
 		);
 	}

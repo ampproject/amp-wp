@@ -114,7 +114,7 @@ ul.meta li:first-child:before {
 	clip: rect(1px, 1px, 1px, 1px);
 	height: 1px;
 	overflow: hidden;
-	position: absolute !important;
+	position: absolute;
 	width: 1px;
 }
 
@@ -185,7 +185,7 @@ amp-vine {
 }
 
 .amp-wp-iframe-placeholder {
-	background: #f3f6f8 url( <?php echo esc_url( $this->get( 'placeholder_image_url' ) ); ?> ) no-repeat center center;
+	background: #f3f6f8 url( <?php echo esc_url( $this->get( 'placeholder_image_url' ) ); ?> ) no-repeat center 40%;
 	background-size: 48px 48px;
 	min-height: 48px;
 }

@@ -1,7 +1,7 @@
 <?php
 // stub class since AMP_Base_Sanitizer is abstract
 class AMP_Stub_Sanitizer extends AMP_Base_Sanitizer {
-	public function sanitize( $amp_attributes = array() ) {
+	public function sanitize() {
 		return $this->dom;
 	}
 }

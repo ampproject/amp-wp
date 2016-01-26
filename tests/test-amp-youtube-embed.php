@@ -9,11 +9,11 @@ class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 			),
 			'simple_url' => array(
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube width="600" height="480" data-videoid="kfVsfOSbJY0" layout="responsive"></amp-youtube></p>' . PHP_EOL
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="480"></amp-youtube></p>' . PHP_EOL
 			),
 			'short_url' => array(
 				'https://youtu.be/kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube width="600" height="480" data-videoid="kfVsfOSbJY0" layout="responsive"></amp-youtube></p>' . PHP_EOL
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="480"></amp-youtube></p>' . PHP_EOL
 			)
 		);
 	}

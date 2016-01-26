@@ -7,6 +7,9 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'instagr.am';
 	const URL_PATTERN = '#http(s?)://(www\.)?instagr(\.am|am\.com)/p/([^/?]+)#i';
 
+	protected $DEFAULT_WIDTH = 600;
+	protected $DEFAULT_HEIGHT = 600;
+
 	private static $script_slug = 'amp-instagram';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-instagram-0.1.js';
 
@@ -66,10 +69,12 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-instagram',
-			wp_parse_args( array(
+			array(
 				'data-shortcode' => $args['instagram_id'],
 				'layout' => 'responsive',
-			), $this->args )
+				'width' => $this->args['width'],
+				'height' => $this->args['height'],
+			)
 		);
 	}
 

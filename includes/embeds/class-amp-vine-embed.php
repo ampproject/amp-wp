@@ -45,10 +45,12 @@ class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-vine',
-			wp_parse_args( array(
+			array(
 				'data-vineid' => $args['vine_id'],
 				'layout' => 'responsive',
-			), $this->args )
+				'width' => $this->args['width'],
+				'height' => $this->args['height'],
+			)
 		);
 	}
 }

@@ -66,10 +66,12 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-youtube',
-			wp_parse_args( array(
+			array(
 				'data-videoid' => $args['video_id'],
 				'layout' => 'responsive',
-			), $this->args )
+				'width' => $this->args['width'],
+				'height' => $this->args['height'],
+			)
 		);
 	}
 
