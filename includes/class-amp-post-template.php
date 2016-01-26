@@ -15,11 +15,11 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php' );
 
 class AMP_Post_Template {
-	private $template_file;
+	private $template_dir;
 	private $data;
 
 	public function __construct( $post_id ) {
-		$this->template_file = AMP__DIR__ . '/templates/single.php';
+		$this->template_dir = AMP__DIR__ . '/templates';
 
 		$this->ID = $post_id;
 		$this->post = get_post( $post_id );
@@ -35,6 +35,7 @@ class AMP_Post_Template {
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
 
+			'site_icon_url' => amp_get_asset_url( 'images/wplogox.svg' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
@@ -58,7 +59,18 @@ class AMP_Post_Template {
 	}
 
 	public function load() {
-		$this->verify_and_include( $this->template_file );
+		$this->load_parts( array( 'single' ) );
+	}
+
+	public function load_parts( $templates ) {
+		foreach ( $templates as $template ) {
+			$file = $this->get_template_path( $template );
+			$this->verify_and_include( $file, $template );
+		}
+	}
+
+	private function get_template_path( $template ) {
+		return sprintf( '%s/%s.php', $this->template_dir, $template );
 	}
 
 	private function add_data( $data ) {
@@ -184,15 +196,13 @@ class AMP_Post_Template {
 		return $post_image_meta;
 	}
 
-	// TODO: load_parts
-
-	private function verify_and_include( $file, $template_type = 'main' ) {
+	private function verify_and_include( $file, $template_type ) {
 		$located_file = $this->locate_template( $file );
 		if ( $located_file ) {
 			$file = $located_file;
 		}
 
-		$file = apply_filters( 'amp_post_template_file', $file, $this->post );
+		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		if ( ! $this->is_valid_template( $file ) ) {
 			_doing_it_wrong( __METHOD__, sprintf( __( 'Path validation for template (%s) failed. Path cannot traverse and must be located in `WP_CONTENT_DIR`.' ), esc_html( $file ) ), '0.1' );
 			return;

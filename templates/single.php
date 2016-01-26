@@ -95,17 +95,35 @@
 	ul.meta li {
 		list-style: none;
 		display: inline-block;
-		margin: 0 8px 0 0;
+		margin: 0;
 		line-height: 24px;
-	    white-space: nowrap;
-	    overflow: hidden;
-	    text-overflow: ellipsis;
-	    max-width: 300px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 300px;
+	}
+
+	ul.meta li:before {
+		content: "\2022";
+		margin: 0 8px;
+	}
+
+	ul.meta li:first-child:before {
+		display: none;
 	}
 
 	.meta,
 	.meta a {
 		color: #4f748e;
+	}
+
+	.meta .screen-reader-text {
+		/* from twentyfifteen */
+		clip: rect(1px, 1px, 1px, 1px);
+		height: 1px;
+		overflow: hidden;
+		position: absolute !important;
+		width: 1px;
 	}
 
 	.byline amp-img {
@@ -166,6 +184,10 @@
 		background: #000;
 	}
 
+	amp-img {
+		background: #f3f6f8;
+	}
+
 	.amp-wp-iframe-placeholder {
 		background: #f3f6f8 url( <?php echo esc_url( $this->get( 'placeholder_image_url' ) ); ?> ) no-repeat center center;
 		background-size: 48px 48px;
@@ -193,30 +215,10 @@
 <div class="content">
 	<h1 class="title"><?php echo esc_html( $this->get( 'post_title' ) ); ?></h1>
 	<ul class="meta">
-		<?php do_action( 'amp_post_meta', $this ); ?>
-		<?php $post_author = $this->get( 'post_author' ); ?>
-		<li class="byline">
-			<amp-img src="<?php echo esc_url( get_avatar_url( $post_author->user_email, array(
-				'size' => 24,
-			) ) ); ?>" width="24" height="24" layout="fixed"></amp-img>
-			<span class="author"><?php echo esc_html( $post_author->display_name ); ?></span>
-			<span>&nbsp;&nbsp;&bull;</span>
-		</li>
-		<li>
-			<time datetime="<?php echo esc_attr( date( 'c', $this->get( 'post_publish_timestamp' ) ) ); ?>">
-				<?php
-				echo esc_html(
-					sprintf(
-						_x( 'Posted %s ago', '%s = human-readable time difference', 'amp' ),
-						human_time_diff( $this->get( 'post_publish_timestamp' ) )
-					)
-				);
-				?>
-			</time>
-		</li>
+		<?php $this->load_parts( apply_filters( 'amp_post_template_meta_parts', array( 'meta-author', 'meta-time', 'meta-taxonomy' ) ) ); ?>
 	</ul>
 	<?php echo $this->get( 'post_amp_content' ); // amphtml content; no kses ?>
 </div>
-<?php do_action( 'amp_post_template_head', $this ); ?>
+<?php do_action( 'amp_post_template_footer', $this ); ?>
 </body>
 </html>
