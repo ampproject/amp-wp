@@ -1,6 +1,6 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-base-embed-handler.php' );
+require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
 
 // Much of this class is borrowed from Jetpack embeds
 class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {

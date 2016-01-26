@@ -1,6 +1,6 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-base-embed-handler.php' );
+require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
 
 class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	private static $script_slug = 'amp-carousel';

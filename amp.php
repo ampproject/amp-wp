@@ -45,7 +45,7 @@ function amp_init() {
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	if ( class_exists( 'Jetpack' ) ) {
-		require_once( dirname( __FILE__ ) . '/jetpack-helper.php' );
+		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
 }
 
@@ -86,7 +86,7 @@ function amp_render() {
 	$post_id = get_queried_object_id();
 	do_action( 'pre_amp_render_post', $post_id );
 
-	require( AMP__DIR__ . '/includes/amp-template-actions.php' );
+	require( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
 
 	$template = new AMP_Post_Template( $post_id );
 	$template->load();

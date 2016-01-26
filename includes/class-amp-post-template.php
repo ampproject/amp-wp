@@ -1,6 +1,6 @@
 <?php
 
-require( AMP__DIR__ . '/class-amp-content.php' );
+require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );

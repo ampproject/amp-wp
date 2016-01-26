@@ -1,7 +1,7 @@
 <?php
 
 // Used by some children
-require_once( dirname( dirname( __FILE__ ) ) . '/utils/class-amp-html-utils.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 
 abstract class AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 600;
