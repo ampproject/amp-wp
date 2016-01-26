@@ -18,6 +18,10 @@ abstract class AMP_Base_Sanitizer {
 		return array();
 	}
 
+	protected function get_body_node() {
+		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
+	}
+
 	/**
 	 * This is our workaround to enforce max sizing with layout=responsive.
 	 *
