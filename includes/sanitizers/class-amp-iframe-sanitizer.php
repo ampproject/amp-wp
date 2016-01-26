@@ -1,6 +1,6 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
 
 /**
  * Converts <iframe> tags to <amp-iframe>

@@ -1,9 +1,8 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/includes/class-amp-dom-utils.php' );
-
-require_once( dirname( __FILE__ ) . '/includes/sanitizers/class-amp-base-sanitizer.php' );
-require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-base-embed-handler.php' );
+require_once( AMP__DIR__ . '/includes/class-amp-dom-utils.php' );
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
 
 class AMP_Content {
 	private $content;

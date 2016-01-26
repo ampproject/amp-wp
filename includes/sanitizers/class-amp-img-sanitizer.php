@@ -1,7 +1,7 @@
 <?php
 
-require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
-require_once( dirname( dirname( __FILE__ ) ) . '/utils/class-amp-image-dimension-extractor.php' );
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-image-dimension-extractor.php' );
 
 /**
  * Converts <img> tags to <amp-img> or <amp-anim>

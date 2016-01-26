@@ -45,7 +45,7 @@ function amp_init() {
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	if ( class_exists( 'Jetpack' ) ) {
-		require_once( dirname( __FILE__ ) . '/jetpack-helper.php' );
+		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
 }
 
