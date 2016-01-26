@@ -139,8 +139,8 @@ Then, in `templates/xyz-meta-comment-count.php`:
 
 If you'd prefer to use your own styles, you can either:
 
-- Create a folder in your theme called `amp` and add a file called `single-style.php` with your custom CSS.
-- Specify a custom template using the `amp_post_template_file` filter for `'single-style' === $type`.
+- Create a folder in your theme called `amp` and add a file called `style.php` with your custom CSS.
+- Specify a custom template using the `amp_post_template_file` filter for `'style' === $type`.
 
 See the "Override" examples in the "Meta" section for examples.
 
@@ -164,13 +164,13 @@ Note: there are some requirements for a custom template:
 * You must trigger the `amp_post_head` action in the `<head>` section:
 
 ```
-do_action( 'amp_head', $this );
+do_action( 'amp_post_head', $this );
 ```
 
 * You must trigger the `amp_post_footer` action right before the `</body>` tag:
 
 ```
-do_action( 'amp_footer', $this );
+do_action( 'amp_post_footer', $this );
 ```
 
 * You must include [all required mark-up](https://www.ampproject.org/docs/get_started/create/basic_markup.html) that isn't already output via the `amp_post_head` action.
