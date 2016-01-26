@@ -78,6 +78,10 @@ function amp_add_frontend_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-frontend-actions.php' );
 }
 
+function amp_add_post_template_actions() {
+	require( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
+}
+
 function amp_prepare_render() {
 	add_action( 'template_redirect', 'amp_render' );
 }
@@ -86,8 +90,7 @@ function amp_render() {
 	$post_id = get_queried_object_id();
 	do_action( 'pre_amp_render_post', $post_id );
 
-	require( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
-
+	amp_add_post_template_actions();
 	$template = new AMP_Post_Template( $post_id );
 	$template->load();
 	exit;
