@@ -9,7 +9,7 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 			),
 			'simple_url' => array(
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				'<p><amp-vine width="400" height="400" data-vineid="MdKjXez002d" layout="responsive"></amp-vine></p>' . PHP_EOL
+				'<p><amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine></p>' . PHP_EOL
 			),
 		);
 	}

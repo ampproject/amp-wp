@@ -9,7 +9,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 			),
 			'simple_url' => array(
 				'https://twitter.com/altjoen/status/118252236836061184' . PHP_EOL,
-				'<p><amp-twitter width="600" height="480" data-tweetid="118252236836061184" layout="responsive"></amp-twitter></p>' . PHP_EOL
+				'<p><amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL
 			)
 		);
 	}
