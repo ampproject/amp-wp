@@ -12,7 +12,7 @@ abstract class AMP_Base_Sanitizer {
 		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
 	}
 
-	abstract public function sanitize( $amp_attributes = array() );
+	abstract public function sanitize();
 
 	public function get_scripts() {
 		return array();

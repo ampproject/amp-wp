@@ -8,7 +8,7 @@ require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
 class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
-	public function sanitize( $amp_attributes = array() ) {
+	public function sanitize() {
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 		if ( 0 === $num_nodes ) {
@@ -21,7 +21,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
-			$new_attributes = array_merge( $new_attributes, $amp_attributes );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 

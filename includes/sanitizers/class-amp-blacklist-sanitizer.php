@@ -9,7 +9,7 @@ require_once( dirname( __FILE__ ) . '/class-amp-base-sanitizer.php' );
  *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
  */
 class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
-	public function sanitize( $amp_attributes = array() ) {
+	public function sanitize() {
 		$blacklisted_tags = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
 		$blacklisted_protocols = $this->get_blacklisted_protocols();

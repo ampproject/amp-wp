@@ -14,7 +14,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-anim';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-anim-0.1.js';
 
-	public function sanitize( $amp_attributes = array() ) {
+	public function sanitize() {
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 		if ( 0 === $num_nodes ) {
@@ -40,7 +40,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
-			$new_attributes = array_merge( $new_attributes, $amp_attributes );
 
 			if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 				$this->did_convert_elements = true;
