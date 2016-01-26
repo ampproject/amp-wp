@@ -8,6 +8,6 @@ function amp_frontend_add_canonical() {
 		return;
 	}
 
-	$amp_url = amp_get_url( get_queried_object_id() );
+	$amp_url = amp_get_permalink( get_queried_object_id() );
 	printf( '<link rel="amphtml" href="%s" />', esc_url( $amp_url ) );
 }
