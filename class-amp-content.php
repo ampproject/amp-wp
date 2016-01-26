@@ -7,17 +7,30 @@ require_once( dirname( __FILE__ ) . '/includes/embeds/class-amp-base-embed-handl
 
 class AMP_Content {
 	private $content;
-	private $scripts = array();
+	private $amp_content = '';
+	private $amp_scripts = array();
 	private $args = array();
+	private $embed_handler_classes = array();
+	private $sanitizer_classes = array();
 
 	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() ) {
 		$this->content = $content;
 		$this->args = $args;
 		$this->embed_handler_classes = $embed_handler_classes;
 		$this->sanitizer_classes = $sanitizer_classes;
+
+		$this->transform();
 	}
 
-	public function transform() {
+	public function get_amp_content() {
+		return $this->amp_content;
+	}
+
+	public function get_amp_scripts() {
+		return $this->amp_scripts;
+	}
+
+	private function transform() {
 		$content = $this->content;
 
 		// First, embeds + the_content filter
@@ -28,15 +41,11 @@ class AMP_Content {
 		// Then, sanitize to strip and/or convert non-amp content
 		$content = $this->sanitize( $content );
 
-		return $content;
-	}
-
-	public function get_scripts() {
-		return $this->scripts;
+		$this->amp_content = $content;
 	}
 
 	private function add_scripts( $scripts ) {
-		$this->scripts = array_merge( $this->scripts, $scripts );
+		$this->amp_scripts = array_merge( $this->amp_scripts, $scripts );
 	}
 
 	private function register_embed_handlers() {
