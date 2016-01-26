@@ -86,7 +86,7 @@ function amp_render() {
 	$post_id = get_queried_object_id();
 	do_action( 'pre_amp_render_post', $post_id );
 
-	require( AMP__DIR__ . '/includes/amp-template-actions.php' );
+	require( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
 
 	$template = new AMP_Post_Template( $post_id );
 	$template->load();
