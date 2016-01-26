@@ -82,7 +82,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				case 'allowfullscreen':
 				case 'allowtransparency':
 					if ( 'false' !== $value ) {
-						$out[ $name ] = 'true';
+						$out[ $name ] = '';
 					}
 					break;
 
