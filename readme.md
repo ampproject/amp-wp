@@ -146,10 +146,10 @@ See the "Override" examples in the "Meta" section for examples.
 
 #### Head and Footer
 
-If you want to add stuff to the head or footer of the default AMP template, use the `amp_post_head` and `amp_post_footer` actions.
+If you want to add stuff to the head or footer of the default AMP template, use the `amp_post_template_head` and `amp_post_template_footer` actions.
 
 ```php
-add_action( 'amp_post_footer', 'xyz_amp_add_analytics' );
+add_action( 'amp_post_template_footer', 'xyz_amp_add_analytics' );
 
 function xyz_amp_add_analytics( $amp_template ) {
 	$post_id = $amp_template->get( 'post_id' );
@@ -187,19 +187,19 @@ function xyz_amp_set_custom_template( $file, $type, $post ) {
 
 Note: there are some requirements for a custom template:
 
-* You must trigger the `amp_post_head` action in the `<head>` section:
+* You must trigger the `amp_post_template_head` action in the `<head>` section:
 
 ```
-do_action( 'amp_post_head', $this );
+do_action( 'amp_post_template_head', $this );
 ```
 
-* You must trigger the `amp_post_footer` action right before the `</body>` tag:
+* You must trigger the `amp_post_template_footer` action right before the `</body>` tag:
 
 ```
-do_action( 'amp_post_footer', $this );
+do_action( 'amp_post_template_footer', $this );
 ```
 
-* You must include [all required mark-up](https://www.ampproject.org/docs/get_started/create/basic_markup.html) that isn't already output via the `amp_post_head` action.
+* You must include [all required mark-up](https://www.ampproject.org/docs/get_started/create/basic_markup.html) that isn't already output via the `amp_post_template_head` action.
 
 ## Handling Media
 
@@ -223,7 +223,7 @@ All existing hooks on `the_content` will continue to work. This can be a good or
 
 You can add additional callbacks to `the_content` filter to output additional content as needed. Use the `is_amp_endpoint()` function to check if an AMP version of a post is being viewed. However, we recommend using an Embed Handler instead.
 
-Caveat: with this method, if you add a custom component that requires inclusion of a script, you will need to add that script manually to the template using the `amp_post_head` action.
+Caveat: with this method, if you add a custom component that requires inclusion of a script, you will need to add that script manually to the template using the `amp_post_template_head` action.
 
 ### Update Existing Shortcodes
 
