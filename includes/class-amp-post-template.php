@@ -19,7 +19,7 @@ class AMP_Post_Template {
 	private $data;
 
 	public function __construct( $post_id ) {
-		$this->template_file = AMP__DIR__ . '/templates/amp-index.php';
+		$this->template_file = AMP__DIR__ . '/templates/single.php';
 
 		$this->ID = $post_id;
 		$this->post = get_post( $post_id );
@@ -85,7 +85,6 @@ class AMP_Post_Template {
 
 		$this->add_data( array(
 			'post' => $this->post,
-			// TODO: are these really needed?
 			'post_title' => $post_title,
 			'post_publish_timestamp' => $post_publish_timestamp,
 			'post_modified_timestamp' => $post_modified_timestamp,
@@ -187,16 +186,36 @@ class AMP_Post_Template {
 
 	// TODO: load_parts
 
-	private function verify_and_include( $template, $template_type = 'main' ) {
-		// TODO: locate_template
-		// TODO apply_filters( 'amp_template_file_post' )
+	private function verify_and_include( $file, $template_type = 'main' ) {
+		$located_file = $this->locate_template( $file );
+		if ( $located_file ) {
+			$file = $located_file;
+		}
 
-		// TODO: check that path matches WP_CONTENT_DIR?
-		if ( 0 !== validate_file( $template ) ) {
-			_doing_it_wrong( __METHOD__, sprintf( __( 'Path validation for template (%s) failed.' ), esc_html( $template ) ), '0.1' );
+		$file = apply_filters( 'amp_post_template_file', $file, $this->post );
+		if ( ! $this->is_valid_template( $file ) ) {
+			_doing_it_wrong( __METHOD__, sprintf( __( 'Path validation for template (%s) failed. Path cannot traverse and must be located in `WP_CONTENT_DIR`.' ), esc_html( $file ) ), '0.1' );
 			return;
 		}
 
-		include( $template );
+		include( $file );
+	}
+
+
+	private function locate_template( $file ) {
+		$search_file = sprintf( 'amp/%s', basename( $file ) );
+		return locate_template( array( $search_file ), false );
+	}
+
+	private function is_valid_template( $template ) {
+		if ( 0 !== strpos( $template, WP_CONTENT_DIR ) ) {
+			return false;
+		}
+
+		if ( 0 !== validate_file( $template ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }
