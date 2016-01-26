@@ -2,8 +2,12 @@
 /**
  * Plugin Name: AMP
  * Description: Add AMP support to your WordPress site.
+ * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
+ * Author URI: https://automattic.com
  * Version: 0.1
+ * Text Domain: amp
+ * Domain Path: /languages/
  * License: GPLv2
  */
 
@@ -32,6 +36,8 @@ function amp_init() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
+
+	load_plugin_textdomain( 'amp', false, plugin_basename( AMP_DIR__ ) . '/languages' );
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
