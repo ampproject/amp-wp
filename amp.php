@@ -37,7 +37,7 @@ function amp_init() {
 		return;
 	}
 
-	load_plugin_textdomain( 'amp', false, plugin_basename( AMP_DIR__ ) . '/languages' );
+	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
