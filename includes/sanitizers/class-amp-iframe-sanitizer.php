@@ -59,7 +59,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$parent_node->removeChild( $node );
 				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
 
-				if ( 0 === $parent_node->childNodes->length && empty( $parent_node->textContent ) ) {
+				if ( AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
 					$parent_node->parentNode->removeChild( $parent_node );
 				}
 			} else {
