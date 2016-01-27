@@ -56,7 +56,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertTrue( AMP_DOM_Utils::is_node_empty( $node ) );
 	}
 
-	public function test__is_node_empty__no_text() {
+	public function test__is_node_empty__no__has_text() {
 		$source = '<p>Hello</p>';
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$node = $dom->getElementsByTagName( 'p' )->item( 0 );
@@ -64,7 +64,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertFalse( AMP_DOM_Utils::is_node_empty( $node ) );
 	}
 
-	public function test__is_node_empty__no_child() {
+	public function test__is_node_empty__no__has_child() {
 		$source = '<p><b></b></p>';
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$node = $dom->getElementsByTagName( 'p' )->item( 0 );
