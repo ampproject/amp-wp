@@ -263,6 +263,10 @@ class XYZ_AMP_Related_Posts_Embed extends AMP_Base_Embed_Handler {
 		remove_filter( 'the_content', array( $this, 'add_related_posts' ) );
 	}
 
+	public function get_scripts() {
+		return array( 'amp-mustache' => 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js' );
+	}
+
 	public function add_related_posts( $content ) {
 		// See https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md for details on amp-list
 		$related_posts_list = '

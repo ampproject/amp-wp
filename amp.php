@@ -8,7 +8,7 @@
  * Version: 0.1
  * Text Domain: amp
  * Domain Path: /languages/
- * License: GPLv2
+ * License: GPLv2 or later
  */
 
 define( 'AMP_QUERY_VAR', 'amp' );
