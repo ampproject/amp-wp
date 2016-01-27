@@ -18,6 +18,11 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				''
 			),
 
+			'multiple_blacklisted_tags_only_in_child' => array(
+				'<p><input type="text" /><script>alert("")</script><style>body{ color: red; }</style></p>',
+				''
+			),
+
 			'whitelisted_tag_only' => array(
 				'<p>Text</p><img src="/path/to/file.jpg" />',
 				'<p>Text</p><img src="/path/to/file.jpg"></img>' // LIBXML_NOEMPTYTAG
@@ -31,6 +36,11 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 			'on_attribute' => array(
 				'<a href="/path/to/file.jpg" onclick="alert(e);">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>'
+			),
+
+			'multiple_blacklisted_attributes' => array(
+				'<a href="/path/to/file.jpg" style="border: 1px solid red;" onclick="alert(e);">Link</a>',
+				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
 			'javascript_protocol' => array(

@@ -47,4 +47,28 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 			$this->assertEquals( $attributes[ $name ], $value, sprintf( 'Attribute "%s" does not have expected value.', $name ) );
 		}
 	}
+
+	public function test__is_node_empty__yes() {
+		$source = '<p></p>';
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$node = $dom->getElementsByTagName( 'p' )->item( 0 );
+
+		$this->assertTrue( AMP_DOM_Utils::is_node_empty( $node ) );
+	}
+
+	public function test__is_node_empty__no__has_text() {
+		$source = '<p>Hello</p>';
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$node = $dom->getElementsByTagName( 'p' )->item( 0 );
+
+		$this->assertFalse( AMP_DOM_Utils::is_node_empty( $node ) );
+	}
+
+	public function test__is_node_empty__no__has_child() {
+		$source = '<p><b></b></p>';
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$node = $dom->getElementsByTagName( 'p' )->item( 0 );
+
+		$this->assertFalse( AMP_DOM_Utils::is_node_empty( $node ) );
+	}
 }

@@ -50,4 +50,8 @@ class AMP_DOM_Utils {
 			$node->setAttribute( $name, $value );
 		}
 	}
+
+	public static function is_node_empty( $node ) {
+		return 0 === $node->childNodes->length && empty( $node->textContent );
+	}
 }
