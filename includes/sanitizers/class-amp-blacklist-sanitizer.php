@@ -55,12 +55,21 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
-	private function strip_tags( $node, $tags ) {
-		foreach ( $tags as $tag_name ) {
+	private function strip_tags( $node, $tag_names ) {
+		foreach ( $tag_names as $tag_name ) {
 			$elements = $node->getElementsByTagName( $tag_name );
-			if ( $elements->length ) {
-				foreach ( $elements as $element ) {
-					$element->parentNode->removeChild( $element );
+			$length = $elements->length;
+			if ( 0 === $length ) {
+				continue;
+			}
+
+			for ( $i = $length - 1; $i >= 0; $i-- ) {
+				$element = $elements->item( $i );
+				$parent_node = $element->parentNode;
+				$parent_node->removeChild( $element );
+
+				if ( 'body' !== $parent_node->nodeName && AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
+					$parent_node->parentNode->removeChild( $parent_node );
 				}
 			}
 		}

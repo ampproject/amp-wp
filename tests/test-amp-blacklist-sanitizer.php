@@ -20,7 +20,7 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 
 			'multiple_blacklisted_tags_only_in_child' => array(
 				'<p><input type="text" /><script>alert("")</script><style>body{ color: red; }</style></p>',
-				'<p></p>'
+				''
 			),
 
 			'whitelisted_tag_only' => array(
