@@ -32,7 +32,7 @@ class AMP_Post_Template {
 		$this->data = array(
 			'content_max_width' => $content_max_width,
 
-			'document_title' => wp_get_document_title(),
+			'document_title' => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // back-compat with 4.3
 			'canonical_url' => get_permalink( $post_id ),
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
