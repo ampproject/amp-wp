@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.1
+ * Version: 0.2
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
