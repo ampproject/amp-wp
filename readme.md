@@ -49,7 +49,7 @@ function xyz_set_custom_placeholder_image( $data ) {
 }
 ```
 
-Note: The path must pass the default criteria set out by `[validate_file](https://developer.wordpress.org/reference/functions/validate_file/)` and must
+Note: The path must pass the default criteria set out by [`validate_file`](https://developer.wordpress.org/reference/functions/validate_file/) and must be somewhere in a subfolder of `WP_CONTENT_DIR`.
 
 #### Meta
 
