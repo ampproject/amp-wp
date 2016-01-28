@@ -135,7 +135,7 @@ nav.title-bar {
 }
 
 nav.title-bar div {
-	line-height: 46px;
+	line-height: 54px;
 	color: #fff;
 }
 
@@ -144,10 +144,18 @@ nav.title-bar a {
 	text-decoration: none;
 }
 
-nav.title-bar svg {
-	fill: #fff;
+nav.title-bar .site-icon {
+	/** site icon is 32px **/
 	float: left;
 	margin: 11px 8px 0 0;
+	border-radius: 50%;
+}
+
+nav.title-bar svg {
+	/** svg is 24px **/
+	fill: #fff;
+	float: left;
+	margin: 15px 8px 0 0;
 }
 
 
@@ -176,7 +184,6 @@ amp-carousel {
 	background: #000;
 }
 
-amp-img,
 amp-iframe,
 amp-youtube,
 amp-instagram,

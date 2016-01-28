@@ -15,6 +15,8 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php' );
 
 class AMP_Post_Template {
+	const SITE_ICON_SIZE = 32;
+
 	private $template_dir;
 	private $data;
 
@@ -35,7 +37,7 @@ class AMP_Post_Template {
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
 
-			'site_icon_url' => amp_get_asset_url( 'images/wplogox.svg' ),
+			'site_icon_url' => get_site_icon_url( self::SITE_ICON_SIZE ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
@@ -104,14 +106,13 @@ class AMP_Post_Template {
 			'post_author' => $post_author,
 		) );
 
-		$this->add_data_by_key( 'metadata', array(
+		$metadata = array(
 			'@context' => 'http://schema.org',
 			'@type' => 'BlogPosting',
 			'mainEntityOfPage' => $this->get( 'canonical_url' ),
 			'publisher' => array(
 				'@type' => 'Organization',
 				'name' => $this->get( 'blog_name' ),
-				// TODO: logo
 			),
 			'headline' => $post_title,
 			'datePublished' => date( 'c', $post_publish_timestamp ),
@@ -121,7 +122,19 @@ class AMP_Post_Template {
 				'name' => $post_author->display_name,
 			),
 			'image' => $this->get_post_image_metadata(),
-		) );
+		);
+
+		$site_icon_url = $this->get( 'site_icon_url' );
+		if ( $site_icon_url ) {
+			$metadata['publisher']['logo'] = array(
+				'@type' => 'ImageObject',
+				'url' => $site_icon_url,
+				'height' => self::SITE_ICON_SIZE,
+				'width' => self::SITE_ICON_SIZE,
+			);
+		}
+
+		$this->add_data_by_key( 'metadata', $metadata );
 	}
 
 	private function build_post_content() {
