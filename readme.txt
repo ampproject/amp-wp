@@ -32,5 +32,10 @@ You can find details about customization options at https://github.com/Automatti
 
 == Changelog ==
 
+= 0.2 (Jan 28, 2016) =
+
+* Lots and lots and lots of compatibility and validation fixes
+* Lots and lots and lots of improvements for customization
+
 = 0.1 =
 * Initial version
