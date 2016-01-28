@@ -13,6 +13,11 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw"></amp-iframe>',
 			),
 
+			'iframe_without_dimensions' => array(
+				'<iframe src="https://example.com/video/132886713"></iframe>',
+				'<amp-iframe src="https://example.com/video/132886713" sandbox="allow-scripts allow-same-origin" height="400" layout="fixed-height"></amp-iframe>',
+			),
+
 			'simple_iframe_with_sandbox' => array(
 				'<iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-same-origin"></iframe>',
 				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"></amp-iframe>',

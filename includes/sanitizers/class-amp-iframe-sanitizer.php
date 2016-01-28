@@ -6,6 +6,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
  * Converts <iframe> tags to <amp-iframe>
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
+	const FALLBACK_HEIGHT = 400;
 	const SANDBOX_DEFAULTS = 'allow-scripts allow-same-origin';
 
 	public static $tag = 'iframe';
@@ -44,6 +45,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$this->did_convert_elements = true;
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
+			if ( ! isset( $new_attributes['width'], $new_attributes['height'] ) ) {
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+				$new_attributes['layout'] = 'fixed-height';
+			}
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );

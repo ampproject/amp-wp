@@ -13,6 +13,11 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
+			'video_without_dimensions' => array(
+				'<video src="https://example.com/file.mp4"></video>',
+				'<amp-video src="https://example.com/file.mp4" height="400" layout="fixed-height"></amp-video>',
+			),
+
 			'autoplay_attribute' => array(
 				'<video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" autoplay></video>',
 				'<amp-video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" autoplay="desktop tablet mobile" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
