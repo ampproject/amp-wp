@@ -31,10 +31,6 @@ abstract class AMP_Base_Sanitizer {
 	 * See https://github.com/Automattic/amp-wp/issues/101
 	 */
 	public function enforce_sizes_attribute( $attributes ) {
-		if ( isset( $attributes['sizes'] ) ) {
-			return $attributes;
-		}
-
 		if ( ! isset( $attributes['width'], $attributes['height'] ) ) {
 			return $attributes;
 		}

@@ -28,9 +28,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<amp-iframe src="https://player.vimeo.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"></amp-iframe>',
 			),
 
-			'iframe_with_sizes_attribute' => array(
+			'iframe_with_sizes_attribute_is_overridden' => array(
 				'<iframe src="https://example.com/iframe" width="500" height="281" sizes="(min-width: 100px) 300px, 90vw"></iframe>',
-				'<amp-iframe src="https://example.com/iframe" width="500" height="281" sizes="(min-width: 100px) 300px, 90vw" sandbox="allow-scripts allow-same-origin"></amp-iframe>',
+				'<amp-iframe src="https://example.com/iframe" width="500" height="281" sizes="(min-width: 500px) 500px, 100vw" sandbox="allow-scripts allow-same-origin" class="amp-wp-enforced-sizes"></amp-iframe>',
 			),
 
 			'multiple_same_iframe' => array(
