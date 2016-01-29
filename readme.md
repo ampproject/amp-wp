@@ -358,3 +358,32 @@ function xyz_amp_add_ad_sanitizer( $sanitizer_classes, $post ) {
 	return $sanitizer_classes;
 }
 ```
+
+## Custom Post Type Support
+
+By default, the plugin only creates AMP content for posts. You can add support for other post_types like so (assume our post_type slug is `xyz-review`):
+
+```php
+add_action( 'amp_init', 'xyz_amp_add_review_cpt' );
+function xyz_amp_add_review_cpt() {
+	add_post_type_support( 'xyz-review', AMP_QUERY_VAR );
+}
+```
+
+You'll need to flush your rewrite rules after this.
+
+If you want a custom template for your post type:
+
+```
+add_filter( 'amp_post_template_file', 'xyz_amp_set_review_template', 10, 3 );
+
+function xyz_amp_set_custom_template( $file, $type, $post ) {
+	if ( 'single' === $type && 'xyz-review' === $post->post_type ) {
+		$file = dirname( __FILE__ ) . '/templates/my-amp-review-template.php';
+	}
+	return $file;
+}
+
+```
+
+We may provide better ways to handle this in the future.

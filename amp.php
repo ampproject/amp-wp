@@ -38,6 +38,8 @@ function amp_init() {
 		return;
 	}
 
+	do_action( 'amp_init' );
+
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
