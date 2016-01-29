@@ -2,7 +2,7 @@
 
 // Jetpack bits.
 
-add_action( 'pre_amp_render', 'amp_jetpack_mods' );
+add_action( 'pre_amp_render_post', 'amp_jetpack_mods' );
 
 /**
  * Disable Jetpack features that are not compatible with AMP.
