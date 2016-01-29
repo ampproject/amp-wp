@@ -33,9 +33,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://archive.org/download/WebmVp8Vorbis/webmvp8_512kb.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'video_with_sizes_attribute' => array(
+			'video_with_sizes_attribute_is_overridden' => array(
 				'<video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 100px) 200px, 90vw"></video>',
-				'<amp-video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 100px) 200px, 90vw"></amp-video>',
+				'<amp-video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
 			'video_with_children' => array(

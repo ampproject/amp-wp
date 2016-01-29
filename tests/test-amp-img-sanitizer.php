@@ -33,9 +33,9 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/350x150"></amp-img>',
 			),
 
-			'image_with_sizes_attribute' => array(
+			'image_with_sizes_attribute_is_overriden' => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 100px) 300px, 90vw" />',
-				'<amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 100px) 300px, 90vw"></amp-img>',
+				'<amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
 			'gif_image_conversion' => array(
