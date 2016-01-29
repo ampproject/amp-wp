@@ -16,9 +16,27 @@ You can tweak small pieces of the template or the entire thing depending on your
 
 ### Theme Mods
 
-(This still needs to be implemented.)
-
 The default template will attempt to draw from various theme mods, such as site icon and background and header color/image, if supported by the active theme.
+
+#### Site Icon
+
+If you add a site icon, we will automatically replace the WordPress logo in the template.
+
+If you'd prefer to do it via code:
+
+```php
+add_filter( 'amp_post_template_data', 'xyz_amp_set_site_icon_url' );
+
+function xyz_amp_set_site_icon_url( $data ) {
+	// Ideally a 32x32 image
+	$data[ 'site_icon_url' ] = get_stylesheet_directory_uri() . '/images/amp-site-icon.png';
+	return $data;
+}
+```
+
+#### Custom Header
+
+This needs to be implemented.
 
 ### Template Tweaks
 
