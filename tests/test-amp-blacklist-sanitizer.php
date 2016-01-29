@@ -62,6 +62,16 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>',
 				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>'
 			),
+
+			'a_with_attachment_rel' => array(
+				'<a href="http://example.com" rel="wp-att-1686">Link</a>',
+				'<a href="http://example.com">Link</a>',
+			),
+
+			'a_with_attachment_rel_plus_another_valid_value' => array(
+				'<a href="http://example.com" rel="attachment wp-att-1686">Link</a>',
+				'<a href="http://example.com" rel="attachment">Link</a>',
+			)
 		);
 	}
 

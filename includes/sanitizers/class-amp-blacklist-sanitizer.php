@@ -9,6 +9,8 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
  *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
  */
 class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
+	const PATTERN_REL_WP_ATTACHMENT = '#wp-att-([\d]+)#';
+
 	public function sanitize() {
 		$blacklisted_tags = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
@@ -25,6 +27,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( $node->hasAttributes() ) {
+			$node_name = $node->nodeName;
 			$length = $node->attributes->length;
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
 				$attribute = $node->attributes->item( $i );
@@ -38,14 +41,21 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 0 === stripos( $attribute_name, 'on' ) ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
-				}
-
-				if ( 'href' === $attribute_name ) {
+				} elseif ( 'href' === $attribute_name ) {
 					$protocol = strtok( $attribute->value, ':' );
 					if ( in_array( $protocol, $bad_protocols ) ) {
 						$node->removeAttribute( $attribute_name );
 						continue;
 					}
+				} elseif ( 'a' === $node_name && 'rel' === $attribute_name ) {
+					$old_value = $attribute->value;
+					$new_value = trim( preg_replace( self::PATTERN_REL_WP_ATTACHMENT, '', $old_value ) );
+					if ( empty( $new_value ) ) {
+						$node->removeAttribute( $attribute_name );
+					} elseif ( $old_value !== $new_value ) {
+						$node->setAttribute( $attribute_name, $new_value );
+					}
+
 				}
 			}
 		}
