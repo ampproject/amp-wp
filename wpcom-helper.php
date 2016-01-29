@@ -60,9 +60,9 @@ function wpcom_amp_get_stats_extras_url() {
 	return $url;
 }
 
-add_action( 'pre_amp_render', 'jetpack_amp_disable_the_content_filters' );
+add_action( 'pre_amp_render_post', 'jetpack_amp_disable_the_content_filters' );
 
-function jetpack_amp_disable_the_content_filters() {
+function jetpack_amp_disable_the_content_filters( $post_id ) {
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	remove_filter( 'the_title', 'widont' );
 
@@ -70,22 +70,15 @@ function jetpack_amp_disable_the_content_filters() {
 	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
 }
 
-add_action( 'post_amp_render', 'jetpack_amp_reenable_the_content_filters' );
-
-function jetpack_amp_reenable_the_content_filters() {
-	add_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
-	add_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
-}
-
-add_action( 'amp_head', 'jetpack_amp_add_og_tags' );
+add_action( 'amp_post_template_head', 'jetpack_amp_add_og_tags' );
 	
-function jetpack_amp_add_og_tags( $amp_post ) {
+function jetpack_amp_add_og_tags( $amp_template ) {
 	if ( function_exists( 'jetpack_og_tags' ) ) {
 		jetpack_og_tags();
 	}
 }
 
-add_filter( 'amp_post_metadata', 'jetpack_amp_post_template_metadata', 10, 2 );
+add_filter( 'amp_post_template_metadata', 'jetpack_amp_post_template_metadata', 10, 2 );
 
 function jetpack_amp_post_template_metadata( $metadata, $post ) {
 	$metadata = wpcom_amp_add_blavatar( $metadata, $post );
