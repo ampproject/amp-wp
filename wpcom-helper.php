@@ -5,23 +5,14 @@
 define( 'AMP_DEV_MODE', defined( 'WPCOM_SANDBOXED' ) && WPCOM_SANDBOXED );
 
 // Add stats pixel
-add_filter( 'amp_post_content', 'jetpack_amp_add_stats_pixel', 10, 2 );
+add_filter( 'amp_post_template_footer', 'jetpack_amp_add_stats_pixel' );
 
-function jetpack_amp_add_stats_pixel( $content, $post ) {
-	$urls = array(
-		wpcom_amp_get_pageview_url(),
-		wpcom_amp_get_mc_url(),
-		wpcom_amp_get_stats_extras_url(),
-	);
-
-	foreach ( $urls as $url ) {
-		if ( ! $url ) {
-			continue;
-		}
-		$content .= sprintf( '<amp-pixel src="%s">', esc_url( $url ) );
-	}
-
-	return $content;
+function jetpack_amp_add_stats_pixel( $amp_template ) {
+	?>
+	<amp-pixel src="<?php echo esc_url( wpcom_amp_get_pageview_url() ); ?>"></amp-pixel>
+	<amp-pixel src="<?php echo esc_url( wpcom_amp_get_mc_url() ); ?>"></amp-pixel>
+	<amp-pixel src="<?php echo esc_url( wpcom_amp_get_stats_extras_url() ); ?>"></amp-pixel>
+	<?php
 }
 
 function wpcom_amp_get_pageview_url() {
@@ -29,9 +20,9 @@ function wpcom_amp_get_pageview_url() {
 	$a = $stats_info['st_go_args'];
 
 	$url = add_query_arg( array(
-		'rand' => '$RANDOM', // special amp placeholder
+		'rand' => 'RANDOM', // AMP placeholder
 		'host' => rawurlencode( $_SERVER['HTTP_HOST'] ),
-		// TODO: ref; not reliably accessible server-side; flag as amp?
+		'ref' => 'DOCUMENT_REFERRER', // AMP placeholder
 	), 'https://pixel.wp.com/b.gif'  );
 	$url .= '&' . stats_array_string( $a );
 	return $url;
@@ -39,7 +30,7 @@ function wpcom_amp_get_pageview_url() {
 
 function wpcom_amp_get_mc_url() {
 	return add_query_arg( array(
-		'rand' => '$RANDOM', // special amp placeholder
+		'rand' => 'RANDOM', // special amp placeholder
 		'v' => 'wpcom-no-pv',
 		'x_amp-views' => 'view',
 	), 'https://pixel.wp.com/b.gif' );
@@ -52,7 +43,7 @@ function wpcom_amp_get_stats_extras_url() {
 	}
 
 	$url = add_query_arg( array(
-		'rand' => '$RANDOM', // special amp placeholder
+		'rand' => 'RANDOM', // special amp placeholder
 		'v' => 'wpcom-no-pv',
 	), 'https://pixel.wp.com/b.gif' );
 
