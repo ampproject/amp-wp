@@ -5,7 +5,9 @@
 define( 'AMP_DEV_MODE', defined( 'WPCOM_SANDBOXED' ) && WPCOM_SANDBOXED );
 
 // Add stats pixel
-add_filter( 'amp_post_content', function( $content, $post ) {
+add_filter( 'amp_post_content', 'jetpack_amp_add_stats_pixel', 10, 2 );
+
+function jetpack_amp_add_stats_pixel( $content, $post ) {
 	$urls = array(
 		wpcom_amp_get_pageview_url(),
 		wpcom_amp_get_mc_url(),
@@ -20,7 +22,7 @@ add_filter( 'amp_post_content', function( $content, $post ) {
 	}
 
 	return $content;
-}, 10, 2 );
+}
 
 function wpcom_amp_get_pageview_url() {
 	$stats_info = stats_collect_info();
@@ -67,29 +69,37 @@ function wpcom_amp_get_stats_extras_url() {
 	return $url;
 }
 
-add_action( 'pre_amp_render', function() {
+add_action( 'pre_amp_render', 'jetpack_amp_disable_the_content_filters' );
+
+function jetpack_amp_disable_the_content_filters() {
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	remove_filter( 'the_title', 'widont' );
 
 	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
 	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
-} );
+}
 
-add_action( 'post_amp_render', function() {
+add_action( 'post_amp_render', 'jetpack_amp_reenable_the_content_filters' );
+
+function jetpack_amp_reenable_the_content_filters() {
 	add_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
 	add_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
-} );
+}
 
-add_action( 'amp_head', function( $amp_post ) {
+add_action( 'amp_head', 'jetpack_amp_add_og_tags' );
+	
+function jetpack_amp_add_og_tags( $amp_post ) {
 	if ( function_exists( 'jetpack_og_tags' ) ) {
 		jetpack_og_tags();
 	}
-} );
+}
 
-add_filter( 'amp_post_metadata', function( $metadata, $post ) {
+add_filter( 'amp_post_metadata', 'jetpack_amp_post_template_metadata', 10, 2 );
+
+function jetpack_amp_post_template_metadata( $metadata, $post ) {
 	$metadata = wpcom_amp_add_blavatar( $metadata, $post );
 	return $metadata;
-}, 10, 2 );
+}
 
 function wpcom_amp_add_blavatar( $metadata, $post ) {
 	if ( ! function_exists( 'blavatar_domain' ) ) {
@@ -118,8 +128,9 @@ function wpcom_amp_add_blavatar( $metadata, $post ) {
 	return $metadata;
 }
 
-add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions', 9, 2 ); // Hook in before the default extractors
-function wpcom_amp_extract_image_dimensions( $dimensions, $url ) {
+// If images are being served from Photon or WP.com files, try extracting the size using querystring.
+add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_from_querystring', 9, 2 ); // Hook in before the default extractors
+function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions, $url ) {
 	if ( $dimensions ) {
 		return $dimensions;
 	}
@@ -140,9 +151,9 @@ function wpcom_amp_extract_image_dimensions( $dimensions, $url ) {
 	return false;
 }
 
-
-add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_fallback', 100, 2 ); // Our last resort
-function wpcom_amp_extract_image_dimensions_fallback( $dimensions, $url ) {
+// Uses a special wpcom lib (wpcom_getimagesize) to extract dimensions as a last resort if we weren't able to figure them out.
+add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_from_getimagesize', 100, 2 ); // Our last resort
+function wpcom_amp_extract_image_dimensions_from_getimagesize( $dimensions, $url ) {
 	if ( $dimensions ) {
 		return $dimensions;
 	}
