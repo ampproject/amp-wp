@@ -134,7 +134,7 @@ class AMP_Post_Template {
 			);
 		}
 
-		$this->add_data_by_key( 'metadata', $metadata );
+		$this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
 	}
 
 	private function build_post_content() {
