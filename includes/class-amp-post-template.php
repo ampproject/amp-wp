@@ -121,7 +121,6 @@ class AMP_Post_Template {
 				'@type' => 'Person',
 				'name' => $post_author->display_name,
 			),
-			'image' => $this->get_post_image_metadata(),
 		);
 
 		$site_icon_url = $this->get( 'site_icon_url' );
@@ -132,6 +131,11 @@ class AMP_Post_Template {
 				'height' => self::SITE_ICON_SIZE,
 				'width' => self::SITE_ICON_SIZE,
 			);
+		}
+
+		$image_metadata = $this->get_post_image_metadata();
+		if ( $image_metadata ) {
+			$metadata['image'] = $image_metadata;
 		}
 
 		$this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
