@@ -175,6 +175,28 @@ Then, in `templates/xyz-meta-comment-count.php`:
 
 #### Custom CSS
 
+##### Rule Additions
+
+If you want to append to the existing CSS rules (e.g. styles for a custom embed handler), you can use the `amp_post_template_css` action: 
+
+```php
+add_action( 'amp_post_template_css', 'xyz_amp_my_additional_css_styles' );
+
+function xyz_amp_my_additional_css_styles( $amp_template ) {
+	// only CSS here please...
+	?>
+	.byline amp-img {
+		border-radius: 0; /* we don't want round avatars! */
+	}
+	.my-custom-class {
+		color: blue;
+	}
+	<?php
+}
+```
+
+##### Completely Override CSS
+
 If you'd prefer to use your own styles, you can either:
 
 - Create a folder in your theme called `amp` and add a file called `style.php` with your custom CSS.

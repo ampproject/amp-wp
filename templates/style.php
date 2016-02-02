@@ -196,4 +196,6 @@ amp-vine {
 	background-size: 48px 48px;
 	min-height: 48px;
 }
+
+<?php do_action( 'amp_post_template_css', $this ); ?>
 </style>
