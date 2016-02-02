@@ -32,6 +32,10 @@ You can find details about customization options at https://github.com/Automatti
 
 == Changelog ==
 
+= 0.3 =
+
+* Breaking change: style.css no longer contains the `<style> tag. If you have a custom stylesheet, you need to update it to remove the tag.
+
 = 0.2 (Jan 28, 2016) =
 
 * Lots and lots and lots of compatibility and validation fixes

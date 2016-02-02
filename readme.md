@@ -200,9 +200,9 @@ function xyz_amp_my_additional_css_styles( $amp_template ) {
 If you'd prefer to use your own styles, you can either:
 
 - Create a folder in your theme called `amp` and add a file called `style.php` with your custom CSS.
-- Specify a custom template using the `amp_post_template_file` filter for `'style' === $type`.
+- Specify a custom template using the `amp_post_template_file` filter for `'style' === $type`. See the "Override" examples in the "Meta" section for examples.
 
-See the "Override" examples in the "Meta" section for examples.
+Note: the file should only include CSS, not the `<style>` opening and closing tag.
 
 #### Head and Footer
 
@@ -257,6 +257,12 @@ do_action( 'amp_post_template_head', $this );
 
 ```
 do_action( 'amp_post_template_footer', $this );
+```
+
+* Within your `amp-custom` `style` tags, you must trigger the `amp_post_template_css` action: 
+
+```php
+do_action( 'amp_post_template_css', $this );
 ```
 
 * You must include [all required mark-up](https://www.ampproject.org/docs/get_started/create/basic_markup.html) that isn't already output via the `amp_post_template_head` action.
