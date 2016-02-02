@@ -126,7 +126,12 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-carousel',
-			wp_parse_args( array(), $this->args ),
+			array(
+				'width' => $this->args['width'],
+				'height' => $this->args['height'],
+				'type' => 'slides',
+				'layout' => 'responsive',
+			),
 			implode( PHP_EOL, $images )
 		);
 	}
