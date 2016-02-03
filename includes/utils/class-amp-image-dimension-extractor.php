@@ -18,7 +18,7 @@ class AMP_Image_Dimension_Extractor {
 	}
 
 	public static function extract_from_attachment_metadata( $dimensions, $url ) {
-		if ( $dimensions ) {
+		if ( is_array( $dimensions ) ) {
 			return $dimensions;
 		}
 

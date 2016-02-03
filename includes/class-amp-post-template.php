@@ -202,7 +202,7 @@ class AMP_Post_Template {
 
 		$post_image_src = wp_get_attachment_image_src( $post_image_id, 'full' );
 
-		if ( $post_image_src ) {
+		if ( is_array( $post_image_src ) ) {
 			$post_image_meta = array(
 				'@type' => 'ImageObject',
 				'url' => $post_image_src[0],
