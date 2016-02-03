@@ -33,7 +33,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			if ( ! isset( $new_attributes['width'] ) || ! isset( $new_attributes['height'] ) ) {
 				$dimensions = AMP_Image_Dimension_Extractor::extract( $new_attributes['src'] );
-				if ( $dimensions ) {
+				if ( is_array( $dimensions ) ) {
 					$new_attributes['width'] = $dimensions[0];
 					$new_attributes['height'] = $dimensions[1];
 				}

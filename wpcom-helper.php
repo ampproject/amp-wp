@@ -71,7 +71,7 @@ function jetpack_amp_disable_the_content_filters( $post_id ) {
 }
 
 add_action( 'amp_post_template_head', 'jetpack_amp_add_og_tags' );
-	
+
 function jetpack_amp_add_og_tags( $amp_template ) {
 	if ( function_exists( 'jetpack_og_tags' ) ) {
 		jetpack_og_tags();
@@ -115,7 +115,7 @@ function wpcom_amp_add_blavatar( $metadata, $post ) {
 // If images are being served from Photon or WP.com files, try extracting the size using querystring.
 add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_from_querystring', 9, 2 ); // Hook in before the default extractors
 function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions, $url ) {
-	if ( $dimensions ) {
+	if ( is_array( $dimensions ) ) {
 		return $dimensions;
 	}
 
@@ -138,7 +138,7 @@ function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions, $url 
 // Uses a special wpcom lib (wpcom_getimagesize) to extract dimensions as a last resort if we weren't able to figure them out.
 add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_from_getimagesize', 100, 2 ); // Our last resort
 function wpcom_amp_extract_image_dimensions_from_getimagesize( $dimensions, $url ) {
-	if ( $dimensions ) {
+	if ( is_array( $dimensions ) ) {
 		return $dimensions;
 	}
 
@@ -148,9 +148,9 @@ function wpcom_amp_extract_image_dimensions_from_getimagesize( $dimensions, $url
 
 	require_lib( 'wpcom/imagesize' );
 	$size = wpcom_getimagesize( $url );
-	if ( $size ) {
-		return array( $size[0], $size[1] );
+	if ( ! is_array( $size ) ) {
+		return false;
 	}
 
-	return false;
+	return array( $size[0], $size[1] );
 }
