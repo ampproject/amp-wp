@@ -9,23 +9,23 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'simple_audio' => array(
-				'<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></audio>',
-				'<amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></amp-audio>',
+				'<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio>',
 			),
 
 			'autoplay_attribute' => array(
-				'<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" autoplay></audio>',
-				'<amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" autoplay="desktop tablet mobile"></amp-audio>',
+				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay></audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay="desktop tablet mobile"></amp-audio>',
 			),
 
 			'audio_with_whitelisted_attributes' => array(
-				'<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" class="test" loop="false" muted></audio>',
-				'<amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" class="test" muted="true"></amp-audio>',
+				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="false" muted></audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" muted="true"></amp-audio>',
 			),
 
 			'audio_with_blacklisted_attribute' => array(
-				'<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg" style="border-color: red;"></audio>',
-				'<amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></amp-audio>',
+				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" style="border-color: red;"></audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio>',
 			),
 
 			'audio_with_children' => array(
@@ -53,11 +53,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'<audio width="400" height="300">
 	<source src="https://example.com/foo.wav" type="audio/wav">
 </audio>
-<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></audio>
+<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>
 <audio height="500" width="300">
 	<source src="https://example.com/foo2.wav" type="audio/wav">
 </audio>',
-				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio><amp-audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></amp-audio><amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"></source></amp-audio>'
+				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio><amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio><amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"></source></amp-audio>'
 			),
 		);
 	}
@@ -86,7 +86,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_scripts__did_convert() {
-		$source = '<audio width="400" height="300" src="https://developer.mozilla.org/@api/deki/files/2926/=AudioTest_(1).ogg"></audio>';
+		$source = '<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>';
 		$expected = array( 'amp-audio' => 'https://cdn.ampproject.org/v0/amp-audio-0.1.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
