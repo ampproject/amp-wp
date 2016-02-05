@@ -37,12 +37,14 @@ class AMP_Post_Template {
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
 
-			'site_icon_url' => get_site_icon_url( self::SITE_ICON_SIZE ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
 		);
+
+		if(function_exists("get_site_icon_url"))
+			$this->data['site_icon_url'] = get_site_icon_url( self::SITE_ICON_SIZE );
 
 		$this->build_post_content();
 		$this->build_post_data();
