@@ -16,7 +16,7 @@
 <nav class="title-bar">
 	<div>
 		<a href="<?php echo esc_url( $this->get( 'home_url' ) ); ?>">
-			<?php $site_icon_url = $this->get( 'site_icon_url' ); ?>
+			<?php $site_icon_url = apply_filters( 'amp_site_icon_url', $this->get( 'site_icon_url' ) ); ?>
 			<?php if ( $site_icon_url ) : ?>
 				<amp-img src="<?php echo esc_url( $site_icon_url ); ?>" width="32" height="32" class="site-icon"></amp-img>
 			<?php else : ?>
