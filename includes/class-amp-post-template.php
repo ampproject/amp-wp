@@ -37,7 +37,7 @@ class AMP_Post_Template {
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
 
-			'site_icon_url' => get_site_icon_url( self::SITE_ICON_SIZE ),
+			'site_icon_url' => function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '',
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
