@@ -150,13 +150,6 @@ nav.title-bar .site-icon {
 	border-radius: 50%;
 }
 
-nav.title-bar svg {
-	/** svg is 24px **/
-	fill: #fff;
-	float: left;
-	margin: 15px 8px 0 0;
-}
-
 
 /* Captions */
 .wp-caption-text {
