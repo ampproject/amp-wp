@@ -35,6 +35,7 @@ function amp_init() {
 	}
 
 	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+	amp_add_backend_actions();
 
 	do_action( 'amp_init' );
 
@@ -61,7 +62,11 @@ function amp_force_query_var_value( $query_vars ) {
 }
 
 function amp_maybe_add_actions() {
+<<<<<<< f252d9d056a7f99e76c5a7c43627a8e2e5343976
 	if ( ! is_singular() || is_feed() ) {
+=======
+	if ( ! is_singular() || ! is_customize_preview() ) {
+>>>>>>> First run: AMP template editor in the Customizer.
 		return;
 	}
 
@@ -94,6 +99,15 @@ function amp_load_classes() {
 
 function amp_add_frontend_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-frontend-actions.php' );
+}
+
+/**
+ * Loads the backend actions callbacks.
+ *
+ * @since 0.3
+ */
+function amp_add_backend_actions() {
+	require_once( AMP__DIR__ . '/includes/admin/amp-backend-actions.php' );
 }
 
 function amp_add_post_template_actions() {
