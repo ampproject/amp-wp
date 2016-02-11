@@ -39,6 +39,8 @@ function amp_init() {
 		return;
 	}
 
+	amp_add_backend_actions();
+
 	do_action( 'amp_init' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
@@ -54,7 +56,7 @@ function amp_init() {
 }
 
 function amp_maybe_add_actions() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || ! is_customize_preview() ) {
 		return;
 	}
 
@@ -84,6 +86,15 @@ function amp_load_classes() {
 
 function amp_add_frontend_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-frontend-actions.php' );
+}
+
+/**
+ * Loads the backend actions callbacks.
+ *
+ * @since 0.3
+ */
+function amp_add_backend_actions() {
+	require_once( AMP__DIR__ . '/includes/admin/amp-backend-actions.php' );
 }
 
 function amp_add_post_template_actions() {
