@@ -3,9 +3,9 @@
 
 	wp.customize( 'amp_navbar_background', function( value ) {
 		value.bind( function( to ) {
-			$( '.title-bar' ).css( {
-				'background': to
-			} );
+			var titleBar = $( '.amp-mode-mouse' ).find( 'nav.title-bar' );
+
+			titleBar.css( 'background', to );
 		} );
 	} );
 

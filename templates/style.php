@@ -129,7 +129,7 @@ ul.meta li:first-child:before {
 
 /* Titlebar */
 nav.title-bar {
-	background: #0a89c0;
+	background: <?php echo get_theme_mod( 'amp_navbar_background' ); ?>;
 	padding: 0 16px;
 }
 

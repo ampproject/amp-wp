@@ -91,7 +91,7 @@ class AMP_Template_Customizer {
 	 */
 	public function enqueue_scripts() {
 		if ( is_customize_preview() ) {
-			wp_enqueue_script( 'amp-customizer', AMP__URL__ . '/assets/js/amp-customizer.js', array( 'customize-controls' ) );
+			wp_enqueue_script( 'amp-customizer', AMP__URL__ . '/assets/js/amp-customizer.js', array( 'customize-preview' ) );
 		}
 	}
 }
