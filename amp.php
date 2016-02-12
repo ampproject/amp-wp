@@ -62,11 +62,7 @@ function amp_force_query_var_value( $query_vars ) {
 }
 
 function amp_maybe_add_actions() {
-<<<<<<< f252d9d056a7f99e76c5a7c43627a8e2e5343976
 	if ( ! is_singular() || is_feed() ) {
-=======
-	if ( ! is_singular() || ! is_customize_preview() ) {
->>>>>>> First run: AMP template editor in the Customizer.
 		return;
 	}
 
