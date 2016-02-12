@@ -12,16 +12,25 @@ class AMP_Template_Customizer {
 	 */
 	public $wp_customizer;
 
+	/**
+	 * Initialize the template Customizer feature class.
+	 *
+	 * @access public
+	 *
+	 * @param WP_Customize_Manager $wp_customize Customizer instance.
+	 */
 	public function init( $wp_customize ) {
 		$self = new self();
 
 		$self->wp_customize = $wp_customize;
 
+		// Set up panel, sections, settings, controls.
 		$self->register_panel();
 		$self->register_sections();
 		$self->register_settings();
 		$self->register_controls();
 
+		// Enqueue scripts.
 		if ( is_customize_preview() ) {
 			add_action( 'customize_preview_init',   array( $self, 'enqueue_scripts' ) );
 			add_action( 'amp_post_template_head',   array( $self, 'enqueue_jquery'  ) );
