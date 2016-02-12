@@ -179,18 +179,17 @@ ul.amp-wp-meta li:first-child:before {
 
 /* Titlebar */
 nav.amp-wp-title-bar {
-	background: #0a89c0;
 	background: <?php echo get_theme_mod( 'amp_navbar_background' ); ?>;
 	padding: 0 16px;
 }
 
 nav.amp-wp-title-bar div {
 	line-height: 54px;
-	color: #fff;
+	color: <?php echo get_theme_mod( 'amp_navbar_color' ); ?>;
 }
 
 nav.amp-wp-title-bar a {
-	color: #fff;
+	color: <?php echo get_theme_mod( 'amp_navbar_color' ); ?>;
 	text-decoration: none;
 }
 

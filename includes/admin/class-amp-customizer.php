@@ -71,7 +71,14 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_settings() {
-		// Background Color setting (Navbar).
+		// Navbar text color setting.
+		$this->wp_customize->add_setting( 'amp_navbar_color', array(
+			'default'           => '#fff',
+			'sanitize_callback' => 'sanitize_hex_color',
+			'transport'         => 'postMessage'
+		) );
+
+		// Navbar background color setting.
 		$this->wp_customize->add_setting( 'amp_navbar_background', array(
 			'default'           => '#0a89c0',
 			'sanitize_callback' => 'sanitize_hex_color',
@@ -85,12 +92,23 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_controls() {
-		// Background Color control (Navbar).
-		$this->wp_customize->add_control( new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background', array(
-			'label'       => __( 'Background Color', 'amp' ),
-			'description' => __( 'This color is used by AMP to format the background of the navigation bar on pages generated for AMP.', 'amp' ),
-			'section'     => 'amp_navbar_section'
-		) ) );
+		// Navbar text color control.
+		$this->wp_customize->add_control(
+			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_color', array(
+				'label'    => __( 'Header Text Color', 'amp' ),
+				'section'  => 'amp_navbar_section',
+				'priority' => 10
+			) )
+		);
+
+		// Navbar background color control.
+		$this->wp_customize->add_control(
+			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background', array(
+				'label'    => __( 'Header Background Color', 'amp' ),
+				'section'  => 'amp_navbar_section',
+				'priority' => 20
+			) )
+		);
 	}
 
 	/**
