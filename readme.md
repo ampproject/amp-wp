@@ -14,6 +14,21 @@ The plugin ships with a default template that looks nice and clean and we tried 
 
 You can tweak small pieces of the template or the entire thing depending on your needs.
 
+### Where Do I Put My Code?
+
+The code snippets below and any other code-level customizations should happen in one of the following locations.
+
+If you're using an off-the-shelf theme (like from the WordPress.org Theme Directory):
+
+- A [child theme](https://developer.wordpress.org/themes/advanced-topics/child-themes/).
+- A custom plugin that you activate via the Dashboard.
+- A [mu-plugin](https://codex.wordpress.org/Must_Use_Plugins).
+
+If you're using a custom theme:
+
+- `functions.php` (or a file `require`-ed by `functions.php`).
+- Any of the options above.
+
 ### Theme Mods
 
 The default template will attempt to draw from various theme mods, such as site icon and background and header color/image, if supported by the active theme.
@@ -177,7 +192,7 @@ Then, in `templates/xyz-meta-comment-count.php`:
 
 ##### Rule Additions
 
-If you want to append to the existing CSS rules (e.g. styles for a custom embed handler), you can use the `amp_post_template_css` action: 
+If you want to append to the existing CSS rules (e.g. styles for a custom embed handler), you can use the `amp_post_template_css` action:
 
 ```php
 add_action( 'amp_post_template_css', 'xyz_amp_my_additional_css_styles' );
@@ -259,7 +274,7 @@ do_action( 'amp_post_template_head', $this );
 do_action( 'amp_post_template_footer', $this );
 ```
 
-* Within your `amp-custom` `style` tags, you must trigger the `amp_post_template_css` action: 
+* Within your `amp-custom` `style` tags, you must trigger the `amp_post_template_css` action:
 
 ```php
 do_action( 'amp_post_template_css', $this );
