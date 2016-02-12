@@ -56,7 +56,7 @@ function amp_init() {
 }
 
 function amp_maybe_add_actions() {
-	if ( ! is_singular() || ! is_customize_preview() ) {
+	if ( ! is_singular() ) {
 		return;
 	}
 
