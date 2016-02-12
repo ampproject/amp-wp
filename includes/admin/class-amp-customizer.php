@@ -22,7 +22,11 @@ class AMP_Template_Customizer {
 		$self->register_settings();
 		$self->register_controls();
 
-		add_action( 'admin_enqueue_scripts', array( $self, 'enqueue_scripts' ), 50 );
+		if ( is_customize_preview() ) {
+			add_action( 'customize_preview_init',   array( $self, 'enqueue_scripts' ) );
+			add_action( 'amp_post_template_head',   array( $self, 'enqueue_jquery'  ) );
+			add_action( 'amp_post_template_footer', array( $self, 'fire_wp_footer'  ) );
+		}
 	}
 
 	/**
@@ -81,13 +85,38 @@ class AMP_Template_Customizer {
 	}
 
 	/**
+	 * Enqueues jQuery inside the AMP template header preview for postMessage purposes.
+	 *
+	 * @access public
+	 */
+	public function enqueue_jquery() {
+		wp_enqueue_script( 'jquery' );
+	}
+
+	/**
+	 * Fires the 'wp_footer' action in the AMP template footer preview for postMessage purposes.
+	 *
+	 * @access public
+	 */
+	public function fire_wp_footer() {
+		/** This action is documented in wp-includes/general-template.php */
+		do_action( 'wp_footer' );
+	}
+
+	/**
 	 * Enqueues scripts used in the Customizer.
 	 *
 	 * @access public
 	 */
 	public function enqueue_scripts() {
 		if ( is_customize_preview() ) {
-			wp_enqueue_script( 'amp-customizer', AMP__URL__ . '/assets/js/amp-customizer.js', array( 'customize-preview' ) );
+			wp_enqueue_script(
+				'amp-customizer',
+				AMP__URL__ . '/assets/js/amp-customizer.js',
+				array( 'customize-preview' ),
+				$version = false,
+				$footer = true
+			);
 		}
 	}
 }
