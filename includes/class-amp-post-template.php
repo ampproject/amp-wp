@@ -246,6 +246,10 @@ class AMP_Post_Template {
 			return false;
 		}
 
+		if ( ! file_exists( $template ) ) {
+			return false;
+		}
+
 		return true;
 	}
 }
