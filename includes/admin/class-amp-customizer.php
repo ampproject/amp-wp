@@ -12,21 +12,17 @@ class AMP_Template_Customizer {
 	 */
 	public $wp_customizer;
 
-	/**
-	 * Constructor.
-	 *
-	 * @access public
-	 *
-	 * @param WP_Customize_Manager $wp_customize Customizer instance.
-	 */
-	public function __construct( $wp_customize ) {
-		$this->wp_customize = $wp_customize;
+	public function init( $wp_customize ) {
+		$self = new self();
 
-		$this->register_panel();
-		$this->register_sections();
-		$this->register_settings();
-		$this->register_controls();
-		$this->enqueue_scripts();
+		$self->wp_customize = $wp_customize;
+
+		$self->register_panel();
+		$self->register_sections();
+		$self->register_settings();
+		$self->register_controls();
+
+		add_action( 'admin_enqueue_scripts', array( $self, 'enqueue_scripts' ), 50 );
 	}
 
 	/**
