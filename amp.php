@@ -42,8 +42,9 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
-	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
+	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK | EP_PAGES );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
+	add_post_type_support( 'page', AMP_QUERY_VAR );
 
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
