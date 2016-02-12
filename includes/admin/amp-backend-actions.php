@@ -10,7 +10,7 @@ require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
  * @param WP_Customize_Manager $wp_customize Customizer instance.
  */
 function init_amp_template_customizer( $wp_customize ) {
-	new AMP_Template_Customizer( $wp_customize );
+	AMP_Template_Customizer::init( $wp_customize );
 }
 add_action( 'customize_register', 'init_amp_template_customizer', 50 );
 
