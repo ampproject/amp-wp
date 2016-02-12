@@ -135,11 +135,11 @@ nav.title-bar {
 
 nav.title-bar div {
 	line-height: 54px;
-	color: #fff;
+	color: <?php echo get_theme_mod( 'amp_navbar_color' ); ?>;
 }
 
 nav.title-bar a {
-	color: #fff;
+	color: <?php echo get_theme_mod( 'amp_navbar_color' ); ?>;
 	text-decoration: none;
 }
 
