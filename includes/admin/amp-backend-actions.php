@@ -15,30 +15,30 @@ function init_amp_template_customizer( $wp_customize ) {
 add_action( 'customize_register', 'init_amp_template_customizer', 50 );
 
 /**
- * Outputs a temporary link for accessing the Customizer URL (for testing purposes).
- *
- * @return string HTML markup for a Customizer link.
+ * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
-function amp_template_customizer_link() {
-	$latest_post = get_posts( array(
+function amp_customizer_editor_link() {
+	$post_id = get_posts( array(
 		'post_status'     => 'publish',
 		'post_type'       => 'post',
+		'orderby'         => 'rand',
 		'posts_per_page'  => 1,
 		'fields'          => 'ids',
 		'supress_filters' => false
 	) );
 
-	// Bail if there's nothing to link to.
-	if ( ! $latest_post ) {
-		return '';
-	} else {
-		$url = add_query_arg( array(
-			'autofocus[panel]' => 'amp_template_editor',
-			'url'              => rawurlencode( amp_get_permalink( $latest_post ) ),
-			'return'           => rawurlencode( admin_url() )
-		), wp_customize_url() );
+	// Teensy little hack on menu_slug, but it works. No redirect!
+	$menu_slug = add_query_arg( array(
+		'autofocus[panel]' => 'amp_template_editor',
+		'url'              => rawurlencode( amp_get_permalink( $post_id ) ),
+		'return'           => rawurlencode( admin_url() )
+	), 'customize.php' );
 
-		printf( '<a href="%1$s">%2$s</a>', esc_url( $url ), __( 'Edit AMP Templates', 'amp' ) );
-	}
+	$page = add_theme_page(
+		__( 'AMP Templates', 'amp' ),
+		__( 'AMP Templates', 'amp' ),
+		'edit_theme_options',
+		$menu_slug
+	);
 }
-add_action( 'activity_box_end', 'amp_template_customizer_link' );
+add_action( 'admin_menu', 'amp_customizer_editor_link' );
