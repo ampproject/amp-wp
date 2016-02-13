@@ -57,7 +57,6 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_sections() {
-
 		// Navigation Bar.
 		$this->wp_customize->add_section( 'amp_navbar_section', array(
 			'title' => __( 'AMP Navigation Bar', 'amp' ),
@@ -109,6 +108,20 @@ class AMP_Template_Customizer {
 				'priority' => 20
 			) )
 		);
+
+		$this->wp_customize->add_control( new WP_Customize_Site_Icon_Control( $this->wp_customize, 'site_icon', array(
+			'label'       => __( 'Site Icon' ),
+			'description' => sprintf(
+			/* translators: %s: site icon size in pixels */
+				__( 'The Site Icon is used as a browser and app icon for your site. Icons must be square, and at least %s pixels wide and tall.' ),
+				'<strong>512</strong>'
+			),
+			'section'     => 'amp_navbar_section',
+			'priority'    => 30,
+			'height'      => 512,
+			'width'       => 512,
+		) ) );
+
 	}
 
 	/**
@@ -140,7 +153,7 @@ class AMP_Template_Customizer {
 			wp_enqueue_script(
 				'amp-customizer',
 				AMP__URL__ . '/assets/js/amp-customizer.js',
-				array( 'customize-preview' ),
+				array( 'customize-preview', 'wp-util' ),
 				$version = false,
 				$footer = true
 			);

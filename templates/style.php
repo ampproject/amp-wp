@@ -200,7 +200,6 @@ nav.amp-wp-title-bar .amp-wp-site-icon {
 	border-radius: 50%;
 }
 
-
 /* Captions */
 .wp-caption-text {
 	padding: 8px 16px;
