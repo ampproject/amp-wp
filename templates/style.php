@@ -150,6 +150,10 @@ nav.title-bar .site-icon {
 	border-radius: 50%;
 }
 
+nav.title-bar .site-icon.hidden {
+	display: none;
+}
+
 nav.title-bar svg {
 	/** svg is 24px **/
 	fill: #fff;
