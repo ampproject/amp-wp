@@ -34,7 +34,8 @@ You can find details about customization options at https://github.com/Automatti
 
 = 0.3 =
 
-* Breaking change: style.css no longer contains the `<style> tag. If you have a custom stylesheet, you need to update it to remove the tag.
+* Breaking change: `style.css` no longer contains the `<style> tag. If you have a custom stylesheet, you need to update it to remove the tag.
+* Breaking change: `single.php` no longer includes the AMP boilerplate styles. They are instead added via the `amp_post_template_head` hook. If you have a custom template, please remove the boilerplate styles.
 
 = 0.2 (Jan 28, 2016) =
 

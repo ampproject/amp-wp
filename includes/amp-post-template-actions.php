@@ -25,6 +25,13 @@ function amp_post_template_add_scripts( $amp_template ) {
 	<?php
 }
 
+add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
+function amp_post_template_add_boilerplate_css( $amp_template ) {
+	?>
+	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+	<?php
+}
+
 add_action( 'amp_post_template_head', 'amp_post_template_add_schemaorg_metadata' );
 function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 	$metadata = $amp_template->get( 'metadata' );
