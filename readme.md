@@ -2,17 +2,32 @@
 
 ## Overview
 
-This plugin adds support for the Accelerated Mobile Pages (AMP) Project, which is an an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
+This plugin adds support for the [Accelerated Mobile Pages](https://ampproject.org) (AMP) Project, which is an an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
 
-With the plugin active, all content on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your permalinks. (If you do not have pretty permalinks enabled, you can do the same thing by appending `?amp=1`.)
+With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your permalinks. (If you do not have pretty permalinks enabled, you can do the same thing by appending `?amp=1`.)
 
-Developers: please note that this plugin is still in early stages and the underlying APIs (like filters, classes, etc.) may change.
+Note: this plugin only creates AMP content but does not automatically display it to your users when they visit from a mobile device. That is handled by AMP consumers such as Google Search. For more details, see the [AMP Project FAQ](https://www.ampproject.org/docs/support/faqs.html).
 
 ## Customization / Templating
 
 The plugin ships with a default template that looks nice and clean and we tried to find a good balance between ease and extensibility when it comes to customization.
 
 You can tweak small pieces of the template or the entire thing depending on your needs.
+
+### Where Do I Put My Code?
+
+The code snippets below and any other code-level customizations should happen in one of the following locations.
+
+If you're using an off-the-shelf theme (like from the WordPress.org Theme Directory):
+
+- A [child theme](https://developer.wordpress.org/themes/advanced-topics/child-themes/).
+- A custom plugin that you activate via the Dashboard.
+- A [mu-plugin](https://codex.wordpress.org/Must_Use_Plugins).
+
+If you're using a custom theme:
+
+- `functions.php` (or a file `require`-ed by `functions.php`).
+- Any of the options above.
 
 ### Theme Mods
 
@@ -41,6 +56,25 @@ This needs to be implemented.
 ### Template Tweaks
 
 You can tweak various parts of the template via code.
+
+#### Featured Image
+
+The default template does not display the featured image currently. There are many ways to add it, such as the snippet below:
+
+```php
+add_action( 'pre_amp_render_post', 'xyz_amp_add_custom_actions' );
+function xyz_add_custom_actions() {
+	add_filter( 'the_content', 'xyz_amp_add_featured_image' );
+}
+
+function xyz_amp_add_featured_image( $content ) {
+	if ( has_post_thumbnail() ) {
+		$image = sprintf( '<p class="xyz-featured-image">%s</p>', get_the_post_thumbnail() );
+		$content = $image . $content;
+	}
+	return $content;
+}
+```
 
 #### Content Width
 
@@ -177,7 +211,7 @@ Then, in `templates/xyz-meta-comment-count.php`:
 
 ##### Rule Additions
 
-If you want to append to the existing CSS rules (e.g. styles for a custom embed handler), you can use the `amp_post_template_css` action: 
+If you want to append to the existing CSS rules (e.g. styles for a custom embed handler), you can use the `amp_post_template_css` action:
 
 ```php
 add_action( 'amp_post_template_css', 'xyz_amp_my_additional_css_styles' );
@@ -259,7 +293,7 @@ do_action( 'amp_post_template_head', $this );
 do_action( 'amp_post_template_footer', $this );
 ```
 
-* Within your `amp-custom` `style` tags, you must trigger the `amp_post_template_css` action: 
+* Within your `amp-custom` `style` tags, you must trigger the `amp_post_template_css` action:
 
 ```php
 do_action( 'amp_post_template_css', $this );
