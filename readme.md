@@ -57,6 +57,25 @@ This needs to be implemented.
 
 You can tweak various parts of the template via code.
 
+#### Featured Image
+
+The default template does not display the featured image currently. There are many ways to add it, such as the snippet below:
+
+```php
+add_action( 'pre_amp_render_post', 'xyz_amp_add_custom_actions' );
+function xyz_add_custom_actions() {
+	add_filter( 'the_content', 'xyz_amp_add_featured_image' );
+}
+
+function xyz_amp_add_featured_image( $content ) {
+	if ( has_post_thumbnail() ) {
+		$image = sprintf( '<p class="xyz-featured-image">%s</p>', get_the_post_thumbnail() );
+		$content = $image . $content;
+	}
+	return $content;
+}
+```
+
 #### Content Width
 
 By default, your theme's `$content_width` value will be used to determine the size of the `amp` content well. You can change this:
