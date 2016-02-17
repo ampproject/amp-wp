@@ -19,12 +19,12 @@ add_action( 'customize_register', 'init_amp_template_customizer', 500 );
  */
 function amp_customizer_editor_link() {
 	$post_id = get_posts( array(
-		'post_status'     => 'publish',
-		'post_type'       => 'post',
-		'orderby'         => 'rand',
-		'posts_per_page'  => 1,
-		'fields'          => 'ids',
-		'supress_filters' => false
+		'post_status'      => 'publish',
+		'post_type'        => 'post',
+		'orderby'          => 'rand',
+		'posts_per_page'   => 1,
+		'fields'           => 'ids',
+		'suppress_filters' => false
 	) );
 
 	// Teensy little hack on menu_slug, but it works. No redirect!
