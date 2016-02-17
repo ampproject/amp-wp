@@ -31,7 +31,8 @@ function amp_customizer_editor_link() {
 	$menu_slug = add_query_arg( array(
 		'autofocus[panel]' => 'amp_template_editor',
 		'url'              => rawurlencode( amp_get_permalink( $post_id ) ),
-		'return'           => rawurlencode( admin_url() )
+		'return'           => rawurlencode( admin_url() ),
+		'amp'              => true
 	), 'customize.php' );
 
 	$page = add_theme_page(
