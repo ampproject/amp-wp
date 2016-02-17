@@ -28,9 +28,8 @@ class AMP_Template_Customizer {
 		$self->wp_customize = $wp_customize;
 
 		// Determine whether the AMP editor is called for, and if not, restore core components.
-		if ( $self->_maybe_restore_core_components() ) {
-			$self->set_up_customizer();
-		}
+		$self->_maybe_restore_core_components();
+		$self->set_up_customizer();
 	}
 
 	/**
@@ -123,8 +122,9 @@ class AMP_Template_Customizer {
 	public function register_panel() {
 		// AMP Templates.
 		$this->wp_customize->add_panel( 'amp_template_editor', array(
-			'type'   => 'amp',
-			'title' => __( 'AMP Templates', 'amp' )
+			'type'            => 'amp',
+			'title'           => __( 'AMP Templates', 'amp' ),
+			'active_callback' => 'is_amp_endpoint'
 		) );
 	}
 
