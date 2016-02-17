@@ -24,18 +24,92 @@ class AMP_Template_Customizer {
 
 		$self->wp_customize = $wp_customize;
 
-		// Set up panel, sections, settings, controls.
-		$self->register_panel();
-		$self->register_sections();
-		$self->register_settings();
-		$self->register_controls();
+		// Determine whether the AMP editor is called for, and if not, restore core components.
+		if ( $self->_maybe_restore_core_components() ) {
+			$self->set_up_customizer();
+		}
+	}
+
+	/**
+	 * Determines whether the AMP editor is loaded, and if not, restore core panels.
+	 *
+	 * The AMP editor is loaded based on the presence of an 'amp' URL variable.
+	 *
+	 * The 'Menus' and 'Widgets' panels are filtered out via the 'customize_loaded_components'
+	 * hook when the plugin is first loaded, see amp_initially_drop_core_panels(). This approach
+	 * is necessary because the filter has to be added in a callback hooked on 'plugins_loaded'
+	 * to fire in time.
+	 *
+	 * @access private
+	 *
+	 * @return bool False if the AMP editor isn't loaded, true otherwise.
+	 */
+	private function _maybe_restore_core_components() {
+
+		$amp_editor = ! empty( $_GET['amp'] );
+
+		// If not in the AMP Templates panel, bail and reregister the nav_menus and widgets panels.
+		if ( ! $amp_editor ) {
+			require_once( ABSPATH . WPINC . '/class-wp-customize-widgets.php' );
+			$this->wp_customize->widgets = new WP_Customize_Widgets( $this->wp_customize );
+
+			require_once( ABSPATH . WPINC . '/class-wp-customize-nav-menus.php' );
+			$this->wp_customize->nav_menus = new WP_Customize_Nav_Menus( $this->wp_customize );
+
+			// Restore setup for nav menus (normally hooked at priority 11).
+			add_action( 'customize_register', array( $this->wp_customize->nav_menus, 'customize_register' ), 501 );
+
+			return false;
+		}
+
+		// The AMP editor is loaded so remove the other sections and panels.
+		$this->_remove_panels_and_sections();
+
+		return true;
+	}
+
+	/**
+	 * Removes all non-AMP sections and panels.
+	 *
+	 * Provides a clean, standalone instance-like experience by removing all non-AMP
+	 * registered panels and sections.
+	 *
+	 * @access private
+	 */
+	private function _remove_panels_and_sections() {
+		$panels   = $this->wp_customize->panels();
+		$sections = $this->wp_customize->sections();
+
+		// Remove all panels except "AMP Templates".
+		foreach ( $panels as $panel_id => $object ) {
+			if ( 'amp_template_editor' !== $panel_id ) {
+				$this->wp_customize->remove_panel( $panel_id );
+			}
+		}
+
+		// Remove all sections except "AMP Navigation Bar".
+		foreach ( $sections as $section_id => $object ) {
+			if ( 'amp_navbar_section' !== $section_id ) {
+				$this->wp_customize->remove_section( $section_id );
+			}
+		}
+	}
+
+	/**
+	 * Sets up the AMP Templates panel and associated Customizer elements and script enqueues.
+	 *
+	 * @access public
+	 */
+	public function set_up_customizer() {
+		$this->register_panel();
+		$this->register_sections();
+		$this->register_settings();
+		$this->register_controls();
 
 		// Enqueue scripts.
-		if ( is_customize_preview() ) {
-			add_action( 'customize_preview_init',   array( $self, 'enqueue_scripts' ) );
-			add_action( 'amp_post_template_head',   array( $self, 'enqueue_jquery'  ) );
-			add_action( 'amp_post_template_footer', array( $self, 'fire_wp_footer'  ) );
-		}
+		add_action( 'customize_preview_init',   array( $this, 'enqueue_scripts' ) );
+		add_action( 'amp_post_template_head',   array( $this, 'enqueue_jquery'  ) );
+		add_action( 'amp_post_template_footer', array( $this, 'fire_wp_footer'  ) );
 	}
 
 	/**
@@ -152,11 +226,12 @@ class AMP_Template_Customizer {
 		if ( is_customize_preview() ) {
 			wp_enqueue_script(
 				'amp-customizer',
-				AMP__URL__ . '/assets/js/amp-customizer.js',
+				AMP__URL__ . '/assets/js/amp-customizer-preview.js',
 				array( 'customize-preview', 'wp-util' ),
 				$version = false,
 				$footer = true
 			);
 		}
 	}
+
 }
