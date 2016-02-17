@@ -149,7 +149,7 @@ class AMP_Template_Customizer {
 	public function register_settings() {
 		// Navbar text color setting.
 		$this->wp_customize->add_setting( 'amp_navbar_color', array(
-			'default'           => '#fff',
+			'default'           => '#ffffff',
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
