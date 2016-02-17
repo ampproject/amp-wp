@@ -46,6 +46,11 @@ class FastImage
 
 	public function getSize()
 	{
+		if (!$this->handle)
+		{
+			return false;
+		}
+
 		$this->strpos = 0;
 		if ($this->getType())
 		{
@@ -58,6 +63,11 @@ class FastImage
 
 	public function getType()
 	{
+		if (!$this->handle)
+		{
+			return false;
+		}
+
 		$this->strpos = 0;
 		
 		if (!$this->type)
