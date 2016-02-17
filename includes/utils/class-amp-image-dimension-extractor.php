@@ -44,31 +44,16 @@ class AMP_Image_Dimension_Extractor {
 			return $dimensions;
 		}
 
-		return AMP_Image_Dimension_Extractor_Via_Download::extract( $url );
-	}
-}
-
-class AMP_Image_Dimension_Extractor_Via_Download {
-	const TRANSIENT_FAILED = 'fail';
-	private static function get_transient() {
-
-	}
-
-	public static function extract( $url ) {
-		// Note to other developers: please don't use this class directly as it may not stick around forever...
-		if ( ! class_exists( 'FastImage' ) ) {
-			require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
-		}
-
 		$url_hash = md5( $url );
 		$transient_name = sprintf( 'amp_img_%s', $url_hash );
 		$transient_expiry = 30 * DAY_IN_SECONDS;
+		$transient_fail = 'fail';
 
 		$dimensions = get_transient( $transient_name );
 
 		if ( is_array( $dimensions ) ) {
 			return $dimensions;
-		} elseif ( self::TRANSIENT_FAILED === $dimensions ) {
+		} elseif ( $transient_fail === $dimensions ) {
 			return false;
 		}
 
@@ -79,12 +64,17 @@ class AMP_Image_Dimension_Extractor_Via_Download {
 		}
 		set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
 
+		// Note to other developers: please don't use this class directly as it may not stick around forever...
+		if ( ! class_exists( 'FastImage' ) ) {
+			require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
+		}
+
 		// TODO: look into using curl+stream (https://github.com/willwashburn/FasterImage)
 		$image = new FastImage( $url );
 		$dimensions = $image->getSize();
 
 		if ( ! is_array( $dimensions ) ) {
-			set_transient( $transient_name, self::TRANSIENT_FAILED, $transient_expiry );
+			set_transient( $transient_name, $transient_fail, $transient_expiry );
 			delete_transient( $transient_lock_name );
 			return false;
 		}
