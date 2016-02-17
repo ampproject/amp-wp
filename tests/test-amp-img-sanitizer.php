@@ -1,6 +1,15 @@
 <?php
 
 class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
+	public static function force_remove_extraction_callbacks() {
+		remove_all_filters( 'amp_extract_image_dimensions' );
+	}
+
+	public function setUp() {
+		parent::setUp();
+		add_action( 'amp_extract_image_dimensions_callbacks_registered', array( __CLASS__, 'force_remove_extraction_callbacks' ) );
+	}
+
 	public function get_data() {
 		return array(
 			'no_images' => array(

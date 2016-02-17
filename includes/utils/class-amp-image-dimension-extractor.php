@@ -17,7 +17,7 @@ class AMP_Image_Dimension_Extractor {
 		add_filter( 'amp_extract_image_dimensions', array( __CLASS__, 'extract_from_attachment_metadata' ), 10, 2 );
 		add_filter( 'amp_extract_image_dimensions', array( __CLASS__, 'extract_by_downloading_image' ), 999, 2 ); // Run really late since this is our last resort
 
-		do_action( 'amp_extract_image_dimensions_callbacks_registered', $this );
+		do_action( 'amp_extract_image_dimensions_callbacks_registered' );
 	}
 
 	public static function extract_from_attachment_metadata( $dimensions, $url ) {
