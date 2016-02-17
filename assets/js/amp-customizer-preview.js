@@ -1,7 +1,16 @@
-( function( $ ) {
+( function( wp, $ ) {
 	'use strict';
 
+	if ( ! wp || ! wp.customize ) {
+		return;
+	}
+
 	var api = wp.customize;
+
+	//api.bind( 'ready', function() {
+	//	wp.customize.panel.expanded = false;
+	//	console.log( this.parentWindow );
+	//} );
 
 	// Nav bar text color.
 	api( 'amp_navbar_color', function( value ) {
@@ -39,4 +48,4 @@
 			}
 		} );
 	} );
-} )( jQuery );
+} )( window.wp, jQuery );
