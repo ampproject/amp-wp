@@ -10,7 +10,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Customizer instance.
 	 *
-	 * @access public
+	 * @access private
 	 * @var WP_Customize_Manager $wp_customize
 	 */
 	private $wp_customize;
@@ -49,7 +49,7 @@ class AMP_Template_Customizer {
 	 */
 	private function _maybe_restore_core_components() {
 
-		$amp_editor = ! empty( $_GET['amp'] );
+		$amp_editor = ! empty( $_REQUEST['amp'] );
 
 		// If not in the AMP Templates panel, bail and reregister the nav_menus and widgets panels.
 		if ( ! $amp_editor ) {
