@@ -1,6 +1,9 @@
 <?php
 /**
  * AMP class that implements a template style editor in the Customizer.
+ *
+ * A direct, formed link to the AMP editor in the Customizer is added via
+ * {@see amp_customizer_editor_link()} as a submenu to the Appearance menu.
  */
 class AMP_Template_Customizer {
 
