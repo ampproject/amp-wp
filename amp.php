@@ -116,3 +116,18 @@ function amp_render() {
 	$template->load();
 	exit;
 }
+
+/**
+ * Initially drops core panels because of the need to hook to 'plugins_loaded' early.
+ *
+ * Core panels will be re-added back to the Customizer later if the AMP editor isn't requested.
+ *
+ * @internal Must be hooked before priority 10.
+ *
+ * @access private.
+ */
+function _amp_initially_drop_core_panels() {
+	// Drop core Customizer panels.
+	add_filter( 'customize_loaded_components', '__return_empty_array' );
+}
+add_action( 'plugins_loaded', '_amp_initially_drop_core_panels', 9 );
