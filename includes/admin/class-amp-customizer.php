@@ -10,10 +10,18 @@ class AMP_Template_Customizer {
 	/**
 	 * Customizer instance.
 	 *
-	 * @access private
+	 * @access protected
 	 * @var WP_Customize_Manager $wp_customize
 	 */
-	private $wp_customize;
+	protected $wp_customize;
+
+	/**
+	 * AMP template editor panel ID.
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $panel_id = 'amp_template_editor';
 
 	/**
 	 * Initialize the template Customizer feature class.
@@ -116,7 +124,7 @@ class AMP_Template_Customizer {
 	 */
 	public function register_panel() {
 		// AMP Templates.
-		$this->wp_customize->add_panel( 'amp_template_editor', array(
+		$this->wp_customize->add_panel( $this->panel_id, array(
 			'type'            => 'amp',
 			'title'           => __( 'AMP Templates', 'amp' ),
 			'active_callback' => 'is_amp_endpoint'
@@ -132,7 +140,7 @@ class AMP_Template_Customizer {
 		// Navigation Bar.
 		$this->wp_customize->add_section( 'amp_navbar_section', array(
 			'title' => __( 'AMP Navigation Bar', 'amp' ),
-			'panel' => 'amp_template_editor',
+			'panel' => $this->panel_id,
 		) );
 	}
 
