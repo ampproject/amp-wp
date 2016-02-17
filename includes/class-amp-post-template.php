@@ -62,7 +62,13 @@ class AMP_Post_Template {
 	}
 
 	public function load() {
-		$this->load_parts( array( 'single' ) );
+		if( is_single() ) {
+			$this->load_parts( array( 'single' ) );
+		}
+
+		if( is_page() ) {
+			$this->load_parts( array( 'page' ) );
+		}
 	}
 
 	public function load_parts( $templates ) {
