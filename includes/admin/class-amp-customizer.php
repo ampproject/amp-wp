@@ -13,7 +13,7 @@ class AMP_Template_Customizer {
 	 * @access public
 	 * @var WP_Customize_Manager $wp_customize
 	 */
-	public $wp_customize;
+	private $wp_customize;
 
 	/**
 	 * Initialize the template Customizer feature class.
