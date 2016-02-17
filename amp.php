@@ -13,7 +13,6 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__URL__', plugins_url( '', __FILE__ ) );
 
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 
