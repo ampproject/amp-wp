@@ -32,6 +32,7 @@
 					id: to
 				} ).done( function( response ) {
 					ampSiteIcon.removeClass( 'hidden' );
+					ampSiteIcon.removeClass( '-amp-notbuilt' );
 
 					ampSiteIcon.attr( 'src', response.url );
 					siteIcon.attr( 'src', response.url );
