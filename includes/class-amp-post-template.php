@@ -143,7 +143,7 @@ class AMP_Post_Template {
 		 *
 		 * @since 0.2
 		 */
-		$metadata = apply_filters( 'amp_metadata', array_merge( $metadata, $article_meta ) );
+		$metadata = apply_filters( 'amp_metadata', array_merge( $metadata, $article_meta ), $this );
 
 		$site_icon_url = $this->get( 'site_icon_url' );
 		if ( $site_icon_url ) {
