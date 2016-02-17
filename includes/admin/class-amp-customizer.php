@@ -43,11 +43,8 @@ class AMP_Template_Customizer {
 	 * to fire in time.
 	 *
 	 * @access private
-	 *
-	 * @return bool False if the AMP editor isn't loaded, true otherwise.
 	 */
 	private function _maybe_restore_core_components() {
-
 		$amp_editor = ! empty( $_REQUEST['amp'] );
 
 		// If not in the AMP Templates panel, bail and reregister the nav_menus and widgets panels.
@@ -61,13 +58,11 @@ class AMP_Template_Customizer {
 			// Restore setup for nav menus (normally hooked at priority 11).
 			add_action( 'customize_register', array( $this->wp_customize->nav_menus, 'customize_register' ), 501 );
 
-			return false;
+			return;
 		}
 
 		// The AMP editor is loaded so remove the other sections and panels.
 		$this->_remove_panels_and_sections();
-
-		return true;
 	}
 
 	/**
