@@ -189,6 +189,7 @@ class AMP_Template_Customizer {
 			) )
 		);
 
+		// Navbar site icon.
 		$this->wp_customize->add_control( new WP_Customize_Site_Icon_Control( $this->wp_customize, 'site_icon_amp', array(
 			'label'       => __( 'Site Icon' ),
 			'settings'    => 'site_icon',
@@ -225,7 +226,7 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Enqueues scripts used in the Customizer.
+	 * Enqueues scripts used in the Customizer preview.
 	 *
 	 * @access public
 	 */
