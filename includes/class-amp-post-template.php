@@ -138,6 +138,11 @@ class AMP_Post_Template {
 			);
 		}
 
+		/**
+		 * Allows plugins to add or modify schema.org metadata
+		 *
+		 * @since 0.2
+		 */
 		$metadata = apply_filters( 'amp_metadata', array_merge( $metadata, $article_meta ) );
 
 		$site_icon_url = $this->get( 'site_icon_url' );
