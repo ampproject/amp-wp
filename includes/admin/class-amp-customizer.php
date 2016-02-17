@@ -229,7 +229,7 @@ class AMP_Template_Customizer {
 		if ( is_customize_preview() ) {
 			wp_enqueue_script(
 				'amp-customizer',
-				AMP__URL__ . '/assets/js/amp-customizer-preview.js',
+				amp_get_asset_url( 'js/amp-customizer-preview.js' ),
 				array( 'customize-preview', 'wp-util' ),
 				$version = false,
 				$footer = true
