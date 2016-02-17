@@ -17,7 +17,7 @@ class FastImage
 	private $str;
 	private $type;
 	private $handle;
-	
+
 	public function __construct($uri = null)
 	{
 		if ($uri) $this->load($uri);
@@ -27,7 +27,7 @@ class FastImage
 	public function load($uri)
 	{
 		if ($this->handle) $this->close();
-		
+
 		$this->handle = fopen($uri, 'r');
 	}
 
@@ -56,7 +56,7 @@ class FastImage
 		{
 			return array_values($this->parseSize());
 		}
-		
+
 		return false;
 	}
 
@@ -69,7 +69,7 @@ class FastImage
 		}
 
 		$this->strpos = 0;
-		
+
 		if (!$this->type)
 		{
 			switch ($this->getChars(2))
@@ -92,9 +92,9 @@ class FastImage
 
 
 	private function parseSize()
-	{	
+	{
 		$this->strpos = 0;
-		
+
 		switch ($this->type)
 		{
 			case 'png':
@@ -104,9 +104,9 @@ class FastImage
 			case 'bmp':
 				return $this->parseSizeForBMP();
 			case 'jpeg':
-				return $this->parseSizeForJPEG();	    
+				return $this->parseSizeForJPEG();
 		}
-		
+
 		return null;
 	}
 
@@ -132,7 +132,7 @@ class FastImage
 		$chars = $this->getChars(29);
 	 	$chars = substr($chars, 14, 14);
 		$type = unpack('C', $chars);
-		
+
 		return (reset($type) == 40) ? unpack('L*', substr($chars, 4)) : unpack('L*', substr($chars, 4, 8));
 	}
 
@@ -150,14 +150,14 @@ class FastImage
 					$this->getChars(2);
 					$state = 'started';
 					break;
-					
+
 				case 'started':
 					$b = $this->getByte();
 					if ($b === false) return false;
-					
+
 					$state = $b == 0xFF ? 'sof' : 'started';
 					break;
-					
+
 				case 'sof':
 					$b = $this->getByte();
 					if (in_array($b, range(0xe0, 0xef)))
@@ -177,20 +177,20 @@ class FastImage
 						$state = 'skipframe';
 					}
 					break;
-					
+
 				case 'skipframe':
 					$skip = $this->readInt($this->getChars(2)) - 2;
 					$state = 'doskip';
 					break;
-					
+
 				case 'doskip':
 					$this->getChars($skip);
 					$state = 'started';
 					break;
-					
+
 				case 'readsize':
 					$c = $this->getChars(7);
-			        
+
 					return array($this->readInt(substr($c, 5, 2)), $this->readInt(substr($c, 3, 2)));
 			}
 		}
@@ -200,8 +200,8 @@ class FastImage
 	private function getChars($n)
 	{
 		$response = null;
-		
-		// do we need more data?		
+
+		// do we need more data?
 		if ($this->strpos + $n -1 >= strlen($this->str))
 		{
 			$end = ($this->strpos + $n);
@@ -219,12 +219,12 @@ class FastImage
 				{
 					return false;
 				}
-			}	
+			}
 		}
-		
+
 		$result = substr($this->str, $this->strpos, $n);
 		$this->strpos += $n;
-		
+
 		return $result;
 	}
 
@@ -233,7 +233,7 @@ class FastImage
 	{
 		$c = $this->getChars(1);
 		$b = unpack("C", $c);
-		
+
 		return reset($b);
 	}
 
@@ -241,7 +241,7 @@ class FastImage
 	private function readInt($str)
 	{
 		$size = unpack("C*", $str);
-		
+
 		return ($size[1] << 8) + $size[2];
 	}
 
