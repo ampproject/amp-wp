@@ -15,6 +15,9 @@ class AMP_Image_Dimension_Extractor {
 		self::$callbacks_registered = true;
 
 		add_filter( 'amp_extract_image_dimensions', array( __CLASS__, 'extract_from_attachment_metadata' ), 10, 2 );
+		add_filter( 'amp_extract_image_dimensions', array( __CLASS__, 'extract_by_downloading_image' ), 999, 2 ); // Run really late since this is our last resort
+
+		do_action( 'amp_extract_image_dimensions_callbacks_registered', $this );
 	}
 
 	public static function extract_from_attachment_metadata( $dimensions, $url ) {
@@ -34,5 +37,60 @@ class AMP_Image_Dimension_Extractor {
 		}
 
 		return array( $metadata['width'], $metadata['height'] );
+	}
+
+	public static function extract_by_downloading_image( $dimensions, $url ) {
+		if ( is_array( $dimensions ) ) {
+			return $dimensions;
+		}
+
+		return AMP_Image_Dimension_Extractor_Via_Download::extract( $url );
+	}
+}
+
+class AMP_Image_Dimension_Extractor_Via_Download {
+	const TRANSIENT_FAILED = 'fail';
+	private static function get_transient() {
+
+	}
+
+	public static function extract( $url ) {
+		// Note to other developers: please don't use this class directly as it may not stick around forever...
+		if ( ! class_exists( 'FastImage' ) ) {
+			require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
+		}
+
+		$url_hash = md5( $url );
+		$transient_name = sprintf( 'amp_img_%s', $url_hash );
+		$transient_expiry = 30 * DAY_IN_SECONDS;
+
+		$dimensions = get_transient( $transient_name );
+
+		if ( is_array( $dimensions ) ) {
+			return $dimensions;
+		} elseif ( self::TRANSIENT_FAILED === $dimensions ) {
+			return false;
+		}
+
+		// Very simple lock to prevent stampedes
+		$transient_lock_name = sprintf( 'amp_lock_%s', $url_hash );
+		if ( false !== get_transient( $transient_lock_name ) ) {
+			return false;
+		}
+		set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
+
+		// TODO: look into using curl+stream (https://github.com/willwashburn/FasterImage)
+		$image = new FastImage( $url );
+		$dimensions = $image->getSize();
+
+		if ( ! is_array( $dimensions ) ) {
+			set_transient( $transient_name, self::TRANSIENT_FAILED, $transient_expiry );
+			delete_transient( $transient_lock_name );
+			return false;
+		}
+
+		set_transient( $transient_name, $dimensions, $transient_expiry );
+		delete_transient( $transient_lock_name );
+		return $dimensions;
 	}
 }
