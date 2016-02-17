@@ -12,7 +12,7 @@ require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 function init_amp_template_customizer( $wp_customize ) {
 	AMP_Template_Customizer::init( $wp_customize );
 }
-add_action( 'customize_register', 'init_amp_template_customizer', 50 );
+add_action( 'customize_register', 'init_amp_template_customizer', 500 );
 
 /**
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
