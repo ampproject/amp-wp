@@ -115,20 +115,31 @@ class AMP_Post_Template {
 
 		$metadata = array(
 			'@context' => 'http://schema.org',
-			'@type' => 'BlogPosting',
 			'mainEntityOfPage' => $this->get( 'canonical_url' ),
 			'publisher' => array(
 				'@type' => 'Organization',
 				'name' => $this->get( 'blog_name' ),
 			),
 			'headline' => $post_title,
-			'datePublished' => date( 'c', $post_publish_timestamp ),
-			'dateModified' => date( 'c', $post_modified_timestamp ),
-			'author' => array(
-				'@type' => 'Person',
-				'name' => $post_author->display_name,
-			),
 		);
+
+		if( true === is_post_type_hierarchical( get_post_type( $this->ID ) ) ) {
+			$article_meta = array(
+				'@type'     => 'WebPage'
+			);
+		} else {
+			$article_meta = array(
+				'@type'     => 'BlogPosting',
+				'datePublished' => date( 'c', $post_publish_timestamp ),
+				'dateModified' => date( 'c', $post_modified_timestamp ),
+				'author' => array(
+					'@type' => 'Person',
+					'name' => $post_author->display_name,
+				),
+			);
+		}
+
+		$metadata = apply_filters( 'amp_metadata', array_merge( $metadata, $article_meta ) );
 
 		$site_icon_url = $this->get( 'site_icon_url' );
 		if ( $site_icon_url ) {
