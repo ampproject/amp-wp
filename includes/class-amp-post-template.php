@@ -62,12 +62,11 @@ class AMP_Post_Template {
 	}
 
 	public function load() {
-		if( is_single() ) {
-			$this->load_parts( array( 'single' ) );
-		}
 
-		if( is_page() ) {
+		if( true === is_post_type_hierarchical( get_post_type( $this->ID ) ) ) {
 			$this->load_parts( array( 'page' ) );
+		} else {
+			$this->load_parts( array( 'single' ) );
 		}
 	}
 
