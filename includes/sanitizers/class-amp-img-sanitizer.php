@@ -73,6 +73,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'class':
 				case 'srcset':
 				case 'sizes':
+				case 'on':
 					$out[ $name ] = $value;
 					break;
 				default;
