@@ -65,12 +65,13 @@ The default template does not display the featured image currently. There are ma
 
 ```php
 add_action( 'pre_amp_render_post', 'xyz_amp_add_custom_actions' );
-function xyz_add_custom_actions() {
+function xyz_amp_add_custom_actions() {
 	add_filter( 'the_content', 'xyz_amp_add_featured_image' );
 }
 
 function xyz_amp_add_featured_image( $content ) {
 	if ( has_post_thumbnail() ) {
+		// Just add the raw <img /> tag; our sanitizer will take care of it later.
 		$image = sprintf( '<p class="xyz-featured-image">%s</p>', get_the_post_thumbnail() );
 		$content = $image . $content;
 	}
