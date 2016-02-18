@@ -2,8 +2,6 @@
 
 // WPCOM-specific things
 
-define( 'AMP_DEV_MODE', defined( 'WPCOM_SANDBOXED' ) && WPCOM_SANDBOXED );
-
 // Add stats pixel
 add_filter( 'amp_post_template_footer', 'jetpack_amp_add_stats_pixel' );
 
