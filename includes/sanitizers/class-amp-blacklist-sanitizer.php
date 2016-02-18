@@ -38,7 +38,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// on* attributes (like onclick) are a special case
-				if ( 0 === stripos( $attribute_name, 'on' ) ) {
+				if ( 0 === stripos( $attribute_name, 'on' ) && $attribute_name != 'on' ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
 				} elseif ( 'href' === $attribute_name ) {
