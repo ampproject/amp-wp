@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic
 Tags: amp, mobile
 Requires at least: 4.4
 Tested up to: 4.4
-Stable tag: 0.2
+Stable tag: 0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,13 +34,14 @@ You can find details about customization options at https://github.com/Automatti
 
 == Changelog ==
 
-= 0.3 =
+= 0.3 (Feb 18, 2016) =
 
 * Fetch dimensions for hotlinked images.
 * Add amp-facebook support.
 * Add some new actions and filters (e.g. `amp_init`).
 * Fix validation errors for [gallery] shortcodes.
 * Fix issues with path validation on Windows.
+* Fix issues with really squeezed layout.
 * Breaking change: `style.css` no longer contains the `<style> tag. If you have a custom stylesheet, you need to update it to remove the tag.
 * Breaking change: `single.php` no longer includes the AMP boilerplate styles. They are instead added via the `amp_post_template_head` hook. If you have a custom template, please remove the boilerplate styles.
 
