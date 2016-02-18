@@ -16,8 +16,11 @@ amp-img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
 
 /* Generic WP.com reader style */
 .content, .title-bar div {
-	max-width: <?php echo sprintf( '%dpx', absint( $this->get( 'content_max_width' ) ) ); ?>;
+	<?php $content_max_width = absint( $this->get( 'content_max_width' ) ); ?>
+	<?php if ( $content_max_width > 0 ) : ?>
+	max-width: <?php echo sprintf( '%dpx', $content_max_width ); ?>;
 	margin: 0 auto;
+	<?php endif; ?>
 }
 
 body {
