@@ -9,7 +9,12 @@ add_action( 'pre_amp_render_post', 'amp_jetpack_mods' );
  *
  **/
 function amp_jetpack_mods() {
+	amp_jetpack_disable_sharing();
 	amp_jetpack_disable_related_posts();
+}
+
+function amp_jetpack_disable_sharing() {
+	add_filter( 'sharing_show', '__return_false', 100 );
 }
 
 /**

@@ -12,9 +12,6 @@
  */
 
 define( 'AMP_QUERY_VAR', 'amp' );
-if ( ! defined( 'AMP_DEV_MODE' ) ) {
-	define( 'AMP_DEV_MODE', defined( 'WP_DEBUG' ) && WP_DEBUG );
-}
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
