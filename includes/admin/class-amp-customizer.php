@@ -113,6 +113,8 @@ class AMP_Template_Customizer {
 
 		// Enqueue scripts.
 		add_action( 'customize_preview_init',   array( $this, 'enqueue_scripts' ) );
+
+		// Needed for postMessage purposes.
 		add_action( 'amp_post_template_head',   array( $this, 'enqueue_jquery'  ) );
 		add_action( 'amp_post_template_footer', array( $this, 'fire_wp_footer'  ) );
 	}
@@ -126,7 +128,7 @@ class AMP_Template_Customizer {
 		// AMP Templates.
 		$this->wp_customize->add_panel( $this->panel_id, array(
 			'type'            => 'amp',
-			'title'           => __( 'AMP Templates', 'amp' ),
+			'title'           => __( 'AMP', 'amp' ),
 			'active_callback' => 'is_amp_endpoint'
 		) );
 	}
@@ -139,7 +141,7 @@ class AMP_Template_Customizer {
 	public function register_sections() {
 		// Navigation Bar.
 		$this->wp_customize->add_section( 'amp_navbar_section', array(
-			'title' => __( 'AMP Navigation Bar', 'amp' ),
+			'title' => __( 'Navigation Bar', 'amp' ),
 			'panel' => $this->panel_id,
 		) );
 	}
