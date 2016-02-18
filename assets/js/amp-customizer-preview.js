@@ -22,7 +22,7 @@
 	api( 'site_icon', function( value ) {
 		value.bind( function( to ) {
 
-			var ampSiteIcon = $( '.site-icon' ),
+			var	ampSiteIcon = $( '.site-icon' ),
 				siteIcon    = $( '.site-icon > img' );
 
 			if ( '' === to ) {
