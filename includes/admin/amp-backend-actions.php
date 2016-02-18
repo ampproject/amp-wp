@@ -5,7 +5,7 @@
 require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 
 /**
- * Instantiates the AMP Template editor for the Customizer.
+ * Instantiates the AMP template editor for the Customizer.
  *
  * @param WP_Customize_Manager $wp_customize Customizer instance.
  */
@@ -35,9 +35,10 @@ function amp_customizer_editor_link() {
 		'amp'              => true
 	), 'customize.php' );
 
+	// Add the theme page.
 	$page = add_theme_page(
-		__( 'AMP Templates', 'amp' ),
-		__( 'AMP Templates', 'amp' ),
+		__( 'AMP', 'amp' ),
+		__( 'AMP', 'amp' ),
 		'edit_theme_options',
 		$menu_slug
 	);
