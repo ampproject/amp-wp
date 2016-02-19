@@ -17,6 +17,7 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php' );
 
 class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
+	const CONTENT_MAX_WIDTH = 600;
 
 	private $template_dir;
 	private $data;
@@ -27,7 +28,10 @@ class AMP_Post_Template {
 		$this->ID = $post_id;
 		$this->post = get_post( $post_id );
 
-		$content_max_width = isset( $GLOBALS['content_width'] ) ? absint( $GLOBALS['content_width'] ) : 600;
+		$content_max_width = self::CONTENT_MAX_WIDTH;
+		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
+			$content_max_width = $GLOBALS['content_width'];
+		}
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
 		$this->data = array(
