@@ -34,6 +34,10 @@ You can find details about customization options at https://github.com/Automatti
 
 == Changelog ==
 
+= 0.4 =
+
+* Breaking change: class names for elements in the default template were prefixed with `amp-wp-`. Any styles targeting these classes should be updated.
+
 = 0.3 (Feb 18, 2016) =
 
 * Fetch dimensions for hotlinked images.

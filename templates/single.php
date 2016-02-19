@@ -12,20 +12,20 @@
 	</style>
 </head>
 <body>
-<nav class="title-bar">
+<nav class="amp-wp-title-bar">
 	<div>
 		<a href="<?php echo esc_url( $this->get( 'home_url' ) ); ?>">
 			<?php $site_icon_url = $this->get( 'site_icon_url' ); ?>
 			<?php if ( $site_icon_url ) : ?>
-				<amp-img src="<?php echo esc_url( $site_icon_url ); ?>" width="32" height="32" class="site-icon"></amp-img>
+				<amp-img src="<?php echo esc_url( $site_icon_url ); ?>" width="32" height="32" class="amp-wp-site-icon"></amp-img>
 			<?php endif; ?>
 			<?php echo esc_html( $this->get( 'blog_name' ) ); ?>
 		</a>
 	</div>
 </nav>
-<div class="content">
-	<h1 class="title"><?php echo esc_html( $this->get( 'post_title' ) ); ?></h1>
-	<ul class="meta">
+<div class="amp-wp-content">
+	<h1 class="amp-wp-title"><?php echo esc_html( $this->get( 'post_title' ) ); ?></h1>
+	<ul class="amp-wp-meta">
 		<?php $this->load_parts( apply_filters( 'amp_post_template_meta_parts', array( 'meta-author', 'meta-time', 'meta-taxonomy' ) ) ); ?>
 	</ul>
 	<?php echo $this->get( 'post_amp_content' ); // amphtml content; no kses ?>
