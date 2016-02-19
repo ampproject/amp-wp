@@ -107,7 +107,6 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'select',
 			'option',
 			'link',
-			'meta',
 
 			// These are converted into amp-* versions
 			//'img',
