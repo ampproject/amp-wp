@@ -135,7 +135,7 @@ For the meta section of the template (i.e. author, date, taxonomies, etc.), you 
 Create a folder in your theme called `amp` and add a file called `meta-author.php` with the following:
 
 ```php
-<li class="byline">
+<li class="xyz-byline">
 	<span>Anonymous</span>
 </li>
 ```
@@ -160,7 +160,7 @@ function xyz_amp_set_custom_tax_meta_template( $file, $type, $post ) {
 In `t/meta-custom-tax.php`, you can add something like the following to replace the default category and tags with your custom `author` taxonomy:
 
 ```php
-<li class="tax-authors">
+<li class="xyz-tax-authors">
 	<?php echo get_the_term_list( $this->get( 'post_id' ), 'xyz-author', '', ', ' ); ?>
 </li>
 ```
@@ -222,7 +222,7 @@ add_action( 'amp_post_template_css', 'xyz_amp_my_additional_css_styles' );
 function xyz_amp_my_additional_css_styles( $amp_template ) {
 	// only CSS here please...
 	?>
-	.byline amp-img {
+	.amp-wp-byline amp-img {
 		border-radius: 0; /* we don't want round avatars! */
 	}
 	.my-custom-class {
