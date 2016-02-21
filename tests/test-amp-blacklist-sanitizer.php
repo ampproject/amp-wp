@@ -76,6 +76,11 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 			'a_with_attachment_rel_plus_another_valid_value' => array(
 				'<a href="http://example.com" rel="attachment wp-att-1686">Link</a>',
 				'<a href="http://example.com" rel="attachment">Link</a>',
+			),
+
+			'datetime_attribute_in_del_tag' => array(
+				'<del datetime="2016-02-09T12:10:11+00:00">Text</del>',
+				'<del>Text</del>',
 			)
 		);
 	}
