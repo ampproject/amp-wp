@@ -6,15 +6,15 @@
 	// Nav bar text color.
 	api( 'amp_navbar_color', function( value ) {
 		value.bind( function( to ) {
-			$( 'nav.title-bar a' ).css( 'color', to );
-			$( 'nav.title-bar div' ).css( 'color', to );
+			$( 'nav.amp-wp-title-bar a' ).css( 'color', to );
+			$( 'nav.amp-wp-title-bar div' ).css( 'color', to );
 		} );
 	} );
 
 	// Nav bar background color.
 	api( 'amp_navbar_background', function( value ) {
 		value.bind( function( to ) {
-			$( 'nav.title-bar' ).css( 'background', to );
+			$( 'nav.amp-wp-title-bar' ).css( 'background', to );
 		} );
 	} );
 
