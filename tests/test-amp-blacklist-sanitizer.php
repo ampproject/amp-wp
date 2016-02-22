@@ -14,7 +14,7 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'multiple_blacklisted_tags_only' => array(
-				'<input type="text" /><script>alert("")</script><style>body{ color: red; }</style>',
+				'<input type="text" /><script>alert("")</script><style>body{ color: red; }</style><label>This is a label</label>',
 				''
 			),
 
@@ -33,9 +33,14 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="/path/to/file.jpg">Link</a>'
 			),
 
-			'on_attribute' => array(
+			'onclick_attribute' => array(
 				'<a href="/path/to/file.jpg" onclick="alert(e);">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>'
+			),
+
+			'on_attribute' => array(
+				'<button on="tap:my-lightbox">Tap Me</button>',
+				'<button on="tap:my-lightbox">Tap Me</button>'
 			),
 
 			'multiple_blacklisted_attributes' => array(
