@@ -63,7 +63,7 @@ class AMP_Post_Template {
 
 	public function load() {
 
-		if( true === is_post_type_hierarchical( get_post_type( $this->ID ) ) ) {
+		if( is_amp_content_hierarchical( $this->ID ) ) {
 			$this->load_parts( array( 'page' ) );
 		} else {
 			$this->load_parts( array( 'single' ) );
@@ -122,7 +122,7 @@ class AMP_Post_Template {
 			'headline' => $post_title,
 		);
 
-		if( true === is_post_type_hierarchical( get_post_type( $this->ID ) ) ) {
+		if( is_amp_content_hierarchical( $this->ID ) ) {
 			$article_meta = array(
 				'@type'     => 'WebPage'
 			);
