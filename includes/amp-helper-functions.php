@@ -44,5 +44,5 @@ function amp_get_asset_url( $file ) {
  * @return boolean
  */
 function is_amp_content_hierarchical( $post_id ) {
-	return (boolean) is_post_type_hierarchical( get_post_type( $this->ID ) );
+	return (boolean) is_post_type_hierarchical( get_post_type( $post_id ) );
 }
