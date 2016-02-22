@@ -65,7 +65,7 @@ function wpcom_amp_extract_image_dimensions_add_custom_callbacks() {
 	// This doesn't work well on WP.com and doesn't scale well for VIP sites (see https://github.com/Automattic/amp-wp/issues/207)
 	remove_filter( 'amp_extract_image_dimensions', array( 'AMP_Image_Dimension_Extractor', 'extract_from_attachment_metadata' ) );
 	// The wpcom override obviates this one, so take it out.
-	remove_filter( 'amp_extract_image_dimensions', array( 'AMP_Image_Dimension_Extractor', 'extract_by_downloading_image' ), 100 );
+	remove_filter( 'amp_extract_image_dimensions', array( 'AMP_Image_Dimension_Extractor', 'extract_by_downloading_image' ), 999, 2 );
 }
 
 function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions, $url ) {
