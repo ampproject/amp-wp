@@ -153,7 +153,7 @@ nav.amp-wp-title-bar .amp-wp-site-icon {
 	border-radius: 50%;
 }
 
-nav.title-bar .site-icon.hidden {
+nav.amp-wp-title-bar .amp-wp-site-icon.amp-wp-hidden {
 	display: none;
 }
 
