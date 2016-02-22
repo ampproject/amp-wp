@@ -22,16 +22,16 @@
 	api( 'site_icon', function( value ) {
 		value.bind( function( to ) {
 
-			var	ampSiteIcon = $( '.site-icon' ),
-				siteIcon    = $( '.site-icon > img' );
+			var	ampSiteIcon = $( '.amp-wp-site-icon' ),
+				siteIcon    = $( '.amp-wp-site-icon > img' );
 
 			if ( '' === to ) {
-				ampSiteIcon.addClass( 'hidden' );
+				ampSiteIcon.addClass( 'amp-wp-hidden' );
 			} else {
 				var request = wp.ajax.post( 'get-attachment', {
 					id: to
 				} ).done( function( response ) {
-					ampSiteIcon.removeClass( 'hidden' );
+					ampSiteIcon.removeClass( 'amp-wp-hidden' );
 					ampSiteIcon.removeClass( '-amp-notbuilt' );
 
 					ampSiteIcon.attr( 'src', response.url );
