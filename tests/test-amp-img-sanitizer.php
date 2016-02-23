@@ -38,16 +38,21 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'image_with_on_attribute' => array(
-				'<img src="http://placehold.it/350x150" on="tap:my-lightbox" />',
-				'<amp-img src="http://placehold.it/350x150" on="tap:my-lightbox"></amp-img>',
+				'<img src="http://placehold.it/350x150" on="tap:my-lightbox" width="350" height="150" />',
+				'<amp-img src="http://placehold.it/350x150" on="tap:my-lightbox" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
 			'image_with_blacklisted_attribute' => array(
-				'<img src="http://placehold.it/350x150" style="border: 1px solid red;" />',
-				'<amp-img src="http://placehold.it/350x150"></amp-img>',
+				'<img src="http://placehold.it/350x150" width="350" height="150" style="border: 1px solid red;" />',
+				'<amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
-			'image_with_sizes_attribute_is_overriden' => array(
+			'image_with_no_dimensions_is_forced_dimensions' => array(
+				'<img src="http://placehold.it/350x150" />',
+				'<amp-img src="http://placehold.it/350x150" width="600" height="400" class="amp-wp-unknown-size amp-wp-enforced-sizes" sizes="(min-width: 600px) 600px, 100vw"></amp-img>',
+			),
+
+			'image_with_sizes_attribute_is_overridden' => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 100px) 300px, 90vw" />',
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img>',
 			),
@@ -63,20 +68,20 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'multiple_same_image' => array(
-				'<img src="http://placehold.it/350x150" />
-<img src="http://placehold.it/350x150" />
-<img src="http://placehold.it/350x150" />
-<img src="http://placehold.it/350x150" />
+				'<img src="http://placehold.it/350x150" width="350" height="150" />
+<img src="http://placehold.it/350x150" width="350" height="150" />
+<img src="http://placehold.it/350x150" width="350" height="150" />
+<img src="http://placehold.it/350x150" width="350" height="150" />
 				',
-				'<amp-img src="http://placehold.it/350x150"></amp-img><amp-img src="http://placehold.it/350x150"></amp-img><amp-img src="http://placehold.it/350x150"></amp-img><amp-img src="http://placehold.it/350x150"></amp-img>'
+				'<amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img>'
 			),
 
 			'multiple_different_images' => array(
-				'<img src="http://placehold.it/350x150" />
-<img src="http://placehold.it/360x160" />
-<img src="http://placehold.it/370x170" />
-<img src="http://placehold.it/380x180" />',
-				'<amp-img src="http://placehold.it/350x150"></amp-img><amp-img src="http://placehold.it/360x160"></amp-img><amp-img src="http://placehold.it/370x170"></amp-img><amp-img src="http://placehold.it/380x180"></amp-img>'
+				'<img src="http://placehold.it/350x150" width="350" height="150" />
+<img src="http://placehold.it/360x160" width="360" height="160" />
+<img src="http://placehold.it/370x170" width="370" height="170" />
+<img src="http://placehold.it/380x180" width="380" height="180" />',
+				'<amp-img src="http://placehold.it/350x150" width="350" height="150" sizes="(min-width: 350px) 350px, 100vw" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/360x160" width="360" height="160" sizes="(min-width: 360px) 360px, 100vw" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/370x170" width="370" height="170" sizes="(min-width: 370px) 370px, 100vw" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/380x180" width="380" height="180" sizes="(min-width: 380px) 380px, 100vw" class="amp-wp-enforced-sizes"></amp-img>'
 			),
 		);
 	}
