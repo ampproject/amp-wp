@@ -11,7 +11,10 @@
  * License: GPLv2 or later
  */
 
-define( 'AMP_QUERY_VAR', 'amp' );
+// Let users define their own feed slug
+if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+	define( 'AMP_QUERY_VAR', 'amp' );
+}
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
