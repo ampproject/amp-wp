@@ -462,6 +462,57 @@ function xyz_amp_add_ad_sanitizer( $sanitizer_classes, $post ) {
 }
 ```
 
+## Analytics
+
+To output proper analytics tags, you can use the `amp_post_template_analytics` filter:
+
+```
+add_filter( 'amp_post_template_analytics', 'xyz_amp_add_custom_analytics' );
+function xyz_amp_add_custom_analytics( $analytics ) {
+	if ( ! is_array( $analytics ) ) {
+		$analytics = array();
+	}
+
+	// https://developers.google.com/analytics/devguides/collection/amp-analytics/
+	$analytics['xyz-googleanalytics'] = array(
+		'type' => 'googleanalytics',
+		'attributes' => array(
+			// 'data-credentials' => 'include',
+		),
+		'config_data' => array(
+			'vars' => array(
+				'account' => "UA-XXXXX-Y"
+			),
+			'triggers' => array(
+				'trackPageview' => array(
+					'on' => 'visible',
+					'request' => 'pageview',
+				),
+			),
+		),
+	);
+
+	// https://www.parsely.com/docs/integration/tracking/google-amp.html
+	$analytics['xyz-parsely'] = array(
+		'type' => 'parsely',
+		'attributes' => array(),
+		'config_data' => array(
+			'vars' => array(
+				'apikey' => 'YOUR APIKEY GOES HERE',
+			)
+		),
+	);
+
+	return $analytics;
+}
+```
+
+Each analytics entry must include a unique array key and the following attributes:
+
+- `type`: `(string)` one of the [valid vendors](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#analytics-vendors) for amp-analytics.
+- `attributes`: `(array)` any [additional valid  attributes](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#attributes) to add to the `amp-analytics` element.
+- `config_data`: `(array)` the [config data](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#configuration) to include in the `amp-analytics` script tag. This is `json_encode`-d on output.
+
 ## Custom Post Type Support
 
 By default, the plugin only creates AMP content for posts. You can add support for other post_types like so (assume our post_type slug is `xyz-review`):

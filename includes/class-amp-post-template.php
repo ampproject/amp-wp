@@ -50,6 +50,8 @@ class AMP_Post_Template {
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
+
+			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array() ),
 		);
 
 		$this->build_post_content();
