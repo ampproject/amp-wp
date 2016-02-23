@@ -490,3 +490,9 @@ function xyz_amp_set_custom_template( $file, $type, $post ) {
 ```
 
 We may provide better ways to handle this in the future.
+
+## Plugin integrations
+
+### Yoast SEO
+
+If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check out the companion plugin here: https://github.com/Yoast/yoastseo-amp
