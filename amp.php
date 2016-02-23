@@ -11,8 +11,6 @@
  * License: GPLv2 or later
  */
 
-define( 'AMP_QUERY_VAR', 'amp' );
-
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 
@@ -34,6 +32,8 @@ function amp_init() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
+
+	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 
 	do_action( 'amp_init' );
 
