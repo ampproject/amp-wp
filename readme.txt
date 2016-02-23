@@ -56,3 +56,14 @@ You can find details about customization options at https://github.com/Automatti
 
 = 0.1 =
 * Initial version
+
+== Upgrade Notice ==
+
+= 0.4 =
+
+* Breaking change: class names for elements in the default template were prefixed with `amp-wp-`. Any styles targeting these classes should be updated.
+
+= 0.3 =
+
+* Breaking change: `style.css` no longer contains the `<style> tag. If you have a custom stylesheet, you need to update it to remove the tag.
+* Breaking change: `single.php` no longer includes the AMP boilerplate styles. They are instead added via the `amp_post_template_head` hook. If you have a custom template, please remove the boilerplate styles.
