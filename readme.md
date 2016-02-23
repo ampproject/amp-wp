@@ -267,6 +267,18 @@ function xyz_amp_add_analytics( $amp_template ) {
 }
 ```
 
+#### AMP Endpoint
+
+If you don't want to use the default `/amp` endpoint, use the `amp_query_var` filter to change it to anything else.
+
+```php
+add_filter( 'amp_query_var' , 'xyz_amp_change_endpoint' );
+
+function xyz_amp_change_endpoint( $amp_endpoint ) {
+	return 'foo';
+}
+```
+
 ### Custom Template
 
 If you want complete control over the look and feel of your AMP content, you can override the default template using the `amp_post_template_file` filter and pass it the path to a custom template:
