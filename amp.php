@@ -33,7 +33,7 @@ function amp_init() {
 		return;
 	}
 
-	define( 'AMP_QUERY_VAR', apply_filters('amp_query_var', 'amp' ) );
+	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 
 	do_action( 'amp_init' );
 
