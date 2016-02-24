@@ -50,7 +50,7 @@ function amp_init() {
 }
 
 function amp_maybe_add_actions() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || is_feed() ) {
 		return;
 	}
 
