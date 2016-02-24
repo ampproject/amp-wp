@@ -257,12 +257,6 @@ class AMP_Post_Template {
 	}
 
 	private function is_valid_template( $template ) {
-		$template = $this->normalize_path( $template );
-		$content_dir = $this->normalize_path( WP_CONTENT_DIR );
-		if ( 0 !== strpos( $template, $content_dir ) ) {
-			return false;
-		}
-
 		if ( 0 !== validate_file( $template ) ) {
 			return false;
 		}
@@ -272,9 +266,5 @@ class AMP_Post_Template {
 		}
 
 		return true;
-	}
-
-	private function normalize_path( $path ) {
-		return str_replace( array( '/', '\\' ), DIRECTORY_SEPARATOR, $path );
 	}
 }
