@@ -49,6 +49,7 @@ function jetpack_amp_add_stats_pixel( $amp_template ) {
  *     https://pixel.wp.com/g.gif?v=ext&j=1%3A3.9.1&blog=1234&post=5678&tz=-4&srv=example.com&host=example.com&ref=&rand=0.4107963021218808
  */
 function jetpack_amp_build_stats_pixel_url() {
+	global $wp_the_query;
 	if ( function_exists( 'stats_build_view_data' ) ) { // added in https://github.com/Automattic/jetpack/pull/3445
 		$data = stats_build_view_data();
 	} else {
