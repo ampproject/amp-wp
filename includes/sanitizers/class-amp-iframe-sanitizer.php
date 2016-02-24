@@ -83,12 +83,15 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'src':
 				case 'sandbox':
 				case 'height':
 				case 'class':
 				case 'sizes':
 					$out[ $name ] = $value;
+					break;
+
+				case 'src':
+					$out[ $name ] = preg_replace('/^\/\//', 'https://', $value);
 					break;
 
 				case 'width':
