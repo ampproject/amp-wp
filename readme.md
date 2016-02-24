@@ -55,6 +55,36 @@ function xyz_amp_set_site_icon_url( $data ) {
 
 This needs to be implemented.
 
+#### Logo Only
+
+If you want to hide the site text and just show a logo, use the `amp_post_template_css` action. The following colours the title bar black, hides the site title, and replaces it with a centered logo:
+
+```
+add_action( 'amp_post_template_css', 'xyz_amp_additional_css_styles' );
+	
+function discover_fp_amp_additional_css_styles( $amp_template ) {
+	// only CSS here please...
+	?>
+	nav.amp-wp-title-bar {
+		padding: 12px 0;
+		background: #000;
+	}
+	nav.amp-wp-title-bar a {
+		background-image: url( 'https://example.com/path/to/logo.png' );
+		background-repeat: no-repeat;
+		background-size: contain;
+		display: block;
+		height: 28px;
+		width: 94px;
+		margin: 0 auto;
+		text-indent: -9999px;
+	}
+	<?php
+}
+```
+
+Note: you will need to adjust the colours and sizes based on your brand.
+
 ### Template Tweaks
 
 You can tweak various parts of the template via code.
