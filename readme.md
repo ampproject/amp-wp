@@ -542,3 +542,9 @@ Jetpack integration is baked in. More support for things like Related Posts to c
 ### Yoast SEO
 
 If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check out the companion plugin here: https://github.com/Yoast/yoastseo-amp
+
+## Compatibility Issues
+
+The following plugins have been known to cause issues with this plugin:
+
+- Cloudflare (Rocket Loader; modifies the output of the AMP page, which breaks validation.)
