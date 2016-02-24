@@ -59,14 +59,14 @@ function amp_post_template_add_analytics_data( $amp_template ) {
 	}
 
 	foreach ( $analytics_entries as $id => $analytics_entry ) {
-		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['script_data'] ) ) {
+		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
 			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Analytics entry for %s is missing one of the following keys: `type`, `attributes`, or `data`', 'amp' ), esc_html( $id ) ) );
 			continue;
 		}
 
 		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
 			'type' => 'application/json',
-		), json_encode( $analytics_entry['script_data'] ) );
+		), json_encode( $analytics_entry['config_data'] ) );
 
 		$amp_analytics_attr = array_merge( array(
 			'id' => $id,
