@@ -276,23 +276,12 @@ Note: the file should only include CSS, not the `<style>` opening and closing ta
 If you want to add stuff to the head or footer of the default AMP template, use the `amp_post_template_head` and `amp_post_template_footer` actions.
 
 ```php
-add_action( 'amp_post_template_footer', 'xyz_amp_add_analytics' );
+add_action( 'amp_post_template_footer', 'xyz_amp_add_pixel' );
 
 function xyz_amp_add_analytics( $amp_template ) {
 	$post_id = $amp_template->get( 'post_id' );
-	// see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md for more on amp-analytics
 	?>
-	<amp-analytics>
-		<script type="application/json">
-		{
-			"requests": {
-				"pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}",
-				"event": "https://example.com/analytics?eid=${eventId}&elab=${eventLabel}&acct=${account}"
-			}
-			// ...
-		}
-		</script>
-	</amp-analytics>
+	<amp-pixel src="https://example.com/hi.gif?x=RANDOM"></amp-pixel>
 	<?php
 }
 ```
@@ -503,6 +492,57 @@ function xyz_amp_add_ad_sanitizer( $sanitizer_classes, $post ) {
 	return $sanitizer_classes;
 }
 ```
+
+## Analytics
+
+To output proper analytics tags, you can use the `amp_post_template_analytics` filter:
+
+```
+add_filter( 'amp_post_template_analytics', 'xyz_amp_add_custom_analytics' );
+function xyz_amp_add_custom_analytics( $analytics ) {
+	if ( ! is_array( $analytics ) ) {
+		$analytics = array();
+	}
+
+	// https://developers.google.com/analytics/devguides/collection/amp-analytics/
+	$analytics['xyz-googleanalytics'] = array(
+		'type' => 'googleanalytics',
+		'attributes' => array(
+			// 'data-credentials' => 'include',
+		),
+		'config_data' => array(
+			'vars' => array(
+				'account' => "UA-XXXXX-Y"
+			),
+			'triggers' => array(
+				'trackPageview' => array(
+					'on' => 'visible',
+					'request' => 'pageview',
+				),
+			),
+		),
+	);
+
+	// https://www.parsely.com/docs/integration/tracking/google-amp.html
+	$analytics['xyz-parsely'] = array(
+		'type' => 'parsely',
+		'attributes' => array(),
+		'config_data' => array(
+			'vars' => array(
+				'apikey' => 'YOUR APIKEY GOES HERE',
+			)
+		),
+	);
+
+	return $analytics;
+}
+```
+
+Each analytics entry must include a unique array key and the following attributes:
+
+- `type`: `(string)` one of the [valid vendors](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#analytics-vendors) for amp-analytics.
+- `attributes`: `(array)` any [additional valid  attributes](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#attributes) to add to the `amp-analytics` element.
+- `config_data`: `(array)` the [config data](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#configuration) to include in the `amp-analytics` script tag. This is `json_encode`-d on output.
 
 ## Custom Post Type Support
 

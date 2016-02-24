@@ -1,5 +1,8 @@
 <?php
 
+require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
+
 require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
@@ -47,6 +50,18 @@ class AMP_Post_Template {
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
+
+			/**
+			 * Add amp-analytics tags.
+			 *
+			 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
+			 *
+			 * @since 0.4
+			 *.
+			 * @param	array	$analytics	An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+			 * @param	object	$post	The current post.
+			 */
+			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
 		);
 
 		$this->build_post_content();
