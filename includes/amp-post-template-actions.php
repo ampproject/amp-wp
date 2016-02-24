@@ -60,7 +60,7 @@ function amp_post_template_add_analytics_data( $amp_template ) {
 
 	foreach ( $analytics_entries as $id => $analytics_entry ) {
 		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['script_data'] ) ) {
-			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Analytics entry for %s is missing one of the following keys: `type`, `attributes`, and `data` keys.', 'amp' ), esc_html( $id ) ) );
+			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Analytics entry for %s is missing one of the following keys: `type`, `attributes`, or `data`', 'amp' ), esc_html( $id ) ) );
 			continue;
 		}
 

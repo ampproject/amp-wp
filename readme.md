@@ -246,23 +246,12 @@ Note: the file should only include CSS, not the `<style>` opening and closing ta
 If you want to add stuff to the head or footer of the default AMP template, use the `amp_post_template_head` and `amp_post_template_footer` actions.
 
 ```php
-add_action( 'amp_post_template_footer', 'xyz_amp_add_analytics' );
+add_action( 'amp_post_template_footer', 'xyz_amp_add_pixel' );
 
 function xyz_amp_add_analytics( $amp_template ) {
 	$post_id = $amp_template->get( 'post_id' );
-	// see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md for more on amp-analytics
 	?>
-	<amp-analytics>
-		<script type="application/json">
-		{
-			"requests": {
-				"pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}",
-				"event": "https://example.com/analytics?eid=${eventId}&elab=${eventLabel}&acct=${account}"
-			}
-			// ...
-		}
-		</script>
-	</amp-analytics>
+	<amp-pixel src="https://example.com/hi.gif?x=RANDOM"></amp-pixel>
 	<?php
 }
 ```
