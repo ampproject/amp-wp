@@ -62,7 +62,7 @@ If you want to hide the site text and just show a logo, use the `amp_post_templa
 ```
 add_action( 'amp_post_template_css', 'xyz_amp_additional_css_styles' );
 	
-function discover_fp_amp_additional_css_styles( $amp_template ) {
+function xyz_amp_additional_css_styles( $amp_template ) {
 	// only CSS here please...
 	?>
 	nav.amp-wp-title-bar {
