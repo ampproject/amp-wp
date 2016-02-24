@@ -547,4 +547,5 @@ If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check
 
 The following plugins have been known to cause issues with this plugin:
 
-- Cloudflare (Rocket Loader; modifies the output of the AMP page, which breaks validation.)
+- Cloudflare Rocket Loader (modifies the output of the AMP page, which breaks validation.)
+- WP Rocket (modifies the output of the AMP page, which breaks validation.)
