@@ -16,6 +16,10 @@ function post_supports_amp( $post ) {
 		return false;
 	}
 
+	if ( post_password_required( $post ) ) {
+		return false;
+	}
+
 	if ( true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
 		return false;
 	}
