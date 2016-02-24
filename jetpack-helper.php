@@ -62,6 +62,7 @@ function jetpack_amp_build_stats_pixel_url() {
 		$data = compact( 'v', 'j', 'blog', 'post', 'tz', 'srv' );
 	}
 
+	$data['host'] = rawurlencode( $_SERVER['HTTP_HOST'] );
 	$data['rand'] = 'RANDOM'; // amp placeholder
 	$data['ref'] = 'DOCUMENT_REFERRER'; // amp placeholder
 	$data = array_map( 'rawurlencode' , $data );
