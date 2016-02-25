@@ -28,7 +28,7 @@ If you're using an off-the-shelf theme (like from the WordPress.org Theme Direct
 
 If you're using a custom theme:
 
-- `functions.php` (or a file required by `functions.php`).
+- `functions.php` (or via a 'require' call to files that utilize `functions.php`).
 - Any of the options above.
 
 ### Theme Mods
