@@ -41,15 +41,12 @@ function wpcom_amp_add_blavatar( $metadata, $post ) {
 	}
 
 	$size = 60;
-	$blavatar_domain = blavatar_domain( site_url() );
-	if ( blavatar_exists( $blavatar_domain ) ) {
-		$metadata['publisher']['logo'] = array(
-			'@type' => 'ImageObject',
-			'url' => blavatar_url( $blavatar_domain, 'img', $size, false, true ),
-			'width' => $size,
-			'height' => $size,
-		);
-	}
+	$metadata['publisher']['logo'] = array(
+		'@type' => 'ImageObject',
+		'url' => blavatar_url( blavatar_domain( site_url() ), 'img', $size, staticize_subdomain( 'https://wordpress.com/i/emails/blavatar.png' ) ),
+		'width' => $size,
+		'height' => $size,
+	);
 
 	return $metadata;
 }

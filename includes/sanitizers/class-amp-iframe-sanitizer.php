@@ -45,8 +45,13 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$this->did_convert_elements = true;
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
-			if ( ! isset( $new_attributes['width'], $new_attributes['height'] ) ) {
+
+			if ( ! isset( $new_attributes['height'] ) ) {
+				unset( $new_attributes['width'] );
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+
+			if ( ! isset( $new_attributes['width'] ) ) {
 				$new_attributes['layout'] = 'fixed-height';
 			}
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
@@ -80,11 +85,23 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			switch ( $name ) {
 				case 'src':
 				case 'sandbox':
-				case 'width':
 				case 'height':
-				case 'frameborder':
 				case 'class':
 				case 'sizes':
+					$out[ $name ] = $value;
+					break;
+
+				case 'width':
+					if ( $value === '100%' ) {
+						continue;
+					}
+					$out[ $name ] = $value;
+					break;
+
+				case 'frameborder':
+					if ( '0' !== $value && '1' !== $value ) {
+						$value = '0';
+					}
 					$out[ $name ] = $value;
 					break;
 

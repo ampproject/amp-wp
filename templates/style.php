@@ -14,7 +14,13 @@ amp-img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
 	max-width: 100%;
 }
 
-/* Generic WP.com reader style */
+.amp-wp-unknown-size img {
+	/** Worst case scenario when we can't figure out dimensions for an image. **/
+	/** Force the image into a box of fixed dimensions and use object-fit to scale. **/
+	object-fit: contain;
+}
+
+/* Template Styles */
 .amp-wp-content, .amp-wp-title-bar div {
 	<?php $content_max_width = absint( $this->get( 'content_max_width' ) ); ?>
 	<?php if ( $content_max_width > 0 ) : ?>

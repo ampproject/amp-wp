@@ -5,13 +5,11 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.3
+ * Version: 0.3.1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
  */
-
-define( 'AMP_QUERY_VAR', 'amp' );
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
@@ -35,7 +33,7 @@ function amp_init() {
 		return;
 	}
 
-	amp_add_backend_actions();
+	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 
 	do_action( 'amp_init' );
 
@@ -43,6 +41,8 @@ function amp_init() {
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
+
+	amp_add_backend_actions();
 
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
@@ -52,7 +52,7 @@ function amp_init() {
 }
 
 function amp_maybe_add_actions() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || is_feed() ) {
 		return;
 	}
 
