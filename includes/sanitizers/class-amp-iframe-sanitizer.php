@@ -91,7 +91,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'src':
-					$out[ $name ] = preg_replace('/^\/\//', 'https://', $value);
+					$out[ $name ] = set_url_scheme( $value, 'https' );
 					break;
 
 				case 'width':
