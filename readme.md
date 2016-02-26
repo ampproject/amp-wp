@@ -61,7 +61,7 @@ If you want to hide the site text and just show a logo, use the `amp_post_templa
 
 ```
 add_action( 'amp_post_template_css', 'xyz_amp_additional_css_styles' );
-	
+
 function xyz_amp_additional_css_styles( $amp_template ) {
 	// only CSS here please...
 	?>
@@ -588,4 +588,3 @@ If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check
 The following plugins have been known to cause issues with this plugin:
 
 - Cloudflare Rocket Loader (modifies the output of the AMP page, which breaks validation.)
-- WP Rocket (modifies the output of the AMP page, which breaks validation.)
