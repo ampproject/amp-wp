@@ -56,7 +56,10 @@ function amp_maybe_add_actions() {
 
 	$is_amp_endpoint = is_amp_endpoint();
 
-	$post = get_queried_object();
+	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
+	global $wp_query;
+	$post = $wp_query->post;
+
 	$supports = post_supports_amp( $post );
 
 	if ( ! $supports ) {
