@@ -546,7 +546,7 @@ Each analytics entry must include a unique array key and the following attribute
 
 ## Custom Post Type Support
 
-By default, the plugin only creates AMP content for posts. You can add support for other post_types like so (assume our post_type slug is `xyz-review`):
+By default, the plugin only creates AMP content for posts. You can add support for other post_types using the post_type parameter used when registering the custom post type (assume our post_type is `xyz-review`):
 
 ```php
 add_action( 'amp_init', 'xyz_amp_add_review_cpt' );
