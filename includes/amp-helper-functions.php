@@ -4,7 +4,7 @@ function amp_get_permalink( $post_id ) {
 	if ( '' != get_option( 'permalink_structure' ) ) {
 		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
 	} else {
-		$amp_url = add_query_arg( AMP_QUERY_VAR, absint( $post_id ), home_url() );
+		$amp_url = add_query_arg( AMP_QUERY_VAR, 1, get_permalink( $post_id ) );
 	}
 
 	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
@@ -16,7 +16,11 @@ function post_supports_amp( $post ) {
 		return false;
 	}
 
-	if ( true === apply_filters( 'amp_skip_post', false, $post->ID ) ) {
+	if ( post_password_required( $post ) ) {
+		return false;
+	}
+
+	if ( true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
 		return false;
 	}
 

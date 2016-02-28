@@ -42,13 +42,16 @@ abstract class AMP_Base_Sanitizer {
 
 		$attributes['sizes'] = sprintf( '(min-width: %1$dpx) %1$dpx, 100vw', absint( $max_width ) );
 
-		$class = 'amp-wp-enforced-sizes';
-		if ( isset( $attributes['class'] ) ) {
-			$attributes['class'] .= ' ' . $class;
-		} else {
-			$attributes['class'] = $class;
-		}
+		$this->add_or_append_attribute( $attributes, 'class', 'amp-wp-enforced-sizes' );
 
 		return $attributes;
+	}
+
+	public function add_or_append_attribute( &$attributes, $key, $value, $separator = ' ' ) {
+		if ( isset( $attributes[ $key ] ) ) {
+			$attributes[ $key ] .= $separator . $value;
+		} else {
+			$attributes[ $key ] = $value;
+		}
 	}
 }

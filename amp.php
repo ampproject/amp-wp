@@ -5,16 +5,11 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.2
+ * Version: 0.3.1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
  */
-
-define( 'AMP_QUERY_VAR', 'amp' );
-if ( ! defined( 'AMP_DEV_MODE' ) ) {
-	define( 'AMP_DEV_MODE', defined( 'WP_DEBUG' ) && WP_DEBUG );
-}
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
@@ -38,6 +33,8 @@ function amp_init() {
 		return;
 	}
 
+	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+
 	do_action( 'amp_init' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
@@ -47,19 +44,22 @@ function amp_init() {
 
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
-	if ( class_exists( 'Jetpack' ) ) {
+	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
 }
 
 function amp_maybe_add_actions() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || is_feed() ) {
 		return;
 	}
 
 	$is_amp_endpoint = is_amp_endpoint();
 
-	$post = get_queried_object();
+	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
+	global $wp_query;
+	$post = $wp_query->post;
+
 	$supports = post_supports_amp( $post );
 
 	if ( ! $supports ) {
