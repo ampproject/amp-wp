@@ -192,6 +192,10 @@ amp-vine {
 	background: #f3f6f8;
 }
 
+amp-carousel > amp-img > img {
+	object-fit: contain;
+}
+
 .amp-wp-iframe-placeholder {
 	background: #f3f6f8 url( <?php echo esc_url( $this->get( 'placeholder_image_url' ) ); ?> ) no-repeat center 40%;
 	background-size: 48px 48px;
