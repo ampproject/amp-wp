@@ -6,14 +6,17 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' )
 
 class AMP_Content {
 	private $content;
+	private $excerpt;
 	private $amp_content = '';
+	private $amp_excerpt = '';
 	private $amp_scripts = array();
 	private $args = array();
 	private $embed_handler_classes = array();
 	private $sanitizer_classes = array();
 
-	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() ) {
+	public function __construct( $content, $excerpt, $embed_handler_classes, $sanitizer_classes, $args = array() ) {
 		$this->content = $content;
+		$this->excerpt = $excerpt;
 		$this->args = $args;
 		$this->embed_handler_classes = $embed_handler_classes;
 		$this->sanitizer_classes = $sanitizer_classes;
@@ -25,12 +28,22 @@ class AMP_Content {
 		return $this->amp_content;
 	}
 
+	public function get_amp_excerpt() {
+		return $this->amp_excerpt;
+	}
+
 	public function get_amp_scripts() {
 		return $this->amp_scripts;
 	}
 
 	private function transform() {
+
 		$content = $this->content;
+		$excerpt = $this->excerpt;
+
+		if (!$this->excerpt) {
+			$excerpt = wp_trim_words($this->content);
+		}
 
 		// First, embeds + the_content filter
 		$embed_handlers = $this->register_embed_handlers();
@@ -41,6 +54,20 @@ class AMP_Content {
 		$content = $this->sanitize( $content );
 
 		$this->amp_content = $content;
+
+		// excerpt
+
+		// First, embeds + the_content filter
+		$embed_handlers = $this->register_embed_handlers();
+		$excerpt = apply_filters( 'the_content', $excerpt );
+		$this->unregister_embed_handlers( $embed_handlers );
+
+		// Then, sanitize to strip and/or convert non-amp content
+		$excerpt = $this->sanitize( $excerpt );
+
+		$this->amp_excerpt = $excerpt;
+
+
 	}
 
 	private function add_scripts( $scripts ) {

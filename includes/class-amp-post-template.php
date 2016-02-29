@@ -1,23 +1,5 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-
-require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
-
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
-
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-gallery-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php' );
-
 class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
 	const CONTENT_MAX_WIDTH = 600;
@@ -26,6 +8,7 @@ class AMP_Post_Template {
 	private $data;
 
 	public function __construct( $post_id ) {
+
 		$this->template_dir = AMP__DIR__ . '/templates';
 
 		$this->ID = $post_id;
@@ -162,7 +145,7 @@ class AMP_Post_Template {
 	}
 
 	private function build_post_content() {
-		$amp_content = new AMP_Content( $this->post->post_content,
+		$amp_content = new AMP_Content( $this->post->post_content, $this->post->post_excerpt,
 			apply_filters( 'amp_content_embed_handlers', array(
 				'AMP_Twitter_Embed_Handler' => array(),
 				'AMP_YouTube_Embed_Handler' => array(),

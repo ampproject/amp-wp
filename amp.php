@@ -50,24 +50,38 @@ function amp_init() {
 }
 
 function amp_maybe_add_actions() {
-	if ( ! is_singular() || is_feed() ) {
+	if ( ( !is_singular() && !is_category() ) || is_feed() ) {
 		return;
 	}
 
 	$is_amp_endpoint = is_amp_endpoint();
 
-	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
-	global $wp_query;
-	$post = $wp_query->post;
+	if (is_category() and get_queried_object() instanceof WP_Term) {
 
-	$supports = post_supports_amp( $post );
-
-	if ( ! $supports ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ) );
-			exit;
+			set_query_var('amp-type', 'archive');
 		}
-		return;
+		else {
+			return;
+		}
+	}
+	else {
+		// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
+		global $wp_query;
+		$post = $wp_query->post;
+
+		$supports = post_supports_amp( $post );
+
+		if ( ! $supports ) {
+			if ( $is_amp_endpoint ) {
+				wp_safe_redirect( get_permalink( $post->ID ) );
+				exit;
+			}
+			return;
+		}
+
+		set_query_var('amp-type', 'post');
+
 	}
 
 	if ( $is_amp_endpoint ) {
@@ -78,7 +92,9 @@ function amp_maybe_add_actions() {
 }
 
 function amp_load_classes() {
-	require_once( AMP__DIR__ . '/includes/class-amp-post-template.php' ); // this loads everything else
+	require_once( AMP__DIR__ . '/includes/class-amp-common-template.php' ); // this loads everything else
+	require_once( AMP__DIR__ . '/includes/class-amp-post-template.php' );
+	require_once( AMP__DIR__ . '/includes/class-amp-archive-template.php' );
 }
 
 function amp_add_frontend_actions() {
@@ -96,11 +112,21 @@ function amp_prepare_render() {
 function amp_render() {
 	amp_load_classes();
 
-	$post_id = get_queried_object_id();
-	do_action( 'pre_amp_render_post', $post_id );
+	if (get_query_var('amp-type') == 'archive') {
+		$post_id = get_queried_object_id();
+		do_action( 'pre_amp_render_post', $post_id );
 
-	amp_add_post_template_actions();
-	$template = new AMP_Post_Template( $post_id );
+		amp_add_post_template_actions();
+		$template = new AMP_Archive_Template( $post_id );
+	}
+	else {
+		$post_id = get_queried_object_id();
+		do_action( 'pre_amp_render_post', $post_id );
+
+		amp_add_post_template_actions();
+		$template = new AMP_Post_Template( $post_id );
+	}
+
 	$template->load();
 	exit;
 }
