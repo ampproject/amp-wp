@@ -28,7 +28,7 @@ If you're using an off-the-shelf theme (like from the WordPress.org Theme Direct
 
 If you're using a custom theme:
 
-- `functions.php` (or a file `require`-ed by `functions.php`).
+- `functions.php` (or via a 'require' call to files that load from `functions.php`).
 - Any of the options above.
 
 ### Theme Mods
@@ -54,6 +54,36 @@ function xyz_amp_set_site_icon_url( $data ) {
 #### Custom Header
 
 This needs to be implemented.
+
+#### Logo Only
+
+If you want to hide the site text and just show a logo, use the `amp_post_template_css` action. The following colours the title bar black, hides the site title, and replaces it with a centered logo:
+
+```
+add_action( 'amp_post_template_css', 'xyz_amp_additional_css_styles' );
+
+function xyz_amp_additional_css_styles( $amp_template ) {
+	// only CSS here please...
+	?>
+	nav.amp-wp-title-bar {
+		padding: 12px 0;
+		background: #000;
+	}
+	nav.amp-wp-title-bar a {
+		background-image: url( 'https://example.com/path/to/logo.png' );
+		background-repeat: no-repeat;
+		background-size: contain;
+		display: block;
+		height: 28px;
+		width: 94px;
+		margin: 0 auto;
+		text-indent: -9999px;
+	}
+	<?php
+}
+```
+
+Note: you will need to adjust the colours and sizes based on your brand.
 
 ### Template Tweaks
 
@@ -135,7 +165,7 @@ For the meta section of the template (i.e. author, date, taxonomies, etc.), you 
 Create a folder in your theme called `amp` and add a file called `meta-author.php` with the following:
 
 ```php
-<li class="byline">
+<li class="xyz-byline">
 	<span>Anonymous</span>
 </li>
 ```
@@ -160,7 +190,7 @@ function xyz_amp_set_custom_tax_meta_template( $file, $type, $post ) {
 In `t/meta-custom-tax.php`, you can add something like the following to replace the default category and tags with your custom `author` taxonomy:
 
 ```php
-<li class="tax-authors">
+<li class="xyz-tax-authors">
 	<?php echo get_the_term_list( $this->get( 'post_id' ), 'xyz-author', '', ', ' ); ?>
 </li>
 ```
@@ -222,7 +252,7 @@ add_action( 'amp_post_template_css', 'xyz_amp_my_additional_css_styles' );
 function xyz_amp_my_additional_css_styles( $amp_template ) {
 	// only CSS here please...
 	?>
-	.byline amp-img {
+	.amp-wp-byline amp-img {
 		border-radius: 0; /* we don't want round avatars! */
 	}
 	.my-custom-class {
@@ -246,24 +276,25 @@ Note: the file should only include CSS, not the `<style>` opening and closing ta
 If you want to add stuff to the head or footer of the default AMP template, use the `amp_post_template_head` and `amp_post_template_footer` actions.
 
 ```php
-add_action( 'amp_post_template_footer', 'xyz_amp_add_analytics' );
+add_action( 'amp_post_template_footer', 'xyz_amp_add_pixel' );
 
 function xyz_amp_add_analytics( $amp_template ) {
 	$post_id = $amp_template->get( 'post_id' );
-	// see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md for more on amp-analytics
 	?>
-	<amp-analytics>
-		<script type="application/json">
-		{
-			"requests": {
-				"pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}",
-				"event": "https://example.com/analytics?eid=${eventId}&elab=${eventLabel}&acct=${account}"
-			}
-			// ...
-		}
-		</script>
-	</amp-analytics>
+	<amp-pixel src="https://example.com/hi.gif?x=RANDOM"></amp-pixel>
 	<?php
+}
+```
+
+#### AMP Endpoint
+
+If you don't want to use the default `/amp` endpoint, use the `amp_query_var` filter to change it to anything else.
+
+```php
+add_filter( 'amp_query_var' , 'xyz_amp_change_endpoint' );
+
+function xyz_amp_change_endpoint( $amp_endpoint ) {
+	return 'foo';
 }
 ```
 
@@ -462,6 +493,57 @@ function xyz_amp_add_ad_sanitizer( $sanitizer_classes, $post ) {
 }
 ```
 
+## Analytics
+
+To output proper analytics tags, you can use the `amp_post_template_analytics` filter:
+
+```
+add_filter( 'amp_post_template_analytics', 'xyz_amp_add_custom_analytics' );
+function xyz_amp_add_custom_analytics( $analytics ) {
+	if ( ! is_array( $analytics ) ) {
+		$analytics = array();
+	}
+
+	// https://developers.google.com/analytics/devguides/collection/amp-analytics/
+	$analytics['xyz-googleanalytics'] = array(
+		'type' => 'googleanalytics',
+		'attributes' => array(
+			// 'data-credentials' => 'include',
+		),
+		'config_data' => array(
+			'vars' => array(
+				'account' => "UA-XXXXX-Y"
+			),
+			'triggers' => array(
+				'trackPageview' => array(
+					'on' => 'visible',
+					'request' => 'pageview',
+				),
+			),
+		),
+	);
+
+	// https://www.parsely.com/docs/integration/tracking/google-amp.html
+	$analytics['xyz-parsely'] = array(
+		'type' => 'parsely',
+		'attributes' => array(),
+		'config_data' => array(
+			'vars' => array(
+				'apikey' => 'YOUR APIKEY GOES HERE',
+			)
+		),
+	);
+
+	return $analytics;
+}
+```
+
+Each analytics entry must include a unique array key and the following attributes:
+
+- `type`: `(string)` one of the [valid vendors](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#analytics-vendors) for amp-analytics.
+- `attributes`: `(array)` any [additional valid  attributes](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#attributes) to add to the `amp-analytics` element.
+- `config_data`: `(array)` the [config data](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#configuration) to include in the `amp-analytics` script tag. This is `json_encode`-d on output.
+
 ## Custom Post Type Support
 
 By default, the plugin only creates AMP content for posts. You can add support for other post_types like so (assume our post_type slug is `xyz-review`):
@@ -490,3 +572,19 @@ function xyz_amp_set_custom_template( $file, $type, $post ) {
 ```
 
 We may provide better ways to handle this in the future.
+
+## Plugin integrations
+
+### Jetpack
+
+Jetpack integration is baked in. More support for things like Related Posts to come.
+
+### Yoast SEO
+
+If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check out the companion plugin here: https://github.com/Yoast/yoastseo-amp
+
+## Compatibility Issues
+
+The following plugins have been known to cause issues with this plugin:
+
+- Cloudflare Rocket Loader (modifies the output of the AMP page, which breaks validation.)

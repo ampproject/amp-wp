@@ -28,7 +28,7 @@ function amp_post_template_add_scripts( $amp_template ) {
 add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
 function amp_post_template_add_boilerplate_css( $amp_template ) {
 	?>
-	<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+	<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 	<?php
 }
 
@@ -41,4 +41,38 @@ function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 	?>
 	<script type="application/ld+json"><?php echo json_encode( $metadata ); ?></script>
 	<?php
+}
+
+add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
+function amp_post_template_add_analytics_script( $data ) {
+	if ( ! empty( $data['amp_analytics'] ) ) {
+		$data['amp_component_scripts']['amp-analytics'] = 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js';
+	}
+	return $data;
+}
+
+add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
+function amp_post_template_add_analytics_data( $amp_template ) {
+	$analytics_entries = $amp_template->get( 'amp_analytics' );
+	if ( empty( $analytics_entries ) ) {
+		return;
+	}
+
+	foreach ( $analytics_entries as $id => $analytics_entry ) {
+		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
+			_doing_it_wrong( __FUNCTION__, sprintf( __( 'Analytics entry for %s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
+			continue;
+		}
+
+		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
+			'type' => 'application/json',
+		), json_encode( $analytics_entry['config_data'] ) );
+
+		$amp_analytics_attr = array_merge( array(
+			'id' => $id,
+			'type' => $analytics_entry['type'],
+		), $analytics_entry['attributes'] );
+
+		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element );
+	}
 }

@@ -1,5 +1,8 @@
 <?php
 
+require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
+
 require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
@@ -17,6 +20,7 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php' );
 
 class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
+	const CONTENT_MAX_WIDTH = 600;
 
 	private $template_dir;
 	private $data;
@@ -27,7 +31,10 @@ class AMP_Post_Template {
 		$this->ID = $post_id;
 		$this->post = get_post( $post_id );
 
-		$content_max_width = isset( $GLOBALS['content_width'] ) ? absint( $GLOBALS['content_width'] ) : 600;
+		$content_max_width = self::CONTENT_MAX_WIDTH;
+		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
+			$content_max_width = $GLOBALS['content_width'];
+		}
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
 		$this->data = array(
@@ -43,6 +50,18 @@ class AMP_Post_Template {
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
+
+			/**
+			 * Add amp-analytics tags.
+			 *
+			 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
+			 *
+			 * @since 0.4
+			 *.
+			 * @param	array	$analytics	An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+			 * @param	object	$post	The current post.
+			 */
+			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
 		);
 
 		$this->build_post_content();
@@ -238,12 +257,6 @@ class AMP_Post_Template {
 	}
 
 	private function is_valid_template( $template ) {
-		$template = $this->normalize_path( $template );
-		$content_dir = $this->normalize_path( WP_CONTENT_DIR );
-		if ( 0 !== strpos( $template, $content_dir ) ) {
-			return false;
-		}
-
 		if ( 0 !== validate_file( $template ) ) {
 			return false;
 		}
@@ -253,9 +266,5 @@ class AMP_Post_Template {
 		}
 
 		return true;
-	}
-
-	private function normalize_path( $path ) {
-		return str_replace( array( '/', '\\' ), DIRECTORY_SEPARATOR, $path );
 	}
 }

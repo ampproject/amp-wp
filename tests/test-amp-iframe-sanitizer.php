@@ -18,6 +18,31 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<amp-iframe src="https://example.com/video/132886713" sandbox="allow-scripts allow-same-origin" height="400" layout="fixed-height"></amp-iframe>',
 			),
 
+			'iframe_with_height_only' => array(
+				'<iframe src="https://example.com/video/132886713" height="400"></iframe>',
+				'<amp-iframe src="https://example.com/video/132886713" height="400" sandbox="allow-scripts allow-same-origin" layout="fixed-height"></amp-iframe>',
+			),
+
+			'iframe_with_width_only' => array(
+				'<iframe src="https://example.com/video/132886713" width="600"></iframe>',
+				'<amp-iframe src="https://example.com/video/132886713" sandbox="allow-scripts allow-same-origin" height="400" layout="fixed-height"></amp-iframe>',
+			),
+
+			'iframe_with_100_percent_width' => array(
+				'<iframe src="https://example.com/embed/132886713" width="100%" height="280"></iframe>',
+				'<amp-iframe src="https://example.com/embed/132886713" height="280" sandbox="allow-scripts allow-same-origin" layout="fixed-height"></amp-iframe>',
+			),
+
+			'iframe_with_invalid_frameborder' => array(
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="no"></iframe>',
+				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"></amp-iframe>',
+			),
+
+			'iframe_with_1_frameborder' => array(
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder=1></iframe>',
+				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="1" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"></amp-iframe>',
+			),
+
 			'simple_iframe_with_sandbox' => array(
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" sandbox="allow-same-origin"></iframe>',
 				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" sandbox="allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"></amp-iframe>',
@@ -31,6 +56,11 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			'iframe_with_sizes_attribute_is_overridden' => array(
 				'<iframe src="https://example.com/iframe" width="500" height="281" sizes="(min-width: 100px) 300px, 90vw"></iframe>',
 				'<amp-iframe src="https://example.com/iframe" width="500" height="281" sizes="(min-width: 500px) 500px, 100vw" sandbox="allow-scripts allow-same-origin" class="amp-wp-enforced-sizes"></amp-iframe>',
+			),
+
+			'iframe_with_protocol_relative_url' => array(
+				'<iframe src="//example.com/video/132886713"></iframe>',
+				'<amp-iframe src="https://example.com/video/132886713" sandbox="allow-scripts allow-same-origin" height="400" layout="fixed-height"></amp-iframe>',
 			),
 
 			'multiple_same_iframe' => array(

@@ -7,6 +7,9 @@ require_once( AMP__DIR__ . '/includes/utils/class-amp-image-dimension-extractor.
  * Converts <img> tags to <amp-img> or <amp-anim>
  */
 class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
+	const FALLBACK_WIDTH = 600;
+	const FALLBACK_HEIGHT = 400;
+
 	public static $tag = 'img';
 
 	private static $anim_extension = '.gif';
@@ -31,12 +34,22 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
+
+			// Try to extract dimensions for the image, if not set.
 			if ( ! isset( $new_attributes['width'] ) || ! isset( $new_attributes['height'] ) ) {
 				$dimensions = AMP_Image_Dimension_Extractor::extract( $new_attributes['src'] );
 				if ( is_array( $dimensions ) ) {
 					$new_attributes['width'] = $dimensions[0];
 					$new_attributes['height'] = $dimensions[1];
 				}
+			}
+
+			// Final fallback when we have no dimensions.
+			if ( ! isset( $new_attributes['width'] ) || ! isset( $new_attributes['height'] ) ) {
+				$new_attributes['width'] = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+
+				$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-unknown-size' );
 			}
 
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );

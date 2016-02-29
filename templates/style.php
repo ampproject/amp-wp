@@ -14,8 +14,14 @@ amp-img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
 	max-width: 100%;
 }
 
-/* Generic WP.com reader style */
-.content, .title-bar div {
+.amp-wp-unknown-size img {
+	/** Worst case scenario when we can't figure out dimensions for an image. **/
+	/** Force the image into a box of fixed dimensions and use object-fit to scale. **/
+	object-fit: contain;
+}
+
+/* Template Styles */
+.amp-wp-content, .amp-wp-title-bar div {
 	<?php $content_max_width = absint( $this->get( 'content_max_width' ) ); ?>
 	<?php if ( $content_max_width > 0 ) : ?>
 	max-width: <?php echo sprintf( '%dpx', $content_max_width ); ?>;
@@ -32,7 +38,7 @@ body {
 	padding-bottom: 100px;
 }
 
-.content {
+.amp-wp-content {
 	padding: 16px;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
@@ -40,7 +46,7 @@ body {
 	color: #3d596d;
 }
 
-.title {
+.amp-wp-title {
 	margin: 36px 0 0 0;
 	font-size: 36px;
 	line-height: 1.258;
@@ -48,7 +54,7 @@ body {
 	color: #2e4453;
 }
 
-.meta {
+.amp-wp-meta {
 	margin-bottom: 16px;
 }
 
@@ -72,8 +78,8 @@ a:focus {
 
 
 /* Open Sans */
-.meta,
-nav.title-bar,
+.amp-wp-meta,
+nav.amp-wp-title-bar,
 .wp-caption-text {
 	font-family: "Open Sans", sans-serif;
 	font-size: 15px;
@@ -81,12 +87,12 @@ nav.title-bar,
 
 
 /* Meta */
-ul.meta {
+ul.amp-wp-meta {
 	padding: 24px 0 0 0;
 	margin: 0 0 24px 0;
 }
 
-ul.meta li {
+ul.amp-wp-meta li {
 	list-style: none;
 	display: inline-block;
 	margin: 0;
@@ -97,21 +103,21 @@ ul.meta li {
 	max-width: 300px;
 }
 
-ul.meta li:before {
+ul.amp-wp-meta li:before {
 	content: "\2022";
 	margin: 0 8px;
 }
 
-ul.meta li:first-child:before {
+ul.amp-wp-meta li:first-child:before {
 	display: none;
 }
 
-.meta,
-.meta a {
+.amp-wp-meta,
+.amp-wp-meta a {
 	color: #4f748e;
 }
 
-.meta .screen-reader-text {
+.amp-wp-meta .screen-reader-text {
 	/* from twentyfifteen */
 	clip: rect(1px, 1px, 1px, 1px);
 	height: 1px;
@@ -120,7 +126,7 @@ ul.meta li:first-child:before {
 	width: 1px;
 }
 
-.byline amp-img {
+.amp-wp-byline amp-img {
 	border-radius: 50%;
 	border: 0;
 	background: #f3f6f8;
@@ -131,22 +137,22 @@ ul.meta li:first-child:before {
 
 
 /* Titlebar */
-nav.title-bar {
+nav.amp-wp-title-bar {
 	background: #0a89c0;
 	padding: 0 16px;
 }
 
-nav.title-bar div {
+nav.amp-wp-title-bar div {
 	line-height: 54px;
 	color: #fff;
 }
 
-nav.title-bar a {
+nav.amp-wp-title-bar a {
 	color: #fff;
 	text-decoration: none;
 }
 
-nav.title-bar .site-icon {
+nav.amp-wp-title-bar .amp-wp-site-icon {
 	/** site icon is 32px **/
 	float: left;
 	margin: 11px 8px 0 0;

@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic
 Tags: amp, mobile
 Requires at least: 4.4
 Tested up to: 4.4
-Stable tag: 0.3
+Stable tag: 0.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,17 @@ You can find details about customization options at https://github.com/Automatti
 
 == Changelog ==
 
+= 0.3.1 (Feb 24, 2016) =
+
+* Fix AMP URLs for non-pretty permalinks.
+* Fix for password-protected posts.
+* Fix dimension extraction for schema-less or relative image URLs.
+* Better fallback for images with no dimensions.
+* Validation fixes for `a` tags.
+* Updated AMP boilerplate.
+* Allow `on` tags for elements.
+* Prefixed class names.
+
 = 0.3 (Feb 18, 2016) =
 
 * Fetch dimensions for hotlinked images.
@@ -52,3 +63,15 @@ You can find details about customization options at https://github.com/Automatti
 
 = 0.1 =
 * Initial version
+
+== Upgrade Notice ==
+
+= 0.3.1 =
+
+* Breaking change: `AMP_QUERY_VAR` is now defined right before `amp_init`.
+* Breaking change: class names for elements in the default template were prefixed with `amp-wp-`. Any styles targeting these classes should be updated.
+
+= 0.3 =
+
+* Breaking change: `style.css` no longer contains the `<style> tag. If you have a custom stylesheet, you need to update it to remove the tag.
+* Breaking change: `single.php` no longer includes the AMP boilerplate styles. They are instead added via the `amp_post_template_head` hook. If you have a custom template, please remove the boilerplate styles.
