@@ -473,7 +473,7 @@ class XYZ_AMP_Ad_Injection_Sanitizer extends AMP_Base_Sanitizer {
 		// Otherwise, add it to the end.
 		$p_nodes = $body->getElementsByTagName( 'p' );
 		if ( $p_nodes->length > 6 ) {
-			$p_nodes->item( 4 )->insertBefore( $ad_node );
+			$p_nodes->item( 4 )->parentNode->insertBefore( $ad_node, $p_nodes->item( 4 ));
 		} else {
 			$body->appendChild( $ad_node );
 		}
