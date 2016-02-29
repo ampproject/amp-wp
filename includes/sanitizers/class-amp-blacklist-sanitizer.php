@@ -37,6 +37,12 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
+                                // xml* attributes (like xml:lang) are not allowed
+				if ( 0 === stripos( $attribute_name, 'xml' )) {
+					$node->removeAttributeNS( NULL, $attribute_name );
+					continue;
+                                }
+
 				// on* attributes (like onclick) are a special case
 				if ( 0 === stripos( $attribute_name, 'on' ) && $attribute_name != 'on' ) {
 					$node->removeAttribute( $attribute_name );
