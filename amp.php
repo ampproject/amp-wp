@@ -41,7 +41,7 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
-	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK | EP_PAGES );
+	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK | EP_PAGES | EP_ROOT );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
 	add_post_type_support( 'page', AMP_QUERY_VAR );
 
@@ -52,6 +52,19 @@ function amp_init() {
 	}
 }
 
+function amp_get_category_base() {
+	if ( '' == ($category_base = get_option('category_base',true) ) )
+		return 'category';
+
+	return $category_base;
+}
+
+function amp_get_tag_base() {
+	if ( '' == ($tag_base = get_option('tag_base',true) ) )
+		return 'tag';
+
+	return $tag_base;
+}
 
 function amp_post_link($permalink, $post, $leavename) {
 	return $permalink.'amp/';
@@ -61,10 +74,10 @@ function amp__get_page_link($permalink, $post, $leavename) {
 }
 function amp_term_link($termlink, $term, $taxonomy) {
 	if ($taxonomy == 'category') {
-		return str_replace('/category/','/amp/category/', $termlink);
+		return str_replace('/'.amp_get_category_base().'/','/amp/'.amp_get_category_base().'/', $termlink);
 	}
 	elseif ($taxonomy == 'post_tag') {
-		return str_replace('/tag/','/amp/tag/', $termlink);
+		return str_replace('/'.amp_get_tag_base().'/','/amp/'.amp_get_tag_base().'/', $termlink);
 	}
 	return $termlink;
 }
@@ -74,21 +87,23 @@ function amp_author_link($link, $author_id, $author_nicename) {
 }
 
 function amp_maybe_add_actions() {
-	if ( ( !is_singular() && !is_category() && !is_author()) && !is_tag() || is_feed() ) {
+	if ( ( !is_home() && !is_singular() && !is_category() && !is_author()) && !is_tag() || is_feed() ) {
 		return;
 	}
-
+	
 	$is_amp_endpoint = is_amp_endpoint();
 
 	if ( !$is_amp_endpoint ) return;
-
 
 	add_filter('term_link', 'amp_term_link', 1, 3);
 	add_filter('author_link', 'amp_author_link', 1, 3);
 	add_filter('_get_page_link', 'amp__get_page_link', 1, 3);
 	add_filter('post_link', 'amp_post_link', 1, 3);
 
-	if (get_queried_object() instanceof WP_Term) {
+	if( get_queried_object() === NULL) {
+		set_query_var('amp-type', 'archive');
+	}
+	elseif (get_queried_object() instanceof WP_Term) {
 		set_query_var('amp-type', 'archive');
 	}
 	elseif (get_queried_object() instanceof WP_User) {
@@ -164,8 +179,10 @@ function amp_rewrite_rules( $rules ) {
 
     $newrules = array();
 
+    $newrules["amp/"] = 'index.php?amp=1';
+
     foreach($rules as $key => $value) {
-        if (preg_match('/^(category|tag|author)\//',$key)) $newrules["amp/".$key] = $value.'&amp=1';
+        if (preg_match('/^('.amp_get_category_base().'|'.amp_get_tag_base().'|author)\//',$key)) $newrules["amp/".$key] = $value.'&amp=1';
     }
 
     return $newrules + $rules;
