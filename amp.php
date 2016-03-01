@@ -35,6 +35,8 @@ function amp_init() {
 
 	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 
+	add_filter( 'rewrite_rules_array','amp_rewrite_rules', 1, 1);
+
 	do_action( 'amp_init' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
@@ -49,21 +51,47 @@ function amp_init() {
 	}
 }
 
+
+function amp_post_link($permalink, $post, $leavename) {
+	return $permalink.'amp/';
+}
+function amp__get_page_link($permalink, $post, $leavename) {
+	return $permalink.'amp/';
+}
+function amp_term_link($termlink, $term, $taxonomy) {
+	if ($taxonomy == 'category') {
+		return str_replace('/category/','/amp/category/', $termlink);
+	}
+	elseif ($taxonomy == 'tag') {
+		return str_replace('/tag/','/amp/tag/', $termlink);
+	}
+	return $termlink;
+}
+
+function amp_author_link($link, $author_id, $author_nicename) {
+	return str_replace('/author/','/amp/author/',$link);
+}
+
 function amp_maybe_add_actions() {
-	if ( ( !is_singular() && !is_category() ) || is_feed() ) {
+	if ( ( !is_singular() && !is_category() && !is_author()) || is_feed() ) {
 		return;
 	}
 
 	$is_amp_endpoint = is_amp_endpoint();
 
-	if (is_category() and get_queried_object() instanceof WP_Term) {
+	if ( !$is_amp_endpoint ) return;
 
-		if ( $is_amp_endpoint ) {
-			set_query_var('amp-type', 'archive');
-		}
-		else {
-			return;
-		}
+
+	add_filter('term_link', 'amp_term_link', 1, 3);
+	add_filter('author_link', 'amp_author_link', 1, 3);
+	add_filter('_get_page_link', 'amp__get_page_link', 1, 3);
+	add_filter('post_link', 'amp_post_link', 1, 3);
+
+	if (get_queried_object() instanceof WP_Term) {
+		set_query_var('amp-type', 'archive');
+	}
+	elseif (get_queried_object() instanceof WP_User) {
+		set_query_var('amp-type', 'archive');
 	}
 	else {
 		// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
@@ -129,4 +157,15 @@ function amp_render() {
 
 	$template->load();
 	exit;
+}
+
+function amp_rewrite_rules( $rules ) {
+
+    $newrules = array();
+
+    foreach($rules as $key => $value) {
+        if (preg_match('/^(category|tag|author)\//',$key)) $newrules["amp/".$key] = $value.'&amp=1';
+    }
+
+    return $newrules + $rules;
 }
