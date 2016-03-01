@@ -62,7 +62,7 @@ function amp_term_link($termlink, $term, $taxonomy) {
 	if ($taxonomy == 'category') {
 		return str_replace('/category/','/amp/category/', $termlink);
 	}
-	elseif ($taxonomy == 'tag') {
+	elseif ($taxonomy == 'post_tag') {
 		return str_replace('/tag/','/amp/tag/', $termlink);
 	}
 	return $termlink;
@@ -73,7 +73,7 @@ function amp_author_link($link, $author_id, $author_nicename) {
 }
 
 function amp_maybe_add_actions() {
-	if ( ( !is_singular() && !is_category() && !is_author()) || is_feed() ) {
+	if ( ( !is_singular() && !is_category() && !is_author()) && !is_tag() || is_feed() ) {
 		return;
 	}
 
