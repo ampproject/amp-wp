@@ -14,14 +14,15 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$blacklisted_tags = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
+		$blacklisted_attributes_for_tags = $this->get_blacklisted_attributes_for_tags();
 		$blacklisted_protocols = $this->get_blacklisted_protocols();
 
 		$body = $this->get_body_node();
 		$this->strip_tags( $body, $blacklisted_tags );
-		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
+		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols, $blacklisted_attributes_for_tags );
 	}
 
-	private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {
+	private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols, $bad_attributes_for_tags ) {
 		if ( $node->nodeType !== XML_ELEMENT_NODE ) {
 			return;
 		}
@@ -33,6 +34,20 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$attribute = $node->attributes->item( $i );
 				$attribute_name = strtolower( $attribute->name );
 				if ( in_array( $attribute_name, $bad_attributes ) ) {
+					$node->removeAttribute( $attribute_name );
+					continue;
+				}
+
+				if ( array_key_exists( $node->tagName, $bad_attributes_for_tags) && in_array( $attribute_name, $bad_attributes_for_tags[$node->tagName]) ) {
+					$class = $node->getAttribute( 'class' );
+					$attr_value = $node->getAttribute( $attribute_name );
+					if ($class == NULL) {
+						$new_class = '';
+					} else {
+						$new_class = $class . " ";
+					}
+					$new_class .= $attribute_name . "_" . $attr_value;
+					$node->setAttribute( 'class', $new_class);
 					$node->removeAttribute( $attribute_name );
 					continue;
 				}
@@ -54,7 +69,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $node->childNodes as $child_node ) {
-			$this->strip_attributes_recursive( $child_node, $bad_attributes, $bad_protocols );
+			$this->strip_attributes_recursive( $child_node, $bad_attributes, $bad_protocols, $bad_attributes_for_tags );
 		}
 	}
 
@@ -134,5 +149,28 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		return array(
 			'style',
 		);
+	}
+
+	// The following attributes for specified tags will be moved to classes
+	private function get_blacklisted_attributes_for_tags() {
+		$list_of_attributes = array(
+			'align',
+			'bgcolor',
+			'border',
+			'cellpadding',
+			'cellspacing',
+			'height',
+			'summary',
+			'type',
+			'width',
+		);
+		$blacklisted_attributes_for_tags = array(
+			'div' => $list_of_attributes,
+			'p' => $list_of_attributes,
+			'table' => $list_of_attributes,
+			'td' => $list_of_attributes,
+			'ul' => $list_of_attributes,
+		);
+		return $blacklisted_attributes_for_tags ;
 	}
 }
