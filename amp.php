@@ -93,7 +93,10 @@ function amp_maybe_add_actions() {
 
 	$is_amp_endpoint = is_amp_endpoint();
 
-	if ( !$is_amp_endpoint ) return;
+	if ( !$is_amp_endpoint )  {
+		amp_add_frontend_actions();
+		return;
+	}
 
 	add_filter('term_link', 'amp_term_link', 1, 3);
 	add_filter('author_link', 'amp_author_link', 1, 3);
@@ -128,11 +131,7 @@ function amp_maybe_add_actions() {
 
 	}
 
-	if ( $is_amp_endpoint ) {
-		amp_prepare_render();
-	} else {
-		amp_add_frontend_actions();
-	}
+	amp_prepare_render();
 }
 
 function amp_load_classes() {
