@@ -79,6 +79,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function sanitize_a_attribute( $node, $attribute ) {
+		// TODO: how to keep the text if the URL is invalid
 		$attribute_name = strtolower( $attribute->name );
 
 		if ( 'rel' === $attribute_name ) {
@@ -127,7 +128,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'select',
 			'option',
 			'link',
-			'font',
+			'font', // TODO: figure out if this needs to be removed but keeping the enclosed text
 			'picture',
 
 			// Sanitizers run after embed handlers,

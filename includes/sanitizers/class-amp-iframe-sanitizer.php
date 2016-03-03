@@ -42,6 +42,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// TODO: add a filter to kill the iframe if not https
+
 			$this->did_convert_elements = true;
 
 			$new_attributes = $this->filter_attributes( $old_attributes );

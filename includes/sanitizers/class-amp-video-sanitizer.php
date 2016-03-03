@@ -32,6 +32,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			// TODO: limit child nodes too (only allowed: `source`; move rest to div+fallback)
 			// TODO: `source` does not have closing tag, and DOMDocument doesn't handle it well.
+			// TODO: add a filter to kill the video if the src or any children are not https
 			foreach ( $node->childNodes as $child_node ) {
 				$new_child_node = $child_node->cloneNode( true );
 				$new_node->appendChild( $new_child_node );
