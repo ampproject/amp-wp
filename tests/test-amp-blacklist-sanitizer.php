@@ -87,6 +87,16 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="http://example.com" target="_new">Link</a>',
 				'<a href="http://example.com" target="_blank">Link</a>',
 			),
+
+			'a_with_target_uppercase_blank' => array(
+				'<a href="http://example.com" target="_BLANK">Link</a>',
+				'<a href="http://example.com" target="_blank">Link</a>',
+			),
+
+			'a_with_invalid_target' => array(
+				'<a href="http://example.com" target="_parent">Link</a>',
+				'<a href="http://example.com">Link</a>',
+			),
 		);
 	}
 
