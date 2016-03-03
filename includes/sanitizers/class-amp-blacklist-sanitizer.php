@@ -106,13 +106,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function get_blacklisted_protocols() {
-		return array(
+		return apply_filters( 'amp_blacklisted_protocols', array(
 			'javascript',
-		);
+		) );
 	}
 
 	private function get_blacklisted_tags() {
-		return array(
+		return apply_filters( 'amp_blacklisted_tags', array(
 			'script',
 			'noscript',
 			'style',
@@ -141,14 +141,14 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			//'video',
 			//'audio',
 			//'iframe',
-		);
+		) );
 	}
 
 	private function get_blacklisted_attributes() {
-		return array(
+		return apply_filters( 'amp_blacklisted_attributes', array(
 			'style',
 			'srcset',
 			'size',
-		);
+		) );
 	}
 }
