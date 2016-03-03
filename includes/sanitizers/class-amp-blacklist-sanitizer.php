@@ -127,6 +127,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'select',
 			'option',
 			'link',
+			'font',
+			'picture',
+
+			// Sanitizers run after embed handlers,
+			// so if anything wasn't matched, it needs to be removed.
+			'embed',
+			'embedvideo',
 
 			// These are converted into amp-* versions
 			//'img',
@@ -139,6 +146,8 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_attributes() {
 		return array(
 			'style',
+			'srcset',
+			'size',
 		);
 	}
 }
