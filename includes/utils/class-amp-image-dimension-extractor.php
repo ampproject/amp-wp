@@ -65,13 +65,20 @@ class AMP_Image_Dimension_Extractor {
 		set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
 
 		// Note to other developers: please don't use this class directly as it may not stick around forever...
+		// TODO: look into using curl+stream (https://github.com/willwashburn/FasterImage)
 		if ( ! class_exists( 'FastImage' ) ) {
 			require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
 		}
 
-		// TODO: look into using curl+stream (https://github.com/willwashburn/FasterImage)
-		$image = new FastImage( $url );
-		$dimensions = $image->getSize();
+		// Make certain the image exists first to prevent PHP warnings.
+		$headers = get_headers( $url );
+
+		if ( is_array( $headers ) && stripos( $headers[0], '200 OK' ) ) {
+
+			$image      = new FastImage( $url );
+			$dimensions = $image->getSize();
+
+		}
 
 		if ( ! is_array( $dimensions ) ) {
 			set_transient( $transient_name, $transient_fail, $transient_expiry );
