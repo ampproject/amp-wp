@@ -5,8 +5,12 @@
 add_action( 'pre_amp_render_post', 'jetpack_amp_disable_the_content_filters' );
 
 function jetpack_amp_disable_the_content_filters( $post_id ) {
+	// Shortcode overrides
+	require_once( dirname( __FILE__ ) . '/wpcom/shortcodes.php' );
+
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	add_filter( 'videopress_show_2015_player', '__return_true' );
+
 	remove_filter( 'the_title', 'widont' );
 
 	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
