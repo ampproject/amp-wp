@@ -48,7 +48,10 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 						continue;
 					}
 				} elseif ( 'a' === $node_name ) {
-					$this->sanitize_a_attribute( $node, $attribute );
+					$result = $this->sanitize_a_attribute( $node, $attribute );
+					if ( false === $result ) {
+						// TODO: remove the tag, but keep the contents of the node
+					}
 				}
 			}
 		}
@@ -103,6 +106,8 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$node->removeAttribute( $attribute_name );
 			}
 		}
+
+		return true;
 	}
 
 	private function get_blacklisted_protocols() {
