@@ -131,8 +131,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'font', // TODO: figure out if this needs to be removed but keeping the enclosed text
 			'picture',
 
-			// Sanitizers run after embed handlers,
-			// so if anything wasn't matched, it needs to be removed.
+			// Sanitizers run after embed handlers, so if anything wasn't matched, it needs to be removed.
 			'embed',
 			'embedvideo',
 
