@@ -10,6 +10,7 @@ function jetpack_amp_disable_the_content_filters( $post_id ) {
 
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	add_filter( 'videopress_show_2015_player', '__return_true' );
+	add_filter( 'protected_embeds_use_form_post', '__return_false' );
 
 	remove_filter( 'the_title', 'widont' );
 
