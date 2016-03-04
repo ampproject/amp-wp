@@ -77,11 +77,11 @@ a:focus {
 }
 
 
-/* Open Sans */
+/* UI Fonts */
 .amp-wp-meta,
 nav.amp-wp-title-bar,
 .wp-caption-text {
-	font-family: "Open Sans", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
 	font-size: 15px;
 }
 
