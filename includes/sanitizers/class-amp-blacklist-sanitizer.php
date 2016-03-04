@@ -26,8 +26,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$node_name = $node->nodeName;
+
 		if ( $node->hasAttributes() ) {
-			$node_name = $node->nodeName;
 			$length = $node->attributes->length;
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
 				$attribute = $node->attributes->item( $i );
@@ -48,11 +49,19 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 						continue;
 					}
 				} elseif ( 'a' === $node_name ) {
+					// Sanitize the tag, but remove it entirely if the href is invalid.
+					// Children will be preserved as part of the parent.
 					if ( false === $this->sanitize_a_attribute( $node, $attribute ) ) {
 						$this->replace_node_with_children( $node );
 					}
 				}
 			}
+		}
+
+		// Some nodes may contain valid content but are themselves invalid.
+		// Remove the node but preserve the children.
+ 		if ( 'font' === $node_name ) {
+			$this->replace_node_with_children( $node );
 		}
 
 		foreach ( $node->childNodes as $child_node ) {
@@ -154,7 +163,6 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'select',
 			'option',
 			'link',
-			'font', // TODO: figure out if this needs to be removed but keeping the enclosed text
 			'picture',
 
 			// Sanitizers run after embed handlers, so if anything wasn't matched, it needs to be removed.
