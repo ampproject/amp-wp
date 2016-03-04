@@ -18,9 +18,14 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay="desktop tablet mobile"></amp-audio>',
 			),
 
-			'audio_with_whitelisted_attributes' => array(
-				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="false" muted></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" muted="true"></amp-audio>',
+			'audio_with_whitelisted_attributes__enabled' => array(
+				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="" muted=""></amp-audio>',
+			),
+
+			'audio_with_whitelisted_attributes__disabled' => array(
+				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test"></amp-audio>',
 			),
 
 			'audio_with_blacklisted_attribute' => array(

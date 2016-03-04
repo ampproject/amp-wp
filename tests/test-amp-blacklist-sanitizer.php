@@ -83,8 +83,8 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="http://example.com">Link</a>',
 			),
 
-			'a_with_target_new' => array(
-				'<a href="http://example.com" target="_new">Link</a>',
+			'a_with_target_blank' => array(
+				'<a href="http://example.com" target="_blank">Link</a>',
 				'<a href="http://example.com" target="_blank">Link</a>',
 			),
 
@@ -93,17 +93,27 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="http://example.com" target="_blank">Link</a>',
 			),
 
-			'a_with_invalid_target' => array(
-				'<a href="http://example.com" target="_parent">Link</a>',
+			'a_with_target_new' => array(
+				'<a href="http://example.com" target="_new">Link</a>',
+				'<a href="http://example.com" target="_blank">Link</a>',
+			),
+
+			'a_with_target_self' => array(
+				'<a href="http://example.com" target="_self">Link</a>',
 				'<a href="http://example.com">Link</a>',
 			),
 
-			'a_with_mailto_href' => array(
+			'a_with_target_invalid' => array(
+				'<a href="http://example.com" target="boom">Link</a>',
+				'<a href="http://example.com">Link</a>',
+			),
+
+			'a_with_href_mailto' => array(
 				'<a href="mailto:email@domain.com">Link</a>',
 				'Link',
 			),
 
-			'a_with_invalid_href' => array(
+			'a_with_href_invalid' => array(
 				'<a href="some random text">Link</a>',
 				'Link',
 			),
@@ -111,6 +121,11 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 			'h1_with_size' => array(
 				'<h1 size="1">Headline</h1>',
 				'<h1>Headline</h1>',
+			),
+
+			'font' => array(
+				'<font size="1">Headline</font>',
+				'Headline',
 			),
 		);
 	}

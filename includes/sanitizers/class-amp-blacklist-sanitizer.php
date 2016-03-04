@@ -108,8 +108,10 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			// replace _new with _blank and others should simply be removed.
 			$old_value = strtolower( $attribute->value );
 			if ( '_blank' === $old_value || '_new' === $old_value ) {
+				// _new is not allowed; swap with _blank
 				$node->setAttribute( $attribute_name, '_blank' );
 			} else {
+				// only _blank is allowed
 				$node->removeAttribute( $attribute_name );
 			}
 		} elseif ( 'href' === $attribute_name ) {
