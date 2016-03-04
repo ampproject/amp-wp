@@ -1,3 +1,5 @@
+@import "https://s1.wp.com/i/fonts/merriweather/merriweather.css?v=20160212";
+
 /* Generic WP styling */
 amp-img.alignright { float: right; margin: 0 0 1em 1em; }
 amp-img.alignleft { float: left; margin: 0 1em 1em 0; }
