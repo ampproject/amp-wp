@@ -41,16 +41,14 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 0 === stripos( $attribute_name, 'on' ) && $attribute_name != 'on' ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
-				} elseif ( 'href' === $attribute_name ) {
-					$protocol = strtok( $attribute->value, ':' );
-					if ( in_array( $protocol, $bad_protocols ) ) {
+				} elseif ( 'href' === $attribute_name && 'a' !== $node_name ) {
+					if ( false === $this->is_valid_href( $attribute->value ) ) {
 						$node->removeAttribute( $attribute_name );
 						continue;
 					}
 				} elseif ( 'a' === $node_name ) {
-					$result = $this->sanitize_a_attribute( $node, $attribute );
-					if ( false === $result ) {
-						// TODO: remove the tag, but keep the contents of the node
+					if ( false === $this->sanitize_a_attribute( $node, $attribute ) ) {
+						$this->replace_node_with_children( $node );
 					}
 				}
 			}
@@ -105,9 +103,37 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$node->removeAttribute( $attribute_name );
 			}
+		} elseif ( 'href' === $attribute_name ) {
+			return false;
 		}
 
 		return true;
+	}
+
+	private function is_valid_href( $href ) {
+		$protocol = strtok( $href, ':' );
+		if ( in_array( $protocol, $bad_protocols )
+			|| false === filter_var( $href, FILTER_VALIDATE_URL ) ) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private function replace_node_with_children( $node ) {
+		// If the node has children and also has a parent node,
+		// clone and re-add all the children just before current node.
+		if ( $node->hasChildNodes() && $node->parentNode ) {
+			foreach ( $node->childNodes as $child_node ) {
+				$new_child = $child_node->cloneNode( true );
+				$node->parentNode->insertBefore( $new_child, $node );
+			}
+		}
+
+		// Remove the node from the parent, if defined.
+		if ( $node->parentNode ) {
+			$node->parentNode->removeChild( $node );
+		}
 	}
 
 	private function get_blacklisted_protocols() {
