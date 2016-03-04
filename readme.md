@@ -33,7 +33,7 @@ If you're using a custom theme:
 
 ### Theme Mods
 
-The default template will attempt to draw from various theme mods, such as site icon and background and header color/image, if supported by the active theme.
+The default template will attempt to draw from various theme mods, such as site icon, if supported by the active theme.
 
 #### Site Icon
 
@@ -50,10 +50,6 @@ function xyz_amp_set_site_icon_url( $data ) {
 	return $data;
 }
 ```
-
-#### Custom Header
-
-This needs to be implemented.
 
 #### Logo Only
 
@@ -152,6 +148,7 @@ function xyz_amp_modify_json_metadata( $metadata, $post ) {
 		'height' => 60,
 		'width' => 600,
 	);
+
 	return $metadata;
 }
 ```
@@ -568,7 +565,6 @@ function xyz_amp_set_custom_template( $file, $type, $post ) {
 	}
 	return $file;
 }
-
 ```
 
 We may provide better ways to handle this in the future.
