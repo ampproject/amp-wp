@@ -98,8 +98,13 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="http://example.com">Link</a>',
 			),
 
-			'a_with_invalid_href' => array(
+			'a_with_mailto_href' => array(
 				'<a href="mailto:email@domain.com">Link</a>',
+				'Link',
+			),
+
+			'a_with_invalid_href' => array(
+				'<a href="some random text">Link</a>',
 				'Link',
 			),
 

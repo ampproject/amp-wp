@@ -42,7 +42,8 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 					$node->removeAttribute( $attribute_name );
 					continue;
 				} elseif ( 'href' === $attribute_name && 'a' !== $node_name ) {
-					if ( false === $this->is_valid_href( $attribute->value ) ) {
+					$protocol = strtok( $attribute->value, ':' );
+					if ( in_array( $protocol, $bad_protocols ) ) {
 						$node->removeAttribute( $attribute_name );
 						continue;
 					}
@@ -80,7 +81,6 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function sanitize_a_attribute( $node, $attribute ) {
-		// TODO: how to keep the text if the URL is invalid
 		$attribute_name = strtolower( $attribute->name );
 
 		if ( 'rel' === $attribute_name ) {
@@ -104,20 +104,15 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$node->removeAttribute( $attribute_name );
 			}
 		} elseif ( 'href' === $attribute_name ) {
-			return false;
+			$valid_protocols = array( 'http', 'https' );
+			$protocol = strtok( $attribute->value, ':' );
+			if ( false === filter_var( $attribute->value, FILTER_VALIDATE_URL )
+				|| ! in_array( $protocol, $valid_protocols ) ) {
+				return false;
+			}
 		}
 
 		return true;
-	}
-
-	private function is_valid_href( $href ) {
-		$protocol = strtok( $href, ':' );
-		if ( in_array( $protocol, $bad_protocols )
-			|| false === filter_var( $href, FILTER_VALIDATE_URL ) ) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
 	private function replace_node_with_children( $node ) {
