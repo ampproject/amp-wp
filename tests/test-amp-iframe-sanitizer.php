@@ -100,6 +100,10 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<p>contents<iframe src="https://example.com/video/132886713" width="500" height="281"></iframe><iframe src="https://example.com/video/132886714" width="500" height="281"></iframe></p>',
 				'<p>contents</p><amp-iframe src="https://example.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"></amp-iframe><amp-iframe src="https://example.com/video/132886714" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"></amp-iframe>',
 			),
+			'iframe_protocol_http' => array(
+				'<iframe src="http://example.com/embed/11111" width="700" height="601"></iframe>',
+				''
+			)
 		);
 	}
 
