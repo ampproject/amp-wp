@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic
 Tags: amp, mobile
 Requires at least: 4.4
 Tested up to: 4.4
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,15 +34,28 @@ You can find details about customization options at https://github.com/Automatti
 
 == Changelog ==
 
+= 0.3.2 (Mar 4, 2016) =
+
+* Jetpack Stats support.
+* Better version of Merriweather and use system fonts for sans-serif (props mattmiklic).
+* Move font to stylesheet so it can be more easily overridden (props mattmiklic).
+* Fix: Template loading issues on Windows. (Thanks to everyone who reported this, especially w33zy for pointing out the `validate_file` issue.)
+* Fix: don't run AMP on post comment feeds (props kraftbj).
+* Fix: un-break pagination when using a static home page with multiple pages.
+* Fix: force amp-iframe to use https to validate correctly (props mister-ben).
+* Fix: validation for `target` and `video`/`audio` attributes.
+* Fix: clipped images in galleries (thanks tobaco).
+
 = 0.3.1 (Feb 24, 2016) =
 
-* Fix AMP URLs for non-pretty permalinks.
+* Allow custom query var (props vaurdan).
+* Fix AMP URLs for non-pretty permalinks (props rakuishi).
 * Fix for password-protected posts.
 * Fix dimension extraction for schema-less or relative image URLs.
 * Better fallback for images with no dimensions.
-* Validation fixes for `a` tags.
+* Validation fixes for `a` tags (props kraftbj).
 * Updated AMP boilerplate.
-* Allow `on` tags for elements.
+* Allow `on` tags for elements (props Steven Evatt).
 * Prefixed class names.
 
 = 0.3 (Feb 18, 2016) =
