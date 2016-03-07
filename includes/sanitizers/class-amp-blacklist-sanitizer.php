@@ -115,7 +115,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$node->removeAttribute( $attribute_name );
 			}
 		} elseif ( 'href' === $attribute_name ) {
-			$valid_protocols = array( 'http', 'https' );
+			$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
 			$protocol = strtok( $attribute->value, ':' );
 			if ( false === filter_var( $attribute->value, FILTER_VALIDATE_URL )
 				|| ! in_array( $protocol, $valid_protocols ) ) {
