@@ -115,9 +115,15 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$node->removeAttribute( $attribute_name );
 			}
 		} elseif ( 'href' === $attribute_name ) {
+			// If the href starts with a '/', append the home_url to it for validation purposes.
+			$href = $attribute->value;
+			if ( 0 === stripos( $attribute->value, '/' ) ) {
+				$href = untrailingslashit( get_home_url() ) . $href;
+			}
+
 			$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
-			$protocol = strtok( $attribute->value, ':' );
-			if ( false === filter_var( $attribute->value, FILTER_VALIDATE_URL )
+			$protocol = strtok( $href, ':' );
+			if ( false === filter_var( $href, FILTER_VALIDATE_URL )
 				|| ! in_array( $protocol, $valid_protocols ) ) {
 				return false;
 			}
