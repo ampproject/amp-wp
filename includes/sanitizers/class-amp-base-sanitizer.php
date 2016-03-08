@@ -54,4 +54,29 @@ abstract class AMP_Base_Sanitizer {
 			$attributes[ $key ] = $value;
 		}
 	}
+
+	/**
+	 * Decide if we should remove a src attribute if https is required.
+	 * If not required, the implementing class may want to try and force https instead.
+	 *
+	 * @param string $src
+	 * @param boolean $force_https
+	 * @return string
+	 */
+	public function validate_src_attribute( $src, $force_https = false ) {
+		$protocol = strtok( $src, ':' );
+		if ( 'https' !== $protocol ) {
+			// Check if https is required
+			$https_required = apply_filters( 'amp_require_https_src', false );
+			if ( true === $https_required ) {
+				// Remove the src. Let the implementing class decide what do from here.
+				$src = '';
+			} elseif ( false === $https_required && true === $force_https ) {
+				// Don't remove the src, but force https instead
+				$src = set_url_scheme( $src, 'https' );
+			}
+		}
+
+		return $src;
+	}
 }
