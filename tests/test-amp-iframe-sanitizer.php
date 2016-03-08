@@ -13,6 +13,11 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw"></amp-iframe>',
 			),
 
+			'force_https' => array(
+				'<iframe src="http://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw"></amp-iframe>',
+			),
+
 			'iframe_without_dimensions' => array(
 				'<iframe src="https://example.com/video/132886713"></iframe>',
 				'<amp-iframe src="https://example.com/video/132886713" sandbox="allow-scripts allow-same-origin" height="400" layout="fixed-height"></amp-iframe>',
@@ -110,6 +115,20 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
 		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	public function test__https_required() {
+		$source = '<iframe src="http://example.com/embed/132886713"></iframe>';
+		$expected = '';
+
+		add_filter( 'amp_require_https_src', '__return_true' );
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
