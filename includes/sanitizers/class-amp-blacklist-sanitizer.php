@@ -11,6 +11,12 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
 class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	const PATTERN_REL_WP_ATTACHMENT = '#wp-att-([\d]+)#';
 
+	protected $DEFAULT_ARGS = array(
+		'add_blacklisted_protocols' => array(),
+		'add_blacklisted_tags' => array(),
+		'add_blacklisted_attributes' => array(),
+	);
+
 	public function sanitize() {
 		$blacklisted_tags = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
@@ -148,14 +154,24 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
+	private function merge_defaults_with_args( $key, $values ) {
+		// Merge default values with user specified args
+		if ( ! empty( $this->args[ $key ] )
+			&& is_array( $this->args[ $key ] ) ) {
+			$values = array_merge( $values, $this->args[ $key ] );
+		}
+
+		return $values;
+	}
+
 	private function get_blacklisted_protocols() {
-		return apply_filters( 'amp_blacklisted_protocols', array(
+		return $this->merge_defaults_with_args( 'add_blacklisted_protocols', array(
 			'javascript',
 		) );
 	}
 
 	private function get_blacklisted_tags() {
-		return apply_filters( 'amp_blacklisted_tags', array(
+		return $this->merge_defaults_with_args( 'add_blacklisted_tags', array(
 			'script',
 			'noscript',
 			'style',
@@ -186,7 +202,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function get_blacklisted_attributes() {
-		return apply_filters( 'amp_blacklisted_attributes', array(
+		return $this->merge_defaults_with_args( 'add_blacklisted_attributes', array(
 			'style',
 			'srcset',
 			'size',

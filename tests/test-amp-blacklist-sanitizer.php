@@ -50,7 +50,7 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 
 			'javascript_protocol' => array(
 				'<a href="javascript:alert(\'Hello\');">Click</a>',
-				'<a>Click</a>'
+				'Click'
 			),
 
 			'attribute_recursive' => array(
