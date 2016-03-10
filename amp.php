@@ -98,10 +98,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	add_filter('term_link', 'amp_term_link', 1, 3);
-	add_filter('author_link', 'amp_author_link', 1, 3);
-	add_filter('_get_page_link', 'amp__get_page_link', 1, 3);
-	add_filter('post_link', 'amp_post_link', 1, 3);
+	set_query_var('amp-object', get_queried_object());
 
 	if( get_queried_object() === NULL) {
 		set_query_var('amp-type', 'archive');
@@ -169,6 +166,11 @@ function amp_render() {
 		amp_add_post_template_actions();
 		$template = new AMP_Post_Template( $post_id );
 	}
+
+	add_filter('term_link', 'amp_term_link', 1, 3);
+	add_filter('author_link', 'amp_author_link', 1, 3);
+	add_filter('_get_page_link', 'amp__get_page_link', 1, 3);
+	add_filter('post_link', 'amp_post_link', 1, 3);
 
 	$template->load();
 	exit;

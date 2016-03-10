@@ -11,7 +11,7 @@ class AMP_Archive_Template extends AMP_Common_Template {
         parent::__construct( $post_id );
 
         $this->ID = $post_id;
-        $this->post = get_post( $post_id );
+        $this->post = get_query_var('amp-object');
 
         $content_max_width = self::CONTENT_MAX_WIDTH;
         if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
@@ -19,11 +19,21 @@ class AMP_Archive_Template extends AMP_Common_Template {
         }
         $content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
+        if( $this->post === NULL) {
+            $_canonical = get_term_link($post_id);
+        }
+        elseif ($this->post instanceof WP_Term) {
+            $_canonical = get_term_link($post_id);
+        }
+        elseif ($this->post instanceof WP_User) {
+            $_canonical = get_author_posts_url( $post_id );
+        }
+
         $this->data = array(
             'content_max_width' => $content_max_width,
 
             'document_title' => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // back-compat with 4.3
-            'canonical_url' => get_permalink( $post_id ),
+            'canonical_url' => $_canonical,
             'home_url' => home_url(),
             'blog_name' => get_bloginfo( 'name' ),
 
@@ -43,8 +53,10 @@ class AMP_Archive_Template extends AMP_Common_Template {
              * @param   array   $analytics  An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
              * @param   object  $post   The current post.
              */
-            'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
+            'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $term ),
         );
+
+
     }
 
     public function have_posts() {
