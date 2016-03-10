@@ -11,17 +11,7 @@
 	</style>
 </head>
 <body>
-<nav class="amp-wp-title-bar">
-	<div>
-		<a href="<?php echo esc_url( $this->get( 'home_url' ) ); ?>">
-			<?php $site_icon_url = $this->get( 'site_icon_url' ); ?>
-			<?php if ( $site_icon_url ) : ?>
-				<amp-img src="<?php echo esc_url( $site_icon_url ); ?>" width="32" height="32" class="amp-wp-site-icon"></amp-img>
-			<?php endif; ?>
-			<?php echo esc_html( $this->get( 'blog_name' ) ); ?>
-		</a>
-	</div>
-</nav>
+<?php $this->load_parts( array( 'header-bar' ) ); ?>
 <div class="amp-wp-content">
 	<h1 class="amp-wp-title"><?php echo wp_kses_data( $this->get( 'post_title' ) ); ?></h1>
 	<ul class="amp-wp-meta">
