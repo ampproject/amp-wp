@@ -119,16 +119,32 @@ function amp_render() {
 }
 
 /**
- * Initially drops core panels because of the need to hook to 'plugins_loaded' early.
+ * Bootstraps the AMP customizer.
  *
- * Core panels will be re-added back to the Customizer later if the AMP editor isn't requested.
+ * If the AMP customizer is enabled, initially drop the core widgets and menus panels. If the current
+ * preview page isn't flagged as an AMP template, the core panels will be re-added and the AMP panel
+ * hidden.
  *
- * @internal Must be hooked before priority 10.
- *
- * @access private.
+ * @internal This callback must be hooked before priority 10 on 'plugins_loaded' to properly unhook
+ *           the core panels.
  */
-function _amp_initially_drop_core_panels() {
-	// Drop core Customizer panels.
-	add_filter( 'customize_loaded_components', '__return_empty_array' );
+function _amp_bootstrap_customizer() {
+	/**
+	 * Filter whether to enable the AMP template customizer functionality.
+	 *
+	 * @param bool $enable Whether to enable the AMP customizer. Default true.
+	 */
+	$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
+
+	if ( true === $amp_customizer_enabled ) {
+		// Drop core panels.
+		add_filter( 'customize_loaded_components', '__return_empty_array'     );
+
+		// Initialize AMP customizer
+		add_action( 'customize_register',          'amp_init_customizer', 500 );
+
+		// Add the Appearance > AMP link to the admin menu.
+		add_action( 'admin_menu',                  'amp_add_customizer_link'  );
+	}
 }
-add_action( 'plugins_loaded', '_amp_initially_drop_core_panels', 9 );
+add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
