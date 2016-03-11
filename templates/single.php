@@ -3,7 +3,6 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-	<link href="https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic|Open+Sans:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 	<?php do_action( 'amp_post_template_head', $this ); ?>
 
 	<style amp-custom>
@@ -12,19 +11,9 @@
 	</style>
 </head>
 <body>
-<nav class="amp-wp-title-bar">
-	<div>
-		<a href="<?php echo esc_url( $this->get( 'home_url' ) ); ?>">
-			<?php $site_icon_url = $this->get( 'site_icon_url' ); ?>
-			<?php $classes = $site_icon_url ? 'amp-wp-site-icon' : 'amp-wp-site-icon amp-wp-hidden'; ?>
-			<amp-img src="<?php echo esc_url( $site_icon_url ); ?>" width="32" height="32" class="<?php echo esc_attr( $classes ); ?>"></amp-img>
-
-			<?php echo esc_html( $this->get( 'blog_name' ) ); ?>
-		</a>
-	</div>
-</nav>
+<?php $this->load_parts( array( 'header-bar' ) ); ?>
 <div class="amp-wp-content">
-	<h1 class="amp-wp-title"><?php echo esc_html( $this->get( 'post_title' ) ); ?></h1>
+	<h1 class="amp-wp-title"><?php echo wp_kses_data( $this->get( 'post_title' ) ); ?></h1>
 	<ul class="amp-wp-meta">
 		<?php $this->load_parts( apply_filters( 'amp_post_template_meta_parts', array( 'meta-author', 'meta-time', 'meta-taxonomy' ) ) ); ?>
 	</ul>

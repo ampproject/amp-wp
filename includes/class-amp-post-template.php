@@ -257,7 +257,11 @@ class AMP_Post_Template {
 	}
 
 	private function is_valid_template( $template ) {
-		if ( 0 !== validate_file( $template ) ) {
+		if ( false !== strpos( $template, '..' ) ) {
+			return false;
+		}
+
+		if ( false !== strpos( $template, './' ) ) {
 			return false;
 		}
 

@@ -58,7 +58,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				case 'loop':
 				case 'muted':
 					if ( 'false' !== $value ) {
-						$out[ $name ] = 'true';
+						$out[ $name ] = '';
 					}
 					break;
 				case 'autoplay':

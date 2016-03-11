@@ -23,9 +23,14 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="desktop tablet mobile" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'video_with_whitelisted_attributes' => array(
-				'<video width="300" height="300" src="https://example.com/video.mp4" controls loop muted="false"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="true" loop="true" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+			'video_with_whitelisted_attributes__enabled' => array(
+				'<video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+			),
+
+			'video_with_whitelisted_attributes__disabled' => array(
+				'<video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
 			'video_with_blacklisted_attribute' => array(

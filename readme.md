@@ -28,12 +28,12 @@ If you're using an off-the-shelf theme (like from the WordPress.org Theme Direct
 
 If you're using a custom theme:
 
-- `functions.php` (or a file `require`-ed by `functions.php`).
+- `functions.php` (or via a 'require' call to files that load from `functions.php`).
 - Any of the options above.
 
 ### Theme Mods
 
-The default template will attempt to draw from various theme mods, such as site icon and background and header color/image, if supported by the active theme.
+The default template will attempt to draw from various theme mods, such as site icon, if supported by the active theme.
 
 #### Site Icon
 
@@ -51,17 +51,13 @@ function xyz_amp_set_site_icon_url( $data ) {
 }
 ```
 
-#### Custom Header
-
-This needs to be implemented.
-
 #### Logo Only
 
 If you want to hide the site text and just show a logo, use the `amp_post_template_css` action. The following colours the title bar black, hides the site title, and replaces it with a centered logo:
 
 ```
 add_action( 'amp_post_template_css', 'xyz_amp_additional_css_styles' );
-	
+
 function xyz_amp_additional_css_styles( $amp_template ) {
 	// only CSS here please...
 	?>
@@ -152,6 +148,7 @@ function xyz_amp_modify_json_metadata( $metadata, $post ) {
 		'height' => 60,
 		'width' => 600,
 	);
+
 	return $metadata;
 }
 ```
@@ -473,7 +470,7 @@ class XYZ_AMP_Ad_Injection_Sanitizer extends AMP_Base_Sanitizer {
 		// Otherwise, add it to the end.
 		$p_nodes = $body->getElementsByTagName( 'p' );
 		if ( $p_nodes->length > 6 ) {
-			$p_nodes->item( 4 )->insertBefore( $ad_node );
+			$p_nodes->item( 4 )->parentNode->insertBefore( $ad_node, $p_nodes->item( 4 ));
 		} else {
 			$body->appendChild( $ad_node );
 		}
@@ -546,7 +543,7 @@ Each analytics entry must include a unique array key and the following attribute
 
 ## Custom Post Type Support
 
-By default, the plugin only creates AMP content for posts. You can add support for other post_types like so (assume our post_type slug is `xyz-review`):
+By default, the plugin only creates AMP content for posts. You can add support for other post_types using the post_type parameter used when registering the custom post type (assume our post_type is `xyz-review`):
 
 ```php
 add_action( 'amp_init', 'xyz_amp_add_review_cpt' );
@@ -568,7 +565,6 @@ function xyz_amp_set_custom_template( $file, $type, $post ) {
 	}
 	return $file;
 }
-
 ```
 
 We may provide better ways to handle this in the future.
@@ -588,4 +584,3 @@ If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check
 The following plugins have been known to cause issues with this plugin:
 
 - Cloudflare Rocket Loader (modifies the output of the AMP page, which breaks validation.)
-- WP Rocket (modifies the output of the AMP page, which breaks validation.)
