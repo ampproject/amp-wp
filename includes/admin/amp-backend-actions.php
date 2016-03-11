@@ -17,10 +17,21 @@ function amp_init_customizer( $wp_customize ) {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
+	/**
+	 * Filter the post type to retrieve the latest of for use in the AMP template customizer.
+	 *
+	 * @param string $post_type Post type slug. Default 'post'.
+	 */
+	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
+
+	// If the post type doesn't support AMP, bail.
+	if ( ! post_type_supports( $post_type, 'amp' ) ) {
+		return;
+	}
+
 	$post_id = get_posts( array(
 		'post_status'      => 'publish',
-		'post_type'        => 'post',
-		'orderby'          => 'rand',
+		'post_type'        => $post_type,
 		'posts_per_page'   => 1,
 		'fields'           => 'ids',
 		'suppress_filters' => false
