@@ -10,7 +10,16 @@ require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
  * @param WP_Customize_Manager $wp_customize Customizer instance.
  */
 function init_amp_template_customizer( $wp_customize ) {
-	AMP_Template_Customizer::init( $wp_customize );
+	/**
+	 * Filter whether to enable the AMP Customizer features.
+	 *
+	 * @param bool $enabled Whether the Customizer panel should be enabled.
+	 */
+	$enabled = apply_filters( 'amp_customizer_is_enabled', true );
+
+	if ( true === $enabled && class_exists( 'AMP_Template_Customizer' ) ) {
+		AMP_Template_Customizer::init( $wp_customize );
+	}
 }
 add_action( 'customize_register', 'init_amp_template_customizer', 500 );
 
