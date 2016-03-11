@@ -149,7 +149,7 @@ function _amp_bootstrap_customizer() {
 
 	if ( true === $amp_customizer_enabled ) {
 		// Drop core panels.
-		add_filter( 'customize_loaded_components', '__return_empty_array'     );
+		add_filter( 'customize_loaded_components', '_amp_drop_core_panels'    );
 
 		// Initialize AMP customizer
 		add_action( 'customize_register',          'amp_init_customizer', 500 );
@@ -159,3 +159,15 @@ function _amp_bootstrap_customizer() {
 	}
 }
 add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
+
+/**
+ * Filters the core components to unhook the menus and widgets panels and retain
+ * 'selective_refresh', a component introduced in 4.5.
+ *
+ * @access private
+ *
+ * @return array Array of core Customizer components to keep active.
+ */
+function _amp_drop_core_panels() {
+	return array( 'selective_refresh' );
+}
