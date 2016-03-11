@@ -37,6 +37,10 @@ function amp_add_customizer_link() {
 		'suppress_filters' => false
 	) );
 
+	if ( ! $post_id ) {
+		return;
+	}
+
 	// Teensy little hack on menu_slug, but it works. No redirect!
 	$menu_slug = add_query_arg( array(
 		'autofocus[panel]' => 'amp_template_editor',
