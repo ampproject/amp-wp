@@ -5,23 +5,25 @@
 require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 
 /**
+ * Filter whether to enable the AMP Customizer features.
+ *
+ * @param bool $enabled Whether the Customizer panel should be enabled.
+ */
+$enabled = apply_filters( 'amp_customizer_is_enabled', true );
+
+if ( true === $enabled && class_exists( 'AMP_Template_Customizer' ) ) {
+	add_action( 'customize_register', 'init_amp_template_customizer', 500 );
+	add_action( 'admin_menu',         'amp_customizer_editor_link'        );
+}
+
+/**
  * Instantiates the AMP template editor for the Customizer.
  *
  * @param WP_Customize_Manager $wp_customize Customizer instance.
  */
 function init_amp_template_customizer( $wp_customize ) {
-	/**
-	 * Filter whether to enable the AMP Customizer features.
-	 *
-	 * @param bool $enabled Whether the Customizer panel should be enabled.
-	 */
-	$enabled = apply_filters( 'amp_customizer_is_enabled', true );
-
-	if ( true === $enabled && class_exists( 'AMP_Template_Customizer' ) ) {
-		AMP_Template_Customizer::init( $wp_customize );
-	}
+	AMP_Template_Customizer::init( $wp_customize );
 }
-add_action( 'customize_register', 'init_amp_template_customizer', 500 );
 
 /**
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
@@ -52,4 +54,3 @@ function amp_customizer_editor_link() {
 		$menu_slug
 	);
 }
-add_action( 'admin_menu', 'amp_customizer_editor_link' );
