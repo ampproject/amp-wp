@@ -6,12 +6,14 @@ class AMP_Archive_Template extends AMP_Common_Template {
 
     public $template_dir;
     public $data;
+    public $original_object;
 
     public function __construct( $post_id ) {
         parent::__construct( $post_id );
 
         $this->ID = $post_id;
         $this->post = get_query_var('amp-object');
+        $this->original_object = get_query_var('amp-object');
 
         $content_max_width = self::CONTENT_MAX_WIDTH;
         if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
@@ -56,6 +58,8 @@ class AMP_Archive_Template extends AMP_Common_Template {
             'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $term ),
         );
 
+        $this->build_archive_data();
+
 
     }
 
@@ -81,5 +85,74 @@ class AMP_Archive_Template extends AMP_Common_Template {
 
     public function load() {
         $this->load_parts( array( 'archive' ) );
+    }
+
+    public function build_archive_data() {
+
+        if ($this->original_object instanceof WP_Term) {
+            $post_title = $this->original_object->name;
+            $args = array(
+                'tax_query' => array(
+                    array(
+                        'taxonomy' => $this->original_object->taxonomy,
+                        'field' => 'slug',
+                        'terms' => $this->original_object->slug
+                    )
+                ),
+                'posts_per_page' => 1
+            );
+            $_posts = get_posts($args);
+            $this->post = array_shift($_posts);
+            $this->ID = $this->post->ID;
+        }
+
+        $post_publish_timestamp = get_the_date( 'U', $this->post->ID );
+        $post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
+        $post_publish_timestamp = get_the_date( 'U', $this->ID );
+        $post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
+        $post_author = get_userdata( $this->post->post_author );
+
+        $this->add_data( array(
+            'post' => $this->post,
+            'post_id' => $this->ID,
+            'post_title' => $post_title,
+            'post_publish_timestamp' => $post_publish_timestamp,
+            'post_modified_timestamp' => $post_modified_timestamp,
+            'post_author' => $post_author,
+        ) );
+
+        $metadata = array(
+            '@context' => 'http://schema.org',
+            '@type' => 'BlogPosting',
+            'mainEntityOfPage' => $this->get( 'canonical_url' ),
+            'publisher' => array(
+                '@type' => 'Organization',
+                'name' => $this->get( 'blog_name' ),
+            ),
+            'headline' => $post_title,
+            'datePublished' => date( 'c', $post_publish_timestamp ),
+            'dateModified' => date( 'c', $post_modified_timestamp ),
+            'author' => array(
+                '@type' => 'Person',
+                'name' => $post_author->display_name,
+            ),
+        );
+
+        $site_icon_url = $this->get( 'site_icon_url' );
+        if ( $site_icon_url ) {
+            $metadata['publisher']['logo'] = array(
+                '@type' => 'ImageObject',
+                'url' => $site_icon_url,
+                'height' => self::SITE_ICON_SIZE,
+                'width' => self::SITE_ICON_SIZE,
+            );
+        }
+
+        $image_metadata = $this->get_post_image_metadata();
+        if ( $image_metadata ) {
+            $metadata['image'] = $image_metadata;
+        }
+
+        $this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
     }
 }
