@@ -7,10 +7,39 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL
 			),
-			'simple_url' => array(
+			'url_simple' => array(
 				'https://twitter.com/altjoen/status/118252236836061184' . PHP_EOL,
 				'<p><amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL
-			)
+			),
+			'url_with_big_tweet_id' => array(
+				'https://twitter.com/wordpress/status/705219971425574912' . PHP_EOL,
+				'<p><amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL
+			),
+
+			'shortcode_without_id' => array(
+				'[tweet]' . PHP_EOL,
+				'' . PHP_EOL,
+			),
+			'shortcode_simple' => array(
+				'[tweet 118252236836061184]' . PHP_EOL,
+				'<amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL
+			),
+			'shortcode_with_tweet_attribute' => array(
+				'[tweet tweet=118252236836061184]' . PHP_EOL,
+				'<amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL
+			),
+			'shortcode_with_big_tweet_id' => array(
+				'[tweet 705219971425574912]' . PHP_EOL,
+				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL
+			),
+			'shortcode_with_url' => array(
+				'[tweet https://twitter.com/altjoen/status/118252236836061184]' . PHP_EOL,
+				'<amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL
+			),
+			'shortcode_with_non_numeric_tweet_id' => array(
+				'[tweet abcd]' . PHP_EOL,
+				'' . PHP_EOL
+			),
 		);
 	}
 
