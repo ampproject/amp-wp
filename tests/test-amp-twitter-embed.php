@@ -32,6 +32,10 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'[tweet 705219971425574912]' . PHP_EOL,
 				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL
 			),
+			'shortcode_with_url' => array(
+				'[tweet https://twitter.com/altjoen/status/118252236836061184]' . PHP_EOL,
+				'<amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL
+			),
 			'shortcode_with_non_numeric_tweet_id' => array(
 				'[tweet abcd]' . PHP_EOL,
 				'' . PHP_EOL
