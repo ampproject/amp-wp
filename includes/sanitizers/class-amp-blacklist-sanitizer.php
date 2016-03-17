@@ -121,6 +121,11 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$node->removeAttribute( $attribute_name );
 			}
 		} elseif ( 'href' === $attribute_name ) {
+			// If this is an anchor link, just return true
+			if ( 0 === strpos( $attribute->value, '#' ) ) {
+				return true;
+			}
+
 			// If the href starts with a '/', append the home_url to it for validation purposes.
 			$href = $attribute->value;
 			if ( 0 === stripos( $attribute->value, '/' ) ) {

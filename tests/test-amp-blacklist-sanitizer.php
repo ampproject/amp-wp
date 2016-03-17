@@ -118,6 +118,11 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="/home">Home</a>',
 			),
 
+			'a_with_anchor' => array(
+				'<a href="#section2">Home</a>',
+				'<a href="#section2">Home</a>',
+			),
+
 			'h1_with_size' => array(
 				'<h1 size="1">Headline</h1>',
 				'<h1>Headline</h1>',
