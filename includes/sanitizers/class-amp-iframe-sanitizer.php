@@ -37,8 +37,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
-			$this->did_convert_elements = true;
-
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
 			// If the src doesn't exist, remove the node.
@@ -51,6 +49,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$node->parentNode->removeChild( $node );
 				continue;
 			}
+
+			$this->did_convert_elements = true;
 
 			if ( ! isset( $new_attributes['height'] ) ) {
 				unset( $new_attributes['width'] );
