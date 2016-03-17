@@ -88,10 +88,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$source = '<video width="300" height="300" src="http://example.com/video.mp4"></video>';
 		$expected = '';
 
-		add_filter( 'amp_require_https_src', '__return_true' );
-
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Video_Sanitizer( $dom );
+		$sanitizer = new AMP_Video_Sanitizer( $dom, array(
+			'require_https_src' => true,
+		) );
 		$sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );

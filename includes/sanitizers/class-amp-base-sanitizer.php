@@ -67,11 +67,11 @@ abstract class AMP_Base_Sanitizer {
 		$protocol = strtok( $src, ':' );
 		if ( 'https' !== $protocol ) {
 			// Check if https is required
-			$https_required = apply_filters( 'amp_require_https_src', false );
-			if ( true === $https_required ) {
+			if ( isset( $this->args['require_https_src'] ) && true === $this->args['require_https_src'] ) {
 				// Remove the src. Let the implementing class decide what do from here.
 				$src = '';
-			} elseif ( false === $https_required && true === $force_https ) {
+			} elseif ( ( ! isset( $this->args['require_https_src'] ) || false === $this->args['require_https_src'] )
+				&& true === $force_https ) {
 				// Don't remove the src, but force https instead
 				$src = set_url_scheme( $src, 'https' );
 			}

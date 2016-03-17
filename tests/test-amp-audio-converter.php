@@ -87,10 +87,10 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		$source = '<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>';
 		$expected = '';
 
-		add_filter( 'amp_require_https_src', '__return_true' );
-
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom, array(
+			'require_https_src' => true,
+		) );
 		$sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
