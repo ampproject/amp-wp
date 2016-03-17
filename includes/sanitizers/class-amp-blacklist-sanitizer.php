@@ -48,12 +48,6 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 0 === stripos( $attribute_name, 'on' ) && $attribute_name != 'on' ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
-				} elseif ( 'href' === $attribute_name && 'a' !== $node_name ) {
-					$protocol = strtok( $attribute->value, ':' );
-					if ( in_array( $protocol, $bad_protocols ) ) {
-						$node->removeAttribute( $attribute_name );
-						continue;
-					}
 				} elseif ( 'a' === $node_name ) {
 					// Sanitize the tag, but remove it entirely if the href is invalid.
 					// Children will be preserved as part of the parent.
