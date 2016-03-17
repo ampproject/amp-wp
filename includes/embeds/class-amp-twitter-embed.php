@@ -32,13 +32,17 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			'tweet' => false,
 		) );
 
+		if ( empty( $attr['tweet'] ) && ! empty( $attr[0] ) ) {
+			$attr['tweet'] = $attr[0];
+		}
+
 		$id = false;
-		if ( intval( $attr['tweet'] ) ) {
-			$id = intval( $attr['tweet'] );
+		if ( is_numeric( $attr['tweet'] ) ) {
+			$id = $attr['tweet'];
 		} else {
 			preg_match( self::URL_PATTERN, $attr['tweet'], $matches );
 			if ( isset( $matches[5] ) && intval( $matches[5] ) ) {
-				$id = intval( $matches[5] );
+				$id = $matches[5];
 			}
 
 			if ( empty( $id ) ) {
@@ -63,7 +67,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		$id = false;
 
 		if ( isset( $matches[5] ) && intval( $matches[5] ) ) {
-			$id = intval( $matches[5] );
+			$id = $matches[5];
 		}
 
 		if ( ! $id ) {
