@@ -34,6 +34,14 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 
 		$node_name = $node->nodeName;
 
+		// Some nodes may contain valid content but are themselves invalid.
+		// Remove the node but preserve the children.
+ 		if ( 'font' === $node_name ) {
+			$this->replace_node_with_children( $node );
+		} elseif ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
+			$this->replace_node_with_children( $node );
+		}
+
 		if ( $node->hasAttributes() ) {
 			$length = $node->attributes->length;
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
@@ -49,19 +57,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 					$node->removeAttribute( $attribute_name );
 					continue;
 				} elseif ( 'a' === $node_name ) {
-					// Sanitize the tag, but remove it entirely if the href is invalid.
-					// Children will be preserved as part of the parent.
-					if ( false === $this->sanitize_a_attribute( $node, $attribute ) ) {
-						$this->replace_node_with_children( $node );
-					}
+					$this->sanitize_a_attribute( $node, $attribute );
 				}
 			}
-		}
-
-		// Some nodes may contain valid content but are themselves invalid.
-		// Remove the node but preserve the children.
- 		if ( 'font' === $node_name ) {
-			$this->replace_node_with_children( $node );
 		}
 
 		foreach ( $node->childNodes as $child_node ) {
@@ -114,24 +112,38 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				// only _blank is allowed
 				$node->removeAttribute( $attribute_name );
 			}
-		} elseif ( 'href' === $attribute_name ) {
-			// If this is an anchor link, just return true
-			if ( 0 === strpos( $attribute->value, '#' ) ) {
+		}
+	}
+
+	private function validate_a_node( $node ) {
+		// Get the href attribute
+		$href = $node->getAttribute( 'href' );
+
+		// If no href is set and this isn't an anchor, it's invalid
+		if ( empty( $href ) ) {
+			if ( ! empty( $node->getAttribute( 'name' ) ) ) {
+				// No further validation is required
 				return true;
-			}
-
-			// If the href starts with a '/', append the home_url to it for validation purposes.
-			$href = $attribute->value;
-			if ( 0 === stripos( $attribute->value, '/' ) ) {
-				$href = untrailingslashit( get_home_url() ) . $href;
-			}
-
-			$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
-			$protocol = strtok( $href, ':' );
-			if ( false === filter_var( $href, FILTER_VALIDATE_URL )
-				|| ! in_array( $protocol, $valid_protocols ) ) {
+			} else {
 				return false;
 			}
+		}
+
+		// If this is an anchor link, just return true
+		if ( 0 === strpos( $href, '#' ) ) {
+			return true;
+		}
+
+		// If the href starts with a '/', append the home_url to it for validation purposes.
+		if ( 0 === stripos( $href, '/' ) ) {
+			$href = untrailingslashit( get_home_url() ) . $href;
+		}
+
+		$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
+		$protocol = strtok( $href, ':' );
+		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
+			|| ! in_array( $protocol, $valid_protocols ) ) {
+			return false;
 		}
 
 		return true;
