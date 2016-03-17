@@ -63,7 +63,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @param boolean $force_https
 	 * @return string
 	 */
-	public function validate_src_attribute( $src, $force_https = false ) {
+	public function maybe_enforce_https_src( $src, $force_https = false ) {
 		$protocol = strtok( $src, ':' );
 		if ( 'https' !== $protocol ) {
 			// Check if https is required

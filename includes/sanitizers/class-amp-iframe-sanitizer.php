@@ -97,7 +97,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'src':
-					$out[ $name ] = $this->validate_src_attribute( $value, true );
+					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
 
 				case 'width':

@@ -64,7 +64,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'src':
-					$out[ $name ] = $this->validate_src_attribute( $value );
+					$out[ $name ] = $this->maybe_enforce_https_src( $value );
 					break;
 				case 'width':
 				case 'height':
