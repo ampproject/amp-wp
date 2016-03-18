@@ -26,11 +26,13 @@ class AMP_Template_Customizer {
 	/**
 	 * Initialize the template Customizer feature class.
 	 *
+	 * @static
+	 * @since 0.4
 	 * @access public
 	 *
 	 * @param WP_Customize_Manager $wp_customize Customizer instance.
 	 */
-	public function init( $wp_customize ) {
+	public static function init( $wp_customize ) {
 		$self = new self();
 
 		$self->wp_customize = $wp_customize;
