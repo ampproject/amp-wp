@@ -4,12 +4,15 @@
  *
  * A direct, formed link to the AMP editor in the Customizer is added via
  * {@see amp_customizer_editor_link()} as a submenu to the Appearance menu.
+ *
+ * @since 0.4
  */
 class AMP_Template_Customizer {
 
 	/**
 	 * Customizer instance.
 	 *
+	 * @since 0.4
 	 * @access protected
 	 * @var WP_Customize_Manager $wp_customize
 	 */
@@ -18,6 +21,7 @@ class AMP_Template_Customizer {
 	/**
 	 * AMP template editor panel ID.
 	 *
+	 * @since 0.4
 	 * @access protected
 	 * @var string
 	 */
@@ -52,6 +56,7 @@ class AMP_Template_Customizer {
 	 * is necessary because the filter has to be added in a callback hooked on 'plugins_loaded'
 	 * to fire in time.
 	 *
+	 * @since 0.4
 	 * @access private
 	 */
 	private function _maybe_restore_core_components() {
@@ -81,6 +86,7 @@ class AMP_Template_Customizer {
 	 * Provides a clean, standalone instance-like experience by removing all non-AMP
 	 * registered panels and sections.
 	 *
+	 * @since 0.4
 	 * @access private
 	 */
 	private function _remove_panels_and_sections() {
@@ -105,6 +111,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Sets up the AMP Templates panel and associated Customizer elements and script enqueues.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function set_up_customizer() {
@@ -124,6 +131,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Registers the AMP Template panel.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function register_panel() {
@@ -138,6 +146,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Registers the AMP Template panel sections.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function register_sections() {
@@ -151,6 +160,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Registers settings for customizing AMP templates.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function register_settings() {
@@ -172,6 +182,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Registers controls for customizing AMP templates.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function register_controls() {
@@ -213,6 +224,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Enqueues jQuery inside the AMP template header preview for postMessage purposes.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function enqueue_jquery() {
@@ -222,6 +234,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Fires the 'wp_footer' action in the AMP template footer preview for postMessage purposes.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function fire_wp_footer() {
@@ -232,6 +245,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Enqueues scripts used in the Customizer preview.
 	 *
+	 * @since 0.4
 	 * @access public
 	 */
 	public function enqueue_scripts() {
