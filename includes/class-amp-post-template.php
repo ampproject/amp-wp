@@ -63,7 +63,27 @@ class AMP_Post_Template {
 			 * @param	object	$post	The current post.
 			 */
 			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
-		);
+
+			/**
+			 * Filter AMP Customizer settings.
+			 *
+			 * Third-party devs: Inject your Customizer settings here to make them accessible via the getter
+			 * in your custom style.php template.
+			 *
+			 * Example:
+			 *
+			 *     echo $this->get( 'customizer_settings' )->your_setting_key;
+			 *
+			 * @since 0.4
+			 *
+			 * @param array   $settings Array of AMP Customizer settings.
+			 * @param WP_Post $post     Current post object.
+			 */
+			'customizer_settings' => (object) apply_filters( 'amp_customizer_settings', array(
+				'navbar_background' => get_theme_mod( 'amp_navbar_background' ),
+				'navbar_color'      => get_theme_mod( 'amp_navbar_color' ),
+			), $this->post ),
+ 		);
 
 		$this->build_post_content();
 		$this->build_post_data();
