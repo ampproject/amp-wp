@@ -127,6 +127,8 @@ function amp_render() {
  *
  * @internal This callback must be hooked before priority 10 on 'plugins_loaded' to properly unhook
  *           the core panels.
+ *
+ * @since 0.4
  */
 function _amp_bootstrap_customizer() {
 	/**
@@ -153,6 +155,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
  * Filters the core components to unhook the menus and widgets panels and retain
  * 'selective_refresh', a component introduced in 4.5.
  *
+ * @since 0.4
  * @access private
  *
  * @return array Array of core Customizer components to keep active.
