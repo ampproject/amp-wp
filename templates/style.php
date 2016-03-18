@@ -179,17 +179,17 @@ ul.amp-wp-meta li:first-child:before {
 
 /* Titlebar */
 nav.amp-wp-title-bar {
-	background: <?php echo get_theme_mod( 'amp_navbar_background' ); ?>;
+	background: <?php echo $this->get( 'customizer_settings' )->navbar_background; ?>;
 	padding: 0 16px;
 }
 
 nav.amp-wp-title-bar div {
 	line-height: 54px;
-	color: <?php echo get_theme_mod( 'amp_navbar_color' ); ?>;
+	color: <?php echo $this->get( 'customizer_settings' )->navbar_color; ?>;
 }
 
 nav.amp-wp-title-bar a {
-	color: <?php echo get_theme_mod( 'amp_navbar_color' ); ?>;
+	color: <?php echo $this->get( 'customizer_settings' )->navbar_color; ?>;
 	text-decoration: none;
 }
 
