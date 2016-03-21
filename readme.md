@@ -559,7 +559,7 @@ If you want a custom template for your post type:
 ```
 add_filter( 'amp_post_template_file', 'xyz_amp_set_review_template', 10, 3 );
 
-function xyz_amp_set_custom_template( $file, $type, $post ) {
+function xyz_amp_set_review_template( $file, $type, $post ) {
 	if ( 'single' === $type && 'xyz-review' === $post->post_type ) {
 		$file = dirname( __FILE__ ) . '/templates/my-amp-review-template.php';
 	}
