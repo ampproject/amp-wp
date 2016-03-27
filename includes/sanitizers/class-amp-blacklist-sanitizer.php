@@ -216,7 +216,6 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_attributes() {
 		return $this->merge_defaults_with_args( 'add_blacklisted_attributes', array(
 			'style',
-			'srcset',
 			'size',
 		) );
 	}
