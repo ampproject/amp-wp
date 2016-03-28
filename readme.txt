@@ -1,5 +1,5 @@
 === AMP ===
-Contributors: batmoo, joen, automattic
+Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.4
 Tested up to: 4.4
@@ -33,6 +33,12 @@ Follow along with or contribute to the development of this plugin at https://git
 You can find details about customization options at https://github.com/Automattic/amp-wp/blob/master/readme.md
 
 == Changelog ==
+
+= 0.4 (??? ?, ????) =
+
+- Handle many more validation errors (props bcampeau and alleyinteractive).
+- Nav bar is now it's own template part (props jdevalk).
+- Fix: don't break really large Twitter IDs.
 
 = 0.3.2 (Mar 4, 2016) =
 
