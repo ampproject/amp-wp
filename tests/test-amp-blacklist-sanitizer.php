@@ -50,7 +50,7 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 
 			'javascript_protocol' => array(
 				'<a href="javascript:alert(\'Hello\');">Click</a>',
-				'<a>Click</a>'
+				'Click'
 			),
 
 			'attribute_recursive' => array(
@@ -83,13 +83,18 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="http://example.com">Link</a>',
 			),
 
-			'a_with_target_new' => array(
-				'<a href="http://example.com" target="_new">Link</a>',
+			'a_with_target_blank' => array(
+				'<a href="http://example.com" target="_blank">Link</a>',
 				'<a href="http://example.com" target="_blank">Link</a>',
 			),
 
-			'a_with_target_blank' => array(
+			'a_with_target_uppercase_blank' => array(
+				'<a href="http://example.com" target="_BLANK">Link</a>',
 				'<a href="http://example.com" target="_blank">Link</a>',
+			),
+
+			'a_with_target_new' => array(
+				'<a href="http://example.com" target="_new">Link</a>',
 				'<a href="http://example.com" target="_blank">Link</a>',
 			),
 
@@ -101,6 +106,36 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 			'a_with_target_invalid' => array(
 				'<a href="http://example.com" target="boom">Link</a>',
 				'<a href="http://example.com">Link</a>',
+			),
+
+			'a_with_href_invalid' => array(
+				'<a href="some random text">Link</a>',
+				'Link',
+			),
+
+			'a_with_href_relative' => array(
+				'<a href="/home">Home</a>',
+				'<a href="/home">Home</a>',
+			),
+
+			'a_with_anchor' => array(
+				'<a href="#section2">Home</a>',
+				'<a href="#section2">Home</a>',
+			),
+
+			'a_is_anchor' => array(
+				'<a name="section2"></a>',
+				'<a name="section2"></a>',
+			),
+
+			'h1_with_size' => array(
+				'<h1 size="1">Headline</h1>',
+				'<h1>Headline</h1>',
+			),
+
+			'font' => array(
+				'<font size="1">Headline</font>',
+				'Headline',
 			),
 		);
 	}

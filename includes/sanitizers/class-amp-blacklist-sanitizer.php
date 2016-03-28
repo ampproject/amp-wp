@@ -11,6 +11,12 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
 class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	const PATTERN_REL_WP_ATTACHMENT = '#wp-att-([\d]+)#';
 
+	protected $DEFAULT_ARGS = array(
+		'add_blacklisted_protocols' => array(),
+		'add_blacklisted_tags' => array(),
+		'add_blacklisted_attributes' => array(),
+	);
+
 	public function sanitize() {
 		$blacklisted_tags = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
@@ -26,8 +32,17 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$node_name = $node->nodeName;
+
+		// Some nodes may contain valid content but are themselves invalid.
+		// Remove the node but preserve the children.
+ 		if ( 'font' === $node_name ) {
+			$this->replace_node_with_children( $node );
+		} elseif ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
+			$this->replace_node_with_children( $node );
+		}
+
 		if ( $node->hasAttributes() ) {
-			$node_name = $node->nodeName;
 			$length = $node->attributes->length;
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
 				$attribute = $node->attributes->item( $i );
@@ -41,12 +56,6 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 0 === stripos( $attribute_name, 'on' ) && $attribute_name != 'on' ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
-				} elseif ( 'href' === $attribute_name ) {
-					$protocol = strtok( $attribute->value, ':' );
-					if ( in_array( $protocol, $bad_protocols ) ) {
-						$node->removeAttribute( $attribute_name );
-						continue;
-					}
 				} elseif ( 'a' === $node_name ) {
 					$this->sanitize_a_attribute( $node, $attribute );
 				}
@@ -93,24 +102,88 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			// rev removed from HTML5 spec, which was used by Jetpack Markdown.
 			$node->removeAttribute( $attribute_name );
 		} elseif ( 'target' === $attribute_name ) {
-		       if ( '_blank' === $attribute->value || '_new' === $attribute->value ) {
-			       // _new is not allowed; swap with _blank
-			       $node->setAttribute( $attribute_name, '_blank' );
-		       } else {
-			       // only _blank is allowed
-			       $node->removeAttribute( $attribute_name );
-		       }
+			// _blank is the only allowed value and it must be lowercase.
+			// replace _new with _blank and others should simply be removed.
+			$old_value = strtolower( $attribute->value );
+			if ( '_blank' === $old_value || '_new' === $old_value ) {
+				// _new is not allowed; swap with _blank
+				$node->setAttribute( $attribute_name, '_blank' );
+			} else {
+				// only _blank is allowed
+				$node->removeAttribute( $attribute_name );
+			}
 		}
 	}
 
+	private function validate_a_node( $node ) {
+		// Get the href attribute
+		$href = $node->getAttribute( 'href' );
+
+		// If no href is set and this isn't an anchor, it's invalid
+		if ( empty( $href ) ) {
+			$name_attr = $node->getAttribute( 'name' );
+			if ( ! empty( $name_attr ) ) {
+				// No further validation is required
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		// If this is an anchor link, just return true
+		if ( 0 === strpos( $href, '#' ) ) {
+			return true;
+		}
+
+		// If the href starts with a '/', append the home_url to it for validation purposes.
+		if ( 0 === stripos( $href, '/' ) ) {
+			$href = untrailingslashit( get_home_url() ) . $href;
+		}
+
+		$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
+		$protocol = strtok( $href, ':' );
+		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
+			|| ! in_array( $protocol, $valid_protocols ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private function replace_node_with_children( $node ) {
+		// If the node has children and also has a parent node,
+		// clone and re-add all the children just before current node.
+		if ( $node->hasChildNodes() && $node->parentNode ) {
+			foreach ( $node->childNodes as $child_node ) {
+				$new_child = $child_node->cloneNode( true );
+				$node->parentNode->insertBefore( $new_child, $node );
+			}
+		}
+
+		// Remove the node from the parent, if defined.
+		if ( $node->parentNode ) {
+			$node->parentNode->removeChild( $node );
+		}
+	}
+
+	private function merge_defaults_with_args( $key, $values ) {
+		// Merge default values with user specified args
+		if ( ! empty( $this->args[ $key ] )
+			&& is_array( $this->args[ $key ] ) ) {
+			$values = array_merge( $values, $this->args[ $key ] );
+		}
+
+		return $values;
+	}
+
 	private function get_blacklisted_protocols() {
-		return array(
+		return $this->merge_defaults_with_args( 'add_blacklisted_protocols', array(
 			'javascript',
-		);
+		) );
 	}
 
 	private function get_blacklisted_tags() {
-		return array(
+		return $this->merge_defaults_with_args( 'add_blacklisted_tags', array(
 			'script',
 			'noscript',
 			'style',
@@ -126,18 +199,24 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'select',
 			'option',
 			'link',
+			'picture',
+
+			// Sanitizers run after embed handlers, so if anything wasn't matched, it needs to be removed.
+			'embed',
+			'embedvideo',
 
 			// These are converted into amp-* versions
 			//'img',
 			//'video',
 			//'audio',
 			//'iframe',
-		);
+		) );
 	}
 
 	private function get_blacklisted_attributes() {
-		return array(
+		return $this->merge_defaults_with_args( 'add_blacklisted_attributes', array(
 			'style',
-		);
+			'size',
+		) );
 	}
 }

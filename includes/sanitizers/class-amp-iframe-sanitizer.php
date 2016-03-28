@@ -37,14 +37,20 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
-			if ( ! array_key_exists( 'src', $old_attributes ) ) {
+			$new_attributes = $this->filter_attributes( $old_attributes );
+
+			// If the src doesn't exist, remove the node.
+			// This means that it never existed or was invalidated
+			// while filtering attributes above.
+			//
+			// TODO: add a filter to allow for a fallback element in this instance.
+			// See: https://github.com/ampproject/amphtml/issues/2261
+			if ( empty( $new_attributes['src'] ) ) {
 				$node->parentNode->removeChild( $node );
 				continue;
 			}
 
 			$this->did_convert_elements = true;
-
-			$new_attributes = $this->filter_attributes( $old_attributes );
 
 			if ( ! isset( $new_attributes['height'] ) ) {
 				unset( $new_attributes['width'] );
@@ -91,7 +97,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'src':
-					$out[ $name ] = set_url_scheme( $value, 'https' );
+					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
 
 				case 'width':

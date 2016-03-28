@@ -64,6 +64,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 </audio>',
 				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></source></amp-audio><amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio><amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"></source></amp-audio>'
 			),
+
+			'https_not_required' => array(
+				'<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>',
+				'<amp-audio width="400" height="300" src="http://example.com/audio/file.ogg"></amp-audio>',
+			),
 		);
 	}
 
@@ -74,6 +79,20 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	public function test__https_required() {
+		$source = '<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>';
+		$expected = '';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom, array(
+			'require_https_src' => true,
+		) );
+		$sanitizer->sanitize();
+
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
