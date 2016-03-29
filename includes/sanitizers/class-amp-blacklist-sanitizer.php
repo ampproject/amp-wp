@@ -92,9 +92,14 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		} elseif ( 'rev' === $attribute_name ) {
 			// rev removed from HTML5 spec, which was used by Jetpack Markdown.
 			$node->removeAttribute( $attribute_name );
-		} elseif ( 'target' === $attribute_name && '_new' === $attribute->value ) {
-			// _new is not allowed; swap with _blank
-			$node->setAttribute( $attribute_name, '_blank' );
+		} elseif ( 'target' === $attribute_name ) {
+		       if ( '_blank' === $attribute->value || '_new' === $attribute->value ) {
+			       // _new is not allowed; swap with _blank
+			       $node->setAttribute( $attribute_name, '_blank' );
+		       } else {
+			       // only _blank is allowed
+			       $node->removeAttribute( $attribute_name );
+		       }
 		}
 	}
 

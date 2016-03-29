@@ -27,7 +27,7 @@
 <?php if ($this->have_posts()): ?>
     <?php while($this->have_posts()): $this->the_post(); ?>
         <div class="amp-wp-content">
-            <h1 class="amp-wp-title"><?php echo esc_html( $this->get( 'post_title' ) ); ?></h1>
+            <h1 class="amp-wp-title"><a href="<?php the_permalink(); ?>"><?php echo esc_html( $this->get( 'post_title' ) ); ?></a></h1>
             <ul class="amp-wp-meta">
                 <?php $this->load_parts( apply_filters( 'amp_post_template_meta_parts', array( 'meta-author', 'meta-time', 'meta-taxonomy' ) ) ); ?>
             </ul>

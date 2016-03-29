@@ -120,6 +120,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 					'src' => $image['url'],
 					'width' => $image['width'],
 					'height' => $image['height'],
+					'layout' => 'responsive',
 				)
 			);
 		}
