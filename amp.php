@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: AMP
- * Description: Add AMP support to your WordPress site.
+ * Plugin Name: AMP fork
+ * Description: Add AMP support to your WordPress site. Fork: support pages, tags, authors..
  * Plugin URI: https://github.com/gabrielperez/amp-wp
  * Author: gabrielperezs
  * Author URI: https://www.guero.net
