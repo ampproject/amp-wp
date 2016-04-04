@@ -275,7 +275,7 @@ If you want to add stuff to the head or footer of the default AMP template, use 
 ```php
 add_action( 'amp_post_template_footer', 'xyz_amp_add_pixel' );
 
-function xyz_amp_add_analytics( $amp_template ) {
+function xyz_amp_add_pixel( $amp_template ) {
 	$post_id = $amp_template->get( 'post_id' );
 	?>
 	<amp-pixel src="https://example.com/hi.gif?x=RANDOM"></amp-pixel>
