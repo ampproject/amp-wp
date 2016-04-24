@@ -89,6 +89,8 @@ class AMP_Archive_Template extends AMP_Common_Template {
 
     public function build_archive_data() {
 
+        $args = false;
+
         if ($this->original_object instanceof WP_Term) {
             $post_title = $this->original_object->name;
             $args = array(
@@ -101,8 +103,18 @@ class AMP_Archive_Template extends AMP_Common_Template {
                 ),
                 'posts_per_page' => 1
             );
-            $_posts = get_posts($args);
-            $this->post = array_shift($_posts);
+        }
+        elseif ($this->original_object instanceof WP_User) {
+            $post_title = $this->original_object->display_name;
+            $args = array(
+                'author' => $this->original_object->ID,
+                'posts_per_page' => 1
+            );
+        }
+
+        if ($args) {
+            $_posts = new WP_Query($args);
+            $this->post = array_shift($_posts->posts);
             $this->ID = $this->post->ID;
         }
 
@@ -110,7 +122,6 @@ class AMP_Archive_Template extends AMP_Common_Template {
         $post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
         $post_publish_timestamp = get_the_date( 'U', $this->ID );
         $post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
-        $post_author = get_userdata( $this->post->post_author );
 
         $this->add_data( array(
             'post' => $this->post,
@@ -118,7 +129,7 @@ class AMP_Archive_Template extends AMP_Common_Template {
             'post_title' => $post_title,
             'post_publish_timestamp' => $post_publish_timestamp,
             'post_modified_timestamp' => $post_modified_timestamp,
-            'post_author' => $post_author,
+            'post_author' => $this->post->post_author,
         ) );
 
         $metadata = array(
@@ -134,7 +145,7 @@ class AMP_Archive_Template extends AMP_Common_Template {
             'dateModified' => date( 'c', $post_modified_timestamp ),
             'author' => array(
                 '@type' => 'Person',
-                'name' => $post_author->display_name,
+                'name' => $this->post->post_author,
             ),
         );
 
@@ -153,6 +164,6 @@ class AMP_Archive_Template extends AMP_Common_Template {
             $metadata['image'] = $image_metadata;
         }
 
-        $this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
+        $this->add_data_by_key( 'metadata', apply_filters( 'amp_archive_template_metadata', $metadata, $this->post ) );
     }
 }
