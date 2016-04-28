@@ -37,11 +37,13 @@ class AMP_Post_Template {
 		}
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
+		$canonical_url = apply_filters( 'amp_canonical_url', get_permalink( $post_id ) );
+
 		$this->data = array(
 			'content_max_width' => $content_max_width,
 
 			'document_title' => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // back-compat with 4.3
-			'canonical_url' => get_permalink( $post_id ),
+			'canonical_url' => $canonical_url,
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
 
