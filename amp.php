@@ -43,6 +43,7 @@ function amp_init() {
 	add_post_type_support( 'post', AMP_QUERY_VAR );
 
 	add_action( 'wp', 'amp_maybe_add_actions' );
+	add_action( 'parse_request', 'amp_maybe_preserve_query_var' );
 
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
@@ -75,6 +76,22 @@ function amp_maybe_add_actions() {
 	} else {
 		amp_add_frontend_actions();
 	}
+}
+
+function amp_maybe_preserve_query_var() {
+	if ( has_filter( 'query_string' ) ) {
+		add_filter( 'query_string', 'amp_preserve_query_var' );
+	}
+}
+
+function amp_preserve_query_var( $query_string ) {
+	global $wp;
+
+	if ( isset( $wp->query_vars[ 'amp' ] ) && $wp->query_vars[ 'amp' ] == '' ) {
+		$query_string = $query_string . '&amp';
+	}
+
+	return $query_string;
 }
 
 function amp_load_classes() {
