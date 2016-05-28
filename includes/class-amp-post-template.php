@@ -74,9 +74,8 @@ class AMP_Post_Template {
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
 		} else {
-			_doing_it_wrong( __METHOD__, sprintf( __( 'Called for non-existant key ("%s").', 'amp' ), esc_html( $property ) ), '0.1' );
+			_doing_it_wrong( __METHOD__, sprintf( __( 'Called for nonexistent key ("%s").', 'amp' ), esc_html( $property ) ), '0.1' );
 		}
-
 		return $default;
 	}
 
