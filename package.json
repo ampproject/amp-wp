@@ -1,0 +1,28 @@
+{
+  "name": "amp-wp",
+  "version": "1.0.0",
+  "description": "Required NPM packages for testing AMP pages",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "amp-validator": "^0.1.5",
+    "node-gyp": "^3.3.1",
+    "xml2js": "^0.4.16"
+  },
+  "scripts": {
+    "test": "\"echo \\\"Error: no test specified\\\" && exit 1\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Automattic/amp-wp.git"
+  },
+  "author": "Automattic",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/Automattic/amp-wp/issues"
+  },
+  "homepage": "https://github.com/Automattic/amp-wp#readme"
+}
