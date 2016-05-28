@@ -6,6 +6,7 @@
 #  - wp-cli
 #  - amp-validator (npm install -g node-gyp && npm install -g amp-validator)
 #
+# from within the plugin root director enter 'bash bin/install-amp-validator-test-data.sh' to run the installer
 #####################################################################################
 
 # Check if our test data exists. If it already does not, we will get it from github.
