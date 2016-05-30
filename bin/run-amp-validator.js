@@ -7,38 +7,46 @@
 
 'use strict';
 
+var urlsPassed = 0,
+    urlsFailed = 0;
+
 function puts(error, stdout, stderr) {
 
     if ( error ) {
         console.log("Error:\r");
         console.log(error);
+        urlsFailed++;
         return;
     }
 
     if ( stderr ) {
         console.log("stderr:\r");
         console.log(stderr);
+        urlsFailed++;
         return;
     }
-    console.log( stdout );
+    // console.log( stdout );
     //
-    // var result = JSON.parse(stdout);
-    //
-    // for ( var key in result ) {
-    //
-    //     result = result[key];
-    //
-    //     if ( ! result.success ) {
-    //
-    //         console.log( "Errors for :"+key+"\n"+result.errors );
-    //
-    //     } else {
-    //
-    //         console.log( "Successfully Validated: "+key );
-    //
-    //     }
-    //
-    // }
+
+
+    var result = JSON.parse(stdout);
+
+    for ( var key in result ) {
+
+        result = result[key];
+
+        if ( ! result.success ) {
+            urlsFailed++;
+            // console.log( "Errors for :"+key+"\n"+result.errors );
+
+        } else {
+            urlsPassed++;
+            // console.log( "Successfully Validated: "+key );
+
+        }
+
+    }
+    console.log("Passed: "+ urlsPassed + " Failed: "+ urlsFailed);
 }
 
 /**
@@ -94,7 +102,8 @@ function loadXMLDoc(filePath, localBaseURL) {
 
 var child = require('child_process'),
     exec = child.exec,
-    prompt = require('prompt');
+    prompt = require('prompt'),
+    amp = require('amp-validator');
 
 var promptSchema = {
     properties: {
@@ -117,15 +126,15 @@ prompt.get(promptSchema, function( err, result) {
         console.log('Trailing slashes are not needed, but we took care of that for you');
     }
 
-    var XMLPath = "wptest.xml";
-    var testUrls = loadXMLDoc(XMLPath, localUrl);
+    var XMLPath = "wptest.xml",
+        testUrls = loadXMLDoc(XMLPath, localUrl);
 
     for (var i = 0, len = testUrls.length; i < len; i++) {
         var url = testUrls[i];
-        var cmd = 'amp-validator ' + url;
+        var cmd = 'amp-validator ' + url + " -o json ";
         setTimeout(function(cmd) {
             exec(cmd, puts);
-        }, i*2000,cmd);
+        }, i*3000,cmd);
     }
 
 });
