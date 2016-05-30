@@ -48,10 +48,9 @@ function puts(error, stdout, stderr) {
  * We also might be able to utilize the BETA Node API listed here: https://github.com/ampproject/amphtml/tree/master/validator
  * could not get it to recognize the amp-validator require and ran into url.StartWith not a function errors.
  *
- * TODO: ask the user for their WP base URL
  */
 
-function loadXMLDoc(filePath) {
+function loadXMLDoc(filePath, localBaseURL) {
     var fs = require('fs');
     var xml2js = require('xml2js');
     var urls = [];
@@ -68,7 +67,6 @@ function loadXMLDoc(filePath) {
 
             for (var i=0 , len = items.length; i< len; i++ ) {
                 var item = items[i],
-                    localBaseURL = 'http://auto-amp.dev',
                     postType = item['wp:post_type'][0],
                     postStatus = item['wp:status'][0],
                     postPassword = item['wp:post_password'][0];
@@ -94,15 +92,40 @@ function loadXMLDoc(filePath) {
     } catch (ex) {console.log(ex)}
 }
 
-var exec = require('child_process').exec;
+var child = require('child_process'),
+    exec = child.exec,
+    prompt = require('prompt');
 
-var XMLPath = "wptest.xml";
-var testURLs = loadXMLDoc(XMLPath);
-
-for (var i = 0, len = testURLs.length; i < len; i++) {
-    var url = testURLs[i];
-    var cmd = 'amp-validator ' + url;
-    setTimeout(function(cmd) {
-        exec(cmd, puts);
-    }, i*2000,cmd);
+var promptSchema = {
+    properties: {
+        localUrl: {
+            type:'string',
+            pattern: /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
+            description: 'Enter your local URL (i.e. http://yourTestUrl.com)',
+            message: "That doesn't look like a URL to me!",
+            require: true
+        }
+    }
 }
+
+prompt.start();
+
+prompt.get(promptSchema, function( err, result) {
+    var localUrl = result.localUrl;
+    if (localUrl.substring(localUrl.length-1) == "/") {
+        localUrl = localUrl.substring(0, localUrl.length-1);
+        console.log('Trailing slashes are not needed, but we took care of that for you');
+    }
+
+    var XMLPath = "wptest.xml";
+    var testUrls = loadXMLDoc(XMLPath, localUrl);
+
+    for (var i = 0, len = testUrls.length; i < len; i++) {
+        var url = testUrls[i];
+        var cmd = 'amp-validator ' + url;
+        setTimeout(function(cmd) {
+            exec(cmd, puts);
+        }, i*2000,cmd);
+    }
+
+});

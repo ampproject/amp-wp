@@ -8,6 +8,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "prompt": "^1.0.0",
     "xml2js": "^0.4.16"
   },
   "scripts": {
