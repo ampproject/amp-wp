@@ -37,7 +37,7 @@ function puts(error, stdout, stderr) {
 
         if ( ! result.success ) {
             urlsFailed++;
-            // console.log( "Errors for :"+key+"\n"+result.errors );
+            console.log( "Errors for :"+key+"\n"+result.errors );
 
         } else {
             urlsPassed++;
