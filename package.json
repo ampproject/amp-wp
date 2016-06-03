@@ -2,19 +2,15 @@
   "name": "amp-wp",
   "version": "1.0.0",
   "description": "Required NPM packages for testing AMP pages",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
+  "engines": {
+    "node": "^4.0.0"
   },
   "dependencies": {},
   "devDependencies": {
-    "amp-validator": "^0.1.5",
-    "node-gyp": "^3.3.1",
+    "amp-html": "github:ampproject/amphtml",
+    "commander": "^2.9.0",
     "prompt": "^1.0.0",
     "xml2js": "^0.4.16"
-  },
-  "scripts": {
-    "test": "\"echo \\\"Error: no test specified\\\" && exit 1\""
   },
   "repository": {
     "type": "git",
