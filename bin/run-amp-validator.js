@@ -7,43 +7,8 @@
 
 'use strict';
 
-function puts(error, stdout, stderr) {
-
-    if ( error ) {
-        console.log("Error:\r");
-        console.log(error);
-        return;
-    }
-
-    if ( stderr ) {
-        console.log("stderr:\r");
-        console.log(stderr);
-        return;
-    }
-    console.log( stdout );
-    //
-    // var result = JSON.parse(stdout);
-    //
-    // for ( var key in result ) {
-    //
-    //     result = result[key];
-    //
-    //     if ( ! result.success ) {
-    //
-    //         console.log( "Errors for :"+key+"\n"+result.errors );
-    //
-    //     } else {
-    //
-    //         console.log( "Successfully Validated: "+key );
-    //
-    //     }
-    //
-    // }
-}
-
 /**
  * This parses our XML to gather the links to our posts so we can test them.
- * TODO: Better output and percent completed?
  *
  * We also might be able to utilize the BETA Node API listed here: https://github.com/ampproject/amphtml/tree/master/validator
  * could not get it to recognize the amp-validator require and ran into url.StartWith not a function errors.
@@ -92,13 +57,30 @@ function loadXMLDoc(filePath, localBaseURL) {
     } catch (ex) {console.log(ex)}
 }
 
+var promiseWhile = function(condition, action) {
+    var resolver = Promise.defer();
+
+    var loop = function() {
+        if (!condition()) return resolver.resolve();
+        return Promise.cast(action())
+            .then(loop)
+            .catch(resolver.reject);
+    };
+
+    process.nextTick(loop);
+
+    return resolver.promise;
+};
+
 var child = require('child_process'),
     exec = child.exec,
     prompt = require('prompt'),
-    url = require('url');
+    url = require('url'),
+    Promise = require('bluebird');
 
 const ampValidator = require('amp-html/validator');
 
+//This is the data schema to gather the user's local URL and make sure it is the right format.
 var promptSchema = {
     properties: {
         localUrl: {
@@ -114,32 +96,39 @@ var promptSchema = {
 prompt.start();
 
 prompt.get(promptSchema, function( err, result) {
+
+    //At this point, our user will be prompted for their local install URL
     var localUrl = result.localUrl;
     if (localUrl.substring(localUrl.length-1) == "/") {
         localUrl = localUrl.substring(0, localUrl.length-1);
         console.log('Trailing slashes are not needed, but we took care of that for you');
     }
 
-    var XMLPath = "wptest.xml";
-    var testUrls = loadXMLDoc(XMLPath, localUrl);
+    //Get our XML path and parse the document to gather our post URLs
+    var XMLPath = "wptest.xml",
+        testUrls = loadXMLDoc(XMLPath, localUrl);
 
-    for (var i = 0, len = testUrls.length; i < len; i++) {
-        var url = testUrls[i];
-        console.log(url);
-//         var cmd = 'amp-validator ' + url;
-//         setTimeout(function(cmd) {
-//             exec(cmd, puts);
-//         }, i*2000,cmd);
-        var stringifyUrl;
-        new Promise( function( resolve, reject ) {
-            resolve( stringifyUrl = ampValidator.readFromUrl( url ) );
+    var stringifyUrl,
+        i = 0,
+        len = testUrls.length - 1;
+
+    //This runs our list of URLs through the AMP Validator.
+    promiseWhile(function() {
+       return i < len;
+    }, function() {
+
+        return new Promise( function( resolve, reject ) {
+            var stringifyUrl = ampValidator.readFromUrl( testUrls[i] );
+            resolve( stringifyUrl );
+
         })
             .then( ampValidator.getInstance() )
-            .then((stringifyUrl) => {
+            .then( (stringifyUrl) => {
                 const ourInstance = ampValidator.getInstance()
                     .then((validator) => {
                         const result = validator.validateString(stringifyUrl);
-                        ((result.status === 'PASS') ? console.log : console.error)(url + " returned: " + result.status);
+                        ((result.status === 'PASS') ? console.log : console.error)((i+1)+": " + testUrls[i] + " returned: " + result.status);
+                        i++;
                         for (const error of result.errors) {
                             let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
                                 error.message;
@@ -148,9 +137,10 @@ prompt.get(promptSchema, function( err, result) {
                             }
                             ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                         }
-                    })
-            });
 
-    }
+                    })
+
+            })
+    });
 
 });
