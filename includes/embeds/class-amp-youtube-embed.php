@@ -6,9 +6,23 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' )
 class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'youtu.be';
 	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|playlist|watch[/\#?])|youtu\.be/).*#i';
+	const RATIO = 0.5625;
+
+	protected $DEFAULT_WIDTH = 600;
+	protected $DEFAULT_HEIGHT = 338;
 
 	private static $script_slug = 'amp-youtube';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-youtube-0.1.js';
+
+	function __construct( $args = array() ) {
+		parent::__construct( $args );
+
+		if ( isset( $this->args['content_max_width'] ) ) {
+			$max_width = $this->args['content_max_width'];
+			$this->args['width'] = $max_width;
+			$this->args['height'] = round( $max_width * self::RATIO );
+		}
+	}
 
 	function register_embed() {
 		wp_embed_register_handler( 'amp-youtube', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
