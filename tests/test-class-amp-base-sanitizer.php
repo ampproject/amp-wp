@@ -5,6 +5,7 @@ class AMP_Stub_Sanitizer extends AMP_Base_Sanitizer {
 		return $this->dom;
 	}
 }
+
 class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
@@ -107,6 +108,72 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 	public function test_enforce_sizes_attribute( $source_attributes, $expected_attributes, $args = array() ) {
 		$sanitizer = new AMP_Stub_Sanitizer( new DOMDocument, $args );
 		$returned_attributes = $sanitizer->enforce_sizes_attribute( $source_attributes );
+
+		$this->assertEquals( $expected_attributes, $returned_attributes );
+	}
+}
+
+class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
+	public function get_data() {
+		return array(
+			'both_dimensions_included' => array(
+				array(
+					'width' => 100,
+					'height' => 100,
+				),
+				array(
+					'width' => 100,
+					'height' => 100,
+				),
+			),
+
+			'both_dimensions_missing' => array(
+				array(),
+				array(
+					'height' => 400,
+					'layout' => 'fixed-height',
+				),
+			),
+
+			'both_dimensions_empty' => array(
+				array(
+					'width' => '',
+					'height' => '',
+				),
+				array(
+					'height' => 400,
+					'layout' => 'fixed-height',
+				),
+			),
+
+			'no_width' => array(
+				array(
+					'height' => 100,
+				),
+				array(
+					'height' => 100,
+					'layout' => 'fixed-height',
+				),
+			),
+
+			'no_height' => array(
+				array(
+					'width' => 200,
+				),
+				array(
+					'height' => 400,
+					'layout' => 'fixed-height',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider get_data
+	 */
+	public function test_enforce_fixed_height( $source_attributes, $expected_attributes, $args = array() ) {
+		$sanitizer = new AMP_Stub_Sanitizer( new DOMDocument, $args );
+		$returned_attributes = $sanitizer->enforce_fixed_height( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}

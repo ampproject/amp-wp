@@ -1,6 +1,8 @@
 <?php
 
 abstract class AMP_Base_Sanitizer {
+	const FALLBACK_HEIGHT = 400;
+
 	protected $DEFAULT_ARGS = array();
 
 	protected $dom;
@@ -20,6 +22,19 @@ abstract class AMP_Base_Sanitizer {
 
 	protected function get_body_node() {
 		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
+	}
+
+	public function enforce_fixed_height( $attributes ) {
+		if ( empty( $attributes['height'] ) ) {
+			unset( $attributes['width'] );
+			$attributes['height'] = self::FALLBACK_HEIGHT;
+		}
+
+		if ( empty( $attributes['width'] ) ) {
+			$attributes['layout'] = 'fixed-height';
+		}
+
+		return $attributes;
 	}
 
 	/**
