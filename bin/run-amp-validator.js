@@ -7,6 +7,12 @@
 
 'use strict';
 
+const prompt = require('prompt'),
+    url = require('url'),
+    Promise = require('bluebird'),
+    ampValidator = require('amp-html/validator'),
+    http = require('http');
+
 /**
  * This parses our XML to gather the links to our posts so we can test them.
  *
@@ -50,9 +56,11 @@ function loadXMLDoc(filePath, localBaseURL) {
 
                 }
             }
-            console.log("Hang tight, we are going to test "+postCount+" urls...");
-        });
 
+        });
+        //Control URLs for Testing purposes
+        urls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/failure.html' );
+        urls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/success.html' );
         return urls;
     } catch (ex) {console.log(ex)}
 }
@@ -72,13 +80,45 @@ var promiseWhile = function(condition, action) {
     return resolver.promise;
 };
 
-var child = require('child_process'),
-    exec = child.exec,
-    prompt = require('prompt'),
-    url = require('url'),
-    Promise = require('bluebird');
+function readFromReadable(name, readable) {
+    return new Promise(function(resolve, reject) {
+        const chunks = [];
+        readable.setEncoding('utf8');
+        readable.on('data', (chunk) => { chunks.push(chunk); });
+        readable.on('end', () => { resolve(chunks.join('')); });
+        readable.on('error', (error) => {
+            reject(new Error('Could not read from ' + name + ' - ' + error.message));
+        });
+    });
+}
 
-const ampValidator = require('amp-html/validator');
+function readFromUrl(url) {
+    return new Promise(function(resolve, reject) {
+        const clientModule = url.startsWith('http://') ? http : https;
+        const req = clientModule.request(url, (response) => {
+            if (response.statusCode !== 200) {
+            // https://nodejs.org/api/http.html says: "[...] However, if
+            // you add a 'response' event handler, then you must consume
+            // the data from the response object, either by calling
+            // response.read() whenever there is a 'readable' event, or by
+            // adding a 'data' handler, or by calling the .resume()
+            // method."
+            response.resume();
+            reject(new Error(
+                'Unable to fetch ' + url + ' - HTTP Status ' +
+                response.statusCode));
+            } else {
+                resolve(response);
+            }
+        });
+        req.on('error', (error) => {  // E.g., DNS resolution errors.
+            reject(
+            new Error('Unable to fetch ' + url + ' - ' + error.message));
+        });
+        req.end();
+    })
+    .then(readFromReadable.bind(null, url));
+}
 
 //This is the data schema to gather the user's local URL and make sure it is the right format.
 var promptSchema = {
@@ -108,39 +148,38 @@ prompt.get(promptSchema, function( err, result) {
     var XMLPath = "wptest.xml",
         testUrls = loadXMLDoc(XMLPath, localUrl);
 
-    var stringifyUrl,
-        i = 0,
+    var i = 0,
         len = testUrls.length - 1;
+    console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
 
+    const ourInstance = ampValidator.getInstance();
     //This runs our list of URLs through the AMP Validator.
     promiseWhile(function() {
-       return i < len;
+        return i <= len;
     }, function() {
 
         return new Promise( function( resolve, reject ) {
-            var stringifyUrl = ampValidator.readFromUrl( testUrls[i] );
-            resolve( stringifyUrl );
-
-        })
-            .then( ampValidator.getInstance() )
-            .then( (stringifyUrl) => {
-                const ourInstance = ampValidator.getInstance()
-                    .then((validator) => {
-                        const result = validator.validateString(stringifyUrl);
+            readFromUrl( testUrls[i] )
+                .then( function( response ) {
+                    return ourInstance.then( function(validator) {
+                        const result = validator.validateString(response);
                         ((result.status === 'PASS') ? console.log : console.error)((i+1)+": " + testUrls[i] + " returned: " + result.status);
-                        i++;
+
                         for (const error of result.errors) {
-                            let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
-                                error.message;
+                            let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
                             if (error.specUrl !== null) {
                                 msg += ' (see ' + error.specUrl + ')';
                             }
                             ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                         }
+                        i++;
+                        resolve();
+                    });
 
-                    })
+                });
 
-            })
+        });
+
     });
 
 });
