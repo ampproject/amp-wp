@@ -52,14 +52,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			$this->did_convert_elements = true;
 
-			if ( ! isset( $new_attributes['height'] ) ) {
-				unset( $new_attributes['width'] );
-				$new_attributes['height'] = self::FALLBACK_HEIGHT;
-			}
-
-			if ( ! isset( $new_attributes['width'] ) ) {
-				$new_attributes['layout'] = 'fixed-height';
-			}
+			$new_attributes = $this->enforce_fixed_height( $new_attributes );
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
