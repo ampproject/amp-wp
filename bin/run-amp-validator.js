@@ -7,12 +7,13 @@
 
 'use strict';
 
-const prompt = require('prompt'),
-    Promise = require('bluebird'),
+const Promise = require('bluebird'),
     ampValidator = require('amp-html/validator'),
-    fetch = require('node-fetch');
+    fetch = require('node-fetch'),
+    exec = require('child_process').exec;
 
-//exec = require('child-process').exec()
+//prompt = require('prompt')
+
 /**
  * This parses our XML to gather the links to our posts so we can test them.
  *
@@ -56,8 +57,6 @@ function loadXMLDoc(filePath, localBaseURL) {
 
         });
         //Control URLs for Testing purposes
-        urls = [];
-        urls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/doesnotexist.html' );
         urls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/failure.html' );
         urls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/success.html' );
         return urls;
@@ -79,29 +78,14 @@ var promiseWhile = function(condition, action) {
     return resolver.promise;
 };
 
-//This is the data schema to gather the user's local URL and make sure it is the right format.
-var promptSchema = {
-    properties: {
-        localUrl: {
-            type:'string',
-            pattern: /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
-            description: 'Enter your local URL (i.e. http://yourTestUrl.com)',
-            message: "That doesn't look like a URL to me!",
-            require: true
-        }
+
+//At this point, our user will be prompted for their local install URL
+exec('wp option get siteurl --quiet --skip-plugins=wordpress-importer', (error, stdout, stderr) => {
+    if (error) {
+        console.error(`exec error: ${error}`);
+        return;
     }
-}
-
-prompt.start();
-
-prompt.get(promptSchema, function( err, result) {
-
-    //At this point, our user will be prompted for their local install URL
-    var localUrl = result.localUrl;
-    if (localUrl.substring(localUrl.length-1) == "/") {
-        localUrl = localUrl.substring(0, localUrl.length-1);
-        console.log('Trailing slashes are not needed, but we took care of that for you');
-    }
+    var localUrl = stdout.replace(/(\r\n|\n|\r)/gm,"");
 
     //Get our XML path and parse the document to gather our post URLs
     var XMLPath = "wptest.xml",
