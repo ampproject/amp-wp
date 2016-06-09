@@ -81,14 +81,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			switch ( $name ) {
 				case 'src':
 				case 'alt':
-				case 'width':
-				case 'height':
 				case 'class':
 				case 'srcset':
 				case 'sizes':
 				case 'on':
 					$out[ $name ] = $value;
 					break;
+
+				case 'width':
+				case 'height':
+					$out[ $name ] = $this->sanitize_dimension( $value, $name );
+					break;
+
 				default;
 					break;
 			}

@@ -83,7 +83,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'sandbox':
-				case 'height':
 				case 'class':
 				case 'sizes':
 					$out[ $name ] = $value;
@@ -94,11 +93,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'width':
-					if ( $value === '100%' ) {
-						continue;
-					}
-					$out[ $name ] = $value;
+				case 'height':
+					$out[ $name ] = $this->sanitize_dimension( $value, $name );
 					break;
+
 
 				case 'frameborder':
 					if ( '0' !== $value && '1' !== $value ) {
