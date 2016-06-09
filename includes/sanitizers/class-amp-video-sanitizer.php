@@ -61,9 +61,13 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				case 'src':
 					$out[ $name ] = $this->maybe_enforce_https_src( $value );
 					break;
-				case 'poster':
+
 				case 'width':
 				case 'height':
+					$out[ $name ] = $this->sanitize_dimension( $value, $name );
+					break;
+
+				case 'poster':
 				case 'class':
 				case 'sizes':
 					$out[ $name ] = $value;

@@ -66,8 +66,12 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 				case 'src':
 					$out[ $name ] = $this->maybe_enforce_https_src( $value );
 					break;
+
 				case 'width':
 				case 'height':
+					$out[ $name ] = $this->sanitize_dimension( $value, $name );
+					break;
+
 				case 'class':
 					$out[ $name ] = $value;
 					break;

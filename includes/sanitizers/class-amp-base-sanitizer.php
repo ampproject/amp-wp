@@ -24,6 +24,29 @@ abstract class AMP_Base_Sanitizer {
 		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
 	}
 
+	public function sanitize_dimension( $value, $dimension ) {
+		if ( empty( $value ) ) {
+			return $value;
+		}
+
+		if ( false !== filter_var( $value, FILTER_VALIDATE_INT ) ) {
+			return absint( $value );
+		}
+
+		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
+			return absint( $value );
+		}
+
+		if ( AMP_String_Utils::endswith( $value, '%' ) ) {
+			if ( 'width' === $dimension && isset( $this->args[ 'content_max_width'] ) ) {
+				$percentage = absint( $value ) / 100;
+				return round( $percentage * $this->args[ 'content_max_width'] );
+			}
+		}
+
+		return '';
+	}
+
 	public function enforce_fixed_height( $attributes ) {
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
