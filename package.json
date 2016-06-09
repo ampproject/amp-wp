@@ -9,6 +9,7 @@
   "devDependencies": {
     "amp-html": "github:ampproject/amphtml",
     "bluebird": "^3.4.0",
+    "colors": "^1.1.2",
     "commander": "^2.9.0",
     "node-fetch": "^1.5.3",
     "prompt": "^1.0.0",

@@ -10,9 +10,14 @@
 const Promise = require('bluebird'),
     ampValidator = require('amp-html/validator'),
     fetch = require('node-fetch'),
-    exec = require('child_process').exec;
+    exec = require('child_process').exec,
+    colors = require('colors');
 
-//prompt = require('prompt')
+colors.setTheme({
+    info: 'green',
+    debug: 'blue',
+    error: 'red'
+});
 
 /**
  * This parses our XML to gather the links to our posts so we can test them.
@@ -108,18 +113,22 @@ exec('wp option get siteurl --quiet --skip-plugins=wordpress-importer', (error, 
                         return res.text();
                     } else {
                         var response = (i + 1) + ': Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
-                        console.log(response);
+                        console.log(response.error);
                     }
                 }).then(function(body) {
                     if ( body ) {
                         return ourInstance.then(function (validator) {
                             const result = validator.validateString(body);
-                            ((result.status === 'PASS') ? console.log : console.error)((i + 1) + ": " + testUrls[i] + " returned: " + result.status);
+                            if (result.status === 'PASS') {
+                                console.log( result.status.info + ": " + testUrls[i] );
+                            } else {
+                                console.error( result.status.error + ": " + testUrls[i]);
+                            }
 
                             for (const error of result.errors) {
-                                let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
+                                let msg = ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
                                 if (error.specUrl !== null) {
-                                    msg += ' (see ' + error.specUrl + ')';
+                                    msg += '\n     (see ' + error.specUrl + ')';
                                 }
                                 ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                             }
