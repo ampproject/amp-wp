@@ -7,9 +7,10 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "amp-html": "github:iamchrissmith/amphtml#readFromUrlExports",
+    "amp-html": "github:ampproject/amphtml",
     "bluebird": "^3.4.0",
     "commander": "^2.9.0",
+    "node-fetch": "^1.5.3",
     "prompt": "^1.0.0",
     "xml2js": "^0.4.16"
   },
