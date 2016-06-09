@@ -1,7 +1,7 @@
 # AMP for WordPress Validator
 
 ## Overview
-The AMP for WordPress Validator runs [WP Test data](http://wptest.io) through the [npm package](https://github.com/dorightdigital/amp-validator/) `amp-validator` CLI and returns the results.  This tool contains two parts:
+The AMP for WordPress Validator runs [WP Test data](http://wptest.io) through the AMP Project's validator and returns the results.  This tool contains two parts:
 1) Shell script for Installing the test data and making sure we have the wptext.xml file in our plugin root directory and
 2) Node script to iterate through each post URL and validate them
 
@@ -18,15 +18,14 @@ This will see if the wptest.xml already exists and if it doesn't, it will place 
 ### Validating the Test data
 Requirements:
 - `npm`
-- `node 4.2.1`
 To make sure you have all your packages installed you can run `npm install` on the plugin directory and our package.json file will add the required packages.
 
-The `amp-validator` plugin also requires the use of Node version 4.2.1 (run `nvm install 4.2.1 && nvm use 4.2.1` to switch to that).
-
-Ok, now that our environment is setup properly we can run the program:
+We can run the program:
 `node bin/run-amp-validator.js`
 
 This will get the post URLs from the `wptest.xml` file, replace them with your test url (note: this currently assumes your permalinks are set to "Day and Name"). 
 
-Then it will run each of those URLs through the `amp-validator` command.  If the URL fails it will display the error. At the end it will show you the count of passed/failed posts.  (Note: in order to prevent the node commands from overloading our server, we have a 3 second delay between each url).  
+Then it will run each of those URLs through the validator.
+
+Note: there are currently two test files included as controls (one for success and one for failure).
  
