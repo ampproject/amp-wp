@@ -62,7 +62,10 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		foreach ( $node->childNodes as $child_node ) {
+		$length = $node->childNodes->length;
+		for ( $i = $length - 1; $i >= 0; $i-- ) {
+			$child_node = $node->childNodes->item( $i );
+
 			$this->strip_attributes_recursive( $child_node, $bad_attributes, $bad_protocols );
 		}
 	}
