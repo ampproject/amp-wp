@@ -103,6 +103,8 @@ class AMP_Template_Customizer {
 		// Needed for postMessage purposes.
 		add_action( 'amp_post_template_head',   array( $this, 'enqueue_jquery'  ) );
 		add_action( 'amp_post_template_footer', array( $this, 'fire_wp_footer'  ) );
+
+		do_action( 'amp_customizer_register_ui', $this->wp_customize );
 	}
 
 	/**
@@ -125,6 +127,8 @@ class AMP_Template_Customizer {
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
+
+		do_action( 'amp_customizer_register_settings', $this->wp_customize );
 	}
 
 	/**
