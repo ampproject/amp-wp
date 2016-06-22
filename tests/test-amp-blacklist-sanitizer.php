@@ -137,6 +137,12 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<font size="1">Headline</font>',
 				'Headline',
 			),
+
+			// font is removed so we should check that other elements are checked as well
+			'font_with_other_bad_elements' => array(
+				'<font size="1">Headline</font><span style="color: blue">Span</span>',
+				'Headline<span>Span</span>',
+			),
 		);
 	}
 
