@@ -77,13 +77,12 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 				case 'loop':
 				case 'muted':
+				case 'autoplay':
 					if ( 'false' !== $value ) {
 						$out[ $name ] = '';
 					}
 					break;
-				case 'autoplay':
-					$out[ $name ] = 'desktop tablet mobile';
-					break;
+
 				default;
 					break;
 			}

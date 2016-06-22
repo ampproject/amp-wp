@@ -20,7 +20,12 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'autoplay_attribute' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="desktop tablet mobile" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+			),
+
+			'autoplay_attribute__false' => array(
+				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay="false"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
 			'video_with_whitelisted_attributes__enabled' => array(

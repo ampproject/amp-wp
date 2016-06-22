@@ -72,16 +72,16 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				case 'sizes':
 					$out[ $name ] = $value;
 					break;
+
 				case 'controls':
 				case 'loop':
 				case 'muted':
+				case 'autoplay':
 					if ( 'false' !== $value ) {
 						$out[ $name ] = '';
 					}
 					break;
-				case 'autoplay':
-					$out[ $name ] = 'desktop tablet mobile';
-					break;
+
 				default;
 					break;
 			}
