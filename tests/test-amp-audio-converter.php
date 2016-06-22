@@ -15,7 +15,12 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 			'autoplay_attribute' => array(
 				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay="desktop tablet mobile"></amp-audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay=""></amp-audio>',
+			),
+
+			'autoplay_attribute__false' => array(
+				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay="false"></audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio>',
 			),
 
 			'audio_with_whitelisted_attributes__enabled' => array(
