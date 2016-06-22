@@ -35,7 +35,6 @@ function amp_init() {
 	}
 
 	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
-	amp_add_backend_actions();
 
 	do_action( 'amp_init' );
 
