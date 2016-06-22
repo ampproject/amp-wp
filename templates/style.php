@@ -176,20 +176,19 @@ ul.amp-wp-meta li:first-child:before {
 	margin-right: 6px;
 }
 
-
 /* Titlebar */
 nav.amp-wp-title-bar {
-	background: <?php echo $this->get( 'customizer_settings' )->navbar_background; ?>;
+	background: <?php echo esc_html( $this->get_customizer_setting( 'navbar_background', self::DEFAULT_NAVBAR_BACKGROUND ) ); // not ideal for escaping here, but better than nothing? ?>;
 	padding: 0 16px;
 }
 
 nav.amp-wp-title-bar div {
 	line-height: 54px;
-	color: <?php echo $this->get( 'customizer_settings' )->navbar_color; ?>;
+	color: <?php echo esc_html( $this->get_customizer_setting( 'navbar_color', self::DEFAULT_NAVBAR_COLOR ) ); ?>;
 }
 
 nav.amp-wp-title-bar a {
-	color: <?php echo $this->get( 'customizer_settings' )->navbar_color; ?>;
+	color: <?php echo esc_html( $this->get_customizer_setting( 'navbar_color', self::DEFAULT_NAVBAR_COLOR ) ); ?>;
 	text-decoration: none;
 }
 

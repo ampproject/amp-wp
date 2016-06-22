@@ -15,6 +15,7 @@ define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
+require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
@@ -100,15 +101,6 @@ function amp_add_frontend_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-frontend-actions.php' );
 }
 
-/**
- * Loads the backend actions callbacks.
- *
- * @since 0.3
- */
-function amp_add_backend_actions() {
-	require_once( AMP__DIR__ . '/includes/admin/amp-backend-actions.php' );
-}
-
 function amp_add_post_template_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
 }
@@ -150,27 +142,7 @@ function _amp_bootstrap_customizer() {
 	$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
 
 	if ( true === $amp_customizer_enabled ) {
-		// Drop core panels.
-		add_filter( 'customize_loaded_components', '_amp_drop_core_panels'    );
-
-		// Initialize AMP customizer
-		add_action( 'customize_register',          'amp_init_customizer', 500 );
-
-		// Add the Appearance > AMP link to the admin menu.
-		add_action( 'admin_menu',                  'amp_add_customizer_link'  );
+		amp_init_customizer();
 	}
 }
 add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
-
-/**
- * Filters the core components to unhook the menus and widgets panels and retain
- * 'selective_refresh', a component introduced in 4.5.
- *
- * @since 0.4
- * @access private
- *
- * @return array Array of core Customizer components to keep active.
- */
-function _amp_drop_core_panels() {
-	return array( 'selective_refresh' );
-}

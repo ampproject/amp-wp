@@ -23,6 +23,9 @@ class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
 	const CONTENT_MAX_WIDTH = 600;
 
+	const DEFAULT_NAVBAR_BACKGROUND = '#0a89c0';
+	const DEFAULT_NAVBAR_COLOR = '#fff';
+
 	private $template_dir;
 	private $data;
 
@@ -63,30 +66,11 @@ class AMP_Post_Template {
 			 * @param	object	$post	The current post.
 			 */
 			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
-
-			/**
-			 * Filter AMP Customizer settings.
-			 *
-			 * Third-party devs: Inject your Customizer settings here to make them accessible via the getter
-			 * in your custom style.php template.
-			 *
-			 * Example:
-			 *
-			 *     echo $this->get( 'customizer_settings' )->your_setting_key;
-			 *
-			 * @since 0.4
-			 *
-			 * @param array   $settings Array of AMP Customizer settings.
-			 * @param WP_Post $post     Current post object.
-			 */
-			'customizer_settings' => (object) apply_filters( 'amp_customizer_settings', array(
-				'navbar_background' => get_theme_mod( 'amp_navbar_background' ),
-				'navbar_color'      => get_theme_mod( 'amp_navbar_color' ),
-			), $this->post ),
  		);
 
 		$this->build_post_content();
 		$this->build_post_data();
+		$this->build_customizer_settings();
 
 		$this->data = apply_filters( 'amp_post_template_data', $this->data, $this->post );
 	}
@@ -96,6 +80,15 @@ class AMP_Post_Template {
 			return $this->data[ $property ];
 		} else {
 			_doing_it_wrong( __METHOD__, sprintf( __( 'Called for non-existant key ("%s").', 'amp' ), esc_html( $property ) ), '0.1' );
+		}
+
+		return $default;
+	}
+
+	public function get_customizer_setting( $name, $default = null ) {
+		$settings = $this->get( 'customizer_settings' );
+		if ( ! empty( $settings[ $name ] ) ) {
+			return $settings[ $name ];
 		}
 
 		return $default;
@@ -208,6 +201,30 @@ class AMP_Post_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
+	}
+
+	private function build_customizer_settings() {
+		$settings = array(
+			'navbar_background' => get_theme_mod( 'amp_navbar_background', self::DEFAULT_NAVBAR_BACKGROUND ),
+
+			'navbar_color' => get_theme_mod( 'amp_navbar_color', self::DEFAULT_NAVBAR_COLOR ),
+		);
+
+		/**
+		 * Filter AMP Customizer settings.
+		 *
+		 * Inject your Customizer settings here to make them accessible via the getter in your custom style.php template.
+		 *
+		 * Example:
+		 *
+		 *     echo esc_html( $this->get_customizer_setting( 'your_setting_key', 'your_default_value' ) );
+		 *
+		 * @since 0.4
+		 *
+		 * @param array   $settings Array of AMP Customizer settings.
+		 * @param WP_Post $post     Current post object.
+		 */
+		$this->add_data_by_key( 'customizer_settings', apply_filters( 'amp_customizer_settings', $settings, $this->post ) );
 	}
 
 	/**

@@ -1,16 +1,17 @@
 <?php
 // Callbacks for adding AMP-related things to the admin.
 
-/** AMP_Template_Customizer class */
-require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
-
 /**
  * Sets up the AMP template editor for the Customizer.
- *
- * @param WP_Customize_Manager $wp_customize Customizer instance.
  */
-function amp_init_customizer( $wp_customize ) {
-	AMP_Template_Customizer::init( $wp_customize );
+function amp_init_customizer() {
+	require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
+
+	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
+
+	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );
+
+	add_action( 'admin_menu', 'amp_add_customizer_link' );
 }
 
 /**
@@ -24,7 +25,6 @@ function amp_add_customizer_link() {
 	 */
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
-	// If the post type doesn't support AMP, bail.
 	if ( ! post_type_supports( $post_type, 'amp' ) ) {
 		return;
 	}
