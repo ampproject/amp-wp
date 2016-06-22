@@ -179,17 +179,17 @@ ul.amp-wp-meta li:first-child:before {
 
 /* Titlebar */
 nav.amp-wp-title-bar {
-	background: #0a89c0;
+	background: <?php echo $this->get( 'customizer_settings' )->navbar_background; ?>;
 	padding: 0 16px;
 }
 
 nav.amp-wp-title-bar div {
 	line-height: 54px;
-	color: #fff;
+	color: <?php echo $this->get( 'customizer_settings' )->navbar_color; ?>;
 }
 
 nav.amp-wp-title-bar a {
-	color: #fff;
+	color: <?php echo $this->get( 'customizer_settings' )->navbar_color; ?>;
 	text-decoration: none;
 }
 
@@ -200,6 +200,9 @@ nav.amp-wp-title-bar .amp-wp-site-icon {
 	border-radius: 50%;
 }
 
+nav.amp-wp-title-bar .amp-wp-site-icon.amp-wp-hidden {
+	display: none;
+}
 
 /* Captions */
 .wp-caption-text {
