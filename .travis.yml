@@ -46,6 +46,7 @@ before_script:
   - chmod +x wp-cli.phar
   - sudo mv wp-cli.phar /usr/local/bin/wp
 
-script: phpunit
-script: wp --info
-script: bash bin/install-amp-validator-test-data.sh
+script:
+  - phpunit
+  - wp --info
+  - bash bin/install-amp-validator-test-data.sh
