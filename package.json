@@ -7,8 +7,8 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "amp-html": "github:ampproject/amphtml",
     "bluebird": "^3.4.0",
-    "amp-html": "https://github.com/ampproject/amphtml",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "node-fetch": "^1.5.3",
