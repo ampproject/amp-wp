@@ -12,6 +12,7 @@ env:
 install:
  - npm install npm -g
  - npm install
+ - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
@@ -42,9 +43,9 @@ matrix:
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-  - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
   - chmod +x wp-cli.phar
   - sudo mv wp-cli.phar /usr/local/bin/wp
+  - echo ${PWD}
   - wp --info
   - wp plugin install wordpress-importer --activate
   - wp import wptest.xml --authors=create

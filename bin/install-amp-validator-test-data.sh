@@ -20,7 +20,7 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
-    echo ${PWD##*/}
+    echo ${PWD}
 
     wp plugin install wordpress-importer --activate
 
