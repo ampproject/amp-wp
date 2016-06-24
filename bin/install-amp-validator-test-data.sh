@@ -20,6 +20,12 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
+    result=${PWD##*/}
+
+    printf '%s\n' "${PWD##*/}"
+
+    printf '%q\n' "${PWD##*/}"
+
     wp plugin is-installed wordpress-importer
     INSTALLED=$?
     echo $[INSTALLED]
