@@ -26,16 +26,9 @@ if [ "${TRAVIS}" = "true" ]; then
 
     php wp-cli.phar --info
 
-    chmod +x wp-cli.phar
-    sudo mv wp-cli.phar /usr/local/bin/wp
+    php wp-cli.phar plugin install wordpress-importer --activate
 
-    echo ${PWD}
-
-    wp --info
-
-    wp plugin install wordpress-importer --activate
-
-    wp import wptest.xml --authors=create
+    php wp-cli.phar import wptest.xml --authors=create
 
 
 else
