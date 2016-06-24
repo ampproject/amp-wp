@@ -42,8 +42,9 @@ matrix:
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-  - bash bin/install-amp-validator-test-data.sh
 
-script: phpunit
+script:
+  - phpunit
+  - bash bin/install-amp-validator-test-data.sh
 
 
