@@ -9,10 +9,6 @@ php:
 env:
     - WP_VERSION=latest
 
-install:
- - npm install npm -g
- - npm install
-
 # We are going to need sudo to do what we want
 sudo: required
 
@@ -28,6 +24,7 @@ sudo: required
 # total of four configurations even though we're testing 4 versions of PHP
 # along with 2 versions of WordPress (which would build 8 configs otherwise).
 # This takes half as long to run while still providing adequate coverage.
+
 
 matrix:
   include:
@@ -47,7 +44,6 @@ before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
   - bash bin/install-amp-validator-test-data.sh
 
-script:
-  - phpunit
+script: phpunit
 
 

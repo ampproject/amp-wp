@@ -20,6 +20,10 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
+    npm install npm -g
+
+    npm install
+
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
     echo ${PWD}
