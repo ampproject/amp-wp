@@ -45,8 +45,10 @@ before_script:
   - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
   - chmod +x wp-cli.phar
   - sudo mv wp-cli.phar /usr/local/bin/wp
+  - wp --info
+  - wp plugin install wordpress-importer --activate
+  - wp import wptest.xml --authors=create
 
 script:
   - phpunit
-  - wp --info
-  - bash bin/install-amp-validator-test-data.sh
+
