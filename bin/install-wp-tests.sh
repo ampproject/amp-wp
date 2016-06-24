@@ -13,8 +13,6 @@ WP_VERSION=${5-latest}
 
 WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-/tmp/wordpress/}
-echo ${WP_TESTS_DIR}
-echo ${WP_CORE_DIR}
 
 download() {
     if [ `which curl` ]; then
@@ -45,7 +43,7 @@ install_wp() {
 	if [ -d $WP_CORE_DIR ]; then
 		return;
 	fi
-
+    echo $WP_CORE_DIR
 	mkdir -p $WP_CORE_DIR
 
 	if [ $WP_VERSION == 'latest' ]; then
