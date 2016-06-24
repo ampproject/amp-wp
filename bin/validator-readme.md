@@ -13,7 +13,7 @@ When you setup your test environment, you can easily import the test data by nav
 
 This will see if the wptest.xml already exists and if it doesn't, it will place it in our plugin root.  Then it will ask you if you want to import the test data into your WP install.  If you don't have the test data installed you can select yes and the script will use WP-CLI's `import` function to add that data to your install.
 
-(Note: WP-CLI's `import` requires the `wordpress-importer` plugin to be installed and activated.  If you don't have that installed the script will install and activate it for you.  However, if the plugin is installed but not activated, WP-CLI will error.)
+(Note: WP-CLI's `import` requires the `wordpress-importer` plugin to be installed and activated.  If you don't have that installed the script will install and activate it for you.  **However, if the plugin is installed but not activated, WP-CLI will error.**)
 
 ### Validating the Test data
 Requirements:
