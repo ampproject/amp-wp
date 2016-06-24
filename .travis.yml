@@ -43,4 +43,4 @@ before_script:
   - sudo mv wp-cli.phar /usr/local/bin/wp
 
 script: phpunit
-script: php --info
+script: wp --info
