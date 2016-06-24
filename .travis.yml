@@ -38,7 +38,9 @@ matrix:
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-  - brew install homebrew/php/wp-cli
+  - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+  - chmod +x wp-cli.phar
+  - sudo mv wp-cli.phar /usr/local/bin/wp
 
 script: phpunit
-script: php wp-cli.phar --info
+script: php --info
