@@ -13,6 +13,9 @@ install:
  - npm install npm -g
  - npm install
 
+# We are going to need sudo to do what we want
+sudo: required
+
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
 # so it doesn't need to be re-defined below.
