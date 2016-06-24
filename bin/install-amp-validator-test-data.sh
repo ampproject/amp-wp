@@ -20,19 +20,9 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
-    result=${PWD##*/}
+    echo ${PWD##*/}
 
-    echo result
-
-    wp plugin is-installed wordpress-importer
-    INSTALLED=$?
-    echo $[INSTALLED]
-
-    if [ $[INSTALLED] ] ; then
-
-        printf "Installing and Activating the WordPress importer plugin to handle our data import"
-        wp plugin install wordpress-importer --activate
-    fi
+    wp plugin install wordpress-importer --activate
 
     wp import wptest.xml --authors=create
 
