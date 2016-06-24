@@ -8,6 +8,10 @@ php:
 # WordPress version used in first build configuration.
 env:
     - WP_VERSION=latest
+    - SH=bash
+
+install:
+ - npm install
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
@@ -43,4 +47,4 @@ before_script:
   - sudo mv wp-cli.phar /usr/local/bin/wp
 
 script: phpunit
-script: wp --info
+script: bash bin/install-amp-validator-test-data.sh

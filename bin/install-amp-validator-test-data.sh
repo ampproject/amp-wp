@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -ev
 #
 # WP-AMP Validator Tests Script
 #
@@ -17,10 +18,7 @@ then
 
 fi
 
-printf "Do want to install the Test data or have you already installed it? 'Y' or 'N': "
-read INSTALL
-
-if [ 'Y' = "$INSTALL" ] ; then
+if [ "${TRAVIS}" = "true" ]; then
 
     wp plugin is-installed wordpress-importer
     INSTALLED=$?
@@ -33,5 +31,27 @@ if [ 'Y' = "$INSTALL" ] ; then
     fi
 
     wp import wptest.xml --authors=create
+
+
+else
+
+    printf "Do want to install the Test data or have you already installed it? 'Y' or 'N': "
+    read INSTALL
+
+    if [ 'Y' = "$INSTALL" ] ; then
+
+        wp plugin is-installed wordpress-importer
+        INSTALLED=$?
+        echo $[INSTALLED]
+
+        if [ $[INSTALLED] ] ; then
+
+            printf "Installing and Activating the WordPress importer plugin to handle our data import"
+            wp plugin install wordpress-importer --activate
+        fi
+
+        wp import wptest.xml --authors=create
+
+    fi
 
 fi
