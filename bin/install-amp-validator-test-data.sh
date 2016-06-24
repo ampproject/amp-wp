@@ -27,6 +27,8 @@ if [ "${TRAVIS}" = "true" ]; then
 
     echo ${PWD}
 
+    cd ..
+
     ls
 
     wp --info
