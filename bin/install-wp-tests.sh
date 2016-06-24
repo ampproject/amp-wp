@@ -43,7 +43,7 @@ install_wp() {
 	if [ -d $WP_CORE_DIR ]; then
 		return;
 	fi
-    printf ${WP_CORE_DIR}
+
 	mkdir -p $WP_CORE_DIR
 
 	if [ $WP_VERSION == 'latest' ]; then

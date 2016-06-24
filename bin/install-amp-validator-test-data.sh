@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ev
+set -e
 #
 # WP-AMP Validator Tests Script
 #
@@ -27,7 +27,8 @@ if [ "${TRAVIS}" = "true" ]; then
 
     echo ${PWD}
 
-    cd ..
+    cd tests/
+    #/tmp/wordpress/
 
     ls
 
