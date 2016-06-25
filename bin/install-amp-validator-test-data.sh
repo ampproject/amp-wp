@@ -47,8 +47,6 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp import wptest.xml --authors=create --quiet
 
-    node bin/run-amp-validator.js
-
 else
 
     printf "Do want to install the Test data or have you already installed it? 'Y' or 'N': "

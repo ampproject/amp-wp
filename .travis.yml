@@ -50,5 +50,6 @@ install:
 script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
+  - node bin/run-amp-validator.js
 
 

@@ -66,12 +66,14 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     const ourInstance = ampValidator.getInstance();
     //This runs our list of URLs through the AMP Validator.
     promiseWhile(function() {
+        console.log('Inside promiseWhile');
         return i <= len;
     }, function() {
-
+        console.log('Inside promiseWhile function');
         return new Promise( function( resolve, reject ) {
             fetch( testUrls[i] )
                 .then( function( res ) {
+                    console.log('Inside fetch then');
                     if ( res.ok ) {
                         return res.text();
                     } else {
@@ -79,7 +81,9 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         console.error(response.error);
                     }
                 }).then(function(body) {
+                    console.log('Inside fetch then then');
                     if ( body ) {
+                        console.log('Inside if body');
                         return ourInstance.then(function (validator) {
                             const result = validator.validateString(body);
                             if (result.status === 'PASS') {
