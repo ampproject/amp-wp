@@ -8,6 +8,7 @@ php:
 # WordPress version used in first build configuration.
 env:
     - WP_VERSION=latest
+    - TRAVIS_NODE_VERSION="4"
 
 # We are going to need sudo to do what we want
 sudo: required
