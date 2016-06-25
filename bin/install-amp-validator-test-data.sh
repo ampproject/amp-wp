@@ -33,6 +33,8 @@ if [ "${TRAVIS}" = "true" ]; then
 
     echo ${PWD}
 
+    wp core download
+
     wp core install --url=http://auto-amp.dev --skip-email
 
     wp --info
