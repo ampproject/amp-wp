@@ -66,7 +66,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     const ourInstance = ampValidator.getInstance();
     //This runs our list of URLs through the AMP Validator.
     promiseWhile(function() {
-        return i <= len;*/
+        return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
             fetch( testUrls[i] )
@@ -105,6 +105,8 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         resolve();
                     }
 
+                }).catch( function(e) {
+                    throw e;
                 });
 
         });
