@@ -24,20 +24,20 @@ sudo: required
 # along with 2 versions of WordPress (which would build 8 configs otherwise).
 # This takes half as long to run while still providing adequate coverage.
 
-
-matrix:
-  include:
-   - php: "nightly"
-     env: WP_VERSION=latest
-   - php: "nightly"
-     env: WP_VERSION=4.4
-   - php: "5.2"
-     env: WP_VERSION=latest
-   - php: "5.2"
-     env: WP_VERSION=4.4
-     # 5.6 / latest already included above as first build.
-   - php: "5.6"
-     env: WP_VERSION=4.4
+#
+#matrix:
+#  include:
+#   - php: "nightly"
+#     env: WP_VERSION=latest
+#   - php: "nightly"
+#     env: WP_VERSION=4.4
+#   - php: "5.2"
+#     env: WP_VERSION=latest
+#   - php: "5.2"
+#     env: WP_VERSION=4.4
+#     # 5.6 / latest already included above as first build.
+#   - php: "5.6"
+#     env: WP_VERSION=4.4
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION

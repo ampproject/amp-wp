@@ -76,7 +76,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         return res.text();
                     } else {
                         var response = (i + 1) + ': Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
-                        console.log(response.error);
+                        console.error(response.error);
                     }
                 }).then(function(body) {
                     if ( body ) {
