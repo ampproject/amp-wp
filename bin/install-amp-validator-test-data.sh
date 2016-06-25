@@ -37,7 +37,7 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp core config --dbname=wordpress_test --dbuser=root
 
-    wp core install --url=http://auto-amp.dev --skip-email
+    wp core install --url=http://auto-amp.dev --title=Test --admin_user=admin --admin_password=password -admin_email=test@test.com --skip-email
 
     wp --info
 
