@@ -20,6 +20,9 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
+    curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+
     cd ..
     #/tmp/wordpress/
 
@@ -37,13 +40,11 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp core install --url=http://auto-amp.dev --title=Test --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email
 
-    wp --info
-
-    wp plugin install wordpress-importer --activate
-
     mv ../amp-wp wp-content/plugins
 
     wp plugin activate amp-wp
+
+    wp plugin install wordpress-importer --activate
 
     cd wp-content/plugins/amp-wp
 
