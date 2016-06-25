@@ -37,7 +37,7 @@ var promiseWhile = function(condition, action) {
 
 
 //run a WP-CLI command to collect our installs post URLS and test them
-exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer', function(error, stdout, stderr) {
+exec('php wp-cli.phar post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer', function(error, stdout, stderr) {
     if (error) {
         console.error('exec error: '+error);
         return;
