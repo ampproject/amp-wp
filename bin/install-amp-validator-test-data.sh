@@ -20,7 +20,8 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
-    curl https://raw.githubusercontent.com/creationix/nvm/v0.11.1/install.sh | bash
+    apt-get install git
+
     nvm install v4.2.1
     nvm use v4.2.1
 
