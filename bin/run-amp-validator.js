@@ -88,7 +88,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                                 console.error( result.status.error + ": " + testUrls[i]);
                             }
 
-                            for (const error of result.errors) {
+                            for (var error of result.errors) {
                                 let msg = ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
                                 if (error.specUrl !== null) {
                                     msg += '\n     (see ' + error.specUrl + ')';

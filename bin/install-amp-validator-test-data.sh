@@ -49,7 +49,7 @@ if [ "${TRAVIS}" = "true" ]; then
 
     cd wp-content/plugins/amp-wp
 
-    wp import wptest.xml --authors=create
+    wp import wptest.xml --authors=create --quiet
 
 
 else
