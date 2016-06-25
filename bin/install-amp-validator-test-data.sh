@@ -31,8 +31,6 @@ if [ "${TRAVIS}" = "true" ]; then
     chmod +x wp-cli.phar
     sudo mv wp-cli.phar /usr/local/bin/wp
 
-    echo ${PWD}
-
     wp core download --version=${WP_VERSION}
 
     wp core config --dbname=wordpress_test --dbuser=root
