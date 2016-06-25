@@ -47,6 +47,7 @@ script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
   - node -v
+  - which node
   - node --harmony bin/run-amp-validator.js
 
 
