@@ -29,22 +29,23 @@ if [ "${TRAVIS}" = "true" ]; then
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
     chmod +x wp-cli.phar
+    sudo mv wp-cli.phar /usr/local/bin/wp
 
-    php wp-cli.phar core download --version=${WP_VERSION}
+    wp core download --version=${WP_VERSION}
 
-    php wp-cli.phar core config --dbname=wordpress_test --dbuser=root
+    wp core config --dbname=wordpress_test --dbuser=root
 
-    php wp-cli.phar core install --url=http://auto-amp.dev --title=Test --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email
+    wp core install --url=http://auto-amp.dev --title=Test --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email
 
     mv ../amp-wp wp-content/plugins
 
-    php wp-cli.phar plugin activate amp-wp
+    wp plugin activate amp-wp
 
-    php wp-cli.phar plugin install wordpress-importer --activate
+    wp plugin install wordpress-importer --activate
 
     cd wp-content/plugins/amp-wp
 
-    php wp-cli.phar import wptest.xml --authors=create --quiet
+    wp import wptest.xml --authors=create --quiet
 
 
 else
