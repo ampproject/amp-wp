@@ -14,6 +14,7 @@
     "node-fetch": "^1.5.3",
     "promise": "^7.1.1",
     "prompt": "^1.0.0",
+    "url": "^0.11.0",
     "xml2js": "^0.4.16"
   },
   "repository": {
