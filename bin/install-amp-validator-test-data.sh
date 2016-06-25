@@ -20,11 +20,6 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
-    apt-get install git
-
-    nvm install v4.2.1
-    nvm use v4.2.1
-
     cd ..
     #/tmp/wordpress/
 
@@ -34,7 +29,7 @@ if [ "${TRAVIS}" = "true" ]; then
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
     chmod +x wp-cli.phar
-    sudo mv wp-cli.phar /usr/local/bin/wp
+    mv wp-cli.phar /usr/local/bin/wp
 
     wp core download --version=${WP_VERSION}
 

@@ -9,9 +9,6 @@ php:
 env:
     - WP_VERSION=latest
 
-# We are going to need sudo to do what we want
-sudo: required
-
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
 # so it doesn't need to be re-defined below.
@@ -46,6 +43,8 @@ before_script:
 script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
+  - nvm install v4.2.1
+  - nvm use v4.2.1
   - node -v
   - which node
   - node --harmony bin/run-amp-validator.js
