@@ -47,6 +47,7 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp import wptest.xml --authors=create --quiet
 
+    node bin/run-amp-validator.js
 
 else
 
