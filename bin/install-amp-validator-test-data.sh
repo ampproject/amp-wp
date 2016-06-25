@@ -20,18 +20,18 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
+    cd ..
+    #/tmp/wordpress/
+
+    mkdir wp
+    cd wp/
+
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
     chmod +x wp-cli.phar
     sudo mv wp-cli.phar /usr/local/bin/wp
 
     echo ${PWD}
-
-    cd ..
-    #/tmp/wordpress/
-
-    mkdir wp
-    cd wp/
 
     wp core install --url=http://auto-amp.dev --skip-email
 
