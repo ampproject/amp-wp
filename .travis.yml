@@ -47,8 +47,7 @@ script:
   - bash bin/install-amp-validator-test-data.sh
   - nvm install v4.2.1
   - nvm use v4.2.1
-  - node -v
-  - which node
-  - node --harmony bin/run-amp-validator.js
+  - npm install
+  - node bin/run-amp-validator.js
 
 
