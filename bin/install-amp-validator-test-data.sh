@@ -27,14 +27,23 @@ if [ "${TRAVIS}" = "true" ]; then
 
     echo ${PWD}
 
-    cd tests/
+    cd ..
     #/tmp/wordpress/
 
-    ls
+    mkdir wp
+    cd wp/
+
+    wp core install --url=http://auto-amp.dev --skip-email
 
     wp --info
 
     wp plugin install wordpress-importer --activate
+
+    mv ../amp-wp wp-content/plugins
+
+    wp plugin activate amp-wp
+
+    cd wp-content/plugins/amp-wp
 
     wp import wptest.xml --authors=create
 
