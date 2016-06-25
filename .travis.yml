@@ -46,6 +46,6 @@ before_script:
 script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
-  - node bin/run-amp-validator.js
+  - node --harmony bin/run-amp-validator.js
 
 
