@@ -8,7 +8,6 @@ php:
 # WordPress version used in first build configuration.
 env:
     - WP_VERSION=latest
-    - TRAVIS_NODE_VERSION="4"
 
 # We are going to need sudo to do what we want
 sudo: required
@@ -47,6 +46,7 @@ before_script:
 script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
+  - node -v
   - node --harmony bin/run-amp-validator.js
 
 
