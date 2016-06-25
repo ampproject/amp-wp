@@ -4,6 +4,8 @@ language: php
 # PHP version used in first build configuration.
 php:
     - "5.6"
+    - "nightly"
+    - "5.2"
 
 # WordPress version used in first build configuration.
 env:
@@ -42,12 +44,15 @@ matrix:
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
 
-script:
-  - phpunit
-  - bash bin/install-amp-validator-test-data.sh
+install:
+  -
   - nvm install v4.2.1
   - nvm use v4.2.1
   - npm install
+
+script:
+  - phpunit
+  - bash bin/install-amp-validator-test-data.sh
   - node bin/run-amp-validator.js
 
 
