@@ -43,13 +43,16 @@ cache:
   directories:
     - node_modules
 
+addons:
+  hosts:
+    - auto-amp.dev
 
 before_install:
-  - "phantomjs --version"
-
-install:
+  - phantomjs --version
   - nvm install v4.2.1
   - nvm use v4.2.1
+
+install:
   - npm install
 
 before_script:
@@ -59,7 +62,3 @@ script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
   - node bin/run-amp-validator.js
-
-addons:
-  hosts:
-    - auto-amp.dev
