@@ -37,13 +37,13 @@ if [ "${TRAVIS}" = "true" ]; then
 
     ./wp-cli.phar core install --url=http://auto-amp.dev --title=Test --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email
 
-    mv ../amp-wp wp-content/plugins
+    cp ../amp-wp wp-content/plugins
 
     ./wp-cli.phar plugin activate amp-wp
 
     ./wp-cli.phar plugin install wordpress-importer --activate
 
-    ./wp-cli.phar import wp-content/plugins/amp-wp/wptest.xml --authors=create --quiet
+    ./wp-cli.phar import wptest.xml --authors=create --quiet
 
 else
 
