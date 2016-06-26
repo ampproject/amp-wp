@@ -37,7 +37,7 @@ var promiseWhile = function(condition, action) {
 
 
 //run a WP-CLI command to collect our installs post URLS and test them
-exec('./wp-cli.phar post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer', function(error, stdout, stderr) {
+exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer', function(error, stdout, stderr) {
     if (error) {
         console.error('exec error: '+error);
         process.exit(1);
@@ -70,6 +70,11 @@ exec('./wp-cli.phar post list --post_type=post --posts_per_page=-1 --post_status
     }, function() {
         return new Promise( function( resolve, reject ) {
             fetch( testUrls[i] )
+                .then( function(res) {
+                    console.log('Inside fetch');
+                    console.log(res);
+                    return res;
+                })
                 .then( function( res ) {
                     console.log('Inside fetch then');
                     if ( res.ok ) {
@@ -108,7 +113,8 @@ exec('./wp-cli.phar post list --post_type=post --posts_per_page=-1 --post_status
                 });
 
         }).catch( function(e){
-            exit(e);
+            console.error(e);
+            process.exit(1);
         });
 
     });
