@@ -9,7 +9,7 @@ php:
 env:
     - WP_VERSION=latest
 
-sudo: required
+#sudo: required
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
@@ -48,21 +48,15 @@ addons:
     - auto-amp.dev
 
 before_install:
-
+  - phantomjs --version
+  - nvm install v4.2.1
+  - nvm use v4.2.1
 
 install:
   - npm install
 
 before_script:
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - sleep 3 # give xvfb some time to start
-  - rackup  # start a Web server
-  - sleep 3 # give Web server some time to bind to sockets, etc
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-  - phantomjs --version
-  - nvm install v4.2.1
-  - nvm use v4.2.1
 
 script:
   - phpunit
