@@ -20,6 +20,12 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
+    ls
+
+    mv ../amp-wp/* /amp-wp
+
+    ls
+
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
     chmod +x wp-cli.phar

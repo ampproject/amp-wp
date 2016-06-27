@@ -107,7 +107,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         i++;
                         resolve();
                     }
-                    return results hasError;
+                    return results, hasError;
                 }).then( function( results, hasError ) {
                     for (var i=0 , len = results.length; i < len; i++ ) {
                         console.log(results[i]);
