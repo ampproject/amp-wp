@@ -47,7 +47,7 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp plugin activate amp-wp
 
-    wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
+    wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
 
     wp plugin install wordpress-importer --activate
 
