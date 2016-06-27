@@ -43,6 +43,8 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp plugin install wordpress-importer --activate
 
+    ls
+
     wp import wptest.xml --authors=create --quiet
 
 else
