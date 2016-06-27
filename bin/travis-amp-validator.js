@@ -72,7 +72,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
-            var cmd = 'phantomjs phantom-get-contents.js '+testUrls[i];
+            var cmd = 'phantomjs bin/phantom-get-contents.js '+testUrls[i];
             exec(cmd, function(err, stdout, stderr) {
                 if (error) {
                     console.error('phantom error: '+error);

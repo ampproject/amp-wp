@@ -16,6 +16,7 @@ page.open(address, function(status) {
     results['body'] = page.evaluate(function() {
         return document;
     })
+    console.log(results);
     return results;
     phantom.exit();
 });
