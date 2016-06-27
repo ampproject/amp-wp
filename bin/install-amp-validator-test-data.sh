@@ -43,9 +43,9 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp plugin install wordpress-importer --activate
 
-    ls
-
     wp import wp-content/plugins/amp-wp/wptest.xml --authors=create --quiet
+
+    wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
 
 else
 

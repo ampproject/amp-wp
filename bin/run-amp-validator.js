@@ -72,13 +72,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     }, function() {
         return new Promise( function( resolve, reject ) {
             fetch( testUrls[i] )
-                .then( function(res) {
-                    console.log('Inside fetch');
-                    console.log(res);
-                    return res;
-                })
                 .then( function( res ) {
-                    console.log('Inside fetch then');
                     if ( res.ok ) {
                         return res.text();
                     } else {
@@ -86,9 +80,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         console.error(response.error);
                     }
                 }).then(function(body) {
-                    console.log('Inside fetch then then');
                     if ( body ) {
-                        console.log('Inside if body');
                         return ourInstance.then(function (validator) {
                             const result = validator.validateString(body);
                             if (result.status === 'PASS') {
