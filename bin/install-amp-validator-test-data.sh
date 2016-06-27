@@ -20,12 +20,6 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
-    cd ..
-    #/tmp/wordpress/
-
-    mkdir wp
-    cd wp/
-
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
     chmod +x wp-cli.phar
@@ -37,15 +31,15 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp core install --url=http://auto-amp.dev --title=Test --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email
 
-    mv ../amp-wp wp-content/plugins
+    mv amp-wp wp-content/plugins
 
     wp plugin activate amp-wp
+
+    wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
 
     wp plugin install wordpress-importer --activate
 
     wp import wp-content/plugins/amp-wp/wptest.xml --authors=create --quiet
-
-    wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
 
 else
 

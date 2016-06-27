@@ -1,6 +1,6 @@
 <VirtualHost *:80>
 
-  DocumentRoot %TRAVIS_BUILD_DIR%+'/wp"
+  DocumentRoot %TRAVIS_BUILD_DIR%
   ServerName www.auto-amp.dev
 
   <Directory "%TRAVIS_BUILD_DIR%">

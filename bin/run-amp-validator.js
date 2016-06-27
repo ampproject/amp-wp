@@ -78,15 +78,19 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                     } else {
                         var response = (i + 1) + ': Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
                         console.error(response.error);
+                        process.exit(1);
                     }
                 }).then(function(body) {
                     if ( body ) {
                         return ourInstance.then(function (validator) {
                             const result = validator.validateString(body);
+                            var results = [];
+                            var hasError = false;
                             if (result.status === 'PASS') {
-                                console.log( result.status.info + ": " + testUrls[i] );
+                                results.push( result.status.info + ": " + testUrls[i] );
                             } else {
-                                console.error( result.status.error + ": " + testUrls[i]);
+                                results.push( result.status.error + ": " + testUrls[i]);
+                                hasError = true;
                             }
 
                             for (const error of result.errors) {
@@ -103,7 +107,16 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         i++;
                         resolve();
                     }
-
+                    return results hasError;
+                }).then( function( results, hasError ) {
+                    for (var i=0 , len = results.length; i < len; i++ ) {
+                        console.log(results[i]);
+                    }
+                    if (hasError) {
+                        process.exit(1);
+                    } else {
+                        process.exit(0);
+                    }
                 });
 
         }).catch( function(e){
