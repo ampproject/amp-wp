@@ -9,7 +9,7 @@
 
 const   Promise         = require('bluebird'),
         ampValidator    = require('amp-html/validator'),
-        horseman        = require('node-horseman'),
+        Horseman        = require('node-horseman'),
         childProcess    = require('child_process'),
         exec            = childProcess.exec,
         colors          = require('colors'),
@@ -72,6 +72,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
+            const horseman = new Horseman();
             horseman.open(testUrls[i])
                 .status()
                 .log()
