@@ -48,7 +48,9 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
 
     for (var i=0 , len = items.length; i < len; i++ ) {
         var item = items[i];
-
+        if ( '/' != item['url'].slice(-1) ) {
+            item['url'] = item['url']+"/";
+        }
         testUrls.push( item['url']+"amp/" );
 
     }
