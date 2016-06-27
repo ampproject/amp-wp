@@ -1,4 +1,6 @@
-<VirtualHost *:80>
+Listen 8080
+
+<VirtualHost *:8080>
 
   DocumentRoot %TRAVIS_BUILD_DIR%
   ServerName www.auto-amp.dev

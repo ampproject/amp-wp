@@ -20,6 +20,8 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
+    print "${TRAVIS_BUILD_DIR}"
+
     cd ..
     #/tmp/wordpress/
 
@@ -43,9 +45,7 @@ if [ "${TRAVIS}" = "true" ]; then
 
     mv wp amp-wp
 
-    ls
-
-    cd amp-wp && ls
+    cd amp-wp
 
     wp plugin activate amp-wp
 
