@@ -45,7 +45,7 @@ if [ "${TRAVIS}" = "true" ]; then
 
     ls
 
-    wp import wptest.xml --authors=create --quiet
+    wp import wp-content/plugins/amp-wp/wptest.xml --authors=create --quiet
 
 else
 
