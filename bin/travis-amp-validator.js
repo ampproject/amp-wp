@@ -89,7 +89,26 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                 resolve();
             })
 
-        }).catch( function(e){
+        })
+        // .then(function(){
+        //     var cmd = 'phantomjs bin/ghostbuster.js';
+        //     exec(cmd, function(err, stdout, stderr) {
+        //         if (error) {
+        //             console.error('ghostbuster error: '+error);
+        //             process.exit(1);
+        //         }
+        //         if (stderr) {
+        //             console.error('ghostbuster stderr: '+stderr);
+        //             process.exit(1);
+        //         }
+        //         console.log(stdout);
+        //         var results = stdout;
+        //         console.log("Status of " + testUrls[i] + " is " + results['status']);
+        //         i++;
+        //         resolve();
+        //     })
+        // })
+        .catch( function(e){
             console.error(e);
             process.exit(1);
         });
