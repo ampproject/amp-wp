@@ -1,7 +1,7 @@
 <VirtualHost *:80>
-  # [...]
 
-  DocumentRoot %TRAVIS_BUILD_DIR%
+  DocumentRoot %TRAVIS_BUILD_DIR%+'/wp"
+  ServerName www.auto-amp.dev
 
   <Directory "%TRAVIS_BUILD_DIR%">
     Options FollowSymLinks MultiViews ExecCGI
@@ -18,5 +18,4 @@
     FastCgiExternalServer /usr/lib/cgi-bin/php5-fcgi -host 127.0.0.1:9000 -pass-header Authorization
   </IfModule>
 
-  # [...]
 </VirtualHost>
