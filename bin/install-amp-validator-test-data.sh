@@ -20,11 +20,11 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
-    ls
+    cd ..
+    #/tmp/wordpress/
 
-    mv ../amp-wp/* /amp-wp
-
-    ls
+    mkdir wp
+    cd wp/
 
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
@@ -37,7 +37,15 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp core install --url=http://auto-amp.dev --title=Test --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email
 
-    mv amp-wp wp-content/plugins
+    mv ../amp-wp wp-content/plugins
+
+    cd ..
+
+    mv wp amp-wp
+
+    ls
+
+    cd amp-wp && ls
 
     wp plugin activate amp-wp
 
