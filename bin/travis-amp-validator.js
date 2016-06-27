@@ -12,9 +12,6 @@ const   Promise         = require('bluebird'),
         fetch           = require('node-fetch'),
         childProcess   = require('child_process'),
         exec            = childProcess.exec,
-        phantomjs       = require('phantomjs-prebuilt'),
-        path            = require('path'),
-        binPath         = phantomjs.path,
         colors          = require('colors'),
         url             = require('url');
 
@@ -75,11 +72,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
-            var childArgs = [
-                path.join( __dirname, 'phantomjs-script.js' ),
-                'phantom-get-contents.js ${testUrls[i]}'
-            ];
-            childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+            exec('phantomjs phantom-get-contents.js ${testUrls[i]}', function(err, stdout, stderr) {
                 if (error) {
                     console.error('phantom error: '+error);
                     process.exit(1);
