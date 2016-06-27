@@ -73,11 +73,14 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     }, function() {
         return new Promise( function( resolve, reject ) {
             const horseman = new Horseman();
-            horseman.open(testUrls[i])
+            horseman
+                .open(testUrls[i])
                 .status()
                 .log()
-                .html(body)
-                .log()
+                .html()
+                .then( function(body) {
+                    console.log("Body of "+ testUrls[i] + " is \n" +body)
+                })
                 .close();
             i++
             resolve();
