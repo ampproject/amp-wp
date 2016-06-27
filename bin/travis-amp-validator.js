@@ -48,7 +48,9 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
 
     for (var i=0 , len = items.length; i < len; i++ ) {
         var item = items[i];
-
+        if ( '/' != item['url'].slice(-1) ) {
+            item['url'] = item['url']+"/";
+        }
         testUrls.push( item['url']+"amp/" );
 
     }
@@ -69,48 +71,10 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
-            fetch( testUrls[i] )
-                .then( function(res) {
-                    console.log('Inside fetch');
-                    console.log(res);
-                    return res;
-                })
-                .then( function( res ) {
-                    console.log('Inside fetch then');
-                    if ( res.ok ) {
-                        return res.text();
-                    } else {
-                        var response = (i + 1) + ': Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
-                        console.error(response.error);
-                    }
-                }).then(function(body) {
-                console.log('Inside fetch then then');
-                if ( body ) {
-                    console.log('Inside if body');
-                    return ourInstance.then(function (validator) {
-                        const result = validator.validateString(body);
-                        if (result.status === 'PASS') {
-                            console.log( result.status.info + ": " + testUrls[i] );
-                        } else {
-                            console.error( result.status.error + ": " + testUrls[i]);
-                        }
-
-                        for (const error of result.errors) {
-                            let msg = ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                            if (error.specUrl !== null) {
-                                msg += '\n     (see ' + error.specUrl + ')';
-                            }
-                            ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-                        }
-                        i++;
-                        resolve();
-                    });
-                } else {
-                    i++;
-                    resolve();
-                }
-
-            });
+            var page = require('webpage').create();
+            page.open(testUrls[i], function(status) {
+                console.log("Status of " + testUrls[i] + " is " + status)
+            })
 
         }).catch( function(e){
             console.error(e);
