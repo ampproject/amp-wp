@@ -20,7 +20,7 @@ fi
 
 if [ "${TRAVIS}" = "true" ]; then
 
-    print "${TRAVIS_BUILD_DIR}"
+    echo "${TRAVIS_BUILD_DIR}"
 
     cd ..
     #/tmp/wordpress/
