@@ -11,12 +11,15 @@ if (system.args.length === 1) {
 address = system.args[1];
 console.log("Address: " +address);
 page.open(address, function(status) {
-    results['status'] = status;
-    console.log("Status: " +status);
-    results['body'] = page.evaluate(function() {
-        return document.body.text();
-    })
-    console.log("Body: " +results['body']);
-    // return results;
-    phantom.exit();
+    if ( "success" === status ) {
+        results['status'] = status;
+        console.log("Status: " +status);
+        results['body'] = page.content;
+        console.log("Body: " +results['body']);
+        // return results;
+        phantom.exit(0);
+    } else {
+        phantom.exit(1);
+    }
+
 });
