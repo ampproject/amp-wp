@@ -9,7 +9,7 @@ if (system.args.length === 1) {
 }
 
 address = system.args[1];
-// console.log("Address: " +address);
+console.log("Address: " +address);
 page.open(address, function(status) {
     console.log("Status: " +status);
     if ( "success" === status ) {
@@ -17,11 +17,9 @@ page.open(address, function(status) {
         results['body'] = page.content;
         console.log("Body: " +results['body']);
         phantom.exit(results);
-        return results;
     } else {
         results['status'] = status;
         phantom.exit(1);
-        return status;
     }
 
 });

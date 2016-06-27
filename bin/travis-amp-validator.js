@@ -9,8 +9,8 @@
 
 const   Promise         = require('bluebird'),
         ampValidator    = require('amp-html/validator'),
-        fetch           = require('node-fetch'),
-        childProcess   = require('child_process'),
+        horseman        = require('node-horseman'),
+        childProcess    = require('child_process'),
         exec            = childProcess.exec,
         colors          = require('colors'),
         url             = require('url');
@@ -72,23 +72,14 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
-            var cmd = 'phantomjs bin/phantom-get-contents.js '+testUrls[i];
-            exec(cmd, function(err, stdout, stderr) {
-                if (error) {
-                    console.error('phantom error: '+error);
-                    process.exit(1);
-                }
-                if (stderr) {
-                    console.error('phantom stderr: '+stderr);
-                    process.exit(1);
-                }
-                console.log(stdout);
-                var results = stdout;
-                console.log("Status of " + testUrls[i] + " is " + results['status']);
-                i++;
-                resolve();
-            })
-
+            horseman.open(testUrls[i])
+                .status()
+                .log()
+                .html(body)
+                .log()
+                .close();
+            i++
+            resolve();
         })
         // .then(function(){
         //     var cmd = 'phantomjs bin/ghostbuster.js';
