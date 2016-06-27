@@ -16,9 +16,11 @@ page.open(address, function(status) {
         console.log("Status: " +status);
         results['body'] = page.content;
         console.log("Body: " +results['body']);
-        // return results;
+        return results;
         phantom.exit(0);
     } else {
+        results['status'] = status;
+        return status;
         phantom.exit(1);
     }
 

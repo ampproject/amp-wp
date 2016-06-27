@@ -77,5 +77,5 @@ script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
   - phantomjs bin/phantom-get-contents.js http://auto-amp.dev/wp-content/plugins/amp-wp/bin/success.html
-  - phantomjs bin/phantom-get-contents.js http://auto-amp.dev/2013/01/07/sticky/amp/
+  - phantomjs bin/phantom-get-contents.js http://auto-amp.dev
 #  - node bin/travis-amp-validator.js
