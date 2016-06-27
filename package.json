@@ -12,6 +12,7 @@
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "node-fetch": "^1.5.3",
+    "phantomjs-prebuilt": "^2.1.7",
     "promise": "^7.1.1",
     "prompt": "^1.0.0",
     "url": "^0.11.0",

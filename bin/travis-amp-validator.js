@@ -7,17 +7,21 @@
 
 'use strict';
 
-const Promise = require('bluebird'),
-    ampValidator = require('amp-html/validator'),
-    fetch = require('node-fetch'),
-    exec = require('child_process').exec,
-    colors = require('colors'),
-    url = require('url');
+const   Promise         = require('bluebird'),
+        ampValidator    = require('amp-html/validator'),
+        fetch           = require('node-fetch'),
+        childProcess   = require('child_process'),
+        exec            = childProcess.exec,
+        phantomjs       = require('phantomjs-prebuilt'),
+        path            = require('path'),
+        binPath         = phantomjs.path,
+        colors          = require('colors'),
+        url             = require('url');
 
 colors.setTheme({
-    info: 'green',
-    debug: 'blue',
-    error: 'red'
+    info:   'green',
+    debug:  'blue',
+    error:  'red'
 });
 
 var promiseWhile = function(condition, action) {
@@ -71,9 +75,24 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
-            var page = require('webpage').create();
-            page.open(testUrls[i], function(status) {
-                console.log("Status of " + testUrls[i] + " is " + status)
+            var childArgs = [
+                path.join( __dirname, 'phantomjs-script.js' ),
+                'phantom-get-contents.js ${testUrls[i]}'
+            ];
+            childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+                if (error) {
+                    console.error('phantom error: '+error);
+                    process.exit(1);
+                }
+                if (stderr) {
+                    console.error('phantom stderr: '+stderr);
+                    process.exit(1);
+                }
+                console.log(stdout);
+                var results = stdout;
+                console.log("Status of " + testUrls[i] + " is " + results['status']);
+                i++;
+                resolve();
             })
 
         }).catch( function(e){
@@ -84,4 +103,3 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     });
 
 });
-phantom.exit();
