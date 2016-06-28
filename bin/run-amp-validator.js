@@ -58,8 +58,9 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     //Control URLs for Testing purposes
     var localBaseURL = url.parse(testUrls[0]);
     localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/failure.html' );
-    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/success.html' );
+    testUrls.push( 'https://amptest.wordpress.com/2016/03/03/image-dimensions/amp/');
+    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
+    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
 
     var i = 0,
         len = testUrls.length - 1;
@@ -78,7 +79,6 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                     } else {
                         var response = (i + 1) + ': Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
                         console.error(response.error);
-                        process.exit(1);
                     }
                 }).then(function(body) {
                     if ( body ) {
@@ -87,10 +87,9 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                             var results = [];
                             var hasError = false;
                             if (result.status === 'PASS') {
-                                results.push( result.status.info + ": " + testUrls[i] );
+                                console.log( result.status.info + ": " + testUrls[i] );
                             } else {
-                                results.push( result.status.error + ": " + testUrls[i]);
-                                hasError = true;
+                                console.error( result.status.error + ": " + testUrls[i]);
                             }
 
                             for (const error of result.errors) {
@@ -107,16 +106,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         i++;
                         resolve();
                     }
-                    return results, hasError;
-                }).then( function( results, hasError ) {
-                    for (var i=0 , len = results.length; i < len; i++ ) {
-                        console.log(results[i]);
-                    }
-                    if (hasError) {
-                        process.exit(1);
-                    } else {
-                        process.exit(0);
-                    }
+
                 });
 
         }).catch( function(e){
