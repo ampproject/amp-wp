@@ -90,8 +90,8 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         + (node.systemId ? ' "' + node.systemId + '"' : '')
                         + '>\n' : '';
                     };
-                    var htmlDoc = document.documentElement.outerHTML.replace('&lt;', '<')
-                    htmlDoc = htmlDoc.replace('&gt;', '>');
+                    var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
+                    htmlDoc = htmlDoc.replace(/&gt;/g, '>');
                     return getDocTypeAsString() + htmlDoc;
 
                 })
