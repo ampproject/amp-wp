@@ -51,7 +51,7 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp import wp-content/plugins/amp-wp/tests/assets/wptest.xml --authors=create --quiet
 
-    wp import wp-content/plugins/amp-wp/tests/assets/amptest.xml --authors=create --quiet
+#    wp import wp-content/plugins/amp-wp/tests/assets/amptest.xml --authors=create --quiet
 
     wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
 
