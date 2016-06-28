@@ -91,9 +91,28 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                     };
 
                     return getDocTypeAsString() + document.documentElement.outerHTML;
-                    
+
                 })
-                .log()
+                .then( function(body) {
+                    return ourInstance.then(function (validator) {
+                        const result = validator.validateString(body);
+                        var results = [];
+                        var hasError = false;
+                        if (result.status === 'PASS') {
+                            console.log( result.status.info + ": " + testUrls[i] );
+                        } else {
+                            console.error( result.status.error + ": " + testUrls[i]);
+                        }
+
+                        for (const error of result.errors) {
+                            let msg = ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+                            if (error.specUrl !== null) {
+                                msg += '\n     (see ' + error.specUrl + ')';
+                            }
+                            ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                        }
+                    });
+                })
                 .finally( function() {
                     i++;
                     resolve();
