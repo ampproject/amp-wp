@@ -104,7 +104,6 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                             console.log( result.status.info + ": " + testUrls[i] );
                         } else {
                             console.error( result.status.error + ": " + testUrls[i]);
-                            console.log(body);
                         }
 
                         for (const error of result.errors) {
