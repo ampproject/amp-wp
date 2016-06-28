@@ -79,12 +79,12 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                 .open(testUrls[i])
                 .status()
                 .log()
-                .html()
-                .then( function(body) {
+                .html('html')
+                .then( function(body, testUrls) {
                     console.log("Body of "+ testUrls[i] + " is \n" +body)
                 })
                 .close();
-            i++
+            i++;
             resolve();
         })
         // .then(function(){
