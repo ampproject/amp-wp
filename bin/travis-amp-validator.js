@@ -56,7 +56,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
 
     }
 
-
+    testUrls[0] = 'http://auto-amp.dev';
     //Control URLs for Testing purposes
     var localBaseURL = url.parse(testUrls[0]);
     localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
