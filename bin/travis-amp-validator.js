@@ -75,16 +75,19 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     }, function() {
         return new Promise( function( resolve, reject ) {
             const horseman = new Horseman();
-            horseman.open(testUrls[i]);
-            if ( 200 !== horseman.status() ) {
-                console.error( "URL: " + testUrls[i] + " returned a status of: " + horseman.status() );
-            } else {
-                var html = horseman.text('html');
-                console.log(html);
-            }
-            horseman.close();
-            i++;
-            resolve();
+            horseman.open(testUrls[i]).then( function() {
+
+                if ( 200 !== horseman.status() ) {
+                    console.error( "URL: " + testUrls[i] + " returned a status of: " + horseman.status() );
+                } else {
+                    var html = horseman.text('html');
+                    console.log(html);
+                }
+                horseman.close();
+                i++;
+                resolve();
+
+            });
         })
         // .then(function(){
         //     var cmd = 'phantomjs bin/ghostbuster.js';
