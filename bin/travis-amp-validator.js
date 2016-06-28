@@ -90,8 +90,9 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         + (node.systemId ? ' "' + node.systemId + '"' : '')
                         + '>\n' : '';
                     };
-
-                    return getDocTypeAsString() + document.documentElement.outerHTML;
+                    var htmlDoc = document.documentElement.outerHTML.replace('&lt;', '<')
+                    htmlDoc = htmlDoc.replace('&gt;', '>');
+                    return getDocTypeAsString() + htmlDoc;
 
                 })
                 .then( function(body) {
@@ -102,8 +103,8 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         if (result.status === 'PASS') {
                             console.log( result.status.info + ": " + testUrls[i] );
                         } else {
-                            console.log(body);
                             console.error( result.status.error + ": " + testUrls[i]);
+                            console.log(body);
                         }
 
                         for (const error of result.errors) {
