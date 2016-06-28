@@ -52,7 +52,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         if ( '/' != item['url'].slice(-1) ) {
             item['url'] = item['url']+"/";
         }
-        // testUrls.push( item['url']+"amp/" );
+        testUrls.push( item['url']+"amp/" );
 
     }
 
