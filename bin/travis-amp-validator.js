@@ -74,6 +74,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
+            var body = '';
             const horseman = new Horseman();
             horseman.open(testUrls[i])
                 .log('URL: '+ testUrls[i] + ' has a status of: ')
@@ -101,6 +102,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         if (result.status === 'PASS') {
                             console.log( result.status.info + ": " + testUrls[i] );
                         } else {
+                            console.log(body);
                             console.error( result.status.error + ": " + testUrls[i]);
                         }
 
