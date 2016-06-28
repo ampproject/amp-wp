@@ -13,8 +13,8 @@ set -e
 if ! [ -f "wptest.xml" ]
 then
 
-	# Get WP Test data.
-	curl -OL https://raw.githubusercontent.com/manovotny/wptest/master/wptest.xml
+	# Get WP Test data if a newer file exists.
+	cd tests/assets && { curl -OL -z wptest.xml https://raw.githubusercontent.com/manovotny/wptest/master/wptest.xml; cd - ; }
 
 fi
 
@@ -49,13 +49,15 @@ if [ "${TRAVIS}" = "true" ]; then
 
     wp plugin install wordpress-importer --activate
 
-    wp import wp-content/plugins/amp-wp/wptest.xml --authors=create --quiet
+    wp import wp-content/plugins/amp-wp/tests/assets/wptest.xml --authors=create --quiet
+
+    wp import wp-content/plugins/amp-wp/tests/assets/amptest.xml --authors=create --quiet
 
     wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
 
 else
 
-    printf "Do want to install the Test data or have you already installed it? 'Y' or 'N': "
+    printf "Do want to install the WPTest.io data? 'Y' or 'N': "
     read INSTALL
 
     if [ 'Y' = "$INSTALL" ] ; then
@@ -70,7 +72,26 @@ else
             wp plugin install wordpress-importer --activate
         fi
 
-        wp import wptest.xml --authors=create
+        wp import tests/assets/amptest.xml --authors=create --quiet
+
+    fi
+
+    printf "Do want to install the custom AMP Test data? 'Y' or 'N': "
+    read INSTALL
+
+    if [ 'Y' = "$INSTALL" ] ; then
+
+        wp plugin is-installed wordpress-importer
+        INSTALLED=$?
+        echo $[INSTALLED]
+
+        if [ $[INSTALLED] ] ; then
+
+            printf "Installing and Activating the WordPress importer plugin to handle our data import"
+            wp plugin install wordpress-importer --activate
+        fi
+
+        wp import tests/assets/amptest.xml --authors=create --quiet
 
     fi
 

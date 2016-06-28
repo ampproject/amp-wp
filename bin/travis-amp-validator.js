@@ -59,8 +59,8 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     //Control URLs for Testing purposes
     var localBaseURL = url.parse(testUrls[0]);
     localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/failure.html' );
-    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/bin/success.html' );
+    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
+    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
 
     var i = 0,
         len = testUrls.length - 1;
