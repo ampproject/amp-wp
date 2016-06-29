@@ -124,7 +124,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                     });
                 })
                 .catch(function(e){
-                    i+=;
+                    i++;
                     console.error(e);
                     return horseman.close();
                 })
