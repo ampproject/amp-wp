@@ -61,21 +61,19 @@ install:
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-  - sudo apt-get update
-  - sudo apt-get install apache2 libapache2-mod-fastcgi
-  # enable php-fpm
-  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - sudo a2enmod rewrite actions fastcgi alias
-  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
-  # configure apache virtual hosts
-  - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/default
-  - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
-  - sudo service apache2 restart
+#  - sudo apt-get update
+#  - sudo apt-get install apache2 libapache2-mod-fastcgi
+#  # enable php-fpm
+#  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+#  - sudo a2enmod rewrite actions fastcgi alias
+#  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+#  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+#  # configure apache virtual hosts
+#  - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/default
+#  - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
+#  - sudo service apache2 restart
 
 script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
-#  - phantomjs bin/phantom-get-contents.js http://auto-amp.dev/wp-content/plugins/amp-wp/bin/success.html
-#  - phantomjs bin/phantom-get-contents.js http://auto-amp.dev
   - DEBUG=horseman node bin/travis-amp-validator.js
