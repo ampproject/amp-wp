@@ -58,7 +58,6 @@ if [ "${TRAVIS}" = "true" ]; then
 
     #set our URL structure
     wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
-    cat .htaccess
 
 else
 

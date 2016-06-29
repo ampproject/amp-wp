@@ -121,7 +121,6 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                 .finally( function() {
                     i++;
                     resolve();
-                    console.log('--------------------CLOSING----------------------');
                     horseman.close();
                 });
         })

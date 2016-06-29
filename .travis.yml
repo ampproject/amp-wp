@@ -91,4 +91,4 @@ before_script:
 script:
   - phpunit
   - bash bin/install-amp-validator-test-data.sh
-  - DEBUG=horseman node bin/travis-amp-validator.js
+  - node bin/travis-amp-validator.js
