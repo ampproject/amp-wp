@@ -61,8 +61,6 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     //Control URLs for Testing purposes
     var localBaseURL = url.parse(testUrls[0]);
     localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-    testUrls.push( localBaseURL );
-    testUrls.push( 'https://amptest.wordpress.com/2016/03/03/image-dimensions/amp/' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
 
