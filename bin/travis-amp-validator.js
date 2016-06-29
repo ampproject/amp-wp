@@ -114,18 +114,18 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                                 msg += '\n     (see ' + error.specUrl + ')';
                             }
                             ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-                            foundErrors[testUrls[i]].push(error);
+                            foundErrors.push([testUrls[i], error]);
                         }
                     });
                 })
                 .finally( function(hasErrors) {
                     i++;
+                    horseman.close();
                     if ( !hasErrors ) {
                         resolve();
                     } else {
                         reject(errors);
                     }
-                    horseman.close();
                 });
         })
         .catch( function(e){
