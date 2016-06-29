@@ -83,7 +83,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                 .status()
                 .then( function(status) {
                     if ( 200 !== Number(status) ) {
-                        throw new Error( 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status);
+                        reject( Error( 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status) );
                     }
                 })
                 .evaluate( function() {
@@ -106,18 +106,18 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         const result = validator.validateString(body);
                         if (result.status === 'PASS') {
                             console.log( result.status.info + ": " + testUrls[i] );
+                            resolve();
                         } else {
-                            hasErrors = true;
-                            console.error( result.status.error + ": " + testUrls[i]);
-                        }
+                            let msg = result.status.error + ": " + testUrls[i] + '\n';
 
-                        for (const error of result.errors) {
-                            let msg = ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                            if (error.specUrl !== null) {
-                                msg += '\n     (see ' + error.specUrl + ')';
+                            for (const error of result.errors) {
+                                msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+                                if (error.specUrl !== null) {
+                                    msg += '\n     (see ' + error.specUrl + ')';
+                                }
+                                ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                             }
-                            ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-                            foundErrors.push([testUrls[i], error]);
+                            reject( Error(msg) );
                         }
                     });
                 })
@@ -125,16 +125,10 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                     console.error(e);
                     return horseman.close();
                 })
-                .finally( function(hasErrors) {
+                .finally( function() {
                     i++;
                     horseman.close();
                 });
-        })
-        .catch( function(e){
-            for (var i=0 , len = e.length; i < len; i++ ) {
-                console.error(e);
-            }
-            process.exit(1);
         });
 
     });

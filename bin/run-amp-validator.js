@@ -58,6 +58,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     //Control URLs for Testing purposes
     var localBaseURL = url.parse(testUrls[0]);
     localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/404.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
 
@@ -77,7 +78,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         return res.text();
                     } else {
                         var response = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
-                        console.error(response.error);
+                        reject(Error(response.error));
                     }
                 }).then(function(body) {
                     if ( body ) {
@@ -85,30 +86,31 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                             const result = validator.validateString(body);
                             if (result.status === 'PASS') {
                                 console.log( result.status.info + ": " + testUrls[i] );
+                                i++;
+                                resolve();
                             } else {
-                                console.error( result.status.error + ": " + testUrls[i]);
-                            }
-
-                            for (const error of result.errors) {
-                                let msg = ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                                if (error.specUrl !== null) {
-                                    msg += '\n     (see ' + error.specUrl + ')';
+                                let msg = result.status.error + ": " + testUrls[i] + '\n';
+                                for (const error of result.errors) {
+                                    msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+                                    if (error.specUrl !== null) {
+                                        msg += '\n     (see ' + error.specUrl + ')';
+                                    }
                                 }
-                                ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                                i++;
+                                reject(msg);
                             }
-                            i++;
-                            resolve();
+                        }).catch( function(e){
+                            console.error(e);
                         });
                     } else {
                         i++;
-                        resolve();
+                        reject('Body of '+ testUrls[i] + ' was empty'.error);
                     }
 
-                });
-
+                })
         }).catch( function(e){
             console.error(e);
-            process.exit(1);
+            // process.exit(1);
         });
 
     });
