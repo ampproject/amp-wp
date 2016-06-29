@@ -75,10 +75,12 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     }, function() {
         return new Promise( function( resolve, reject ) {
             var body = '';
+            var hasErrors = false;
+            var foundErrors = [];
             const horseman = new Horseman();
             horseman.open(testUrls[i])
                 .status()
-                .evaluate( function (status) {
+                .evaluate( function(status) {
                     if ( 200 === status) {
                         var getDocTypeAsString = function () {
                             var node = document.doctype;
@@ -92,18 +94,17 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
                         htmlDoc = htmlDoc.replace(/&gt;/g, '>');
                         return getDocTypeAsString() + htmlDoc;
-                    } else {
-                        return status;
                     }
+                    console.log(status);
+                    return status;
                 })
                 .then( function(body) {
                     return ourInstance.then(function (validator) {
                         const result = validator.validateString(body);
-                        var results = [];
-                        var hasError = false;
                         if (result.status === 'PASS') {
                             console.log( result.status.info + ": " + testUrls[i] );
                         } else {
+                            hasErrors = true;
                             console.error( result.status.error + ": " + testUrls[i]);
                         }
 
@@ -113,35 +114,24 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                                 msg += '\n     (see ' + error.specUrl + ')';
                             }
                             ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                            foundErrors[testUrls[i]].push(error);
                         }
                     });
                 })
-                .finally( function() {
+                .finally( function(hasErrors) {
                     i++;
-                    resolve();
+                    if ( !hasErrors ) {
+                        resolve();
+                    } else {
+                        reject(errors);
+                    }
                     horseman.close();
                 });
         })
-        // .then(function(){
-        //     var cmd = 'phantomjs bin/ghostbuster.js';
-        //     exec(cmd, function(err, stdout, stderr) {
-        //         if (error) {
-        //             console.error('ghostbuster error: '+error);
-        //             process.exit(1);
-        //         }
-        //         if (stderr) {
-        //             console.error('ghostbuster stderr: '+stderr);
-        //             process.exit(1);
-        //         }
-        //         console.log(stdout);
-        //         var results = stdout;
-        //         console.log("Status of " + testUrls[i] + " is " + results['status']);
-        //         i++;
-        //         resolve();
-        //     })
-        // })
         .catch( function(e){
-            console.error(e);
+            for (var i=0 , len = e.length; i < len; i++ ) {
+                console.error(e);
+            }
             process.exit(1);
         });
 
