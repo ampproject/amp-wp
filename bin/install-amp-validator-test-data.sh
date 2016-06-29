@@ -45,6 +45,8 @@ if [ "${TRAVIS}" = "true" ]; then
 
     cd amp-wp
 
+    ls
+
     wp plugin activate amp-wp
 
     wp plugin install wordpress-importer --activate
@@ -54,6 +56,8 @@ if [ "${TRAVIS}" = "true" ]; then
     wp import wp-content/plugins/amp-wp/tests/assets/amptest-wordpress.xml --authors=create --quiet
 
     wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
+
+    cat .htaccess
 
 else
 
