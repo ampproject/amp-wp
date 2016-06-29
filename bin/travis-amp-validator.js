@@ -83,8 +83,10 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                 .status()
                 .then( function(status) {
                     if ( 200 !== Number(status) ) {
-                        reject( Error( 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status) );
+                        var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
+                        reject( Error( statusMessage ) );
                     }
+                    return;
                 })
                 .evaluate( function() {
                     var getDocTypeAsString = function () {
@@ -115,13 +117,14 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                                 if (error.specUrl !== null) {
                                     msg += '\n     (see ' + error.specUrl + ')';
                                 }
-                                ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                                // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                             }
                             reject( Error(msg) );
                         }
                     });
                 })
                 .catch(function(e){
+                    i+=;
                     console.error(e);
                     return horseman.close();
                 })
