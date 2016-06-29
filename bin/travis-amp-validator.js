@@ -83,8 +83,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                 .status()
                 .then( function(status) {
                     if ( 200 !== Number(status) ) {
-                        console.error( 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status);
-                        return horseman.close();
+                        throw new Error( 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status);
                     }
                 })
                 .evaluate( function() {
@@ -122,14 +121,13 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         }
                     });
                 })
+                .catch(function(e){
+                    console.error(e);
+                    return horseman.close();
+                })
                 .finally( function(hasErrors) {
                     i++;
                     horseman.close();
-                    if ( !hasErrors ) {
-                        resolve();
-                    } else {
-                        reject(errors);
-                    }
                 });
         })
         .catch( function(e){
