@@ -86,7 +86,11 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
                         reject( Error( statusMessage ) );
                     }
-                    return;
+                })
+                .catch(function(e){
+                    i++;
+                    console.error(e);
+                    return horseman.close();
                 })
                 .evaluate( function() {
                     var getDocTypeAsString = function () {
