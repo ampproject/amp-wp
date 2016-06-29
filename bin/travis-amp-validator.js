@@ -77,23 +77,24 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
             var body = '';
             const horseman = new Horseman();
             horseman.open(testUrls[i])
-                .log('URL: '+ testUrls[i] + ' has a status of: ')
                 .status()
-                .log()
-                .evaluate( function () {
-                    var getDocTypeAsString = function () {
-                        var node = document.doctype;
-                        return node ? "<!DOCTYPE "
-                        + node.name
-                        + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
-                        + (!node.publicId && node.systemId ? ' SYSTEM' : '')
-                        + (node.systemId ? ' "' + node.systemId + '"' : '')
-                        + '>\n' : '';
-                    };
-                    var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
-                    htmlDoc = htmlDoc.replace(/&gt;/g, '>');
-                    return getDocTypeAsString() + htmlDoc;
-
+                .evaluate( function (status) {
+                    if ( 200 === status) {
+                        var getDocTypeAsString = function () {
+                            var node = document.doctype;
+                            return node ? "<!DOCTYPE "
+                            + node.name
+                            + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
+                            + (!node.publicId && node.systemId ? ' SYSTEM' : '')
+                            + (node.systemId ? ' "' + node.systemId + '"' : '')
+                            + '>\n' : '';
+                        };
+                        var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
+                        htmlDoc = htmlDoc.replace(/&gt;/g, '>');
+                        return getDocTypeAsString() + htmlDoc;
+                    } else {
+                        return status;
+                    }
                 })
                 .then( function(body) {
                     return ourInstance.then(function (validator) {
@@ -103,7 +104,6 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         if (result.status === 'PASS') {
                             console.log( result.status.info + ": " + testUrls[i] );
                         } else {
-                            console.log(body);
                             console.error( result.status.error + ": " + testUrls[i]);
                         }
 
