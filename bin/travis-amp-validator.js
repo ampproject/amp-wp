@@ -80,8 +80,8 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
             const horseman = new Horseman();
             horseman.open(testUrls[i])
                 .status()
-                .evaluate( function(status) {
-                    if ( 200 === status) {
+                .evaluate( function() {
+                    // if ( 200 === status) {
                         var getDocTypeAsString = function () {
                             var node = document.doctype;
                             return node ? "<!DOCTYPE "
@@ -94,9 +94,9 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                         var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
                         htmlDoc = htmlDoc.replace(/&gt;/g, '>');
                         return getDocTypeAsString() + htmlDoc;
-                    }
-                    console.log(status);
-                    return status;
+                    // }
+                    // console.log(status);
+                    // return status;
                 })
                 .then( function(body) {
                     return ourInstance.then(function (validator) {
