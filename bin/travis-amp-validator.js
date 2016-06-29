@@ -61,6 +61,7 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     //Control URLs for Testing purposes
     var localBaseURL = url.parse(testUrls[0]);
     localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/404.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
 
@@ -80,23 +81,26 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
             const horseman = new Horseman();
             horseman.open(testUrls[i])
                 .status()
+                .then( function(status) {
+                    if ( 200 !== Number(status) ) {
+                        console.error( 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status);
+                        return horseman.close();
+                    }
+                })
                 .evaluate( function() {
-                    // if ( 200 === status) {
-                        var getDocTypeAsString = function () {
-                            var node = document.doctype;
-                            return node ? "<!DOCTYPE "
-                            + node.name
-                            + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
-                            + (!node.publicId && node.systemId ? ' SYSTEM' : '')
-                            + (node.systemId ? ' "' + node.systemId + '"' : '')
-                            + '>\n' : '';
-                        };
-                        var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
-                        htmlDoc = htmlDoc.replace(/&gt;/g, '>');
-                        return getDocTypeAsString() + htmlDoc;
-                    // }
-                    // console.log(status);
-                    // return status;
+                    var getDocTypeAsString = function () {
+                        var node = document.doctype;
+                        return node ? "<!DOCTYPE "
+                        + node.name
+                        + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
+                        + (!node.publicId && node.systemId ? ' SYSTEM' : '')
+                        + (node.systemId ? ' "' + node.systemId + '"' : '')
+                        + '>\n' : '';
+                    };
+                    var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
+                    htmlDoc = htmlDoc.replace(/&gt;/g, '>');
+                    return getDocTypeAsString() + htmlDoc;
+
                 })
                 .then( function(body) {
                     return ourInstance.then(function (validator) {

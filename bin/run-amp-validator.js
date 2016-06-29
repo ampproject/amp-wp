@@ -58,7 +58,6 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     //Control URLs for Testing purposes
     var localBaseURL = url.parse(testUrls[0]);
     localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-    testUrls.push( 'https://amptest.wordpress.com/2016/03/03/image-dimensions/amp/');
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
 
@@ -77,15 +76,13 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                     if ( res.ok ) {
                         return res.text();
                     } else {
-                        var response = (i + 1) + ': Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
+                        var response = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
                         console.error(response.error);
                     }
                 }).then(function(body) {
                     if ( body ) {
                         return ourInstance.then(function (validator) {
                             const result = validator.validateString(body);
-                            var results = [];
-                            var hasError = false;
                             if (result.status === 'PASS') {
                                 console.log( result.status.info + ": " + testUrls[i] );
                             } else {
