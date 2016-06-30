@@ -64,12 +64,16 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/404.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
     testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
+    
+    console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
+    validateUrls(testUrls);
 
+});
+
+var validateUrls = function(testUrls){
+    const ourInstance = ampValidator.getInstance();
     var i = 0,
         len = testUrls.length - 1;
-    console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
-
-    const ourInstance = ampValidator.getInstance();
     //This runs our list of URLs through the AMP Validator.
     promiseWhile(function() {
         return i <= len;
@@ -84,24 +88,27 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
                 .then( function(status) {
                     if ( 200 !== Number(status) ) {
                         var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
-                        // reject( Error( statusMessage ) );
-                        console.error( statusMessage );
+                        reject( Error( statusMessage ) );
+                        // console.error( statusMessage );
                     }
                     // resolve();
                 })
                 .evaluate( function() {
-                    var getDocTypeAsString = function () {
-                        var node = document.doctype;
-                        return node ? "<!DOCTYPE "
-                        + node.name
-                        + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
-                        + (!node.publicId && node.systemId ? ' SYSTEM' : '')
-                        + (node.systemId ? ' "' + node.systemId + '"' : '')
-                        + '>\n' : '';
-                    };
-                    var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
-                    htmlDoc = htmlDoc.replace(/&gt;/g, '>');
-                    return getDocTypeAsString() + htmlDoc;
+                    if ( 200 !== Number (horseman.status) ) {
+                        var getDocTypeAsString = function () {
+                            var node = document.doctype;
+                            return node ? "<!DOCTYPE "
+                            + node.name
+                            + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
+                            + (!node.publicId && node.systemId ? ' SYSTEM' : '')
+                            + (node.systemId ? ' "' + node.systemId + '"' : '')
+                            + '>\n' : '';
+                        };
+                        var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
+                        htmlDoc = htmlDoc.replace(/&gt;/g, '>');
+                        return getDocTypeAsString() + htmlDoc;
+                    }
+                    return '';
 
                 })
                 .then( function(body) {
@@ -136,5 +143,4 @@ exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --
         });
 
     });
-
-});
+}
