@@ -122,7 +122,6 @@ describe('AMP Validation Suite', function() {
                                     if (result.status === 'PASS') {
                                         console.log(result.status + ": "+testUrls[i]);
                                         ourResults.push('PASS');
-                                        resolve();
                                     } else {
                                         let msg = result.status.error + ": " + testUrls[i] + '\n';
                                         for (const error of result.errors) {
@@ -132,11 +131,9 @@ describe('AMP Validation Suite', function() {
                                             }
                                             // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                         }
-                                        reject( Error(msg) );
+                                        ourResults.push(msg);
                                     }
-                                }).catch(function(e){
-                                    console.log("error: "+e);
-                                    ourResults.push(e);
+                                    resolve();
                                 });
                             })
                             .catch(function(e){
@@ -163,6 +160,9 @@ describe('AMP Validation Suite', function() {
 
     it('Get URLs from WP', function(){
         testUrls.length.should.not.equal(0);
+    });
+    it('Get Validation Results', function(){
+        ourResults.length.should.not.equal(0);
     });
     it('All URLs correctly validate', function(){
         ourResults.should.all.be.equal('PASS');
