@@ -75,7 +75,7 @@ describe('AMP Validation Suite', function() {
                 // var localBaseURL = 'http://auto-amp.dev';
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
                 console.log("Hang tight, we are going to test " + testUrls.length + " urls...");
 
@@ -144,30 +144,46 @@ describe('AMP Validation Suite', function() {
                             })
                             .finally( function() {
                                 i++;
+                                if (i > len) {
+                                    if (ourErrors.length > 0) {
+                                        console.log('----------------------------------------------------------------------------'.error);
+                                        console.log('---------------------------------Errors-------------------------------------'.error);
+                                        console.log('----------------------------------------------------------------------------\n'.error);
+                                        for (var j = 0, num = ourErrors.length; j < num; j++) {
+                                            console.log('||||||||||||||||||||||||||||||        ' + (j + 1) + '        ||||||||||||||||||||||||||||||');
+                                            console.log(ourErrors[j]);
+                                            console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
+                                        }
+                                        console.log('----------------------------------------------------------------------------'.error);
+                                        console.log('----------------------------------------------------------------------------\n'.error);
+                                    }
+                                    horseman.close();
+                                    resolve();
+                                }
                                 return horseman.close();
                             });
                     });
 
                 });
-
-                var timeout = setInterval(function () {
-                    if (i >= len) {
-                        clearInterval(timeout);
-                        if (ourErrors.length > 0) {
-                            console.log('----------------------------------------------------------------------------'.error);
-                            console.log('---------------------------------Errors-------------------------------------'.error);
-                            console.log('----------------------------------------------------------------------------\n'.error);
-                            for (var j = 0, num = ourErrors.length; j < num; j++) {
-                                console.log('||||||||||||||||||||||||||||||        ' + (j + 1) + '        ||||||||||||||||||||||||||||||');
-                                console.log(ourErrors[j]);
-                                console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
-                            }
-                            console.log('----------------------------------------------------------------------------'.error);
-                            console.log('----------------------------------------------------------------------------\n'.error);
-                        }
-                        resolve();
-                    }
-                }, 1500);
+                //
+                // var timeout = setInterval(function () {
+                //     if (i >= len) {
+                //         clearInterval(timeout);
+                //         if (ourErrors.length > 0) {
+                //             console.log('----------------------------------------------------------------------------'.error);
+                //             console.log('---------------------------------Errors-------------------------------------'.error);
+                //             console.log('----------------------------------------------------------------------------\n'.error);
+                //             for (var j = 0, num = ourErrors.length; j < num; j++) {
+                //                 console.log('||||||||||||||||||||||||||||||        ' + (j + 1) + '        ||||||||||||||||||||||||||||||');
+                //                 console.log(ourErrors[j]);
+                //                 console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
+                //             }
+                //             console.log('----------------------------------------------------------------------------'.error);
+                //             console.log('----------------------------------------------------------------------------\n'.error);
+                //         }
+                //         resolve();
+                //     }
+                // }, 1500);
             });
         });
     });
