@@ -92,6 +92,8 @@ describe('AMP Validation Suite', function() {
                                 }
                             }).then(function(body) {
                             if ( body ) {
+                                console.log(i);
+
                                 return ourInstance.then(function (validator) {
                                     const result = validator.validateString(body);
                                     if (result.status === 'PASS') {
