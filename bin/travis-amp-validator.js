@@ -75,14 +75,13 @@ describe('AMP Validation Suite', function() {
                 // var localBaseURL = 'http://auto-amp.dev';
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
                 console.log("Hang tight, we are going to test " + testUrls.length + " urls...");
 
                 const ourInstance = ampValidator.getInstance();
                 var i = 0,
                     len = testUrls.length - 1;
-                console.log(testUrls[len]);
                 //This runs our list of URLs through the AMP Validator.
                 promiseWhile(function() {
                     return i <= len;
@@ -120,6 +119,7 @@ describe('AMP Validation Suite', function() {
                             })
                             .then( function(body) {
                                 return ourInstance.then(function (validator) {
+                                    console.log(testUrls[i]);
                                     const result = validator.validateString(body);
                                     if (result.status === 'PASS') {
                                         console.log(i+": "+result.status.info + ": "+testUrls[i]);
