@@ -77,6 +77,7 @@ describe('AMP Validation Suite', function() {
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
 
                 console.log("Hang tight, we are going to test " + testUrls.length + " urls...");
+                ourTestUrls = testUrls;
 
                 const ourInstance = ampValidator.getInstance();
                 var i = 0,
@@ -116,6 +117,7 @@ describe('AMP Validation Suite', function() {
                                 return ourInstance.then(function (validator) {
                                     const result = validator.validateString(body);
                                     if (result.status === 'PASS') {
+                                        console.log(result.status + ": "+testUrls[i]);
                                         ourResults.push('PASS');
                                         resolve();
                                     } else {
@@ -146,6 +148,7 @@ describe('AMP Validation Suite', function() {
                 });
 
                 var timeout = setInterval(function () {
+                    console.log('i:'+i+' : len:'+len);
                     if (i >= len) {
                         clearInterval(timeout);
                         resolve();
