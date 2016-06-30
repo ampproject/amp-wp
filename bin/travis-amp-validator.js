@@ -64,14 +64,14 @@ describe('AMP Validation Suite', function() {
                         item['url'] = item['url'] + "/";
                     }
 
-                    // testUrls.push(item['url'] + "amp/");
+                    testUrls.push(item['url'] + "amp/");
 
                 }
 
                 //Control URLs for Testing purposes
-                // var localBaseURL = url.parse(testUrls[0]);
-                // localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-                var localBaseURL = 'http://auto-amp.dev';
+                var localBaseURL = url.parse(testUrls[0]);
+                localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+                // var localBaseURL = 'http://auto-amp.dev';
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
@@ -87,14 +87,14 @@ describe('AMP Validation Suite', function() {
                 }, function() {
                     return new Promise( function( resolve, reject ) {
                         const horseman = new Horseman();
-                        console.log(testUrls[i]);
                         horseman.open(testUrls[i])
                             .status()
                             .then( function(status) {
                                 if ( 200 !== Number(status) ) {
                                     var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
                                     // throw statusMessage ;
-                                    console.error( statusMessage );
+                                    console.error( statusMessage.error );
+                                    ourResults.push(statusMessage);
                                     return Promise.reject();
                                 }
                             })
@@ -114,20 +114,19 @@ describe('AMP Validation Suite', function() {
 
                             })
                             .then( function(body) {
-                                console.log(i);
                                 return ourInstance.then(function (validator) {
                                     const result = validator.validateString(body);
                                     if (result.status === 'PASS') {
-                                        console.log(result.status + ": "+testUrls[i]);
+                                        console.log(i+": "+result.status.info + ": "+testUrls[i]);
                                         ourResults.push('PASS');
                                     } else {
-                                        let msg = result.status.error + ": " + testUrls[i] + '\n';
+                                        let msg = i+": "+result.status.error + ": " + testUrls[i] + '\n';
                                         for (const error of result.errors) {
                                             msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
                                             if (error.specUrl !== '') {
                                                 msg += '\n     (see ' + error.specUrl + ')\n';
                                             }
-                                            // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                                            ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                         }
                                         ourResults.push(msg);
                                     }
@@ -146,9 +145,9 @@ describe('AMP Validation Suite', function() {
                 });
 
                 var timeout = setInterval(function () {
-                    console.log("Our Results:"+ourResults);
                     if (i >= len) {
                         clearInterval(timeout);
+                        console.log("Our Results:"+ourResults);
                         resolve();
                     }
                 }, 500);
