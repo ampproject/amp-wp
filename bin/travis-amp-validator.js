@@ -65,7 +65,7 @@ describe('AMP Validation Suite', function() {
                         item['url'] = item['url'] + "/";
                     }
 
-                    testUrls.push(item['url'] + "amp/");
+                    // testUrls.push(item['url'] + "amp/");
 
                 }
 
@@ -153,6 +153,7 @@ describe('AMP Validation Suite', function() {
                 });
 
                 var timeout = setInterval(function () {
+                    console.log(i);
                     if (i > len) {
                         clearInterval(timeout);
                         if (ourErrors.length > 0) {
