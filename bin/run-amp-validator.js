@@ -41,7 +41,7 @@ var promiseWhile = function(condition, action) {
 };
 
 describe('AMP Validation Suite', function() {
-    this.timeout(1000000);
+    this.timeout(20000);
     var testUrls = [];
     var ourResults = [];
     var ourErrors = [];
@@ -67,15 +67,16 @@ describe('AMP Validation Suite', function() {
                 //Control URLs for Testing purposes
                 var localBaseURL = url.parse(testUrls[0]);
                 localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
+                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
+                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
                 console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
 
                 const ourInstance = ampValidator.getInstance();
                 var i = 0,
                     len = testUrls.length - 1;
+
                 //This runs our list of URLs through the AMP Validator.
                 promiseWhile(function() {
                     return i <= len;
@@ -86,7 +87,7 @@ describe('AMP Validation Suite', function() {
                                 if ( res.ok ) {
                                     return res.text();
                                 } else {
-                                    var response = i+': Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
+                                    var response = 'FAIL: '.error + 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
                                     ourErrors.push( response );
                                     ourResults.push( 'FAIL' );
                                     i++;
@@ -106,7 +107,7 @@ describe('AMP Validation Suite', function() {
                                                 msg += '\n     (see ' + error.specUrl + ')';
                                             }
                                         }
-                                        ourErrors.push(i+": "+msg);
+                                        ourErrors.push( msg );
                                         ourResults.push('FAIL');
                                     }
                                     i++;
@@ -115,12 +116,11 @@ describe('AMP Validation Suite', function() {
                             }
                             i++;
                             resolve();
-                        })
+                        });
                     });
-
                 });
                 var timeout = setInterval(function(){
-                    if (i >= len) {
+                    if (i > len) {
                         clearInterval(timeout);
                         if (ourErrors.length > 0) {
                             console.log('----------------------------------------------------------------------------'.error);
@@ -137,7 +137,6 @@ describe('AMP Validation Suite', function() {
                         resolve();
                     }
                 },500);
-
             });
         });
     });
