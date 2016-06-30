@@ -42,7 +42,7 @@ var promiseWhile = function(condition, action) {
 
 describe('AMP Validation Suite', function() {
     this.timeout(10000);
-    var ourTestUrls = [];
+    var testUrls = [];
     var ourResults = [];
 
     before( function() {
@@ -51,7 +51,7 @@ describe('AMP Validation Suite', function() {
                 if (error || stderr) {
                     reject(error);
                 }
-                var testUrls = [];
+
                 var items = JSON.parse(stdout.trim());
 
                 for (var i=0 , len = items.length; i < len; i++ ) {
@@ -66,16 +66,15 @@ describe('AMP Validation Suite', function() {
                 //Control URLs for Testing purposes
                 var localBaseURL = url.parse(testUrls[0]);
                 localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-                testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/404.html' );
-                testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
+                // testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/404.html' );
+                // testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
                 testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
 
                 console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
-                ourTestUrls = testUrls;
 
                 const ourInstance = ampValidator.getInstance();
                 var i = 0,
-                    len = ourTestUrls.length - 1;
+                    len = testUrls.length - 1;
                 //This runs our list of URLs through the AMP Validator.
                 promiseWhile(function() {
                     return i <= len;
@@ -134,7 +133,7 @@ describe('AMP Validation Suite', function() {
     });
 
     it('Get URLs from WP', function(){
-        ourTestUrls.length.should.not.equal(0);
+        testUrls.length.should.not.equal(0);
     });
     it('All URLs correctly validate', function(){
         ourResults.should.all.be.equal('PASS');
