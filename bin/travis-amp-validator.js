@@ -91,7 +91,7 @@ describe('AMP Validation Suite', function() {
                             .then( function(status) {
                                 if ( 200 !== Number(status) ) {
                                     var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
-                                    throw statusMessage );
+                                    throw statusMessage ;
                                     // console.error( statusMessage );
                                 }
                                 // resolve();
