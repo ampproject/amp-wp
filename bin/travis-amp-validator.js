@@ -72,9 +72,9 @@ describe('AMP Validation Suite', function() {
                 // var localBaseURL = url.parse(testUrls[0]);
                 // localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
                 var localBaseURL = 'http://auto-amp.dev';
-                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
+                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
                 console.log("Hang tight, we are going to test " + testUrls.length + " urls...");
 
@@ -97,7 +97,6 @@ describe('AMP Validation Suite', function() {
                                     console.error( statusMessage );
                                     return Promise.reject();
                                 }
-                                // resolve();
                             })
                             .evaluate( function() {
                                 var getDocTypeAsString = function () {
@@ -118,7 +117,6 @@ describe('AMP Validation Suite', function() {
                                 console.log(i);
                                 return ourInstance.then(function (validator) {
                                     const result = validator.validateString(body);
-                                    console.log(body);
                                     if (result.status === 'PASS') {
                                         console.log(result.status + ": "+testUrls[i]);
                                         ourResults.push('PASS');
