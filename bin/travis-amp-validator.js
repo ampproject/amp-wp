@@ -75,7 +75,7 @@ describe('AMP Validation Suite', function() {
                 // var localBaseURL = 'http://auto-amp.dev';
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
                 console.log("Hang tight, we are going to test " + testUrls.length + " urls...");
 
