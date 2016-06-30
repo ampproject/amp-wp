@@ -87,7 +87,7 @@ describe('AMP Validation Suite', function() {
                                 if ( res.ok ) {
                                     return res.text();
                                 } else {
-                                    var response = 'FAIL: '.error + 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
+                                    var response = 'FAIL: '.error + 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText + '\n';
                                     ourErrors.push( response );
                                     ourResults.push( 'FAIL' );
                                     i++;

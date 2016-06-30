@@ -70,9 +70,9 @@ describe('AMP Validation Suite', function() {
                 }
 
                 //Control URLs for Testing purposes
-                var localBaseURL = url.parse(testUrls[0]);
-                localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-                // var localBaseURL = 'http://auto-amp.dev';
+                // var localBaseURL = url.parse(testUrls[0]);
+                // localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+                var localBaseURL = 'http://auto-amp.dev';
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
@@ -82,6 +82,7 @@ describe('AMP Validation Suite', function() {
                 const ourInstance = ampValidator.getInstance();
                 var i = 0,
                     len = testUrls.length - 1;
+                console.log("len:"+len);
                 //This runs our list of URLs through the AMP Validator.
                 promiseWhile(function() {
                     return i <= len;
@@ -91,9 +92,9 @@ describe('AMP Validation Suite', function() {
                         horseman.open(testUrls[i])
                             .status()
                             .then( function(status) {
+                                console.log("          "+testUrls[i]);
                                 if ( 200 !== Number(status) ) {
-                                    var statusMessage = 'FAIL: Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
-                                    // throw statusMessage ;
+                                    var statusMessage = 'FAIL: Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status+"\n";
                                     console.log(i+": " + status + ": " + testUrls[i]);
                                     ourErrors.push( statusMessage );
                                     ourResults.push( statusMessage );
@@ -119,7 +120,6 @@ describe('AMP Validation Suite', function() {
                             })
                             .then( function(body) {
                                 return ourInstance.then(function (validator) {
-                                    console.log(testUrls[i]);
                                     const result = validator.validateString(body);
                                     if (result.status === 'PASS') {
                                         console.log(i+": "+result.status.info + ": "+testUrls[i]);
@@ -137,7 +137,7 @@ describe('AMP Validation Suite', function() {
                                         ourErrors.push(msg);
                                         ourResults.push(msg);
                                     }
-                                    resolve();
+
                                 });
                             })
                             .catch(function(e){
@@ -159,7 +159,7 @@ describe('AMP Validation Suite', function() {
                             console.log('----------------------------------------------------------------------------'.error);
                             console.log('---------------------------------Errors-------------------------------------'.error);
                             console.log('----------------------------------------------------------------------------\n'.error);
-                            for (var j = 0, num = ourErrors.length; j < num; j++) {
+                            for (var j = 0, num = ourErrors.length-1; j < num; j++) {
                                 console.log('||||||||||||||||||||||||||||||        ' + (j + 1) + '        ||||||||||||||||||||||||||||||');
                                 console.log(ourErrors[j]);
                                 console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
