@@ -95,7 +95,7 @@ describe('AMP Validation Suite', function() {
                                     var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
                                     // throw statusMessage ;
                                     console.error( statusMessage );
-                                    process.exit(1);
+                                    return Promise.reject();
                                 }
                                 // resolve();
                             })
@@ -125,7 +125,6 @@ describe('AMP Validation Suite', function() {
                                         resolve();
                                     } else {
                                         let msg = result.status.error + ": " + testUrls[i] + '\n';
-                                        console.log(result.errors);
                                         for (const error of result.errors) {
                                             msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
                                             if (error.specUrl !== '') {
@@ -136,17 +135,12 @@ describe('AMP Validation Suite', function() {
                                         reject( Error(msg) );
                                     }
                                 }).catch(function(e){
-                                    i++;
                                     console.log("error: "+e);
                                     ourResults.push(e);
-                                    return horseman.close();
                                 });
                             })
                             .catch(function(e){
-                                i++;
-                                console.log("e: "+e);
                                 ourResults.push(e);
-                                return horseman.close();
                             })
                             .finally( function() {
                                 i++;
