@@ -94,7 +94,6 @@ var validateUrls = function(testUrls){
                     // resolve();
                 })
                 .evaluate( function() {
-                    if ( 200 !== Number (horseman.status) ) {
                         var getDocTypeAsString = function () {
                             var node = document.doctype;
                             return node ? "<!DOCTYPE "
@@ -107,11 +106,12 @@ var validateUrls = function(testUrls){
                         var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
                         htmlDoc = htmlDoc.replace(/&gt;/g, '>');
                         return getDocTypeAsString() + htmlDoc;
-                    }
-                    return '';
 
                 })
                 .then( function(body) {
+                    if (!body) {
+                        body = '';
+                    }
                     return ourInstance.then(function (validator) {
                         const result = validator.validateString(body);
                         if (result.status === 'PASS') {
@@ -132,9 +132,9 @@ var validateUrls = function(testUrls){
                     });
                 })
                 .catch(function(e){
-                    // i++;
+                    i++;
                     console.error(e);
-                    // horseman.close();
+                    return horseman.close();
                 })
                 .finally( function() {
                     i++;
