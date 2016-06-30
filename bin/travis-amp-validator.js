@@ -58,8 +58,8 @@ describe('AMP Validation Suite', function() {
 
                 var items = JSON.parse(stdout.trim());
 
-                for (var i = 0, len = items.length; i < len; i++) {
-                    var item = items[i];
+                for (var h = 0, itemLength = items.length; h < itemLength ; h++) {
+                    var item = items[h];
 
                     if ('/' != item['url'].slice(-1)) {
                         item['url'] = item['url'] + "/";
@@ -130,8 +130,8 @@ describe('AMP Validation Suite', function() {
                                                 msg += '\n     (see ' + error.specUrl + ')\n';
                                             }
                                             // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-                                            console.log(i+": FAIL: ".error + testUrls[i]);
                                         }
+                                        console.log(i+": FAIL: ".error + testUrls[i]);
                                         ourErrors.push(msg);
                                         ourResults.push(msg);
                                     }
@@ -167,7 +167,7 @@ describe('AMP Validation Suite', function() {
                         }
                         resolve();
                     }
-                }, 500);
+                }, 1500);
             });
         });
     });
