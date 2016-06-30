@@ -82,6 +82,7 @@ describe('AMP Validation Suite', function() {
                 const ourInstance = ampValidator.getInstance();
                 var i = 0,
                     len = testUrls.length - 1;
+                console.log(testUrls[len]);
                 //This runs our list of URLs through the AMP Validator.
                 promiseWhile(function() {
                     return i <= len;
@@ -100,6 +101,7 @@ describe('AMP Validation Suite', function() {
                                     i++;
                                     return Promise.reject();
                                 }
+                                resolve();
                             })
                             .evaluate( function() {
                                 var getDocTypeAsString = function () {
@@ -151,7 +153,7 @@ describe('AMP Validation Suite', function() {
                 });
 
                 var timeout = setInterval(function () {
-                    if (i >= len) {
+                    if (i > len) {
                         clearInterval(timeout);
                         if (ourErrors.length > 0) {
                             console.log('----------------------------------------------------------------------------'.error);
@@ -167,7 +169,7 @@ describe('AMP Validation Suite', function() {
                         }
                         resolve();
                     }
-                }, 2000);
+                }, 5000);
             });
         });
     });
