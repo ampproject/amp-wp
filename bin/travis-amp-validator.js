@@ -121,7 +121,7 @@ describe('AMP Validation Suite', function() {
                             })
                             .then( function(body) {
                                 return ourInstance.then(function (validator) {
-                                    const result = '';
+                                    var result = '';
                                     result = validator.validateString(body);
                                     if (result.status === 'PASS') {
                                         console.log(i+": "+result.status.info + ": "+testUrls[i]);
