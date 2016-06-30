@@ -50,14 +50,14 @@ if [ "${TRAVIS}" = "true" ]; then
 
     #get the necessary plugins ready
     wp plugin activate amp-wp
-    wp plugin install wordpress-importer --activate
+#    wp plugin install wordpress-importer --activate
 
     #import our test data
-    wp import wp-content/plugins/amp-wp/tests/assets/wptest.xml --authors=create --quiet
-    wp import wp-content/plugins/amp-wp/tests/assets/amptest-wordpress.xml --authors=create --quiet
+#    wp import wp-content/plugins/amp-wp/tests/assets/wptest.xml --authors=create --quiet
+#    wp import wp-content/plugins/amp-wp/tests/assets/amptest-wordpress.xml --authors=create --quiet
 
     #set our URL structure
-    wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
+#    wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
 
 else
 
