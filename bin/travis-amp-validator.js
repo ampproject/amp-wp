@@ -87,6 +87,7 @@ describe('AMP Validation Suite', function() {
                 }, function() {
                     return new Promise( function( resolve, reject ) {
                         const horseman = new Horseman();
+                        console.log(testUrls[i]);
                         horseman.open(testUrls[i])
                             .status()
                             .then( function(status) {
@@ -114,7 +115,7 @@ describe('AMP Validation Suite', function() {
 
                             })
                             .then( function(body) {
-                                console.log(i)
+                                console.log(i);
                                 return ourInstance.then(function (validator) {
                                     const result = validator.validateString(body);
                                     console.log(body);
@@ -127,7 +128,7 @@ describe('AMP Validation Suite', function() {
                                         console.log(result.errors);
                                         for (const error of result.errors) {
                                             msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                                            if (error.specUrl !== null) {
+                                            if (error.specUrl !== '') {
                                                 msg += '\n     (see ' + error.specUrl + ')\n';
                                             }
                                             // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
