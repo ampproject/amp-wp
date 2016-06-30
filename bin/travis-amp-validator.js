@@ -72,7 +72,7 @@ describe('AMP Validation Suite', function() {
                 //Control URLs for Testing purposes
                 var localBaseURL = url.parse(testUrls[0]);
                 localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
 
