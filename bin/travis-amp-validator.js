@@ -147,9 +147,9 @@ describe('AMP Validation Suite', function() {
                                 ourResults.push(e);
                             })
                             .finally( function() {
-                                i++;
                                 return horseman.close();
                             });
+                        i++;
                     });
 
                 });
