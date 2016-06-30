@@ -41,7 +41,7 @@ var promiseWhile = function(condition, action) {
 };
 
 describe('AMP Validation Suite', function() {
-    this.timeout(100000);
+    this.timeout(1000000);
     var testUrls = [];
     var ourResults = [];
     var ourErrors = [];

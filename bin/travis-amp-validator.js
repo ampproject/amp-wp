@@ -46,6 +46,7 @@ describe('AMP Validation Suite', function() {
     this.timeout(1000000);
     var testUrls = [];
     var ourResults = [];
+    var ourErrors = [];
 
     before( function() {
         return new Promise(function (resolve, reject) {
@@ -91,10 +92,12 @@ describe('AMP Validation Suite', function() {
                             .status()
                             .then( function(status) {
                                 if ( 200 !== Number(status) ) {
-                                    var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
+                                    var statusMessage = 'FAIL: Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
                                     // throw statusMessage ;
-                                    console.error( statusMessage.error );
-                                    ourResults.push(statusMessage);
+                                    console.log(i+": " + status + ": " + testUrls[i]);
+                                    ourErrors.push( statusMessage );
+                                    ourResults.push( statusMessage );
+                                    i++;
                                     return Promise.reject();
                                 }
                             })
@@ -126,14 +129,17 @@ describe('AMP Validation Suite', function() {
                                             if (error.specUrl !== '') {
                                                 msg += '\n     (see ' + error.specUrl + ')\n';
                                             }
-                                            ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                                            // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                                            console.log(i+": FAIL: ".error + testUrls[i]);
                                         }
+                                        ourErrors.push(msg);
                                         ourResults.push(msg);
                                     }
                                     resolve();
                                 });
                             })
                             .catch(function(e){
+                                ourErrors.push(e);
                                 ourResults.push(e);
                             })
                             .finally( function() {
@@ -147,7 +153,18 @@ describe('AMP Validation Suite', function() {
                 var timeout = setInterval(function () {
                     if (i >= len) {
                         clearInterval(timeout);
-                        console.log("Our Results:"+ourResults);
+                        if (ourErrors.length > 0) {
+                            console.log('----------------------------------------------------------------------------'.error);
+                            console.log('---------------------------------Errors-------------------------------------'.error);
+                            console.log('----------------------------------------------------------------------------\n'.error);
+                            for (var j = 0, num = ourErrors.length; j < num; j++) {
+                                console.log('||||||||||||||||||||||||||||||        ' + (j + 1) + '        ||||||||||||||||||||||||||||||');
+                                console.log(ourErrors[j]);
+                                console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
+                            }
+                            console.log('----------------------------------------------------------------------------'.error);
+                            console.log('----------------------------------------------------------------------------\n'.error);
+                        }
                         resolve();
                     }
                 }, 500);
@@ -163,6 +180,9 @@ describe('AMP Validation Suite', function() {
     });
     it('All URLs correctly validate', function(){
         ourResults.should.all.be.equal('PASS');
+    });
+    it('No Errors found', function(){
+        ourErrors.length.should.equal(0);
     });
 
 });
