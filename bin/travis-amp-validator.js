@@ -92,13 +92,14 @@ describe('AMP Validation Suite', function() {
                         horseman.open(testUrls[i])
                             .status()
                             .then( function(status) {
-                                console.log("          "+testUrls[i]);
+                                console.log("Status: "+status);
+                                console.log(i+":       "+testUrls[i]);
                                 if ( 200 !== Number(status) ) {
                                     var statusMessage = 'FAIL: Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status+"\n";
                                     console.log(i+": " + status + ": " + testUrls[i]);
                                     ourErrors.push( statusMessage );
                                     ourResults.push( statusMessage );
-                                    i++;
+                                    // i++;
                                     return Promise.reject();
                                 }
                                 resolve();
