@@ -6,14 +6,14 @@
 
 'use strict'
 
-const Promise = require('bluebird'),
-    ampValidator = require('amp-html/validator'),
-    fetch = require('node-fetch'),
-    exec = require('child_process').exec,
-    colors = require('colors'),
-    url = require('url'),
-    chai = require('chai'),
-    assert = chai.assert;
+const Promise       = require('bluebird'),
+    ampValidator    = require('amp-html/validator'),
+    fetch           = require('node-fetch'),
+    exec            = require('child_process').exec,
+    colors          = require('colors'),
+    url             = require('url'),
+    chai            = require('chai'),
+    assert          = chai.assert;
 
 chai.should();
 chai.use(require('chai-things'));
