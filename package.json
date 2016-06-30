@@ -9,8 +9,11 @@
   "devDependencies": {
     "amp-html": "github:ampproject/amphtml",
     "bluebird": "^3.4.0",
+    "chai": "^3.5.0",
+    "chai-things": "^0.2.0",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
+    "mocha": "^2.5.3",
     "node-fetch": "^1.5.3",
     "node-horseman": "^3.1.1",
     "promise": "^7.1.1",

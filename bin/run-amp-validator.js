@@ -1,18 +1,23 @@
-#!/usr/bin/env node
 /**
- * Gather our URLs to test from the WPX file in our plugin directory and run it through the validator.
+ * Tool to locally gather our URLs to test and run them through the validator.
  *
- * from the plugin root dir on your server run 'node bin/run-amp-validator.js' to run
+ * from the plugin root dir on your server run 'mocha bin/run-amp-validator.js' to run
  */
 
-'use strict';
+'use strict'
 
 const Promise = require('bluebird'),
     ampValidator = require('amp-html/validator'),
     fetch = require('node-fetch'),
     exec = require('child_process').exec,
     colors = require('colors'),
-    url = require('url');
+    url = require('url'),
+    chai = require('chai'),
+    assert = chai.assert;
+
+chai.should();
+chai.use(require('chai-things'));
+
 
 colors.setTheme({
     info: 'green',
@@ -35,84 +40,104 @@ var promiseWhile = function(condition, action) {
     return resolver.promise;
 };
 
+describe('AMP Validation Suite', function() {
+    this.timeout(10000);
+    var ourTestUrls = [];
+    var ourResults = [];
 
-//run a WP-CLI command to collect our installs post URLS and test them
-exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer', function(error, stdout, stderr) {
-    if (error) {
-        console.error('exec error: '+error);
-        process.exit(1);
-    }
+    before( function() {
+        return new Promise( function(resolve, reject){
+            exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer', function(error, stdout, stderr) {
+                if (error || stderr) {
+                    reject(error);
+                }
+                var testUrls = [];
+                var items = JSON.parse(stdout.trim());
 
-    var testUrls = [];
-    var items = JSON.parse(stdout.trim());
-
-    for (var i=0 , len = items.length; i < len; i++ ) {
-        var item = items[i];
-        if ( '/' != item['url'].slice(-1) ) {
-            item['url'] = item['url']+"/";
-        }
-        testUrls.push( item['url']+"amp/" );
-
-    }
-
-    //Control URLs for Testing purposes
-    var localBaseURL = url.parse(testUrls[0]);
-    localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/404.html' );
-    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
-    testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
-
-    var i = 0,
-        len = testUrls.length - 1;
-    console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
-
-    const ourInstance = ampValidator.getInstance();
-    //This runs our list of URLs through the AMP Validator.
-    promiseWhile(function() {
-        return i <= len;
-    }, function() {
-        return new Promise( function( resolve, reject ) {
-            fetch( testUrls[i] )
-                .then( function( res ) {
-                    if ( res.ok ) {
-                        return res.text();
-                    } else {
-                        var response = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
-                        reject(Error(response.error));
+                for (var i=0 , len = items.length; i < len; i++ ) {
+                    var item = items[i];
+                    if ( '/' != item['url'].slice(-1) ) {
+                        item['url'] = item['url']+"/";
                     }
-                }).then(function(body) {
-                    if ( body ) {
-                        return ourInstance.then(function (validator) {
-                            const result = validator.validateString(body);
-                            if (result.status === 'PASS') {
-                                console.log( result.status.info + ": " + testUrls[i] );
-                                i++;
-                                resolve();
-                            } else {
-                                let msg = result.status.error + ": " + testUrls[i] + '\n';
-                                for (const error of result.errors) {
-                                    msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                                    if (error.specUrl !== null) {
-                                        msg += '\n     (see ' + error.specUrl + ')';
-                                    }
+                    testUrls.push( item['url']+"amp/" );
+
+                }
+
+                //Control URLs for Testing purposes
+                var localBaseURL = url.parse(testUrls[0]);
+                localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+                testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/404.html' );
+                testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/failure.html' );
+                testUrls.push( localBaseURL+'/wp-content/plugins/amp-wp/tests/assets/success.html' );
+
+                console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
+                ourTestUrls = testUrls;
+
+                const ourInstance = ampValidator.getInstance();
+                var i = 0,
+                    len = ourTestUrls.length - 1;
+                //This runs our list of URLs through the AMP Validator.
+                promiseWhile(function() {
+                    return i <= len;
+                }, function() {
+                    return new Promise( function( resolve, reject ) {
+                        fetch( testUrls[i] )
+                            .then( function( res ) {
+                                if ( res.ok ) {
+                                    return res.text();
+                                } else {
+                                    var response = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + res.status + ' - ' + res.statusText;
+                                    console.error(response);
+                                    ourResults.push('Unable to Fetch'+ testUrls[i]);
+                                    resolve();
                                 }
+                            }).then(function(body) {
+                            if ( body ) {
+                                return ourInstance.then(function (validator) {
+                                    const result = validator.validateString(body);
+                                    if (result.status === 'PASS') {
+                                        ourResults.push('PASS');
+                                        i++;
+                                    } else {
+                                        let msg = result.status.error + ": " + testUrls[i] + '\n';
+                                        for (const error of result.errors) {
+                                            msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+                                            if (error.specUrl !== null) {
+                                                msg += '\n     (see ' + error.specUrl + ')';
+                                            }
+                                        }
+                                        console.error(testUrls[i]+"returned:\n"+msg);
+                                        ourResults.push('FAIL');
+                                        i++;
+                                    }
+                                    resolve();
+                                });
+                            } else {
                                 i++;
-                                reject(msg);
+                                console.error('Body of '+ testUrls[i] + ' was empty'.error);
+                                ourResults.push('FAIL');
                             }
-                        }).catch( function(e){
-                            console.error(e);
-                        });
-                    } else {
-                        i++;
-                        reject('Body of '+ testUrls[i] + ' was empty'.error);
+                            resolve();
+                        })
+                    });
+
+                });
+                var timeout = setInterval(function(){
+                    if (i >= len) {
+                        clearInterval(timeout);
+                        resolve();
                     }
+                },500);
 
-                })
-        }).catch( function(e){
-            console.error(e);
-            // process.exit(1);
+            });
         });
+    });
 
+    it('Get URLs from WP', function(){
+        ourTestUrls.length.should.not.equal(0);
+    });
+    it('All URLs correctly validate', function(){
+        ourResults.should.all.be.equal('PASS');
     });
 
 });
