@@ -92,8 +92,9 @@ describe('AMP Validation Suite', function() {
                             .then( function(status) {
                                 if ( 200 !== Number(status) ) {
                                     var statusMessage = 'Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status;
-                                    throw statusMessage ;
-                                    // console.error( statusMessage );
+                                    // throw statusMessage ;
+                                    console.error( statusMessage );
+                                    process.exit(1);
                                 }
                                 // resolve();
                             })
@@ -133,6 +134,11 @@ describe('AMP Validation Suite', function() {
                                         }
                                         reject( Error(msg) );
                                     }
+                                }).catch(function(e){
+                                    i++;
+                                    console.log("error: "+e);
+                                    ourResults.push(e);
+                                    return horseman.close();
                                 });
                             })
                             .catch(function(e){
