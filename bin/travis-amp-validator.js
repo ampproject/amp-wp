@@ -65,14 +65,14 @@ describe('AMP Validation Suite', function() {
                         item['url'] = item['url'] + "/";
                     }
 
-                    // testUrls.push(item['url'] + "amp/");
+                    testUrls.push(item['url'] + "amp/");
 
                 }
 
                 //Control URLs for Testing purposes
-                // var localBaseURL = url.parse(testUrls[0]);
-                // localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-                var localBaseURL = 'http://auto-amp.dev';
+                var localBaseURL = url.parse(testUrls[0]);
+                localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+                // var localBaseURL = 'http://auto-amp.dev';
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
                 testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
