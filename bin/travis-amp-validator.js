@@ -70,19 +70,18 @@ describe('AMP Validation Suite', function() {
                 }
 
                 //Control URLs for Testing purposes
-                var localBaseURL = url.parse(testUrls[0]);
-                localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
                 // var localBaseURL = 'http://auto-amp.dev';
-                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
-                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-                testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+                // var localBaseURL = url.parse(testUrls[0]);
+                // localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
+                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
+                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
                 console.log("Hang tight, we are going to test " + testUrls.length + " urls...");
 
                 const ourInstance = ampValidator.getInstance();
                 var i = 0,
                     len = testUrls.length - 1;
-                console.log("len:"+len);
                 //This runs our list of URLs through the AMP Validator.
                 promiseWhile(function() {
                     return i <= len;
@@ -94,7 +93,7 @@ describe('AMP Validation Suite', function() {
                             .status()
                             .then( function(status) {
                                 if ( 200 !== Number(status) ) {
-                                    var statusMessage = 'FAIL: Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
+                                    var statusMessage = i+": FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
                                     console.log( i + ": " + status + ": " + url );
                                     ourErrors.push( statusMessage );
                                     ourResults.push( statusMessage );
@@ -154,7 +153,6 @@ describe('AMP Validation Suite', function() {
                 });
 
                 var timeout = setInterval(function () {
-                    console.log(i);
                     if (i > len) {
                         clearInterval(timeout);
                         if (ourErrors.length > 0) {
