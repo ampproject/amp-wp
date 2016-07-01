@@ -89,17 +89,18 @@ describe('AMP Validation Suite', function() {
                 }, function() {
                     return new Promise( function( resolve, reject ) {
                         const horseman = new Horseman();
-                        horseman.open(testUrls[i])
+                        var url = testUrls[i];
+                        console.log(url);
+                        horseman.open(url)
                             .status()
                             .then( function(status) {
-                                console.log("Status: "+status);
-                                console.log(i+":       "+testUrls[i]);
+                                console.log("Status: " + status);
+                                console.log(i+":       " + url);
                                 if ( 200 !== Number(status) ) {
-                                    var statusMessage = 'FAIL: Unable to fetch ' + testUrls[i] + ' - HTTP Status ' + status+"\n";
-                                    console.log(i+": " + status + ": " + testUrls[i]);
+                                    var statusMessage = 'FAIL: Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
+                                    console.log( i + ": " + status + ": " + url );
                                     ourErrors.push( statusMessage );
                                     ourResults.push( statusMessage );
-                                    // i++;
                                     return Promise.reject();
                                 }
                                 resolve();
@@ -124,10 +125,10 @@ describe('AMP Validation Suite', function() {
                                     var result = '';
                                     result = validator.validateString(body);
                                     if (result.status === 'PASS') {
-                                        console.log(i+": "+result.status.info + ": "+testUrls[i]);
+                                        console.log(i+": "+result.status.info + ": "+url);
                                         ourResults.push('PASS');
                                     } else {
-                                        let msg = i+": "+result.status.error + ": " + testUrls[i] + '\n';
+                                        let msg = i+": "+result.status.error + ": " + url + '\n';
                                         for (const error of result.errors) {
                                             msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
                                             if (error.specUrl !== '') {
@@ -135,12 +136,14 @@ describe('AMP Validation Suite', function() {
                                             }
                                             // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                         }
-                                        console.log(i+": FAIL: ".error + testUrls[i]);
+                                        console.log(i+": FAIL: ".error + url);
                                         ourErrors.push(msg);
                                         ourResults.push(msg);
                                     }
 
                                 });
+                            }).then( function(){
+                                i++;
                             })
                             .catch(function(e){
                                 ourErrors.push(e);
@@ -149,7 +152,7 @@ describe('AMP Validation Suite', function() {
                             .finally( function() {
                                 return horseman.close();
                             });
-                        i++;
+
                     });
 
                 });
