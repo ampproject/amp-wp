@@ -90,12 +90,9 @@ describe('AMP Validation Suite', function() {
                     return new Promise( function( resolve, reject ) {
                         const horseman = new Horseman();
                         var url = testUrls[i];
-                        console.log(url);
                         horseman.open(url)
                             .status()
                             .then( function(status) {
-                                console.log("Status: " + status);
-                                console.log(i+":       " + url);
                                 if ( 200 !== Number(status) ) {
                                     var statusMessage = 'FAIL: Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
                                     console.log( i + ": " + status + ": " + url );
@@ -142,14 +139,13 @@ describe('AMP Validation Suite', function() {
                                     }
 
                                 });
-                            }).then( function(){
-                                i++;
                             })
                             .catch(function(e){
                                 ourErrors.push(e);
                                 ourResults.push(e);
                             })
                             .finally( function() {
+                                i++;
                                 return horseman.close();
                             });
 
