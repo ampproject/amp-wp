@@ -237,12 +237,14 @@ class AMP_Post_Template {
 	}
 
 	private function verify_and_include( $file, $template_type ) {
+		// $this->locate_template should be able to override this filter
+		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
+		
 		$located_file = $this->locate_template( $file );
 		if ( $located_file ) {
 			$file = $located_file;
 		}
 
-		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		if ( ! $this->is_valid_template( $file ) ) {
 			_doing_it_wrong( __METHOD__, sprintf( __( 'Path validation for template (%s) failed. Path cannot traverse and must be located in `%s`.', 'amp' ), esc_html( $file ), 'WP_CONTENT_DIR' ), '0.1' );
 			return;
