@@ -26,6 +26,22 @@ colors.setTheme({
     error:  'red'
 });
 
+/**
+ * Promisifying exec children
+ * adapted from: http://stackoverflow.com/a/30883005
+ */
+var promiseFromChildProcess = function(child) {
+    return new Promise(function (resolve, reject) {
+        child.addListener("error", reject);
+        child.addListener("exit", resolve);
+    });
+}
+
+
+/**
+ * While Looping for Promises
+ * adapted from: http://blog.victorquinn.com/javascript-promise-while-loop
+ */
 var promiseWhile = function(condition, action) {
     var resolver = Promise.defer();
 
@@ -41,6 +57,21 @@ var promiseWhile = function(condition, action) {
     return resolver.promise;
 };
 
+/**
+ * Timeout promise
+ * adapted from: http://exploringjs.com/es6/ch_promises.html
+ * @param ms
+ * @param promise
+ */
+var timeout = function (ms, promise) {
+    return new Promise(function(resolve, reject){
+        promise.then(resolve);
+        setTimeout(function(){
+            reject( new Error('Timeout after '+ms+'ms'));
+        }, ms);
+    });
+}
+
 
 describe('AMP Validation Suite', function() {
     this.timeout(1000000);
@@ -49,75 +80,79 @@ describe('AMP Validation Suite', function() {
     var ourErrors = [];
 
     before( function() {
-        return new Promise(function (resolve, reject) {
-            exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer', function (error, stdout, stderr) {
-                if (error) {
-                    console.error('exec error: ' + error);
-                    process.exit(1);
+        var child = exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer');
+
+        child.stdout.on('data', function (data) {
+            var items = JSON.parse(data.trim());
+
+            for (var i=0 , len = items.length; i < len; i++ ) {
+                var item = items[i];
+                if ( '/' != item['url'].slice(-1) ) {
+                    item['url'] = item['url']+"/";
                 }
+                testUrls.push( item['url']+"amp/" );
 
-                var items = JSON.parse(stdout.trim());
+            }
 
-                for (var h = 0, itemLength = items.length; h < itemLength ; h++) {
-                    var item = items[h];
+            //Control URLs for Testing purposes
+            var localBaseURL = url.parse(testUrls[0]);
+            localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
+            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
 
-                    if ('/' != item['url'].slice(-1)) {
-                        item['url'] = item['url'] + "/";
-                    }
 
-                    testUrls.push(item['url'] + "amp/");
 
-                }
+        });
+        child.stderr.on('data', function (data) {
+            console.log('stderr: ' + data);
+        });
+        return promiseFromChildProcess(child).then(function () {
+            console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
+        }, function (err) {
+            console.log('Child Exec rejected: ' + err);
+        }).then(function() {
+            const ourInstance = ampValidator.getInstance();
+            var i = 0,
+                len = testUrls.length - 1;
 
-                //Control URLs for Testing purposes
-                // var localBaseURL = 'http://auto-amp.dev';
-                // var localBaseURL = url.parse(testUrls[0]);
-                // localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-                // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+            return promiseWhile(function() {
+                return i <= len;
+            }, function() {
+                return new Promise( function( resolve, reject ) {
+                    const horseman = new Horseman();
+                    var url = testUrls[i];
+                    return horseman.open(url)
+                        .status()
+                        .then( function(status) {
+                            if ( 200 !== Number(status) ) {
+                                var statusMessage = i+": FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
+                                console.log( i + ": " + status + ": " + url );
+                                ourErrors.push( statusMessage );
+                                ourResults.push( statusMessage );
+                                return Promise.reject();
+                            }
+                            resolve();
+                        })
+                        .evaluate( function() {
+                            var getDocTypeAsString = function () {
+                                var node = document.doctype;
+                                return node ? "<!DOCTYPE "
+                                + node.name
+                                + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
+                                + (!node.publicId && node.systemId ? ' SYSTEM' : '')
+                                + (node.systemId ? ' "' + node.systemId + '"' : '')
+                                + '>\n' : '';
+                            };
+                            var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
+                            htmlDoc = htmlDoc.replace(/&gt;/g, '>');
+                            return getDocTypeAsString() + htmlDoc;
 
-                console.log("Hang tight, we are going to test " + testUrls.length + " urls...");
-
-                const ourInstance = ampValidator.getInstance();
-                var i = 0,
-                    len = testUrls.length - 1;
-                //This runs our list of URLs through the AMP Validator.
-                promiseWhile(function() {
-                    return i <= len;
-                }, function() {
-                    return new Promise( function( resolve, reject ) {
-                        const horseman = new Horseman();
-                        var url = testUrls[i];
-                        horseman.open(url)
-                            .status()
-                            .then( function(status) {
-                                if ( 200 !== Number(status) ) {
-                                    var statusMessage = i+": FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
-                                    console.log( i + ": " + status + ": " + url );
-                                    ourErrors.push( statusMessage );
-                                    ourResults.push( statusMessage );
-                                    return Promise.reject();
-                                }
-                                resolve();
-                            })
-                            .evaluate( function() {
-                                var getDocTypeAsString = function () {
-                                    var node = document.doctype;
-                                    return node ? "<!DOCTYPE "
-                                    + node.name
-                                    + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
-                                    + (!node.publicId && node.systemId ? ' SYSTEM' : '')
-                                    + (node.systemId ? ' "' + node.systemId + '"' : '')
-                                    + '>\n' : '';
-                                };
-                                var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
-                                htmlDoc = htmlDoc.replace(/&gt;/g, '>');
-                                return getDocTypeAsString() + htmlDoc;
-
-                            })
-                            .then( function(body) {
-                                return ourInstance.then(function (validator) {
+                        })
+                        .then( function(body) {
+                            return timeout(2000,
+                                ourInstance)
+                                .then(function (validator) {
                                     var result = '';
                                     result = validator.validateString(body);
                                     if (result.status === 'PASS') {
@@ -137,41 +172,41 @@ describe('AMP Validation Suite', function() {
                                         ourResults.push(msg);
                                     }
 
+                                }).catch(function(reason){
+                                    ourErrors.push( reason );
+                                    console.error('Error or timeout',reason);
+                                    reject(reason);
                                 });
-                            })
-                            .catch(function(e){
-                                ourErrors.push(e);
-                                ourResults.push(e);
-                            })
-                            .finally( function() {
-                                i++;
-                                return horseman.close();
-                            });
+                        })
+                        .catch(function(e){
+                            ourErrors.push(e);
+                            ourResults.push(e);
+                        })
+                        .finally( function() {
+                            i++;
+                            return horseman.close();
+                        });
 
                     });
-
-                });
-
-                var timeout = setInterval(function () {
-                    if (i > len) {
-                        clearInterval(timeout);
-                        if (ourErrors.length > 0) {
-                            console.log('----------------------------------------------------------------------------'.error);
-                            console.log('---------------------------------Errors-------------------------------------'.error);
-                            console.log('----------------------------------------------------------------------------\n'.error);
-                            for (var j = 0, num = ourErrors.length-1; j < num; j++) {
-                                console.log('||||||||||||||||||||||||||||||        ' + (j + 1) + '        ||||||||||||||||||||||||||||||');
-                                console.log(ourErrors[j]);
-                                console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
-                            }
-                            console.log('----------------------------------------------------------------------------'.error);
-                            console.log('----------------------------------------------------------------------------\n'.error);
-                        }
-                        resolve();
-                    }
-                }, 5000);
             });
+        }).then(function(){
+            if (ourErrors.length > 0) {
+                console.log('----------------------------------------------------------------------------'.error);
+                console.log('---------------------------------Errors-------------------------------------'.error);
+                console.log('----------------------------------------------------------------------------\n'.error);
+                for (var j = 0, num = ourErrors.length; j < num; j++) {
+                    console.log('||||||||||||||||||||||||||||||        ' + (j + 1) + '        ||||||||||||||||||||||||||||||');
+                    console.log(ourErrors[j]);
+                    console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n');
+                }
+                console.log('----------------------------------------------------------------------------'.error);
+                console.log('----------------------------------------------------------------------------\n'.error);
+            }
+            resolve();
+        }).catch(function(error) {
+            console.error(error);
         });
+
     });
 
     it('Get URLs from WP', function(){
