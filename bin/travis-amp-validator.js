@@ -151,10 +151,10 @@ describe('AMP Validation Suite', function() {
                         .then( function(body) {
                             return ourInstance.then(function (validator) {
                                 var result = validator.validateString(body);
+                                console.log(i+": "+url);
                                 if (result.status === 'PASS') {
                                     console.log(i+": "+result.status.info + ": "+url);
                                     ourResults.push('PASS');
-                                    resolve();
                                 } else {
                                     let msg = i+": "+result.status.error + ": " + url + '\n';
                                     for (const error of result.errors) {
@@ -167,15 +167,11 @@ describe('AMP Validation Suite', function() {
                                     console.log(i + ": FAIL: ".error + url);
                                     ourErrors.push(msg);
                                     ourResults.push(msg);
-                                    reject();
                                 }
+                                i++;
+                                resolve();
                             });
-                        })
-                        .then(function(){
-                            i++;
-                            horseman.close();
-                            resolve();
-                        });
+                        }).close();
                 })
                 .catch(function(e){
                     ourErrors.push(e);
