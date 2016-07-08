@@ -99,7 +99,7 @@ describe('AMP Validation Suite', function() {
             localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-            // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
 
         });
@@ -113,10 +113,10 @@ describe('AMP Validation Suite', function() {
         }).then(function() {
             const ourInstance = ampValidator.getInstance();
             var i = 0,
-                len = testUrls.length - 1;
+                len = testUrls.length;
 
             return promiseWhile(function() {
-                return i <= len;
+                return i < len;
             }, function() {
                 return new Promise( function( resolve, reject ) {
                     const horseman = new Horseman();
@@ -127,11 +127,12 @@ describe('AMP Validation Suite', function() {
                             if ( 200 !== Number(status) ) {
                                 var statusMessage = i+": FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
                                 console.log( statusMessage );
-                                ourErrors.push( statusMessage );
-                                ourResults.push( statusMessage );
+                                // ourErrors.push( statusMessage );
+                                // ourResults.push( statusMessage );
                                 reject(statusMessage);
+                            } else {
+                                resolve();
                             }
-                            resolve();
                         })
                         .evaluate( function() {
                             var getDocTypeAsString = function () {
@@ -150,11 +151,11 @@ describe('AMP Validation Suite', function() {
                         })
                         .then( function(body) {
                             return ourInstance.then(function (validator) {
-                                var result = '';
-                                result = validator.validateString(body);
+                                var result = validator.validateString(body);
                                 if (result.status === 'PASS') {
                                     console.log(i+": "+result.status.info + ": "+url);
                                     ourResults.push('PASS');
+                                    resolve();
                                 } else {
                                     let msg = i+": "+result.status.error + ": " + url + '\n';
                                     for (const error of result.errors) {
@@ -165,20 +166,20 @@ describe('AMP Validation Suite', function() {
                                         // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                     }
                                     console.log(i+": FAIL: ".error + url);
-                                    ourErrors.push(msg);
-                                    ourResults.push(msg);
+                                    // ourErrors.push(msg);
+                                    // ourResults.push(msg);
+                                    reject(msg);
                                 }
-                                resolve();
                             });
-                        })
-                        .catch(function(e){
-                            ourErrors.push(e);
-                            ourResults.push(e);
                         })
                         .then(function(){
                             i++;
                             horseman.close()
                             resolve();
+                        })
+                        .catch(function(e){
+                            ourErrors.push(e);
+                            ourResults.push(e);
                         });
                 });
             });
