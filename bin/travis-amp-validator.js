@@ -98,7 +98,7 @@ describe('AMP Validation Suite', function() {
             // var localBaseURL = url.parse(testUrls[0]);
             // localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
             // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
-            // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
+            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
             // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
 
@@ -195,7 +195,7 @@ describe('AMP Validation Suite', function() {
                 console.log('----------------------------------------------------------------------------'.error);
                 console.log('----------------------------------------------------------------------------\n'.error);
             }
-            
+
         });
 
     });
