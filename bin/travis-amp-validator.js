@@ -152,7 +152,7 @@ describe('AMP Validation Suite', function() {
                             return ourInstance.then(function (validator) {
                                 var result = validator.validateString(body);
                                 if (result.status === 'PASS') {
-                                    // console.log(i+": "+result.status.info + ": "+url);
+                                    console.log(i+": "+result.status.info + ": "+url);
                                     ourResults.push('PASS');
                                     resolve();
                                 } else {
@@ -164,7 +164,7 @@ describe('AMP Validation Suite', function() {
                                         }
                                         // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                     }
-                                    // console.log(i + ": FAIL: ".error + url);
+                                    console.log(i + ": FAIL: ".error + url);
                                     ourErrors.push(msg);
                                     ourResults.push(msg);
                                     reject();
