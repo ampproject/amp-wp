@@ -173,6 +173,7 @@ describe('AMP Validation Suite', function() {
                                 });
                             }).close();
                     } else {
+                        i++;
                         resolve();
                     }
                 })
