@@ -106,7 +106,8 @@ describe('AMP Validation Suite', function() {
         child.stderr.on('data', function (data) {
             ourErrors.push('stderr: ' + data);
         });
-        return promiseFromChildProcess(child).then(function () {
+        return promiseFromChildProcess(child)
+        .then(function () {
             console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
         }, function (err) {
             ourErrors.push('stderr: ' + err);
@@ -185,7 +186,7 @@ describe('AMP Validation Suite', function() {
         }).then(function(){
             setTimeout(function(){
                 resolve();
-            }, 500);
+            }, 1000);
         }).then(function(){
             if (ourErrors.length > 0) {
                 console.log('----------------------------------------------------------------------------'.error);
