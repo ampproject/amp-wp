@@ -99,9 +99,8 @@ describe('AMP Validation Suite', function() {
             localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
-
-            console.log(testUrls);
+            // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+            
 
         });
         child.stderr.on('data', function (data) {
@@ -150,44 +149,38 @@ describe('AMP Validation Suite', function() {
 
                         })
                         .then( function(body) {
-                            return timeout(2000,
-                                ourInstance)
-                                .then(function (validator) {
-                                    var result = '';
-                                    result = validator.validateString(body);
-                                    if (result.status === 'PASS') {
-                                        console.log(i+": "+result.status.info + ": "+url);
-                                        ourResults.push('PASS');
-                                    } else {
-                                        let msg = i+": "+result.status.error + ": " + url + '\n';
-                                        for (const error of result.errors) {
-                                            msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                                            if (error.specUrl !== '') {
-                                                msg += '\n     (see ' + error.specUrl + ')\n';
-                                            }
-                                            // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                            return ourInstance.then(function (validator) {
+                                var result = '';
+                                result = validator.validateString(body);
+                                if (result.status === 'PASS') {
+                                    console.log(i+": "+result.status.info + ": "+url);
+                                    ourResults.push('PASS');
+                                } else {
+                                    let msg = i+": "+result.status.error + ": " + url + '\n';
+                                    for (const error of result.errors) {
+                                        msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+                                        if (error.specUrl !== '') {
+                                            msg += '\n     (see ' + error.specUrl + ')\n';
                                         }
-                                        console.log(i+": FAIL: ".error + url);
-                                        ourErrors.push(msg);
-                                        ourResults.push(msg);
+                                        // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                     }
-
-                                }).catch(function(reason){
-                                    ourErrors.push( reason );
-                                    console.error('Error or timeout',reason);
-                                    reject(reason);
-                                });
+                                    console.log(i+": FAIL: ".error + url);
+                                    ourErrors.push(msg);
+                                    ourResults.push(msg);
+                                }
+                                resolve();
+                            });
                         })
                         .catch(function(e){
                             ourErrors.push(e);
                             ourResults.push(e);
                         })
-                        .finally( function() {
-                            i++;
-                            return horseman.close();
-                        });
+                        .close();
 
-                    });
+                }).then(function(){
+                    i++;
+                    resolve();
+                });
             });
         }).then(function(){
             if (ourErrors.length > 0) {
