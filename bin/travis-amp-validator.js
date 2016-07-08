@@ -100,7 +100,7 @@ describe('AMP Validation Suite', function() {
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
             // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
-            
+
 
         });
         child.stderr.on('data', function (data) {
@@ -121,7 +121,7 @@ describe('AMP Validation Suite', function() {
                 return new Promise( function( resolve, reject ) {
                     const horseman = new Horseman();
                     var url = testUrls[i];
-                    return horseman.open(url)
+                    horseman.open(url)
                         .status()
                         .then( function(status) {
                             if ( 200 !== Number(status) ) {
@@ -175,11 +175,11 @@ describe('AMP Validation Suite', function() {
                             ourErrors.push(e);
                             ourResults.push(e);
                         })
-                        .close();
-
-                }).then(function(){
-                    i++;
-                    resolve();
+                        .then(function(){
+                            i++;
+                            horseman.close()
+                            resolve();
+                        });
                 });
             });
         }).then(function(){
