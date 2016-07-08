@@ -116,62 +116,65 @@ describe('AMP Validation Suite', function() {
                 len = testUrls.length;
 
             return promiseWhile(function() {
-                return i < len;
+                return i <= len;
             }, function() {
                 return new Promise( function( resolve, reject ) {
                     const horseman = new Horseman();
                     var url = testUrls[i];
-                    horseman.open(url)
-                        .status()
-                        .then( function(status) {
-                            if ( 200 !== Number(status) ) {
-                                var statusMessage = "FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
-                                ourErrors.push( statusMessage );
-                                ourResults.push( statusMessage );
-                                resolve(statusMessage);
-                            } else {
-                                resolve();
-                            }
-                        })
-                        .evaluate( function() {
-                            var getDocTypeAsString = function () {
-                                var node = document.doctype;
-                                return node ? "<!DOCTYPE "
-                                + node.name
-                                + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
-                                + (!node.publicId && node.systemId ? ' SYSTEM' : '')
-                                + (node.systemId ? ' "' + node.systemId + '"' : '')
-                                + '>\n' : '';
-                            };
-                            var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
-                            htmlDoc = htmlDoc.replace(/&gt;/g, '>');
-                            return getDocTypeAsString() + htmlDoc;
-
-                        })
-                        .then( function(body) {
-                            return ourInstance.then(function (validator) {
-                                var result = validator.validateString(body);
-                                console.log(i+": "+url);
-                                if (result.status === 'PASS') {
-                                    console.log(i+": "+result.status.info + ": "+url);
-                                    ourResults.push('PASS');
+                    if (url) {
+                        horseman.open(url)
+                            .status()
+                            .then(function (status) {
+                                if (200 !== Number(status)) {
+                                    var statusMessage = "FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status + "\n";
+                                    ourErrors.push(statusMessage);
+                                    ourResults.push(statusMessage);
+                                    resolve(statusMessage);
                                 } else {
-                                    let msg = i+": "+result.status.error + ": " + url + '\n';
-                                    for (const error of result.errors) {
-                                        msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                                        if (error.specUrl !== '') {
-                                            msg += '\n     (see ' + error.specUrl + ')\n';
-                                        }
-                                        // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-                                    }
-                                    console.log(i + ": FAIL: ".error + url);
-                                    ourErrors.push(msg);
-                                    ourResults.push(msg);
+                                    resolve();
                                 }
-                                i++;
-                                resolve();
-                            });
-                        }).close();
+                            })
+                            .evaluate(function () {
+                                var getDocTypeAsString = function () {
+                                    var node = document.doctype;
+                                    return node ? "<!DOCTYPE "
+                                    + node.name
+                                    + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
+                                    + (!node.publicId && node.systemId ? ' SYSTEM' : '')
+                                    + (node.systemId ? ' "' + node.systemId + '"' : '')
+                                    + '>\n' : '';
+                                };
+                                var htmlDoc = document.documentElement.outerHTML.replace(/&lt;/g, '<')
+                                htmlDoc = htmlDoc.replace(/&gt;/g, '>');
+                                return getDocTypeAsString() + htmlDoc;
+
+                            })
+                            .then(function (body) {
+                                return ourInstance.then(function (validator) {
+                                    var result = validator.validateString(body);
+                                    if (result.status === 'PASS') {
+                                        console.log(i + ": " + result.status.info + ": " + url);
+                                        ourResults.push('PASS');
+                                    } else {
+                                        let msg = i + ": " + result.status.error + ": " + url + '\n';
+                                        for (const error of result.errors) {
+                                            msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+                                            if (error.specUrl !== '') {
+                                                msg += '\n     (see ' + error.specUrl + ')\n';
+                                            }
+                                            // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+                                        }
+                                        console.log(i + ": FAIL: ".error + url);
+                                        ourErrors.push(msg);
+                                        ourResults.push(msg);
+                                    }
+                                    i++;
+                                    resolve();
+                                });
+                            }).close();
+                    } else {
+                        resolve();
+                    }
                 })
                 .catch(function(e){
                     ourErrors.push(e);
