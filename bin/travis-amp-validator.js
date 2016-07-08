@@ -186,7 +186,7 @@ describe('AMP Validation Suite', function() {
         }).then(function(){
             setTimeout(function(){
                 resolve();
-            }, 1000);
+            }, 5000);
         }).then(function(){
             if (ourErrors.length > 0) {
                 console.log('----------------------------------------------------------------------------'.error);
