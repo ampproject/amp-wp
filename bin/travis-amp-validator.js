@@ -116,7 +116,7 @@ describe('AMP Validation Suite', function() {
                 len = testUrls.length;
 
             return promiseWhile(function() {
-                return i <= len;
+                return i < len;
             }, function() {
                 return new Promise( function( resolve, reject ) {
                     const horseman = new Horseman();
@@ -182,6 +182,8 @@ describe('AMP Validation Suite', function() {
                     ourResults.push(e);
                 });
             });
+        }).then(function(){
+            setTimeout(resolve(), 500);
         }).then(function(){
             if (ourErrors.length > 0) {
                 console.log('----------------------------------------------------------------------------'.error);
