@@ -197,7 +197,7 @@ describe('AMP Validation Suite', function() {
                 console.log('----------------------------------------------------------------------------\n'.error);
             }
 
-            resolve();
+            // resolve();
         });
 
     });
