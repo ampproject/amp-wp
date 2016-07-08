@@ -104,12 +104,12 @@ describe('AMP Validation Suite', function() {
 
         });
         child.stderr.on('data', function (data) {
-            console.log('stderr: ' + data);
+            ourErrors.push('stderr: ' + data);
         });
         return promiseFromChildProcess(child).then(function () {
             console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
         }, function (err) {
-            console.log('Child Exec rejected: ' + err);
+            ourErrors.push('stderr: ' + err);
         }).then(function() {
             const ourInstance = ampValidator.getInstance();
             var i = 0,
@@ -125,8 +125,7 @@ describe('AMP Validation Suite', function() {
                         .status()
                         .then( function(status) {
                             if ( 200 !== Number(status) ) {
-                                var statusMessage = i+": FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
-                                // console.log( statusMessage );
+                                var statusMessage = "FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
                                 ourErrors.push( statusMessage );
                                 ourResults.push( statusMessage );
                                 resolve(statusMessage);
@@ -153,7 +152,7 @@ describe('AMP Validation Suite', function() {
                             return ourInstance.then(function (validator) {
                                 var result = validator.validateString(body);
                                 if (result.status === 'PASS') {
-                                    console.log(i+": "+result.status.info + ": "+url);
+                                    // console.log(i+": "+result.status.info + ": "+url);
                                     ourResults.push('PASS');
                                     resolve();
                                 } else {
@@ -165,7 +164,7 @@ describe('AMP Validation Suite', function() {
                                         }
                                         // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                     }
-                                    console.log(i + ": FAIL: ".error + url);
+                                    // console.log(i + ": FAIL: ".error + url);
                                     ourErrors.push(msg);
                                     ourResults.push(msg);
                                     reject();
@@ -196,8 +195,7 @@ describe('AMP Validation Suite', function() {
                 console.log('----------------------------------------------------------------------------'.error);
                 console.log('----------------------------------------------------------------------------\n'.error);
             }
-
-            // resolve();
+            
         });
 
     });
