@@ -183,7 +183,9 @@ describe('AMP Validation Suite', function() {
                 });
             });
         }).then(function(){
-            setTimeout(resolve(), 500);
+            setTimeout(function(){
+                resolve();
+            }, 500);
         }).then(function(){
             if (ourErrors.length > 0) {
                 console.log('----------------------------------------------------------------------------'.error);
