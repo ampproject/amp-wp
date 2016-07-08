@@ -35,7 +35,7 @@ var promiseFromChildProcess = function(child) {
         child.addListener("error", reject);
         child.addListener("exit", resolve);
     });
-}
+};
 
 
 /**
@@ -70,7 +70,7 @@ var timeout = function (ms, promise) {
             reject( new Error('Timeout after '+ms+'ms'));
         }, ms);
     });
-}
+};
 
 
 describe('AMP Validation Suite', function() {
@@ -126,10 +126,10 @@ describe('AMP Validation Suite', function() {
                         .then( function(status) {
                             if ( 200 !== Number(status) ) {
                                 var statusMessage = i+": FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
-                                console.log( statusMessage );
-                                // ourErrors.push( statusMessage );
-                                // ourResults.push( statusMessage );
-                                reject(statusMessage);
+                                // console.log( statusMessage );
+                                ourErrors.push( statusMessage );
+                                ourResults.push( statusMessage );
+                                resolve(statusMessage);
                             } else {
                                 resolve();
                             }
@@ -165,22 +165,22 @@ describe('AMP Validation Suite', function() {
                                         }
                                         // ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
                                     }
-                                    console.log(i+": FAIL: ".error + url);
-                                    // ourErrors.push(msg);
-                                    // ourResults.push(msg);
-                                    reject(msg);
+                                    console.log(i + ": FAIL: ".error + url);
+                                    ourErrors.push(msg);
+                                    ourResults.push(msg);
+                                    reject();
                                 }
                             });
                         })
                         .then(function(){
                             i++;
-                            horseman.close()
+                            horseman.close();
                             resolve();
-                        })
-                        .catch(function(e){
-                            ourErrors.push(e);
-                            ourResults.push(e);
                         });
+                });
+                .catch(function(e){
+                    ourErrors.push(e);
+                    ourResults.push(e);
                 });
             });
         }).then(function(){
@@ -196,9 +196,8 @@ describe('AMP Validation Suite', function() {
                 console.log('----------------------------------------------------------------------------'.error);
                 console.log('----------------------------------------------------------------------------\n'.error);
             }
+
             resolve();
-        }).catch(function(error) {
-            console.error(error);
         });
 
     });
