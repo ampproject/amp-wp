@@ -98,10 +98,10 @@ describe('AMP Validation Suite', function() {
             var localBaseURL = url.parse(testUrls[0]);
             localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
-            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
             testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
+            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
 
-
+            console.log(testUrls);
 
         });
         child.stderr.on('data', function (data) {
@@ -127,10 +127,10 @@ describe('AMP Validation Suite', function() {
                         .then( function(status) {
                             if ( 200 !== Number(status) ) {
                                 var statusMessage = i+": FAIL: ".error + ' Unable to fetch ' + url + ' - HTTP Status ' + status+"\n";
-                                console.log( i + ": " + status + ": " + url );
+                                console.log( statusMessage );
                                 ourErrors.push( statusMessage );
                                 ourResults.push( statusMessage );
-                                return Promise.reject();
+                                reject(statusMessage);
                             }
                             resolve();
                         })
