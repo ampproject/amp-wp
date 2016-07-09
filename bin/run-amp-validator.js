@@ -134,7 +134,6 @@ describe('AMP Validation Suite', function() {
                             }
                         }).then(function(body) {
                         if ( body ) {
-                            console.log(body);
                             return timeout(2000,
                                 ourInstance)
                                 .then(function (validator) {
