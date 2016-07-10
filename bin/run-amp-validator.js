@@ -153,7 +153,7 @@ var validateUrls = function( urls ) {
 };
 
 describe('AMP Validation Suite', function() {
-    this.timeout(20000);
+    this.timeout(200000);
 
     before( function() {
         var child = exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer');
