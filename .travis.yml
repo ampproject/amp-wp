@@ -16,6 +16,9 @@ env:
 
 sudo: required
 
+allow_failures:
+        - php: '5.2'
+
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
 # so it doesn't need to be re-defined below.
