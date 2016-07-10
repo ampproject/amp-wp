@@ -18,9 +18,6 @@ sudo: required
 
 dist: trusty
 
-allow_failures:
-        - php: '5.2'
-
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
 # so it doesn't need to be re-defined below.
@@ -48,6 +45,8 @@ matrix:
      # 5.6 / latest already included above as first build.
    - php: "5.6"
      env: WP_VERSION=4.4
+  allow_failures:
+   - php: "5.2"
 
 cache:
   directories:
