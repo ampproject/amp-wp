@@ -147,7 +147,7 @@ var validateUrls = function( urls ) {
                                 reject(reason);
                             });
                     }
-            });
+                });
         });
     });
 };

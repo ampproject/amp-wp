@@ -1,8 +1,8 @@
 # AMP for WordPress Validator
 
 ## Overview
-The AMP for WordPress Validator runs [WP Test data](http://wptest.io) through the AMP Project's validator and returns the results.  This tool contains two parts:
-1) Shell script for Installing the test data and making sure we have the wptext.xml file in our plugin root directory and
+The AMP for WordPress Validator runs test data from [WP Test data](http://wptest.io) and WP-AMP specific data (stored in tests/assets/amptest-wordpress.xml) through the AMP Project's validator and returns the results.  This tool contains two parts:
+1) Shell script for Installing the test data and
 2) Node script to iterate through each post URL and validate them
 
 ## Instructions
@@ -23,9 +23,9 @@ To make sure you have all your packages installed you can run `npm install` on t
 We can run the program:
 `node bin/run-amp-validator.js`
 
-This will get the post URLs from the `wptest.xml` file, replace them with your test url (note: this currently assumes your permalinks are set to "Day and Name"). 
+This will get the post URLs from the site. 
 
 Then it will run each of those URLs through the validator.
 
-Note: there are currently two test files included as controls (one for success and one for failure).
+Note: there are currently three test files included as controls (one for success, one for failure and one for 404).  If you want to use the control files, you should comment 'in' lines 177-181 in run-amp-validator.js
  
