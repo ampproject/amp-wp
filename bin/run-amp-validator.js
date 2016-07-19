@@ -37,6 +37,44 @@ var promiseFromChildProcess = function(child) {
     });
 };
 
+/**
+ * move the child process outside the before() statement because we do not need it in there.
+ */
+var child = exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer');
+
+child.stdout.on('data', function (data) {
+    var items = JSON.parse(data.trim());
+
+    for (var i=0 , len = items.length; i < len; i++ ) {
+        var item = items[i];
+        if ( '/' != item['url'].slice(-1) ) {
+            item['url'] = item['url']+"/";
+        }
+        testUrls.push( item['url']+"amp/" );
+
+    }
+
+    var localBaseURL = url.parse(testUrls[0]);
+    localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
+    testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
+    testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
+    testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
+
+    if ( 0 === testUrls.length ) {
+        console.error('URLs not retrieved.'.error);
+        process.exit(1);
+    }
+
+});
+child.stderr.on('data', function (data) {
+    console.error('Child Exec Errored: '.error + data.error);
+    process.exit(1);
+});
+
+/**
+ * run an individual URL through the validator
+ * @param url   string  URL of local testing site we want to validate
+ */
 var validateUrl = function(url){
     return new Promise( function( resolve, reject ) {
         fetch(url)
@@ -85,46 +123,15 @@ describe('AMP Validation Suite', function() {
     this.timeout(20000);
 
     before( function() {
-        var child = exec('wp post list --post_type=post --posts_per_page=-1 --post_status=publish --post_password="" --format=json --fields=url --quiet --skip-plugins=wordpress-importer');
-
-        child.stdout.on('data', function (data) {
-            var items = JSON.parse(data.trim());
-
-            for (var i=0 , len = items.length; i < len; i++ ) {
-                var item = items[i];
-                if ( '/' != item['url'].slice(-1) ) {
-                    item['url'] = item['url']+"/";
-                }
-                testUrls.push( item['url']+"amp/" );
-
-            }
-            
-            var localBaseURL = url.parse(testUrls[0]);
-            localBaseURL = localBaseURL.protocol + "//" + localBaseURL.hostname;
-            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/success.html');
-            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
-            testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
-
-            if ( 0 === testUrls.length ) {
-                console.error('URLs not retrieved.'.error);
-                process.exit(1);
-            }
-
-        });
-        child.stderr.on('data', function (data) {
-            console.error('Child Exec Errored: '.error + data.error);
-            process.exit(1);
-        });
-
         return promiseFromChildProcess(child)
         .then(function () {
-                console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
+                //empty success because we just want to move on to the next thenable
             }, function (err) {
                 console.error('Child Exec rejected: ' + err);
                 process.exit(1);
         })
         .then(function() {
-            describe('Dynamic tests for URLs', function(){
+            describe("Hang tight, we are going to test "+testUrls.length+" urls...", function(){
                 testUrls.forEach( function( url ) {
                     if ( '404.html' == url.substr(url.length - 8) || 'failure.html' == url.substr(url.length - 12)) {
                         it( url + ' should NOT validate', function(done) {
@@ -133,6 +140,7 @@ describe('AMP Validation Suite', function() {
                                 urlResult.should.equal('PASS');
                                 done(urlResult);
                             }).catch(function(error){
+                                console.log(error);
                                 done();
                             });
                         });
@@ -156,9 +164,5 @@ describe('AMP Validation Suite', function() {
     it('Control Test to Make Mocha run before()', function () {
         // console.log('Mocha should not require this hack IMHO');
     });
-
-
-
-
 
 });
