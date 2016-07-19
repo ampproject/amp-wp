@@ -60,12 +60,12 @@ var promiseWhile = function(condition, action) {
 };
 
 /**
- * Timeout promise
+ * promiseWithTimeout
  * adapted from: http://exploringjs.com/es6/ch_promises.html
  * @param ms integer time in milliseconds before timing out our promise with a reject()
  * @param promise string name of promise function to timeout
  */
-var timeout = function (ms, promise) {
+var promiseWithTimeout = function (ms, promise) {
     return new Promise(function(resolve, reject){
        promise.then(resolve);
         setTimeout(function(){
@@ -119,7 +119,7 @@ var validateUrls = function( urls ) {
                 }).then(function(body) {
                     if (body) {
                         //We use timeout here because the AMP validator tool needs an internet connection.  If you are testing locally we want this to fail.  Without the timeout mocha was just failing assertion 1, but didn't provide any information as to why it failed.
-                        return timeout(2000,
+                        return promiseWithTimeout(2000,
                             ourInstance)
                             .then(function (validator) {
                                 const result = validator.validateString(body);
