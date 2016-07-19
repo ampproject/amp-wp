@@ -92,62 +92,101 @@ var outputErrors = function( errors ){
 };
 
 /**
- * Validate urls and add results to our* results variables
- * @param   errors  array of error messages
+ * Process the status over the fetched URL
+ * @param   result  object of the fetch result
+ */
+var processUrlStatus = function( result ){
+    if ( result.ok ) {
+        return result.text();
+    } else {
+        var response = 'FAIL: '.error + 'Unable to fetch ' + result.url + ' - HTTP Status ' + result.status + ' - ' + result.statusText + '\n';
+        // i++;
+        return Promise.reject(response);
+    }
+};
+
+/**
+ * When the validator returns an error, we need to process that message into a helpful error message
+ * @param result string result from the Amp Validator that contains our error message
+ */
+var processValidationError = function( result ) {
+    let msg = result.status.error + ": " + url + '\n';
+    for (const error of result.errors) {
+        msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+        if (error.specUrl !== null) {
+            msg += '\n     (see ' + error.specUrl + ')';
+        }
+    }
+    ourErrors.push(msg);
+    ourResults.push('FAIL');
+};
+
+/**
+ * Run each URL through the validator
+ * @param body  string  html of the page from fetch
+ */
+var processValidation = function( body ) {
+    const ourInstance = ampValidator.getInstance();
+    if (body) {
+        //We use timeout here because the AMP validator tool needs an internet connection.  If you are testing locally we want this to fail.  Without the timeout mocha was just failing assertion 1, but didn't provide any information as to why it failed.
+        return promiseWithTimeout(2000,
+            ourInstance)
+            .then(function (validator) {
+
+                const result = validator.validateString(body);
+                if (result.status === 'PASS') {
+
+                    ourResults.push('PASS');
+
+                } else {
+
+                    processValidationError( result );
+
+                }
+                return Promise.resolve(result);
+
+            }).catch(function (reason) {
+
+                ourErrors.push(reason);
+                console.error('Error or timeout', reason);
+                return Promise.reject(reason);
+
+            });
+    } else {
+        return Promise.reject('Body was empty');
+    }
+};
+
+/**
+ * Validate urls and add results to our results variables
+ * @param   urls  array of urls to be tested
  */
 var validateUrls = function( urls ) {
-    const ourInstance = ampValidator.getInstance();
     var i = 0,
         len = urls.length - 1;
-
     return promiseWhile(function() {
         return i <= len;
     }, function() {
         return new Promise( function( resolve, reject ) {
             var url = urls[i];
             fetch( url )
-                .then( function( res ) {
-                    if ( res.ok ) {
-                        return res.text();
-                    } else {
-                        var response = 'FAIL: '.error + 'Unable to fetch ' + url + ' - HTTP Status ' + res.status + ' - ' + res.statusText + '\n';
-                        ourErrors.push( response );
-                        ourResults.push( 'FAIL' );
-                        i++;
-                        resolve();
-                    }
-                }).then(function(body) {
-                    if (body) {
-                        //We use timeout here because the AMP validator tool needs an internet connection.  If you are testing locally we want this to fail.  Without the timeout mocha was just failing assertion 1, but didn't provide any information as to why it failed.
-                        return promiseWithTimeout(2000,
-                            ourInstance)
-                            .then(function (validator) {
-                                const result = validator.validateString(body);
-                                if (result.status === 'PASS') {
+            .then( function(res){
 
-                                    ourResults.push('PASS');
+                i++;
+                return processUrlStatus( res );
 
-                                } else {
-                                    let msg = result.status.error + ": " + url + '\n';
-                                    for (const error of result.errors) {
-                                        msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                                        if (error.specUrl !== null) {
-                                            msg += '\n     (see ' + error.specUrl + ')';
-                                        }
-                                    }
-                                    ourErrors.push(msg);
-                                    ourResults.push('FAIL');
-                                }
-                                i++;
-                                resolve();
-                            }).catch(function (reason) {
-                                i++;
-                                ourErrors.push(reason);
-                                console.error('Error or timeout', reason);
-                                reject(reason);
-                            });
-                    }
-                });
+            }).then(function( body ) {
+
+                return processValidation( body );
+
+            }).catch(function(error){
+
+                ourErrors.push( error );
+                ourResults.push( 'FAIL' );
+
+            }).then(function(){
+                resolve();
+            });
         });
     });
 };
