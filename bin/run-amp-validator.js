@@ -180,16 +180,23 @@ describe('AMP Validation Suite', function() {
             // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/404.html');
             // testUrls.push(localBaseURL + '/wp-content/plugins/amp-wp/tests/assets/failure.html');
 
+            if ( 0 === testUrls.length ) {
+                console.error('URLs not retrieved.'.error);
+                process.exit(1);
+            }
+
         });
         child.stderr.on('data', function (data) {
-
+            console.error('Child Exec Errored: '.error + data.error);
+            process.exit(1);
         });
 
         return promiseFromChildProcess(child)
         .then(function () {
                 console.log("Hang tight, we are going to test "+testUrls.length+" urls...");
             }, function (err) {
-                console.log('Child Exec rejected: ' + err);
+                console.error('Child Exec rejected: ' + err);
+                process.exit(1);
         }).then(function() {
 
             return validateUrls( testUrls );
@@ -204,10 +211,6 @@ describe('AMP Validation Suite', function() {
             }
 
         });
-    });
-
-    it('Get URLs from WP', function(){
-        testUrls.length.should.not.equal(0);
     });
 
     it('Get All Validation Results', function(){
