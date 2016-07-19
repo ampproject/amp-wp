@@ -67,7 +67,7 @@ child.stdout.on('data', function (data) {
 
 });
 child.stderr.on('data', function (data) {
-    console.error('Child Exec Errored: '.error + data.error);
+    console.error('Child Exec Threw an Error: '.error + data.error);
     process.exit(1);
 });
 
@@ -99,10 +99,13 @@ var validateUrl = function(url){
                     } else {
                         let msg = url + '\n';
                         for (const error of result.errors) {
-                            msg += ('     line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
-                            if (error.specUrl !== null) {
-                                msg += '\n     (see ' + error.specUrl + ')';
+                            msg += ('      line ' + error.line + ', col ' + error.col + ': ').debug + error.message.error;
+                            if (error.specUrl !== '') {
+                                msg += '\n      (see ' + error.specUrl + ')';
+                            } else {
+                                msg += "\n";
                             }
+                            msg += "\n";
                         }
                         var errorMessage = new Error ( msg );
                         reject( errorMessage );
@@ -122,15 +125,10 @@ var validateUrl = function(url){
 describe('AMP Validation Suite', function() {
     this.timeout(20000);
 
-    before( function() {
-        return promiseFromChildProcess(child)
+    it('Get URLs', function (done) {
+
+        promiseFromChildProcess(child)
         .then(function () {
-                //empty success because we just want to move on to the next thenable
-            }, function (err) {
-                console.error('Child Exec rejected: ' + err);
-                process.exit(1);
-        })
-        .then(function() {
             describe("Hang tight, we are going to test "+testUrls.length+" urls...", function(){
                 testUrls.forEach( function( url ) {
                     if ( '404.html' == url.substr(url.length - 8) || 'failure.html' == url.substr(url.length - 12)) {
@@ -140,7 +138,7 @@ describe('AMP Validation Suite', function() {
                                 urlResult.should.equal('PASS');
                                 done(urlResult);
                             }).catch(function(error){
-                                console.log(error);
+                                console.log("      "+error);
                                 done();
                             });
                         });
@@ -157,12 +155,12 @@ describe('AMP Validation Suite', function() {
                     }
                 });
             });
+        }, function (err) {
+            console.error('Child Exec rejected: ' + err);
+            done(err);
+        }).then(function(){
+            done();
         });
-    });
-
-
-    it('Control Test to Make Mocha run before()', function () {
-        // console.log('Mocha should not require this hack IMHO');
     });
 
 });
