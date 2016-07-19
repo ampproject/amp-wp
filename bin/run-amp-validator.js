@@ -130,6 +130,7 @@ describe('AMP Validation Suite', function() {
         promiseFromChildProcess(child)
         .then(function () {
             describe("Hang tight, we are going to test "+testUrls.length+" urls...", function(){
+                this.timeout(0);
                 testUrls.forEach( function( url ) {
                     if ( '404.html' == url.substr(url.length - 8) || 'failure.html' == url.substr(url.length - 12)) {
                         it( url + ' should NOT validate', function(done) {
