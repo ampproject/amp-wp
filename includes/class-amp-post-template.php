@@ -237,7 +237,6 @@ class AMP_Post_Template {
 	}
 
 	private function verify_and_include( $file, $template_type ) {
-		// $this->locate_template should be able to override this filter
 		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		
 		$located_file = $this->locate_template( $file );
