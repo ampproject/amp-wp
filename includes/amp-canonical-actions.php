@@ -65,14 +65,6 @@ add_action( 'wp_footer', 'amp_deregister_scripts' );
 // the final filter that replaces the content
 add_filter( 'the_content', 'amp_the_content_filter' );
 
-// we need to replace thumbnail img tags (and probably a few other functions I've missed)
-add_filter( 'post_thumbnail_html', 'amp_thumbnail_filter' );
-
-function amp_thumbnail_filter( $thumbnail ) {
-	echo "WARK";
-	return $thumbnail;
-}
-
 function amp_the_content_filter($content) {
 	if(isset($GLOBALS['amp_content'])) {
 		return $GLOBALS['amp_content']->get_amp_content();
