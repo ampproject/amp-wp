@@ -22,7 +22,7 @@ function build_post_content() {
 
 	$post = get_post();
 
-	$content_max_width = 600;
+	$content_max_width = 1200;
 	if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
 		$content_max_width = $GLOBALS['content_width'];
 	}
