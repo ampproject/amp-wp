@@ -57,13 +57,17 @@ function build_post_content() {
 // Generate the AMP post content early on (runs the_content filters but skips our filter below)
 $GLOBALS['amp_content'] = build_post_content();
 
+// "the_content" filter was already invoked now, so attempt remove all filters
+remove_all_filters('the_content');
+
 // Callbacks for adding AMP-related things to the main theme when used as canonical
 add_action( 'wp_head', 'amp_canonical_add_scripts' );
 add_action( 'wp_head', 'amp_canonical_add_boilerplate_css' );
 add_action( 'wp_footer', 'amp_deregister_scripts' );
 
-// the final filter that replaces the content
-add_filter( 'the_content', 'amp_the_content_filter' );
+// the final filter that replaces the content, run at the very end just to
+// make sure that no content filters run after it
+add_filter( 'the_content', 'amp_the_content_filter', PHP_INT_MAX);
 
 function amp_the_content_filter($content) {
 	if(isset($GLOBALS['amp_content'])) {
