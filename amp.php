@@ -17,9 +17,6 @@ define( 'AMP__DIR__', dirname( __FILE__ ) );
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 require_once( AMP__DIR__ . '/options.php' );
 
-// Determine if we want to treat the whole page as AMP
-define( 'AMP_CANONICAL', get_option( 'amp_canonical', 0 ) );
-
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate(){
 	amp_init();
@@ -43,7 +40,8 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
-	if( !AMP_CANONICAL ) {
+	// Add rewrite endpoints if we either don't want canonical AMP, or if the theme doesn't support it
+	if( ! get_option( 'amp_canonical') || ! get_theme_support('amp') ) {
 		add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 		add_post_type_support( 'post', AMP_QUERY_VAR );
 	}
@@ -88,7 +86,7 @@ function amp_maybe_add_actions() {
 
 	if ( $is_amp_endpoint ) {
 		amp_prepare_render();
-	} else if(AMP_CANONICAL && $supports) {
+	} else if( get_option( 'amp_canonical') && $supports && get_theme_support('amp') ) {
 		amp_render_canonical();
 	} else {
 		amp_add_frontend_actions();
@@ -128,6 +126,6 @@ function amp_render_canonical() {
 }
 
 // load high priority filters for canonical AMP
-if( AMP_CANONICAL ) {
+if( get_option( 'amp_canonical') ) {
 	require_once( AMP__DIR__ . '/includes/amp-canonical-filters.php' );
 }
