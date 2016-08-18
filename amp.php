@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.3.2
+ * Version: 0.3.3
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -17,13 +17,13 @@ define( 'AMP__DIR__', dirname( __FILE__ ) );
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
-function amp_activate(){
+function amp_activate() {
 	amp_init();
 	flush_rewrite_rules();
 }
 
 register_deactivation_hook( __FILE__, 'amp_deactivate' );
-function amp_deactivate(){
+function amp_deactivate() {
 	flush_rewrite_rules();
 }
 
