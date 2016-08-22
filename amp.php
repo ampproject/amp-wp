@@ -43,10 +43,6 @@ function amp_init() {
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
 
-	if ( is_admin() || is_customize_preview() ) {
-		amp_add_backend_actions();
-	}
-
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
