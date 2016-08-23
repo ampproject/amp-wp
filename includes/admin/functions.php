@@ -1,12 +1,15 @@
 <?php
 // Callbacks for adding AMP-related things to the admin.
 
+define( 'AMP_CUSTOMIZER_QUERY_VAR', 'amp_customizer' );
+
 /**
  * Sets up the AMP template editor for the Customizer.
  */
 function amp_init_customizer() {
 	require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 
+	// We don't want core panels in our AMP customizer
 	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
 
 	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );
@@ -43,10 +46,10 @@ function amp_add_customizer_link() {
 
 	// Teensy little hack on menu_slug, but it works. No redirect!
 	$menu_slug = add_query_arg( array(
-		'autofocus[panel]' => 'amp_template_editor',
-		'url'              => rawurlencode( amp_get_permalink( $post_id ) ),
-		'return'           => rawurlencode( admin_url() ),
-		'amp'              => true
+		'autofocus[panel]'         => AMP_Template_Customizer::PANEL_ID,
+		'url'                      => rawurlencode( amp_get_permalink( $post_id ) ),
+		'return'                   => rawurlencode( admin_url() ),
+		AMP_CUSTOMIZER_QUERY_VAR   => true
 	), 'customize.php' );
 
 	// Add the theme page.

@@ -8,6 +8,13 @@
  * @since 0.4
  */
 class AMP_Template_Customizer {
+	/**
+	 * AMP template editor panel ID.
+	 *
+	 * @since 0.4
+	 * @var string
+	 */
+	const PANEL_ID = 'amp_template_editor';
 
 	/**
 	 * Customizer instance.
@@ -17,15 +24,6 @@ class AMP_Template_Customizer {
 	 * @var WP_Customize_Manager $wp_customize
 	 */
 	protected $wp_customize;
-
-	/**
-	 * AMP template editor panel ID.
-	 *
-	 * @since 0.4
-	 * @access protected
-	 * @var string
-	 */
-	protected $panel_id = 'amp_template_editor';
 
 	/**
 	 * Initialize the template Customizer feature class.
@@ -47,7 +45,10 @@ class AMP_Template_Customizer {
 		// Our custom panels only need to go for AMP Customizer requests though
 		if ( self::is_amp_customizer() ) {
 			$self->_unregister_core_ui();
-			$self->register_ui();
+			$self->init_ui();
+		} elseif ( is_customize_preview() ) {
+			// Delay preview-specific actions until we're sure we're rendering an AMP page, since it's too early for `is_amp_endpoint()` here.
+			add_action( 'pre_amp_render_post', array( $self, 'init_preview' ) );
 		}
 	}
 
@@ -88,17 +89,23 @@ class AMP_Template_Customizer {
 	}
 
 	/**
+	 * Sets up the AMP Customizer preview.
+	 */
+	public function init_preview() {
+		// Preview needs controls registered too for postMessage communication.
+		$this->init_ui();
+
+		add_action( 'amp_post_template_footer', array( $this, 'add_preview_scripts'  ) );
+	}
+
+	/**
 	 * Sets up the AMP Templates panel and associated Customizer elements and script enqueues.
 	 *
 	 * @since 0.4
 	 * @access public
 	 */
-	public function register_ui() {
+	public function init_ui() {
 		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
-
-		// Scripts for handling postMessage communication
-		add_action( 'customize_preview_init', array( $this, 'enqueue_scripts' ) );
-		add_action( 'amp_post_template_footer', array( $this, 'fire_wp_footer'  ) );
 
 		$this->register_panel();
 		$this->register_sections();
@@ -138,10 +145,9 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_panel() {
-		$this->wp_customize->add_panel( $this->panel_id, array(
+		$this->wp_customize->add_panel( self::PANEL_ID, array(
 			'type'            => 'amp',
 			'title'           => __( 'AMP', 'amp' ),
-			'active_callback' => array( __CLASS__, 'is_amp_customizer' ),
 		) );
 	}
 
@@ -154,7 +160,7 @@ class AMP_Template_Customizer {
 	public function register_sections() {
 		$this->wp_customize->add_section( 'amp_navbar_section', array(
 			'title' => __( 'Navigation Bar', 'amp' ),
-			'panel' => $this->panel_id,
+			'panel' => self::PANEL_ID,
 		) );
 	}
 
@@ -185,34 +191,24 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Fires the 'wp_footer' action in the AMP template footer preview so we can output customizer scripts.
+	 * Enqueues scripts and fires the 'wp_footer' action so we can output customizer scripts.
+	 *
+	 * This breaks AMP validation in the customizer but is necessary for the live preview.
 	 *
 	 * @since 0.4
 	 * @access public
 	 */
-	public function fire_wp_footer() {
+	public function add_preview_scripts() {
+		wp_enqueue_script(
+			'amp-customizer',
+			amp_get_asset_url( 'js/amp-customizer-preview.js' ),
+			array( 'jquery', 'customize-preview', 'wp-util' ),
+			$version = false,
+			$footer = true
+		);
+
 		/** This action is documented in wp-includes/general-template.php */
 		do_action( 'wp_footer' );
-	}
-
-	/**
-	 * Enqueues scripts used in the Customizer preview.
-	 *
-	 * This breaks AMP validation in the customizer but necessary for the live preview.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function enqueue_scripts() {
-		if ( is_customize_preview() ) {
-			wp_enqueue_script(
-				'amp-customizer',
-				amp_get_asset_url( 'js/amp-customizer-preview.js' ),
-				array( 'jquery', 'customize-preview', 'wp-util' ),
-				$version = false,
-				$footer = true
-			);
-		}
 	}
 
 	public function force_mobile_preview( $devices ) {
@@ -225,6 +221,6 @@ class AMP_Template_Customizer {
 	}
 
 	public static function is_amp_customizer() {
-		return ! empty( $_REQUEST['amp'] );
+		return ! empty( $_REQUEST[ AMP_CUSTOMIZER_QUERY_VAR ] );
 	}
 }
