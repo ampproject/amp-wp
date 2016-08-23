@@ -1,7 +1,7 @@
 <?php
 // Callbacks for adding AMP-related things to the admin.
 
-define( 'AMP_CUSTOMIZER_QUERY_VAR', 'amp_customizer' );
+define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
 /**
  * Sets up the AMP template editor for the Customizer.
