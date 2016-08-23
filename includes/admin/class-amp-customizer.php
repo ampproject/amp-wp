@@ -141,7 +141,7 @@ class AMP_Template_Customizer {
 		$this->wp_customize->add_panel( $this->panel_id, array(
 			'type'            => 'amp',
 			'title'           => __( 'AMP', 'amp' ),
-			'active_callback' => 'is_amp_endpoint'
+			'active_callback' => array( __CLASS__, 'is_amp_customizer' ),
 		) );
 	}
 
@@ -224,7 +224,7 @@ class AMP_Template_Customizer {
 		return $devices;
 	}
 
-	private static function is_amp_customizer() {
+	public static function is_amp_customizer() {
 		return ! empty( $_REQUEST['amp'] );
 	}
 }
