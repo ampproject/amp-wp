@@ -98,10 +98,12 @@ class AMP_Template_Customizer {
 		$this->register_sections();
 		$this->register_controls();
 
-		add_action( 'customize_preview_init',   array( $this, 'enqueue_scripts' ) );
+		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
+
+		add_action( 'customize_preview_init', array( $this, 'enqueue_scripts' ) );
 
 		// Needed for postMessage purposes.
-		add_action( 'amp_post_template_head',   array( $this, 'enqueue_jquery'  ) );
+		add_action( 'amp_post_template_head', array( $this, 'enqueue_jquery'  ) );
 		add_action( 'amp_post_template_footer', array( $this, 'fire_wp_footer'  ) );
 
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
@@ -223,6 +225,15 @@ class AMP_Template_Customizer {
 				$footer = true
 			);
 		}
+	}
+
+	public function force_mobile_preview( $devices ) {
+		if ( isset( $devices[ 'mobile' ] ) ) {
+			$devices['mobile']['default'] = true;
+			unset( $devices['desktop']['default'] );
+		}
+
+		return $devices;
 	}
 
 	private static function is_amp_customizer() {
