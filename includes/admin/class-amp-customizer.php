@@ -182,22 +182,6 @@ class AMP_Template_Customizer {
 				'priority' => 20
 			) )
 		);
-
-		// Navbar site icon.
-		$this->wp_customize->add_control( new WP_Customize_Site_Icon_Control( $this->wp_customize, 'site_icon_amp', array(
-			'label'       => __( 'Site Icon' ),
-			'settings'    => 'site_icon',
-			'description' => sprintf(
-			/* translators: %s: site icon size in pixels */
-				__( 'The Site Icon is used as a browser and app icon for your site. Icons must be square, and at least %s pixels wide and tall.' ),
-				'<strong>512</strong>'
-			),
-			'section'     => 'amp_navbar_section',
-			'priority'    => 30,
-			'height'      => 512,
-			'width'       => 512,
-		) ) );
-
 	}
 
 	/**
