@@ -94,17 +94,15 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_ui() {
+		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
+
+		// Scripts for handling postMessage communication
+		add_action( 'customize_preview_init', array( $this, 'enqueue_scripts' ) );
+		add_action( 'amp_post_template_footer', array( $this, 'fire_wp_footer'  ) );
+
 		$this->register_panel();
 		$this->register_sections();
 		$this->register_controls();
-
-		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
-
-		add_action( 'customize_preview_init', array( $this, 'enqueue_scripts' ) );
-
-		// Needed for postMessage purposes.
-		add_action( 'amp_post_template_head', array( $this, 'enqueue_jquery'  ) );
-		add_action( 'amp_post_template_footer', array( $this, 'fire_wp_footer'  ) );
 
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
 	}
@@ -187,19 +185,7 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Enqueues jQuery inside the AMP template header preview for postMessage purposes.
-	 *
-	 * This breaks AMP validation in the customizer but necessary for the live preview.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function enqueue_jquery() {
-		wp_enqueue_script( 'jquery' );
-	}
-
-	/**
-	 * Fires the 'wp_footer' action in the AMP template footer preview for postMessage purposes.
+	 * Fires the 'wp_footer' action in the AMP template footer preview so we can output customizer scripts.
 	 *
 	 * @since 0.4
 	 * @access public
@@ -212,6 +198,8 @@ class AMP_Template_Customizer {
 	/**
 	 * Enqueues scripts used in the Customizer preview.
 	 *
+	 * This breaks AMP validation in the customizer but necessary for the live preview.
+	 *
 	 * @since 0.4
 	 * @access public
 	 */
@@ -220,7 +208,7 @@ class AMP_Template_Customizer {
 			wp_enqueue_script(
 				'amp-customizer',
 				amp_get_asset_url( 'js/amp-customizer-preview.js' ),
-				array( 'customize-preview', 'wp-util' ),
+				array( 'jquery', 'customize-preview', 'wp-util' ),
 				$version = false,
 				$footer = true
 			);
