@@ -42,6 +42,7 @@ You can find details about customization options at https://github.com/Automatti
 
 = 0.3.3 (Aug 18, 2016) =
 
+- Basic customizer support. You can now tweak some colours and select your site icon from the AMP Customizer. (props DrewAPicture and 10up)
 - Handle many more validation errors (props bcampeau and alleyinteractive).
 - New filter: `amp_post_template_dir` (props mustafauysal).
 - New template: Nav bar is now it's own template part (props jdevalk).

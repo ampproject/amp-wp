@@ -15,6 +15,7 @@ define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
+require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
@@ -114,3 +115,29 @@ function amp_render() {
 	$template->load();
 	exit;
 }
+
+/**
+ * Bootstraps the AMP customizer.
+ *
+ * If the AMP customizer is enabled, initially drop the core widgets and menus panels. If the current
+ * preview page isn't flagged as an AMP template, the core panels will be re-added and the AMP panel
+ * hidden.
+ *
+ * @internal This callback must be hooked before priority 10 on 'plugins_loaded' to properly unhook
+ *           the core panels.
+ *
+ * @since 0.4
+ */
+function _amp_bootstrap_customizer() {
+	/**
+	 * Filter whether to enable the AMP template customizer functionality.
+	 *
+	 * @param bool $enable Whether to enable the AMP customizer. Default true.
+	 */
+	$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
+
+	if ( true === $amp_customizer_enabled ) {
+		amp_init_customizer();
+	}
+}
+add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
