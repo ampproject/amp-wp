@@ -104,7 +104,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			parse_str( $parsed_url['query'], $query_args );
 
 			if ( isset( $query_args['v'] ) ) {
-				$video_id = $query_args['v'];
+				$video_id = $this->sanitize_v_arg( $query_args['v'] );
 			}
 		}
 
@@ -118,5 +118,14 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $video_id;
+	}
+
+	private function sanitize_v_arg( $value ) {
+		// Deal with broken params like `?v=123?rel=0`
+		if ( false !== strpos( $value, '?' ) ) {
+			$value = strtok( $value, '?' );
+		}
+
+		return $value;
 	}
 }
