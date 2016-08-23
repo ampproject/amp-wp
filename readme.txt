@@ -2,8 +2,8 @@
 Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.4
-Tested up to: 4.5
-Stable tag: 0.3.2
+Tested up to: 4.6
+Stable tag: 0.3.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +15,7 @@ This plugin adds support for the [Accelerated Mobile Pages](https://www.ampproje
 
 With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/2016/01/01/amp-on/?amp=1`
 
-Note #1: that Pages and archives are not currently supported.
+Note #1: that Pages and archives are not currently supported. Pages support is being worked on.
 
 Note #2: this plugin only creates AMP content but does not automatically display it to your users when they visit from a mobile device. That is handled by AMP consumers such as Google Search. For more details, see the [AMP Project FAQ](https://www.ampproject.org/docs/support/faqs.html).
 
@@ -34,11 +34,27 @@ You can find details about customization options at https://github.com/Automatti
 
 == Changelog ==
 
-= 0.4 (??? ?, ????) =
+= 0.4 (in-progress) =
+
+- AMP Customizer: You can now tweak some colours and select your site icon from the AMP Customizer (props DrewAPicture and 10up)
+- Pages
+- Customizer
+- Updated Template
+
+= 0.3.3 (Aug 18, 2016) =
 
 - Handle many more validation errors (props bcampeau and alleyinteractive).
-- Nav bar is now it's own template part (props jdevalk).
+- New filter: `amp_post_template_dir` (props mustafauysal).
+- New template: Nav bar is now it's own template part (props jdevalk).
+- Better ratio for YouTube embeds.
+- Fix: better timezone handling (props rinatkhaziev).
+- Fix: better handling of non-int dimensions (like `100%`).
+- Fix: better handling of empty dimensions.
+- Fix: `autoplay` is a bool-like value.
+- Fix: breakage when using the `query_string` hook (h/t mkuplens).
 - Fix: don't break really large Twitter IDs.
+- Fix: don't break Instagram shortcodes when using URLs with querystrings.
+- Readme improvements (props nickjohnford, sotayamashita)
 
 = 0.3.2 (Mar 4, 2016) =
 
