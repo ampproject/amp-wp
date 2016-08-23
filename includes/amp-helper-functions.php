@@ -1,6 +1,12 @@
 <?php
 
 function amp_get_permalink( $post_id ) {
+	$pre_url = apply_filters( 'amp_pre_get_permalink', false, $post_id );
+
+	if ( false !== $pre_url ) {
+		return $pre_url;
+	}
+
 	if ( '' != get_option( 'permalink_structure' ) ) {
 		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
 	} else {
