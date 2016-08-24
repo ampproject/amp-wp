@@ -129,11 +129,18 @@ class AMP_Template_Customizer {
 		) );
 
 		// Navbar background color setting.
-		$this->wp_customize->add_setting( 'amp_navbar_background', array(
+		$this->wp_customize->add_setting( 'amp_navbar_background_color', array(
 			'default'           => '#0a89c0',
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
+
+		// Radio Input               =
+		$this->wp_customize->add_setting( 'amp_background_color', array(
+			'default'           => 'standard',
+			'sanitize_callback' => 'amp_sanitize_color_scheme',
+			'transport'         => 'postMessage'
+		));
 
 		do_action( 'amp_customizer_register_settings', $this->wp_customize );
 	}
@@ -182,12 +189,46 @@ class AMP_Template_Customizer {
 
 		// Navbar background color control.
 		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background', array(
+			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background_color', array(
 				'label'    => __( 'Header Background Color', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 20
 			) )
 		);
+
+		// Background color scheme
+		$this->wp_customize->add_control( 'amp_background_color', array(
+			'label'      => __( 'Background Color Scheme', 'amp' ),
+			'section'    => 'amp_navbar_section',
+		//	'settings'   => 'amp_theme_options[color_scheme]',
+			'type'       => 'radio',
+			'priority'   => 30,
+			'choices'    => array(
+				'light'   => 'Light',
+				'dark'    => 'Dark',
+				'default' => 'Default'
+			),
+		));
+	}
+
+	/**
+	* This will output the custom WordPress settings to the live theme's WP head.
+	*
+	* Used by hook: 'wp_head'
+	*
+	* @see add_action('wp_head',$func)
+	* @since MyTheme 1.0
+	*/
+	public static function header_output() { ?>
+		<!--Customizer CSS-->
+		<style type="text/css">
+			<?php // self::generate_css( '.amp-wp-header div, .amp-wp-header a', 'color', 'amp_navbar_color', '#' ); ?>
+			<?php // self::generate_css( '.amp-wp-header', 'background-color', 'amp_navbar_background_color', '#' ); ?>
+			<?php // self::generate_css( 'a, a:visited', 'color', 'amp_navbar_background_color', '#' ); ?>
+			<?php // self::generate_css( 'blockquote, .amp-wp-byline amp-img', 'border-color', 'amp_navbar_background_color', '#' ); ?>
+		</style>
+		<!--/Customizer CSS-->
+	<?php
 	}
 
 	/**
@@ -223,4 +264,14 @@ class AMP_Template_Customizer {
 	public static function is_amp_customizer() {
 		return ! empty( $_REQUEST[ AMP_CUSTOMIZER_QUERY_VAR ] );
 	}
+}
+
+// Output custom CSS to live site
+add_action( 'wp_head' , array( 'AMP_Template_Customizer' , 'header_output' ) );
+
+function amp_sanitize_color_scheme( $value ) {
+    if ( ! in_array( $value, array( 'light', 'dark', 'default' ) ) )
+        $value = 'light';
+
+    return $value;
 }
