@@ -1,63 +1,21 @@
 <?php
 
-// Make sure hex colors are formatted with a leading #
-// src: https://goo.gl/zeVP7e
-function amp_force_hex( $hexcolor ) {
-
-	// Check for a hex color string '#c1c2b4'
-	if ( preg_match( '/^#[a-f0-9]{6}$/i', $hexcolor ) ) { //hex color is valid
-
-		// Verified hex color
-		$output_color = $hexcolor;
-
-	// Check for a hex color string without hash 'c1c2b4'
-	} else if ( preg_match( '/^[a-f0-9]{6}$/i', $hexcolor ) ) { //hex color is valid
-
-		$output_color = '#' . $hexcolor;
-	}
-
-	return $output_color;
-
-}
-
-// Determine wether to use the dark or light theme
-// src: https://goo.gl/URwBw3
-function amp_get_contrast( $hexcolor ) {
-
-	if ( strlen( $hex ) == 3 ) {
-		$r = hexdec( substr($hex,0,1).substr($hex,0,1));
-		$g = hexdec( substr($hex,1,1).substr($hex,1,1));
-		$b = hexdec( substr($hex,2,1).substr($hex,2,1));
-	} else {
-		$r = hexdec( substr( $hexcolor, 0,2 ) );
-		$g = hexdec( substr( $hexcolor, 2,2 ) );
-		$b = hexdec( substr( $hexcolor, 4,2 ) );
-	}
-
-	$yiq = ( ( $r * 299 ) + ( $g * 587 ) + ( $b * 114 ) ) / 1000;
-
-	return ( $yiq >= 128 ) ? 'dark' : 'light';
-}
+// Navbar background color
+$amp_navbar_background_color = get_theme_mod( 'amp_navbar_background_color', '#0087be' );
 
 // Link Color
-// pulling from new AMP customizer settings
-$amp_navbar_background_color = amp_force_hex( get_theme_mod( 'amp_navbar_background_color', '#0087be' ) );
-
-// Link Color
-// pulling from new AMP customizer settings
-$amp_navbar_color = amp_force_hex( get_theme_mod( 'amp_navbar_color', '#ffffff' ) );
-
-// Header Image / Color
-// pulling from new AMP customizer settings
 $amp_link_color = $amp_navbar_background_color;
 
+// Navbar Text Color
+$amp_navbar_color = get_theme_mod( 'amp_navbar_color', '#ffffff' );
+
 // Theme color settings: Dark || Light
-$theme_color_setting = get_theme_mod( 'amp_background_color', 'light' ); // amp_get_contrast( $amp_navbar_background ); // 'dark';
+$theme_color_setting = get_theme_mod( 'amp_background_color', 'light' );
 
 // Set text and border color based on $theme_color_setting
 if ( $theme_color_setting == 'light' ) {
 
-	// Convert colors to greyscale
+	// Convert colors to greyscale for light theme color
 	// src: http://goo.gl/2gDLsp
 	$theme_color      = '#fff';
 	$text_color       = '#535353';
@@ -66,7 +24,7 @@ if ( $theme_color_setting == 'light' ) {
 
 } elseif ( $theme_color_setting == 'dark' ) {
 
-	// Convert and invert colors to greyscale for dark theme
+	// Convert and invert colors to greyscale for dark theme color
 	// src: http://goo.gl/uVB2cO
 	$theme_color      = '#111';
 	$text_color       = '#acacac';
@@ -127,15 +85,43 @@ if ( $theme_color_setting == 'light' ) {
 
 /* Generic WP styling */
 
-amp-img.alignright { float: right; margin: 0 0 1em 16px; }
-amp-img.alignleft { float: left; margin: 0 16px 1em 0; }
-amp-img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
-.alignright { float: right; }
-.alignleft { float: left; }
-.aligncenter { display: block; margin-left: auto; margin-right: auto; }
+amp-img.alignright {
+	float: right;
+	margin: 0 0 1em 16px;
+}
 
-.wp-caption.alignleft { margin-right: 16px; }
-.wp-caption.alignright { margin-left: 16px; }
+amp-img.alignleft {
+	float: left;
+	margin: 0 16px 1em 0;
+}
+
+amp-img.aligncenter {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.alignright {
+	float: right;
+}
+
+.alignleft {
+	float: left;
+}
+
+.aligncenter {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.wp-caption.alignleft {
+	margin-right: 16px;
+}
+
+.wp-caption.alignright {
+	margin-left: 16px;
+}
 
 .amp-wp-enforced-sizes {
 	/** Our sizes fallback is 100vw, and we have a padding on the container; the max-width here prevents the element from overflowing. **/
@@ -154,17 +140,17 @@ amp-img.aligncenter { display: block; margin-left: auto; margin-right: auto; }
 .amp-wp-title-bar div {
 	<?php $content_max_width = absint( $this->get( 'content_max_width' ) ); ?>
 	<?php if ( $content_max_width > 0 ) : ?>
-	max-width: <?php echo sprintf( '%dpx', $content_max_width ); ?>;
 	margin: 0 auto;
+	max-width: <?php echo sprintf( '%dpx', $content_max_width ); ?>;
 	<?php endif; ?>
 }
 
 body {
+	background: <?php echo $theme_color; ?>;
+	color: <?php echo $text_color; ?>;
 	font-family: 'Merriweather', 'Times New Roman', Times, Serif;
 	font-weight: 300;
 	line-height: 1.75em;
-	background: <?php echo $theme_color; ?>;
-	color: <?php echo $text_color; ?>;
 }
 
 p,
@@ -189,11 +175,11 @@ a:focus {
 /* Quotes */
 
 blockquote {
-	padding: 16px;
-	margin: 8px 0 24px 0;
-	border-left: 2px solid <?php echo $amp_link_color; ?>;
 	color: <?php echo $text_color; ?>;
 	background: rgba(127,127,127,.125);
+	border-left: 2px solid <?php echo $amp_link_color; ?>;
+	margin: 8px 0 24px 0;
+	padding: 16px;
 }
 
 blockquote p:last-child {
@@ -257,30 +243,30 @@ blockquote p:last-child {
 /* Article */
 
 .amp-wp-article {
+	color: <?php echo $text_color; ?>;
+	font-weight: 400;
 	margin: 1.5em auto;
+	max-width: 840px;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
-	font-weight: 400;
-	color: <?php echo $text_color; ?>;
-	max-width: 840px;
 }
 
 /* Article Header */
 
 .amp-wp-article-header {
+	align-items: center;
+	align-content: stretch;
 	display: flex;
 	flex-wrap: wrap;
-	align-items: center;
 	justify-content: space-between;
-	align-content: stretch;
 	margin: 1.5em 16px 1.5em;
 }
 
 .amp-wp-title {
 	color: <?php echo $text_color; ?>;
 	display: block;
-	font-weight: 900;
 	flex: 1 0 100%;
+	font-weight: 900;
 	margin: 0 0 .625em;
 	width: 100%;
 }
@@ -433,7 +419,7 @@ amp-social-share {
 	border-color: <?php echo $border_color; ?>;
 	border-width: 1px 1px 2px;
 	border-radius: 4px;
-	background-color: <?php echo $theme_color; ?>;
+	background-color: transparent;
 	color: <?php echo $text_color; ?>;
 	cursor: pointer;
 	display: block;
