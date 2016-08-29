@@ -71,4 +71,73 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 		$this->assertFalse( AMP_DOM_Utils::is_node_empty( $node ) );
 	}
+
+	public function test__get_content_from_dom__br_no_closing_tag() {
+		$source = '<br/>';
+		$expected = '<br/>';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	public function test__recursive_force_closing_tags__ignore_non_elements() {
+		$dom = new DOMDocument;
+		$node = $dom->createAttribute( 'src' );
+		$expected = ' src=""';
+
+		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+
+		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+	}
+
+	public function test__recursive_force_closing_tags__ignore_self_closing() {
+		$dom = new DOMDocument;
+		$node = $dom->createElement( 'br' );
+		$expected = '<br/>';
+
+		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+
+		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+	}
+
+	public function test__recursive_force_closing_tags__ignore_non_empty() {
+		$dom = new DOMDocument;
+		$node = $dom->createElement( 'p' );
+		$text = $dom->createTextNode( 'Hello' );
+		$node->appendChild( $text );
+		$expected = '<p>Hello</p>';
+
+		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+
+		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+	}
+
+	public function test__recursive_force_closing_tags__force_close() {
+		$dom = new DOMDocument;
+		$node = $dom->createElement( 'amp-img' );
+		$expected = '<amp-img></amp-img>';
+
+		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+
+		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		// Extra test to confirm we added the child node
+		$this->assertTrue( $node->hasChildNodes() );
+		$this->assertEquals( '', $node->firstChild->nodeValue );
+	}
+
+	public function test__recursive_force_closing_tags__force_close_with_children() {
+		$dom = new DOMDocument;
+		$node = $dom->createElement( 'div' );
+		$child_with_closing = $dom->createElement( 'amp-img' );
+		$child_self_closing = $dom->createElement( 'br' );
+		$node->appendChild( $child_with_closing );
+		$node->appendChild( $child_self_closing );
+		$expected = '<div><amp-img></amp-img><br/></div>';
+
+		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+
+		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+	}
 }

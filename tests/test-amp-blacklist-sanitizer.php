@@ -25,7 +25,7 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 
 			'whitelisted_tag_only' => array(
 				'<p>Text</p><img src="/path/to/file.jpg" />',
-				'<p>Text</p><img src="/path/to/file.jpg"></img>' // LIBXML_NOEMPTYTAG
+				'<p>Text</p><img src="/path/to/file.jpg"/>' // LIBXML_NOEMPTYTAG
 			),
 
 			'blacklisted_attributes' => array(
