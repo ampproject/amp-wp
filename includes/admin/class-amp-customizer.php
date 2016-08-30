@@ -260,9 +260,6 @@ class AMP_Template_Customizer {
 	}
 }
 
-// Output custom CSS to live site
-add_action( 'wp_head' , array( 'AMP_Template_Customizer' , 'header_output' ) );
-
 function amp_sanitize_color_scheme( $value ) {
     if ( ! in_array( $value, array( 'light', 'dark', 'default' ) ) )
         $value = 'light';
