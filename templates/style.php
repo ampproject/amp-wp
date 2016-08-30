@@ -189,16 +189,6 @@ blockquote p:last-child {
 	margin-bottom: 0;
 }
 
-/* from twentyfifteen
-.screen-reader-text {
-	clip: rect(1px, 1px, 1px, 1px);
-	height: 1px;
-	overflow: hidden;
-	position: absolute;
-	width: 1px;
-}
-*/
-
 /* UI Fonts */
 
 .amp-wp-meta,
