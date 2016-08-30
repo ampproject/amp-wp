@@ -13,9 +13,21 @@
 	// Nav bar background color.
 	wp.customize( 'amp_navbar_background_color', function( value ) {
 		value.bind( function( to ) {
-			$( '.amp-wp-header' ).css( 'background', to );
+			$( '.amp-wp-header' ).css( 'background-color', to );
 			$( '.amp-wp-article a, .amp-wp-article a:visited, .amp-wp-footer a, .amp-wp-footer a:visited' ).css( 'color', to );
 			$( 'blockquote, .amp-wp-byline amp-img' ).css( 'border-color', to );
+		} );
+	} );
+
+	// Add custom-background-image body class when background image is added.
+	wp.customize( 'amp_navbar_background_image', function( value ) {
+		value.bind( function( newVal, oldVal ) {
+			if ( newVal ) {
+				$( '.amp-wp-header' ).addClass( 'header-background-image' ).css( 'background-image', 'url(' + newVal + ')' );
+			} else {
+				$( '.amp-wp-header' ).removeClass( 'header-background-image' ).css( 'background-image', 'none' );
+			}
+			console.log( 'new = '+newVal, 'old = '+oldVal);
 		} );
 	} );
 

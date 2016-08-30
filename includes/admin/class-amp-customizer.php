@@ -121,26 +121,33 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_settings() {
-		// Navbar text color setting.
+
+		// Header text color setting
 		$this->wp_customize->add_setting( 'amp_navbar_color', array(
 			'default'           => '#ffffff',
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
 
-		// Navbar background color setting.
+		// Header background color
 		$this->wp_customize->add_setting( 'amp_navbar_background_color', array(
 			'default'           => '#0a89c0',
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
 
-		// Radio Input               =
+		// Header background image upload
+		$this->wp_customize->add_setting( 'amp_navbar_background_image', array(
+			'default'    => '',
+			'transport'  => 'postMessage'
+		) );
+
+		// Background color scheme
 		$this->wp_customize->add_setting( 'amp_background_color', array(
 			'default'           => 'standard',
 			'sanitize_callback' => 'amp_sanitize_color_scheme',
 			'transport'         => 'postMessage'
-		));
+		) );
 
 		do_action( 'amp_customizer_register_settings', $this->wp_customize );
 	}
@@ -166,7 +173,7 @@ class AMP_Template_Customizer {
 	 */
 	public function register_sections() {
 		$this->wp_customize->add_section( 'amp_navbar_section', array(
-			'title' => __( 'Navigation Bar', 'amp' ),
+			'title' => __( 'Color Options', 'amp' ),
 			'panel' => self::PANEL_ID,
 		) );
 	}
@@ -190,9 +197,17 @@ class AMP_Template_Customizer {
 		// Navbar background color control.
 		$this->wp_customize->add_control(
 			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background_color', array(
-				'label'    => __( 'Header Background Color', 'amp' ),
+				'label'    => __( 'Header Background & Link Color', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 20
+			) )
+		);
+
+		$this->wp_customize->add_control(
+			new WP_Customize_Image_Control( $this->wp_customize, 'amp_navbar_background_image', array(
+				'label'    => __( 'Header Background Image', 'amp' ),
+				'section'  => 'amp_navbar_section',
+				'priority' => 30
 			) )
 		);
 
