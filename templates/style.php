@@ -3,6 +3,9 @@
 // Navbar background color
 $amp_navbar_background_color = get_theme_mod( 'amp_navbar_background_color', '#0087be' );
 
+// Navbar background color
+$amp_navbar_background_image = get_theme_mod( 'amp_navbar_background_image', '' );
+
 // Link Color
 $amp_link_color = $amp_navbar_background_color;
 
@@ -213,7 +216,16 @@ blockquote p:last-child {
 /* Header */
 
 .amp-wp-header {
-	background: <?php echo $amp_navbar_background_color; ?>;
+	background-color: <?php echo $amp_navbar_background_color; ?>;
+}
+
+<?php // if ( $amp_navbar_background_image != '' ) { ?>
+<?php // } ?>
+.amp-wp-header.header-background-image {
+	background-image: url(<?php echo $amp_navbar_background_image; ?>);
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: cover;
 }
 
 .amp-wp-header div {

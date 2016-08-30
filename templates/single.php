@@ -13,7 +13,7 @@
 
 <body itemscope="itemscope" itemtype="http://schema.org/WebPage">
 
-<?php $this->load_parts( array( 'header-bar' ) ); ?>
+<?php $this->load_parts( array( 'header' ) ); ?>
 
 <article class="amp-wp-article" itemscope="itemscope" itemtype="http://schema.org/BlogPosting" itemprop="blogPost">
 
