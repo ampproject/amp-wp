@@ -27,7 +27,6 @@
 			} else {
 				$( '.amp-wp-header' ).removeClass( 'header-background-image' ).css( 'background-image', 'none' );
 			}
-			console.log( 'new = '+newVal, 'old = '+oldVal);
 		} );
 	} );
 
