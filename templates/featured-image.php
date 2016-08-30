@@ -12,7 +12,8 @@ if ( ! $feat_image ) {
 
 // Get image caption
 $image = get_post( get_post_thumbnail_id( $post_ID ) );
-$caption = $image->post_excerpt;
+$image_caption = $image->post_excerpt;
+$image_title = $image->post_title;
 
 // Get image aspect ratio
 $full_height = $feat_image_meta['height'];
@@ -59,9 +60,9 @@ $content = $this->get( 'post_amp_content' ); // amphtml content; no kses
 if ( false == preg_match( $regex1, $content ) || false == preg_match( $regex2, $content ) ) { ?>
 
 <figure class="amp-wp-article-featured-image wp-caption">
-	<amp-img alt="<?php echo wp_kses_data( $this->get( 'post_title' ) ); ?>" src="<?php the_post_thumbnail_url(); ?>" <?php echo $srcset; ?> height="<?php echo $full_height; ?>" width="<?php echo $full_width; ?>" layout="responsive" itemprop="image"></amp-img>
-	<?php if ( $caption ) { ?>
-		<p class="wp-caption-text"><?php echo $caption; ?></p>
+	<amp-img alt="<?php esc_attr_e( $image_title ); ?>" src="<?php the_post_thumbnail_url(); ?>" <?php echo $srcset; ?> height="<?php esc_attr_e( $full_height, 'amp' ); ?>" width="<?php esc_attr_e( $full_width, 'amp' ); ?>" layout="responsive" itemprop="image"></amp-img>
+	<?php if ( $image_caption ) { ?>
+		<p class="wp-caption-text"><?php echo $image_caption; ?></p>
 	<?php } ?>
 </figure>
 
