@@ -403,7 +403,7 @@ amp-social-share {
 	background-size: 66.66%;
 	border-radius: 50%;
 	display: inline-block;
-	margin: 0 3px;
+	margin: 0 2px;
 	vertical-align: middle;
 }
 
