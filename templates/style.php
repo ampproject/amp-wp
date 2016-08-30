@@ -466,7 +466,7 @@ amp-social-share {
 .amp-wp-footer div {
 	margin: 0 auto;
 	max-width: calc(840px - 32px);
-	padding: 1.5em 16px;
+	padding: 1.5em 16px 1.25em;
 	position: relative;
 }
 
