@@ -410,7 +410,7 @@ amp-social-share {
 .amp-wp-share-links span {
 	clear: both;
 	display: block;
-	margin-bottom: .625em;
+	margin-bottom: .75em;
 }
 
 .amp-wp-comment-link {
