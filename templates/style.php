@@ -465,8 +465,8 @@ amp-social-share {
 }
 
 .amp-wp-footer h2 {
-	font-size: 1.25em;
-	line-height: 1.5em;
+	font-size: 1em;
+	line-height: 1.125em;
 	margin: 0 0 .5em;
 }
 
@@ -474,7 +474,7 @@ amp-social-share {
 	color: <?php echo $muted_text_color; ?>;
 	font-size: .875em;
 	line-height: 1.5em;
-	margin: 0;
+	margin: 0 100px 0 0;
 }
 
 .back-to-top {
