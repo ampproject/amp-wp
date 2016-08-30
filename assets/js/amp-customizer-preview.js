@@ -6,7 +6,7 @@
 		value.bind( function( to ) {
 			$( '.amp-wp-header a' ).css( 'color', to );
 			$( '.amp-wp-header div' ).css( 'color', to );
-			$( '.amp-wp-header .amp-wp-site-icon' ).css( 'border-color', to );
+			$( '.amp-wp-header .amp-wp-site-icon' ).css( 'border-color', to ).css( 'background-color', to );
 		} );
 	} );
 
