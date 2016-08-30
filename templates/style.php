@@ -407,6 +407,12 @@ amp-social-share {
 	vertical-align: middle;
 }
 
+.amp-wp-share-links span {
+	clear: both;
+	display: block;
+	margin-bottom: .625em;
+}
+
 .amp-wp-comment-link {
 	color: <?php echo $muted_text_color; ?>;
 	font-size: .875em;
