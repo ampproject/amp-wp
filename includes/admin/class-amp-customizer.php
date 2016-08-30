@@ -160,8 +160,8 @@ class AMP_Template_Customizer {
 	 */
 	public function register_panel() {
 		$this->wp_customize->add_panel( self::PANEL_ID, array(
-			'type'            => 'amp',
-			'title'           => __( 'AMP', 'amp' ),
+			'type'  => 'amp',
+			'title' => __( 'AMP', 'amp' ),
 		) );
 	}
 
@@ -197,7 +197,7 @@ class AMP_Template_Customizer {
 		// Navbar background color control.
 		$this->wp_customize->add_control(
 			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background_color', array(
-				'label'    => __( 'Header Background & Link Color', 'amp' ),
+				'label'    => __( 'Header Background Color & Link Color', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 20
 			) )
