@@ -218,9 +218,8 @@ class AMP_Template_Customizer {
 			'type'       => 'radio',
 			'priority'   => 30,
 			'choices'    => array(
-				'light'   => 'Light',
-				'dark'    => 'Dark',
-				'default' => 'Default'
+				'light'   => __( 'Light (Default)', 'amp'),
+				'dark'    => __( 'Dark', 'amp' ),
 			),
 		));
 	}
@@ -261,8 +260,8 @@ class AMP_Template_Customizer {
 }
 
 function amp_sanitize_color_scheme( $value ) {
-    if ( ! in_array( $value, array( 'light', 'dark', 'default' ) ) )
-        $value = 'light';
+    if ( ! in_array( $value, array( 'light', 'dark' ) ) )
+        $value = 'default';
 
     return $value;
 }
