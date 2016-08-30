@@ -219,8 +219,6 @@ blockquote p:last-child {
 	background-color: <?php echo $amp_navbar_background_color; ?>;
 }
 
-<?php // if ( $amp_navbar_background_image != '' ) { ?>
-<?php // } ?>
 .amp-wp-header.header-background-image {
 	background-image: url(<?php echo $amp_navbar_background_image; ?>);
 	background-repeat: no-repeat;
@@ -245,6 +243,7 @@ blockquote p:last-child {
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
+	background-color: <?php echo $amp_navbar_color; ?>;
 	border: 1px solid <?php echo $amp_navbar_color; ?>;
 	border-radius: 50%;
 	position: absolute;
