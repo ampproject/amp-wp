@@ -200,7 +200,6 @@ class AMP_Template_Customizer {
 		$this->wp_customize->add_control( 'amp_background_color', array(
 			'label'      => __( 'Background Color Scheme', 'amp' ),
 			'section'    => 'amp_navbar_section',
-		//	'settings'   => 'amp_theme_options[color_scheme]',
 			'type'       => 'radio',
 			'priority'   => 30,
 			'choices'    => array(
@@ -209,26 +208,6 @@ class AMP_Template_Customizer {
 				'default' => 'Default'
 			),
 		));
-	}
-
-	/**
-	* This will output the custom WordPress settings to the live theme's WP head.
-	*
-	* Used by hook: 'wp_head'
-	*
-	* @see add_action('wp_head',$func)
-	* @since MyTheme 1.0
-	*/
-	public static function header_output() { ?>
-		<!--Customizer CSS-->
-		<style type="text/css">
-			<?php // self::generate_css( '.amp-wp-header div, .amp-wp-header a', 'color', 'amp_navbar_color', '#' ); ?>
-			<?php // self::generate_css( '.amp-wp-header', 'background-color', 'amp_navbar_background_color', '#' ); ?>
-			<?php // self::generate_css( 'a, a:visited', 'color', 'amp_navbar_background_color', '#' ); ?>
-			<?php // self::generate_css( 'blockquote, .amp-wp-byline amp-img', 'border-color', 'amp_navbar_background_color', '#' ); ?>
-		</style>
-		<!--/Customizer CSS-->
-	<?php
 	}
 
 	/**
