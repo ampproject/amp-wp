@@ -199,6 +199,7 @@ blockquote p:last-child {
 .amp-wp-tax-category,
 .amp-wp-tax-tag,
 .amp-wp-comment-link,
+.wpa-about,
 .amp-wp-footer p {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
 }
@@ -444,14 +445,23 @@ amp-social-share {
 
 /* AMP Ad */
 
-.adspace {
+.amp-wp-ad-about {
+    display: block;
+    font-size: 10px;
+    text-align: center;
+    text-decoration: none;
+    opacity: 0.85;
+}
+
+.amp-wp-ad {
 	border-top: 1px solid <?php echo $border_color; ?>;
+	line-height: 0;
 	margin: 1.5em auto;
 	padding-top: 1.5em;
 	position: relative;
 	text-align: center;
 }
-.adspace amp-ad {
+.amp-wp-ad amp-ad {
 	display: block;
 	margin: 0 auto;
 }
