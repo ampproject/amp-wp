@@ -37,9 +37,11 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		// Some nodes may contain valid content but are themselves invalid.
 		// Remove the node but preserve the children.
  		if ( 'font' === $node_name ) {
-			$this->replace_node_with_children( $node );
+			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
+			return;
 		} elseif ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
-			$this->replace_node_with_children( $node );
+			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
+			return;
 		}
 
 		if ( $node->hasAttributes() ) {
@@ -153,12 +155,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		return true;
 	}
 
-	private function replace_node_with_children( $node ) {
+	private function replace_node_with_children( $node, $bad_attributes, $bad_protocols ) {
 		// If the node has children and also has a parent node,
 		// clone and re-add all the children just before current node.
 		if ( $node->hasChildNodes() && $node->parentNode ) {
 			foreach ( $node->childNodes as $child_node ) {
 				$new_child = $child_node->cloneNode( true );
+				$this->strip_attributes_recursive( $new_child, $bad_attributes, $bad_protocols );
 				$node->parentNode->insertBefore( $new_child, $node );
 			}
 		}

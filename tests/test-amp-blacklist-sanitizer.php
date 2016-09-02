@@ -128,6 +128,16 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a name="section2"></a>',
 			),
 
+			'a_empty' => array(
+				'<a>Hello World</a>',
+				'Hello World',
+			),
+
+			'a_empty_with_children_with_restricted_attributes' => array(
+				'<a><span style="color: red;">Red</span>&amp;<span style="color: blue;">Orange</span></a>',
+				'<span>Red</span>&amp;<span>Orange</span>'
+			),
+
 			'h1_with_size' => array(
 				'<h1 size="1">Headline</h1>',
 				'<h1>Headline</h1>',
