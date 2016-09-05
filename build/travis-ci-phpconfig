@@ -1,0 +1,22 @@
+# PHPENV Setup
+<IfModule alias_module>
+    ScriptAlias /phpenv "/home/vagrant/.phpenv/shims"
+    <Directory "/home/vagrant/.phpenv/shims">
+        Order allow,deny
+        Allow from all
+    </Directory>
+</IfModule>
+
+<IfModule mime_module>
+    AddType application/x-httpd-php5 .php
+</IfModule>
+
+<IfModule dir_module>
+    DirectoryIndex index.php index.html
+</IfModule>
+
+Action application/x-httpd-php5 "/phpenv/php-cgi"
+
+RewriteEngine On
+RewriteLog "/tmp/rewrite.log"
+RewriteLogLevel 9

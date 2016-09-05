@@ -5,9 +5,16 @@ language: php
 php:
     - "5.6"
 
+mysql:
+  database: wordpress_test
+  username: root
+  encoding: utf8
+
 # WordPress version used in first build configuration.
 env:
     - WP_VERSION=latest
+
+sudo: required
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
@@ -22,12 +29,17 @@ env:
 # along with 2 versions of WordPress (which would build 8 configs otherwise).
 # This takes half as long to run while still providing adequate coverage.
 
+#
 matrix:
   include:
    - php: "nightly"
      env: WP_VERSION=latest
    - php: "nightly"
      env: WP_VERSION=4.4
+#   - php: "5.3"
+#     env: WP_VERSION=latest
+#   - php: "5.3"
+#     env: WP_VERSION=4.4
    - php: "5.2"
      env: WP_VERSION=latest
    - php: "5.2"
@@ -35,8 +47,40 @@ matrix:
      # 5.6 / latest already included above as first build.
    - php: "5.6"
      env: WP_VERSION=4.4
+  allow_failures:
+   - php: "5.2"
+
+cache:
+  directories:
+    - node_modules
+
+addons:
+  hosts:
+    - auto-amp.dev
+
+before_install:
+  - nvm install v4.2.1
+  - nvm use v4.2.1
+
+install:
+  - npm install
 
 before_script:
-  - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION 
+  - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+  - sudo apt-get update
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - if [[ -f ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf.default ]]; then sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf; fi
+  - if [[ -f ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ]]; then sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf; fi
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo cp -f build/travis-ci-phpconfig /etc/apache2/conf.d/phpconfig
+  - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/default
+  - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
+  - sudo service apache2 restart
 
-script: phpunit
+script:
+  - phpunit
+  - bash bin/install-amp-validator-test-data.sh
+  - mocha bin/run-amp-validator.js

@@ -1,0 +1,31 @@
+{
+  "name": "amp-wp",
+  "version": "1.0.0",
+  "description": "Required NPM packages for testing AMP pages",
+  "engines": {
+    "node": "^4.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "amp-html": "github:ampproject/amphtml",
+    "bluebird": "^3.4.0",
+    "chai": "^3.5.0",
+    "chai-things": "^0.2.0",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "mocha": "^2.5.3",
+    "node-fetch": "^1.5.3",
+    "promise": "^7.1.1",
+    "url": "^0.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Automattic/amp-wp.git"
+  },
+  "author": "Automattic",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/Automattic/amp-wp/issues"
+  },
+  "homepage": "https://github.com/Automattic/amp-wp#readme"
+}
