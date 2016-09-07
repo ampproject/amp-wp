@@ -121,17 +121,31 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_settings() {
-		// Navbar text color setting.
+
+		// Header text color setting
 		$this->wp_customize->add_setting( 'amp_navbar_color', array(
 			'default'           => '#ffffff',
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
 
-		// Navbar background color setting.
-		$this->wp_customize->add_setting( 'amp_navbar_background', array(
+		// Header background color
+		$this->wp_customize->add_setting( 'amp_navbar_background_color', array(
 			'default'           => '#0a89c0',
 			'sanitize_callback' => 'sanitize_hex_color',
+			'transport'         => 'postMessage'
+		) );
+
+		// Header background image upload
+		$this->wp_customize->add_setting( 'amp_navbar_background_image', array(
+			'default'    => '',
+			'transport'  => 'postMessage'
+		) );
+
+		// Background color scheme
+		$this->wp_customize->add_setting( 'amp_background_color', array(
+			'default'           => 'standard',
+			'sanitize_callback' => 'amp_sanitize_color_scheme',
 			'transport'         => 'postMessage'
 		) );
 
@@ -146,8 +160,8 @@ class AMP_Template_Customizer {
 	 */
 	public function register_panel() {
 		$this->wp_customize->add_panel( self::PANEL_ID, array(
-			'type'            => 'amp',
-			'title'           => __( 'AMP', 'amp' ),
+			'type'  => 'amp',
+			'title' => __( 'AMP', 'amp' ),
 		) );
 	}
 
@@ -159,7 +173,7 @@ class AMP_Template_Customizer {
 	 */
 	public function register_sections() {
 		$this->wp_customize->add_section( 'amp_navbar_section', array(
-			'title' => __( 'Navigation Bar', 'amp' ),
+			'title' => __( 'Color Options', 'amp' ),
 			'panel' => self::PANEL_ID,
 		) );
 	}
@@ -182,12 +196,32 @@ class AMP_Template_Customizer {
 
 		// Navbar background color control.
 		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background', array(
-				'label'    => __( 'Header Background Color', 'amp' ),
+			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background_color', array(
+				'label'    => __( 'Header Background Color & Link Color', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 20
 			) )
 		);
+
+		$this->wp_customize->add_control(
+			new WP_Customize_Image_Control( $this->wp_customize, 'amp_navbar_background_image', array(
+				'label'    => __( 'Header Background Image', 'amp' ),
+				'section'  => 'amp_navbar_section',
+				'priority' => 30
+			) )
+		);
+
+		// Background color scheme
+		$this->wp_customize->add_control( 'amp_background_color', array(
+			'label'      => __( 'Background Color Scheme', 'amp' ),
+			'section'    => 'amp_navbar_section',
+			'type'       => 'radio',
+			'priority'   => 30,
+			'choices'    => array(
+				'light'   => __( 'Light (Default)', 'amp'),
+				'dark'    => __( 'Dark', 'amp' ),
+			),
+		));
 	}
 
 	/**
@@ -223,4 +257,11 @@ class AMP_Template_Customizer {
 	public static function is_amp_customizer() {
 		return ! empty( $_REQUEST[ AMP_CUSTOMIZER_QUERY_VAR ] );
 	}
+}
+
+function amp_sanitize_color_scheme( $value ) {
+    if ( ! in_array( $value, array( 'light', 'dark' ) ) )
+        $value = 'default';
+
+    return $value;
 }
