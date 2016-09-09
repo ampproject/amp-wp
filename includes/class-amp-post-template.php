@@ -6,6 +6,7 @@ require_once( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php' );
 
 require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
@@ -186,6 +187,7 @@ class AMP_Post_Template {
 				'AMP_Gallery_Embed_Handler' => array(),
 			), $this->post ),
 			apply_filters( 'amp_content_sanitizers', array(
+				 'AMP_Style_Sanitizer' => array(),
 				 'AMP_Blacklist_Sanitizer' => array(),
 				 'AMP_Img_Sanitizer' => array(),
 				 'AMP_Video_Sanitizer' => array(),
