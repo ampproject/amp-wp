@@ -27,6 +27,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$class = $node->getAttribute( 'class' );
 
 			if ( $style ) {
+				$style = $this->process_style( $style );
+
 				$class_name = $this->generate_class_name( $style );
 				$new_class  = trim( $class . ' ' . $class_name );
 
@@ -43,8 +45,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
+	private function process_style( $string ) {
+		// Filter properties
+		$string = safecss_filter_attr( $string );
+
+		// Normalize order
+		$arr = array_map( 'trim', explode( ';', $string ) );
+		sort( $arr );
+
+		return implode( ";\n", $arr ) . ';';
+	}
+
 	private function generate_class_name( $string ) {
-		return 'amp-style-' . md5( $string );
+		return 'amp-inline-style-' . md5( $string );
 	}
 
 	public function append_styles() {
@@ -52,7 +65,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 /* Inline Styles */
 <?php foreach ( $this->styles as $class_name => $style ) : ?>
-.<?php echo $class_name; ?> { <?php echo $style; ?> }
+.<?php echo $class_name; ?> {
+	<?php echo $style; ?>
+
+}
 <?php endforeach; ?>
 
 		<?php
