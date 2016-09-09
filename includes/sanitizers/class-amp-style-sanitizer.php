@@ -53,7 +53,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$arr = array_map( 'trim', explode( ';', $string ) );
 		sort( $arr );
 
-		return implode( ";\n", $arr ) . ';';
+		// Handle overflow rule
+		// https://www.ampproject.org/docs/reference/spec.html#properties
+		if ( $overflow = preg_grep( '/^overflow.*(auto|scroll)$/', $arr ) ) {
+			foreach( $overflow as $index => $rule ) {
+				unset( $arr[ $index ] );
+			}
+		}
+
+		return implode( ";\n\t", $arr ) . ';';
 	}
 
 	private function generate_class_name( $string ) {
