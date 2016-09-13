@@ -53,6 +53,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$arr = array_map( 'trim', explode( ';', $string ) );
 		sort( $arr );
 
+		// Normalize whitespace
+		foreach ( $arr as $index => $rule ) {
+			$arr2 = array_map( 'trim', explode( ':', $rule, 2 ) );
+			if ( 2 === count( $arr2 ) ) {
+				$arr[ $index ] = $arr2[0] . ': ' . $arr2[1];
+			}
+		}
+
 		// Handle overflow rule
 		// https://www.ampproject.org/docs/reference/spec.html#properties
 		if ( $overflow = preg_grep( '/^overflow.*(auto|scroll)$/', $arr ) ) {
