@@ -64,6 +64,12 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	public function oembed( $matches, $attr, $url, $rawattr ) {
+		// Use the standard oembed handler if it's a playlist
+		$parsed_url = wp_parse_url( $url );
+		if ( isset( $parsed_url['path'] ) && false !== strpos( $parsed_url['path'], 'playlist' ) ) {
+			return wp_oembed_get( $url );
+		}
+
 		return $this->shortcode( array( $url ) );
 	}
 
