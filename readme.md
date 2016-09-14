@@ -575,6 +575,11 @@ We may provide better ways to handle this in the future.
 
 Jetpack integration is baked in. More support for things like Related Posts to come.
 
+### Parse.ly
+
+If you're using Parse.ly with [the official AMP plugin](https://wordpress.org/plugins/amp/), check out the documentation here: https://www.parsely.com/help/integration/google-amp/
+
+
 ### Yoast SEO
 
 If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check out the companion plugin here: https://github.com/Yoast/yoastseo-amp
