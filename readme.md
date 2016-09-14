@@ -577,7 +577,7 @@ Jetpack integration is baked in. More support for things like Related Posts to c
 
 ### Parse.ly
 
-If you're using Parse.ly with [the official AMP plugin](https://wordpress.org/plugins/amp/), check out the documentation here: https://www.parsely.com/help/integration/google-amp/
+If you're using [Parse.ly](https://wordpress.org/plugins/wp-parsely/), please check out the AMP documentation here: https://www.parsely.com/help/integration/google-amp/
 
 
 ### Yoast SEO
