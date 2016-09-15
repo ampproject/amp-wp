@@ -38,6 +38,11 @@ class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 				'https://www.youtube.com/playlist?list=PLtn57NsUdLz7Phy4bzX0f3d5_eAQQ7FCA' . PHP_EOL,
 				'<p><iframe width="660" height="371" src="https://www.youtube.com/embed/videoseries?list=PLtn57NsUdLz7Phy4bzX0f3d5_eAQQ7FCA" frameborder="0" allowfullscreen></iframe></p>' . PHP_EOL,
 			),
+
+			'url_playlist_broken' => array(
+				'https://www.youtube.com/playlist?asdf=PLtn57NsUdLz7Phy4bzX0f3d5_eAQQ7FCA' . PHP_EOL,
+				'<p>https://www.youtube.com/playlist?asdf=PLtn57NsUdLz7Phy4bzX0f3d5_eAQQ7FCA</p>' . PHP_EOL,
+			),
 		);
 	}
 
