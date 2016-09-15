@@ -33,6 +33,11 @@ class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 				'[youtube http://www.youtube.com/watch?v=kfVsfOSbJY0]' . PHP_EOL,
 				'<amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube>' . PHP_EOL
 			),
+
+			'url_playlist' => array(
+				'https://www.youtube.com/playlist?list=PLtn57NsUdLz7Phy4bzX0f3d5_eAQQ7FCA' . PHP_EOL,
+				'<p><iframe width="660" height="371" src="https://www.youtube.com/embed/videoseries?list=PLtn57NsUdLz7Phy4bzX0f3d5_eAQQ7FCA" frameborder="0" allowfullscreen></iframe></p>' . PHP_EOL,
+			),
 		);
 	}
 
