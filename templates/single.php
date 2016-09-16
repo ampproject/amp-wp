@@ -19,6 +19,6 @@
 	</ul>
 	<?php echo $this->get( 'post_amp_content' ); // amphtml content; no kses ?>
 </div>
-<?php do_action( 'amp_post_template_footer', $this ); ?>
+<?php $this->load_parts( array( 'footer' ) ); ?>
 </body>
 </html>
