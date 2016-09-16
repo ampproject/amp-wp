@@ -43,7 +43,7 @@ class Faster_Image_B52f1a8_Faster_Image
         // Create the curl handles and add them to the multi_request
         foreach ( array_values($urls) as $count => $uri ) {
 
-            $results[$uri] = [];
+            $results[$uri] = array();
 
             $$count = $this->handle($uri, $results[$uri]);
 
