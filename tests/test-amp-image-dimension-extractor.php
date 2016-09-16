@@ -49,93 +49,71 @@ class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase
 	}
 }
 
-class AMP_Image_Dimension_Extractor__From_Metadata__Test extends WP_UnitTestCase {
-	private $_attachment_id = null;
-
-	function setUp() {
-		parent::setUp();
-
-		$this->_attachment_id = $this->factory->attachment->create_upload_object( AMP_IMG_DIMENSION_TEST_VALID_FILE );
-	}
-
-	function test__dimensions_already_passed_in() {
-		$source_dimensions = array( 1, 1 );
-		$source = wp_get_attachment_url( $this->_attachment_id );
-		$expected = array( 1, 1 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata(  $source_dimensions, $source );
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__invalid_attachment() {
-		$source = 'https://example.com/path/to/file.jpg';
-		$expected = false;
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata(  false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__valid_attachment_missing_metadata() {
-		$source = wp_get_attachment_url( $this->_attachment_id );
-		$expected = false;
-
-		delete_post_meta( $this->_attachment_id, '_wp_attachment_metadata' );
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__valid_attachment_and_dimensions_with_query() {
-		$source = wp_get_attachment_url( $this->_attachment_id ) . '?rand=1';
-		$expected = array( 498, 113 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__valid_attachment_and_dimensions() {
-		$source = wp_get_attachment_url( $this->_attachment_id );
-		$expected = array( 498, 113 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-}
-
 // TODO: tests for transients, errors, lock
 // TODO: mocked tests
 class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCase {
-	function test__dimensions_already_passed_in() {
-		$source_dimensions = array( 1, 1 );
-		$source = AMP_IMG_DIMENSION_TEST_VALID_FILE;
-		$expected = array( 1, 1 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_image( $source_dimensions, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
 
 	function test__valid_image_file() {
-		$source = AMP_IMG_DIMENSION_TEST_VALID_FILE;
-		$expected = array( 498, 113 );
+		$source = 'https://i0.wp.com/placehold.it/350x150.png';
+		$expected = array(
+		    'https://i0.wp.com/placehold.it/350x150.png' => array(
+		        'width' => 350,
+                'height' => 150 ),
+        );
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_image( false, $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array ( $source ) );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
 
-	/**
-	 * @expectedException PHPUnit_Framework_Error_Warning
-	 */
+	function test__multiple_valid_image_files() {
+        $sources = array (
+            'https://i0.wp.com/placehold.it/350x150.png',
+            'https://i0.wp.com/placehold.it/1024x768.png',
+        );
+        $expected = array(
+            'https://i0.wp.com/placehold.it/350x150.png' => array(
+                'width' => 350,
+                'height' => 150 ),
+            'https://i0.wp.com/placehold.it/1024x768.png' => array(
+                'width' => 1024,
+                'height' => 768 ),
+        );
+
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+
+        $this->assertEquals( $expected, $dimensions );
+    }
+
 	function test__invalid_image_file() {
 		$source = AMP_IMG_DIMENSION_TEST_INVALID_FILE;
-		$expected = false;
+        $expected = array(
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+        );
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_image( false, $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array( $source ) );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
+
+	function test__mix_of_valid_and_invalid_image_file() {
+        $sources = array (
+            'https://i0.wp.com/placehold.it/350x150.png',
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE,
+            'https://i0.wp.com/placehold.it/1024x768.png',
+        );
+        $expected = array(
+            'https://i0.wp.com/placehold.it/350x150.png' => array(
+                'width' => 350,
+                'height' => 150 ),
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+            'https://i0.wp.com/placehold.it/1024x768.png' => array(
+                'width' => 1024,
+                'height' => 768 ),
+        );
+
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+
+        $this->assertEquals( $expected, $dimensions );
+    }
 }
