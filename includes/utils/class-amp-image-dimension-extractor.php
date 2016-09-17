@@ -149,7 +149,11 @@ class AMP_Image_Dimension_Extractor {
         if ( $mode != 'concurrent' || strnatcmp( phpversion(), '5.3.0' ) < 0 ) {
             require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
             $image = new FastImage();
-            foreach ( array_column( $urls_to_fetch, 'url' ) as $url ) {
+            $urls = array();
+            foreach ( $urls_to_fetch as $key => $value) {
+                $urls[] = $key;
+            }
+            foreach ( $urls as $url ) {
                 $image->load($url);
                 $size = $image->getSize();
                 if ( is_array ($size) ) {
