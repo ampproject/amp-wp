@@ -82,7 +82,7 @@ class AMP_Image_Dimension_Extractor {
      * @param array $urls Image urls
      * @return array Dimensions mapped to image urls, or false if they could not be retrieved
      */
-	public static function extract_by_downloading_images($urls ) {
+	public static function extract_by_downloading_images($urls, $mode = 'concurrent') {
         $transient_expiration = 30 * DAY_IN_SECONDS;
 
         $urls_to_fetch = array();
@@ -90,7 +90,7 @@ class AMP_Image_Dimension_Extractor {
         $images = array();
 
         self::determine_which_images_to_fetch($urls, $urls_to_fetch, $all_dimensions);
-        self::fetch_images($urls_to_fetch, $images);
+        self::fetch_images($urls_to_fetch, $images, $mode);
         self::process_fetched_images($urls_to_fetch, $images, $all_dimensions, $transient_expiration);
 
         return $all_dimensions;
@@ -144,13 +144,27 @@ class AMP_Image_Dimension_Extractor {
      * @param array $urls_to_fetch Image src urls to fetch
      * @param array $images Array to populate with results of image/dimension inspection
      */
-    private static function fetch_images($urls_to_fetch, &$images) {
-        // Note to other developers: please don't use this class directly as it may not stick around forever...
-        if ( ! class_exists( 'Faster_Image_B52f1a8_Faster_Image' ) ) {
-            require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-faster-image.php' );
+    private static function fetch_images($urls_to_fetch, &$images, $mode) {
+        //User Faster Image when PHP version supports it (it contains a closure that could not be ported to 5.2)
+        if ( $mode != 'concurrent' || strnatcmp( phpversion(), '5.3.0' ) < 0 ) {
+            require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
+            $image = new FastImage();
+            foreach ( array_column( $urls_to_fetch, 'url' ) as $url ) {
+                $image->load($url);
+                $size = $image->getSize();
+                if ( is_array ($size) ) {
+                    $images[ $url ]['size'] = $size;
+                } else {
+                    $images[ $url ]['size'] = false;
+                }
+            }
+        } else {
+            if ( ! class_exists( 'Faster_Image_B52f1a8_Faster_Image' ) ) {
+                require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-faster-image.php' );
+            }
+            $client = new Faster_Image_B52f1a8_Faster_Image();
+            $images = $client->batch( array_column( $urls_to_fetch, 'url' ) );
         }
-        $client = new Faster_Image_B52f1a8_Faster_Image();
-        $images = $client->batch( array_column( $urls_to_fetch, 'url' ) );
     }
 
     /**

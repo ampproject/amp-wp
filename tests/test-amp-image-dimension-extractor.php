@@ -2,6 +2,8 @@
 
 define( 'AMP_IMG_DIMENSION_TEST_VALID_FILE', dirname( __FILE__ ) . '/assets/wordpress-logo.png' );
 define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/not-exists.png' );
+define( 'IMG_350', 'https://i0.wp.com/placehold.it/350x150.png');
+define( 'IMG_1024', 'https://i0.wp.com/placehold.it/1024x768.png');
 
 class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase {
 	function get_data() {
@@ -54,60 +56,114 @@ class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase
 class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCase {
 
 	function test__valid_image_file() {
-		$source = 'https://i0.wp.com/placehold.it/350x150.png';
+		$sources = array(
+		    IMG_350,
+        );
 		$expected = array(
-		    'https://i0.wp.com/placehold.it/350x150.png' => array(
+		    IMG_350 => array(
 		        'width' => 350,
                 'height' => 150 ),
         );
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array ( $source ) );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
 
-	function test__multiple_valid_image_files() {
-        $sources = array (
-            'https://i0.wp.com/placehold.it/350x150.png',
-            'https://i0.wp.com/placehold.it/1024x768.png',
+    function test__valid_image_file_synchronous() {
+        $sources = array(
+            IMG_350,
         );
         $expected = array(
-            'https://i0.wp.com/placehold.it/350x150.png' => array(
+            IMG_350 => array(
                 'width' => 350,
                 'height' => 150 ),
-            'https://i0.wp.com/placehold.it/1024x768.png' => array(
+        );
+
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
+
+        $this->assertEquals( $expected, $dimensions );
+    }
+
+	function test__multiple_valid_image_files() {
+        $sources = array (
+            IMG_350,
+            IMG_1024,
+        );
+        $expected = array(
+            IMG_350 => array(
+                'width' => 350,
+                'height' => 150 ),
+            IMG_1024 => array(
                 'width' => 1024,
                 'height' => 768 ),
         );
 
         $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+
+        $this->assertEquals( $expected, $dimensions );
+    }
+
+    function test__multiple_valid_image_files_synchronous() {
+        $sources = array (
+            IMG_350,
+            IMG_1024,
+        );
+        $expected = array(
+            IMG_350 => array(
+                'width' => 350,
+                'height' => 150 ),
+            IMG_1024 => array(
+                'width' => 1024,
+                'height' => 768 ),
+        );
+
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
         $this->assertEquals( $expected, $dimensions );
     }
 
 	function test__invalid_image_file() {
-		$source = AMP_IMG_DIMENSION_TEST_INVALID_FILE;
+		$sources = array(
+		    AMP_IMG_DIMENSION_TEST_INVALID_FILE,
+        );
         $expected = array(
             AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
         );
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array( $source ) );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
 
-	function test__mix_of_valid_and_invalid_image_file() {
-        $sources = array (
-            'https://i0.wp.com/placehold.it/350x150.png',
+    /**
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+    function test__invalid_image_file_synchronous() {
+        $sources = array(
             AMP_IMG_DIMENSION_TEST_INVALID_FILE,
-            'https://i0.wp.com/placehold.it/1024x768.png',
         );
         $expected = array(
-            'https://i0.wp.com/placehold.it/350x150.png' => array(
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+        );
+
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
+
+        $this->assertEquals( $expected, $dimensions );
+    }
+
+	function test__mix_of_valid_and_invalid_image_file() {
+        $sources = array (
+            IMG_350,
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE,
+            IMG_1024,
+        );
+        $expected = array(
+            IMG_350 => array(
                 'width' => 350,
                 'height' => 150 ),
             AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-            'https://i0.wp.com/placehold.it/1024x768.png' => array(
+            IMG_1024 => array(
                 'width' => 1024,
                 'height' => 768 ),
         );
@@ -116,4 +172,20 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
         $this->assertEquals( $expected, $dimensions );
     }
+
+    /**
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+    function test__mix_of_valid_and_invalid_image_file_synchronous() {
+        $sources = array (
+            IMG_350,
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE,
+            IMG_1024,
+        );
+
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
+
+        $this->assertEquals( $expected, $dimensions );
+    }
+
 }
