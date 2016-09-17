@@ -54,9 +54,9 @@ class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase
 class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCase {
 
 	function test__valid_image_file() {
-		$source = 'https://placehold.it/350x150.png';
+		$source = 'https://i0.wp.com/placehold.it/350x150.png';
 		$expected = array(
-		    'https://placehold.it/350x150.png' => array(
+		    'https://i0.wp.com/placehold.it/350x150.png' => array(
 		        'width' => 350,
                 'height' => 150 ),
         );
@@ -68,14 +68,14 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__multiple_valid_image_files() {
         $sources = array (
-            'https://placehold.it/350x150.png',
-            'https://placehold.it/1024x768.png',
+            'https://i0.wp.com/placehold.it/350x150.png',
+            'https://i0.wp.com/placehold.it/1024x768.png',
         );
         $expected = array(
-            'https://placehold.it/350x150.png' => array(
+            'https://i0.wp.com/placehold.it/350x150.png' => array(
                 'width' => 350,
                 'height' => 150 ),
-            'https://placehold.it/1024x768.png' => array(
+            'https://i0.wp.com/placehold.it/1024x768.png' => array(
                 'width' => 1024,
                 'height' => 768 ),
         );
@@ -98,16 +98,16 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__mix_of_valid_and_invalid_image_file() {
         $sources = array (
-            'https://placehold.it/350x150.png',
+            'https://i0.wp.com/placehold.it/350x150.png',
             AMP_IMG_DIMENSION_TEST_INVALID_FILE,
-            'https://placehold.it/1024x768.png',
+            'https://i0.wp.com/placehold.it/1024x768.png',
         );
         $expected = array(
-            'https://placehold.it/350x150.png' => array(
+            'https://i0.wp.com/placehold.it/350x150.png' => array(
                 'width' => 350,
                 'height' => 150 ),
             AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-            'https://placehold.it/1024x768.png' => array(
+            'https://i0.wp.com/placehold.it/1024x768.png' => array(
                 'width' => 1024,
                 'height' => 768 ),
         );
