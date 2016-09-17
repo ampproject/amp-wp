@@ -38,19 +38,19 @@ class Faster_Image_B52f1a8_Faster_Image
     {
 
         $multi   = curl_multi_init();
-        $results = array();
+        $this->results = array();
 
         // Create the curl handles and add them to the multi_request
         foreach ( array_values($urls) as $count => $uri ) {
 
-            $results[$uri] = array();
+            $this->results[$uri] = array();
 
-            $$count = $this->handle($uri, $results[$uri]);
+            $$count = $this->handle($uri);
 
             $code = curl_multi_add_handle($multi, $$count);
 
             if ( $code != CURLM_OK ) {
-                throw new \Exception("Curl handle for $uri could not be added");
+                throw new Exception("Curl handle for $uri could not be added");
             }
         }
 
@@ -58,7 +58,7 @@ class Faster_Image_B52f1a8_Faster_Image
         do {
             while ( ($mrc = curl_multi_exec($multi, $active)) == CURLM_CALL_MULTI_PERFORM ) ;
             if ( $mrc != CURLM_OK && $mrc != CURLM_CALL_MULTI_PERFORM ) {
-                throw new \Exception("Curl error code: $mrc");
+                throw new Exception("Curl error code: $mrc");
             }
 
             if ( $active && curl_multi_select($multi) === -1 ) {
@@ -73,11 +73,11 @@ class Faster_Image_B52f1a8_Faster_Image
             $error = curl_error($$count);
 
             if ( $error ) {
-                $results[$uri]['failure_reason'] = $error;
+                $this->results[$uri]['failure_reason'] = $error;
             }
         }
 
-        return $results;
+        return $this->results;
     }
 
     /**
@@ -96,13 +96,14 @@ class Faster_Image_B52f1a8_Faster_Image
      *
      * @return resource
      */
-    protected function handle($url, & $result)
+    protected function handle($url)
     {
-        $stream           = new Stream_17b32f3_Stream();
-        $parser           = new Faster_Image_B52f1a8_Image_Parser($stream);
-        $result['rounds'] = 0;
-        $result['bytes']  = 0;
-        $result['size']   = 'failed';
+        $this->url = $url;
+        $this->stream           = new Stream_17b32f3_Stream();
+        $this->parser           = new Faster_Image_B52f1a8_Image_Parser($this->stream);
+        $this->results[$this->url]['rounds'] = 0;
+        $this->results[$this->url]['bytes']  = 0;
+        $this->results[$this->url]['size']   = 'failed';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -118,33 +119,33 @@ class Faster_Image_B52f1a8_Faster_Image
         #  Some web servers require the useragent to be not a bot. So we are liars.
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36');
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
-            "Cache-Control: max-age=0",
-            "Connection: keep-alive",
-            "Keep-Alive: 300",
-            "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-            "Accept-Language: en-us,en;q=0.5",
-            "Pragma: ", // browsers keep this blank.
+                "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
+                "Cache-Control: max-age=0",
+                "Connection: keep-alive",
+                "Keep-Alive: 300",
+                "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+                "Accept-Language: en-us,en;q=0.5",
+                "Pragma: ", // browsers keep this blank.
             )
         );
         curl_setopt($ch, CURLOPT_ENCODING, "");
 
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $str) use (& $result, & $parser, & $stream, $url) {
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $str) {
 
-            $result['rounds']++;
-            $result['bytes'] += strlen($str);
+            $this->results[$this->url]['rounds']++;
+            $this->results[$this->url]['bytes'] += strlen($str);
 
-            $stream->write($str);
+            $this->stream->write($str);
 
             try {
                 // store the type in the result array by looking at the bits
-                $result['type'] = $parser->parseType();
+                $this->results[$this->url]['type'] = $this->parser->parseType();
 
                 /*
                  * We try here to parse the buffer of characters we already have
                  * for the size.
                  */
-                $result['size'] = $parser->parseSize() ?: 'failed';
+                $this->results[$this->url]['size'] = $this->parser->parseSize() ?: 'failed';
             }
             catch (Stream_17b32f3_Stream_Buffer_Too_Small_Exception $e) {
                 /*
@@ -156,7 +157,7 @@ class Faster_Image_B52f1a8_Faster_Image
                  * the entire image and we couldn't figure it out. Otherwise
                  * it'll get overwritten with the next round.
                  */
-                $result['size'] = 'failed';
+                $this->results[$this->url]['size'] = 'failed';
 
                 return strlen($str);
             }
@@ -168,7 +169,7 @@ class Faster_Image_B52f1a8_Faster_Image
                  *
                  * We set the size to invalid and move on
                  */
-                $result['size'] = 'invalid';
+                $this->results[$this->url]['size'] = 'invalid';
 
                 return -1;
             }
