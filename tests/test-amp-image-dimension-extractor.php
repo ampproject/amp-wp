@@ -124,21 +124,18 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
     }
 
 	function test__invalid_image_file() {
-		$sources = array(
-		    AMP_IMG_DIMENSION_TEST_INVALID_FILE,
+        $sources = array(
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE,
         );
         $expected = array(
             AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
         );
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
-		$this->assertEquals( $expected, $dimensions );
+        $this->assertEquals($expected, $dimensions);
 	}
 
-    /**
-     * @expectedException PHPUnit_Framework_Error_Warning
-     */
     function test__invalid_image_file_synchronous() {
         $sources = array(
             AMP_IMG_DIMENSION_TEST_INVALID_FILE,
@@ -149,11 +146,11 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
         $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
-        $this->assertEquals( $expected, $dimensions );
+        $this->assertEquals($expected, $dimensions);
     }
 
 	function test__mix_of_valid_and_invalid_image_file() {
-        $sources = array (
+        $sources = array(
             IMG_350,
             AMP_IMG_DIMENSION_TEST_INVALID_FILE,
             IMG_1024,
@@ -161,31 +158,36 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
         $expected = array(
             IMG_350 => array(
                 'width' => 350,
-                'height' => 150 ),
+                'height' => 150),
             AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
             IMG_1024 => array(
                 'width' => 1024,
-                'height' => 768 ),
+                'height' => 768),
         );
 
         $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
-        $this->assertEquals( $expected, $dimensions );
+        $this->assertEquals($expected, $dimensions);
     }
 
-    /**
-     * @expectedException PHPUnit_Framework_Error_Warning
-     */
     function test__mix_of_valid_and_invalid_image_file_synchronous() {
-        $sources = array (
+        $sources = array(
             IMG_350,
             AMP_IMG_DIMENSION_TEST_INVALID_FILE,
             IMG_1024,
         );
+        $expected = array(
+            IMG_350 => array(
+                'width' => 350,
+                'height' => 150),
+            AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+            IMG_1024 => array(
+                'width' => 1024,
+                'height' => 768),
+        );
 
-        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
+        $dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous');
 
-        $this->assertEquals( $expected, $dimensions );
+        $this->assertEquals($expected, $dimensions);
     }
-
 }

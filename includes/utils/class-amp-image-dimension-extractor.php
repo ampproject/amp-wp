@@ -3,7 +3,7 @@
 class AMP_Image_Dimension_Extractor {
 	static $callbacks_registered = false;
     const STATUS_FAILED_LAST_ATTEMPT = 'failed';
-    const STATUS_FASTER_IMAGE_FAILED = 'failed';
+    const STATUS_IMAGE_EXTRACTION_FAILED= 'failed';
 
     static public function extract( $urls ) {
 		if ( ! self::$callbacks_registered ) {
@@ -146,29 +146,50 @@ class AMP_Image_Dimension_Extractor {
      */
     private static function fetch_images($urls_to_fetch, &$images, $mode) {
         //User Faster Image when PHP version supports it (it contains a closure that could not be ported to 5.2)
-        if ( $mode != 'concurrent' || strnatcmp( phpversion(), '5.3.0' ) < 0 ) {
-            require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
-            $image = new FastImage();
-            $urls = array();
-            foreach ( $urls_to_fetch as $key => $value) {
-                $urls[] = $key;
-            }
-            foreach ( $urls as $url ) {
-                $image->load($url);
-                $size = $image->getSize();
-                if ( is_array ($size) ) {
-                    $images[ $url ]['size'] = $size;
-                } else {
-                    $images[ $url ]['size'] = false;
-                }
-            }
+        if ( $mode === 'synchronous' || strnatcmp( phpversion(), '5.3.0' ) < 0 ) {
+            self::fetch_images_via_fast_image( $urls_to_fetch, $images );
         } else {
-            if ( ! class_exists( 'Faster_Image_B52f1a8_Faster_Image' ) ) {
-                require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-faster-image.php' );
-            }
-            $client = new Faster_Image_B52f1a8_Faster_Image();
-            $images = $client->batch( array_column( $urls_to_fetch, 'url' ) );
+            self::fetch_images_via_faster_image( $urls_to_fetch, $images );
         }
+    }
+
+    /**
+     * Fetch images via FastImage library
+     *
+     * @param array $urls_to_fetch Image src urls to fetch
+     * @param array $images Array to populate with results of image/dimension inspection
+     */
+    private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
+        require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
+        $image = new FastImage();
+        $urls = array();
+        // array_column doesn't exist in PHP 5.2
+        foreach ( $urls_to_fetch as $key => $value) {
+            $urls[] = $key;
+        }
+        foreach ( $urls as $url ) {
+            $result = $image->load($url);
+            if ( false === $result ) {
+                $images[ $url ]['size'] = self::STATUS_IMAGE_EXTRACTION_FAILED;
+            } else {
+                $size = $image->getSize();
+                $images[ $url ]['size'] = $size;
+            }
+        }
+    }
+
+    /**
+     * Fetch images via FasterImage library
+     *
+     * @param array $urls_to_fetch Image src urls to fetch
+     * @param array $images Array to populate with results of image/dimension inspection
+     */
+    private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
+        if ( ! class_exists( 'Faster_Image_B52f1a8_Faster_Image' ) ) {
+            require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-faster-image.php' );
+        }
+        $client = new Faster_Image_B52f1a8_Faster_Image();
+        $images = $client->batch( array_column( $urls_to_fetch, 'url' ) );
     }
 
     /**
@@ -183,7 +204,7 @@ class AMP_Image_Dimension_Extractor {
     private static function process_fetched_images($urls_to_fetch, $images, &$all_dimensions, $transient_expiration) {
         foreach ( $urls_to_fetch as $url_data) {
             $image_data = $images[$url_data['url']];
-            if ( self::STATUS_FASTER_IMAGE_FAILED === $image_data['size'] ) {
+            if ( self::STATUS_IMAGE_EXTRACTION_FAILED === $image_data['size'] ) {
                 $all_dimensions[$url_data['url']] = false;
                 set_transient( $url_data['transient_name'], self::STATUS_FAILED_LAST_ATTEMPT, $transient_expiration );
             } else {

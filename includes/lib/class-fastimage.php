@@ -22,7 +22,10 @@ class FastImage
     public function load($uri)
     {
         if ($this->handle) $this->close();
-        $this->handle = fopen($uri, 'r');
+        $this->handle = @fopen($uri, 'r');
+        if ( false === $this->handle ) {
+            return false;
+        }
     }
     public function close()
     {
