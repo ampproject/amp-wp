@@ -60,7 +60,7 @@ $content = $this->get( 'post_amp_content' ); // amphtml content; no kses
 if ( false == preg_match( $regex1, $content ) || false == preg_match( $regex2, $content ) ) { ?>
 
 <figure class="amp-wp-article-featured-image wp-caption">
-	<amp-img alt="<?php esc_attr_e( $image_title ); ?>" src="<?php the_post_thumbnail_url(); ?>" <?php echo $srcset; ?> height="<?php esc_attr_e( $full_height, 'amp' ); ?>" width="<?php esc_attr_e( $full_width, 'amp' ); ?>" layout="responsive" itemprop="image"></amp-img>
+	<amp-img alt="<?php esc_attr_e( $image_title ); ?>" src="<?php the_post_thumbnail_url(); ?>" <?php echo $srcset; ?> height="<?php esc_attr_e( $full_height, 'amp' ); ?>" width="<?php esc_attr_e( $full_width, 'amp' ); ?>" layout="responsive"></amp-img>
 	<?php if ( $image_caption ) { ?>
 		<p class="wp-caption-text"><?php echo $image_caption; ?></p>
 	<?php } ?>
