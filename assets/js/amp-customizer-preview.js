@@ -23,6 +23,7 @@
 	wp.customize( 'amp_navbar_background_image', function( value ) {
 		value.bind( function( newVal, oldVal ) {
 			if ( newVal ) {
+				newVal = encodeURI( newVal );
 				$( '.amp-wp-header' ).addClass( 'header-background-image' ).css( 'background-image', 'url(' + newVal + ')' );
 			} else {
 				$( '.amp-wp-header' ).removeClass( 'header-background-image' ).css( 'background-image', 'none' );
