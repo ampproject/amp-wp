@@ -48,7 +48,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	private function generate_class_name( $string ) {
-		return 'amp-inline-style-' . md5( $string );
+		return 'amp-wp-inline-style-' . md5( $string );
 	}
 
 	private function wrap_style( $array ) {

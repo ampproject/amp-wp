@@ -83,7 +83,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function generate_class_name( $string ) {
-		return 'amp-inline-style-' . md5( $string );
+		return 'amp-wp-inline-style-' . md5( $string );
 	}
 
 	public function append_styles() {
