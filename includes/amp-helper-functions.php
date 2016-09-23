@@ -18,7 +18,7 @@ function amp_get_permalink( $post_id ) {
 
 function post_supports_amp( $post ) {
 	// Because `add_rewrite_endpoint` doesn't let us target specific post_types :(
-	if (!AMP_CANONICAL && !post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
+	if (! get_option( 'amp_canonical') && ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
 		return false;
 	}
 

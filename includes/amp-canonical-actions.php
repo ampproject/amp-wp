@@ -19,7 +19,7 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php' );
 
-function build_post_content() {
+function amp_canonical_retrieve_content() {
 
 	$post = get_post();
 
@@ -56,7 +56,7 @@ function build_post_content() {
 }
 
 // Generate the AMP post content early on (runs the_content filters but skips our filter below)
-$GLOBALS['amp_content'] = build_post_content();
+$GLOBALS['amp_content'] = amp_canonical_retrieve_content();
 
 // "the_content" filter was already invoked now, so attempt remove all filters
 remove_all_filters('the_content');
