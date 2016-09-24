@@ -49,14 +49,19 @@ function amp_options_page() {
                               <?php settings_fields( 'amp_options' ); ?>
                               <?php $amp_canonical = get_option( 'amp_canonical' ); ?>
                               <table class="form-table">
-                                   <tr valign="top"><th scope="row"><?php _e( 'Make the whole site AMP?', 'amp' ); ?></th>
+                                   <tr valign="top"><th scope="row"><?php _e( 'AMP Generation Mode (Beta)', 'amp' ); ?></th>
                                         <td>
-                                             <select name="amp_canonical" id="amp_canonical">
-                                                  <?php $selected = intval($amp_canonical); ?>
-                                                  <option value="1" <?php selected( $selected, 1 ); ?> >Yes, enable for all posts!</option>
-                                                  <option value="0" <?php selected( $selected, 0 ); ?> >No, generate separate pages</option>
-                                             </select><br />
-                                             <label class="description" for="amp_canonical"><?php _e( 'Toggles whether the plugin generates paired AMP pages or reuses the current theme.', 'amp' ); ?></label>
+                                          <?php $selected = intval($amp_canonical); ?>
+                                          <fieldset>
+                                            <legend class="screen-reader-text"><span><?php _e( 'Mode', 'amp' ); ?></span></legend>
+                                            <p>
+                                              <label><input name="amp_canonical" type="radio" value="1" <?php checked( $selected, 1 ); ?> > Standalone</label>
+                                              <br>
+                                              <label><input name="amp_canonical" type="radio" value="0" <?php checked( $selected, 0 ); ?> > Paired</label>
+                                            </p>
+                                            <p><?php _e( 'Toggles whether the plugin generates paired AMP pages, or makes the whole site use AMP (similar to any JS library).', 'amp' ); ?></p>
+                                            <p class="description"><?php _e( 'Note: Standalone mode is experimental and requires a supporting theme and widgets. Currently only applies to single posts.', 'amp' ); ?> <a href="https://github.com/Automattic/amp-wp#standalone-mode"><?php _e( 'Learn more.', 'amp' ); ?></a></p>
+                                          </fieldset>
                                         </td>
                                    </tr>
                               </table>
