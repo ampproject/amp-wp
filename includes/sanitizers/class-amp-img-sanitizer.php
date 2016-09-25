@@ -45,8 +45,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 		$this->determine_dimensions( $need_dimensions );
-
-		// Calling function twice to save overhead of merging arrays just to send single array to function.
+		
 		$this->adjust_and_replace( $need_dimensions );
 		$this->adjust_and_replace( $have_dimensions );
 	}
