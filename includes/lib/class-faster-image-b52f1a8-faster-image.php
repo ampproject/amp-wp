@@ -26,7 +26,15 @@ class Faster_Image_B52f1a8_Faster_Image
      */
     protected $timeout = 4;
 
-    /**
+	/**
+	 * Backup user agent
+	 *
+	 * @var string
+	 */
+	protected $user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36';
+
+
+	/**
      * Get the size of each of the urls in a list
      *
      * @param array $urls
@@ -115,8 +123,8 @@ class Faster_Image_B52f1a8_Faster_Image
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
 
-        #  Some web servers require the useragent to be not a bot. So we are liars.
-        curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : $this->user_agent;
+        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
                 "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
                 "Cache-Control: max-age=0",
