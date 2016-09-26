@@ -19,7 +19,7 @@ class AMP_Image_Dimension_Extractor {
 		if ( has_filter( 'amp_extract_image_dimensions' ) ) {
 			return $dimensions;
 		} else {
-			return self::modify_return_value_for_tests_that_disable_extraction_filter( $dimensions );
+			return self::normalize_value_returned_by_extract( $dimensions );
 		}
 	}
 
@@ -32,7 +32,7 @@ class AMP_Image_Dimension_Extractor {
 	 *
 	 * @param array $urls A list or urls that would have had dimensions fetched had amp_extract_image_dimensions filter not been removed
 	 */
-	private static function modify_return_value_for_tests_that_disable_extraction_filter( $urls ) {
+	private static function normalize_value_returned_by_extract( $urls ) {
 	    $dimensions = array();
 		foreach ( $urls as $url ) {
 			$dimensions[ $url ] = false;
