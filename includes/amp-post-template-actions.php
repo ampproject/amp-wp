@@ -43,6 +43,11 @@ function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 	<?php
 }
 
+add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
+function amp_post_template_add_styles( $amp_template ) {
+	echo $amp_template->get( 'post_amp_styles' );
+}
+
 add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 function amp_post_template_add_analytics_script( $data ) {
 	if ( ! empty( $data['amp_analytics'] ) ) {

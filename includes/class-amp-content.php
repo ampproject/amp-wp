@@ -8,6 +8,7 @@ class AMP_Content {
 	private $content;
 	private $amp_content = '';
 	private $amp_scripts = array();
+	private $amp_styles = '';
 	private $args = array();
 	private $embed_handler_classes = array();
 	private $sanitizer_classes = array();
@@ -29,6 +30,10 @@ class AMP_Content {
 		return $this->amp_scripts;
 	}
 
+	public function get_amp_styles() {
+		return $this->amp_styles;
+	}
+
 	private function transform() {
 		$content = $this->content;
 
@@ -45,6 +50,10 @@ class AMP_Content {
 
 	private function add_scripts( $scripts ) {
 		$this->amp_scripts = array_merge( $this->amp_scripts, $scripts );
+	}
+
+	private function add_styles( $styles ) {
+		$this->amp_styles .= $styles;
 	}
 
 	private function register_embed_handlers() {
@@ -85,6 +94,7 @@ class AMP_Content {
 
 			$sanitizer->sanitize();
 			$this->add_scripts( $sanitizer->get_scripts() );
+			$this->add_styles( $sanitizer->get_styles() );
 		}
 
 		return AMP_DOM_Utils::get_content_from_dom( $dom );

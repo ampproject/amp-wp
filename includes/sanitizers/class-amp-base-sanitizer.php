@@ -20,6 +20,10 @@ abstract class AMP_Base_Sanitizer {
 		return array();
 	}
 
+	public function get_styles() {
+		return '';
+	}
+
 	protected function get_body_node() {
 		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
 	}

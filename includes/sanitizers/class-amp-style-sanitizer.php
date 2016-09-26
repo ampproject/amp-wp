@@ -11,10 +11,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$body = $this->get_body_node();
 		$this->collect_styles_recursive( $body );
-
-		if ( ! empty( $this->styles ) ) {
-			add_action( 'amp_post_template_css', array( $this, 'append_styles' ), 99 );
-		}
 	}
 
 	private function collect_styles_recursive( $node ) {
@@ -88,8 +84,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		return 'amp-wp-inline-style-' . md5( $string );
 	}
 
-	public function append_styles() {
-		?>
+	public function get_styles() {
+		if ( ! empty( $this->styles ) ) {
+			ob_start();
+			?>
 
 /* Inline Styles */
 <?php foreach ( $this->styles as $class_name => $style ) : ?>
@@ -99,6 +97,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 }
 <?php endforeach; ?>
 
-		<?php
+<?php
+
+			return ob_get_clean();
+		}
+
+		return '';
 	}
 }

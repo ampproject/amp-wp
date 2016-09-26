@@ -18,7 +18,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	color: #00ff00;
 }
 
-		",
+",
 			),
 
 			'span_one_style_bad_format' => array(
@@ -30,7 +30,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	color: #00ff00;
 }
 
-		",
+",
 			),
 
 			'span_two_styles_reversed' => array(
@@ -43,7 +43,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	width: 350px;
 }
 
-		",
+",
 			),
 
 			'div_kses_banned_style' => array(
@@ -70,7 +70,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	color: #ff0000;
 }
 
-		",
+",
 			),
 		);
 	}
@@ -88,9 +88,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected_content, $content );
 
 		// Test stylesheet
-		ob_start();
-		do_action( 'amp_post_template_css' );
-		$stylesheet = ob_get_clean();
+		$stylesheet = $sanitizer->get_styles();
 		$this->assertEquals( $expected_stylesheet, $stylesheet );
 	}
 }

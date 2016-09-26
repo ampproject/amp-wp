@@ -203,6 +203,7 @@ class AMP_Post_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
+		$this->add_data_by_key( 'post_amp_styles', $amp_content->get_amp_styles() );
 	}
 
 	private function build_customizer_settings() {
