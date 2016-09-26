@@ -11,7 +11,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'span_one_style' => array(
 				'<span style="color: #00ff00;">This is green.</span>',
-				'<span style="color: #00ff00;" class="amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2">This is green.</span>',
+				'<span class="amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2">This is green.</span>',
 				"
 /* Inline Styles */
 .amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2 {
@@ -22,8 +22,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'span_one_style_bad_format' => array(
-				'<span style="color  : #00ff00">This is green.</span>',
-				'<span style="color  : #00ff00" class="amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2">This is green.</span>',
+				'<span style="color  :   #00ff00">This is green.</span>',
+				'<span class="amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2">This is green.</span>',
 				"
 /* Inline Styles */
 .amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2 {
@@ -35,7 +35,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'span_two_styles_reversed' => array(
 				'<span style="width: 350px; color: #00ff00;">This is green.</span>',
-				'<span style="width: 350px; color: #00ff00;" class="amp-wp-inline-style-a754703dea82f6e9d2782874c77bdb60">This is green.</span>',
+				'<span class="amp-wp-inline-style-a754703dea82f6e9d2782874c77bdb60">This is green.</span>',
 				"
 /* Inline Styles */
 .amp-wp-inline-style-a754703dea82f6e9d2782874c77bdb60 {
@@ -48,19 +48,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'div_kses_banned_style' => array(
 				'<span style="overflow-x: hidden;">Specific overflow axis not allowed.</span>',
-				'<span style="overflow-x: hidden;">Specific overflow axis not allowed.</span>',
+				'<span>Specific overflow axis not allowed.</span>',
 				'',
 			),
 
 			'div_amp_banned_style' => array(
 				'<span style="overflow: scroll;">Scrollbars not allowed.</span>',
-				'<span style="overflow: scroll;">Scrollbars not allowed.</span>',
+				'<span>Scrollbars not allowed.</span>',
 				'',
 			),
 
 			'two_nodes' => array(
 				'<span style="color: #00ff00;"><span style="color: #ff0000;">This is red.</span></span>',
-				'<span style="color: #00ff00;" class="amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2"><span style="color: #ff0000;" class="amp-wp-inline-style-cc68ddc00c4fa7c4e4ea8d4351e25831">This is red.</span></span>',
+				'<span class="amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2"><span class="amp-wp-inline-style-cc68ddc00c4fa7c4e4ea8d4351e25831">This is red.</span></span>',
 				"
 /* Inline Styles */
 .amp-wp-inline-style-bb01159393134c225a1df0d44226c3d2 {

@@ -36,6 +36,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$node->setAttribute( 'class', $new_class );
 					$this->styles[ $class_name ] = $style;
 				}
+
+				$node->removeAttribute( 'style' );
 			}
 		}
 
