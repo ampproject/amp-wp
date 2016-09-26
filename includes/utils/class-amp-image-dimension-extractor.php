@@ -112,30 +112,34 @@ class AMP_Image_Dimension_Extractor {
 			$transient_name = sprintf( 'amp_img_%s', $url_hash );
 			$dimensions = get_transient( $transient_name );
 
+			// If we're able to retrieve the dimensions from a transient, set them and move on.
 			if ( is_array( $dimensions ) ) {
 				$all_dimensions[ $url ] = array(
 					'width' => $dimensions[0],
 					'height' => $dimensions[1],
 				);
-			} else {
-				if ( self::STATUS_FAILED_LAST_ATTEMPT === $dimensions ) {
-					// If we couldn't get dimensions for this image the last time we tried, don't try again until the transient expires.
-					$all_dimensions[ $url ] = false;
-					continue;
-				} else {
-					// Ensure we're the only one trying to extract dimensions for this image at the moment so we don't duplicate requests.
-					$transient_lock_name = sprintf( 'amp_lock_%s', $url_hash );
-					if ( false !== get_transient( $transient_lock_name ) ) {
-						$all_dimensions[ $url ] = false;
-						continue;
-					} else {
-						$urls_to_fetch[ $url ]['url'] = $url;
-						$urls_to_fetch[ $url ]['transient_name'] = $transient_name;
-						$urls_to_fetch[ $url ]['transient_lock_name'] = $transient_lock_name;
-						set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
-					}
-				}
+				continue;
 			}
+
+			// If the value in the transient reflects we couldn't get dimensions for this image the last time we tried, move on.
+			if ( self::STATUS_FAILED_LAST_ATTEMPT === $dimensions ) {
+				$all_dimensions[ $url ] = false;
+				continue;
+			}
+
+			$transient_lock_name = sprintf( 'amp_lock_%s', $url_hash );
+
+			// If somebody is already trying to extract dimensions for this transient right now, move on.
+			if ( false !== get_transient( $transient_lock_name ) ) {
+				$all_dimensions[ $url ] = false;
+				continue;
+			}
+
+			// Include the image as a url to fetch
+			$urls_to_fetch[ $url ]['url'] = $url;
+			$urls_to_fetch[ $url ]['transient_name'] = $transient_name;
+			$urls_to_fetch[ $url ]['transient_lock_name'] = $transient_lock_name;
+			set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
 		}
 	}
 
