@@ -135,7 +135,7 @@ class AMP_Image_Dimension_Extractor {
 				continue;
 			}
 
-			// Include the image as a url to fetch
+			// Include the image as a url to fetch.
 			$urls_to_fetch[ $url ]['url'] = $url;
 			$urls_to_fetch[ $url ]['transient_name'] = $transient_name;
 			$urls_to_fetch[ $url ]['transient_lock_name'] = $transient_lock_name;
