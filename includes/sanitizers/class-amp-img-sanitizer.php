@@ -45,7 +45,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 		$this->determine_dimensions( $need_dimensions );
-		
+
 		$this->adjust_and_replace( $need_dimensions );
 		$this->adjust_and_replace( $have_dimensions );
 	}
