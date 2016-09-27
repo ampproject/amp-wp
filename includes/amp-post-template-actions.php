@@ -45,7 +45,19 @@ function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 
 add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 function amp_post_template_add_styles( $amp_template ) {
-	echo $amp_template->get( 'post_amp_styles' );
+	$styles = $amp_template->get( 'post_amp_styles' );
+	if ( ! empty( $styles ) ) : ?>
+
+/* Inline styles */
+<?php
+	foreach ( $styles as $selector => $declarations ) :
+		$declarations = implode( ";\n\t", $declarations ) . ";\n"; ?>
+<?php echo $selector; ?> {
+	<?php echo $declarations; ?>
+}
+
+<?php endforeach;
+	endif;
 }
 
 add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );

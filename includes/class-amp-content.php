@@ -8,7 +8,7 @@ class AMP_Content {
 	private $content;
 	private $amp_content = '';
 	private $amp_scripts = array();
-	private $amp_styles = '';
+	private $amp_styles = array();
 	private $args = array();
 	private $embed_handler_classes = array();
 	private $sanitizer_classes = array();
@@ -53,7 +53,7 @@ class AMP_Content {
 	}
 
 	private function add_styles( $styles ) {
-		$this->amp_styles .= $styles;
+		$this->amp_styles = array_merge( $this->amp_styles, $styles );
 	}
 
 	private function register_embed_handlers() {

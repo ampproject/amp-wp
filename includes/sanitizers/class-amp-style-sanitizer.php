@@ -8,6 +8,10 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $styles = array();
 
+	public function get_styles() {
+		return $this->styles;
+	}
+
 	public function sanitize() {
 		$body = $this->get_body_node();
 		$this->collect_styles_recursive( $body );
@@ -25,12 +29,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $style ) {
 				$style = $this->process_style( $style );
 
-				if ( $style ) {
+				if ( ! empty( $style ) ) {
 					$class_name = $this->generate_class_name( $style );
 					$new_class  = trim( $class . ' ' . $class_name );
 
 					$node->setAttribute( 'class', $new_class );
-					$this->styles[ $class_name ] = $style;
+					$this->styles[ '.' . $class_name ] = $style;
 				}
 
 				$node->removeAttribute( 'style' );
@@ -47,10 +51,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	private function process_style( $string ) {
 		// Filter properties
-		$string = safecss_filter_attr( $string );
+		$string = safecss_filter_attr( esc_html( $string ) );
 
 		if ( ! $string ) {
-			return '';
+			return array();
 		}
 
 		// Normalize order
@@ -73,32 +77,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( empty( $arr ) ) {
-			return '';
-		}
-
-		return implode( "; ", $arr ) . ';';
+		return $arr;
 	}
 
-	private function generate_class_name( $string ) {
+	private function generate_class_name( $data ) {
+		$string = maybe_serialize( $data );
 		return 'amp-wp-inline-' . md5( $string );
-	}
-
-	public function get_styles() {
-		if ( ! empty( $this->styles ) ) {
-			ob_start();
-			?>
-
-/* Inline Styles */
-<?php foreach ( $this->styles as $class_name => $style ) : ?>
-.<?php echo $class_name; ?> { <?php echo $style; ?> }
-<?php endforeach; ?>
-
-<?php
-
-			return ob_get_clean();
-		}
-
-		return '';
 	}
 }

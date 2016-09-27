@@ -21,7 +21,7 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	public function get_styles() {
-		return '';
+		return array();
 	}
 
 	protected function get_body_node() {
