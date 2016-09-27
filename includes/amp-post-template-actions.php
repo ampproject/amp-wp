@@ -43,6 +43,13 @@ function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 	<?php
 }
 
+add_action( 'amp_post_template_head', 'amp_post_template_add_merriweather_font' );
+function amp_post_template_add_merriweather_font( $amp_template ) {
+	?>
+	<link href="https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic" rel="stylesheet" type="text/css">
+	<?php
+}
+
 add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 function amp_post_template_add_analytics_script( $data ) {
 	if ( ! empty( $data['amp_analytics'] ) ) {
