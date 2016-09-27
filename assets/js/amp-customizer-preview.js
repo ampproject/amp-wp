@@ -47,8 +47,8 @@
 
 				$( 'body' ).css( 'background-color', '#ffffff' );
 				$( 'body, a:hover, a:active, a:focus, blockquote, .amp-wp-article, .amp-wp-title' ).css( 'color', '#535353' );
-				$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-share-links, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', '#9f9f9f' );
-				$( '.amp-wp-article-featured-image amp-img, .amp-wp-article-content amp-img, .wp-caption .wp-caption-text, .amp-wp-comment-link a, .amp-wp-ad, .amp-wp-footer' ).css( 'border-color', '#d4d4d4' );
+				$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', '#9f9f9f' );
+				$( '.amp-wp-article-featured-image amp-img, .amp-wp-article-content amp-img, .wp-caption .wp-caption-text, .amp-wp-comment-link a, .amp-wp-footer' ).css( 'border-color', '#d4d4d4' );
 				$( '.amp-wp-iframe-placeholder, amp-carousel, amp-iframe, amp-youtube, amp-instagram, amp-vine' ).css( 'background-color', '#d4d4d4' );
 
 			// Dark
@@ -63,8 +63,8 @@
 
 				$( 'body' ).css( 'background-color', '#111111' );
 				$( 'body, a:hover, a:active, a:focus, blockquote, .amp-wp-article, .amp-wp-title' ).css( 'color', '#acacac' );
-				$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-share-links, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', '#606060' );
-				$( '.amp-wp-article-featured-image amp-img, .amp-wp-article-content amp-img, .wp-caption .wp-caption-text, .amp-wp-comment-link a, .amp-wp-ad, .amp-wp-footer' ).css( 'border-color', '#2b2b2b' );
+				$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', '#606060' );
+				$( '.amp-wp-article-featured-image amp-img, .amp-wp-article-content amp-img, .wp-caption .wp-caption-text, .amp-wp-comment-link a, .amp-wp-footer' ).css( 'border-color', '#2b2b2b' );
 				$( '.amp-wp-iframe-placeholder, amp-carousel, amp-iframe, amp-youtube, amp-instagram, amp-vine' ).css( 'background-color', '#2b2b2b' );
 
 			// Default
@@ -79,8 +79,8 @@
 
 				$( 'body' ).css( 'background-color', '#ffffff' );
 				$( 'body, a:hover, a:active, a:focus, blockquote, .amp-wp-article, .amp-wp-title' ).css( 'color', '#3d596d' );
-				$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-share-links, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', '#87A6BC' );
-				$( '.amp-wp-article-featured-image amp-img, .amp-wp-article-content amp-img, .wp-caption .wp-caption-text, .amp-wp-comment-link a, .amp-wp-ad, .amp-wp-footer' ).css( 'border-color', '#c8d7e1' );
+				$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', '#87A6BC' );
+				$( '.amp-wp-article-featured-image amp-img, .amp-wp-article-content amp-img, .wp-caption .wp-caption-text, .amp-wp-comment-link a, .amp-wp-footer' ).css( 'border-color', '#c8d7e1' );
 				$( '.amp-wp-iframe-placeholder, amp-carousel, amp-iframe, amp-youtube, amp-instagram, amp-vine' ).css( 'background-color', '#c8d7e1' );
 
 			}

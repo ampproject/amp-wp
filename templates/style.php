@@ -195,11 +195,9 @@ blockquote p:last-child {
 .amp-wp-header div,
 .amp-wp-title,
 .wp-caption-text,
-.amp-wp-share-links,
 .amp-wp-tax-category,
 .amp-wp-tax-tag,
 .amp-wp-comment-link,
-.amp-wp-ad-about,
 .amp-wp-footer p {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
 }
@@ -387,31 +385,12 @@ amp-carousel > amp-img > img {
 	display: block;
 }
 
-.amp-wp-share-links,
 .amp-wp-tax-category,
 .amp-wp-tax-tag {
 	color: <?php echo $muted_text_color; ?>;
 	font-size: .875em;
 	line-height: 1.5em;
 	margin: 1.5em 16px;
-}
-
-.amp-wp-share-links {
-	vertical-align: middle;
-}
-
-amp-social-share {
-	background-size: 66.66%;
-	border-radius: 50%;
-	display: inline-block;
-	margin: 0 2px;
-	vertical-align: middle;
-}
-
-.amp-wp-share-links span {
-	clear: both;
-	display: block;
-	margin-bottom: .75em;
 }
 
 .amp-wp-comment-link {
@@ -441,32 +420,6 @@ amp-social-share {
 	width: 50%;
 	-webkit-transition: background-color 0.2s ease;
 			transition: background-color 0.2s ease;
-}
-
-/* AMP Ad */
-
-.amp-wp-ad {
-	border-top: 1px solid <?php echo $border_color; ?>;
-	line-height: 0;
-	margin: 1.5em auto;
-	padding-top: 1.5em;
-	position: relative;
-	text-align: center;
-}
-
-.amp-wp-ad-about {
-	color: <?php echo $text_color; ?>;
-	display: inline-block;
-	font-size: 10px;
-	line-height: 1.5;
-	opacity: 0.85;
-	text-align: center;
-	text-decoration: none;
-}
-
-.amp-wp-ad amp-ad {
-	display: block;
-	margin: 0 auto;
 }
 
 /* AMP Footer */
