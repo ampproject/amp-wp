@@ -37,8 +37,6 @@
 
 </article>
 
-<?php $this->load_parts( array( 'footer-wordads' ) ); ?>
-
 <?php $this->load_parts( array( 'footer' ) ); ?>
 
 <?php do_action( 'amp_post_template_footer', $this ); ?>
