@@ -39,6 +39,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Only append source tags with a valid src attribute
 				if ( ! empty( $new_child_attributes['src'] ) && 'source' === $new_child_node->tagName ) {
+					AMP_DOM_Utils::add_attributes_to_node( $new_child_node, $new_child_attributes );
 					$new_node->appendChild( $new_child_node );
 				}
 			}
