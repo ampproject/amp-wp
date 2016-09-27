@@ -77,7 +77,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return '';
 		}
 
-		return implode( ";\n\t", $arr ) . ';';
+		return implode( "; ", $arr ) . ';';
 	}
 
 	private function generate_class_name( $string ) {
@@ -91,10 +91,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 /* Inline Styles */
 <?php foreach ( $this->styles as $class_name => $style ) : ?>
-.<?php echo $class_name; ?> {
-	<?php echo $style; ?>
-
-}
+.<?php echo $class_name; ?> { <?php echo $style; ?> }
 <?php endforeach; ?>
 
 <?php

@@ -14,9 +14,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<span class="amp-wp-inline-bb01159393134c225a1df0d44226c3d2">This is green.</span>',
 				"
 /* Inline Styles */
-.amp-wp-inline-bb01159393134c225a1df0d44226c3d2 {
-	color: #00ff00;
-}
+.amp-wp-inline-bb01159393134c225a1df0d44226c3d2 { color: #00ff00; }
 
 ",
 			),
@@ -26,22 +24,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<span class="amp-wp-inline-bb01159393134c225a1df0d44226c3d2">This is green.</span>',
 				"
 /* Inline Styles */
-.amp-wp-inline-bb01159393134c225a1df0d44226c3d2 {
-	color: #00ff00;
-}
+.amp-wp-inline-bb01159393134c225a1df0d44226c3d2 { color: #00ff00; }
 
 ",
 			),
 
 			'span_two_styles_reversed' => array(
 				'<span style="width: 350px; color: #00ff00;">This is green.</span>',
-				'<span class="amp-wp-inline-a754703dea82f6e9d2782874c77bdb60">This is green.</span>',
+				'<span class="amp-wp-inline-858600a8f78ba6085b17e66e6fd02325">This is green.</span>',
 				"
 /* Inline Styles */
-.amp-wp-inline-a754703dea82f6e9d2782874c77bdb60 {
-	color: #00ff00;
-	width: 350px;
-}
+.amp-wp-inline-858600a8f78ba6085b17e66e6fd02325 { color: #00ff00; width: 350px; }
 
 ",
 			),
@@ -63,12 +56,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<span class="amp-wp-inline-bb01159393134c225a1df0d44226c3d2"><span class="amp-wp-inline-cc68ddc00c4fa7c4e4ea8d4351e25831">This is red.</span></span>',
 				"
 /* Inline Styles */
-.amp-wp-inline-bb01159393134c225a1df0d44226c3d2 {
-	color: #00ff00;
-}
-.amp-wp-inline-cc68ddc00c4fa7c4e4ea8d4351e25831 {
-	color: #ff0000;
-}
+.amp-wp-inline-bb01159393134c225a1df0d44226c3d2 { color: #00ff00; }
+.amp-wp-inline-cc68ddc00c4fa7c4e4ea8d4351e25831 { color: #ff0000; }
 
 ",
 			),
