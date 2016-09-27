@@ -1,6 +1,6 @@
 <?php $categories = get_the_category_list( _x( ', ', 'Used between list items, there is a space after the comma.', 'amp' ) ); ?>
 <?php if ( $categories ) : ?>
-	<div class="amp-wp-meta amp-wp-tax-category" itemprop="about">
+	<div class="amp-wp-meta amp-wp-tax-category">
 		Categories:
 		<?php echo $categories; ?>
 	</div>
@@ -8,7 +8,7 @@
 
 <?php $tags = get_the_tag_list( '', _x( ', ', 'Used between list items, there is a space after the comma.', 'amp' ) ); ?>
 <?php if ( $tags ) : ?>
-	<div class="amp-wp-meta amp-wp-tax-tag" itemprop="keywords">
+	<div class="amp-wp-meta amp-wp-tax-tag">
 		Tags:
 		<?php echo $tags; ?>
 	</div>
