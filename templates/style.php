@@ -1,48 +1,16 @@
 <?php
+$content_max_width = absint( $this->get( 'content_max_width' ) );
 
-// Navbar background color
-$amp_navbar_background_color = get_theme_mod( 'amp_navbar_background_color', '#0087be' );
+$theme_color       = $this->get_customizer_setting( 'theme_color' );
+$text_color        = $this->get_customizer_setting( 'text_color' );
+$muted_text_color  = $this->get_customizer_setting( 'muted_text_color' );
+$border_color      = $this->get_customizer_setting( 'border_color' );
+$link_color        = $this->get_customizer_setting( 'link_color' );
 
-// Navbar background color
-$amp_navbar_background_image = get_theme_mod( 'amp_navbar_background_image', '' );
-
-// Link Color
-$amp_link_color = $amp_navbar_background_color;
-
-// Navbar Text Color
-$amp_navbar_color = get_theme_mod( 'amp_navbar_color', '#ffffff' );
-
-// Theme color settings: Dark || Light
-$theme_color_setting = get_theme_mod( 'amp_background_color', 'light' );
-
-// Set text and border color based on $theme_color_setting
-if ( $theme_color_setting == 'light' ) {
-
-	// Convert colors to greyscale for light theme color
-	// src: http://goo.gl/2gDLsp
-	$theme_color      = '#fff';
-	$text_color       = '#535353';
-	$muted_text_color = '#9f9f9f';
-	$border_color     = '#d4d4d4';
-
-} elseif ( $theme_color_setting == 'dark' ) {
-
-	// Convert and invert colors to greyscale for dark theme color
-	// src: http://goo.gl/uVB2cO
-	$theme_color      = '#111';
-	$text_color       = '#acacac';
-	$muted_text_color = '#606060';
-	$border_color     = '#2b2b2b';
-
-} else {
-
-	// Default Calypso-based colors
-	$theme_color      = '#fff';
-	$text_color       = '#3d596d';
-	$muted_text_color = '#87A6BC';
-	$border_color     = '#c8d7e1';
-
-} ?>
+$navbar_background_image = $this->get_customizer_setting( 'navbar_background_image' );
+$navbar_background_color = $this->get_customizer_setting( 'navbar_background_color' );
+$navbar_color            = $this->get_customizer_setting( 'navbar_color' );
+?>
 
 /* Merriweather fonts */
 
@@ -141,7 +109,6 @@ amp-img.aligncenter {
 
 .amp-wp-content,
 .amp-wp-title-bar div {
-	<?php $content_max_width = absint( $this->get( 'content_max_width' ) ); ?>
 	<?php if ( $content_max_width > 0 ) : ?>
 	margin: 0 auto;
 	max-width: <?php echo sprintf( '%dpx', $content_max_width ); ?>;
@@ -166,7 +133,7 @@ figure {
 
 a,
 a:visited {
-	color: <?php echo $amp_link_color; ?>;
+	color: <?php echo $link_color; ?>;
 }
 
 a:hover,
@@ -180,7 +147,7 @@ a:focus {
 blockquote {
 	color: <?php echo $text_color; ?>;
 	background: rgba(127,127,127,.125);
-	border-left: 2px solid <?php echo $amp_link_color; ?>;
+	border-left: 2px solid <?php echo $link_color; ?>;
 	margin: 8px 0 24px 0;
 	padding: 16px;
 }
@@ -197,7 +164,7 @@ blockquote p:last-child {
 .wp-caption-text,
 .amp-wp-tax-category,
 .amp-wp-tax-tag,
-.amp-wp-comment-link,
+.amp-wp-comments-link,
 .amp-wp-footer p {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
 }
@@ -205,18 +172,18 @@ blockquote p:last-child {
 /* Header */
 
 .amp-wp-header {
-	background-color: <?php echo $amp_navbar_background_color; ?>;
+	background-color: <?php echo $navbar_background_color; ?>;
 }
 
-.amp-wp-header.header-background-image {
-	background-image: url(<?php echo $amp_navbar_background_image; ?>);
+.amp-wp-has-header-image .amp-wp-header {
+	background-image: url(<?php echo $navbar_background_image; ?>);
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: cover;
 }
 
 .amp-wp-header div {
-	color: <?php echo $amp_navbar_color; ?>;
+	color: <?php echo $navbar_color; ?>;
 	font-size: 1em;
 	font-weight: 400;
 	margin: 0 auto;
@@ -226,14 +193,14 @@ blockquote p:last-child {
 }
 
 .amp-wp-header a {
-	color: <?php echo $amp_navbar_color; ?>;
+	color: <?php echo $navbar_color; ?>;
 	text-decoration: none;
 }
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
-	background-color: <?php echo $amp_navbar_color; ?>;
-	border: 1px solid <?php echo $amp_navbar_color; ?>;
+	background-color: <?php echo $navbar_color; ?>;
+	border: 1px solid <?php echo $navbar_color; ?>;
 	border-radius: 50%;
 	position: absolute;
 	right: 18px;
@@ -298,7 +265,7 @@ blockquote p:last-child {
 }
 
 .amp-wp-byline amp-img {
-	border: 1px solid <?php echo $amp_link_color; ?>;
+	border: 1px solid <?php echo $link_color; ?>;
 	border-radius: 50%;
 	position: relative;
 	margin-right: 6px;
@@ -393,7 +360,7 @@ amp-carousel > amp-img > img {
 	margin: 1.5em 16px;
 }
 
-.amp-wp-comment-link {
+.amp-wp-comments-link {
 	color: <?php echo $muted_text_color; ?>;
 	font-size: .875em;
 	line-height: 1.5em;
@@ -401,13 +368,13 @@ amp-carousel > amp-img > img {
 	margin: 2.25em 0 1.5em;
 }
 
-.amp-wp-comment-link a {
+.amp-wp-comments-link a {
 	border-style: solid;
 	border-color: <?php echo $border_color; ?>;
 	border-width: 1px 1px 2px;
 	border-radius: 4px;
 	background-color: transparent;
-	color: <?php echo $amp_link_color; ?>;
+	color: <?php echo $link_color; ?>;
 	cursor: pointer;
 	display: block;
 	font-size: 14px;

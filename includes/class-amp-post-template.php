@@ -48,6 +48,7 @@ class AMP_Post_Template {
 			'canonical_url' => get_permalink( $post_id ),
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
+			'body_class' => array(),
 
 			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
@@ -204,11 +205,24 @@ class AMP_Post_Template {
 	}
 
 	private function build_customizer_settings() {
-		$settings = array(
-			'navbar_background' => get_theme_mod( 'amp_navbar_background', self::DEFAULT_NAVBAR_BACKGROUND ),
+		// TODO: move this data collection to a separate bridge class
+		$color_scheme = get_theme_mod( 'amp_background_color', 'light' );
+		$theme_colors = $this->get_colors_for_color_scheme( $color_scheme );
 
-			'navbar_color' => get_theme_mod( 'amp_navbar_color', self::DEFAULT_NAVBAR_COLOR ),
-		);
+		$navbar_background_color = get_theme_mod( 'amp_navbar_background_color', '#0087be' );
+		$navbar_color = get_theme_mod( 'amp_navbar_color', '#ffffff' );
+		$navbar_background_image = get_theme_mod( 'amp_navbar_background_image', '' );
+
+		$settings = array_merge( array(
+			'navbar_background_image' => $navbar_background_image,
+			'navbar_background_color' => $navbar_background_color,
+			'navbar_color' => $navbar_color,
+			'link_color' => $navbar_background_color,
+		), $theme_colors );
+
+		if ( ! empty( $settings['navbar_background_image'] ) ) {
+			$this->merge_data_for_key( 'body_class', array( 'amp-wp-has-header-image' ) );
+		}
 
 		/**
 		 * Filter AMP Customizer settings.
@@ -225,6 +239,30 @@ class AMP_Post_Template {
 		 * @param WP_Post $post     Current post object.
 		 */
 		$this->add_data_by_key( 'customizer_settings', apply_filters( 'amp_customizer_settings', $settings, $this->post ) );
+	}
+
+	// Set text and border color based on $theme_color_setting
+	private function get_colors_for_color_scheme( $theme ) {
+		switch ( $theme ) {
+			case 'dark':
+				return array(
+					// Convert and invert colors to greyscale for dark theme color; see http://goo.gl/uVB2cO
+					'theme_color'      => '#111',
+					'text_color'       => '#acacac',
+					'muted_text_color' => '#606060',
+					'border_color'     => '#2b2b2b',
+				);
+
+			case 'light':
+			default:
+				return array(
+					// Convert colors to greyscale for light theme color; see http://goo.gl/2gDLsp
+					'theme_color'      => '#fff',
+					'text_color'       => '#535353',
+					'muted_text_color' => '#9f9f9f',
+					'border_color'     => '#d4d4d4',
+				);
+		}
 	}
 
 	/**

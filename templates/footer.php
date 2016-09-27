@@ -1,4 +1,4 @@
-<footer class="amp-wp-footer" role="contentinfo" itemscope="itemscope" itemtype="http://schema.org/WPFooter">
+<footer class="amp-wp-footer">
 	<div>
 		<h2><?php echo esc_html( $this->get( 'blog_name' ) ); ?></h2>
 		<p><?php _e( 'WordPress', 'amp' ); ?></p>
