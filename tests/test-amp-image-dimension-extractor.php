@@ -7,6 +7,7 @@ define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/no
  define( 'IMG_350', 'https://placehold.it/350x150.png');
  define( 'IMG_1024', 'https://placehold.it/1024x768.png');
 
+
 class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase {
 	function get_data() {
 		$site_url = site_url();
