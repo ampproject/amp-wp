@@ -10,24 +10,22 @@
 	</style>
 </head>
 
-<body itemscope="itemscope" itemtype="http://schema.org/WebPage">
+<body <?php body_class( $this->get( 'body_class' ) ); ?>>
 
 <?php $this->load_parts( array( 'header' ) ); ?>
 
-<article class="amp-wp-article" itemscope="itemscope" itemtype="http://schema.org/BlogPosting" itemprop="blogPost">
+<article class="amp-wp-article">
 
 	<header class="amp-wp-article-header">
-		<h1 class="amp-wp-title" itemprop="headline"><?php echo wp_kses_data( $this->get( 'post_title' ) ); ?></h1>
+		<h1 class="amp-wp-title"><?php echo wp_kses_data( $this->get( 'post_title' ) ); ?></h1>
 		<?php $this->load_parts( array( 'meta-author' ) ); ?>
 		<?php $this->load_parts( array( 'meta-time' ) ); ?>
 	</header>
 
 	<?php $this->load_parts( array( 'featured-image' ) ); ?>
 
-	<div class="amp-wp-article-content" itemprop="articleBody">
-		<?php // Get the post content
-			$content = $this->get( 'post_amp_content' ); // amphtml content; no kses
-			echo $content; ?>
+	<div class="amp-wp-article-content">
+		<?php echo $this->get( 'post_amp_content' ); // amphtml content; no kses ?>
 	</div>
 
 	<footer class="amp-wp-article-footer">
