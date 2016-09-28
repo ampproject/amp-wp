@@ -8,6 +8,10 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-audio';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-audio-0.1.js';
 
+	protected $DEFAULT_ARGS = array(
+		'require_https_src' => true,
+	);
+
 	public function get_scripts() {
 		if ( ! $this->did_convert_elements ) {
 			return array();
@@ -24,8 +28,14 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			$orig_src = array();
+
 			$node = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+
+			if ( isset( $old_attributes['src'] ) ) {
+				$orig_src[] = $old_attributes['src'];
+			}
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
@@ -35,6 +45,11 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $node->childNodes as $child_node ) {
 				$new_child_node = $child_node->cloneNode( true );
 				$old_child_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $new_child_node );
+
+				if ( isset( $old_child_attributes['src'] ) ) {
+					$orig_src[] = $old_child_attributes['src'];
+				}
+
 				$new_child_attributes = $this->filter_attributes( $old_child_attributes );
 
 				// Only append source tags with a valid src attribute
@@ -45,12 +60,31 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// If the node has at least one valid source, replace the old node with it.
+			// If the node has no valid sources, but at least one invalid (http) one, add a fallback element.
 			// Otherwise, just remove the node.
-			//
-			// TODO: Add a fallback handler.
-			// See: https://github.com/ampproject/amphtml/issues/2261
 			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
-				$node->parentNode->removeChild( $node );
+				if ( ! empty( $orig_src ) ) {
+					$fallback_node = AMP_DOM_Utils::create_node(
+						$this->dom,
+						'blockquote',
+						array(
+							'class' => 'amp-wp-fallback amp-wp-audio-fallback'
+						)
+					);
+
+					$fallback_content = $this->dom->createDocumentFragment();
+					$fallback_content->appendXML( sprintf(
+							wp_kses( __( 'Could not load <a href="%s">audio</a>.', 'amp' ), array( 'a' => array( 'href' => true ) ) ),
+							esc_url( array_shift( $orig_src ) )
+						)
+					);
+
+					$fallback_node->appendChild( $fallback_content );
+
+					$node->parentNode->replaceChild( $fallback_node, $node );
+				} else {
+					$node->parentNode->removeChild( $node );
+				}
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 			}
