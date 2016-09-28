@@ -53,6 +53,10 @@ class AMP_Post_Template {
 			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
+			'featured_image' => false,
+			'comments_link_url' => false,
+			'comments_link_text' => false,
+
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
 
@@ -74,7 +78,6 @@ class AMP_Post_Template {
  		);
 
 		$this->build_post_content();
-		$this->build_post_featured_media();
 		$this->build_post_data();
 		$this->build_customizer_settings();
 
@@ -179,6 +182,25 @@ class AMP_Post_Template {
 		}
 
 		$this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
+
+		$this->build_post_featured_image();
+		$this->build_post_commments_data();
+	}
+
+	private function build_post_commments_data() {
+		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
+			return;
+		}
+
+		$comments_link_url = get_comments_link( $this->ID );
+		$comments_link_text = comments_open( $this->ID )
+			? __( 'Leave a Comment', 'amp' )
+			: __( 'View Comments', 'amp' );
+
+		$this->add_data( array(
+			'comments_link_url' => $comments_link_url,
+			'comments_link_text' => $comments_link_text,
+		) );
 	}
 
 	private function build_post_content() {
@@ -209,7 +231,7 @@ class AMP_Post_Template {
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
 	}
 
-	private function build_post_featured_media() {
+	private function build_post_featured_image() {
 		$post_id = $this->ID;
 		$featured_html = get_the_post_thumbnail( $post_id, 'large' );
 
