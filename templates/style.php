@@ -228,8 +228,7 @@ blockquote p:last-child {
 	margin: 0 0 1em;
 }
 .amp-wp-article-featured-image amp-img {
-	border: 1px solid <?php echo $border_color; ?>;
-	margin: -1px;
+	margin: -1px auto;
 }
 .amp-wp-article-featured-image.wp-caption .wp-caption-text {
 	margin: 0 18px;
