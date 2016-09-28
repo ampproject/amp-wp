@@ -11,31 +11,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'span_one_style' => array(
 				'<span style="color: #00ff00;">This is green.</span>',
-				'<span class="amp-wp-inline-846b203684c92aae7df71d5b8a6ba7ea">This is green.</span>',
+				'<span class="amp-wp-inline-ad0e57ab02197f7023aa5b93bcf6c97e">This is green.</span>',
 				array(
-					'.amp-wp-inline-846b203684c92aae7df71d5b8a6ba7ea' => array(
-						'color: #00ff00',
+					'.amp-wp-inline-ad0e57ab02197f7023aa5b93bcf6c97e' => array(
+						'color:#00ff00',
 					),
 				),
 			),
 
 			'span_one_style_bad_format' => array(
 				'<span style="color  :   #00ff00">This is green.</span>',
-				'<span class="amp-wp-inline-846b203684c92aae7df71d5b8a6ba7ea">This is green.</span>',
+				'<span class="amp-wp-inline-ad0e57ab02197f7023aa5b93bcf6c97e">This is green.</span>',
 				array(
-					'.amp-wp-inline-846b203684c92aae7df71d5b8a6ba7ea' => array(
-						'color: #00ff00',
+					'.amp-wp-inline-ad0e57ab02197f7023aa5b93bcf6c97e' => array(
+						'color:#00ff00',
 					),
 				),
 			),
 
 			'span_two_styles_reversed' => array(
 				'<span style="width: 350px; color: #00ff00;">This is green.</span>',
-				'<span class="amp-wp-inline-9e3a754064939f6cf521fb25f67f8a73">This is green.</span>',
+				'<span class="amp-wp-inline-c83b149f3e9c3426a6eab43e21ac2fba">This is green.</span>',
 				array(
-					'.amp-wp-inline-9e3a754064939f6cf521fb25f67f8a73' => array(
-						'color: #00ff00',
-						'width: 350px',
+					'.amp-wp-inline-c83b149f3e9c3426a6eab43e21ac2fba' => array(
+						'color:#00ff00',
+						'width:350px',
 					),
 				),
 			),
@@ -54,13 +54,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'two_nodes' => array(
 				'<span style="color: #00ff00;"><span style="color: #ff0000;">This is red.</span></span>',
-				'<span class="amp-wp-inline-846b203684c92aae7df71d5b8a6ba7ea"><span class="amp-wp-inline-74ce01776d679398d58eba941c5c84bb">This is red.</span></span>',
+				'<span class="amp-wp-inline-ad0e57ab02197f7023aa5b93bcf6c97e"><span class="amp-wp-inline-f146f9bb819d875bbe5cf83e36368b44">This is red.</span></span>',
 				array(
-					'.amp-wp-inline-846b203684c92aae7df71d5b8a6ba7ea' => array(
-						'color: #00ff00',
+					'.amp-wp-inline-ad0e57ab02197f7023aa5b93bcf6c97e' => array(
+						'color:#00ff00',
 					),
-					'.amp-wp-inline-74ce01776d679398d58eba941c5c84bb' => array(
-						'color: #ff0000',
+					'.amp-wp-inline-f146f9bb819d875bbe5cf83e36368b44' => array(
+						'color:#ff0000',
 					),
 				),
 			),
