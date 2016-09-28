@@ -43,6 +43,18 @@ function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 	<?php
 }
 
+add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
+function amp_post_template_add_styles( $amp_template ) {
+	$styles = $amp_template->get( 'post_amp_styles' );
+	if ( ! empty( $styles ) ) {
+		echo '/* Inline styles */' . PHP_EOL;
+		foreach ( $styles as $selector => $declarations ) {
+			$declarations = implode( ";", $declarations ) . ";";
+			printf( '%1$s{%2$s}', $selector, $declarations );
+		}
+	}
+}
+
 add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 function amp_post_template_add_analytics_script( $data ) {
 	if ( ! empty( $data['amp_analytics'] ) ) {
