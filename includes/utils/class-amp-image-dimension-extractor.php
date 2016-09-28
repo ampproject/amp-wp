@@ -97,6 +97,11 @@ class AMP_Image_Dimension_Extractor {
 		}
 		set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
 
+		// Make sure the image exists before trying to pass it to FastImage
+		if ( false === file_exists( $url ) ) {
+			return false;
+		}
+
 		// Note to other developers: please don't use this class directly as it may not stick around forever...
 		if ( ! class_exists( 'FastImage' ) ) {
 			require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
