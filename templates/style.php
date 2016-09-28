@@ -154,6 +154,18 @@ blockquote p:last-child {
 	text-decoration: none;
 }
 
+/* Site Icon */
+
+.amp-wp-header .amp-wp-site-icon {
+	/** site icon is 32px **/
+	background-color: <?php echo $navbar_color; ?>;
+	border: 1px solid <?php echo $navbar_color; ?>;
+	border-radius: 50%;
+	position: absolute;
+	right: 18px;
+	top: 10px;
+}
+
 /* Article */
 
 .amp-wp-article {
