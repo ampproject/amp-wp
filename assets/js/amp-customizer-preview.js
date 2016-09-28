@@ -23,11 +23,11 @@
 	wp.customize( 'amp_navbar_background_image', function( value ) {
 		value.bind( function( newVal, oldVal ) {
 			if ( newVal ) {
-				$( body ).addClass( 'amp-wp-has-header-image' );
-				$( '.amp-wp-header' ).addClass( 'header-background-image' ).css( 'background-image', 'url(' + encodeURI( newVal ) + ')' );
+				$( 'body' ).addClass( 'amp-wp-has-header-image' );
+				$( '.amp-wp-header' ).css( 'background-image', 'url(' + encodeURI( newVal ) + ')' );
 			} else {
-				$( body ).removeClass( 'amp-wp-has-header-image' );
-				$( '.amp-wp-header' ).removeClass( 'header-background-image' ).css( 'background-image', 'none' );
+				$( 'body' ).removeClass( 'amp-wp-has-header-image' );
+				$( '.amp-wp-header' ).css( 'background-image', 'none' );
 			}
 		} );
 	} );
