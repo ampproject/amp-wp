@@ -123,28 +123,32 @@ class AMP_Template_Customizer {
 	public function register_settings() {
 
 		// Header text color setting
-		$this->wp_customize->add_setting( 'amp_navbar_color', array(
+		$this->wp_customize->add_setting( 'amp_customizer[navbar_color]', array(
+			'type'              => 'option',
 			'default'           => '#ffffff',
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
 
 		// Header background color
-		$this->wp_customize->add_setting( 'amp_navbar_background_color', array(
+		$this->wp_customize->add_setting( 'amp_customizer[navbar_background_color]', array(
+			'type'              => 'option',
 			'default'           => '#0a89c0',
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
 
 		// Header background image upload
-		$this->wp_customize->add_setting( 'amp_navbar_background_image', array(
+		$this->wp_customize->add_setting( 'amp_customizer[navbar_background_image]', array(
+			'type'              => 'option',
 			'default'    => '',
 			'transport'  => 'postMessage'
 		) );
 
 		// Background color scheme
-		$this->wp_customize->add_setting( 'amp_background_color', array(
-			'default'           => 'standard',
+		$this->wp_customize->add_setting( 'amp_customizer[background_color]', array(
+			'type'              => 'option',
+			'default'           => 'light',
 			'sanitize_callback' => 'amp_sanitize_color_scheme',
 			'transport'         => 'postMessage'
 		) );
@@ -188,6 +192,7 @@ class AMP_Template_Customizer {
 		// Navbar text color control.
 		$this->wp_customize->add_control(
 			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_color', array(
+				'settings'   => 'amp_customizer[navbar_color]',
 				'label'    => __( 'Header Text Color', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 10
@@ -197,6 +202,7 @@ class AMP_Template_Customizer {
 		// Navbar background color control.
 		$this->wp_customize->add_control(
 			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background_color', array(
+				'settings'   => 'amp_customizer[navbar_background_color]',
 				'label'    => __( 'Header Background Color & Link Color', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 20
@@ -205,6 +211,7 @@ class AMP_Template_Customizer {
 
 		$this->wp_customize->add_control(
 			new WP_Customize_Image_Control( $this->wp_customize, 'amp_navbar_background_image', array(
+				'settings'   => 'amp_customizer[navbar_background_image]',
 				'label'    => __( 'Header Background Image', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 30
@@ -213,6 +220,7 @@ class AMP_Template_Customizer {
 
 		// Background color scheme
 		$this->wp_customize->add_control( 'amp_background_color', array(
+			'settings'   => 'amp_customizer[background_color]',
 			'label'      => __( 'Background Color Scheme', 'amp' ),
 			'section'    => 'amp_navbar_section',
 			'type'       => 'radio',

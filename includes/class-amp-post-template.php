@@ -274,18 +274,15 @@ class AMP_Post_Template {
 
 	private function build_customizer_settings() {
 		// TODO: move this data collection to a separate bridge class
-		$color_scheme = get_theme_mod( 'amp_background_color', 'light' );
+		$amp_customizer_settings = get_option( 'amp_customizer', array() );
+		$color_scheme = $amp_customizer_settings['background_color'];
 		$theme_colors = $this->get_colors_for_color_scheme( $color_scheme );
 
-		$navbar_background_color = get_theme_mod( 'amp_navbar_background_color', '#0087be' );
-		$navbar_color = get_theme_mod( 'amp_navbar_color', '#ffffff' );
-		$navbar_background_image = get_theme_mod( 'amp_navbar_background_image', '' );
-
 		$settings = array_merge( array(
-			'navbar_background_image' => $navbar_background_image,
-			'navbar_background_color' => $navbar_background_color,
-			'navbar_color' => $navbar_color,
-			'link_color' => $navbar_background_color,
+			'navbar_background_image' => $amp_customizer_settings['navbar_background_image'],
+			'navbar_background_color' => $amp_customizer_settings['navbar_background_color'],
+			'navbar_color' => $amp_customizer_settings['navbar_color'],
+			'link_color' => $amp_customizer_settings['navbar_background_color'],
 		), $theme_colors );
 
 		if ( ! empty( $settings['navbar_background_image'] ) ) {
