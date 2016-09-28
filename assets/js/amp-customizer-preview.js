@@ -6,6 +6,7 @@
 		value.bind( function( to ) {
 			$( '.amp-wp-header a' ).css( 'color', to );
 			$( '.amp-wp-header div' ).css( 'color', to );
+			$( '.amp-wp-header .amp-wp-site-icon' ).css( 'border-color', to ).css( 'background-color', to );
 		} );
 	} );
 
@@ -23,10 +24,10 @@
 		value.bind( function( newVal, oldVal ) {
 			if ( newVal ) {
 				$( body ).addClass( 'amp-wp-has-header-image' );
-				$( '.amp-wp-header' ).css( 'background-image', 'url(' + encodeURI( newVal ) + ')' );
+				$( '.amp-wp-header' ).addClass( 'header-background-image' ).css( 'background-image', 'url(' + encodeURI( newVal ) + ')' );
 			} else {
 				$( body ).removeClass( 'amp-wp-has-header-image' );
-				$( '.amp-wp-header' ).css( 'background-image', 'none' );
+				$( '.amp-wp-header' ).removeClass( 'header-background-image' ).css( 'background-image', 'none' );
 			}
 		} );
 	} );
