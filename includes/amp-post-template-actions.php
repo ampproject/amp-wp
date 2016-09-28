@@ -25,6 +25,14 @@ function amp_post_template_add_scripts( $amp_template ) {
 	<?php
 }
 
+add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
+function amp_post_template_add_fonts( $amp_template ) {
+	$font_urls = $amp_template->get( 'font_urls', array() );
+	foreach( $font_urls as $slug => $url ) : ?>
+		<link rel="stylesheet" href="<?php echo esc_url( $url ); ?>">
+	<?php endforeach;
+}
+
 add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
 function amp_post_template_add_boilerplate_css( $amp_template ) {
 	?>
