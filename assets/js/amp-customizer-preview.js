@@ -22,10 +22,10 @@
 	wp.customize( 'amp_navbar_background_image', function( value ) {
 		value.bind( function( newVal, oldVal ) {
 			if ( newVal ) {
-				$( body ).addClass( 'amp-wp-has-header-image' );
+				$( 'body' ).addClass( 'amp-wp-has-header-image' );
 				$( '.amp-wp-header' ).css( 'background-image', 'url(' + encodeURI( newVal ) + ')' );
 			} else {
-				$( body ).removeClass( 'amp-wp-has-header-image' );
+				$( 'body' ).removeClass( 'amp-wp-has-header-image' );
 				$( '.amp-wp-header' ).css( 'background-image', 'none' );
 			}
 		} );
