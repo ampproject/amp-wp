@@ -178,7 +178,6 @@ class AMP_Image_Dimension_Extractor {
 		}
 		foreach ( $urls as $url ) {
 			$result = $image->load( $url );
-			print_r($result);
 			if ( false === $result ) {
 				$images[ $url ]['size'] = self::STATUS_IMAGE_EXTRACTION_FAILED;
 			} else {
