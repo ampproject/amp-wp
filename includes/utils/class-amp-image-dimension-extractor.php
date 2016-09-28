@@ -169,7 +169,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
-		echo "Fast Image\n";
 		require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
 		$image = new FastImage();
 		$urls = array();
@@ -186,6 +185,7 @@ class AMP_Image_Dimension_Extractor {
 				$images[ $url ]['size'] = $size;
 			}
 		}
+		print_r($images);
 	}
 
 	/**
@@ -195,7 +195,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
-		echo "FastER Image\n";
 		if ( ! class_exists( 'Faster_Image_B52f1a8_Faster_Image' ) ) {
 			require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-faster-image.php' );
 		}
