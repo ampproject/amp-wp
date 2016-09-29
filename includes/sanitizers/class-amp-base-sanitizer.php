@@ -102,14 +102,18 @@ abstract class AMP_Base_Sanitizer {
 	 * @return string
 	 */
 	public function maybe_enforce_https_src( $src, $force_https = false ) {
+		$https_required = isset( $this->args['require_https_src'] ) && true === $this->args['require_https_src'];
 		$protocol = strtok( $src, ':' );
-		if ( 'https' !== $protocol ) {
+
+		if ( $protocol === $src && ( $https_required || $force_https ) ) {
+			// src has relative protocol, ie //example.com/asdf, so add https.
+			$src = set_url_scheme( $src, 'https' );
+		} else if ( 'https' !== $protocol ) {
 			// Check if https is required
-			if ( isset( $this->args['require_https_src'] ) && true === $this->args['require_https_src'] ) {
+			if ( $https_required ) {
 				// Remove the src. Let the implementing class decide what do from here.
 				$src = '';
-			} elseif ( ( ! isset( $this->args['require_https_src'] ) || false === $this->args['require_https_src'] )
-				&& true === $force_https ) {
+			} elseif ( ! $https_required && true === $force_https ) {
 				// Don't remove the src, but force https instead
 				$src = set_url_scheme( $src, 'https' );
 			}
