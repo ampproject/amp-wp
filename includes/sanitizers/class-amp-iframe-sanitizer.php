@@ -15,7 +15,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
 
 	protected $DEFAULT_ARGS = array(
-		'add_placeholder' => false,
+		'require_https_src' => true,
+		'add_placeholder'   => false,
 	);
 
 	public function get_scripts() {
@@ -37,16 +38,39 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
+			$orig_src = '';
+			if ( isset( $old_attributes['src'] ) ) {
+				$orig_src = $old_attributes['src'];
+			}
+
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
-			// If the src doesn't exist, remove the node.
-			// This means that it never existed or was invalidated
-			// while filtering attributes above.
-			//
-			// TODO: add a filter to allow for a fallback element in this instance.
-			// See: https://github.com/ampproject/amphtml/issues/2261
+			// If the filtered src doesn't exist, but there's an invalid src, add a fallback element.
+			// Otherwise remove the node.
 			if ( empty( $new_attributes['src'] ) ) {
-				$node->parentNode->removeChild( $node );
+				if ( ! empty( $orig_src ) ) {
+					$fallback_node = AMP_DOM_Utils::create_node(
+						$this->dom,
+						'blockquote',
+						array(
+							'class' => 'amp-wp-fallback amp-wp-iframe-fallback'
+						)
+					);
+
+					$fallback_content = $this->dom->createDocumentFragment();
+					$fallback_content->appendXML( sprintf(
+							wp_kses( __( 'Could not load <a href="%s">iframe</a>.', 'amp' ), array( 'a' => array( 'href' => true ) ) ),
+							esc_url( $orig_src )
+						)
+					);
+
+					$fallback_node->appendChild( $fallback_content );
+
+					$node->parentNode->replaceChild( $fallback_node, $node );
+				} else {
+					$node->parentNode->removeChild( $node );
+				}
+
 				continue;
 			}
 
