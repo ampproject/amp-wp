@@ -282,15 +282,10 @@ class AMP_Post_Template {
 		$theme_colors = $this->get_colors_for_color_scheme( $color_scheme );
 
 		$settings = array_merge( array(
-			'navbar_background_image' => $amp_customizer_settings['navbar_background_image'],
 			'navbar_background_color' => $amp_customizer_settings['navbar_background_color'],
 			'navbar_color' => $amp_customizer_settings['navbar_color'],
 			'link_color' => $amp_customizer_settings['navbar_background_color'],
 		), $theme_colors );
-
-		if ( ! empty( $settings['navbar_background_image'] ) ) {
-			$this->merge_data_for_key( 'body_class', get_body_class( array( 'amp-wp-has-header-image' ) ) );
-		}
 
 		/**
 		 * Filter AMP Customizer settings.

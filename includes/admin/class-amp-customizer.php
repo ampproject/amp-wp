@@ -138,13 +138,6 @@ class AMP_Template_Customizer {
 			'transport'         => 'postMessage'
 		) );
 
-		// Header background image upload
-		$this->wp_customize->add_setting( 'amp_customizer[navbar_background_image]', array(
-			'type'              => 'option',
-			'default'    => '',
-			'transport'  => 'postMessage'
-		) );
-
 		// Background color scheme
 		$this->wp_customize->add_setting( 'amp_customizer[background_color]', array(
 			'type'              => 'option',
@@ -206,15 +199,6 @@ class AMP_Template_Customizer {
 				'label'    => __( 'Header Background Color & Link Color', 'amp' ),
 				'section'  => 'amp_navbar_section',
 				'priority' => 20
-			) )
-		);
-
-		$this->wp_customize->add_control(
-			new WP_Customize_Image_Control( $this->wp_customize, 'amp_navbar_background_image', array(
-				'settings'   => 'amp_customizer[navbar_background_image]',
-				'label'    => __( 'Header Background Image', 'amp' ),
-				'section'  => 'amp_navbar_section',
-				'priority' => 30
 			) )
 		);
 

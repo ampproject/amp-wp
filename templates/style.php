@@ -7,7 +7,6 @@ $muted_text_color  = $this->get_customizer_setting( 'muted_text_color' );
 $border_color      = $this->get_customizer_setting( 'border_color' );
 $link_color        = $this->get_customizer_setting( 'link_color' );
 
-$navbar_background_image = $this->get_customizer_setting( 'navbar_background_image' );
 $navbar_background_color = $this->get_customizer_setting( 'navbar_background_color' );
 $navbar_color            = $this->get_customizer_setting( 'navbar_color' );
 ?>
@@ -130,13 +129,6 @@ blockquote p:last-child {
 
 .amp-wp-header {
 	background-color: <?php echo sanitize_hex_color( $navbar_background_color ); ?>;
-}
-
-.amp-wp-has-header-image .amp-wp-header {
-	background-image: url('<?php echo esc_url( $navbar_background_image ); ?>');
-	background-repeat: no-repeat;
-	background-position: center center;
-	background-size: cover;
 }
 
 .amp-wp-header div {

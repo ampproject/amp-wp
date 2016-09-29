@@ -19,19 +19,6 @@
 		} );
 	} );
 
-	// Add custom-background-image body class when background image is added.
-	wp.customize( 'amp_customizer[navbar_background_image]', function( value ) {
-		value.bind( function( newVal, oldVal ) {
-			if ( newVal ) {
-				$( 'body' ).addClass( 'amp-wp-has-header-image' );
-				$( '.amp-wp-header' ).css( 'background-image', 'url(' + encodeURI( newVal ) + ')' );
-			} else {
-				$( 'body' ).removeClass( 'amp-wp-has-header-image' );
-				$( '.amp-wp-header' ).css( 'background-image', 'none' );
-			}
-		} );
-	} );
-
 	// AMP background color scheme.
 	wp.customize( 'amp_customizer[background_color]', function( value ) {
 		value.bind( function( to ) {
