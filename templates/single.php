@@ -18,8 +18,7 @@
 
 	<header class="amp-wp-article-header">
 		<h1 class="amp-wp-title"><?php echo wp_kses_data( $this->get( 'post_title' ) ); ?></h1>
-		<?php $this->load_parts( array( 'meta-author' ) ); ?>
-		<?php $this->load_parts( array( 'meta-time' ) ); ?>
+		<?php $this->load_parts( apply_filters( 'amp_post_article_header_meta', array( 'meta-author', 'meta-time' ) ) ); ?>
 	</header>
 
 	<?php $this->load_parts( array( 'featured-image' ) ); ?>
@@ -29,8 +28,7 @@
 	</div>
 
 	<footer class="amp-wp-article-footer">
-		<?php $this->load_parts( array( 'meta-taxonomy' ) ); ?>
-		<?php $this->load_parts( array( 'meta-comments-link' ) ); ?>
+		<?php $this->load_parts( apply_filters( 'amp_post_article_footer_meta', array( 'meta-taxonomy', 'meta-comments-link' ) ) ); ?>
 	</footer>
 
 </article>
