@@ -49,7 +49,7 @@ class AMP_Post_Template {
 			'canonical_url' => get_permalink( $post_id ),
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
-			'body_class' => array(),
+			'body_class' => '',
 
 			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
@@ -289,7 +289,7 @@ class AMP_Post_Template {
 		), $theme_colors );
 
 		if ( ! empty( $settings['navbar_background_image'] ) ) {
-			$this->merge_data_for_key( 'body_class', array( 'amp-wp-has-header-image' ) );
+			$this->merge_data_for_key( 'body_class', get_body_class( array( 'amp-wp-has-header-image' ) ) );
 		}
 
 		/**
