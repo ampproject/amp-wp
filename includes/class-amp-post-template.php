@@ -53,6 +53,10 @@ class AMP_Post_Template {
 			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
+			'featured_image' => false,
+			'comments_link_url' => false,
+			'comments_link_text' => false,
+
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
 
@@ -74,7 +78,6 @@ class AMP_Post_Template {
  		);
 
 		$this->build_post_content();
-		$this->build_post_featured_media();
 		$this->build_post_data();
 		$this->build_customizer_settings();
 
@@ -179,6 +182,25 @@ class AMP_Post_Template {
 		}
 
 		$this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
+
+		$this->build_post_featured_image();
+		$this->build_post_commments_data();
+	}
+
+	private function build_post_commments_data() {
+		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
+			return;
+		}
+
+		$comments_link_url = get_comments_link( $this->ID );
+		$comments_link_text = comments_open( $this->ID )
+			? __( 'Leave a Comment', 'amp' )
+			: __( 'View Comments', 'amp' );
+
+		$this->add_data( array(
+			'comments_link_url' => $comments_link_url,
+			'comments_link_text' => $comments_link_text,
+		) );
 	}
 
 	private function build_post_content() {
@@ -209,7 +231,7 @@ class AMP_Post_Template {
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
 	}
 
-	private function build_post_featured_media() {
+	private function build_post_featured_image() {
 		$post_id = $this->ID;
 		$featured_html = get_the_post_thumbnail( $post_id, 'large' );
 
@@ -252,18 +274,15 @@ class AMP_Post_Template {
 
 	private function build_customizer_settings() {
 		// TODO: move this data collection to a separate bridge class
-		$color_scheme = get_theme_mod( 'amp_background_color', 'light' );
+		$amp_customizer_settings = get_option( 'amp_customizer', array() );
+		$color_scheme = $amp_customizer_settings['background_color'];
 		$theme_colors = $this->get_colors_for_color_scheme( $color_scheme );
 
-		$navbar_background_color = get_theme_mod( 'amp_navbar_background_color', '#0087be' );
-		$navbar_color = get_theme_mod( 'amp_navbar_color', '#ffffff' );
-		$navbar_background_image = get_theme_mod( 'amp_navbar_background_image', '' );
-
 		$settings = array_merge( array(
-			'navbar_background_image' => $navbar_background_image,
-			'navbar_background_color' => $navbar_background_color,
-			'navbar_color' => $navbar_color,
-			'link_color' => $navbar_background_color,
+			'navbar_background_image' => $amp_customizer_settings['navbar_background_image'],
+			'navbar_background_color' => $amp_customizer_settings['navbar_background_color'],
+			'navbar_color' => $amp_customizer_settings['navbar_color'],
+			'link_color' => $amp_customizer_settings['navbar_background_color'],
 		), $theme_colors );
 
 		if ( ! empty( $settings['navbar_background_image'] ) ) {
