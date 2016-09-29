@@ -240,7 +240,7 @@ blockquote p:last-child {
 	margin: 0 0 1em;
 }
 .amp-wp-article-featured-image amp-img {
-	margin: -1px auto;
+	margin: 0 auto;
 }
 .amp-wp-article-featured-image.wp-caption .wp-caption-text {
 	margin: 0 18px;
@@ -258,7 +258,7 @@ blockquote p:last-child {
 }
 
 .amp-wp-article-content amp-img {
-	border: 1px solid <?php echo $border_color; ?>;
+	margin: 0 auto;
 }
 
 /* Captions */
