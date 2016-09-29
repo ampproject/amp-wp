@@ -6,6 +6,7 @@ require_once( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php' );
 
 require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
@@ -48,7 +49,7 @@ class AMP_Post_Template {
 			'canonical_url' => get_permalink( $post_id ),
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
-			'body_class' => array(),
+			'body_class' => '',
 
 			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
@@ -214,6 +215,7 @@ class AMP_Post_Template {
 				'AMP_Gallery_Embed_Handler' => array(),
 			), $this->post ),
 			apply_filters( 'amp_content_sanitizers', array(
+				 'AMP_Style_Sanitizer' => array(),
 				 'AMP_Blacklist_Sanitizer' => array(),
 				 'AMP_Img_Sanitizer' => array(),
 				 'AMP_Video_Sanitizer' => array(),
@@ -229,6 +231,7 @@ class AMP_Post_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
+		$this->add_data_by_key( 'post_amp_styles', $amp_content->get_amp_styles() );
 	}
 
 	private function build_post_featured_image() {
@@ -279,15 +282,10 @@ class AMP_Post_Template {
 		$theme_colors = $this->get_colors_for_color_scheme( $color_scheme );
 
 		$settings = array_merge( array(
-			'navbar_background_image' => $amp_customizer_settings['navbar_background_image'],
 			'navbar_background_color' => $amp_customizer_settings['navbar_background_color'],
 			'navbar_color' => $amp_customizer_settings['navbar_color'],
 			'link_color' => $amp_customizer_settings['navbar_background_color'],
 		), $theme_colors );
-
-		if ( ! empty( $settings['navbar_background_image'] ) ) {
-			$this->merge_data_for_key( 'body_class', array( 'amp-wp-has-header-image' ) );
-		}
 
 		/**
 		 * Filter AMP Customizer settings.

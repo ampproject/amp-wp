@@ -575,6 +575,11 @@ We may provide better ways to handle this in the future.
 
 Jetpack integration is baked in. More support for things like Related Posts to come.
 
+### Parse.ly
+
+[Parse.ly's WordPress plugin](https://wordpress.org/plugins/wp-parsely/) automatically tracks AMP pages when enabled along with this plugin.
+
+
 ### Yoast SEO
 
 If you're using [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/), check out the companion plugin here: https://github.com/Yoast/yoastseo-amp
