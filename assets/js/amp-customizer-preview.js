@@ -2,7 +2,7 @@
 	'use strict';
 
 	// Nav bar text color.
-	wp.customize( 'amp_customizer[navbar_color]', function( value ) {
+	wp.customize( 'amp_customizer[header_color]', function( value ) {
 		value.bind( function( to ) {
 			$( '.amp-wp-header a' ).css( 'color', to );
 			$( '.amp-wp-header div' ).css( 'color', to );
@@ -11,7 +11,7 @@
 	} );
 
 	// Nav bar background color.
-	wp.customize( 'amp_customizer[navbar_background_color]', function( value ) {
+	wp.customize( 'amp_customizer[header_background_color]', function( value ) {
 		value.bind( function( to ) {
 			$( '.amp-wp-header' ).css( 'background-color', to );
 			$( '.amp-wp-article a, .amp-wp-article a:visited, .amp-wp-footer a, .amp-wp-footer a:visited' ).css( 'color', to );

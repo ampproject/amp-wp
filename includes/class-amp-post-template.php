@@ -24,9 +24,6 @@ class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
 	const CONTENT_MAX_WIDTH = 600;
 
-	const DEFAULT_NAVBAR_BACKGROUND = '#0a89c0';
-	const DEFAULT_NAVBAR_COLOR = '#fff';
-
 	private $template_dir;
 	private $data;
 
@@ -282,9 +279,9 @@ class AMP_Post_Template {
 		$theme_colors = $this->get_colors_for_color_scheme( $color_scheme );
 
 		$settings = array_merge( array(
-			'navbar_background_color' => $amp_customizer_settings['navbar_background_color'],
-			'navbar_color' => $amp_customizer_settings['navbar_color'],
-			'link_color' => $amp_customizer_settings['navbar_background_color'],
+			'header_background_color' => $amp_customizer_settings['header_background_color'],
+			'header_color' => $amp_customizer_settings['header_color'],
+			'link_color' => $amp_customizer_settings['header_background_color'],
 		), $theme_colors );
 
 		/**

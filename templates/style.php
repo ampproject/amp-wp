@@ -7,8 +7,8 @@ $muted_text_color  = $this->get_customizer_setting( 'muted_text_color' );
 $border_color      = $this->get_customizer_setting( 'border_color' );
 $link_color        = $this->get_customizer_setting( 'link_color' );
 
-$navbar_background_color = $this->get_customizer_setting( 'navbar_background_color' );
-$navbar_color            = $this->get_customizer_setting( 'navbar_color' );
+$header_background_color = $this->get_customizer_setting( 'header_background_color' );
+$header_color            = $this->get_customizer_setting( 'header_color' );
 ?>
 /* Generic WP styling */
 
@@ -128,11 +128,11 @@ blockquote p:last-child {
 /* Header */
 
 .amp-wp-header {
-	background-color: <?php echo sanitize_hex_color( $navbar_background_color ); ?>;
+	background-color: <?php echo sanitize_hex_color( $header_background_color ); ?>;
 }
 
 .amp-wp-header div {
-	color: <?php echo sanitize_hex_color( $navbar_color ); ?>;
+	color: <?php echo sanitize_hex_color( $header_color ); ?>;
 	font-size: 1em;
 	font-weight: 400;
 	margin: 0 auto;
@@ -142,7 +142,7 @@ blockquote p:last-child {
 }
 
 .amp-wp-header a {
-	color: <?php echo sanitize_hex_color( $navbar_color ); ?>;
+	color: <?php echo sanitize_hex_color( $header_color ); ?>;
 	text-decoration: none;
 }
 
@@ -150,8 +150,8 @@ blockquote p:last-child {
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
-	background-color: <?php echo $navbar_color; ?>;
-	border: 1px solid <?php echo $navbar_color; ?>;
+	background-color: <?php echo $header_color; ?>;
+	border: 1px solid <?php echo $header_color; ?>;
 	border-radius: 50%;
 	position: absolute;
 	right: 18px;
