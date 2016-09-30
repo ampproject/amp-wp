@@ -105,6 +105,7 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function init_ui() {
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_scripts' ) );
 		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
 
 		$this->register_panel();
@@ -214,6 +215,10 @@ class AMP_Template_Customizer {
 				'dark'    => __( 'Dark', 'amp' ),
 			),
 		));
+	}
+
+	public function add_customizer_scripts() {
+		wp_enqueue_script( 'wp-util' ); // fix `wp.template is not a function`
 	}
 
 	/**
