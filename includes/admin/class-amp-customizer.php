@@ -44,6 +44,10 @@ class AMP_Template_Customizer {
 
 		// Our custom panels only need to go for AMP Customizer requests though
 		if ( self::is_amp_customizer() ) {
+			if ( ! isset( $_GET['url'] ) ) {
+				$wp_customize->set_preview_url( amp_admin_get_preview_permalink() );
+			}
+
 			$self->_unregister_core_ui();
 			$self->init_ui();
 		} elseif ( is_customize_preview() ) {

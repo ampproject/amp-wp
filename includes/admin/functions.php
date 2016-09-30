@@ -21,6 +21,30 @@ function amp_init_customizer() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
+	$permalink = amp_admin_get_preview_permalink();
+
+	if ( ! $permalink ) {
+		return;
+	}
+
+	// Teensy little hack on menu_slug, but it works. No redirect!
+	$menu_slug = add_query_arg( array(
+		'autofocus[panel]'         => AMP_Template_Customizer::PANEL_ID,
+		'url'                      => rawurlencode( $permalink ),
+		'return'                   => rawurlencode( admin_url() ),
+		AMP_CUSTOMIZER_QUERY_VAR   => true
+	), 'customize.php' );
+
+	// Add the theme page.
+	$page = add_theme_page(
+		__( 'AMP', 'amp' ),
+		__( 'AMP', 'amp' ),
+		'edit_theme_options',
+		$menu_slug
+	);
+}
+
+function amp_admin_get_preview_permalink() {
 	/**
 	 * Filter the post type to retrieve the latest of for use in the AMP template customizer.
 	 *
@@ -41,22 +65,8 @@ function amp_add_customizer_link() {
 	) );
 
 	if ( ! $post_id ) {
-		return;
+		return false;
 	}
 
-	// Teensy little hack on menu_slug, but it works. No redirect!
-	$menu_slug = add_query_arg( array(
-		'autofocus[panel]'         => AMP_Template_Customizer::PANEL_ID,
-		'url'                      => rawurlencode( amp_get_permalink( $post_id ) ),
-		'return'                   => rawurlencode( admin_url() ),
-		AMP_CUSTOMIZER_QUERY_VAR   => true
-	), 'customize.php' );
-
-	// Add the theme page.
-	$page = add_theme_page(
-		__( 'AMP', 'amp' ),
-		__( 'AMP', 'amp' ),
-		'edit_theme_options',
-		$menu_slug
-	);
+	return amp_get_permalink( $post_id );
 }
