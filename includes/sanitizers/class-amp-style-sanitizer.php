@@ -28,7 +28,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			if ( $style ) {
 				$style = $this->process_style( $style );
-
 				if ( ! empty( $style ) ) {
 					$class_name = $this->generate_class_name( $style );
 					$new_class  = trim( $class . ' ' . $class_name );
@@ -58,26 +57,43 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Normalize order
-		$arr = array_map( 'trim', explode( ';', $string ) );
-		sort( $arr );
+		$styles = array_map( 'trim', explode( ';', $string ) );
+		sort( $styles );
 
-		// Normalize whitespace
-		foreach ( $arr as $index => $rule ) {
+		$processed_styles = array();
+
+		// Normalize whitespace and filter rules
+		foreach ( $styles as $index => $rule ) {
 			$arr2 = array_map( 'trim', explode( ':', $rule, 2 ) );
-			if ( 2 === count( $arr2 ) ) {
-				$arr[ $index ] = $arr2[0] . ':' . $arr2[1];
+			if ( 2 !== count( $arr2 ) ) {
+				continue;
 			}
+
+			list( $property, $value ) = $this->filter_style( $arr2[0], $arr2[1] );
+			if ( empty( $property ) || empty( $value ) ) {
+				continue;
+			}
+
+			$processed_styles[ $index ] = $property . ':' . $value;
 		}
 
+		return $processed_styles;
+	}
+
+	private function filter_style( $property, $value ) {
 		// Handle overflow rule
 		// https://www.ampproject.org/docs/reference/spec.html#properties
-		if ( $overflow = preg_grep( '/^overflow.*(auto|scroll)$/', $arr ) ) {
-			foreach( $overflow as $index => $rule ) {
-				unset( $arr[ $index ] );
-			}
+		if ( 0 === strpos( $property, 'overflow' )
+			&& ( false !== strpos( $value, 'auto' ) || false !== strpos( $value, 'scroll' ) )
+		) {
+			return false;
 		}
 
-		return $arr;
+		if ( 'width' === $property ) {
+			$property = 'max-width';
+		}
+
+		return array( $property, $value );
 	}
 
 	private function generate_class_name( $data ) {
