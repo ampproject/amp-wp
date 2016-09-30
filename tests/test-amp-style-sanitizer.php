@@ -30,12 +30,22 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'span_two_styles_reversed' => array(
-				'<span style="width: 350px; color: #00ff00;">This is green.</span>',
-				'<span class="amp-wp-inline-c83b149f3e9c3426a6eab43e21ac2fba">This is green.</span>',
+				'<span style="color: #00ff00; background-color: #000; ">This is green.</span>',
+				'<span class="amp-wp-inline-58550689c128f3d396444313296e4c47">This is green.</span>',
 				array(
-					'.amp-wp-inline-c83b149f3e9c3426a6eab43e21ac2fba' => array(
+					'.amp-wp-inline-58550689c128f3d396444313296e4c47' => array(
+						'background-color:#000',
 						'color:#00ff00',
-						'width:350px',
+					),
+				),
+			),
+
+			'width_to_max-width' => array(
+				'<figure style="width: 300px"></figure>',
+				'<figure class="amp-wp-inline-2676cd1bfa7e8feb4f0e0e8086ae9ce4"></figure>',
+				array(
+					'.amp-wp-inline-2676cd1bfa7e8feb4f0e0e8086ae9ce4' => array(
+						'max-width:300px',
 					),
 				),
 			),
@@ -63,6 +73,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						'color:#ff0000',
 					),
 				),
+			),
+
+			'existing_class_attribute' => array(
+				'<figure class="alignleft" style="background: #000"></figure>',
+				'<figure class="alignleft amp-wp-inline-3be9b2f79873ad78941ba2b3c03025a3"></figure>',
+				array(
+					'.amp-wp-inline-3be9b2f79873ad78941ba2b3c03025a3' => array(
+						'background:#000',
+					),
+				)
+
 			),
 		);
 	}
