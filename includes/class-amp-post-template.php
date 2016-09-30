@@ -273,16 +273,7 @@ class AMP_Post_Template {
 	}
 
 	private function build_customizer_settings() {
-		// TODO: move this data collection to a separate bridge class
-		$amp_customizer_settings = get_option( 'amp_customizer', array() );
-		$color_scheme = $amp_customizer_settings['background_color'];
-		$theme_colors = $this->get_colors_for_color_scheme( $color_scheme );
-
-		$settings = array_merge( array(
-			'header_background_color' => $amp_customizer_settings['header_background_color'],
-			'header_color' => $amp_customizer_settings['header_color'],
-			'link_color' => $amp_customizer_settings['header_background_color'],
-		), $theme_colors );
+		$settings = AMP_Customizer_Settings::get_settings();
 
 		/**
 		 * Filter AMP Customizer settings.
@@ -298,31 +289,7 @@ class AMP_Post_Template {
 		 * @param array   $settings Array of AMP Customizer settings.
 		 * @param WP_Post $post     Current post object.
 		 */
-		$this->add_data_by_key( 'customizer_settings', apply_filters( 'amp_customizer_settings', $settings, $this->post ) );
-	}
-
-	// Set text and border color based on $theme_color_setting
-	private function get_colors_for_color_scheme( $theme ) {
-		switch ( $theme ) {
-			case 'dark':
-				return array(
-					// Convert and invert colors to greyscale for dark theme color; see http://goo.gl/uVB2cO
-					'theme_color'      => '#111',
-					'text_color'       => '#acacac',
-					'muted_text_color' => '#606060',
-					'border_color'     => '#2b2b2b',
-				);
-
-			case 'light':
-			default:
-				return array(
-					// Convert colors to greyscale for light theme color; see http://goo.gl/2gDLsp
-					'theme_color'      => '#fff',
-					'text_color'       => '#535353',
-					'muted_text_color' => '#9f9f9f',
-					'border_color'     => '#d4d4d4',
-				);
-		}
+		$this->add_data_by_key( 'customizer_settings', apply_filters( 'amp_post_template_customizer_settings', $settings, $this->post ) );
 	}
 
 	/**

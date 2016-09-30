@@ -126,7 +126,7 @@ class AMP_Template_Customizer {
 		// Header text color setting
 		$this->wp_customize->add_setting( 'amp_customizer[header_color]', array(
 			'type'              => 'option',
-			'default'           => '#ffffff',
+			'default'           => AMP_Customizer_Settings::DEFAULT_HEADER_COLOR,
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
@@ -134,16 +134,16 @@ class AMP_Template_Customizer {
 		// Header background color
 		$this->wp_customize->add_setting( 'amp_customizer[header_background_color]', array(
 			'type'              => 'option',
-			'default'           => '#0a89c0',
+			'default'           => AMP_Customizer_Settings::DEFAULT_HEADER_BACKGROUND_COLOR,
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
 
 		// Background color scheme
-		$this->wp_customize->add_setting( 'amp_customizer[background_color]', array(
+		$this->wp_customize->add_setting( 'amp_customizer[color_scheme]', array(
 			'type'              => 'option',
-			'default'           => 'light',
-			'sanitize_callback' => 'amp_sanitize_color_scheme',
+			'default'           => AMP_Customizer_Settings::DEFAULT_COLOR_SCHEME,
+			'sanitize_callback' => '_amp_sanitize_color_scheme',
 			'transport'         => 'postMessage'
 		) );
 
@@ -170,7 +170,7 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_sections() {
-		$this->wp_customize->add_section( 'amp_header_section', array(
+		$this->wp_customize->add_section( 'amp_color_section', array(
 			'title' => __( 'Color Options', 'amp' ),
 			'panel' => self::PANEL_ID,
 		) );
@@ -188,7 +188,7 @@ class AMP_Template_Customizer {
 			new WP_Customize_Color_Control( $this->wp_customize, 'amp_header_color', array(
 				'settings'   => 'amp_customizer[header_color]',
 				'label'    => __( 'Header Text Color', 'amp' ),
-				'section'  => 'amp_header_section',
+				'section'  => 'amp_color_section',
 				'priority' => 10
 			) )
 		);
@@ -198,16 +198,16 @@ class AMP_Template_Customizer {
 			new WP_Customize_Color_Control( $this->wp_customize, 'amp_header_background_color', array(
 				'settings'   => 'amp_customizer[header_background_color]',
 				'label'    => __( 'Header Background Color & Link Color', 'amp' ),
-				'section'  => 'amp_header_section',
+				'section'  => 'amp_color_section',
 				'priority' => 20
 			) )
 		);
 
 		// Background color scheme
-		$this->wp_customize->add_control( 'amp_background_color', array(
-			'settings'   => 'amp_customizer[background_color]',
-			'label'      => __( 'Background Color Scheme', 'amp' ),
-			'section'    => 'amp_header_section',
+		$this->wp_customize->add_control( 'amp_color_scheme', array(
+			'settings'   => 'amp_customizer[color_scheme]',
+			'label'      => __( 'Color Scheme', 'amp' ),
+			'section'    => 'amp_color_section',
 			'type'       => 'radio',
 			'priority'   => 30,
 			'choices'    => array(
@@ -256,7 +256,7 @@ class AMP_Template_Customizer {
 	}
 }
 
-function amp_sanitize_color_scheme( $value ) {
+function _amp_sanitize_color_scheme( $value ) {
 	if ( ! in_array( $value, array( 'light', 'dark' ) ) ) {
 		$value = 'light';
 	}

@@ -16,6 +16,7 @@ define( 'AMP__DIR__', dirname( __FILE__ ) );
 
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 require_once( AMP__DIR__ . '/includes/admin/functions.php' );
+require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {

@@ -20,19 +20,20 @@
 	} );
 
 	// AMP background color scheme.
-	wp.customize( 'amp_customizer[background_color]', function( value ) {
+	wp.customize( 'amp_customizer[color_scheme]', function( value ) {
 		value.bind( function( to ) {
-			var scheme;
+			var colors;
 
+			// TODO: pull these values from AMP_Customizer_Settings
 			if ( to === 'dark' ) {
-				scheme = {
+				colors = {
 					theme_color: '#111',
 					text_color: '#acacac',
 					muted_text_color: '#606060',
 					border_color: '#2b2b2b'
 				};
 			} else {
-				scheme = {
+				colors = {
 					theme_color: '#fff',
 					text_color: '#535353',
 					muted_text_color: '#9f9f9f',
@@ -40,11 +41,11 @@
 				};
 			}
 
-			$( 'body' ).css( 'background-color', scheme.theme_color );
-			$( 'body, a:hover, a:active, a:focus, blockquote, .amp-wp-article, .amp-wp-title' ).css( 'color', scheme.text_color );
-			$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', scheme.muted_text_color );
-			$( '.amp-wp-article-featured-image amp-img, .amp-wp-article- amp-img, .wp-caption .wp-caption-text, .amp-wp-comments-link a, .amp-wp-footer' ).css( 'border-color', scheme.border_color );
-			$( '.amp-wp-iframe-placeholder, amp-carousel, amp-iframe, amp-youtube, amp-instagram, amp-vine' ).css( 'background-color', scheme.border_color );
+			$( 'body' ).css( 'background-color', colors.theme_color );
+			$( 'body, a:hover, a:active, a:focus, blockquote, .amp-wp-article, .amp-wp-title' ).css( 'color', colors.text_color );
+			$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', colors.muted_text_color );
+			$( '.wp-caption .wp-caption-text, .amp-wp-comments-link a, .amp-wp-footer' ).css( 'border-color', colors.border_color );
+			$( '.amp-wp-iframe-placeholder, amp-carousel, amp-iframe, amp-youtube, amp-instagram, amp-vine' ).css( 'background-color', colors.border_color );
 		} );
 	} );
 
