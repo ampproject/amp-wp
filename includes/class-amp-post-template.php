@@ -24,9 +24,6 @@ class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
 	const CONTENT_MAX_WIDTH = 600;
 
-	const DEFAULT_NAVBAR_BACKGROUND = '#0a89c0';
-	const DEFAULT_NAVBAR_COLOR = '#fff';
-
 	private $template_dir;
 	private $data;
 
@@ -49,12 +46,21 @@ class AMP_Post_Template {
 			'canonical_url' => get_permalink( $post_id ),
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
+			'body_class' => '',
 
 			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
+			'featured_image' => false,
+			'comments_link_url' => false,
+			'comments_link_text' => false,
+
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
+
+			'font_urls' => array(
+				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
+			),
 
 			/**
 			 * Add amp-analytics tags.
@@ -174,6 +180,25 @@ class AMP_Post_Template {
 		}
 
 		$this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
+
+		$this->build_post_featured_image();
+		$this->build_post_commments_data();
+	}
+
+	private function build_post_commments_data() {
+		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
+			return;
+		}
+
+		$comments_link_url = get_comments_link( $this->ID );
+		$comments_link_text = comments_open( $this->ID )
+			? __( 'Leave a Comment', 'amp' )
+			: __( 'View Comments', 'amp' );
+
+		$this->add_data( array(
+			'comments_link_url' => $comments_link_url,
+			'comments_link_text' => $comments_link_text,
+		) );
 	}
 
 	private function build_post_content() {
@@ -206,12 +231,49 @@ class AMP_Post_Template {
 		$this->add_data_by_key( 'post_amp_styles', $amp_content->get_amp_styles() );
 	}
 
-	private function build_customizer_settings() {
-		$settings = array(
-			'navbar_background' => get_theme_mod( 'amp_navbar_background', self::DEFAULT_NAVBAR_BACKGROUND ),
+	private function build_post_featured_image() {
+		$post_id = $this->ID;
+		$featured_html = get_the_post_thumbnail( $post_id, 'large' );
 
-			'navbar_color' => get_theme_mod( 'amp_navbar_color', self::DEFAULT_NAVBAR_COLOR ),
+		// Skip featured image if no featured image is available.
+		if ( ! $featured_html ) {
+			return;
+		}
+
+		$featured_id = get_post_thumbnail_id( $post_id );
+
+		// If an image with the same ID as the featured image exists in the content, skip the featured image markup.
+		// Prevents duplicate images, which is especially problematic for photo blogs.
+		// A bit crude but it's fast and should cover most cases.
+		$post_content = $this->post->post_content;
+		if ( false !== strpos( $post_content, 'wp-image-' . $featured_id )
+			|| false !== strpos( $post_content, 'attachment_' . $featured_id ) ) {
+			return;
+		}
+
+		$featured_image = get_post( $featured_id );
+
+		remove_filter( 'the_content', 'wpautop' ); // We don't want our image wrapped in a <p>
+		$featured_amp_content = new AMP_Content(
+			$featured_html,
+			array(),
+			array(
+				 'AMP_Img_Sanitizer' => array(),
+			),
+			array(
+				'content_max_width' => $this->get( 'content_max_width' ),
+			)
 		);
+		add_filter( 'the_content', 'wpautop' );
+
+		$this->add_data_by_key( 'featured_image', array(
+			'amp_html' => $featured_amp_content->get_amp_content(),
+			'caption' => $featured_image->post_excerpt,
+		) );
+	}
+
+	private function build_customizer_settings() {
+		$settings = AMP_Customizer_Settings::get_settings();
 
 		/**
 		 * Filter AMP Customizer settings.
@@ -227,7 +289,7 @@ class AMP_Post_Template {
 		 * @param array   $settings Array of AMP Customizer settings.
 		 * @param WP_Post $post     Current post object.
 		 */
-		$this->add_data_by_key( 'customizer_settings', apply_filters( 'amp_customizer_settings', $settings, $this->post ) );
+		$this->add_data_by_key( 'customizer_settings', apply_filters( 'amp_post_template_customizer_settings', $settings, $this->post ) );
 	}
 
 	/**

@@ -105,6 +105,7 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function init_ui() {
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_scripts' ) );
 		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
 
 		$this->register_panel();
@@ -121,17 +122,28 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_settings() {
-		// Navbar text color setting.
-		$this->wp_customize->add_setting( 'amp_navbar_color', array(
-			'default'           => '#ffffff',
+
+		// Header text color setting
+		$this->wp_customize->add_setting( 'amp_customizer[header_color]', array(
+			'type'              => 'option',
+			'default'           => AMP_Customizer_Settings::DEFAULT_HEADER_COLOR,
 			'sanitize_callback' => 'sanitize_hex_color',
 			'transport'         => 'postMessage'
 		) );
 
-		// Navbar background color setting.
-		$this->wp_customize->add_setting( 'amp_navbar_background', array(
-			'default'           => '#0a89c0',
+		// Header background color
+		$this->wp_customize->add_setting( 'amp_customizer[header_background_color]', array(
+			'type'              => 'option',
+			'default'           => AMP_Customizer_Settings::DEFAULT_HEADER_BACKGROUND_COLOR,
 			'sanitize_callback' => 'sanitize_hex_color',
+			'transport'         => 'postMessage'
+		) );
+
+		// Background color scheme
+		$this->wp_customize->add_setting( 'amp_customizer[color_scheme]', array(
+			'type'              => 'option',
+			'default'           => AMP_Customizer_Settings::DEFAULT_COLOR_SCHEME,
+			'sanitize_callback' => '_amp_sanitize_color_scheme',
 			'transport'         => 'postMessage'
 		) );
 
@@ -146,8 +158,8 @@ class AMP_Template_Customizer {
 	 */
 	public function register_panel() {
 		$this->wp_customize->add_panel( self::PANEL_ID, array(
-			'type'            => 'amp',
-			'title'           => __( 'AMP', 'amp' ),
+			'type'  => 'amp',
+			'title' => __( 'AMP', 'amp' ),
 		) );
 	}
 
@@ -158,8 +170,8 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_sections() {
-		$this->wp_customize->add_section( 'amp_navbar_section', array(
-			'title' => __( 'Navigation Bar', 'amp' ),
+		$this->wp_customize->add_section( 'amp_color_section', array(
+			'title' => __( 'Color Options', 'amp' ),
 			'panel' => self::PANEL_ID,
 		) );
 	}
@@ -171,23 +183,42 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_controls() {
-		// Navbar text color control.
+		// Header text color control.
 		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_color', array(
+			new WP_Customize_Color_Control( $this->wp_customize, 'amp_header_color', array(
+				'settings'   => 'amp_customizer[header_color]',
 				'label'    => __( 'Header Text Color', 'amp' ),
-				'section'  => 'amp_navbar_section',
+				'section'  => 'amp_color_section',
 				'priority' => 10
 			) )
 		);
 
-		// Navbar background color control.
+		// Header background color control.
 		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background', array(
-				'label'    => __( 'Header Background Color', 'amp' ),
-				'section'  => 'amp_navbar_section',
+			new WP_Customize_Color_Control( $this->wp_customize, 'amp_header_background_color', array(
+				'settings'   => 'amp_customizer[header_background_color]',
+				'label'    => __( 'Header Background Color & Link Color', 'amp' ),
+				'section'  => 'amp_color_section',
 				'priority' => 20
 			) )
 		);
+
+		// Background color scheme
+		$this->wp_customize->add_control( 'amp_color_scheme', array(
+			'settings'   => 'amp_customizer[color_scheme]',
+			'label'      => __( 'Color Scheme', 'amp' ),
+			'section'    => 'amp_color_section',
+			'type'       => 'radio',
+			'priority'   => 30,
+			'choices'    => array(
+				'light'   => __( 'Light', 'amp'),
+				'dark'    => __( 'Dark', 'amp' ),
+			),
+		));
+	}
+
+	public function add_customizer_scripts() {
+		wp_enqueue_script( 'wp-util' ); // fix `wp.template is not a function`
 	}
 
 	/**
@@ -223,4 +254,12 @@ class AMP_Template_Customizer {
 	public static function is_amp_customizer() {
 		return ! empty( $_REQUEST[ AMP_CUSTOMIZER_QUERY_VAR ] );
 	}
+}
+
+function _amp_sanitize_color_scheme( $value ) {
+	if ( ! in_array( $value, array( 'light', 'dark' ) ) ) {
+		$value = 'light';
+	}
+
+	return $value;
 }
