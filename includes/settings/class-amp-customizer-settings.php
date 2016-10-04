@@ -31,8 +31,8 @@ class AMP_Customizer_Settings {
 					// Convert and invert colors to greyscale for dark theme color; see http://goo.gl/uVB2cO
 					'theme_color'      => '#111',
 					'text_color'       => '#acacac',
-					'muted_text_color' => '#606060',
-					'border_color'     => '#2b2b2b',
+					'muted_text_color' => '#808080',
+					'border_color'     => '#4b4b4b',
 				);
 
 			case 'light':
