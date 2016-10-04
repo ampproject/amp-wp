@@ -197,7 +197,7 @@ class AMP_Template_Customizer {
 		$this->wp_customize->add_control(
 			new WP_Customize_Color_Control( $this->wp_customize, 'amp_header_background_color', array(
 				'settings'   => 'amp_customizer[header_background_color]',
-				'label'    => __( 'Header Background Color & Link Color', 'amp' ),
+				'label'    => __( 'Header Background & Link Color', 'amp' ),
 				'section'  => 'amp_color_section',
 				'priority' => 20
 			) )
