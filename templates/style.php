@@ -98,7 +98,8 @@ blockquote p:last-child {
 .amp-wp-tax-category,
 .amp-wp-tax-tag,
 .amp-wp-comments-link,
-.amp-wp-footer p {
+.amp-wp-footer p,
+.back-to-top {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
 }
 
@@ -342,26 +343,31 @@ amp-carousel > amp-img > img {
 .amp-wp-footer div {
 	margin: 0 auto;
 	max-width: calc(840px - 32px);
-	padding: 1.5em 16px 1.25em;
+	padding: 1.25em 16px 1.25em;
 	position: relative;
 }
 
 .amp-wp-footer h2 {
 	font-size: 1em;
-	line-height: 1.125em;
+	line-height: 1.375em;
 	margin: 0 0 .5em;
 }
 
 .amp-wp-footer p {
 	color: <?php echo sanitize_hex_color( $muted_text_color ); ?>;
-	font-size: .875em;
+	font-size: .8em;
 	line-height: 1.5em;
-	margin: 0 100px 0 0;
+	margin: 0 85px 0 0;
+}
+
+.amp-wp-footer a {
+	text-decoration: none;
 }
 
 .back-to-top {
-	bottom: 1.5em;
-	font-size: .875em;
+	bottom: 1.275em;
+	font-size: .8em;
+	font-weight: 600;
 	line-height: 2em;
 	position: absolute;
 	right: 16px;
