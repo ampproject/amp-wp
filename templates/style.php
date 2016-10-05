@@ -48,6 +48,10 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 	<?php endif; ?>
 }
 
+html {
+	background: <?php echo sanitize_hex_color( $header_background_color ); ?>;
+}
+
 body {
 	background: <?php echo sanitize_hex_color( $theme_color ); ?>;
 	color: <?php echo sanitize_hex_color( $text_color ); ?>;
