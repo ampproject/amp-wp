@@ -14,7 +14,7 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @var string
 	 */
-	const PANEL_ID = 'amp_template_editor';
+	const PANEL_ID = 'amp_panel';
 
 	/**
 	 * Customizer instance.
@@ -164,6 +164,7 @@ class AMP_Template_Customizer {
 		$this->wp_customize->add_panel( self::PANEL_ID, array(
 			'type'  => 'amp',
 			'title' => __( 'AMP', 'amp' ),
+			'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
 		) );
 	}
 
@@ -175,7 +176,7 @@ class AMP_Template_Customizer {
 	 */
 	public function register_sections() {
 		$this->wp_customize->add_section( 'amp_color_section', array(
-			'title' => __( 'Color Options', 'amp' ),
+			'title' => __( 'Colors & Backgrounds', 'amp' ),
 			'panel' => self::PANEL_ID,
 		) );
 	}
