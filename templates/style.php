@@ -48,6 +48,10 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 	<?php endif; ?>
 }
 
+html {
+	background: <?php echo sanitize_hex_color( $header_background_color ); ?>;
+}
+
 body {
 	background: <?php echo sanitize_hex_color( $theme_color ); ?>;
 	color: <?php echo sanitize_hex_color( $text_color ); ?>;
@@ -128,8 +132,8 @@ blockquote p:last-child {
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
-	background-color: <?php echo $header_color; ?>;
-	border: 1px solid <?php echo $header_color; ?>;
+	background-color: <?php echo sanitize_hex_color( $header_color ); ?>;
+	border: 1px solid <?php echo sanitize_hex_color(  $header_color ); ?>;
 	border-radius: 50%;
 	position: absolute;
 	right: 18px;
