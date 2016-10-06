@@ -12,7 +12,7 @@
 
 <body class="<?php echo esc_attr( $this->get( 'body_class' ) ); ?>">
 
-<?php $this->load_parts( array( 'header' ) ); ?>
+<?php $this->load_parts( array( 'header-bar' ) ); ?>
 
 <article class="amp-wp-article">
 
