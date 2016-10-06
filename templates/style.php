@@ -30,6 +30,7 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 .amp-wp-enforced-sizes {
 	/** Our sizes fallback is 100vw, and we have a padding on the container; the max-width here prevents the element from overflowing. **/
 	max-width: 100%;
+	margin: 0 auto;
 }
 
 .amp-wp-unknown-size img {
