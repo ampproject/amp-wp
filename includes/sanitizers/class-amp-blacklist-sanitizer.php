@@ -211,6 +211,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'embed',
 			'embedvideo',
 
+			// Other weird ones
+			'comments-count',
+
 			// These are converted into amp-* versions
 			//'img',
 			//'video',
@@ -223,6 +226,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		return $this->merge_defaults_with_args( 'add_blacklisted_attributes', array(
 			'style',
 			'size',
+			'clear',
+			'align',
+			'valign',
 		) );
 	}
 }
