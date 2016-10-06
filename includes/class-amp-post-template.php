@@ -350,6 +350,7 @@ class AMP_Post_Template {
 			return;
 		}
 
+		do_action( 'amp_post_template_include_' . $template_type, $this );
 		include( $file );
 	}
 
