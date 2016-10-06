@@ -28,7 +28,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
-			if ( ! array_key_exists( 'src', $old_attributes ) ) {
+			if ( empty( $old_attributes['src'] ) ) {
 				$node->parentNode->removeChild( $node );
 				continue;
 			}
