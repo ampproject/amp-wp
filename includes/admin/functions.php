@@ -9,11 +9,16 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 function amp_init_customizer() {
 	require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 
-	// We don't want core panels in our AMP customizer
+	// Drop core panels (menus, widgets) from the AMP customizer
 	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
 
+	// Fire up the AMP Customizer
 	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );
 
+	// Add some basic design settings + controls to the Customizer
+	add_action( 'amp_init', array( 'AMP_Customizer_Design_Settings', 'init' ) );
+
+	// Add a link to the Customizer
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
 }
 
