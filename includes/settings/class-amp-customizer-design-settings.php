@@ -119,9 +119,9 @@ class AMP_Customizer_Design_Settings {
 			'light' => array(
 				// Convert colors to greyscale for light theme color; see http://goo.gl/2gDLsp
 				'theme_color'      => '#fff',
-				'text_color'       => '#535353',
-				'muted_text_color' => '#9f9f9f',
-				'border_color'     => '#d4d4d4',
+				'text_color'       => '#353535',
+				'muted_text_color' => '#696969',
+				'border_color'     => '#c2c2c2',
 			),
 			'dark' => array(
 				// Convert and invert colors to greyscale for dark theme color; see http://goo.gl/uVB2cO
