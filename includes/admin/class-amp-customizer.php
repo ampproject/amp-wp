@@ -14,7 +14,7 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @var string
 	 */
-	const PANEL_ID = 'amp_template_editor';
+	const PANEL_ID = 'amp_panel';
 
 	/**
 	 * Customizer instance.
@@ -39,6 +39,8 @@ class AMP_Template_Customizer {
 
 		$self->wp_customize = $wp_customize;
 
+		do_action( 'amp_customizer_init', $self );
+
 		// Settings need to be registered for regular customize requests as well (since save is handled there)
 		$self->register_settings();
 
@@ -49,7 +51,7 @@ class AMP_Template_Customizer {
 			}
 
 			$self->_unregister_core_ui();
-			$self->init_ui();
+			$self->register_ui();
 		} elseif ( is_customize_preview() ) {
 			// Delay preview-specific actions until we're sure we're rendering an AMP page, since it's too early for `is_amp_endpoint()` here.
 			add_action( 'pre_amp_render_post', array( $self, 'init_preview' ) );
@@ -92,29 +94,25 @@ class AMP_Template_Customizer {
 		}
 	}
 
-	/**
-	 * Sets up the AMP Customizer preview.
-	 */
 	public function init_preview() {
 		// Preview needs controls registered too for postMessage communication.
-		$this->init_ui();
+		$this->register_ui();
 
-		add_action( 'amp_post_template_footer', array( $this, 'add_preview_scripts'  ) );
+		add_action( 'amp_post_template_footer', array( $this, 'add_preview_scripts' ) );
 	}
 
 	/**
-	 * Sets up the AMP Templates panel and associated Customizer elements and script enqueues.
-	 *
-	 * @since 0.4
-	 * @access public
+	 * Sets up the AMP Customizer preview.
 	 */
-	public function init_ui() {
+	public function register_ui() {
 		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_scripts' ) );
 		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
 
-		$this->register_panel();
-		$this->register_sections();
-		$this->register_controls();
+		$this->wp_customize->add_panel( self::PANEL_ID, array(
+			'type'  => 'amp',
+			'title' => __( 'AMP', 'amp' ),
+			'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
+		) );
 
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
 	}
@@ -126,99 +124,7 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_settings() {
-
-		// Header text color setting
-		$this->wp_customize->add_setting( 'amp_customizer[header_color]', array(
-			'type'              => 'option',
-			'default'           => AMP_Customizer_Settings::DEFAULT_HEADER_COLOR,
-			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage'
-		) );
-
-		// Header background color
-		$this->wp_customize->add_setting( 'amp_customizer[header_background_color]', array(
-			'type'              => 'option',
-			'default'           => AMP_Customizer_Settings::DEFAULT_HEADER_BACKGROUND_COLOR,
-			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage'
-		) );
-
-		// Background color scheme
-		$this->wp_customize->add_setting( 'amp_customizer[color_scheme]', array(
-			'type'              => 'option',
-			'default'           => AMP_Customizer_Settings::DEFAULT_COLOR_SCHEME,
-			'sanitize_callback' => '_amp_sanitize_color_scheme',
-			'transport'         => 'postMessage'
-		) );
-
 		do_action( 'amp_customizer_register_settings', $this->wp_customize );
-	}
-
-	/**
-	 * Registers the AMP Template panel.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function register_panel() {
-		$this->wp_customize->add_panel( self::PANEL_ID, array(
-			'type'  => 'amp',
-			'title' => __( 'AMP', 'amp' ),
-		) );
-	}
-
-	/**
-	 * Registers the AMP Template panel sections.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function register_sections() {
-		$this->wp_customize->add_section( 'amp_color_section', array(
-			'title' => __( 'Color Options', 'amp' ),
-			'panel' => self::PANEL_ID,
-		) );
-	}
-
-	/**
-	 * Registers controls for customizing AMP templates.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function register_controls() {
-		// Header text color control.
-		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_header_color', array(
-				'settings'   => 'amp_customizer[header_color]',
-				'label'    => __( 'Header Text Color', 'amp' ),
-				'section'  => 'amp_color_section',
-				'priority' => 10
-			) )
-		);
-
-		// Header background color control.
-		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_header_background_color', array(
-				'settings'   => 'amp_customizer[header_background_color]',
-				'label'    => __( 'Header Background & Link Color', 'amp' ),
-				'section'  => 'amp_color_section',
-				'priority' => 20
-			) )
-		);
-
-		// Background color scheme
-		$this->wp_customize->add_control( 'amp_color_scheme', array(
-			'settings'   => 'amp_customizer[color_scheme]',
-			'label'      => __( 'Color Scheme', 'amp' ),
-			'section'    => 'amp_color_section',
-			'type'       => 'radio',
-			'priority'   => 30,
-			'choices'    => array(
-				'light'   => __( 'Light', 'amp'),
-				'dark'    => __( 'Dark', 'amp' ),
-			),
-		));
 	}
 
 	public function add_customizer_scripts() {
@@ -242,6 +148,8 @@ class AMP_Template_Customizer {
 			$footer = true
 		);
 
+		do_action( 'amp_customizer_enqueue_preview_scripts', $this->wp_customize );
+
 		/** This action is documented in wp-includes/general-template.php */
 		do_action( 'wp_footer' );
 	}
@@ -258,12 +166,4 @@ class AMP_Template_Customizer {
 	public static function is_amp_customizer() {
 		return ! empty( $_REQUEST[ AMP_CUSTOMIZER_QUERY_VAR ] );
 	}
-}
-
-function _amp_sanitize_color_scheme( $value ) {
-	if ( ! in_array( $value, array( 'light', 'dark' ) ) ) {
-		$value = 'light';
-	}
-
-	return $value;
 }
