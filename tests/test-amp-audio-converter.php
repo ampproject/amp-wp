@@ -79,7 +79,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 			'https_required' => array(
 				'<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>',
-				'<blockquote class="amp-wp-fallback amp-wp-audio-fallback">Could not load <a href="http://example.com/audio/file.ogg">audio</a>.</blockquote>',
+				'<blockquote class="amp-wp-fallback">Could not load <a href="http://example.com/audio/file.ogg">audio</a>.</blockquote>',
 			),
 		);
 	}
@@ -97,7 +97,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 	public function test__https_required() {
 		$source = '<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>';
-		$expected = '<blockquote class="amp-wp-fallback amp-wp-audio-fallback">Could not load <a href="http://example.com/audio/file.ogg">audio</a>.</blockquote>';
+		$expected = '<blockquote class="amp-wp-fallback">Could not load <a href="http://example.com/audio/file.ogg">audio</a>.</blockquote>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom, array(

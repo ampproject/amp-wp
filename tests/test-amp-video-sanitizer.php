@@ -80,7 +80,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'https_required' => array(
 				'<video width="300" height="300" src="http://example.com/video.mp4"></video>',
-				'<blockquote class="amp-wp-fallback amp-wp-video-fallback">Could not load <a href="http://example.com/video.mp4">video</a>.</blockquote>',
+				'<blockquote class="amp-wp-fallback">Could not load <a href="http://example.com/video.mp4">video</a>.</blockquote>',
 			),
 		);
 	}
@@ -98,7 +98,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	public function test__https_required() {
 		$source = '<video width="300" height="300" src="http://example.com/video.mp4"></video>';
-		$expected = '<blockquote class="amp-wp-fallback amp-wp-video-fallback">Could not load <a href="http://example.com/video.mp4">video</a>.</blockquote>';
+		$expected = '<blockquote class="amp-wp-fallback">Could not load <a href="http://example.com/video.mp4">video</a>.</blockquote>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom, array(

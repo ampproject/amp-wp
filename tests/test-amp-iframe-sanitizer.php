@@ -15,7 +15,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 			'force_https' => array(
 				'<iframe src="http://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
-				'<blockquote class="amp-wp-fallback amp-wp-iframe-fallback">Could not load <a href="http://example.com/embed/132886713">iframe</a>.</blockquote>',
+				'<blockquote class="amp-wp-fallback">Could not load <a href="http://example.com/embed/132886713">iframe</a>.</blockquote>',
 			),
 
 			'iframe_without_dimensions' => array(
@@ -116,7 +116,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	public function test__https_required() {
 		$source = '<iframe src="http://example.com/embed/132886713"></iframe>';
-		$expected = '<blockquote class="amp-wp-fallback amp-wp-iframe-fallback">Could not load <a href="http://example.com/embed/132886713">iframe</a>.</blockquote>';
+		$expected = '<blockquote class="amp-wp-fallback">Could not load <a href="http://example.com/embed/132886713">iframe</a>.</blockquote>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom, array(
