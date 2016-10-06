@@ -37,7 +37,7 @@ function amp_add_customizer_link() {
 		'autofocus[panel]'         => AMP_Template_Customizer::PANEL_ID,
 		'url'                      => rawurlencode( $permalink ),
 		'return'                   => rawurlencode( admin_url() ),
-		AMP_CUSTOMIZER_QUERY_VAR   => true
+		AMP_CUSTOMIZER_QUERY_VAR   => true,
 	), 'customize.php' );
 
 	// Add the theme page.
@@ -61,17 +61,19 @@ function amp_admin_get_preview_permalink() {
 		return;
 	}
 
-	$post_id = get_posts( array(
+	$post_ids = get_posts( array(
 		'post_status'      => 'publish',
 		'post_type'        => $post_type,
 		'posts_per_page'   => 1,
 		'fields'           => 'ids',
-		'suppress_filters' => false
+		'suppress_filters' => false,
 	) );
 
-	if ( ! $post_id ) {
+	if ( empty( $post_ids ) ) {
 		return false;
 	}
+
+	$post_id = $post_ids[0];
 
 	return amp_get_permalink( $post_id );
 }
