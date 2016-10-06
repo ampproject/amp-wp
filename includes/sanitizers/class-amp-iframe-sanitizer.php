@@ -49,22 +49,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			// Otherwise remove the node.
 			if ( empty( $new_attributes['src'] ) ) {
 				if ( ! empty( $orig_src ) ) {
-					$fallback_node = AMP_DOM_Utils::create_node(
-						$this->dom,
-						'blockquote',
-						array(
-							'class' => 'amp-wp-fallback amp-wp-iframe-fallback'
-						)
-					);
-
-					$fallback_content = $this->dom->createDocumentFragment();
-					$fallback_content->appendXML( sprintf(
+					$fallback_node = $this->create_fallback_node(
+						sprintf(
 							wp_kses( __( 'Could not load <a href="%s">iframe</a>.', 'amp' ), array( 'a' => array( 'href' => true ) ) ),
 							esc_url( $orig_src )
 						)
 					);
-
-					$fallback_node->appendChild( $fallback_content );
 
 					$node->parentNode->replaceChild( $fallback_node, $node );
 				} else {

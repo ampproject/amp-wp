@@ -121,4 +121,25 @@ abstract class AMP_Base_Sanitizer {
 
 		return $src;
 	}
+
+	protected function create_fallback_node( $content, $container_el = 'blockquote', $attributes = array() ) {
+		$defaults = array(
+			'class' => 'amp-wp-fallback',
+		);
+		$attributes = wp_parse_args( $attributes, $defaults );
+
+		$fallback_node = AMP_DOM_Utils::create_node(
+			$this->dom,
+			$container_el,
+			$attributes
+		);
+
+		if ( $content ) {
+			$fallback_content = $this->dom->createDocumentFragment();
+			$fallback_content->appendXML( $content );
+			$fallback_node->appendChild( $fallback_content );
+		}
+
+		return $fallback_node;
+	}
 }
