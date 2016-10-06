@@ -129,6 +129,7 @@ class AMP_Template_Customizer {
 
 	public function add_customizer_scripts() {
 		wp_enqueue_script( 'wp-util' ); // fix `wp.template is not a function`
+		do_action( 'amp_customizer_enqueue_scripts' );
 	}
 
 	/**
