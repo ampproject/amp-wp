@@ -106,9 +106,22 @@ abstract class AMP_Base_Sanitizer {
 		$protocol = strtok( $src, ':' );
 
 		if ( $protocol === $src && ( $https_required || $force_https ) ) {
-			// src has relative protocol, ie //example.com/asdf, so add https.
-			$src = set_url_scheme( $src, 'https' );
-		} else if ( 'https' !== $protocol ) {
+			if ( 0 === strpos( $src, '//' ) ) {
+				// src has relative protocol, ie //example.com/asdf, so add https
+				$src = set_url_scheme( $src, 'https' );
+			} else if ( 0 === strpos( $src, '/' ) ) {
+				// src is URL relative to the site root
+				$src = home_url( $src );
+			} else {
+				// src is URL relative to current URI
+				global $wp;
+				$src = home_url( trailingslashit( $wp->request ) . $src );
+			}
+
+			$protocol = strtok( $src, ':' );
+		}
+
+		if ( 'https' !== $protocol ) {
 			// Check if https is required
 			if ( $https_required ) {
 				// Remove the src. Let the implementing class decide what do from here.
