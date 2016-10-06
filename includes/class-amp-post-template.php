@@ -24,6 +24,10 @@ class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
 	const CONTENT_MAX_WIDTH = 600;
 
+	// Needed for 0.3 back-compat
+	const DEFAULT_NAVBAR_BACKGROUND = '#0a89c0';
+	const DEFAULT_NAVBAR_COLOR = '#fff';
+
 	private $template_dir;
 	private $data;
 
