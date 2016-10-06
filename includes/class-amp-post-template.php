@@ -58,6 +58,8 @@ class AMP_Post_Template {
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
 
+			'customizer_settings' => array(),
+
 			'font_urls' => array(
 				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
 			),
@@ -350,6 +352,7 @@ class AMP_Post_Template {
 			return;
 		}
 
+		do_action( 'amp_post_template_include_' . $template_type, $this );
 		include( $file );
 	}
 
