@@ -13,7 +13,7 @@
 	// Nav bar background color.
 	wp.customize( 'amp_customizer[header_background_color]', function( value ) {
 		value.bind( function( to ) {
-			$( '.amp-wp-header' ).css( 'background-color', to );
+			$( 'html, .amp-wp-header' ).css( 'background-color', to );
 			$( '.amp-wp-article a, .amp-wp-article a:visited, .amp-wp-footer a, .amp-wp-footer a:visited' ).css( 'color', to );
 			$( 'blockquote, .amp-wp-byline amp-img' ).css( 'border-color', to );
 		} );
