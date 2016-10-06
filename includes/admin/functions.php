@@ -26,16 +26,9 @@ function amp_init_customizer() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
-	$permalink = amp_admin_get_preview_permalink();
-
-	if ( ! $permalink ) {
-		return;
-	}
-
 	// Teensy little hack on menu_slug, but it works. No redirect!
 	$menu_slug = add_query_arg( array(
 		'autofocus[panel]'         => AMP_Template_Customizer::PANEL_ID,
-		'url'                      => rawurlencode( $permalink ),
 		'return'                   => rawurlencode( admin_url() ),
 		AMP_CUSTOMIZER_QUERY_VAR   => true,
 	), 'customize.php' );
@@ -66,7 +59,6 @@ function amp_admin_get_preview_permalink() {
 		'post_type'        => $post_type,
 		'posts_per_page'   => 1,
 		'fields'           => 'ids',
-		'suppress_filters' => false,
 	) );
 
 	if ( empty( $post_ids ) ) {
