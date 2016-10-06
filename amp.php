@@ -13,6 +13,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
+define( 'AMP__VERSION', '0.3.3' );
 
 require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
