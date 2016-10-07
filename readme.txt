@@ -62,6 +62,8 @@ A wise green Yoda once said, "Patience you must have, my young padawan." We're w
 - Fix: no more unnecessary `<br>` tags.
 - Fix: sanitize children of removed nodes (like empty `<a>` tags) (props Maxime2).
 - Fix: no more broken YouTube URLs with multiple ?s.
+- Fix: properly handle tel and sms schemes (h/t soundstrategies).
+- Fix: remove amp endpoint on deactivate.
 - New filter: `amp_pre_get_permalink` if you want a completely custom AMP permalink.
 
 = 0.3.3 (Aug 18, 2016) =
