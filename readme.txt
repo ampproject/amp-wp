@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.4
 Tested up to: 4.6
-Stable tag: 0.3.3
+Stable tag: 0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,21 +25,44 @@ Follow along with or contribute to the development of this plugin at https://git
 
 1. Upload the folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
+1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button. 
 
 == Frequently Asked Questions ==
 
 = How do I customize the AMP output for my site? =
 
-You can find details about customization options at https://github.com/Automattic/amp-wp/blob/master/readme.md
+You can tweak a few things like colours from the AMP Customizer. From the Dashboard, go to `Appearance > AMP`.
+
+For deeper level customizations, please see the readme at https://github.com/Automattic/amp-wp/blob/master/readme.md
+
+= What about ads and shortcodes and such? =
+
+Check out https://github.com/Automattic/amp-wp/blob/master/readme.md#handling-media
+
+= What about analytics? =
+
+Many plugins are adding AMP support already. If you handling analytics yourself, please see https://github.com/Automattic/amp-wp/blob/master/readme.md#analytics
+
+= Google Webmaster Tools is reporting validation errors for my site. How do I fix them? =
+
+The best place to start is to open a new discussion in the [support forum](https://wordpress.org/support/plugin/amp) with details on what the specific validation error is.
+
+= Why aren't Pages supported yet =
+
+A wise green Yoda once said, "Patience you must have, my young padawan." We're working on it :)
 
 == Changelog ==
 
-= 0.4 (in-progress) =
+= 0.4 (2016-10-06) =
 
-- AMP Customizer: You can now tweak some colours and select your site icon from the AMP Customizer (props DrewAPicture and 10up)
-- Pages
-- Customizer
-- Updated Template
+- New template: spiffy, shiny, and has the fresh theme smell (props allancole and the Automattic Theme Team).
+- AMP Customizer: Pick your colours and make the template your own (props DrewAPicture and 10up)
+- Fix: support for inline styles (props coreymckrill).
+- Fix: no more fatal errors when tags not supported by post type (props david-binda)
+- Fix: no more unnecessary `<br>` tags.
+- Fix: sanitize children of removed nodes (like empty `<a>` tags) (props Maxime2).
+- Fix: no more broken YouTube URLs with multiple ?s.
+- New filter: `amp_pre_get_permalink` if you want a completely custom AMP permalink.
 
 = 0.3.3 (Aug 18, 2016) =
 
@@ -100,6 +123,16 @@ You can find details about customization options at https://github.com/Automatti
 * Initial version
 
 == Upgrade Notice ==
+
+= 0.4 =
+
+* Breaking change: The new template has changes to markup, class names, and styles that may not work with existing customizations. If you want to stay on the old template for now, you can use the following code snippet:
+
+```
+if ( function_exists( 'amp_backcompat_use_v03_templates' ) ) {
+    amp_backcompat_use_v03_templates();
+}
+```
 
 = 0.3.1 =
 
