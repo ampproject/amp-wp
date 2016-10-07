@@ -146,9 +146,15 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
+		$special_protocols = array( 'tel', 'sms' ); // these ones don't valid with `filter_var+FILTER_VALIDATE_URL`
 		$protocol = strtok( $href, ':' );
+
 		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
-			|| ! in_array( $protocol, $valid_protocols ) ) {
+			&& ! in_array( $protocol, $special_protocols ) ) {
+			return false;
+		}
+
+		if ( ! in_array( $protocol, $valid_protocols ) ) {
 			return false;
 		}
 
