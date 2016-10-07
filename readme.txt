@@ -136,6 +136,8 @@ if ( function_exists( 'amp_backcompat_use_v03_templates' ) ) {
 }
 ```
 
+For more details, please see https://wordpress.org/support/topic/v0-4-whats-new-and-possible-breaking-changes/
+
 = 0.3.1 =
 
 * Breaking change: `AMP_QUERY_VAR` is now defined right before `amp_init`.
