@@ -23,12 +23,23 @@ require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-setti
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
-	amp_init();
+	if ( ! did_action( 'amp_init' ) ) {
+		amp_init();
+	}
 	flush_rewrite_rules();
 }
 
 register_deactivation_hook( __FILE__, 'amp_deactivate' );
 function amp_deactivate() {
+	// We need to manually remove the amp endpoint
+	global $wp_rewrite;
+	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
+		if ( AMP_QUERY_VAR === $endpoint[1] ) {
+			unset( $wp_rewrite->endpoints[ $index ] );
+			break;
+		}
+	}
+
 	flush_rewrite_rules();
 }
 
