@@ -113,6 +113,26 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'Link',
 			),
 
+			'a_with_href_scheme_invalid' => array(
+				'<a href="wp://alinktosomething">Link</a>',
+				'Link',
+			),
+
+			'a_with_href_scheme_tel' => array(
+				'<a href="tel:4166669999">Call Me, Maybe</a>',
+				'<a href="tel:4166669999">Call Me, Maybe</a>',
+			),
+
+			'a_with_href_scheme_sms' => array(
+				'<a href="sms:4166669999">SMS Me, Maybe</a>',
+				'<a href="sms:4166669999">SMS Me, Maybe</a>',
+			),
+
+			'a_with_href_scheme_mailto' => array(
+				'<a href="mailto:email@example.com">Email Me, Maybe</a>',
+				'<a href="mailto:email@example.com">Email Me, Maybe</a>',
+			),
+
 			'a_with_href_relative' => array(
 				'<a href="/home">Home</a>',
 				'<a href="/home">Home</a>',
