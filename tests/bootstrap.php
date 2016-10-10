@@ -9,7 +9,10 @@ require_once $_tests_dir . '/includes/functions.php';
 
 function _manually_load_plugin() {
 	require dirname( dirname( __FILE__ ) ) . '/amp.php';
+
 	amp_load_classes();
+
+	require dirname( __FILE__ ) . '/stubs.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 

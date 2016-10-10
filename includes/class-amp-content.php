@@ -82,10 +82,28 @@ class AMP_Content {
 	}
 
 	private function sanitize( $content ) {
+		list( $sanitized_content, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $content, $this->sanitizer_classes, $this->args );
+
+		$this->add_scripts( $scripts );
+		$this->add_styles( $styles );
+
+		return $sanitized_content;
+	}
+}
+
+class AMP_Content_Sanitizer {
+	public static function sanitize( $content, $sanitizer_classes, $args = array() ) {
+		$scripts = array();
+		$styles = array();
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
-		foreach ( $this->sanitizer_classes as $sanitizer_class => $args ) {
-			$sanitizer = new $sanitizer_class( $dom, array_merge( $this->args, $args ) );
+		foreach ( $sanitizer_classes as $sanitizer_class => $args ) {
+			if ( ! class_exists( $sanitizer_class ) ) {
+				_doing_it_wrong( __METHOD__, sprintf( __( 'Sanitizer (%s) class does not exist', 'amp' ), esc_html( $sanitizer_class ) ), '0.4.1' );
+				continue;
+			}
+
+			$sanitizer = new $sanitizer_class( $dom, array_merge( $args, $args ) );
 
 			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {
 				_doing_it_wrong( __METHOD__, sprintf( __( 'Sanitizer (%s) must extend `AMP_Base_Sanitizer`', 'amp' ), esc_html( $sanitizer_class ) ), '0.1' );
@@ -93,10 +111,13 @@ class AMP_Content {
 			}
 
 			$sanitizer->sanitize();
-			$this->add_scripts( $sanitizer->get_scripts() );
-			$this->add_styles( $sanitizer->get_styles() );
+
+			$scripts = array_merge( $scripts, $sanitizer->get_scripts() );
+			$styles = array_merge( $styles, $sanitizer->get_styles() );
 		}
 
-		return AMP_DOM_Utils::get_content_from_dom( $dom );
+		$sanitized_content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		return array( $sanitized_content, $scripts, $styles );
 	}
 }

@@ -1,10 +1,4 @@
 <?php
-// stub class since AMP_Base_Sanitizer is abstract
-class AMP_Stub_Sanitizer extends AMP_Base_Sanitizer {
-	public function sanitize() {
-		return $this->dom;
-	}
-}
 
 class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase {
 	public function get_data() {
@@ -106,7 +100,7 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 	 * @dataProvider get_data
 	 */
 	public function test_enforce_sizes_attribute( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer = new AMP_Stub_Sanitizer( new DOMDocument, $args );
+		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
 		$returned_attributes = $sanitizer->enforce_sizes_attribute( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
@@ -172,7 +166,7 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_enforce_fixed_height( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer = new AMP_Stub_Sanitizer( new DOMDocument, $args );
+		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
 		$returned_attributes = $sanitizer->enforce_fixed_height( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
@@ -240,7 +234,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_enforce_sizes_attribute( $source_params, $expected_value, $args = array() ) {
-		$sanitizer = new AMP_Stub_Sanitizer( new DOMDocument, $args );
+		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
 		list( $value, $dimension ) = $source_params;
 
 		$actual_value = $sanitizer->sanitize_dimension( $value, $dimension );
