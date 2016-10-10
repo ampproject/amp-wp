@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.4
 Tested up to: 4.6
-Stable tag: 0.4
+Stable tag: 0.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,11 @@ The best place to start is to open a new discussion in the [support forum](https
 A wise green Yoda once said, "Patience you must have, my young padawan." We're working on it :)
 
 == Changelog ==
+
+= 0.4.1 (2016-10-10 =
+
+- Fix: Don't fire the_content for featured image output
+- Fix: Don't show comment link when disabled and no comments on post (h/t neotrope)
 
 = 0.4 (2016-10-06) =
 
