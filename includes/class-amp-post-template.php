@@ -196,8 +196,16 @@ class AMP_Post_Template {
 			return;
 		}
 
+		$comments_open = comments_open( $this->ID );
+
+		// Don't show link if close and no comments 
+		if ( ! $comments_open
+			&& ! $this->post->comment_count ) {
+			return;
+		}
+
 		$comments_link_url = get_comments_link( $this->ID );
-		$comments_link_text = comments_open( $this->ID )
+		$comments_link_text = $comments_open
 			? __( 'Leave a Comment', 'amp' )
 			: __( 'View Comments', 'amp' );
 
