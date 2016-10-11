@@ -57,6 +57,7 @@ A wise green Yoda once said, "Patience you must have, my young padawan." We're w
 
 - Fix: Don't fire the_content for featured image output
 - Fix: Don't show comment link when disabled and no comments on post (h/t neotrope)
+- Fix: strip `!important` from inline styles (h/t compointdesigner and enriccardonagmailcom)
 
 = 0.4 (2016-10-06) =
 
