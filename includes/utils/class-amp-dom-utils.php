@@ -45,6 +45,10 @@ class AMP_DOM_Utils {
 
 	public static function get_node_attributes_as_assoc_array( $node ) {
 		$attributes = array();
+		if ( ! $node->hasAttributes() ) {
+			return $attributes;
+		}
+
 		foreach ( $node->attributes as $attribute ) {
 			$attributes[ $attribute->nodeName ] = $attribute->nodeValue;
 		}
