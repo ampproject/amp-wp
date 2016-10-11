@@ -62,6 +62,7 @@ A wise green Yoda once said, "Patience you must have, my young padawan." We're w
 = 0.4 (2016-10-06) =
 
 - New template: spiffy, shiny, and has the fresh theme smell (props allancole and the Automattic Theme Team).
+- *Warning*: The template update has potential breaking changes. Please see https://wordpress.org/support/topic/v0-4-whats-new-and-possible-breaking-changes/
 - AMP Customizer: Pick your colours and make the template your own (props DrewAPicture and 10up)
 - Fix: support for inline styles (props coreymckrill).
 - Fix: no more fatal errors when tags not supported by post type (props david-binda)
