@@ -92,7 +92,7 @@ class AMP_Content {
 }
 
 class AMP_Content_Sanitizer {
-	public static function sanitize( $content, $sanitizer_classes, $args = array() ) {
+	public static function sanitize( $content, $sanitizer_classes, $global_args = array() ) {
 		$scripts = array();
 		$styles = array();
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
@@ -103,7 +103,7 @@ class AMP_Content_Sanitizer {
 				continue;
 			}
 
-			$sanitizer = new $sanitizer_class( $dom, array_merge( $args, $args ) );
+			$sanitizer = new $sanitizer_class( $dom, array_merge( $global_args, $args ) );
 
 			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {
 				_doing_it_wrong( __METHOD__, sprintf( __( 'Sanitizer (%s) must extend `AMP_Base_Sanitizer`', 'amp' ), esc_html( $sanitizer_class ) ), '0.1' );
