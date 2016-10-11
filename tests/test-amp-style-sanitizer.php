@@ -62,6 +62,37 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(),
 			),
 
+			'!important_not_allowed' => array(
+				'<span style="margin: 1px!important;">!important not allowed.</span>',
+				'<span class="amp-wp-inline-b370df7c42957a3192cac40a8ddcff79">!important not allowed.</span>',
+				array(
+					'.amp-wp-inline-b370df7c42957a3192cac40a8ddcff79' => array(
+						'margin:1px',
+					),
+				),
+			),
+
+			'!important_with_spaces_not_allowed' => array(
+				'<span style="color: red  !  important;">!important not allowed.</span>',
+				'<span class="amp-wp-inline-5b88d03e432f20476a218314084d3a05">!important not allowed.</span>',
+				array(
+					'.amp-wp-inline-5b88d03e432f20476a218314084d3a05' => array(
+						'color:red',
+					),
+				),
+			),
+
+			'!important_multiple_not_allowed' => array(
+				'<span style="color: red !important; background: blue!important;">!important not allowed.</span>',
+				'<span class="amp-wp-inline-ef4329d562b6b3486a8a661df5c5280f">!important not allowed.</span>',
+				array(
+					'.amp-wp-inline-ef4329d562b6b3486a8a661df5c5280f' => array(
+						'background:blue',
+						'color:red',
+					),
+				),
+			),
+
 			'two_nodes' => array(
 				'<span style="color: #00ff00;"><span style="color: #ff0000;">This is red.</span></span>',
 				'<span class="amp-wp-inline-ad0e57ab02197f7023aa5b93bcf6c97e"><span class="amp-wp-inline-f146f9bb819d875bbe5cf83e36368b44">This is red.</span></span>',
