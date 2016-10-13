@@ -270,7 +270,7 @@ class AMP_Post_Template {
 
 		$featured_image = get_post( $featured_id );
 
-		list( $sanitized_html ) = AMP_Content_Sanitizer::sanitize(
+		list( $sanitized_html, $featured_scripts, $featured_styles ) = AMP_Content_Sanitizer::sanitize(
 			$featured_html,
 			array( 'AMP_Img_Sanitizer' => array() ),
 			array(
@@ -282,6 +282,14 @@ class AMP_Post_Template {
 			'amp_html' => $sanitized_html,
 			'caption' => $featured_image->post_excerpt,
 		) );
+
+		if ( $featured_scripts ) {
+			$this->merge_data_for_key( 'amp_component_scripts', $featured_scripts );
+		}
+
+		if ( $featured_styles ) {
+			$this->add_data_by_key( 'post_amp_styles', $featured_styles );
+		}
 	}
 
 	private function build_customizer_settings() {
