@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.4
 Tested up to: 4.6
-Stable tag: 0.4.1
+Stable tag: 0.4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,7 +53,16 @@ A wise green Yoda once said, "Patience you must have, my young padawan." We're w
 
 == Changelog ==
 
-= 0.4.1 (2016-10-10 =
+= 0.4.2 (2016-10-13) =
+
+- Fix: Prevent validation errors for `html` tag (h/t Maxime2 and everyone else that reported this error)
+- Fix: Handle variable name conflict that was causing content_max_width to be ignored (h/t mimancillas)
+- Fix: Prevent errors when nodes don't have attributes (h/t stephenmax)
+- Fix: Back-compat for 4.5 (add sanitize_hex_color function, h/t xotihcan)
+- Fix: Handle gif featured images (h/t protocolil)
+- Documentation updates (props troyxmccall)
+
+= 0.4.1 (2016-10-10) =
 
 - Fix: Don't fire the_content for featured image output
 - Fix: Don't show comment link when disabled and no comments on post (h/t neotrope)
