@@ -2,12 +2,12 @@
 
 class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	public static function force_remove_extraction_callbacks() {
-		remove_all_filters( 'amp_extract_image_dimensions' );
+		remove_all_filters( 'amp_extract_image_dimensions_batch' );
 	}
 
 	public function setUp() {
 		parent::setUp();
-		add_action( 'amp_extract_image_dimensions_callbacks_registered', array( __CLASS__, 'force_remove_extraction_callbacks' ) );
+		add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', array( __CLASS__, 'force_remove_extraction_callbacks' ) );
 	}
 
 	public function get_data() {

@@ -14,9 +14,9 @@ class AMP_Image_Dimension_Extractor {
 			$url = self::normalize_url( $url );
 		}
 
-		$dimensions = apply_filters( 'amp_extract_image_dimensions', $urls );
+		$dimensions = apply_filters( 'amp_extract_image_dimensions_batch', $urls );
 
-		if ( has_filter( 'amp_extract_image_dimensions' ) ) {
+		if ( has_filter( 'amp_extract_image_dimensions_batch' ) ) {
 			return $dimensions;
 		} else {
 			return self::normalize_value_returned_by_extract( $dimensions );
@@ -24,13 +24,13 @@ class AMP_Image_Dimension_Extractor {
 	}
 
 	/**
-	 * Account for the possibility of the amp_extract_image_dimensions filter being removed (see AMP_Img_Sanitizer_Test)
+	 * Account for the possibility of the amp_extract_image_dimensions_batch filter being removed (see AMP_Img_Sanitizer_Test)
 	 *
-	 * Not surprisingly, the functions invoked by the amp_extract_image_dimensions filter modify the value returned by
+	 * Not surprisingly, the functions invoked by the amp_extract_image_dimensions_batch filter modify the value returned by
 	 * AMP_Image_Dimension_Extractor::extract. For that reason, the return value has to be massaged before being returned
-	 * when the amp_extract_image_dimensions filter is removed via tests.
+	 * when the amp_extract_image_dimensions_batch filter is removed via tests.
 	 *
-	 * @param array $urls A list or urls that would have had dimensions fetched had amp_extract_image_dimensions filter not been removed
+	 * @param array $urls A list or urls that would have had dimensions fetched had amp_extract_image_dimensions_batch filter not been removed
 	 */
 	private static function normalize_value_returned_by_extract( $urls ) {
 	    $dimensions = array();
@@ -71,9 +71,9 @@ class AMP_Image_Dimension_Extractor {
 	private static function register_callbacks() {
 		self::$callbacks_registered = true;
 
-		add_filter( 'amp_extract_image_dimensions', array( __CLASS__, 'extract_by_downloading_images' ), 999, 1 );
+		add_filter( 'amp_extract_image_dimensions_batch', array( __CLASS__, 'extract_by_downloading_images' ), 999, 1 );
 
-		do_action( 'amp_extract_image_dimensions_callbacks_registered' );
+		do_action( 'amp_extract_image_dimensions_batch_callbacks_registered' );
 	}
 
 	/**
