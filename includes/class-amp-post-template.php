@@ -232,7 +232,8 @@ class AMP_Post_Template {
 				 'AMP_Video_Sanitizer' => array(),
 				 'AMP_Audio_Sanitizer' => array(),
 				 'AMP_Iframe_Sanitizer' => array(
-					 'add_placeholder' => true,
+					'add_placeholder' => true,
+					'content_max_width' => $this->get( 'content_max_width' ),
 				 ),
 			), $this->post ),
 			array(
