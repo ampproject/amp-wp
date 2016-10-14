@@ -25,6 +25,14 @@ function amp_post_template_add_scripts( $amp_template ) {
 	<?php
 }
 
+add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
+function amp_post_template_add_fonts( $amp_template ) {
+	$font_urls = $amp_template->get( 'font_urls', array() );
+	foreach( $font_urls as $slug => $url ) : ?>
+		<link rel="stylesheet" href="<?php echo esc_url( $url ); ?>">
+	<?php endforeach;
+}
+
 add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
 function amp_post_template_add_boilerplate_css( $amp_template ) {
 	?>
@@ -41,6 +49,18 @@ function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 	?>
 	<script type="application/ld+json"><?php echo json_encode( $metadata ); ?></script>
 	<?php
+}
+
+add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
+function amp_post_template_add_styles( $amp_template ) {
+	$styles = $amp_template->get( 'post_amp_styles' );
+	if ( ! empty( $styles ) ) {
+		echo '/* Inline styles */' . PHP_EOL;
+		foreach ( $styles as $selector => $declarations ) {
+			$declarations = implode( ";", $declarations ) . ";";
+			printf( '%1$s{%2$s}', $selector, $declarations );
+		}
+	}
 }
 
 add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );

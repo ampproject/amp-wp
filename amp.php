@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.3.3
+ * Version: 0.4.2
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -13,18 +13,33 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
+define( 'AMP__VERSION', '0.4.2' );
 
+require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 require_once( AMP__DIR__ . '/includes/admin/functions.php' );
+require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
+require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
-	amp_init();
+	if ( ! did_action( 'amp_init' ) ) {
+		amp_init();
+	}
 	flush_rewrite_rules();
 }
 
 register_deactivation_hook( __FILE__, 'amp_deactivate' );
 function amp_deactivate() {
+	// We need to manually remove the amp endpoint
+	global $wp_rewrite;
+	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
+		if ( AMP_QUERY_VAR === $endpoint[1] ) {
+			unset( $wp_rewrite->endpoints[ $index ] );
+			break;
+		}
+	}
+
 	flush_rewrite_rules();
 }
 
@@ -98,6 +113,7 @@ function amp_add_frontend_actions() {
 
 function amp_add_post_template_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
+	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
 }
 
 function amp_prepare_render() {

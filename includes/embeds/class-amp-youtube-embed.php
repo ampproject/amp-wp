@@ -5,7 +5,8 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' )
 // Much of this class is borrowed from Jetpack embeds
 class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'youtu.be';
-	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|playlist|watch[/\#?])|youtu\.be/).*#i';
+	// Only handling single videos. Playlists are handled elsewhere.
+	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|watch[/\#?])|youtu\.be/).*#i';
 	const RATIO = 0.5625;
 
 	protected $DEFAULT_WIDTH = 600;

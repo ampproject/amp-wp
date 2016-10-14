@@ -14,7 +14,7 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @var string
 	 */
-	const PANEL_ID = 'amp_template_editor';
+	const PANEL_ID = 'amp_panel';
 
 	/**
 	 * Customizer instance.
@@ -39,13 +39,19 @@ class AMP_Template_Customizer {
 
 		$self->wp_customize = $wp_customize;
 
+		do_action( 'amp_customizer_init', $self );
+
 		// Settings need to be registered for regular customize requests as well (since save is handled there)
 		$self->register_settings();
 
 		// Our custom panels only need to go for AMP Customizer requests though
 		if ( self::is_amp_customizer() ) {
+			if ( empty( $_GET['url'] ) ) {
+				$wp_customize->set_preview_url( amp_admin_get_preview_permalink() );
+			}
+
 			$self->_unregister_core_ui();
-			$self->init_ui();
+			$self->register_ui();
 		} elseif ( is_customize_preview() ) {
 			// Delay preview-specific actions until we're sure we're rendering an AMP page, since it's too early for `is_amp_endpoint()` here.
 			add_action( 'pre_amp_render_post', array( $self, 'init_preview' ) );
@@ -88,28 +94,25 @@ class AMP_Template_Customizer {
 		}
 	}
 
-	/**
-	 * Sets up the AMP Customizer preview.
-	 */
 	public function init_preview() {
 		// Preview needs controls registered too for postMessage communication.
-		$this->init_ui();
+		$this->register_ui();
 
-		add_action( 'amp_post_template_footer', array( $this, 'add_preview_scripts'  ) );
+		add_action( 'amp_post_template_footer', array( $this, 'add_preview_scripts' ) );
 	}
 
 	/**
-	 * Sets up the AMP Templates panel and associated Customizer elements and script enqueues.
-	 *
-	 * @since 0.4
-	 * @access public
+	 * Sets up the AMP Customizer preview.
 	 */
-	public function init_ui() {
+	public function register_ui() {
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_scripts' ) );
 		add_filter( 'customize_previewable_devices', array( $this, 'force_mobile_preview' ) );
 
-		$this->register_panel();
-		$this->register_sections();
-		$this->register_controls();
+		$this->wp_customize->add_panel( self::PANEL_ID, array(
+			'type'  => 'amp',
+			'title' => __( 'AMP', 'amp' ),
+			'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
+		) );
 
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
 	}
@@ -121,73 +124,12 @@ class AMP_Template_Customizer {
 	 * @access public
 	 */
 	public function register_settings() {
-		// Navbar text color setting.
-		$this->wp_customize->add_setting( 'amp_navbar_color', array(
-			'default'           => '#ffffff',
-			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage'
-		) );
-
-		// Navbar background color setting.
-		$this->wp_customize->add_setting( 'amp_navbar_background', array(
-			'default'           => '#0a89c0',
-			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage'
-		) );
-
 		do_action( 'amp_customizer_register_settings', $this->wp_customize );
 	}
 
-	/**
-	 * Registers the AMP Template panel.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function register_panel() {
-		$this->wp_customize->add_panel( self::PANEL_ID, array(
-			'type'            => 'amp',
-			'title'           => __( 'AMP', 'amp' ),
-		) );
-	}
-
-	/**
-	 * Registers the AMP Template panel sections.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function register_sections() {
-		$this->wp_customize->add_section( 'amp_navbar_section', array(
-			'title' => __( 'Navigation Bar', 'amp' ),
-			'panel' => self::PANEL_ID,
-		) );
-	}
-
-	/**
-	 * Registers controls for customizing AMP templates.
-	 *
-	 * @since 0.4
-	 * @access public
-	 */
-	public function register_controls() {
-		// Navbar text color control.
-		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_color', array(
-				'label'    => __( 'Header Text Color', 'amp' ),
-				'section'  => 'amp_navbar_section',
-				'priority' => 10
-			) )
-		);
-
-		// Navbar background color control.
-		$this->wp_customize->add_control(
-			new WP_Customize_Color_Control( $this->wp_customize, 'amp_navbar_background', array(
-				'label'    => __( 'Header Background Color', 'amp' ),
-				'section'  => 'amp_navbar_section',
-				'priority' => 20
-			) )
-		);
+	public function add_customizer_scripts() {
+		wp_enqueue_script( 'wp-util' ); // fix `wp.template is not a function`
+		do_action( 'amp_customizer_enqueue_scripts' );
 	}
 
 	/**
@@ -206,6 +148,8 @@ class AMP_Template_Customizer {
 			$version = false,
 			$footer = true
 		);
+
+		do_action( 'amp_customizer_enqueue_preview_scripts', $this->wp_customize );
 
 		/** This action is documented in wp-includes/general-template.php */
 		do_action( 'wp_footer' );

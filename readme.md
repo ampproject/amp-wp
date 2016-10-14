@@ -192,12 +192,12 @@ In `t/meta-custom-tax.php`, you can add something like the following to replace 
 </li>
 ```
 
-##### Example: Remove Author from `meta`
+##### Example: Remove Author from `header_meta`
 
 This will completely remove the author section:
 
 ```php
-add_filter( 'amp_post_template_meta_parts', 'xyz_amp_remove_author_meta' );
+add_filter( 'amp_post_article_header_meta', 'xyz_amp_remove_author_meta' );
 
 function xyz_amp_remove_author_meta( $meta_parts ) {
 	foreach ( array_keys( $meta_parts, 'meta-author', true ) as $key ) {
@@ -207,12 +207,12 @@ function xyz_amp_remove_author_meta( $meta_parts ) {
 }
 ```
 
-##### Example: Add Comment Count to `meta`
+##### Example: Add Comment Count to `footer_meta`
 
 This adds a new section to display the comment count:
 
 ```php
-add_filter( 'amp_post_template_meta_parts', 'xyz_amp_add_comment_count_meta' );
+add_filter( 'amp_post_article_footer_meta', 'xyz_amp_add_comment_count_meta' );
 
 function xyz_amp_add_comment_count_meta( $meta_parts ) {
 	$meta_parts[] = 'xyz-meta-comment-count';
@@ -577,7 +577,7 @@ Jetpack integration is baked in. More support for things like Related Posts to c
 
 ### Parse.ly
 
-If you're using [Parse.ly](https://wordpress.org/plugins/wp-parsely/), please check out the AMP documentation here: https://www.parsely.com/help/integration/google-amp/
+[Parse.ly's WordPress plugin](https://wordpress.org/plugins/wp-parsely/) automatically tracks AMP pages when enabled along with this plugin.
 
 
 ### Yoast SEO

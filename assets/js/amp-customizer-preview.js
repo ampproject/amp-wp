@@ -1,19 +1,15 @@
 ( function( $ ) {
 	'use strict';
 
-	// Nav bar text color.
-	wp.customize( 'amp_navbar_color', function( value ) {
-		value.bind( function( to ) {
-			$( 'nav.amp-wp-title-bar a' ).css( 'color', to );
-			$( 'nav.amp-wp-title-bar div' ).css( 'color', to );
-		} );
-	} );
+	// Don't allow navigation away from the AMP page in the preview.
+	// The Customizer breaks pretty spectacularly when that happens as it's only meant to work for AMP pages.
+	$( 'a' ).click( function( e ) {
+		var href = this.getAttribute( 'href' );
+		if ( href && href.indexOf( '#' ) === 0 ) {
+			return true;
+		}
 
-	// Nav bar background color.
-	wp.customize( 'amp_navbar_background', function( value ) {
-		value.bind( function( to ) {
-			$( 'nav.amp-wp-title-bar' ).css( 'background', to );
-		} );
+		return false;
 	} );
 
 } )( jQuery );
