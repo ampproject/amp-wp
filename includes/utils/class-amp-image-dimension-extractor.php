@@ -14,29 +14,9 @@ class AMP_Image_Dimension_Extractor {
 			$url = self::normalize_url( $url );
 		}
 
-		$dimensions = apply_filters( 'amp_extract_image_dimensions_batch', $urls );
+		$dimensions = array_fill_keys( $urls, false );
+		$dimensions = apply_filters( 'amp_extract_image_dimensions_batch', $dimensions, $urls );
 
-		if ( has_filter( 'amp_extract_image_dimensions_batch' ) ) {
-			return $dimensions;
-		} else {
-			return self::normalize_value_returned_by_extract( $dimensions );
-		}
-	}
-
-	/**
-	 * Account for the possibility of the amp_extract_image_dimensions_batch filter being removed (see AMP_Img_Sanitizer_Test)
-	 *
-	 * Not surprisingly, the functions invoked by the amp_extract_image_dimensions_batch filter modify the value returned by
-	 * AMP_Image_Dimension_Extractor::extract. For that reason, the return value has to be massaged before being returned
-	 * when the amp_extract_image_dimensions_batch filter is removed via tests.
-	 *
-	 * @param array $urls A list or urls that would have had dimensions fetched had amp_extract_image_dimensions_batch filter not been removed
-	 */
-	private static function normalize_value_returned_by_extract( $urls ) {
-	    $dimensions = array();
-		foreach ( $urls as $url ) {
-			$dimensions[ $url ] = false;
-		}
 		return $dimensions;
 	}
 
@@ -71,7 +51,7 @@ class AMP_Image_Dimension_Extractor {
 	private static function register_callbacks() {
 		self::$callbacks_registered = true;
 
-		add_filter( 'amp_extract_image_dimensions_batch', array( __CLASS__, 'extract_by_downloading_images' ), 999, 1 );
+		add_filter( 'amp_extract_image_dimensions_batch', array( __CLASS__, 'extract_by_downloading_images' ), 999, 2 );
 
 		do_action( 'amp_extract_image_dimensions_batch_callbacks_registered' );
 	}
@@ -79,15 +59,15 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
 	 *
+	 * @param array  $all_dimensions Dimensions for image urls.
 	 * @param array  $urls Image urls.
 	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
 	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
 	 */
-	public static function extract_by_downloading_images( $urls, $mode = 'concurrent' ) {
+	public static function extract_by_downloading_images( $all_dimensions, $urls, $mode = 'concurrent' ) {
 		$transient_expiration = 30 * DAY_IN_SECONDS;
 
 		$urls_to_fetch = array();
-		$all_dimensions = array();
 		$images = array();
 
 		self::determine_which_images_to_fetch( $urls, $urls_to_fetch, $all_dimensions );
