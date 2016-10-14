@@ -31,7 +31,7 @@ class Faster_Image_B52f1a8_Faster_Image
 	 *
 	 * @var string
 	 */
-	protected $user_agent = 'wp-amp v' . AMP__VERSION;
+	protected $user_agent = 'wp-amp, v' . AMP__VERSION;
 
 	/**
      * Get the size of each of the urls in a list
