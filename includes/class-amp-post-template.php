@@ -369,6 +369,15 @@ class AMP_Post_Template {
 		if ( $lang ) {
 			$attributes['lang'] = $lang;
 		}
+		
+		/**
+		 * Filter the HTML tag attributes
+		 *
+		 * @since  0.4.3
+		 * @param  array   $attributes The attributes (key => value)
+		 * @return array
+		 */
+		$attributes = apply_filters( 'amp_html_tag_attributes', $attributes );
 
 		$this->add_data_by_key( 'html_tag_attributes', $attributes );
 	}
