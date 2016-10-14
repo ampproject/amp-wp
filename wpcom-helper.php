@@ -1,11 +1,10 @@
 <?php
 
 // WPCOM-specific things
-
 add_action( 'pre_amp_render_post', 'jetpack_amp_disable_the_content_filters' );
 
 function jetpack_amp_disable_the_content_filters( $post_id ) {
-	// Shortcode overrides
+	// Shortcode overrides.
 	require_once( dirname( __FILE__ ) . '/wpcom/shortcodes.php' );
 
 	add_filter( 'post_flair_disable', '__return_true', 99 );
@@ -74,10 +73,14 @@ function wpcom_amp_add_image_to_metadata( $metadata, $post ) {
 	}
 
 	if ( ! isset( $image['src_width'] ) ) {
-		$dimensions = wpcom_amp_getimagesize( $image['src'] );
-		if ( $dimensions ) {
-			$image['src_width'] = $dimensions[0];
-			$image['src_height'] = $dimensions[1];
+		$dimensions = wpcom_amp_extract_image_dimensions_from_getimagesize( array(
+			$image['src'] => false,
+			)
+		);
+
+		if ( false !== $dimensions[ $image['src'] ] ) {
+			$image['src_width'] = $dimensions['width'];
+			$image['src_height'] = $dimensions['height'];
 		}
 	}
 
@@ -102,59 +105,62 @@ function wpcom_amp_add_fallback_image_to_metadata( $metadata ) {
 	return $metadata;
 }
 
-add_action( 'amp_extract_image_dimensions_callbacks_registered', 'wpcom_amp_extract_image_dimensions_add_custom_callbacks' );
-function wpcom_amp_extract_image_dimensions_add_custom_callbacks() {
+add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', 'wpcom_amp_extract_image_dimensions_batch_add_custom_callbacks' );
+function wpcom_amp_extract_image_dimensions_batch_add_custom_callbacks() {
 	// If images are being served from Photon or WP.com files, try extracting the size using querystring.
-	add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_from_querystring', 9, 2 ); // Hook in before the default extractors
+	add_action( 'amp_extract_image_dimensions_batch', 'wpcom_amp_extract_image_dimensions_from_querystring', 9, 1 ); // Hook in before the default extractors.
 
 	// Uses a special wpcom lib (wpcom_getimagesize) to extract dimensions as a last resort if we weren't able to figure them out.
-	add_action( 'amp_extract_image_dimensions', 'wpcom_amp_extract_image_dimensions_from_getimagesize', 99, 2 ); // Our last resort, so run late
+	add_action( 'amp_extract_image_dimensions_batch', 'wpcom_amp_extract_image_dimensions_from_getimagesize', 99, 1 ); // Our last resort, so run late
 
-	// This doesn't work well on WP.com and doesn't scale well for VIP sites (see https://github.com/Automattic/amp-wp/issues/207)
-	remove_filter( 'amp_extract_image_dimensions', array( 'AMP_Image_Dimension_Extractor', 'extract_from_attachment_metadata' ) );
 	// The wpcom override obviates this one, so take it out.
-	remove_filter( 'amp_extract_image_dimensions', array( 'AMP_Image_Dimension_Extractor', 'extract_by_downloading_image' ), 999, 2 );
+	remove_filter( 'amp_extract_image_dimensions_batch', array( 'AMP_Image_Dimension_Extractor', 'extract_by_downloading_images' ), 999, 1 );
 }
 
-function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions, $url ) {
-	if ( is_array( $dimensions ) ) {
-		return $dimensions;
+function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions ) {
+	foreach ( $dimensions as $url => $value  ) {
+
+		if ( is_array( $value ) ) {
+			continue;
+		}
+
+		$host = parse_url( $url, PHP_URL_HOST );
+		if ( ! wp_endswith( $host, '.wp.com' ) || ! wp_endswith( $host, '.files.wordpress.com' ) ) {
+			continue;
+		}
+
+		$query = parse_url( $url, PHP_URL_QUERY );
+		$w = isset( $query['w'] ) ? absint( $query['w'] ) : false;
+		$h = isset( $query['h'] ) ? absint( $query['h'] ) : false;
+
+		if ( false !== $w && false !== $h ) {
+			$dimensions[ $url ] = array(
+				'width' => $w,
+				'height' => $h,
+			);
+		}
 	}
-
-	$host = parse_url( $url, PHP_URL_HOST );
-	if ( ! wp_endswith( $host, '.wp.com' ) || ! wp_endswith( $host, '.files.wordpress.com' ) ) {
-		return false;
-	}
-
-	$query = parse_url( $url, PHP_URL_QUERY );
-	$w = isset( $query['w'] ) ? absint( $query['w'] ) : false;
-	$h = isset( $query['h'] ) ? absint( $query['h'] ) : false;
-
-	if ( false !== $w && false !== $h ) {
-		return array( $w, $h );
-	}
-
-	return false;
+	return $dimensions;
 }
 
-function wpcom_amp_extract_image_dimensions_from_getimagesize( $dimensions, $url ) {
-	if ( is_array( $dimensions ) ) {
-		return $dimensions;
-	}
-
-	return wpcom_amp_getimagesize( $url );
-}
-
-function wpcom_amp_getimagesize( $url ) {
+function wpcom_amp_extract_image_dimensions_from_getimagesize( $dimensions ) {
 	if ( ! function_exists( 'require_lib' ) ) {
-		return false;
+		return $dimensions;
 	}
-
 	require_lib( 'wpcom/imagesize' );
-	$size = wpcom_getimagesize( $url );
-	if ( ! is_array( $size ) ) {
-		return false;
+
+	foreach ( $dimensions as $url => $value ) {
+		if ( is_array( $value ) ) {
+			continue;
+		}
+		$result = wpcom_getimagesize( $url );
+		if ( is_array( $result ) ) {
+			$dimensions[ $url ] = array(
+				'width' => $result[0],
+				'height' => $result[1],
+			);
+		}
 	}
 
-	return array( $size[0], $size[1] );
+	return $dimensions;
 }
