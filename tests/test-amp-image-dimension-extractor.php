@@ -66,7 +66,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -82,7 +83,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources, 'synchronous' );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -103,7 +105,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -124,7 +127,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources, 'synchronous' );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -137,7 +141,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -150,7 +155,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources, 'synchronous' );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -173,7 +179,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -196,7 +203,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( array(), $sources, 'synchronous' );
+		$sources = array_fill_keys( $sources, false );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
