@@ -10,11 +10,15 @@ class AMP_Image_Dimension_Extractor {
 			self::register_callbacks();
 		}
 
-		foreach ( $urls as &$url ) {
+		$valid_urls = array();
+		foreach ( $urls as $url ) {
 			$url = self::normalize_url( $url );
+			if ( false !== $url ) {
+				$valid_urls[] = $url;
+			}
 		}
 
-		$dimensions = array_fill_keys( $urls, false );
+		$dimensions = array_fill_keys( $valid_urls, false );
 		$dimensions = apply_filters( 'amp_extract_image_dimensions_batch', $dimensions );
 
 		return $dimensions;
