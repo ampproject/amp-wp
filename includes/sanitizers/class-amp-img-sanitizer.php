@@ -38,7 +38,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Determine which images need their dimensions determined/extracted.
-			if ( ! $node->hasAttribute( 'width' ) || ! $node->hasAttribute( 'height' ) ) {
+			if ( ! $node->hasAttribute( 'width' ) || '' === $node->getAttribute( 'width' ) ||
+				! $node->hasAttribute( 'height' ) || '' === $node->getAttribute( 'height' )
+			) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$have_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
