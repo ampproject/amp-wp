@@ -57,7 +57,7 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__valid_image_file() {
 		$sources = array(
-		    IMG_350,
+		    IMG_350 => false,
 		);
 		$expected = array(
 		    IMG_350 => array(
@@ -66,7 +66,6 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
@@ -74,7 +73,7 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__valid_image_file_synchronous() {
 		$sources = array(
-			IMG_350,
+			IMG_350 => false,
 		);
 		$expected = array(
 			IMG_350 => array(
@@ -83,7 +82,6 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
@@ -91,8 +89,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__multiple_valid_image_files() {
 		$sources = array(
-			IMG_350,
-			IMG_1024,
+			IMG_350 => false,
+			IMG_1024 => false,
 		);
 		$expected = array(
 			IMG_350 => array(
@@ -105,7 +103,6 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
@@ -113,8 +110,8 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__multiple_valid_image_files_synchronous() {
 		$sources = array(
-			IMG_350,
-			IMG_1024,
+			IMG_350 => false,
+			IMG_1024 => false,
 		);
 		$expected = array(
 			IMG_350 => array(
@@ -127,7 +124,6 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
@@ -135,13 +131,12 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__invalid_image_file() {
 		$sources = array(
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE,
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		);
 		$expected = array(
 			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
@@ -149,13 +144,12 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__invalid_image_file_synchronous() {
 		$sources = array(
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE,
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		);
 		$expected = array(
 			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
@@ -163,9 +157,9 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__mix_of_valid_and_invalid_image_file() {
 		$sources = array(
-			IMG_350,
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE,
-			IMG_1024,
+			IMG_350 => false,
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			IMG_1024 => false,
 		);
 		$expected = array(
 			IMG_350 => array(
@@ -179,7 +173,6 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
@@ -187,9 +180,9 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 	function test__mix_of_valid_and_invalid_image_file_synchronous() {
 		$sources = array(
-			IMG_350,
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE,
-			IMG_1024,
+			IMG_350 => false,
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			IMG_1024 => false,
 		);
 		$expected = array(
 			IMG_350 => array(
@@ -203,7 +196,6 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 			),
 		);
 
-		$sources = array_fill_keys( $sources, false );
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
