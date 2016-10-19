@@ -20,7 +20,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
-		$have_dimensions = array();
 		$need_dimensions = array();
 
 		$num_nodes = $nodes->length;
@@ -43,13 +42,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
-				$have_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
+				$this->adjust_and_replace_node( $node );
 			}
 		}
-		$this->determine_dimensions( $need_dimensions );
 
-		$this->adjust_and_replace( $need_dimensions );
-		$this->adjust_and_replace( $have_dimensions );
+		$this->determine_dimensions( $need_dimensions );
+		$this->adjust_and_replace_nodes( $need_dimensions );
 	}
 
 	/**
@@ -80,24 +78,33 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Make final modifications to DOMNode
+	 *
+	 * @param DOMNode $node The DOMNode to adjust and replace
+	 */
+	private function adjust_and_replace_node( $node ) {
+		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+		$new_attributes = $this->filter_attributes( $old_attributes );
+		$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
+			$this->did_convert_elements = true;
+			$new_tag = 'amp-anim';
+		} else {
+			$new_tag = 'amp-img';
+		}
+		$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
+		$node->parentNode->replaceChild( $new_node, $node );
+	}
+
+	/**
 	 * Now that all images have width and height attributes, make final tweaks and replace original image nodes
 	 *
 	 * @param array $node_lists Img DOM nodes (now with width and height attributes).
 	 */
-	private function adjust_and_replace( $node_lists ) {
+	private function adjust_and_replace_nodes( $node_lists ) {
 		foreach ( $node_lists as $node_list ) {
 			foreach ( $node_list as $node ) {
-				$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-				$new_attributes = $this->filter_attributes( $old_attributes );
-				$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
-				if ( $this->is_gif_url( $new_attributes['src'] ) ) {
-					$this->did_convert_elements = true;
-					$new_tag = 'amp-anim';
-				} else {
-					$new_tag = 'amp-img';
-				}
-				$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
-				$node->parentNode->replaceChild( $new_node, $node );
+				$this->adjust_and_replace_node( $node );
 			}
 		}
 	}
