@@ -208,4 +208,12 @@ class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCas
 
 		$this->assertEquals( $expected, $dimensions );
 	}
+
+	function test__amp_wp_user_agent() {
+		$expected = 'amp-wp, v' . AMP__VERSION . ', ';
+		$user_agent = AMP_Image_Dimension_Extractor::get_default_user_agent( '' );
+		$user_agent = substr( $user_agent, 0, strlen( $expected ) );
+
+		$this->assertEquals( $expected, $user_agent );
+	}
 }

@@ -26,12 +26,10 @@ class Faster_Image_B52f1a8_Faster_Image
      */
     protected $timeout = 4;
 
-	/**
-	 * Backup user agent
-	 *
-	 * @var string
-	 */
-	protected $user_agent = 'wp-amp, v' . AMP__VERSION;
+	public function __construct( $user_agent )
+	{
+		$this->user_agent = $user_agent;
+	}
 
 	/**
      * Get the size of each of the urls in a list
