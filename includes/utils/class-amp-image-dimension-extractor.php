@@ -56,7 +56,6 @@ class AMP_Image_Dimension_Extractor {
 		self::$callbacks_registered = true;
 
 		add_filter( 'amp_extract_image_dimensions_batch', array( __CLASS__, 'extract_by_downloading_images' ), 999, 1 );
-		add_filter( 'amp_extract_image_dimensions_get_user_agent', array( __CLASS__, 'get_default_user_agent' ), 999, 1 );
 
 		do_action( 'amp_extract_image_dimensions_batch_callbacks_registered' );
 	}
@@ -147,8 +146,7 @@ class AMP_Image_Dimension_Extractor {
 		) {
 			self::fetch_images_via_fast_image( $urls_to_fetch, $images );
 		} else {
-			$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', '' );
-			self::fetch_images_via_faster_image( $urls_to_fetch, $images, $user_agent );
+			self::fetch_images_via_faster_image( $urls_to_fetch, $images );
 		}
 	}
 
@@ -180,14 +178,14 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Fetch images via FasterImage library
 	 *
-	 * @param array  $urls_to_fetch Image src urls to fetch.
-	 * @param array  $images Array to populate with results of image/dimension inspection.
-	 * @param string $user_agent User agent FasterImage library will use to fetch remote images.
+	 * @param array $urls_to_fetch Image src urls to fetch.
+	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
-	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images, $user_agent ) {
+	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
 		if ( ! class_exists( 'Faster_Image_B52f1a8_Faster_Image' ) ) {
 			require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-faster-image.php' );
 		}
+		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
 		$client = new Faster_Image_B52f1a8_Faster_Image( $user_agent );
 		$images = $client->batch( array_column( $urls_to_fetch, 'url' ) );
 	}
@@ -229,10 +227,9 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Get default user agent
 	 *
-	 * @param string $user_agent User agent.
 	 * @return string
 	 */
-	public static function get_default_user_agent( $user_agent ) {
+	public static function get_default_user_agent() {
 		return 'amp-wp, v' . AMP__VERSION . ', ' . get_site_url();
 	}
 }

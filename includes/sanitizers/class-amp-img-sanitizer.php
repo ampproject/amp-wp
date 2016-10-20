@@ -37,9 +37,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Determine which images need their dimensions determined/extracted.
-			if ( ! $node->hasAttribute( 'width' ) || '' === $node->getAttribute( 'width' ) ||
-				! $node->hasAttribute( 'height' ) || '' === $node->getAttribute( 'height' )
-			) {
+			if ( '' === $node->getAttribute( 'width' ) || '' === $node->getAttribute( 'height' ) ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
@@ -47,7 +45,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$this->determine_dimensions( $need_dimensions );
-		$this->adjust_and_replace_nodes( $need_dimensions );
+		$this->adjust_and_replace_nodes_in_array_map( $need_dimensions );
 	}
 
 	/**
@@ -101,7 +99,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array $node_lists Img DOM nodes (now with width and height attributes).
 	 */
-	private function adjust_and_replace_nodes( $node_lists ) {
+	private function adjust_and_replace_nodes_in_array_map( $node_lists ) {
 		foreach ( $node_lists as $node_list ) {
 			foreach ( $node_list as $node ) {
 				$this->adjust_and_replace_node( $node );
