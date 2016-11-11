@@ -148,6 +148,11 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<a name="section2"></a>',
 			),
 
+			'a_is_achor_with_id' => array(
+				'<a id="section3"></a>',
+				'<a id="section3"></a>',
+			),
+
 			'a_empty' => array(
 				'<a>Hello World</a>',
 				'Hello World',

@@ -124,15 +124,10 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		// Get the href attribute
 		$href = $node->getAttribute( 'href' );
 
-		// If no href is set and this isn't an anchor, it's invalid
 		if ( empty( $href ) ) {
-			$name_attr = $node->getAttribute( 'name' );
-			if ( ! empty( $name_attr ) ) {
-				// No further validation is required
-				return true;
-			} else {
-				return false;
-			}
+			// If no href, check that a is an anchor or not.
+			// We don't need to validate anchors any further.
+			return $node->hasAttribute( 'name' ) || $node->hasAttribute( 'id' );
 		}
 
 		// If this is an anchor link, just return true
