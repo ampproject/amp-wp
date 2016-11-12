@@ -43,7 +43,7 @@ class AMP_Customizer_Design_Settings {
 		) );
 	}
 
-	public function register_customizer_ui( $wp_customize ) {
+	public static function register_customizer_ui( $wp_customize ) {
 		$wp_customize->add_section( 'amp_design', array(
 			'title' => __( 'Design', 'amp' ),
 			'panel' => AMP_Template_Customizer::PANEL_ID,
