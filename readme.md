@@ -4,7 +4,7 @@
 
 This plugin adds support for the [Accelerated Mobile Pages](https://www.ampproject.org) (AMP) Project, which is an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
 
-With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/2016/01/01/amp-on/?amp=1`
+With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
 
 Note #1: that Pages and archives are not currently supported.
 
@@ -53,7 +53,7 @@ function xyz_amp_set_site_icon_url( $data ) {
 
 #### Logo Only
 
-If you want to hide the site text and just show a logo, use the `amp_post_template_css` action. The following colours the title bar black, hides the site title, and replaces it with a centered logo:
+If you want to hide the site text and just show a logo, use the `amp_post_template_css` action. The following colors the title bar black, hides the site title, and replaces it with a centered logo:
 
 ```
 add_action( 'amp_post_template_css', 'xyz_amp_additional_css_styles' );
@@ -79,7 +79,7 @@ function xyz_amp_additional_css_styles( $amp_template ) {
 }
 ```
 
-Note: you will need to adjust the colours and sizes based on your brand.
+Note: you will need to adjust the colors and sizes based on your brand.
 
 ### Template Tweaks
 

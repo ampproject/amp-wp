@@ -13,7 +13,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
 This plugin adds support for the [Accelerated Mobile Pages](https://www.ampproject.org) (AMP) Project, which is an an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
 
-With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/2016/01/01/amp-on/?amp=1`
+With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
 
 Note #1: that Pages and archives are not currently supported. Pages support is being worked on.
 
@@ -31,7 +31,7 @@ Follow along with or contribute to the development of this plugin at https://git
 
 = How do I customize the AMP output for my site? =
 
-You can tweak a few things like colours from the AMP Customizer. From the Dashboard, go to `Appearance > AMP`.
+You can tweak a few things like colors from the AMP Customizer. From the Dashboard, go to `Appearance > AMP`.
 
 For deeper level customizations, please see the readme at https://github.com/Automattic/amp-wp/blob/master/readme.md
 
@@ -72,7 +72,7 @@ A wise green Yoda once said, "Patience you must have, my young padawan." We're w
 
 - New template: spiffy, shiny, and has the fresh theme smell (props allancole and the Automattic Theme Team).
 - *Warning*: The template update has potential breaking changes. Please see https://wordpress.org/support/topic/v0-4-whats-new-and-possible-breaking-changes/
-- AMP Customizer: Pick your colours and make the template your own (props DrewAPicture and 10up)
+- AMP Customizer: Pick your colors and make the template your own (props DrewAPicture and 10up)
 - Fix: support for inline styles (props coreymckrill).
 - Fix: no more fatal errors when tags not supported by post type (props david-binda)
 - Fix: no more unnecessary `<br>` tags.
