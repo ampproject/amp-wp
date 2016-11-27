@@ -42,6 +42,14 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$new_attributes['width'] = $dimensions[0];
 					$new_attributes['height'] = $dimensions[1];
 				}
+				// Take care of the case when only one dimension is set, leaving the browser to calculate the other.
+				if ( ! $old_attributes['height'] )  {
+					$new_attributes['height'] = ( $old_attributes['width'] / $new_attributes['width'] ) * $new_attributes['height'];
+					$new_attributes['width'] = $old_attributes['width'];
+				} else if ( ! $old_attributes['width'] ) {
+					$new_attributes['width'] = ( $old_attributes['height'] / $new_attributes['height'] ) * $new_attributes['width'];
+					$new_attributes['height'] = $old_attributes['height'];
+				}
 			}
 
 			// Final fallback when we have no dimensions.
