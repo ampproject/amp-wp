@@ -2,6 +2,8 @@
 
 define( 'AMP_IMG_DIMENSION_TEST_VALID_FILE', dirname( __FILE__ ) . '/assets/wordpress-logo.png' );
 define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/not-exists.png' );
+define( 'IMG_350', 'http://i0.wp.com/placehold.it/350x150.png' );
+define( 'IMG_1024', 'http://i0.wp.com/placehold.it/1024x768.png' );
 
 class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase {
 	function get_data() {
@@ -10,31 +12,31 @@ class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase
 		return array(
 			'empty_url' => array(
 				'',
-				false
+				false,
 			),
 			'data_url' => array(
 				'data:image/gif;base64,R0lGODl...',
-				false
+				false,
 			),
 			'protocol-less_url' => array(
 				'//example.com/file.jpg',
-				'http://example.com/file.jpg'
+				'http://example.com/file.jpg',
 			),
 			'path_only' => array(
 				'/path/to/file.png',
-				$site_url . '/path/to/file.png'
+				$site_url . '/path/to/file.png',
 			),
 			'query_only' => array(
 				'?file=file.png',
-				$site_url . '/?file=file.png'
+				$site_url . '/?file=file.png',
 			),
 			'path_and_query' => array(
 				'/path/file.jpg?query=1',
-				$site_url . '/path/file.jpg?query=1'
+				$site_url . '/path/file.jpg?query=1',
 			),
 			'normal_url' => array(
 				'https://example.com/path/to/file.jpg',
-				'https://example.com/path/to/file.jpg'
+				'https://example.com/path/to/file.jpg',
 			),
 		);
 	}
@@ -49,93 +51,161 @@ class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase
 	}
 }
 
-class AMP_Image_Dimension_Extractor__From_Metadata__Test extends WP_UnitTestCase {
-	private $_attachment_id = null;
-
-	function setUp() {
-		parent::setUp();
-
-		$this->_attachment_id = $this->factory->attachment->create_upload_object( AMP_IMG_DIMENSION_TEST_VALID_FILE );
-	}
-
-	function test__dimensions_already_passed_in() {
-		$source_dimensions = array( 1, 1 );
-		$source = wp_get_attachment_url( $this->_attachment_id );
-		$expected = array( 1, 1 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata(  $source_dimensions, $source );
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__invalid_attachment() {
-		$source = 'https://example.com/path/to/file.jpg';
-		$expected = false;
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata(  false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__valid_attachment_missing_metadata() {
-		$source = wp_get_attachment_url( $this->_attachment_id );
-		$expected = false;
-
-		delete_post_meta( $this->_attachment_id, '_wp_attachment_metadata' );
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__valid_attachment_and_dimensions_with_query() {
-		$source = wp_get_attachment_url( $this->_attachment_id ) . '?rand=1';
-		$expected = array( 498, 113 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	function test__valid_attachment_and_dimensions() {
-		$source = wp_get_attachment_url( $this->_attachment_id );
-		$expected = array( 498, 113 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_from_attachment_metadata( false, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-}
-
 // TODO: tests for transients, errors, lock
 // TODO: mocked tests
 class AMP_Image_Dimension_Extractor__By_Downloading__Test extends WP_UnitTestCase {
-	function test__dimensions_already_passed_in() {
-		$source_dimensions = array( 1, 1 );
-		$source = AMP_IMG_DIMENSION_TEST_VALID_FILE;
-		$expected = array( 1, 1 );
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_image( $source_dimensions, $source );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
 
 	function test__valid_image_file() {
-		$source = AMP_IMG_DIMENSION_TEST_VALID_FILE;
-		$expected = array( 498, 113 );
+		$sources = array(
+		    IMG_350 => false,
+		);
+		$expected = array(
+		    IMG_350 => array(
+		        'width' => 350,
+				'height' => 150,
+			),
+		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_image( false, $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
 
-	/**
-	 * @expectedException PHPUnit_Framework_Error_Warning
-	 */
-	function test__invalid_image_file() {
-		$source = AMP_IMG_DIMENSION_TEST_INVALID_FILE;
-		$expected = false;
+	function test__valid_image_file_synchronous() {
+		$sources = array(
+			IMG_350 => false,
+		);
+		$expected = array(
+			IMG_350 => array(
+				'width' => 350,
+				'height' => 150,
+			),
+		);
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_image( false, $source );
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__multiple_valid_image_files() {
+		$sources = array(
+			IMG_350 => false,
+			IMG_1024 => false,
+		);
+		$expected = array(
+			IMG_350 => array(
+				'width' => 350,
+				'height' => 150,
+			),
+			IMG_1024 => array(
+				'width' => 1024,
+				'height' => 768,
+			),
+		);
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+
+		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__multiple_valid_image_files_synchronous() {
+		$sources = array(
+			IMG_350 => false,
+			IMG_1024 => false,
+		);
+		$expected = array(
+			IMG_350 => array(
+				'width' => 350,
+				'height' => 150,
+			),
+			IMG_1024 => array(
+				'width' => 1024,
+				'height' => 768,
+			),
+		);
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
+
+		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__invalid_image_file() {
+		$sources = array(
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+		);
+		$expected = array(
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+		);
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+
+		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__invalid_image_file_synchronous() {
+		$sources = array(
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+		);
+		$expected = array(
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+		);
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
+
+		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__mix_of_valid_and_invalid_image_file() {
+		$sources = array(
+			IMG_350 => false,
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			IMG_1024 => false,
+		);
+		$expected = array(
+			IMG_350 => array(
+				'width' => 350,
+				'height' => 150,
+			),
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			IMG_1024 => array(
+				'width' => 1024,
+				'height' => 768,
+			),
+		);
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+
+		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__mix_of_valid_and_invalid_image_file_synchronous() {
+		$sources = array(
+			IMG_350 => false,
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			IMG_1024 => false,
+		);
+		$expected = array(
+			IMG_350 => array(
+				'width' => 350,
+				'height' => 150,
+			),
+			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			IMG_1024 => array(
+				'width' => 1024,
+				'height' => 768,
+			),
+		);
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
+
+		$this->assertEquals( $expected, $dimensions );
+	}
+
+	function test__amp_wp_user_agent() {
+		$expected = 'amp-wp, v' . AMP__VERSION . ', ';
+		$user_agent = AMP_Image_Dimension_Extractor::get_default_user_agent( '' );
+		$user_agent = substr( $user_agent, 0, strlen( $expected ) );
+
+		$this->assertEquals( $expected, $user_agent );
 	}
 }
