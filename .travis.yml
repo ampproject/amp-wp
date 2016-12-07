@@ -3,7 +3,7 @@ language: php
 
 # PHP version used in first build configuration.
 php:
-    - "5.6"
+    - "7.0"
 
 # WordPress version used in first build configuration.
 env:
@@ -27,14 +27,18 @@ matrix:
    - php: "nightly"
      env: WP_VERSION=latest
    - php: "nightly"
-     env: WP_VERSION=4.4
+     env: WP_VERSION=4.6
    - php: "5.2"
      env: WP_VERSION=latest
    - php: "5.2"
-     env: WP_VERSION=4.4
-     # 5.6 / latest already included above as first build.
+     env: WP_VERSION=4.6
    - php: "5.6"
-     env: WP_VERSION=4.4
+     env: WP_VERSION=latest
+   - php: "5.6"
+     env: WP_VERSION=4.6
+     # 7.0 / latest already included above as first build.
+   - php: "7.0"
+     env: WP_VERSION=4.6
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION 
