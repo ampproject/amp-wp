@@ -230,13 +230,14 @@ class AMP_Post_Template {
 			), $this->post ),
 			apply_filters( 'amp_content_sanitizers', array(
 				 'AMP_Style_Sanitizer' => array(),
-				 'AMP_Blacklist_Sanitizer' => array(),
+				 // 'AMP_Blacklist_Sanitizer' => array(),
 				 'AMP_Img_Sanitizer' => array(),
 				 'AMP_Video_Sanitizer' => array(),
 				 'AMP_Audio_Sanitizer' => array(),
 				 'AMP_Iframe_Sanitizer' => array(
 					 'add_placeholder' => true,
 				 ),
+                 'AMP_Allowed_Tags_Sanitizer' => array(),
 			), $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
