@@ -376,7 +376,7 @@ Your Embed Handler class needs to extend the `AMP_Base_Embed_Handler` class.
 
 Note: make sure to set proper priorities or remove existing callbacks for your regular content.
 
-In `classes/class-amp-related-posts-embed.php`:
+In `includes/class-amp-related-posts-embed.php`:
 
 ```php
 class XYZ_AMP_Related_Posts_Embed extends AMP_Base_Embed_Handler {
@@ -426,7 +426,7 @@ class XYZ_AMP_Related_Posts_Embed extends AMP_Base_Embed_Handler {
 add_filter( 'amp_content_embed_handlers', 'xyz_amp_add_related_embed', 10, 2 );
 
 function xyz_amp_add_related_embed( $embed_handler_classes, $post ) {
-	require_once( dirname( __FILE__ ) . '/classes/class-amp-related-posts-embed.php' );
+	require_once( dirname( __FILE__ ) . '/includes/class-amp-related-posts-embed.php' );
 	$embed_handler_classes[ 'XYZ_AMP_Related_Posts_Embed' ] = array();
 	return $embed_handler_classes;
 }
@@ -440,7 +440,7 @@ Sanitizers are pretty versatile and, unlike Embed Handlers -- which work with HT
 
 #### Step 1: Build the Sanitizer
 
-Your sanitizer needs to extend the `AMP_Base_Sanitizer`. In `classes/class-ad-inject-sanitizer.php`:
+Your sanitizer needs to extend the `AMP_Base_Sanitizer`. In `includes/sanitizers/class-ad-inject-sanitizer.php`:
 
 ```php
 class XYZ_AMP_Ad_Injection_Sanitizer extends AMP_Base_Sanitizer {
@@ -484,7 +484,7 @@ class XYZ_AMP_Ad_Injection_Sanitizer extends AMP_Base_Sanitizer {
 add_filter( 'amp_content_sanitizers', 'xyz_amp_add_ad_sanitizer', 10, 2 );
 
 function xyz_amp_add_ad_sanitizer( $sanitizer_classes, $post ) {
-	require_once( dirname( __FILE__ ) . '/classes/class-ad-inject-sanitizer.php' );
+	require_once( dirname( __FILE__ ) . '/includes/class-ad-inject-sanitizer.php' );
 	$sanitizer_classes[ 'XYZ_AMP_Ad_Injection_Sanitizer' ] = array(); // the array can be used to pass args to your sanitizer and accessed within the class via `$this->args`
 	return $sanitizer_classes;
 }
@@ -531,26 +531,26 @@ function my_custom_dimension_extraction_callback( $dimensions ) {
         }
         $width = <YOUR CUSTOM CODE TO DETERMINE WIDTH>
         $height = <YOUR CUSTOM CODE TO DETERMINE HEIGHT>
-        $dimensions[ $url ] = array( 
+        $dimensions[ $url ] = array(
             'width' => $width,
             'height' => $height,
          );
     }
-    
+
     return $dimensions;
 ```
-Your callback needs to return $dimensions so that the value either cascades to the next callback that was added to the *amp_extract_image_dimensions_batch* filter or is 
+Your callback needs to return $dimensions so that the value either cascades to the next callback that was added to the *amp_extract_image_dimensions_batch* filter or is
 returned to the apply_filter() call (if there are no more unprocessed callbacks).
 
-The default callback provided by WP-AMP described above, *extract_by_downloading_images*, will fire unless explicitly removed, so be sure 
+The default callback provided by WP-AMP described above, *extract_by_downloading_images*, will fire unless explicitly removed, so be sure
 to remove it from the callback chain if you don't want it to, e.g.
 
 ```php
 	remove_filter( 'amp_extract_image_dimensions_batch', array( 'AMP_Image_Dimension_Extractor', 'extract_by_downloading_images' ), 999, 1 );
 ````
 
-**Note that if you previously added a custom dimension extraction callback to the *amp_extract_image_dimensions* filter, 
-you need to update it to hook into the *amp_extract_image_dimensions_batch* filter instead and iterate over the key value 
+**Note that if you previously added a custom dimension extraction callback to the *amp_extract_image_dimensions* filter,
+you need to update it to hook into the *amp_extract_image_dimensions_batch* filter instead and iterate over the key value
 pairs in the single argument as per the example above.**
 ## Analytics
 
