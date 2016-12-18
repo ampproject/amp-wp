@@ -10,2994 +10,7726 @@
  * tag_name.
  */
 
-$spec_file_revision = 320;
+$spec_file_revision = 325;
 $minimum_validator_revision_required = 189;
 
 $allowed_tags = array(
-	'!doctype' => array(
-		'html' => true,
-	),
-	'$reference_point' => array(
-		'update' => true,
-		'items' => true,
-		'pagination' => true,
-		'id' => true,
-		'data-sort-time' => true,
-		'data-update-time' => true,
-		'data-tombstone' => true,
-	),
 	'a' => array(
-		'href' => true,
-		'hreflang' => true,
-		'rel' => true,
-		'role' => true,
-		'tabindex' => true,
-		'target' => true,
-		'download' => true,
-		'media' => true,
-		'type' => true,
-		'border' => true,
-		'name' => true,
+		array(
+			'attr_spec_list' => array(
+				'border' => array(
+				),
+				'download' => array(
+				),
+				'href' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'bbmi',
+						'fb-messenger',
+						'ftp',
+						'http',
+						'https',
+						'intent',
+						'line',
+						'mailto',
+						'skype',
+						'sms',
+						'snapchat',
+						'tel',
+						'tg',
+						'threema',
+						'twitter',
+						'viber',
+						'whatsapp',
+					),
+				),
+				'hreflang' => array(
+				),
+				'media' => array(
+				),
+				'name' => array(
+				),
+				'rel' => array(
+					'blacklisted_value_regex' => '(^|\\s)(components|dns-prefetch|import|manifest|preconnect|prefetch|preload|prerender|serviceworker|stylesheet|subresource|)(\\s|$)',
+				),
+				'role' => array(
+				),
+				'tabindex' => array(
+				),
+				'target' => array(
+					'value_regex' => '(_blank|_self|_top)',
+				),
+				'type' => array(
+					'value_casei' => 'text/html',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'abbr' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'acronym' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'address' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-accordion' => array(
-		'disable-session-states' => true,
+		array(
+			'attr_spec_list' => array(
+				'disable-session-states' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-ad' => array(
-		'src' => true,
-		'json' => true,
-		'media' => true,
-		'alt' => true,
-		'type' => true,
-		'noloading' => true,
+		array(
+			'attr_spec_list' => array(
+				'alt' => array(
+				),
+				'json' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'type' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-analytics' => array(
-		'type' => true,
-		'config' => true,
+		array(
+			'attr_spec_list' => array(
+				'config' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'type' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-anim' => array(
-		'src' => true,
-		'noloading' => true,
-		'attribution' => true,
-		'media' => true,
-		'alt' => true,
-		'srcset' => true,
-		'controls' => true,
-		'autoplay' => true,
+		array(
+			'attr_spec_list' => array(
+				'alt' => array(
+				),
+				'attribution' => array(
+				),
+				'autoplay' => array(
+					'value' => '',
+				),
+				'controls' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'alternative_names' => array(
+						'srcset',
+					),
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'data',
+						'http',
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-apester-media' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-apester-media-id' => true,
-		'data-apester-channel-token' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-apester-channel-token' => array(
+					'value_regex' => '[0-9a-zA-Z]+',
+				),
+				'data-apester-media-id' => array(
+					'value_regex' => '[0-9a-zA-Z]+',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-app-banner' => array(
-		'media' => true,
-		'noloading' => true,
-		'id' => true,
+		array(
+			'attr_spec_list' => array(
+				'id' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-audio' => array(
-		'src' => true,
-		'noloading' => true,
-		'loop' => true,
-		'muted' => true,
-		'media' => true,
-		'controls' => true,
-		'autoplay' => true,
+		array(
+			'attr_spec_list' => array(
+				'autoplay' => array(
+					'value_regex' => '^$|desktop|tablet|mobile|autoplay',
+				),
+				'controls' => array(
+				),
+				'loop' => array(
+					'value' => '',
+				),
+				'media' => array(
+				),
+				'muted' => array(
+					'value' => '',
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'controls' => array(
+				),
+				'loop' => array(
+					'value' => '',
+				),
+				'media' => array(
+				),
+				'muted' => array(
+					'value' => '',
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-auto-ads' => array(
-		'media' => true,
-		'noloading' => true,
-		'type' => true,
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'type' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-brid-player' => array(
-		'data-player' => true,
-		'noloading' => true,
-		'media' => true,
-		'data-video' => true,
-		'data-partner' => true,
-		'data-playlist' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-partner' => array(
+					'mandatory' => 'True',
+					'value_regex' => '[0-9]+',
+				),
+				'data-player' => array(
+					'mandatory' => 'True',
+					'value_regex' => '[0-9]+',
+				),
+				'data-playlist' => array(
+					'value_regex' => '[0-9]+',
+				),
+				'data-video' => array(
+					'value_regex' => '[0-9]+',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-brightcove' => array(
-		'data-player' => true,
-		'data-account' => true,
-		'data-video-id' => true,
-		'media' => true,
-		'noloading' => true,
-		'data-playlist-id' => true,
-		'data-embed' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-account' => array(
+					'mandatory' => 'True',
+				),
+				'data-embed' => array(
+				),
+				'data-player' => array(
+				),
+				'data-playlist-id' => array(
+				),
+				'data-video-id' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-carousel' => array(
-		'dots' => true,
-		'delay' => true,
-		'noloading' => true,
-		'loop' => true,
-		'media' => true,
-		'type' => true,
-		'arrows' => true,
-		'controls' => true,
-		'autoplay' => true,
+		array(
+			'attr_spec_list' => array(
+				'arrows' => array(
+					'value' => '',
+				),
+				'autoplay' => array(
+					'value' => '',
+				),
+				'controls' => array(
+				),
+				'delay' => array(
+					'value_regex' => '[0-9]+',
+				),
+				'dots' => array(
+					'value' => '',
+				),
+				'loop' => array(
+					'value' => '',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'type' => array(
+					'value_regex' => 'slides|carousel',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-dailymotion' => array(
-		'media' => true,
-		'data-sharing-enable' => true,
-		'data-ui-highlight' => true,
-		'data-mute' => true,
-		'data-start' => true,
-		'data-info' => true,
-		'noloading' => true,
-		'data-ui-logo' => true,
-		'data-videoid' => true,
-		'data-endscreen-enable' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-endscreen-enable' => array(
+					'value_regex' => 'true|false',
+				),
+				'data-info' => array(
+					'value_regex' => 'true|false',
+				),
+				'data-mute' => array(
+					'value_regex' => 'true|false',
+				),
+				'data-sharing-enable' => array(
+					'value_regex' => 'true|false',
+				),
+				'data-start' => array(
+					'value_regex' => '[0-9]+',
+				),
+				'data-ui-highlight' => array(
+					'value_regex_casei' => '([0-9a-f]{3}){1,2}',
+				),
+				'data-ui-logo' => array(
+					'value_regex' => 'true|false',
+				),
+				'data-videoid' => array(
+					'mandatory' => 'True',
+					'value_regex_casei' => '[a-z0-9]+',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-embed' => array(
-		'src' => true,
-		'json' => true,
-		'media' => true,
-		'alt' => true,
-		'type' => true,
-		'noloading' => true,
+		array(
+			'attr_spec_list' => array(
+				'alt' => array(
+				),
+				'json' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'type' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-experiment' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-facebook' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-href' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-href' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-fit-text' => array(
-		'min-font-size' => true,
-		'noloading' => true,
-		'max-font-size' => true,
-		'media' => true,
+		array(
+			'attr_spec_list' => array(
+				'max-font-size' => array(
+				),
+				'media' => array(
+				),
+				'min-font-size' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-font' => array(
-		'on-load-remove-class' => true,
-		'font-weight' => true,
-		'media' => true,
-		'on-load-add-class' => true,
-		'on-error-remove-class' => true,
-		'noloading' => true,
-		'on-error-add-class' => true,
-		'timeout' => true,
-		'font-variant' => true,
-		'font-family' => true,
-		'font-style' => true,
+		array(
+			'attr_spec_list' => array(
+				'font-family' => array(
+					'mandatory' => 'True',
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'on-error-add-class' => array(
+				),
+				'on-error-remove-class' => array(
+				),
+				'on-load-add-class' => array(
+				),
+				'on-load-remove-class' => array(
+				),
+				'timeout' => array(
+					'value_regex' => '[0-9]+',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-fx-flying-carpet' => array(
-		'media' => true,
-		'noloading' => true,
-		'height' => true,
+		array(
+			'attr_spec_list' => array(
+				'height' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-gfycat' => array(
-		'noautoplay' => true,
-		'media' => true,
-		'noloading' => true,
-		'data-gfyid' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-gfyid' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noautoplay' => array(
+					'value' => '',
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-hulu' => array(
-		'data-eid' => true,
-		'noloading' => true,
-		'media' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-eid' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-iframe' => array(
-		'src' => true,
-		'resizable' => true,
-		'referrerpolicy' => true,
-		'noloading' => true,
-		'sandbox' => true,
-		'allowfullscreen' => true,
-		'frameborder' => true,
-		'media' => true,
-		'allowtransparency' => true,
-		'scrolling' => true,
-		'srcdoc' => true,
+		array(
+			'attr_spec_list' => array(
+				'allowfullscreen' => array(
+					'value' => '',
+				),
+				'allowtransparency' => array(
+					'value' => '',
+				),
+				'frameborder' => array(
+					'value_regex' => '0|1',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'referrerpolicy' => array(
+				),
+				'resizable' => array(
+					'value' => '',
+				),
+				'sandbox' => array(
+				),
+				'scrolling' => array(
+					'value_regex' => 'auto|yes|no',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'data',
+						'https',
+					),
+				),
+				'srcdoc' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-image-lightbox' => array(
-		'media' => true,
-		'noloading' => true,
-		'controls' => true,
+		array(
+			'attr_spec_list' => array(
+				'controls' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-img' => array(
-		'src' => true,
-		'noloading' => true,
-		'attribution' => true,
-		'srcset' => true,
-		'media' => true,
-		'alt' => true,
-		'placeholder' => true,
+		array(
+			'attr_spec_list' => array(
+				'alt' => array(
+				),
+				'attribution' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'placeholder' => array(
+				),
+				'src' => array(
+					'alternative_names' => array(
+						'srcset',
+					),
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'data',
+						'http',
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-instagram' => array(
-		'media' => true,
-		'alt' => true,
-		'data-shortcode' => true,
-		'noloading' => true,
+		array(
+			'attr_spec_list' => array(
+				'alt' => array(
+				),
+				'data-shortcode' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-install-serviceworker' => array(
-		'src' => true,
+		array(
+			'attr_spec_list' => array(
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-jwplayer' => array(
-		'data-media-id' => true,
-		'data-player-id' => true,
-		'data-playlist-id' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-media-id' => array(
+					'value_regex_casei' => '[0-9a-z]{8}',
+				),
+				'data-player-id' => array(
+					'mandatory' => 'True',
+					'value_regex_casei' => '[0-9a-z]{8}',
+				),
+				'data-playlist-id' => array(
+					'value_regex_casei' => '[0-9a-z]{8}',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-kaltura-player' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-partner' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-partner' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-lightbox' => array(
-		'scrollable' => true,
-		'noloading' => true,
-		'from' => true,
-		'controls' => true,
-		'media' => true,
+		array(
+			'attr_spec_list' => array(
+				'controls' => array(
+				),
+				'from' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'scrollable' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-list' => array(
-		'credentials' => true,
-		'noloading' => true,
-		'media' => true,
-		'template' => true,
-		'src' => true,
+		array(
+			'attr_spec_list' => array(
+				'credentials' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'template' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-live-list' => array(
-		'id' => true,
-		'data-poll-interval' => true,
-		'data-max-items-per-page' => true,
-		'disabled' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-max-items-per-page' => array(
+					'mandatory' => 'True',
+					'value_regex' => '\\d+',
+				),
+				'data-poll-interval' => array(
+					'value_regex' => '\\d{5,}',
+				),
+				'disabled' => array(
+					'value' => '',
+				),
+				'id' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-o2-player' => array(
-		'data-pid' => true,
-		'data-bcid' => true,
-		'data-bid' => true,
-		'media' => true,
-		'data-vid' => true,
-		'noloading' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-bcid' => array(
+					'mandatory' => 'True',
+				),
+				'data-bid' => array(
+				),
+				'data-pid' => array(
+					'mandatory' => 'True',
+				),
+				'data-vid' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+	),
+	'amp-ooyala-player' => array(
+		array(
+			'attr_spec_list' => array(
+				'data-config' => array(
+				),
+				'data-embedcode' => array(
+					'mandatory' => 'True',
+				),
+				'data-pcode' => array(
+					'mandatory' => 'True',
+				),
+				'data-playerid' => array(
+					'mandatory' => 'True',
+				),
+				'data-playerversion' => array(
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-pinterest' => array(
-		'data-do' => true,
-		'noloading' => true,
-		'media' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-do' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-pixel' => array(
-		'src' => true,
-		'noloading' => true,
-		'media' => true,
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+	),
+	'amp-playbuzz' => array(
+		array(
+			'attr_spec_list' => array(
+				'data-comments' => array(
+					'value_regex_casei' => '(false|true)',
+				),
+				'data-item-info' => array(
+					'value_regex_casei' => '(false|true)',
+				),
+				'data-share-buttons' => array(
+					'value_regex_casei' => '(false|true)',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-reach-player' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-embed-id' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-embed-id' => array(
+					'mandatory' => 'True',
+					'value_regex' => '[0-9a-z-]+',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-reddit' => array(
-		'data-embedlive' => true,
-		'noloading' => true,
-		'media' => true,
-		'data-embedparent' => true,
-		'data-src' => true,
-		'data-embedtype' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-embedlive' => array(
+					'value_regex_casei' => '(false|true)',
+				),
+				'data-embedparent' => array(
+					'value_regex_casei' => '(false|true)',
+				),
+				'data-embedtype' => array(
+					'mandatory' => 'True',
+					'value_regex_casei' => '(comment|post)',
+				),
+				'data-src' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+	),
+	'amp-selector' => array(
+		array(
+			'attr_spec_list' => array(
+				'disabled' => array(
+					'value' => '',
+				),
+				'form' => array(
+				),
+				'media' => array(
+				),
+				'multiple' => array(
+					'value' => '',
+				),
+				'name' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-sidebar' => array(
-		'media' => true,
-		'noloading' => true,
-		'side' => true,
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'side' => array(
+					'value_regex' => '(left|right)',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-social-share' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-share-endpoint' => true,
-		'type' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-share-endpoint' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'bbmi',
+						'fb-messenger',
+						'ftp',
+						'http',
+						'https',
+						'intent',
+						'line',
+						'mailto',
+						'skype',
+						'sms',
+						'snapchat',
+						'tel',
+						'tg',
+						'threema',
+						'viber',
+						'whatsapp',
+					),
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'type' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-soundcloud' => array(
-		'data-color' => true,
-		'noloading' => true,
-		'data-secret-token' => true,
-		'media' => true,
-		'data-visual' => true,
-		'data-trackid' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-color' => array(
+					'value_regex_casei' => '([0-9a-f]{3}){1,2}',
+				),
+				'data-secret-token' => array(
+					'value_regex' => '[A-Za-z0-9_-]+',
+				),
+				'data-trackid' => array(
+					'mandatory' => 'True',
+					'value_regex' => '[0-9]+',
+				),
+				'data-visual' => array(
+					'value_regex' => 'true|false',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-springboard-player' => array(
-		'data-items' => true,
-		'noloading' => true,
-		'media' => true,
-		'data-mode' => true,
-		'data-content-id' => true,
-		'data-domain' => true,
-		'data-player-id' => true,
-		'data-site-id' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-content-id' => array(
+					'mandatory' => 'True',
+				),
+				'data-domain' => array(
+					'mandatory' => 'True',
+				),
+				'data-items' => array(
+					'mandatory' => 'True',
+				),
+				'data-mode' => array(
+					'mandatory' => 'True',
+					'value_regex_casei' => 'playlist|video',
+				),
+				'data-player-id' => array(
+					'mandatory' => 'True',
+					'value_regex_casei' => '[a-z0-9]+',
+				),
+				'data-site-id' => array(
+					'mandatory' => 'True',
+					'value_regex' => '[0-9]+',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-sticky-ad' => array(
-		'media' => true,
-		'noloading' => true,
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-twitter' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-tweetid' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-tweetid' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-user-notification' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-show-if-href' => true,
-		'data-dismiss-href' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-dismiss-href' => array(
+					'allow_empty' => 'False',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'data-show-if-href' => array(
+					'allow_empty' => 'False',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-video' => array(
-		'preload' => true,
-		'src' => true,
-		'attribution' => true,
-		'muted' => true,
-		'poster' => true,
-		'controls' => true,
-		'noloading' => true,
-		'media' => true,
-		'alt' => true,
-		'placeholder' => true,
-		'loop' => true,
-		'autoplay' => true,
+		array(
+			'attr_spec_list' => array(
+				'alt' => array(
+				),
+				'attribution' => array(
+				),
+				'autoplay' => array(
+					'value' => '',
+				),
+				'controls' => array(
+					'value' => '',
+				),
+				'loop' => array(
+					'value' => '',
+				),
+				'media' => array(
+				),
+				'muted' => array(
+					'value' => '',
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+				'placeholder' => array(
+				),
+				'poster' => array(
+				),
+				'preload' => array(
+					'value_regex' => '(none|metadata|auto|)',
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-vimeo' => array(
-		'data-videoid' => true,
-		'noloading' => true,
-		'media' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-videoid' => array(
+					'mandatory' => 'True',
+					'value_regex' => '[0-9]+',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-vine' => array(
-		'media' => true,
-		'noloading' => true,
-		'data-vineid' => true,
+		array(
+			'attr_spec_list' => array(
+				'data-vineid' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'amp-youtube' => array(
-		'data-videoid' => true,
-		'noloading' => true,
-		'media' => true,
-		'autoplay' => true,
+		array(
+			'attr_spec_list' => array(
+				'autoplay' => array(
+				),
+				'data-videoid' => array(
+					'mandatory' => 'True',
+					'value_regex' => '[^=/?:]+',
+				),
+				'media' => array(
+				),
+				'noloading' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'article' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'aside' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'audio' => array(
-		'autoplay' => true,
-		'controls' => true,
-		'loop' => true,
-		'muted' => true,
-		'preload' => true,
-		'src' => true,
+		array(
+			'attr_spec_list' => array(
+				'autoplay' => array(
+				),
+				'controls' => array(
+				),
+				'loop' => array(
+				),
+				'muted' => array(
+				),
+				'preload' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'data',
+						'https',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'b' => array(
-	),
-	'base' => array(
-		'href' => true,
-		'target' => true,
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'bdi' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'bdo' => array(
-		'dir' => true,
+		array(
+			'attr_spec_list' => array(
+				'dir' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'big' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'blockquote' => array(
-		'align' => true,
-		'cite' => true,
-	),
-	'body' => array(
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+				'cite' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'fb-messenger',
+						'ftp',
+						'http',
+						'https',
+						'intent',
+						'mailto',
+						'skype',
+						'sms',
+						'snapchat',
+						'tel',
+						'tg',
+						'threema',
+						'twitter',
+						'viber',
+						'whatsapp',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'br' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'button' => array(
-		'disabled' => true,
-		'name' => true,
-		'role' => true,
-		'tabindex' => true,
-		'type' => true,
-		'value' => true,
-		'open-button' => true,
+		array(
+			'attr_spec_list' => array(
+				'disabled' => array(
+					'value' => '',
+				),
+				'name' => array(
+				),
+				'role' => array(
+				),
+				'tabindex' => array(
+				),
+				'type' => array(
+				),
+				'value' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'name' => array(
+				),
+				'open-button' => array(
+					'value' => '',
+				),
+				'role' => array(
+				),
+				'tabindex' => array(
+				),
+				'type' => array(
+				),
+				'value' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'caption' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'center' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'circle' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'cy' => true,
-		'cx' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'sketch:type' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'r' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'cx' => array(
+				),
+				'cy' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'r' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'sketch:type' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'cite' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'clippath' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'clippathunits' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'clippathunits' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'code' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'col' => array(
-		'span' => true,
+		array(
+			'attr_spec_list' => array(
+				'span' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'colgroup' => array(
-		'span' => true,
+		array(
+			'attr_spec_list' => array(
+				'span' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'data' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'datalist' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'dd' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'defs' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'del' => array(
-		'cite' => true,
-		'datetime' => true,
+		array(
+			'attr_spec_list' => array(
+				'cite' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'fb-messenger',
+						'ftp',
+						'http',
+						'https',
+						'intent',
+						'mailto',
+						'skype',
+						'sms',
+						'snapchat',
+						'tel',
+						'tg',
+						'threema',
+						'twitter',
+						'viber',
+						'whatsapp',
+					),
+				),
+				'datetime' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'desc' => array(
-		'xml:lang' => true,
-		'xml:base' => true,
-		'xml:space' => true,
-		'xmlns:xlink' => true,
-		'class' => true,
-		'xmlns' => true,
+		array(
+			'attr_spec_list' => array(
+				'class' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'dfn' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'dir' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'div' => array(
-		'align' => true,
-		'submit-success' => true,
-		'submit-error' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+				'submit-success' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+				'submit-error' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'dl' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'dt' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'ellipse' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'cy' => true,
-		'cx' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'sketch:type' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'rx' => true,
-		'ry' => true,
-		'xml:lang' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'systemlanguage' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'cx' => array(
+				),
+				'cy' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'rx' => array(
+				),
+				'ry' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'sketch:type' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'em' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'fieldset' => array(
-		'disabled' => true,
-		'name' => true,
+		array(
+			'attr_spec_list' => array(
+				'disabled' => array(
+				),
+				'name' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'figcaption' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'figure' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'filter' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'primitiveunits' => true,
-		'fill-rule' => true,
-		'width' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'filterres' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'filterunits' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'filterres' => array(
+				),
+				'filterunits' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'primitiveunits' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'footer' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'foreignobject' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'width' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'form' => array(
-		'accept' => true,
-		'accept-charset' => true,
-		'action' => true,
-		'action-xhr' => true,
-		'autocomplete' => true,
-		'custom-validation-reporting' => true,
-		'enctype' => true,
-		'method' => true,
-		'name' => true,
-		'novalidate' => true,
-		'target' => true,
+		array(
+			'attr_spec_list' => array(
+				'accept' => array(
+				),
+				'accept-charset' => array(
+				),
+				'action' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+					'disallowed_domain' => array(
+						'cdn.ampproject.org',
+					),
+				),
+				'action-xhr' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+					'disallowed_domain' => array(
+						'cdn.ampproject.org',
+					),
+				),
+				'autocomplete' => array(
+				),
+				'custom-validation-reporting' => array(
+					'value_regex' => '(show-first-on-submit|show-all-on-submit|as-you-go)',
+				),
+				'enctype' => array(
+				),
+				'method' => array(
+					'value_casei' => 'get',
+				),
+				'name' => array(
+				),
+				'novalidate' => array(
+				),
+				'target' => array(
+					'mandatory' => 'True',
+					'value_regex_casei' => '(_blank|_top)',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'accept' => array(
+				),
+				'accept-charset' => array(
+				),
+				'action-xhr' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+					'disallowed_domain' => array(
+						'cdn.ampproject.org',
+					),
+				),
+				'autocomplete' => array(
+				),
+				'custom-validation-reporting' => array(
+					'value_regex' => '(show-first-on-submit|show-all-on-submit|as-you-go)',
+				),
+				'enctype' => array(
+				),
+				'method' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'post',
+				),
+				'name' => array(
+				),
+				'novalidate' => array(
+				),
+				'target' => array(
+					'mandatory' => 'True',
+					'value_regex_casei' => '(_blank|_top)',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'g' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'glyph' => array(
-		'vert-adv-y' => true,
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'vert-origin-x' => true,
-		'vert-origin-y' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'unicode' => true,
-		'arabic-form' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'fill-opacity' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'd' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'glyph-name' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'orientation' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'stroke-opacity' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'horiz-adv-x' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'arabic-form' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'd' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-name' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'horiz-adv-x' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'orientation' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'vert-adv-y' => array(
+				),
+				'vert-origin-x' => array(
+				),
+				'vert-origin-y' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'glyphref' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'fill-rule' => true,
-		'glyphref' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'dx' => true,
-		'dy' => true,
-		'overflow' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'format' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'dx' => array(
+				),
+				'dy' => array(
+				),
+				'enable-background' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'format' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'glyphref' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'h1' => array(
-		'align' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'h2' => array(
-		'align' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'h3' => array(
-		'align' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'h4' => array(
-		'align' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'h5' => array(
-		'align' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'h6' => array(
-		'align' => true,
-	),
-	'head' => array(
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'header' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'hgroup' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'hkern' => array(
-		'xmlns' => true,
-		'xml:base' => true,
-		'g2' => true,
-		'g1' => true,
-		'k' => true,
-		'u1' => true,
-		'u2' => true,
-		'xml:lang' => true,
-		'xmlns:xlink' => true,
-		'xml:space' => true,
+		array(
+			'attr_spec_list' => array(
+				'g1' => array(
+				),
+				'g2' => array(
+				),
+				'k' => array(
+				),
+				'u1' => array(
+				),
+				'u2' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'hr' => array(
-	),
-	'html' => array(
-		'\u26a1' => true,
-		'amp' => true,
-		'\u26a14ads' => true,
-		'amp4ads' => true,
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'i' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'image' => array(
-		'font-variant' => true,
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'letter-spacing' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'width' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'preserveaspectratio' => true,
-		'xlink:arcrole' => true,
-		'filter' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'xlink:title' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'xlink:actuate' => true,
-		'xlink:show' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'xlink:role' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'cursor' => true,
-		'xml:lang' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'font-weight' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'systemlanguage' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'preserveaspectratio' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'blacklisted_value_regex' => '(^|\\s)data:image\\/svg\\+xml',
+					'allow_empty' => 'False',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'data',
+					),
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'img' => array(
-		'alt' => true,
-		'ismap' => true,
-		'longdesc' => true,
-		'src' => true,
-		'srcset' => true,
-		'border' => true,
-		'height' => true,
-		'width' => true,
+		array(
+			'attr_spec_list' => array(
+				'alt' => array(
+				),
+				'border' => array(
+				),
+				'height' => array(
+				),
+				'ismap' => array(
+				),
+				'longdesc' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'http',
+						'https',
+					),
+				),
+				'src' => array(
+					'alternative_names' => array(
+						'srcset',
+					),
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'data',
+						'https',
+					),
+				),
+				'width' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'input' => array(
-		'accept' => true,
-		'accesskey' => true,
-		'autocomplete' => true,
-		'autofocus' => true,
-		'checked' => true,
-		'default-value' => true,
-		'disabled' => true,
-		'height' => true,
-		'inputmode' => true,
-		'list' => true,
-		'max' => true,
-		'maxlength' => true,
-		'min' => true,
-		'minlength' => true,
-		'multiple' => true,
-		'name' => true,
-		'pattern' => true,
-		'placeholder' => true,
-		'readonly' => true,
-		'required' => true,
-		'selectiondirection' => true,
-		'size' => true,
-		'spellcheck' => true,
-		'step' => true,
-		'tabindex' => true,
-		'type' => true,
-		'value' => true,
-		'width' => true,
+		array(
+			'attr_spec_list' => array(
+				'accept' => array(
+				),
+				'accesskey' => array(
+				),
+				'autocomplete' => array(
+				),
+				'autofocus' => array(
+				),
+				'checked' => array(
+				),
+				'default-value' => array(
+				),
+				'disabled' => array(
+				),
+				'height' => array(
+				),
+				'inputmode' => array(
+				),
+				'list' => array(
+				),
+				'max' => array(
+				),
+				'maxlength' => array(
+				),
+				'min' => array(
+				),
+				'minlength' => array(
+				),
+				'multiple' => array(
+				),
+				'name' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+				),
+				'pattern' => array(
+				),
+				'placeholder' => array(
+				),
+				'readonly' => array(
+				),
+				'required' => array(
+				),
+				'selectiondirection' => array(
+				),
+				'size' => array(
+				),
+				'spellcheck' => array(
+				),
+				'step' => array(
+				),
+				'tabindex' => array(
+				),
+				'type' => array(
+					'blacklisted_value_regex' => '(^|\\s)(button|file|image|password|)(\\s|$)',
+				),
+				'value' => array(
+				),
+				'width' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'ins' => array(
-		'cite' => true,
-		'datetime' => true,
+		array(
+			'attr_spec_list' => array(
+				'cite' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'fb-messenger',
+						'ftp',
+						'http',
+						'https',
+						'intent',
+						'mailto',
+						'skype',
+						'sms',
+						'snapchat',
+						'tel',
+						'tg',
+						'threema',
+						'twitter',
+						'viber',
+						'whatsapp',
+					),
+				),
+				'datetime' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'kbd' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'label' => array(
-		'for' => true,
+		array(
+			'attr_spec_list' => array(
+				'for' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'legend' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'li' => array(
-		'value' => true,
+		array(
+			'attr_spec_list' => array(
+				'value' => array(
+					'value_regex' => '[0-9]*',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'line' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'y1' => true,
-		'text-rendering' => true,
-		'y2' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'x2' => true,
-		'overflow' => true,
-		'x1' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'sketch:type' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'stroke-width' => true,
-		'xml:lang' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'systemlanguage' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'sketch:type' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x1' => array(
+				),
+				'x2' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y1' => array(
+				),
+				'y2' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'lineargradient' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'shape-rendering' => true,
-		'y1' => true,
-		'text-rendering' => true,
-		'y2' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'fill-rule' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'gradientunits' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'x2' => true,
-		'overflow' => true,
-		'x1' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'stroke-width' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'color-interpolation' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'spreadmethod' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'gradienttransform' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'gradienttransform' => array(
+				),
+				'gradientunits' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'spreadmethod' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x1' => array(
+				),
+				'x2' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y1' => array(
+				),
+				'y2' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'link' => array(
-		'target' => true,
-		'sizes' => true,
-		'color' => true,
-		'media' => true,
-		'charset' => true,
-		'itemprop' => true,
-		'hreflang' => true,
-		'href' => true,
-		'rel' => true,
-		'type' => true,
+		array(
+			'attr_spec_list' => array(
+				'charset' => array(
+					'value_casei' => 'utf-8',
+				),
+				'color' => array(
+				),
+				'href' => array(
+				),
+				'hreflang' => array(
+				),
+				'media' => array(
+				),
+				'rel' => array(
+					'blacklisted_value_regex' => '(^|\\s)(canonical|components|import|manifest|serviceworker|stylesheet|subresource|)(\\s|$)',
+					'mandatory' => 'True',
+				),
+				'sizes' => array(
+				),
+				'target' => array(
+				),
+				'type' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'charset' => array(
+					'value_casei' => 'utf-8',
+				),
+				'color' => array(
+				),
+				'href' => array(
+					'mandatory' => 'True',
+				),
+				'hreflang' => array(
+				),
+				'itemprop' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'sameas',
+				),
+				'media' => array(
+				),
+				'sizes' => array(
+				),
+				'target' => array(
+				),
+				'type' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'charset' => array(
+					'value_casei' => 'utf-8',
+				),
+				'color' => array(
+				),
+				'href' => array(
+					'mandatory' => 'True',
+				),
+				'hreflang' => array(
+				),
+				'itemprop' => array(
+					'mandatory' => 'True',
+				),
+				'media' => array(
+				),
+				'sizes' => array(
+				),
+				'target' => array(
+				),
+				'type' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'listing' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'main' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'mark' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'marker' => array(
-		'stroke-linejoin' => true,
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'preserveaspectratio' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'dominant-baseline' => true,
-		'writing-mode' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'viewbox' => true,
-		'refy' => true,
-		'refx' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'orient' => true,
-		'markerheight' => true,
-		'filter' => true,
-		'display' => true,
-		'font-style' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'markerwidth' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'markerunits' => true,
-		'stroke-opacity' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'markerheight' => array(
+				),
+				'markerunits' => array(
+				),
+				'markerwidth' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'orient' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'preserveaspectratio' => array(
+				),
+				'refx' => array(
+				),
+				'refy' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'viewbox' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'mask' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'maskcontentunits' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'width' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'maskunits' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'color-profile' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'maskcontentunits' => array(
+				),
+				'maskunits' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'meta' => array(
-		'charset' => true,
-		'content' => true,
-		'name' => true,
-		'http-equiv' => true,
-		'property' => true,
-		'itemprop' => true,
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'x-ua-compatible',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+				),
+				'itemprop' => array(
+				),
+				'name' => array(
+					'blacklisted_value_regex' => '(^|\\s)(viewport|content-disposition|revisit-after|apple-itunes-app)(\\s|$)',
+				),
+				'property' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'text/html; charset=utf-8',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'content-type',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'content-language',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'pics-label',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'imagetoolbar',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'text/css',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'content-style-type',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'text/javascript',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'content-script-type',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+				),
+				'http-equiv' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'resource-type',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'multicol' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'nav' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'nextid' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'nobr' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'noscript' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'o:p' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'ol' => array(
-		'reversed' => true,
-		'start' => true,
-		'type' => true,
+		array(
+			'attr_spec_list' => array(
+				'reversed' => array(
+					'value' => '',
+				),
+				'start' => array(
+					'value_regex' => '[0-9]*',
+				),
+				'type' => array(
+					'value_regex' => '[1AaIi]',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'optgroup' => array(
-		'disabled' => true,
-		'label' => true,
+		array(
+			'attr_spec_list' => array(
+				'disabled' => array(
+				),
+				'label' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'option' => array(
-		'disabled' => true,
-		'label' => true,
-		'selected' => true,
-		'value' => true,
+		array(
+			'attr_spec_list' => array(
+				'disabled' => array(
+				),
+				'label' => array(
+				),
+				'selected' => array(
+				),
+				'value' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'p' => array(
-		'align' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'path' => array(
-		'font-variant' => true,
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'pathlength' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'alignment-baseline' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'd' => true,
-		'font-size-adjust' => true,
-		'sketch:type' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'd' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pathlength' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'sketch:type' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'pattern' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'fill-rule' => true,
-		'width' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'preserveaspectratio' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'patternunits' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'patterntransform' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'systemlanguage' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'patterncontentunits' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'viewbox' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'patterncontentunits' => array(
+				),
+				'patterntransform' => array(
+				),
+				'patternunits' => array(
+				),
+				'pointer-events' => array(
+				),
+				'preserveaspectratio' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'viewbox' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'polygon' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'sketch:type' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'points' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'points' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'sketch:type' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'polyline' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'sketch:type' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'points' => true,
-		'filter' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'points' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'sketch:type' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'pre' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'q' => array(
-		'cite' => true,
+		array(
+			'attr_spec_list' => array(
+				'cite' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'fb-messenger',
+						'ftp',
+						'http',
+						'https',
+						'intent',
+						'mailto',
+						'skype',
+						'sms',
+						'snapchat',
+						'tel',
+						'tg',
+						'threema',
+						'twitter',
+						'viber',
+						'whatsapp',
+					),
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'radialgradient' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'shape-rendering' => true,
-		'cy' => true,
-		'cx' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'fill-rule' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'gradientunits' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'r' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'color-interpolation' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'fx' => true,
-		'fy' => true,
-		'spreadmethod' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'gradienttransform' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'cx' => array(
+				),
+				'cy' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'fx' => array(
+				),
+				'fy' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'gradienttransform' => array(
+				),
+				'gradientunits' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'r' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'spreadmethod' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'rb' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'rect' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'width' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'sketch:type' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'rx' => true,
-		'ry' => true,
-		'xml:lang' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'systemlanguage' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'rx' => array(
+				),
+				'ry' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'sketch:type' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'rp' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'rt' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'rtc' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'ruby' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	's' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'samp' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'script' => array(
-		'async' => true,
-		'src' => true,
-		'type' => true,
-		'custom-element' => true,
-		'id' => true,
-		'amp-ad-metadata' => true,
-		'custom-template' => true,
+		array(
+			'attr_spec_list' => array(
+				'type' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'application/ld+json',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'type' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'application/json',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'amp-ad-metadata' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'type' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'application/json',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'type' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'application/json',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'type' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'application/json',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'section' => array(
-		'expanded' => true,
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'expanded' => array(
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'select' => array(
-		'autofocus' => true,
-		'disabled' => true,
-		'multiple' => true,
-		'name' => true,
-		'required' => true,
-		'size' => true,
+		array(
+			'attr_spec_list' => array(
+				'autofocus' => array(
+				),
+				'disabled' => array(
+				),
+				'multiple' => array(
+				),
+				'name' => array(
+				),
+				'required' => array(
+				),
+				'size' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'small' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'source' => array(
-		'src' => true,
-		'media' => true,
-		'type' => true,
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'type' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'type' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'type' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'media' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'type' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'spacer' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'span' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'stop' => array(
-		'offset' => true,
-		'stop-color' => true,
-		'stop-opacity' => true,
+		array(
+			'attr_spec_list' => array(
+				'offset' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'offset' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'strike' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'strong' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'style' => array(
-		'amp-custom' => true,
-		'type' => true,
-		'amp-boilerplate' => true,
-		'amp4ads-boilerplate' => true,
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'amp-boilerplate' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'sub' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'sup' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'svg' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'font-stretch' => true,
-		'width' => true,
-		'version' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'preserveaspectratio' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'stroke' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'viewbox' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'flood-color' => true,
-		'word-spacing' => true,
-		'contentstyletype' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'zoomandpan' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'display' => true,
-		'xml:lang' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'color-interpolation' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'systemlanguage' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'contentscripttype' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'contentscripttype' => array(
+				),
+				'contentstyletype' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'preserveaspectratio' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'version' => array(
+					'value_regex' => '(1.0|1.1)',
+				),
+				'viewbox' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+				'zoomandpan' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'symbol' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'preserveaspectratio' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'font-weight' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'viewbox' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'display' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'preserveaspectratio' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'viewbox' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'table' => array(
-		'sortable' => true,
-		'align' => true,
-		'border' => true,
-		'bgcolor' => true,
-		'cellpadding' => true,
-		'cellspacing' => true,
-		'width' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+				'bgcolor' => array(
+				),
+				'border' => array(
+					'value_regex' => '0|1',
+				),
+				'cellpadding' => array(
+				),
+				'cellspacing' => array(
+				),
+				'sortable' => array(
+				),
+				'width' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'tbody' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'td' => array(
-		'colspan' => true,
-		'headers' => true,
-		'rowspan' => true,
-		'align' => true,
-		'bgcolor' => true,
-		'height' => true,
-		'valign' => true,
-		'width' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+				'bgcolor' => array(
+				),
+				'colspan' => array(
+				),
+				'headers' => array(
+				),
+				'height' => array(
+				),
+				'rowspan' => array(
+				),
+				'valign' => array(
+				),
+				'width' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'template' => array(
-		'type' => true,
+		array(
+			'attr_spec_list' => array(
+				'type' => array(
+					'mandatory' => 'True',
+					'value' => 'amp-mustache',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'text' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'textlength' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'dx' => true,
-		'dy' => true,
-		'overflow' => true,
-		'rotate' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'marker-mid' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'clip-path' => true,
-		'xml:lang' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'lengthadjust' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'font-weight' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'systemlanguage' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'dx' => array(
+				),
+				'dy' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'lengthadjust' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'rotate' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'textlength' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'textarea' => array(
-		'autocomplete' => true,
-		'autofocus' => true,
-		'cols' => true,
-		'disabled' => true,
-		'maxlength' => true,
-		'minlength' => true,
-		'name' => true,
-		'placeholder' => true,
-		'readonly' => true,
-		'required' => true,
-		'rows' => true,
-		'selectiondirection' => true,
-		'selectionend' => true,
-		'selectionstart' => true,
-		'spellcheck' => true,
-		'wrap' => true,
+		array(
+			'attr_spec_list' => array(
+				'autocomplete' => array(
+				),
+				'autofocus' => array(
+				),
+				'cols' => array(
+				),
+				'disabled' => array(
+				),
+				'maxlength' => array(
+				),
+				'minlength' => array(
+				),
+				'name' => array(
+				),
+				'placeholder' => array(
+				),
+				'readonly' => array(
+				),
+				'required' => array(
+				),
+				'rows' => array(
+				),
+				'selectiondirection' => array(
+				),
+				'selectionend' => array(
+				),
+				'selectionstart' => array(
+				),
+				'spellcheck' => array(
+				),
+				'wrap' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'textpath' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'fill-rule' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'startoffset' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'method' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'systemlanguage' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'spacing' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'method' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'spacing' => array(
+				),
+				'startoffset' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'tfoot' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'th' => array(
-		'abbr' => true,
-		'colspan' => true,
-		'headers' => true,
-		'rowspan' => true,
-		'scope' => true,
-		'sorted' => true,
-		'align' => true,
-		'bgcolor' => true,
-		'height' => true,
-		'valign' => true,
-		'width' => true,
+		array(
+			'attr_spec_list' => array(
+				'abbr' => array(
+				),
+				'align' => array(
+				),
+				'bgcolor' => array(
+				),
+				'colspan' => array(
+				),
+				'headers' => array(
+				),
+				'height' => array(
+				),
+				'rowspan' => array(
+				),
+				'scope' => array(
+				),
+				'sorted' => array(
+				),
+				'valign' => array(
+				),
+				'width' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'thead' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'time' => array(
-		'datetime' => true,
+		array(
+			'attr_spec_list' => array(
+				'datetime' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'title' => array(
-		'xml:lang' => true,
-		'xml:base' => true,
-		'xml:space' => true,
-		'xmlns:xlink' => true,
-		'class' => true,
-		'xmlns' => true,
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'class' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'tr' => array(
-		'align' => true,
-		'bgcolor' => true,
-		'height' => true,
-		'valign' => true,
+		array(
+			'attr_spec_list' => array(
+				'align' => array(
+				),
+				'bgcolor' => array(
+				),
+				'height' => array(
+				),
+				'valign' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'track' => array(
-		'src' => true,
-		'kind' => true,
-		'default' => true,
-		'label' => true,
-		'srclang' => true,
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'value_regex' => '(captions|descriptions|chapters|metadata)',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'subtitles',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'value_regex' => '(captions|descriptions|chapters|metadata)',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'subtitles',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'value_regex' => '(captions|descriptions|chapters|metadata)',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'subtitles',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'value_regex' => '(captions|descriptions|chapters|metadata)',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'default' => array(
+					'value' => '',
+				),
+				'kind' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'subtitles',
+				),
+				'label' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'srclang' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'tref' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'fill-rule' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'font-variant' => true,
-		'stop-opacity' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'alignment-baseline' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'systemlanguage' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'tspan' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'letter-spacing' => true,
-		'shape-rendering' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'fill-rule' => true,
-		'font-stretch' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'direction' => true,
-		'textlength' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'dominant-baseline' => true,
-		'dx' => true,
-		'dy' => true,
-		'overflow' => true,
-		'rotate' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'marker-mid' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'font-size' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'filter' => true,
-		'clip-path' => true,
-		'systemlanguage' => true,
-		'glyph-orientation-horizontal' => true,
-		'xmlns:xlink' => true,
-		'lengthadjust' => true,
-		'opacity' => true,
-		'xml:base' => true,
-		'kerning' => true,
-		'font-weight' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'stop-color' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'dx' => array(
+				),
+				'dy' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'lengthadjust' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'rotate' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'textlength' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'tt' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'u' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'ul' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'use' => array(
-		'baseline-shift' => true,
-		'color-rendering' => true,
-		'fill-opacity' => true,
-		'color' => true,
-		'marker-start' => true,
-		'xml:space' => true,
-		'xlink:href' => true,
-		'font-size' => true,
-		'height' => true,
-		'text-rendering' => true,
-		'stroke-width' => true,
-		'color-profile' => true,
-		'color-interpolation-filters' => true,
-		'flood-opacity' => true,
-		'lighting-color' => true,
-		'xlink:role' => true,
-		'fill-rule' => true,
-		'transform' => true,
-		'width' => true,
-		'kerning' => true,
-		'stroke-miterlimit' => true,
-		'alignment-baseline' => true,
-		'stop-opacity' => true,
-		'xlink:arcrole' => true,
-		'direction' => true,
-		'clip-path' => true,
-		'font-variant' => true,
-		'glyph-orientation-vertical' => true,
-		'visibility' => true,
-		'requiredfeatures' => true,
-		'xlink:show' => true,
-		'dominant-baseline' => true,
-		'overflow' => true,
-		'shape-rendering' => true,
-		'xlink:actuate' => true,
-		'xmlns:xlink' => true,
-		'marker-end' => true,
-		'font-size-adjust' => true,
-		'flood-color' => true,
-		'text-anchor' => true,
-		'cursor' => true,
-		'x' => true,
-		'display' => true,
-		'stroke-linejoin' => true,
-		'letter-spacing' => true,
-		'clip' => true,
-		'word-spacing' => true,
-		'stroke' => true,
-		'stroke-linecap' => true,
-		'externalresourcesrequired' => true,
-		'font-style' => true,
-		'fill' => true,
-		'stop-color' => true,
-		'systemlanguage' => true,
-		'font-stretch' => true,
-		'glyph-orientation-horizontal' => true,
-		'font-weight' => true,
-		'marker-mid' => true,
-		'opacity' => true,
-		'xlink:title' => true,
-		'xml:base' => true,
-		'unicode-bidi' => true,
-		'clip-rule' => true,
-		'image-rendering' => true,
-		'xlink:type' => true,
-		'font-family' => true,
-		'class' => true,
-		'xmlns' => true,
-		'writing-mode' => true,
-		'stroke-opacity' => true,
-		'requiredextensions' => true,
-		'mask' => true,
-		'stroke-dashoffset' => true,
-		'text-decoration' => true,
-		'filter' => true,
-		'pointer-events' => true,
-		'xml:lang' => true,
-		'stroke-dasharray' => true,
-		'y' => true,
-		'enable-background' => true,
-		'color-interpolation' => true,
+		array(
+			'attr_spec_list' => array(
+				'alignment-baseline' => array(
+				),
+				'baseline-shift' => array(
+				),
+				'class' => array(
+				),
+				'clip' => array(
+				),
+				'clip-path' => array(
+				),
+				'clip-rule' => array(
+				),
+				'color' => array(
+				),
+				'color-interpolation' => array(
+				),
+				'color-interpolation-filters' => array(
+				),
+				'color-profile' => array(
+				),
+				'color-rendering' => array(
+				),
+				'cursor' => array(
+				),
+				'direction' => array(
+				),
+				'display' => array(
+				),
+				'dominant-baseline' => array(
+				),
+				'enable-background' => array(
+				),
+				'externalresourcesrequired' => array(
+				),
+				'fill' => array(
+				),
+				'fill-opacity' => array(
+				),
+				'fill-rule' => array(
+				),
+				'filter' => array(
+				),
+				'flood-color' => array(
+				),
+				'flood-opacity' => array(
+				),
+				'font-family' => array(
+				),
+				'font-size' => array(
+				),
+				'font-size-adjust' => array(
+				),
+				'font-stretch' => array(
+				),
+				'font-style' => array(
+				),
+				'font-variant' => array(
+				),
+				'font-weight' => array(
+				),
+				'glyph-orientation-horizontal' => array(
+				),
+				'glyph-orientation-vertical' => array(
+				),
+				'height' => array(
+				),
+				'image-rendering' => array(
+				),
+				'kerning' => array(
+				),
+				'letter-spacing' => array(
+				),
+				'lighting-color' => array(
+				),
+				'marker-end' => array(
+				),
+				'marker-mid' => array(
+				),
+				'marker-start' => array(
+				),
+				'mask' => array(
+				),
+				'opacity' => array(
+				),
+				'overflow' => array(
+				),
+				'pointer-events' => array(
+				),
+				'requiredextensions' => array(
+				),
+				'requiredfeatures' => array(
+				),
+				'shape-rendering' => array(
+				),
+				'stop-color' => array(
+				),
+				'stop-opacity' => array(
+				),
+				'stroke' => array(
+				),
+				'stroke-dasharray' => array(
+				),
+				'stroke-dashoffset' => array(
+				),
+				'stroke-linecap' => array(
+				),
+				'stroke-linejoin' => array(
+				),
+				'stroke-miterlimit' => array(
+				),
+				'stroke-opacity' => array(
+				),
+				'stroke-width' => array(
+				),
+				'systemlanguage' => array(
+				),
+				'text-anchor' => array(
+				),
+				'text-decoration' => array(
+				),
+				'text-rendering' => array(
+				),
+				'transform' => array(
+				),
+				'unicode-bidi' => array(
+				),
+				'visibility' => array(
+				),
+				'width' => array(
+				),
+				'word-spacing' => array(
+				),
+				'writing-mode' => array(
+				),
+				'x' => array(
+				),
+				'xlink:actuate' => array(
+				),
+				'xlink:arcrole' => array(
+				),
+				'xlink:href' => array(
+					'value_regex' => '#.*',
+				),
+				'xlink:role' => array(
+				),
+				'xlink:show' => array(
+				),
+				'xlink:title' => array(
+				),
+				'xlink:type' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'y' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'var' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'video' => array(
-		'autoplay' => true,
-		'controls' => true,
-		'height' => true,
-		'loop' => true,
-		'muted' => true,
-		'poster' => true,
-		'preload' => true,
-		'src' => true,
-		'width' => true,
+		array(
+			'attr_spec_list' => array(
+				'autoplay' => array(
+				),
+				'controls' => array(
+				),
+				'height' => array(
+				),
+				'loop' => array(
+				),
+				'muted' => array(
+				),
+				'poster' => array(
+				),
+				'preload' => array(
+				),
+				'src' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'allow_relative' => 'False',
+					'allowed_protocol' => array(
+						'data',
+						'https',
+					),
+				),
+				'width' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'view' => array(
-		'xmlns:xlink' => true,
-		'xml:base' => true,
-		'viewtarget' => true,
-		'xml:space' => true,
-		'viewbox' => true,
-		'xmlns' => true,
-		'xml:lang' => true,
-		'externalresourcesrequired' => true,
-		'zoomandpan' => true,
-		'preserveaspectratio' => true,
+		array(
+			'attr_spec_list' => array(
+				'externalresourcesrequired' => array(
+				),
+				'preserveaspectratio' => array(
+				),
+				'viewbox' => array(
+				),
+				'viewtarget' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+				'zoomandpan' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'vkern' => array(
-		'xmlns' => true,
-		'xml:base' => true,
-		'g2' => true,
-		'g1' => true,
-		'k' => true,
-		'u1' => true,
-		'u2' => true,
-		'xml:lang' => true,
-		'xmlns:xlink' => true,
-		'xml:space' => true,
+		array(
+			'attr_spec_list' => array(
+				'g1' => array(
+				),
+				'g2' => array(
+				),
+				'k' => array(
+				),
+				'u1' => array(
+				),
+				'u2' => array(
+				),
+				'xml:base' => array(
+				),
+				'xml:lang' => array(
+				),
+				'xml:space' => array(
+				),
+				'xmlns' => array(
+				),
+				'xmlns:xlink' => array(
+				),
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'wbr' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 	'xmp' => array(
+		array(
+			'attr_spec_list' => array(
+			),
+			'tag_spec' => array(
+			),
+		),
 	),
 );
 
 $globally_allowed_attrs = array(
-	'accesskey' => true,
-	'amp-access' => true,
-	'amp-access-behavior' => true,
-	'amp-access-hide' => true,
-	'amp-access-id' => true,
-	'amp-access-loader' => true,
-	'amp-access-loading' => true,
-	'amp-access-off' => true,
-	'amp-access-on' => true,
-	'amp-access-show' => true,
-	'amp-access-style' => true,
-	'amp-access-template' => true,
-	'aria-activedescendant' => true,
-	'aria-atomic' => true,
-	'aria-autocomplete' => true,
-	'aria-busy' => true,
-	'aria-checked' => true,
-	'aria-controls' => true,
-	'aria-describedby' => true,
-	'aria-disabled' => true,
-	'aria-dropeffect' => true,
-	'aria-expanded' => true,
-	'aria-flowto' => true,
-	'aria-grabbed' => true,
-	'aria-haspopup' => true,
-	'aria-hidden' => true,
-	'aria-invalid' => true,
-	'aria-label' => true,
-	'aria-labelledby' => true,
-	'aria-level' => true,
-	'aria-live' => true,
-	'aria-multiline' => true,
-	'aria-multiselectable' => true,
-	'aria-orientation' => true,
-	'aria-owns' => true,
-	'aria-posinset' => true,
-	'aria-pressed' => true,
-	'aria-readonly' => true,
-	'aria-relevant' => true,
-	'aria-required' => true,
-	'aria-selected' => true,
-	'aria-setsize' => true,
-	'aria-sort' => true,
-	'aria-valuemax' => true,
-	'aria-valuemin' => true,
-	'aria-valuenow' => true,
-	'aria-valuetext' => true,
-	'class' => true,
-	'dir' => true,
-	'draggable' => true,
-	'fallback' => true,
-	'i-amp-access-id' => true,
-	'id' => true,
-	'itemid' => true,
-	'itemprop' => true,
-	'itemref' => true,
-	'itemscope' => true,
-	'itemtype' => true,
-	'lang' => true,
-	'lightbox' => true,
-	'on' => true,
-	'overflow' => true,
-	'placeholder' => true,
-	'role' => true,
-	'tabindex' => true,
-	'title' => true,
-	'translate' => true,
-	'validation-for' => true,
-	'visible-when-invalid' => true,
+	'accesskey' => array(
+	),
+	'amp-access' => array(
+	),
+	'amp-access-behavior' => array(
+	),
+	'amp-access-hide' => array(
+	),
+	'amp-access-id' => array(
+	),
+	'amp-access-loader' => array(
+	),
+	'amp-access-loading' => array(
+	),
+	'amp-access-off' => array(
+	),
+	'amp-access-on' => array(
+	),
+	'amp-access-show' => array(
+	),
+	'amp-access-style' => array(
+	),
+	'amp-access-template' => array(
+	),
+	'aria-activedescendant' => array(
+	),
+	'aria-atomic' => array(
+	),
+	'aria-autocomplete' => array(
+	),
+	'aria-busy' => array(
+	),
+	'aria-checked' => array(
+	),
+	'aria-controls' => array(
+	),
+	'aria-describedby' => array(
+	),
+	'aria-disabled' => array(
+	),
+	'aria-dropeffect' => array(
+	),
+	'aria-expanded' => array(
+	),
+	'aria-flowto' => array(
+	),
+	'aria-grabbed' => array(
+	),
+	'aria-haspopup' => array(
+	),
+	'aria-hidden' => array(
+	),
+	'aria-invalid' => array(
+	),
+	'aria-label' => array(
+	),
+	'aria-labelledby' => array(
+	),
+	'aria-level' => array(
+	),
+	'aria-live' => array(
+	),
+	'aria-multiline' => array(
+	),
+	'aria-multiselectable' => array(
+	),
+	'aria-orientation' => array(
+	),
+	'aria-owns' => array(
+	),
+	'aria-posinset' => array(
+	),
+	'aria-pressed' => array(
+	),
+	'aria-readonly' => array(
+	),
+	'aria-relevant' => array(
+	),
+	'aria-required' => array(
+	),
+	'aria-selected' => array(
+	),
+	'aria-setsize' => array(
+	),
+	'aria-sort' => array(
+	),
+	'aria-valuemax' => array(
+	),
+	'aria-valuemin' => array(
+	),
+	'aria-valuenow' => array(
+	),
+	'aria-valuetext' => array(
+	),
+	'class' => array(
+				'blacklisted_value_regex' => '(^|\\W)i-amphtml-',
+	),
+	'dir' => array(
+	),
+	'draggable' => array(
+	),
+	'fallback' => array(
+				'value' => '',
+	),
+	'i-amp-access-id' => array(
+	),
+	'id' => array(
+				'blacklisted_value_regex' => '^i-amphtml-',
+	),
+	'itemid' => array(
+	),
+	'itemprop' => array(
+	),
+	'itemref' => array(
+	),
+	'itemscope' => array(
+	),
+	'itemtype' => array(
+	),
+	'lang' => array(
+	),
+	'lightbox' => array(
+	),
+	'on' => array(
+	),
+	'overflow' => array(
+	),
+	'placeholder' => array(
+				'value' => '',
+	),
+	'role' => array(
+	),
+	'tabindex' => array(
+	),
+	'title' => array(
+	),
+	'translate' => array(
+	),
+	'validation-for' => array(
+	),
+	'visible-when-invalid' => array(
+				'value_regex' => '(badInput|customError|patternMismatch|rangeOverflow|rangeUnderflow|stepMismatch|tooLong|typeMismatch|valueMissing)',
+	),
 );
 
 ?>

@@ -68,6 +68,7 @@ def GenValidatorProtoascii(out_dir):
 	f = open('%s/validator.protoascii' % out_dir, 'w')
 	f.write(''.join(protoascii_segments))
 	f.close()
+
 	logging.info('... done')
 
 
@@ -81,39 +82,25 @@ def GeneratePHP(out_dir):
 	logging.info('entering ...')
 	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
-	# These imports happen late, within this method because they don't necessarily
-	# exist when the module starts running, and the ones that probably do
-	# are checked by CheckPrereqs.
-	from google.protobuf import text_format
-	from del_dir import validator_pb2
-	import validator_gen_md
+	allowed_tags, attr_lists, versions = ParseRules(out_dir)
+
+	#Generate the output
 	out = []
-	allowed_tags = {}
-	attr_lists = {}
-	specfile='%s/validator.protoascii' % out_dir
-	validator_pb2=validator_pb2
-	text_format=text_format
+	GenerateHeaderPHP(out)
+	GenerateSpecVersionPHP(out, versions)
+	GenerateAllowedTagsPHP(out, allowed_tags)
+	GenerateGlobalAttributesPHP(out, attr_lists)
+	GenerateFooterPHP(out)
 
-	# Merge specfile with message buffers.
-	rules = validator_pb2.ValidatorRules()
-	text_format.Merge(open(specfile).read(), rules)
+	# Write the php file to disk.
+	f = open('%s/amp-allowed-tags-generated.php' % out_dir, 'w')
+	f.write('\n'.join(out))
+	f.close()
+	logging.info('... done')
 
-	# Build a dictionary of the named attribute lists that are used by multiple tags.
-	for (field_desc, field_val) in rules.ListFields():
-		if 'attr_lists' == field_desc.name:
-			for attr_spec in field_val:
-				if attr_spec.name not in attr_lists:
-					attr_array = []
-				else:
-					attr_array = attr_lists[UnicodeEscape(attr_spec.name)]
-				AddAttrs(attr_array, attr_spec.attrs)
-				attr_lists[UnicodeEscape(attr_spec.name)] = attr_array
 
-	# Build a dictionary of allowed tags and an associated list of their allowed attributes.
-	for (field_desc, field_val) in rules.ListFields():
-		if 'tags' == field_desc.name:
-			for tag_spec in field_val:
-				AddTag(allowed_tags, tag_spec, attr_lists)
+def GenerateHeaderPHP(out):
+	# logging.info('entering ...')
 
 	# Output the file's header
 	out.append('<?php')
@@ -128,71 +115,316 @@ def GeneratePHP(out_dir):
 	out.append(' * Reference points are partial tag specs which don\'t have a defined')
 	out.append(' * tag_name.')
 	out.append(' */')
+	out.append('')
+	# logging.info('... done')
+
+
+def GenerateSpecVersionPHP(out, versions):
+	# logging.info('entering ...')
 
 	# Output the version of the spec file and matching validator version
-	out.append('')
-	if rules.HasField('spec_file_revision'):
-		out.append('$spec_file_revision = %d;' % rules.spec_file_revision)
-	if rules.HasField('min_validator_revision_required'):
+	if versions['spec_file_revision']:
+		out.append('$spec_file_revision = %d;' % versions['spec_file_revision'])
+	if versions['min_validator_revision_required']:
 		out.append('$minimum_validator_revision_required = %d;' %
-							 rules.min_validator_revision_required)
+							 versions['min_validator_revision_required'])
+	# logging.info('... done')
+
+
+def GenerateAllowedTagsPHP(out, allowed_tags):
+	# logging.info('entering ...')
 
   # Output the allowed tags dictionary along with each tag's allowed attributes
 	out.append('')
 	out.append('$allowed_tags = array(')
 	sorted_tags = sorted(allowed_tags.items())
-	for (tag, attributes) in collections.OrderedDict(sorted_tags).iteritems():
-		out.append('\t\'%s\' => array(' % tag.lower())
-		for attribute in attributes:
-			out.append('\t\t\'%s\' => true,' % attribute.lower())
-		out.append('\t),')
+	for (tag, attributes_list) in collections.OrderedDict(sorted_tags).iteritems():
+		GenerateTagPHP(out, tag, attributes_list)
 	out.append(');')
+	# logging.info('... done')
+
+
+def GenerateGlobalAttributesPHP(out, attr_lists):
+	# logging.info('entering ...')
 
 	# Output the globally allowed attribute list.
 	out.append('')
 	out.append('$globally_allowed_attrs = array(')
-	sorted_global_attrs = sorted(attr_lists['$GLOBAL_ATTRS'])
-	for global_attr in sorted_global_attrs:
-		out.append('\t\'%s\' => true,' % global_attr.lower())
+	GenerateAttributesPHP(out, attr_lists['$GLOBAL_ATTRS'], 1)
 	out.append(');')
+	# logging.info('... done')
+
+
+def GenerateTagPHP(out, tag, attributes_list):
+	# logging.info('entering ...')
+
+	# Output an attributes list for a tag
+	out.append('\t\'%s\' => array(' % tag.lower())
+	for attributes in attributes_list:
+		out.append('\t\tarray(')
+		GenerateAttributesPHP(out, attributes)
+		out.append('\t\t),')
+	out.append('\t),')
+	# logging.info('... done')
+
+
+def GenerateAttributesPHP(out, attributes, indent_level = 3):
+	# logging.info('entering ...')
+
+	indent = ''
+	for i in range(0,indent_level):
+		indent += '\t'
+	
+	sorted_attributes = sorted(attributes.items())
+	for (attribute, values) in collections.OrderedDict(sorted_attributes).iteritems():
+		out.append('%s\'%s\' => array(' % (indent, attribute.lower()))
+		GeneratePropertiesPHP(out, values)
+		out.append('%s),' % indent)
+	
+	# logging.info('... done')
+
+
+def GeneratePropertiesPHP(out, properties, indent_level = 4):
+	# logging.info('entering ...')
+
+	indent = ''
+	for i in range(0,indent_level):
+		indent += '\t'
+
+	sorted_properties = sorted(properties.items())
+	for (prop, values) in collections.OrderedDict(sorted_properties).iteritems():
+
+		if isinstance(values, str):
+			out.append('%s\'%s\' => \'%s\',' % (indent, prop.lower(), values))
+		else:
+			out.append('%s\'%s\' => array(' % (indent, prop.lower()))
+			sorted_values = sorted(values.items())
+			for(value_type, value) in collections.OrderedDict(sorted_values).iteritems():
+				if isinstance(value, (str, bool)):
+					out.append('%s\t\'%s\' => \'%s\',' % (indent, value_type, value))
+				else:
+					GenerateValuesPHP(out, value)
+			out.append('%s),' % indent)
+
+	# logging.info('...done')
+
+
+def GenerateValuesPHP(out, values, indent_level = 5):
+	# logging.info('entering...')
+
+	indent = ''
+	for i in range(0, indent_level):
+		indent += '\t'
+
+	if isinstance(values, dict):
+		sorted_values = sorted(values.items())
+		for (key, value) in collections.OrderedDict(sorted_values).iteritems():
+
+			if isinstance(value, (str, bool)):
+				out.append('%s\'%s\' => \'%s\',' % (indent, key.lower(), value))
+
+			if isinstance(value, list):
+				out.append('%s\'%s\' => array(' % (indent, key.lower()))
+				sorted_value = sorted(value)
+				for v in sorted_value:
+					out.append('%s\t\'%s\',' % (indent, v))
+				out.append('%s),' % indent)
+
+	elif isinstance(values, list):
+		sorted_values = sorted(values)
+		for v in sorted_values:
+			out.append('%s\t\'%s\',' % (indent, v))
+
+	# logging.info('...done')
+
+
+def GenerateFooterPHP(out):
+	# logging.info('entering ...')
 
 	# Output the footer.
 	out.append('')
 	out.append('?>')
 	out.append('')
+	# logging.info('... done')
 
-	# Actually write the file to disk.
-	f = open('%s/amp-allowed-tags-generated.php' % out_dir, 'w')
-	f.write('\n'.join(out))
-	f.close()
+
+def ParseRules(out_dir):
+	logging.info('entering ...')
+
+	# These imports happen late, within this method because they don't necessarily
+	# exist when the module starts running, and the ones that probably do
+	# are checked by CheckPrereqs.
+	from google.protobuf import text_format
+	from amp_wp import validator_pb2
+	import validator_gen_md
+
+	allowed_tags = {}
+	attr_lists = {}
+	versions = {}
+
+	specfile='%s/validator.protoascii' % out_dir
+
+	validator_pb2=validator_pb2
+	text_format=text_format
+
+	# Merge specfile with message buffers.
+	rules = validator_pb2.ValidatorRules()
+	text_format.Merge(open(specfile).read(), rules)
+
+	# Record the version of this specfile and the corresponding validator version.
+	if rules.HasField('spec_file_revision'):
+		versions['spec_file_revision'] = rules.spec_file_revision
+
+	if rules.HasField('min_validator_revision_required'):
+		versions['min_validator_revision_required'] = rules.min_validator_revision_required
+
+	# Build a dictionary of the named attribute lists that are used by multiple tags.
+	for (field_desc, field_val) in rules.ListFields():
+		if 'attr_lists' == field_desc.name:
+			for attr_spec in field_val:
+				attr_lists[UnicodeEscape(attr_spec.name)] = GetAttrs(attr_spec.attrs)
+
+	# Build a dictionary of allowed tags and an associated list of their allowed
+	# attributes, values and other criteria.
+
+	# Don't include tags that have a mandatory parent with one of these tag names
+	# since we're only concerned with using this tag list to validate the body
+	# of the DOM
+	mandatory_parent_blacklist = [
+		'$ROOT',
+		'!DOCTYPE',
+		'HTML',
+		'HEAD',
+	]
+
+	for (field_desc, field_val) in rules.ListFields():
+		if 'tags' == field_desc.name:
+			for tag_spec in field_val:
+				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist:
+					continue
+				if '$REFERENCE_POINT' == tag_spec.tag_name:
+					continue
+				if tag_spec.tag_name not in allowed_tags:
+					tag_list = []
+				else:
+					tag_list = allowed_tags[UnicodeEscape(tag_spec.tag_name)]
+				# AddTag(allowed_tags, tag_spec, attr_lists)
+				tag_list.append(GetTagSpec(tag_spec, attr_lists))
+				allowed_tags[UnicodeEscape(tag_spec.tag_name)] = tag_list
+
 	logging.info('... done')
-	
+	return allowed_tags, attr_lists, versions
 
-def AddTag(tag_dict, tag_spec, attr_lists):
-	if tag_spec.tag_name:
-		if tag_spec.tag_name not in tag_dict:
-			attr_array = []
-		else:
-			attr_array = tag_dict[UnicodeEscape(tag_spec.tag_name)]
-		AddAttrs(attr_array, tag_spec.attrs)
 
-	# Now add attributes from any attribute lists tp this tag.
+def GetTagSpec(tag_spec, attr_lists):
+	# logging.info('entering ...')
+
+	tag_dict = GetTagRules(tag_spec)
+	attr_dict = GetAttrs(tag_spec.attrs)
+
+	# Now add attributes from any attribute lists to this tag.
 	for (tag_field_desc, tag_field_val) in tag_spec.ListFields():
 		if 'attr_lists' == tag_field_desc.name:
 			for attr_list in tag_field_val:
-				attr_array = list(set(attr_array)|set(attr_lists[UnicodeEscape(attr_list)]))
+				attr_dict.update(attr_lists[UnicodeEscape(attr_list)])
 
-	tag_dict[UnicodeEscape(tag_spec.tag_name)] = attr_array
+	# logging.info('... done')
+	return {'tag_spec':tag_dict, 'attr_spec_list':attr_dict}
 
 
-def AddAttrs(attr_array, attrs):
+def GetTagRules(tag_spec):
+	# logging.info('entering ...')
+
+	tag_rules = {}
+	# logging.info('... done')
+	return tag_rules
+
+
+def GetAttrs(attrs):
+	# logging.info('entering ...')
+
+	attr_dict = {}
 	for attr_spec in attrs:
-		if attr_spec.name not in attr_array:
-			attr_array.append(UnicodeEscape(attr_spec.name))
-		if attr_spec.alternative_names:
-			for alternative_name in attr_spec.alternative_names:
-				if attr_spec.alternative_names not in attr_array:
-					attr_array.append(UnicodeEscape(alternative_name))
+
+		value_dict = GetValues(attr_spec)
+
+		# Add attribute name and alternative_names
+		attr_dict[UnicodeEscape(attr_spec.name)] = value_dict
+
+	# logging.info('... done')
+	return attr_dict
+
+
+def GetValues(attr_spec):
+	# logging.info('entering ...')
+
+	value_dict = {}
+
+	# Add alternative names
+	if attr_spec.alternative_names:
+		alt_names_list = []
+		for alternative_name in attr_spec.alternative_names:
+			alt_names_list.append(UnicodeEscape(alternative_name))
+		value_dict['alternative_names'] = {'alternative_names': alt_names_list}
+
+	# Add blacklisted value regex
+	if attr_spec.HasField('blacklisted_value_regex'):
+		value_dict['blacklisted_value_regex'] = UnicodeEscape(attr_spec.blacklisted_value_regex)
+
+	# dispatch_key is a boolean
+	if attr_spec.HasField('dispatch_key'):
+		value_dict['dispatch_key'] = attr_spec.dispatch_key
+
+	# mandatory is a boolean
+	if attr_spec.HasField('mandatory'):
+		value_dict['mandatory'] = attr_spec.mandatory
+
+	# Add allowed value
+	if attr_spec.HasField('value'):
+		value_dict['value'] = UnicodeEscape(attr_spec.value)
+
+	# value_casei
+	if attr_spec.HasField('value_casei'):
+		value_dict['value_casei'] = UnicodeEscape(attr_spec.value_casei)
+
+	# value_regex
+	if attr_spec.HasField('value_regex'):
+		value_dict['value_regex'] = UnicodeEscape(attr_spec.value_regex)
+
+	# value_regex_casei
+	if attr_spec.HasField('value_regex_casei'):
+		value_dict['value_regex_casei'] = UnicodeEscape(attr_spec.value_regex_casei)
+
+	#value_properties is a dictionary of dictionaries
+	if attr_spec.HasField('value_properties'):
+		value_properties_dict = {}
+		for (value_properties_key, value_properties_val) in attr_spec.value_properties.ListFields():
+			for value_property in value_properties_val:
+				property_dict = {}
+				# print 'value_property.name: %s' % value_property.name
+				for (key,val) in value_property.ListFields():
+					if val != value_property.name:
+						if isinstance(val, unicode):
+							val = UnicodeEscape(val)
+						property_dict[UnicodeEscape(key.name)] = val
+				value_properties_dict[UnicodeEscape(value_property.name)] = property_dict
+		value_dict['value_properties'] = value_properties_dict
+
+	# value_url is a dictionary
+	if attr_spec.HasField('value_url'):
+		value_url_dict = {}
+		for (value_url_key, value_url_val) in attr_spec.value_url.ListFields():
+			if isinstance(value_url_val, (list, collections.Sequence)):
+				value_url_val_val = []
+				for val in value_url_val:
+					value_url_val_val.append(UnicodeEscape(val))
+			else:
+				value_url_val_val = value_url_val
+			value_url_dict[value_url_key.name] = value_url_val_val
+		value_dict['value_url'] = value_url_dict
+
+	# logging.info('... done')
+	return value_dict
 
 
 def UnicodeEscape(string):
@@ -210,11 +442,14 @@ def Main():
 	"""The main method, which executes all build steps and runs the tests."""
 	logging.basicConfig(
 			format='[[%(filename)s %(funcName)s]] - %(message)s', level=logging.INFO)
-	SetupOutDir(out_dir='amp_wp')
-	GenValidatorProtoascii(out_dir='amp_wp')
-	GenValidatorPb2Py(out_dir='amp_wp')
-	GenValidatorProtoascii(out_dir='amp_wp')
-	GeneratePHP(out_dir='amp_wp')
+
+	out_dir = 'amp_wp'
+
+	SetupOutDir(out_dir)
+	GenValidatorProtoascii(out_dir)
+	GenValidatorPb2Py(out_dir)
+	GenValidatorProtoascii(out_dir)
+	GeneratePHP(out_dir)
 
 if __name__ == '__main__':
 	Main()
