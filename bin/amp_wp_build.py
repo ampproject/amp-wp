@@ -104,7 +104,7 @@ def GeneratePHP(out_dir):
 
 
 def GenerateHeaderPHP(out):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	# Output the file's header
 	out.append('<?php')
@@ -113,18 +113,18 @@ def GenerateHeaderPHP(out):
 						 os.path.basename(__file__))
 	out.append(' *')
 	out.append(' * This is a list of HTML tags and attributes that are allowed by the')
-	out.append(' * AMP specification. Note that the tags have been converted to lowercase.')
+	out.append(' * AMP specification. Note that tag names have been converted to lowercase.')
 	out.append(' *')
-	out.append(' * Note: "$REFERENCE_POINT" is a special tag_name value.')
-	out.append(' * Reference points are partial tag specs which don\'t have a defined')
-	out.append(' * tag_name.')
+	out.append(' * Note: This file only contains tags that are relevant to the `body` of')
+	out.append(' * an AMP page. To include additional elements modify the variable')
+	out.append(' * `mandatory_parent_blacklist` in the amp_wp_build.py script.')
 	out.append(' */')
 	out.append('')
-	# logging.info('... done')
+	logging.info('... done')
 
 
 def GenerateSpecVersionPHP(out, versions):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	# Output the version of the spec file and matching validator version
 	if versions['spec_file_revision']:
@@ -132,11 +132,11 @@ def GenerateSpecVersionPHP(out, versions):
 	if versions['min_validator_revision_required']:
 		out.append('$minimum_validator_revision_required = %d;' %
 							 versions['min_validator_revision_required'])
-	# logging.info('... done')
+	logging.info('... done')
 
 
 def GenerateAllowedTagsPHP(out, allowed_tags):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
   # Output the allowed tags dictionary along with each tag's allowed attributes
 	out.append('')
@@ -145,22 +145,22 @@ def GenerateAllowedTagsPHP(out, allowed_tags):
 	for (tag, attributes_list) in collections.OrderedDict(sorted_tags).iteritems():
 		GenerateTagPHP(out, tag, attributes_list)
 	out.append(');')
-	# logging.info('... done')
+	logging.info('... done')
 
 
 def GenerateGlobalAttributesPHP(out, attr_lists):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	# Output the globally allowed attribute list.
 	out.append('')
 	out.append('$globally_allowed_attrs = array(')
 	GenerateAttributesPHP(out, attr_lists['$GLOBAL_ATTRS'], 1)
 	out.append(');')
-	# logging.info('... done')
+	logging.info('... done')
 
 
 def GenerateTagPHP(out, tag, attributes_list):
-	# logging.info('entering ...')
+	logging.info('generating php for tag: %s...' % tag.lower())
 
 	# Output an attributes list for a tag
 	out.append('\t\'%s\' => array(' % tag.lower())
@@ -169,11 +169,11 @@ def GenerateTagPHP(out, tag, attributes_list):
 		GenerateAttributesPHP(out, attributes)
 		out.append('\t\t),')
 	out.append('\t),')
-	# logging.info('... done')
+	logging.info('... done with: %s' % tag.lower())
 
 
 def GenerateAttributesPHP(out, attributes, indent_level = 3):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	indent = ''
 	for i in range(0,indent_level):
@@ -181,15 +181,17 @@ def GenerateAttributesPHP(out, attributes, indent_level = 3):
 	
 	sorted_attributes = sorted(attributes.items())
 	for (attribute, values) in collections.OrderedDict(sorted_attributes).iteritems():
+		logging.info('generating php for attribute: %s...' % attribute.lower())
 		out.append('%s\'%s\' => array(' % (indent, attribute.lower()))
 		GeneratePropertiesPHP(out, values)
 		out.append('%s),' % indent)
+		logging.info('...done with: %s' % attribute.lower())
 	
-	# logging.info('... done')
+	logging.info('... done')
 
 
 def GeneratePropertiesPHP(out, properties, indent_level = 4):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	indent = ''
 	for i in range(0,indent_level):
@@ -197,7 +199,7 @@ def GeneratePropertiesPHP(out, properties, indent_level = 4):
 
 	sorted_properties = sorted(properties.items())
 	for (prop, values) in collections.OrderedDict(sorted_properties).iteritems():
-
+		logging.info('generating php for property: %s...' % prop.lower())
 		if isinstance(values, (str, bool)):
 			if isinstance(values, str):
 				values = values.lower()
@@ -213,12 +215,13 @@ def GeneratePropertiesPHP(out, properties, indent_level = 4):
 				else:
 					GenerateValuesPHP(out, value)
 			out.append('%s),' % indent)
+		logging.info('...done with: %s' % prop.lower())
 
-	# logging.info('...done')
+	logging.info('...done')
 
 
 def GenerateValuesPHP(out, values, indent_level = 5):
-	# logging.info('entering...')
+	logging.info('entering...')
 
 	indent = ''
 	for i in range(0, indent_level):
@@ -227,6 +230,8 @@ def GenerateValuesPHP(out, values, indent_level = 5):
 	if isinstance(values, dict):
 		sorted_values = sorted(values.items())
 		for (key, value) in collections.OrderedDict(sorted_values).iteritems():
+
+			logging.info('generating php for value: %s...' % key.lower())
 
 			if isinstance(value, (str, bool)):
 				out.append('%s\'%s\' => \'%s\',' % (indent, key.lower(), value))
@@ -238,22 +243,26 @@ def GenerateValuesPHP(out, values, indent_level = 5):
 					out.append('%s\t\'%s\',' % (indent, v))
 				out.append('%s),' % indent)
 
+			logging.info('...done with: %s' % key.lower())
+
 	elif isinstance(values, list):
 		sorted_values = sorted(values)
 		for v in sorted_values:
+			logging.info('generating php for value: %s' % v.lower())
 			out.append('%s\t\'%s\',' % (indent, v.lower()))
+			logging.info('...done with: %s' % v.lower())
 
-	# logging.info('...done')
+	logging.info('...done')
 
 
 def GenerateFooterPHP(out):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	# Output the footer.
 	out.append('')
 	out.append('?>')
 	out.append('')
-	# logging.info('... done')
+	logging.info('... done')
 
 
 def ParseRules(out_dir):
@@ -299,10 +308,10 @@ def ParseRules(out_dir):
 	# since we're only concerned with using this tag list to validate the body
 	# of the DOM
 	mandatory_parent_blacklist = [
-		# '$ROOT',
-		# '!DOCTYPE',
-		# 'HTML',
-		# 'HEAD',
+		'$ROOT',
+		'!DOCTYPE',
+		'HTML',
+		'HEAD',
 	]
 
 	for (field_desc, field_val) in rules.ListFields():
@@ -335,11 +344,11 @@ def ParseRules(out_dir):
 
 
 def GetTagSpec(tag_spec, attr_lists):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	tag_dict = GetTagRules(tag_spec)
 	attr_dict = GetAttrs(tag_spec.attrs)
-	# TODO: add cdata spec section
+	# TODO: add CDATA section if validation of non-body elements is required.
 
 	# Now add attributes from any attribute lists to this tag.
 	for (tag_field_desc, tag_field_val) in tag_spec.ListFields():
@@ -347,12 +356,12 @@ def GetTagSpec(tag_spec, attr_lists):
 			for attr_list in tag_field_val:
 				attr_dict.update(attr_lists[UnicodeEscape(attr_list)])
 
-	# logging.info('... done')
+	logging.info('... done')
 	return {'tag_spec':tag_dict, 'attr_spec_list':attr_dict}
 
 
 def GetTagRules(tag_spec):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	tag_rules = {}
 
@@ -392,6 +401,12 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('mandatory_parent'):
 		tag_rules['mandatory_parent'] = UnicodeEscape(tag_spec.mandatory_parent)
 
+	if tag_spec.HasField('spec_name'):
+		tag_rules['spec_name'] = UnicodeEscape(tag_spec.spec_name)
+
+	if tag_spec.HasField('spec_url'):
+		tag_rules['spec_url'] = UnicodeEscape(tag_spec.spec_url)
+
 	if tag_spec.HasField('unique'):
 		tag_rules['unique'] = tag_spec.unique
 
@@ -400,12 +415,12 @@ def GetTagRules(tag_spec):
 
 
 
-	# logging.info('... done')
+	logging.info('... done')
 	return tag_rules
 
 
 def GetAttrs(attrs):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	attr_dict = {}
 	for attr_spec in attrs:
@@ -415,12 +430,12 @@ def GetAttrs(attrs):
 		# Add attribute name and alternative_names
 		attr_dict[UnicodeEscape(attr_spec.name)] = value_dict
 
-	# logging.info('... done')
+	logging.info('... done')
 	return attr_dict
 
 
 def GetValues(attr_spec):
-	# logging.info('entering ...')
+	logging.info('entering ...')
 
 	value_dict = {}
 
@@ -487,7 +502,7 @@ def GetValues(attr_spec):
 			value_url_dict[value_url_key.name] = value_url_val_val
 		value_dict['value_url'] = value_url_dict
 
-	# logging.info('... done')
+	logging.info('... done')
 	return value_dict
 
 
