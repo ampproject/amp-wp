@@ -14,13 +14,26 @@ $spec_file_revision = 325;
 $minimum_validator_revision_required = 189;
 
 $allowed_tags = array(
+	'!doctype' => array(
+		array(
+			'attr_spec_list' => array(
+				'html' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+				'mandatory' => 'True',
+				'mandatory_parent' => '$root',
+				'unique' => 'True',
+			),
+		),
+	),
 	'a' => array(
 		array(
 			'attr_spec_list' => array(
-				'border' => array(
-				),
-				'download' => array(
-				),
+				'border' => array(),
+				'download' => array(),
 				'href' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'allow_relative' => 'True',
@@ -44,19 +57,14 @@ $allowed_tags = array(
 						'whatsapp',
 					),
 				),
-				'hreflang' => array(
-				),
-				'media' => array(
-				),
-				'name' => array(
-				),
+				'hreflang' => array(),
+				'media' => array(),
+				'name' => array(),
 				'rel' => array(
 					'blacklisted_value_regex' => '(^|\\s)(components|dns-prefetch|import|manifest|preconnect|prefetch|preload|prerender|serviceworker|stylesheet|subresource|)(\\s|$)',
 				),
-				'role' => array(
-				),
-				'tabindex' => array(
-				),
+				'role' => array(),
+				'tabindex' => array(),
 				'target' => array(
 					'value_regex' => '(_blank|_self|_top)',
 				),
@@ -64,32 +72,29 @@ $allowed_tags = array(
 					'value_casei' => 'text/html',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'abbr' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'acronym' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'address' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'amp-accordion' => array(
@@ -100,18 +105,22 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-accordion extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-ad' => array(
 		array(
 			'attr_spec_list' => array(
-				'alt' => array(
-				),
-				'json' => array(
-				),
-				'media' => array(
-				),
+				'alt' => array(),
+				'json' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -127,6 +136,13 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'disallowed_ancestor' => array(
+						'amp-app-banner',
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
@@ -140,27 +156,32 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'type' => array(
-				),
+				'type' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-analytics extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-anim' => array(
 		array(
 			'attr_spec_list' => array(
-				'alt' => array(
-				),
-				'attribution' => array(
-				),
+				'alt' => array(),
+				'attribution' => array(),
 				'autoplay' => array(
 					'value' => '',
 				),
-				'controls' => array(
-				),
-				'media' => array(
-				),
+				'controls' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -179,6 +200,16 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-anim extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -186,18 +217,23 @@ $allowed_tags = array(
 		array(
 			'attr_spec_list' => array(
 				'data-apester-channel-token' => array(
-					'value_regex' => '[0-9a-zA-Z]+',
+					'value_regex' => '[0-9a-za-z]+',
 				),
 				'data-apester-media-id' => array(
-					'value_regex' => '[0-9a-zA-Z]+',
+					'value_regex' => '[0-9a-za-z]+',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-apester-media extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
@@ -207,13 +243,21 @@ $allowed_tags = array(
 				'id' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-app-banner button[open-button]',
+						'amp-app-banner extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'body',
+				'unique' => 'True',
 			),
 		),
 	),
@@ -223,13 +267,11 @@ $allowed_tags = array(
 				'autoplay' => array(
 					'value_regex' => '^$|desktop|tablet|mobile|autoplay',
 				),
-				'controls' => array(
-				),
+				'controls' => array(),
 				'loop' => array(
 					'value' => '',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'muted' => array(
 					'value' => '',
 				),
@@ -245,17 +287,24 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-audio extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 		array(
 			'attr_spec_list' => array(
-				'controls' => array(
-				),
+				'controls' => array(),
 				'loop' => array(
 					'value' => '',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'muted' => array(
 					'value' => '',
 				),
@@ -271,14 +320,22 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-audio extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-auto-ads' => array(
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -287,6 +344,9 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
@@ -307,13 +367,22 @@ $allowed_tags = array(
 				'data-video' => array(
 					'value_regex' => '[0-9]+',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-brid-player extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -323,21 +392,26 @@ $allowed_tags = array(
 				'data-account' => array(
 					'mandatory' => 'True',
 				),
-				'data-embed' => array(
-				),
-				'data-player' => array(
-				),
-				'data-playlist-id' => array(
-				),
-				'data-video-id' => array(
-				),
-				'media' => array(
-				),
+				'data-embed' => array(),
+				'data-player' => array(),
+				'data-playlist-id' => array(),
+				'data-video-id' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-brightcove extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -350,8 +424,7 @@ $allowed_tags = array(
 				'autoplay' => array(
 					'value' => '',
 				),
-				'controls' => array(
-				),
+				'controls' => array(),
 				'delay' => array(
 					'value_regex' => '[0-9]+',
 				),
@@ -361,8 +434,7 @@ $allowed_tags = array(
 				'loop' => array(
 					'value' => '',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -371,6 +443,16 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-carousel extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -402,25 +484,31 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_regex_casei' => '[a-z0-9]+',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-dailymotion extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-embed' => array(
 		array(
 			'attr_spec_list' => array(
-				'alt' => array(
-				),
-				'json' => array(
-				),
-				'media' => array(
-				),
+				'alt' => array(),
+				'json' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -436,14 +524,29 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'amp-experiment' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-experiment extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'unique' => 'True',
 			),
 		),
 	),
@@ -453,30 +556,43 @@ $allowed_tags = array(
 				'data-href' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-facebook extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-fit-text' => array(
 		array(
 			'attr_spec_list' => array(
-				'max-font-size' => array(
-				),
-				'media' => array(
-				),
-				'min-font-size' => array(
-				),
+				'max-font-size' => array(),
+				'media' => array(),
+				'min-font-size' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-fit-text extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -486,30 +602,32 @@ $allowed_tags = array(
 				'font-family' => array(
 					'mandatory' => 'True',
 				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'media' => array(
-				),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
-				'on-error-add-class' => array(
-				),
-				'on-error-remove-class' => array(
-				),
-				'on-load-add-class' => array(
-				),
-				'on-load-remove-class' => array(
-				),
+				'on-error-add-class' => array(),
+				'on-error-remove-class' => array(),
+				'on-load-add-class' => array(),
+				'on-load-remove-class' => array(),
 				'timeout' => array(
 					'value_regex' => '[0-9]+',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-font extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -519,13 +637,22 @@ $allowed_tags = array(
 				'height' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-fx-flying-carpet extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -535,8 +662,7 @@ $allowed_tags = array(
 				'data-gfyid' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noautoplay' => array(
 					'value' => '',
 				),
@@ -545,6 +671,16 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-gfycat extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -554,13 +690,22 @@ $allowed_tags = array(
 				'data-eid' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-hulu extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -576,18 +721,15 @@ $allowed_tags = array(
 				'frameborder' => array(
 					'value_regex' => '0|1',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
-				'referrerpolicy' => array(
-				),
+				'referrerpolicy' => array(),
 				'resizable' => array(
 					'value' => '',
 				),
-				'sandbox' => array(
-				),
+				'sandbox' => array(),
 				'scrolling' => array(
 					'value_regex' => 'auto|yes|no',
 				),
@@ -599,42 +741,54 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'srcdoc' => array(
-				),
+				'srcdoc' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-iframe extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'amp-image-lightbox' => array(
 		array(
 			'attr_spec_list' => array(
-				'controls' => array(
-				),
-				'media' => array(
-				),
+				'controls' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-image-lightbox extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-img' => array(
 		array(
 			'attr_spec_list' => array(
-				'alt' => array(
-				),
-				'attribution' => array(
-				),
-				'media' => array(
-				),
+				'alt' => array(),
+				'attribution' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
-				'placeholder' => array(
-				),
+				'placeholder' => array(),
 				'src' => array(
 					'alternative_names' => array(
 						'srcset',
@@ -650,24 +804,36 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-instagram' => array(
 		array(
 			'attr_spec_list' => array(
-				'alt' => array(
-				),
+				'alt' => array(),
 				'data-shortcode' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-instagram extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -684,6 +850,15 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-install-serviceworker extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
@@ -702,6 +877,16 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-jwplayer extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -711,42 +896,55 @@ $allowed_tags = array(
 				'data-partner' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-kaltura-player extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-lightbox' => array(
 		array(
 			'attr_spec_list' => array(
-				'controls' => array(
-				),
-				'from' => array(
-				),
-				'media' => array(
-				),
+				'controls' => array(),
+				'from' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
-				'scrollable' => array(
-				),
+				'scrollable' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-lightbox extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-list' => array(
 		array(
 			'attr_spec_list' => array(
-				'credentials' => array(
-				),
-				'media' => array(
-				),
+				'credentials' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -758,10 +956,16 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'template' => array(
-				),
+				'template' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-list extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -783,6 +987,13 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-live-list extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -792,28 +1003,34 @@ $allowed_tags = array(
 				'data-bcid' => array(
 					'mandatory' => 'True',
 				),
-				'data-bid' => array(
-				),
+				'data-bid' => array(),
 				'data-pid' => array(
 					'mandatory' => 'True',
 				),
-				'data-vid' => array(
-				),
-				'media' => array(
-				),
+				'data-vid' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-o2-player extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-ooyala-player' => array(
 		array(
 			'attr_spec_list' => array(
-				'data-config' => array(
-				),
+				'data-config' => array(),
 				'data-embedcode' => array(
 					'mandatory' => 'True',
 				),
@@ -823,15 +1040,20 @@ $allowed_tags = array(
 				'data-playerid' => array(
 					'mandatory' => 'True',
 				),
-				'data-playerversion' => array(
-				),
-				'media' => array(
-				),
+				'data-playerversion' => array(),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-ooyala-player extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -841,21 +1063,29 @@ $allowed_tags = array(
 				'data-do' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-pinterest extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-pixel' => array(
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -869,6 +1099,13 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -884,8 +1121,7 @@ $allowed_tags = array(
 				'data-share-buttons' => array(
 					'value_regex_casei' => '(false|true)',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -894,6 +1130,13 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-playbuzz extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -904,13 +1147,22 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_regex' => '[0-9a-z-]+',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-reach-player extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -930,13 +1182,22 @@ $allowed_tags = array(
 				'data-src' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-reddit extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -946,28 +1207,35 @@ $allowed_tags = array(
 				'disabled' => array(
 					'value' => '',
 				),
-				'form' => array(
-				),
-				'media' => array(
-				),
+				'form' => array(),
+				'media' => array(),
 				'multiple' => array(
 					'value' => '',
 				),
-				'name' => array(
-				),
+				'name' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-selector extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-selector',
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-sidebar' => array(
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -976,6 +1244,17 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-sidebar extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'body',
+				'unique' => 'True',
 			),
 		),
 	),
@@ -1004,8 +1283,7 @@ $allowed_tags = array(
 						'whatsapp',
 					),
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
@@ -1014,6 +1292,13 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-social-share extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -1024,7 +1309,7 @@ $allowed_tags = array(
 					'value_regex_casei' => '([0-9a-f]{3}){1,2}',
 				),
 				'data-secret-token' => array(
-					'value_regex' => '[A-Za-z0-9_-]+',
+					'value_regex' => '[a-za-z0-9_-]+',
 				),
 				'data-trackid' => array(
 					'mandatory' => 'True',
@@ -1033,13 +1318,22 @@ $allowed_tags = array(
 				'data-visual' => array(
 					'value_regex' => 'true|false',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-soundcloud extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -1067,26 +1361,63 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_regex' => '[0-9]+',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-springboard-player extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+			),
+		),
+	),
+	'amp-state' => array(
+		array(
+			'attr_spec_list' => array(
+				'id' => array(
+					'mandatory' => 'True',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-bind extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
 			),
 		),
 	),
 	'amp-sticky-ad' => array(
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-sticky-ad extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-app-banner',
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'unique' => 'True',
 			),
 		),
 	),
@@ -1096,13 +1427,22 @@ $allowed_tags = array(
 				'data-tweetid' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-twitter extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -1123,23 +1463,30 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-analytics extension .js script',
+						'amp-user-notification extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'amp-video' => array(
 		array(
 			'attr_spec_list' => array(
-				'alt' => array(
-				),
-				'attribution' => array(
-				),
+				'alt' => array(),
+				'attribution' => array(),
 				'autoplay' => array(
 					'value' => '',
 				),
@@ -1149,18 +1496,15 @@ $allowed_tags = array(
 				'loop' => array(
 					'value' => '',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'muted' => array(
 					'value' => '',
 				),
 				'noloading' => array(
 					'value' => '',
 				),
-				'placeholder' => array(
-				),
-				'poster' => array(
-				),
+				'placeholder' => array(),
+				'poster' => array(),
 				'preload' => array(
 					'value_regex' => '(none|metadata|auto|)',
 				),
@@ -1173,6 +1517,13 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -1183,13 +1534,22 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_regex' => '[0-9]+',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-vimeo extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
@@ -1199,64 +1559,72 @@ $allowed_tags = array(
 				'data-vineid' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-vine extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'amp-youtube' => array(
 		array(
 			'attr_spec_list' => array(
-				'autoplay' => array(
-				),
+				'autoplay' => array(),
 				'data-videoid' => array(
 					'mandatory' => 'True',
 					'value_regex' => '[^=/?:]+',
 				),
-				'media' => array(
-				),
+				'media' => array(),
 				'noloading' => array(
 					'value' => '',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-youtube extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-sidebar',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
 			),
 		),
 	),
 	'article' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'aside' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'audio' => array(
 		array(
 			'attr_spec_list' => array(
-				'autoplay' => array(
-				),
-				'controls' => array(
-				),
-				'loop' => array(
-				),
-				'muted' => array(
-				),
-				'preload' => array(
-				),
+				'autoplay' => array(),
+				'controls' => array(),
+				'loop' => array(),
+				'muted' => array(),
+				'preload' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'allow_relative' => 'False',
@@ -1267,48 +1635,64 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_ancestor' => 'noscript',
+				'mandatory_ancestor_suggested_alternative' => 'amp-audio',
 			),
 		),
 	),
 	'b' => array(
 		array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
+		),
+	),
+	'base' => array(
+		array(
 			'attr_spec_list' => array(
+				'href' => array(
+					'value' => '/',
+				),
+				'target' => array(
+					'value_regex_casei' => '(_blank|_self|_top)',
+				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
 			),
 		),
 	),
 	'bdi' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'bdo' => array(
 		array(
 			'attr_spec_list' => array(
-				'dir' => array(
-				),
+				'dir' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'big' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'blockquote' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 				'cite' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'allow_relative' => 'True',
@@ -1331,16 +1715,23 @@ $allowed_tags = array(
 					),
 				),
 			),
+			'tag_spec' => array(),
+		),
+	),
+	'body' => array(
+		array(
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'mandatory' => 'True',
+				'mandatory_parent' => 'html',
+				'unique' => 'True',
 			),
 		),
 	),
 	'br' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'button' => array(
@@ -1349,567 +1740,336 @@ $allowed_tags = array(
 				'disabled' => array(
 					'value' => '',
 				),
-				'name' => array(
-				),
-				'role' => array(
-				),
-				'tabindex' => array(
-				),
-				'type' => array(
-				),
-				'value' => array(
-				),
+				'name' => array(),
+				'role' => array(),
+				'tabindex' => array(),
+				'type' => array(),
+				'value' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
-				'name' => array(
-				),
+				'name' => array(),
 				'open-button' => array(
 					'value' => '',
 				),
-				'role' => array(
-				),
-				'tabindex' => array(
-				),
-				'type' => array(
-				),
-				'value' => array(
-				),
+				'role' => array(),
+				'tabindex' => array(),
+				'type' => array(),
+				'value' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'amp-app-banner',
 			),
 		),
 	),
 	'caption' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'center' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'circle' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'cx' => array(
-				),
-				'cy' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'r' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'sketch:type' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'cx' => array(),
+				'cy' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'r' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'sketch:type' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'cite' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'clippath' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'clippathunits' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'clippathunits' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'code' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'col' => array(
 		array(
 			'attr_spec_list' => array(
-				'span' => array(
-				),
+				'span' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'colgroup' => array(
 		array(
 			'attr_spec_list' => array(
-				'span' => array(
-				),
+				'span' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'data' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'datalist' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-form extension .js script',
+				),
+				'mandatory_ancestor' => 'form',
 			),
 		),
 	),
 	'dd' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'defs' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
@@ -1937,631 +2097,380 @@ $allowed_tags = array(
 						'whatsapp',
 					),
 				),
-				'datetime' => array(
-				),
+				'datetime' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'desc' => array(
 		array(
 			'attr_spec_list' => array(
-				'class' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'class' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'dfn' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'dir' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'div' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 				'submit-success' => array(
 					'mandatory' => 'True',
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'form',
 			),
 		),
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 				'submit-error' => array(
 					'mandatory' => 'True',
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'form',
 			),
 		),
 	),
 	'dl' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'dt' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'ellipse' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'cx' => array(
-				),
-				'cy' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'rx' => array(
-				),
-				'ry' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'sketch:type' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'cx' => array(),
+				'cy' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'rx' => array(),
+				'ry' => array(),
+				'shape-rendering' => array(),
+				'sketch:type' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'em' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'fieldset' => array(
 		array(
 			'attr_spec_list' => array(
-				'disabled' => array(
-				),
-				'name' => array(
-				),
+				'disabled' => array(),
+				'name' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'figcaption' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'figure' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'filter' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'filterres' => array(
-				),
-				'filterunits' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'primitiveunits' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'filterres' => array(),
+				'filterunits' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'primitiveunits' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'footer' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'foreignobject' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'form' => array(
 		array(
 			'attr_spec_list' => array(
-				'accept' => array(
-				),
-				'accept-charset' => array(
-				),
+				'accept' => array(),
+				'accept-charset' => array(),
 				'action' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -2583,34 +2492,34 @@ $allowed_tags = array(
 						'cdn.ampproject.org',
 					),
 				),
-				'autocomplete' => array(
-				),
+				'autocomplete' => array(),
 				'custom-validation-reporting' => array(
 					'value_regex' => '(show-first-on-submit|show-all-on-submit|as-you-go)',
 				),
-				'enctype' => array(
-				),
+				'enctype' => array(),
 				'method' => array(
 					'value_casei' => 'get',
 				),
-				'name' => array(
-				),
-				'novalidate' => array(
-				),
+				'name' => array(),
+				'novalidate' => array(),
 				'target' => array(
 					'mandatory' => 'True',
 					'value_regex_casei' => '(_blank|_top)',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-form extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-app-banner',
+				),
 			),
 		),
 		array(
 			'attr_spec_list' => array(
-				'accept' => array(
-				),
-				'accept-charset' => array(
-				),
+				'accept' => array(),
+				'accept-charset' => array(),
 				'action-xhr' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -2622,765 +2531,503 @@ $allowed_tags = array(
 						'cdn.ampproject.org',
 					),
 				),
-				'autocomplete' => array(
-				),
+				'autocomplete' => array(),
 				'custom-validation-reporting' => array(
 					'value_regex' => '(show-first-on-submit|show-all-on-submit|as-you-go)',
 				),
-				'enctype' => array(
-				),
+				'enctype' => array(),
 				'method' => array(
 					'dispatch_key' => 'True',
 					'mandatory' => 'True',
 					'value_casei' => 'post',
 				),
-				'name' => array(
-				),
-				'novalidate' => array(
-				),
+				'name' => array(),
+				'novalidate' => array(),
 				'target' => array(
 					'mandatory' => 'True',
 					'value_regex_casei' => '(_blank|_top)',
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-form extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'amp-app-banner',
+				),
 			),
 		),
 	),
 	'g' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'glyph' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'arabic-form' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'd' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-name' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'horiz-adv-x' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'orientation' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'vert-adv-y' => array(
-				),
-				'vert-origin-x' => array(
-				),
-				'vert-origin-y' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'arabic-form' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'd' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-name' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'horiz-adv-x' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'orientation' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode' => array(),
+				'unicode-bidi' => array(),
+				'vert-adv-y' => array(),
+				'vert-origin-x' => array(),
+				'vert-origin-y' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'glyphref' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'dx' => array(
-				),
-				'dy' => array(
-				),
-				'enable-background' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'format' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'glyphref' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'dx' => array(),
+				'dy' => array(),
+				'enable-background' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'format' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'glyphref' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'h1' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'h2' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'h3' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'h4' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'h5' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'h6' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
+			'tag_spec' => array(),
+		),
+	),
+	'head' => array(
+		array(
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'mandatory' => 'True',
+				'mandatory_parent' => 'html',
+				'unique' => 'True',
 			),
 		),
 	),
 	'header' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'hgroup' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'hkern' => array(
 		array(
 			'attr_spec_list' => array(
-				'g1' => array(
-				),
-				'g2' => array(
-				),
-				'k' => array(
-				),
-				'u1' => array(
-				),
-				'u2' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'g1' => array(),
+				'g2' => array(),
+				'k' => array(),
+				'u1' => array(),
+				'u2' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'hr' => array(
 		array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
+		),
+	),
+	'html' => array(
+		array(
 			'attr_spec_list' => array(
+				'\u26a1' => array(
+					'alternative_names' => array(
+						'amp',
+					),
+					'mandatory' => 'True',
+					'value' => '',
+				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory' => 'True',
+				'mandatory_parent' => '!doctype',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'\u26a14ads' => array(
+					'alternative_names' => array(
+						'amp4ads',
+					),
+					'mandatory' => 'True',
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp4ads',
+				),
+				'mandatory' => 'True',
+				'mandatory_parent' => '!doctype',
+				'unique' => 'True',
 			),
 		),
 	),
 	'i' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'image' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'preserveaspectratio' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'preserveaspectratio' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'blacklisted_value_regex' => '(^|\\s)data:image\\/svg\\+xml',
 					'allow_empty' => 'False',
@@ -3389,42 +3036,29 @@ $allowed_tags = array(
 						'data',
 					),
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'img' => array(
 		array(
 			'attr_spec_list' => array(
-				'alt' => array(
-				),
-				'border' => array(
-				),
-				'height' => array(
-				),
-				'ismap' => array(
-				),
+				'alt' => array(),
+				'border' => array(),
+				'height' => array(),
+				'ismap' => array(),
 				'longdesc' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'allow_relative' => 'True',
@@ -3445,77 +3079,54 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'width' => array(
-				),
+				'width' => array(),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_ancestor' => 'noscript',
+				'mandatory_ancestor_suggested_alternative' => 'amp-img',
 			),
 		),
 	),
 	'input' => array(
 		array(
 			'attr_spec_list' => array(
-				'accept' => array(
-				),
-				'accesskey' => array(
-				),
-				'autocomplete' => array(
-				),
-				'autofocus' => array(
-				),
-				'checked' => array(
-				),
-				'default-value' => array(
-				),
-				'disabled' => array(
-				),
-				'height' => array(
-				),
-				'inputmode' => array(
-				),
-				'list' => array(
-				),
-				'max' => array(
-				),
-				'maxlength' => array(
-				),
-				'min' => array(
-				),
-				'minlength' => array(
-				),
-				'multiple' => array(
-				),
+				'accept' => array(),
+				'accesskey' => array(),
+				'autocomplete' => array(),
+				'autofocus' => array(),
+				'checked' => array(),
+				'default-value' => array(),
+				'disabled' => array(),
+				'height' => array(),
+				'inputmode' => array(),
+				'list' => array(),
+				'max' => array(),
+				'maxlength' => array(),
+				'min' => array(),
+				'minlength' => array(),
+				'multiple' => array(),
 				'name' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 				),
-				'pattern' => array(
-				),
-				'placeholder' => array(
-				),
-				'readonly' => array(
-				),
-				'required' => array(
-				),
-				'selectiondirection' => array(
-				),
-				'size' => array(
-				),
-				'spellcheck' => array(
-				),
-				'step' => array(
-				),
-				'tabindex' => array(
-				),
+				'pattern' => array(),
+				'placeholder' => array(),
+				'readonly' => array(),
+				'required' => array(),
+				'selectiondirection' => array(),
+				'size' => array(),
+				'spellcheck' => array(),
+				'step' => array(),
+				'tabindex' => array(),
 				'type' => array(
 					'blacklisted_value_regex' => '(^|\\s)(button|file|image|password|)(\\s|$)',
 				),
-				'value' => array(
-				),
-				'width' => array(
-				),
+				'value' => array(),
+				'width' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'ins' => array(
@@ -3542,37 +3153,29 @@ $allowed_tags = array(
 						'whatsapp',
 					),
 				),
-				'datetime' => array(
-				),
+				'datetime' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'kbd' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'label' => array(
 		array(
 			'attr_spec_list' => array(
-				'for' => array(
-				),
+				'for' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'legend' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'li' => array(
@@ -3582,334 +3185,181 @@ $allowed_tags = array(
 					'value_regex' => '[0-9]*',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'line' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'sketch:type' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x1' => array(
-				),
-				'x2' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y1' => array(
-				),
-				'y2' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'sketch:type' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x1' => array(),
+				'x2' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y1' => array(),
+				'y2' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'lineargradient' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'gradienttransform' => array(
-				),
-				'gradientunits' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'spreadmethod' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x1' => array(
-				),
-				'x2' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'gradienttransform' => array(),
+				'gradientunits' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'shape-rendering' => array(),
+				'spreadmethod' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x1' => array(),
+				'x2' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y1' => array(
-				),
-				'y2' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y1' => array(),
+				'y2' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
@@ -3919,26 +3369,22 @@ $allowed_tags = array(
 				'charset' => array(
 					'value_casei' => 'utf-8',
 				),
-				'color' => array(
-				),
-				'href' => array(
-				),
-				'hreflang' => array(
-				),
-				'media' => array(
-				),
+				'color' => array(),
+				'href' => array(),
+				'hreflang' => array(),
+				'media' => array(),
 				'rel' => array(
 					'blacklisted_value_regex' => '(^|\\s)(canonical|components|import|manifest|serviceworker|stylesheet|subresource|)(\\s|$)',
 					'mandatory' => 'True',
 				),
-				'sizes' => array(
-				),
-				'target' => array(
-				),
-				'type' => array(
-				),
+				'sizes' => array(),
+				'target' => array(),
+				'type' => array(),
 			),
 			'tag_spec' => array(
+				'disallowed_ancestor' => array(
+						'template',
+				),
 			),
 		),
 		array(
@@ -3946,399 +3392,350 @@ $allowed_tags = array(
 				'charset' => array(
 					'value_casei' => 'utf-8',
 				),
-				'color' => array(
+				'color' => array(),
+				'href' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'http',
+						'https',
+					),
 				),
+				'hreflang' => array(),
+				'media' => array(),
+				'rel' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'canonical',
+				),
+				'sizes' => array(),
+				'target' => array(),
+				'type' => array(),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory' => 'True',
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'charset' => array(
+					'value_casei' => 'utf-8',
+				),
+				'color' => array(),
+				'href' => array(
+					'blacklisted_value_regex' => '__amp_source_origin',
+					'mandatory' => 'True',
+					'allow_relative' => 'True',
+					'allowed_protocol' => array(
+						'https',
+					),
+				),
+				'hreflang' => array(),
+				'media' => array(),
+				'rel' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'manifest',
+				),
+				'sizes' => array(),
+				'target' => array(),
+				'type' => array(),
+			),
+			'tag_spec' => array(
+				'mandatory_parent' => 'head',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'href' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://fonts\\.googleapis\\.com/css\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://fast\\.fonts\\.net/.*|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/.*|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css',
+				),
+				'media' => array(),
+				'rel' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'stylesheet',
+				),
+				'type' => array(
+					'value_casei' => 'text/css',
+				),
+			),
+			'tag_spec' => array(
+				'mandatory_parent' => 'head',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'charset' => array(
+					'value_casei' => 'utf-8',
+				),
+				'color' => array(),
 				'href' => array(
 					'mandatory' => 'True',
 				),
-				'hreflang' => array(
-				),
+				'hreflang' => array(),
 				'itemprop' => array(
 					'dispatch_key' => 'True',
 					'mandatory' => 'True',
 					'value_casei' => 'sameas',
 				),
-				'media' => array(
-				),
-				'sizes' => array(
-				),
-				'target' => array(
-				),
-				'type' => array(
-				),
+				'media' => array(),
+				'sizes' => array(),
+				'target' => array(),
+				'type' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
 				'charset' => array(
 					'value_casei' => 'utf-8',
 				),
-				'color' => array(
-				),
+				'color' => array(),
 				'href' => array(
 					'mandatory' => 'True',
 				),
-				'hreflang' => array(
-				),
+				'hreflang' => array(),
 				'itemprop' => array(
 					'mandatory' => 'True',
 				),
-				'media' => array(
-				),
-				'sizes' => array(
-				),
-				'target' => array(
-				),
-				'type' => array(
-				),
+				'media' => array(),
+				'sizes' => array(),
+				'target' => array(),
+				'type' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'listing' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'main' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'mark' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'marker' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'markerheight' => array(
-				),
-				'markerunits' => array(
-				),
-				'markerwidth' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'orient' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'preserveaspectratio' => array(
-				),
-				'refx' => array(
-				),
-				'refy' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'viewbox' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'markerheight' => array(),
+				'markerunits' => array(),
+				'markerwidth' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'orient' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'preserveaspectratio' => array(),
+				'refx' => array(),
+				'refy' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'viewbox' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'mask' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'maskcontentunits' => array(
-				),
-				'maskunits' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'maskcontentunits' => array(),
+				'maskunits' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'meta' => array(
+		array(
+			'attr_spec_list' => array(
+				'charset' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'utf-8',
+				),
+			),
+			'tag_spec' => array(
+				'mandatory' => 'True',
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(
+					'mandatory' => 'True',
+				),
+				'name' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'viewport',
+				),
+			),
+			'tag_spec' => array(
+				'mandatory' => 'True',
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
 		array(
 			'attr_spec_list' => array(
 				'content' => array(
@@ -4350,23 +3747,34 @@ $allowed_tags = array(
 					'value_casei' => 'x-ua-compatible',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
 				'content' => array(
-				),
-				'itemprop' => array(
+					'mandatory' => 'True',
+					'value_regex' => '.*app-id=.*',
 				),
 				'name' => array(
-					'blacklisted_value_regex' => '(^|\\s)(viewport|content-disposition|revisit-after|apple-itunes-app)(\\s|$)',
-				),
-				'property' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value_casei' => 'apple-itunes-app',
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'head',
 			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'content' => array(),
+				'itemprop' => array(),
+				'name' => array(
+					'blacklisted_value_regex' => '(^|\\s)(viewport|content-disposition|revisit-after|apple-itunes-app)(\\s|$)',
+				),
+				'property' => array(),
+			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
@@ -4380,8 +3788,7 @@ $allowed_tags = array(
 					'value_casei' => 'content-type',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
@@ -4394,8 +3801,7 @@ $allowed_tags = array(
 					'value_casei' => 'content-language',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
@@ -4408,8 +3814,7 @@ $allowed_tags = array(
 					'value_casei' => 'pics-label',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
@@ -4422,8 +3827,7 @@ $allowed_tags = array(
 					'value_casei' => 'imagetoolbar',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
@@ -4437,8 +3841,7 @@ $allowed_tags = array(
 					'value_casei' => 'content-style-type',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
@@ -4452,8 +3855,7 @@ $allowed_tags = array(
 					'value_casei' => 'content-script-type',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
@@ -4466,55 +3868,77 @@ $allowed_tags = array(
 					'value_casei' => 'resource-type',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'multicol' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'nav' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'nextid' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'nobr' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'noscript' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory' => 'True',
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(
+				'disallowed_ancestor' => array(
+						'noscript',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_ancestor' => 'body',
 			),
 		),
 	),
 	'o:p' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
@@ -4528,694 +3952,394 @@ $allowed_tags = array(
 					'value_regex' => '[0-9]*',
 				),
 				'type' => array(
-					'value_regex' => '[1AaIi]',
+					'value_regex' => '[1aaii]',
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'optgroup' => array(
 		array(
 			'attr_spec_list' => array(
-				'disabled' => array(
-				),
-				'label' => array(
-				),
+				'disabled' => array(),
+				'label' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-form extension .js script',
+				),
+				'mandatory_parent' => 'select',
 			),
 		),
 	),
 	'option' => array(
 		array(
 			'attr_spec_list' => array(
-				'disabled' => array(
-				),
-				'label' => array(
-				),
-				'selected' => array(
-				),
-				'value' => array(
-				),
+				'disabled' => array(),
+				'label' => array(),
+				'selected' => array(),
+				'value' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-form extension .js script',
+				),
+				'mandatory_ancestor' => 'form',
 			),
 		),
 	),
 	'p' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
+				'align' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'path' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'd' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pathlength' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'sketch:type' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'd' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pathlength' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'sketch:type' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'pattern' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'patterncontentunits' => array(
-				),
-				'patterntransform' => array(
-				),
-				'patternunits' => array(
-				),
-				'pointer-events' => array(
-				),
-				'preserveaspectratio' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'viewbox' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'patterncontentunits' => array(),
+				'patterntransform' => array(),
+				'patternunits' => array(),
+				'pointer-events' => array(),
+				'preserveaspectratio' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'viewbox' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'polygon' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'points' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'sketch:type' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'points' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'sketch:type' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'polyline' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'points' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'sketch:type' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'points' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'sketch:type' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'pre' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'q' => array(
@@ -5243,400 +4367,277 @@ $allowed_tags = array(
 					),
 				),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'radialgradient' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'cx' => array(
-				),
-				'cy' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'fx' => array(
-				),
-				'fy' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'gradienttransform' => array(
-				),
-				'gradientunits' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'r' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'spreadmethod' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'cx' => array(),
+				'cy' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'fx' => array(),
+				'fy' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'gradienttransform' => array(),
+				'gradientunits' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'r' => array(),
+				'shape-rendering' => array(),
+				'spreadmethod' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'rb' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'rect' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'rx' => array(
-				),
-				'ry' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'sketch:type' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'rx' => array(),
+				'ry' => array(),
+				'shape-rendering' => array(),
+				'sketch:type' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'rp' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'rt' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'rtc' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'ruby' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	's' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'samp' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'script' => array(
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'src' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'https://cdn.ampproject.org/v0.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory' => 'True',
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/(amp4ads-)?v0\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp4ads',
+				),
+				'mandatory' => 'True',
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
 		array(
 			'attr_spec_list' => array(
 				'type' => array(
@@ -5645,7 +4646,140 @@ $allowed_tags = array(
 					'value_casei' => 'application/ld+json',
 				),
 			),
+			'tag_spec' => array(),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-access',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-access-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'id' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-access',
+				),
+				'type' => array(
+					'mandatory' => 'True',
+					'value_casei' => 'application/json',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-access extension .js script',
+						'amp-analytics extension .js script',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-accordion',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-accordion-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-ad',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-ad-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-analytics',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-analytics-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
 			),
 		),
 		array(
@@ -5657,6 +4791,11 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'amp-analytics',
 			),
 		),
 		array(
@@ -5672,6 +4811,177 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'body',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-anim',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-anim-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-apester-media',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-apester-media-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-app-banner',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-app-banner-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-app-banner',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-audio',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-audio-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-auto-ads',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-auto-ads-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-bind',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-bind-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
 			),
 		),
 		array(
@@ -5683,6 +4993,176 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'amp-state',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-brid-player',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-brid-player-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-brightcove',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-brightcove-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-carousel',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-dailymotion',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-dailymotion-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-dynamic-css-classes',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-dynamic-css-classes-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-experiment',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-experiment-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
 			),
 		),
 		array(
@@ -5694,14 +5174,997 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'amp-experiment',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-facebook',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-facebook-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-fit-text',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-fit-text-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-font',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-font-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-form',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-form-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-fx-flying-carpet',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-fx-flying-carpet-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-gfycat',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-gfycat-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-hulu',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-hulu-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-iframe',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-iframe-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-image-lightbox',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-image-lightbox-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-instagram',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-instagram-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-install-serviceworker',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-install-serviceworker-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-jwplayer',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-jwplayer-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-kaltura-player',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-kaltura-player-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-lightbox',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-lightbox-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-list',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-list-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-live-list',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-live-list-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-template' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-mustache',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-mustache-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-o2-player',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-o2-player-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-ooyala-player',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-ooyala-player-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-ooyala-player',
+				),
+				'mandatory_parent' => 'head',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-pinterest',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-pinterest-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-playbuzz',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-playbuzz-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-playbuzz',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-reach-player',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-reach-player-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-reddit',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-reddit-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-reddit',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-selector',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-selector-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-selector',
+				),
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-sidebar',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-sidebar-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-slides',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-slides-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-social-share',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-social-share-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-soundcloud',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-soundcloud-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-springboard-player',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-springboard-player-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-sticky-ad',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-sticky-ad-(latest|0\\.1||1\\.0)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-twitter',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-twitter-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-user-notification',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-user-notification-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-vimeo',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-vimeo-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-vine',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'async' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'custom-element' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => 'amp-youtube',
+				),
+				'src' => array(
+					'mandatory' => 'True',
+					'value_regex' => 'https://cdn\\.ampproject\\.org/v0/amp-youtube-(latest|0\\.1)\\.js',
+				),
+				'type' => array(
+					'value_casei' => 'text/javascript',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique_warning' => 'True',
 			),
 		),
 	),
 	'section' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'disallowed_ancestor' => array(
+						'amp-accordion',
+				),
 			),
 		),
 		array(
@@ -5711,42 +6174,42 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+						'amp4ads',
+				),
+				'mandatory_parent' => 'amp-accordion',
 			),
 		),
 	),
 	'select' => array(
 		array(
 			'attr_spec_list' => array(
-				'autofocus' => array(
-				),
-				'disabled' => array(
-				),
-				'multiple' => array(
-				),
-				'name' => array(
-				),
-				'required' => array(
-				),
-				'size' => array(
-				),
+				'autofocus' => array(),
+				'disabled' => array(),
+				'multiple' => array(),
+				'name' => array(),
+				'required' => array(),
+				'size' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-form extension .js script',
+				),
+				'mandatory_ancestor' => 'form',
 			),
 		),
 	),
 	'small' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'source' => array(
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'allow_relative' => 'True',
@@ -5754,16 +6217,15 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'type' => array(
-				),
+				'type' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'amp-video',
 			),
 		),
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'allow_relative' => 'True',
@@ -5771,16 +6233,15 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'type' => array(
-				),
+				'type' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'amp-audio',
 			),
 		),
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -5794,12 +6255,12 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'audio',
 			),
 		),
 		array(
 			'attr_spec_list' => array(
-				'media' => array(
-				),
+				'media' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -5813,72 +6274,99 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'video',
 			),
 		),
 	),
 	'spacer' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'span' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'stop' => array(
 		array(
 			'attr_spec_list' => array(
-				'offset' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
+				'offset' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'lineargradient',
 			),
 		),
 		array(
 			'attr_spec_list' => array(
-				'offset' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
+				'offset' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'radialgradient',
 			),
 		),
 	),
 	'strike' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'strong' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'style' => array(
 		array(
 			'attr_spec_list' => array(
+				'amp-custom' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'type' => array(
+					'value_casei' => 'text/css',
+				),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'amp-custom' => array(
+					'mandatory' => 'True',
+					'value' => '',
+				),
+				'type' => array(
+					'value_casei' => 'text/css',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
 			),
 		),
 		array(
@@ -5890,389 +6378,266 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'noscript > style[amp-boilerplate]',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_alternatives' => 'head > style[amp-boilerplate]',
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'amp4ads-boilerplate' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+				'html_format' => array(
+						'amp4ads',
+				),
+				'mandatory_parent' => 'head',
+				'unique' => 'True',
+			),
+		),
+		array(
+			'attr_spec_list' => array(
+				'amp-boilerplate' => array(
+					'dispatch_key' => 'True',
+					'mandatory' => 'True',
+					'value' => '',
+				),
+			),
+			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'head > style[amp-boilerplate]',
+				),
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_alternatives' => 'noscript > style[amp-boilerplate]',
+				'mandatory_parent' => 'noscript',
+				'unique' => 'True',
 			),
 		),
 	),
 	'sub' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'sup' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'svg' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'contentscripttype' => array(
-				),
-				'contentstyletype' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'preserveaspectratio' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'contentscripttype' => array(),
+				'contentstyletype' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'preserveaspectratio' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
 				'version' => array(
 					'value_regex' => '(1.0|1.1)',
 				),
-				'viewbox' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
-				'zoomandpan' => array(
-				),
+				'viewbox' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
+				'zoomandpan' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'symbol' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'preserveaspectratio' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'viewbox' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'preserveaspectratio' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'viewbox' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'table' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
-				'bgcolor' => array(
-				),
+				'align' => array(),
+				'bgcolor' => array(),
 				'border' => array(
 					'value_regex' => '0|1',
 				),
-				'cellpadding' => array(
-				),
-				'cellspacing' => array(
-				),
-				'sortable' => array(
-				),
-				'width' => array(
-				),
+				'cellpadding' => array(),
+				'cellspacing' => array(),
+				'sortable' => array(),
+				'width' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'tbody' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'td' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
-				'bgcolor' => array(
-				),
-				'colspan' => array(
-				),
-				'headers' => array(
-				),
-				'height' => array(
-				),
-				'rowspan' => array(
-				),
-				'valign' => array(
-				),
-				'width' => array(
-				),
+				'align' => array(),
+				'bgcolor' => array(),
+				'colspan' => array(),
+				'headers' => array(),
+				'height' => array(),
+				'rowspan' => array(),
+				'valign' => array(),
+				'width' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'template' => array(
@@ -6284,474 +6649,285 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-mustache extension .js script',
+				),
+				'disallowed_ancestor' => array(
+						'template',
+				),
 			),
 		),
 	),
 	'text' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'dx' => array(
-				),
-				'dy' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'lengthadjust' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'rotate' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'textlength' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'dx' => array(),
+				'dy' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'lengthadjust' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'rotate' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'textlength' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'textarea' => array(
 		array(
 			'attr_spec_list' => array(
-				'autocomplete' => array(
-				),
-				'autofocus' => array(
-				),
-				'cols' => array(
-				),
-				'disabled' => array(
-				),
-				'maxlength' => array(
-				),
-				'minlength' => array(
-				),
-				'name' => array(
-				),
-				'placeholder' => array(
-				),
-				'readonly' => array(
-				),
-				'required' => array(
-				),
-				'rows' => array(
-				),
-				'selectiondirection' => array(
-				),
-				'selectionend' => array(
-				),
-				'selectionstart' => array(
-				),
-				'spellcheck' => array(
-				),
-				'wrap' => array(
-				),
+				'autocomplete' => array(),
+				'autofocus' => array(),
+				'cols' => array(),
+				'disabled' => array(),
+				'maxlength' => array(),
+				'minlength' => array(),
+				'name' => array(),
+				'placeholder' => array(),
+				'readonly' => array(),
+				'required' => array(),
+				'rows' => array(),
+				'selectiondirection' => array(),
+				'selectionend' => array(),
+				'selectionstart' => array(),
+				'spellcheck' => array(),
+				'wrap' => array(),
 			),
 			'tag_spec' => array(
+				'also_requires_tag' => array(
+						'amp-form extension .js script',
+				),
+				'mandatory_ancestor' => 'form',
 			),
 		),
 	),
 	'textpath' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'method' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'spacing' => array(
-				),
-				'startoffset' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'method' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'spacing' => array(),
+				'startoffset' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'tfoot' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'th' => array(
 		array(
 			'attr_spec_list' => array(
-				'abbr' => array(
-				),
-				'align' => array(
-				),
-				'bgcolor' => array(
-				),
-				'colspan' => array(
-				),
-				'headers' => array(
-				),
-				'height' => array(
-				),
-				'rowspan' => array(
-				),
-				'scope' => array(
-				),
-				'sorted' => array(
-				),
-				'valign' => array(
-				),
-				'width' => array(
-				),
+				'abbr' => array(),
+				'align' => array(),
+				'bgcolor' => array(),
+				'colspan' => array(),
+				'headers' => array(),
+				'height' => array(),
+				'rowspan' => array(),
+				'scope' => array(),
+				'sorted' => array(),
+				'valign' => array(),
+				'width' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'thead' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'time' => array(
 		array(
 			'attr_spec_list' => array(
-				'datetime' => array(
-				),
+				'datetime' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'title' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 		array(
 			'attr_spec_list' => array(
-				'class' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'class' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'tr' => array(
 		array(
 			'attr_spec_list' => array(
-				'align' => array(
-				),
-				'bgcolor' => array(
-				),
-				'height' => array(
-				),
-				'valign' => array(
-				),
+				'align' => array(),
+				'bgcolor' => array(),
+				'height' => array(),
+				'valign' => array(),
 			),
-			'tag_spec' => array(
-			),
+			'tag_spec' => array(),
 		),
 	),
 	'track' => array(
@@ -6763,8 +6939,7 @@ $allowed_tags = array(
 				'kind' => array(
 					'value_regex' => '(captions|descriptions|chapters|metadata)',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6773,10 +6948,10 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'srclang' => array(
-				),
+				'srclang' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'audio',
 			),
 		),
 		array(
@@ -6788,8 +6963,7 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_casei' => 'subtitles',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6803,6 +6977,7 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'audio',
 			),
 		),
 		array(
@@ -6813,8 +6988,7 @@ $allowed_tags = array(
 				'kind' => array(
 					'value_regex' => '(captions|descriptions|chapters|metadata)',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6823,10 +6997,10 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'srclang' => array(
-				),
+				'srclang' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'video',
 			),
 		),
 		array(
@@ -6838,8 +7012,7 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_casei' => 'subtitles',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6853,6 +7026,7 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'video',
 			),
 		),
 		array(
@@ -6863,8 +7037,7 @@ $allowed_tags = array(
 				'kind' => array(
 					'value_regex' => '(captions|descriptions|chapters|metadata)',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6873,10 +7046,10 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'srclang' => array(
-				),
+				'srclang' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'amp-audio',
 			),
 		),
 		array(
@@ -6888,8 +7061,7 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_casei' => 'subtitles',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6903,6 +7075,7 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'amp-audio',
 			),
 		),
 		array(
@@ -6913,8 +7086,7 @@ $allowed_tags = array(
 				'kind' => array(
 					'value_regex' => '(captions|descriptions|chapters|metadata)',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6923,10 +7095,10 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'srclang' => array(
-				),
+				'srclang' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'amp-video',
 			),
 		),
 		array(
@@ -6938,8 +7110,7 @@ $allowed_tags = array(
 					'mandatory' => 'True',
 					'value_casei' => 'subtitles',
 				),
-				'label' => array(
-				),
+				'label' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'mandatory' => 'True',
@@ -6953,550 +7124,312 @@ $allowed_tags = array(
 				),
 			),
 			'tag_spec' => array(
+				'mandatory_parent' => 'amp-video',
 			),
 		),
 	),
 	'tref' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'tspan' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'dx' => array(
-				),
-				'dy' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'lengthadjust' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'rotate' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'textlength' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'dx' => array(),
+				'dy' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'lengthadjust' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'rotate' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'textlength' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'tt' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 	'u' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'ul' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'use' => array(
 		array(
 			'attr_spec_list' => array(
-				'alignment-baseline' => array(
-				),
-				'baseline-shift' => array(
-				),
-				'class' => array(
-				),
-				'clip' => array(
-				),
-				'clip-path' => array(
-				),
-				'clip-rule' => array(
-				),
-				'color' => array(
-				),
-				'color-interpolation' => array(
-				),
-				'color-interpolation-filters' => array(
-				),
-				'color-profile' => array(
-				),
-				'color-rendering' => array(
-				),
-				'cursor' => array(
-				),
-				'direction' => array(
-				),
-				'display' => array(
-				),
-				'dominant-baseline' => array(
-				),
-				'enable-background' => array(
-				),
-				'externalresourcesrequired' => array(
-				),
-				'fill' => array(
-				),
-				'fill-opacity' => array(
-				),
-				'fill-rule' => array(
-				),
-				'filter' => array(
-				),
-				'flood-color' => array(
-				),
-				'flood-opacity' => array(
-				),
-				'font-family' => array(
-				),
-				'font-size' => array(
-				),
-				'font-size-adjust' => array(
-				),
-				'font-stretch' => array(
-				),
-				'font-style' => array(
-				),
-				'font-variant' => array(
-				),
-				'font-weight' => array(
-				),
-				'glyph-orientation-horizontal' => array(
-				),
-				'glyph-orientation-vertical' => array(
-				),
-				'height' => array(
-				),
-				'image-rendering' => array(
-				),
-				'kerning' => array(
-				),
-				'letter-spacing' => array(
-				),
-				'lighting-color' => array(
-				),
-				'marker-end' => array(
-				),
-				'marker-mid' => array(
-				),
-				'marker-start' => array(
-				),
-				'mask' => array(
-				),
-				'opacity' => array(
-				),
-				'overflow' => array(
-				),
-				'pointer-events' => array(
-				),
-				'requiredextensions' => array(
-				),
-				'requiredfeatures' => array(
-				),
-				'shape-rendering' => array(
-				),
-				'stop-color' => array(
-				),
-				'stop-opacity' => array(
-				),
-				'stroke' => array(
-				),
-				'stroke-dasharray' => array(
-				),
-				'stroke-dashoffset' => array(
-				),
-				'stroke-linecap' => array(
-				),
-				'stroke-linejoin' => array(
-				),
-				'stroke-miterlimit' => array(
-				),
-				'stroke-opacity' => array(
-				),
-				'stroke-width' => array(
-				),
-				'systemlanguage' => array(
-				),
-				'text-anchor' => array(
-				),
-				'text-decoration' => array(
-				),
-				'text-rendering' => array(
-				),
-				'transform' => array(
-				),
-				'unicode-bidi' => array(
-				),
-				'visibility' => array(
-				),
-				'width' => array(
-				),
-				'word-spacing' => array(
-				),
-				'writing-mode' => array(
-				),
-				'x' => array(
-				),
-				'xlink:actuate' => array(
-				),
-				'xlink:arcrole' => array(
-				),
+				'alignment-baseline' => array(),
+				'baseline-shift' => array(),
+				'class' => array(),
+				'clip' => array(),
+				'clip-path' => array(),
+				'clip-rule' => array(),
+				'color' => array(),
+				'color-interpolation' => array(),
+				'color-interpolation-filters' => array(),
+				'color-profile' => array(),
+				'color-rendering' => array(),
+				'cursor' => array(),
+				'direction' => array(),
+				'display' => array(),
+				'dominant-baseline' => array(),
+				'enable-background' => array(),
+				'externalresourcesrequired' => array(),
+				'fill' => array(),
+				'fill-opacity' => array(),
+				'fill-rule' => array(),
+				'filter' => array(),
+				'flood-color' => array(),
+				'flood-opacity' => array(),
+				'font-family' => array(),
+				'font-size' => array(),
+				'font-size-adjust' => array(),
+				'font-stretch' => array(),
+				'font-style' => array(),
+				'font-variant' => array(),
+				'font-weight' => array(),
+				'glyph-orientation-horizontal' => array(),
+				'glyph-orientation-vertical' => array(),
+				'height' => array(),
+				'image-rendering' => array(),
+				'kerning' => array(),
+				'letter-spacing' => array(),
+				'lighting-color' => array(),
+				'marker-end' => array(),
+				'marker-mid' => array(),
+				'marker-start' => array(),
+				'mask' => array(),
+				'opacity' => array(),
+				'overflow' => array(),
+				'pointer-events' => array(),
+				'requiredextensions' => array(),
+				'requiredfeatures' => array(),
+				'shape-rendering' => array(),
+				'stop-color' => array(),
+				'stop-opacity' => array(),
+				'stroke' => array(),
+				'stroke-dasharray' => array(),
+				'stroke-dashoffset' => array(),
+				'stroke-linecap' => array(),
+				'stroke-linejoin' => array(),
+				'stroke-miterlimit' => array(),
+				'stroke-opacity' => array(),
+				'stroke-width' => array(),
+				'systemlanguage' => array(),
+				'text-anchor' => array(),
+				'text-decoration' => array(),
+				'text-rendering' => array(),
+				'transform' => array(),
+				'unicode-bidi' => array(),
+				'visibility' => array(),
+				'width' => array(),
+				'word-spacing' => array(),
+				'writing-mode' => array(),
+				'x' => array(),
+				'xlink:actuate' => array(),
+				'xlink:arcrole' => array(),
 				'xlink:href' => array(
 					'value_regex' => '#.*',
 				),
-				'xlink:role' => array(
-				),
-				'xlink:show' => array(
-				),
-				'xlink:title' => array(
-				),
-				'xlink:type' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'y' => array(
-				),
+				'xlink:role' => array(),
+				'xlink:show' => array(),
+				'xlink:title' => array(),
+				'xlink:type' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'y' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'var' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'video' => array(
 		array(
 			'attr_spec_list' => array(
-				'autoplay' => array(
-				),
-				'controls' => array(
-				),
-				'height' => array(
-				),
-				'loop' => array(
-				),
-				'muted' => array(
-				),
-				'poster' => array(
-				),
-				'preload' => array(
-				),
+				'autoplay' => array(),
+				'controls' => array(),
+				'height' => array(),
+				'loop' => array(),
+				'muted' => array(),
+				'poster' => array(),
+				'preload' => array(),
 				'src' => array(
 					'blacklisted_value_regex' => '__amp_source_origin',
 					'allow_relative' => 'False',
@@ -7505,230 +7438,152 @@ $allowed_tags = array(
 						'https',
 					),
 				),
-				'width' => array(
-				),
+				'width' => array(),
 			),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
+				'mandatory_ancestor' => 'noscript',
+				'mandatory_ancestor_suggested_alternative' => 'amp-video',
 			),
 		),
 	),
 	'view' => array(
 		array(
 			'attr_spec_list' => array(
-				'externalresourcesrequired' => array(
-				),
-				'preserveaspectratio' => array(
-				),
-				'viewbox' => array(
-				),
-				'viewtarget' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
-				'zoomandpan' => array(
-				),
+				'externalresourcesrequired' => array(),
+				'preserveaspectratio' => array(),
+				'viewbox' => array(),
+				'viewtarget' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'zoomandpan' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'vkern' => array(
 		array(
 			'attr_spec_list' => array(
-				'g1' => array(
-				),
-				'g2' => array(
-				),
-				'k' => array(
-				),
-				'u1' => array(
-				),
-				'u2' => array(
-				),
-				'xml:base' => array(
-				),
-				'xml:lang' => array(
-				),
-				'xml:space' => array(
-				),
-				'xmlns' => array(
-				),
-				'xmlns:xlink' => array(
-				),
+				'g1' => array(),
+				'g2' => array(),
+				'k' => array(),
+				'u1' => array(),
+				'u2' => array(),
+				'xml:base' => array(),
+				'xml:lang' => array(),
+				'xml:space' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
 			),
 			'tag_spec' => array(
+				'mandatory_ancestor' => 'svg',
 			),
 		),
 	),
 	'wbr' => array(
 		array(
-			'attr_spec_list' => array(
-			),
-			'tag_spec' => array(
-			),
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
 		),
 	),
 	'xmp' => array(
 		array(
-			'attr_spec_list' => array(
-			),
+			'attr_spec_list' => array(),
 			'tag_spec' => array(
+				'html_format' => array(
+						'amp',
+				),
 			),
 		),
 	),
 );
 
 $globally_allowed_attrs = array(
-	'accesskey' => array(
-	),
-	'amp-access' => array(
-	),
-	'amp-access-behavior' => array(
-	),
-	'amp-access-hide' => array(
-	),
-	'amp-access-id' => array(
-	),
-	'amp-access-loader' => array(
-	),
-	'amp-access-loading' => array(
-	),
-	'amp-access-off' => array(
-	),
-	'amp-access-on' => array(
-	),
-	'amp-access-show' => array(
-	),
-	'amp-access-style' => array(
-	),
-	'amp-access-template' => array(
-	),
-	'aria-activedescendant' => array(
-	),
-	'aria-atomic' => array(
-	),
-	'aria-autocomplete' => array(
-	),
-	'aria-busy' => array(
-	),
-	'aria-checked' => array(
-	),
-	'aria-controls' => array(
-	),
-	'aria-describedby' => array(
-	),
-	'aria-disabled' => array(
-	),
-	'aria-dropeffect' => array(
-	),
-	'aria-expanded' => array(
-	),
-	'aria-flowto' => array(
-	),
-	'aria-grabbed' => array(
-	),
-	'aria-haspopup' => array(
-	),
-	'aria-hidden' => array(
-	),
-	'aria-invalid' => array(
-	),
-	'aria-label' => array(
-	),
-	'aria-labelledby' => array(
-	),
-	'aria-level' => array(
-	),
-	'aria-live' => array(
-	),
-	'aria-multiline' => array(
-	),
-	'aria-multiselectable' => array(
-	),
-	'aria-orientation' => array(
-	),
-	'aria-owns' => array(
-	),
-	'aria-posinset' => array(
-	),
-	'aria-pressed' => array(
-	),
-	'aria-readonly' => array(
-	),
-	'aria-relevant' => array(
-	),
-	'aria-required' => array(
-	),
-	'aria-selected' => array(
-	),
-	'aria-setsize' => array(
-	),
-	'aria-sort' => array(
-	),
-	'aria-valuemax' => array(
-	),
-	'aria-valuemin' => array(
-	),
-	'aria-valuenow' => array(
-	),
-	'aria-valuetext' => array(
-	),
+	'accesskey' => array(),
+	'amp-access' => array(),
+	'amp-access-behavior' => array(),
+	'amp-access-hide' => array(),
+	'amp-access-id' => array(),
+	'amp-access-loader' => array(),
+	'amp-access-loading' => array(),
+	'amp-access-off' => array(),
+	'amp-access-on' => array(),
+	'amp-access-show' => array(),
+	'amp-access-style' => array(),
+	'amp-access-template' => array(),
+	'aria-activedescendant' => array(),
+	'aria-atomic' => array(),
+	'aria-autocomplete' => array(),
+	'aria-busy' => array(),
+	'aria-checked' => array(),
+	'aria-controls' => array(),
+	'aria-describedby' => array(),
+	'aria-disabled' => array(),
+	'aria-dropeffect' => array(),
+	'aria-expanded' => array(),
+	'aria-flowto' => array(),
+	'aria-grabbed' => array(),
+	'aria-haspopup' => array(),
+	'aria-hidden' => array(),
+	'aria-invalid' => array(),
+	'aria-label' => array(),
+	'aria-labelledby' => array(),
+	'aria-level' => array(),
+	'aria-live' => array(),
+	'aria-multiline' => array(),
+	'aria-multiselectable' => array(),
+	'aria-orientation' => array(),
+	'aria-owns' => array(),
+	'aria-posinset' => array(),
+	'aria-pressed' => array(),
+	'aria-readonly' => array(),
+	'aria-relevant' => array(),
+	'aria-required' => array(),
+	'aria-selected' => array(),
+	'aria-setsize' => array(),
+	'aria-sort' => array(),
+	'aria-valuemax' => array(),
+	'aria-valuemin' => array(),
+	'aria-valuenow' => array(),
+	'aria-valuetext' => array(),
 	'class' => array(
-				'blacklisted_value_regex' => '(^|\\W)i-amphtml-',
+				'blacklisted_value_regex' => '(^|\\w)i-amphtml-',
 	),
-	'dir' => array(
-	),
-	'draggable' => array(
-	),
+	'dir' => array(),
+	'draggable' => array(),
 	'fallback' => array(
 				'value' => '',
 	),
-	'i-amp-access-id' => array(
-	),
+	'i-amp-access-id' => array(),
 	'id' => array(
 				'blacklisted_value_regex' => '^i-amphtml-',
 	),
-	'itemid' => array(
-	),
-	'itemprop' => array(
-	),
-	'itemref' => array(
-	),
-	'itemscope' => array(
-	),
-	'itemtype' => array(
-	),
-	'lang' => array(
-	),
-	'lightbox' => array(
-	),
-	'on' => array(
-	),
-	'overflow' => array(
-	),
+	'itemid' => array(),
+	'itemprop' => array(),
+	'itemref' => array(),
+	'itemscope' => array(),
+	'itemtype' => array(),
+	'lang' => array(),
+	'lightbox' => array(),
+	'on' => array(),
+	'overflow' => array(),
 	'placeholder' => array(
 				'value' => '',
 	),
-	'role' => array(
-	),
-	'tabindex' => array(
-	),
-	'title' => array(
-	),
-	'translate' => array(
-	),
-	'validation-for' => array(
-	),
+	'role' => array(),
+	'tabindex' => array(),
+	'title' => array(),
+	'translate' => array(),
+	'validation-for' => array(),
 	'visible-when-invalid' => array(
-				'value_regex' => '(badInput|customError|patternMismatch|rangeOverflow|rangeUnderflow|stepMismatch|tooLong|typeMismatch|valueMissing)',
+				'value_regex' => '(badinput|customerror|patternmismatch|rangeoverflow|rangeunderflow|stepmismatch|toolong|typemismatch|valuemissing)',
 	),
 );
 

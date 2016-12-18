@@ -92,9 +92,13 @@ def GeneratePHP(out_dir):
 	GenerateGlobalAttributesPHP(out, attr_lists)
 	GenerateFooterPHP(out)
 
+	# join out array into a single string and remove unneeded whitespace
+	output = re.sub("\\(\\s*\\)", "()", '\n'.join(out))
+
 	# Write the php file to disk.
 	f = open('%s/amp-allowed-tags-generated.php' % out_dir, 'w')
-	f.write('\n'.join(out))
+	# f.write('\n'.join(out))
+	f.write(output)
 	f.close()
 	logging.info('... done')
 
@@ -194,13 +198,17 @@ def GeneratePropertiesPHP(out, properties, indent_level = 4):
 	sorted_properties = sorted(properties.items())
 	for (prop, values) in collections.OrderedDict(sorted_properties).iteritems():
 
-		if isinstance(values, str):
+		if isinstance(values, (str, bool)):
+			if isinstance(values, str):
+				values = values.lower()
 			out.append('%s\'%s\' => \'%s\',' % (indent, prop.lower(), values))
 		else:
 			out.append('%s\'%s\' => array(' % (indent, prop.lower()))
 			sorted_values = sorted(values.items())
 			for(value_type, value) in collections.OrderedDict(sorted_values).iteritems():
 				if isinstance(value, (str, bool)):
+					if isinstance(value, str):
+						value = value.lower()
 					out.append('%s\t\'%s\' => \'%s\',' % (indent, value_type, value))
 				else:
 					GenerateValuesPHP(out, value)
@@ -233,7 +241,7 @@ def GenerateValuesPHP(out, values, indent_level = 5):
 	elif isinstance(values, list):
 		sorted_values = sorted(values)
 		for v in sorted_values:
-			out.append('%s\t\'%s\',' % (indent, v))
+			out.append('%s\t\'%s\',' % (indent, v.lower()))
 
 	# logging.info('...done')
 
@@ -291,19 +299,29 @@ def ParseRules(out_dir):
 	# since we're only concerned with using this tag list to validate the body
 	# of the DOM
 	mandatory_parent_blacklist = [
-		'$ROOT',
-		'!DOCTYPE',
-		'HTML',
-		'HEAD',
+		# '$ROOT',
+		# '!DOCTYPE',
+		# 'HTML',
+		# 'HEAD',
 	]
 
 	for (field_desc, field_val) in rules.ListFields():
 		if 'tags' == field_desc.name:
 			for tag_spec in field_val:
+
+				# Ignore tags that are outside of the body
 				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist:
 					continue
+
+				# Ignore the special $REFERENCE_POINT tag
 				if '$REFERENCE_POINT' == tag_spec.tag_name:
 					continue
+
+				# Ignore deprecated tags
+				if tag_spec.HasField('deprecation'):
+					continue
+
+				# If we made it here, then start adding the tag_spec
 				if tag_spec.tag_name not in allowed_tags:
 					tag_list = []
 				else:
@@ -321,6 +339,7 @@ def GetTagSpec(tag_spec, attr_lists):
 
 	tag_dict = GetTagRules(tag_spec)
 	attr_dict = GetAttrs(tag_spec.attrs)
+	# TODO: add cdata spec section
 
 	# Now add attributes from any attribute lists to this tag.
 	for (tag_field_desc, tag_field_val) in tag_spec.ListFields():
@@ -336,6 +355,51 @@ def GetTagRules(tag_spec):
 	# logging.info('entering ...')
 
 	tag_rules = {}
+
+	if tag_spec.also_requires_tag:
+		also_requires_tag_list = []
+		for also_requires_tag in tag_spec.also_requires_tag:
+			also_requires_tag_list.append(UnicodeEscape(also_requires_tag))
+		tag_rules['also_requires_tag'] = {'also_requires_tag': also_requires_tag_list}
+
+	if tag_spec.disallowed_ancestor:
+		disallowed_ancestor_list = []
+		for disallowed_ancestor in tag_spec.disallowed_ancestor:
+			disallowed_ancestor_list.append(UnicodeEscape(disallowed_ancestor))
+		tag_rules['disallowed_ancestor'] = {'disallowed_ancestor': disallowed_ancestor_list}
+
+	if tag_spec.html_format:
+		html_format_list = []
+		for html_format in tag_spec.html_format:
+			if 1 == html_format:
+				html_format_list.append('amp')
+			elif 2 == html_format:
+				html_format_list.append('amp4ads')
+		tag_rules['html_format'] = {'html_format': html_format_list}
+
+	if tag_spec.HasField('mandatory'):
+		tag_rules['mandatory'] = tag_spec.mandatory
+
+	if tag_spec.HasField('mandatory_alternatives'):
+		tag_rules['mandatory_alternatives'] = UnicodeEscape(tag_spec.mandatory_alternatives)
+
+	if tag_spec.HasField('mandatory_ancestor'):
+		tag_rules['mandatory_ancestor'] = UnicodeEscape(tag_spec.mandatory_ancestor)
+
+	if tag_spec.HasField('mandatory_ancestor_suggested_alternative'):
+		tag_rules['mandatory_ancestor_suggested_alternative'] = UnicodeEscape(tag_spec.mandatory_ancestor_suggested_alternative)
+
+	if tag_spec.HasField('mandatory_parent'):
+		tag_rules['mandatory_parent'] = UnicodeEscape(tag_spec.mandatory_parent)
+
+	if tag_spec.HasField('unique'):
+		tag_rules['unique'] = tag_spec.unique
+
+	if tag_spec.HasField('unique_warning'):
+		tag_rules['unique_warning'] = tag_spec.unique_warning
+
+
+
 	# logging.info('... done')
 	return tag_rules
 
