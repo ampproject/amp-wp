@@ -1722,6 +1722,17 @@ $allowed_tags = array(
 			'tag_spec' => array(),
 		),
 	),
+	'body' => array(
+		array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(
+				'mandatory' => 'True',
+				'mandatory_parent' => 'html',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/spec.html#required-markup',
+				'unique' => 'True',
+			),
+		),
+	),
 	'br' => array(
 		array(
 			'attr_spec_list' => array(),

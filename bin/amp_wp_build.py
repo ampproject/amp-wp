@@ -319,7 +319,7 @@ def ParseRules(out_dir):
 			for tag_spec in field_val:
 
 				# Ignore tags that are outside of the body
-				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist:
+				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist and tag_spec.tag_name != 'BODY':
 					continue
 
 				# Ignore the special $REFERENCE_POINT tag
