@@ -96,7 +96,7 @@ def GeneratePHP(out_dir):
 	output = re.sub("\\(\\s*\\)", "()", '\n'.join(out))
 
 	# Write the php file to disk.
-	f = open('%s/amp-allowed-tags-generated.php' % out_dir, 'w')
+	f = open('%s/class-amp-allowed-tags-generated.php' % out_dir, 'w')
 	# f.write('\n'.join(out))
 	f.write(output)
 	f.close()
@@ -119,6 +119,7 @@ def GenerateHeaderPHP(out):
 	out.append(' * an AMP page. To include additional elements modify the variable')
 	out.append(' * `mandatory_parent_blacklist` in the amp_wp_build.py script.')
 	out.append(' */')
+	out.append('class AMP_Allowed_Tags_Generated {')
 	out.append('')
 	logging.info('... done')
 
@@ -128,9 +129,9 @@ def GenerateSpecVersionPHP(out, versions):
 
 	# Output the version of the spec file and matching validator version
 	if versions['spec_file_revision']:
-		out.append('$spec_file_revision = %d;' % versions['spec_file_revision'])
+		out.append('\tprivate static $spec_file_revision = %d;' % versions['spec_file_revision'])
 	if versions['min_validator_revision_required']:
-		out.append('$minimum_validator_revision_required = %d;' %
+		out.append('\tprivate static $minimum_validator_revision_required = %d;' %
 							 versions['min_validator_revision_required'])
 	logging.info('... done')
 
@@ -140,11 +141,11 @@ def GenerateAllowedTagsPHP(out, allowed_tags):
 
   # Output the allowed tags dictionary along with each tag's allowed attributes
 	out.append('')
-	out.append('$allowed_tags = array(')
+	out.append('\tprivate static $allowed_tags = array(')
 	sorted_tags = sorted(allowed_tags.items())
 	for (tag, attributes_list) in collections.OrderedDict(sorted_tags).iteritems():
 		GenerateTagPHP(out, tag, attributes_list)
-	out.append(');')
+	out.append('\t);')
 	logging.info('... done')
 
 
@@ -153,9 +154,10 @@ def GenerateGlobalAttributesPHP(out, attr_lists):
 
 	# Output the globally allowed attribute list.
 	out.append('')
-	out.append('$globally_allowed_attrs = array(')
-	GenerateAttributesPHP(out, attr_lists['$GLOBAL_ATTRS'], 1)
-	out.append(');')
+	out.append('\tprivate static $globally_allowed_attrs = array(')
+	GenerateAttributesPHP(out, attr_lists['$GLOBAL_ATTRS'], 2)
+	out.append('\t);')
+	out.append('')
 	logging.info('... done')
 
 
@@ -163,16 +165,16 @@ def GenerateTagPHP(out, tag, attributes_list):
 	logging.info('generating php for tag: %s...' % tag.lower())
 
 	# Output an attributes list for a tag
-	out.append('\t\'%s\' => array(' % tag.lower())
+	out.append('\t\t\'%s\' => array(' % tag.lower())
 	for attributes in attributes_list:
-		out.append('\t\tarray(')
+		out.append('\t\t\tarray(')
 		GenerateAttributesPHP(out, attributes)
-		out.append('\t\t),')
-	out.append('\t),')
+		out.append('\t\t\t),')
+	out.append('\t\t),')
 	logging.info('... done with: %s' % tag.lower())
 
 
-def GenerateAttributesPHP(out, attributes, indent_level = 3):
+def GenerateAttributesPHP(out, attributes, indent_level = 4):
 	logging.info('entering ...')
 
 	indent = ''
@@ -187,10 +189,11 @@ def GenerateAttributesPHP(out, attributes, indent_level = 3):
 		out.append('%s),' % indent)
 		logging.info('...done with: %s' % attribute.lower())
 	
+	out.append('')
 	logging.info('... done')
 
 
-def GeneratePropertiesPHP(out, properties, indent_level = 4):
+def GeneratePropertiesPHP(out, properties, indent_level = 5):
 	logging.info('entering ...')
 
 	indent = ''
@@ -220,7 +223,7 @@ def GeneratePropertiesPHP(out, properties, indent_level = 4):
 	logging.info('...done')
 
 
-def GenerateValuesPHP(out, values, indent_level = 5):
+def GenerateValuesPHP(out, values, indent_level = 6):
 	logging.info('entering...')
 
 	indent = ''
@@ -259,7 +262,18 @@ def GenerateFooterPHP(out):
 	logging.info('entering ...')
 
 	# Output the footer.
+	out.append('\tpublic static function get_allowed_tags() {')
+	out.append('\t\treturn self::$allowed_tags;')
+	out.append('\t}')
 	out.append('')
+
+	out.append('\tpublic static function get_allowed_attributes() {')
+	out.append('\t\treturn self::$globally_allowed_attrs;')
+	out.append('\t}')
+	out.append('')
+	out.append('}')
+	out.append('')
+
 	out.append('?>')
 	out.append('')
 	logging.info('... done')
