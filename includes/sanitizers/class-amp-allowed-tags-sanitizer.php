@@ -1,235 +1,279 @@
 <?php
 
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
 
 /**
- * Strips blacklisted tags and attributes from content.
+ * Strips tags and attributes not allowed by the AMP sped from the content.
  *
- * See following for blacklist:
- *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
+ * Allowed tags array is generated from this protocol buffer:
+ *     https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
  */
-class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
-	const PATTERN_REL_WP_ATTACHMENT = '#wp-att-([\d]+)#';
+class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 
-	protected $DEFAULT_ARGS = array(
-		'add_blacklisted_protocols' => array(),
-		'add_blacklisted_tags' => array(),
-		'add_blacklisted_attributes' => array(),
-	);
+	protected $allowed_tags;
+	protected $globally_allowed_attrs;
+	private $stack = array();
 
 	public function sanitize() {
-		$blacklisted_tags = $this->get_blacklisted_tags();
-		$blacklisted_attributes = $this->get_blacklisted_attributes();
-		$blacklisted_protocols = $this->get_blacklisted_protocols();
+		// Get whitelists.
+		$this->allowed_tags = apply_filters( 'amp_allowed_tags', AMP_Allowed_Tags_Generated::get_allowed_tags() );
+		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
 
+		// Add root of content to the stack
 		$body = $this->get_body_node();
-		$this->strip_tags( $body, $blacklisted_tags );
-		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
-	}
+		$this->stack[] = $body;
 
-	private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {
-		if ( $node->nodeType !== XML_ELEMENT_NODE ) {
-			return;
-		}
+		// This loop iterates through the DOM tree iteratively.
+		while ( 0 < count( $this->stack ) ) {
 
-		$node_name = $node->nodeName;
+			// Get the next node to process.
+			$node = array_pop( $this->stack );
 
-		// Some nodes may contain valid content but are themselves invalid.
-		// Remove the node but preserve the children.
- 		if ( 'font' === $node_name ) {
-			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
-			return;
-		} elseif ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
-			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
-			return;
-		}
+			// Validate this node.
+			$this->validate_node( $node );
 
-		if ( $node->hasAttributes() ) {
-			$length = $node->attributes->length;
-			for ( $i = $length - 1; $i >= 0; $i-- ) {
-				$attribute = $node->attributes->item( $i );
-				$attribute_name = strtolower( $attribute->name );
-				if ( in_array( $attribute_name, $bad_attributes ) ) {
-					$node->removeAttribute( $attribute_name );
-					continue;
-				}
-
-				// on* attributes (like onclick) are a special case
-				if ( 0 === stripos( $attribute_name, 'on' ) && $attribute_name != 'on' ) {
-					$node->removeAttribute( $attribute_name );
-					continue;
-				} elseif ( 'a' === $node_name ) {
-					$this->sanitize_a_attribute( $node, $attribute );
-				}
-			}
-		}
-
-		$length = $node->childNodes->length;
-		for ( $i = $length - 1; $i >= 0; $i-- ) {
-			$child_node = $node->childNodes->item( $i );
-
-			$this->strip_attributes_recursive( $child_node, $bad_attributes, $bad_protocols );
-		}
-	}
-
-	private function strip_tags( $node, $tag_names ) {
-		foreach ( $tag_names as $tag_name ) {
-			$elements = $node->getElementsByTagName( $tag_name );
-			$length = $elements->length;
-			if ( 0 === $length ) {
-				continue;
-			}
-
-			for ( $i = $length - 1; $i >= 0; $i-- ) {
-				$element = $elements->item( $i );
-				$parent_node = $element->parentNode;
-				$parent_node->removeChild( $element );
-
-				if ( 'body' !== $parent_node->nodeName && AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$parent_node->parentNode->removeChild( $parent_node );
+			// Push child nodes onto the stack, if any exist.
+			// Note: if the node was removed, then it's parentNode value is null.
+			if ( $node->parentNode ) {
+				$child = $node->firstChild;
+				while ( $child ) {
+					$this->stack[] = $child;
+					$child = $child->nextSibling;
 				}
 			}
 		}
 	}
 
-	private function sanitize_a_attribute( $node, $attribute ) {
-		$attribute_name = strtolower( $attribute->name );
+	private function validate_node( $node ) {
+		// Don't process text nodes
+		if ( XML_TEXT_NODE == $node->nodeType ) {
+			return;
+		}
 
-		if ( 'rel' === $attribute_name ) {
-			$old_value = $attribute->value;
-			$new_value = trim( preg_replace( self::PATTERN_REL_WP_ATTACHMENT, '', $old_value ) );
-			if ( empty( $new_value ) ) {
-				$node->removeAttribute( $attribute_name );
-			} elseif ( $old_value !== $new_value ) {
-				$node->setAttribute( $attribute_name, $new_value );
-			}
-		} elseif ( 'rev' === $attribute_name ) {
-			// rev removed from HTML5 spec, which was used by Jetpack Markdown.
-			$node->removeAttribute( $attribute_name );
-		} elseif ( 'target' === $attribute_name ) {
-			// _blank is the only allowed value and it must be lowercase.
-			// replace _new with _blank and others should simply be removed.
-			$old_value = strtolower( $attribute->value );
-			if ( '_blank' === $old_value || '_new' === $old_value ) {
-				// _new is not allowed; swap with _blank
-				$node->setAttribute( $attribute_name, '_blank' );
-			} else {
-				// only _blank is allowed
-				$node->removeAttribute( $attribute_name );
+		// Check whether this node's tag name is on the AMP whitelist
+		if ( ! $this->is_amp_allowed_tag( $node ) ) {
+			// If it's not an allowed tag, replace the node with it's children
+			$this->replace_node_with_children( $node );
+			// Return early since this node no longer exists.
+			return;
+		}
+
+		// Validate each tag_spec for this node. If the a tag_spec is valid
+		//	we'll have to validate the corresponding attr_spec later, so
+		//	we keep a list of those.
+		$attr_spec_list_to_validate = array();
+		foreach ( $this->allowed_tags[ $node->nodeName ] as $rule_spec ) {
+			if ( $this->tag_spec_is_valid_for_node( $node, $rule_spec[AMP_Rule_Spec::tag_spec] ) ) {
+				$attr_spec_list_to_validate[] = $rule_spec[AMP_Rule_Spec::attr_spec_list];			
 			}
 		}
+
+		// If there were no valid tag_specs, then $attr_spec_list_to_validate
+		//	will be empty and we can remove this node and return.
+		if ( empty( $attr_spec_list_to_validate ) ) {
+			$node->parentNode->removeChild( $node );
+			return;
+		}
+
+
+		// If we made it here, there is at least one attr_spec to validate.
+		foreach ( $attr_spec_list_to_validate as $attr_spec_id => $attr_spec ) {
+			
+			// If we can't validate this attr_spec, remove it from the list.
+			if ( false == $this->attr_spec_is_valid_for_node( $node, $attr_spec ) ) {
+				unset( $attr_spec_list_to_validate );
+			}
+		}
+
+		// TODO: Need to handle the case where we have multiple attr_spec lists to validate
 	}
 
-	private function validate_a_node( $node ) {
-		// Get the href attribute
-		$href = $node->getAttribute( 'href' );
+	/**
+	 * Rules in a tag_spec are essentially restrictions. So, if a rule
+	 *	doesn't exist, then that means there is no restriction ans we can 
+	 *	safely skip that test.
+	 */
+	private function tag_spec_is_valid_for_node( $node, $tag_spec ) {
 
-		if ( empty( $href ) ) {
-			// If no href, check that a is an anchor or not.
-			// We don't need to validate anchors any further.
-			return $node->hasAttribute( 'name' ) || $node->hasAttribute( 'id' );
+		if ( ! empty( $tag_spec[AMP_Rule_Spec::mandatory_parent] ) ) {
+			if ( ! $this->has_parent( $node, $tag_spec[AMP_Rule_Spec::mandatory_parent] ) ) {
+				return false;
+			}
 		}
 
-		// If this is an anchor link, just return true
-		if ( 0 === strpos( $href, '#' ) ) {
-			return true;
+		if ( ! empty( $tag_spec[AMP_Rule_Spec::disallowed_ancestor] ) ) {
+			foreach ( $tag_spec[AMP_Rule_Spec::disallowed_ancestor] as $disallowed_ancestor_node_name ) {
+				if ( $this->has_ancestor( $node, $disallowed_ancestor_node_name ) ) {
+					return false;
+				}
+			}
 		}
 
-		// If the href starts with a '/', append the home_url to it for validation purposes.
-		if ( 0 === stripos( $href, '/' ) ) {
-			$href = untrailingslashit( get_home_url() ) . $href;
-		}
-
-		$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
-		$special_protocols = array( 'tel', 'sms' ); // these ones don't valid with `filter_var+FILTER_VALIDATE_URL`
-		$protocol = strtok( $href, ':' );
-
-		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
-			&& ! in_array( $protocol, $special_protocols ) ) {
-			return false;
-		}
-
-		if ( ! in_array( $protocol, $valid_protocols ) ) {
-			return false;
+		if ( ! empty( $tag_spec[AMP_Rule_Spec::mandatory_ancestor] ) ) {
+			if ( ! $this->has_ancestor( $node, $tag_spec[AMP_Rule_Spec::mandatory_ancestor] ) ) {
+				return false;
+			}
 		}
 
 		return true;
 	}
 
-	private function replace_node_with_children( $node, $bad_attributes, $bad_protocols ) {
-		// If the node has children and also has a parent node,
-		// clone and re-add all the children just before current node.
-		if ( $node->hasChildNodes() && $node->parentNode ) {
-			foreach ( $node->childNodes as $child_node ) {
-				$new_child = $child_node->cloneNode( true );
-				$this->strip_attributes_recursive( $new_child, $bad_attributes, $bad_protocols );
-				$node->parentNode->insertBefore( $new_child, $node );
+	private function attr_spec_is_valid_for_node( $node, $attr_spec_list ) {
+
+		$attrs_to_remove = array();
+		foreach ( $node->attributes as $attr_name => $attr_node ) {
+			// see if this attribute is allowed for this node
+			if ( ! $this->is_amp_allowed_attribute( $attr_name, $attr_spec_list ) ) {
+				$attrs_to_remove[] = $attr_name;
+			
+			// if the attribute was allowed, check for a value restriction
+			} else {
+				if ( ! empty( $attr_spec_list[ $attr_name ] ) ) {
+					foreach ( $attr_spec_list[ $attr_name ] as $attr_spec_rule => $attr_spec_rule_value ) {
+						$this->process_attr_spec_rules( $attr_spec_rule, $attr_spec_rule_value, $attr_node );
+					}
+				}
+
+				if ( ! empty( $this->globally_allowed_attributes[ $attr_name ] ) ) {
+					foreach ( $this->globally_allowed_attributes[ $attr_name ] as $attr_spec_rule => $attr_spec_rule_value ) {
+						$this->process_attr_spec_rules( $attr_spec_rule, $attr_spec_rule_value, $attr_node );
+					}
+				} 
 			}
 		}
 
-		// Remove the node from the parent, if defined.
-		if ( $node->parentNode ) {
+		// Remove the disllowed attributes
+		foreach ( $attrs_to_remove as $attr_name ) {
+			$node->removeAttribute( $attr_name );
+		}
+
+		return true;
+	}
+
+	private function process_attr_spec_rules( $attr_spec_rule, $attr_spec_rule_value, $attr_node ) {
+		switch ( $attr_spec_rule ) {
+			case AMP_Rule_Spec::blacklisted_value_regex:
+				$this->enforce_attr_spec_rule_blacklisted_value_regex( $attr_spec_rule_value, $attr_node );
+				break;
+
+			case AMP_Rule_Spec::value_regex:
+				$this->enforce_attr_spec_rule_value_regex( $attr_spec_rule_value, $attr_node );
+				break;
+
+			// TODO: add the rest of the property checks
+			
+			default:
+				break;
+		}
+	}
+
+	/**
+	 * property must *not* match regex
+	 */
+	private function enforce_attr_spec_rule_blacklisted_value_regex( $attr_spec_rule_value, $attr_node ) {
+		$pattern = '/' . $attr_spec_rule_value . '/u';
+		if ( preg_match( $pattern, $attr_node->value ) ) {
+			$attr_node->value = '';
+		}
+	}
+
+	/**
+	 * property *must* match regex
+	 */
+	private function enforce_attr_spec_rule_value_regex( $attr_spec_rule_value, $attr_node ) {
+		$pattern = '/' . $attr_spec_rule_value . '/u';
+		$x = preg_match( $pattern, $attr_node->value );
+		if ( 0 == preg_match( $pattern, $attr_node->value ) ) {
+			$attr_node->value = '';
+		}
+	}
+
+	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
+		return ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || isset( $attr_spec_list[ $attr_name ] ) );
+	}
+
+	private function is_amp_allowed_tag( $node ) {
+		// Return true if node is on the allowed tags list or if it is a text node.
+		return ( isset( $this->allowed_tags[ $node->nodeName ] ) || ( $node->nodeType == XML_TEXT_NODE ) );
+	}
+
+	/**
+	 * Below are some utility functions to search and manipulate the DOM.
+	 */
+
+	private function has_parent( $node, $parent_tag_name ) {
+		if ( $node && $node->parentNode && ( $node->parentNode->nodeName == $parent_tag_name ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private function has_ancestor( $node, $ancestor_tag_name ) {
+		if ( $this->get_ancestor_with_tag_name( $node, $ancestor_tag_name ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private function get_ancestor_with_tag_name( $node, $ancestor_tag_name ) {
+		while ( $node && $node = $node->parentNode ) {
+			if ( $node->nodeName == $ancestor_tag_name ) {
+				return $node;
+			}
+		}
+		return null;
+	}
+
+	private function replace_node_with_children( $node ) {
+		// If node has children, replace it with them and push children onto stack
+		if ( $node->hasChildNodes() && $node->parentNode ) {
+
+			// create a DOM fragment to hold the children
+			$fragment = $this->dom->createDocumentFragment();
+
+			// Add all children to fragment/stack
+			$child = $node->firstChild;
+			while( $child ) {
+				$fragment->appendChild( $child );
+				$this->stack[] = $child;
+				$child = $node->firstChild;
+			}
+
+			// replace node with fragment
+			$node->parentNode->replaceChild( $fragment, $node );
+
+		// If node has no children, just remove the node.
+		} else {
 			$node->parentNode->removeChild( $node );
 		}
 	}
+}
 
-	private function merge_defaults_with_args( $key, $values ) {
-		// Merge default values with user specified args
-		if ( ! empty( $this->args[ $key ] )
-			&& is_array( $this->args[ $key ] ) ) {
-			$values = array_merge( $values, $this->args[ $key ] );
-		}
+abstract class AMP_Rule_Spec_Status {
+	const not_done = 0;
+	const does_not_apply = 1;
+	const passed = 2;
+	const failed = 3;
+	const bad_test_should_not_be_here = 9999;
+}
 
-		return $values;
-	}
+abstract class AMP_Rule_Spec {
 
-	private function get_blacklisted_protocols() {
-		return $this->merge_defaults_with_args( 'add_blacklisted_protocols', array(
-			'javascript',
-		) );
-	}
+	const tag_spec = 'tag_spec';
+	const attr_spec_list = 'attr_spec_list';
+	const rule_spec = 'rule_spec';
+	const status_list = 'status_list';
+	const status_check = 'status_check';
 
-	private function get_blacklisted_tags() {
-		return $this->merge_defaults_with_args( 'add_blacklisted_tags', array(
-			'script',
-			'noscript',
-			'style',
-			'frame',
-			'frameset',
-			'object',
-			'param',
-			'applet',
-			'form',
-			'label',
-			'input',
-			'textarea',
-			'select',
-			'option',
-			'link',
-			'picture',
+	// tag rules
+	const mandatory_parent = 'mandatory_parent';
+	const disallowed_ancestor = 'disallowed_ancestor';
+	const mandatory_ancestor = 'mandatory_ancestor';
 
-			// Sanitizers run after embed handlers, so if anything wasn't matched, it needs to be removed.
-			'embed',
-			'embedvideo',
-
-			// Other weird ones
-			'comments-count',
-
-			// These are converted into amp-* versions
-			//'img',
-			//'video',
-			//'audio',
-			//'iframe',
-		) );
-	}
-
-	private function get_blacklisted_attributes() {
-		return $this->merge_defaults_with_args( 'add_blacklisted_attributes', array(
-			'style',
-			'size',
-			'clear',
-			'align',
-			'valign',
-		) );
-	}
+	// attr rules
+	const blacklisted_value_regex = 'blacklisted_value_regex';
+	const value_regex = 'value_regex';
 }

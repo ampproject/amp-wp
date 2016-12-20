@@ -8,6 +8,7 @@ require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
@@ -237,7 +238,7 @@ class AMP_Post_Template {
 				 'AMP_Iframe_Sanitizer' => array(
 					 'add_placeholder' => true,
 				 ),
-                 'AMP_Allowed_Tags_Sanitizer' => array(),
+				 'AMP_Allowed_Tags_Sanitizer' => array(),
 			), $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
