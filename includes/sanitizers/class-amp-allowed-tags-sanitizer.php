@@ -105,11 +105,6 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 		//	attr_spec lists to validate.
 	}
 
-	// private function node_is_valid_for_attr_spec( $node, $attr_name, $attr_node ) {
-
-	// 	foreach ( $this->
-	// }
-
 	/**
 	 * Rules in a tag_spec are essentially restrictions. So, if a rule
 	 *	doesn't exist, then that means there is no restriction ans we can 
@@ -218,7 +213,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 					if ( ! $found ) {
-						// if we're here, then there was a protocol specified,
+						// If we're here, then there was a protocol specified,
 						//	but it wasn't allowed. Fail vaildation.
 						return false;
 					}
@@ -238,13 +233,20 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				// 	ie. '//domain.com/path' and '/path' should both be considered
 				//	relative for purposes of AMP validation.
 				if ( empty( $parsed_url['scheme'] ) ) {
+				}
+			}
+			
+			// 5) If attribute exists and is empty, but empty is not allowed, fail.
+			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) &&
+				( false == $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) &&
+				 $node->hasAttribute( $attr_name ) ) {
+				$attr_value = $node->getAttribute( $attr_name );
+				if ( empty( $attr_value ) ) {
 					return false;
 				}
 			}
 
-			// 5) If property is empty, but empty is not allowed, fail.
-
-			// 6) If property exists, but is disallowed domain, fail.
+			// 6) If attribute exists, but is disallowed domain, fail.
 		}
 
 		return true;
