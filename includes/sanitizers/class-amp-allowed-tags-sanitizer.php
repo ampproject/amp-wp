@@ -80,7 +80,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			
 			// If we can't validate this attr_spec, remove it from the list.
 			if ( false == $this->attr_spec_is_valid_for_node( $node, $attr_spec ) ) {
-				unset( $attr_spec_list_to_validate );
+				unset( $attr_spec_list_to_validate[$attr_spec_id] );
 			}
 		}
 
@@ -183,7 +183,6 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) && $node->hasAttribute( $attr_name ) ) {
 				$attr_value = $node->getAttribute( $attr_name );
 				$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex];
-
 				if ( ! preg_match('/^' . $rule_value . '$/u', $attr_value) ) {
 					return false;
 				}
@@ -235,7 +234,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				if ( empty( $parsed_url['scheme'] ) ) {
 				}
 			}
-			
+
 			// 5) If attribute exists and is empty, but empty is not allowed, fail.
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) &&
 				( false == $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) &&
@@ -246,9 +245,23 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// 6) If attribute exists, but is disallowed domain, fail.
+			// 6) If attribute exists, but has a disallowed domain, fail.
+			if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) &&
+				$node->hasAttribute( $attr_name ) ) {
+				$attr_value = $node->getAttribute( $attr_name );
+				$url_domain = parse_url( $attr_value, PHP_URL_HOST );
+				if ( ! empty( $url_domain ) ) {
+					foreach ( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] as $disallowed_domain ) {
+						if ( strtolower( $url_domain ) == strtolower( $disallowed_domain ) ) {
+							// found a disallowed domain, fail validation
+							return false;
+						}
+					}
+				}
+			}
 		}
 
+		// If we made it here, then all validation checks passed.
 		return true;
 	}
 
