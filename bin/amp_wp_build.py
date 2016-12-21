@@ -95,6 +95,10 @@ def GeneratePHP(out_dir):
 	# join out array into a single string and remove unneeded whitespace
 	output = re.sub("\\(\\s*\\)", "()", '\n'.join(out))
 
+	# replace 'True' with true and 'False' with false
+	output = re.sub("'True'", "true", output)
+	output = re.sub("'False'", "false", output)
+
 	# Write the php file to disk.
 	f = open('%s/class-amp-allowed-tags-generated.php' % out_dir, 'w')
 	# f.write('\n'.join(out))
