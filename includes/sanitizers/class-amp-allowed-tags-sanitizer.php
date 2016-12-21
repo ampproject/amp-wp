@@ -176,7 +176,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// check 'value_casei' - case insensitive
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] )  && $node->hasAttribute( $attr_name ) ) {
+			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) && $node->hasAttribute( $attr_name ) ) {
 				$attr_value = strtolower( $node->getAttribute( $attr_name ) );
 				$rule_value = strtolower( $attr_spec_rule[AMP_Rule_Spec::value_casei] );
 				if ( ! ( $attr_value == $rule_value ) ) {
@@ -185,7 +185,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// check 'value_regex' - case sensitive regex match
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] )  && $node->hasAttribute( $attr_name ) ) {
+			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) && $node->hasAttribute( $attr_name ) ) {
 				$attr_value = $node->getAttribute( $attr_name );
 				$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex];
 
@@ -195,7 +195,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// check 'value_regex_casei' - case insensitive regex match
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] )  && $node->hasAttribute( $attr_name ) ) {
+			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) && $node->hasAttribute( $attr_name ) ) {
 				$attr_value = $node->getAttribute( $attr_name );
 				$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex_casei];
 				if ( ! preg_match('/^' . $rule_value . '$/ui', $attr_value) ) {
@@ -203,11 +203,33 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// 3) If property has protocol, but protocol is not allowed, fail.
+			// 3) If property has protocol, but protocol is not on allowed list, fail.
+			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] )  && $node->hasAttribute( $attr_name ) ) {
+				$attr_value = $node->getAttribute( $attr_name );
+				// This seems to be an acceptable check since the AMP validator
+				//	will allow a URL with no protocol to pass validation.
+				if ( $url_scheme = parse_url( $attr_value, PHP_URL_SCHEME ) ) {
+					$found = false;
+					foreach ( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] as $allowed_protocol ) {
+						if ( strtolower( $url_scheme ) == strtolower( $allowed_protocol ) ) {
+							// found an acceptable protocol
+							$found = true;
+							break;
+						}
+					}
+					if ( ! $found ) {
+						// if we're here, then there was a protocol specified,
+						//	but it wasn't allowed. Fail vaildation.
+						return false;
+					}
+				}
+			}
 
 			// 4) If property doesn't have protocol and relative is not allowed, fail.
 
 			// 5) If property is empty, but empty is not allowed, fail.
+
+			// 6) If property exists, but is disallowed domain, fail.
 		}
 
 		return true;
@@ -333,6 +355,10 @@ abstract class AMP_Rule_Spec {
 
 	// attr rules
 	const alternative_names = 'alternative_names';
+	const allowed_protocol = 'allowed_protocol';
+	const allow_relative = 'allow_relative';
+	const allow_empty = 'allow_empty';
+	const disallowed_domain = 'disallowed_domain';
 	const blacklisted_value_regex = 'blacklisted_value_regex';
 	const mandatory = 'mandatory';
 	const value = 'value';
