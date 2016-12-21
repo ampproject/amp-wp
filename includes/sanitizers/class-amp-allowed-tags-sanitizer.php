@@ -225,7 +225,22 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// 4) If property doesn't have protocol and relative is not allowed, fail.
+			// 4) If allow_relative is specified as false and url is relative, then fail.
+			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) &&
+				 ( false == $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) &&
+				 $node->hasAttribute( $attr_name ) ) {
+				$attr_value = $node->getAttribute( $attr_name );
+				$parsed_url = parse_url( $attr_value );
+				// It dpesn't seem to be specified anywhere, but the AMP validator
+				//	seems to consider 'relative' to mean *protocol* relative, not 
+				//	*host* relative for this rule.  So, a url with an empty
+				//	'scheme' is considered "relative" by AMP.
+				// 	ie. '//domain.com/path' and '/path' should both be considered
+				//	relative for purposes of AMP validation.
+				if ( empty( $parsed_url['scheme'] ) ) {
+					return false;
+				}
+			}
 
 			// 5) If property is empty, but empty is not allowed, fail.
 
