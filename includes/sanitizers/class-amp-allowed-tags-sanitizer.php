@@ -147,11 +147,27 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) &&
 				$attr_spec_rule[AMP_Rule_Spec::mandatory] ) {
 				if ( ! $node->hasAttribute( $attr_name ) ) {
-					return false;
+					// check if an alternative name list is specified
+					if ( isset( $attr_spec_rule[AMP_Rule_Spec::alternative_names] ) ) {
+						$found = false;
+						foreach ( $attr_spec_rule[AMP_Rule_Spec::alternative_names] as $alt_name ) {
+							if ( $node->hasAttribute( $alt_name ) ) {
+								$found = true;
+							}
+						}
+						if ( ! $found ) {
+							// Neither the specified attribute or an alternate 
+							//	was found. Validation failed.
+							return false;
+						}
+					} else {
+						// if no alternate names exist, fail
+						return false;
+					}
 				}
 			}
 
-			// 2) If a property exists, but doesn't have required value, fail validation.
+			// 2) If a property exists, but doesn't have a required value, fail validation.
 			// check 'value' - case sensitive
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) && $node->hasAttribute( $attr_name ) ) {
 				if ( ! ( $node->getAttribute( $attr_name ) == $attr_spec_rule[AMP_Rule_Spec::value] ) ) {
@@ -316,6 +332,7 @@ abstract class AMP_Rule_Spec {
 	const mandatory_ancestor = 'mandatory_ancestor';
 
 	// attr rules
+	const alternative_names = 'alternative_names';
 	const blacklisted_value_regex = 'blacklisted_value_regex';
 	const mandatory = 'mandatory';
 	const value = 'value';
