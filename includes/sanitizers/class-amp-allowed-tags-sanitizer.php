@@ -148,7 +148,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 
 			// 1) If a mandatory attribute doesn't exist, fail validation
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) &&
-				$attr_spec_rule[AMP_Rule_Spec::mandatory] ) {
+				( true == $attr_spec_rule[AMP_Rule_Spec::mandatory] ) ) {
 				if ( ! $node->hasAttribute( $attr_name ) ) {
 					// check if an alternative name list is specified
 					if ( isset( $attr_spec_rule[AMP_Rule_Spec::alternative_names] ) ) {
@@ -164,18 +164,17 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 							return false;
 						}
 					} else {
-						// if no alternate names exist, fail
+						// If no alternate names exist, validation failed.
 						return false;
 					}
 				}
 			}
 
 			// 2) Check to make sure that this attribute meets any restrictions
-			//	on any attribute value restrictions.
+			//	on any attribute value restrictions. If a property exists, but 
+			//	doesn't have a required value, fail validation.
 
-			// 2a) If a property exists, but doesn't have a required value, fail 
-			//	validation.
-			// check 'value' - case sensitive
+			// 2a) check 'value' - case sensitive
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) && $node->hasAttribute( $attr_name ) ) {
 				if ( ! ( $node->getAttribute( $attr_name ) == $attr_spec_rule[AMP_Rule_Spec::value] ) ) {
 					return false;
@@ -309,7 +308,9 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			if ( isset( $attr_spec_rule_value[AMP_Rule_Spec::alternative_names] ) ) {
 				foreach ( $attr_spec_rule_value[AMP_Rule_Spec::alternative_names] as $alternative_name ) {
 					$alt_name_keys = array_keys( $attrs_to_remove, $alternative_name, true );
-					unset( $attrs_to_remove[ $alt_name_keys[0] ] );
+					if ( ! empty( $alt_name_keys ) ) {
+						unset( $attrs_to_remove[ $alt_name_keys[0] ] );
+					}
 				}
 			}
 		}
@@ -343,33 +344,50 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 	 * Below are some utility functions to search and manipulate the DOM.
 	 */
 
+	/**
+	 * Return true if the attribute name valid for this attr_spec, false otherwise.
+	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
 		return ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || 
 			isset( $attr_spec_list[ $attr_name ] ) ||
 			isset( AMP_Rule_Spec::tags_allowed_for_styling[ $attr_name ] ) );
 	}
 
+	/**
+	 * Return true if the specified node's name is an AMP allowed tag, false otherwise.
+	 */
 	private function is_amp_allowed_tag( $node ) {
 		// Return true if node is on the allowed tags list or if it is a text node.
-		return ( isset( $this->allowed_tags[ $node->nodeName ] ) || ( $node->nodeType == XML_TEXT_NODE ) );
+		return ( isset( $this->allowed_tags[ $node->nodeName ] ) || 
+			( XML_TEXT_NODE == $node->nodeType ) );
 	}
 
+	/**
+	 * Return true if the given node has a direct parent with the given name,
+	 * otherwise return false.
+	 */
 	private function has_parent( $node, $parent_tag_name ) {
 		if ( $node && $node->parentNode && ( $node->parentNode->nodeName == $parent_tag_name ) ) {
 			return true;
 		}
-
 		return false;
 	}
 
+	/**
+	 * Return true if the given node has any ancestor with the give name,
+	 * otherwise return false.
+	 */
 	private function has_ancestor( $node, $ancestor_tag_name ) {
 		if ( $this->get_ancestor_with_tag_name( $node, $ancestor_tag_name ) ) {
 			return true;
 		}
-
 		return false;
 	}
 
+	/**
+	 * Returns the first ancestor with the given tag name. If no ancestor
+	 * with that name is found, returns null.
+	 */
 	private function get_ancestor_with_tag_name( $node, $ancestor_tag_name ) {
 		while ( $node && $node = $node->parentNode ) {
 			if ( $node->nodeName == $ancestor_tag_name ) {
@@ -379,6 +397,10 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 		return null;
 	}
 
+	/**
+	 * Replaces the given node with it's child nodes, if any, and adds them to
+	 * the stack for processing by the sanitize() function.
+	 */
 	private function replace_node_with_children( $node ) {
 		// If node has children, replace it with them and push children onto stack
 		if ( $node->hasChildNodes() && $node->parentNode ) {
@@ -404,39 +426,49 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 	}
 }
 
+/**
+ * This is a set of constants that are used throughout the sanitizer.
+ * The rule name strings are listed here because it's easier to have the php
+ * interpreter catch a typo than for me to catch mistyping a string.
+ */
 abstract class AMP_Rule_Spec {
 
-	const tag_spec = 'tag_spec';
+	// AMP rule_spec types
 	const attr_spec_list = 'attr_spec_list';
-	const rule_spec = 'rule_spec';
-	const status_list = 'status_list';
-	const status_check = 'status_check';
+	const tag_spec = 'tag_spec';
 
-	// tag rules
-	const mandatory_parent = 'mandatory_parent';
+	// tag rule names
 	const disallowed_ancestor = 'disallowed_ancestor';
 	const mandatory_ancestor = 'mandatory_ancestor';
+	const mandatory_parent = 'mandatory_parent';
 
-	// attr rules
-	const alternative_names = 'alternative_names';
-	const allowed_protocol = 'allowed_protocol';
-	const allow_relative = 'allow_relative';
+	// attr rule names
 	const allow_empty = 'allow_empty';
-	const disallowed_domain = 'disallowed_domain';
+	const allow_relative = 'allow_relative';
+	const allowed_protocol = 'allowed_protocol';
+	const alternative_names = 'alternative_names';
 	const blacklisted_value_regex = 'blacklisted_value_regex';
+	const disallowed_domain = 'disallowed_domain';
 	const mandatory = 'mandatory';
 	const value = 'value';
 	const value_casei = 'value_casei';
 	const value_regex = 'value_regex';
 	const value_regex_casei = 'value_regex_casei';
 
+	// If a node type listed here is invalid, it and it's subtree will be 
+	//	removed. If it isn't listed here, it will be replaced by its children.
+	//	...mostly because any children will be non-functional without this
+	//	parent.
+	//	
+	// TODO: There are other nodes that should probably be listed here as well.
+	//	I should probably go through the whole spec and evaluate them all.
 	const node_types_to_remove_if_invalid = array (
 		'form',
-		'script',
 		'input',
-		'style',
 		'link',
 		'meta',
+		'script',
+		'style',
 	);
 
 	// This is here because these tags are not listed in either the AMP global
@@ -446,9 +478,9 @@ abstract class AMP_Rule_Spec {
 	//	because I want the generated file to accurately reflect the protoascii
 	//	file it was built from as much as possible.
 	const tags_allowed_for_styling = array(
-		'width' => array(),
 		'height' => array(),
 		'layout' => array(),
 		'sizes' => array(),
+		'width' => array(),
 	);
 }
