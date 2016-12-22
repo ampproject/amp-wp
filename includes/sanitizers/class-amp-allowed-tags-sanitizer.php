@@ -24,7 +24,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 		$body = $this->get_body_node();
 		$this->stack[] = $body;
 
-		// This loop iterates through the DOM tree iteratively.
+		// This loop traverses through the DOM tree iteratively.
 		while ( 0 < count( $this->stack ) ) {
 
 			// Get the next node to process.
@@ -95,14 +95,19 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		// 5a) This is my solution to the hypothetical case where we have multiple
+		//	attr_specs that are still valid for this node: merge the attr_spec_lists
+		//	and the remaining checks will operate on the merged list.
+		$attr_spec_list_merged = array();
+		foreach ( $attr_spec_list_to_validate as $attr_spec_id => $attr_spec ) {
+			$attr_spec_list_merged = array_merge($attr_spec, $attr_spec_list_merged);
+		}
+
 		// 6) Remove any remaining disallowed attributes.
+		$this->remove_disallowed_attributes_from_node( $node, $attr_spec_list_merged );
 
 		// 7) Remove any blacklisted attribute values.
-
-
-
-		// TODO: Need to handle the hypothetical case where we have multiple 
-		//	attr_spec lists to validate.
+		$this->remove_blacklisted_attribute_values( $node, $attr_spec_list_merged );
 	}
 
 	/**
@@ -136,6 +141,9 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function attr_spec_is_valid_for_node( $node, $attr_spec_list ) {
+
+		// Iterate through each attribute rule in ths attr spec list and run
+		//	the series of tests 
 		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
 
 			// 1) If a mandatory attribute doesn't exist, fail validation
@@ -162,7 +170,11 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// 2) If a property exists, but doesn't have a required value, fail validation.
+			// 2) Check to make sure that this attribute meets any restrictions
+			//	on any attribute value restrictions.
+
+			// 2a) If a property exists, but doesn't have a required value, fail 
+			//	validation.
 			// check 'value' - case sensitive
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) && $node->hasAttribute( $attr_name ) ) {
 				if ( ! ( $node->getAttribute( $attr_name ) == $attr_spec_rule[AMP_Rule_Spec::value] ) ) {
@@ -170,7 +182,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// check 'value_casei' - case insensitive
+			// 2b)check 'value_casei' - case insensitive
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) && $node->hasAttribute( $attr_name ) ) {
 				$attr_value = strtolower( $node->getAttribute( $attr_name ) );
 				$rule_value = strtolower( $attr_spec_rule[AMP_Rule_Spec::value_casei] );
@@ -179,19 +191,25 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// check 'value_regex' - case sensitive regex match
+			// 2c)check 'value_regex' - case sensitive regex match
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) && $node->hasAttribute( $attr_name ) ) {
 				$attr_value = $node->getAttribute( $attr_name );
 				$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex];
+				// Note: I added in the '^' and '$' to the regex pattern even though
+				//	they weren't in the AMP spec. But leaving them out would allow
+				//	both '_blank' and 'yyy_blankzzz' to be matched  by a regex spec of
+				//	'(_blank|_self|_top)'. The AMP JS validator only accepts '_blank',
+				//	so I'm leaving it this way for now.
 				if ( ! preg_match('/^' . $rule_value . '$/u', $attr_value) ) {
 					return false;
 				}
 			}
 
-			// check 'value_regex_casei' - case insensitive regex match
+			// 2d)check 'value_regex_casei' - case insensitive regex match
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) && $node->hasAttribute( $attr_name ) ) {
 				$attr_value = $node->getAttribute( $attr_name );
 				$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex_casei];
+				// See note on 2c) above regarding the '^' and '$' that I added.
 				if ( ! preg_match('/^' . $rule_value . '$/ui', $attr_value) ) {
 					return false;
 				}
@@ -204,6 +222,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				//	will allow a URL with no protocol to pass validation.
 				if ( $url_scheme = parse_url( $attr_value, PHP_URL_SCHEME ) ) {
 					$found = false;
+					// The 'allowed_protocol' rule contains an array of allowed protocols.
 					foreach ( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] as $allowed_protocol ) {
 						if ( strtolower( $url_scheme ) == strtolower( $allowed_protocol ) ) {
 							// found an acceptable protocol
@@ -225,7 +244,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				 $node->hasAttribute( $attr_name ) ) {
 				$attr_value = $node->getAttribute( $attr_name );
 				$parsed_url = parse_url( $attr_value );
-				// It dpesn't seem to be specified anywhere, but the AMP validator
+				// It doesn't seem to be specified anywhere, but the JS AMP validator
 				//	seems to consider 'relative' to mean *protocol* relative, not 
 				//	*host* relative for this rule.  So, a url with an empty
 				//	'scheme' is considered "relative" by AMP.
@@ -253,7 +272,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! empty( $url_domain ) ) {
 					foreach ( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] as $disallowed_domain ) {
 						if ( strtolower( $url_domain ) == strtolower( $disallowed_domain ) ) {
-							// found a disallowed domain, fail validation
+							// Found a disallowed domain, fail validation.
 							return false;
 						}
 					}
@@ -261,64 +280,79 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// If we made it here, then all validation checks passed.
+		// If we made it here, then all validation checks passed. Whew!
 		return true;
 	}
 
-	private function process_attr_spec_rules( $attr_spec_rule, $attr_spec_rule_value, $attr_node ) {
-		switch ( $attr_spec_rule ) {
-			case AMP_Rule_Spec::blacklisted_value_regex:
-				return $this->enforce_attr_spec_rule_blacklisted_value_regex( $attr_spec_rule_value, $attr_node );
-				break;
+	/**
+	 * If an attribute is not listed in $allowed_attrs, then it will be removed 
+	 * from $node.
+	 */
+	private function remove_disallowed_attributes_from_node( $node, $attr_spec_list ) {
 
-			// case AMP_Rule_Spec::mandatory:
-			// 	return $this->enforce_attr_spec_rule_mandatory( $attr_spec_rule_value, $attr_node );
-			// 	break;
+		// Note: We can't remove the attributes inside the 'foreach' loop
+		//	because that breaks the process of iterating through the attrs. So,
+		//	we keep track of what needs to be removed in the first loop, then
+		//	actually remove the attributes in the second loop.
 
-			case AMP_Rule_Spec::value_regex:
-				return $this->enforce_attr_spec_rule_value_regex( $attr_spec_rule_value, $attr_node );
-				break;
+		$attrs_to_remove = array();
+		foreach ( $node->attributes as $attr_name => $attr_node ) {
+			// see if this attribute is allowed for this node
+			if ( ! $this->is_amp_allowed_attribute( $attr_name, $attr_spec_list ) ) {
+				$attrs_to_remove[] = $attr_name;
+			} 
+		}
 
-			// TODO: add the rest of the property checks
-			
-			default:
-				break;
+		// Make sure we're not removing an attribtue that is listed as an alternate
+		//	for some other allowed attribtue. ex. 'srcset' is an alternate for 'src'.
+		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule_value ) {
+			if ( isset( $attr_spec_rule_value[AMP_Rule_Spec::alternative_names] ) ) {
+				foreach ( $attr_spec_rule_value[AMP_Rule_Spec::alternative_names] as $alternative_name ) {
+					$alt_name_keys = array_keys( $attrs_to_remove, $alternative_name, true );
+					unset( $attrs_to_remove[ $alt_name_keys[0] ] );
+				}
+			}
+		}
+
+		// Remove the disllowed attributes
+		foreach ( $attrs_to_remove as $attr_name ) {
+			$node->removeAttribute( $attr_name );
 		}
 	}
 
 	/**
-	 * property must *not* match regex
+	 * If a node has an attribute that matches a blacklisted regex value, then
+	 * that value will be removed from the attribute on this node.
 	 */
-	private function enforce_attr_spec_rule_blacklisted_value_regex( $attr_spec_rule_value, $attr_node ) {
-		$pattern = '/' . $attr_spec_rule_value . '/u';
-		if ( preg_match( $pattern, $attr_node->value ) ) {
-			$attr_node->value = '';
+	private function remove_blacklisted_attribute_values( $node, $attr_spec_list ) {
+		foreach( $node->attributes as $attr_name => $attr_node ) {
+			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::blacklisted_value_regex] ) ) {
+				// Note: Unlike the note on step 2c in attr_spec_is_valid_for_node(),
+				//	I am *not* adding the '^' and '$' to the regex patternc because
+				//	the AMP JS validator doesn't allow either '__amp_source_origin'
+				//	or 'AAA__amp_source_originZZZ', for example.
+				$pattern = '/' . $attr_spec_list[ $attr_name ][AMP_Rule_Spec::blacklisted_value_regex] . '/u';
+				if ( preg_match( $pattern, $attr_node->value ) ) {
+					$attr_node->value = '';
+				}
+			}
 		}
 	}
 
 	/**
-	 * property *must* match regex
+	 * Below are some utility functions to search and manipulate the DOM.
 	 */
-	private function enforce_attr_spec_rule_value_regex( $attr_spec_rule_value, $attr_node ) {
-		$pattern = '/' . $attr_spec_rule_value . '/u';
-		$x = preg_match( $pattern, $attr_node->value );
-		if ( 0 == preg_match( $pattern, $attr_node->value ) ) {
-			$attr_node->value = '';
-		}
-	}
 
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		return ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || isset( $attr_spec_list[ $attr_name ] ) );
+		return ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || 
+			isset( $attr_spec_list[ $attr_name ] ) ||
+			isset( AMP_Rule_Spec::tags_allowed_for_styling[ $attr_name ] ) );
 	}
 
 	private function is_amp_allowed_tag( $node ) {
 		// Return true if node is on the allowed tags list or if it is a text node.
 		return ( isset( $this->allowed_tags[ $node->nodeName ] ) || ( $node->nodeType == XML_TEXT_NODE ) );
 	}
-
-	/**
-	 * Below are some utility functions to search and manipulate the DOM.
-	 */
 
 	private function has_parent( $node, $parent_tag_name ) {
 		if ( $node && $node->parentNode && ( $node->parentNode->nodeName == $parent_tag_name ) ) {
@@ -403,5 +437,18 @@ abstract class AMP_Rule_Spec {
 		'style',
 		'link',
 		'meta',
+	);
+
+	// This is here because these tags are not listed in either the AMP global
+	//	attributes or the attr_spec_list for elements such as 'amp-img'.
+	//
+	// I decided to add them here instead of hard-coding them into amp-wp-build.py
+	//	because I want the generated file to accurately reflect the protoascii
+	//	file it was built from as much as possible.
+	const tags_allowed_for_styling = array(
+		'width' => array(),
+		'height' => array(),
+		'layout' => array(),
+		'sizes' => array(),
 	);
 }
