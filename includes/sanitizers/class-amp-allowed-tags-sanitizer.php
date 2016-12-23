@@ -74,32 +74,24 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// If we only have a single attr_spec is left, then we can skip the rest
-		//	of these tests and move on to sanitizing it.
-		if ( 1 == count( $attr_spec_list_to_validate ) ) {
-
-			// If we still have multiple attr_specs, then try to narrow it down
-			//	using this node's attributes.
-
-			// 4) Validate remaining attr_specs based on the node's attributes
-			//		and their values.
-			foreach ( $attr_spec_list_to_validate as $attr_spec_id => $attr_spec ) {
-				// If we can't validate this attr_spec, remove it from the list.
-				if ( false == $this->attr_spec_is_valid_for_node( $node, $attr_spec ) ) {
-					unset( $attr_spec_list_to_validate[$attr_spec_id] );
-				}
+		// 4) Validate remaining attr_specs based on the node's attributes
+		//		and their values.
+		foreach ( $attr_spec_list_to_validate as $attr_spec_id => $attr_spec ) {
+			// If we can't validate this attr_spec, remove it from the list.
+			if ( false == $this->attr_spec_is_valid_for_node( $node, $attr_spec ) ) {
+				unset( $attr_spec_list_to_validate[$attr_spec_id] );
 			}
+		}
 
-			// 5) If no valid attr_specs exist, remove or replace the node.
-			if ( empty( $attr_spec_list_to_validate ) ) {
+		// 5) If no valid attr_specs exist, remove or replace the node.
+		if ( empty( $attr_spec_list_to_validate ) ) {
 
-				if ( in_array( $node->nodeName, AMP_Rule_Spec::node_types_to_remove_if_invalid ) ) {
-					$node->parentNode->removeChild( $node );
-				} else {
-					$this->replace_node_with_children( $node );
-				}
-				return;
+			if ( in_array( $node->nodeName, AMP_Rule_Spec::node_types_to_remove_if_invalid ) ) {
+				$node->parentNode->removeChild( $node );
+			} else {
+				$this->replace_node_with_children( $node );
 			}
+			return;
 		}
 
 		// Hopefully, we've narrowed this down to a single attr_spec_list.
@@ -159,28 +151,6 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $this->mandatory_attr_exists( $node, $attr_name, $attr_spec_rule ) ) {
 				return false;
 			}
-			// if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) &&
-			// 	( true == $attr_spec_rule[AMP_Rule_Spec::mandatory] ) ) {
-			// 	if ( ! $node->hasAttribute( $attr_name ) ) {
-			// 		// check if an alternative name list is specified
-			// 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::alternative_names] ) ) {
-			// 			$found = false;
-			// 			foreach ( $attr_spec_rule[AMP_Rule_Spec::alternative_names] as $alt_name ) {
-			// 				if ( $node->hasAttribute( $alt_name ) ) {
-			// 					$found = true;
-			// 				}
-			// 			}
-			// 			if ( ! $found ) {
-			// 				// Neither the specified attribute or an alternate 
-			// 				//	was found. Validation failed.
-			// 				return false;
-			// 			}
-			// 		} else {
-			// 			// If no alternate names exist, validation failed.
-			// 			return false;
-			// 		}
-			// 	}
-			// }
 
 			// 2) Check to make sure that this attribute meets any restrictions
 			//	on any attribute value restrictions. If a property exists, but 
@@ -192,11 +162,6 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 					return false;
 				}
 			}
-			// if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) && $node->hasAttribute( $attr_name ) ) {
-			// 	if ( ! ( $node->getAttribute( $attr_name ) == $attr_spec_rule[AMP_Rule_Spec::value] ) ) {
-			// 		return false;
-			// 	}
-			// }
 
 			// 2c)check 'value_regex' - case sensitive regex match
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) ) {
@@ -204,18 +169,6 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 					return false;
 				}
 			}
-			// if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) && $node->hasAttribute( $attr_name ) ) {
-			// 	$attr_value = $node->getAttribute( $attr_name );
-			// 	$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex];
-			// 	// Note: I added in the '^' and '$' to the regex pattern even though
-			// 	//	they weren't in the AMP spec. But leaving them out would allow
-			// 	//	both '_blank' and 'yyy_blankzzz' to be matched  by a regex spec of
-			// 	//	'(_blank|_self|_top)'. The AMP JS validator only accepts '_blank',
-			// 	//	so I'm leaving it this way for now.
-			// 	if ( ! preg_match('/^' . $rule_value . '$/u', $attr_value) ) {
-			// 		return false;
-			// 	}
-			// }
 
 			// 2b)check 'value_casei' - case insensitive
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) ) {
@@ -223,13 +176,6 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 					return false;
 				}
 			}
-			// if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) && $node->hasAttribute( $attr_name ) ) {
-			// 	$attr_value = strtolower( $node->getAttribute( $attr_name ) );
-			// 	$rule_value = strtolower( $attr_spec_rule[AMP_Rule_Spec::value_casei] );
-			// 	if ( ! ( $attr_value == $rule_value ) ) {
-			// 		return false;
-			// 	}
-			// }
 
 			// 2d)check 'value_regex_casei' - case insensitive regex match
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) ) {
@@ -237,14 +183,6 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 					return false;
 				}
 			}
-			// if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) && $node->hasAttribute( $attr_name ) ) {
-			// 	$attr_value = $node->getAttribute( $attr_name );
-			// 	$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex_casei];
-			// 	// See note on 2c) above regarding the '^' and '$' that I added.
-			// 	if ( ! preg_match('/^' . $rule_value . '$/ui', $attr_value) ) {
-			// 		return false;
-			// 	}
-			// }
 
 			// 3) If property has protocol, but protocol is not on allowed list, fail.
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] )  && $node->hasAttribute( $attr_name ) ) {
@@ -404,7 +342,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) ) {
-					if ( AMP_Rule_Spec::fail == $this->is_amp_allowed_value_regex_casei( $node, $attr_name, $attr_spec_list[$attr_name] ) ) {
+					if ( AMP_Rule_Spec::fail == $this->attr_spec_value_regex_casei_test( $node, $attr_name, $attr_spec_list[$attr_name] ) ) {
 						if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 							$attr_node->value = '';
 						} else {
@@ -452,7 +390,7 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 		// 	return false;
 		// }
 
-		// $value_regex_casei_result = $this->_is_amp_allowed_value_regex_casei( $node, $attr_name, $attr_spec_rule, '' );
+		// $value_regex_casei_result = $this->_is_amp_allowed_value_regex_casei_test( $node, $attr_name, $attr_spec_rule, '' );
 		// if ( AMP_Rule_Spec::pass == $value_regex_casei_result ) {
 		// 	return true;
 		// } elseif ( AMP_Rule_Spec::fail == $value_regex_casei_result ) {
@@ -546,11 +484,11 @@ class AMP_Allowed_Tags_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
-	private function is_amp_allowed_value_regex_casei( $node, $attr_name, $attr_spec_rule ) {
-		return $this->_is_amp_allowed_value_regex_casei( $node, $attr_name, $attr_spec_rule, $node->getAttribute( $attr_name ) );
+	private function attr_spec_value_regex_casei_test( $node, $attr_name, $attr_spec_rule ) {
+		return $this->_attr_spec_value_regex_casei_test( $node, $attr_name, $attr_spec_rule, $node->getAttribute( $attr_name ) );
 	}
 
-	private function _is_amp_allowed_value_regex_casei( $node, $attr_name, $attr_spec_rule, $attr_value ) {
+	private function _attr_spec_value_regex_casei_test( $node, $attr_name, $attr_spec_rule, $attr_value ) {
 		// check 'value_regex_casei' - case insensitive regex match
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex_casei];
