@@ -9,7 +9,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
  * Allowed tags array is generated from this protocol buffer:
  *     https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
  */
-class AMP_Tags_And_Attributes_Sanitizer extends AMP_Base_Sanitizer {
+class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	protected $allowed_tags;
 	protected $globally_allowed_attrs;
