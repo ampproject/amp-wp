@@ -24,6 +24,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $globally_allowed_attrs;
 	private $stack = array();
 
+	public function __construct( $dom, $args = array() ) {
+        parent::__construct( $dom, $args );
+
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_value_mandatory_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_value_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_value_regex_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_value_casei_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_value_regex_casei_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_allowed_protocol_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_disallowed_relative_protocol_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_disallowed_empty_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_disallowed_domain_for_node' ), 10, 4 );
+        add_filter( 'amp_tags_and_attributes_validate_attr_for_node', array( $this, 'attr_spec_validate_blacklisted_attribute_values_for_node' ), 10, 4 );
+    }
+
 	public function sanitize() {
 		// Get whitelists.
 		$this->allowed_tags = apply_filters( 'amp_allowed_tags', AMP_Allowed_Tags_Generated::get_allowed_tags() );
@@ -60,7 +75,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// 1) Remove nodes with non-whitelisted tags.
+		// Remove nodes with non-whitelisted tags.
 		if ( ! $this->is_amp_allowed_tag( $node ) ) {
 			// If it's not an allowed tag, replace the node with it's children
 			$this->replace_node_with_children( $node );
@@ -68,8 +83,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// 2) Compile a list of attr_specs to validate for this node based on
-		//		tag name of the node.
+		// Compile a list of rule_specs to validate for this node based on
+		// tag name of the node.
 		$rule_spec_list_to_validate = array();
 		foreach ( $this->allowed_tags[ $node->nodeName ] as $id => $rule_spec ) {
 			if ( $this->tag_spec_is_valid_for_node( $node, $rule_spec[AMP_Rule_Spec::tag_spec] ) ) {
@@ -77,56 +92,98 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// 3) If no valid attr_specs exist, then remove this node and return.
+		// Allow rule_spec_list to be filtered. ex.:
+        // add_filter( 'amp_tags_and_attributes_rule_spec_list_for_node', array( $this, 'example_rule_spec_list_filter' ), 10, 2 );
+        // public function example_rule_spec_list_filter( $rule_spec_list, $node ) {
+		//		// remove audio tags
+		//		if ( 'amp-audio' == $node->nodeName ) {
+		//			$rule_spec_list = array();
+		//		}
+        // 		return $rule_spec_list;
+        // }
+		$rule_spec_list_to_validate = apply_filters( 'amp_tags_and_attributes_rule_spec_list_for_node', $rule_spec_list_to_validate, $node );
+
+		// If no valid rule_specs exist, then remove this node and return.
 		if ( empty( $rule_spec_list_to_validate ) ) {
 			$this->remove_node( $node );
 			return;
 		}
 
-		// The remaining validations and filters all have to do with attributes.
+		// The remaining validations all have to do with attributes.
 		if ( $node->hasAttributes() ) {
 
 			$attr_spec_list = array();
 
-			// 4) If there is more than one valid rule_spec for this node, then
-			//	try to deduce which one it is by inspecting the attributes.
+			// If we have exactly one rule_spec, use it's attr_spec_list to 
+			// validate the node's attributes.
 			if ( 1 == count( $rule_spec_list_to_validate ) ) {
 				$rule_spec = array_pop( $rule_spec_list_to_validate );
 				$attr_spec_list = $rule_spec[AMP_Rule_Spec::attr_spec_list];
 
+			// If there is more than one valid rule_spec for this node, then
+			// try to deduce which one is intended by inspecting the node's
+			// attributes.
 			} else {
+
+				// Get a score from each attr_spec_list by seeing how many
+				// attributes and values match the node.
 				$attr_spec_scores = array();
 				foreach ( $rule_spec_list_to_validate as $spec_id => $rule_spec ) {
 					$attr_spec_scores[ $spec_id ] = $this->attr_spec_is_valid_for_node( $node, $rule_spec[AMP_Rule_Spec::attr_spec_list] );
 				}
 
-				// If at least one score was non-negative, get the best spec
-				if ( 0 <= max( $attr_spec_scores ) ) {
-					$spec_ids_sorted = array_keys( $attr_spec_scores, max( $attr_spec_scores ) );
+				// Get the key(s) to the highest score(s).
+				$spec_ids_sorted = array_keys( $attr_spec_scores, max( $attr_spec_scores ) );
 
-					// If there is exactly one attr_spec with a max score, use that one.
-					if ( 1 == count( $spec_ids_sorted ) ) {
-						$attr_spec_list = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][AMP_Rule_Spec::attr_spec_list];
+				// If there is exactly one attr_spec with a max score, use that one.
+				if ( 1 == count( $spec_ids_sorted ) ) {
+					$attr_spec_list = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][AMP_Rule_Spec::attr_spec_list];
 
-					// Otherwise...
-					} else {
-						// This shoud not happen very often, if ever, but...
-						// If we're here, then we have no idea which spec shold
-						// be used. Try to merge the top scoring ones and cross
-						// your fingers.
-						foreach( $spec_ids_sorted as $id ) {
-							$attr_spec_list = array_merge( $attr_spec_list, $rule_spec_list_to_validate[ $id ][AMP_Rule_Spec::attr_spec_list] );
-						}
+				// Otherwise...
+				} else {
+					// This shoud not happen very often, but...
+					// If we're here, then we have no idea which spec should
+					// be used. Try to merge the top scoring ones and cross
+					// your fingers.
+					foreach( $spec_ids_sorted as $id ) {
+						$attr_spec_list = array_merge( $attr_spec_list, $rule_spec_list_to_validate[ $id ][AMP_Rule_Spec::attr_spec_list] );
 					}
 				}
 			}
 
-			// 5) Remove any remaining disallowed attributes.
-			// $this->remove_disallowed_attributes_from_node( $node, $rule_spec_list_merged[AMP_Rule_Spec::attr_spec_list] );
+			// Allow attr_spec_list to be filtered. ex.:
+			// add_filter( 'amp_tags_and_attributes_attr_spec_list_for_node', array( $this, 'example_attr_spec_list_filter' ), 10, 2 );
+			// public function example_attr_spec_list_filter( $attr_spec_list, $node ) {
+			// 	// Look for an anchor tag.
+			// 	if ( 'a' == $node->nodeName ) {
+			// 		// Add some domains to the disallowed_domain array.
+			// 		$disallowed_domains = array(
+			// 			'example.com',
+			// 			'rea-bad-domain.com',
+			// 		);
+			// 		if ( isset( $attr_spec_list['href']['disallowed_domain'] ) ) {
+			// 			$disallowed_domains = array_merge( $attr_spec_list['href']['disallowed_domain'], $disallowed_domains );
+			// 		}
+			// 		$attr_spec_list['href']['disallowed_domain'] = $disallowed_domains;
+			//
+			// 		// Add a new protocol to the allowed_protocol array.
+			// 		$allowed_protocol = array(
+			// 			'protocol'
+			// 		);
+			//
+			// 		if ( isset( $attr_spec_list['href']['allowed_protocol'] ) ) {
+			// 			$allowed_protocol = array_merge( $attr_spec_list['href']['allowed_protocol'], $allowed_protocol );
+			// 		}
+			// 		$attr_spec_list['href']['allowed_protocol'] = $allowed_protocol;
+			// 	}
+			// 	return $attr_spec_list;
+			// }
+			$attr_spec_list = apply_filters( 'amp_tags_and_attributes_attr_spec_list_for_node', $attr_spec_list, $node );
+
+			// Remove any remaining disallowed attributes.
 			$this->remove_disallowed_attributes_from_node( $node, $attr_spec_list );
 
-			// 6) Remove values that don't conform to the attr_spec.
-			// $this->remove_disallowed_attribute_values_from_node( $node, $rule_spec_list_merged[AMP_Rule_Spec::attr_spec_list] );
+			// Remove values that don't conform to the attr_spec.
 			$this->remove_disallowed_attribute_values_from_node( $node, $attr_spec_list );
 		}
 	}
@@ -182,146 +239,127 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$score = 0;
 
 		// Iterate through each attribute rule in this attr spec list and run
-		//	the series of tests 
+		// the series of tests 
 		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
+			$score = apply_filters( 'amp_tags_and_attributes_validate_attr_for_node', $score, $node, $attr_name, $attr_spec_rule );
+		}
+					
+		// return true;
+		return $score;
+	}
 
-			// 1) If a mandatory attribute is required, but doesn't exist, fail 
-			//	validation.
+	public function attr_spec_validate_value_mandatory_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+			// If a mandatory attribute is required, but doesn't exist, fail 
+			// validation.
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->mandatory_attr_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
 				$result = $this->mandatory_attr_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
+				if ( AMP_Rule_Spec::pass == $result ) {
 					$score += 1;
 				}
 			}
+		return $score;
+	}
 
-			// 2) Check to make sure that this attribute meets any value
-			//	restrictions. If a property exists, but doesn't have a required
-			//	value, fail validation. Otherwise move on to the next test.
 
-			// 2a) check 'value' - case sensitive
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_value_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_value_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 2b) check 'value_regex' - case sensitive regex match
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_value_regex_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_value_regex_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 2c) check 'value_casei' - case insensitive
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_value_casei_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_value_casei_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 2d) check 'value_regex_casei' - case insensitive regex match
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_value_regex_casei_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_value_regex_casei_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 3) If property has a protocol, but protocol is not on allowed list, fail.
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_allowed_protocol_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_allowed_protocol_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 4) If allow_relative is specified as false and url is relative, then fail.
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_disallowed_relative_protocol_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_disallowed_relative_protocol_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 5) If attribute exists and is empty, but empty is not allowed, fail.
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_disallowed_empty_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_disallowed_empty_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 6) If attribute exists, but has a disallowed domain, fail.
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_disallowed_domain_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_disallowed_domain_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
-			}
-
-			// 7) If attribute exists, and has a blacklisted value, fail.
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::blacklisted_value_regex] ) ) {
-				// if ( AMP_Rule_Spec::fail == $this->attr_spec_blacklisted_attribute_values_test( $node, $attr_name, $attr_spec_rule ) ) {
-				// 	return false;
-				// }
-				$result = $this->attr_spec_blacklisted_attribute_values_test( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::fail == $result ) {
-					// return -1;
-				} elseif ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
+	public function attr_spec_validate_value_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// check 'value' - case sensitive
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) ) {
+			$result = $this->attr_spec_value_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
 			}
 		}
+		return $score;
+	}
 
-		// return true;
+
+	public function attr_spec_validate_value_regex_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// check 'value_regex' - case sensitive regex match
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) ) {
+			$result = $this->attr_spec_value_regex_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
+		return $score;
+	}
+
+	public function attr_spec_validate_value_casei_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// check 'value_casei' - case insensitive
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) ) {
+			$result = $this->attr_spec_value_casei_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
+		return $score;
+	}
+
+	public function attr_spec_validate_value_regex_casei_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// check 'value_regex_casei' - case insensitive regex match
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) ) {
+			$result = $this->attr_spec_value_regex_casei_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
+		return $score;
+	}
+
+
+	public function attr_spec_validate_allowed_protocol_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// If property has a protocol, but protocol is not on allowed list, fail.
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
+			$result = $this->attr_spec_allowed_protocol_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
+		return $score;
+	}
+
+
+	public function attr_spec_validate_disallowed_relative_protocol_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// If allow_relative is specified as false and url is relative, then fail.
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) ) {
+			$result = $this->attr_spec_disallowed_relative_protocol_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
+		return $score;
+	}
+
+	public function attr_spec_validate_disallowed_empty_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// If attribute exists and is empty, but empty is not allowed, fail.
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) ) {
+			$result = $this->attr_spec_disallowed_empty_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
+		return $score;
+	}
+
+	public function attr_spec_validate_disallowed_domain_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// If attribute exists, but has a disallowed domain, fail.
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) ) {
+			$result = $this->attr_spec_disallowed_domain_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
+		return $score;
+	}
+
+	public function  attr_spec_validate_blacklisted_attribute_values_for_node( $score, $node, $attr_name, $attr_spec_rule ) {
+		// If attribute exists, and has a blacklisted value, fail.
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::blacklisted_value_regex] ) ) {
+			$result = $this->attr_spec_blacklisted_attribute_values_test( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
+			}
+		}
 		return $score;
 	}
 
