@@ -238,7 +238,7 @@ class AMP_Post_Template {
 				 'AMP_Iframe_Sanitizer' => array(
 					 'add_placeholder' => true,
 				 ),
-				 'AMP_Allowed_Tags_Sanitizer' => array(),
+				 'AMP_Tags_And_Attributes_Sanitizer' => array(),
 			), $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
