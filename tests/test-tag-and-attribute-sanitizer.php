@@ -1,6 +1,12 @@
 <?php
 
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
+
 class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
+
+	protected $allowed_tags;
+	protected $globally_allowed_attrs;
+
 	public function get_data() {
 		return array(
 			'empty' => array(
@@ -329,6 +335,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		);
 	}
 
+	public function setUp() {
+		$this->allowed_tags = apply_filters( 'amp_allowed_tags', AMP_Allowed_Tags_Generated::get_allowed_tags() );
+		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
+	}
+
 	/**
 	 * @dataProvider get_data
 	 * @group allowed-tags
@@ -339,5 +350,326 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * @group allowed-tags
+	 */
+	public function test_validate_attr_spec_rules() {
+
+		$test_data = array(
+			'validate_attr_spec_rule_value_mandatory_for_attr_valid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-ad',
+				'attribute_name' => 'type',
+				'attribute_value' => '',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_mandatory_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_value_mandatory_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-ad',
+				'attribute_name' => 'type',
+				'attribute_value' => '',
+				'include_attr' => false,
+				'include_attr_value' => false,
+				'func_name' => 'validate_attr_spec_rule_value_mandatory_for_attr',
+				'expected' => 0,
+			),
+
+
+			
+			'validate_attr_spec_rule_value_for_attr_valid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'template',
+				'attribute_name' => 'type',
+				'attribute_value' => 'amp-mustache',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_value_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'template',
+				'attribute_name' => 'type',
+				'attribute_value' => 'amp-mustache',
+				'include_attr' => false,
+				'include_attr_value' => false,
+				'func_name' => 'validate_attr_spec_rule_value_for_attr',
+				'expected' => 0,
+			),
+
+
+			
+			'validate_attr_spec_rule_value_regex_for_attr_valid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'target',
+				'attribute_value' => '_blank',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_regex_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_value_regex_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'target',
+				'attribute_value' => '_blankzzz',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_regex_for_attr',
+				'expected' => 0,
+			),
+
+
+			
+			'validate_attr_spec_rule_value_casei_for_attr_lower' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'type',
+				'attribute_value' => 'text/html',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_casei_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_value_casei_for_attr_upper' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'type',
+				'attribute_value' => 'TEXT/HTML',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_casei_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_value_casei_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'type',
+				'attribute_value' => 'text/css',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_casei_for_attr',
+				'expected' => 0,
+			),
+
+
+			'validate_attr_spec_rule_value_regex_casei_for_attr_lower' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-playbuzz',
+				'attribute_name' => 'data-comments',
+				'attribute_value' => 'false',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_regex_casei_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_value_regex_casei_for_attr_upper' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-playbuzz',
+				'attribute_name' => 'data-comments',
+				'attribute_value' => 'FALSE',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_regex_casei_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_value_regex_casei_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-playbuzz',
+				'attribute_name' => 'data-comments',
+				'attribute_value' => 'invalid',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_value_regex_casei_for_attr',
+				'expected' => 0,
+			),
+
+
+			'validate_attr_spec_rule_allowed_protocol_for_attr_http' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'href',
+				'attribute_value' => 'http://example.com',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_allowed_protocol_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_allowed_protocol_for_attr_https' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'href',
+				'attribute_value' => 'https://example.com',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_allowed_protocol_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_allowed_protocol_for_attr_relative' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'href',
+				'attribute_value' => '//example.com',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_allowed_protocol_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_allowed_protocol_for_attr_invalid_protocol' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'href',
+				'attribute_value' => 'bad://example.com',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_allowed_protocol_for_attr',
+				'expected' => 0,
+			),
+			'validate_attr_spec_rule_allowed_protocol_for_attr_missing_protocol_is_ok' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'a',
+				'attribute_name' => 'href',
+				'attribute_value' => 'example.com',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_allowed_protocol_for_attr',
+				'expected' => 1,
+			),
+
+
+			'validate_attr_spec_rule_disallowed_relative_for_attr_valid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'audio',
+				'attribute_name' => 'src',
+				'attribute_value' => 'https://example.com/path/to/content',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_disallowed_relative_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_disallowed_relative_for_attr_protocol_relative_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'audio',
+				'attribute_name' => 'src',
+				'attribute_value' => '//example.com/path/to/content',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_disallowed_relative_for_attr',
+				'expected' => 0,
+			),
+			'validate_attr_spec_rule_disallowed_relative_for_attr_server_relative_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'audio',
+				'attribute_name' => 'src',
+				'attribute_value' => '/path/to/content',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_disallowed_relative_for_attr',
+				'expected' => 0,
+			),
+
+
+			'validate_attr_spec_rule_disallowed_empty_for_attr_valid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'image',
+				'attribute_name' => 'xlink:href',
+				'attribute_value' => 'http://example.com/path/to/content',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_disallowed_empty_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_disallowed_empty_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'image',
+				'attribute_name' => 'xlink:href',
+				'attribute_value' => '',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_disallowed_empty_for_attr',
+				'expected' => 0,
+			),
+
+
+			'validate_attr_spec_rule_disallowed_domain_for_attr_valid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'form',
+				'attribute_name' => 'action-xhr',
+				'attribute_value' => 'http://example.com/path/to/resource',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_disallowed_domain_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_disallowed_domain_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'form',
+				'attribute_name' => 'action-xhr',
+				'attribute_value' => 'http://cdn.ampproject.org/path/to/resource',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_disallowed_domain_for_attr',
+				'expected' => 0,
+			),
+
+
+
+			'validate_attr_spec_rule_blacklisted_attribute_values_for_attr_valid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'form',
+				'attribute_name' => 'action',
+				'attribute_value' => '/path/to/resource',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_blacklisted_attribute_values_for_attr',
+				'expected' => 1,
+			),
+			'validate_attr_spec_rule_blacklisted_attribute_values_for_attr_invalid' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'form',
+				'attribute_name' => 'action',
+				'attribute_value' => '__amp_source_origin',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'validate_attr_spec_rule_blacklisted_attribute_values_for_attr',
+				'expected' => 0,
+			),
+		);
+
+		foreach ( $test_data as $test_name => $test ) {
+			if ( isset( $test['include_attr_value'] ) && $test['include_attr_value'] ) {
+				$attr_value = '="' . $test['attribute_value'] . '"';
+			} else {
+				$attr_value = '';
+			}
+			if ( isset( $test['include_attr'] ) && $test['include_attr'] ) {
+				$attribute = $test['attribute_name'] . $attr_value;
+			} else {
+				$attribute = '';
+			}
+			$source = '<' . $test['tag_name'] . ' ' . $attribute . '>Some test content</' . $test['tag_name'] . '>';
+			$attr_spec_rule = $this->allowed_tags[ $test['tag_name'] ][$test['rule_spec_index']]['attr_spec_list'][ $test['attribute_name'] ];
+
+			$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+			$node = $dom->getElementsByTagName( $test['tag_name'] )->item( 0 );
+			$got = call_user_func( array( $sanitizer, $test['func_name'] ) , 0, $node, $test['attribute_name'], $attr_spec_rule );
+
+			if ( $test['expected'] != $got ) {
+				printf( PHP_EOL . '%s failed:' . PHP_EOL, $test_name );
+				printf( $source . PHP_EOL );
+				printf( 'expected: %s' . PHP_EOL, $test['expected'] );
+				printf( 'got: %s' . PHP_EOL, $got );
+				var_dump( $test );
+			}
+
+			$this->assertEquals( $test['expected'], $got );
+		}
 	}
 }
