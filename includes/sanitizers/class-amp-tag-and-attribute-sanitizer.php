@@ -218,7 +218,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		//	continuing.
 		if ( ! $node->hasAttributes() ) {
 			return 0;
-			// return true;
 		}
 
 		$score = 0;
@@ -255,7 +254,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Check 'value_casei' - case insensitive
-			// Given attribute's value must be a case inseisitive match to the value of
+			// Given attribute's value must be a case insensitive match to the value of
 			// the rule to pass.
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) ) {
 				if ( AMP_Rule_Spec::pass == $this->test_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) ) {
