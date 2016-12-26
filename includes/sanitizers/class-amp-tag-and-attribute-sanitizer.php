@@ -273,12 +273,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return intval - If the validation passed, this should be `$score + 1`, else `$score`
 	 */
 	public function validate_attr_spec_rule_value_mandatory_for_attr( $score, $node, $attr_name, $attr_spec_rule ) {
-			if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) ) {
-				$result = $this->test_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::pass == $result ) {
-					$score += 1;
-				}
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) ) {
+			$result = $this->test_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule );
+			if ( AMP_Rule_Spec::pass == $result ) {
+				$score += 1;
 			}
+		}
 		return $score;
 	}
 
@@ -481,7 +481,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_value_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -495,7 +495,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_value_casei_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -509,7 +509,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_value_regex_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -523,7 +523,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_value_regex_casei_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -537,7 +537,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_allowed_protocol_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -551,7 +551,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_disallowed_relative_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -565,7 +565,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_disallowed_empty_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -579,7 +579,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_disallowed_domain_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -593,7 +593,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function sanitize_attr_spec_rule_blacklisted_value_regex_for_attr( $attrs_to_remove, $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[AMP_Rule_Spec::blacklisted_value_regex] ) ) {
+		if ( isset( $attr_spec_rule[AMP_Rule_Spec::blacklisted_value_regex] ) && ( ! isset( $attrs_to_remove[ $attr_name ] ) ) ) {
 			if ( AMP_Rule_Spec::fail == $this->test_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
 				if ( $this->is_empty_attribute_allowed( $node, $attr_name, $attr_spec_rule ) ) {
 					$attr = $node->attributes;
@@ -652,13 +652,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function test_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) {
-		return $this->_test_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule, $node->getAttribute( $attr_name ) );
-	}
-
-	private function _test_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule, $attr_value ) {
 		// check 'value' - case sensitive
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) && $node->hasAttribute( $attr_name ) ) {
-			if ( $attr_value == $attr_spec_rule[AMP_Rule_Spec::value] ) {
+			if ( $node->getAttribute( $attr_name ) == $attr_spec_rule[AMP_Rule_Spec::value] ) {
 				return AMP_Rule_Spec::pass;
 			} else {
 				return AMP_Rule_Spec::fail;
@@ -668,13 +664,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function test_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) {
-		return $this->_test_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule, $node->getAttribute( $attr_name ) );
-	}
-
-	private function _test_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule, $attr_value ) {
 		// check 'value_casei' - case insensitive
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) && $node->hasAttribute( $attr_name ) ) {
-			$attr_value = strtolower( $attr_value );
+			$attr_value = strtolower( $node->getAttribute( $attr_name ) );
 			$rule_value = strtolower( $attr_spec_rule[AMP_Rule_Spec::value_casei] );
 			if ( $attr_value == $rule_value ) {
 				return AMP_Rule_Spec::pass;
@@ -686,10 +678,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function test_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) {
-		return $this->_test_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule, $node->getAttribute( $attr_name ) );
-	}
-
-	private function _test_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule, $attr_value ) {
 		// check 'value_regex' - case sensitive regex match
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex];
@@ -698,7 +686,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			//	both '_blank' and 'yyy_blankzzz' to be matched  by a regex spec of
 			//	'(_blank|_self|_top)'. The AMP JS validator only accepts '_blank',
 			//	so I'm leaving it this way for now.
-			if ( preg_match('/^' . $rule_value . '$/u', $attr_value) ) {
+			if ( preg_match('@^' . $rule_value . '$@u', $node->getAttribute( $attr_name )) ) {
 				return AMP_Rule_Spec::pass;
 			} else {
 				return AMP_Rule_Spec::fail;
@@ -708,15 +696,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function test_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) {
-		return $this->_test_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule, $node->getAttribute( $attr_name ) );
-	}
-
-	private function _test_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule, $attr_value ) {
 		// check 'value_regex_casei' - case insensitive regex match
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex_casei];
 			// See note above regarding the '^' and '$' that are added here.
-			if ( preg_match('/^' . $rule_value . '$/ui', $attr_value) ) {
+			if ( preg_match('/^' . $rule_value . '$/ui', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::pass;
 			} else {
 				return AMP_Rule_Spec::fail;
