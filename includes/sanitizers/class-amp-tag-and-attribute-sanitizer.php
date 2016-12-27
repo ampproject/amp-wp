@@ -171,13 +171,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// Remove values that don't conform to the attr_spec.
 			$this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
 
+			// Allow additional sanitization to be done here.
 			do_action( 'amp_tags_and_attributes_sanitize_node', $node, $attr_spec_list );
 		}
 	}
 
 	/**
-	 * Checks to see if a node's placement with the DOM seems to be valid for 
-	 * the given tag_spec. If there are restrictions placed on the type of node 
+	 * Checks to see if a node's placement with the DOM is be valid for the 
+	 * given tag_spec. If there are restrictions placed on the type of node 
 	 * that can be an immediate parent or an ancestor of this node, then make 
 	 * sure those restrictions are met.
 	 *
