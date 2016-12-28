@@ -541,18 +541,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// This seems to be an acceptable check since the AMP validator
 			//	will allow a URL with no protocol to pass validation.
 			if ( $url_scheme = parse_url( $attr_value, PHP_URL_SCHEME ) ) {
-				$found = false;
-				// The 'allowed_protocol' rule contains an array of allowed protocols.
-				foreach ( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] as $allowed_protocol ) {
-					if ( strtolower( $url_scheme ) == strtolower( $allowed_protocol ) ) {
-						// found an acceptable protocol
-						$found = true;
-						break;
-					}
-				}
-				if ( ! $found ) {
-					// If we're here, then there was a required protocol 
-					//	specified, but it wasn't found. Fail vaildation.
+				if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
 					return AMP_Rule_Spec::fail;
 				}
 			}
