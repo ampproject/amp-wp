@@ -5,105 +5,96 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
 class AMP_Tag_And_Attribute_Sanitizer_Benchmark_Test extends WP_UnitTestCase {
 
 	public $files = array();
-	public $num_tests = 3;
+	public $num_tests = 100;
 	public $data = array();
 	public $results = array();
+	public $diffs = array();
+	public $sanitizers_to_test = array(
+		'AMP_Blacklist_Sanitizer', // all sanitizers below will be compared with the results of this one
+		'AMP_Tag_And_Attribute_Sanitizer',
+	);
 
 	/**
 	 * @group allowed-tags-benchmark
 	 */
 	public function test_sanitizer_benchmark() {
 
-		$benchmark_data_dir = AMP__DIR__ . '/tests/benchmark/';
+		$benchmark_data_dir = AMP__DIR__ . '/tests/benchmark/test-data/';
+		$sanitizer_instances = array();
 		$this->files = glob( $benchmark_data_dir . '*.html' );
 		$dom = new DOMDocument;
 
 		foreach ( $this->files as $file ) {
-			printf( PHP_EOL . 'loading file: %s' . PHP_EOL, $file );
 			$libxml_previous_state = libxml_use_internal_errors( true );
 			$result = $dom->loadHTMLFile( $file );
 			libxml_clear_errors();
 			libxml_use_internal_errors( $libxml_previous_state );
 
-			print(PHP_EOL.'----------------'.PHP_EOL);
-			var_dump($result);
-
-			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-			for ( $i = 0; $i < $this->num_tests; $i++ ) {
-				$start = $this->start_timer();
-				$sanitizer->sanitize();
-				$stop = $this->stop_timer();
-				$this->add_result( 'tag_and_attribute_sanitizer', $file, $this->get_elapsed_time( $start, $stop ) );
+			foreach ( $this->sanitizers_to_test as $sanitizer_name ) {
+				$sanitizer_instances[ $sanitizer_name ] = new $sanitizer_name( $dom );
 			}
 
-			$sanitizer = new AMP_Blacklist_Sanitizer( $dom );
 			for ( $i = 0; $i < $this->num_tests; $i++ ) {
-				$start = $this->start_timer();
-				$sanitizer->sanitize();
-				$stop = $this->stop_timer();
-				$this->add_result( 'blacklist_sanitizer', $file, $this->get_elapsed_time( $start, $stop ) );
+				foreach ( $this->sanitizers_to_test as $sanitizer_name ) {
+					$start = $this->start_timer();
+					$sanitizer_instances[ $sanitizer_name ]->sanitize();
+					$stop = $this->stop_timer();
+					$this->add_result( $sanitizer_name, $file, $this->get_elapsed_time( $start, $stop ) );
+				}
 			}
 		}
 
-		var_dump($this->data);
-
-		// $results = $this->get_results();
-		// foreach ( $results as $function => $data ) {
-		// 	echo "$function: \n\n";
-		// 	foreach ( $data as $length => $values ) {
-		// 		echo "  $length\n";
-		// 		echo "  --------\n";
-		// 		echo "     Range: {$values['min']} - {$values['max']}\n";
-		// 		echo "    Median: {$values['median']}\n";
-		// 		echo "      Mean: {$values['mean']}\n";
-		// 		echo "        SD: {$values['sd']}\n\n";
-		// 	}
-		// }
 
 		$results = $this->get_results();
-		var_dump($results);
-		foreach ( $results as $file => $data ) {
-			echo "$function: \n\n";
-			foreach ( $data as $length => $values ) {
-				echo "  $length\n";
-				echo "  --------\n";
-				echo "     Range: {$values['min']} - {$values['max']}\n";
-				echo "    Median: {$values['median']}\n";
-				echo "      Mean: {$values['mean']}\n";
-				// echo "        SD: {$values['sd']}\n\n";
+		$diffs = $this->get_diffs();
+		foreach ( $this->sanitizers_to_test as $sanitizer_name ) {
+			echo "\n";
+			echo "  $sanitizer_name stats:\n";
+			echo "  ------------------\n";
+			echo "     Range: {$results[ $sanitizer_name ]['min']} - {$results[ $sanitizer_name ]['max']}\n";
+			echo "    Median: {$results[ $sanitizer_name ]['median']}\n";
+			echo "      Mean: {$results[ $sanitizer_name ]['mean']}\n";
+			echo "        SD: {$results[ $sanitizer_name ]['sd']}\n\n";
+
+			if ( ! isset( $diffs[ $sanitizer_name ] ) ) {
+				continue;
 			}
+
+			echo "  $sanitizer_name times as multiples of {$this->sanitizers_to_test[0]}: \n";
+			echo "  ------------------\n";
+			echo "     Range: {$diffs[ $sanitizer_name ]['min']} - {$diffs[ $sanitizer_name ]['max']}\n";
+			echo "    Median: {$diffs[ $sanitizer_name ]['median']}\n";
+			echo "      Mean: {$diffs[ $sanitizer_name ]['mean']}\n";
+			echo "        SD: {$diffs[ $sanitizer_name ]['sd']}\n\n";
 		}
+
 	}
 
 	public function calculate_diffs() {
-		$sanitizers = array( 'tag_and_attribute_sanitizer', 'blacklist_sanitizer' );
-		$files = $this->files;
-		$results = array();
-		foreach ( $files as $file ) {
-			$results[ $file ] = array(
-				'mean'		=> $this->format( ( $this->get_mean( $this->data[ $sanitizers[1] ][ $file ] ) - $this->get_mean( $this->data[ $sanitizers[0] ][ $file ] ) ) / $this->get_mean( $this->data[ $sanitizers[1] ][ $file ] ) ),
-				'median'	=> $this->format( ( $this->get_median( $this->data[ $sanitizers[1] ][ $file ] ) - $this->get_median( $this->data[ $sanitizers[0] ][ $file ] ) ) / $this->get_median( $this->data[ $sanitizers[1] ][ $file ] ) ),
-				'min'		=> $this->format( ( $this->get_min( $this->data[ $sanitizers[1] ][ $file ] ) - $this->get_min( $this->data[ $sanitizers[0] ][ $file ] ) ) / $this->get_min( $this->data[ $sanitizers[1] ][ $file ] ) ),
-				'max'		=> $this->format( ( $this->get_max( $this->data[ $sanitizers[1] ][ $file ] ) - $this->get_max( $this->data[ $sanitizers[0] ][ $file ] ) ) / $this->get_max( $this->data[ $sanitizers[1] ][ $file ] ) ),
+		$results = $this->get_results();
+		$sanitizers = array_slice( $this->sanitizers_to_test, 1);
+		foreach ( $sanitizers as $sanitizer ) {
+			$diffs[ $sanitizer ] = array(
+				'mean'   => $this->format( $results[ $sanitizer ]['mean']   / $results[ $this->sanitizers_to_test[0] ]['mean'] ),
+				'median' => $this->format( $results[ $sanitizer ]['median'] / $results[ $this->sanitizers_to_test[0] ]['median'] ),
+				'min'    => $this->format( $results[ $sanitizer ]['min']    / $results[ $this->sanitizers_to_test[0] ]['min'] ),
+				'max'    => $this->format( $results[ $sanitizer ]['max']    / $results[ $this->sanitizers_to_test[0] ]['max'] ),  
+				'sd'     => $this->format( $results[ $sanitizer ]['sd']     / $results[ $this->sanitizers_to_test[0] ]['sd'] ),  
 			);
 		}
+		return $diffs;
 	}
 
 	public function calculate_results() {
-		
-		$sanitizers = array( 'tag_and_attribute_sanitizer', 'blacklist_sanitizer' );
-		$files = $this->files;
 		$results = array();
-		foreach ( $sanitizers as $sanitizer ) {
-			foreach ( $files as $file ) {
-				$results[ $sanitizer ][ $file ] = array(
-					'mean'   => $this->format( $this->get_mean( $this->data[ $sanitizer ][ $file ] ) ),
-					'median' => $this->format( $this->get_median( $this->data[ $sanitizer ][ $file ] ) ),
-					'min'    => $this->format( $this->get_min( $this->data[ $sanitizer ][ $file ] ) ),
-					'max'    => $this->format( $this->get_max( $this->data[ $sanitizer ][ $file ] ) ),
-					'sd'     => $this->format( $this->get_standard_deviation( $this->data[ $sanitizer ][ $file ] ) ),
-				);
-			}
+		foreach ( $this->sanitizers_to_test as $sanitizer_name ) {
+			$results[ $sanitizer_name ] = array(
+				'mean'   => $this->format( $this->get_mean( $this->data[ $sanitizer_name ] ) ),
+				'median' => $this->format( $this->get_median( $this->data[ $sanitizer_name ] ) ),
+				'min'    => $this->format( $this->get_min( $this->data[ $sanitizer_name ] ) ),
+				'max'    => $this->format( $this->get_max( $this->data[ $sanitizer_name ] ) ),
+				'sd'     => $this->format( $this->get_standard_deviation( $this->data[ $sanitizer_name ] ) ),
+			);
 		}
 		return $results;
 	}
@@ -112,10 +103,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Benchmark_Test extends WP_UnitTestCase {
 		return sprintf( '%.10F', $num );
 	}
 
+	public function get_diffs() {
+		if ( empty( $this->diffs ) ) {
+			$this->diffs = $this->calculate_diffs();
+		}
+		return $this->diffs;
+	}
+
 	public function get_results() {
 		if ( empty( $this->results ) ) {
-			// $this->results = $this->calculate_results();
-			$this->results = $this->calculate_diffs();
+			$this->results = $this->calculate_results();
+			// $this->results = $this->calculate_diffs();
 		}
 		return $this->results;
 	}
@@ -133,7 +131,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Benchmark_Test extends WP_UnitTestCase {
 	}
 	
 	public function add_result( $sanitizer, $file, $result ) {
-		$this->data[ $sanitizer ][ $file ][] = $result;
+		$this->data[ $sanitizer ][] = $result;
 	}
 	
 	public function get_mean( $array ) {
@@ -161,6 +159,4 @@ class AMP_Tag_And_Attribute_Sanitizer_Benchmark_Test extends WP_UnitTestCase {
 	public function get_min( $array ) {
 		return min( $array );
 	}
-
-
 }
