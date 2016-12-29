@@ -75,7 +75,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Compile a list of rule_specs to validate for this node based on
 		// tag name of the node.
 		$rule_spec_list_to_validate = array();
-		foreach ( $this->allowed_tags[ $node->nodeName ] as $id => $rule_spec ) {
+		if ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
+			$rule_spec_list = $this->allowed_tags[ $node->nodeName ];
+		} elseif ( isset( AMP_Rule_Spec::allowed_experimental_tags_with_no_protoascii_file[ $node->nodeName ] ) ) {
+			$rule_spec_list = AMP_Rule_Spec::allowed_experimental_tags_with_no_protoascii_file[ $node->nodeName ];
+		}
+		foreach ( $rule_spec_list as $id => $rule_spec ) {
 			if ( $this->validate_tag_spec_for_node( $node, $rule_spec[AMP_Rule_Spec::tag_spec] ) ) {
 				$rule_spec_list_to_validate[ $id ] = $rule_spec;
 			}
@@ -673,9 +678,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function is_amp_allowed_tag( $node ) {
 		// Return true if node is on the allowed tags list or if it is a text
 		// or comment node.
-		return ( isset( $this->allowed_tags[ $node->nodeName ] ) || 
-			( XML_TEXT_NODE == $node->nodeType ) ||
-			( XML_COMMENT_NODE == $node->nodeType ) );
+		return ( ( XML_TEXT_NODE == $node->nodeType ) ||
+			isset( $this->allowed_tags[ $node->nodeName ] ) || 
+			( XML_COMMENT_NODE == $node->nodeType ) || 
+			( isset( AMP_Rule_Spec::allowed_experimental_tags_with_no_protoascii_file[ $node->nodeName ] ) ) );
 	}
 
 	/**
@@ -818,6 +824,17 @@ abstract class AMP_Rule_Spec {
 	// generally allowed, but there is no specific rule for it in the protoascii
 	// file, so I'm including it here.
 	const whitelisted_attr_regex = array(
-		'/^data-/i',
+		'@^data-[a-zA-Z][\\w:.-]*$@uis',
+		'(update|item|pagination)',	// allowed for reference points - not perfect
+	);
+
+	const allowed_experimental_tags_with_no_protoascii_file = array(
+		'amp-share-tracking' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(),
+
+			),
+		),
 	);
 }
