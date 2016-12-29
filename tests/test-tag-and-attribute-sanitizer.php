@@ -184,6 +184,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<div>All I have is this div, when all you want is a noscript tag.</div>',
 			),
 
+			'amp-img_with_good_protocols' => array(
+				'<amp-img srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
+				'<amp-img srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
+			),
+
+			'amp-img_with_bad_protocols' => array(
+				'<amp-img srcset="https://somewhere.com/resource1, evil://somewhereelse.com/resource2"></amp-img>',
+				'<amp-img></amp-img>',
+			),
+
 
 			// Test Cases from test-amp-blacklist-sanitizer.php
 
@@ -613,6 +623,78 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 
+			'test_attr_spec_rule_allowed_protocol_srcset_single_pass' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-img',
+				'attribute_name' => 'srcset',
+				'attribute_value' => 'http://veryunique.com/img.jpg',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'test_attr_spec_rule_allowed_protocol',
+				'expected' => AMP_Rule_Spec::pass,
+			),
+			'test_attr_spec_rule_allowed_protocol_srcset_multiple_pass' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-img',
+				'attribute_name' => 'srcset',
+				'attribute_value' => 'http://example.com/img.jpg, https://example.com/whatever.jpg, image.jpg',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'test_attr_spec_rule_allowed_protocol',
+				'expected' => AMP_Rule_Spec::pass,
+			),
+			'test_attr_spec_rule_allowed_protocol_srcset_single_fail' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-img',
+				'attribute_name' => 'srcset',
+				'attribute_value' => 'bad://example.com/img.jpg',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'test_attr_spec_rule_allowed_protocol',
+				'expected' => AMP_Rule_Spec::fail,
+			),
+			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-img',
+				'attribute_name' => 'srcset',
+				'attribute_value' => 'bad://example.com/img.jpg, evil://example.com/whatever.jpg',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'test_attr_spec_rule_allowed_protocol',
+				'expected' => AMP_Rule_Spec::fail,
+			),
+			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_good_first' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-img',
+				'attribute_name' => 'srcset',
+				'attribute_value' => 'https://example.com/img.jpg, evil://example.com/whatever.jpg',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'test_attr_spec_rule_allowed_protocol',
+				'expected' => AMP_Rule_Spec::fail,
+			),
+			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_bad_first' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-img',
+				'attribute_name' => 'srcset',
+				'attribute_value' => 'evil://example.com/img.jpg, https://example.com/whatever.jpg',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'test_attr_spec_rule_allowed_protocol',
+				'expected' => AMP_Rule_Spec::fail,
+			),
+			'test_attr_spec_rule_allowed_protocol_srcset_na' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-img',
+				'attribute_name' => 'srcset',
+				'attribute_value' => 'invalid',
+				'include_attr' => false,
+				'include_attr_value' => false,
+				'func_name' => 'test_attr_spec_rule_allowed_protocol',
+				'expected' => AMP_Rule_Spec::not_applicable,
+			),
+
+
 
 
 			'test_attr_spec_rule_disallowed_relative_pass' => array(
@@ -782,11 +864,22 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				$attribute = '';
 			}
 			$source = '<' . $test['tag_name'] . ' ' . $attribute . '>Some test content</' . $test['tag_name'] . '>';
-			$attr_spec_rule = $this->allowed_tags[ $test['tag_name'] ][$test['rule_spec_index']]['attr_spec_list'][ $test['attribute_name'] ];
+
+			$attr_spec_list = $this->allowed_tags[ $test['tag_name'] ][$test['rule_spec_index']]['attr_spec_list'];
+			foreach( $attr_spec_list as $attr_name => $attr_val ) {
+				if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] ) ) {
+					foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] as $attr_alt_name ) {
+						$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
+					}
+				}
+			}
+
+			$attr_spec_rule = $attr_spec_list[ $test['attribute_name'] ];
 
 			$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 			$node = $dom->getElementsByTagName( $test['tag_name'] )->item( 0 );
+
 			$got = $this->invokeMethod( $sanitizer, $test['func_name'], array( $node, $test['attribute_name'], $attr_spec_rule ) );
 
 			if ( $test['expected'] != $got ) {

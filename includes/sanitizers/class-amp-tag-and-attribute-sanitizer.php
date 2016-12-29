@@ -221,6 +221,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return 0;
 		}
 
+		foreach( $node->attributes as $attr_name => $attr_node ) {
+			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] ) ) {
+				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] as $attr_alt_name ) {
+					$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
+				}
+			}
+		}
+
 		$score = 0;
 
 		// Iterate through each attribute rule in this attr spec list and run
@@ -228,7 +236,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// and an `$attr_spec_rule`. If the `$attr_spec_rule` seems to be valid
 		// for the given node, then the filter should increment the score by one.
 		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
-			// $score = apply_filters( 'amp_tags_and_attributes_validate_attr_for_node', $score, $node, $attr_name, $attr_spec_rule );
 
 		 	// If a mandatory attribute is required, and attribute exists, pass.
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) ) {
@@ -369,6 +376,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 	private function _sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list ) {
 		$attrs_to_remove = array();
+
+		foreach( $attr_spec_list as $attr_name => $attr_val ) {
+			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] ) ) {
+				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] as $attr_alt_name ) {
+					$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
+				}
+			}
+		}
+
 		foreach( $node->attributes as $attr_name => $attr_node ) {
 
 			if ( ! isset( $attr_spec_list[$attr_name] ) ) {
@@ -538,11 +554,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function test_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] )  && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
-			// This seems to be an acceptable check since the AMP validator
-			//	will allow a URL with no protocol to pass validation.
-			if ( $url_scheme = parse_url( $attr_value, PHP_URL_SCHEME ) ) {
-				if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
-					return AMP_Rule_Spec::fail;
+
+			// If this is a `srcset`, there could be multiple protocols.
+			if ( AMP_Rule_Spec::srcset == $attr_name ) {
+				$urls_to_test = explode( ', ', $attr_value );
+			} else {
+				$urls_to_test = array( $attr_value );
+			}
+
+			foreach ( $urls_to_test as $url ) {
+				// This seems to be an acceptable check since the AMP validator
+				//	will allow a URL with no protocol to pass validation.
+				$url_parts = explode( ' ', $url );
+				if ( $url_scheme = parse_url( $url_parts[0], PHP_URL_SCHEME ) ) {
+					if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
+						return AMP_Rule_Spec::fail;
+					}
 				}
 			}
 			return AMP_Rule_Spec::pass;
@@ -738,6 +765,9 @@ abstract class AMP_Rule_Spec {
 	const disallowed_ancestor = 'disallowed_ancestor';
 	const mandatory_ancestor = 'mandatory_ancestor';
 	const mandatory_parent = 'mandatory_parent';
+
+	// attr names
+	const srcset = 'srcset';
 
 	// attr rule names
 	const allow_empty = 'allow_empty';
