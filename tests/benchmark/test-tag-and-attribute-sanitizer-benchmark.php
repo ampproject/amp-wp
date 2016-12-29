@@ -5,7 +5,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
 class AMP_Tag_And_Attribute_Sanitizer_Benchmark_Test extends WP_UnitTestCase {
 
 	public $files = array();
-	public $num_tests = 100;
+	public $num_tests = 500;
 	public $data = array();
 	public $results = array();
 	public $diffs = array();
@@ -35,12 +35,28 @@ class AMP_Tag_And_Attribute_Sanitizer_Benchmark_Test extends WP_UnitTestCase {
 			}
 
 			for ( $i = 0; $i < $this->num_tests; $i++ ) {
+
+				$sanitized_content = array();
+
 				foreach ( $this->sanitizers_to_test as $sanitizer_name ) {
 					$start = $this->start_timer();
 					$sanitizer_instances[ $sanitizer_name ]->sanitize();
 					$stop = $this->stop_timer();
 					$this->add_result( $sanitizer_name, $file, $this->get_elapsed_time( $start, $stop ) );
+
+					// Uncomment this section if you want to output the results of the sanitized data to files.
+					// $sanitized_content[ $sanitizer_name ] = AMP_DOM_Utils::get_content_from_dom( $dom );
+					// $out_dir = AMP__DIR__ . '/tests/benchmark/output/' . $sanitizer_name . '/';
+					// if ( !is_dir( $out_dir ) ) {
+					// 	mkdir( $out_dir );
+					// }
+					// file_put_contents( $out_dir . 'sanitized-' . basename( $file ) , $sanitized_content[ $sanitizer_name ] );
 				}
+
+				// if ( $sanitized_content[$this->sanitizers_to_test[0]] != $sanitized_content[$this->sanitizers_to_test[1]] ) {
+				// 	printf( '%s' . PHP_EOL, $file );
+				// }
+
 			}
 		}
 
