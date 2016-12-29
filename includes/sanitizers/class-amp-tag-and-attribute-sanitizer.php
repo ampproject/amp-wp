@@ -22,12 +22,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	protected $allowed_tags;
 	protected $globally_allowed_attrs;
+	protected $layout_allowed_attrs;
 	private $stack = array();
 
 	public function sanitize() {
 		// Get whitelists.
 		$this->allowed_tags = apply_filters( 'amp_allowed_tags', AMP_Allowed_Tags_Generated::get_allowed_tags() );
 		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
+		$this->layout_allowed_attributes = apply_filters( 'amp_layout_allowed_attributes', AMP_Allowed_Tags_Generated::get_layout_attributes() );
 
 		// Add root of content to the stack
 		$body = $this->get_body_node();
@@ -652,8 +654,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
 		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || 
-			isset( $attr_spec_list[ $attr_name ] ) ||
-			isset( AMP_Rule_Spec::attrs_allowed_for_styling[ $attr_name ] ) ) {
+			isset( $this->layout_allowed_attributes[ $attr_name] ) ||
+			isset( $attr_spec_list[ $attr_name ] ) ) {
 			return true;
 		} else {
 			foreach ( AMP_Rule_Spec::whitelisted_attr_regex as $whitelisted_attr_regex ) {
@@ -810,20 +812,6 @@ abstract class AMP_Rule_Spec {
 		'meta',
 		'script',
 		'style',
-	);
-
-	// This is here because these attributes are not listed in either the AMP global
-	//	attributes or the attr_spec_list for elements such as 'amp-img' for which
-	//	they are still valid.
-	//
-	// I decided to add them here instead of hard-coding them into amp-wp-build.py
-	//	because I want the generated whitelist to accurately reflect the protoascii
-	//	file it was built from as much as possible.
-	const attrs_allowed_for_styling = array(
-		'height' => array(),
-		'layout' => array(),
-		'sizes' => array(),
-		'width' => array(),
 	);
 
 	// It is mentioned in the documentation in several places that data-* is

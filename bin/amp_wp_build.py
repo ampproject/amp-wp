@@ -89,6 +89,7 @@ def GeneratePHP(out_dir):
 	GenerateHeaderPHP(out)
 	GenerateSpecVersionPHP(out, versions)
 	GenerateAllowedTagsPHP(out, allowed_tags)
+	GenerateLayoutAttributesPHP(out, attr_lists)
 	GenerateGlobalAttributesPHP(out, attr_lists)
 	GenerateFooterPHP(out)
 
@@ -150,6 +151,18 @@ def GenerateAllowedTagsPHP(out, allowed_tags):
 	for (tag, attributes_list) in collections.OrderedDict(sorted_tags).iteritems():
 		GenerateTagPHP(out, tag, attributes_list)
 	out.append('\t);')
+	logging.info('... done')
+
+
+def GenerateLayoutAttributesPHP(out, attr_lists):
+	logging.info('entering ...')
+
+	# Output the attribute list allowed for layouts.
+	out.append('')
+	out.append('\tprivate static $layout_allowed_attrs = array(')
+	GenerateAttributesPHP(out, attr_lists['$AMP_LAYOUT_ATTRS'], 2)
+	out.append('\t);')
+	out.append('')
 	logging.info('... done')
 
 
@@ -275,6 +288,12 @@ def GenerateFooterPHP(out):
 	out.append('\t\treturn self::$globally_allowed_attrs;')
 	out.append('\t}')
 	out.append('')
+
+	out.append('\tpublic static function get_layout_attributes() {')
+	out.append('\t\treturn self::$layout_allowed_attrs;')
+	out.append('\t}')
+	out.append('')
+
 	out.append('}')
 	out.append('')
 

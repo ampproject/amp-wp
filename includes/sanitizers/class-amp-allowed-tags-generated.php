@@ -6100,6 +6100,16 @@ class AMP_Allowed_Tags_Generated {
 		),
 	);
 
+	private static $layout_allowed_attrs = array(
+		'height' => array(),
+		'heights' => array(),
+		'layout' => array(),
+		'sizes' => array(),
+		'width' => array(),
+
+	);
+
+
 	private static $globally_allowed_attrs = array(
 		'accesskey' => array(),
 		'amp-access' => array(),
@@ -6189,6 +6199,10 @@ class AMP_Allowed_Tags_Generated {
 
 	public static function get_allowed_attributes() {
 		return self::$globally_allowed_attrs;
+	}
+
+	public static function get_layout_attributes() {
+		return self::$layout_allowed_attrs;
 	}
 
 }
