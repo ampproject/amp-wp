@@ -847,6 +847,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'func_name' => 'test_attr_spec_rule_blacklisted_value_regex',
 				'expected' => AMP_Rule_Spec::not_applicable,
 			),
+
 		);
 
 
@@ -881,6 +882,93 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			$node = $dom->getElementsByTagName( $test['tag_name'] )->item( 0 );
 
 			$got = $this->invokeMethod( $sanitizer, $test['func_name'], array( $node, $test['attribute_name'], $attr_spec_rule ) );
+
+			if ( $test['expected'] != $got ) {
+				printf( PHP_EOL . '%s failed:' . PHP_EOL, $test_name );
+				printf( $source . PHP_EOL );
+				printf( 'expected: %s' . PHP_EOL, $test['expected'] );
+				printf( 'got: %s' . PHP_EOL, $got );
+				var_dump( $test );
+			}
+
+			$this->assertEquals( $test['expected'], $got );
+		}
+	}
+
+	public function test_is_allowed_attribute() {
+
+		$test_data = array(
+			'test_is_amp_allowed_attribute_whitelisted_regex_pass' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-social-share',
+				'attribute_name' => 'data-whatever-else-you-want',
+				'attribute_value' => 'whatever',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'is_amp_allowed_attribute',
+				'expected' => true,
+			),
+			'test_is_amp_allowed_attribute_global_attribute_pass' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-social-share',
+				'attribute_name' => 'itemid',
+				'attribute_value' => 'whatever',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'is_amp_allowed_attribute',
+				'expected' => true,
+			),
+			'test_is_amp_allowed_attribute_tag_spec_pass' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-social-share',
+				'attribute_name' => 'media',
+				'attribute_value' => 'whatever',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'is_amp_allowed_attribute',
+				'expected' => true,
+			),
+			'test_is_amp_allowed_attribute_disallowed_attr_fail' => array(
+				'rule_spec_index' => 0,
+				'tag_name' => 'amp-social-share',
+				'attribute_name' => 'bad-attr',
+				'attribute_value' => 'whatever',
+				'include_attr' => true,
+				'include_attr_value' => true,
+				'func_name' => 'is_amp_allowed_attribute',
+				'expected' => false,
+			),
+		);
+
+		foreach ( $test_data as $test_name => $test ) {
+			if ( isset( $test['include_attr_value'] ) && $test['include_attr_value'] ) {
+				$attr_value = '="' . $test['attribute_value'] . '"';
+			} else {
+				$attr_value = '';
+			}
+			if ( isset( $test['use_alternate_name'] ) && $test['use_alternate_name'] && $test['include_attr'] ) {
+				$attribute = $test['use_alternate_name'] . $attr_value;
+			} elseif ( isset( $test['include_attr'] ) && $test['include_attr'] ) {
+				$attribute = $test['attribute_name'] . $attr_value;
+			} else {
+				$attribute = '';
+			}
+			$source = '<' . $test['tag_name'] . ' ' . $attribute . '>Some test content</' . $test['tag_name'] . '>';
+
+			$attr_spec_list = $this->allowed_tags[ $test['tag_name'] ][$test['rule_spec_index']]['attr_spec_list'];
+			foreach( $attr_spec_list as $attr_name => $attr_val ) {
+				if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] ) ) {
+					foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] as $attr_alt_name ) {
+						$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
+					}
+				}
+			}
+
+			$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+			$node = $dom->getElementsByTagName( $test['tag_name'] )->item( 0 );
+
+			$got = $this->invokeMethod( $sanitizer, $test['func_name'], array( $test['attribute_name'], $attr_spec_list ) );
 
 			if ( $test['expected'] != $got ) {
 				printf( PHP_EOL . '%s failed:' . PHP_EOL, $test_name );

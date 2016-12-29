@@ -55,13 +55,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	} 
 
 	private function process_node( $node ) {
-		// Don't process text nodes
-		if ( XML_TEXT_NODE == $node->nodeType ) {
+		// Don't process text or comment nodes
+		if ( ( XML_TEXT_NODE == $node->nodeType ) ||
+			( XML_COMMENT_NODE == $node->nodeType ) ) {
 			return;
 		}
 
 		// Remove nodes with non-whitelisted tags.
 		if ( ! $this->is_amp_allowed_tag( $node ) ) {
+
 			// If it's not an allowed tag, replace the node with it's children
 			$this->replace_node_with_children( $node );
 			// Return early since this node no longer exists.
@@ -649,18 +651,29 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Return true if the attribute name is valid for this attr_spec, false otherwise.
 	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		return ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || 
+		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || 
 			isset( $attr_spec_list[ $attr_name ] ) ||
-			isset( AMP_Rule_Spec::tags_allowed_for_styling[ $attr_name ] ) );
+			isset( AMP_Rule_Spec::attrs_allowed_for_styling[ $attr_name ] ) ) {
+			return true;
+		} else {
+			foreach ( AMP_Rule_Spec::whitelisted_attr_regex as $whitelisted_attr_regex ) {
+				if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * Return true if the specified node's name is an AMP allowed tag, false otherwise.
 	 */
 	private function is_amp_allowed_tag( $node ) {
-		// Return true if node is on the allowed tags list or if it is a text node.
+		// Return true if node is on the allowed tags list or if it is a text
+		// or comment node.
 		return ( isset( $this->allowed_tags[ $node->nodeName ] ) || 
-			( XML_TEXT_NODE == $node->nodeType ) );
+			( XML_TEXT_NODE == $node->nodeType ) ||
+			( XML_COMMENT_NODE == $node->nodeType ) );
 	}
 
 	/**
@@ -799,17 +812,24 @@ abstract class AMP_Rule_Spec {
 		'style',
 	);
 
-	// This is here because these tags are not listed in either the AMP global
+	// This is here because these attributes are not listed in either the AMP global
 	//	attributes or the attr_spec_list for elements such as 'amp-img' for which
 	//	they are still valid.
 	//
 	// I decided to add them here instead of hard-coding them into amp-wp-build.py
 	//	because I want the generated whitelist to accurately reflect the protoascii
 	//	file it was built from as much as possible.
-	const tags_allowed_for_styling = array(
+	const attrs_allowed_for_styling = array(
 		'height' => array(),
 		'layout' => array(),
 		'sizes' => array(),
 		'width' => array(),
+	);
+
+	// It is mentioned in the documentation in several places that data-* is
+	// generally allowed, but there is no specific rule for it in the protoascii
+	// file, so I'm including it here.
+	const whitelisted_attr_regex = array(
+		'/^data-/i',
 	);
 }
