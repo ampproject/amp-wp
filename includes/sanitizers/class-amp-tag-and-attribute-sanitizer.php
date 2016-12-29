@@ -8,6 +8,8 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
  *
  * Allowed tags array is generated from this protocol buffer:
  *     https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
+ *     by the python script in amp-wp/bin/amp_wp_build.py. See the comment at the top
+ *     of that file for instructions to generate class-amp-allowed-tags-generated.php. 
  *
  * TODO: AMP Spec items not checked by this sanitizer -
  * - `if_value_regex` - if one attribute value matches, this places a restriction
@@ -476,9 +478,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * whether the attribute (or a specified alternate) exists.
 	 *	
 	 *	Returns:
-	 *		AMP_Rule_Spec::pass - $attr_name is mandatory and it exists
-	 *		AMP_Rule_Spec::fail - $attr_name is mandatory, but doesn't exist
-	 *		AMP_Rule_Spec::not_applicable - $attr_name is not mandatory
+	 *		- AMP_Rule_Spec::pass - $attr_name is mandatory and it exists
+	 *		- AMP_Rule_Spec::fail - $attr_name is mandatory, but doesn't exist
+	 *		- AMP_Rule_Spec::not_applicable - $attr_name is not mandatory
 	 */
 	private function test_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::mandatory] ) &&
@@ -502,6 +504,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a value rule, and whether
+	 * the attribute matches the value.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) {
 		// check 'value' - case sensitive
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value] ) && $node->hasAttribute( $attr_name ) ) {
@@ -514,6 +526,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a value rule, and whether
+	 * or not the value matches the rule without respect to case.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) {
 		// check 'value_casei' - case insensitive
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_casei] ) && $node->hasAttribute( $attr_name ) ) {
@@ -528,13 +550,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a value_regex rule, and
+	 * whether or not the value matches the rule.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) {
 		// check 'value_regex' - case sensitive regex match
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[AMP_Rule_Spec::value_regex];
 			// Note: I added in the '^' and '$' to the regex pattern even though
 			//	they weren't in the AMP spec. But leaving them out would allow
-			//	both '_blank' and 'yyy_blankzzz' to be matched  by a regex spec of
+			//	both '_blank' and 'yyy_blankzzz' to be matched by a regex rule of
 			//	'(_blank|_self|_top)'. The AMP JS validator only accepts '_blank',
 			//	so I'm leaving it this way for now.
 			if ( preg_match('@^' . $rule_value . '$@u', $node->getAttribute( $attr_name )) ) {
@@ -546,6 +578,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a value_regex_casei rule,
+	 * and whether or not the value matches the rule without respect to case.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) {
 		// check 'value_regex_casei' - case insensitive regex match
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::value_regex_casei] ) && $node->hasAttribute( $attr_name ) ) {
@@ -560,6 +602,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a protocol rule, and
+	 * whether or not the value matches the rule.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] )  && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
@@ -586,6 +638,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a disallowed_relative rule,
+	 * and whether or not the value matches the rule.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) &&
 			 ( false == $attr_spec_rule[AMP_Rule_Spec::allow_relative] ) &&
@@ -605,6 +667,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a disallowed_relative rule,
+	 * and whether or not the value matches the rule.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) &&
 			( false == $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) &&
@@ -618,6 +690,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a disallowed_domain rule,
+	 * and whether or not the value matches the rule.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) &&
 			$node->hasAttribute( $attr_name ) ) {
@@ -636,6 +718,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		return AMP_Rule_Spec::not_applicable;
 	}
 
+	/**
+	 * Checks to see if the given attribute exists, has a blacklisted_value_regex rule,
+	 * and whether or not the value matches the rule.
+	 *
+	 * Returns:
+	 * 	- AMP_Rule_Spec::pass - $attr_name has a value that matches the rule.
+	 * 	- AMP_Rule_Spec::fail - $attr_name has a value that does *not* match rule.
+	 * 	- AMP_Rule_Spec::not_applicable - $attr_name does not exist or there
+	 * 		is no rule for this attribute.
+	 */
 	private function test_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::blacklisted_value_regex] ) &&
 			$node->hasAttribute( $attr_name ) ) {
@@ -825,7 +917,7 @@ abstract class AMP_Rule_Spec {
 	// file, so I'm including it here.
 	const whitelisted_attr_regex = array(
 		'@^data-[a-zA-Z][\\w:.-]*$@uis',
-		'(update|item|pagination)',	// allowed for reference points - not perfect
+		'(update|item|pagination)',	// allowed for live reference points
 	);
 
 	const allowed_experimental_tags_with_no_protoascii_file = array(
