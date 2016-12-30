@@ -33,7 +33,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
 		$this->layout_allowed_attributes = apply_filters( 'amp_layout_allowed_attributes', AMP_Allowed_Tags_Generated::get_layout_attributes() );
 
-		foreach( AMP_Rule_Spec::additional_allowed_tags as $tag_name => $tag_rule_spec ) {
+		foreach( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
 			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
 		}
 
@@ -758,7 +758,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			isset( $attr_spec_list[ $attr_name ] ) ) {
 			return true;
 		} else {
-			foreach ( AMP_Rule_Spec::whitelisted_attr_regex as $whitelisted_attr_regex ) {
+			foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
 				if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
 					return true;
 				}
@@ -906,7 +906,7 @@ abstract class AMP_Rule_Spec {
 	//	is invalid.
 	//	
 	// TODO: There are other nodes that should probably be listed here as well.
-	const node_types_to_remove_if_invalid = array(
+	static $node_types_to_remove_if_invalid = array(
 		'form',
 		'input',
 		'link',
@@ -918,12 +918,12 @@ abstract class AMP_Rule_Spec {
 	// It is mentioned in the documentation in several places that data-* is
 	// generally allowed, but there is no specific rule for it in the protoascii
 	// file, so I'm including it here.
-	const whitelisted_attr_regex = array(
+	static $whitelisted_attr_regex = array(
 		'@^data-[a-zA-Z][\\w:.-]*$@uis',
 		'(update|item|pagination)',	// allowed for live reference points
 	);
 
-	const additional_allowed_tags = array(
+	static $additional_allowed_tags = array(
 
 		// this is an experimental tag with no protoascii
 		'amp-share-tracking' => array(
