@@ -14,6 +14,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				''
 			),
 
+				'a-test' => array(
+				'<a on="tap:see-image-lightbox" role="button" class="button button-secondary play" tabindex="0">Show Image</a>',
+				'<a on="tap:see-image-lightbox" role="button" class="button button-secondary play" tabindex="0">Show Image</a>'
+			),
+
+			'a4a' => array(
+				'<amp-ad width="300" height="400" type="fake" data-use-a4a="true" data-vars-analytics-var="bar" src="fake_amp.json"><div placeholder=""></div><div fallback=""></div></amp-ad>',
+				'<amp-ad width="300" height="400" type="fake" data-use-a4a="true" data-vars-analytics-var="bar" src="fake_amp.json"><div placeholder=""></div><div fallback=""></div></amp-ad>',
+			),
+
+			'ads' => array(
+				'<amp-ad width="300" height="250" type="a9" data-aax_size="300x250" data-aax_pubname="test123" data-aax_src="302"><div placeholder=""></div><div fallback=""></div></amp-ad>',
+				'<amp-ad width="300" height="250" type="a9" data-aax_size="300x250" data-aax_pubname="test123" data-aax_src="302"><div placeholder=""></div><div fallback=""></div></amp-ad>',
+			),
+
+			'adsense' => array(
+				'<amp-ad width="300" height="250" type="adsense" data-ad-client="ca-pub-2005682797531342" data-ad-slot="7046626912"><div placeholder=""></div><div fallback=""></div></amp-ad>',
+				'<amp-ad width="300" height="250" type="adsense" data-ad-client="ca-pub-2005682797531342" data-ad-slot="7046626912"><div placeholder=""></div><div fallback=""></div></amp-ad>',
+			),
+
+			'amp-user-notification' => array(
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP" data-dismiss-href="https://example.com/api/echo/post">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP" data-dismiss-href="https://example.com/api/echo/post">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+			),
+
+			'amp-apester-media' => array(
+				'<amp-apester-media height="444" data-apester-media-id="57a336dba187a2ca3005e826" layout="fixed-height"></amp-apester-media>',
+				'<amp-apester-media height="444" data-apester-media-id="57a336dba187a2ca3005e826" layout="fixed-height"></amp-apester-media>',
+			),
+
 			'empty_element' => array(
 				'<br/>',
 				'<br/>'
@@ -197,20 +227,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			// Test Cases from test-amp-blacklist-sanitizer.php
 
-			'disallowed_tag_with_innertext' => array(
-				'<script>alert("")</script>',
-				''
-			),
+			// 'disallowed_tag_with_innertext' => array(
+			// 	'<script>alert("")</script>',
+			// 	''
+			// ),
 
-			'multiple_disallowed_tags_only' => array(
-				'<clearly_not_allowed /><script>alert("")</script><style>body{ color: red; }</style>',
-				''
-			),
+			// 'multiple_disallowed_tags_only' => array(
+			// 	'<clearly_not_allowed /><script>alert("")</script><style>body{ color: red; }</style>',
+			// 	''
+			// ),
 
-			'multiple_disallowed_tags_only_in_child' => array(
-				'<p><clearly_not_allowed /><script>alert("")</script><style>body{ color: red; }</style></p>',
-				''
-			),
+			// 'multiple_disallowed_tags_only_in_child' => array(
+			// 	'<p><clearly_not_allowed /><script>alert("")</script><style>body{ color: red; }</style></p>',
+			// 	''
+			// ),
 
 			'allowed_tag_only' => array(
 				'<p>Text</p><img src="/path/to/file.jpg" />',
@@ -248,7 +278,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'mixed_tags' => array(
-				'<input type="text"/><p>Text</p><script>alert("")</script><style>body{ color: red; }</style>',
+				'<input type="text"/><p>Text</p><style>body{ color: red; }</style>',
 				'<input type="text"/><p>Text</p>'
 			),
 
