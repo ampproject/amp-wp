@@ -23,8 +23,8 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	protected $allowed_tags;
-	protected $globally_allowed_attrs;
-	protected $layout_allowed_attrs;
+	protected $globally_allowed_attributes;
+	protected $layout_allowed_attributes;
 	private $stack = array();
 
 	public function sanitize() {
@@ -754,7 +754,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
 		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || 
-			isset( $this->layout_allowed_attributes[ $attr_name] ) ||
+			isset( $this->layout_allowed_attributes[ $attr_name ] ) ||
 			isset( $attr_spec_list[ $attr_name ] ) ) {
 			return true;
 		} else {
