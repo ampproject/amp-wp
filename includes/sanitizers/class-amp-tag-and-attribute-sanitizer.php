@@ -33,6 +33,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
 		$this->layout_allowed_attributes = apply_filters( 'amp_layout_allowed_attributes', AMP_Allowed_Tags_Generated::get_layout_attributes() );
 
+		foreach( AMP_Rule_Spec::additional_allowed_tags as $tag_name => $tag_rule_spec ) {
+			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
+		}
+
 		// Add root of content to the stack
 		$body = $this->get_body_node();
 		$this->stack[] = $body;
@@ -61,7 +65,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_node( $node ) {
 		// Don't process text or comment nodes
 		if ( ( XML_TEXT_NODE == $node->nodeType ) ||
-			( XML_COMMENT_NODE == $node->nodeType ) ) {
+			( XML_COMMENT_NODE == $node->nodeType ) ||
+			( XML_CDATA_SECTION_NODE == $node->nodeType ) ) {
 			return;
 		}
 
@@ -79,8 +84,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$rule_spec_list_to_validate = array();
 		if ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
 			$rule_spec_list = $this->allowed_tags[ $node->nodeName ];
-		} elseif ( isset( AMP_Rule_Spec::allowed_experimental_tags_with_no_protoascii_file[ $node->nodeName ] ) ) {
-			$rule_spec_list = AMP_Rule_Spec::allowed_experimental_tags_with_no_protoascii_file[ $node->nodeName ];
 		}
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
 			if ( $this->validate_tag_spec_for_node( $node, $rule_spec[AMP_Rule_Spec::tag_spec] ) ) {
@@ -772,8 +775,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// or comment node.
 		return ( ( XML_TEXT_NODE == $node->nodeType ) ||
 			isset( $this->allowed_tags[ $node->nodeName ] ) || 
-			( XML_COMMENT_NODE == $node->nodeType ) || 
-			( isset( AMP_Rule_Spec::allowed_experimental_tags_with_no_protoascii_file[ $node->nodeName ] ) ) );
+			( XML_COMMENT_NODE == $node->nodeType ) ||
+			( XML_CDATA_SECTION_NODE == $node->nodeType ) );
 	}
 
 	/**
@@ -908,7 +911,7 @@ abstract class AMP_Rule_Spec {
 		'input',
 		'link',
 		'meta',
-		'script',
+		// 'script',
 		'style',
 	);
 
@@ -920,13 +923,32 @@ abstract class AMP_Rule_Spec {
 		'(update|item|pagination)',	// allowed for live reference points
 	);
 
-	const allowed_experimental_tags_with_no_protoascii_file = array(
-		'amp-share-tracking' => array(
-			array(
-				'attr_spec_list' => array(),
-				'tag_spec' => array(),
+	const additional_allowed_tags = array(
 
+		// this is an experimental tag with no protoascii
+		'amp-share-tracking' => array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(),
+		),
+
+		// this is needed for some tags such as analytics
+		'script' => array(
+			'attr_spec_list' => array(
+				'type' => array(
+					'mandatory' => true,
+					'value_casei' => 'text/javascript',
+				),
 			),
+			'tag_spec' => array(),
+		),
+		'script' => array(
+			'attr_spec_list' => array(
+				'type' => array(
+					'mandatory' => true,
+					'value_casei' => 'application/json',
+				),
+			),
+			'tag_spec' => array(),
 		),
 	);
 }
