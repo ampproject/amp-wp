@@ -27,11 +27,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $layout_allowed_attributes;
 	private $stack = array();
 
-	public function sanitize() {
-		// Get whitelists.
+	private function get_whitelist_data() {
+			// Get whitelists.
 		$this->allowed_tags = apply_filters( 'amp_allowed_tags', AMP_Allowed_Tags_Generated::get_allowed_tags() );
 		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
 		$this->layout_allowed_attributes = apply_filters( 'amp_layout_allowed_attributes', AMP_Allowed_Tags_Generated::get_layout_attributes() );
+	}
+
+	public function sanitize() {
+		$this->get_whitelist_data();
 
 		foreach( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
 			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
