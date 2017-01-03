@@ -62,7 +62,7 @@ function amp_init() {
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	// Redirect the old url of amp page to the updated url.
-	add_filter( 'old_slug_redirect_url', 'amp_redirect_to_new_url' );
+	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
@@ -169,7 +169,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
  *
  * @return string $link URL to be redirected.
  */
-function amp_redirect_to_new_url( $link ) {
+function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() ) {
 		$link = trailingslashit( $link ) . AMP_QUERY_VAR;
