@@ -8,6 +8,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  */
 function amp_init_customizer() {
 	require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
+	require_once( AMP__DIR__ . '/includes/admin/class-amp-cache-utilities.php' );
 
 	// Drop core panels (menus, widgets) from the AMP customizer
 	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
@@ -20,6 +21,9 @@ function amp_init_customizer() {
 
 	// Add a link to the Customizer
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
+
+	// Hook the functions to update the AMP cache on post update/deletion.
+	AMP_Cache_Utilities::amp_add_cache_update_actions();
 }
 
 /**
