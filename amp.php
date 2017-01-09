@@ -172,7 +172,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
 function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() ) {
-		$link = trailingslashit( $link ) . AMP_QUERY_VAR;
+		$link = trailingslashit( trailingslashit( $link ) . AMP_QUERY_VAR );
 	}
 
 	return $link;
