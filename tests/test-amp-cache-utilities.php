@@ -94,7 +94,7 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 					'content_type' => 'c',
 					'scheme' => null,
 				),
-				false,
+				'/c/example.com/path/to/resource.ext',
 			),
 			'no_host_scheme_http_fail' => array(
 				array(
@@ -167,12 +167,14 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 	 * @dataProvider get_amp_cache_path_for_url_data
 	 * @group amp-cache-path-test	
 	 */
-	public function test_get_amp_cache_path_for_url( $data, $expected_ache_path ) {
+	public function test_get_amp_cache_path_for_url( $data, $expected_cache_path ) {
 		$cache_path = AMP_Cache_Utilities::get_amp_cache_path_for_url( $data['url'], $data['content_type'] , $data['scheme'] );
-		$this->assertEquals( $cache_path, $expected_ache_path );
+		$this->assertEquals( $cache_path, $expected_cache_path );
 	}
 
 
+	// These tests are mostly meaningless when `blocking` is set to
+	// `false` for `wp_remote_get()` in `do_amp_update_ping()`.
 	public function get_do_amp_update_ping_data() {
 		return array(
 			'post_success' => array(
@@ -182,26 +184,12 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 				),
 				true,
 			),
-			'tag_fail' => array(
-				array(
-					'factory_type' => 'tag',
-					'http_response_code' => 204,
-				),
-				false,
-			),
-			'user_fail' => array(
-				array(
-					'factory_type' => 'user',
-					'http_response_code' => 204,
-				),
-				false,
-			),
 			'post_fail' => array(
 				array(
 					'factory_type' => 'post',
 					'http_response_code' => 404,
 				),
-				false,
+				true,
 			),
 		);
 	}
@@ -214,7 +202,7 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', array( $this, 'mock_update_ping_request' ), 10, 3 );
 		$post_id = $this->factory->{$data['factory_type']}->create();
 		$this->http_response_code = $data['http_response_code'];
-		$result = AMP_Cache_Utilities::do_amp_update_ping( $post_id );
+		$result = AMP_Cache_Utilities::do_amp_update_ping_for_post( $post_id );
 		$this->assertEquals( $expected, $result );
 	}
 
@@ -277,13 +265,13 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 				),
 				false,
 			),
-			'protocol_relative_scheme_fail' => array(
+			'protocol_relative_scheme_success' => array(
 				array(
 					'url' => '//example.com/path/to/resource',
 					'content_type' => 'c',
 					'scheme' => null,
 				),
-				false,
+				'https://cdn.ampproject.org/update-ping/c/example.com/path/to/resource',
 			),
 			'no_protocol_scheme_fail' => array(
 				array(
@@ -371,7 +359,7 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 					'content_type' => 'c',
 					'scheme' => null,
 				),
-				false,
+				'https://cdn.ampproject.org/c/example.com/path/to/resource',
 			),
 			'no_protocol_scheme_fail' => array(
 				array(
@@ -411,7 +399,7 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 					'post_status_before' => 'publish',
 					'post_status_after' => 'publish',
 				),
-				true,
+				false,
 			),
 			'post_unpublished' => array(
 				array(
@@ -427,7 +415,7 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 					'post_status_before' => 'draft',
 					'post_status_after' => 'publish',
 				),
-				true,
+				false,
 			),
 			'post_updated_not_published' => array(
 				array(
@@ -445,7 +433,9 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 	 * @group post-updated-test	
 	 */
 	public function test_post_updated( $data, $expected ) {
-		AMP_Cache_Utilities::amp_add_cache_update_actions();
+		$amp_cachce_utilities = new AMP_Cache_Utilities;
+		$amp_cachce_utilities->amp_add_cache_update_actions();
+
 		$post = $this->factory->{$data['factory_type']}->create_and_get();
 		$post->post_status = $data['post_status_before'];
 		wp_update_post( $post );
@@ -453,7 +443,7 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 		$post->post_status = $data['post_status_after'];
 		wp_update_post( $post );
 		$post_after = clone $post;
-		$got = AMP_Cache_Utilities::post_updated( $post->ID, $post_after, $post_before );
+		$got = $amp_cachce_utilities->post_updated( $post->ID, $post_after, $post_before );
 
 		$this->assertEquals( $expected, $got );
 	}
@@ -467,13 +457,6 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 					'content_type' => 'c',
 				),
 				true,
-			),
-			'bad_post_type_fail' => array(
-				array(
-					'factory_type' => 'user',
-					'content_type' => 'c',
-				),
-				false,
 			),
 		);
 	}
