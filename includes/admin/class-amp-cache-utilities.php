@@ -51,6 +51,11 @@ abstract class AMP_Cache_Utilities {
 	 * need to update the AMP Cache when a post is updated or about to be deleted.
 	 */
 	public static function amp_add_cache_update_actions() {
+		// Skip AMP Cache updates when importing.
+		if ( defined( 'WP_IMPORTING' ) && ( true === WP_IMPORTING ) ) {
+			return;
+		}
+
 		// Hooking this to the post_updated action so this will fire any time a post
 		// is updated in any way (including status transitions).
 		add_action( 'post_updated',  array( 'AMP_Cache_Utilities', 'post_updated' ), 10, 3 );
