@@ -225,10 +225,11 @@ class AMP_Cache_Utilities {
 	 */
 	public static function get_amp_cache_url_for_post( $post ) {
 		$amp_cache_resource_path = self::get_amp_cache_path_for_post( $post );
-		if ( $amp_cache_resource_path ) {
-			return self::$amp_cache_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
+		if ( ! $amp_cache_resource_path ) {
+			return false;
 		}
-		return false;
+		
+		return self::$amp_cache_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
 	}
 
 	/**
@@ -242,10 +243,11 @@ class AMP_Cache_Utilities {
 	 */
 	public static function get_amp_cache_update_url_for_post( $post ) {
 		$amp_cache_resource_path = self::get_amp_cache_path_for_post( $post );
-		if ( $amp_cache_resource_path ) {
-			return self::$amp_cache_update_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
+		if ( ! $amp_cache_resource_path ) {
+			return false;
 		}
-		return false;
+		
+		return self::$amp_cache_update_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
 	}
 
 	/**
@@ -259,10 +261,11 @@ class AMP_Cache_Utilities {
 	 */
 	public static function get_amp_cache_url_for_resource( $url, $content_type, $scheme = null ) {
 		$amp_cache_resource_path = self::get_amp_cache_path_for_url( $url, $content_type );
-		if ( $amp_cache_resource_path ) {
-			return self::$amp_cache_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
+		if ( ! $amp_cache_resource_path ) {
+			return false;
 		}
-		return false;
+		
+		return self::$amp_cache_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
 	}
 
 	/**
@@ -276,10 +279,11 @@ class AMP_Cache_Utilities {
 	 */
 	public static function get_amp_cache_update_url_for_resource( $url, $content_type, $scheme = null ) {
 		$amp_cache_resource_path = self::get_amp_cache_path_for_url( $url, $content_type );
-		if ( $amp_cache_resource_path ) {
-			return self::$amp_cache_update_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
+		if ( ! $amp_cache_resource_path ) {
+			return false;
 		}
-		return false;
+
+		return self::$amp_cache_update_url_base . '/' . ltrim( $amp_cache_resource_path, '/' );
 	}
 
 	/**
