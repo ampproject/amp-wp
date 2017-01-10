@@ -1,5 +1,7 @@
 <?php
 
+require_once( AMP__DIR__ . '/includes/admin/class-amp-cache-utilities.php' );
+
 class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 
 	private $http_response_code = 0;

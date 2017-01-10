@@ -177,3 +177,13 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 
 	return $link;
 }
+
+/**
+ * Hook AMP Cache update functions on admin pages.
+ */
+function amp_cache_update_init() {
+	require_once( AMP__DIR__ . '/includes/admin/class-amp-cache-utilities.php' );
+	AMP_Cache_Utilities::amp_add_cache_update_actions();
+}
+add_action( 'admin_init', 'amp_cache_update_init' );
+
