@@ -476,8 +476,10 @@ class AMP_Cache_Utilities_Test extends WP_UnitTestCase {
 
 			if ( 'c' == $data['content_type'] ) {
 				$expected = preg_replace('@(http[s]{0,1}\:\/\/)@ui', 'https://cdn.ampproject.org/c/', $permalink);
+				$expected .= '&amp=1';
 			} elseif ( 'i' == $data['content_type'] ) {
 				$expected = preg_replace('@(http[s]{0,1}\:\/\/)@ui', 'https://cdn.ampproject.org/i/', $permalink);
+				$expected .= '&amp=1';
 			} else {
 				$expected = false;
 			}

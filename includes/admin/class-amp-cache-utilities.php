@@ -55,12 +55,11 @@ class AMP_Cache_Utilities {
 
 	/**
 	 * Called from the 'post_updated' hook when a post is updated. This hook is also fired when
-	 * a post's status changes. If the post is currently published or was not published and now is, 
-	 * then we need to update the cache.
+	 * a post's status changes. If the post is "unpublished", then we need to update the cache.
 	 * 
 	 * This function will return true if the cache was updated successfully. It returns
 	 * false if the cache did not need to be updated *or* if the update failed for any
-	 * reason.
+	 * reason including if $post does not support AMP.
 	 * 
 	 * @param  int/WP_Post 	$post The post that was being updated
 	 * @param  WP_Post 		$post_after  A copy of the post after the update.
@@ -109,8 +108,8 @@ class AMP_Cache_Utilities {
 
 	/**
 	 * Called form the 'before_delete_post' hook when a post is about to be deleted. If the
-	 * post is currentrly published, then we will add this post's ping URL to a list of 
-	 * urls to publish once they are actually deleted.
+	 * post is currently published, then we will add this post's ping URL to a list of 
+	 * urls to publish once they are actually deleted. $post must support AMP.
 	 * 
 	 * @param  int/WP_Post 	$post The post that was being deleted
 	 * @return bool         true if this post was added to the $deferred_updates list, false otherwise.
@@ -132,9 +131,9 @@ class AMP_Cache_Utilities {
 			return false;
 		}
 
-		$permalink = get_permalink( $post );
-		if ( $permalink ) {
-			$this->deferred_permalinks_to_update[ $post->ID ] = get_permalink( $post );
+		$amp_permalink = amp_get_permalink( $post->ID );
+		if ( $amp_permalink ) {
+			$this->deferred_permalinks_to_update[ $post->ID ] = $amp_permalink;
 			add_action( 'deleted_post', array( $this, 'do_deferred_update' ) );
 		}
 	}
@@ -149,7 +148,7 @@ class AMP_Cache_Utilities {
 	 */
 	public function do_deferred_update( $post_id ) {
 		if ( isset( $this->deferred_permalinks_to_update[ $post_id ] ) ) {
-			self::do_amp_update_ping_for_permalink( $this->deferred_permalinks_to_update[ $post_id ] );
+			self::do_amp_update_ping_for_amp_permalink( $this->deferred_permalinks_to_update[ $post_id ] );
 			unset( $this->deferred_permalinks_to_update[ $post_id ] );
 		}
 	}
@@ -181,19 +180,19 @@ class AMP_Cache_Utilities {
 	}
 
 	/**
-	 * Given a permalink URL, this function will calculate the AMP
+	 * Given an AMP permalink, this function will calculate the AMP
 	 * cache update URL and ping it.
 	 * 
 	 * This function will return true if the cache was updated successfully. It returns
 	 * false if the update failed for any reason.
 	 *
-	 * Note: This function assumes that $post supports AMP.
+	 * Note: This function assumes that $amp_permalink is an AMP endpoint.
 	 * 
 	 * @param  int/WP_Post	$post 	The post to update in the AMP cache.
 	 * @return bool       			true if the cache was updated, false otherwise.
 	 */
-	public static function do_amp_update_ping_for_permalink( $permalink ) {
-		$update_ping_url = self::get_amp_cache_update_url_for_resource( $permalink, 'c' );
+	public static function do_amp_update_ping_for_amp_permalink( $amp_permalink ) {
+		$update_ping_url = self::get_amp_cache_update_url_for_resource( $amp_permalink, 'c' );
 		if ( ! $update_ping_url ) {
 			return false;
 		}
@@ -201,7 +200,10 @@ class AMP_Cache_Utilities {
 	}
 
 	/**
-	 * Perform an HTTP GET on the URL.
+	 * Perform a non-blocking HTTP GET on the URL with a timeout of 1s.
+	 *
+	 * Note: This function assumes that $url is an AMP endpoint.
+	 * 
 	 * @param  string $url 	The URL to ping.
 	 * @return bool     	true if the wp_remote_get doesn't return an error
 	 */
@@ -215,10 +217,12 @@ class AMP_Cache_Utilities {
 	}
 
 	/**
-	 * Given a post_id or WP_Post object, calculste the AMP cache URL based on
+	 * Given a post_id or WP_Post object, calculate the AMP cache URL based on
 	 * the post's permalink.
 	 *
 	 * See: https://developers.google.com/amp/cache/overview
+	 *
+	 * Note: This function assumes that $post supports AMP.
 	 * 
 	 * @param  int/WP_Post	$post 	The post to get rhe AMP cache url for.
 	 * @return string/bool       	The AMP cache URL on success, false on failure.
@@ -238,6 +242,8 @@ class AMP_Cache_Utilities {
 	 *
 	 * See: https://developers.google.com/amp/cache/update-ping
 	 *
+	 * Note: This function assumes that $post supports AMP.
+	 *
 	 * @param  int/WP_Post	$post 	The post to get rhe AMP cache update url for.
 	 * @return string/bool       	The AMP cache URL on success, false on failure.
 	 */
@@ -252,6 +258,8 @@ class AMP_Cache_Utilities {
 
 	/**
 	 * Given any URL and content type, calculate the AMP cache URL for this resource.
+	 *
+	 * Note: This function assumes that $url is an AMP endpoint.
 	 * 
 	 * @param  string 	$url     		The url to calculate the AMP cache URL from.
 	 * @param  string 	$content_type 	Currently only supports 'c' for posts and 'i' for images.
@@ -270,6 +278,8 @@ class AMP_Cache_Utilities {
 
 	/**
 	 * Given any URL and content type, calculate the AMP cache update URL for this resource.
+	 *
+	 * Note: This function assumes that $url is an AMP endpoint.
 	 * 
 	 * @param  string 	$url     		The url to calculate the AMP cache update URL from.
 	 * @param  string 	$content_type 	Currently only supports 'c' for posts and 'i' for images.
@@ -287,14 +297,12 @@ class AMP_Cache_Utilities {
 	}
 
 	/**
-	 * Given a post_id or WP_Post onbject, calculate the AMP cache path part (the part after 
+	 * Given a post_id or WP_Post object, calculate the AMP cache path part (the part after 
 	 * https://cdn.ampproject.org) for this post.
+	 *
+	 * Note: This function assumes that $post supports AMP.
 	 * 
 	 * @param  int/WP_Post	$post 			The post to get rhe AMP cache path for.
-	 * @param  string 		$content_type 	Currently only supports 'c' for posts and 'i' for images.
-	 *                                 		Optional, if provided, this overrides the actual content
-	 *                                 		type of the post. If null, the content type is determined
-	 *                                 		by post_type.
 	 * @param  string 	$scheme       		Optional. 'http' or 'https' If provided, this overrides the
 	 *                                		scheme in the URL. If null, scheme is taken from the URL.
 	 * @return string/bool              	The AMP cache path part on success, false on failure.
@@ -311,22 +319,24 @@ class AMP_Cache_Utilities {
 		}
 
 		// If permalink couldn't be retrieved, return failure.
-		$permalink = get_permalink( $post );
-		if ( false === $permalink ) {
+		$amp_permalink = amp_get_permalink( $post->ID );
+		if ( false === $amp_permalink ) {
 			return false;
 		}
 
 		// assume that all supported posts types are 'c' content_type and
 		// return the url
-		return self::get_amp_cache_path_for_url( $permalink, 'c', $scheme );
+		return self::get_amp_cache_path_for_url( $amp_permalink, 'c', $scheme );
 	}
 
 	/**
 	 * Given a URL and content_type, calculate the AMP cache path part (the part after
 	 * https://cdn.ampproject.org) for this url/content_type
+	 *
+	 * Note: This function assumes that $url is an AMP endpoint.
 	 * .
-	 * @param  string 	$url     		The url to calculate the AMP cache path from.
-	 * @param  string 	$content_type 	Currently only supports 'c' for posts and 'i' for images.
+	 * @param  string 	$url     		The url to calculate the AMP cache path from.'
+ 	 * @param  string 	$content_type 	'c' for content (posts), '1' for images, 'r' for resources (ex. fonts).
 	 * @param  string 	$scheme       	Optional. 'http' or 'https' If provided, this overrides the
 	 *                                	scheme in the URL. If null, scheme is taken from the URL.
 	 * @return string/bool              The AMP cache path part on success, false on failure.
