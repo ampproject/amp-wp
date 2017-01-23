@@ -163,6 +163,16 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 				'<span>Red</span>&amp;<span>Orange</span>'
 			),
 
+			'a_with_mustache_value_for_href' => array(
+				'<template type="amp-mustache"><a href="{{url}}">clickety clack</a></template>',
+				'<template type="amp-mustache"><a href="{{url}}">clickety clack</a></template>',
+			),
+
+			'a_with_mustache_value_for_href_not_in_template' => array(
+				'<a href="{{url}}">clickety clack</a>',
+				'clickety clack',
+			),
+
 			'h1_with_size' => array(
 				'<h1 size="1">Headline</h1>',
 				'<h1>Headline</h1>',
