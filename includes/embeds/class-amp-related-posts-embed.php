@@ -1,6 +1,13 @@
 <?php
 
+/**
+ * Add related posts to AMP posts.
+ */
 class AMP_Related_Posts_Embed_Handler extends AMP_Base_Embed_Handler {
+
+	/**
+	 * Remove Jetpack's native content filter and add our own.
+	 */
 	public function register_embed() {
 		if ( class_exists( 'Jetpack_RelatedPosts' ) && method_exists( 'Jetpack_RelatedPosts', 'init' ) ) {
 			// If we have an existing callback we are overriding, remove it.
@@ -15,6 +22,9 @@ class AMP_Related_Posts_Embed_Handler extends AMP_Base_Embed_Handler {
 		do_action( 'amp_related_posts_register_embed' );
 	}
 
+	/**
+	 * Remove our own filter and re-register Jetpack's filter.
+	 */
 	public function unregister_embed() {
 		if ( class_exists( 'Jetpack_RelatedPosts' ) && method_exists( 'Jetpack_RelatedPosts', 'init' ) ) {
 			// Let's clean up after ourselves, just in case.
@@ -26,6 +36,11 @@ class AMP_Related_Posts_Embed_Handler extends AMP_Base_Embed_Handler {
 		do_action( 'amp_related_posts_unregister_embed' );
 	}
 
+	/**
+	 * Get scripts that need to be added for the related posts template to work.
+	 * 
+	 * @return array The array of scripts that should be added.
+	 */
 	public function get_scripts() {
 		$scripts = array(
 			'amp-mustache' => 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
@@ -34,6 +49,11 @@ class AMP_Related_Posts_Embed_Handler extends AMP_Base_Embed_Handler {
 		return apply_filters( 'amp_related_posts_scripts', $scripts );
 	}
 
+	/**
+	 * Get any options that might be needed to render the related posts.
+	 * 
+	 * @return array The array of options.
+	 */
   	private function get_options() {
   		$defaults = array(
   			'size' => 3,
@@ -55,6 +75,11 @@ class AMP_Related_Posts_Embed_Handler extends AMP_Base_Embed_Handler {
 		return apply_filters( 'amp_related_posts_options', $options );
 	}
 
+	/**
+	 * Custom styles for use with the related posts template included below.
+	 * 
+	 * @param AMP_Post_Template $amp_template The instance of the template in use.
+	 */
 	public function add_related_posts_styles( $amp_template ) {
 
 		$amp_related_posts_styles = <<<EOT
@@ -119,29 +144,56 @@ class AMP_Related_Posts_Embed_Handler extends AMP_Base_Embed_Handler {
 		opacity: 0.6
 	}
 EOT;
-		echo apply_filters( 'amp_related_posts_styles', $amp_related_posts_styles );
+
+		echo apply_filters( 'amp_related_posts_styles', $amp_related_posts_styles, $amp_template );
 	}
 
+	/**
+	 * Get the url to retrieve the JSON for related posts.
+	 *
+	 * Note: According to the AMP spec, the list data returned from this endpoint
+	 * must follow the 'items' key.
+	 * 
+	 * For more information see: https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md
+	 * 
+	 * @return string The url of the API endpoint to retreieve related posts.
+	 */
+	public function get_related_posts_url() {
+		$permalink = get_permalink();
+		$parsed_permalink = wp_parse_url( $permalink );
+		$related_posts_url = false;
+		if ( 'http' == $parsed_permalink['scheme'] ) {
+			$related_posts_url = '//';
+		} elseif ( 'https' == $parsed_permalink['scheme'] ) {
+			$related_posts_url = 'https://';
+		} else {
+			return false;
+		}
+		$related_posts_url .= $parsed_permalink['host'];
+		if ( ! empty( $parsed_permalink['port'] ) ) {
+			$related_posts_url .= ':' . $parsed_permalink['port'];
+		}
+		if ( ! empty( $parsed_permalink['path'] ) ) {
+			$related_posts_url .= $parsed_permalink['path'];
+		}
+		if ( ! empty( $parsed_permalink['query'] ) ) {
+			$related_posts_url .= '?' . $parsed_permalink['query'] . '&relatedposts=1';
+		} else {
+			$related_posts_url .= '?relatedposts=1';
+		}
+
+		return apply_filters( 'amp_related_posts_url', $related_posts_url );
+	}
+
+	/**
+	 * Add related posts to the end of the post content.
+	 * 
+	 * @param string $content The post content.
+	 */
 	public function add_related_posts( $content ) {
 
 		$options = $this->get_options();	
-
-		$permalink = get_permalink();
-		$parsed_permalink = wp_parse_url( $permalink );
-		if ( 'https' != $parsed_permalink['scheme'] ) {
-			$related_posts_url = '//' . $parsed_permalink['host'];
-			if ( ! empty( $parsed_permalink['port'] ) ) {
-				$related_posts_url .= ':' . $parsed_permalink['port'];
-			}
-			if ( ! empty( $parsed_permalink['path'] ) ) {
-				$related_posts_url .= $parsed_permalink['path'];
-			}
-			if ( ! empty( $parsed_permalink['query'] ) ) {
-				$related_posts_url .= '?' . $parsed_permalink['query'] . '&relatedposts=1';
-			} else {
-				$related_posts_url .= '?relatedposts=1';
-			}
-		}
+		$related_posts_url = $this->get_related_posts_url();
 
 		$related_posts_wrap_begin = <<<EOT
 <div class="amp-related-posts">
@@ -206,33 +258,32 @@ EOT;
 EOT;
 
 		$related_posts = apply_filters( 'amp_related_posts_template_wrap_begin', $related_posts_wrap_begin );
-		if ( true == $options['show_headline'] ) {
+		if ( isset( $options['show_headline'] ) && ( true == $options['show_headline'] ) ) {
 			$related_posts .= apply_filters( 'amp_related_posts_template_headline', $related_posts_headline );
 		}
-		if ( true == $options['show_thumbnails'] ) {
+		if ( isset( $options['show_thumbnails'] ) && ( true == $options['show_thumbnails'] ) ) {
 			$related_posts .= apply_filters( 'amp_related_posts_template_header_thumbs', $related_posts_header_thumbs );
 		} else {
 			$related_posts .= apply_filters( 'amp_related_posts_template_header_excerpt', $related_posts_header_excerpt );
 		}
-		if ( true == $options['show_thumbnails'] ) {
+		if ( isset( $options['show_thumbnails'] ) && ( true == $options['show_thumbnails'] ) ) {
 			$related_posts .= apply_filters( 'amp_related_posts_template_thumb', $related_posts_thumb );
 		}
 		$related_posts .= $related_posts_title;
-		if ( false == $options['show_thumbnails'] ) {
+		if ( isset( $options['show_thumbnails'] ) && ( false == $options['show_thumbnails'] ) ) {
 			$related_posts .= apply_filters( 'amp_related_posts_template_excerpt', $related_posts_excerpt );
 		}
-		if ( true == $options['show_date'] ) {	
+		if ( isset( $options['show_date'] ) && ( true == $options['show_date'] ) ) {
 			$related_posts .= apply_filters( 'amp_related_posts_template_date', $related_posts_date );
 		}
-		if ( true == $options['show_context'] ) {
+		if ( isset( $options['show_context'] ) && ( true == $options['show_context'] ) ) {
 			$related_posts .= apply_filters( 'amp_related_posts_template_context', $related_posts_context );
 		}
 		$related_posts .= apply_filters( 'amp_related_posts_template_footer', $related_posts_footer );
 		$related_posts .= apply_filters( 'amp_related_posts_template_wrap_end', $related_posts_wrap_end );
 
+		$content .= apply_filters( 'amp_related_posts_template', $related_posts, $options, $related_posts_url );
 
-
-		$content .= apply_filters( 'amp_related_posts_template', $related_posts );
 		return $content;
 	}
 }
