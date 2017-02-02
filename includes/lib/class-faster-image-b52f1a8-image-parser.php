@@ -195,7 +195,7 @@ class Faster_Image_B52f1a8_Image_Parser
                     if ( $b === 0xe1 ) {
                         $data = $this->stream->read($this->readInt($this->stream->read(2)) - 2);
 
-                        $stream = new Stream;
+                        $stream = new Stream_17b32f3_Stream;
                         $stream->write($data);
 
                         if ( $stream->read(4) === 'Exif' ) {
