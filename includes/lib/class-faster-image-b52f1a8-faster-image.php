@@ -1,6 +1,7 @@
 <?php
 
 require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-invalid-image-exception.php' );
+require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-exif-parser.php' );
 require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-image-parser.php' );
 require_once( AMP__DIR__ . '/includes/lib/class-stream-17b32f3-stream.php' );
 require_once( AMP__DIR__ . '/includes/lib/class-stream-17b32f3-stream-buffer-too-small-exception.php' );
