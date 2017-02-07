@@ -103,14 +103,26 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
-	public function test_get_scripts__empty() {
-		$source = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';
+	public function test_get_scripts__didnt_convert() {
+		$source = '<p>Hello World</p>';
 		$expected = array();
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
+		$scripts = $sanitizer->get_scripts();
+		$this->assertEquals( $expected, $scripts );
+	}
+
+	public function test_get_scripts__did_convert() {
+		$source = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';
+		$expected = array( 'amp-video' => 'https://cdn.ampproject.org/v0/amp-video-0.1.js' );
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Video_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		
 		$scripts = $sanitizer->get_scripts();
 		$this->assertEquals( $expected, $scripts );
 	}

@@ -10,6 +10,17 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 	public static $tag = 'video';
 
+	private static $script_slug = 'amp-video';
+	private static $script_src = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
+
+	public function get_scripts() {
+		if ( ! $this->did_convert_elements ) {
+			return array();
+		}
+
+		return array( self::$script_slug => self::$script_src );
+	}
+
 	public function sanitize() {
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
@@ -50,6 +61,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 			}
+
+			$this->did_convert_elements = true;
 		}
 	}
 
