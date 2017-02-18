@@ -43,28 +43,30 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	public function shortcode( $attr ) {
-		$url = false;
+		$video_id = false;
 
-		if ( isset( $attr[0] ) ) {
-			$url = ltrim( $attr[0] , '=' );
+		if (isset($attr["id"])) {
+			$video_id = $attr["id"];
+		} elseif ( isset( $attr[0] ) ) {
+			$video_id = $attr[0];
 		} elseif ( function_exists ( 'shortcode_new_to_old_params' ) ) {
-			$url = shortcode_new_to_old_params( $attr );
+			$video_id = shortcode_new_to_old_params( $attr );
 		}
 
-		if ( empty( $url ) ) {
+		if ( empty( $video_id ) ) {
 			return '';
 		}
 
-		$video_id = $this->get_video_id_from_url( $url );
-
 		return $this->render( array(
-			'url' => $url,
 			'video_id' => $video_id,
 		) );
 	}
 
 	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->shortcode( array( $url ) );
+		$video_id = $this->get_video_id_from_url( $url );
+		return $this->render( array(
+			'video_id' => $video_id,
+		) );
 	}
 
 	public function render( $args ) {
@@ -92,9 +94,9 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = parse_url( $url );
 		parse_str( $parsed_url['path'], $path );
-        $tok = explode("/", $parsed_url['path']);
+		$tok = explode("/", $parsed_url['path']);
 		$tok = explode("_", $tok[2]);
-        $video_id = $tok[0];
+		$video_id = $tok[0];
 
 		return $video_id;
 	}

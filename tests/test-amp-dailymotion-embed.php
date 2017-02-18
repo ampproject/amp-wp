@@ -18,15 +18,16 @@ class AMP_DailyMotion_Embed_Test extends WP_UnitTestCase {
 				'<p><amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion></p>' . PHP_EOL
 			),
 
-			'shortcode_unnamed_attr_as_url' => array(
-				'[dailymotion https://www.dailymotion.com/video/x5awwth]' . PHP_EOL,
-                '<amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion>' . PHP_EOL
-			),
-
-			'shortcode_id_and_title_as_url' => array(
-				'[dailymotion http://www.dailymotion.com/video/x5awwth_snatched-official-trailer-2-hd_shortfilms]' . PHP_EOL,
+			'shortcode_unnamed_attr_as_id' => array(
+				'[dailymotion x5awwth]' . PHP_EOL,
 				'<amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion>' . PHP_EOL
 			),
+
+			'shortcode_named_attr_as_id' => array(
+				'[dailymotion id=x5awwth]' . PHP_EOL,
+				'<amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion>' . PHP_EOL
+			),
+
 		);
 	}
 
