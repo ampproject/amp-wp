@@ -53,7 +53,7 @@ class Faster_Image_B52f1a8_Faster_Image {
 
 			$code = curl_multi_add_handle( $multi, $$count );
 
-			if ( $code !== CURLM_OK ) {
+			if ( CURLM_OK !== $code ) {
 				throw new \Exception( "Curl handle for $uri could not be added" );
 			}
 		}
@@ -61,7 +61,7 @@ class Faster_Image_B52f1a8_Faster_Image {
 		// Perform the requests
 		do {
 			while ( ($mrc = curl_multi_exec( $multi, $active )) === CURLM_CALL_MULTI_PERFORM ) {}
-			if ( $mrc !== CURLM_OK && $mrc !== CURLM_CALL_MULTI_PERFORM ) {
+			if ( CURLM_OK !== $mrc && CURLM_CALL_MULTI_PERFORM !== $mrc ) {
 				throw new \Exception( "Curl error code: $mrc" );
 			}
 

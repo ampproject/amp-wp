@@ -105,9 +105,9 @@ class FastImage {
 					break;
 				case 'started':
 					$b = $this->getByte();
-					if ( $b === false ) { return false;
+					if ( false === $b ) { return false;
 					}
-					$state = $b === 0xFF ? 'sof' : 'started';
+					$state = 0xFF === $b ? 'sof' : 'started';
 					break;
 				case 'sof':
 					$b = $this->getByte();
@@ -115,7 +115,7 @@ class FastImage {
 						$state = 'skipframe';
 					} elseif ( in_array( $b, array_merge( range( 0xC0,0xC3 ), range( 0xC5,0xC7 ), range( 0xC9,0xCB ), range( 0xCD,0xCF ) ), true ) ) {
 						$state = 'readsize';
-					} elseif ( $b === 0xFF ) {
+					} elseif ( 0xFF === $b ) {
 						$state = 'sof';
 					} else {
 						$state = 'skipframe';
@@ -140,7 +140,7 @@ class FastImage {
 		// do we need more data?
 		if ( $this->strpos + $n -1 >= strlen( $this->str ) ) {
 			$end = ($this->strpos + $n);
-			while ( strlen( $this->str ) < $end && $response !== false ) {
+			while ( strlen( $this->str ) < $end && false !== $response ) {
 				// read more from the file handle
 				$need = $end - ftell( $this->handle );
 				if ( $response = fread( $this->handle, $need ) ) {

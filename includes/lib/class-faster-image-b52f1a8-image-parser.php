@@ -66,8 +66,8 @@ class Faster_Image_B52f1a8_Image_Parser {
 		$b2 = $this->getByte();
 
 		return [
-			$b1 === 0 ? 256 : $b1,
-			$b2 === 0 ? 256 : $b2,
+			0 === $b1 ? 256 : $b1,
+			0 === $b2 ? 256 : $b2,
 		];
 	}
 
@@ -177,16 +177,16 @@ class Faster_Image_B52f1a8_Image_Parser {
 
 				case 'started':
 					$b = $this->getByte();
-					if ( $b === false ) { return false;
+					if ( false === $b ) { return false;
 					}
 
-					$state = $b === 0xFF ? 'sof' : 'started';
+					$state = 0xFF === $b ? 'sof' : 'started';
 					break;
 
 				case 'sof':
 					$b = $this->getByte();
 
-					if ( $b === 0xe1 ) {
+					if ( 0xe1 === $b ) {
 						$data = $this->stream->read( $this->readInt( $this->stream->read( 2 ) ) - 2 );
 
 						$stream = new Stream_17b32f3_Stream;
@@ -209,7 +209,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 						$state = 'readsize';
 						break;
 					}
-					if ( $b === 0xFF ) {
+					if ( 0xFF === $b ) {
 						$state = 'sof';
 						break;
 					}
