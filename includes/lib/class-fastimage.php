@@ -111,9 +111,9 @@ class FastImage {
 					break;
 				case 'sof':
 					$b = $this->getByte();
-					if ( in_array( $b, range( 0xe0, 0xef ) ) ) {
+					if ( in_array( $b, range( 0xe0, 0xef ), true ) ) {
 						$state = 'skipframe';
-					} elseif ( in_array( $b, array_merge( range( 0xC0,0xC3 ), range( 0xC5,0xC7 ), range( 0xC9,0xCB ), range( 0xCD,0xCF ) ) ) ) {
+					} elseif ( in_array( $b, array_merge( range( 0xC0,0xC3 ), range( 0xC5,0xC7 ), range( 0xC9,0xCB ), range( 0xCD,0xCF ) ), true ) ) {
 						$state = 'readsize';
 					} elseif ( $b === 0xFF ) {
 						$state = 'sof';

@@ -49,7 +49,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
 				$attribute = $node->attributes->item( $i );
 				$attribute_name = strtolower( $attribute->name );
-				if ( in_array( $attribute_name, $bad_attributes ) ) {
+				if ( in_array( $attribute_name, $bad_attributes, true ) ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
 				}
@@ -145,11 +145,11 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		$protocol = strtok( $href, ':' );
 
 		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
-			&& ! in_array( $protocol, $special_protocols ) ) {
+			&& ! in_array( $protocol, $special_protocols, true ) ) {
 			return false;
 		}
 
-		if ( ! in_array( $protocol, $valid_protocols ) ) {
+		if ( ! in_array( $protocol, $valid_protocols, true ) ) {
 			return false;
 		}
 

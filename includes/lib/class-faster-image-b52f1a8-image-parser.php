@@ -200,12 +200,12 @@ class Faster_Image_B52f1a8_Image_Parser {
 						break;
 					}
 
-					if ( in_array( $b, range( 0xe0, 0xef ) ) ) {
+					if ( in_array( $b, range( 0xe0, 0xef ), true ) ) {
 						$state = 'skipframe';
 						break;
 					}
 
-					if ( in_array( $b, array_merge( range( 0xC0, 0xC3 ), range( 0xC5, 0xC7 ), range( 0xC9, 0xCB ), range( 0xCD, 0xCF ) ) ) ) {
+					if ( in_array( $b, array_merge( range( 0xC0, 0xC3 ), range( 0xC5, 0xC7 ), range( 0xC9, 0xCB ), range( 0xCD, 0xCF ) ), true ) ) {
 						$state = 'readsize';
 						break;
 					}

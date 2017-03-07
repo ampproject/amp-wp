@@ -147,7 +147,7 @@ class AMP_Customizer_Design_Settings {
 		$schemes = self::get_color_scheme_names();
 		$scheme_slugs = array_keys( $schemes );
 
-		if ( ! in_array( $value, $scheme_slugs ) ) {
+		if ( ! in_array( $value, $scheme_slugs, true ) ) {
 			$value = self::DEFAULT_COLOR_SCHEME;
 		}
 
