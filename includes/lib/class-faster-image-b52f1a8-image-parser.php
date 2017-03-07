@@ -66,8 +66,8 @@ class Faster_Image_B52f1a8_Image_Parser {
 		$b2 = $this->getByte();
 
 		return [
-			$b1 == 0 ? 256 : $b1,
-			$b2 == 0 ? 256 : $b2,
+			$b1 === 0 ? 256 : $b1,
+			$b2 === 0 ? 256 : $b2,
 		];
 	}
 
@@ -114,7 +114,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 				case chr( 0x89 ) . 'P':
 					return $this->type = 'png';
 				case 'RI':
-					if ( substr( $this->stream->read( 10 ), 6, 4 ) == 'WEBP' ) {
+					if ( substr( $this->stream->read( 10 ), 6, 4 ) === 'WEBP' ) {
 						return $this->type = 'webp';
 					}
 
@@ -140,7 +140,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 		$chars = substr( $chars, 14, 14 );
 		$type  = unpack( 'C', $chars );
 
-		$size = (reset( $type ) == 40) ? unpack( 'l*', substr( $chars, 4 ) ) : unpack( 'l*', substr( $chars, 4, 8 ) );
+		$size = (reset( $type ) === 40) ? unpack( 'l*', substr( $chars, 4 ) ) : unpack( 'l*', substr( $chars, 4, 8 ) );
 
 		return [
 			current( $size ),
@@ -180,7 +180,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 					if ( $b === false ) { return false;
 					}
 
-					$state = $b == 0xFF ? 'sof' : 'started';
+					$state = $b === 0xFF ? 'sof' : 'started';
 					break;
 
 				case 'sof':
@@ -209,7 +209,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 						$state = 'readsize';
 						break;
 					}
-					if ( $b == 0xFF ) {
+					if ( $b === 0xFF ) {
 						$state = 'sof';
 						break;
 					}

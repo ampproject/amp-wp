@@ -92,7 +92,7 @@ class FastImage {
 		$chars = $this->getChars( 29 );
 		$chars = substr( $chars, 14, 14 );
 		$type = unpack( 'C', $chars );
-		return (reset( $type ) == 40) ? unpack( 'L*', substr( $chars, 4 ) ) : unpack( 'L*', substr( $chars, 4, 8 ) );
+		return (reset( $type ) === 40) ? unpack( 'L*', substr( $chars, 4 ) ) : unpack( 'L*', substr( $chars, 4, 8 ) );
 	}
 	private function parseSizeForJPEG() {
 		$state = null;
@@ -107,7 +107,7 @@ class FastImage {
 					$b = $this->getByte();
 					if ( $b === false ) { return false;
 					}
-					$state = $b == 0xFF ? 'sof' : 'started';
+					$state = $b === 0xFF ? 'sof' : 'started';
 					break;
 				case 'sof':
 					$b = $this->getByte();
@@ -115,7 +115,7 @@ class FastImage {
 						$state = 'skipframe';
 					} elseif ( in_array( $b, array_merge( range( 0xC0,0xC3 ), range( 0xC5,0xC7 ), range( 0xC9,0xCB ), range( 0xCD,0xCF ) ) ) ) {
 						$state = 'readsize';
-					} elseif ( $b == 0xFF ) {
+					} elseif ( $b === 0xFF ) {
 						$state = 'sof';
 					} else {
 						$state = 'skipframe';

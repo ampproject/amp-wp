@@ -7,7 +7,7 @@ function amp_get_permalink( $post_id ) {
 		return $pre_url;
 	}
 
-	if ( '' != get_option( 'permalink_structure' ) ) {
+	if ( '' !== get_option( 'permalink_structure' ) ) {
 		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
 	} else {
 		$amp_url = add_query_arg( AMP_QUERY_VAR, 1, get_permalink( $post_id ) );
