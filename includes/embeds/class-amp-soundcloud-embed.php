@@ -86,7 +86,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	private function get_track_id_from_url( $url ) {
-		$parsed_url = parse_url( $url );
+		$parsed_url = wp_parse_url( $url );
 		$tok = explode( '/', $parsed_url['path'] );
 		$track_id = $tok[2];
 

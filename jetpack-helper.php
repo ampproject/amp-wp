@@ -56,7 +56,7 @@ function jetpack_amp_build_stats_pixel_url() {
 		$blog = Jetpack_Options::get_option( 'id' );
 		$tz = get_option( 'gmt_offset' );
 		$v = 'ext';
-		$blog_url = parse_url( site_url() );
+		$blog_url = wp_parse_url( site_url() );
 		$srv = $blog_url['host'];
 		$j = sprintf( '%s:%s', JETPACK__API_VERSION, JETPACK__VERSION );
 		$post = $wp_the_query->get_queried_object_id();
