@@ -30,27 +30,27 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return array|bool|null
 	 */
-	public function parseSize() {
-		$this->stream->resetPointer();
+	public function parse_size() {
+		$this->stream->reset_pointer();
 
 		switch ( $this->type ) {
 			case 'png':
-				return $this->parseSizeForPNG();
+				return $this->parse_size_for_png();
 			case 'ico':
 			case 'cur':
-				return $this->parseSizeForIco();
+				return $this->parse_size_for_ico();
 			case 'gif':
-				return $this->parseSizeForGIF();
+				return $this->parse_size_for_gif();
 			case 'bmp':
-				return $this->parseSizeForBMP();
+				return $this->parse_size_for_bmp();
 			case 'jpeg':
-				return $this->parseSizeForJPEG();
+				return $this->parse_size_for_jpeg();
 			case 'tiff':
-				return $this->parseSizeForTiff();
+				return $this->parse_size_for_tiff();
 			case 'psd':
-				return $this->parseSizeForPSD();
+				return $this->parse_size_for_psd();
 			case 'webp':
-				return $this->parseSizeForWebp();
+				return $this->parse_size_for_webp();
 		}
 
 		return null;
@@ -59,11 +59,11 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return array
 	 */
-	public function parseSizeForIco() {
+	public function parse_size_for_ico() {
 		$this->stream->read( 6 );
 
-		$b1 = $this->getByte();
-		$b2 = $this->getByte();
+		$b1 = $this->get_byte();
+		$b2 = $this->get_byte();
 
 		return [
 			0 === $b1 ? 256 : $b1,
@@ -74,7 +74,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return array
 	 */
-	protected function parseSizeForPSD() {
+	protected function parse_size_for_psd() {
 
 		$this->stream->read( 14 );
 		$sizes = unpack( 'N*',$this->stream->read( 12 ) );
@@ -90,9 +90,9 @@ class Faster_Image_B52f1a8_Image_Parser {
 	 *
 	 * @return bool|string
 	 */
-	public function parseType() {
+	public function parse_type() {
 		if ( ! $this->type ) {
-			$this->stream->resetPointer();
+			$this->stream->reset_pointer();
 
 			switch ( $this->stream->read( 2 ) ) {
 				case 'BM':
@@ -102,7 +102,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 				case chr( 0xFF ) . chr( 0xd8 ):
 					return $this->type = 'jpeg';
 				case "\0\0":
-					switch ( $this->readByte( $this->stream->peek( 1 ) ) ) {
+					switch ( $this->read_byte( $this->stream->peek( 1 ) ) ) {
 						case 1:
 							return $this->type = 'ico';
 						case 2:
@@ -135,7 +135,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return array
 	 */
-	protected function parseSizeForBMP() {
+	protected function parse_size_for_bmp() {
 		$chars = $this->stream->read( 29 );
 		$chars = substr( $chars, 14, 14 );
 		$type  = unpack( 'C', $chars );
@@ -151,7 +151,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return array
 	 */
-	protected function parseSizeForGIF() {
+	protected function parse_size_for_gif() {
 		$chars = $this->stream->read( 11 );
 
 		$size = unpack( 'S*', substr( $chars, 6, 4 ) );
@@ -165,7 +165,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return array|bool
 	 */
-	protected function parseSizeForJPEG() {
+	protected function parse_size_for_jpeg() {
 		$state = null;
 
 		while ( true ) {
@@ -176,7 +176,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 					break;
 
 				case 'started':
-					$b = $this->getByte();
+					$b = $this->get_byte();
 					if ( false === $b ) { return false;
 					}
 
@@ -184,10 +184,10 @@ class Faster_Image_B52f1a8_Image_Parser {
 					break;
 
 				case 'sof':
-					$b = $this->getByte();
+					$b = $this->get_byte();
 
 					if ( 0xe1 === $b ) {
-						$data = $this->stream->read( $this->readInt( $this->stream->read( 2 ) ) - 2 );
+						$data = $this->stream->read( $this->read_int( $this->stream->read( 2 ) ) - 2 );
 
 						$stream = new Stream_17b32f3_Stream;
 						$stream->write( $data );
@@ -218,7 +218,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 					break;
 
 				case 'skipframe':
-					$skip = $this->readInt( $this->stream->read( 2 ) ) - 2;
+					$skip = $this->read_int( $this->stream->read( 2 ) ) - 2;
 					$this->stream->read( $skip );
 					$state = 'started';
 					break;
@@ -226,9 +226,9 @@ class Faster_Image_B52f1a8_Image_Parser {
 				case 'readsize':
 					$c = $this->stream->read( 7 );
 
-					$size = array( $this->readInt( substr( $c, 5, 2 ) ), $this->readInt( substr( $c, 3, 2 ) ) );
+					$size = array( $this->read_int( substr( $c, 5, 2 ) ), $this->read_int( substr( $c, 3, 2 ) ) );
 
-					if ( isset( $exif ) && $exif->isRotated() ) {
+					if ( isset( $exif ) && $exif->is_rotated() ) {
 						return array_reverse( $size );
 					}
 
@@ -242,7 +242,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return array
 	 */
-	protected function parseSizeForPNG() {
+	protected function parse_size_for_png() {
 		$chars = $this->stream->read( 25 );
 
 		$size = unpack( 'N*', substr( $chars, 16, 8 ) );
@@ -259,21 +259,21 @@ class Faster_Image_B52f1a8_Image_Parser {
 	 * @throws \FasterImage\Exception\InvalidImageException
 	 * @throws StreamBufferTooSmallException
 	 */
-	protected function parseSizeForTiff() {
+	protected function parse_size_for_tiff() {
 		$exif = new Faster_Image_B52f1a8_Exif_Parser( $this->stream );
 
-		if ( $exif->isRotated() ) {
-			return [ $exif->getHeight(), $exif->getWidth() ];
+		if ( $exif->is_rotated() ) {
+			return [ $exif->get_height(), $exif->get_width() ];
 		}
 
-		return [ $exif->getWidth(), $exif->getHeight() ];
+		return [ $exif->get_width(), $exif->get_height() ];
 	}
 
 	/**
 	 * @return null
 	 * @throws StreamBufferTooSmallException
 	 */
-	protected function parseSizeForWebp() {
+	protected function parse_size_for_webp() {
 		$vp8 = substr( $this->stream->read( 16 ), 12, 4 );
 		$len = unpack( 'V', $this->stream->read( 4 ) );
 
@@ -293,10 +293,10 @@ class Faster_Image_B52f1a8_Image_Parser {
 			case 'VP8L':
 				$this->stream->read( 1 );
 
-				$b1 = $this->getByte();
-				$b2 = $this->getByte();
-				$b3 = $this->getByte();
-				$b4 = $this->getByte();
+				$b1 = $this->get_byte();
+				$b2 = $this->get_byte();
+				$b3 = $this->get_byte();
+				$b4 = $this->get_byte();
 
 				$width  = 1 + ((($b2 & 0x3f) << 8) | $b1);
 				$height = 1 + ((($b4 & 0xf) << 10) | ($b3 << 2) | (($b2 & 0xc0) >> 6));
@@ -307,12 +307,12 @@ class Faster_Image_B52f1a8_Image_Parser {
 
 				$flags = current( unpack( 'C', $this->stream->read( 4 ) ) );
 
-				$b1 = $this->getByte();
-				$b2 = $this->getByte();
-				$b3 = $this->getByte();
-				$b4 = $this->getByte();
-				$b5 = $this->getByte();
-				$b6 = $this->getByte();
+				$b1 = $this->get_byte();
+				$b2 = $this->get_byte();
+				$b3 = $this->get_byte();
+				$b4 = $this->get_byte();
+				$b5 = $this->get_byte();
+				$b6 = $this->get_byte();
 
 				$width = 1 + $b1 + ($b2 << 8) + ($b3 << 16);
 
@@ -328,8 +328,8 @@ class Faster_Image_B52f1a8_Image_Parser {
 	/**
 	 * @return mixed
 	 */
-	private function getByte() {
-		return $this->readByte( $this->stream->read( 1 ) );
+	private function get_byte() {
+		return $this->read_byte( $this->stream->read( 1 ) );
 	}
 
 	/**
@@ -337,7 +337,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 	 *
 	 * @return mixed
 	 */
-	private function readByte( $string ) {
+	private function read_byte( $string ) {
 		return current( unpack( 'C', $string ) );
 	}
 
@@ -346,7 +346,7 @@ class Faster_Image_B52f1a8_Image_Parser {
 	 *
 	 * @return int
 	 */
-	private function readInt( $str ) {
+	private function read_int( $str ) {
 		$size = unpack( 'C*', $str );
 
 		return ($size[1] << 8) + $size[2];

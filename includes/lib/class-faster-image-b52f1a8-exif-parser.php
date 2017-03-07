@@ -43,27 +43,27 @@ class Faster_Image_B52f1a8_Exif_Parser {
 	 */
 	public function __construct( Stream_17b32f3_Streamable_Interface $stream ) {
 		$this->stream = $stream;
-		$this->parseExifIfd();
+		$this->parse_exif_ifd();
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getHeight() {
+	public function get_height() {
 		return $this->height;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getWidth() {
+	public function get_width() {
 		return $this->width;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isRotated() {
+	public function is_rotated() {
 		return ( ! empty( $this->orientation ) && $this->orientation >= 5);
 	}
 
@@ -71,7 +71,7 @@ class Faster_Image_B52f1a8_Exif_Parser {
 	 * @return bool
 	 * @throws \FasterImage\Exception\InvalidImageException
 	 */
-	protected function parseExifIfd() {
+	protected function parse_exif_ifd() {
 		$byte_order = $this->stream->read( 2 );
 
 		switch ( $byte_order ) {

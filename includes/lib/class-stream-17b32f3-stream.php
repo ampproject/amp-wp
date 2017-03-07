@@ -59,7 +59,7 @@ class Stream_17b32f3_Stream implements Stream_17b32f3_Streamable_Interface {
 	 *
 	 * @return mixed
 	 */
-	public function resetPointer() {
+	public function reset_pointer() {
 		$this->strpos = 0;
 	}
 

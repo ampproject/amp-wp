@@ -22,7 +22,7 @@ class FastImage {
 	public function load( $uri ) {
 		if ( $this->handle ) { $this->close();
 		}
-		$this->handle = @fopen( $uri, 'r' );
+		$this->handle = fopen( $uri, 'r' );
 		if ( false === $this->handle ) {
 			return false;
 		}
@@ -35,23 +35,23 @@ class FastImage {
 			$this->str = null;
 		}
 	}
-	public function getSize() {
+	public function get_size() {
 		if ( ! $this->handle ) {
 			return false;
 		}
 		$this->strpos = 0;
-		if ( $this->getType() ) {
-			return array_values( $this->parseSize() );
+		if ( $this->get_type() ) {
+			return array_values( $this->parse_size() );
 		}
 		return false;
 	}
-	public function getType() {
+	public function get_type() {
 		if ( ! $this->handle ) {
 			return false;
 		}
 		$this->strpos = 0;
 		if ( ! $this->type ) {
-			switch ( $this->getChars( 2 ) ) {
+			switch ( $this->get_chars( 2 ) ) {
 				case 'BM':
 					return $this->type = 'bmp';
 				case 'GI':
@@ -66,51 +66,51 @@ class FastImage {
 		}
 		return $this->type;
 	}
-	private function parseSize() {
+	private function parse_size() {
 		$this->strpos = 0;
 		switch ( $this->type ) {
 			case 'png':
-				return $this->parseSizeForPNG();
+				return $this->parse_size_for_png();
 			case 'gif':
-				return $this->parseSizeForGIF();
+				return $this->parse_size_for_gif();
 			case 'bmp':
-				return $this->parseSizeForBMP();
+				return $this->parse_size_for_bmp();
 			case 'jpeg':
-				return $this->parseSizeForJPEG();
+				return $this->parse_size_for_jpeg();
 		}
 		return null;
 	}
-	private function parseSizeForPNG() {
-		$chars = $this->getChars( 25 );
+	private function parse_size_for_png() {
+		$chars = $this->get_chars( 25 );
 		return unpack( 'N*', substr( $chars, 16, 8 ) );
 	}
-	private function parseSizeForGIF() {
-		$chars = $this->getChars( 11 );
+	private function parse_size_for_gif() {
+		$chars = $this->get_chars( 11 );
 		return unpack( 'S*', substr( $chars, 6, 4 ) );
 	}
-	private function parseSizeForBMP() {
-		$chars = $this->getChars( 29 );
+	private function parse_size_for_bmp() {
+		$chars = $this->get_chars( 29 );
 		$chars = substr( $chars, 14, 14 );
 		$type = unpack( 'C', $chars );
 		return (reset( $type ) === 40) ? unpack( 'L*', substr( $chars, 4 ) ) : unpack( 'L*', substr( $chars, 4, 8 ) );
 	}
-	private function parseSizeForJPEG() {
+	private function parse_size_for_jpeg() {
 		$state = null;
 		$i = 0;
 		while ( true ) {
 			switch ( $state ) {
 				default:
-					$this->getChars( 2 );
+					$this->get_chars( 2 );
 					$state = 'started';
 					break;
 				case 'started':
-					$b = $this->getByte();
+					$b = $this->get_byte();
 					if ( false === $b ) { return false;
 					}
 					$state = 0xFF === $b ? 'sof' : 'started';
 					break;
 				case 'sof':
-					$b = $this->getByte();
+					$b = $this->get_byte();
 					if ( in_array( $b, range( 0xe0, 0xef ), true ) ) {
 						$state = 'skipframe';
 					} elseif ( in_array( $b, array_merge( range( 0xC0,0xC3 ), range( 0xC5,0xC7 ), range( 0xC9,0xCB ), range( 0xCD,0xCF ) ), true ) ) {
@@ -122,20 +122,20 @@ class FastImage {
 					}
 					break;
 				case 'skipframe':
-					$skip = $this->readInt( $this->getChars( 2 ) ) - 2;
+					$skip = $this->read_int( $this->get_chars( 2 ) ) - 2;
 					$state = 'doskip';
 					break;
 				case 'doskip':
-					$this->getChars( $skip );
+					$this->get_chars( $skip );
 					$state = 'started';
 					break;
 				case 'readsize':
-					$c = $this->getChars( 7 );
-					return array( $this->readInt( substr( $c, 5, 2 ) ), $this->readInt( substr( $c, 3, 2 ) ) );
+					$c = $this->get_chars( 7 );
+					return array( $this->read_int( substr( $c, 5, 2 ) ), $this->read_int( substr( $c, 3, 2 ) ) );
 			}
 		}
 	}
-	private function getChars( $n ) {
+	private function get_chars( $n ) {
 		$response = null;
 		// do we need more data?
 		if ( $this->strpos + $n -1 >= strlen( $this->str ) ) {
@@ -154,12 +154,12 @@ class FastImage {
 		$this->strpos += $n;
 		return $result;
 	}
-	private function getByte() {
-		$c = $this->getChars( 1 );
+	private function get_byte() {
+		$c = $this->get_chars( 1 );
 		$b = unpack( 'C', $c );
 		return reset( $b );
 	}
-	private function readInt( $str ) {
+	private function read_int( $str ) {
 		$size = unpack( 'C*', $str );
 		return ($size[1] << 8) + $size[2];
 	}

@@ -34,6 +34,6 @@ interface Stream_17b32f3_Streamable_Interface {
 	 * Resets the pointer to the 0 position
 	 * @return mixed
 	 */
-	public function resetPointer();
+	public function reset_pointer();
 
 }

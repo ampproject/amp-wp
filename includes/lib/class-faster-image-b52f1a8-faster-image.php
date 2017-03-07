@@ -87,7 +87,7 @@ class Faster_Image_B52f1a8_Faster_Image {
 	/**
 	 * @param $seconds
 	 */
-	public function setTimeout( $seconds ) {
+	public function set_timeout( $seconds ) {
 		$this->timeout = $seconds;
 	}
 
@@ -138,13 +138,13 @@ class Faster_Image_B52f1a8_Faster_Image {
 
 			try {
 				// store the type in the result array by looking at the bits
-				$result['type'] = $parser->parseType();
+				$result['type'] = $parser->parse_type();
 
 				/*
                  * We try here to parse the buffer of characters we already have
                  * for the size.
                  */
-				$result['size'] = $parser->parseSize() ?: 'failed';
+				$result['size'] = $parser->parse_size() ?: 'failed';
 			} catch (Stream_17b32f3_Stream_Buffer_Too_Small_Exception $e) {
 				/*
                  * If this exception is thrown, we don't have enough of the stream buffered
