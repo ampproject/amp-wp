@@ -5,127 +5,122 @@
  *
  * @package FasterImage
  */
-class Faster_Image_B52f1a8_Exif_Parser
-{
-    /**
-     * @var int
-     */
-    protected $width;
-    /**
-     * @var  int
-     */
-    protected $height;
+class Faster_Image_B52f1a8_Exif_Parser {
 
-    /**
-     * @var
-     */
-    protected $short;
+	/**
+	 * @var int
+	 */
+	protected $width;
+	/**
+	 * @var  int
+	 */
+	protected $height;
 
-    /**
-     * @var
-     */
-    protected $long;
+	/**
+	 * @var
+	 */
+	protected $short;
 
-    /**
-     * @var  StreamableInterface
-     */
-    protected $stream;
+	/**
+	 * @var
+	 */
+	protected $long;
 
-    /**
-     * @var int
-     */
-    protected $orientation;
+	/**
+	 * @var  StreamableInterface
+	 */
+	protected $stream;
 
-    /**
-     * ExifParser constructor.
-     *
-     * @param StreamableInterface $stream
-     */
-    public function __construct(Stream_17b32f3_Streamable_Interface $stream)
-    {
-        $this->stream = $stream;
-        $this->parseExifIfd();
-    }
+	/**
+	 * @var int
+	 */
+	protected $orientation;
 
-    /**
-     * @return int
-     */
-    public function getHeight()
-    {
-        return $this->height;
-    }
+	/**
+	 * ExifParser constructor.
+	 *
+	 * @param StreamableInterface $stream
+	 */
+	public function __construct( Stream_17b32f3_Streamable_Interface $stream ) {
+		$this->stream = $stream;
+		$this->parseExifIfd();
+	}
 
-    /**
-     * @return int
-     */
-    public function getWidth()
-    {
-        return $this->width;
-    }
+	/**
+	 * @return int
+	 */
+	public function getHeight() {
+		return $this->height;
+	}
 
-    /**
-     * @return bool
-     */
-    public function isRotated()
-    {
-        return (! empty($this->orientation) && $this->orientation >= 5);
-    }
+	/**
+	 * @return int
+	 */
+	public function getWidth() {
+		return $this->width;
+	}
 
-    /**
-     * @return bool
-     * @throws \FasterImage\Exception\InvalidImageException
-     */
-    protected function parseExifIfd()
-    {
-        $byte_order = $this->stream->read(2);
+	/**
+	 * @return bool
+	 */
+	public function isRotated() {
+		return ( ! empty( $this->orientation ) && $this->orientation >= 5);
+	}
 
-        switch ( $byte_order ) {
-            case 'II':
-                $this->short = 'v';
-                $this->long  = 'V';
-                break;
-            case 'MM':
-                $this->short = 'n';
-                $this->long  = 'N';
-                break;
-            default:
-                throw new Faster_Image_B52f1a8_Invalid_Image_Exception;
-                break;
-        }
+	/**
+	 * @return bool
+	 * @throws \FasterImage\Exception\InvalidImageException
+	 */
+	protected function parseExifIfd() {
+		$byte_order = $this->stream->read( 2 );
 
-        $this->stream->read(2);
+		switch ( $byte_order ) {
+			case 'II':
+				$this->short = 'v';
+				$this->long  = 'V';
+				break;
+			case 'MM':
+				$this->short = 'n';
+				$this->long  = 'N';
+				break;
+			default:
+				throw new Faster_Image_B52f1a8_Invalid_Image_Exception;
+				break;
+		}
 
-        $offset = current(unpack($this->long, $this->stream->read(4)));
+		$this->stream->read( 2 );
 
-        $this->stream->read($offset - 8);
+		$offset = current( unpack( $this->long, $this->stream->read( 4 ) ) );
 
-        $tag_count = current(unpack($this->short, $this->stream->read(2)));
+		$this->stream->read( $offset - 8 );
 
-        for ( $i = $tag_count; $i > 0; $i-- ) {
+		$tag_count = current( unpack( $this->short, $this->stream->read( 2 ) ) );
 
-            $type = current(unpack($this->short, $this->stream->read(2)));
-            $this->stream->read(6);
-            $data = current(unpack($this->short, $this->stream->read(2)));
+		for ( $i = $tag_count; $i > 0; $i-- ) {
 
-            switch ( $type ) {
-                case 0x0100:
-                    $this->width = $data;
-                    break;
-                case 0x0101:
-                    $this->height = $data;
-                    break;
-                case 0x0112:
-                    $this->orientation = $data;
-                    break;
-            }
+			$type = current( unpack( $this->short, $this->stream->read( 2 ) ) );
+			$this->stream->read( 6 );
+			$data = current( unpack( $this->short, $this->stream->read( 2 ) ) );
 
-            if ( isset($this->width) && isset($this->height) && isset($this->orientation) ) {
-                return true;
-            }
+			switch ( $type ) {
+				case 0x0100:
+					$this->width = $data;
+					break;
+				case 0x0101:
+					$this->height = $data;
+					break;
+				case 0x0112:
+					$this->orientation = $data;
+					break;
+			}
 
-            $this->stream->read(2);
-        }
+			if ( isset( $this->width ) && isset( $this->height ) && isset( $this->orientation ) ) {
+				return true;
+			}
 
-        return false;
-    }
+			$this->stream->read( 2 );
+		}
+
+		return false;
+	}
 }

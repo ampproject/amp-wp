@@ -134,7 +134,7 @@ blockquote p:last-child {
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
 	background-color: <?php echo sanitize_hex_color( $header_color ); ?>;
-	border: 1px solid <?php echo sanitize_hex_color(  $header_color ); ?>;
+	border: 1px solid <?php echo sanitize_hex_color( $header_color ); ?>;
 	border-radius: 50%;
 	position: absolute;
 	right: 18px;

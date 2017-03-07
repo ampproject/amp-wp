@@ -44,7 +44,7 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 					'width' => 200,
 					'height' => 100,
 					'sizes' => '(min-width: 200px) 200px, 100vw',
-					'class' => 'amp-wp-enforced-sizes'
+					'class' => 'amp-wp-enforced-sizes',
 				),
 			),
 
@@ -58,7 +58,7 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 					'width' => 200,
 					'height' => 100,
 					'sizes' => '(min-width: 200px) 200px, 100vw',
-					'class' => 'my-class amp-wp-enforced-sizes'
+					'class' => 'my-class amp-wp-enforced-sizes',
 				),
 			),
 
@@ -71,7 +71,7 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 					'width' => 250,
 					'height' => 100,
 					'sizes' => '(min-width: 250px) 250px, 100vw',
-					'class' => 'amp-wp-enforced-sizes'
+					'class' => 'amp-wp-enforced-sizes',
 				),
 				array(
 					'content_max_width' => 500,
@@ -87,7 +87,7 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 					'width' => 800,
 					'height' => 350,
 					'sizes' => '(min-width: 675px) 675px, 100vw',
-					'class' => 'amp-wp-enforced-sizes'
+					'class' => 'amp-wp-enforced-sizes',
 				),
 				array(
 					'content_max_width' => 675,

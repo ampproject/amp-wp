@@ -156,7 +156,7 @@ class AMP_Template_Customizer {
 	}
 
 	public function force_mobile_preview( $devices ) {
-		if ( isset( $devices[ 'mobile' ] ) ) {
+		if ( isset( $devices['mobile'] ) ) {
 			$devices['mobile']['default'] = true;
 			unset( $devices['desktop']['default'] );
 		}
