@@ -47,7 +47,7 @@ function amp_post_template_add_schemaorg_metadata( $amp_template ) {
 		return;
 	}
 	?>
-	<script type="application/ld+json"><?php echo json_encode( $metadata ); ?></script>
+	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
 	<?php
 }
 
@@ -86,7 +86,7 @@ function amp_post_template_add_analytics_data( $amp_template ) {
 
 		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
 			'type' => 'application/json',
-		), json_encode( $analytics_entry['config_data'] ) );
+		), wp_json_encode( $analytics_entry['config_data'] ) );
 
 		$amp_analytics_attr = array_merge( array(
 			'id' => $id,
