@@ -5,8 +5,8 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' )
 class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://(www\.)?facebook\.com/.*#i';
 
-	protected $DEFAULT_WIDTH = 600;
-	protected $DEFAULT_HEIGHT = 400;
+	protected $default_width = 600;
+	protected $default_height = 400;
 
 	private static $script_slug = 'amp-facebook';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-facebook-0.1.js';

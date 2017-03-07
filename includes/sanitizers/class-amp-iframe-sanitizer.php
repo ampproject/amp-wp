@@ -14,7 +14,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-iframe';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
 
-	protected $DEFAULT_ARGS = array(
+	protected $default_args = array(
 		'add_placeholder' => false,
 	);
 

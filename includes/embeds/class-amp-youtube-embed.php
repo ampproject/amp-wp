@@ -9,8 +9,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|watch[/\#?])|youtu\.be/).*#i';
 	const RATIO = 0.5625;
 
-	protected $DEFAULT_WIDTH = 600;
-	protected $DEFAULT_HEIGHT = 338;
+	protected $default_width = 600;
+	protected $default_height = 338;
 
 	private static $script_slug = 'amp-youtube';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-youtube-0.1.js';

@@ -3,7 +3,7 @@
 abstract class AMP_Base_Sanitizer {
 	const FALLBACK_HEIGHT = 400;
 
-	protected $DEFAULT_ARGS = array();
+	protected $default_args = array();
 
 	protected $dom;
 	protected $args;
@@ -11,7 +11,7 @@ abstract class AMP_Base_Sanitizer {
 
 	public function __construct( $dom, $args = array() ) {
 		$this->dom = $dom;
-		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
+		$this->args = array_merge( $this->default_args, $args );
 	}
 
 	abstract public function sanitize();

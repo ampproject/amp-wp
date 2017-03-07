@@ -7,8 +7,8 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'instagr.am';
 	const URL_PATTERN = '#http(s?)://(www\.)?instagr(\.am|am\.com)/p/([^/?]+)#i';
 
-	protected $DEFAULT_WIDTH = 600;
-	protected $DEFAULT_HEIGHT = 600;
+	protected $default_width = 600;
+	protected $default_height = 600;
 
 	private static $script_slug = 'amp-instagram';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-instagram-0.1.js';

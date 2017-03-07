@@ -4,8 +4,8 @@
 require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 
 abstract class AMP_Base_Embed_Handler {
-	protected $DEFAULT_WIDTH = 600;
-	protected $DEFAULT_HEIGHT = 480;
+	protected $default_width = 600;
+	protected $default_height = 480;
 
 	protected $args = array();
 	protected $did_convert_elements = false;
@@ -15,8 +15,8 @@ abstract class AMP_Base_Embed_Handler {
 
 	function __construct( $args = array() ) {
 		$this->args = wp_parse_args( $args, array(
-			'width' => $this->DEFAULT_WIDTH,
-			'height' => $this->DEFAULT_HEIGHT,
+			'width' => $this->default_width,
+			'height' => $this->default_height,
 		) );
 	}
 
