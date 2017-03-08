@@ -39,7 +39,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			'id'         => $post ? $post->ID : 0,
 			'include'    => '',
 			'exclude'    => '',
-			'size'       => array( $this->args['width'], $this->args['height'] )
+			'size'       => array( $this->args['width'], $this->args['height'] ),
 		), $attr, 'gallery' );
 
 		$id = intval( $atts['id'] );

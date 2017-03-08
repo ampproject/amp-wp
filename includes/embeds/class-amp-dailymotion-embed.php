@@ -45,11 +45,11 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function shortcode( $attr ) {
 		$video_id = false;
 
-		if (isset($attr["id"])) {
-			$video_id = $attr["id"];
+		if ( isset( $attr['id'] ) ) {
+			$video_id = $attr['id'];
 		} elseif ( isset( $attr[0] ) ) {
 			$video_id = $attr[0];
-		} elseif ( function_exists ( 'shortcode_new_to_old_params' ) ) {
+		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
 			$video_id = shortcode_new_to_old_params( $attr );
 		}
 
@@ -94,8 +94,8 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = parse_url( $url );
 		parse_str( $parsed_url['path'], $path );
-		$tok = explode("/", $parsed_url['path']);
-		$tok = explode("_", $tok[2]);
+		$tok = explode( '/', $parsed_url['path'] );
+		$tok = explode( '_', $tok[2] );
 		$video_id = $tok[0];
 
 		return $video_id;

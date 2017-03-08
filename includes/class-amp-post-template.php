@@ -83,7 +83,7 @@ class AMP_Post_Template {
 			 * @param	object	$post	The current post.
 			 */
 			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
- 		);
+			);
 
 		$this->build_post_content();
 		$this->build_post_data();
@@ -278,7 +278,7 @@ class AMP_Post_Template {
 			$featured_html,
 			array( 'AMP_Img_Sanitizer' => array() ),
 			array(
-				'content_max_width' => $this->get( 'content_max_width' )
+				'content_max_width' => $this->get( 'content_max_width' ),
 			)
 		);
 

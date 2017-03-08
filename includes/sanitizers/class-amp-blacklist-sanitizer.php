@@ -36,7 +36,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Some nodes may contain valid content but are themselves invalid.
 		// Remove the node but preserve the children.
- 		if ( 'font' === $node_name ) {
+		if ( 'font' === $node_name ) {
 			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
 			return;
 		} elseif ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {

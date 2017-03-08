@@ -28,9 +28,9 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	public function oembed( $matches, $attr, $url, $rawattr ) {
-		$track_id = $this->get_track_id_from_url($url);
+		$track_id = $this->get_track_id_from_url( $url );
 		return $this->render( array(
-			'track_id' =>  $track_id
+			'track_id' => $track_id,
 		) );
 	}
 
@@ -38,24 +38,24 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$track_id = false;
 
-		if ( isset( $attr["id"] ) ) {
-			$track_id = $attr["id"];
+		if ( isset( $attr['id'] ) ) {
+			$track_id = $attr['id'];
 		} else {
 			$url = false;
-			if (isset($attr["url"])) {
-				$url = $attr["url"];
-			} elseif (isset($attr[0])) {
+			if ( isset( $attr['url'] ) ) {
+				$url = $attr['url'];
+			} elseif ( isset( $attr[0] ) ) {
 				$url = $attr[0];
-			} elseif (function_exists('shortcode_new_to_old_params')) {
-				$url = shortcode_new_to_old_params($attr);
+			} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
+				$url = shortcode_new_to_old_params( $attr );
 			}
 
-			if (!empty($url)) {
-				$track_id = $this->get_track_id_from_url($url);
+			if ( ! empty( $url ) ) {
+				$track_id = $this->get_track_id_from_url( $url );
 			}
 		}
 
-		if (empty($track_id)) {
+		if ( empty( $track_id ) ) {
 			return '';
 		}
 
@@ -87,7 +87,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	private function get_track_id_from_url( $url ) {
 		$parsed_url = parse_url( $url );
-		$tok = explode("/", $parsed_url['path']);
+		$tok = explode( '/', $parsed_url['path'] );
 		$track_id = $tok[2];
 
 		return $track_id;
