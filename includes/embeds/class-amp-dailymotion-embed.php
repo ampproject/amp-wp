@@ -8,8 +8,8 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?:\/\/(www\.)?dailymotion\.com\/video\/.*#i';
 	const RATIO = 0.5625;
 
-	protected $default_width = 600;
-	protected $default_height = 338;
+	protected $DEFAULT_WIDTH = 600;
+	protected $DEFAULT_HEIGHT = 338;
 
 	private static $script_slug = 'amp-dailymotion';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js';

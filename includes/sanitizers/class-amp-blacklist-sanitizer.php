@@ -11,7 +11,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
 class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	const PATTERN_REL_WP_ATTACHMENT = '#wp-att-([\d]+)#';
 
-	protected $default_args = array(
+	protected $DEFAULT_ARGS = array(
 		'add_blacklisted_protocols' => array(),
 		'add_blacklisted_tags' => array(),
 		'add_blacklisted_attributes' => array(),

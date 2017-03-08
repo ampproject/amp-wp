@@ -4,7 +4,7 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' )
 
 class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://api\.soundcloud\.com/tracks/.*#i';
-	protected $default_height = 200;
+	protected $DEFAULT_HEIGHT = 200;
 
 	private static $script_slug = 'amp-soundcloud';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js';

@@ -5,8 +5,8 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' )
 class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://vine\.co/v/([^/?]+)#i';
 
-	protected $default_width = 400;
-	protected $default_height = 400;
+	protected $DEFAULT_WIDTH = 400;
+	protected $DEFAULT_HEIGHT = 400;
 
 	private static $script_slug = 'amp-vine';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-vine-0.1.js';
