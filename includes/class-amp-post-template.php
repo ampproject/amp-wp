@@ -385,7 +385,7 @@ class AMP_Post_Template {
 
 		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		if ( ! $this->is_valid_template( $file ) ) {
-			_doing_it_wrong( __METHOD__, sprintf( __( 'Path validation for template (%1$s) failed. Path cannot traverse and must be located in `%1$s`.', 'amp' ), esc_html( $file ), 'WP_CONTENT_DIR' ), '0.1' );
+			_doing_it_wrong( __METHOD__, sprintf( __( 'Path validation for template (%s) failed. Path cannot traverse and must be located in `%s`.', 'amp' ), esc_html( $file ), 'WP_CONTENT_DIR' ), '0.1' );
 			return;
 		}
 
