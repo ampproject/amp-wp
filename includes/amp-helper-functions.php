@@ -7,10 +7,11 @@ function amp_get_permalink( $post_id ) {
 		return $pre_url;
 	}
 
-	if ( '' != get_option( 'permalink_structure' ) ) {
-		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
-	} else {
+	$structure = get_option( 'permalink_structure' );
+	if ( empty( $structure ) ) {
 		$amp_url = add_query_arg( AMP_QUERY_VAR, 1, get_permalink( $post_id ) );
+	} else {
+		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
 	}
 
 	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
@@ -40,7 +41,7 @@ function post_supports_amp( $post ) {
  */
 function is_amp_endpoint() {
 	if ( 0 === did_action( 'parse_query' ) ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( __( 'is_amp_endpoint() was called before the \'parse_query\' hook was called. This function will always return \'false\' before the \'parse_query\' hook is called.', 'amp' ) ), '0.4.2' );
+		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
 	return false !== get_query_var( AMP_QUERY_VAR, false );

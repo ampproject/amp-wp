@@ -116,6 +116,6 @@ class AMP_DOM_Utils {
 			);
 		}
 
-		return in_array( $tag, $self_closing_tags );
+		return in_array( $tag, $self_closing_tags, true );
 	}
 }

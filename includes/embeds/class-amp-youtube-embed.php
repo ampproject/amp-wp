@@ -113,7 +113,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			// /(v|e|embed)/{id}
 			$parts = explode( '/', $parsed_url['path'] );
 
-			if ( in_array( $parts[1], array( 'v', 'e', 'embed' ) ) ) {
+			if ( in_array( $parts[1], array( 'v', 'e', 'embed' ), true ) ) {
 				$video_id = $parts[2];
 			}
 		}

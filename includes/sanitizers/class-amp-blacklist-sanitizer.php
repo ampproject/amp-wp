@@ -28,7 +28,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {
-		if ( $node->nodeType !== XML_ELEMENT_NODE ) {
+		if ( XML_ELEMENT_NODE !== $node->nodeType ) {
 			return;
 		}
 
@@ -49,13 +49,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
 				$attribute = $node->attributes->item( $i );
 				$attribute_name = strtolower( $attribute->name );
-				if ( in_array( $attribute_name, $bad_attributes ) ) {
+				if ( in_array( $attribute_name, $bad_attributes, true ) ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
 				}
 
 				// on* attributes (like onclick) are a special case
-				if ( 0 === stripos( $attribute_name, 'on' ) && $attribute_name != 'on' ) {
+				if ( 0 === stripos( $attribute_name, 'on' ) && 'on' !== $attribute_name ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
 				} elseif ( 'a' === $node_name ) {
@@ -145,11 +145,11 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		$protocol = strtok( $href, ':' );
 
 		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
-			&& ! in_array( $protocol, $special_protocols ) ) {
+			&& ! in_array( $protocol, $special_protocols, true ) ) {
 			return false;
 		}
 
-		if ( ! in_array( $protocol, $valid_protocols ) ) {
+		if ( ! in_array( $protocol, $valid_protocols, true ) ) {
 			return false;
 		}
 
