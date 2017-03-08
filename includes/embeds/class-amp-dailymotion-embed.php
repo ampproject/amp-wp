@@ -92,7 +92,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	private function get_video_id_from_url( $url ) {
-		$parsed_url = wp_parse_url( $url );
+		$parsed_url = parse_url( $url );
 		parse_str( $parsed_url['path'], $path );
 		$tok = explode( '/', $parsed_url['path'] );
 		$tok = explode( '_', $tok[2] );
