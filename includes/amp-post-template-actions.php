@@ -4,15 +4,15 @@
 class AMP_Template_Actions {
 
 	public static function hooks() {
-		add_action( 'amp_post_template_head',   [ __CLASS__, 'add_title' ] );
-		add_action( 'amp_post_template_head',   [ __CLASS__, 'add_canonical' ] );
-		add_action( 'amp_post_template_head',   [ __CLASS__, 'add_scripts' ] );
-		add_action( 'amp_post_template_head',   [ __CLASS__, 'add_fonts' ] );
-		add_action( 'amp_post_template_head',   [ __CLASS__, 'add_boilerplate_css' ] );
-		add_action( 'amp_post_template_head',   [ __CLASS__, 'add_schemaorg_metadata' ] );
-		add_action( 'amp_post_template_css',    [ __CLASS__, 'add_styles', 99 ] );
-		add_action( 'amp_post_template_data',   [ __CLASS__, 'add_analytics_script' ] );
-		add_action( 'amp_post_template_footer', [ __CLASS__, 'add_analytics_data' ] );
+		add_action( 'amp_post_template_head',   array( __CLASS__, 'add_title' ) );
+		add_action( 'amp_post_template_head',   array( __CLASS__, 'add_canonical' ) );
+		add_action( 'amp_post_template_head',   array( __CLASS__, 'add_scripts' ) );
+		add_action( 'amp_post_template_head',   array( __CLASS__, 'add_fonts' ) );
+		add_action( 'amp_post_template_head',   array( __CLASS__, 'add_boilerplate_css' ) );
+		add_action( 'amp_post_template_head',   array( __CLASS__, 'add_schemaorg_metadata' ) );
+		add_action( 'amp_post_template_css',    array( __CLASS__, 'add_styles', 99 ) );
+		add_action( 'amp_post_template_data',   array( __CLASS__, 'add_analytics_script' ) );
+		add_action( 'amp_post_template_footer', array( __CLASS__, 'add_analytics_data' ) );
 	}
 
 	public static function add_title( $amp_template ) {
