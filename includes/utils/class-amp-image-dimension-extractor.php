@@ -169,7 +169,7 @@ class AMP_Image_Dimension_Extractor {
 			if ( false === $result ) {
 				$images[ $url ]['size'] = self::STATUS_IMAGE_EXTRACTION_FAILED;
 			} else {
-				$size = $image->get_size();
+				$size = $image->getSize();
 				$images[ $url ]['size'] = $size;
 			}
 		}
