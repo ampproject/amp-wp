@@ -2,7 +2,9 @@
 
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
 
-
+/**
+ * Converts Playbuzz embed to <amp-playbuzz>
+ */
 class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer{
 
     public static $tag = 'div';
@@ -48,6 +50,10 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer{
 
             $new_attributes = $this->filter_attributes( $old_attributes );
 
+            if(!isset($new_attributes['data-item']) && !isset($new_attributes['src'])){
+                continue;
+            }
+
             $new_node = AMP_DOM_Utils::create_node( $this->dom, self::$script_slug, $new_attributes );
 
 
@@ -71,7 +77,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer{
                     break;
 
                 case 'data-game':
-                    $out[ 'src' ] = $this->maybe_enforce_https_src( $value );
+                    $out[ 'src' ] = $value;
                     break;
 
                 case 'data-game-info':
