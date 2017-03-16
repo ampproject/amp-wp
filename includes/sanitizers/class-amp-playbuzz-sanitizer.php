@@ -50,9 +50,11 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer{
 
             $new_attributes = $this->filter_attributes( $old_attributes );
 
+
             if(!isset($new_attributes['data-item']) && !isset($new_attributes['src'])){
                 continue;
             }
+
 
             $new_node = AMP_DOM_Utils::create_node( $this->dom, self::$script_slug, $new_attributes );
 
@@ -73,11 +75,15 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer{
         foreach ( $attributes as $name => $value ) {
             switch ( $name ) {
                 case 'data-item':
-                    $out[ 'data-item' ] = $value;
+                    if(!empty($value)){
+                        $out[ 'data-item' ] = $value;
+                    }
                     break;
 
                 case 'data-game':
-                    $out[ 'src' ] = $value;
+                    if(!empty($value)){
+                        $out[ 'src' ] = $value;
+                    }
                     break;
 
                 case 'data-game-info':

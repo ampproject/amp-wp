@@ -21,13 +21,13 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
             ),
 
             'playbuzz_item_with_data_game' => array(
-                '<div class="pb_feed" data-game="jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
-                '<amp-playbuzz src="jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>'
+                '<div class="pb_feed" data-game="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
+                '<amp-playbuzz src="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>'
             ),
 
             'playbuzz_item_with_data_game_and_data_item' => array(
-                '<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" data-game="jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
-                '<amp-playbuzz data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" src="jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>'
+                '<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" data-game="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
+                '<amp-playbuzz data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" src="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>'
             ),
 
             'playbuzz_item_with_data_game_info' => array(
