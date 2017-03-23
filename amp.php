@@ -21,6 +21,8 @@ require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
+require_once( AMP__DIR__ . '/option.php' );
+
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
 	if ( ! did_action( 'amp_init' ) ) {
@@ -55,8 +57,12 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
-	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
-	add_post_type_support( 'post', AMP_QUERY_VAR );
+	// If the amp_canonical option has not been setup, or the current
+	// theme does not provide AMP support, then follow the "paired" approach
+	if ( ! get_option('amp_canonical') || ! get_theme_support('amp')) {
+		add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
+		add_post_type_support( 'post', AMP_QUERY_VAR );
+	}
 
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );
@@ -67,6 +73,7 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
+
 }
 
 // Make sure the `amp` query var has an explicit value.
@@ -101,6 +108,8 @@ function amp_maybe_add_actions() {
 
 	if ( $is_amp_endpoint ) {
 		amp_prepare_render();
+	} else if( get_option('amp_canonical') && $supports && get_theme_support('amp')) {
+		amp_add_canonical_actions();
 	} else {
 		amp_add_frontend_actions();
 	}
@@ -133,6 +142,13 @@ function amp_render() {
 	$template = new AMP_Post_Template( $post_id );
 	$template->load();
 	exit;
+}
+
+// Load AMP canonical actions and high-priority
+// filters for canonical AMP
+function amp_add_canonical_actions() {
+	require_once( AMP__DIR__ . '/includes/amp-canonical-actions.php');
+	require_once( AMP__DIR__ . '/includes/amp-canonical-filters.php');
 }
 
 /**
