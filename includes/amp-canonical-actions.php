@@ -1,0 +1,111 @@
+<?php
+require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php');
+require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php');
+require_once( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php');
+
+require_once( AMP__DIR__ . '/includes/class-amp-content.php');
+
+require_once( AMP__DIR__ . '/includes/class-amp-blacklist-sanitizer.php');
+require_once( AMP__DIR__ . '/includes/class-amp-img-sanitizer.php');
+require_once( AMP__DIR__ . '/includes/class-amp-video-sanitizer.php');
+require_once( AMP__DIR__ . '/includes/class-amp-iframe-sanitizer.php');
+require_once( AMP__DIR__ . '/includes/class-amp-audio-sanitizer.php');
+
+require_once( AMP__DIR__ . '/includes/class-amp-twitter-embed.php');
+require_once( AMP__DIR__ . '/includes/class-amp-youtube-embed.php');
+require_once( AMP__DIR__ . '/includes/class-amp-gallery-embed.php');
+require_once( AMP__DIR__ . '/includes/class-amp-instagram-embed.php');
+require_once( AMP__DIR__ . '/includes/class-amp-vine-embed.php');
+require_once( AMP__DIR__ . '/includes/class-amp-facebook-embed.php');
+
+function amp_canonical_retrieve_content() {
+
+	$post = get_post();
+
+	$content_max_width = 1200;
+
+	if ( isset( $GLOBALS['content_width']) && $GLOBALS['content_width'] > 0 ) {
+		$content_max_width = $GLOBALS['content_width'];
+	}
+
+	$amp_content = new AMP_Content(
+		$post->post_content,
+		array(
+			'AMP_Twitter_Embed_Handler' => array(),
+			'AMP_YouTube_Embed_Handler' => array(),
+			'AMP_DailyMotion_Embed_Handler' => array(),
+			'AMP_SoundCloud_Embed_Handler' => array(),
+			'AMP_Instagram_Embed_Handler' => array(),
+			'AMP_Vine_Embed_Handler' => array(),
+			'AMP_Facebook_Embed_Handler' => array(),
+			'AMP_Gallery_Embed_Handler' => array(),
+		),
+		array(
+			'AMP_Style_Sanitizer' => array(),
+			'AMP_Blacklist_Sanitizer' => array(),
+			'AMP_Img_Sanitizer' => array(),
+			'AMP_Video_Sanitizer' => array(),
+			'AMP_Audio_Sanitizer' => array(),
+			'AMP_Iframe_Sanitizer' => array(),
+				'add_placeholder' => true,
+		),
+		array(
+			'content_max_width' => $content_max_width,
+		)
+	);
+
+	return $amp_content;
+
+}
+
+// Generate the AMP post content early on
+// Runs the filters for the_content, but skips our filters below
+$GLOBALS['amp_content'] = amp_canonical_retrieve_content();
+
+// The filter for the_content hook was already invoked,
+// attempt to remove all filters
+remove_all_filters('the_content');
+
+add_action( 'wp_head', 'amp_amp_canonical_add_scripts' );
+add_action( 'wp_head', 'amp_canonical_add_boilerplate_css' );
+add_action( 'wp_footer', 'amp_deregister_scripts' );
+
+// Add the filter that replaces the content, and ensure
+// that no content filters run afterwards
+add_filter( 'the_content', 'amp_the_content_filter', PHP_INT_MAX);
+function amp_the_content_filter($content) {
+	if (isset($GLOBALS['amp_content'])) {
+		return $GLOBALS['amp_content']->get_amp_content();
+	} else {
+		return $content;
+	}
+}
+
+function amp_deregister_scripts() {
+	wp_deregister_script( 'wp_embed');
+}
+
+function amp_canonical_add_boilerplate_css() {
+	?>
+	<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+	<?php
+}
+
+function amp_canonical_add_scripts() {
+
+	$amp_runtime_script = 'https://cdn.ampproject.org/v0.js';
+
+	// Always include AMP form & analytics, as almost every template includes
+	// a search form and is tracking page views
+	$scripts = array_merge(
+		array('amp-form' => 'https://cdn.ampproject.org/v0/amp-form-0.1.js'),
+		array('amp-analytics' => 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js'),
+		$GLOBALS['amp_content']->get_amp_scripts()
+	);
+
+	foreach ( $scripts as $element => $script) : ?>
+		<script custom-element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
+	<?php endforeach; ?>
+	<script src="<?php echo esc_url( $amp_runtime_script ); ?>" async></script>
+	<?php
+}
