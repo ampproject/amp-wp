@@ -6,6 +6,7 @@
 // TODO[@amedina]  remove as soon as it works
 
 function amp_canonical_disable_jetpack_dns_fetch() {
+
 	if ( class_exists( 'Jetpack') ) {
 		remove_action( 'wp_head', array( 'Jetpack', 'dns_prefetch' ) );
 	}

@@ -147,6 +147,7 @@ function amp_render() {
 // Load AMP canonical actions and high-priority
 // filters for canonical AMP
 function amp_add_canonical_actions() {
+
 	require_once( AMP__DIR__ . '/includes/amp-canonical-actions.php');
 	require_once( AMP__DIR__ . '/includes/amp-canonical-filters.php');
 }
