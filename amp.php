@@ -20,7 +20,7 @@ require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
-
+require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php');
 require_once( AMP__DIR__ . '/option.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
@@ -144,12 +144,50 @@ function amp_render() {
 	exit;
 }
 
-// Load AMP canonical actions and high-priority
-// filters for canonical AMP
 function amp_add_canonical_actions() {
-
+	// Load AMP canonical actions
 	require_once( AMP__DIR__ . '/includes/amp-canonical-actions.php');
+	// Load high-priority filters for canonical AMP
 	require_once( AMP__DIR__ . '/includes/amp-canonical-filters.php');
+	add_action( 'template_redirect', 'amp_maybe_init_postprocess_html' );
+}
+
+function amp_maybe_init_postprocess_html() {
+	ob_start( 'amp_canonical_postprocess_html' );
+}
+
+/**
+ * Convert generated $html to AMP-compatible format
+ */
+function amp_canonical_postprocess_html( $html ) {
+
+	$dom = new DOMDocument();
+	$dom->loadHTML($html);
+
+	// Add amp attribute to html tag
+	$html_tag = $dom->getElementsByTagName('html')->item(0);
+	$html_tag->setAttribute('amp', '');
+
+	// Get rid of 3rd-party scripts
+	$scripts = $dom->getElementsByTagName('script');
+	$scripts_to_remove = [];
+	foreach ($scripts as $script) {
+		$type = $script->getAttribute('type');
+		$src = $script->getAttribute('src');
+		if ($type !== "application/ld+json" and $type !== "custom-element") {
+			if ($src !== "https://cdn.ampproject.org/v0.js") {
+				array_push($scripts_to_remove, $script);
+			}
+		}
+	}
+
+	foreach ($scripts_to_remove as $script) {
+		$script->parentNode->removeChild($script);
+	}
+
+	$amp_html = $dom->saveHTML();
+
+	return $amp_html;
 }
 
 /**
