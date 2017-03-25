@@ -57,7 +57,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Normalize order
-		$styles = array_map( 'trim', explode( ';', $string ) );
+		$styles = array_map( 'trim', preg_split("/;(?![^(]*\))/", $string ) );
 		sort( $styles );
 
 		$processed_styles = array();
