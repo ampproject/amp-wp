@@ -56,8 +56,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return array();
 		}
 
-		// Normalize order
-		$styles = array_map( 'trim', explode( ';', $string ) );
+		// safecss returns a string but we want individual rules.
+		// Using preg_split to break up rules by `;` but only if the semi-colon is not inside parens (like a data-encoded image).
+		$styles = array_map( 'trim', preg_split( "/;(?![^(]*\))/", $string ) );
+
+		// Normalize the order of the styles
 		sort( $styles );
 
 		$processed_styles = array();
