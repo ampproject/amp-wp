@@ -2,8 +2,10 @@
 
 define( 'AMP_IMG_DIMENSION_TEST_VALID_FILE', dirname( __FILE__ ) . '/assets/wordpress-logo.png' );
 define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/not-exists.png' );
-define( 'IMG_350', 'http://i0.wp.com/placehold.it/350x150.png' );
-define( 'IMG_1024', 'http://i0.wp.com/placehold.it/1024x768.png' );
+
+// Not ideal to use remote URLs (since the remote service can change); mocking would be better.
+define( 'IMG_350', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/350x150.png' );
+define( 'IMG_1024', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/1024x768.png' );
 
 class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase {
 	function get_data() {
