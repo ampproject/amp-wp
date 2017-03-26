@@ -118,4 +118,14 @@ class AMP_DOM_Utils {
 
 		return in_array( $tag, $self_closing_tags, true );
 	}
+
+	/**
+	 * Remove nodes from DOM element
+	 */
+	public static function remove_dom_nodes($nodes_to_remove) {
+		foreach ($nodes_to_remove as $node) {
+			$node->parentNode->removeChild($node);
+		}
+	}
+
 }

@@ -22,6 +22,7 @@ require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php');
 require_once( AMP__DIR__ . '/option.php' );
+require_once(AMP__DIR__ . '/post-processing/class-amp-sanitize-tweentyseventeen-theme-plain.php');
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
@@ -149,6 +150,7 @@ function amp_add_canonical_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-canonical-actions.php');
 	// Load high-priority filters for canonical AMP
 	require_once( AMP__DIR__ . '/includes/amp-canonical-filters.php');
+	// Template redirect to postprocessing actions
 	add_action( 'template_redirect', 'amp_maybe_init_postprocess_html' );
 }
 
@@ -157,165 +159,7 @@ function amp_maybe_init_postprocess_html() {
 }
 
 /**
- * Remove nodes from DOM
- */
-function remove_dom_nodes($nodes_to_remove) {
-	foreach ($nodes_to_remove as $node) {
-		$node->parentNode->removeChild($node);
-	}
-}
-
-/**
- * Add amp attribute to html tag
- */
-function add_amp_attr($dom) {
-	$html_tag = $dom->getElementsByTagName('html')->item(0);
-	$html_tag->setAttribute('amp', '');
-}
-
-/**
- * Eliminate 3rd-party JS
- */
-function eliminate_3p_js($dom) {
-	// Get rid of 3rd-party scripts
-	$scripts = $dom->getElementsByTagName('script');
-	$scripts_to_remove = [];
-	foreach ($scripts as $script) {
-		$type = $script->getAttribute('type');
-		$custom_element = $script->getAttribute('custom-element');
-		if ($type !== "application/ld+json" and !$custom_element) {
-			$src = $script->getAttribute('src');
-			if ($src !== "https://cdn.ampproject.org/v0.js") {
-				array_push($scripts_to_remove, $script);
-			}
-		}
-	}
-
-	error_log( "Removing  scripts!" );
-	remove_dom_nodes($scripts_to_remove);
-}
-
-/**
- * Eliminate external stylesheets
- */
-function eliminate_ext_css($dom) {
-	$links = $dom->getElementsByTagName('link');
-	$links_to_remove = [];
-
-	$ids = array("dashicons-css", "admin-bar-css");
-	foreach ($links as $link) {
-		$rel = $link->getAttribute('rel');
-		$id = $link->getAttribute('id');
-		if ($rel == "stylesheet" and in_array($id, $ids)) {
-			array_push($links_to_remove, $link);
-		}
-		if ( $link->hasAttribute('crossorigin') ) {
-			$link->removeAttribute('crossorigin');
-		}
-	}
-
-	error_log( "Removing external stylesheet links!" );
-	remove_dom_nodes($links_to_remove);
-
-}
-
-/**
- * Eliminate sidebars
- */
-function eliminate_sidebars($dom) {
-	$aside_secondary = $dom->getElementById('secondary');
-	error_log( "Removing secondary aside!" );
-	remove_dom_nodes(array($aside_secondary));
-}
-
-/**
- * Eliminate entry-footers
- */
-function eliminate_entry_footers($dom) {
-	$entry_footers = $dom->getElementsByTagName( 'footer' );
-	$footers_to_remove = [];
-	foreach ($entry_footers as $footer) {
-		$class = $footer->getAttribute('class');
-		if ($class == "entry-footer") {
-			array_push($footers_to_remove, $footer);
-		}
-	}
-	error_log( "Removing footers!" );
-	remove_dom_nodes($footers_to_remove);
-}
-
-/**
- * Eliminate overall footer
- */
-function eliminate_overall_footer($dom) {
-	$overall_footer = $dom->getElementById('colophon');
-	error_log( "Removing overall footer!" );
-	remove_dom_nodes(array($overall_footer));
-}
-
-/**
- * Eliminate post navigation
- */
-function eliminate_post_navigation($dom) {
-	$navs = $dom->getElementsByTagName( 'nav' );
-	$navs_to_remove = [];
-	foreach ($navs as $nav) {
-		$classes = $nav->getAttribute('class');
-		error_log(print_r($classes));
-		error_log(gettype($classes));
-		if (strpos($classes, "post-navigation") !== false) {
-			array_push($navs_to_remove, $nav);
-		}
-	}
-	error_log( "Removing post navigation!" );
-	remove_dom_nodes($navs_to_remove);
-}
-
-/**
- * Eliminate comments section
- */
-function eliminate_comments_section($dom) {
-	$comments = $dom->getElementById('comments');
-	error_log( "Removing comments section!" );
-	remove_dom_nodes(array($comments));
-}
-
-/**
- * Set meta viewport
- * <meta name="viewport" content="width=device-width,minimum-scale=1">
- */
-function set_meta_viewport($dom) {
-	$metatags = $dom->getElementsByTagName('meta');
-	foreach ($metatags as $meta) {
-		$meta_tag_name = $meta->getAttribute('name');
-		if ($meta_tag_name == "viewport") {
-			error_log( "Updating viewport met tag!" );
-			$meta->setAttribute('content', 'width=device-width,minimum-scale=1');
-		}
-	}
-}
-
-/**
- * Eliminate non-amp-custom styles
- */
-function eliminate_non_amp_custom_styles($dom) {
-	$styles = $dom->getElementsByTagName('style');
-	$styles_to_remove = [];
-	foreach ($styles as $style) {
-		$type = $style->getAttribute('type');
-		if ($type == "text/css") {
-			if (!$style->hasAttribute('amp-custom')) {
-				array_push($styles_to_remove, $style);
-			}
-		}
-	}
-
-	error_log("Removing non amp-custom style tags!");
-	remove_dom_nodes($styles_to_remove);
-}
-
-/**
- * Convert generated $html to AMP-compatible format
+ * Convert generated $html (plain 2017 Theme) to valid-AMP format
  */
 function amp_canonical_postprocess_html( $html ) {
 
@@ -324,27 +168,36 @@ function amp_canonical_postprocess_html( $html ) {
 	$dom->loadHTML($html);
 	libxml_use_internal_errors(false);
 
-	// Add amp attribute to html tag
-	add_amp_attr($dom);
-	// Eliminate 3p JS
-	eliminate_3p_js($dom);
-	// Eliminate external stylesheets
-	eliminate_ext_css($dom);
-	// Eliminate sidebars
-	eliminate_sidebars($dom);
-	// Eliminate entry footers
-	eliminate_entry_footers($dom);
-	// Eliminate overall footer
-	eliminate_overall_footer($dom);
-	// Eliminate post navigation
-	eliminate_post_navigation($dom);
-	// Eliminate comments section
-	eliminate_comments_section($dom);
-	// Set meta viewport
-	set_meta_viewport($dom);
-	// Eliminate non-amp-custom Stylesheets
-	eliminate_non_amp_custom_styles($dom);
+	// TODO (@amedina): Define how specific theme sanitations
+	// will be executed; user can select a specific one or a
+	// generic one could be executed
 
+	// Add amp attribute to html tag
+	AMP_Sanitize_TweentySeventeen_Theme::add_amp_attr($dom);
+	// Eliminate 3p JS
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_3p_js($dom);
+	// Eliminate external stylesheets
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_ext_css($dom);
+	// Eliminate sidebars
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
+	// Eliminate entry footers
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_entry_footers($dom);
+	// Eliminate overall footer
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_overall_footer($dom);
+	// Eliminate post navigation
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_post_navigation($dom);
+	// Eliminate comments section
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_comments_section($dom);
+	// Set meta viewport
+	AMP_Sanitize_TweentySeventeen_Theme::set_meta_viewport($dom);
+	// Eliminate non-amp-custom Stylesheets
+	AMP_Sanitize_TweentySeventeen_Theme::eliminate_non_amp_custom_styles($dom);
+	// Inline theme CSS
+	AMP_Sanitize_TweentySeventeen_Theme::inline_theme_css($dom);
+	// AMP Custom-header img
+	AMP_Sanitize_TweentySeventeen_Theme::amp_custom_header_img($dom);
+	// Remove styled SVGs
+	AMP_Sanitize_TweentySeventeen_Theme::remove_styled_svgs($dom);
 	// Save new HTML contents
 	$amp_html = $dom->saveHTML();
 
