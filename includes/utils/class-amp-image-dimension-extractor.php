@@ -157,13 +157,13 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
-		require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
-		$image = new FastImage();
-		$urls = array();
-		// array_column doesn't exist in PHP 5.2.
-		foreach ( $urls_to_fetch as $key => $value ) {
-			$urls[] = $key;
+		if ( ! class_exists( 'FastImage' ) ) {
+			require_once( AMP__DIR__ . '/includes/lib/class-fastimage.php' );
 		}
+
+		$image = new FastImage();
+		$urls = array_keys( $urls_to_fetch );
+
 		foreach ( $urls as $url ) {
 			$result = $image->load( $url );
 			if ( false === $result ) {
@@ -182,13 +182,15 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
+		$urls = array_keys( $urls_to_fetch );
+
 		if ( ! function_exists( 'amp_get_fasterimage_client' ) ) {
 			require_once( AMP__DIR__ . '/includes/lib/fasterimage/amp-fasterimage.php' );
 		}
+
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
 		$client = amp_get_fasterimage_client( $user_agent );
-		// TODO: can't use array_column, 5.5+
-		$images = $client->batch( array_column( $urls_to_fetch, 'url' ) );
+		$images = $client->batch( $urls );
 	}
 
 	/**
