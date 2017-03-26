@@ -12,6 +12,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php' );
 
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php' );
@@ -240,6 +241,7 @@ class AMP_Post_Template {
 				 'AMP_Img_Sanitizer' => array(),
 				 'AMP_Video_Sanitizer' => array(),
 				 'AMP_Audio_Sanitizer' => array(),
+				 'AMP_Playbuzz_Sanitizer' => array(),
 				 'AMP_Iframe_Sanitizer' => array(
 					 'add_placeholder' => true,
 				 ),
