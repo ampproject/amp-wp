@@ -142,7 +142,7 @@ class AMP_Image_Dimension_Extractor {
 		// Use FasterImage when able/PHP version supports it (it contains a closure that could not be ported to 5.2).
 		if ( 'synchronous' === $mode ||
 			false === function_exists( 'curl_multi_exec' ) ||
-			strnatcmp( phpversion(), '5.3.0' ) < 0
+			strnatcmp( phpversion(), '5.4.0' ) < 0
 		) {
 			self::fetch_images_via_fast_image( $urls_to_fetch, $images );
 		} else {
@@ -182,11 +182,12 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
-		if ( ! class_exists( 'Faster_Image_B52f1a8_Faster_Image' ) ) {
-			require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-faster-image.php' );
+		if ( ! function_exists( 'amp_get_fasterimage_client' ) ) {
+			require_once( AMP__DIR__ . '/includes/lib/fasterimage/amp-fasterimage.php' );
 		}
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client = new Faster_Image_B52f1a8_Faster_Image( $user_agent );
+		$client = amp_get_fasterimage_client( $user_agent );
+		// TODO: can't use array_column, 5.5+
 		$images = $client->batch( array_column( $urls_to_fetch, 'url' ) );
 	}
 

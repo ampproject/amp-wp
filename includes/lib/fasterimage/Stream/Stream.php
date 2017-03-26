@@ -1,14 +1,14 @@
-<?php
+<?php namespace WillWashburn\Stream;
 
-require_once( AMP__DIR__ . '/includes/lib/class-stream-17b32f3-stream-buffer-too-small-exception.php' );
-require_once( AMP__DIR__ . '/includes/lib/interface-stream-17b32f3-streamable-interface.php' );
+use WillWashburn\Stream\Exception\StreamBufferTooSmallException;
+
 
 /**
  * Class Stream
  *
  * @package FasterImage
  */
-class Stream_17b32f3_Stream implements Stream_17b32f3_Streamable_Interface
+class Stream implements StreamableInterface
 {
     /**
      * The string that we have downloaded so far
@@ -33,7 +33,7 @@ class Stream_17b32f3_Stream implements Stream_17b32f3_Streamable_Interface
     public function peek($characters)
     {
         if ( strlen($this->stream_string) < $this->strpos + $characters ) {
-            throw new Stream_17b32f3_Stream_Buffer_Too_Small_Exception('Not enough of the stream available.');
+            throw new StreamBufferTooSmallException('Not enough of the stream available.');
         }
 
         return substr($this->stream_string, $this->strpos, $characters);
