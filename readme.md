@@ -90,7 +90,7 @@ You can tweak various parts of the template via code.
 The default template displays the featured image. If you don't want to display the featured image in your amp page, use the following code:
 
 ```php
-add_filter( 'amp_post_template_data', 'xyz_amp_remove_featured_image' }
+add_filter( 'amp_post_template_data', 'xyz_amp_remove_featured_image' )
 
 function xyz_amp_remove_featured_image( $data ) {
     $data['featured_image'] = false;
