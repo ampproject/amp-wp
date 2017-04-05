@@ -130,6 +130,11 @@ function amp_render() {
 }
 
 function amp_render_post( $post_id ) {
+	$post = get_post( $post_id );
+	if ( ! $post ) {
+		return;
+	}
+
 	amp_load_classes();
 
 	do_action( 'pre_amp_render_post', $post_id );
