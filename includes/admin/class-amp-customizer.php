@@ -46,7 +46,7 @@ class AMP_Template_Customizer {
 
 		// Our custom panels only need to go for AMP Customizer requests though
 		if ( self::is_amp_customizer() ) {
-			if ( empty( $_GET['url'] ) ) {
+			if ( empty( $_GET['url'] ) ) { // input var ok
 				$wp_customize->set_preview_url( amp_admin_get_preview_permalink() );
 			}
 
@@ -156,7 +156,7 @@ class AMP_Template_Customizer {
 	}
 
 	public function force_mobile_preview( $devices ) {
-		if ( isset( $devices[ 'mobile' ] ) ) {
+		if ( isset( $devices['mobile'] ) ) {
 			$devices['mobile']['default'] = true;
 			unset( $devices['desktop']['default'] );
 		}
@@ -165,6 +165,6 @@ class AMP_Template_Customizer {
 	}
 
 	public static function is_amp_customizer() {
-		return ! empty( $_REQUEST[ AMP_CUSTOMIZER_QUERY_VAR ] );
+		return ! empty( $_REQUEST[ AMP_CUSTOMIZER_QUERY_VAR ] ); // input var ok
 	}
 }

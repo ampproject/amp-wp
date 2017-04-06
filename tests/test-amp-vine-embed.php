@@ -5,11 +5,11 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 		return array(
 			'no_embed' => array(
 				'<p>Hello world.</p>',
-				'<p>Hello world.</p>' . PHP_EOL
+				'<p>Hello world.</p>' . PHP_EOL,
 			),
 			'simple_url' => array(
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				'<p><amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine></p>' . PHP_EOL
+				'<p><amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine></p>' . PHP_EOL,
 			),
 		);
 	}
@@ -29,11 +29,11 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 		return array(
 			'not_converted' => array(
 				'<p>Hello World.</p>',
-				array()
+				array(),
 			),
 			'converted' => array(
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				array( 'amp-vine' => 'https://cdn.ampproject.org/v0/amp-vine-0.1.js' )
+				array( 'amp-vine' => 'https://cdn.ampproject.org/v0/amp-vine-0.1.js' ),
 			),
 		);
 	}

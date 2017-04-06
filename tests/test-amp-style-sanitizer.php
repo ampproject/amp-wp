@@ -113,7 +113,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-wp-inline-3be9b2f79873ad78941ba2b3c03025a3' => array(
 						'background:#000',
 					),
-				)
+				),
 
 			),
 		);

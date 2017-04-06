@@ -18,7 +18,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function collect_styles_recursive( $node ) {
-		if ( $node->nodeType !== XML_ELEMENT_NODE ) {
+		if ( XML_ELEMENT_NODE !== $node->nodeType ) {
 			return;
 		}
 
@@ -56,8 +56,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return array();
 		}
 
-		// Normalize order
-		$styles = array_map( 'trim', explode( ';', $string ) );
+		// safecss returns a string but we want individual rules.
+		// Using preg_split to break up rules by `;` but only if the semi-colon is not inside parens (like a data-encoded image).
+		$styles = array_map( 'trim', preg_split( "/;(?![^(]*\))/", $string ) );
+
+		// Normalize the order of the styles
 		sort( $styles );
 
 		$processed_styles = array();

@@ -129,7 +129,7 @@ function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions ) {
 			continue;
 		}
 
-		$query = parse_url( $url, PHP_URL_QUERY );
+		parse_str( parse_url( $url, PHP_URL_QUERY ), $query );
 		$w = isset( $query['w'] ) ? absint( $query['w'] ) : false;
 		$h = isset( $query['h'] ) ? absint( $query['h'] ) : false;
 

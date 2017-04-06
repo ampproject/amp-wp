@@ -48,7 +48,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		$video_id = false;
 		if ( isset( $attr[0] ) ) {
 			$url = ltrim( $attr[0] , '=' );
-		} elseif ( function_exists ( 'shortcode_new_to_old_params' ) ) {
+		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
 			$url = shortcode_new_to_old_params( $attr );
 		}
 
@@ -113,7 +113,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			// /(v|e|embed)/{id}
 			$parts = explode( '/', $parsed_url['path'] );
 
-			if ( in_array( $parts[1], array( 'v', 'e', 'embed' ) ) ) {
+			if ( in_array( $parts[1], array( 'v', 'e', 'embed' ), true ) ) {
 				$video_id = $parts[2];
 			}
 		}

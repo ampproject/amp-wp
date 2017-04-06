@@ -23,7 +23,7 @@ class AMP_Customizer_Design_Settings {
 			'type'              => 'option',
 			'default'           => self::DEFAULT_HEADER_COLOR,
 			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage'
+			'transport'         => 'postMessage',
 		) );
 
 		// Header background color
@@ -31,7 +31,7 @@ class AMP_Customizer_Design_Settings {
 			'type'              => 'option',
 			'default'           => self::DEFAULT_HEADER_BACKGROUND_COLOR,
 			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage'
+			'transport'         => 'postMessage',
 		) );
 
 		// Background color scheme
@@ -39,7 +39,7 @@ class AMP_Customizer_Design_Settings {
 			'type'              => 'option',
 			'default'           => self::DEFAULT_COLOR_SCHEME,
 			'sanitize_callback' => array( __CLASS__ , 'sanitize_color_scheme' ),
-			'transport'         => 'postMessage'
+			'transport'         => 'postMessage',
 		) );
 	}
 
@@ -55,7 +55,7 @@ class AMP_Customizer_Design_Settings {
 				'settings'   => 'amp_customizer[header_color]',
 				'label'    => __( 'Header Text Color', 'amp' ),
 				'section'  => 'amp_design',
-				'priority' => 10
+				'priority' => 10,
 			) )
 		);
 
@@ -65,7 +65,7 @@ class AMP_Customizer_Design_Settings {
 				'settings'   => 'amp_customizer[header_background_color]',
 				'label'    => __( 'Header Background & Link Color', 'amp' ),
 				'section'  => 'amp_design',
-				'priority' => 20
+				'priority' => 20,
 			) )
 		);
 
@@ -109,7 +109,7 @@ class AMP_Customizer_Design_Settings {
 
 	protected static function get_color_scheme_names() {
 		return array(
-			'light'   => __( 'Light', 'amp'),
+			'light'   => __( 'Light', 'amp' ),
 			'dark'    => __( 'Dark', 'amp' ),
 		);
 	}
@@ -129,7 +129,7 @@ class AMP_Customizer_Design_Settings {
 				'text_color'       => '#dedede',
 				'muted_text_color' => '#b1b1b1',
 				'border_color'     => '#707070',
-			)
+			),
 		);
 	}
 
@@ -147,7 +147,7 @@ class AMP_Customizer_Design_Settings {
 		$schemes = self::get_color_scheme_names();
 		$scheme_slugs = array_keys( $schemes );
 
-		if ( ! in_array( $value, $scheme_slugs ) ) {
+		if ( ! in_array( $value, $scheme_slugs, true ) ) {
 			$value = self::DEFAULT_COLOR_SCHEME;
 		}
 

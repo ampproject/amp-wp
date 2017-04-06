@@ -5,42 +5,42 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 		return array(
 			'empty' => array(
 				'',
-				''
+				'',
 			),
 
 			'blacklisted_tag_with_innertext' => array(
 				'<script>alert("")</script>',
-				''
+				'',
 			),
 
 			'multiple_blacklisted_tags_only' => array(
 				'<input type="text" /><script>alert("")</script><style>body{ color: red; }</style><label>This is a label</label>',
-				''
+				'',
 			),
 
 			'multiple_blacklisted_tags_only_in_child' => array(
 				'<p><input type="text" /><script>alert("")</script><style>body{ color: red; }</style></p>',
-				''
+				'',
 			),
 
 			'whitelisted_tag_only' => array(
 				'<p>Text</p><img src="/path/to/file.jpg" />',
-				'<p>Text</p><img src="/path/to/file.jpg"/>' // LIBXML_NOEMPTYTAG
+				'<p>Text</p><img src="/path/to/file.jpg"/>', // LIBXML_NOEMPTYTAG
 			),
 
 			'blacklisted_attributes' => array(
 				'<a href="/path/to/file.jpg" style="border: 1px solid red;">Link</a>',
-				'<a href="/path/to/file.jpg">Link</a>'
+				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
 			'onclick_attribute' => array(
 				'<a href="/path/to/file.jpg" onclick="alert(e);">Link</a>',
-				'<a href="/path/to/file.jpg">Link</a>'
+				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
 			'on_attribute' => array(
 				'<button on="tap:my-lightbox">Tap Me</button>',
-				'<button on="tap:my-lightbox">Tap Me</button>'
+				'<button on="tap:my-lightbox">Tap Me</button>',
 			),
 
 			'multiple_blacklisted_attributes' => array(
@@ -50,22 +50,22 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 
 			'javascript_protocol' => array(
 				'<a href="javascript:alert(\'Hello\');">Click</a>',
-				'Click'
+				'Click',
 			),
 
 			'attribute_recursive' => array(
 				'<div style="border: 1px solid red;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
-				'<div><a href="/path/to/file.jpg">Hello World</a></div>'
+				'<div><a href="/path/to/file.jpg">Hello World</a></div>',
 			),
 
 			'mixed_tags' => array(
 				'<input type="text" /><p>Text</p><script>alert("")</script><style>body{ color: red; }</style>',
-				'<p>Text</p>'
+				'<p>Text</p>',
 			),
 
 			'no_strip_amp_tags' => array(
 				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>',
-				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>'
+				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>',
 			),
 
 			'a_with_attachment_rel' => array(
@@ -160,7 +160,7 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 
 			'a_empty_with_children_with_restricted_attributes' => array(
 				'<a><span style="color: red;">Red</span>&amp;<span style="color: blue;">Orange</span></a>',
-				'<span>Red</span>&amp;<span>Orange</span>'
+				'<span>Red</span>&amp;<span>Orange</span>',
 			),
 
 			'h1_with_size' => array(

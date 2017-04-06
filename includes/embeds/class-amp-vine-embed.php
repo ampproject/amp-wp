@@ -28,7 +28,7 @@ class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->render( array( 'url' => $url, 'vine_id' =>  end( $matches ) ) );
+		return $this->render( array( 'url' => $url, 'vine_id' => end( $matches ) ) );
 	}
 
 	public function render( $args ) {

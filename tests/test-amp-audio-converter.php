@@ -42,9 +42,8 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'<audio width="400" height="300">
 	<source src="https://example.com/foo.wav" type="audio/wav">
 </audio>',
-				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"/></amp-audio>'
+				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"/></amp-audio>',
 			),
-
 
 			'multiple_same_audio' => array(
 				'<audio width="400" height="300">
@@ -67,7 +66,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 <audio height="500" width="300">
 	<source src="https://example.com/foo2.wav" type="audio/wav">
 </audio>',
-				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"/></amp-audio><amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio><amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"/></amp-audio>'
+				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"/></amp-audio><amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio><amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"/></amp-audio>',
 			),
 
 			'https_not_required' => array(
