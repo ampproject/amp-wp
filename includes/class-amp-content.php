@@ -8,6 +8,7 @@ class AMP_Content {
 	private $content;
 	private $amp_content = '';
 	private $amp_scripts = array();
+	private $amp_templates = array();
 	private $amp_styles = array();
 	private $args = array();
 	private $embed_handler_classes = array();
@@ -28,6 +29,10 @@ class AMP_Content {
 
 	public function get_amp_scripts() {
 		return $this->amp_scripts;
+	}
+
+	public function get_amp_templates() {
+		return $this->amp_templates;
 	}
 
 	public function get_amp_styles() {

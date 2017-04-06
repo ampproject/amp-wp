@@ -20,7 +20,13 @@ function amp_post_template_add_scripts( $amp_template ) {
 	$scripts = $amp_template->get( 'amp_component_scripts', array() );
 	foreach ( $scripts as $element => $script ) : ?>
 		<script custom-element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
+	<?php endforeach;
+
+	$templates = $amp_template->get( 'amp_component_templates', array() );
+	foreach ( $templates as $template => $script ) : ?>
+		<script custom-template="<?php echo esc_attr( $template ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
 	<?php endforeach; ?>
+
 	<script src="<?php echo esc_url( $amp_template->get( 'amp_runtime_script' ) ); ?>" async></script>
 	<?php
 }
