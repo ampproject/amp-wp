@@ -5,7 +5,7 @@ require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 
 abstract class AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 600;
-	protected $DEFAULT_HEIGHT = 480;
+	protected $DEFAULT_HEIGHT = 338;
 
 	protected $args = array();
 	protected $did_convert_elements = false;
