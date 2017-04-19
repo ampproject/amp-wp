@@ -12,6 +12,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php' );
 
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php' );
@@ -71,6 +72,8 @@ class AMP_Post_Template {
 			'font_urls' => array(
 				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
 			),
+
+			'post_amp_styles' => array(),
 
 			/**
 			 * Add amp-analytics tags.
@@ -238,6 +241,7 @@ class AMP_Post_Template {
 				 'AMP_Img_Sanitizer' => array(),
 				 'AMP_Video_Sanitizer' => array(),
 				 'AMP_Audio_Sanitizer' => array(),
+				 'AMP_Playbuzz_Sanitizer' => array(),
 				 'AMP_Iframe_Sanitizer' => array(
 					 'add_placeholder' => true,
 				 ),
@@ -249,7 +253,7 @@ class AMP_Post_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
-		$this->add_data_by_key( 'post_amp_styles', $amp_content->get_amp_styles() );
+		$this->merge_data_for_key( 'post_amp_styles', $amp_content->get_amp_styles() );
 	}
 
 	private function build_post_featured_image() {
@@ -292,7 +296,7 @@ class AMP_Post_Template {
 		}
 
 		if ( $featured_styles ) {
-			$this->add_data_by_key( 'post_amp_styles', $featured_styles );
+			$this->merge_data_for_key( 'post_amp_styles', $featured_styles );
 		}
 	}
 
