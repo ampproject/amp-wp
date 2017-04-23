@@ -124,15 +124,24 @@ function amp_prepare_render() {
 }
 
 function amp_render() {
+	$post_id = get_queried_object_id();
+	amp_render_post( $post_id );
+	exit;
+}
+
+function amp_render_post( $post_id ) {
+	$post = get_post( $post_id );
+	if ( ! $post ) {
+		return;
+	}
+
 	amp_load_classes();
 
-	$post_id = get_queried_object_id();
 	do_action( 'pre_amp_render_post', $post_id );
 
 	amp_add_post_template_actions();
 	$template = new AMP_Post_Template( $post_id );
 	$template->load();
-	exit;
 }
 
 /**
