@@ -1,10 +1,8 @@
-<?php
+<?php namespace FasterImage;
 
-require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-invalid-image-exception.php' );
-require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-exif-parser.php' );
-require_once( AMP__DIR__ . '/includes/lib/class-faster-image-b52f1a8-image-parser.php' );
-require_once( AMP__DIR__ . '/includes/lib/class-stream-17b32f3-stream.php' );
-require_once( AMP__DIR__ . '/includes/lib/class-stream-17b32f3-stream-buffer-too-small-exception.php' );
+use FasterImage\Exception\InvalidImageException;
+use WillWashburn\Stream\Exception\StreamBufferTooSmallException;
+use WillWashburn\Stream\Stream;
 
 /**
  * FasterImage - Because sometimes you just want the size, and you want them in
@@ -18,21 +16,16 @@ require_once( AMP__DIR__ . '/includes/lib/class-stream-17b32f3-stream-buffer-too
  *
  * @version 0.01
  */
-class Faster_Image_B52f1a8_Faster_Image
+class FasterImage
 {
     /**
      * The default timeout
      *
      * @var int
      */
-    protected $timeout = 4;
+    protected $timeout = 10;
 
-	public function __construct( $user_agent )
-	{
-		$this->user_agent = $user_agent;
-	}
-
-	/**
+    /**
      * Get the size of each of the urls in a list
      *
      * @param array $urls
@@ -49,7 +42,7 @@ class Faster_Image_B52f1a8_Faster_Image
         // Create the curl handles and add them to the multi_request
         foreach ( array_values($urls) as $count => $uri ) {
 
-            $results[$uri] = array();
+            $results[$uri] = [];
 
             $$count = $this->handle($uri, $results[$uri]);
 
@@ -104,8 +97,8 @@ class Faster_Image_B52f1a8_Faster_Image
      */
     protected function handle($url, & $result)
     {
-        $stream           = new Stream_17b32f3_Stream();
-        $parser           = new Faster_Image_B52f1a8_Image_Parser($stream);
+        $stream           = new Stream();
+        $parser           = new ImageParser($stream);
         $result['rounds'] = 0;
         $result['bytes']  = 0;
         $result['size']   = 'failed';
@@ -120,17 +113,18 @@ class Faster_Image_B52f1a8_Faster_Image
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
-        curl_setopt($ch, CURLOPT_USERAGENT, $this->user_agent);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
-                "Cache-Control: max-age=0",
-                "Connection: keep-alive",
-                "Keep-Alive: 300",
-                "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-                "Accept-Language: en-us,en;q=0.5",
-                "Pragma: ", // browsers keep this blank.
-            )
-        );
+
+        #  Some web servers require the useragent to be not a bot. So we are liars.
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
+            "Cache-Control: max-age=0",
+            "Connection: keep-alive",
+            "Keep-Alive: 300",
+            "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+            "Accept-Language: en-us,en;q=0.5",
+            "Pragma: ", // browsers keep this blank.
+        ]);
         curl_setopt($ch, CURLOPT_ENCODING, "");
 
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $str) use (& $result, & $parser, & $stream, $url) {
@@ -150,7 +144,7 @@ class Faster_Image_B52f1a8_Faster_Image
                  */
                 $result['size'] = $parser->parseSize() ?: 'failed';
             }
-            catch (Stream_17b32f3_Stream_Buffer_Too_Small_Exception $e) {
+            catch (StreamBufferTooSmallException $e) {
                 /*
                  * If this exception is thrown, we don't have enough of the stream buffered
                  * so in order to tell curl to keep streaming we need to return the number
@@ -164,7 +158,7 @@ class Faster_Image_B52f1a8_Faster_Image
 
                 return strlen($str);
             }
-            catch (Faster_Image_B52f1a8_Invalid_Image_Exception $e) {
+            catch (InvalidImageException $e) {
 
                 /*
                  * This means we've determined that we're lost and don't know

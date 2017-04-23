@@ -1,11 +1,11 @@
-<?php
+<?php namespace WillWashburn\Stream;
 
 /**
  * Interface StreamableInterface
  *
  * @package FasterImage
  */
-interface Stream_17b32f3_Streamable_Interface {
+interface StreamableInterface {
 
     /**
      * Append to the stream string

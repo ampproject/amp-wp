@@ -1,11 +1,15 @@
-<?php
+<?php namespace FasterImage;
+
+use WillWashburn\Stream\Exception\StreamBufferTooSmallException;
+use WillWashburn\Stream\Stream;
+use WillWashburn\Stream\StreamableInterface;
 
 /**
  * Parses the stream of the image and determines the size and type of the image
  *
  * @package FasterImage
  */
-class Faster_Image_B52f1a8_Image_Parser
+class ImageParser
 {
     /**
      * The type of image we've determined this is
@@ -23,7 +27,7 @@ class Faster_Image_B52f1a8_Image_Parser
      *
      * @param StreamableInterface $stream
      */
-    public function __construct(Stream_17b32f3_Streamable_Interface & $stream)
+    public function __construct(StreamableInterface & $stream)
     {
         $this->stream = $stream;
     }
@@ -195,12 +199,19 @@ class Faster_Image_B52f1a8_Image_Parser
                     if ( $b === 0xe1 ) {
                         $data = $this->stream->read($this->readInt($this->stream->read(2)) - 2);
 
-                        $stream = new Stream_17b32f3_Stream;
+                        $stream = new Stream;
                         $stream->write($data);
 
                         if ( $stream->read(4) === 'Exif' ) {
+
                             $stream->read(2);
-                            $exif = new Faster_Image_B52f1a8_Exif_Parser($stream);
+
+                            // Some Exif data is broken/wrong so we'll ignore
+                            // any exceptions here
+                            try {
+                                $exif = new ExifParser($stream);
+                            } catch (\Exception $e) {}
+
                         }
 
                         break;
@@ -268,7 +279,7 @@ class Faster_Image_B52f1a8_Image_Parser
      */
     protected function parseSizeForTiff()
     {
-        $exif = new Faster_Image_B52f1a8_Exif_Parser($this->stream);
+        $exif = new ExifParser($this->stream);
 
         if ( $exif->isRotated() ) {
             return [$exif->getHeight(), $exif->getWidth()];
