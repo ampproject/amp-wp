@@ -140,10 +140,10 @@ class AMP_Image_Dimension_Extractor {
 	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
 	 */
 	private static function fetch_images( $urls_to_fetch, &$images, $mode ) {
-		// Use FasterImage when able/PHP version supports it (it contains a closure that could not be ported to 5.2).
+		// Use FasterImage when for compatible PHP versions
 		if ( 'synchronous' === $mode ||
 			false === function_exists( 'curl_multi_exec' ) ||
-			strnatcmp( phpversion(), '5.4.0' ) < 0
+			version_compare( PHP_VERSION, '5.4.0' ) < 0
 		) {
 			self::fetch_images_via_fast_image( $urls_to_fetch, $images );
 		} else {
