@@ -1,11 +1,14 @@
-<?php
+<?php namespace FasterImage;
+
+use FasterImage\Exception\InvalidImageException;
+use WillWashburn\Stream\StreamableInterface;
 
 /**
  * Class ExifParser
  *
  * @package FasterImage
  */
-class Faster_Image_B52f1a8_Exif_Parser
+class ExifParser
 {
     /**
      * @var int
@@ -41,7 +44,7 @@ class Faster_Image_B52f1a8_Exif_Parser
      *
      * @param StreamableInterface $stream
      */
-    public function __construct(Stream_17b32f3_Streamable_Interface $stream)
+    public function __construct(StreamableInterface $stream)
     {
         $this->stream = $stream;
         $this->parseExifIfd();
@@ -89,7 +92,7 @@ class Faster_Image_B52f1a8_Exif_Parser
                 $this->long  = 'N';
                 break;
             default:
-                throw new Faster_Image_B52f1a8_Invalid_Image_Exception;
+                throw new InvalidImageException;
                 break;
         }
 
