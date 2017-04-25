@@ -51,6 +51,7 @@ function amp_init() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
+	error_log("AMP INIT");
 
 	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 
@@ -87,24 +88,24 @@ function amp_force_query_var_value( $query_vars ) {
 }
 
 function amp_maybe_add_actions() {
-	if ( ! is_singular() || is_feed() ) {
+	if ( is_feed() || (!get_option('amp_canonical') && !is_singular())) {
 		return;
 	}
 
 	$is_amp_endpoint = is_amp_endpoint();
-
-	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
-	global $wp_query;
-	$post = $wp_query->post;
-
-	$supports = post_supports_amp( $post );
-
-	if ( ! $supports ) {
-		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ) );
-			exit;
+	$supports = true;
+	if (is_singular()) {
+		// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
+		global $wp_query;
+		$post = $wp_query->post;
+		$supports = post_supports_amp($post);
+		if ( ! $supports ) {
+			if ( $is_amp_endpoint ) {
+				wp_safe_redirect( get_permalink( $post->ID ) );
+				exit;
+			}
+			return;
 		}
-		return;
 	}
 
 	if ( $is_amp_endpoint ) {

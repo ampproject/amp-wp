@@ -10,6 +10,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	 */
 	public static function add_amp_attr($dom)
 	{
+		error_log('Adding AMP attribute to the html tag');
 		$html_tag = $dom->getElementsByTagName('html')->item(0);
 		$html_tag->setAttribute('amp', '');
 	}
@@ -33,8 +34,10 @@ class AMP_Sanitize_TweentySeventeen_Theme
 			}
 		}
 
-		error_log("Removing  scripts!");
-		AMP_DOM_Utils::remove_dom_nodes($scripts_to_remove);
+		if ($scripts_to_remove) {
+			error_log("Removing  scripts!");
+			AMP_DOM_Utils::remove_dom_nodes($scripts_to_remove);
+		}
 	}
 
 	/**
@@ -57,9 +60,10 @@ class AMP_Sanitize_TweentySeventeen_Theme
 			}
 		}
 
-		error_log("Removing external stylesheet links!");
-		AMP_DOM_Utils::remove_dom_nodes($links_to_remove);
-
+		if ($links_to_remove) {
+			error_log("Removing external stylesheet links!");
+			AMP_DOM_Utils::remove_dom_nodes($links_to_remove);
+		}
 	}
 
 	/**
@@ -68,8 +72,10 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	public static function eliminate_sidebars($dom)
 	{
 		$aside_secondary = $dom->getElementById('secondary');
-		error_log("Removing secondary aside!");
-		AMP_DOM_Utils::remove_dom_nodes(array($aside_secondary));
+		if ($aside_secondary) {
+			error_log("Removing secondary aside!");
+			AMP_DOM_Utils::remove_dom_nodes(array($aside_secondary));
+		}
 	}
 
 	/**
@@ -85,8 +91,10 @@ class AMP_Sanitize_TweentySeventeen_Theme
 				array_push($footers_to_remove, $footer);
 			}
 		}
-		error_log("Removing footers!");
-		AMP_DOM_Utils::remove_dom_nodes($footers_to_remove);
+		if ($footers_to_remove) {
+			error_log("Removing footers!");
+			AMP_DOM_Utils::remove_dom_nodes($footers_to_remove);
+		}
 	}
 
 	/**
@@ -95,8 +103,10 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	public static function eliminate_overall_footer($dom)
 	{
 		$overall_footer = $dom->getElementById('colophon');
-		error_log("Removing overall footer!");
-		AMP_DOM_Utils::remove_dom_nodes(array($overall_footer));
+		if ($overall_footer) {
+			error_log("Removing overall footer!");
+			AMP_DOM_Utils::remove_dom_nodes(array($overall_footer));
+		}
 	}
 
 	/**
@@ -108,14 +118,14 @@ class AMP_Sanitize_TweentySeventeen_Theme
 		$navs_to_remove = [];
 		foreach ($navs as $nav) {
 			$classes = $nav->getAttribute('class');
-			error_log(print_r($classes));
-			error_log(gettype($classes));
 			if (strpos($classes, "post-navigation") !== false) {
 				array_push($navs_to_remove, $nav);
 			}
 		}
-		error_log("Removing post navigation!");
-		AMP_DOM_Utils::remove_dom_nodes($navs_to_remove);
+		if ($navs_to_remove) {
+			error_log("Removing post navigation!");
+			AMP_DOM_Utils::remove_dom_nodes($navs_to_remove);
+		}
 	}
 
 	/**
@@ -124,8 +134,10 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	public static function eliminate_comments_section($dom)
 	{
 		$comments = $dom->getElementById('comments');
-		error_log("Removing comments section!");
-		AMP_DOM_Utils::remove_dom_nodes(array($comments));
+		if ($comments) {
+			error_log("Removing comments section!");
+			AMP_DOM_Utils::remove_dom_nodes(array($comments));
+		}
 	}
 
 	/**
@@ -160,8 +172,10 @@ class AMP_Sanitize_TweentySeventeen_Theme
 			}
 		}
 
-		error_log("Removing non amp-custom style tags!");
-		AMP_DOM_Utils::remove_dom_nodes($styles_to_remove);
+		if ($styles_to_remove) {
+			error_log("Removing non amp-custom style tags!");
+			AMP_DOM_Utils::remove_dom_nodes($styles_to_remove);
+		}
 	}
 
 	/**
@@ -204,7 +218,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	}
 
 	public static function remove_styled_svgs($dom) {
-		error_log("AMPing custom-header image");
+		//error_log("AMPing custom-header image");
 		$svgs = $dom->getElementsByTagName( 'svg' );
 		$svgs_to_remove = [];
 		foreach ($svgs as $svg) {
@@ -212,6 +226,8 @@ class AMP_Sanitize_TweentySeventeen_Theme
 				array_push($svgs_to_remove, $svg);
 			}
 		}
-		AMP_DOM_Utils::remove_dom_nodes($svgs_to_remove);
+		if ($svgs_to_remove) {
+			AMP_DOM_Utils::remove_dom_nodes($svgs_to_remove);
+		}
 	}
 }

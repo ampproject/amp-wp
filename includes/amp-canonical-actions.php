@@ -113,3 +113,14 @@ function amp_canonical_add_scripts() {
 	<script src="<?php echo esc_url( $amp_runtime_script ); ?>" async></script>
 	<?php
 }
+
+// TODO (@amedina) Get the canonical URL [Check!]
+if (!is_singular()) {
+	add_action( 'wp_head', 'amp_post_template_add_canonical');
+}
+function amp_post_template_add_canonical() {
+    error_log("CANONICAL: Adding canonical link")
+	?>
+    <link rel="canonical" href="<?php echo esc_url( get_site_url() ); ?>" />
+	<?php
+}
