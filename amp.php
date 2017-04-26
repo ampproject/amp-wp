@@ -110,7 +110,7 @@ function amp_maybe_add_actions() {
 
 	if ( $is_amp_endpoint ) {
 		amp_prepare_render();
-	} else if( get_option('amp_canonical') && $supports && get_theme_support('amp')) {
+	} else if( get_option('amp_canonical') && $supports && get_theme_support('amp') && is_singular() ) {
 		amp_add_canonical_actions();
 	} else {
 		amp_add_frontend_actions();
@@ -189,13 +189,13 @@ function amp_canonical_postprocess_html( $html ) {
 	// Eliminate external stylesheets
 	AMP_Sanitize_TweentySeventeen_Theme::eliminate_ext_css($dom);
 	// Eliminate sidebars
-	AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
+	//AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
 	// Eliminate entry footers
 	AMP_Sanitize_TweentySeventeen_Theme::eliminate_entry_footers($dom);
 	// Eliminate overall footer
 	AMP_Sanitize_TweentySeventeen_Theme::eliminate_overall_footer($dom);
 	// Eliminate post navigation
-	AMP_Sanitize_TweentySeventeen_Theme::eliminate_post_navigation($dom);
+	//AMP_Sanitize_TweentySeventeen_Theme::eliminate_post_navigation($dom);
 	// Eliminate comments section
 	AMP_Sanitize_TweentySeventeen_Theme::eliminate_comments_section($dom);
 	// Set meta viewport
