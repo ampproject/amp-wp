@@ -67,6 +67,7 @@ class AMP_Post_Template {
 
 			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
+			'amp_component_templates' => array(),
 
 			'customizer_settings' => array(),
 
@@ -255,6 +256,7 @@ class AMP_Post_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
+		$this->merge_data_for_key( 'amp_component_templates', $amp_content->get_amp_templates() );
 		$this->merge_data_for_key( 'post_amp_styles', $amp_content->get_amp_styles() );
 	}
 
@@ -280,9 +282,10 @@ class AMP_Post_Template {
 
 		$featured_image = get_post( $featured_id );
 
-		list( $sanitized_html, $featured_scripts, $featured_styles ) = AMP_Content_Sanitizer::sanitize(
+		list( $sanitized_html, $featured_scripts, $featured_templates, $featured_styles ) = AMP_Content_Sanitizer::sanitize(
 			$featured_html,
 			array( 'AMP_Img_Sanitizer' => array() ),
+			array( ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
@@ -295,6 +298,10 @@ class AMP_Post_Template {
 
 		if ( $featured_scripts ) {
 			$this->merge_data_for_key( 'amp_component_scripts', $featured_scripts );
+		}
+
+		if ( $featured_templates ) {
+			$this->merge_data_for_key( 'amp_component_templates', $featured_templates );
 		}
 
 		if ( $featured_styles ) {
