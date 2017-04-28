@@ -120,7 +120,7 @@ function amp_add_post_template_actions() {
 }
 
 function amp_prepare_render() {
-	add_action( 'template_redirect', 'amp_render' );
+	add_action( 'template_include', 'amp_render' );
 }
 
 function amp_render() {
