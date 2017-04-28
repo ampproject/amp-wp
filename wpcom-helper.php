@@ -28,7 +28,9 @@ function jetpack_amp_add_og_tags( $amp_template ) {
 add_filter( 'amp_post_template_metadata', 'jetpack_amp_post_template_metadata', 10, 2 );
 
 function jetpack_amp_post_template_metadata( $metadata, $post ) {
-	if ( isset( $metadata['publisher'] ) && ! isset( $metadata['publisher']['logo'] ) ) {
+	// Add a fallback publisher logo if it's not set, or the plugin is using the fallback
+	if ( isset( $metadata['publisher'] ) &&
+		( empty( $metadata['publisher']['logo'] ) || false !== strpos( $metadata['publisher']['logo'], '/assets/images/fallback-logo.gif' ) ) ) {
 		$metadata = wpcom_amp_add_blavatar_to_metadata( $metadata, $post );
 	}
 
