@@ -70,6 +70,11 @@ $GLOBALS['amp_content'] = amp_canonical_retrieve_content();
 // attempt to remove all filters
 remove_all_filters('the_content');
 
+/* @TODO (amedina, mo): check this:
+    This hook is theme-dependent which means that it is up to the author of each
+    WordPress theme to include it. It may not be available on all themes, so you should
+    take this into account when using it.
+*/
 add_action( 'wp_head', 'amp_canonical_add_scripts' );
 add_action( 'wp_head', 'amp_canonical_add_boilerplate_css' );
 add_action( 'wp_footer', 'amp_deregister_scripts' );

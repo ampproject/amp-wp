@@ -111,7 +111,9 @@ function amp_maybe_add_actions() {
 	if ( $is_amp_endpoint ) {
 		amp_prepare_render();
 	} else if( get_option('amp_canonical') && $supports && get_theme_support('amp') && is_singular() ) {
-		amp_add_canonical_actions();
+		amp_add_canonical_post_actions();
+	} else if (is_home()) {
+		amp_add_canonical_index_actions();
 	} else {
 		amp_add_frontend_actions();
 	}
@@ -155,23 +157,50 @@ function amp_render_post( $post_id ) {
 	$template->load();
 }
 
-function amp_add_canonical_actions() {
+function amp_add_canonical_post_actions() {
 	// Load AMP canonical actions
-	require_once( AMP__DIR__ . '/includes/amp-canonical-actions.php');
+	require_once(AMP__DIR__ . '/includes/amp-canonical-post-actions.php');
 	// Load high-priority filters for canonical AMP
-	require_once( AMP__DIR__ . '/includes/amp-canonical-filters.php');
+	require_once(AMP__DIR__ . '/includes/amp-canonical-post-filters.php');
 	// Template redirect to postprocessing actions
-	add_action( 'template_redirect', 'amp_maybe_init_postprocess_html' );
+	add_action( 'template_redirect', 'amp_maybe_init_post_postprocess_html');
 }
 
-function amp_maybe_init_postprocess_html() {
-	ob_start( 'amp_canonical_postprocess_html' );
+function amp_maybe_init_post_postprocess_html() {
+	error_log("Post-processing post...");
+	ob_start('amp_canonical_postprocess_post_html');
 }
 
+function amp_add_canonical_index_actions() {
+	error_log("Rendering home page...");
+	// Need to add the equivalent of amp-canonical-post-actions.php
+	// and amp-canonical-post-filters.php
+	// but for rendering the index page content in AMP
+	add_action( 'template_redirect', 'amp_maybe_init_index_postprocess_html');
+}
+
+function amp_maybe_init_index_postprocess_html() {
+	error_log("Post-processing home page...");
+	ob_start('amp_canonical_postprocess_index_html');
+}
+
+function amp_canonical_postprocess_index_html( $html ) {
+	$dom = new DOMDocument();
+	libxml_use_internal_errors(true);
+	$dom->loadHTML($html);
+	libxml_use_internal_errors(false);
+
+	// Add amp attribute to html tag
+	AMP_Sanitize_TweentySeventeen_Theme::add_amp_attr($dom);
+
+	$amp_html = $dom->saveHTML();
+	error_log($amp_html);
+	return $amp_html;
+}
 /**
  * Convert generated $html (plain 2017 Theme) to valid-AMP format
  */
-function amp_canonical_postprocess_html( $html ) {
+function amp_canonical_postprocess_post_html($html ) {
 
 	$dom = new DOMDocument();
 	libxml_use_internal_errors(true);
