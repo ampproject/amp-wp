@@ -187,6 +187,14 @@ class AMP_Post_Template {
 				'height' => self::SITE_ICON_SIZE,
 				'width' => self::SITE_ICON_SIZE,
 			);
+		} else {
+			// Add an empty, fallback image to keep GWT happy since 'logo' is required
+			$metadata['publisher']['logo'] = array(
+				'@type' => 'ImageObject',
+				'url' => plugins_url( 'assets/images/blank.gif', AMP__FILE__ ),
+				'height' => 1,
+				'width' => 1,
+			);
 		}
 
 		$image_metadata = $this->get_post_image_metadata();
