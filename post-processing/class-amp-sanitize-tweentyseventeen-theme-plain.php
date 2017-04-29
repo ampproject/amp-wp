@@ -10,7 +10,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	 */
 	public static function add_amp_attr($dom)
 	{
-		error_log('Adding AMP attribute to the html tag');
+		//error_log('Adding AMP attribute to the html tag');
 		$html_tag = $dom->getElementsByTagName('html')->item(0);
 		$html_tag->setAttribute('amp', '');
 	}
@@ -35,7 +35,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 		}
 
 		if ($scripts_to_remove) {
-			error_log("Removing  scripts!");
+			//error_log("Removing  scripts!");
 			AMP_DOM_Utils::remove_dom_nodes($scripts_to_remove);
 		}
 	}
@@ -61,7 +61,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 		}
 
 		if ($links_to_remove) {
-			error_log("Removing external stylesheet links!");
+			//error_log("Removing external stylesheet links!");
 			AMP_DOM_Utils::remove_dom_nodes($links_to_remove);
 		}
 	}
@@ -73,7 +73,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	{
 		$aside_secondary = $dom->getElementById('secondary');
 		if ($aside_secondary) {
-			error_log("Removing secondary aside!");
+			//error_log("Removing secondary aside!");
 			AMP_DOM_Utils::remove_dom_nodes(array($aside_secondary));
 		}
 	}
@@ -92,7 +92,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 			}
 		}
 		if ($footers_to_remove) {
-			error_log("Removing footers!");
+			//error_log("Removing footers!");
 			AMP_DOM_Utils::remove_dom_nodes($footers_to_remove);
 		}
 	}
@@ -104,7 +104,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	{
 		$overall_footer = $dom->getElementById('colophon');
 		if ($overall_footer) {
-			error_log("Removing overall footer!");
+			//error_log("Removing overall footer!");
 			AMP_DOM_Utils::remove_dom_nodes(array($overall_footer));
 		}
 	}
@@ -123,7 +123,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 			}
 		}
 		if ($navs_to_remove) {
-			error_log("Removing post navigation!");
+			//error_log("Removing post navigation!");
 			AMP_DOM_Utils::remove_dom_nodes($navs_to_remove);
 		}
 	}
@@ -135,7 +135,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	{
 		$comments = $dom->getElementById('comments');
 		if ($comments) {
-			error_log("Removing comments section!");
+			//error_log("Removing comments section!");
 			AMP_DOM_Utils::remove_dom_nodes(array($comments));
 		}
 	}
@@ -150,7 +150,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 		foreach ($metatags as $meta) {
 			$meta_tag_name = $meta->getAttribute('name');
 			if ($meta_tag_name == "viewport") {
-				error_log("Updating viewport met tag!");
+				//error_log("Updating viewport met tag!");
 				$meta->setAttribute('content', 'width=device-width,minimum-scale=1');
 			}
 		}
@@ -173,7 +173,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 		}
 
 		if ($styles_to_remove) {
-			error_log("Removing non amp-custom style tags!");
+			//error_log("Removing non amp-custom style tags!");
 			AMP_DOM_Utils::remove_dom_nodes($styles_to_remove);
 		}
 	}
@@ -183,7 +183,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	 */
 	public static function inline_theme_css($dom)
 	{
-		error_log("Inline theme CSS");
+		//error_log("Inline theme CSS");
 		// Grab stylesheet link for 2017 theme
 		$stylesheet_link = $dom->getElementById('twentyseventeen-style-css');
 		// Extract the the location of the file (content of the href attribute)
@@ -204,7 +204,7 @@ class AMP_Sanitize_TweentySeventeen_Theme
 	}
 
 	public static function amp_custom_header_img($dom) {
-		error_log("AMPing custom-header image");
+		//error_log("AMPing custom-header image");
 		$custom_header = $dom->getElementById( 'wp-custom-header' );
 		$img = $custom_header->childNodes->item(0);
 		$amp_img = $dom->createElement( 'amp-img' );

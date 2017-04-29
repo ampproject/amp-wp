@@ -1,27 +1,27 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php' );
+require_once(AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php');
+require_once(AMP__DIR__ . '/includes/utils/class-amp-html-utils.php');
+require_once(AMP__DIR__ . '/includes/utils/class-amp-string-utils.php');
 
-require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
+require_once(AMP__DIR__ . '/includes/class-amp-content.php');
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php' );
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php');
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php');
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php');
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php');
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php');
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php');
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php');
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-dailymotion-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-soundcloud-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-gallery-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php' );
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-dailymotion-embed.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-soundcloud-embed.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-gallery-embed.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php');
 
 class AMP_Post_Template {
 	const SITE_ICON_SIZE = 32;
