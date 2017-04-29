@@ -100,6 +100,13 @@ class AMPCanonicalPostActions {
         <script src="<?php echo esc_url( $amp_runtime_script ); ?>" async></script>
 		<?php
 	}
+
+	public static function add_canonical() {
+		error_log("CANONICAL: Adding canonical link")
+		?>
+        <link rel="canonical" href="<?php echo esc_url( get_site_url() ); ?>" />
+		<?php
+	}
 }
 
 
@@ -132,11 +139,5 @@ add_filter( 'the_content', 'AMPCanonicalPostActions::the_content_filter', PHP_IN
 
 // TODO (@amedina) Get the canonical URL [Check!]
 if (!is_singular()) {
-	add_action( 'wp_head', 'amp_post_template_add_canonical');
-}
-function amp_post_template_add_canonical() {
-    error_log("CANONICAL: Adding canonical link")
-	?>
-    <link rel="canonical" href="<?php echo esc_url( get_site_url() ); ?>" />
-	<?php
+	add_action( 'wp_head', 'AMPCanonicalPostActions::add_canonical');
 }
