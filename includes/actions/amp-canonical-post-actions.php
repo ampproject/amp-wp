@@ -3,7 +3,7 @@ require_once(AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php');
 require_once(AMP__DIR__ . '/includes/utils/class-amp-html-utils.php');
 require_once(AMP__DIR__ . '/includes/utils/class-amp-string-utils.php');
 
-require_once(AMP__DIR__ . '/includes/class-amp-content.php');
+require_once(AMP__DIR__ . '/includes/content/class-amp-content.php');
 
 require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php');
 require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php');
@@ -21,48 +21,10 @@ require_once(AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php');
 require_once(AMP__DIR__ . '/includes/embeds/class-amp-dailymotion-embed.php');
 require_once(AMP__DIR__ . '/includes/embeds/class-amp-soundcloud-embed.php');
 
+require_once(AMP__DIR__ . '/includes/content/amp-content-generator.php');
+require_once(AMP__DIR__ . '/post-processing/class-amp-sanitize-tweentyseventeen-theme-plain.php');
+
 class AMPCanonicalPostActions {
-
-	public static function amp_canonical_retrieve_content() {
-
-		$post = get_post();
-
-		$content_max_width = 1200;
-
-		if ( isset( $GLOBALS['content_width']) && $GLOBALS['content_width'] > 0 ) {
-			$content_max_width = $GLOBALS['content_width'];
-		}
-
-		$amp_content = new AMP_Content(
-			$post->post_content,
-			array(
-				'AMP_Twitter_Embed_Handler' => array(),
-				'AMP_YouTube_Embed_Handler' => array(),
-				'AMP_DailyMotion_Embed_Handler' => array(),
-				'AMP_SoundCloud_Embed_Handler' => array(),
-				'AMP_Instagram_Embed_Handler' => array(),
-				'AMP_Vine_Embed_Handler' => array(),
-				'AMP_Facebook_Embed_Handler' => array(),
-				'AMP_Gallery_Embed_Handler' => array(),
-			),
-			array(
-				'AMP_Style_Sanitizer' => array(),
-				'AMP_Blacklist_Sanitizer' => array(),
-				'AMP_Img_Sanitizer' => array(),
-				'AMP_Video_Sanitizer' => array(),
-				'AMP_Audio_Sanitizer' => array(),
-				'AMP_Iframe_Sanitizer' => array(
-					'add_placeholder' => true,
-				),
-			),
-			array(
-				'content_max_width' => $content_max_width,
-			)
-		);
-
-		return $amp_content;
-
-	}
 
 	public static function the_content_filter($content) {
 		if (isset($GLOBALS['amp_content'])) {
@@ -102,23 +64,63 @@ class AMPCanonicalPostActions {
 	}
 
 	public static function add_canonical() {
-		error_log("CANONICAL: Adding canonical link")
+        //error_log("CANONICAL: Adding canonical link")
 		?>
         <link rel="canonical" href="<?php echo esc_url( get_site_url() ); ?>" />
 		<?php
 	}
+
+	/**
+	 * Convert generated $html (plain 2017 Theme) to valid-AMP format
+	 */
+	public static function postprocess_post_html($html ) {
+		error_log("AMPCanonicalPostActions::postprocess_post_html()");
+		$dom = new DOMDocument();
+		libxml_use_internal_errors(true);
+		$dom->loadHTML($html);
+		libxml_use_internal_errors(false);
+
+		// TODO (@amedina): Define how specific theme sanitations
+		// will be executed; user can select a specific one or a
+		// generic one could be executed
+
+		// Add amp attribute to html tag
+		AMP_Sanitize_TweentySeventeen_Theme::add_amp_attr($dom);
+		// Eliminate 3p JS
+		AMP_Sanitize_TweentySeventeen_Theme::eliminate_3p_js($dom);
+		// Eliminate external stylesheets
+		AMP_Sanitize_TweentySeventeen_Theme::eliminate_ext_css($dom);
+		// Eliminate sidebars
+		//AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
+		// Eliminate entry footers
+		AMP_Sanitize_TweentySeventeen_Theme::eliminate_entry_footers($dom);
+		// Eliminate overall footer
+		AMP_Sanitize_TweentySeventeen_Theme::eliminate_overall_footer($dom);
+		// Eliminate post navigation
+		//AMP_Sanitize_TweentySeventeen_Theme::eliminate_post_navigation($dom);
+		// Eliminate comments section
+		AMP_Sanitize_TweentySeventeen_Theme::eliminate_comments_section($dom);
+		// Set meta viewport
+		AMP_Sanitize_TweentySeventeen_Theme::set_meta_viewport($dom);
+		// Eliminate non-amp-custom Stylesheets
+		AMP_Sanitize_TweentySeventeen_Theme::eliminate_non_amp_custom_styles($dom);
+		// Inline theme CSS
+		AMP_Sanitize_TweentySeventeen_Theme::inline_theme_css($dom);
+		// AMP Custom-header img
+		AMP_Sanitize_TweentySeventeen_Theme::amp_custom_header_img($dom);
+		// Remove styled SVGs
+		AMP_Sanitize_TweentySeventeen_Theme::remove_styled_svgs($dom);
+		// Save new HTML contents
+		$amp_html = $dom->saveHTML();
+
+		return $amp_html;
+	}
 }
-
-
-// Use this for the index action
-//function canonical_post_action( $post_object ) {
-//	$GLOBALS['amp_content'] = amp_canonical_retrieve_content();
-//}
-//add_action( 'the_post', 'canonical_post_action' );
 
 // Generate the AMP post content early on
 // Runs the filters for the_content, but skips our filters below
-$GLOBALS['amp_content'] = AMPCanonicalPostActions::amp_canonical_retrieve_content();
+$post = get_post();
+$GLOBALS['amp_content'] = AMPContentGenerator::amp_canonical_retrieve_content( $post );
 
 // The filter for the_content hook was already invoked,
 // attempt to remove all filters
