@@ -38,7 +38,64 @@ class AMPCanonicalIndexActions
 		self::$current = self::$amp_posts[ $post->ID ];
 	}
 
+	public static function deregister_scripts() {
+		wp_deregister_script( 'wp_embed');
+	}
 
+	public static function add_boilerplate_css() {
+		?>
+		<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+		<?php
+	}
+
+	public static function add_general_scripts() {
+		$amp_runtime_script = 'https://cdn.ampproject.org/v0.js';
+
+		// Always include AMP form & analytics, as almost every template includes
+		// a search form and is tracking page views
+		$scripts = array_merge(
+			array('amp-form' => 'https://cdn.ampproject.org/v0/amp-form-0.1.js'),
+			array('amp-analytics' => 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js')
+		);
+
+		foreach ( $scripts as $element => $script) : ?>
+			<script custom-element="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
+		<?php endforeach; ?>
+		<script src="<?php echo esc_url( $amp_runtime_script ); ?>" async></script>
+		<?php
+	}
+
+	public static function add_scripts($dom) {
+
+		$scripts = array();
+		// Flatten the arrays of scripts
+		foreach ( self::$amp_posts as $amp_post) {
+			$amp_scripts = $amp_post->get_amp_scripts();
+			// Use an associative array for dedupping scripts
+			foreach ($amp_scripts as $element => $amp_script) {
+				$scripts[ $element ] = $amp_script;
+			}
+		}
+
+		$head = $dom->getElementsByTagName('head')->item(0);
+		foreach ( $scripts as $element => $script) {
+			$custom_script = $dom->createElement( 'script');
+			$custom_script->setAttribute('async', '');
+			$custom_script->setAttribute('custom-element', esc_attr( $element ));
+			$custom_script->setAttribute('src', esc_url( $script ));
+			$head->appendChild($custom_script);
+		}
+	}
+
+	public static function add_canonical($dom) {
+
+		$head = $dom->getElementsByTagName('head')->item(0);
+		$link = $dom->createElement( 'link');
+		$link->setAttribute('rel', 'canonical');
+		$link->setAttribute('href', esc_url( get_site_url() ) );
+		$head->appendChild($link);
+	}
+	
 	public static function postprocess_index_html( $html ) {
 		error_log("AMPCanonicalIndexActions::postprocess_index_html()");
 
@@ -47,9 +104,8 @@ class AMPCanonicalIndexActions
 		$dom->loadHTML($html);
 		libxml_use_internal_errors(false);
 
-		// TODO (@amedina): Define how specific theme sanitations
-		// will be executed; user can select a specific one or a
-		// generic one could be executed
+		self::add_scripts($dom);
+		self::add_canonical($dom);
 
 		// Add amp attribute to html tag
 		AMP_Sanitize_TweentySeventeen_Theme::add_amp_attr($dom);
@@ -58,15 +114,7 @@ class AMPCanonicalIndexActions
 		// Eliminate external stylesheets
 		AMP_Sanitize_TweentySeventeen_Theme::eliminate_ext_css($dom);
 		// Eliminate sidebars
-		//AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
-		// Eliminate entry footers
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_entry_footers($dom);
-		// Eliminate overall footer
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_overall_footer($dom);
-		// Eliminate post navigation
-		//AMP_Sanitize_TweentySeventeen_Theme::eliminate_post_navigation($dom);
-		// Eliminate comments section
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_comments_section($dom);
+		AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
 		// Set meta viewport
 		AMP_Sanitize_TweentySeventeen_Theme::set_meta_viewport($dom);
 		// Eliminate non-amp-custom Stylesheets
@@ -85,3 +133,6 @@ class AMPCanonicalIndexActions
 }
 
 AMPCanonicalIndexActions::init();
+add_action( 'wp_head', 'AMPCanonicalIndexActions::add_general_scripts' );
+add_action( 'wp_head', 'AMPCanonicalIndexActions::add_boilerplate_css' );
+add_action( 'wp_footer', 'AMPCanonicalIndexActions::deregister_scripts' );
