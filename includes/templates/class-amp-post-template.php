@@ -4,7 +4,7 @@ require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
 require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 require_once( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php' );
 
-require_once(AMP__DIR__ . '/includes/class-amp-content.php');
+require_once(AMP__DIR__ . '/includes/content/class-amp-content.php');
 
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php' );
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
