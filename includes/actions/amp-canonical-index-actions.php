@@ -113,8 +113,6 @@ class AMPCanonicalIndexActions
 		AMP_Sanitize_TweentySeventeen_Theme::eliminate_3p_js($dom);
 		// Eliminate external stylesheets
 		AMP_Sanitize_TweentySeventeen_Theme::eliminate_ext_css($dom);
-		// Eliminate sidebars
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
 		// Set meta viewport
 		AMP_Sanitize_TweentySeventeen_Theme::set_meta_viewport($dom);
 		// Eliminate non-amp-custom Stylesheets
