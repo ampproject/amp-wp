@@ -22,7 +22,7 @@ require_once(AMP__DIR__ . '/includes/embeds/class-amp-dailymotion-embed.php');
 require_once(AMP__DIR__ . '/includes/embeds/class-amp-soundcloud-embed.php');
 
 require_once(AMP__DIR__ . '/includes/content/amp-content-generator.php');
-require_once(AMP__DIR__ . '/post-processing/class-amp-sanitize-tweentyseventeen-theme-plain.php');
+require_once(AMP__DIR__ . '/post-processing/class-amp-postprocessing.php');
 
 class AMPCanonicalPostActions {
 
@@ -85,31 +85,28 @@ class AMPCanonicalPostActions {
 		// generic one could be executed
 
 		// Add amp attribute to html tag
-		AMP_Sanitize_TweentySeventeen_Theme::add_amp_attr($dom);
+		AMP_Postprocessing::add_amp_attr($dom);
 		// Eliminate 3p JS
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_3p_js($dom);
+		AMP_Postprocessing::eliminate_3p_js($dom);
 		// Eliminate external stylesheets
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_ext_css($dom);
+		AMP_Postprocessing::eliminate_ext_css($dom);
 		// Eliminate sidebars
 		//AMP_Sanitize_TweentySeventeen_Theme::eliminate_sidebars($dom);
 		// Eliminate entry footers
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_entry_footers($dom);
-		// Eliminate overall footer
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_overall_footer($dom);
-		// Eliminate post navigation
-		//AMP_Sanitize_TweentySeventeen_Theme::eliminate_post_navigation($dom);
-		// Eliminate comments section
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_comments_section($dom);
+		AMP_Postprocessing::eliminate_entry_footers($dom);
 		// Set meta viewport
-		AMP_Sanitize_TweentySeventeen_Theme::set_meta_viewport($dom);
+		AMP_Postprocessing::set_meta_viewport($dom);
 		// Eliminate non-amp-custom Stylesheets
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_non_amp_custom_styles($dom);
+		AMP_Postprocessing::eliminate_non_amp_custom_styles($dom);
 		// Inline theme CSS
-		AMP_Sanitize_TweentySeventeen_Theme::inline_theme_css($dom);
+		AMP_Postprocessing::inline_theme_css($dom);
 		// AMP Custom-header img
-		AMP_Sanitize_TweentySeventeen_Theme::amp_custom_header_img($dom);
+		AMP_Postprocessing::amp_custom_header_img($dom);
 		// Remove styled SVGs
-		AMP_Sanitize_TweentySeventeen_Theme::remove_styled_svgs($dom);
+		AMP_Postprocessing::remove_styled_svgs($dom);
+		// Process img tags
+		AMP_Postprocessing::convert_img_tags( $dom );
+
 		// Save new HTML contents
 		$amp_html = $dom->saveHTML();
 

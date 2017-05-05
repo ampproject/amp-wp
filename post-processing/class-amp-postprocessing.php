@@ -2,7 +2,7 @@
 
 require_once( AMP__DIR__ . '/includes/utils/class-amp-css-utils.php' );
 
-class AMP_Sanitize_TweentySeventeen_Theme
+class AMP_Postprocessing
 {
 	/**
 	 * Add amp attribute to html tag
@@ -228,6 +228,24 @@ class AMP_Sanitize_TweentySeventeen_Theme
 		}
 		if ($svgs_to_remove) {
 			AMP_DOM_Utils::remove_dom_nodes($svgs_to_remove);
+		}
+	}
+
+	public static function convert_img_tags( $dom ) {
+		$img_tags = $dom->getElementsByTagName( 'img');
+		foreach ($img_tags as $img) {
+			$parent = $img->parentNode;
+			$amp_img = $dom->createElement( 'amp-img' );
+			$amp_img->setAttribute( 'alt', 'avatar' );
+			$amp_img->setAttribute( 'src', $img->getAttribute( 'src' ));
+			$amp_img->setAttribute( 'srcset', $img->getAttribute( 'srcset' ));
+			$img_classes = $img->getAttribute( 'class');
+			$amp_img->setAttribute( 'class', $img_classes);
+			$amp_img->setAttribute( 'height', $img->getAttribute( 'height' ));
+			$amp_img->setAttribute( 'width', $img->getAttribute( 'width' ));
+			$amp_img->setAttribute( 'layout', 'responsive');
+
+			$parent->replaceChild( $amp_img, $img );
 		}
 	}
 }

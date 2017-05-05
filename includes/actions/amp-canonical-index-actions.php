@@ -1,7 +1,7 @@
 <?php
 
 require_once(AMP__DIR__ . '/includes/content/amp-content-generator.php');
-require_once(AMP__DIR__ . '/post-processing/class-amp-sanitize-tweentyseventeen-theme-plain.php');
+require_once(AMP__DIR__ . '/post-processing/class-amp-postprocessing.php');
 
 class AMPCanonicalIndexActions
 {
@@ -108,21 +108,21 @@ class AMPCanonicalIndexActions
 		self::add_canonical($dom);
 
 		// Add amp attribute to html tag
-		AMP_Sanitize_TweentySeventeen_Theme::add_amp_attr($dom);
+		AMP_Postprocessing::add_amp_attr($dom);
 		// Eliminate 3p JS
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_3p_js($dom);
+		AMP_Postprocessing::eliminate_3p_js($dom);
 		// Eliminate external stylesheets
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_ext_css($dom);
+		AMP_Postprocessing::eliminate_ext_css($dom);
 		// Set meta viewport
-		AMP_Sanitize_TweentySeventeen_Theme::set_meta_viewport($dom);
+		AMP_Postprocessing::set_meta_viewport($dom);
 		// Eliminate non-amp-custom Stylesheets
-		AMP_Sanitize_TweentySeventeen_Theme::eliminate_non_amp_custom_styles($dom);
+		AMP_Postprocessing::eliminate_non_amp_custom_styles($dom);
 		// Inline theme CSS
-		AMP_Sanitize_TweentySeventeen_Theme::inline_theme_css($dom);
+		AMP_Postprocessing::inline_theme_css($dom);
 		// AMP Custom-header img
-		AMP_Sanitize_TweentySeventeen_Theme::amp_custom_header_img($dom);
+		AMP_Postprocessing::amp_custom_header_img($dom);
 		// Remove styled SVGs
-		AMP_Sanitize_TweentySeventeen_Theme::remove_styled_svgs($dom);
+		AMP_Postprocessing::remove_styled_svgs($dom);
 		// Save new HTML contents
 		$amp_html = $dom->saveHTML();
 
