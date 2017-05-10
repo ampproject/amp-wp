@@ -84,6 +84,12 @@ abstract class AMP_Base_Sanitizer {
 
 		$attributes['sizes'] = sprintf( '(min-width: %1$dpx) %1$dpx, 100vw', absint( $max_width ) );
 
+		// Convert attributes like width="300px" to width="300"
+		$attributes['width'] = absint( $attributes['width'] );
+		if ( isset( $attributes['height'] ) ) {
+			$attributes['height'] = absint( $attributes['height'] );
+		}
+
 		$this->add_or_append_attribute( $attributes, 'class', 'amp-wp-enforced-sizes' );
 
 		return $attributes;
