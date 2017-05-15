@@ -84,6 +84,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 		$new_attributes = $this->filter_attributes( $old_attributes );
 		$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+		if ( $new_attributes['height'] === '' ) {
+			$new_attributes['height'] = self::FALLBACK_HEIGHT;
+		}
+		if ( $new_attributes['width'] === '' ) {
+			$new_attributes['width'] = self::FALLBACK_WIDTH;
+		}
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 			$new_tag = 'amp-anim';
