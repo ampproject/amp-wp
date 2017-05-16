@@ -1,13 +1,13 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
+require_once(AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php');
+require_once(AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php');
+require_once(AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php');
 
 class AMP_Content {
 	private $content;
 	private $amp_content = '';
-	private $amp_scripts = array();
+	public  $amp_scripts = array();
 	private $amp_styles = array();
 	private $args = array();
 	private $embed_handler_classes = array();
@@ -89,6 +89,7 @@ class AMP_Content {
 
 		return $sanitized_content;
 	}
+
 }
 
 class AMP_Content_Sanitizer {

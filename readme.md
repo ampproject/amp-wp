@@ -628,6 +628,105 @@ function xyz_amp_set_review_template( $file, $type, $post ) {
 
 We may provide better ways to handle this in the future.
 
+## Standalone mode
+
+In Settings -> AMP, you'll find the option to change the **AMP Generation Mode**
+to "Standalone".
+
+This will cause the whole site to turn into AMP – that is, there won't be a
+"normal" version of your site, and an "AMP" version, but just one, single
+AMP-enabled experience.
+
+This mode is experimental, and requires the theme and any potential rendered
+widgets to specifically add support.
+
+### How do I enable canonical AMP support for my theme or widget?
+
+Here's how a theme would conform:
+
+#### 1. Add `amp` theme support
+
+The theme must signal that it supports AMP in order for the plugin to enable canonical AMP mode, like so:
+
+```
+add_theme_support( 'amp' );
+```
+
+#### 2. Inline stylesheet
+
+Something like:
+
+```
+function add_inline_stylesheet() {
+	if( get_option( 'amp_canonical') ) {
+		$css = file_get_contents(get_stylesheet_uri());
+		?>
+		<style amp-custom><?= $css; ?></style>
+		<?php
+	}
+}
+
+add_action( 'wp_head', 'add_inline_stylesheet' );
+```
+
+#### 3. Provide valid header bits
+
+Include the flash in the html tag (doesn't hurt even without AMP), make sure that the charset is lowercase and that the correct viewport is set.
+
+```
+<html ⚡ <?php language_attributes(); ?>>
+	<head>
+		<meta charset="<?= strtolower(get_bloginfo( 'charset', 'display' )); ?>">
+		<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+```
+
+#### 4. Embed AMP analytics
+
+Use AMP analytics instead of other analytics solutions based on the AMP_CANONICAL check:
+
+```
+if ( get_option( 'amp_canonical') ) {
+?>
+<amp-analytics type="googleanalytics" id="analytics-ga">
+  <script type="application/json">
+  {
+    "vars": {
+      "account": "UA-2427667-1"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+<?php
+}
+```
+
+#### 5. Optional: Add AMP-specific styles
+
+Currently, stolen from the styles in the default template. These are not required but helpful:
+
+```
+.amp-wp-enforced-sizes {
+	/** Our sizes fallback is 100vw, and we have a padding on the container; the max-width here prevents the element from overflowing. **/
+	max-width: 100%;
+}
+
+.amp-wp-unknown-size img {
+	/** Worst case scenario when we can't figure out dimensions for an image. **/
+	/** Force the image into a box of fixed dimensions and use object-fit to scale. **/
+	object-fit: contain;
+}
+
+amp-carousel > amp-img > img {
+	object-fit: contain;
+}
+```
+
 ## Plugin integrations
 
 ### Jetpack

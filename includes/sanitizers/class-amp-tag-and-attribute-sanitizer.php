@@ -4,7 +4,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
 require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
 
 /**
- * Strips tags and attributes not allowed by the AMP sped from the content.
+ * Strips from the content tags and attributes not allowed by the AMP spec.
  *
  * Allowed tags array is generated from this protocol buffer:
  *     https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
