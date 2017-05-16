@@ -3,7 +3,6 @@
 class CanonicalModeActions {
 
 	public static function add_actions() {
-		error_log("CanonicalModeActions::add_actions()");
 		if ( is_feed()) {
 			return;
 		}
@@ -16,7 +15,6 @@ class CanonicalModeActions {
 	}
 
 	private static function add_canonical_post_actions() {
-		error_log("CanonicalModeActions::add_canonical_post_actions()");
 		// Load AMP canonical actions
 		require_once(AMP__DIR__ . '/includes/actions/amp-canonical-post-actions.php');
 		// Load high-priority filters for canonical AMP
@@ -26,7 +24,6 @@ class CanonicalModeActions {
 	}
 
 	private static function add_canonical_index_actions() {
-		error_log("CanonicalModeActions::add_canonical_index_actions()");
 		require_once(AMP__DIR__ . '/includes/actions/amp-canonical-index-actions.php');
 		// Load high-priority filters for canonical AMP
 		require_once(AMP__DIR__ . '/includes/actions/amp-canonical-post-filters.php');
@@ -34,12 +31,10 @@ class CanonicalModeActions {
 	}
 
 	public static function init_post_postprocess_html() {
-		error_log("CanonicalModeActions::init_post_postprocess_html()");
 		ob_start('AMPCanonicalPostActions::postprocess_post_html');
 	}
 
 	public static function init_index_postprocess_html() {
-		error_log("CanonicalModeActions::init_index_postprocess_html()");
 		ob_start('AMPCanonicalIndexActions::postprocess_index_html');
 	}
 

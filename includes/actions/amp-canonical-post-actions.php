@@ -74,7 +74,6 @@ class AMPCanonicalPostActions {
 	 * Convert generated $html (plain 2017 Theme) to valid-AMP format
 	 */
 	public static function postprocess_post_html($html ) {
-		error_log("AMPCanonicalPostActions::postprocess_post_html()");
 		$dom = new DOMDocument();
 		libxml_use_internal_errors(true);
 		$dom->loadHTML($html);

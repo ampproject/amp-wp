@@ -51,6 +51,7 @@ function amp_deactivate() {
 
 add_action( 'init', 'amp_init' );
 function amp_init() {
+
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
@@ -96,6 +97,27 @@ function amp_add_frontend_actions() {
 	require_once(AMP__DIR__ . '/includes/actions/amp-frontend-actions.php');
 }
 
-
 add_action( 'plugins_loaded', 'AMPUtils::_amp_bootstrap_customizer', 9 );
+
+/**
+ * Inject link to AMP version of a post to the REST API posts endpoint
+ * @param $response
+ * @param $post
+ * @return mixed
+ */
+function amp_add_link_to_rest_response( $response, $post ) {
+	if ( ! post_supports_amp( $post ) ) {
+		return $response;
+	}
+
+	$response->add_link( 'amphtml', amp_get_permalink( $post->ID ) );
+
+	return $response;
+}
+add_filter( 'rest_prepare_post', 'amp_add_link_to_rest_response', 10, 2 );
+ 
+// TODO (@amedina): Check the removal of wpautop
+// Stop WP adding extra <p> </p> to your pages' content
+remove_filter( 'the_content', 'wpautop' );
+
 

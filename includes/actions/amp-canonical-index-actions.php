@@ -10,14 +10,12 @@ class AMPCanonicalIndexActions
 	static $is_processing;
 
 	public static function init() {
-		error_log("AMPCanonicalIndexActions::init()");
 		self:$amp_posts = array();
 		add_action( 'the_post', array( __CLASS__, 'prepare_content' ));
 		add_action( 'the_content', array( __CLASS__, 'the_content_filter'), 99999 );
 	}
 
 	public static function the_content_filter($content ) {
-		error_log("AMPCanonicalIndexActions::the_content_filter()");
 		// Avoid infinite loops when calling amp_canonical_retrieve_content
 		if (self::$is_processing ) {
 			return $content;
@@ -28,13 +26,11 @@ class AMPCanonicalIndexActions
 	}
 
 	public static function prepare_content( $post ) {
-		error_log("AMPCanonicalIndexActions::prepare_content()");
 		if ( !isset( self::$amp_posts[ $post->ID ] ) ) {
 			self::$is_processing = true;
 			self::$amp_posts[ $post->ID ] = AMPContentGenerator::amp_canonical_retrieve_content( $post );
 			self::$is_processing = false;
 		}
-
 		self::$current = self::$amp_posts[ $post->ID ];
 	}
 
@@ -97,8 +93,6 @@ class AMPCanonicalIndexActions
 	}
 	
 	public static function postprocess_index_html( $html ) {
-		error_log("AMPCanonicalIndexActions::postprocess_index_html()");
-
 		$dom = new DOMDocument();
 		libxml_use_internal_errors(true);
 		$dom->loadHTML($html);
