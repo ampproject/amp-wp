@@ -26,6 +26,23 @@ function amp_custom_admin_menu() {
 	);
 }
 
+add_action( 'update_option_amp_canonical', 'amp_update_canonical_option', 10, 2 );
+function amp_update_canonical_option( $old_value, $new_value ) {
+    if ( $old_value == "0" /* => standalone */) {
+        error_log("Switched to Standalone");
+	    global $wp_rewrite;
+	    foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
+		    if ( AMP_QUERY_VAR === $endpoint[1] ) {
+			    unset( $wp_rewrite->endpoints[ $index ] );
+			    break;
+		    }
+	    }
+    } else {
+	    error_log("Switched to Paired");
+	    add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
+    }
+	flush_rewrite_rules();
+}
 
 /**
  * Build the options page

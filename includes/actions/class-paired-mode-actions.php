@@ -4,7 +4,7 @@ class PairedModeActions {
 
 	public static function add_actions() {
 
-		if ( is_feed() && ( !get_theme_support('amp') || !is_singular())) {
+		if ( is_feed() || ( !get_theme_support('amp') || !is_singular())) {
 			return;
 		}
 
