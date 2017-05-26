@@ -18,10 +18,13 @@ function amp_post_template_add_canonical( $amp_template ) {
 add_action( 'amp_post_template_head', 'amp_post_template_add_scripts' );
 function amp_post_template_add_scripts( $amp_template ) {
 	$scripts = $amp_template->get( 'amp_component_scripts', array() );
-	foreach ( $scripts as $element => $script ) : ?>
+	foreach ( $scripts as $element => $script ) {
 		$custom_type = ($element == 'amp-mustache') ? 'template' : 'element';
+		?>
 		<script custom-<?php echo esc_attr( $custom_type ); ?>="<?php echo esc_attr( $element ); ?>" src="<?php echo esc_url( $script ); ?>" async></script>
-	<?php endforeach; ?>
+		<?php
+	}
+	?>
 	<script src="<?php echo esc_url( $amp_template->get( 'amp_runtime_script' ) ); ?>" async></script>
 	<?php
 }
