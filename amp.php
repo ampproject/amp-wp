@@ -59,6 +59,7 @@ function amp_init() {
 	add_post_type_support( 'post', AMP_QUERY_VAR );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
+	add_filter( 'language_attributes', 'amp_language_attributes', PHP_INT_MAX, 2 );
 	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	// Redirect the old url of amp page to the updated url.
@@ -76,6 +77,14 @@ function amp_force_query_var_value( $query_vars ) {
 		$query_vars[ AMP_QUERY_VAR ] = 1;
 	}
 	return $query_vars;
+}
+
+function amp_language_attributes($content, $doctype) {
+    if ($doctype == 'html' && is_amp_endpoint()) {
+        $content = preg_replace('/ xml(ns|:lang|:base|:space)=\"[^\"]+\"/', '', $content);
+        $content = preg_replace('/ prefix=\"[^\"]+\"/', '', $content);
+    }
+    return $content;
 }
 
 function amp_maybe_add_actions() {
