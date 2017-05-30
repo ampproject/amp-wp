@@ -47,8 +47,10 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( isset( $attr['id'] ) ) {
 			$video_id = $attr['id'];
-		} elseif ( isset( $attr[0] ) ) {
-			$video_id = $attr[0];
+		} elseif ( isset( $attr['url'] ) ) {
+			$video_id = $this->get_video_id_from_url($attr['url']);
+		}elseif ( isset( $attr[0] ) ) {
+			$video_id = $this->get_video_id_from_url($attr[0]);
 		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
 			$video_id = shortcode_new_to_old_params( $attr );
 		}
