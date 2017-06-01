@@ -21,6 +21,8 @@ require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
+require_once( AMP__DIR__ . '/includes/shortcodes/amp-analytics-shortcode.php' );
+
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
 	if ( ! did_action( 'amp_init' ) ) {
