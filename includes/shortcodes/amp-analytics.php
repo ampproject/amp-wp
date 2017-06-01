@@ -17,7 +17,10 @@ add_filter( 'the_content', 'wpautop' , 12);
 // Primary handler
 function amp_analytics( $atts, $content ) {
 	$ga = json_decode($content);
-	var_dump($ga);
+
+	// TODO (@amedina): Define here the logic to add the amp-analytics
+	// component to the footer section
+
 	return '';
 }
 add_shortcode('amp-analytics', 'amp_analytics');
