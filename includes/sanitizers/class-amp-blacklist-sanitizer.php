@@ -140,6 +140,14 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			$href = untrailingslashit( get_home_url() ) . $href;
 		}
 
+		// If we are sanitizing a mustache template, then we should allow a variable for the href value.
+		// Note: This was added specifically to allow the AMP_Related_Posts_Embed class to work using
+		// amp-mustache templates in an amp-list to render the related posts.
+		$matched = preg_match( '/^{{[^{}]*?}}$/um', $href );
+		if ( ( 1 === $matched ) && ( $this->has_ancestor( $node, 'template' ) ) ) {
+			return true;
+		}
+
 		$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
 		$special_protocols = array( 'tel', 'sms' ); // these ones don't valid with `filter_var+FILTER_VALIDATE_URL`
 		$protocol = strtok( $href, ':' );
@@ -171,6 +179,30 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $node->parentNode ) {
 			$node->parentNode->removeChild( $node );
 		}
+	}
+
+	/**
+	 * Return true if the given node has any ancestor with the give name,
+	 * otherwise return false.
+	 */
+	private function has_ancestor( $node, $ancestor_tag_name ) {
+		if ( $this->get_ancestor_with_tag_name( $node, $ancestor_tag_name ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the first ancestor with the given tag name. If no ancestor
+	 * with that name is found, returns null.
+	 */
+	private function get_ancestor_with_tag_name( $node, $ancestor_tag_name ) {
+		while ( $node && $node = $node->parentNode ) {
+			if ( $node->nodeName == $ancestor_tag_name ) {
+				return $node;
+			}
+		}
+		return null;
 	}
 
 	private function merge_defaults_with_args( $key, $values ) {

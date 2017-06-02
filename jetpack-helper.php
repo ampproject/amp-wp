@@ -69,3 +69,26 @@ function jetpack_amp_build_stats_pixel_url() {
 	$data = array_map( 'rawurlencode' , $data );
 	return add_query_arg( $data, 'https://pixel.wp.com/g.gif' );
 }
+
+/**
+ * Convert the URL of the Jetpack Related Posts to the corresponding
+ * AMP endpoint, if the post supports AMP.
+ * 
+ * @param  array  $related_posts The related posts returned by Jetpack.
+ * @param  int 	  $post_id       The ID of the post where these related posts will appear.
+ * @return array                 The array of posts with modified URLs.
+ */
+function amp_modify_jetpack_related_post_links( $related_posts, $post_id ) {
+	$amp_related_posts = array();
+
+	foreach( $related_posts as $related_post ) {
+		$post = get_post( $related_post['id'] );
+		if ( post_supports_amp( $post ) ) {
+			$related_post['url'] = amp_get_permalink( $related_post['id'] );
+		}
+		$amp_related_posts[] = $related_post;
+	}
+
+	return $amp_related_posts;
+}
+add_filter( 'jetpack_relatedposts_returned_results', 'amp_modify_jetpack_related_post_links', 10, 2 );
