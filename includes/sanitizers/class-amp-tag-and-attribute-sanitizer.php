@@ -767,7 +767,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) &&
 			$node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
-			$url_domain = parse_url( $attr_value, PHP_URL_HOST );
+			$url_domain = wp_parse_url( $attr_value, PHP_URL_HOST );
 			if ( ! empty( $url_domain ) ) {
 				foreach ( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] as $disallowed_domain ) {
 					if ( strtolower( $url_domain ) == strtolower( $disallowed_domain ) ) {
