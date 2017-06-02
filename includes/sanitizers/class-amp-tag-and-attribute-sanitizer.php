@@ -9,7 +9,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
  * Allowed tags array is generated from this protocol buffer:
  *     https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
  *     by the python script in amp-wp/bin/amp_wp_build.py. See the comment at the top
- *     of that file for instructions to generate class-amp-allowed-tags-generated.php. 
+ *     of that file for instructions to generate class-amp-allowed-tags-generated.php.
  *
  * TODO: AMP Spec items not checked by this sanitizer -
  * - `if_value_regex` - if one attribute value matches, this places a restriction
@@ -64,7 +64,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
-	} 
+	}
 
 	private function process_node( $node ) {
 		// Don't process text or comment nodes
@@ -117,7 +117,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			$attr_spec_list = array();
 
-			// If we have exactly one rule_spec, use it's attr_spec_list to 
+			// If we have exactly one rule_spec, use it's attr_spec_list to
 			// validate the node's attributes.
 			if ( 1 == count( $rule_spec_list_to_validate ) ) {
 				$rule_spec = array_pop( $rule_spec_list_to_validate );
@@ -195,9 +195,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Checks to see if a node's placement with the DOM is be valid for the 
-	 * given tag_spec. If there are restrictions placed on the type of node 
-	 * that can be an immediate parent or an ancestor of this node, then make 
+	 * Checks to see if a node's placement with the DOM is be valid for the
+	 * given tag_spec. If there are restrictions placed on the type of node
+	 * that can be an immediate parent or an ancestor of this node, then make
 	 * sure those restrictions are met.
 	 *
 	 * If any of the tests on the restrictions fail, return false, otherwise
@@ -313,7 +313,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// If the given attribute's value exists, is non-empty and the rule's value 
+			// If the given attribute's value exists, is non-empty and the rule's value
 			// is false, then pass.
 			if ( isset( $attr_spec_rule[AMP_Rule_Spec::allow_empty] ) ) {
 				if ( AMP_Rule_Spec::pass == $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
@@ -337,13 +337,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
-					
+
 		// return true;
 		return $score;
 	}
 
 	/**
-	 * If an attribute is not listed in $allowed_attrs, then it will be removed 
+	 * If an attribute is not listed in $allowed_attrs, then it will be removed
 	 * from $node.
 	 */
 	private function sanitize_disallowed_attributes_in_node( $node, $attr_spec_list ) {
@@ -483,7 +483,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Checks to see if the given attribute is mandatory for the given node and
 	 * whether the attribute (or a specified alternate) exists.
-	 *	
+	 *
 	 *	Returns:
 	 *		- AMP_Rule_Spec::pass - $attr_name is mandatory and it exists
 	 *		- AMP_Rule_Spec::fail - $attr_name is mandatory, but doesn't exist
@@ -651,7 +651,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				foreach ( $urls_to_test as $url ) {
 					// This seems to be an acceptable check since the AMP validator
 					//	will allow a URL with no protocol to pass validation.
-					if ( $url_scheme = parse_url( $url, PHP_URL_SCHEME ) ) {
+					if ( $url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME ) ) {
 						if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
 							return AMP_Rule_Spec::fail;
 						}
@@ -667,7 +667,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						foreach ( $urls_to_test as $url ) {
 							// This seems to be an acceptable check since the AMP validator
 							//	will allow a URL with no protocol to pass validation.
-							if ( $url_scheme = parse_url( $url, PHP_URL_SCHEME ) ) {
+							if ( $url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME ) ) {
 								if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[AMP_Rule_Spec::allowed_protocol] ) ) {
 									return AMP_Rule_Spec::fail;
 								}
@@ -699,8 +699,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$attr_value = preg_replace( '/\s*,\s*/', ',', $attr_value );
 				$urls_to_test = explode( ',', $attr_value );
 				foreach ( $urls_to_test as $url ) {
-					$parsed_url = parse_url( $url );
-					// The JS AMP validator seems to consider 'relative' to mean 
+					$parsed_url = AMP_WP_Utils::parse_url( $url );
+					// The JS AMP validator seems to consider 'relative' to mean
 					//	*protocol* relative, not *host* relative for this rule. So,
 					//	a url with an empty 'scheme' is considered "relative" by AMP.
 					// 	ie. '//domain.com/path' and '/path' should both be considered
@@ -717,7 +717,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						$attr_value = preg_replace( '/\s*,\s*/', ',', $attr_value );
 						$urls_to_test = explode( ',', $attr_value );
 						foreach ( $urls_to_test as $url ) {
-							$parsed_url = parse_url( $url );
+							$parsed_url = AMP_WP_Utils::parse_url( $url );
 							if ( empty( $parsed_url['scheme'] ) ) {
 								return AMP_Rule_Spec::fail;
 							}
@@ -767,7 +767,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] ) &&
 			$node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
-			$url_domain = parse_url( $attr_value, PHP_URL_HOST );
+			$url_domain = AMP_WP_Utils::parse_url( $attr_value, PHP_URL_HOST );
 			if ( ! empty( $url_domain ) ) {
 				foreach ( $attr_spec_rule[AMP_Rule_Spec::disallowed_domain] as $disallowed_domain ) {
 					if ( strtolower( $url_domain ) == strtolower( $disallowed_domain ) ) {
@@ -821,7 +821,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Return true if the attribute name is valid for this attr_spec, false otherwise.
 	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || 
+		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) ||
 			isset( $this->layout_allowed_attributes[ $attr_name ] ) ||
 			isset( $attr_spec_list[ $attr_name ] ) ) {
 			return true;
@@ -842,7 +842,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Return true if node is on the allowed tags list or if it is a text
 		// or comment node.
 		return ( ( XML_TEXT_NODE == $node->nodeType ) ||
-			isset( $this->allowed_tags[ $node->nodeName ] ) || 
+			isset( $this->allowed_tags[ $node->nodeName ] ) ||
 			( XML_COMMENT_NODE == $node->nodeType ) ||
 			( XML_CDATA_SECTION_NODE == $node->nodeType ) );
 	}
@@ -966,13 +966,13 @@ abstract class AMP_Rule_Spec {
 	const value_regex = 'value_regex';
 	const value_regex_casei = 'value_regex_casei';
 
-	// If a node type listed here is invalid, it and it's subtree will be 
-	//	removed if it is invalid. This is mainly  because any children will be 
+	// If a node type listed here is invalid, it and it's subtree will be
+	//	removed if it is invalid. This is mainly  because any children will be
 	//	non-functional without this parent.
 	//
 	// If a tag is not listed here, it will be replaced by its children if it
 	//	is invalid.
-	//	
+	//
 	// TODO: There are other nodes that should probably be listed here as well.
 	static $node_types_to_remove_if_invalid = array(
 		'form',
