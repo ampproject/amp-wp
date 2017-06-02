@@ -36,6 +36,9 @@ class AMP_Post_Template {
 	private $data;
 
 	public function __construct( $post_id ) {
+		error_log('Constructing post template!');
+		flush();
+
 		$this->template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
 
 		$this->ID = $post_id;

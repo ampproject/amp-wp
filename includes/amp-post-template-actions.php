@@ -74,6 +74,7 @@ function amp_post_template_add_analytics_script( $data ) {
 
 add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
 function amp_post_template_add_analytics_data( $amp_template ) {
+
 	$analytics_entries = $amp_template->get( 'amp_analytics' );
 	if ( empty( $analytics_entries ) ) {
 		return;
