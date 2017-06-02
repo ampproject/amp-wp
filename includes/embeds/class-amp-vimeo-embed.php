@@ -5,7 +5,8 @@ require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' )
 // Much of this class is borrowed from Jetpack embeds
 class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
-	const URL_PATTERN = '#https?:\/\/(www\.)?vimeo\.com\/*\/*\/.*#i';
+	const URL_PATTERN = '#https?:\/\/(www\.)?vimeo\.com\/.*#i';
+
 	const RATIO = 0.5625;
 
 	protected $DEFAULT_WIDTH = 600;
@@ -95,6 +96,9 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 	}
 
+	// get_video_id_from_url()
+	// Takes the last component of a Vimeo URL
+	// and returns it as the associated video id
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = parse_url( $url );
 		parse_str( $parsed_url['path'], $path );
