@@ -20,6 +20,7 @@ require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
+require_once( AMP__DIR__ . '/includes/shortcodes/amp-analytics.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
@@ -64,9 +65,20 @@ function amp_init() {
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
+	// Register available AMP shortcodes
+	register_amp_shortcodes();
+
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
+}
+
+/**
+ * Register AMP shortcodes
+ *
+ */
+function register_amp_shortcodes() {
+	add_shortcode('amp-analytics', 'amp_analytics');
 }
 
 // Make sure the `amp` query var has an explicit value.
