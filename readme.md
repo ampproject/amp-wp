@@ -288,6 +288,19 @@ function xyz_amp_change_endpoint( $amp_endpoint ) {
 }
 ```
 
+### Custom JavaScript
+
+If you'd like to include your own JavaScript files in a similar way to how you enqueue them in a regular WordPress theme, you can do so by using the `amp_post_template_data` hook to add them to the `amp_component_scripts` array.
+
+```php
+add_filter( 'amp_post_template_data', 'xyz_amp_add_my_custom_script' );
+
+function xyz_amp_add_my_custom_script( $data ) {
+	$data[ 'amp_component_scripts' ][ 'amp-my-custom-script' ] = get_template_directory_uri() . '/scripts/my-custom-script.js';
+	return $data;
+}
+```
+
 ### Custom Template
 
 If you want complete control over the look and feel of your AMP content, you can override the default template using the `amp_post_template_file` filter and pass it the path to a custom template:
