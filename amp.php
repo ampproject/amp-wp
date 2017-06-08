@@ -60,6 +60,7 @@ function amp_init() {
 
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );
+	add_action( 'parse_request', 'amp_maybe_preserve_query_var' );
 
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
@@ -104,6 +105,22 @@ function amp_maybe_add_actions() {
 	} else {
 		amp_add_frontend_actions();
 	}
+}
+
+function amp_maybe_preserve_query_var() {
+	if ( has_filter( 'query_string' ) ) {
+		add_filter( 'query_string', 'amp_preserve_query_var' );
+	}
+}
+
+function amp_preserve_query_var( $query_string ) {
+	global $wp;
+
+	if ( isset( $wp->query_vars[ 'amp' ] ) && $wp->query_vars[ 'amp' ] == '' ) {
+		$query_string = $query_string . '&amp';
+	}
+
+	return $query_string;
 }
 
 function amp_load_classes() {
