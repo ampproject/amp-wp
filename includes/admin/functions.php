@@ -1,7 +1,12 @@
 <?php
 // Callbacks for adding AMP-related things to the admin.
 
+require_once( AMP__DIR__ . '/includes/options/class-amp-options-menu.php' );
+require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-serializer.php' );
+
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
+
+$amp_options_menus = array();
 
 /**
  * Sets up the AMP template editor for the Customizer.
@@ -20,6 +25,9 @@ function amp_init_customizer() {
 
 	// Add a link to the Customizer
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
+
+	// Add a link to Settings
+	add_action( 'admin_menu', 'amp_add_amp_options_link' );
 }
 
 /**
@@ -34,13 +42,19 @@ function amp_add_customizer_link() {
 	), 'customize.php' );
 
 	// Add the theme page.
-	$page = add_theme_page(
+	add_theme_page(
 		__( 'AMP', 'amp' ),
 		__( 'AMP', 'amp' ),
 		'edit_theme_options',
 		$menu_slug
 	);
 }
+
+function amp_add_amp_options_link() {
+	$amp_options = new AMP_Options_Menu();
+	$amp_options->init();
+}
+add_action( 'admin_post_analytics_options', 'Analytics_Options_Serializer::save' );
 
 function amp_admin_get_preview_permalink() {
 	/**
