@@ -1,7 +1,7 @@
 === AMP ===
 Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
-Requires at least: 4.4
+Requires at least: 4.7
 Tested up to: 4.8
 Stable tag: 0.4.2
 License: GPLv2 or later
