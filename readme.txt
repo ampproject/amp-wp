@@ -25,7 +25,7 @@ Follow along with or contribute to the development of this plugin at https://git
 
 1. Upload the folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button. 
+1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
 
 == Frequently Asked Questions ==
 
