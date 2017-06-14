@@ -16,7 +16,7 @@ class AMP_Analytics_Options_Submenu_Page {
 			?>
 			<div class="analytics-data-container">
 				<form method="post" action="<?php echo esc_html( admin_url( 'admin-post.php' ) ); ?>">
-					<h2>Analytics Component: <?php echo $type . ':' . $id ?></h2>
+					<h2>Analytics Component: <?php echo ($type ? $type . ':' : '') . $id ?></h2>
 					<div class="options">
 						<p>
 							<label>Type: </label>

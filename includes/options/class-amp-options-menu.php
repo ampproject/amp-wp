@@ -7,12 +7,12 @@ class AMP_Options_Menu {
 
 	private $menu_page;
 	private $menu_slug;
-	
+
 	public function __construct() {
 		$this->menu_page = new AMP_Options_Menu_Page();
 		$this->menu_slug = 'amp-plugin-options';
 	}
-	
+
 	public function init() {
 		$submenus = array(
 			new AMP_Analytics_Options_Submenu( $this->menu_slug ),

@@ -87,7 +87,7 @@ function amp_add_custom_analytics( ) {
 		$fields = get_analytics_component_fields($option);
 		$analytics[$fields['id']] = $fields;
 	}
-	
+
 	return $analytics;
 }
 add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
