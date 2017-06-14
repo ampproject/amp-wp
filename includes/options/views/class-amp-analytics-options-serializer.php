@@ -36,7 +36,7 @@ class Analytics_Options_Serializer {
 		}
 		update_option( $option_name, $analytics_options, false);
 
-		// TODO(@amedina): change this hardwired redirect to use a variable reference
-		header('Location: http://localhost:8888/amp-wp-plugin-dev/wp-admin/admin.php?page=amp-analytics-options');
+		// [Redirect] Keep the user in the analytics options page
+		header('Location: ' . admin_url('admin.php?page=amp-analytics-options'));
 	}
 }
