@@ -27,22 +27,22 @@ matrix:
    - php: "5.2"
      env: WP_VERSION=latest
    - php: "5.2"
-     env: WP_VERSION=4.6
+     env: WP_VERSION=4.7
    - php: "5.3"
      env: WP_VERSION=latest
    - php: "5.3"
-     env: WP_VERSION=4.6
+     env: WP_VERSION=4.7
    - php: "5.4"
      env: WP_VERSION=latest
    - php: "5.4"
-     env: WP_VERSION=4.6
+     env: WP_VERSION=4.7
    - php: "7.0"
      env: WP_VERSION=latest
    - php: "7.0"
-     env: WP_VERSION=4.6
+     env: WP_VERSION=4.7
      # 7.1 / latest already included above as first build.
    - php: "7.1"
-     env: WP_VERSION=4.6
+     env: WP_VERSION=4.7
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
