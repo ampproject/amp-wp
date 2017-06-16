@@ -5,13 +5,6 @@ require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-
 
 class AMP_Analytics_Options_Submenu_Page {
 
-	private $serializer;
-
-	public function __construct() {
-		$this->serializer = new Analytics_Options_Serializer();
-		$this->serializer->init();
-	}
-
 	private function render_option($id = "", $type = "", $config = "") {
 			?>
 			<div class="analytics-data-container">

@@ -2,10 +2,6 @@
 
 class Analytics_Options_Serializer {
 
-	public function init() {
-		add_action( 'admin_post_analytics_options', array( $this, 'save' ) );
-	}
-
 	public static function save() {
 
 		$option_name = 'analytics';
