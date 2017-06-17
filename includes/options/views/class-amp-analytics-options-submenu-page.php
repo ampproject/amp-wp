@@ -9,13 +9,14 @@ class AMP_Analytics_Options_Submenu_Page {
 			?>
 			<div class="analytics-data-container">
 				<form method="post" action="<?php echo esc_html( admin_url( 'admin-post.php' ) ); ?>">
-					<h2>Analytics Component: <?php echo ($type ? $type . ':' : '') . $id ?></h2>
+					<h2>Analytics Component: <?php echo ($type ? $type . ':' : '') . substr($id, -6) ?></h2>
 					<div class="options">
 						<p>
 							<label>Type: </label>
 							<input class="option-input" type="text" name=vendor-type value="<?php echo $type; ?>" />
 							<label>Id: </label>
-							<input type="text" name=id value="<?php echo $id; ?>" />
+							<input type="text" name=id value="<?php echo substr($id, -6); ?>" text="alberto" readonly />
+                            <input type="hidden" name=id-value value="<?php echo $id; ?>" />
 						</p>
 						<p>
 							<label>JSON Configuration:</label>

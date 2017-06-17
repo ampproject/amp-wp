@@ -2,8 +2,6 @@
 
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
-	private $id_one = 'ga-1';
-	private $id_two = 'ga-2';
 	private $vendor = 'googleanalytics';
 
 	private $config_one = '{
@@ -29,16 +27,16 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	private $config_two = '{
 		"requests": {
-			"event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=amp-pV356ME7W4U6b_ILVWGDfCPCqFv2m4H7mPY0SYwKQPjBFQGoGYlsYcUikw1UiDVl&account=ampbyexample&event=${eventId}"
+			"event": "https://amp-publisher.com/amp-analytics/ping?user=amp-pV356ME7W4U6b_ILVWGDfCPCqFv2m4H7mPY0SYwKQPjBFQGoGYlsYcUikw1UiDVl&account=ampbyexample&event=${eventId}"
 		},
 		"triggers": {
 			"trackAnchorClicks": {
 				"on": "click",
-		          "selector": "a",
-		          "request": "event",
-		          "vars": {
+		        "selector": "a",
+		        "request": "event",
+		        "vars": {
 					"eventId": "clickOnAnyAnchor"
-		          }
+		        }
 			}
 		}
 	}';
@@ -53,22 +51,16 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$wpdb->query( 'ROLLBACK' );
 	}
 
-	public function get_analytics_component_data() {
-		return array(
-			'one_component' => array( '', '<amp-analytics id="googleanalytics-ga-1" type="googleanalytics"><script type="application/json">{"requests":{"event":"https:\/\/amp-publisher-samples-staging.herokuapp.com\/amp-analytics\/ping?user=amp-pV356ME7W4U6b_ILVWGDfCPCqFv2m4H7mPY0SYwKQPjBFQGoGYlsYcUikw1UiDVl&account=ampbyexample&event=${eventId}"},"triggers":{"trackPageview":{"on":"visible","request":"event","visibilitySpec":{"selector":"#cat-image-id","visiblePercentageMin":20,"totalTimeMin":500,"continuousTimeMin":200},"vars":{"eventId":"catview"}}}}</script></amp-analytics>')
-		);
+	private function get_options() {
+		return get_option('analytics');
 	}
 
-	private function insert_one_option($id, $vendor, $config) {
+	private function insert_one_option($vendor, $config) {
 		global $_POST;
-		$_POST['id'] = $id;
+		$_POST['id-value'] = '';
 		$_POST['vendor-type'] = $vendor;
 		$_POST['config'] = $config;
 		$this->serializer->save();
-	}
-
-	private function get_options() {
-		return get_option('analytics');
 	}
 
 	/**
@@ -88,7 +80,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		/* Insert analytics option */
 		$this->insert_one_option(
-			$this->id_one,
 			$this->vendor,
 			$this->config
 		);
@@ -104,14 +95,14 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		/* Delete analytics options, if any */
 		delete_option( 'analytics' );
 
-		/* Insert analytics option */
+		/* Insert analytics option one */
 		$this->insert_one_option(
-			$this->id_one,
 			$this->vendor,
 			$this->config_one
 		);
+
+		/* Insert analytics option two */
 		$this->insert_one_option(
-			$this->id_two,
 			$this->vendor,
 			$this->config_two
 		);
@@ -129,7 +120,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		/* Insert analytics option */
 		$this->insert_one_option(
-			$this->id_one,
 			$this->vendor,
 			$this->config_one
 		);
@@ -171,7 +161,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		/* Insert analytics option */
 		$this->insert_one_option(
-			$this->id_one,
 			$this->vendor,
 			$this->config_one
 		);
@@ -201,13 +190,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 */
 	function test_two_analytics_components_added() {
 		$this->insert_one_option(
-			$this->id_one,
 			$this->vendor,
 			$this->config_one
 		);
 
 		$this->insert_one_option(
-			$this->id_two,
 			$this->vendor,
 			$this->config_two
 		);

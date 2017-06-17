@@ -6,23 +6,27 @@ class Analytics_Options_Serializer {
 
 		$option_name = 'analytics';
 
-		if ( empty( $_POST['id'] ) ||
-		     empty( $_POST['vendor-type'] ) ||
+		if ( empty( $_POST['vendor-type'] ) ||
 		     empty( $_POST['config'] ) ) {
 			return;
 		}
 
+		if ( empty($_POST['id-value'])) {
+			$_POST['id-value'] = md5($_POST['config']);
+		}
+
 		$new_analytics_options = array(
-			$_POST['id'],
+			$_POST['id-value'],
 			$_POST['vendor-type'],
 			stripslashes($_POST['config'])
 		);
 
-		$inner_option_name = $_POST['vendor-type'] . '-' . $_POST['id'];
+		$inner_option_name = $_POST['vendor-type'] . '-' . $_POST['id-value'];
 		$analytics_options = get_option($option_name);
 		if ( ! $analytics_options ) {
 			$analytics_options = array();
 		}
+
 		if ( isset($_POST['delete']) ) {
 			unset($analytics_options[$inner_option_name]);
 		} else {
