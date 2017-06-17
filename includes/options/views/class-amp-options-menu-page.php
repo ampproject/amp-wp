@@ -2,6 +2,14 @@
 
 class AMP_Options_Menu_Page {
 	public function render() {
-		echo '<div class="wrap"><p>Here is where the form would go if I actually had AMP options.</p></div>';
+		?>
+		<div class="ampoptions-admin-page">
+			<h1>AMP Plugin Options</h1>
+				<p>
+					This admin panel menu contains configuration options
+					for the AMP Plugin.
+				</p>
+		</div>
+		<?php
 	}
 }
