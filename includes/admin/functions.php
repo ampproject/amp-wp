@@ -3,6 +3,7 @@
 
 require_once( AMP__DIR__ . '/includes/options/class-amp-options-menu.php' );
 require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-serializer.php' );
+require_once( AMP__DIR__ . '/includes/admin/amp-wp-admin-styles.php' );
 
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
@@ -26,6 +27,37 @@ function amp_init_customizer() {
 
 	// Add a link to Settings
 	add_action( 'admin_menu', 'amp_add_amp_options_link' );
+
+	// Trigger analytics options serializer on analytics option's save
+	add_action( 'admin_post_analytics_options', 'Analytics_Options_Serializer::save' );
+}
+
+function amp_admin_get_preview_permalink() {
+	/**
+	 * Filter the post type to retrieve the latest of for use in the AMP template customizer.
+	 *
+	 * @param string $post_type Post type slug. Default 'post'.
+	 */
+	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
+
+	if ( ! post_type_supports( $post_type, 'amp' ) ) {
+		return;
+	}
+
+	$post_ids = get_posts( array(
+		'post_status'      => 'publish',
+		'post_type'        => $post_type,
+		'posts_per_page'   => 1,
+		'fields'           => 'ids',
+	) );
+
+	if ( empty( $post_ids ) ) {
+		return false;
+	}
+
+	$post_id = $post_ids[0];
+
+	return amp_get_permalink( $post_id );
 }
 
 /**
@@ -55,7 +87,6 @@ function amp_add_amp_options_link() {
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
-add_action( 'admin_post_analytics_options', 'Analytics_Options_Serializer::save' );
 
 /**
  * Grab the analytics options from the DB and return $analytics option
@@ -92,44 +123,3 @@ function amp_add_custom_analytics( ) {
 }
 add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
 
-function amp_admin_get_preview_permalink() {
-	/**
-	 * Filter the post type to retrieve the latest of for use in the AMP template customizer.
-	 *
-	 * @param string $post_type Post type slug. Default 'post'.
-	 */
-	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
-
-	if ( ! post_type_supports( $post_type, 'amp' ) ) {
-		return;
-	}
-
-	$post_ids = get_posts( array(
-		'post_status'      => 'publish',
-		'post_type'        => $post_type,
-		'posts_per_page'   => 1,
-		'fields'           => 'ids',
-	) );
-
-	if ( empty( $post_ids ) ) {
-		return false;
-	}
-
-	$post_id = $post_ids[0];
-
-	return amp_get_permalink( $post_id );
-}
-
-add_action('admin_head', 'amp_options_styles');
-function amp_options_styles() {
-	?>
-	<style>
-		.analytics-data-container #delete {
-			background: red;
-			border-color: red;
-			text-shadow: 0 0 0;
-			margin: 0 5px;
-		}
-    </style>;
-	<?php
-}

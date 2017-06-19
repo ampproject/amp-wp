@@ -34,6 +34,7 @@ class Analytics_Options_Serializer {
 		}
 		update_option( $option_name, $analytics_options, false);
 		// [Redirect] Keep the user in the analytics options page
-		header('Location: ' . admin_url('admin.php?page=amp-analytics-options'));
+		//header('Location: ' . admin_url('admin.php?page=amp-analytics-options'));
+		wp_redirect(admin_url('admin.php?page=amp-analytics-options'));
 	}
 }
