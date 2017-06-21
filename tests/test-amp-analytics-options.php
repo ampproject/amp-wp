@@ -46,13 +46,26 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->serializer = new Analytics_Options_Serializer();
 	}
 
-	public function tearDown() {
-		global $wpdb;
-		$wpdb->query( 'ROLLBACK' );
+	private function get_options() {
+		$analytics_options = false;
+		$amp_options = get_option('amp-options');
+		if ( $amp_options ) {
+			$analytics_options = $amp_options[ 'amp-analytics'];
+		}
+
+		return $analytics_options;
 	}
 
-	private function get_options() {
-		return get_option('analytics');
+	private function render_post() {
+		$user_id = $this->factory->user->create();
+		$post_id = $this->factory->post->create( array( 'post_author' => $user_id ) );
+
+		// Need to use ob here since the method echos
+		ob_start();
+		amp_render_post( $post_id );
+		$amp_rendered = ob_get_clean();
+
+		return $amp_rendered;
 	}
 
 	private function insert_one_option($vendor, $config) {
@@ -75,8 +88,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that exactly one analytics component is inserted into the DB
 	 */
 	function test_one_option_inserted() {
-		/* Delete analytics options, if any */
-		delete_option( 'analytics' );
+
+		// Delete options, if any
+		delete_option( 'amp-options' );
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -92,8 +106,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that two analytics components are inserted into the DB
 	 */
 	function test_two_options_inserted() {
-		/* Delete analytics options, if any */
-		delete_option( 'analytics' );
+
+		// Delete options, if any
+		delete_option( 'amp-options' );
 
 		/* Insert analytics option one */
 		$this->insert_one_option(
@@ -124,13 +139,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			$this->config_one
 		);
 
-		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create( array( 'post_author' => $user_id ) );
-
-		// Need to use ob here since the method echos
-		ob_start();
-		amp_render_post( $post_id );
-		$amp_rendered = ob_get_clean();
+		$amp_rendered = $this->render_post();
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
@@ -156,8 +165,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that exactly one analytics component are added to the page
 	 */
 	function test_one_analytics_component_added() {
-		/* Delete analytics options, if any */
-		delete_option( 'analytics' );
+
+		// Delete options, if any
+		delete_option( 'amp-options' );
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -165,20 +175,17 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			$this->config_one
 		);
 
-		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create( array( 'post_author' => $user_id ) );
-
-		// Need to use ob here since the method echos
-		ob_start();
-		amp_render_post( $post_id );
-		$amp_rendered = ob_get_clean();
-
+		// Render AMP post
+		$amp_rendered = $this->render_post();
+		
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
 		$dom = new DOMDocument;
 		$dom->loadHTML( $amp_rendered );
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
+
+		// One amp-analytics component should be in the page
 		$this->assertEquals(1, $components->length );
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
@@ -189,6 +196,10 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that two analytics components are added to the page
 	 */
 	function test_two_analytics_components_added() {
+
+		// Delete options, if any
+		delete_option( 'amp-options' );
+
 		$this->insert_one_option(
 			$this->vendor,
 			$this->config_one
@@ -199,20 +210,14 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			$this->config_two
 		);
 
-		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create( array( 'post_author' => $user_id ) );
-
-		// Need to use ob here since the method echos
-		ob_start();
-		amp_render_post( $post_id );
-		$amp_rendered = ob_get_clean();
+		$amp_rendered = $this->render_post();
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
 		$dom = new DOMDocument;
 		$dom->loadHTML( $amp_rendered );
-
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
+		// Two amp-analytics components should be in the page
 		$this->assertEquals(2, $components->length );
 
 		libxml_clear_errors();

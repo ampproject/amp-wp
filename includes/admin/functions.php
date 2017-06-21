@@ -3,7 +3,6 @@
 
 require_once( AMP__DIR__ . '/includes/options/class-amp-options-menu.php' );
 require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-serializer.php' );
-require_once( AMP__DIR__ . '/includes/admin/amp-wp-admin-styles.php' );
 
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
@@ -24,12 +23,6 @@ function amp_init_customizer() {
 
 	// Add a link to the Customizer
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
-
-	// Add a link to Settings
-	add_action( 'admin_menu', 'amp_add_amp_options_link' );
-
-	// Trigger analytics options serializer on analytics option's save
-	add_action( 'admin_post_analytics_options', 'Analytics_Options_Serializer::save' );
 }
 
 function amp_admin_get_preview_permalink() {
@@ -83,20 +76,22 @@ function amp_add_customizer_link() {
 /**
  * Registers a top-level menu for AMP configuration options
  */
-function amp_add_amp_options_link() {
+function amp_add_options_menu() {
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
+add_action('admin_menu','amp_add_options_menu');
+// Action to trigger analytics options serializer on analytics option's save
+add_action( 'admin_post_analytics_options', 'Analytics_Options_Serializer::save' );
+
 
 /**
  * Grab the analytics options from the DB and return $analytics option
  * @return array
  */
-function get_analytics_component_fields($option) {
+function amp_get_analytics_component_fields($option) {
 
-	$id= $option[0];
-	$type = $option[1];
-	$config = $option[2];
+	list( $id, $type, $config ) = $option;
 
 	$fields = array();
 	$component_index = $type . '-' . $id;
@@ -104,22 +99,31 @@ function get_analytics_component_fields($option) {
 	$fields['type'] = $type;
 	$fields['attributes'] = array();
 
-	$analytics_json = json_decode( stripslashes( $config ), true );
+	$analytics_json = json_decode(  $config , true );
 	$fields['config_data'] = $analytics_json;
 
 	return $fields;
 }
 
-function amp_add_custom_analytics( ) {
-	$analytics = array();
-	$analytics_options = get_option( 'analytics', array() );
 
+function amp_add_custom_analytics() {
+	$amp_options = get_option('amp-options');
+	if ( $amp_options ) {
+		$analytics_options = $amp_options[ 'amp-analytics'];
+	}
+
+	if ( ! $analytics_options )
+		return;
+
+	$analytics = array();
 	foreach ( $analytics_options as $option ) {
-		$fields = get_analytics_component_fields($option);
+		$fields = amp_get_analytics_component_fields($option);
 		$analytics[$fields['id']] = $fields;
 	}
 
 	return $analytics;
 }
 add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
+
+
 

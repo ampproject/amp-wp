@@ -2,6 +2,7 @@
 
 require_once( AMP__DIR__ . '/includes/options/class-amp-analytics-options-submenu.php' );
 require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-menu-page.php' );
+require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-serializer.php' );
 
 class AMP_Options_Menu {
 
@@ -26,8 +27,8 @@ class AMP_Options_Menu {
 	 */
 	public function add_amp_options_menu( $submenus ) {
 		add_menu_page(
-			'AMP Plugin Options',
-			'AMP',
+			__( 'AMP Plugin Options', 'amp' ),
+			__( 'AMP', 'amp' ),
 			'manage_options',
 			$this->menu_slug,
 			array( $this->menu_page, 'render' )
@@ -38,3 +39,4 @@ class AMP_Options_Menu {
 		}
 	}
 }
+
