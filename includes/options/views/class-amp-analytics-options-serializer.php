@@ -6,17 +6,18 @@ class Analytics_Options_Serializer {
 
 	public static function save() {
 
-		// Request must come from user with right capabilities
-		if ( ! current_user_can( 'administrator' ) ) {
-			wp_die( 'Sorry, you do not have the necessary permissions to perform this action' );
+		if ( is_admin() ) {
+			// Request must come from user with right capabilities
+			if ( ! current_user_can( 'administrator' ) ) {
+				wp_die( 'Sorry, you do not have the necessary permissions to perform this action' );
+			}
+			// Ensure request is coming from analytics option form
+			check_admin_referer( 'analytics-options', 'analytics-options' );
 		}
-
-		// Ensure request is coming from analytics option form
-		check_admin_referer( 'analytics-options', 'analytics-options' );
 
 		$option_name = 'amp-analytics';
 
-		// Check conditions and proceed if correct
+		// Check save/delete pre-conditions and proceed if correct
 		if ( ! ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) ) &&
 				AMP_HTML_Utils::valid_json( stripslashes($_POST['config'] ) ) ) {
 
