@@ -1,21 +1,24 @@
 <?php
 
-class Analytics_Options_Serializer {
+require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 
-	private static function valid_json( $data ) {
-		if (!empty($data)) {
-			@json_decode($data);
-			return (json_last_error() === JSON_ERROR_NONE);
-		}
-		return false;
-	}
+class Analytics_Options_Serializer {
 
 	public static function save() {
 
+		// Request must come from user with right capabilities
+		if ( ! current_user_can( 'administrator' ) ) {
+			wp_die( 'Sorry, you do not have the necessary permissions to perform this action' );
+		}
+
+		// Ensure request is coming from analytics option form
+		check_admin_referer( 'analytics-options', 'analytics-options' );
+
 		$option_name = 'amp-analytics';
 
+		// Check conditions and proceed if correct
 		if ( ! ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) ) &&
-				Analytics_Options_Serializer::valid_json( stripslashes($_POST['config'] ) ) ) {
+				AMP_HTML_Utils::valid_json( stripslashes($_POST['config'] ) ) ) {
 
 			if ( empty( $_POST['id-value'] ) ) {
 				$_POST['id-value'] = md5( $_POST['config'] );
@@ -24,11 +27,11 @@ class Analytics_Options_Serializer {
 			// Prepare the data for the new analytics setting
 			$new_analytics_option = array(
 				$_POST['id-value'],
-				$_POST['vendor-type'],
+				sanitize_key($_POST['vendor-type']),
 				stripslashes( $_POST['config'] )
 			);
 			// Identifier for analytics option
-			$inner_option_name = $_POST['vendor-type'] . '-' . $_POST['id-value'];
+			$inner_option_name = sanitize_key($_POST['vendor-type'] . '-' . $_POST['id-value'] );
 
 			// Grab the amp_options from the DB
 			$amp_options = get_option( 'amp-options' );

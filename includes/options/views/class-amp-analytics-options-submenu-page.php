@@ -2,7 +2,6 @@
 
 require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-serializer.php' );
 
-
 class AMP_Analytics_Options_Submenu_Page {
 
 	private function render_option($id = "", $type = "", $config = "") {
@@ -27,6 +26,7 @@ class AMP_Analytics_Options_Submenu_Page {
 					</div><!-- #analytics-data-container -->
 				<p>
 			<?php
+			    wp_nonce_field( 'analytics-options', 'analytics-options');
 				submit_button('Save', 'primary', 'save', false);
 				submit_button('Delete', 'delete button-primary', 'delete', false);
 				?>
@@ -49,7 +49,8 @@ class AMP_Analytics_Options_Submenu_Page {
 
 		if ( $analytics_options ) {
 			foreach ( $analytics_options as $option ) {
-				$this->render_option( $option[0], $option[1], $option[2] );
+			    list( $id, $type, $config ) = $option;
+				$this->render_option( $id, $type, $config );
 			}
 		}
 		$this->render_option();

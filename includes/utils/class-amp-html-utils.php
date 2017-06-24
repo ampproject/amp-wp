@@ -17,4 +17,12 @@ class AMP_HTML_Utils {
 		}
 		return implode( ' ', $string );
 	}
+
+	public static function valid_json( $data ) {
+		if (!empty($data)) {
+			@json_decode($data);
+			return (json_last_error() === JSON_ERROR_NONE);
+		}
+		return false;
+	}
 }
