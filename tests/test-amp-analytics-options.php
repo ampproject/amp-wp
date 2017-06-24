@@ -6,7 +6,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	private $config_one = '{
       "requests": {
-        "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=amp-pV356ME7W4U6b_ILVWGDfCPCqFv2m4H7mPY0SYwKQPjBFQGoGYlsYcUikw1UiDVl&account=ampbyexample&event=${eventId}"
+        "event": "https://example.com/..."
       },
       "triggers": {
         "trackPageview": {
@@ -27,7 +27,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	private $config_two = '{
 		"requests": {
-			"event": "https://amp-publisher.com/amp-analytics/ping?user=amp-pV356ME7W4U6b_ILVWGDfCPCqFv2m4H7mPY0SYwKQPjBFQGoGYlsYcUikw1UiDVl&account=ampbyexample&event=${eventId}"
+			"event": "https://example.com/..."
 		},
 		"triggers": {
 			"trackAnchorClicks": {
