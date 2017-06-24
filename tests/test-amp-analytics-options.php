@@ -148,7 +148,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		// Load the rendered page into it
 		$dom->loadHTML( $amp_rendered );
 
-		$head = $dom->getElementsByTagName( 'head' )[0];
+		$head = $dom->getElementsByTagName( 'head' )->item(0);
 		$scripts = $head->getElementsByTagName( 'script');
 		$analytics_js_found = false;
 		foreach ( $scripts as $script) {
