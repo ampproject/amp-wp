@@ -36,17 +36,36 @@ class AMP_Analytics_Options_Submenu_Page {
 			<?php
 	}
 
-	public function render() {
+	public function render_title() {
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 		<?php
 
+		// If redirected from serializer, check if action succeeded
+		global $_GET;
+		if ( isset( $_GET['valid'] ) ) {
+            if ( ! esc_attr( $_GET['valid'] ) ) {
+                ?>
+                <h3 style='color:red'><?php echo 'Action not taken: invalid input!'; ?></h3>
+                <?php
+            } else {
+                ?>
+                <h3 style='color:green'><?php echo 'Option(s) saved!'; ?></h3>
+                <?php
+            }
+            unset( $_GET['valid'] );
+		}
+	}
+
+	public function render() {
+
+	    $this->render_title();
+
 		$amp_options = get_option('amp-options');
 		if ( $amp_options ) {
 			$analytics_options = $amp_options[ 'amp-analytics'];
-        }
-
+		}
 		if ( $analytics_options ) {
 			foreach ( $analytics_options as $option ) {
 			    list( $id, $type, $config ) = $option;

@@ -177,7 +177,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		// Render AMP post
 		$amp_rendered = $this->render_post();
-		
+
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
 		$dom = new DOMDocument;

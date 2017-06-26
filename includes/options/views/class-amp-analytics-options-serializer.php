@@ -17,9 +17,12 @@ class Analytics_Options_Serializer {
 
 		$option_name = 'amp-analytics';
 
+		// Validate JSON configuration is valid
+		$is_valid_json = AMP_HTML_Utils::valid_json( stripslashes($_POST['config'] ) );
+
 		// Check save/delete pre-conditions and proceed if correct
 		if ( ! ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) ) &&
-				AMP_HTML_Utils::valid_json( stripslashes($_POST['config'] ) ) ) {
+				$is_valid_json ) {
 
 			if ( empty( $_POST['id-value'] ) ) {
 				$_POST['id-value'] = md5( $_POST['config'] );
@@ -53,10 +56,11 @@ class Analytics_Options_Serializer {
 			$amp_options[ $option_name ] = $amp_analytics;
 			update_option( 'amp-options' , $amp_options, false );
 		}
-		// [Redirect] Keep the user in the analytics options page
-		// Wrap with is_admin() to enable phpunit tests to exercise this code
+		// Redirect to keep the user in the analytics options page
+		// Wrap in is_admin() to enable phpunit tests to exercise this code
 		if ( is_admin() ) {
-			wp_redirect( admin_url( 'admin.php?page=amp-analytics-options' ) );
+			wp_redirect( admin_url( 'admin.php?page=amp-analytics-options&valid=' . $is_valid_json  ) );
+			exit;
 		}
 	}
 }
