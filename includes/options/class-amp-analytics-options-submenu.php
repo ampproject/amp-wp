@@ -30,7 +30,7 @@ class AMP_Analytics_Options_Submenu {
 			__( 'Analytics', 'amp' ),
 			'manage_options',
 			$this->menu_slug,
-			array($this->menu_page, 'render')
+			array( $this->menu_page, 'render' )
 		);
 	}
 
@@ -42,6 +42,9 @@ class AMP_Analytics_Options_Submenu {
 				border-color: red;
 				text-shadow: 0 0 0;
 				margin: 0 5px;
+			}
+			.amp-analytics-options.notice {
+				width: 200px;
 			}
 		</style>;
 

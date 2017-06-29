@@ -19,9 +19,9 @@ class AMP_HTML_Utils {
 	}
 
 	public static function valid_json( $data ) {
-		if (!empty($data)) {
-			@json_decode($data);
-			return (json_last_error() === JSON_ERROR_NONE);
+		if (!empty( $data )) {
+			@json_decode( $data );
+			return ( json_last_error() === JSON_ERROR_NONE );
 		}
 		return false;
 	}

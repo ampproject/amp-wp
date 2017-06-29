@@ -43,14 +43,14 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	private $serializer;
 
 	public function setUp() {
-		$this->serializer = new Analytics_Options_Serializer();
+		$this->serializer = new AMP_Options_Manager();
 	}
 
 	private function get_options() {
 		$analytics_options = false;
 		$amp_options = get_option('amp-options');
 		if ( $amp_options ) {
-			$analytics_options = $amp_options[ 'amp-analytics'];
+			$analytics_options = $amp_options['amp-analytics'];
 		}
 
 		return $analytics_options;
@@ -68,12 +68,12 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		return $amp_rendered;
 	}
 
-	private function insert_one_option($vendor, $config) {
+	private function insert_one_option( $vendor, $config ) {
 		global $_POST;
 		$_POST['id-value'] = '';
 		$_POST['vendor-type'] = $vendor;
 		$_POST['config'] = $config;
-		$this->serializer->save();
+		$this->serializer->submit( $_POST );
 	}
 
 	/**
@@ -99,7 +99,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$options = $this->get_options();
 
-		$this->assertEquals( 1, count($options) );
+		$this->assertEquals( 1, count( $options ) );
 	}
 
 	/**
@@ -123,7 +123,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$options = $this->get_options();
 
-		$this->assertEquals( 2, count($options) );
+		$this->assertEquals( 2, count( $options ) );
 	}
 
 	/**
@@ -151,13 +151,13 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$head = $dom->getElementsByTagName( 'head' )->item(0);
 		$scripts = $head->getElementsByTagName( 'script');
 		$analytics_js_found = false;
-		foreach ( $scripts as $script) {
+		foreach ( $scripts as $script ) {
 			if ($script->getAttribute( 'custom-element') == "amp-analytics" ) {
 				$analytics_js_found = true;
 				break;
 			}
 		}
-		$this->AssertTrue($analytics_js_found);
+		$this->AssertTrue( $analytics_js_found );
 
 	}
 
@@ -218,7 +218,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 		// Two amp-analytics components should be in the page
-		$this->assertEquals(2, $components->length );
+		$this->assertEquals( 2, $components->length );
 
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );

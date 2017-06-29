@@ -2,7 +2,7 @@
 // Callbacks for adding AMP-related things to the admin.
 
 require_once( AMP__DIR__ . '/includes/options/class-amp-options-menu.php' );
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-serializer.php' );
+require_once ( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
 
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
@@ -80,9 +80,8 @@ function amp_add_options_menu() {
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
-add_action('admin_menu','amp_add_options_menu');
-// Action to trigger analytics options serializer on analytics option's save
-add_action( 'admin_post_analytics_options', 'Analytics_Options_Serializer::save' );
+add_action( 'admin_menu', 'amp_add_options_menu' );
+add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::save' );
 
 
 /**
@@ -99,7 +98,7 @@ function amp_get_analytics_component_fields($option) {
 	$fields['type'] = $type;
 	$fields['attributes'] = array();
 
-	$analytics_json = json_decode(  $config , true );
+	$analytics_json = json_decode( $config , true );
 	$fields['config_data'] = $analytics_json;
 
 	return $fields;
@@ -107,9 +106,9 @@ function amp_get_analytics_component_fields($option) {
 
 
 function amp_add_custom_analytics() {
-	$amp_options = get_option('amp-options');
+	$amp_options = get_option( 'amp-options' );
 	if ( $amp_options ) {
-		$analytics_options = $amp_options[ 'amp-analytics'];
+		$analytics_options = $amp_options['amp-analytics'];
 	}
 
 	if ( ! $analytics_options )
@@ -117,13 +116,10 @@ function amp_add_custom_analytics() {
 
 	$analytics = array();
 	foreach ( $analytics_options as $option ) {
-		$fields = amp_get_analytics_component_fields($option);
-		$analytics[$fields['id']] = $fields;
+		$fields = amp_get_analytics_component_fields( $option );
+		$analytics[ $fields['id'] ] = $fields;
 	}
 
 	return $analytics;
 }
 add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
-
-
-

@@ -2,7 +2,7 @@
 
 require_once( AMP__DIR__ . '/includes/options/class-amp-analytics-options-submenu.php' );
 require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-menu-page.php' );
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-serializer.php' );
+require_once ( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
 
 class AMP_Options_Menu {
 
@@ -18,8 +18,8 @@ class AMP_Options_Menu {
 		$submenus = array(
 			new AMP_Analytics_Options_Submenu( $this->menu_slug ),
 		);
-		$this->add_amp_options_menu($submenus);
-		add_action( 'admin_menu', array($this, 'amp_remove_toplevel_menu_item'), 9999 );
+		$this->add_amp_options_menu( $submenus );
+		add_action( 'admin_menu', array( $this, 'amp_remove_toplevel_menu_item' ), 9999 );
 	}
 
 	// Helper function to avoid having the top-level menu as
@@ -44,8 +44,8 @@ class AMP_Options_Menu {
 			array( $this->menu_page, 'render' )
 		);
 
-		foreach ($submenus as $submenu) {
-			$submenu->init($this->menu_slug);
+		foreach ( $submenus as $submenu ) {
+			$submenu->init( $this->menu_slug );
 		}
 	}
 }
