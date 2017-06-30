@@ -18,12 +18,13 @@ class AMP_Analytics_Options_Submenu {
 	public function init() {
 		$this->add_submenu();
 		add_action(
-			'admin_head',
-			'AMP_Analytics_Options_Submenu::amp_options_styles'
-		);
+		        'admin_print_styles-amp_page_' . $this->menu_slug,
+                array( $this, 'amp_options_styles' )
+        );
 	}
 
 	private function add_submenu() {
+
 		add_submenu_page(
 			$this->parent_menu_slug,
 			__( 'AMP Analytics Options', 'amp' ),
@@ -34,7 +35,7 @@ class AMP_Analytics_Options_Submenu {
 		);
 	}
 
-	public static function amp_options_styles() {
+	public function amp_options_styles() {
 		?>
 		<style>
 			.analytics-data-container #delete {

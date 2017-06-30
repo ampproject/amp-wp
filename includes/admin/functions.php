@@ -105,16 +105,16 @@ function amp_get_analytics_component_fields($option) {
 }
 
 
-function amp_add_custom_analytics() {
+function amp_add_custom_analytics( $analytics ) {
 	$amp_options = get_option( 'amp-options' );
+	$analytics_options = null;
 	if ( $amp_options ) {
 		$analytics_options = $amp_options['amp-analytics'];
 	}
 
 	if ( ! $analytics_options )
-		return;
+		return $analytics;
 
-	$analytics = array();
 	foreach ( $analytics_options as $option ) {
 		$fields = amp_get_analytics_component_fields( $option );
 		$analytics[ $fields['id'] ] = $fields;

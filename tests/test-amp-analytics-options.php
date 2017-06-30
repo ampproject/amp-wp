@@ -43,6 +43,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	private $serializer;
 
 	public function setUp() {
+		parent::setUp();
 		$this->serializer = new AMP_Options_Manager();
 	}
 
@@ -89,9 +90,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 */
 	function test_one_option_inserted() {
 
-		// Delete options, if any
-		delete_option( 'amp-options' );
-
 		/* Insert analytics option */
 		$this->insert_one_option(
 			$this->vendor,
@@ -106,9 +104,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that two analytics components are inserted into the DB
 	 */
 	function test_two_options_inserted() {
-
-		// Delete options, if any
-		delete_option( 'amp-options' );
 
 		/* Insert analytics option one */
 		$this->insert_one_option(
@@ -130,8 +125,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that the analytics JS is added to the page
 	 */
 	function test_analytics_js_added() {
-		/* Delete analytics options, if any */
-		delete_option( 'analytics' );
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -149,6 +142,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$dom->loadHTML( $amp_rendered );
 
 		$head = $dom->getElementsByTagName( 'head' )->item(0);
+
 		$scripts = $head->getElementsByTagName( 'script');
 		$analytics_js_found = false;
 		foreach ( $scripts as $script ) {
@@ -165,9 +159,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that exactly one analytics component are added to the page
 	 */
 	function test_one_analytics_component_added() {
-
-		// Delete options, if any
-		delete_option( 'amp-options' );
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -196,9 +187,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * Test that two analytics components are added to the page
 	 */
 	function test_two_analytics_components_added() {
-
-		// Delete options, if any
-		delete_option( 'amp-options' );
 
 		$this->insert_one_option(
 			$this->vendor,

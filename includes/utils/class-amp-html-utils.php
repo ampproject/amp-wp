@@ -20,8 +20,12 @@ class AMP_HTML_Utils {
 
 	public static function valid_json( $data ) {
 		if (!empty( $data )) {
-			@json_decode( $data );
-			return ( json_last_error() === JSON_ERROR_NONE );
+			$decoded = @json_decode ( $data );
+			if ( function_exists ( 'json_last_error' ) ) {
+				return ( json_last_error () === JSON_ERROR_NONE );
+			} else { // PHP 5.2 back-compatibility
+				return $decoded !== null;
+			}
 		}
 		return false;
 	}
