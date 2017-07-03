@@ -7,14 +7,14 @@ require_once( AMP__DIR__ . '/includes/utils/class-amp-wp-utils.php' );
 
 require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-tag-and-attribute-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-style-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-blacklist-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-tag-and-attribute-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-img-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-video-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-iframe-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-audio-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-playbuzz-filter.php' );
 
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php' );
@@ -241,17 +241,16 @@ class AMP_Post_Template {
 				'AMP_Pinterest_Embed_Handler' => array(),
 				'AMP_Gallery_Embed_Handler' => array(),
 			), $this->post ),
-			apply_filters( 'amp_content_sanitizers', array(
-				 'AMP_Style_Sanitizer' => array(),
-				 // 'AMP_Blacklist_Sanitizer' => array(),
-				 'AMP_Img_Sanitizer' => array(),
-				 'AMP_Video_Sanitizer' => array(),
-				 'AMP_Audio_Sanitizer' => array(),
-				 'AMP_Playbuzz_Sanitizer' => array(),
-				 'AMP_Iframe_Sanitizer' => array(
+			apply_filters( 'amp_content_filters', array(
+				'AMP_Style_Filter'             => array(),
+				'AMP_Img_Filter'               => array(),
+				'AMP_Video_Filter'             => array(),
+				'AMP_Audio_Filter'             => array(),
+				'AMP_Playbuzz_Filter'          => array(),
+				'AMP_Iframe_Filter'            => array(
 					 'add_placeholder' => true,
 				 ),
-				 'AMP_Tag_And_Attribute_Sanitizer' => array(),
+				'AMP_Tag_And_Attribute_Filter' => array(),
 			), $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
@@ -285,16 +284,16 @@ class AMP_Post_Template {
 
 		$featured_image = get_post( $featured_id );
 
-		list( $sanitized_html, $featured_scripts, $featured_styles ) = AMP_Content_Sanitizer::sanitize(
+		list( $filtered_html, $featured_scripts, $featured_styles ) = AMP_Content_Filter::filter(
 			$featured_html,
-			array( 'AMP_Img_Sanitizer' => array() ),
+			array( 'AMP_Img_Filter' => array() ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
 		);
 
 		$this->add_data_by_key( 'featured_image', array(
-			'amp_html' => $sanitized_html,
+			'amp_html' => $filtered_html,
 			'caption' => $featured_image->post_excerpt,
 		) );
 

@@ -1,11 +1,11 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-base-filter.php' );
 
 /**
  * Converts <iframe> tags to <amp-iframe>
  */
-class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
+class AMP_Iframe_Filter extends AMP_Base_Filter {
 	const FALLBACK_HEIGHT = 400;
 	const SANDBOX_DEFAULTS = 'allow-scripts allow-same-origin';
 
@@ -26,7 +26,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		return array( self::$script_slug => self::$script_src );
 	}
 
-	public function sanitize() {
+	public function filter() {
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 		if ( 0 === $num_nodes ) {
@@ -94,7 +94,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'width':
 				case 'height':
-					$out[ $name ] = $this->sanitize_dimension( $value, $name );
+					$out[ $name ] = $this->filter_dimension( $value, $name );
 					break;
 
 				case 'frameborder':

@@ -1,8 +1,8 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-allowed-tags-generated.php' );
 
-class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
+class AMP_Tag_And_Attribute_Filter_Attr_Spec_Rules_Test extends WP_UnitTestCase {
 
 	protected $allowed_tags;
 	protected $globally_allowed_attrs;
@@ -590,11 +590,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$attr_spec_rule = $attr_spec_list[ $data['attribute_name'] ];
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$this->invoke_method( $sanitizer, 'get_whitelist_data' );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
+		$this->invoke_method( $filter, 'get_whitelist_data' );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
-		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $node, $data['attribute_name'], $attr_spec_rule ) );
+		$got = $this->invoke_method( $filter, $data['func_name'], array( $node, $data['attribute_name'], $attr_spec_rule ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $source );
@@ -748,11 +748,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		}
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$this->invoke_method( $sanitizer, 'get_whitelist_data' );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
+		$this->invoke_method( $filter, 'get_whitelist_data' );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
-		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $data['attribute_name'], $attr_spec_list ) );
+		$got = $this->invoke_method( $filter, $data['func_name'], array( $data['attribute_name'], $attr_spec_list ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $source );
@@ -843,10 +843,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 */
 	public function test_remove_node( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 		
-		$this->invoke_method( $sanitizer, 'remove_node', array( $node ) );
+		$this->invoke_method( $filter, 'remove_node', array( $node ) );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
 
@@ -983,10 +983,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 */
 	public function test_replace_node_with_children( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 		
-		$this->invoke_method( $sanitizer, 'replace_node_with_children', array( $node ) );
+		$this->invoke_method( $filter, 'replace_node_with_children', array( $node ) );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
 
@@ -1042,7 +1042,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 */
 	public function test_get_ancestor_with_tag_name( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		if ( $expected ) {
 			$ancestor_node = $dom->getElementsByTagName( $expected )->item( 0 );
@@ -1050,7 +1050,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			$ancestor_node = null;
 		}
 		
-		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_tag_name', array( $node, $data['ancestor_tag_name'] ) );
+		$got = $this->invoke_method( $filter, 'get_ancestor_with_tag_name', array( $node, $data['ancestor_tag_name'] ) );
 
 		if ( $ancestor_node != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
@@ -1303,10 +1303,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 */
 	public function test_validate_attr_spec_list_for_node( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		
-		$got = $this->invoke_method( $sanitizer, 'validate_attr_spec_list_for_node', array( $node, $data['attr_spec_list'] ) );
+		$got = $this->invoke_method( $filter, 'validate_attr_spec_list_for_node', array( $node, $data['attr_spec_list'] ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
@@ -1431,9 +1431,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	public function test_check_attr_spec_rule_value( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $filter, 'check_attr_spec_rule_value', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
@@ -1583,9 +1583,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	public function test_check_attr_spec_rule_value_casei( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value_casei', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $filter, 'check_attr_spec_rule_value_casei', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
@@ -1677,9 +1677,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	public function test_check_attr_spec_rule_blacklisted_value_regex( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_blacklisted_value_regex', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $filter, 'check_attr_spec_rule_blacklisted_value_regex', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
@@ -1800,9 +1800,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	public function test_check_attr_spec_rule_allowed_protocol( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $filter, 'check_attr_spec_rule_allowed_protocol', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
@@ -1933,9 +1933,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	public function test_check_attr_spec_rule_disallowed_relative( $data, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_disallowed_relative', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $filter, 'check_attr_spec_rule_disallowed_relative', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );

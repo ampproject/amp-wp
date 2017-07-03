@@ -1,6 +1,6 @@
 """
 This script is used to generate the 'class-amp-allowed-tags-generated.php'
-file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
+file that is used by the class AMP_Tag_And_Attribute_Filter.
 
 Follow the steps below to generate a new version of the allowed tags class:
 
@@ -19,7 +19,7 @@ Follow the steps below to generate a new version of the allowed tags class:
 	amphtml/validator/amp_wp/class-amp-allowed-tags-generated.php
 
 - copy this file into the amp-wp plugin:
-	cp amp_wp/class-amp-allowed-tags-generated.php /path/to/wordpress/wp-content/plugins/amp-wp/includes/sanitizers/
+	cp amp_wp/class-amp-allowed-tags-generated.php /path/to/wordpress/wp-content/plugins/amp-wp/includes/filters/
 
 Then have fun sanitizing your AMP posts!
 """

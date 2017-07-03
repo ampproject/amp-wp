@@ -1,12 +1,12 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-base-filter.php' );
 require_once( AMP__DIR__ . '/includes/utils/class-amp-image-dimension-extractor.php' );
 
 /**
  * Converts <img> tags to <amp-img> or <amp-anim>
  */
-class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
+class AMP_Img_Filter extends AMP_Base_Filter {
 	const FALLBACK_WIDTH = 600;
 	const FALLBACK_HEIGHT = 400;
 
@@ -17,7 +17,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-anim';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-anim-0.1.js';
 
-	public function sanitize() {
+	public function filter() {
 
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
 		$need_dimensions = array();
@@ -131,7 +131,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'width':
 				case 'height':
-					$out[ $name ] = $this->sanitize_dimension( $value, $name );
+					$out[ $name ] = $this->filter_dimension( $value, $name );
 					break;
 
 				default;

@@ -1,14 +1,14 @@
 <?php
 
-// stub classes for AMP_Base_Sanitizer, since it is an abstract class
-class AMP_Test_Stub_Sanitizer extends AMP_Base_Sanitizer {
-	public function sanitize() {
+// stub classes for AMP_Base_Filter, since it is an abstract class
+class AMP_Test_Stub_Filter extends AMP_Base_Filter {
+	public function filter() {
 		return $this->dom;
 	}
 }
 
-class AMP_Test_World_Sanitizer extends AMP_Base_Sanitizer {
-	public function sanitize() {
+class AMP_Test_World_Filter extends AMP_Base_Filter {
+	public function filter() {
 		$node = $this->dom->createElement( 'em' );
 		$text = $this->dom->createTextNode( 'World' );
 		$node->appendChild( $text );

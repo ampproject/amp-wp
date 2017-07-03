@@ -1,6 +1,6 @@
 <?php
 
-abstract class AMP_Base_Sanitizer {
+abstract class AMP_Base_Filter {
 	const FALLBACK_HEIGHT = 400;
 
 	protected $DEFAULT_ARGS = array();
@@ -14,7 +14,7 @@ abstract class AMP_Base_Sanitizer {
 		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
 	}
 
-	abstract public function sanitize();
+	abstract public function filter();
 
 	public function get_scripts() {
 		return array();
@@ -28,7 +28,7 @@ abstract class AMP_Base_Sanitizer {
 		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
 	}
 
-	public function sanitize_dimension( $value, $dimension ) {
+	public function filter_dimension( $value, $dimension ) {
 		if ( empty( $value ) ) {
 			return $value;
 		}

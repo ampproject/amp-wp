@@ -1,7 +1,7 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-base-filter.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-allowed-tags-generated.php' );
 
 /**
  * Strips tags and attributes not allowed by the AMP sped from the content.
@@ -11,16 +11,16 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
  *     by the python script in amp-wp/bin/amp_wp_build.py. See the comment at the top
  *     of that file for instructions to generate class-amp-allowed-tags-generated.php.
  *
- * TODO: AMP Spec items not checked by this sanitizer -
+ * TODO: AMP Spec items not checked by this filter -
  * - `if_value_regex` - if one attribute value matches, this places a restriction
  *		on another attribute/value.
  * - `also_requires_attr` - if one attribute is present, this requires another.
  * - `mandatory_oneof` -  Within the context of the tag, exactly one of the attributes
  *		must be present.
- * - `CdataSpec` - CDATA is not validated or sanitized.
+ * - `CdataSpec` - CDATA is not validated or filtered.
  * - `ChildTagSpec` - Places restrictions on the number and type of child tags.
  */
-class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
+class AMP_Tag_And_Attribute_Filter extends AMP_Base_Filter {
 
 	protected $allowed_tags;
 	protected $globally_allowed_attributes;
@@ -34,7 +34,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$this->layout_allowed_attributes = apply_filters( 'amp_layout_allowed_attributes', AMP_Allowed_Tags_Generated::get_layout_attributes() );
 	}
 
-	public function sanitize() {
+	public function filter() {
 		$this->get_whitelist_data();
 
 		foreach( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
@@ -184,10 +184,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$attr_spec_list = apply_filters( 'amp_tags_and_attributes_attr_spec_list_for_node', $attr_spec_list, $node );
 
 			// Remove any remaining disallowed attributes.
-			$this->sanitize_disallowed_attributes_in_node( $node, $attr_spec_list );
+			$this->filter_disallowed_attributes_in_node( $node, $attr_spec_list );
 
 			// Remove values that don't conform to the attr_spec.
-			$this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
+			$this->filter_disallowed_attribute_values_in_node( $node, $attr_spec_list );
 
 			// Allow additional sanitization to be done here.
 			do_action( 'amp_tags_and_attributes_sanitize_node', $node, $attr_spec_list );
@@ -346,7 +346,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * If an attribute is not listed in $allowed_attrs, then it will be removed
 	 * from $node.
 	 */
-	private function sanitize_disallowed_attributes_in_node( $node, $attr_spec_list ) {
+	private function filter_disallowed_attributes_in_node( $node, $attr_spec_list ) {
 		// Note: We can't remove the attributes inside the 'foreach' loop
 		//	because that breaks the process of iterating through the attrs. So,
 		//	we keep track of what needs to be removed in the first loop, then
@@ -358,7 +358,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$attrs_to_remove[] = $attr_name;
 			}
 
-			$attrs_to_remove = apply_filters( 'amp_tags_and_attributes_sanitize_disallowed_attributes_in_node', $attrs_to_remove, $node, $attr_name, $attr_spec_list );
+			$attrs_to_remove = apply_filters( 'amp_tags_and_attributes_filter_disallowed_attributes_in_node', $attrs_to_remove, $node, $attr_name, $attr_spec_list );
 		}
 
 		if ( ! empty( $attrs_to_remove ) ) {
@@ -386,13 +386,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * If a node has an attribute value that is disallowed, then that value will
 	 * be removed from the attribute on this node.
 	 */
-	private function sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list ) {
-		$this->_sanitize_disallowed_attribute_values_in_node( $node, $this->globally_allowed_attributes );
+	private function filter_disallowed_attribute_values_in_node( $node, $attr_spec_list ) {
+		$this->_filter_disallowed_attribute_values_in_node( $node, $this->globally_allowed_attributes );
 		if ( ! empty( $attr_spec_list ) ) {
-			$this->_sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
+			$this->_filter_disallowed_attribute_values_in_node( $node, $attr_spec_list );
 		}
 	}
-	private function _sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list ) {
+	private function _filter_disallowed_attribute_values_in_node( $node, $attr_spec_list ) {
 		$attrs_to_remove = array();
 
 		foreach( $attr_spec_list as $attr_name => $attr_val ) {
@@ -465,7 +465,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$attrs_to_remove = apply_filters( 'amp_tags_and_attributes_sanitize_attr_for_node', $attrs_to_remove, $node, $attr_name, $attr_spec_rule );
+			$attrs_to_remove = apply_filters( 'amp_tags_and_attributes_filter_attr_for_node', $attrs_to_remove, $node, $attr_name, $attr_spec_rule );
 		}
 
 		// Remove the disallowed values

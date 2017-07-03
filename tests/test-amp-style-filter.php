@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Style_Filter_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'empty' => array(
@@ -122,17 +122,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * @dataProvider get_data
 	 */
-	public function test_sanitizer( $source, $expected_content, $expected_stylesheet ) {
+	public function test_filter( $source, $expected_content, $expected_stylesheet ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Style_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Style_Filter( $dom );
+		$filter->filter();
 
 		// Test content
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected_content, $content );
 
 		// Test stylesheet
-		$stylesheet = $sanitizer->get_styles();
+		$stylesheet = $filter->get_styles();
 		$this->assertEquals( $expected_stylesheet, $stylesheet );
 	}
 }

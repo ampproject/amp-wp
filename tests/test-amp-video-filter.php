@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Video_Converter_Test extends WP_UnitTestCase {
+class AMP_Video_Filter_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'no_videos' => array(
@@ -83,8 +83,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	 */
 	public function test_converter( $source, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Video_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Video_Filter( $dom );
+		$filter->filter();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
@@ -94,10 +94,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$expected = '';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Video_Sanitizer( $dom, array(
+		$filter = new AMP_Video_Filter( $dom, array(
 			'require_https_src' => true,
 		) );
-		$sanitizer->sanitize();
+		$filter->filter();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
@@ -108,10 +108,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$expected = array();
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Video_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Video_Filter( $dom );
+		$filter->filter();
 
-		$scripts = $sanitizer->get_scripts();
+		$scripts = $filter->get_scripts();
 		$this->assertEquals( $expected, $scripts );
 	}
 
@@ -120,10 +120,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$expected = array( 'amp-video' => 'https://cdn.ampproject.org/v0/amp-video-0.1.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Video_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Video_Filter( $dom );
+		$filter->filter();
 
-		$scripts = $sanitizer->get_scripts();
+		$scripts = $filter->get_scripts();
 		$this->assertEquals( $expected, $scripts );
 	}
 }

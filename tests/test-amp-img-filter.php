@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Img_Filter_Test extends WP_UnitTestCase {
 	public static function force_remove_extraction_callbacks() {
 		remove_all_filters( 'amp_extract_image_dimensions_batch' );
 	}
@@ -96,8 +96,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_converter( $source, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Img_Filter( $dom );
+		$filter->filter();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
@@ -107,10 +107,10 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$expected = array();
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Img_Filter( $dom );
+		$filter->filter();
 
-		$scripts = $sanitizer->get_scripts();
+		$scripts = $filter->get_scripts();
 		$this->assertEquals( $expected, $scripts );
 	}
 
@@ -119,10 +119,10 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$expected = array( 'amp-anim' => 'https://cdn.ampproject.org/v0/amp-anim-0.1.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Img_Filter( $dom );
+		$filter->filter();
 
-		$scripts = $sanitizer->get_scripts();
+		$scripts = $filter->get_scripts();
 		$this->assertEquals( $expected, $scripts );
 	}
 }

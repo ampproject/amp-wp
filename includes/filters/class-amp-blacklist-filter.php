@@ -1,6 +1,6 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-base-filter.php' );
 
 /**
  * Strips blacklisted tags and attributes from content.
@@ -8,7 +8,7 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
  * See following for blacklist:
  *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
  */
-class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
+class AMP_Blacklist_Filter extends AMP_Base_Filter {
 	const PATTERN_REL_WP_ATTACHMENT = '#wp-att-([\d]+)#';
 
 	protected $DEFAULT_ARGS = array(
@@ -17,7 +17,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		'add_blacklisted_attributes' => array(),
 	);
 
-	public function sanitize() {
+	public function filter() {
 		$blacklisted_tags = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
 		$blacklisted_protocols = $this->get_blacklisted_protocols();
@@ -208,7 +208,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'link',
 			'picture',
 
-			// Sanitizers run after embed handlers, so if anything wasn't matched, it needs to be removed.
+			// Filters run after embed handlers, so if anything wasn't matched, it needs to be removed.
 			'embed',
 			'embedvideo',
 

@@ -1,11 +1,11 @@
 <?php
 
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php';
+require_once AMP__DIR__ . '/includes/filters/class-amp-base-filter.php';
 
 /**
  * Converts Playbuzz embed to <amp-playbuzz>
  */
-class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
+class AMP_Playbuzz_Filter extends AMP_Base_Filter {
 
 
 	public static $tag = 'div';
@@ -26,7 +26,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 
-	public function sanitize() {
+	public function filter() {
 
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
