@@ -428,19 +428,19 @@ function xyz_amp_add_related_embed( $embed_handler_classes, $post ) {
 }
 ```
 
-### Custom Sanitizer
+### Custom Filter
 
-The name "sanitizer" is a bit of a misnomer. These are primarily used internally in the plugin to make your site's content compatible with the amp spec. This involves stripping unsupported tags and attributes and transforming media elements to their matching amp version (e.g. `img` => `amp-img`).
+The name "filter" is a bit of a misnomer. These are primarily used internally in the plugin to make your site's content compatible with the amp spec. This involves stripping unsupported tags and attributes and transforming media elements to their matching amp version (e.g. `img` => `amp-img`).
 
-Sanitizers are pretty versatile and, unlike Embed Handlers -- which work with HTML content as a string -- they can be used to manipulate your post's AMP content using [PHP's `DOM` library](http://php.net/manual/en/book.dom.php). We've included an example that shows you how to use a custom sanitizer to inject ads into your content. You can, of course, do many other things such as add related content.
+Filters are pretty versatile and, unlike Embed Handlers -- which work with HTML content as a string -- they can be used to manipulate your post's AMP content using [PHP's `DOM` library](http://php.net/manual/en/book.dom.php). We've included an example that shows you how to use a custom filter to inject ads into your content. You can, of course, do many other things such as add related content.
 
-#### Step 1: Build the Sanitizer
+#### Step 1: Build the Filter
 
-Your sanitizer needs to extend the `AMP_Base_Sanitizer`. In `classes/class-ad-inject-sanitizer.php`:
+Your filter needs to extend the `AMP_Base_Filter`. In `classes/class-ad-inject-filter.php`:
 
 ```php
-class XYZ_AMP_Ad_Injection_Sanitizer extends AMP_Base_Sanitizer {
-	public function sanitize() {
+class XYZ_AMP_Ad_Injection_Filter extends AMP_Base_Filter {
+	public function filter() {
 		$body = $this->get_body_node();
 
 		// Build our amp-ad tag
@@ -474,15 +474,15 @@ class XYZ_AMP_Ad_Injection_Sanitizer extends AMP_Base_Sanitizer {
 }
 ```
 
-#### Step 2: Load the Sanitizer
+#### Step 2: Load the Filter
 
 ```php
-add_filter( 'amp_content_sanitizers', 'xyz_amp_add_ad_sanitizer', 10, 2 );
+add_filter( 'amp_content_filters', 'xyz_amp_add_ad_filter', 10, 2 );
 
-function xyz_amp_add_ad_sanitizer( $sanitizer_classes, $post ) {
-	require_once( dirname( __FILE__ ) . '/classes/class-ad-inject-sanitizer.php' );
-	$sanitizer_classes[ 'XYZ_AMP_Ad_Injection_Sanitizer' ] = array(); // the array can be used to pass args to your sanitizer and accessed within the class via `$this->args`
-	return $sanitizer_classes;
+function xyz_amp_add_ad_filter( $filter_classes, $post ) {
+	require_once( dirname( __FILE__ ) . '/classes/class-ad-inject-filter.php' );
+	$filter_classes[ 'XYZ_AMP_Ad_Injection_Filter' ] = array(); // the array can be used to pass args to your filter and accessed within the class via `$this->args`
+	return $filter_classes;
 }
 ```
 

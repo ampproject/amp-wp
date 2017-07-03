@@ -1,18 +1,18 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-base-filter.php' );
 
 /**
  * Collects inline styles and outputs them in the amp-custom stylesheet.
  */
-class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
+class AMP_Style_Filter extends AMP_Base_Filter {
 	private $styles = array();
 
 	public function get_styles() {
 		return $this->styles;
 	}
 
-	public function sanitize() {
+	public function filter() {
 		$body = $this->get_body_node();
 		$this->collect_styles_recursive( $body );
 	}

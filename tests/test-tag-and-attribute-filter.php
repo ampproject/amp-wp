@@ -1,8 +1,8 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-allowed-tags-generated.php' );
 
-class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Tag_And_Attribute_Filter_Test extends WP_UnitTestCase {
 
 	protected $allowed_tags;
 	protected $globally_allowed_attrs;
@@ -276,7 +276,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 
-			// Test Cases from test-amp-blacklist-sanitizer.php
+			// Test Cases from test-amp-blacklist-filter.php
 
 			// 'disallowed_tag_with_innertext' => array(
 			// 	'<script>alert("")</script>',
@@ -461,10 +461,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 * @group allowed-tags
 	 */
-	public function test_sanitizer( $source, $expected ) {
+	public function test_filter( $source, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Tag_And_Attribute_Filter( $dom );
+		$filter->filter();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}

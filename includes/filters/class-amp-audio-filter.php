@@ -1,17 +1,12 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-base-filter.php' );
 
-/**
- * Converts <video> tags to <amp-video>
- */
-class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
-	const FALLBACK_HEIGHT = 400;
+class AMP_Audio_Filter extends AMP_Base_Filter {
+	public static $tag = 'audio';
 
-	public static $tag = 'video';
-
-	private static $script_slug = 'amp-video';
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
+	private static $script_slug = 'amp-audio';
+	private static $script_src = 'https://cdn.ampproject.org/v0/amp-audio-0.1.js';
 
 	public function get_scripts() {
 		if ( ! $this->did_convert_elements ) {
@@ -21,7 +16,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		return array( self::$script_slug => self::$script_src );
 	}
 
-	public function sanitize() {
+	public function filter() {
 		$nodes = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 		if ( 0 === $num_nodes ) {
@@ -34,10 +29,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
-			$new_attributes = $this->enforce_fixed_height( $new_attributes );
-			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
-
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
 
 			// TODO: `source` does not have closing tag, and DOMDocument doesn't handle it well.
 			foreach ( $node->childNodes as $child_node ) {
@@ -77,16 +69,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'width':
 				case 'height':
-					$out[ $name ] = $this->sanitize_dimension( $value, $name );
+					$out[ $name ] = $this->filter_dimension( $value, $name );
 					break;
 
-				case 'poster':
 				case 'class':
-				case 'sizes':
 					$out[ $name ] = $value;
 					break;
-
-				case 'controls':
 				case 'loop':
 				case 'muted':
 				case 'autoplay':

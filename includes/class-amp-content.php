@@ -1,7 +1,7 @@
 <?php
 
 require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+require_once( AMP__DIR__ . '/includes/filters/class-amp-base-filter.php' );
 require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
 
 class AMP_Content {
@@ -11,13 +11,13 @@ class AMP_Content {
 	private $amp_styles = array();
 	private $args = array();
 	private $embed_handler_classes = array();
-	private $sanitizer_classes = array();
+	private $filter_classes = array();
 
-	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() ) {
-		$this->content = $content;
-		$this->args = $args;
+	public function __construct( $content, $embed_handler_classes, $filter_classes, $args = array() ) {
+		$this->content               = $content;
+		$this->args                  = $args;
 		$this->embed_handler_classes = $embed_handler_classes;
-		$this->sanitizer_classes = $sanitizer_classes;
+		$this->filter_classes        = $filter_classes;
 
 		$this->transform();
 	}
@@ -42,8 +42,8 @@ class AMP_Content {
 		$content = apply_filters( 'the_content', $content );
 		$this->unregister_embed_handlers( $embed_handlers );
 
-		// Then, sanitize to strip and/or convert non-amp content
-		$content = $this->sanitize( $content );
+		// Then, filter to strip and/or convert non-amp content
+		$content = $this->filter( $content );
 
 		$this->amp_content = $content;
 	}
@@ -81,43 +81,43 @@ class AMP_Content {
 		}
 	}
 
-	private function sanitize( $content ) {
-		list( $sanitized_content, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $content, $this->sanitizer_classes, $this->args );
+	private function filter( $content ) {
+		list( $filtered_content, $scripts, $styles ) = AMP_Content_Filter::filter( $content, $this->filter_classes, $this->args );
 
 		$this->add_scripts( $scripts );
 		$this->add_styles( $styles );
 
-		return $sanitized_content;
+		return $filtered_content;
 	}
 }
 
-class AMP_Content_Sanitizer {
-	public static function sanitize( $content, $sanitizer_classes, $global_args = array() ) {
+class AMP_Content_Filter {
+	public static function filter( $content, $filter_classes, $global_args = array() ) {
 		$scripts = array();
 		$styles = array();
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
-		foreach ( $sanitizer_classes as $sanitizer_class => $args ) {
-			if ( ! class_exists( $sanitizer_class ) ) {
-				_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Sanitizer (%s) class does not exist', 'amp' ), esc_html( $sanitizer_class ) ), '0.4.1' );
+		foreach ( $filter_classes as $filter_class => $args ) {
+			if ( ! class_exists( $filter_class ) ) {
+				_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Filter (%s) class does not exist', 'amp' ), esc_html( $filter_class ) ), '0.4.1' );
 				continue;
 			}
 
-			$sanitizer = new $sanitizer_class( $dom, array_merge( $global_args, $args ) );
+			$filter = new $filter_class( $dom, array_merge( $global_args, $args ) );
 
-			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {
-				_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Sanitizer (%s) must extend `AMP_Base_Sanitizer`', 'amp' ), esc_html( $sanitizer_class ) ), '0.1' );
+			if ( ! is_subclass_of( $filter, 'AMP_Base_Filter' ) ) {
+				_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Filter (%s) must extend `AMP_Base_Filter`', 'amp' ), esc_html( $filter_class ) ), '0.1' );
 				continue;
 			}
 
-			$sanitizer->sanitize();
+			$filter->filter();
 
-			$scripts = array_merge( $scripts, $sanitizer->get_scripts() );
-			$styles = array_merge( $styles, $sanitizer->get_styles() );
+			$scripts = array_merge( $scripts, $filter->get_scripts() );
+			$styles = array_merge( $styles, $filter->get_styles() );
 		}
 
-		$sanitized_content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$filtered_content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		return array( $sanitized_content, $scripts, $styles );
+		return array( $filtered_content, $scripts, $styles );
 	}
 }

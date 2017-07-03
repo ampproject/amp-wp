@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
+class AMP_Iframe_Filter_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'no_iframes' => array(
@@ -108,8 +108,8 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 	 */
 	public function test_converter( $source, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Iframe_Filter( $dom );
+		$filter->filter();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
@@ -119,11 +119,11 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$expected = '';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom, array(
+		$filter = new AMP_Iframe_Filter( $dom, array(
 			'add_placeholder' => true,
 			'require_https_src' => true,
 		) );
-		$sanitizer->sanitize();
+		$filter->filter();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
@@ -134,10 +134,10 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$expected = array();
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Iframe_Filter( $dom );
+		$filter->filter();
 
-		$scripts = $sanitizer->get_scripts();
+		$scripts = $filter->get_scripts();
 		$this->assertEquals( $expected, $scripts );
 	}
 
@@ -146,9 +146,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$expected = array( 'amp-iframe' => 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
-		$sanitizer->sanitize();
-		$scripts = $sanitizer->get_scripts();
+		$filter = new AMP_Iframe_Filter( $dom );
+		$filter->filter();
+		$scripts = $filter->get_scripts();
 
 		$this->assertEquals( $expected, $scripts );
 	}
@@ -158,10 +158,10 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$expected = '<amp-iframe src="https://example.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"><div placeholder="" class="amp-wp-iframe-placeholder"></div></amp-iframe>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom, array(
+		$filter = new AMP_Iframe_Filter( $dom, array(
 			'add_placeholder' => true,
 		) );
-		$sanitizer->sanitize();
+		$filter->filter();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEquals( $expected, $content );

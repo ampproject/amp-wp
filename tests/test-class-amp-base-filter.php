@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase {
+class AMP_Base_Filter__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'already_has_sizes' => array(
@@ -100,14 +100,14 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 	 * @dataProvider get_data
 	 */
 	public function test_enforce_sizes_attribute( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
-		$returned_attributes = $sanitizer->enforce_sizes_attribute( $source_attributes );
+		$filter = new AMP_Test_Stub_Filter( new DOMDocument, $args );
+		$returned_attributes = $filter->enforce_sizes_attribute( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
 }
 
-class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
+class AMP_Base_Filter__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'both_dimensions_included' => array(
@@ -166,14 +166,14 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_enforce_fixed_height( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
-		$returned_attributes = $sanitizer->enforce_fixed_height( $source_attributes );
+		$filter = new AMP_Test_Stub_Filter( new DOMDocument, $args );
+		$returned_attributes = $filter->enforce_fixed_height( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
 }
 
-class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
+class AMP_Base_Filter__Filter_Dimension__Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'empty' => array(
@@ -234,10 +234,10 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_enforce_sizes_attribute( $source_params, $expected_value, $args = array() ) {
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
+		$filter = new AMP_Test_Stub_Filter( new DOMDocument, $args );
 		list( $value, $dimension ) = $source_params;
 
-		$actual_value = $sanitizer->sanitize_dimension( $value, $dimension );
+		$actual_value = $filter->filter_dimension( $value, $dimension );
 
 		$this->assertEquals( $expected_value, $actual_value );
 	}

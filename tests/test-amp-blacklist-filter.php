@@ -1,6 +1,6 @@
 <?php
 
-class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Blacklist_Filter_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
 			'empty' => array(
@@ -184,10 +184,10 @@ class AMP_Blacklist_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * @dataProvider get_data
 	 */
-	public function test_sanitizer( $source, $expected ) {
+	public function test_filter( $source, $expected ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Blacklist_Sanitizer( $dom );
-		$sanitizer->sanitize();
+		$filter = new AMP_Blacklist_Filter( $dom );
+		$filter->filter();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
