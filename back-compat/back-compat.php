@@ -8,5 +8,5 @@ function amp_backcompat_use_v03_templates() {
 }
 
 function _amp_backcompat_use_v03_templates_callback( $templates ) {
-	return AMP__DIR__ . '/back-compat/templates-v0-3';
+	return AMP__DIR__ . '/back-compat/theme-templates-v0-3';
 }

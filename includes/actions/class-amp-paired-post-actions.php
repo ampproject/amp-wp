@@ -62,7 +62,7 @@ class AMP_Paired_Post_Actions extends AMP_Actions {
 	}
 
 	public static function add_styles( $amp_template ) {
-		$styles = $amp_template->get( 'post_amp_styles' );
+		$styles = $amp_template->get( 'amp_styles' );
 		if ( ! empty( $styles ) ) {
 			echo '/* Inline styles */' . PHP_EOL;
 			foreach ( $styles as $selector => $declarations ) {
