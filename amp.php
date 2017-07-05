@@ -21,6 +21,9 @@ require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
+require_once ( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
+require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
+
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
 	if ( ! did_action( 'amp_init' ) ) {
@@ -111,11 +114,11 @@ function amp_load_classes() {
 }
 
 function amp_add_frontend_actions() {
-	require_once( AMP__DIR__ . '/includes/amp-frontend-actions.php' );
+	AMP_Frontend_Actions::register_frontend_actions_filter();
 }
 
 function amp_add_post_template_actions() {
-	require_once( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
+	AMP_Paired_Post_Actions::register();
 	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
 }
 
