@@ -83,7 +83,7 @@ class AMP_Customizer_Design_Settings {
 	public static function enqueue_customizer_preview_scripts() {
 		wp_enqueue_script(
 			'amp-customizer-design-preview',
-			amp_get_asset_url( 'js/amp-customizer-design-preview.js' ),
+			AMP_WP_Utils::amp_get_asset_url( 'js/amp-customizer-design-preview.js' ),
 			array( 'amp-customizer' ),
 			false,
 			true

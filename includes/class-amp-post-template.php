@@ -62,7 +62,7 @@ class AMP_Post_Template {
 			'body_class' => '',
 
 			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
-			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
+			'placeholder_image_url' => AMP_WP_Utils::amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'featured_image' => false,
 			'comments_link_url' => false,
