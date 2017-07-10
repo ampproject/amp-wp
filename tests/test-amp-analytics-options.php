@@ -5,24 +5,24 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	private $vendor = 'googleanalytics';
 
 	private $config_one = '{
-      "requests": {
-        "event": "https://example.com/..."
-      },
-      "triggers": {
-        "trackPageview": {
-          "on": "visible",
-          "request": "event",
-          "visibilitySpec": {
-            "selector": "#cat-image-id",
-            "visiblePercentageMin": 20,
-            "totalTimeMin": 500,
-            "continuousTimeMin": 200
-          },
-          "vars": {
-            "eventId": "catview"
-          }
-        }
-      }
+		"requests": {
+			"event": "https://example.com/..."
+		},
+		"triggers": {
+			"trackPageview": {
+				"on": "visible",
+				"request": "event",
+				"visibilitySpec": {
+					"selector": "#cat-image-id",
+					"visiblePercentageMin": 20,
+					"totalTimeMin": 500,
+					"continuousTimeMin": 200
+				},
+				"vars": {
+					"eventId": "catview"
+				}
+			}
+		}
 	}';
 
 	private $config_two = '{
@@ -32,11 +32,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		"triggers": {
 			"trackAnchorClicks": {
 				"on": "click",
-		        "selector": "a",
-		        "request": "event",
-		        "vars": {
+				"selector": "a",
+				"request": "event",
+				"vars": {
 					"eventId": "clickOnAnyAnchor"
-		        }
+				}
 			}
 		}
 	}';
@@ -49,7 +49,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	private function get_options() {
 		$analytics_options = false;
-		$amp_options = get_option('amp-options');
+		$amp_options = get_option( 'amp-options' );
 		if ( $amp_options ) {
 			$analytics_options = $amp_options['amp-analytics'];
 		}
@@ -59,7 +59,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	private function render_post() {
 		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create( array( 'post_author' => $user_id ) );
+		$post_id = $this->factory->post->create( array(
+			'post_author' => $user_id,
+		) );
 
 		// Need to use ob here since the method echos
 		ob_start();
@@ -141,12 +143,12 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		// Load the rendered page into it
 		$dom->loadHTML( $amp_rendered );
 
-		$head = $dom->getElementsByTagName( 'head' )->item(0);
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
-		$scripts = $head->getElementsByTagName( 'script');
+		$scripts = $head->getElementsByTagName( 'script' );
 		$analytics_js_found = false;
 		foreach ( $scripts as $script ) {
-			if ($script->getAttribute( 'custom-element') == "amp-analytics" ) {
+			if ( 'amp-analytics' === $script->getAttribute( 'custom-element' ) ) {
 				$analytics_js_found = true;
 				break;
 			}
@@ -177,7 +179,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 
 		// One amp-analytics component should be in the page
-		$this->assertEquals(1, $components->length );
+		$this->assertEquals( 1, $components->length );
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
 

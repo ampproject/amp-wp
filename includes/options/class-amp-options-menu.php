@@ -2,7 +2,7 @@
 
 require_once( AMP__DIR__ . '/includes/options/class-amp-analytics-options-submenu.php' );
 require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-menu-page.php' );
-require_once ( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
+require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
 
 class AMP_Options_Menu {
 
@@ -49,4 +49,3 @@ class AMP_Options_Menu {
 		}
 	}
 }
-
