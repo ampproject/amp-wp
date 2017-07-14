@@ -16,7 +16,7 @@ class AMP_Options_Manager {
 	public static function save() {
 		// Request must come from user with right capabilities
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Sorry, you do not have the necessary permissions to perform this action' );
+			wp_die( __( 'Sorry, you do not have the necessary permissions to perform this action', 'amp' ) );
 		}
 		// Ensure request is coming from analytics option form
 		check_admin_referer( 'analytics-options', 'analytics-options' );

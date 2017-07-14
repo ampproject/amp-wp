@@ -44,9 +44,9 @@ class AMP_Analytics_Options_Submenu_Page {
 			<p>
 				<?php
 				wp_nonce_field( 'analytics-options', 'analytics-options' );
-				submit_button( 'Save', 'primary', 'save', false );
+				submit_button( __( 'Save', 'amp' ), 'primary', 'save', false );
 				if ( $is_existing_entry ) {
-					submit_button( 'Delete', 'delete button-primary', 'delete', false );
+					submit_button( __( 'Delete', 'amp' ), 'delete button-primary', 'delete', false );
 				}
 				?>
 			</p>
