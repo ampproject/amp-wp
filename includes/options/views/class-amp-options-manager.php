@@ -47,10 +47,10 @@ class AMP_Options_Manager {
 			$new_analytics_option = array(
 				sanitize_key( $_POST['id-value'] ),
 				sanitize_key( $_POST['vendor-type'] ),
-				stripslashes( $_POST['config'] )
+				stripslashes( $_POST['config'] ),
 			);
 			// Identifier for analytics option
-			$inner_option_name = sanitize_key($_POST['vendor-type'] . '-' . $_POST['id-value'] );
+			$inner_option_name = sanitize_key( $_POST['vendor-type'] . '-' . $_POST['id-value'] );
 
 			// Grab the amp_options from the DB
 			$amp_options = get_option( 'amp-options' );
@@ -59,7 +59,7 @@ class AMP_Options_Manager {
 			}
 
 			// Grab the amp-analytics options
-			$amp_analytics = isset($amp_options[ $option_name ])
+			$amp_analytics = isset( $amp_options[ $option_name ] )
 				? $amp_options[ $option_name ]
 				: array();
 
@@ -69,6 +69,7 @@ class AMP_Options_Manager {
 				$amp_analytics[ $inner_option_name ] = $new_analytics_option;
 			}
 			$amp_options[ $option_name ] = $amp_analytics;
+
 			update_option( 'amp-options', $amp_options, false );
 
 			return true;
