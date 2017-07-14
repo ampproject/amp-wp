@@ -56,22 +56,27 @@ class AMP_Analytics_Options_Submenu_Page {
 	}
 
 	public function render_title() {
+		$admin_notice_text = false;
+		$admin_notice_type = false;
+		if ( isset( $_GET['valid'] ) ) {
+			$is_valid = (bool) $_GET['valid'];
+
+			if ( $is_valid ) {
+				$admin_notice_text = __( 'The analytics entry was successfully saved!', 'amp' );
+				$admin_notice_type = 'success';
+			} else {
+				$admin_notice_text = __( 'Failed to save the analytics entry. Please make sure that the JSON configuration is valid.', 'amp' );
+				$admin_notice_type = 'error';
+			}
+		}
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php
-
 			// If redirected from serializer, check if action succeeded
-			if ( isset( $_GET['valid'] ) ) : ?>
-				<div class="amp-analytics-options notice notice-error is-dismissible">
-					<p><strong>Action not taken: invalid input!</strong></p>
-					<button type="button" class="notice-dismiss">
-						<span class="screen-reader-text">Dismiss this notice.</span>
-					</button>
-				</div>
-			<?php else : ?>
-				<div class="amp-analytics-options notice notice-success is-dismissible">
-					<p><strong>Analytics options saved!</strong></p>
+			if ( $admin_notice_text ) : ?>
+				<div class="amp-analytics-options notice <?php echo esc_attr( 'notice-' . $admin_notice_type ); ?> is-dismissible">
+					<p><?php echo esc_html( $admin_notice_text ); ?></p>
 					<button type="button" class="notice-dismiss">
 						<span class="screen-reader-text">Dismiss this notice.</span>
 					</button>
