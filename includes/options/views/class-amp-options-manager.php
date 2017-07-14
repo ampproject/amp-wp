@@ -3,6 +3,15 @@
 require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 
 class AMP_Options_Manager {
+	public static function get_option( $option, $default = false ) {
+		$amp_options = get_option( 'amp-options' );
+
+		if ( ! isset( $amp_options[ $option ] ) ) {
+			return $default;
+		}
+
+		return $amp_options[ $option ];
+	}
 
 	public static function save() {
 		// Request must come from user with right capabilities
@@ -20,7 +29,7 @@ class AMP_Options_Manager {
 		exit;
 	}
 
-	public static function submit( $data) {
+	public static function submit( $data ) {
 
 		$option_name = 'amp-analytics';
 
@@ -28,8 +37,7 @@ class AMP_Options_Manager {
 		$is_valid_json = AMP_HTML_Utils::valid_json( stripslashes( $_POST['config'] ) );
 
 		// Check save/delete pre-conditions and proceed if correct
-		if ( ! ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) ) &&
-		     $is_valid_json ) {
+		if ( ! ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) ) && $is_valid_json ) {
 
 			if ( empty( $_POST['id-value'] ) ) {
 				$_POST['id-value'] = md5( $_POST['config'] );
@@ -61,7 +69,7 @@ class AMP_Options_Manager {
 				$amp_analytics[ $inner_option_name ] = $new_analytics_option;
 			}
 			$amp_options[ $option_name ] = $amp_analytics;
-			update_option( 'amp-options' , $amp_options, false );
+			update_option( 'amp-options', $amp_options, false );
 
 			return true;
 		}
