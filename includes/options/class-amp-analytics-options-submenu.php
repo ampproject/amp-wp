@@ -18,9 +18,9 @@ class AMP_Analytics_Options_Submenu {
 	public function init() {
 		$this->add_submenu();
 		add_action(
-		        'admin_print_styles-amp_page_' . $this->menu_slug,
-                array( $this, 'amp_options_styles' )
-        );
+			'admin_print_styles-amp_page_' . $this->menu_slug,
+			array( $this, 'amp_options_styles' )
+		);
 	}
 
 	private function add_submenu() {

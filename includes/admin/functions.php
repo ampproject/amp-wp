@@ -2,7 +2,7 @@
 // Callbacks for adding AMP-related things to the admin.
 
 require_once( AMP__DIR__ . '/includes/options/class-amp-options-menu.php' );
-require_once ( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
+require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
 
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
