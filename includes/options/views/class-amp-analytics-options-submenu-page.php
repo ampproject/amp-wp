@@ -18,22 +18,26 @@ class AMP_Analytics_Options_Submenu_Page {
 		<div class="analytics-data-container">
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<h2>
-					<?php
-					echo esc_html( $analytics_title );
-					?>
+					<?php echo esc_html( $analytics_title ); ?>
 				</h2>
 				<div class="options">
 					<p>
-						<label><?php echo __( 'Type:', 'amp' ) ?></label>
-						<input class="option-input" type="text" name=vendor-type value="<?php echo esc_attr( $type ); ?>" />
-						<label><?php echo __( 'ID:', 'amp' ) ?></label>
-						<input type="text" name=id value="<?php echo esc_attr( substr( $id, -6 ) ); ?>" readonly />
+						<label>
+							<?php echo __( 'Type:', 'amp' ) ?>
+							<input class="option-input" type="text" name=vendor-type value="<?php echo esc_attr( $type ); ?>" />
+						</label>
+						<label>
+							<?php echo __( 'ID:', 'amp' ) ?>
+							<input type="text" name=id value="<?php echo esc_attr( substr( $id, -6 ) ); ?>" readonly />
+						</label>
 						<input type="hidden" name=id-value value="<?php echo esc_attr( $id ); ?>" />
 					</p>
 					<p>
-						<label><?php echo __( 'JSON Configuration:', 'amp' ) ?></label>
-						<br />
-						<textarea rows="10" cols="100" name="config"><?php echo esc_textarea( $config ); ?></textarea>
+						<label>
+							<?php echo __( 'JSON Configuration:', 'amp' ) ?>
+							<br />
+							<textarea rows="10" cols="100" name="config"><?php echo esc_textarea( $config ); ?></textarea>
+						</label>
 					</p>
 					<input type="hidden" name="action" value="amp_analytics_options">
 				</div><!-- #analytics-data-container -->
