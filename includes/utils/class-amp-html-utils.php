@@ -18,7 +18,7 @@ class AMP_HTML_Utils {
 		return implode( ' ', $string );
 	}
 
-	public static function valid_json( $data ) {
+	public static function is_valid_json( $data ) {
 		if ( ! empty( $data ) ) {
 			$decoded = json_decode( $data );
 			if ( function_exists( 'json_last_error' ) ) {

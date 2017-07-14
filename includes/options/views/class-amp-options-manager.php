@@ -34,7 +34,7 @@ class AMP_Options_Manager {
 		$option_name = 'amp-analytics';
 
 		// Validate JSON configuration is valid
-		$is_valid_json = AMP_HTML_Utils::valid_json( stripslashes( $_POST['config'] ) );
+		$is_valid_json = AMP_HTML_Utils::is_valid_json( stripslashes( $_POST['config'] ) );
 
 		// Check save/delete pre-conditions and proceed if correct
 		if ( ! ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) ) && $is_valid_json ) {
