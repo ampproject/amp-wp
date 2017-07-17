@@ -114,7 +114,7 @@ function amp_load_classes() {
 }
 
 function amp_add_frontend_actions() {
-	AMP_Frontend_Actions::register_frontend_actions_filter();
+	AMP_Frontend_Actions::register_hooks();
 }
 
 function amp_add_post_template_actions() {
