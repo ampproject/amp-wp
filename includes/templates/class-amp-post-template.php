@@ -26,25 +26,11 @@ class AMP_Post_Template extends AMP_Template {
 		$this->data = array_merge(
 			$this->amp_base_template_data,
 			array(
-				'document_title' => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // back-compat with 4.3
 				'canonical_url' => get_permalink( $post_id ),
-				'html_tag_attributes' => array(),
-				'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
-				'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 				'featured_image' => false,
 				'comments_link_url' => false,
 				'comments_link_text' => false,
-				/**
-				 * Add amp-analytics tags.
-				 *
-				 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
-				 *
-				 * @since 0.4
-				 *.
-				 * @param	array	$analytics	An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
-				 * @param	object	$post	The current post.
-				 */
-				'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
+				'post_amp_styles' => array(),
 			)
 		);
 
@@ -54,6 +40,16 @@ class AMP_Post_Template extends AMP_Template {
 		$this->build_html_tag_attributes();
 
 		$this->data = apply_filters( 'amp_post_template_data', $this->data, $this->post );
+	}
+
+	// Magic __get() method to provide backward compatibility
+	// for deprecated class data members
+	public function __get( $name ) {
+		if ( 'ID' === $name ) {
+			return $this->post_id;
+		}
+
+		return null;
 	}
 
 	public function load_post_template() {
@@ -170,7 +166,10 @@ class AMP_Post_Template extends AMP_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
+		// Keeping both style arrays for backward compatibility
+		// post_amp_styles will be deprecated in the future
 		$this->merge_data_for_key( 'amp_styles', $amp_content->get_amp_styles() );
+		$this->merge_data_for_key( 'post_amp_styles', $amp_content->get_amp_styles() );
 	}
 
 	private function build_post_featured_image() {
