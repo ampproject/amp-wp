@@ -81,6 +81,11 @@ function amp_add_options_menu() {
 		return;
 	}
 
+	$show_options_menu = apply_filters( 'amp_options_menu_is_enabled', true );
+	if ( true !== $show_options_menu ) {
+		return;
+	}
+
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
