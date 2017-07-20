@@ -40,18 +40,18 @@ class AMP_Analytics_Options_Submenu_Page {
 						</label>
 					</p>
 					<input type="hidden" name="action" value="amp_analytics_options">
-				</div><!-- #analytics-data-container -->
-			<p>
-				<?php
-				wp_nonce_field( 'analytics-options', 'analytics-options' );
-				submit_button( __( 'Save', 'amp' ), 'primary', 'save', false );
-				if ( $is_existing_entry ) {
-					submit_button( __( 'Delete', 'amp' ), 'delete button-primary', 'delete', false );
-				}
-				?>
-			</p>
+				</div>
+				<p>
+					<?php
+					wp_nonce_field( 'analytics-options', 'analytics-options' );
+					submit_button( __( 'Save', 'amp' ), 'primary', 'save', false );
+					if ( $is_existing_entry ) {
+						submit_button( __( 'Delete', 'amp' ), 'delete button-primary', 'delete', false );
+					}
+					?>
+				</p>
 			</form>
-		</div><!-- .wrap -->
+		</div><!-- #analytics-data-container -->
 		<?php
 	}
 
@@ -65,7 +65,7 @@ class AMP_Analytics_Options_Submenu_Page {
 				$admin_notice_text = __( 'The analytics entry was successfully saved!', 'amp' );
 				$admin_notice_type = 'success';
 			} else {
-				$admin_notice_text = __( 'Failed to save the analytics entry. Please make sure that the JSON configuration is valid.', 'amp' );
+				$admin_notice_text = __( 'Failed to save the analytics entry. Please make sure that the JSON configuration is valid and unique.', 'amp' );
 				$admin_notice_type = 'error';
 			}
 		}
@@ -81,7 +81,9 @@ class AMP_Analytics_Options_Submenu_Page {
 						<span class="screen-reader-text"><?php __( 'Dismiss this notice.', 'amp' ) ?></span>
 					</button>
 				</div>
-			<?php endif;
+			<?php endif; ?>
+		</div><!-- .wrap -->
+		<?php
 	}
 
 	public function render() {
@@ -89,10 +91,11 @@ class AMP_Analytics_Options_Submenu_Page {
 
 		$this->render_title();
 
+		// Render entries stored in the DB
 		foreach ( $analytics_entries as $entry_id => $entry ) {
 			$this->render_entry( $entry_id, $entry['type'], $entry['config'] );
 		}
-
+		// Empty form for adding more entries
 		$this->render_entry();
 	}
 }

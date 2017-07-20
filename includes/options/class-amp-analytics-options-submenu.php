@@ -44,7 +44,7 @@ class AMP_Analytics_Options_Submenu {
 				margin: 0 5px;
 			}
 			.amp-analytics-options.notice {
-				width: 200px;
+				width: 300px;
 			}
 		</style>;
 

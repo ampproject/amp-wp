@@ -27,7 +27,7 @@ function amp_init_customizer() {
 
 function amp_admin_get_preview_permalink() {
 	/**
-	 * Filter the post type to retrieve the latest of for use in the AMP template customizer.
+	 * Filter the post type to retrieve the latest for use in the AMP template customizer.
 	 *
 	 * @param string $post_type Post type slug. Default 'post'.
 	 */
@@ -102,7 +102,7 @@ function amp_add_custom_analytics( $analytics ) {
 		$analytics[ $entry_id ] = array(
 			'type' => $entry['type'],
 			'attributes' => array(),
-			'config_data' => $entry['config'],
+			'config_data' => json_decode( $entry['config'] ),
 		);
 	}
 

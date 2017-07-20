@@ -49,22 +49,26 @@ class AMP_Options_Manager {
 			return false;
 		}
 
-		// Validate JSON configuration is valid
+		// Validate JSON configuration
 		$is_valid_json = AMP_HTML_Utils::is_valid_json( stripslashes( $data['config'] ) );
 		if ( ! $is_valid_json ) {
 			return false;
 		}
-
 		$amp_analytics = self::get_option( 'analytics', array() );
+
+		$entry_vendor_type = sanitize_key( $data['vendor-type'] );
+		$entry_config = stripslashes( trim( $data['config'] ) );
 
 		if ( ! empty( $data['id-value'] ) ) {
 			$entry_id = sanitize_key( $data['id-value'] );
 		} else {
-			// Generate a random string to uniquely identify this entry
-			$entry_id = substr( md5( wp_rand() ), 0, 12 );
+			// Generate a hash string to uniquely identify this entry
+			$entry_id = substr( md5( $entry_vendor_type . $entry_config ), 0, 12 );
+			// Avoid duplicates
+			if ( isset( $amp_analytics[ $entry_id ] ) ) {
+				return false;
+			}
 		}
-		$entry_vendor_type = sanitize_key( $data['vendor-type'] );
-		$entry_config = stripslashes( trim( $data['config'] ) );
 
 		if ( isset( $data['delete'] ) ) {
 			unset( $amp_analytics[ $entry_id ] );
