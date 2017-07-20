@@ -41,44 +41,43 @@ class AMP_Options_Manager {
 		$is_valid_json = AMP_HTML_Utils::is_valid_json( stripslashes( $_POST['config'] ) );
 
 		// Check save/delete pre-conditions and proceed if correct
-		if ( ! ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) ) && $is_valid_json ) {
-
-			if ( empty( $_POST['id-value'] ) ) {
-				$_POST['id-value'] = md5( $_POST['config'] );
-			}
-
-			// Prepare the data for the new analytics setting
-			$new_analytics_option = array(
-				sanitize_key( $_POST['id-value'] ),
-				sanitize_key( $_POST['vendor-type'] ),
-				stripslashes( $_POST['config'] ),
-			);
-			// Identifier for analytics option
-			$inner_option_name = sanitize_key( $_POST['vendor-type'] . '-' . $_POST['id-value'] );
-
-			// Grab the amp_options from the DB
-			$amp_options = get_option( 'amp-options' );
-			if ( ! $amp_options ) {
-				$amp_options = array();
-			}
-
-			// Grab the amp-analytics options
-			$amp_analytics = isset( $amp_options[ $option_name ] )
-				? $amp_options[ $option_name ]
-				: array();
-
-			if ( isset( $_POST['delete'] ) ) {
-				unset( $amp_analytics[ $inner_option_name ] );
-			} else {
-				$amp_analytics[ $inner_option_name ] = $new_analytics_option;
-			}
-			$amp_options[ $option_name ] = $amp_analytics;
-
-			update_option( 'amp-options', $amp_options, false );
-
-			return true;
+		if ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) || ! $is_valid_json ) {
+			return false;
 		}
 
-		return false;
+		if ( empty( $_POST['id-value'] ) ) {
+			$_POST['id-value'] = md5( $_POST['config'] );
+		}
+
+		// Prepare the data for the new analytics setting
+		$new_analytics_option = array(
+			sanitize_key( $_POST['id-value'] ),
+			sanitize_key( $_POST['vendor-type'] ),
+			stripslashes( $_POST['config'] ),
+		);
+		// Identifier for analytics option
+		$inner_option_name = sanitize_key( $_POST['vendor-type'] . '-' . $_POST['id-value'] );
+
+		// Grab the amp_options from the DB
+		$amp_options = get_option( 'amp-options' );
+		if ( ! $amp_options ) {
+			$amp_options = array();
+		}
+
+		// Grab the amp-analytics options
+		$amp_analytics = isset( $amp_options[ $option_name ] )
+			? $amp_options[ $option_name ]
+			: array();
+
+		if ( isset( $_POST['delete'] ) ) {
+			unset( $amp_analytics[ $inner_option_name ] );
+		} else {
+			$amp_analytics[ $inner_option_name ] = $new_analytics_option;
+		}
+		$amp_options[ $option_name ] = $amp_analytics;
+
+		update_option( 'amp-options', $amp_options, false );
+
+		return true;
 	}
 }
