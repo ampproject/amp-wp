@@ -16,7 +16,7 @@ class AMP_Options_Menu {
 	}
 
 	public function init() {
-		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::save' );
+		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
 
 		add_action( 'admin_menu', array( $this, 'add_menu_items' ) );
 	}

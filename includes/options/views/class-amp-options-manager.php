@@ -3,8 +3,12 @@
 require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 
 class AMP_Options_Manager {
+	public static function get_options() {
+		return get_option( 'amp-options' );
+	}
+
 	public static function get_option( $option, $default = false ) {
-		$amp_options = get_option( 'amp-options' );
+		$amp_options = self::get_options();
 
 		if ( ! isset( $amp_options[ $option ] ) ) {
 			return $default;
@@ -13,7 +17,7 @@ class AMP_Options_Manager {
 		return $amp_options[ $option ];
 	}
 
-	public static function save() {
+	public static function handle_analytics_submit() {
 		// Request must come from user with right capabilities
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( __( 'Sorry, you do not have the necessary permissions to perform this action', 'amp' ) );
@@ -21,7 +25,7 @@ class AMP_Options_Manager {
 		// Ensure request is coming from analytics option form
 		check_admin_referer( 'analytics-options', 'analytics-options' );
 
-		$status = AMP_Options_Manager::submit( $_POST );
+		$status = AMP_Options_Manager::update_analytics_options( $_POST );
 
 		// Redirect to keep the user in the analytics options page
 		// Wrap in is_admin() to enable phpunit tests to exercise this code
@@ -29,7 +33,7 @@ class AMP_Options_Manager {
 		exit;
 	}
 
-	public static function submit( $data ) {
+	public static function update_analytics_options( $data ) {
 
 		$option_name = 'amp-analytics';
 
