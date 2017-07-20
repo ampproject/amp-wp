@@ -38,25 +38,25 @@ class AMP_Options_Manager {
 		$option_name = 'amp-analytics';
 
 		// Validate JSON configuration is valid
-		$is_valid_json = AMP_HTML_Utils::is_valid_json( stripslashes( $_POST['config'] ) );
+		$is_valid_json = AMP_HTML_Utils::is_valid_json( stripslashes( $data['config'] ) );
 
 		// Check save/delete pre-conditions and proceed if correct
-		if ( empty( $_POST['vendor-type'] ) || empty( $_POST['config'] ) || ! $is_valid_json ) {
+		if ( empty( $data['vendor-type'] ) || empty( $data['config'] ) || ! $is_valid_json ) {
 			return false;
 		}
 
-		if ( empty( $_POST['id-value'] ) ) {
-			$_POST['id-value'] = md5( $_POST['config'] );
+		if ( empty( $data['id-value'] ) ) {
+			$data['id-value'] = md5( $data['config'] );
 		}
 
 		// Prepare the data for the new analytics setting
 		$new_analytics_option = array(
-			sanitize_key( $_POST['id-value'] ),
-			sanitize_key( $_POST['vendor-type'] ),
-			stripslashes( $_POST['config'] ),
+			sanitize_key( $data['id-value'] ),
+			sanitize_key( $data['vendor-type'] ),
+			stripslashes( $data['config'] ),
 		);
 		// Identifier for analytics option
-		$inner_option_name = sanitize_key( $_POST['vendor-type'] . '-' . $_POST['id-value'] );
+		$inner_option_name = sanitize_key( $data['vendor-type'] . '-' . $data['id-value'] );
 
 		// Grab the amp_options from the DB
 		$amp_options = get_option( 'amp-options' );
@@ -69,7 +69,7 @@ class AMP_Options_Manager {
 			? $amp_options[ $option_name ]
 			: array();
 
-		if ( isset( $_POST['delete'] ) ) {
+		if ( isset( $data['delete'] ) ) {
 			unset( $amp_analytics[ $inner_option_name ] );
 		} else {
 			$amp_analytics[ $inner_option_name ] = $new_analytics_option;
