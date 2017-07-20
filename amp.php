@@ -117,6 +117,7 @@ function amp_add_frontend_actions() {
 function amp_add_post_template_actions() {
 	require_once( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
 	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
+	amp_post_template_init_hooks();
 }
 
 function amp_prepare_render() {
