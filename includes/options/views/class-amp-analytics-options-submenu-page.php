@@ -78,7 +78,7 @@ class AMP_Analytics_Options_Submenu_Page {
 				<div class="amp-analytics-options notice <?php echo esc_attr( 'notice-' . $admin_notice_type ); ?> is-dismissible">
 					<p><?php echo esc_html( $admin_notice_text ); ?></p>
 					<button type="button" class="notice-dismiss">
-						<span class="screen-reader-text">Dismiss this notice.</span>
+						<span class="screen-reader-text"><?php __( 'Dismiss this notice.', 'amp' ) ?></span>
 					</button>
 				</div>
 			<?php endif;
