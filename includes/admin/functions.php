@@ -77,24 +77,26 @@ function amp_add_customizer_link() {
  * Registers a top-level menu for AMP configuration options
  */
 function amp_add_options_menu() {
+	if ( ! is_admin() ) {
+		return;
+	}
+
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
-add_action( 'admin_menu', 'amp_add_options_menu' );
-add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::save' );
-
+add_action( 'wp_loaded', 'amp_add_options_menu' );
 
 /**
  * Grab the analytics options from the DB and return $analytics option
  * @return array
  */
-function amp_get_analytics_component_fields($option) {
+function amp_get_analytics_component_fields( $option ) {
 
 	list( $id, $type, $config ) = $option;
 
 	$fields = array();
 	$component_index = $type . '-' . $id;
-	$fields['id'] =  $component_index;
+	$fields['id'] = $component_index;
 	$fields['type'] = $type;
 	$fields['attributes'] = array();
 
@@ -104,7 +106,6 @@ function amp_get_analytics_component_fields($option) {
 	return $fields;
 }
 
-
 function amp_add_custom_analytics( $analytics ) {
 	$amp_options = get_option( 'amp-options' );
 	$analytics_options = null;
@@ -112,8 +113,9 @@ function amp_add_custom_analytics( $analytics ) {
 		$analytics_options = $amp_options['amp-analytics'];
 	}
 
-	if ( ! $analytics_options )
+	if ( ! $analytics_options ) {
 		return $analytics;
+	}
 
 	foreach ( $analytics_options as $option ) {
 		$fields = amp_get_analytics_component_fields( $option );

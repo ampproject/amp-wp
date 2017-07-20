@@ -16,29 +16,15 @@ class AMP_Options_Menu {
 	}
 
 	public function init() {
-		$submenus = array(
-			new AMP_Analytics_Options_Submenu( $this->menu_slug ),
-		);
-		$this->add_amp_options_menu( $submenus );
-		add_action( 'admin_menu', array( $this, 'amp_remove_toplevel_menu_item' ), 9999 );
+		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::save' );
+
+		add_action( 'admin_menu', array( $this, 'add_menu_items' ) );
 	}
 
-	// Helper function to avoid having the top-level menu as
-	// the first menu item
-	function amp_remove_toplevel_menu_item() {
-		global $submenu;
-		if ( isset( $submenu['amp-plugin-options'][0] ) ) {
-			unset( $submenu['amp-plugin-options'][0] );
-		}
-	}
-	/**
-	 * @param $submenus
-	 * Creates the submenu item and calls on the Submenu Page object to render
-	 * the actual contents of the page.
-	 */
-	public function add_amp_options_menu( $submenus ) {
+	public function add_menu_items() {
+		var_dump( 'adding menu items' );
 		add_menu_page(
-			__( 'AMP Plugin Options', 'amp' ),
+			__( 'AMP Options', 'amp' ),
 			__( 'AMP', 'amp' ),
 			'manage_options',
 			$this->menu_slug,
@@ -46,8 +32,24 @@ class AMP_Options_Menu {
 			self::ICON_BASE64_SVG
 		);
 
+		$submenus = array(
+			new AMP_Analytics_Options_Submenu( $this->menu_slug ),
+		);
+
+		// Create submenu items and calls on the Submenu Page object to render the actual contents of the page.
 		foreach ( $submenus as $submenu ) {
 			$submenu->init( $this->menu_slug );
+		}
+
+		$this->remove_toplevel_menu_item();
+	}
+
+	// Helper function to avoid having the top-level menu as
+	// the first menu item
+	function remove_toplevel_menu_item() {
+		global $submenu;
+		if ( isset( $submenu['amp-plugin-options'][0] ) ) {
+			unset( $submenu['amp-plugin-options'][0] );
 		}
 	}
 }
