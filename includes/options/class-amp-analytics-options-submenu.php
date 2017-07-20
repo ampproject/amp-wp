@@ -24,7 +24,6 @@ class AMP_Analytics_Options_Submenu {
 	}
 
 	private function add_submenu() {
-
 		add_submenu_page(
 			$this->parent_menu_slug,
 			__( 'AMP Analytics Options', 'amp' ),

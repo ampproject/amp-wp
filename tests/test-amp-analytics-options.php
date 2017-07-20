@@ -40,21 +40,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			}
 		}
 	}';
-	private $serializer;
-
-	public function setUp() {
-		parent::setUp();
-		$this->serializer = new AMP_Options_Manager();
-	}
 
 	private function get_options() {
-		$analytics_options = false;
-		$amp_options = get_option( 'amp-options' );
-		if ( $amp_options ) {
-			$analytics_options = $amp_options['amp-analytics'];
-		}
-
-		return $analytics_options;
+		return AMP_Options_Manager::get_option( 'analytics', array() );
 	}
 
 	private function render_post() {
@@ -72,11 +60,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}
 
 	private function insert_one_option( $vendor, $config ) {
-		global $_POST;
-		$_POST['id-value'] = '';
-		$_POST['vendor-type'] = $vendor;
-		$_POST['config'] = $config;
-		$this->serializer->submit( $_POST );
+		$data = array();
+		$data['id-value'] = '';
+		$data['vendor-type'] = $vendor;
+		$data['config'] = $config;
+		AMP_Options_Manager::update_analytics_options( $data );
 	}
 
 	/**
@@ -84,18 +72,16 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 */
 	function test_no_options() {
 		$options = $this->get_options();
-		$this->assertFalse( $options );
+		$this->assertEmpty( $options );
 	}
 
 	/**
 	 * Test that exactly one analytics component is inserted into the DB
 	 */
 	function test_one_option_inserted() {
-
-		/* Insert analytics option */
 		$this->insert_one_option(
 			$this->vendor,
-			$this->config
+			$this->config_one
 		);
 		$options = $this->get_options();
 

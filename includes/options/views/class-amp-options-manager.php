@@ -3,8 +3,10 @@
 require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
 
 class AMP_Options_Manager {
+	const OPTION_NAME = 'amp-options';
+
 	public static function get_options() {
-		return get_option( 'amp-options' );
+		return get_option( self::OPTION_NAME, array() );
 	}
 
 	public static function get_option( $option, $default = false ) {
@@ -15,6 +17,14 @@ class AMP_Options_Manager {
 		}
 
 		return $amp_options[ $option ];
+	}
+
+	public static function update_option( $option, $value ) {
+		$amp_options = self::get_options();
+
+		$amp_options[ $option ] = $value;
+
+		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 
 	public static function handle_analytics_submit() {
@@ -34,50 +44,37 @@ class AMP_Options_Manager {
 	}
 
 	public static function update_analytics_options( $data ) {
-
-		$option_name = 'amp-analytics';
-
-		// Validate JSON configuration is valid
-		$is_valid_json = AMP_HTML_Utils::is_valid_json( stripslashes( $data['config'] ) );
-
 		// Check save/delete pre-conditions and proceed if correct
-		if ( empty( $data['vendor-type'] ) || empty( $data['config'] ) || ! $is_valid_json ) {
+		if ( empty( $data['vendor-type'] ) || empty( $data['config'] ) ) {
 			return false;
 		}
 
-		if ( empty( $data['id-value'] ) ) {
-			$data['id-value'] = md5( $data['config'] );
+		// Validate JSON configuration is valid
+		$is_valid_json = AMP_HTML_Utils::is_valid_json( stripslashes( $data['config'] ) );
+		if ( ! $is_valid_json ) {
+			return false;
 		}
 
-		// Prepare the data for the new analytics setting
-		$new_analytics_option = array(
-			sanitize_key( $data['id-value'] ),
-			sanitize_key( $data['vendor-type'] ),
-			stripslashes( $data['config'] ),
-		);
-		// Identifier for analytics option
-		$inner_option_name = sanitize_key( $data['vendor-type'] . '-' . $data['id-value'] );
+		$amp_analytics = self::get_option( 'analytics', array() );
 
-		// Grab the amp_options from the DB
-		$amp_options = get_option( 'amp-options' );
-		if ( ! $amp_options ) {
-			$amp_options = array();
+		if ( ! empty( $data['id-value'] ) ) {
+			$entry_id = sanitize_key( $data['id-value'] );
+		} else {
+			// Generate a random string to uniquely identify this entry
+			$entry_id = substr( md5( wp_rand() ), 0, 12 );
 		}
-
-		// Grab the amp-analytics options
-		$amp_analytics = isset( $amp_options[ $option_name ] )
-			? $amp_options[ $option_name ]
-			: array();
+		$entry_vendor_type = sanitize_key( $data['vendor-type'] );
+		$entry_config = stripslashes( trim( $data['config'] ) );
 
 		if ( isset( $data['delete'] ) ) {
-			unset( $amp_analytics[ $inner_option_name ] );
+			unset( $amp_analytics[ $entry_id ] );
 		} else {
-			$amp_analytics[ $inner_option_name ] = $new_analytics_option;
+			$amp_analytics[ $entry_id ] = array(
+				'type' => $entry_vendor_type,
+				'config' => $entry_config,
+			);
 		}
-		$amp_options[ $option_name ] = $amp_analytics;
 
-		update_option( 'amp-options', $amp_options, false );
-
-		return true;
+		return self::update_option( 'analytics', $amp_analytics );
 	}
 }

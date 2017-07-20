@@ -28,7 +28,7 @@ class AMP_Analytics_Options_Submenu_Page {
 						</label>
 						<label>
 							<?php echo __( 'ID:', 'amp' ) ?>
-							<input type="text" name=id value="<?php echo esc_attr( substr( $id, -6 ) ); ?>" readonly />
+							<input type="text" name=id value="<?php echo esc_attr( $id ); ?>" readonly />
 						</label>
 						<input type="hidden" name=id-value value="<?php echo esc_attr( $id ); ?>" />
 					</p>
@@ -85,13 +85,12 @@ class AMP_Analytics_Options_Submenu_Page {
 	}
 
 	public function render() {
-		$analytics_entries = AMP_Options_Manager::get_option( 'amp-analytics', array() );
+		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
 		$this->render_title();
 
-		foreach ( $analytics_entries as $entries ) {
-			list( $id, $type, $config ) = $entries;
-			$this->render_entry( $id, $type, $config );
+		foreach ( $analytics_entries as $entry_id => $entry ) {
+			$this->render_entry( $entry_id, $entry['type'], $entry['config'] );
 		}
 
 		$this->render_entry();

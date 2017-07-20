@@ -91,40 +91,19 @@ function amp_add_options_menu() {
 }
 add_action( 'wp_loaded', 'amp_add_options_menu' );
 
-/**
- * Grab the analytics options from the DB and return $analytics option
- * @return array
- */
-function amp_get_analytics_component_fields( $option ) {
-
-	list( $id, $type, $config ) = $option;
-
-	$fields = array();
-	$component_index = $type . '-' . $id;
-	$fields['id'] = $component_index;
-	$fields['type'] = $type;
-	$fields['attributes'] = array();
-
-	$analytics_json = json_decode( $config , true );
-	$fields['config_data'] = $analytics_json;
-
-	return $fields;
-}
-
 function amp_add_custom_analytics( $analytics ) {
-	$amp_options = get_option( 'amp-options' );
-	$analytics_options = null;
-	if ( $amp_options ) {
-		$analytics_options = $amp_options['amp-analytics'];
-	}
+	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
-	if ( ! $analytics_options ) {
+	if ( ! $analytics_entries ) {
 		return $analytics;
 	}
 
-	foreach ( $analytics_options as $option ) {
-		$fields = amp_get_analytics_component_fields( $option );
-		$analytics[ $fields['id'] ] = $fields;
+	foreach ( $analytics_entries as $entry_id => $entry ) {
+		$analytics[ $entry_id ] = array(
+			'type' => $entry['type'],
+			'attributes' => array(),
+			'config_data' => $entry['config'],
+		);
 	}
 
 	return $analytics;

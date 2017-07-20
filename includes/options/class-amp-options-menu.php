@@ -22,7 +22,6 @@ class AMP_Options_Menu {
 	}
 
 	public function add_menu_items() {
-		var_dump( 'adding menu items' );
 		add_menu_page(
 			__( 'AMP Options', 'amp' ),
 			__( 'AMP', 'amp' ),
