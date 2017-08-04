@@ -591,7 +591,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$this->invoke_method( $sanitizer, 'get_whitelist_data' );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
 		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $node, $data['attribute_name'], $attr_spec_rule ) );
@@ -749,7 +748,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$this->invoke_method( $sanitizer, 'get_whitelist_data' );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
 		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $data['attribute_name'], $attr_spec_list ) );
