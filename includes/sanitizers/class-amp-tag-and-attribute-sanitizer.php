@@ -21,7 +21,6 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generate
  * - `ChildTagSpec` - Places restrictions on the number and type of child tags.
  */
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
-
 	protected $allowed_tags;
 	protected $globally_allowed_attributes;
 	protected $layout_allowed_attributes;
@@ -38,14 +37,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
-		// Get whitelists
+		// Prepare whitelists
 		$this->allowed_tags = $this->args['amp_allowed_tags'];
 		$this->globally_allowed_attributes = $this->args['amp_globally_allowed_attributes'];
 		$this->layout_allowed_attributes = $this->args['amp_layout_allowed_attributes'];
-	}
-
-	private function get_whitelist_data() {
-
 	}
 
 	public function sanitize() {
@@ -108,14 +103,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Allow rule_spec_list to be filtered. ex.:
-        // add_filter( 'amp_tags_and_attributes_rule_spec_list_for_node', array( $this, 'example_rule_spec_list_filter' ), 10, 2 );
-        // public function example_rule_spec_list_filter( $rule_spec_list, $node ) {
+		// add_filter( 'amp_tags_and_attributes_rule_spec_list_for_node', array( $this, 'example_rule_spec_list_filter' ), 10, 2 );
+		// public function example_rule_spec_list_filter( $rule_spec_list, $node ) {
 		//		// remove audio tags
 		//		if ( 'amp-audio' == $node->nodeName ) {
 		//			$rule_spec_list = array();
 		//		}
-        // 		return $rule_spec_list;
-        // }
+		// 		return $rule_spec_list;
+		// }
 		$rule_spec_list_to_validate = apply_filters( 'amp_tags_and_attributes_rule_spec_list_for_node', $rule_spec_list_to_validate, $node );
 
 		// If no valid rule_specs exist, then remove this node and return.
