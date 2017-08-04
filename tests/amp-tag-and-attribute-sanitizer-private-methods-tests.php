@@ -9,11 +9,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	protected $layout_allowed_attrs;
 
 	public function setUp() {
-		$this->allowed_tags = apply_filters( 'amp_allowed_tags', AMP_Allowed_Tags_Generated::get_allowed_tags() );
-		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
-		$this->layout_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
+		$this->allowed_tags = AMP_Allowed_Tags_Generated::get_allowed_tags();
+		$this->globally_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
+		$this->layout_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
 	}
-	
+
 	public function get_attr_spec_rule_data() {
 		return array(
 			'test_attr_spec_rule_mandatory_pass' => array(
@@ -845,7 +845,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
-		
+
 		$this->invoke_method( $sanitizer, 'remove_node', array( $node ) );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -985,7 +985,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
-		
+
 		$this->invoke_method( $sanitizer, 'replace_node_with_children', array( $node ) );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -1049,7 +1049,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		} else {
 			$ancestor_node = null;
 		}
-		
+
 		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_tag_name', array( $node, $data['ancestor_tag_name'] ) );
 
 		if ( $ancestor_node != $got ) {
@@ -1305,7 +1305,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
-		
+
 		$got = $this->invoke_method( $sanitizer, 'validate_attr_spec_list_for_node', array( $node, $data['attr_spec_list'] ) );
 
 		if ( $expected != $got ) {
