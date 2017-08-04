@@ -102,17 +102,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// Allow rule_spec_list to be filtered. ex.:
-		// add_filter( 'amp_tags_and_attributes_rule_spec_list_for_node', array( $this, 'example_rule_spec_list_filter' ), 10, 2 );
-		// public function example_rule_spec_list_filter( $rule_spec_list, $node ) {
-		//		// remove audio tags
-		//		if ( 'amp-audio' == $node->nodeName ) {
-		//			$rule_spec_list = array();
-		//		}
-		// 		return $rule_spec_list;
-		// }
-		$rule_spec_list_to_validate = apply_filters( 'amp_tags_and_attributes_rule_spec_list_for_node', $rule_spec_list_to_validate, $node );
-
 		// If no valid rule_specs exist, then remove this node and return.
 		if ( empty( $rule_spec_list_to_validate ) ) {
 			$this->remove_node( $node );
@@ -121,7 +110,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// The remaining validations all have to do with attributes.
 		if ( $node->hasAttributes() ) {
-
 			$attr_spec_list = array();
 
 			// If we have exactly one rule_spec, use it's attr_spec_list to
@@ -161,43 +149,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// Allow attr_spec_list to be filtered. ex.:
-			// add_filter( 'amp_tags_and_attributes_attr_spec_list_for_node', array( $this, 'example_attr_spec_list_filter' ), 10, 2 );
-			// public function example_attr_spec_list_filter( $attr_spec_list, $node ) {
-			// 	// Look for an anchor tag.
-			// 	if ( 'a' == $node->nodeName ) {
-			// 		// Add some domains to the disallowed_domain array.
-			// 		$disallowed_domains = array(
-			// 			'example.com',
-			// 			'rea-bad-domain.com',
-			// 		);
-			// 		if ( isset( $attr_spec_list['href']['disallowed_domain'] ) ) {
-			// 			$disallowed_domains = array_merge( $attr_spec_list['href']['disallowed_domain'], $disallowed_domains );
-			// 		}
-			// 		$attr_spec_list['href']['disallowed_domain'] = $disallowed_domains;
-			//
-			// 		// Add a new protocol to the allowed_protocol array.
-			// 		$allowed_protocol = array(
-			// 			'protocol'
-			// 		);
-			//
-			// 		if ( isset( $attr_spec_list['href']['allowed_protocol'] ) ) {
-			// 			$allowed_protocol = array_merge( $attr_spec_list['href']['allowed_protocol'], $allowed_protocol );
-			// 		}
-			// 		$attr_spec_list['href']['allowed_protocol'] = $allowed_protocol;
-			// 	}
-			// 	return $attr_spec_list;
-			// }
-			$attr_spec_list = apply_filters( 'amp_tags_and_attributes_attr_spec_list_for_node', $attr_spec_list, $node );
-
 			// Remove any remaining disallowed attributes.
 			$this->sanitize_disallowed_attributes_in_node( $node, $attr_spec_list );
 
 			// Remove values that don't conform to the attr_spec.
 			$this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
-
-			// Allow additional sanitization to be done here.
-			do_action( 'amp_tags_and_attributes_sanitize_node', $node, $attr_spec_list );
 		}
 	}
 
@@ -364,8 +320,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $this->is_amp_allowed_attribute( $attr_name, $attr_spec_list ) ) {
 				$attrs_to_remove[] = $attr_name;
 			}
-
-			$attrs_to_remove = apply_filters( 'amp_tags_and_attributes_sanitize_disallowed_attributes_in_node', $attrs_to_remove, $node, $attr_name, $attr_spec_list );
 		}
 
 		if ( ! empty( $attrs_to_remove ) ) {
@@ -471,8 +425,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$attrs_to_remove[] = $attr_name;
 				continue;
 			}
-
-			$attrs_to_remove = apply_filters( 'amp_tags_and_attributes_sanitize_attr_for_node', $attrs_to_remove, $node, $attr_name, $attr_spec_rule );
 		}
 
 		// Remove the disallowed values
