@@ -26,7 +26,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_mandatory',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_mandatory_alternate_attr_pass' => array(
 				array(
@@ -39,7 +39,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_mandatory',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_mandatory_fail' => array(
 				array(
@@ -51,7 +51,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_mandatory',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_mandatory_na' => array(
 				array(
@@ -63,7 +63,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_mandatory',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -78,7 +78,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_value_fail' => array(
 				array(
@@ -90,7 +90,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_value_not_applicable' => array(
 				array(
@@ -102,7 +102,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -118,7 +118,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_value_casei_upper_pass' => array(
 				array(
@@ -130,7 +130,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_value_casei_fail' => array(
 				array(
@@ -142,7 +142,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_value_casei_na' => array(
 				array(
@@ -154,7 +154,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value_casei',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -169,7 +169,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_regex',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_value_regex_fail' => array(
 				array(
@@ -181,7 +181,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_regex',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_value_regex_na' => array(
 				array(
@@ -193,7 +193,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value_regex',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -208,7 +208,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_regex_casei',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_value_regex_casei_upper_pass' => array(
 				array(
@@ -220,7 +220,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_regex_casei',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_value_regex_casei_fail' => array(
 				array(
@@ -232,7 +232,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_regex_casei',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_value_regex_casei_na' => array(
 				array(
@@ -244,7 +244,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value_regex_casei',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -260,7 +260,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_allowed_protocol_fail' => array(
 				array(
@@ -272,7 +272,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_allowed_protocol_na' => array(
 				array(
@@ -284,7 +284,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -298,7 +298,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_allowed_protocol_srcset_multiple_pass' => array(
 				array(
@@ -310,7 +310,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_allowed_protocol_srcset_single_fail' => array(
 				array(
@@ -322,7 +322,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail' => array(
 				array(
@@ -334,7 +334,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_good_first' => array(
 				array(
@@ -346,7 +346,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_bad_first' => array(
 				array(
@@ -358,7 +358,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_allowed_protocol_srcset_na' => array(
 				array(
@@ -370,7 +370,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_allowed_protocol',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -386,7 +386,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_relative',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_disallowed_relative_fail' => array(
 				array(
@@ -398,7 +398,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_relative',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_disallowed_relative_na' => array(
 				array(
@@ -410,7 +410,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_disallowed_relative',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -425,7 +425,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_empty',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_disallowed_empty_fail' => array(
 				array(
@@ -437,7 +437,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_empty',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_disallowed_empty_na' => array(
 				array(
@@ -449,7 +449,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_disallowed_empty',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -464,7 +464,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_domain',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_disallowed_domain_fail' => array(
 				array(
@@ -476,7 +476,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_domain',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_disallowed_domain_fail_2' => array(
 				array(
@@ -488,7 +488,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_domain',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_disallowed_domain_na' => array(
 				array(
@@ -500,7 +500,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_disallowed_domain',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
 
@@ -516,7 +516,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
 				),
-				'expected' => AMP_Rule_Spec::pass,
+				'expected' => AMP_Rule_Spec::PASS,
 			),
 			'test_attr_spec_rule_blacklisted_value_regex_fail' => array(
 				array(
@@ -528,7 +528,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_blacklisted_value_regex_fail_2' => array(
 				array(
@@ -540,7 +540,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
 				),
-				'expected' => AMP_Rule_Spec::fail,
+				'expected' => AMP_Rule_Spec::FAIL,
 			),
 			'test_attr_spec_rule_blacklisted_value_regex_na' => array(
 				array(
@@ -552,7 +552,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
 				),
-				'expected' => AMP_Rule_Spec::not_applicable,
+				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 		);
 	}
@@ -580,8 +580,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$attr_spec_list = $this->allowed_tags[ $data['tag_name'] ][$data['rule_spec_index']]['attr_spec_list'];
 		foreach( $attr_spec_list as $attr_name => $attr_val ) {
-			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] ) ) {
-				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] as $attr_alt_name ) {
+			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] ) ) {
+				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] as $attr_alt_name ) {
 					$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
 				}
 			}
@@ -740,8 +740,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$attr_spec_list = $this->allowed_tags[ $data['tag_name'] ][$data['rule_spec_index']]['attr_spec_list'];
 		foreach( $attr_spec_list as $attr_name => $attr_val ) {
-			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] ) ) {
-				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::alternative_names] as $attr_alt_name ) {
+			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] ) ) {
+				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] as $attr_alt_name ) {
 					$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
 				}
 			}
@@ -1325,7 +1325,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => array(),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'value_pass' => array(
 				array(
@@ -1336,7 +1336,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value' => 'value1',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_fail' => array(
 				array(
@@ -1347,7 +1347,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value' => 'valuex',
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'value_no_attr' => array(
 				array(
@@ -1358,7 +1358,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value' => 'value1',
 					),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'value_empty_pass1' => array(
 				array(
@@ -1369,7 +1369,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value' => '',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_empty_pass2' => array(
 				array(
@@ -1380,7 +1380,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value' => '',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_empty_fail' => array(
 				array(
@@ -1391,7 +1391,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value' => '',
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'value_alternative_attr_name_pass' => array(
 				array(
@@ -1405,7 +1405,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_alternative_attr_name_fail' => array(
 				array(
@@ -1419,7 +1419,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 		);
 	}
@@ -1452,7 +1452,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => array(),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'value_pass' => array(
 				array(
@@ -1463,7 +1463,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value_casei' => 'value1',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_upper_pass' => array(
 				array(
@@ -1474,7 +1474,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value_casei' => 'value1',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_fail' => array(
 				array(
@@ -1485,7 +1485,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value_casei' => 'valuex',
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'value_no_attr' => array(
 				array(
@@ -1496,7 +1496,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value_casei' => 'value1',
 					),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'value_empty_pass1' => array(
 				array(
@@ -1507,7 +1507,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value_casei' => '',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_empty_pass2' => array(
 				array(
@@ -1518,7 +1518,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value_casei' => '',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_empty_fail' => array(
 				array(
@@ -1529,7 +1529,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'value_casei' => '',
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'value_alternative_attr_name_pass' => array(
 				array(
@@ -1543,7 +1543,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_alternative_attr_name__upper_pass' => array(
 				array(
@@ -1557,7 +1557,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_alternative_attr_name_fail' => array(
 				array(
@@ -1571,7 +1571,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 		);
 	}
@@ -1604,7 +1604,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => array(),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'value_pass' => array(
 				array(
@@ -1615,7 +1615,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'blacklisted_value_regex' => '(not_this|or_this)',
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_fail' => array(
 				array(
@@ -1626,7 +1626,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'blacklisted_value_regex' => '(not_this|or_this)',
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'value_no_attr' => array(
 				array(
@@ -1637,7 +1637,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'blacklisted_value_regex' => '(not_this|or_this)',
 					),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'value_alternative_attr_name_pass' => array(
 				array(
@@ -1651,7 +1651,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'value_alternative_attr_name_fail' => array(
 				array(
@@ -1665,7 +1665,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 		);
 	}
@@ -1698,7 +1698,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => array(),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'protocol_pass' => array(
 				array(
@@ -1712,7 +1712,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'protocol_multiple_pass' => array(
 				array(
@@ -1726,7 +1726,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'protocol_fail' => array(
 				array(
@@ -1740,7 +1740,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'protocol_multiple_fail' => array(
 				array(
@@ -1754,7 +1754,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'protocol_alternative_pass' => array(
 				array(
@@ -1771,7 +1771,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'protocol_alternative_fail' => array(
 				array(
@@ -1788,7 +1788,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 		);
 	}
@@ -1821,7 +1821,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => array(),
 				),
-				AMP_Rule_Spec::not_applicable,
+				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 			'disallowed_relative_pass' => array(
 				array(
@@ -1832,7 +1832,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'allow_relative' => false,
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'disallowed_relative_ multiple_pass' => array(
 				array(
@@ -1843,7 +1843,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'allow_relative' => false,
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'disallowed_relative_alternative_pass' => array(
 				array(
@@ -1857,7 +1857,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'disallowed_relative_alternative_multiple_pass' => array(
 				array(
@@ -1871,7 +1871,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::pass,
+				AMP_Rule_Spec::PASS,
 			),
 			'disallowed_relative_fail' => array(
 				array(
@@ -1882,7 +1882,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'allow_relative' => false,
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'disallowed_relative_multiple_fail' => array(
 				array(
@@ -1893,7 +1893,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						'allow_relative' => false,
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'disallowed_relative_alternative_fail' => array(
 				array(
@@ -1907,7 +1907,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 			'disallowed_relative_alternative_multiple_fail' => array(
 				array(
@@ -1921,7 +1921,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				AMP_Rule_Spec::fail,
+				AMP_Rule_Spec::FAIL,
 			),
 		);
 	}
