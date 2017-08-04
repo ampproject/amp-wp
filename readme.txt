@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.8
-Stable tag: 0.4.2
+Stable tag: 0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,10 @@ The best place to start is to open a new discussion in the [support forum](https
 A wise green Yoda once said, "Patience you must have, my young padawan." We're working on it :)
 
 == Changelog ==
+
+= 0.5 (2017-08-04) =
+
+- ??
 
 = 0.4.2 (2016-10-13) =
 
