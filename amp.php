@@ -192,6 +192,12 @@ function amp_render_post( $post ) {
 	}
 	$post_id = $post->ID;
 
+	// If amp_render_post is called directly outside of the standard endpoint, is_amp_endpoint will return false, which is not ideal for any code that expects to run in an AMP context.
+	// Let's force the value to be true while we render AMP.
+	add_filter( 'is_amp_endpoint', '__return_true' );
+
+	amp_load_classes();
+
 	/**
 	 * Fires before rendering a post in AMP.
 	 *
@@ -204,6 +210,8 @@ function amp_render_post( $post ) {
 	amp_add_post_template_actions();
 	$template = new AMP_Post_Template( $post );
 	$template->load();
+
+	remove_filter( 'is_amp_endpoint', '__return_true' );
 }
 
 /**
