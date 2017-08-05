@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.8
-Stable tag: 0.4.2
+Stable tag: 0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,22 @@ The best place to start is to open a new discussion in the [support forum](https
 A wise green Yoda once said, "Patience you must have, my young padawan." We're working on it :)
 
 == Changelog ==
+
+= 0.5 (2017-08-04) =
+
+- Whitelist Sanitizer: Replace Blacklist Sanitizer with a whitelist-based approach using the AMP spec (props delputnam)
+- Image Dimensions: Replace fastimage with fasterimage for PHP 5.4+. Enables faster downloads and wider support (props gititon)
+- Embed Handlers: Added support for Vimeo, SoundCloud, Pinterest (props amedina) and PlayBuzz (props lysk88)
+- Analytics: UI for easier addition of analytics tags (props amedina)
+- Fix: parse query strings properly (props amyevans)
+- Fix: Old slug redirect for AMP URLs (props rahulsprajapati)
+- Fix: Handle issues with data uri images in CSS (props trepmal)
+- Fix: Add amp-video js for amp-video tags (props ptbello)
+- Fix: Output CSS for feature image (props mjangda)
+- Fix: Fix attribute when adding AMP Mustache lib (props luigitec)
+- Fix: Various documentation updates (props piersb, bhhaskin)
+- Fix: PHP Warnings from `register_customizer_ui` (props jahvi)
+- Fix: Coding Standards (props paulschreiber)
 
 = 0.4.2 (2016-10-13) =
 
