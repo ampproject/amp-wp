@@ -55,7 +55,7 @@ function xyz_amp_set_site_icon_url( $data ) {
 
 If you want to hide the site text and just show a logo, use the `amp_post_template_css` action. The following colors the title bar black, hides the site title, and replaces it with a centered logo:
 
-```
+```php
 add_action( 'amp_post_template_css', 'xyz_amp_additional_css_styles' );
 
 function xyz_amp_additional_css_styles( $amp_template ) {
@@ -129,7 +129,7 @@ Note: The path must pass the default criteria set out by [`validate_file`](https
 
 The plugin adds some default metadata to enable ["Rich Snippet" support](https://developers.google.com/structured-data/rich-snippets/articles). You can modify this using the `amp_post_template_metadata` filter. The following changes the type annotation to `NewsArticle` (from the default `BlogPosting`) and overrides the default Publisher Logo.
 
-```
+```php
 add_filter( 'amp_post_template_metadata', 'xyz_amp_modify_json_metadata', 10, 2 );
 
 function xyz_amp_modify_json_metadata( $metadata, $post ) {
@@ -307,13 +307,13 @@ Note: there are some requirements for a custom template:
 
 * You must trigger the `amp_post_template_head` action in the `<head>` section:
 
-```
+```php
 do_action( 'amp_post_template_head', $this );
 ```
 
 * You must trigger the `amp_post_template_footer` action right before the `</body>` tag:
 
-```
+```php
 do_action( 'amp_post_template_footer', $this );
 ```
 
@@ -548,12 +548,46 @@ to remove it from the callback chain if you don't want it to, e.g.
 **Note that if you previously added a custom dimension extraction callback to the *amp_extract_image_dimensions* filter,
 you need to update it to hook into the *amp_extract_image_dimensions_batch* filter instead and iterate over the key value
 pairs in the single argument as per the example above.**
+
 ## Analytics
 
+There are two options you can follow to include analytics tags in your posts.
 
-To output proper analytics tags, you can use the `amp_post_template_analytics` filter:
+### Plugin Analytics Options
 
-```
+The plugin defines an analytics option to enable the addition of
+[amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) in your posts. When the plugin is
+ active, an AMP top-level menu appears in the Dashboard with one inner sub-menu called 'Analytics':
+
+ ![AMP Options Menu](https://github.com/Automattic/amp-wp/blob/amedina/amp-analytics-customizer/readme-assets/amp-options-analytics.png)
+
+ Selecting the `Analytics` sub-menu in the AMP options menu takes us to an Analytics Options entry page, where we can
+  define the analytics tags we want to have, by specifying the vendor type (e.g. Parsely), and the associated  JSON 
+  configuration.
+
+ ![AMP Options Menu](https://github.com/Automattic/amp-wp/blob/amedina/amp-analytics-customizer/readme-assets/analytics-option-entries.png)
+
+Notice that the goal of this option of the plugin is to provide a simple mechanism to insert analytics tags;
+ it provides very simple validation based solely on the validity of the JSON string provided. It is the users 
+ responsibility to make sure that the values in the configuration string and the vendor type used are coherent with 
+ the analytics requirements of their site . Please review the documentation in the [AMP project ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) and in [AMPByExample](https://ampbyexample.com/components/amp-analytics/).
+ 
+ The AMP Analytics options entry form provides a very simple validation feedback mechanism: if the JSON configuration 
+ string entered is invalid (i.e. not valid  JSON), an error message (in red) is displayed below the title of the 
+ options window and the entry form is reloaded:
+    
+![AMP Options Menu](https://github.com/Automattic/amp-wp/blob/amedina/amp-analytics-customizer/readme-assets/invalid-input.png)
+    
+And, if the configuration provided is actually a valid JSON string, a success message (in green) is displayed at the 
+top of the window below the title, and again the entry form is reloaded. 
+
+![AMP Options Menu](https://github.com/Automattic/amp-wp/blob/amedina/amp-analytics-customizer/readme-assets/options-saved.png)
+
+### Manually
+
+Alaternatively, you can use the `amp_post_template_analytics` filter:
+
+```php
 add_filter( 'amp_post_template_analytics', 'xyz_amp_add_custom_analytics' );
 function xyz_amp_add_custom_analytics( $analytics ) {
 	if ( ! is_array( $analytics ) ) {
@@ -615,7 +649,7 @@ You'll need to flush your rewrite rules after this.
 
 If you want a custom template for your post type:
 
-```
+```php
 add_filter( 'amp_post_template_file', 'xyz_amp_set_review_template', 10, 3 );
 
 function xyz_amp_set_review_template( $file, $type, $post ) {

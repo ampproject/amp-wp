@@ -452,9 +452,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	public function setUp() {
-		$this->allowed_tags = apply_filters( 'amp_allowed_tags', AMP_Allowed_Tags_Generated::get_allowed_tags() );
-		$this->globally_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
-		$this->layout_allowed_attributes = apply_filters( 'amp_globally_allowed_attributes', AMP_Allowed_Tags_Generated::get_allowed_attributes() );
+		$this->allowed_tags = AMP_Allowed_Tags_Generated::get_allowed_tags();
+		$this->globally_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
+		$this->layout_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
 	}
 
 	/**

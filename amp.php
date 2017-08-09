@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.4.2
+ * Version: 0.5
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -13,7 +13,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.4.2' );
+define( 'AMP__VERSION', '0.5' );
 
 require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
@@ -21,6 +21,7 @@ require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
+require_once ( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
 require_once ( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
 require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
 
@@ -120,6 +121,7 @@ function amp_add_frontend_actions() {
 function amp_add_post_template_actions() {
 	AMP_Paired_Post_Actions::register();
 	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
+	amp_post_template_init_hooks();
 }
 
 function amp_prepare_render() {
