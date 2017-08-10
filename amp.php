@@ -119,7 +119,7 @@ function amp_add_frontend_actions() {
 }
 
 function amp_add_post_template_actions() {
-	AMP_Paired_Post_Actions::register();
+	AMP_Paired_Post_Actions::register_hooks();
 	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
 	amp_post_template_init_hooks();
 }

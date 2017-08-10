@@ -4,7 +4,7 @@ require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-mode-actions.php'
 
 class AMP_Paired_Post_Actions extends AMP_Paired_Mode_Actions {
 	
-	public static function register() {
+	public static function register_hooks() {
 		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_title' );
 		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_canonical_link' );
 		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_scripts' );
@@ -15,19 +15,19 @@ class AMP_Paired_Post_Actions extends AMP_Paired_Mode_Actions {
 		add_action( 'amp_post_template_data', 'AMP_Paired_Post_Actions::add_analytics_scripts' );
 		add_action( 'amp_post_template_footer', 'AMP_Paired_Post_Actions::add_analytics_data' );
 	}
-	
+ 
 	public static function add_title( $amp_template ) {
 		?>
 		<title><?php echo esc_html( $amp_template->get( 'document_title' ) ); ?></title>
 		<?php
 	}
-	
+
 	public static function add_canonical_link( $amp_template ) {
 		?>
 		<link rel="canonical" href="<?php echo esc_url( $amp_template->get( 'canonical_url' ) ); ?>" />
 		<?php
 	}
-	
+
 	public static function add_scripts( $amp_template ) {
 		$scripts = $amp_template->get( 'amp_component_scripts', array() );
 		foreach ( $scripts as $element => $script ) :
@@ -37,20 +37,20 @@ class AMP_Paired_Post_Actions extends AMP_Paired_Mode_Actions {
 		<script src="<?php echo esc_url( $amp_template->get( 'amp_runtime_script' ) ); ?>" async></script>
 		<?php
 	}
-	
+
 	public static function add_fonts( $amp_template ) {
 		$font_urls = $amp_template->get( 'font_urls', array() );
 		foreach ( $font_urls as $slug => $url ) : ?>
 			<link rel="stylesheet" href="<?php echo esc_url( $url ); ?>">
 		<?php endforeach;
 	}
-	
+
 	public static function add_boilerplate_css( $amp_template ) {
 		?>
 		<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 		<?php
 	}
-	
+
 	public static function add_schemaorg_metadata( $amp_template ) {
 		$metadata = $amp_template->get( 'metadata' );
 		if ( empty( $metadata ) ) {
@@ -60,7 +60,7 @@ class AMP_Paired_Post_Actions extends AMP_Paired_Mode_Actions {
 		<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
 		<?php
 	}
-	
+
 	public static function add_styles( $amp_template ) {
 		$styles = $amp_template->get( 'post_amp_styles' );
 		if ( ! empty( $styles ) ) {
