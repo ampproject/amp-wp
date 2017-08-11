@@ -21,7 +21,6 @@ require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
-require_once ( AMP__DIR__ . '/includes/amp-post-template-actions.php' );
 require_once ( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
 require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
 
@@ -121,7 +120,6 @@ function amp_add_frontend_actions() {
 function amp_add_post_template_actions() {
 	AMP_Paired_Post_Actions::register_hooks();
 	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
-	amp_post_template_init_hooks();
 }
 
 function amp_prepare_render() {
