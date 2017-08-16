@@ -145,9 +145,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<template type="amp-mustache">Template Data</template>',
 			),
 
-			'attribute_value_valid' => array(
+			'attribute_value_invalid' => array(
+				// type is mandatory, so the node is removed
 				'<template type="bad-type">Template Data</template>',
-				'<template>Template Data</template>',
+				'',
 			),
 
 			'attribute_amp_accordion_value' => array(
@@ -206,18 +207,37 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'attribute_value_with_bad_value_regex_casei_removed' => array(
-				'<amp-dailymotion data-videoid="###"></amp-dailymotion>',
-				'<amp-dailymotion></amp-dailymotion>',
+				// data-ui-logo should be true|false
+				'<amp-dailymotion data-videoid="123" data-ui-logo="maybe"></amp-dailymotion>',
+				'<amp-dailymotion data-videoid="123"></amp-dailymotion>',
 			),
 
-			'atribute_bad_attr_with_no_value_removed' => array(
-				'<amp-ad bad-attr-no-value>something here</amp-alt>',
-				'<amp-ad>something here</amp-ad>'
+			'attribute_bad_attr_with_no_value_removed' => array(
+				'<amp-ad type="adsense" bad-attr-no-value>something here</amp-alt>',
+				'<amp-ad type="adsense">something here</amp-ad>'
 			),
 
-			'atribute_bad_attr_with_value_removed' => array(
-				'<amp-ad bad-attr="some-value">something here</amp-alt>',
-				'<amp-ad>something here</amp-ad>'
+			'attribute_bad_attr_with_value_removed' => array(
+				'<amp-ad type="adsense" bad-attr="some-value">something here</amp-alt>',
+				'<amp-ad type="adsense">something here</amp-ad>'
+			),
+
+			'remove_node_with_missing_mandatory_attribute' => array(
+				// script needs "type"
+				'<script></script>',
+				'',
+			),
+
+			'remove_node_with_invalid_mandatory_attribute' => array(
+				// script only allows application/json, nothing else
+				'<script type="type/javascript">console.log()</script>',
+				'',
+			),
+
+			'allow_node_with_valid_mandatory_attribute' => array(
+				// script only allows application/json
+				'<script type="application/json">{}</script>',
+				'',
 			),
 
 			'nodes_with_non_whitelisted_tags_replaced_by_children' => array(
@@ -241,8 +261,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'leave_attribute_on_node_with_present_mandatory_parent' => array(
-				'<form><div submit-success>This is a test.</div></form>',
-				'<form><div submit-success="">This is a test.</div></form>',
+				'<form action="form.php" target="_top"><div submit-success>This is a test.</div></form>',
+				'<form action="form.php" target="_top"><div submit-success="">This is a test.</div></form>',
 			),
 
 			'disallowed_empty_attr_removed' => array(
@@ -266,15 +286,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-img_with_good_protocols' => array(
-				'<amp-img srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
-				'<amp-img srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
+				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
+				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
 			),
 
 			'amp-img_with_bad_protocols' => array(
 				'<amp-img srcset="https://somewhere.com/resource1, evil://somewhereelse.com/resource2"></amp-img>',
-				'<amp-img></amp-img>',
+				'',
 			),
-
 
 			// Test Cases from test-amp-blacklist-sanitizer.php
 
