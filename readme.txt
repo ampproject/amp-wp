@@ -1,5 +1,5 @@
 === AMP ===
-Contributors: batmoo, joen, automattic, potatomaster
+Contributors: batmoo, joen, automattic, potatomaster, albertomedina
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.8
