@@ -21,7 +21,7 @@ require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
-require_once ( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
+require_once( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
 require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
 
 register_activation_hook( __FILE__, 'amp_activate' );

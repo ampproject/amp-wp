@@ -1,8 +1,8 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-mode-actions.php' );
+require_once( AMP__DIR__ . '/includes/actions/class-amp-actions.php' );
 
-class AMP_Paired_Post_Actions extends AMP_Paired_Mode_Actions {
+class AMP_Paired_Post_Actions extends AMP_Actions {
 	
 	public static function register_hooks() {
 		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_title' );
