@@ -7,6 +7,39 @@ define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/no
 define( 'IMG_350', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/350x150.png' );
 define( 'IMG_1024', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/1024x768.png' );
 
+class AMP_Image_Dimension_Extractor__Extract__Test extends
+WP_UnitTestCase {
+	public function setUp() {
+		parent::setUp();
+
+		// We don't want to actually download the images; just testing the extract method
+		add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', array( $this, 'disable_downloads' ) );
+	}
+
+	public function disable_downloads() {
+		remove_all_filters( 'amp_extract_image_dimensions_batch' );
+	}
+
+	public function test__should_return_original_urls() {
+		$source_urls = array(
+			'https://example.com',
+			'//example.com/no-protocol',
+			'/absolute-url/no-host',
+			'data:image/gif;base64,R0lGODl...', // can't normalize
+		);
+		$expected = array(
+			'https://example.com' => false,
+			'//example.com/no-protocol' => false,
+			'/absolute-url/no-host' => false,
+			'data:image/gif;base64,R0lGODl...' => false,
+		);
+
+		$actual = AMP_Image_Dimension_Extractor::extract( $source_urls );
+
+		$this->assertEquals( $expected, $actual );
+	}
+}
+
 class AMP_Image_Dimension_Extractor__Normalize_URL__Test extends WP_UnitTestCase {
 	function get_data() {
 		$site_url = site_url();
