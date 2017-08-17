@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.8
-Stable tag: 0.5
+Stable tag: 0.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,11 @@ The best place to start is to open a new discussion in the [support forum](https
 A wise green Yoda once said, "Patience you must have, my young padawan." We're working on it :)
 
 == Changelog ==
+
+= 0.5.1 (2017-08-17) =
+
+- Fix: issues with invalid tags not being stripped out (e.g. script tags) (h/t tmmbecker, fahmi182, pppdog, seejacobscott, RavanH, jenniejj, lkraav, simonrperry for the reports).
+- Fix: issues with dimension extraction for protocol-less and relative URLs (h/t ktmn for the report).
 
 = 0.5 (2017-08-04) =
 
