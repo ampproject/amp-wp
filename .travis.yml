@@ -9,6 +9,10 @@ php:
 env:
     - WP_VERSION=latest
 
+# Newer versions like trusty don't have PHP 5.2 or 5.3
+# https://blog.travis-ci.com/2017-07-11-trusty-as-default-linux-is-coming
+dist: precise
+
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
 # so it doesn't need to be re-defined below.
