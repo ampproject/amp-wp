@@ -22,6 +22,24 @@ class AMP_Content {
 		$this->transform();
 	}
 
+	// Magic __get() method to provide backward compatibility
+	// for deprecated class data members
+	public function __get( $property ) {
+		switch ( $property ) {
+			case 'post_amp_styles':
+				_doing_it_wrong( __METHOD__, 'The `post_amp_styles` key has been deprecated; use `amp_styles` instead.', '0.6' );
+				return $this->get( 'amp_styles' );
+			case 'amp_styles':
+				return $this->amp_styles;
+			case 'amp_content':
+				return $this->amp_content;
+			case 'amp_scripts':
+				return $this->amp_scripts;
+		}
+
+		return null;
+	}
+
 	public function get_amp_content() {
 		return $this->amp_content;
 	}

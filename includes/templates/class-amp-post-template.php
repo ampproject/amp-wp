@@ -164,12 +164,11 @@ class AMP_Post_Template extends AMP_Template {
 			)
 		);
 
-		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
-		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
+		$this->add_data_by_key( 'post_amp_content', $amp_content->get( 'amp_content' ) );
+		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get( 'amp_scripts' ) );
 		// Keeping both style arrays for backward compatibility
 		// post_amp_styles will be deprecated in the future
-		$this->merge_data_for_key( 'amp_styles', $amp_content->get_amp_styles() );
-		$this->merge_data_for_key( 'post_amp_styles', $amp_content->get_amp_styles() );
+		$this->merge_data_for_key( 'amp_styles', $amp_content->get( 'amp_styles' ) );
 	}
 
 	private function build_post_featured_image() {
