@@ -1,18 +1,18 @@
 <?php
 
-require_once ( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
-require_once ( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-require_once ( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php' );
 require_once( AMP__DIR__ . '/includes/utils/class-amp-wp-utils.php' );
 
-require_once ( AMP__DIR__ . '/includes/class-amp-content.php' );
+require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
 
 // Require AMP filters
 require_once( AMP__DIR__ . '/includes/sanitizers/require-sanitizers.php' );
 // Require embed classes
-require_once ( AMP__DIR__ . '/includes/embeds/require-embeds.php' );
+require_once( AMP__DIR__ . '/includes/embeds/require-embeds.php' );
 // Require base AMP template class
-require_once ( AMP__DIR__ . '/includes/templates/class-amp-template.php' );
+require_once( AMP__DIR__ . '/includes/templates/class-amp-template.php' );
 
 class AMP_Post_Template extends AMP_Template {
 
@@ -164,11 +164,11 @@ class AMP_Post_Template extends AMP_Template {
 			)
 		);
 
-		$this->add_data_by_key( 'post_amp_content', $amp_content->get( 'amp_content' ) );
-		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get( 'amp_scripts' ) );
+		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
+		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
 		// Keeping both style arrays for backward compatibility
 		// post_amp_styles will be deprecated in the future
-		$this->merge_data_for_key( 'amp_styles', $amp_content->get( 'amp_styles' ) );
+		$this->merge_data_for_key( 'amp_styles', $amp_content->get_amp_styles() );
 	}
 
 	private function build_post_featured_image() {

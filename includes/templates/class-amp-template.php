@@ -59,12 +59,25 @@ class AMP_Template {
 	}
 
 	public function get( $property, $default = null ) {
+		switch ( $property ) {
+			// Handle access to deprecated 'post_amp_styles' key
+			case 'post_amp_styles':
+				_doing_it_wrong( __METHOD__, 'The `post_amp_styles` key has been deprecated; use `amp_styles` instead.', '0.6' );
+				return $this->get( 'amp_styles' );
+			case 'amp_styles':
+				if ( isset( $this->data['post_amp_styles'] ) ) {
+					$this->merge_data_for_key ( 'amp_styles', $this->data['post_amp_styles'] );
+					unset( $this->data['post_amp_styles'] );
+				}
+				break;
+		}
+
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
 		} else {
 			_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Called for non-existant key ("%s").', 'amp' ), esc_html( $property ) ), '0.1' );
 		}
-		
+
 		return $default;
 	}
 

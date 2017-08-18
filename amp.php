@@ -111,7 +111,7 @@ function amp_maybe_add_actions() {
 }
 
 function amp_load_classes() {
-	require_once ( AMP__DIR__ . '/includes/templates/class-amp-post-template.php' ); // this loads everything else
+	require_once( AMP__DIR__ . '/includes/templates/class-amp-post-template.php' ); // this loads everything else
 }
 
 function amp_add_frontend_actions() {
@@ -120,7 +120,7 @@ function amp_add_frontend_actions() {
 
 function amp_add_post_template_actions() {
 	AMP_Paired_Post_Actions::register_hooks();
-	require_once ( AMP__DIR__ . '/includes/templates/amp-post-template-functions.php' );
+	require_once( AMP__DIR__ . '/includes/templates/amp-post-template-functions.php' );
 }
 
 function amp_prepare_render() {
