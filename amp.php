@@ -16,7 +16,7 @@ define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '0.5.1' );
 
 require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
-require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
+require_once( AMP__DIR__ . '/includes/utils/class-amp-wp-utils.php' );
 require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
@@ -84,17 +84,17 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	$is_amp_endpoint = is_amp_endpoint();
+	$is_amp_endpoint = AMP_WP_Utils::is_amp_endpoint();
 
 	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
 	global $wp_query;
 	$post = $wp_query->post;
 
-	$supports = post_supports_amp( $post );
+	$supports = AMP_WP_Utils::post_supports_amp( $post );
 
 	if ( ! $supports ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ) );
+			wp_safe_redirect( AMP_WP_Utils::get_permalink( $post->ID ) );
 			exit;
 		}
 		return;
