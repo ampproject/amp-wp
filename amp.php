@@ -145,7 +145,7 @@ function amp_render_post( $post_id ) {
 
 	amp_add_post_template_actions();
 	$template = new AMP_Post_Template( $post_id );
-	$template->load_post_template();
+	$template->load();
 }
 
 /**

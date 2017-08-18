@@ -52,8 +52,8 @@ class AMP_Post_Template extends AMP_Template {
 		return null;
 	}
 
-	public function load_post_template() {
-		$this->load( 'single' );
+	public function load( $template = 'single' ) {
+		parent::load( $template );
 	}
 
 	private function build_post_data() {
