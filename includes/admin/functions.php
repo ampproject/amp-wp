@@ -9,11 +9,17 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 /**
  * Sets up the AMP template editor for the Customizer.
  */
-function amp_init_customizer() {
-	require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
+function amp_maybe_init_customizer() {
+	/**
+	 * Filter whether to enable the AMP template customizer functionality.
+	 *
+	 * @param bool $enable Whether to enable the AMP customizer. Default true.
+	 */
+	$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
 
-	// Drop core panels (menus, widgets) from the AMP customizer
-	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
+	if ( true !== $amp_customizer_enabled ) {
+		return;
+	}
 
 	// Fire up the AMP Customizer
 	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );

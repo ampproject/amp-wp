@@ -18,6 +18,7 @@ define( 'AMP__VERSION', '0.5.1' );
 require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
 require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
 require_once( AMP__DIR__ . '/includes/admin/functions.php' );
+require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
 
@@ -152,24 +153,16 @@ function amp_render_post( $post_id ) {
  * preview page isn't flagged as an AMP template, the core panels will be re-added and the AMP panel
  * hidden.
  *
- * @internal This callback must be hooked before priority 10 on 'plugins_loaded' to properly unhook
- *           the core panels.
- *
  * @since 0.4
  */
 function _amp_bootstrap_customizer() {
-	/**
-	 * Filter whether to enable the AMP template customizer functionality.
-	 *
-	 * @param bool $enable Whether to enable the AMP customizer. Default true.
-	 */
-	$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
+	// Drop core panels (menus, widgets) from the AMP customizer
+	// `customize_loaded_components` runs super early so we need to call this regardless of whether the AMP customizer is enabled or not
+	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
 
-	if ( true === $amp_customizer_enabled ) {
-		amp_init_customizer();
-	}
+	add_action( 'after_setup_theme', 'amp_maybe_init_customizer' );
 }
-add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 );
+add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
 
 /**
  * Redirects the old AMP URL to the new AMP URL.
