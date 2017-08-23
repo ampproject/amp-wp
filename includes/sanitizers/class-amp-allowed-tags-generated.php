@@ -6183,6 +6183,8 @@ class AMP_Allowed_Tags_Generated {
 					'value' => '',
 		),
 		'role' => array(),
+		'submit-error' => array(),
+		'submit-success' => array(),
 		'tabindex' => array(),
 		'title' => array(),
 		'translate' => array(),
