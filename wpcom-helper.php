@@ -4,7 +4,7 @@
 add_action( 'pre_amp_render_post', 'jetpack_amp_disable_the_content_filters' );
 
 // Disable admin menu
-remove_action( 'amp_options_menu_is_enabled', '__return_false' );
+add_filter( 'amp_options_menu_is_enabled', '__return_false', 9999 );
 
 function jetpack_amp_disable_the_content_filters( $post_id ) {
 	// Shortcode overrides.
