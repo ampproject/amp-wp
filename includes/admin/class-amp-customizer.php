@@ -118,7 +118,7 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Registers settings for customizing AMP templates.
+	 * Registers settings for customizing AMP theme-templates.
 	 *
 	 * @since 0.4
 	 * @access public
