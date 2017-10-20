@@ -57,6 +57,16 @@ class AMP_Allowed_Tags_Generated {
 					'type' => array(
 						'value_casei' => 'text/html',
 					),
+					'verify-xhr' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
+						'disallowed_domain' => array(
+							'cdn.ampproject.org',
+						),
+					),
 				),
 				'tag_spec' => array(
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec.html#links',
@@ -2617,6 +2627,16 @@ class AMP_Allowed_Tags_Generated {
 					'target' => array(
 						'mandatory' => true,
 						'value_regex_casei' => '(_blank|_top)',
+					),
+					'verify-xhr' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
+						'disallowed_domain' => array(
+							'cdn.ampproject.org',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -6188,7 +6208,7 @@ class AMP_Allowed_Tags_Generated {
 		'translate' => array(),
 		'validation-for' => array(),
 		'visible-when-invalid' => array(
-					'value_regex' => '(badinput|customerror|patternmismatch|rangeoverflow|rangeunderflow|stepmismatch|toolong|typemismatch|valuemissing)',
+					'value_regex' => '(badInput|customError|patternMismatch|rangeOverflow|rangeUnderflow|stepMismatch|tooLong|typeMismatch|valueMissing)',
 		),
 
 	);
