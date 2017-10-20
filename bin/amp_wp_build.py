@@ -4,6 +4,12 @@ file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
 
 Follow the steps below to generate a new version of the allowed tags class:
 
+- Install the `protoc` bin for your system and the python `protobuf` library:
+
+    https://github.com/google/protobuf/releases
+
+    Installation instructions are available in the downloaded libs.
+
 - Download a copy of the latet AMPHTML repository from github:
 	
 	git clone git@github.com:ampproject/amphtml.git
@@ -66,8 +72,7 @@ def GenValidatorPb2Py(out_dir):
 	logging.info('entering ...')
 	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
-	subprocess.check_call(['protoc', 'validator.proto',
-												 '--python_out=%s' % out_dir])
+	subprocess.check_call(['protoc', 'validator.proto', '--python_out=%s' % out_dir])
 	open('%s/__init__.py' % out_dir, 'w').close()
 	logging.info('... done')
 
@@ -428,19 +433,19 @@ def GetTagRules(tag_spec):
 
 	tag_rules = {}
 
-	if tag_spec.also_requires_tag:
+	if hasattr(tag_spec, 'also_requires_tag'):
 		also_requires_tag_list = []
 		for also_requires_tag in tag_spec.also_requires_tag:
 			also_requires_tag_list.append(UnicodeEscape(also_requires_tag))
 		tag_rules['also_requires_tag'] = {'also_requires_tag': also_requires_tag_list}
 
-	if tag_spec.disallowed_ancestor:
+	if hasattr(tag_spec, 'disallowed_ancestor'):
 		disallowed_ancestor_list = []
 		for disallowed_ancestor in tag_spec.disallowed_ancestor:
 			disallowed_ancestor_list.append(UnicodeEscape(disallowed_ancestor))
 		tag_rules['disallowed_ancestor'] = {'disallowed_ancestor': disallowed_ancestor_list}
 
-	if tag_spec.html_format:
+	if hasattr(tag_spec, 'html_format'):
 		html_format_list = []
 		for html_format in tag_spec.html_format:
 			if 1 == html_format:
