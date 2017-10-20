@@ -92,7 +92,7 @@ class AMP_Content {
 }
 
 class AMP_Content_Sanitizer {
-	public static function sanitize( $content, $sanitizer_classes, $global_args = array() ) {
+	public static function sanitize( $content, array $sanitizer_classes, $global_args = array() ) {
 		$scripts = array();
 		$styles = array();
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
