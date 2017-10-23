@@ -124,9 +124,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	private function build_placeholder( $parent_attributes ) {
-		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'div', array(
+		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-img', array(
 			'placeholder' => '',
+			'layout' => 'fill',
 			'class' => 'amp-wp-iframe-placeholder',
+			'src' => get_stylesheet_directory_uri() . '/images/amp-iframe-placeholder.png'
 		) );
 
 		return $placeholder_node;

@@ -155,7 +155,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	public function test__args__placeholder() {
 		$source = '<iframe src="https://example.com/video/132886713" width="500" height="281"></iframe>';
-		$expected = '<amp-iframe src="https://example.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"><div placeholder="" class="amp-wp-iframe-placeholder"></div></amp-iframe>';
+		$expected = '<amp-iframe src="https://example.com/video/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" sizes="(min-width: 500px) 500px, 100vw" class="amp-wp-enforced-sizes"><amp-img placeholder="" layout="fill" class="amp-wp-iframe-placeholder" src="http://example.org/wp-content/themes/twentyseventeen/images/amp-iframe-placeholder.png"></amp-img></amp-iframe>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom, array(
