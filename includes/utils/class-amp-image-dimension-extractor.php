@@ -12,6 +12,12 @@ class AMP_Image_Dimension_Extractor {
 
 		$return_dimensions = array();
 
+		// Back-compat for users calling this method directly
+		$is_single = is_string( $urls );
+		if ( $is_single ) {
+			$urls = array( $urls );
+		}
+
 		// Normalize URLs and also track a map of normalized-to-original as we'll need it to reformat things when returning the data.
 		$url_map = array();
 		$normalized_urls = array();
@@ -22,6 +28,7 @@ class AMP_Image_Dimension_Extractor {
 				$normalized_urls[] = $normalized_url;
 			} else {
 				// This is not a URL we can extract dimensions from, so default to false.
+				$url_map[ $original_url ] = $original_url;
 				$return_dimensions[ $original_url ] = false;
 			}
 		}
@@ -33,6 +40,11 @@ class AMP_Image_Dimension_Extractor {
 		foreach ( $extracted_dimensions as $normalized_url => $dimension ) {
 			$original_url = $url_map[ $normalized_url ];
 			$return_dimensions[ $original_url ] = $dimension;
+		}
+
+		// Back-compat: just return the dimensions, not the full mapped array
+		if ( $is_single ) {
+			return current( $return_dimensions );
 		}
 
 		return $return_dimensions;
