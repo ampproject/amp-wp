@@ -13,10 +13,10 @@ class WPCOM_AMP_Polldaddy_Embed extends AMP_Base_Embed_Handler {
 		$url = 'https://polldaddy.com/';
 		if ( ! empty( $attr['poll'] ) ) {
 			$url .= 'poll/' . $attr['poll'] . '/';
-			$name = ! empty( $attr['title'] ) ? $attr['title'] : __( 'View Poll' );
+			$name = ! empty( $attr['title'] ) ? $attr['title'] : __( 'View Poll', 'amp' );
 		} elseif ( ! empty( $attr['survey'] ) ) { // Surveys and Quizzes both use attr survey
 			$url .= 's/' . $attr['survey'] . '/';
-			$name = ! empty( $attr['title'] ) ? $attr['title'] : __( 'View Survey' );
+			$name = ! empty( $attr['title'] ) ? $attr['title'] : __( 'View Survey', 'amp' );
 		} else {
 			return ''; // We can't embed anything useful for rating
 		}
