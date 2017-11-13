@@ -4,16 +4,23 @@ file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
 
 Follow the steps below to generate a new version of the allowed tags class:
 
+- Make sure you have Python 3 installed as well as protoc. If not, install on OSX via Homebrew:
+
+	brew install python3
+	brew install protobuf
+	pip3 install protobuf
+
 - Download a copy of the latet AMPHTML repository from github:
-	
+
 	git clone git@github.com:ampproject/amphtml.git
 
-- Copy this file into the repo's validator subdirectory:
+- Copy or hardlink Symlink this file into the repo's validator subdirectory:
 
-	cp amp_wp_build.py amphtml/validator
+	ln amp_wp_build.py amphtml/validator/
 
 - Run the file from the validator subdirectory:
-	cd amphtml/validator;python amp_wp_build.py
+
+	cd amphtml/validator; python3 amp_wp_build.py
 
 - The class-amp-allowed-tags-generated.php will be generated at:
 	amphtml/validator/amp_wp/class-amp-allowed-tags-generated.php
