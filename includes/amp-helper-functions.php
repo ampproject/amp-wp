@@ -11,10 +11,26 @@ function amp_get_permalink( $post_id ) {
 	if ( empty( $structure ) ) {
 		$amp_url = add_query_arg( AMP_QUERY_VAR, 1, get_permalink( $post_id ) );
 	} else {
-		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
+		$amp_url = amp_normalize_url_param( get_permalink( $post_id ) );
 	}
 
 	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
+}
+
+/**
+ * For normalizing urls with parameters
+ */
+function amp_normalize_url_param( $url ) {
+	if ( false === strpos( $url, '?' ) ) {
+		return trailingslashit( $url ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
+	}
+
+	$parts   = explode( '?', $url, 2 );
+	$amp_url = trailingslashit( $parts[0] ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
+
+	parse_str( $parts[1], $query_arg );
+
+	return add_query_arg( $query_arg, $amp_url );
 }
 
 function post_supports_amp( $post ) {
