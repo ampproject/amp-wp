@@ -3,6 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="generator" content="<?php echo esc_attr('AMP Plugin v' . AMP__VERSION);?>" />
 	<?php do_action( 'amp_post_template_head', $this ); ?>
 
 	<style amp-custom>
