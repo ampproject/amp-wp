@@ -9,4 +9,5 @@ abstract class AMP_Actions {
 	public static function add_analytics_scripts( $template ) {}
 	public static function add_analytics_data( $template ) {}
 	public static function add_canonical_link( $template ) {}
+	public static function add_generatedby_metadata( $template ) {}
 }
