@@ -15,17 +15,16 @@ define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '0.5.1' );
 
-require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
-require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-settings.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-settings-post-types.php' );
-
-require_once( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
-require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
+require_once AMP__DIR__ . '/back-compat/back-compat.php';
+require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
+require_once AMP__DIR__ . '/includes/admin/functions.php';
+require_once AMP__DIR__ . '/includes/admin/class-amp-customizer.php';
+require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php';
+require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php';
+require_once AMP__DIR__ . '/includes/settings/class-amp-settings.php';
+require_once AMP__DIR__ . '/includes/settings/class-amp-settings-post-types.php';
+require_once AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php';
+require_once AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {

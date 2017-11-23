@@ -81,7 +81,7 @@ class AMP_Settings_Post_Types {
 
 		if ( false !== $post_type ) {
 			// Always return true if the post type is always on.
-			if ( true == $this->is_always_on( $post_type ) ) {
+			if ( true === $this->is_always_on( $post_type ) ) {
 				return true;
 			}
 
@@ -108,7 +108,7 @@ class AMP_Settings_Post_Types {
 		$core = get_post_types( array(
 			'name' => 'post',
 		), 'objects' );
-		$cpt = get_post_types( array(
+		$cpt  = get_post_types( array(
 			'public'   => true,
 			'_builtin' => false,
 		), 'objects' );

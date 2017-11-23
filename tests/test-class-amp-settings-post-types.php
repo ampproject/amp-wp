@@ -46,10 +46,10 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	public function test_register_settings() {
 		global $wp_settings_sections, $wp_settings_fields;
 
-		$menu_slug = AMP_Settings::MENU_SLUG;
+		$menu_slug    = AMP_Settings::MENU_SLUG;
 		$option_group = AMP_Settings::SETTINGS_KEY;
-		$section_id = 'post_types';
-		$setting_id = 'post_types_support';
+		$section_id   = 'post_types';
+		$setting_id   = 'post_types_support';
 
 		$this->instance->register_settings();
 		$this->assertArrayHasKey( $menu_slug, $wp_settings_sections );
