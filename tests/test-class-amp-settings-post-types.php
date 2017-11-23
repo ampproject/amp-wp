@@ -80,8 +80,6 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	 * @see AMP_Settings_Post_Types::get_settings_value()
 	 */
 	public function test_get_settings_value() {
-		$this->assertEmpty( $this->instance->get_settings_value() );
-		$this->assertInternalType( 'array', $this->instance->get_settings_value() );
 		$this->assertFalse( $this->instance->get_settings_value( 'foo' ) );
 
 		update_option( AMP_Settings::SETTINGS_KEY, array(
@@ -90,8 +88,6 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 			),
 		) );
 
-		$this->assertContains( 'post', $this->instance->get_settings_value() );
-		$this->assertInternalType( 'array', $this->instance->get_settings_value() );
 		$this->assertTrue( $this->instance->get_settings_value( 'post' ) );
 
 		// Cleanup.
@@ -115,15 +111,6 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	 */
 	public function test_get_setting_name() {
 		$this->assertEquals( AMP_Settings::SETTINGS_KEY . '[post_types_support][post]', $this->instance->get_setting_name( 'post' ) );
-	}
-
-	/**
-	 * Test is_always_on.
-	 *
-	 * @see AMP_Settings_Post_Types::is_always_on()
-	 */
-	public function test_is_always_on() {
-		$this->assertTrue( $this->instance->is_always_on( 'post' ) );
 	}
 
 	/**

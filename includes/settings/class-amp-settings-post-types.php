@@ -25,13 +25,6 @@ class AMP_Settings_Post_Types {
 	protected $setting = array();
 
 	/**
-	 * List of post types which are always AMPlified.
-	 *
-	 * @var array
-	 */
-	protected $always_on = array( 'post' );
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -73,32 +66,17 @@ class AMP_Settings_Post_Types {
 	/**
 	 * Getter for settings value.
 	 *
-	 * The value(s) return are not sanitized.
-	 *
 	 * @param string $post_type The post type name.
-	 * @return bool|array Return true if the post type is always on; the setting value otherwise.
+	 * @return bool Return the setting value.
 	 */
-	public function get_settings_value( $post_type = false ) {
+	public function get_settings_value( $post_type ) {
 		$settings = get_option( AMP_Settings::SETTINGS_KEY, array() );
 
-		if ( false !== $post_type ) {
-			// Always return true if the post type is always on.
-			if ( true === $this->is_always_on( $post_type ) ) {
-				return true;
-			}
-
-			if ( isset( $settings[ $this->setting['id'] ][ $post_type ] ) ) {
-				return $settings[ $this->setting['id'] ][ $post_type ];
-			}
-
-			return false;
+		if ( isset( $settings[ $this->setting['id'] ][ $post_type ] ) ) {
+			return (bool) $settings[ $this->setting['id'] ][ $post_type ];
 		}
 
-		if ( empty( $settings[ $this->setting['id'] ] ) || ! is_array( $settings[ $this->setting['id'] ] ) ) {
-			return array();
-		}
-
-		return $settings[ $this->setting['id'] ];
+		return false;
 	}
 
 	/**
@@ -128,16 +106,6 @@ class AMP_Settings_Post_Types {
 		$id = $this->setting['id'];
 
 		return AMP_Settings::SETTINGS_KEY . "[{$id}][{$post_type}]";
-	}
-
-	/**
-	 * Check if a post type is always on.
-	 *
-	 * @param string $post_type The post type name.
-	 * @return bool True if the post type is always on; false otherwise.
-	 */
-	public function is_always_on( $post_type ) {
-		return in_array( $post_type, $this->always_on, true );
 	}
 
 	/**
