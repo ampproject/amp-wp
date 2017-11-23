@@ -21,6 +21,8 @@ require_once( AMP__DIR__ . '/includes/admin/functions.php' );
 require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
 require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
+require_once( AMP__DIR__ . '/includes/settings/class-amp-settings.php' );
+require_once( AMP__DIR__ . '/includes/settings/class-amp-settings-post-types.php' );
 
 require_once( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
 require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
@@ -61,6 +63,15 @@ function amp_init() {
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 	add_post_type_support( 'post', AMP_QUERY_VAR );
+
+	// Listen to post types settings.
+	$post_types_supported = AMP_Settings_Post_Types::get_instance()->get_settings_value();
+
+	foreach ( $post_types_supported as $post_type_name => $enabled ) {
+		if ( true === $enabled ) {
+			add_post_type_support( $post_type_name, AMP_QUERY_VAR );
+		}
+	}
 
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );

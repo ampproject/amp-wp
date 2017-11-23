@@ -80,17 +80,27 @@ function amp_add_customizer_link() {
 }
 
 /**
- * Registers a top-level menu for AMP configuration options
+ * Registers AMP settings.
  */
 function amp_add_options_menu() {
 	if ( ! is_admin() ) {
 		return;
 	}
 
-	$show_options_menu = apply_filters( 'amp_options_menu_is_enabled', true );
-	if ( true !== $show_options_menu ) {
+	/**
+	 * Filter whether to enable the AMP settings.
+	 *
+	 * @param bool $enable Whether to enable the AMP settings. Default true.
+	 */
+	$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
+
+	if ( true !== $short_circuit ) {
 		return;
 	}
+
+	// Initialize settings.
+	AMP_Settings::get_instance()->init();
+	AMP_Settings_Post_Types::get_instance()->init();
 
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
