@@ -67,7 +67,7 @@ function amp_init() {
 	$post_types_supported = AMP_Settings_Post_Types::get_instance()->get_settings_value();
 
 	foreach ( $post_types_supported as $post_type_name => $enabled ) {
-		if ( true === $enabled ) {
+		if ( true === (bool) $enabled ) {
 			add_post_type_support( $post_type_name, AMP_QUERY_VAR );
 		}
 	}

@@ -73,6 +73,8 @@ class AMP_Settings_Post_Types {
 	/**
 	 * Getter for settings value.
 	 *
+	 * The value(s) return are not sanitized.
+	 *
 	 * @param string $post_type The post type name.
 	 * @return bool|array Return true if the post type is always on; the setting value otherwise.
 	 */
@@ -86,7 +88,7 @@ class AMP_Settings_Post_Types {
 			}
 
 			if ( isset( $settings[ $this->setting['id'] ][ $post_type ] ) ) {
-				return (bool) $settings[ $this->setting['id'] ][ $post_type ];
+				return $settings[ $this->setting['id'] ][ $post_type ];
 			}
 
 			return false;
@@ -96,7 +98,7 @@ class AMP_Settings_Post_Types {
 			return array();
 		}
 
-		return array_map( 'boolval', $settings[ $this->setting['id'] ] );
+		return $settings[ $this->setting['id'] ];
 	}
 
 	/**
