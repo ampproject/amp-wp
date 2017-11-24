@@ -90,6 +90,7 @@ function amp_add_options_menu() {
 	/**
 	 * Filter whether to enable the AMP settings.
 	 *
+	 * @since 0.5
 	 * @param bool $enable Whether to enable the AMP settings. Default true.
 	 */
 	$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );

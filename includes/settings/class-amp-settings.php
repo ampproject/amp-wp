@@ -3,10 +3,13 @@
  * AMP Settings.
  *
  * @package AMP
+ * @since 0.6
  */
 
 /**
  * Settings class.
+ *
+ * @since 0.6
  */
 class AMP_Settings {
 
@@ -14,6 +17,7 @@ class AMP_Settings {
 	 * Menu slug.
 	 *
 	 * @const string
+	 * @since 0.6
 	 */
 	const MENU_SLUG = 'amp_settings';
 
@@ -21,11 +25,14 @@ class AMP_Settings {
 	 * Settings key.
 	 *
 	 * @const string
+	 * @since 0.6
 	 */
 	const SETTINGS_KEY = 'amp';
 
 	/**
 	 * Initialize.
+	 *
+	 * @since 0.6
 	 */
 	public function init() {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -33,6 +40,8 @@ class AMP_Settings {
 
 	/**
 	 * Add admin menu.
+	 *
+	 * @since 0.6
 	 */
 	public function admin_menu() {
 		add_menu_page(
@@ -56,6 +65,7 @@ class AMP_Settings {
 	/**
 	 * Display Settings.
 	 *
+	 * @since 0.6
 	 * @return void Void on user capabilities check failure.
 	 */
 	public function render_screen() {
@@ -75,6 +85,7 @@ class AMP_Settings {
 	/**
 	 * Getter for the AMP svg menu icon.
 	 *
+	 * @since 0.6
 	 * @return object The AMP svg menu icon.
 	 */
 	public function get_svg_icon() {
@@ -84,12 +95,13 @@ class AMP_Settings {
 	/**
 	 * Get the instance of AMP_Settings.
 	 *
+	 * @since 0.6
 	 * @return object $instance AMP_Settings instance.
 	 */
 	public static function get_instance() {
 		static $instance;
 
-		if ( ! $instance instanceof AMP_Settings ) {
+		if ( ! ( $instance instanceof AMP_Settings ) ) {
 			$instance = new AMP_Settings();
 		}
 

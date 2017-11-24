@@ -3,16 +3,20 @@
  * Post types settings.
  *
  * @package AMP
+ * @since 0.6
  */
 
 /**
  * Settings post types class.
+ *
+ * @since 0.6
  */
 class AMP_Settings_Post_Types {
 
 	/**
 	 * Settings section id.
 	 *
+	 * @since 0.6
 	 * @var string
 	 */
 	protected $section_id = 'post_types';
@@ -20,6 +24,7 @@ class AMP_Settings_Post_Types {
 	/**
 	 * Settings config.
 	 *
+	 * @since 0.6
 	 * @var array
 	 */
 	protected $setting = array();
@@ -71,6 +76,7 @@ class AMP_Settings_Post_Types {
 	/**
 	 * Getter for settings value.
 	 *
+	 * @since 0.6
 	 * @param string $post_type The post type name.
 	 * @return bool|array Return true if the post type is always on; the setting value otherwise.
 	 */
@@ -95,6 +101,7 @@ class AMP_Settings_Post_Types {
 	/**
 	 * Getter for the supported post types.
 	 *
+	 * @since 0.6
 	 * @return object Supported post types list.
 	 */
 	public function get_supported_post_types() {
@@ -106,12 +113,13 @@ class AMP_Settings_Post_Types {
 			'_builtin' => false,
 		), 'objects' );
 
-		return $core + $cpt;
+		return array_merge( $core, $cpt );
 	}
 
 	/**
 	 * Getter for the setting HTML input name attribute.
 	 *
+	 * @since 0.6
 	 * @param string $post_type The post type name.
 	 * @return object The setting HTML input name attribute.
 	 */
@@ -126,6 +134,7 @@ class AMP_Settings_Post_Types {
 	 * Since we can't flag a post type which is not enabled by setting and removed by plugin/theme,
 	 * we can't disable the checkbox but the errors() takes care of this scenario.
 	 *
+	 * @since 0.6
 	 * @param string $post_type The post type name.
 	 * @return bool True if disabled; false otherwise.
 	 */
@@ -142,6 +151,8 @@ class AMP_Settings_Post_Types {
 
 	/**
 	 * Handle errors.
+	 *
+	 * @since 0.6
 	 */
 	public function errors() {
 		$settings = $this->get_settings();
@@ -167,6 +178,7 @@ class AMP_Settings_Post_Types {
 	/**
 	 * Validate and sanitize the settings.
 	 *
+	 * @since 0.6
 	 * @param array $settings The post types settings.
 	 * @return array The post types settings.
 	 */
@@ -184,6 +196,8 @@ class AMP_Settings_Post_Types {
 
 	/**
 	 * Setting renderer.
+	 *
+	 * @since 0.6
 	 */
 	public function render() {
 		require_once AMP__DIR__ . '/templates/admin/settings/fields/checkbox-post-types.php';
@@ -192,12 +206,13 @@ class AMP_Settings_Post_Types {
 	/**
 	 * Get the instance of AMP_Settings_Post_Types.
 	 *
+	 * @since 0.6
 	 * @return object $instance AMP_Settings_Post_Types instance.
 	 */
 	public static function get_instance() {
 		static $instance;
 
-		if ( ! $instance instanceof AMP_Settings_Post_Types ) {
+		if ( ! ( $instance instanceof AMP_Settings_Post_Types ) ) {
 			$instance = new AMP_Settings_Post_Types();
 		}
 
