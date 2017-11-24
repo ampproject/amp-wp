@@ -75,12 +75,14 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_settings_value.
+	 * Test get_value.
 	 *
-	 * @see AMP_Settings_Post_Types::get_settings_value()
+	 * @see AMP_Settings_Post_Types::get_settings()
 	 */
-	public function test_get_settings_value() {
-		$this->assertFalse( $this->instance->get_settings_value( 'foo' ) );
+	public function test_get_settings() {
+		$this->assertEmpty( $this->instance->get_settings() );
+		$this->assertInternalType( 'array', $this->instance->get_settings() );
+		$this->assertFalse( $this->instance->get_settings( 'foo' ) );
 
 		update_option( AMP_Settings::SETTINGS_KEY, array(
 			'post_types_support' => array(
@@ -88,7 +90,9 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 			),
 		) );
 
-		$this->assertTrue( $this->instance->get_settings_value( 'post' ) );
+		$this->assertContains( 'post', $this->instance->get_settings() );
+		$this->assertInternalType( 'array', $this->instance->get_settings() );
+		$this->assertTrue( $this->instance->get_settings( 'post' ) );
 
 		// Cleanup.
 		delete_option( AMP_Settings::SETTINGS_KEY );
@@ -105,22 +109,67 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_setting_name.
+	 * Test get_name_attribute.
 	 *
-	 * @see AMP_Settings_Post_Types::get_setting_name()
+	 * @see AMP_Settings_Post_Types::get_name_attribute()
 	 */
-	public function test_get_setting_name() {
-		$this->assertEquals( AMP_Settings::SETTINGS_KEY . '[post_types_support][post]', $this->instance->get_setting_name( 'post' ) );
+	public function test_get_name_attribute() {
+		$this->assertEquals( AMP_Settings::SETTINGS_KEY . '[post_types_support][post]', $this->instance->get_name_attribute( 'post' ) );
 	}
 
 	/**
-	 * Test render_setting.
+	 * Test disabled.
 	 *
-	 * @see AMP_Settings_Post_Types::render_setting()
+	 * @see AMP_Settings_Post_Types::disabled()
 	 */
-	public function test_render_setting() {
+	public function test_disabled() {
+		$this->assertFalse( $this->instance->disabled( 'foo' ) );
+		add_post_type_support( 'foo', AMP_QUERY_VAR );
+		$this->assertTrue( $this->instance->disabled( 'foo' ) );
+	}
+
+	/**
+	 * Test errors.
+	 *
+	 * @see AMP_Settings_Post_Types::errors()
+	 */
+	public function test_errors() {
+		update_option( AMP_Settings::SETTINGS_KEY, array(
+			'post_types_support' => array(
+				'foo' => true,
+			),
+		) );
+		remove_post_type_support( 'foo', AMP_QUERY_VAR );
+		$this->instance->errors();
+		$this->assertNotEmpty( get_settings_errors() );
+		delete_option( AMP_Settings::SETTINGS_KEY );
+	}
+
+	/**
+	 * Test validate.
+	 *
+	 * @see AMP_Settings_Post_Types::validate()
+	 */
+	public function test_validate() {
+		$this->assertInternalType( 'array', $this->instance->validate( array() ) );
+		update_option( AMP_Settings::SETTINGS_KEY, array(
+			'post_types_support' => array(
+				'foo' => true,
+			),
+		) );
+		$settings = $this->instance->validate( get_option( AMP_Settings::SETTINGS_KEY ) );
+		$this->assertInternalType( 'bool', $settings['post_types_support']['foo'] );
+		delete_option( AMP_Settings::SETTINGS_KEY );
+	}
+
+	/**
+	 * Test render.
+	 *
+	 * @see AMP_Settings_Post_Types::render()
+	 */
+	public function test_render() {
 		ob_start();
-		$this->instance->render_setting();
+		$this->instance->render();
 		$this->assertContains( '<fieldset>', ob_get_clean() );
 	}
 

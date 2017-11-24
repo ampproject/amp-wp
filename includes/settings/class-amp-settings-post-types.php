@@ -41,13 +41,18 @@ class AMP_Settings_Post_Types {
 	public function init() {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'update_option_' . AMP_Settings::SETTINGS_KEY, 'flush_rewrite_rules' );
+		add_action( 'amp_settings_screen', array( $this, 'errors' ) );
 	}
 
 	/**
 	 * Register the current page settings.
 	 */
 	public function register_settings() {
-		register_setting( AMP_Settings::SETTINGS_KEY, AMP_Settings::SETTINGS_KEY );
+		register_setting(
+			AMP_Settings::SETTINGS_KEY,
+			AMP_Settings::SETTINGS_KEY,
+			array( $this, 'validate' )
+		);
 		add_settings_section(
 			$this->section_id,
 			false,
@@ -57,7 +62,7 @@ class AMP_Settings_Post_Types {
 		add_settings_field(
 			$this->setting['id'],
 			$this->setting['label'],
-			array( $this, 'render_setting' ),
+			array( $this, 'render' ),
 			AMP_Settings::MENU_SLUG,
 			$this->section_id
 		);
@@ -67,16 +72,24 @@ class AMP_Settings_Post_Types {
 	 * Getter for settings value.
 	 *
 	 * @param string $post_type The post type name.
-	 * @return bool Return the setting value.
+	 * @return bool|array Return true if the post type is always on; the setting value otherwise.
 	 */
-	public function get_settings_value( $post_type ) {
-		$settings = get_option( AMP_Settings::SETTINGS_KEY, array() );
+	public function get_settings( $post_type = false ) {
+		$settings = $this->validate( get_option( AMP_Settings::SETTINGS_KEY, array() ) );
 
-		if ( isset( $settings[ $this->setting['id'] ][ $post_type ] ) ) {
-			return (bool) $settings[ $this->setting['id'] ][ $post_type ];
+		if ( false !== $post_type ) {
+			if ( isset( $settings[ $this->setting['id'] ][ $post_type ] ) ) {
+				return $settings[ $this->setting['id'] ][ $post_type ];
+			}
+
+			return false;
 		}
 
-		return false;
+		if ( empty( $settings[ $this->setting['id'] ] ) || ! is_array( $settings[ $this->setting['id'] ] ) ) {
+			return array();
+		}
+
+		return $settings[ $this->setting['id'] ];
 	}
 
 	/**
@@ -102,16 +115,77 @@ class AMP_Settings_Post_Types {
 	 * @param string $post_type The post type name.
 	 * @return object The setting HTML input name attribute.
 	 */
-	public function get_setting_name( $post_type ) {
+	public function get_name_attribute( $post_type ) {
 		$id = $this->setting['id'];
-
 		return AMP_Settings::SETTINGS_KEY . "[{$id}][{$post_type}]";
+	}
+
+	/**
+	 * Check whether the post type should be disabled or not.
+	 *
+	 * Since we can't flag a post type which is not enabled by setting and removed by plugin/theme,
+	 * we can't disable the checkbox but the errors() takes care of this scenario.
+	 *
+	 * @param string $post_type The post type name.
+	 * @return bool True if disabled; false otherwise.
+	 */
+	public function disabled( $post_type ) {
+		$settings = $this->get_settings();
+
+		// Disable if post type support was not added by setting and added by plugin/theme.
+		if ( post_type_supports( $post_type, AMP_QUERY_VAR ) && ! isset( $settings[ $post_type ] ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Handle errors.
+	 */
+	public function errors() {
+		$settings = $this->get_settings();
+
+		foreach ( $settings as $post_type => $value ) {
+			// Throw error if post type support was added by setting and removed by plugin/theme.
+			if ( true === $value && ! post_type_supports( $post_type, AMP_QUERY_VAR ) ) {
+				$post_type_object = get_post_type_object( $post_type );
+
+				add_settings_error(
+					$post_type,
+					$post_type,
+					sprintf(
+						/* Translators: %s: Post type name. */
+						__( '"%s" could not be activated because support was removed by a plugin or theme', 'amp' ),
+						isset( $post_type_object->label ) ? $post_type_object->label : $post_type
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Validate and sanitize the settings.
+	 *
+	 * @param array $settings The post types settings.
+	 * @return array The post types settings.
+	 */
+	public function validate( $settings ) {
+		if ( ! isset( $settings[ $this->setting['id'] ] ) || ! is_array( $settings[ $this->setting['id'] ] ) ) {
+			return array();
+		}
+
+		foreach ( $settings[ $this->setting['id'] ] as $key => $value ) {
+			$settings[ $this->setting['id'] ][ $key ] = (bool) $value;
+		}
+
+		return $settings;
 	}
 
 	/**
 	 * Setting renderer.
 	 */
-	public function render_setting() {
+	public function render() {
 		require_once AMP__DIR__ . '/templates/admin/settings/fields/checkbox-post-types.php';
 	}
 

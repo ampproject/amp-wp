@@ -17,6 +17,7 @@ define( 'AMP__VERSION', '0.5.1' );
 
 require_once AMP__DIR__ . '/back-compat/back-compat.php';
 require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
+require_once AMP__DIR__ . '/includes/amp-post-types-support.php';
 require_once AMP__DIR__ . '/includes/admin/functions.php';
 require_once AMP__DIR__ . '/includes/admin/class-amp-customizer.php';
 require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php';
@@ -54,14 +55,11 @@ function amp_init() {
 		return;
 	}
 
-	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
-
 	do_action( 'amp_init' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
-	add_post_type_support( 'post', AMP_QUERY_VAR );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );
@@ -73,6 +71,19 @@ function amp_init() {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
 }
+
+/**
+ * Define AMP query var.
+ *
+ * This function must be invoked through the 'after_setup_theme' action to allow
+ * the AMP setting to declare the post types support earlier than plugins/theme.
+ *
+ * @since 0.6
+ */
+function define_query_var() {
+	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+}
+add_action( 'after_setup_theme', 'define_query_var', 7 );
 
 // Make sure the `amp` query var has an explicit value.
 // Avoids issues when filtering the deprecated `query_string` hook.

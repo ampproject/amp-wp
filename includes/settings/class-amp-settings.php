@@ -63,6 +63,12 @@ class AMP_Settings {
 			return;
 		}
 
+		/**
+		 * Fires before the AMP settings screen is rendered.
+		 *
+		 * @since 0.6
+		 */
+		do_action( 'amp_settings_screen' );
 		include_once AMP__DIR__ . '/templates/admin/settings/screen.php';
 	}
 

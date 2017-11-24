@@ -18,11 +18,8 @@ function amp_get_permalink( $post_id ) {
 }
 
 function post_supports_amp( $post ) {
-	// Listen to post types settings.
-	$is_enabled_via_setting = (bool) AMP_Settings_Post_Types::get_instance()->get_settings_value( $post->post_type );
-
-	// Because `add_rewrite_endpoint` doesn't let us target specific post_types.
-	if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) && true !== $is_enabled_via_setting ) {
+	// Because `add_rewrite_endpoint` doesn't let us target specific post_types :(.
+	if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
 		return false;
 	}
 
