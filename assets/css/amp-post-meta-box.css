@@ -1,0 +1,22 @@
+/**
+* 1.0 AMP preview.
+*
+* Submit box preview buttons.
+*/
+
+/* Core preview button */
+#preview-action.has-next-sibling .preview:first-of-type {
+    border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	float: none;
+}
+
+/* AMP preview button */
+#preview-action.has-next-sibling .preview.amp-preview {
+    border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	text-indent: -9999px;
+	width: 30px;
+	background: #f7f7f7 url( '../images/amp-icon.svg' ) no-repeat center;
+	background-size: 14px;
+}

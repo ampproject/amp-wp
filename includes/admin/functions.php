@@ -115,3 +115,16 @@ function amp_add_custom_analytics( $analytics ) {
 	return $analytics;
 }
 add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
+
+/**
+ * Bootstrap AMP post meta box.
+ *
+ * This function must be invoked only once through the 'wp_loaded' action.
+ *
+ * @since 0.6
+ */
+function amp_post_meta_box() {
+	$post_meta_box = new AMP_Post_Meta_Box();
+	$post_meta_box->init();
+}
+add_action( 'wp_loaded', 'amp_post_meta_box' );
