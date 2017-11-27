@@ -16,9 +16,34 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Assets handle.
 	 *
+	 * @since 0.6
 	 * @const string
 	 */
 	const ASSETS_HANDLE = 'amp-post-meta-box';
+
+	/**
+	 * The post meta key.
+	 *
+	 * @since 0.6
+	 * @const string
+	 */
+	const POST_META_KEY = 'amp_status';
+
+	/**
+	 * The nonce name.
+	 *
+	 * @since 0.6
+	 * @const string
+	 */
+	const NONCE_NAME = 'amp-status';
+
+	/**
+	 * The nonce action.
+	 *
+	 * @since 0.6
+	 * @const string
+	 */
+	const NONCE_ACTION = 'amp-update-status';
 
 	/**
 	 * Initialize.
@@ -27,6 +52,8 @@ class AMP_Post_Meta_Box {
 	 */
 	public function init() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'post_submitbox_misc_actions', array( $this, 'render_status' ) );
+		add_action( 'save_post', array( $this, 'save_amp_status' ) );
 	}
 
 	/**
@@ -38,7 +65,7 @@ class AMP_Post_Meta_Box {
 		$post = get_post();
 
 		// Stop if the post doesn't have AMP support.
-		if ( ! isset( $post->post_type ) || true !== post_supports_amp( $post ) ) {
+		if ( ! isset( $post->post_type ) || true !== post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
 			return;
 		}
 
@@ -62,6 +89,71 @@ class AMP_Post_Meta_Box {
 				'previewLink' => esc_url_raw( add_query_arg( AMP_QUERY_VAR, true, get_preview_post_link( $post ) ) ),
 			) )
 		) );
+	}
+
+	/**
+	 * Render AMP status.
+	 *
+	 * @since 0.6
+	 * @param object $post \WP_POST object.
+	 */
+	public function render_status( $post ) {
+		$verify = (
+			isset( $post->ID )
+			&&
+			isset( $post->post_type )
+			&&
+			post_type_supports( $post->post_type, AMP_QUERY_VAR )
+			&&
+			current_user_can( 'edit_post', $post->ID )
+		);
+
+		if ( true !== $verify ) {
+			return;
+		}
+
+		$status = get_post_meta( $post->ID, self::POST_META_KEY, true );
+		$labels = array(
+			'enabled'  => __( 'Enabled', 'amp' ),
+			'disabled' => __( 'Disabled', 'amp' ),
+		);
+
+		// Set default.
+		if ( empty( $status ) ) {
+			$status = 'enabled';
+		}
+
+		include_once AMP__DIR__ . '/templates/admin/amp-status.php';
+	}
+
+	/**
+	 * Save AMP Status.
+	 *
+	 * @since 0.6
+	 * @param int $post_id The Post ID.
+	 */
+	public function save_amp_status( $post_id ) {
+		$verify = (
+			isset( $_POST[ self::NONCE_NAME ] )
+			&&
+			isset( $_POST[ self::POST_META_KEY ] )
+			&&
+			wp_verify_nonce( sanitize_key( wp_unslash( $_POST[ self::NONCE_NAME ] ) ), self::NONCE_ACTION )
+			&&
+			current_user_can( 'edit_post', $post_id )
+			&&
+			! wp_is_post_revision( $post_id )
+			&&
+			! wp_is_post_autosave( $post_id )
+		);
+
+		if ( true === $verify ) {
+			update_post_meta(
+				$post_id,
+				self::POST_META_KEY,
+				sanitize_key( wp_unslash( $_POST[ self::POST_META_KEY ] ) )
+			);
+		}
 	}
 
 }

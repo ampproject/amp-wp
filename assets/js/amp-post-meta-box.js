@@ -18,6 +18,13 @@ var AmpPostMetaBox = ( function( $ ) {
 		data: {},
 
 		/**
+		 * Toggle animation speed.
+		 *
+		 * @since 0.6
+		 */
+		toggleSpeed: 200,
+
+		/**
 		 * Boot plugin.
 		 *
 		 * @since 0.6
@@ -26,9 +33,22 @@ var AmpPostMetaBox = ( function( $ ) {
 		 */
 		boot: function( data ) {
 			this.data = data;
-
 			$( document ).ready( function() {
 				this.addPreviewButton();
+				this.listen();
+			}.bind( this ) );
+		},
+
+		/**
+		 * Events listener.
+		 *
+		 * @since 0.6
+		 * @return {void}
+		 */
+		listen: function() {
+			$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
+				e.preventDefault();
+				this.toggleAmpStatus( $( e.target ) );
 			}.bind( this ) );
 		},
 
@@ -52,6 +72,35 @@ var AmpPostMetaBox = ( function( $ ) {
 				} )
 				.parent()
 				.addClass( 'has-next-sibling' );
+		},
+
+		/**
+		 * Add AMP Preview button.
+		 *
+		 * @since 0.6
+		 * @param {Object} $target Event target.
+		 * @return {void}
+		 */
+		toggleAmpStatus: function( $target ) {
+			var $container = $( '#amp-status-select' ),
+				status = $container.data( 'amp-status' ),
+				$checked;
+
+			// Don't modify status on cancel button click.
+			if ( ! $target.hasClass( 'button-cancel' ) ) {
+				status = $( '[name="amp_status"]:checked' ).val();
+			}
+
+			$checked = $( '#amp-satus-' + status );
+
+			// Toggle elements.
+			$( '.edit-amp-status' ).fadeToggle( this.toggleSpeed );
+			$container.slideToggle( this.toggleSpeed );
+
+			// Update status.
+			$container.data( 'amp-status', status );
+			$checked.prop( 'checked', 'checked' );
+			$( '.amp-status-text' ).text( $checked.next().text() );
 		}
 	};
 })( window.jQuery );

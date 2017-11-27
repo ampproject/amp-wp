@@ -23,6 +23,11 @@ function post_supports_amp( $post ) {
 		return false;
 	}
 
+	// Listen to post meta.
+	if ( ! isset( $post->ID ) || 'disabled' === get_post_meta( $post->ID, AMP_Post_Meta_Box::POST_META_KEY, true ) ) {
+		return false;
+	}
+
 	if ( post_password_required( $post ) ) {
 		return false;
 	}
