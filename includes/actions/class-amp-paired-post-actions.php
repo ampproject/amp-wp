@@ -5,7 +5,7 @@ require_once( AMP__DIR__ . '/includes/actions/class-amp-actions.php' );
 class AMP_Paired_Post_Actions extends AMP_Actions {
 	
 	public static function register_hooks() {
-		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_generatedby_metadata' );
+		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_generator_metadata' );
 		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_title' );
 		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_canonical_link' );
 		add_action( 'amp_post_template_head', 'AMP_Paired_Post_Actions::add_scripts' );
@@ -106,9 +106,9 @@ class AMP_Paired_Post_Actions extends AMP_Actions {
 		}
 	}
 
-	public static function add_generatedby_metadata( $amp_template ) {
+	public static function add_generator_metadata( $amp_template ) {
 		?>
-		<meta name="generator" content="<?php echo esc_attr( $amp_template->get( 'generatedby_metadata' ) );?>" />
+		<meta name="generator" content="<?php echo esc_attr( $amp_template->get( 'generator_metadata' ) ); ?>" />
 		<?php
 	}
 }
