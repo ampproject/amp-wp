@@ -6,7 +6,7 @@
  */
 
 // Check referrer.
-if ( ! $this instanceof AMP_Settings ) {
+if ( ! ( $this instanceof AMP_Settings ) ) {
 	return;
 }
 ?>

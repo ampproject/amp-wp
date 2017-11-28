@@ -81,9 +81,15 @@ function amp_init() {
  * @since 0.6
  */
 function define_query_var() {
+	/**
+	 * Filter the AMP query variable.
+	 *
+	 * @since 0.3.2
+	 * @param string $query_var The AMP query variable.
+	 */
 	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 }
-add_action( 'after_setup_theme', 'define_query_var', 7 );
+add_action( 'after_setup_theme', 'define_query_var', 3 );
 
 // Make sure the `amp` query var has an explicit value.
 // Avoids issues when filtering the deprecated `query_string` hook.

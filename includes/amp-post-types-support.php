@@ -32,4 +32,4 @@ function amp_custom_post_types_support() {
 		}
 	}
 }
-add_action( 'after_setup_theme', 'amp_custom_post_types_support' );
+add_action( 'after_setup_theme', 'amp_custom_post_types_support', 5 );

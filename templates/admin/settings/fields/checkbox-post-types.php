@@ -6,7 +6,7 @@
  */
 
 // Check referrer.
-if ( ! $this instanceof AMP_Settings_Post_Types ) {
+if ( ! ( $this instanceof AMP_Settings_Post_Types ) ) {
 	return;
 }
 ?>
