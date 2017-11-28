@@ -106,6 +106,12 @@ class AMP_Paired_Post_Actions extends AMP_Actions {
 		}
 	}
 
+	/**
+	 * Add AMP generator metadata.
+	 *
+	 * @param object $amp_template AMP_Post_Template object.
+	 * @since 0.6
+	 */
 	public static function add_generator_metadata( $amp_template ) {
 		?>
 		<meta name="generator" content="<?php echo esc_attr( $amp_template->get( 'generator_metadata' ) ); ?>" />

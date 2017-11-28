@@ -57,7 +57,7 @@ class AMP_Post_Template {
 			'canonical_url' => get_permalink( $post_id ),
 			'home_url' => home_url(),
 			'blog_name' => get_bloginfo( 'name' ),
-			'generator_metadata'  => 'AMP Plugin v' . AMP__VERSION,
+			'generator_metadata'    => 'AMP Plugin v' . AMP__VERSION,
 
 			'html_tag_attributes' => array(),
 			'body_class' => '',
