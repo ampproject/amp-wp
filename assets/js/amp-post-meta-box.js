@@ -1,11 +1,11 @@
-/* exported AmpPostMetaBox */
+/* exported ampPostMetaBox */
 
 /**
  * AMP Post Meta Box.
  *
  * @since 0.6
  */
-var AmpPostMetaBox = ( function( $ ) {
+var ampPostMetaBox = ( function( $ ) {
 	'use strict';
 
 	// Exports.
@@ -16,6 +16,20 @@ var AmpPostMetaBox = ( function( $ ) {
 		 * @since 0.6
 		 */
 		data: {},
+
+		/**
+		 * Core preview button selector.
+		 *
+		 * @since 0.6
+		 */
+		previewBtn: '#post-preview',
+
+		/**
+		 * AMP preview button selector.
+		 *
+		 * @since 0.6
+		 */
+		ampPreviewBtn: '#amp-post-preview',
 
 		/**
 		 * Boot plugin.
@@ -29,6 +43,24 @@ var AmpPostMetaBox = ( function( $ ) {
 
 			$( document ).ready( function() {
 				this.addPreviewButton();
+				this.listen();
+			}.bind( this ) );
+		},
+
+		/**
+		 * Events listener.
+		 *
+		 * @since 0.6
+		 * @return {void}
+		 */
+		listen: function() {
+			$( this.ampPreviewBtn ).on( 'click.amp-post-preview', function( e ) {
+				e.preventDefault();
+				this.onAmpPreviewButtonClick();
+			}.bind( this ) );
+
+			$( '#submitpost input[type="submit"]' ).on( 'click', function() {
+				$( this.ampPreviewBtn ).addClass( 'amp-disabled' );
 			}.bind( this ) );
 		},
 
@@ -39,19 +71,32 @@ var AmpPostMetaBox = ( function( $ ) {
 		 * @return {void}
 		 */
 		addPreviewButton: function() {
-			var $previewBtn = $( '#preview-action a.preview' );
-
-			$previewBtn
+			$( this.previewBtn )
 				.clone()
-				.insertAfter( $previewBtn )
-				.addClass( 'amp-preview' )
+				.insertAfter( this.previewBtn )
 				.prop( {
 					'href': this.data.previewLink,
-					'id': 'amp-' + $previewBtn.prop( 'id' ),
-					'target': 'amp-' + $previewBtn.prop( 'target' )
+					'id': this.ampPreviewBtn.replace( '#', '' )
 				} )
 				.parent()
 				.addClass( 'has-next-sibling' );
+		},
+
+		/**
+		 * AMP Preview button click handler.
+		 *
+		 * We trigger the Core preview link for events propagation purposes.
+		 *
+		 * @since 0.6
+		 * @return {void}
+		 */
+		onAmpPreviewButtonClick: function() {
+			var currentHref = $( this.ampPreviewBtn ).prop( 'href' );
+
+			$( this.previewBtn )
+				.prop( 'href', $( this.ampPreviewBtn ).prop( 'href' ) )
+				.trigger( 'click' )
+				.prop( 'href', currentHref );
 		}
 	};
 })( window.jQuery );

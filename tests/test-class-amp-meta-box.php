@@ -46,11 +46,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// Test enqueue outside of a post with AMP support.
 		$this->assertFalse( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
+		$this->instance->enqueue_admin_assets( 'foo-bar.php' );
+		$this->assertFalse( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 
 		// Test enqueue on a post with AMP support.
 		$post            = self::factory()->post->create_and_get();
 		$GLOBALS['post'] = $post;
-		$this->instance->enqueue_admin_assets();
+		$this->instance->enqueue_admin_assets( 'post.php' );
 		$this->assertTrue( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$script_data = wp_scripts()->get_data( AMP_Post_Meta_Box::ASSETS_HANDLE, 'after' );
@@ -60,7 +62,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		}
 
 		// Test inline script boot.
-		$this->assertTrue( false !== stripos( wp_json_encode( $script_data ), 'AmpPostMetaBox.boot(' ) );
+		$this->assertTrue( false !== stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
 		unset( $GLOBALS['post'] );
 	}
 

@@ -16,7 +16,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Assets handle.
 	 *
-	 * @const string
+	 * @var string
 	 */
 	const ASSETS_HANDLE = 'amp-post-meta-box';
 
@@ -33,12 +33,18 @@ class AMP_Post_Meta_Box {
 	 * Enqueue admin assets.
 	 *
 	 * @since 0.6
+	 * @param string $hook_suffix The current admin page.
+	 * @return Void Void on failure.
 	 */
-	public function enqueue_admin_assets() {
-		$post = get_post();
+	public function enqueue_admin_assets( $hook_suffix ) {
+		$post     = get_post();
+		$validate = (
+			true === (bool) preg_match( '#(post|post-new).php#', $hook_suffix )
+			&&
+			true === post_supports_amp( $post )
+		);
 
-		// Stop if the post doesn't have AMP support.
-		if ( ! isset( $post->post_type ) || true !== post_supports_amp( $post ) ) {
+		if ( true !== $validate ) {
 			return;
 		}
 
@@ -57,7 +63,7 @@ class AMP_Post_Meta_Box {
 			array( 'jquery' ),
 			AMP__VERSION
 		);
-		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'AmpPostMetaBox.boot( %s );',
+		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink' => esc_url_raw( add_query_arg( AMP_QUERY_VAR, true, get_preview_post_link( $post ) ) ),
 			) )
