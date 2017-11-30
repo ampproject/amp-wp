@@ -102,7 +102,7 @@ class AMP_Settings_Post_Types {
 	 * Getter for the supported post types.
 	 *
 	 * @since 0.6
-	 * @return object Supported post types list.
+	 * @return array Supported post types list.
 	 */
 	public function get_supported_post_types() {
 		$core = get_post_types( array(
@@ -121,7 +121,7 @@ class AMP_Settings_Post_Types {
 	 *
 	 * @since 0.6
 	 * @param string $post_type The post type name.
-	 * @return object The setting HTML input name attribute.
+	 * @return string The setting HTML input name attribute.
 	 */
 	public function get_name_attribute( $post_type ) {
 		$id = $this->setting['id'];
