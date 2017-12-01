@@ -52,7 +52,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// Test enqueue on a post with AMP support.
 		$post            = self::factory()->post->create_and_get();
 		$GLOBALS['post'] = $post;
-		$this->instance->enqueue_admin_assets( 'post.php' );
+		set_current_screen( 'post.php' );
+		$this->instance->enqueue_admin_assets();
 		$this->assertTrue( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$script_data = wp_scripts()->get_data( AMP_Post_Meta_Box::ASSETS_HANDLE, 'after' );

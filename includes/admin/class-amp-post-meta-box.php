@@ -34,13 +34,15 @@ class AMP_Post_Meta_Box {
 	 * Enqueue admin assets.
 	 *
 	 * @since 0.6
-	 * @param string $hook_suffix The current admin page.
 	 * @return Void Void on failure.
 	 */
-	public function enqueue_admin_assets( $hook_suffix ) {
+	public function enqueue_admin_assets() {
 		$post     = get_post();
+		$screen   = get_current_screen();
 		$validate = (
-			true === (bool) preg_match( '#(post|post-new).php#', $hook_suffix )
+			isset( $screen->base )
+			&&
+			'post' === $screen->base
 			&&
 			true === post_supports_amp( $post )
 		);
