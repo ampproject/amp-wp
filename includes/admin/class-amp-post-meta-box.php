@@ -27,6 +27,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function init() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_filter( 'preview_post_link', array( $this, 'preview_post_link' ) );
 	}
 
 	/**
@@ -68,6 +69,28 @@ class AMP_Post_Meta_Box {
 				'previewLink' => esc_url_raw( add_query_arg( AMP_QUERY_VAR, true, get_preview_post_link( $post ) ) ),
 			) )
 		) );
+	}
+
+	/**
+	 * Modify post preview link.
+	 *
+	 * Add the AMP query var is the amp-preview flag is set.
+	 *
+	 * @param string $link The post preview link.
+	 * @since 0.6
+	 */
+	public function preview_post_link( $link ) {
+		$is_amp = (
+			isset( $_POST['amp-preview'] ) // WPCS: CSRF ok.
+			&&
+			'do-preview' === sanitize_key( wp_unslash( $_POST['amp-preview'] ) ) // WPCS: CSRF ok.
+		);
+
+		if ( $is_amp ) {
+			$link = add_query_arg( AMP_QUERY_VAR, true, $link );
+		}
+
+		return $link;
 	}
 
 }

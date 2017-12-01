@@ -66,4 +66,16 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		unset( $GLOBALS['post'] );
 	}
 
+	/**
+	 * Test preview_post_link.
+	 *
+	 * @see AMP_Settings::preview_post_link()
+	 */
+	public function test_preview_post_link() {
+		$link = 'https://foo.bar';
+		$this->assertEquals( 'https://foo.bar', $this->instance->preview_post_link( $link ) );
+		$_POST['amp-preview'] = 'do-preview';
+		$this->assertEquals( 'https://foo.bar?' . AMP_QUERY_VAR . '=1', $this->instance->preview_post_link( $link ) );
+	}
+
 }

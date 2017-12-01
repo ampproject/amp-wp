@@ -91,12 +91,20 @@ var ampPostMetaBox = ( function( $ ) {
 		 * @return {void}
 		 */
 		onAmpPreviewButtonClick: function() {
-			var currentHref = $( this.ampPreviewBtn ).prop( 'href' );
+			var $input;
 
-			$( this.previewBtn )
-				.prop( 'href', $( this.ampPreviewBtn ).prop( 'href' ) )
-				.trigger( 'click' )
-				.prop( 'href', currentHref );
+			// Flag the AMP preview referer.
+			$input = $( '<input>' )
+				.prop( {
+					'type': 'hidden',
+					'name': 'amp-preview',
+					'value': 'do-preview'
+				} )
+				.insertAfter( this.ampPreviewBtn );
+
+			// Trigger Core preview button and remove AMP flag.
+			$( this.previewBtn ).click();
+			$input.remove();
 		}
 	};
 })( window.jQuery );
