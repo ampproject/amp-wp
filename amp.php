@@ -131,7 +131,6 @@ function amp_render() {
 	$template->load();
 	exit;
 }
-
 /**
  * Bootstraps the AMP customizer.
  *
