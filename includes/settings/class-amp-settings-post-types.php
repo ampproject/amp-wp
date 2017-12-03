@@ -137,7 +137,7 @@ class AMP_Settings_Post_Types {
 		$on_update = (
 			isset( $_GET['settings-updated'] ) // WPCS: CSRF ok.
 			&&
-			! empty( (bool) wp_unslash( $_GET['settings-updated'] ) ) // WPCS: CSRF ok.
+			true === (bool) wp_unslash( $_GET['settings-updated'] ) // WPCS: CSRF ok.
 		);
 
 		// Only apply on update.
