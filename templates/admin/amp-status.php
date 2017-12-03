@@ -11,7 +11,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 }
 ?>
 <div class="misc-pub-section misc-amp-status">
-	<i></i>
+	<span class="amp-icon"></span>
 	<?php esc_html_e( 'AMP:', 'amp' ); ?>
 	<strong class="amp-status-text"><?php echo esc_html( $labels[ $status ] ); ?></strong>
 	<a href="#amp_status" class="edit-amp-status hide-if-no-js" role="button">

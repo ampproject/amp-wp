@@ -104,7 +104,7 @@ class AMP_Post_Meta_Box {
 	 * Render AMP status.
 	 *
 	 * @since 0.6
-	 * @param object $post \WP_POST object.
+	 * @param object $post WP_POST object.
 	 */
 	public function render_status( $post ) {
 		$verify = (

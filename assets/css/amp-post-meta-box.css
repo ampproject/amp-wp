@@ -29,7 +29,7 @@
 }
 
 /* AMP status */
-.misc-amp-status > i {
+.misc-amp-status .amp-icon {
 	float: left;
 	background: transparent url( '../images/amp-icon.svg' ) no-repeat left;
 	background-size: 17px;
