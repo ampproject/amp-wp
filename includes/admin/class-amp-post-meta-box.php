@@ -17,7 +17,7 @@ class AMP_Post_Meta_Box {
 	 * Assets handle.
 	 *
 	 * @since 0.6
-	 * @const string
+	 * @var string
 	 */
 	const ASSETS_HANDLE = 'amp-post-meta-box';
 
@@ -25,7 +25,7 @@ class AMP_Post_Meta_Box {
 	 * The post meta key.
 	 *
 	 * @since 0.6
-	 * @const string
+	 * @var string
 	 */
 	const POST_META_KEY = 'amp_status';
 
@@ -33,7 +33,7 @@ class AMP_Post_Meta_Box {
 	 * The nonce name.
 	 *
 	 * @since 0.6
-	 * @const string
+	 * @var string
 	 */
 	const NONCE_NAME = 'amp-status';
 
@@ -41,7 +41,7 @@ class AMP_Post_Meta_Box {
 	 * The nonce action.
 	 *
 	 * @since 0.6
-	 * @const string
+	 * @var string
 	 */
 	const NONCE_ACTION = 'amp-update-status';
 
@@ -54,18 +54,27 @@ class AMP_Post_Meta_Box {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'render_status' ) );
 		add_action( 'save_post', array( $this, 'save_amp_status' ) );
+		add_filter( 'preview_post_link', array( $this, 'preview_post_link' ) );
 	}
 
 	/**
 	 * Enqueue admin assets.
 	 *
 	 * @since 0.6
+	 * @return Void Void on failure.
 	 */
 	public function enqueue_admin_assets() {
-		$post = get_post();
+		$post     = get_post();
+		$screen   = get_current_screen();
+		$validate = (
+			isset( $screen->base )
+			&&
+			'post' === $screen->base
+			&&
+			true === post_supports_amp( $post )
+		);
 
-		// Stop if the post doesn't have AMP support.
-		if ( ! isset( $post->post_type ) || true !== post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
+		if ( true !== $validate ) {
 			return;
 		}
 
@@ -84,7 +93,7 @@ class AMP_Post_Meta_Box {
 			array( 'jquery' ),
 			AMP__VERSION
 		);
-		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'AmpPostMetaBox.boot( %s );',
+		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink' => esc_url_raw( add_query_arg( AMP_QUERY_VAR, true, get_preview_post_link( $post ) ) ),
 			) )
@@ -154,6 +163,28 @@ class AMP_Post_Meta_Box {
 				sanitize_key( wp_unslash( $_POST[ self::POST_META_KEY ] ) )
 			);
 		}
+	}
+
+	/**
+	 * Modify post preview link.
+	 *
+	 * Add the AMP query var is the amp-preview flag is set.
+	 *
+	 * @param string $link The post preview link.
+	 * @since 0.6
+	 */
+	public function preview_post_link( $link ) {
+		$is_amp = (
+			isset( $_POST['amp-preview'] ) // WPCS: CSRF ok.
+			&&
+			'do-preview' === sanitize_key( wp_unslash( $_POST['amp-preview'] ) ) // WPCS: CSRF ok.
+		);
+
+		if ( $is_amp ) {
+			$link = add_query_arg( AMP_QUERY_VAR, true, $link );
+		}
+
+		return $link;
 	}
 
 }

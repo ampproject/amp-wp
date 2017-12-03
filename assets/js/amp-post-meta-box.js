@@ -1,11 +1,11 @@
-/* exported AmpPostMetaBox */
+/* exported ampPostMetaBox */
 
 /**
  * AMP Post Meta Box.
  *
  * @since 0.6
  */
-var AmpPostMetaBox = ( function( $ ) {
+var ampPostMetaBox = ( function( $ ) {
 	'use strict';
 
 	// Exports.
@@ -23,6 +23,20 @@ var AmpPostMetaBox = ( function( $ ) {
 		 * @since 0.6
 		 */
 		toggleSpeed: 200,
+
+		/**
+		 * Core preview button selector.
+		 *
+		 * @since 0.6
+		 */
+		previewBtn: '#post-preview',
+
+		/**
+		 * AMP preview button selector.
+		 *
+		 * @since 0.6
+		 */
+		ampPreviewBtn: '#amp-post-preview',
 
 		/**
 		 * Boot plugin.
@@ -46,9 +60,18 @@ var AmpPostMetaBox = ( function( $ ) {
 		 * @return {void}
 		 */
 		listen: function() {
+			$( this.ampPreviewBtn ).on( 'click.amp-post-preview', function( e ) {
+				e.preventDefault();
+				this.onAmpPreviewButtonClick();
+			}.bind( this ) );
+
 			$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
 				e.preventDefault();
 				this.toggleAmpStatus( $( e.target ) );
+			}.bind( this ) );
+
+			$( '#submitpost input[type="submit"]' ).on( 'click', function() {
+				$( this.ampPreviewBtn ).addClass( 'amp-disabled' );
 			}.bind( this ) );
 		},
 
@@ -59,19 +82,40 @@ var AmpPostMetaBox = ( function( $ ) {
 		 * @return {void}
 		 */
 		addPreviewButton: function() {
-			var $previewBtn = $( '#preview-action a.preview' );
-
-			$previewBtn
+			$( this.previewBtn )
 				.clone()
-				.insertAfter( $previewBtn )
-				.addClass( 'amp-preview' )
+				.insertAfter( this.previewBtn )
 				.prop( {
 					'href': this.data.previewLink,
-					'id': 'amp-' + $previewBtn.prop( 'id' ),
-					'target': 'amp-' + $previewBtn.prop( 'target' )
+					'id': this.ampPreviewBtn.replace( '#', '' )
 				} )
 				.parent()
 				.addClass( 'has-next-sibling' );
+		},
+
+		/**
+		 * AMP Preview button click handler.
+		 *
+		 * We trigger the Core preview link for events propagation purposes.
+		 *
+		 * @since 0.6
+		 * @return {void}
+		 */
+		onAmpPreviewButtonClick: function() {
+			var $input;
+
+			// Flag the AMP preview referer.
+			$input = $( '<input>' )
+				.prop( {
+					'type': 'hidden',
+					'name': 'amp-preview',
+					'value': 'do-preview'
+				} )
+				.insertAfter( this.ampPreviewBtn );
+
+			// Trigger Core preview button and remove AMP flag.
+			$( this.previewBtn ).click();
+			$input.remove();
 		},
 
 		/**
