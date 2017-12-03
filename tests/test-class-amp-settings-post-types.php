@@ -118,31 +118,25 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test disabled.
-	 *
-	 * @see AMP_Settings_Post_Types::disabled()
-	 */
-	public function test_disabled() {
-		$this->assertFalse( $this->instance->disabled( 'foo' ) );
-		add_post_type_support( 'foo', AMP_QUERY_VAR );
-		$this->assertTrue( $this->instance->disabled( 'foo' ) );
-	}
-
-	/**
 	 * Test errors.
 	 *
 	 * @see AMP_Settings_Post_Types::errors()
 	 */
 	public function test_errors() {
+		register_post_type( 'foo', array(
+			'public' => true,
+		) );
 		update_option( AMP_Settings::SETTINGS_KEY, array(
 			'post_types_support' => array(
 				'foo' => true,
 			),
 		) );
 		remove_post_type_support( 'foo', AMP_QUERY_VAR );
+		$_GET['settings-updated'] = 'true';
 		$this->instance->errors();
 		$this->assertNotEmpty( get_settings_errors() );
 		delete_option( AMP_Settings::SETTINGS_KEY );
+		unregister_post_type( 'foo' );
 	}
 
 	/**

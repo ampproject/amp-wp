@@ -129,46 +129,45 @@ class AMP_Settings_Post_Types {
 	}
 
 	/**
-	 * Check whether the post type should be disabled or not.
-	 *
-	 * Since we can't flag a post type which is not enabled by setting and removed by plugin/theme,
-	 * we can't disable the checkbox but the errors() takes care of this scenario.
-	 *
-	 * @since 0.6
-	 * @param string $post_type The post type name.
-	 * @return bool True if disabled; false otherwise.
-	 */
-	public function disabled( $post_type ) {
-		$settings = $this->get_settings();
-
-		// Disable if post type support was not added by setting and added by plugin/theme.
-		if ( post_type_supports( $post_type, AMP_QUERY_VAR ) && ! isset( $settings[ $post_type ] ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Handle errors.
 	 *
 	 * @since 0.6
 	 */
 	public function errors() {
-		$settings = $this->get_settings();
+		$on_update = (
+			isset( $_GET['settings-updated'] ) // WPCS: CSRF ok.
+			&&
+			! empty( (bool) wp_unslash( $_GET['settings-updated'] ) ) // WPCS: CSRF ok.
+		);
 
-		foreach ( $settings as $post_type => $value ) {
-			// Throw error if post type support was added by setting and removed by plugin/theme.
-			if ( true === $value && ! post_type_supports( $post_type, AMP_QUERY_VAR ) ) {
-				$post_type_object = get_post_type_object( $post_type );
+		// Only apply on update.
+		if ( ! $on_update ) {
+			return;
+		}
 
+		foreach ( $this->get_supported_post_types() as $post_type ) {
+			if ( ! isset( $post_type->name, $post_type->label ) ) {
+				continue;
+			}
+
+			$post_type_support = post_type_supports( $post_type->name, AMP_QUERY_VAR );
+			$value             = $this->get_settings( $post_type->name );
+
+			if ( true === $value && true !== $post_type_support ) {
+				/* Translators: %s: Post type name. */
+				$error = __( '"%s" could not be activated because support is removed by a plugin or theme', 'amp' );
+			} elseif ( empty( $value ) && true === $post_type_support ) {
+				/* Translators: %s: Post type name. */
+				$error = __( '"%s" could not be deactivated because support is added by a plugin or theme', 'amp' );
+			}
+
+			if ( isset( $error ) ) {
 				add_settings_error(
-					$post_type,
-					$post_type,
+					$post_type->name,
+					$post_type->name,
 					sprintf(
-						/* Translators: %s: Post type name. */
-						__( '"%s" could not be activated because support was removed by a plugin or theme', 'amp' ),
-						isset( $post_type_object->label ) ? $post_type_object->label : $post_type
+						$error,
+						$post_type->label
 					)
 				);
 			}
