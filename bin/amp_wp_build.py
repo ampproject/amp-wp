@@ -83,11 +83,11 @@ def GenValidatorProtoascii(out_dir):
 	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
 	protoascii_segments = [open('validator-main.protoascii').read()]
-	extensions = glob.glob('extensions/*/0.1/validator-*.protoascii')
+	extensions = glob.glob('extensions/*/validator-*.protoascii')
 	# In the Github project, the extensions are located in a sibling directory
 	# to the validator rather than a child directory.
 	if not extensions:
-		extensions = glob.glob('../extensions/*/0.1/validator-*.protoascii')
+		extensions = glob.glob('../extensions/*/validator-*.protoascii')
 	extensions.sort()
 	for extension in extensions:
 		protoascii_segments.append(open(extension).read())
@@ -428,7 +428,7 @@ def GetTagRules(tag_spec):
 
 	tag_rules = {}
 
-	if tag_spec.also_requires_tag:
+	if hasattr(tag_spec, 'also_requires_tag') and tag_spec.also_requires_tag:
 		also_requires_tag_list = []
 		for also_requires_tag in tag_spec.also_requires_tag:
 			also_requires_tag_list.append(UnicodeEscape(also_requires_tag))
