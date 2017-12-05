@@ -12,7 +12,7 @@ abstract class AMP_Actions {
 	/**
 	 * Add AMP generator metadata.
 	 *
-	 * @param object $amp_template AMP_Post_Template object.
+	 * @param object $template AMP_Post_Template object.
 	 * @since 0.6
 	 */
 	public static function add_generator_metadata( $template ) {}
