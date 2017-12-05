@@ -17,13 +17,11 @@ define( 'AMP__VERSION', '0.5.1' );
 
 require_once AMP__DIR__ . '/back-compat/back-compat.php';
 require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
-require_once AMP__DIR__ . '/includes/amp-post-types-support.php';
+require_once AMP__DIR__ . '/includes/class-amp-post-type-support.php';
 require_once AMP__DIR__ . '/includes/admin/functions.php';
 require_once AMP__DIR__ . '/includes/admin/class-amp-customizer.php';
 require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php';
 require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php';
-require_once AMP__DIR__ . '/includes/settings/class-amp-settings.php';
-require_once AMP__DIR__ . '/includes/settings/class-amp-settings-post-types.php';
 require_once AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php';
 require_once AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php';
 
@@ -49,6 +47,8 @@ function amp_deactivate() {
 	flush_rewrite_rules();
 }
 
+AMP_Post_Type_Support::add_hooks();
+
 add_action( 'init', 'amp_init' );
 function amp_init() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
@@ -56,6 +56,7 @@ function amp_init() {
 	}
 
 	do_action( 'amp_init' );
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 

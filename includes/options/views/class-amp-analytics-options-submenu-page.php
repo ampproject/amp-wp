@@ -14,6 +14,12 @@ class AMP_Analytics_Options_Submenu_Page {
 		} else {
 			$analytics_title = __( 'Add new entry:', 'amp' );
 		}
+
+		if ( ! $is_existing_entry ) {
+			$id = '__new__';
+		}
+
+		$id_base = sprintf( '%s[analytics][%s]', AMP_Options_Manager::OPTION_NAME, $id );
 		?>
 		<div class="analytics-data-container">
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -23,20 +29,20 @@ class AMP_Analytics_Options_Submenu_Page {
 				<div class="options">
 					<p>
 						<label>
-							<?php echo __( 'Type:', 'amp' ) ?>
-							<input class="option-input" type="text" name=vendor-type value="<?php echo esc_attr( $type ); ?>" />
+							<?php esc_html_e( 'Type:', 'amp' ); ?>
+							<input class="option-input" type="text" name="<?php echo esc_attr( $id_base . '[type]' ); ?>" value="<?php echo esc_attr( $type ); ?>" />
 						</label>
 						<label>
-							<?php echo __( 'ID:', 'amp' ) ?>
-							<input type="text" name=id value="<?php echo esc_attr( $id ); ?>" readonly />
+							<?php esc_html_e( 'ID:', 'amp' ); ?>
+							<input type="text" value="<?php echo esc_attr( $is_existing_entry ? $id : '' ); ?>" readonly />
 						</label>
-						<input type="hidden" name=id-value value="<?php echo esc_attr( $id ); ?>" />
+							<input type="hidden" name="<?php echo esc_attr( $id_base . '[id]' ); ?>" value="<?php echo esc_attr( $id ); ?>" />
 					</p>
 					<p>
 						<label>
-							<?php echo __( 'JSON Configuration:', 'amp' ) ?>
+							<?php esc_html_e( 'JSON Configuration:', 'amp' ); ?>
 							<br />
-							<textarea rows="10" cols="100" name="config"><?php echo esc_textarea( $config ); ?></textarea>
+							<textarea rows="10" cols="100" name="<?php echo esc_attr( $id_base . '[config]' ); ?>"><?php echo esc_textarea( $config ); ?></textarea>
 						</label>
 					</p>
 					<input type="hidden" name="action" value="amp_analytics_options">
@@ -46,7 +52,7 @@ class AMP_Analytics_Options_Submenu_Page {
 					wp_nonce_field( 'analytics-options', 'analytics-options' );
 					submit_button( __( 'Save', 'amp' ), 'primary', 'save', false );
 					if ( $is_existing_entry ) {
-						submit_button( __( 'Delete', 'amp' ), 'delete button-primary', 'delete', false );
+						submit_button( __( 'Delete', 'amp' ), 'delete button-primary', $id_base . '[delete]', false );
 					}
 					?>
 				</p>
@@ -91,11 +97,12 @@ class AMP_Analytics_Options_Submenu_Page {
 
 		$this->render_title();
 
-		// Render entries stored in the DB
+		// Render entries stored in the DB.
 		foreach ( $analytics_entries as $entry_id => $entry ) {
 			$this->render_entry( $entry_id, $entry['type'], $entry['config'] );
 		}
-		// Empty form for adding more entries
+
+		// Empty form for adding more entries.
 		$this->render_entry();
 	}
 }

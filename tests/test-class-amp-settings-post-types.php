@@ -49,7 +49,7 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 		$menu_slug    = AMP_Settings::MENU_SLUG;
 		$option_group = AMP_Settings::SETTINGS_KEY;
 		$section_id   = 'post_types';
-		$setting_id   = 'post_types_support';
+		$setting_id   = 'supported_post_types';
 
 		$this->instance->register_settings();
 		$this->assertArrayHasKey( $menu_slug, $wp_settings_sections );
@@ -71,7 +71,7 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 			$this->markTestIncomplete( 'Settings field could not be found.' );
 		}
 
-		$this->assertEquals( 'post_types_support', $wp_settings_fields[ $menu_slug ][ $section_id ][ $setting_id ]['id'] );
+		$this->assertEquals( 'supported_post_types', $wp_settings_fields[ $menu_slug ][ $section_id ][ $setting_id ]['id'] );
 	}
 
 	/**
@@ -85,7 +85,7 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 		$this->assertFalse( $this->instance->get_settings( 'foo' ) );
 
 		update_option( AMP_Settings::SETTINGS_KEY, array(
-			'post_types_support' => array(
+			'supported_post_types' => array(
 				'post' => true,
 			),
 		) );
@@ -114,7 +114,7 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	 * @see AMP_Settings_Post_Types::get_name_attribute()
 	 */
 	public function test_get_name_attribute() {
-		$this->assertEquals( AMP_Settings::SETTINGS_KEY . '[post_types_support][post]', $this->instance->get_name_attribute( 'post' ) );
+		$this->assertEquals( AMP_Settings::SETTINGS_KEY . '[supported_post_types][post]', $this->instance->get_name_attribute( 'post' ) );
 	}
 
 	/**
@@ -127,7 +127,7 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 			'public' => true,
 		) );
 		update_option( AMP_Settings::SETTINGS_KEY, array(
-			'post_types_support' => array(
+			'supported_post_types' => array(
 				'foo' => true,
 			),
 		) );
@@ -147,12 +147,12 @@ class Test_AMP_Settings_Post_Types extends WP_UnitTestCase {
 	public function test_validate() {
 		$this->assertInternalType( 'array', $this->instance->validate( array() ) );
 		update_option( AMP_Settings::SETTINGS_KEY, array(
-			'post_types_support' => array(
+			'supported_post_types' => array(
 				'foo' => true,
 			),
 		) );
 		$settings = $this->instance->validate( get_option( AMP_Settings::SETTINGS_KEY ) );
-		$this->assertInternalType( 'bool', $settings['post_types_support']['foo'] );
+		$this->assertInternalType( 'bool', $settings['supported_post_types']['foo'] );
 		delete_option( AMP_Settings::SETTINGS_KEY );
 	}
 

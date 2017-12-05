@@ -99,10 +99,6 @@ function amp_add_options_menu() {
 		return;
 	}
 
-	// Initialize settings.
-	AMP_Settings::get_instance()->init();
-	AMP_Settings_Post_Types::get_instance()->init();
-
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
