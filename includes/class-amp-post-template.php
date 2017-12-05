@@ -121,7 +121,12 @@ class AMP_Post_Template {
 	}
 
 	public function load() {
-		$this->load_parts( array( 'single' ) );
+
+		if( is_amp_content_hierarchical( $this->ID ) ) {
+			$this->load_parts( array( 'page' ) );
+		} else {
+			$this->load_parts( array( 'single' ) );
+		}
 	}
 
 	public function load_parts( $templates ) {
@@ -168,20 +173,29 @@ class AMP_Post_Template {
 
 		$metadata = array(
 			'@context' => 'http://schema.org',
-			'@type' => 'BlogPosting',
 			'mainEntityOfPage' => $this->get( 'canonical_url' ),
 			'publisher' => array(
 				'@type' => 'Organization',
 				'name' => $this->get( 'blog_name' ),
 			),
 			'headline' => $post_title,
-			'datePublished' => date( 'c', $post_publish_timestamp ),
-			'dateModified' => date( 'c', $post_modified_timestamp ),
-			'author' => array(
-				'@type' => 'Person',
-				'name' => $post_author->display_name,
-			),
 		);
+
+		if( is_amp_content_hierarchical( $this->ID ) ) {
+			$article_meta = array(
+				'@type'     => 'WebPage'
+			);
+		} else {
+			$article_meta = array(
+				'@type'     => 'BlogPosting',
+				'datePublished' => date( 'c', $post_publish_timestamp ),
+				'dateModified' => date( 'c', $post_modified_timestamp ),
+				'author' => array(
+					'@type' => 'Person',
+					'name' => $post_author->display_name,
+				),
+			);
+		}
 
 		$site_icon_url = $this->get( 'site_icon_url' );
 		if ( $site_icon_url ) {

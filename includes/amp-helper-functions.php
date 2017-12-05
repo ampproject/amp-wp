@@ -50,3 +50,14 @@ function is_amp_endpoint() {
 function amp_get_asset_url( $file ) {
 	return plugins_url( sprintf( 'assets/%s', $file ), AMP__FILE__ );
 }
+
+/**
+ * Determine if the post type is hierarchical as template handling is slightly different
+ *
+ * @var $post_id int
+ *
+ * @return boolean
+ */
+function is_amp_content_hierarchical( $post_id ) {
+	return (boolean) is_post_type_hierarchical( get_post_type( $post_id ) );
+}
