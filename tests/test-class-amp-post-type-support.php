@@ -70,9 +70,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			'label'  => 'Poem',
 			'public' => true,
 		) );
-		AMP_Options_Manager::update_option( 'supported_post_types', array(
-			'poem' => true,
-		) );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'poem' ) );
 
 		AMP_Post_Type_Support::add_post_type_support();
 		$this->assertTrue( post_type_supports( 'post', AMP_QUERY_VAR ) );

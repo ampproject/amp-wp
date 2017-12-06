@@ -83,8 +83,12 @@ class AMP_Options_Manager {
 		// Validate post type support.
 		if ( isset( $new_options['supported_post_types'] ) ) {
 			$options['supported_post_types'] = array();
-			foreach ( $new_options['supported_post_types'] as $post_type => $enabled ) {
-				$options['supported_post_types'][ $post_type ] = (bool) $enabled;
+			foreach ( $new_options['supported_post_types'] as $post_type ) {
+				if ( ! post_type_exists( $post_type ) ) {
+					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
+				} else {
+					$options['supported_post_types'][] = $post_type;
+				}
 			}
 		}
 

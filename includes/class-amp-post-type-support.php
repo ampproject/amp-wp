@@ -60,7 +60,7 @@ class AMP_Post_Type_Support {
 	public static function add_post_type_support() {
 		$post_types = array_merge(
 			self::get_builtin_supported_post_types(),
-			array_keys( array_filter( AMP_Options_Manager::get_option( 'supported_post_types', array() ) ) )
+			AMP_Options_Manager::get_option( 'supported_post_types', array() )
 		);
 		foreach ( $post_types as $post_type ) {
 			add_post_type_support( $post_type, AMP_QUERY_VAR );

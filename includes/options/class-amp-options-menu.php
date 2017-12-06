@@ -81,33 +81,28 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	protected function check_supported_post_type_update_errors() {
-		$on_update = (
-			isset( $_GET['settings-updated'] ) // WPCS: CSRF ok.
-			&&
-			true === (bool) wp_unslash( $_GET['settings-updated'] ) // WPCS: CSRF ok.
-		);
 
 		// Only apply on update.
-		if ( ! $on_update ) {
+		if ( empty( $_GET['settings-updated'] ) ) { // WPCS: CSRF ok.
 			return;
 		}
 
 		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
-		$settings        = AMP_Options_Manager::get_option( 'supported_post_types', array() );
+		$supported_types = AMP_Options_Manager::get_option( 'supported_post_types', array() );
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
 			$post_type = get_post_type_object( $name );
 			if ( ! isset( $post_type->name, $post_type->label ) || in_array( $post_type->name, $builtin_support, true ) ) {
 				continue;
 			}
 
-			$post_type_support = post_type_supports( $post_type->name, AMP_QUERY_VAR );
-			$value             = ! empty( $settings[ $post_type->name ] );
+			$post_type_supported = post_type_supports( $post_type->name, AMP_QUERY_VAR );
+			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
 
 			$error = null;
-			if ( true === $value && true !== $post_type_support ) {
+			if ( $is_support_elected && ! $post_type_supported ) {
 				/* translators: %s: Post type name. */
 				$error = __( '"%s" could not be activated because support is removed by a plugin or theme', 'amp' );
-			} elseif ( empty( $value ) && true === $post_type_support ) {
+			} elseif ( ! $is_support_elected && $post_type_supported ) {
 				/* translators: %s: Post type name. */
 				$error = __( '"%s" could not be deactivated because support is added by a plugin or theme', 'amp' );
 			}
@@ -132,25 +127,26 @@ class AMP_Options_Menu {
 	 */
 	public function render_post_types_support() {
 		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
+		$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
 		?>
 		<fieldset>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<?php
-				$id         = AMP_Options_Manager::OPTION_NAME . "[supported_post_types][{$post_type->name}][]";
+				$element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}";
 				$is_builtin = in_array( $post_type->name, $builtin_support, true );
 				?>
 				<?php if ( $is_builtin ) : ?>
-					<input type="hidden" name="<?php echo esc_attr( $id ); ?>" value="1">
+					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $post_type->name ); ?>">
 				<?php endif; ?>
 				<input
 					type="checkbox"
-					value="1"
-					id="<?php echo esc_attr( $id ); ?>"
-					name="<?php echo esc_attr( $id ); ?>"
+					id="<?php echo esc_attr( $element_id ); ?>"
+					name="<?php echo esc_attr( $element_name ); ?>"
+					value="<?php echo esc_attr( $post_type->name ); ?>"
 					<?php checked( true, post_type_supports( $post_type->name, AMP_QUERY_VAR ) ); ?>
 					<?php disabled( $is_builtin ); ?>
 					>
-				<label for="<?php echo esc_attr( $id ); ?>">
+				<label for="<?php echo esc_attr( $element_id ); ?>">
 					<?php echo esc_html( $post_type->label ); ?>
 				</label>
 				<br>

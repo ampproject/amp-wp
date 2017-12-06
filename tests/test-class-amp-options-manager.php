@@ -51,16 +51,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
 
 		// Test supported_post_types validation.
-		AMP_Options_Manager::update_option( 'supported_post_types', array(
-			'post'       => true,
-			'page'       => '1',
-			'attachment' => '',
-		) );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'page', 'attachment' ) );
 		$this->assertSame(
 			array(
-				'post'       => true,
-				'page'       => true,
-				'attachment' => false,
+				'post',
+				'page',
+				'attachment',
 			),
 			AMP_Options_Manager::get_option( 'supported_post_types' )
 		);
