@@ -1,19 +1,47 @@
 <?php
 
+/**
+ * Get AMP permalink.
+ *
+ * @since 0.1
+ *
+ * @param int $post_id Post ID.
+ * @return string AMP permalink.
+ */
 function amp_get_permalink( $post_id ) {
+
+	/**
+	 * Filters the AMP permalink to short-circuit normal generation.
+	 *
+	 * Returning a non-false value in this filter will cause the `get_permalink()` to get called and the `amp_get_permalink` filter to not apply.
+	 *
+	 * @since 0.4
+	 *
+	 * @param false $url     Short-circuited URL.
+	 * @param int   $post_id Post ID.
+	 */
 	$pre_url = apply_filters( 'amp_pre_get_permalink', false, $post_id );
 
 	if ( false !== $pre_url ) {
 		return $pre_url;
 	}
 
+	$parsed_url = wp_parse_url( get_permalink( $post_id ) );
 	$structure = get_option( 'permalink_structure' );
-	if ( empty( $structure ) ) {
-		$amp_url = add_query_arg( AMP_QUERY_VAR, 1, get_permalink( $post_id ) );
+	if ( empty( $structure ) || ! empty( $parsed_url['query'] ) ) {
+		$amp_url = add_query_arg( AMP_QUERY_VAR, '', get_permalink( $post_id ) );
 	} else {
 		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
 	}
 
+	/**
+	 * Filters AMP permalink.
+	 *
+	 * @since 0.2
+	 *
+	 * @param false $amp_url AMP URL.
+	 * @param int   $post_id Post ID.
+	 */
 	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
 }
 
