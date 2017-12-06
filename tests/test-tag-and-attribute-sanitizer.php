@@ -135,11 +135,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
 			),
 
-			'attribute_with_disallowed_protocol_removed' => array(
-				'<a href="evil://example.com/path/to/content">Click me.</a>',
-				'<a>Click me.</a>'
-			),
-
 			'attribute_value_valid' => array(
 				'<template type="amp-mustache">Template Data</template>',
 				'<template type="amp-mustache">Template Data</template>',
@@ -369,7 +364,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'a_with_rev' => array(
 				'<a href="http://example.com" rev="footnote">Link</a>',
-				'<a href="http://example.com">Link</a>',
+				'<a href="http://example.com" rev="footnote">Link</a>',
 			),
 
 			'a_with_target_blank' => array(

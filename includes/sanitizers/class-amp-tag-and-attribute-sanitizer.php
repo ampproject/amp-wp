@@ -139,22 +139,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				// If we're here, then we're not sure which spec should
 				// be used. Let's use the top scoring ones.
 				foreach( $spec_ids_sorted as $id ) {
-					$attr_spec_list = array_merge( $attr_spec_list, $rule_spec_list_to_validate[ $id ][AMP_Rule_Spec::ATTR_SPEC_LIST] );
+					$spec_list = $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ];
+					if ( ! $this->is_mandatory_attribute_missing( $spec_list, $node ) ) {
+						$attr_spec_list = array_merge( $attr_spec_list, $spec_list );
+					}
 				}
-			}
-		}
-
-		// If an attribute is mandatory and we don't have it, just remove the node and move on.
-		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule_value ) {
-			$is_mandatory =
-				isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] )
-				? (bool) $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ]
-				: false;
-			$attribute_exists = $node->hasAttribute( $attr_name );
-
-			if ( $is_mandatory && ! $attribute_exists ) {
-				$this->remove_node( $node );
-				return;
+				if ( empty( $attr_spec_list ) ) {
+					$this->remove_node( $node );
+					return;
+				}
 			}
 		}
 
@@ -163,6 +156,24 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove values that don't conform to the attr_spec.
 		$this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
+	}
+
+	/**
+	 * Whether a node is missing a required attribute.
+	 *
+	 * @param $attr_spec
+	 * @param $node
+	 * @return $is_missing boolean Whether a required attribute is missing.
+	 */
+	public function is_mandatory_attribute_missing( $attr_spec, $node ) {
+		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
+			$is_mandatory = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? boolval( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
+			$attribute_exists = $node->hasAttribute( $attr_name );
+			if ( $is_mandatory && ! $attribute_exists ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -481,6 +492,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::VALUE] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
+				$spec_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE ];
 				if ( $node->getAttribute( $attr_name ) == $attr_spec_rule[AMP_Rule_Spec::VALUE] ) {
 					return AMP_Rule_Spec::PASS;
 				} else {
