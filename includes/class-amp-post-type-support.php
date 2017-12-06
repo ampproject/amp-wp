@@ -14,9 +14,11 @@ class AMP_Post_Type_Support {
 	/**
 	 * Add hooks.
 	 */
-	public static function add_hooks() {
-		add_action( 'amp_init', array( __CLASS__, 'add_builtin_post_type_support' ) );
-		add_action( 'after_setup_theme', array( __CLASS__, 'add_elected_post_type_support' ), 5 );
+	public static function init() {
+		add_action( 'after_setup_theme', array( __CLASS__, 'add_post_type_support' ), 5 );
+		if ( did_action( 'after_setup_theme' ) ) {
+			self::add_post_type_support();
+		}
 	}
 
 	/**
@@ -37,25 +39,14 @@ class AMP_Post_Type_Support {
 	public static function get_eligible_post_types() {
 		return array_merge(
 			self::get_builtin_supported_post_types(),
-			get_post_types(
+			array_values( get_post_types(
 				array(
 					'public'   => true,
 					'_builtin' => false,
 				),
 				'names'
-			)
+			) )
 		);
-	}
-
-	/**
-	 * Declare core post types support for built-in post types.
-	 *
-	 * @since 0.6
-	 */
-	public static function add_builtin_post_type_support() {
-		foreach ( self::get_builtin_supported_post_types() as $post_type ) {
-			add_post_type_support( $post_type, AMP_QUERY_VAR );
-		}
 	}
 
 	/**
@@ -66,10 +57,10 @@ class AMP_Post_Type_Support {
 	 *
 	 * @since 0.6
 	 */
-	public static function add_elected_post_type_support() {
+	public static function add_post_type_support() {
 		$post_types = array_merge(
-			array_keys( array_filter( AMP_Options_Manager::get_option( 'supported_post_types', array() ) ) ),
-			self::get_builtin_supported_post_types() // Make sure support is still present.
+			self::get_builtin_supported_post_types(),
+			array_keys( array_filter( AMP_Options_Manager::get_option( 'supported_post_types', array() ) ) )
 		);
 		foreach ( $post_types as $post_type ) {
 			add_post_type_support( $post_type, AMP_QUERY_VAR );

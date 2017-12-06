@@ -47,7 +47,7 @@ function amp_deactivate() {
 	flush_rewrite_rules();
 }
 
-AMP_Post_Type_Support::add_hooks();
+AMP_Post_Type_Support::init();
 
 add_action( 'init', 'amp_init' );
 function amp_init() {
