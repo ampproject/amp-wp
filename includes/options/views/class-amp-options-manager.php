@@ -26,7 +26,10 @@ class AMP_Options_Manager {
 		register_setting(
 			self::OPTION_NAME,
 			self::OPTION_NAME,
-			array( __CLASS__, 'validate_options' )
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( __CLASS__, 'validate_options' ),
+			)
 		);
 
 		add_action( 'update_option_' . self::OPTION_NAME, 'flush_rewrite_rules' );
@@ -66,7 +69,6 @@ class AMP_Options_Manager {
 	 * @return array Options.
 	 */
 	public static function validate_options( $new_options ) {
-
 		$defaults = array(
 			'supported_post_types' => array(),
 			'analytics'            => array(),

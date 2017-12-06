@@ -52,7 +52,7 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_section(
-			'supported_post_types',
+			'post_types',
 			false,
 			'__return_false',
 			AMP_Options_Manager::OPTION_NAME
@@ -62,7 +62,7 @@ class AMP_Options_Menu {
 			__( 'Post Type Support', 'amp' ),
 			array( $this, 'render_post_types_support' ),
 			AMP_Options_Manager::OPTION_NAME,
-			'supported_post_types'
+			'post_types'
 		);
 
 		$submenus = array(
@@ -76,29 +76,11 @@ class AMP_Options_Menu {
 	}
 
 	/**
-	 * Getter for the supported post types.
-	 *
-	 * @since 0.6
-	 * @return array Supported post types list.
-	 */
-	public function get_supported_post_types() {
-		$core = get_post_types( array(
-			'name' => 'post',
-		), 'objects' );
-		$cpt  = get_post_types( array(
-			'public'   => true,
-			'_builtin' => false,
-		), 'objects' );
-
-		return array_merge( $core, $cpt );
-	}
-
-	/**
-	 * Handle errors.
+	 * Check for errors with updating the supported post types.
 	 *
 	 * @since 0.6
 	 */
-	public function errors() {
+	protected function check_supported_post_type_update_errors() {
 		$on_update = (
 			isset( $_GET['settings-updated'] ) // WPCS: CSRF ok.
 			&&
@@ -112,7 +94,8 @@ class AMP_Options_Menu {
 
 		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
 		$settings        = AMP_Options_Manager::get_option( 'supported_post_types', array() );
-		foreach ( $this->get_supported_post_types() as $post_type ) {
+		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
+			$post_type = get_post_type_object( $name );
 			if ( ! isset( $post_type->name, $post_type->label ) || in_array( $post_type->name, $builtin_support, true ) ) {
 				continue;
 			}
@@ -151,7 +134,7 @@ class AMP_Options_Menu {
 		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
 		?>
 		<fieldset>
-			<?php foreach ( $this->get_supported_post_types() as $post_type ) : ?>
+			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<?php
 				$id         = AMP_Options_Manager::OPTION_NAME . "[supported_post_types][{$post_type->name}][]";
 				$is_builtin = in_array( $post_type->name, $builtin_support, true );
@@ -183,7 +166,7 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	public function render_screen() {
-		$this->errors();
+		$this->check_supported_post_type_update_errors();
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>

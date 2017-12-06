@@ -22,10 +22,29 @@ class AMP_Post_Type_Support {
 	/**
 	 * Get post types that plugin supports out of the box (which cannot be disabled).
 	 *
-	 * @return array Post types.
+	 * @return string[] Post types.
 	 */
 	public static function get_builtin_supported_post_types() {
-		return array( 'post' );
+		return array_filter( array( 'post' ), 'post_type_exists' );
+	}
+
+	/**
+	 * Get post types that are eligible for AMP support.
+	 *
+	 * @since 0.6
+	 * @return string[] Post types eligible for AMP.
+	 */
+	public static function get_eligible_post_types() {
+		return array_merge(
+			self::get_builtin_supported_post_types(),
+			get_post_types(
+				array(
+					'public'   => true,
+					'_builtin' => false,
+				),
+				'names'
+			)
+		);
 	}
 
 	/**
@@ -50,7 +69,7 @@ class AMP_Post_Type_Support {
 	public static function add_elected_post_type_support() {
 		$post_types = array_merge(
 			array_keys( array_filter( AMP_Options_Manager::get_option( 'supported_post_types', array() ) ) ),
-			self::get_builtin_supported_post_types()
+			self::get_builtin_supported_post_types() // Make sure support is still present.
 		);
 		foreach ( $post_types as $post_type ) {
 			add_post_type_support( $post_type, AMP_QUERY_VAR );
