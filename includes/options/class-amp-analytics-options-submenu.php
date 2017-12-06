@@ -37,7 +37,10 @@ class AMP_Analytics_Options_Submenu {
 	public function amp_options_styles() {
 		?>
 		<style>
-			.analytics-data-container #delete {
+			.analytics-data-container .button.delete,
+			.analytics-data-container .button.delete:hover,
+			.analytics-data-container .button.delete:active,
+			.analytics-data-container .button.delete:focus {
 				background: red;
 				border-color: red;
 				text-shadow: 0 0 0;

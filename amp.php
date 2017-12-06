@@ -5,25 +5,27 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.5.1
+ * Version: 0.6.0-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
+ *
+ * @package AMP
  */
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.5.1' );
+define( 'AMP__VERSION', '0.6.0-alpha' );
 
-require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
-require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
-
-require_once( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
-require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
+require_once AMP__DIR__ . '/back-compat/back-compat.php';
+require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
+require_once AMP__DIR__ . '/includes/class-amp-post-type-support.php';
+require_once AMP__DIR__ . '/includes/admin/functions.php';
+require_once AMP__DIR__ . '/includes/admin/class-amp-customizer.php';
+require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php';
+require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php';
+require_once AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php';
+require_once AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
@@ -47,20 +49,19 @@ function amp_deactivate() {
 	flush_rewrite_rules();
 }
 
+AMP_Post_Type_Support::init();
+
 add_action( 'init', 'amp_init' );
 function amp_init() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
 
-	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
-
 	do_action( 'amp_init' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
-	add_post_type_support( 'post', AMP_QUERY_VAR );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );
@@ -72,6 +73,25 @@ function amp_init() {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
 }
+
+/**
+ * Define AMP query var.
+ *
+ * This function must be invoked through the 'after_setup_theme' action to allow
+ * the AMP setting to declare the post types support earlier than plugins/theme.
+ *
+ * @since 0.6
+ */
+function define_query_var() {
+	/**
+	 * Filter the AMP query variable.
+	 *
+	 * @since 0.3.2
+	 * @param string $query_var The AMP query variable.
+	 */
+	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+}
+add_action( 'after_setup_theme', 'define_query_var', 3 );
 
 // Make sure the `amp` query var has an explicit value.
 // Avoids issues when filtering the deprecated `query_string` hook.

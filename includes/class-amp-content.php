@@ -91,6 +91,7 @@ class AMP_Content {
 	}
 }
 
+// @todo Split this class out into a separate file.
 class AMP_Content_Sanitizer {
 	public static function sanitize( $content, array $sanitizer_classes, $global_args = array() ) {
 		$scripts = array();
