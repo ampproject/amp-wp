@@ -101,7 +101,7 @@ class AMP_Options_Manager {
 				// Validate JSON configuration.
 				$is_valid_json = AMP_HTML_Utils::is_valid_json( $data['config'] );
 				if ( ! $is_valid_json ) {
-					add_settings_error( self::OPTION_NAME, 'invalid_analytics_config', __( 'Invalid analytics config.', 'amp' ) );
+					add_settings_error( self::OPTION_NAME, 'invalid_analytics_config_json', __( 'Invalid analytics config JSON.', 'amp' ) );
 					continue;
 				}
 
@@ -165,23 +165,27 @@ class AMP_Options_Manager {
 		// Ensure request is coming from analytics option form.
 		check_admin_referer( 'analytics-options', 'analytics-options' );
 
-		$status = '';
 		if ( isset( $_POST['amp-options']['analytics'] ) ) {
 			self::update_option( 'analytics', wp_unslash( $_POST['amp-options']['analytics'] ) );
-			if ( 0 === count( get_settings_errors( self::OPTION_NAME ) ) ) {
-				$status = '1';
+
+			$errors = get_settings_errors( self::OPTION_NAME );
+			if ( empty( $errors ) ) {
+				add_settings_error( self::OPTION_NAME, 'settings_updated', __( 'The analytics entry was successfully saved!', 'amp' ), 'updated' );
+				$errors = get_settings_errors( self::OPTION_NAME );
 			}
+			set_transient( 'settings_errors', $errors );
 		}
 
 		// Redirect to keep the user in the analytics options page.
 		// Wrap in is_admin() to enable phpunit tests to exercise this code.
-		wp_safe_redirect( admin_url( 'admin.php?page=amp-analytics-options&valid=' . $status ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=amp-analytics-options&settings-updated=1' ) );
 		exit;
 	}
 
 	/**
 	 * Update analytics options.
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated
 	 * @param array $data Unsanitized unslashed data.
 	 * @return bool Whether options were updated.
