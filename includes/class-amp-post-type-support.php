@@ -50,7 +50,7 @@ class AMP_Post_Type_Support {
 	}
 
 	/**
-	 * Declare custom post types support.
+	 * Declare support for post types.
 	 *
 	 * This function should only be invoked through the 'after_setup_theme' action to
 	 * allow plugins/theme to overwrite the post types support.

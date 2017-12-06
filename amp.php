@@ -58,7 +58,6 @@ function amp_init() {
 	}
 
 	do_action( 'amp_init' );
-	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 

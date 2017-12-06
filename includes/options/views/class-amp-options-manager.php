@@ -176,8 +176,10 @@ class AMP_Options_Manager {
 			set_transient( 'settings_errors', $errors );
 		}
 
-		// Redirect to keep the user in the analytics options page.
-		// Wrap in is_admin() to enable phpunit tests to exercise this code.
+		/*
+		 * Redirect to keep the user in the analytics options page.
+		 * Wrap in is_admin() to enable phpunit tests to exercise this code.
+		 */
 		wp_safe_redirect( admin_url( 'admin.php?page=amp-analytics-options&settings-updated=1' ) );
 		exit;
 	}
