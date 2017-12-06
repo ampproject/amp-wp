@@ -140,6 +140,50 @@ class AMP_Options_Manager {
 		return $options;
 	}
 
+
+	/**
+	 * Check for errors with updating the supported post types.
+	 *
+	 * @since 0.6
+	 * @see add_settings_error()
+	 */
+	public static function check_supported_post_type_update_errors() {
+		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
+		$supported_types = self::get_option( 'supported_post_types', array() );
+		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
+			$post_type = get_post_type_object( $name );
+			if ( empty( $post_type ) || in_array( $post_type->name, $builtin_support, true ) ) {
+				continue;
+			}
+
+			$post_type_supported = post_type_supports( $post_type->name, AMP_QUERY_VAR );
+			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
+
+			$error = null;
+			$code  = null;
+			if ( $is_support_elected && ! $post_type_supported ) {
+				/* translators: %s: Post type name. */
+				$error = __( '"%s" could not be activated because support is removed by a plugin or theme', 'amp' );
+				$code  = sprintf( '%s_activation_error', $post_type->name );
+			} elseif ( ! $is_support_elected && $post_type_supported ) {
+				/* translators: %s: Post type name. */
+				$error = __( '"%s" could not be deactivated because support is added by a plugin or theme', 'amp' );
+				$code  = sprintf( '%s_deactivation_error', $post_type->name );
+			}
+
+			if ( isset( $error, $code ) ) {
+				add_settings_error(
+					self::OPTION_NAME,
+					$code,
+					sprintf(
+						$error,
+						isset( $post_type->label ) ? $post_type->label : $post_type->name
+					)
+				);
+			}
+		}
+	}
+
 	/**
 	 * Update plugin option.
 	 *

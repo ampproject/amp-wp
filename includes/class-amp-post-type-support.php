@@ -16,9 +16,6 @@ class AMP_Post_Type_Support {
 	 */
 	public static function init() {
 		add_action( 'after_setup_theme', array( __CLASS__, 'add_post_type_support' ), 5 );
-		if ( did_action( 'after_setup_theme' ) ) {
-			self::add_post_type_support();
-		}
 	}
 
 	/**

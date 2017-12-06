@@ -14,6 +14,15 @@
 class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 
 	/**
+	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		unregister_post_type( 'book' );
+		unregister_post_type( 'secret' );
+	}
+
+	/**
 	 * Test add_hooks().
 	 *
 	 * @covers AMP_Post_Type_Support::init()

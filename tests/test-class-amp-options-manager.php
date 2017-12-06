@@ -13,6 +13,14 @@
 class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 	/**
+	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		unregister_post_type( 'foo' );
+	}
+
+	/**
 	 * Test constants.
 	 */
 	public function test_constants() {
@@ -143,5 +151,42 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$entries = AMP_Options_Manager::get_option( 'analytics' );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
+	}
+
+	/**
+	 * Test check_supported_post_type_update_errors.
+	 *
+	 * @covers AMP_Options_Manager::check_supported_post_type_update_errors()
+	 */
+	public function test_check_supported_post_type_update_errors() {
+		global $wp_settings_errors;
+
+		register_post_type( 'foo', array(
+			'public' => true,
+			'label'  => 'Foo',
+		) );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
+		AMP_Post_Type_Support::add_post_type_support();
+		AMP_Options_Manager::check_supported_post_type_update_errors();
+		$this->assertEmpty( get_settings_errors() );
+
+		// Activation error.
+		remove_post_type_support( 'foo', AMP_QUERY_VAR );
+		AMP_Options_Manager::check_supported_post_type_update_errors();
+		$errors = get_settings_errors();
+		$this->assertCount( 1, $errors );
+		$error = current( $errors );
+		$this->assertEquals( 'foo_activation_error', $error['code'] );
+		$wp_settings_errors = array();
+
+		// Deactivation error.
+		AMP_Options_Manager::update_option( 'supported_post_types', array() );
+		add_post_type_support( 'foo', AMP_QUERY_VAR );
+		AMP_Options_Manager::check_supported_post_type_update_errors();
+		$errors = get_settings_errors();
+		$this->assertCount( 1, $errors );
+		$error = current( $errors );
+		$this->assertEquals( 'foo_deactivation_error', $error['code'] );
+		$wp_settings_errors = array();
 	}
 }

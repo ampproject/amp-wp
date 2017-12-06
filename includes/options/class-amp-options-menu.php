@@ -76,51 +76,6 @@ class AMP_Options_Menu {
 	}
 
 	/**
-	 * Check for errors with updating the supported post types.
-	 *
-	 * @since 0.6
-	 */
-	protected function check_supported_post_type_update_errors() {
-
-		// Only apply on update.
-		if ( empty( $_GET['settings-updated'] ) ) { // WPCS: CSRF ok.
-			return;
-		}
-
-		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
-		$supported_types = AMP_Options_Manager::get_option( 'supported_post_types', array() );
-		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
-			$post_type = get_post_type_object( $name );
-			if ( ! isset( $post_type->name, $post_type->label ) || in_array( $post_type->name, $builtin_support, true ) ) {
-				continue;
-			}
-
-			$post_type_supported = post_type_supports( $post_type->name, AMP_QUERY_VAR );
-			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
-
-			$error = null;
-			if ( $is_support_elected && ! $post_type_supported ) {
-				/* translators: %s: Post type name. */
-				$error = __( '"%s" could not be activated because support is removed by a plugin or theme', 'amp' );
-			} elseif ( ! $is_support_elected && $post_type_supported ) {
-				/* translators: %s: Post type name. */
-				$error = __( '"%s" could not be deactivated because support is added by a plugin or theme', 'amp' );
-			}
-
-			if ( isset( $error ) ) {
-				add_settings_error(
-					$post_type->name,
-					$post_type->name,
-					sprintf(
-						$error,
-						$post_type->label
-					)
-				);
-			}
-		}
-	}
-
-	/**
 	 * Post types support section renderer.
 	 *
 	 * @since 0.6
@@ -162,7 +117,9 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	public function render_screen() {
-		$this->check_supported_post_type_update_errors();
+		if ( ! empty( $_GET['settings-updated'] ) ) { // WPCS: CSRF ok.
+			AMP_Options_Manager::check_supported_post_type_update_errors();
+		}
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
