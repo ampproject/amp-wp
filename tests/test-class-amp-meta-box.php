@@ -108,29 +108,38 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	public function test_save_amp_status() {
 		// Test failure.
 		$post_id = $this->factory->post->create();
-		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::POST_META_KEY, true ) );
+		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) );
 
 		// Setup for success.
 		wp_set_current_user( $this->factory->user->create( array(
 			'role' => 'administrator',
 		) ) );
-		$_POST[ AMP_Post_Meta_Box::NONCE_NAME ]    = wp_create_nonce( AMP_Post_Meta_Box::NONCE_ACTION );
-		$_POST[ AMP_Post_Meta_Box::POST_META_KEY ] = 'foo';
+		$_POST[ AMP_Post_Meta_Box::NONCE_NAME ]        = wp_create_nonce( AMP_Post_Meta_Box::NONCE_ACTION );
+		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'disabled';
 
 		// Test revision bail.
 		$post_id = $this->factory->post->create();
-		delete_post_meta( $post_id, AMP_Post_Meta_Box::POST_META_KEY );
+		delete_post_meta( $post_id, AMP_Post_Meta_Box::DISABLED_POST_META_KEY );
 		wp_save_post_revision( $post_id );
-		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::POST_META_KEY, true ) );
+		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) );
 
-		// Test post update success.
+		// Test post update success to disable.
 		$post_id = $this->factory->post->create();
-		delete_post_meta( $post_id, AMP_Post_Meta_Box::POST_META_KEY );
+		delete_post_meta( $post_id, AMP_Post_Meta_Box::DISABLED_POST_META_KEY );
 		wp_update_post( array(
 			'ID'         => $post_id,
 			'post_title' => 'updated',
 		) );
-		$this->assertEquals( 'foo', get_post_meta( $post_id, AMP_Post_Meta_Box::POST_META_KEY, true ) );
+		$this->assertTrue( (bool) get_post_meta( $post_id, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) );
+
+		// Test post update success to enable.
+		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'enabled';
+		delete_post_meta( $post_id, AMP_Post_Meta_Box::DISABLED_POST_META_KEY );
+		wp_update_post( array(
+			'ID'         => $post_id,
+			'post_title' => 'updated',
+		) );
+		$this->assertFalse( (bool) get_post_meta( $post_id, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) );
 	}
 
 	/**

@@ -15,7 +15,11 @@ var ampPostMetaBox = ( function( $ ) {
 		 *
 		 * @since 0.6
 		 */
-		data: {},
+		data: {
+			previewLink: '',
+			disabled: false,
+			statusInputName: ''
+		},
 
 		/**
 		 * Toggle animation speed.
@@ -48,7 +52,9 @@ var ampPostMetaBox = ( function( $ ) {
 		boot: function( data ) {
 			this.data = data;
 			$( document ).ready( function() {
-				this.addPreviewButton();
+				if ( ! this.data.disabled ) {
+					this.addPreviewButton();
+				}
 				this.listen();
 			}.bind( this ) );
 		},
@@ -82,9 +88,11 @@ var ampPostMetaBox = ( function( $ ) {
 		 * @return {void}
 		 */
 		addPreviewButton: function() {
-			$( this.previewBtn )
+			var previewBtn = $( this.previewBtn );
+			previewBtn.addClass( 'without-amp' );
+			previewBtn
 				.clone()
-				.insertAfter( this.previewBtn )
+				.insertAfter( previewBtn )
 				.prop( {
 					'href': this.data.previewLink,
 					'id': this.ampPreviewBtn.replace( '#', '' )
@@ -119,7 +127,7 @@ var ampPostMetaBox = ( function( $ ) {
 		},
 
 		/**
-		 * Add AMP Preview button.
+		 * Add AMP status toggle.
 		 *
 		 * @since 0.6
 		 * @param {Object} $target Event target.
@@ -128,22 +136,27 @@ var ampPostMetaBox = ( function( $ ) {
 		toggleAmpStatus: function( $target ) {
 			var $container = $( '#amp-status-select' ),
 				status = $container.data( 'amp-status' ),
-				$checked;
+				$checked,
+				editAmpStatus = $( '.edit-amp-status' );
 
 			// Don't modify status on cancel button click.
 			if ( ! $target.hasClass( 'button-cancel' ) ) {
-				status = $( '[name="amp_status"]:checked' ).val();
+				status = $( '[name="' + this.data.statusInputName + '"]:checked' ).val();
 			}
 
-			$checked = $( '#amp-satus-' + status );
+			$checked = $( '#amp-status-' + status );
 
 			// Toggle elements.
-			$( '.edit-amp-status' ).fadeToggle( this.toggleSpeed );
+			editAmpStatus.fadeToggle( this.toggleSpeed, function() {
+				if ( editAmpStatus.is( ':visible' ) ) {
+					editAmpStatus.focus();
+				}
+			} );
 			$container.slideToggle( this.toggleSpeed );
 
 			// Update status.
 			$container.data( 'amp-status', status );
-			$checked.prop( 'checked', 'checked' );
+			$checked.prop( 'checked', true );
 			$( '.amp-status-text' ).text( $checked.next().text() );
 		}
 	};

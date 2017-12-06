@@ -5,7 +5,7 @@
 */
 
 /* Core preview button */
-#post-preview {
+#post-preview.without-amp {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 	float: none;

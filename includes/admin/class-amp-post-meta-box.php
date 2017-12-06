@@ -22,12 +22,20 @@ class AMP_Post_Meta_Box {
 	const ASSETS_HANDLE = 'amp-post-meta-box';
 
 	/**
-	 * The post meta key.
+	 * The post meta key for whether the post is skipped.
 	 *
 	 * @since 0.6
 	 * @var string
 	 */
-	const POST_META_KEY = 'amp_status';
+	const DISABLED_POST_META_KEY = 'amp_disabled';
+
+	/**
+	 * The field name for the enabled/disabled radio buttons.
+	 *
+	 * @since 0.6
+	 * @var string
+	 */
+	const STATUS_INPUT_NAME = 'amp_status';
 
 	/**
 	 * The nonce name.
@@ -35,7 +43,7 @@ class AMP_Post_Meta_Box {
 	 * @since 0.6
 	 * @var string
 	 */
-	const NONCE_NAME = 'amp-status';
+	const NONCE_NAME = 'amp-status-nonce';
 
 	/**
 	 * The nonce action.
@@ -61,7 +69,6 @@ class AMP_Post_Meta_Box {
 	 * Enqueue admin assets.
 	 *
 	 * @since 0.6
-	 * @return Void Void on failure.
 	 */
 	public function enqueue_admin_assets() {
 		$post     = get_post();
@@ -71,10 +78,9 @@ class AMP_Post_Meta_Box {
 			&&
 			'post' === $screen->base
 			&&
-			true === post_supports_amp( $post )
+			post_type_supports( $post->post_type, AMP_QUERY_VAR )
 		);
-
-		if ( true !== $validate ) {
+		if ( ! $validate ) {
 			return;
 		}
 
@@ -95,7 +101,9 @@ class AMP_Post_Meta_Box {
 		);
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
-				'previewLink' => esc_url_raw( add_query_arg( AMP_QUERY_VAR, true, get_preview_post_link( $post ) ) ),
+				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
+				'disabled'        => (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true ),
+				'statusInputName' => self::STATUS_INPUT_NAME,
 			) )
 		) );
 	}
@@ -104,7 +112,7 @@ class AMP_Post_Meta_Box {
 	 * Render AMP status.
 	 *
 	 * @since 0.6
-	 * @param object $post WP_POST object.
+	 * @param WP_Post $post Post.
 	 */
 	public function render_status( $post ) {
 		$verify = (
@@ -121,16 +129,12 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$status = get_post_meta( $post->ID, self::POST_META_KEY, true );
-		$labels = array(
+		$disabled = (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true );
+		$status   = $disabled ? 'disabled' : 'enabled';
+		$labels   = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),
 		);
-
-		// Set default.
-		if ( empty( $status ) ) {
-			$status = 'enabled';
-		}
 
 		include_once AMP__DIR__ . '/templates/admin/amp-status.php';
 	}
@@ -145,7 +149,7 @@ class AMP_Post_Meta_Box {
 		$verify = (
 			isset( $_POST[ self::NONCE_NAME ] )
 			&&
-			isset( $_POST[ self::POST_META_KEY ] )
+			isset( $_POST[ self::STATUS_INPUT_NAME ] )
 			&&
 			wp_verify_nonce( sanitize_key( wp_unslash( $_POST[ self::NONCE_NAME ] ) ), self::NONCE_ACTION )
 			&&
@@ -157,11 +161,11 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( true === $verify ) {
-			update_post_meta(
-				$post_id,
-				self::POST_META_KEY,
-				sanitize_key( wp_unslash( $_POST[ self::POST_META_KEY ] ) )
-			);
+			if ( 'disabled' === $_POST[ self::STATUS_INPUT_NAME ] ) {
+				update_post_meta( $post_id, self::DISABLED_POST_META_KEY, true );
+			} else {
+				delete_post_meta( $post_id, self::DISABLED_POST_META_KEY );
+			}
 		}
 	}
 
@@ -170,8 +174,10 @@ class AMP_Post_Meta_Box {
 	 *
 	 * Add the AMP query var is the amp-preview flag is set.
 	 *
-	 * @param string $link The post preview link.
 	 * @since 0.6
+	 *
+	 * @param string $link The post preview link.
+	 * @return string Preview URL.
 	 */
 	public function preview_post_link( $link ) {
 		$is_amp = (
