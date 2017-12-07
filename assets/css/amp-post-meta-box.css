@@ -16,12 +16,20 @@
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
 	text-indent: -9999px;
-	width: 30px;
-	background: no-repeat center url( '../images/amp-icon.svg' ) !important; /* Important needed due to .disabled rule in buttons.css */
+	padding-right: 7px;
+	padding-left: 7px;
+}
+
+.wp-core-ui #amp-post-preview.preview::after {
+	content: "icon";
+	width: 14px;
+	float: left;
+	background: no-repeat center url( '../images/amp-icon.svg' );
 	background-size: 14px !important;
 }
-.wp-core-ui #amp-post-preview.preview.disabled {
-	opacity: 0.7;
+
+.wp-core-ui #amp-post-preview.preview.disabled::after {
+	opacity: 0.6;
 }
 
 /* AMP status */
