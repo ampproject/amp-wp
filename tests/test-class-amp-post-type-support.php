@@ -23,16 +23,6 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_hooks().
-	 *
-	 * @covers AMP_Post_Type_Support::init()
-	 */
-	public function test_init() {
-		AMP_Post_Type_Support::init();
-		$this->assertEquals( 5, has_action( 'after_setup_theme', array( 'AMP_Post_Type_Support', 'add_post_type_support' ) ) );
-	}
-
-	/**
 	 * Test get_builtin_supported_post_types.
 	 *
 	 * @covers AMP_Post_Type_Support::get_builtin_supported_post_types()
