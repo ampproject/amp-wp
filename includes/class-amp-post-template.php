@@ -208,7 +208,8 @@ class AMP_Post_Template {
 	}
 
 	public function load() {
-		$this->load_parts( array( 'single' ) );
+		$template = is_page() ? 'page' : 'single';
+		$this->load_parts( array( $template ) );
 	}
 
 	public function load_parts( $templates ) {
@@ -254,21 +255,26 @@ class AMP_Post_Template {
 		) );
 
 		$metadata = array(
-			'@context' => 'http://schema.org',
-			'@type' => 'BlogPosting',
+			'@context'         => 'http://schema.org',
 			'mainEntityOfPage' => $this->get( 'canonical_url' ),
-			'publisher' => array(
+			'headline'         => $post_title,
+			'publisher'        => array(
 				'@type' => 'Organization',
-				'name' => $this->get( 'blog_name' ),
-			),
-			'headline' => $post_title,
-			'datePublished' => date( 'c', $post_publish_timestamp ),
-			'dateModified' => date( 'c', $post_modified_timestamp ),
-			'author' => array(
-				'@type' => 'Person',
-				'name' => $post_author->display_name,
+				'name'  => $this->get( 'blog_name' ),
 			),
 		);
+
+		if ( is_page() ) {
+			$metadata['@type'] = 'WebPage';
+		} else {
+			$metadata['@type']         = 'BlogPosting';
+			$metadata['datePublished'] = date( 'c', $post_publish_timestamp );
+			$metadata['dateModified']  = date( 'c', $post_modified_timestamp );
+			$metadata['author']        = array(
+				'@type' => 'Person',
+				'name'  => $post_author->display_name,
+			);
+		}
 
 		$site_icon_url = $this->get( 'site_icon_url' );
 		if ( $site_icon_url ) {
