@@ -496,7 +496,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[AMP_Rule_Spec::VALUE] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$spec_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE ];
 				if ( $node->getAttribute( $attr_name ) == $attr_spec_rule[AMP_Rule_Spec::VALUE] ) {
 					return AMP_Rule_Spec::PASS;
 				} else {
