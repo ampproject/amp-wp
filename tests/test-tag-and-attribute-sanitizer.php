@@ -15,7 +15,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				''
 			),
 
-				'a-test'                                                => array(
+			'a-test'                                                    => array(
 				'<a on="tap:see-image-lightbox" role="button" class="button button-secondary play" tabindex="0">Show Image</a>',
 				'<a on="tap:see-image-lightbox" role="button" class="button button-secondary play" tabindex="0">Show Image</a>'
 			),
@@ -541,7 +541,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
-		$content   = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
 }
