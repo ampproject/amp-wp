@@ -86,7 +86,10 @@ class AMP_Template_Customizer {
 			$footer  = true
 		);
 
-		wp_localize_script( 'amp-customizer', 'ampPost', amp_admin_get_preview_permalink() );
+		wp_localize_script( 'amp-customizer', 'ampVars', array(
+			'post'  => amp_admin_get_preview_permalink(),
+			'query' => AMP_QUERY_VAR,
+		) );
 
 		wp_enqueue_style(
 			'amp-customizer',

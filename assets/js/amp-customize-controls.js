@@ -1,6 +1,8 @@
 ( function( api, $ ) {
 	'use strict';
 
+	var ampVars = window.ampVars;
+
 	/**
 	 * Check if the URL is AMPified.
 	 *
@@ -8,12 +10,15 @@
 	 * @return {boolean} whether it is an AMP URL.
 	 */
 	function isAmpUrl( url ) {
-		var urlParser = document.createElement( 'a' );
+		var urlParser = document.createElement( 'a' ),
+			regexParam = new RegExp( "(^|\\?|&)" + ampVars.query + "=1(?=&|$)" ),
+			regexEndpoint = new RegExp( "\\/" + ampVars.query + "\\/?$" );
+
 		urlParser.href = url;
-		if ( /(^|\?|&)amp=1(?=&|$)/.test( urlParser.search ) ) {
+		if ( regexParam.test( urlParser.search ) ) {
 			return true;
 		}
-		return ( /\/amp\/?$/ ).test( urlParser.pathname );
+		return regexEndpoint.test( urlParser.pathname );
 	}
 
 	/**
@@ -23,10 +28,13 @@
 	 * @return {string} non-AMPified URL.
 	 */
 	function unampifyUrl( url ) {
-		var urlParser = document.createElement( 'a' );
+		var urlParser = document.createElement( 'a' ),
+			regexParam = new RegExp( "(^|\\?|&)" + ampVars.query + "=1" ),
+			regexEndpoint = new RegExp( "\\/" + ampVars.query + "\\/?$" );
+
 		urlParser.href = url;
-		urlParser.pathname = urlParser.pathname.replace( /\/amp\/?$/, '' );
-		urlParser.search = urlParser.search.replace( /(^|\?|&)amp=1/, '' );
+		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
+		urlParser.search = urlParser.search.replace( regexParam, '' );
 		return urlParser.href;
 	}
 
@@ -42,7 +50,7 @@
 		if ( urlParser.search.length ) {
 			urlParser.search += '&';
 		}
-		urlParser.search += 'amp=1';
+		urlParser.search += ampVars.query + '=1';
 		return urlParser.href;
 	}
 
@@ -168,7 +176,7 @@
 		// Notification tooltip for AMP toggle.
 		$( '.amp-toggle input' ).before( '<span class="tooltip">' +
 			'This page is not AMP compatible.<br>' +
-			'<a data-post="' + window.ampPost + '">Navigate to an AMP compatible page</a>' +
+			'<a data-post="' + ampVars.post + '">Navigate to an AMP compatible page</a>' +
 		'</span>' );
 
 		$( '.amp-toggle .tooltip a' ).on( 'click', function() {
