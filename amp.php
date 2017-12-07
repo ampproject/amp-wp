@@ -22,6 +22,7 @@ require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
 require_once AMP__DIR__ . '/includes/class-amp-post-type-support.php';
 require_once AMP__DIR__ . '/includes/admin/functions.php';
 require_once AMP__DIR__ . '/includes/admin/class-amp-customizer.php';
+require_once AMP__DIR__ . '/includes/admin/class-amp-post-meta-box.php';
 require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php';
 require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php';
 require_once AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php';
@@ -61,6 +62,7 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
+	amp_define_query_var();
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
@@ -82,7 +84,11 @@ function amp_init() {
  *
  * @since 0.6
  */
-function define_query_var() {
+function amp_define_query_var() {
+	if ( defined( 'AMP_QUERY_VAR' ) ) {
+		return;
+	}
+
 	/**
 	 * Filter the AMP query variable.
 	 *
@@ -91,7 +97,7 @@ function define_query_var() {
 	 */
 	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 }
-add_action( 'after_setup_theme', 'define_query_var', 3 );
+add_action( 'after_setup_theme', 'amp_define_query_var', 3 );
 
 // Make sure the `amp` query var has an explicit value.
 // Avoids issues when filtering the deprecated `query_string` hook.
@@ -147,24 +153,40 @@ function amp_prepare_render() {
 	add_action( 'template_redirect', 'amp_render' );
 }
 
+/**
+ * Render AMP for queried post.
+ *
+ * @since 0.1
+ */
 function amp_render() {
-	$post_id = get_queried_object_id();
-	amp_render_post( $post_id );
+
+	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
+	amp_render_post( get_queried_object() );
 	exit;
 }
 
-function amp_render_post( $post_id ) {
-	$post = get_post( $post_id );
-	if ( ! $post ) {
-		return;
+/**
+ * Render AMP post template.
+ *
+ * @since 0.5
+ * @param WP_Post|int $post Post.
+ */
+function amp_render_post( $post ) {
+
+	if ( ! ( $post instanceof WP_Post ) ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return;
+		}
 	}
+	$post_id = $post->ID;
 
 	amp_load_classes();
 
 	do_action( 'pre_amp_render_post', $post_id );
 
 	amp_add_post_template_actions();
-	$template = new AMP_Post_Template( $post_id );
+	$template = new AMP_Post_Template( $post );
 	$template->load();
 }
 

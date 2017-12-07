@@ -17,9 +17,23 @@ function amp_get_permalink( $post_id ) {
 	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
 }
 
+/**
+ * Determine whether a given post supports AMP.
+ *
+ * @since 0.1
+ *
+ * @param WP_Post $post Post.
+ * @return bool Whether the post supports AMP.
+ */
 function post_supports_amp( $post ) {
-	// Because `add_rewrite_endpoint` doesn't let us target specific post_types :(
+
+	// Because `add_rewrite_endpoint` doesn't let us target specific post_types.
 	if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
+		return false;
+	}
+
+	// Skip based on postmeta.
+	if ( ! isset( $post->ID ) || (bool) get_post_meta( $post->ID, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) ) {
 		return false;
 	}
 
@@ -27,6 +41,15 @@ function post_supports_amp( $post ) {
 		return false;
 	}
 
+	/**
+	 * Filters whether to skip the post from AMP.
+	 *
+	 * @since 0.3
+	 *
+	 * @param bool    $skipped Skipped.
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post.
+	 */
 	if ( true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
 		return false;
 	}
