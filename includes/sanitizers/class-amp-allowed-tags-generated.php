@@ -144,7 +144,6 @@ class AMP_Allowed_Tags_Generated {
 					'alt' => array(),
 					'data-multi-size' => array(
 						'mandatory' => true,
-						'value' => '',
 					),
 					'json' => array(),
 					'media' => array(),
