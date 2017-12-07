@@ -140,7 +140,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				// be used. Let's use the top scoring ones.
 				foreach( $spec_ids_sorted as $id ) {
 					$spec_list = $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ];
-					if ( ! $this->is_mandatory_attribute_missing( $spec_list, $node ) ) {
+					if ( ! $this->is_missing_mandatory_attribute( $spec_list, $node ) ) {
 						$attr_spec_list = array_merge( $attr_spec_list, $spec_list );
 					}
 				}
@@ -159,16 +159,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Whether a node is missing a required attribute.
+	 * Whether a node is missing a mandatory attribute.
 	 *
-	 * @param $attr_spec
-	 * @param $node
-	 * @return $is_missing boolean Whether a required attribute is missing.
+	 * @param array  $attr_spec The attribute specification.
+	 * @param object $node The DOMElement of the node to check.
+	 * @return boolean $is_missing boolean Whether a required attribute is missing.
 	 */
-	public function is_mandatory_attribute_missing( $attr_spec, $node ) {
+	public function is_missing_mandatory_attribute( $attr_spec, $node ) {
+		if ( ! is_array( $attr_spec ) ) {
+			return false;
+		}
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
 			$is_mandatory = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? boolval( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
-			$attribute_exists = $node->hasAttribute( $attr_name );
+			$attribute_exists = method_exists( $node, 'hasAttribute' ) && $node->hasAttribute( $attr_name );
 			if ( $is_mandatory && ! $attribute_exists ) {
 				return true;
 			}

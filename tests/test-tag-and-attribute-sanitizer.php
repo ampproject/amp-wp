@@ -35,9 +35,94 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-ad width="300" height="250" type="adsense" data-ad-client="ca-pub-2005682797531342" data-ad-slot="7046626912"><div placeholder=""></div><div fallback=""></div></amp-ad>',
 			),
 
+			'amp-3q-player' => array(
+				'<amp-3q-player data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158" layout="responsive" width="480" height="270"></amp-3q-player>',
+			),
+
+			'amp-ad' => array(
+				'<amp-ad width="300" height="250" type="foo"></amp-ad>',
+			),
+
+			'amp-ad-exit' => array(
+				'<amp-ad-exit id="exit-api"><script type="application/json"></script></amp-ad-exit>',
+			),
+
+			'amp-animation' => array(
+				'<amp-animation layout="nodisplay"><script type="application/json"></script></amp-animation>',
+			),
+
+			'amp-call-tracking' => array(
+				'<amp-call-tracking config="https://example.com/calltracking.json"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
+			),
+
+			'amp-call-tracking_blacklisted_config' => array(
+				'<amp-call-tracking config="__amp_source_origin"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
+				'',
+			),
+
+			'amp-embed' => array(
+				'<amp-embed type="taboola" width="400" height="300" layout="responsive"></amp-embed>',
+			),
+
+			'amp-facebook-comments' => array(
+				'<amp-facebook-comments width="486" height="657" layout="responsive" data-numposts="5"></amp-facebook-comments>',
+			),
+
+			'amp-facebook-like' => array(
+				'<amp-facebook-like width="90" height="20" layout="fixed" data-layout="button_count"></amp-facebook-like>',
+			),
+
+			'amp-fit-text' => array(
+				'<amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum</amp-fit-text>',
+			),
+
+			'amp-gist' => array(
+				'<amp-gist layout="fixed-height" data-gistid="a19" height="1613"></amp-gist>',
+			),
+
+			'amp-gwd-animation' => array(
+				'<amp-gwd-animation id="4321" layout="nodisplay"></amp-gwd-animation>',
+			),
+
+			'amp-ima-video' => array(
+				'<amp-ima-video width="640" height="360" layout="responsive" data-src="https://example.com/bar"></amp-ima-video>',
+			),
+
+			'amp-imgur' => array(
+				'<amp-imgur data-imgur-id="54321" layout="responsive" width="540" height="663"></amp-imgur>',
+			),
+
+			'amp-install-serviceworker' => array(
+				'<amp-install-serviceworker src="https://www.emample.com/worker.js" data-iframe-src="https://www.example.com/serviceworker.html" layout="nodisplay"></amp-install-serviceworker>',
+			),
+
+			'amp-izlesene' => array(
+				'<amp-izlesene data-videoid="4321" layout="responsive" width="432" height="123"></amp-izlesene>',
+			),
+
+			'amp-nexxtv-player' => array(
+				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
+			),
+
+			'amp-position-observer' => array(
+				'<amp-position-observer intersection-ratios="1"></amp-position-observer>',
+			),
+
+			'amp-twitter' => array(
+				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765"></amp-twitter>',
+			),
+
 			'amp-user-notification' => array(
 				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP" data-dismiss-href="https://example.com/api/echo/post">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
 				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP" data-dismiss-href="https://example.com/api/echo/post">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+			),
+
+			'amp-video' => array(
+				'<amp-video width="432" height="987" src="/video/location.mp4"></amp-video>',
+			),
+
+			'amp-vk' => array(
+				'<amp-vk width="500" height="300" data-embedtype="post" layout="responsive"></amp-vk>',
 			),
 
 			'amp-apester-media' => array(
@@ -95,9 +180,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-gfycat data-gfyid="BareSecondaryFlamingo" width="225" height="400"></amp-gfycat>',
 			),
 
+			'h2' => array(
+				'<h2>Example Text</h2>',
+			),
+
 			'empty_element' => array(
 				'<br/>',
-				'<br/>'
 			),
 
 			'merge_two_attr_specs' => array(
@@ -112,57 +200,49 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'host_relative_url_allowed' => array(
 				'<a href="/path/to/content">Click me.</a>',
-				'<a href="/path/to/content">Click me.</a>'
 			),
 
 			'protocol_relative_url_allowed' => array(
 				'<a href="//example.com/path/to/content">Click me.</a>',
-				'<a href="//example.com/path/to/content">Click me.</a>'
 			),
 
 			'node_with_whiteilsted_protocol_http_allowed' => array(
-				'<a href="http://example.com/path/to/content">Click me.</a>',
 				'<a href="http://example.com/path/to/content">Click me.</a>',
 			),
 
 			'node_with_whiteilsted_protocol_https_allowed' => array(
 				'<a href="https://example.com/path/to/content">Click me.</a>',
-				'<a href="https://example.com/path/to/content">Click me.</a>',
 			),
 
 			'node_with_whiteilsted_protocol_fb-messenger_allowed' => array(
-				'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
 				'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
 			),
 
 			'attribute_value_valid' => array(
 				'<template type="amp-mustache">Template Data</template>',
-				'<template type="amp-mustache">Template Data</template>',
 			),
 
 			'attribute_value_invalid' => array(
-				// type is mandatory, so the node is removed
+				// type is mandatory, so the node is removed.
 				'<template type="bad-type">Template Data</template>',
 				'',
 			),
 
 			'attribute_amp_accordion_value' => array(
 				'<amp-accordion disable-session-states="">test</amp-accordion>',
-				'<amp-accordion disable-session-states="">test</amp-accordion>'
 			),
 
 			'attribute_value_with_blacklisted_regex_removed' => array(
 				'<a rel="import">Click me.</a>',
-				'<a>Click me.</a>'
+				'<a>Click me.</a>',
 			),
 
 			'attribute_value_with_blacklisted_multi-part_regex_removed' => array(
 				'<a rel="something else import">Click me.</a>',
-				'<a>Click me.</a>'
+				'<a>Click me.</a>',
 			),
 
 			'attribute_value_with_required_regex' => array(
-				'<a target="_blank">Click me.</a>',
 				'<a target="_blank">Click me.</a>',
 			),
 
@@ -173,16 +253,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'attribute_value_with_required_value_casei_lower' => array(
 				'<a type="text/html">Click.me.</a>',
-				'<a type="text/html">Click.me.</a>',
 			),
 
 			'attribute_value_with_required_value_casei_upper' => array(
 				'<a type="TEXT/HTML">Click.me.</a>',
-				'<a type="TEXT/HTML">Click.me.</a>',
 			),
 
 			'attribute_value_with_required_value_casei_mixed' => array(
-				'<a type="TeXt/HtMl">Click.me.</a>',
 				'<a type="TeXt/HtMl">Click.me.</a>',
 			),
 
@@ -193,46 +270,42 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'attribute_value_with_value_regex_casei_lower' => array(
 				'<amp-dailymotion data-videoid="abc"></amp-dailymotion>',
-				'<amp-dailymotion data-videoid="abc"></amp-dailymotion>',
 			),
 
 			'attribute_value_with_value_regex_casei_upper' => array(
 				'<amp-dailymotion data-videoid="ABC"></amp-dailymotion>',
-				'<amp-dailymotion data-videoid="ABC"></amp-dailymotion>',
 			),
 
 			'attribute_value_with_bad_value_regex_casei_removed' => array(
-				// data-ui-logo should be true|false
+				// data-ui-logo should be true|false.
 				'<amp-dailymotion data-videoid="123" data-ui-logo="maybe"></amp-dailymotion>',
 				'<amp-dailymotion data-videoid="123"></amp-dailymotion>',
 			),
 
 			'attribute_bad_attr_with_no_value_removed' => array(
 				'<amp-ad type="adsense" bad-attr-no-value>something here</amp-alt>',
-				'<amp-ad type="adsense">something here</amp-ad>'
+				'<amp-ad type="adsense">something here</amp-ad>',
 			),
 
 			'attribute_bad_attr_with_value_removed' => array(
 				'<amp-ad type="adsense" bad-attr="some-value">something here</amp-alt>',
-				'<amp-ad type="adsense">something here</amp-ad>'
+				'<amp-ad type="adsense">something here</amp-ad>',
 			),
 
 			'remove_node_with_missing_mandatory_attribute' => array(
-				// script needs "type"
+				// script needs "type".
 				'<script></script>',
 				'',
 			),
 
 			'remove_node_with_invalid_mandatory_attribute' => array(
-				// script only allows application/json, nothing else
+				// script only allows application/json, nothing else.
 				'<script type="type/javascript">console.log()</script>',
 				'',
 			),
 
 			'allow_node_with_valid_mandatory_attribute' => array(
 				'<script type="application/json"></script>',
-				'<script type="application/json"></script>',
-				'',
 			),
 
 			'nodes_with_non_whitelisted_tags_replaced_by_children' => array(
@@ -267,7 +340,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'allowed_empty_attr' => array(
 				'<a border=""></a>',
-				'<a border=""></a>',
 			),
 
 			'remove_node_with_disallowed_ancestor' => array(
@@ -282,27 +354,25 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-img_with_good_protocols' => array(
 				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
-				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
 			),
 
 			'allowed_tag_only' => array(
 				'<p>Text</p><img src="/path/to/file.jpg" />',
-				'<p>Text</p>'
+				'<p>Text</p>',
 			),
 
 			'disallowed_attributes' => array(
 				'<a href="/path/to/file.jpg" style="border: 1px solid red;">Link</a>',
-				'<a href="/path/to/file.jpg">Link</a>'
+				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
 			'onclick_attribute' => array(
 				'<a href="/path/to/file.jpg" onclick="alert(e);">Link</a>',
-				'<a href="/path/to/file.jpg">Link</a>'
+				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
 			'on_attribute' => array(
 				'<button on="tap:my-lightbox">Tap Me</button>',
-				'<button on="tap:my-lightbox">Tap Me</button>'
 			),
 
 			'multiple_disallowed_attributes' => array(
@@ -312,31 +382,26 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'attribute_recursive' => array(
 				'<div style="border: 1px solid red;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
-				'<div><a href="/path/to/file.jpg">Hello World</a></div>'
+				'<div><a href="/path/to/file.jpg">Hello World</a></div>',
 			),
 
 			'no_strip_amp_tags' => array(
 				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>',
-				'<amp-img src="http://example.com/path/to/file.jpg" width="300" height="300"></amp-img>'
 			),
 
 			'a_with_attachment_rel' => array(
-				'<a href="http://example.com" rel="wp-att-1686">Link</a>',
 				'<a href="http://example.com" rel="wp-att-1686">Link</a>',
 			),
 
 			'a_with_attachment_rel_plus_another_valid_value' => array(
 				'<a href="http://example.com" rel="attachment wp-att-1686">Link</a>',
-				'<a href="http://example.com" rel="attachment wp-att-1686">Link</a>',
 			),
 
 			'a_with_rev' => array(
 				'<a href="http://example.com" rev="footnote">Link</a>',
-				'<a href="http://example.com" rev="footnote">Link</a>',
 			),
 
 			'a_with_target_blank' => array(
-				'<a href="http://example.com" target="_blank">Link</a>',
 				'<a href="http://example.com" target="_blank">Link</a>',
 			),
 
@@ -352,7 +417,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'a_with_target_self' => array(
 				'<a href="http://example.com" target="_self">Link</a>',
-				'<a href="http://example.com" target="_self">Link</a>',
 			),
 
 			'a_with_target_invalid' => array(
@@ -362,52 +426,43 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'a_with_href_invalid' => array(
 				'<a href="some random text">Link</a>',
-				'<a href="some random text">Link</a>',
 			),
 
 			'a_with_href_scheme_tel' => array(
-				'<a href="tel:4166669999">Call Me, Maybe</a>',
 				'<a href="tel:4166669999">Call Me, Maybe</a>',
 			),
 
 			'a_with_href_scheme_sms' => array(
 				'<a href="sms:4166669999">SMS Me, Maybe</a>',
-				'<a href="sms:4166669999">SMS Me, Maybe</a>',
 			),
 
 			'a_with_href_scheme_mailto' => array(
-				'<a href="mailto:email@example.com">Email Me, Maybe</a>',
 				'<a href="mailto:email@example.com">Email Me, Maybe</a>',
 			),
 
 			'a_with_href_relative' => array(
 				'<a href="/home">Home</a>',
-				'<a href="/home">Home</a>',
 			),
 
 			'a_with_anchor' => array(
-				'<a href="#section2">Home</a>',
 				'<a href="#section2">Home</a>',
 			),
 
 			'a_is_anchor' => array(
 				'<a name="section2"></a>',
-				'<a name="section2"></a>',
 			),
 
 			'a_is_achor_with_id' => array(
-				'<a id="section3"></a>',
 				'<a id="section3"></a>',
 			),
 
 			'a_empty' => array(
 				'<a>Hello World</a>',
-				'<a>Hello World</a>',
 			),
 
 			'a_empty_with_children_with_restricted_attributes' => array(
 				'<a><span style="color: red;">Red</span>&amp;<span style="color: blue;">Orange</span></a>',
-				'<a><span>Red</span>&amp;<span>Orange</span></a>'
+				'<a><span>Red</span>&amp;<span>Orange</span></a>',
 			),
 
 			'h1_with_size' => array(
@@ -420,7 +475,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'Headline',
 			),
 
-			// font is removed so we should check that other elements are checked as well
+			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements' => array(
 				'<font size="1">Headline</font><span style="color: blue">Span</span>',
 				'Headline<span>Span</span>',
@@ -435,10 +490,37 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests is_missing_mandatory_attribute
+	 *
+	 * @see AMP_Tag_And_Attribute_Sanitizer::is_missing_mandatory_attribute()
+	 */
+	public function test_is_missing_mandatory_attribute() {
+		$spec = array(
+			'data-gistid' => array(
+				'mandatory' => true,
+			),
+			'media'       => array(),
+			'noloading'   => array(),
+		);
+		$dom = new DomDocument();
+		$node = new DOMElement( 'amp-gist' );
+		$dom->appendChild( $node );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$this->assertTrue( $sanitizer->is_missing_mandatory_attribute( $spec, $node ) );
+
+		$node->setAttribute( 'data-gistid', 'foo-value' );
+		$this->assertFalse( $sanitizer->is_missing_mandatory_attribute( $spec, $node ) );
+
+		$spec_non_array = new stdClass();
+		$this->assertFalse( $sanitizer->is_missing_mandatory_attribute( $spec_non_array, $node ) );
+	}
+
+	/**
 	 * @dataProvider get_data
 	 * @group allowed-tags
 	 */
-	public function test_sanitizer( $source, $expected ) {
+	public function test_sanitizer( $source, $expected = null ) {
+		$expected = isset( $expected ) ? $expected : $source;
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
