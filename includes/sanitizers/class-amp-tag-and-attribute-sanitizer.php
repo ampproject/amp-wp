@@ -171,7 +171,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
-			$is_mandatory     = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? boolval( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
+			$is_mandatory     = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? ( true === $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
 			$attribute_exists = method_exists( $node, 'hasAttribute' ) && $node->hasAttribute( $attr_name );
 			if ( $is_mandatory && ! $attribute_exists ) {
 				return true;
