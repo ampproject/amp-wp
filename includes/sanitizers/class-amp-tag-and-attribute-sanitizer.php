@@ -449,8 +449,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $attrs_to_remove as $attr_name ) {
 			if ( isset( $attr_spec_list[$attr_name][AMP_Rule_Spec::ALLOW_EMPTY] ) &&
 				( true == $attr_spec_list[$attr_name][AMP_Rule_Spec::ALLOW_EMPTY] ) ) {
-				$attr = $node->attributes;
-				$attr[ $attr_name ]->value = '';
+				$node->setAttribute( $attr_name, '' );
 			} else {
 				$node->removeAttribute( $attr_name );
 			}
