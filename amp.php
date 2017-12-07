@@ -62,6 +62,7 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
+	amp_define_query_var();
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
@@ -83,7 +84,11 @@ function amp_init() {
  *
  * @since 0.6
  */
-function define_query_var() {
+function amp_define_query_var() {
+	if ( defined( 'AMP_QUERY_VAR' ) ) {
+		return;
+	}
+
 	/**
 	 * Filter the AMP query variable.
 	 *
@@ -92,7 +97,7 @@ function define_query_var() {
 	 */
 	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 }
-add_action( 'after_setup_theme', 'define_query_var', 3 );
+add_action( 'after_setup_theme', 'amp_define_query_var', 3 );
 
 // Make sure the `amp` query var has an explicit value.
 // Avoids issues when filtering the deprecated `query_string` hook.
