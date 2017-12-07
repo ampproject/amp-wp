@@ -5,26 +5,22 @@
 */
 
 /* Core preview button */
-#post-preview.without-amp {
+.wp-core-ui #preview-action.has-amp-preview #post-preview {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 	float: none;
 }
 
 /* AMP preview button */
-#amp-post-preview {
+.wp-core-ui #amp-post-preview.preview {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
 	text-indent: -9999px;
 	width: 30px;
-	background-image: url( '../images/amp-icon.svg' );
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: 14px;
+	background: no-repeat center url( '../images/amp-icon.svg' ) !important; /* Important needed due to .disabled rule in buttons.css */
+	background-size: 14px !important;
 }
-
-#amp-post-preview.amp-disabled {
-	box-shadow: none;
+.wp-core-ui #amp-post-preview.preview.disabled {
 	opacity: 0.7;
 }
 

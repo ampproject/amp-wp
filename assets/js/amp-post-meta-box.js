@@ -83,7 +83,7 @@ var ampPostMetaBox = ( function( $ ) {
 		} );
 
 		$( '#submitpost input[type="submit"]' ).on( 'click', function() {
-			$( component.ampPreviewBtnSelector ).addClass( 'amp-disabled' );
+			$( component.ampPreviewBtnSelector ).addClass( 'disabled' );
 		} );
 	};
 
@@ -104,8 +104,7 @@ var ampPostMetaBox = ( function( $ ) {
 			} )
 			.text( component.data.l10n.ampPreviewBtnLabel )
 			.parent()
-			.addClass( 'has-next-sibling' );
-		previewBtn.addClass( 'without-amp' );
+			.addClass( 'has-amp-preview' );
 	};
 
 	/**
