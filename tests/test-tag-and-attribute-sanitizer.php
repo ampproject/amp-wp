@@ -210,12 +210,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'merge_two_attr_specs' => array(
 				'<div submit-success>Whatever</div>',
-				'<div>Whatever</div>'
+				'<div>Whatever</div>',
 			),
 
 			'attribute_value_blacklisted_by_regex_removed' => array(
 				'<a href="__amp_source_origin">Click me.</a>',
-				'<a href="">Click me.</a>'
+				'<a href="">Click me.</a>',
 			),
 
 			'host_relative_url_allowed' => array(
@@ -515,7 +515,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'noloading'   => array(),
 		);
-		$dom = new DomDocument();
+		$dom  = new DomDocument();
 		$node = new DOMElement( 'amp-gist' );
 		$dom->appendChild( $node );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -529,15 +529,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test sanitization of tags and attributes.
+	 *
 	 * @dataProvider get_data
 	 * @group allowed-tags
+	 * @param string $source Markup to process.
+	 * @param string $expected The markup to expect.
 	 */
 	public function test_sanitizer( $source, $expected = null ) {
-		$expected = isset( $expected ) ? $expected : $source;
+		$expected  = isset( $expected ) ? $expected : $source;
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content   = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
 }

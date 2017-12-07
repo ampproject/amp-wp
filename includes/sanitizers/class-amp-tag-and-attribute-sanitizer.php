@@ -171,7 +171,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
-			$is_mandatory = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? boolval( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
+			$is_mandatory     = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? boolval( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
 			$attribute_exists = method_exists( $node, 'hasAttribute' ) && $node->hasAttribute( $attr_name );
 			if ( $is_mandatory && ! $attribute_exists ) {
 				return true;
@@ -188,6 +188,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * If any of the tests on the restrictions fail, return false, otherwise
 	 *	return true.
+	 *
+	 * @param object $node The node to validate.
+	 * @param array  $tag_spec The sepecification.
+	 * @return boolean $valid Whether the node's placement is valid.
 	 */
 	private function validate_tag_spec_for_node( $node, $tag_spec ) {
 		if ( ! empty( $tag_spec[AMP_Rule_Spec::MANDATORY_PARENT] ) &&
