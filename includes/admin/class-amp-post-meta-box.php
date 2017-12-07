@@ -104,6 +104,9 @@ class AMP_Post_Meta_Box {
 				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
 				'disabled'        => (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true ),
 				'statusInputName' => self::STATUS_INPUT_NAME,
+				'l10n'            => array(
+					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
+				),
 			) )
 		) );
 	}
@@ -129,6 +132,7 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		// The following variables are used inside amp-status.php template.
 		$disabled = (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true );
 		$status   = $disabled ? 'disabled' : 'enabled';
 		$labels   = array(

@@ -3,13 +3,15 @@
 /**
  * AMP Post Meta Box.
  *
+ * @todo Rename this to be just the ampEditPostScreen?
+ *
  * @since 0.6
  */
 var ampPostMetaBox = ( function( $ ) {
 	'use strict';
 
-	// Exports.
-	return {
+	var component = {
+
 		/**
 		 * Holds data.
 		 *
@@ -18,7 +20,10 @@ var ampPostMetaBox = ( function( $ ) {
 		data: {
 			previewLink: '',
 			disabled: false,
-			statusInputName: ''
+			statusInputName: '',
+			l10n: {
+				ampPreviewBtnLabel: ''
+			}
 		},
 
 		/**
@@ -33,131 +38,134 @@ var ampPostMetaBox = ( function( $ ) {
 		 *
 		 * @since 0.6
 		 */
-		previewBtn: '#post-preview',
+		previewBtnSelector: '#post-preview',
 
 		/**
 		 * AMP preview button selector.
 		 *
 		 * @since 0.6
 		 */
-		ampPreviewBtn: '#amp-post-preview',
-
-		/**
-		 * Boot plugin.
-		 *
-		 * @since 0.6
-		 * @param {Object} data Object data.
-		 * @return {void}
-		 */
-		boot: function( data ) {
-			this.data = data;
-			$( document ).ready( function() {
-				if ( ! this.data.disabled ) {
-					this.addPreviewButton();
-				}
-				this.listen();
-			}.bind( this ) );
-		},
-
-		/**
-		 * Events listener.
-		 *
-		 * @since 0.6
-		 * @return {void}
-		 */
-		listen: function() {
-			$( this.ampPreviewBtn ).on( 'click.amp-post-preview', function( e ) {
-				e.preventDefault();
-				this.onAmpPreviewButtonClick();
-			}.bind( this ) );
-
-			$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
-				e.preventDefault();
-				this.toggleAmpStatus( $( e.target ) );
-			}.bind( this ) );
-
-			$( '#submitpost input[type="submit"]' ).on( 'click', function() {
-				$( this.ampPreviewBtn ).addClass( 'amp-disabled' );
-			}.bind( this ) );
-		},
-
-		/**
-		 * Add AMP Preview button.
-		 *
-		 * @since 0.6
-		 * @return {void}
-		 */
-		addPreviewButton: function() {
-			var previewBtn = $( this.previewBtn );
-			previewBtn.addClass( 'without-amp' );
-			previewBtn
-				.clone()
-				.insertAfter( previewBtn )
-				.prop( {
-					'href': this.data.previewLink,
-					'id': this.ampPreviewBtn.replace( '#', '' )
-				} )
-				.parent()
-				.addClass( 'has-next-sibling' );
-		},
-
-		/**
-		 * AMP Preview button click handler.
-		 *
-		 * We trigger the Core preview link for events propagation purposes.
-		 *
-		 * @since 0.6
-		 * @return {void}
-		 */
-		onAmpPreviewButtonClick: function() {
-			var $input;
-
-			// Flag the AMP preview referer.
-			$input = $( '<input>' )
-				.prop( {
-					'type': 'hidden',
-					'name': 'amp-preview',
-					'value': 'do-preview'
-				} )
-				.insertAfter( this.ampPreviewBtn );
-
-			// Trigger Core preview button and remove AMP flag.
-			$( this.previewBtn ).click();
-			$input.remove();
-		},
-
-		/**
-		 * Add AMP status toggle.
-		 *
-		 * @since 0.6
-		 * @param {Object} $target Event target.
-		 * @return {void}
-		 */
-		toggleAmpStatus: function( $target ) {
-			var $container = $( '#amp-status-select' ),
-				status = $container.data( 'amp-status' ),
-				$checked,
-				editAmpStatus = $( '.edit-amp-status' );
-
-			// Don't modify status on cancel button click.
-			if ( ! $target.hasClass( 'button-cancel' ) ) {
-				status = $( '[name="' + this.data.statusInputName + '"]:checked' ).val();
-			}
-
-			$checked = $( '#amp-status-' + status );
-
-			// Toggle elements.
-			editAmpStatus.fadeToggle( this.toggleSpeed, function() {
-				if ( editAmpStatus.is( ':visible' ) ) {
-					editAmpStatus.focus();
-				}
-			} );
-			$container.slideToggle( this.toggleSpeed );
-
-			// Update status.
-			$container.data( 'amp-status', status );
-			$checked.prop( 'checked', true );
-			$( '.amp-status-text' ).text( $checked.next().text() );
-		}
+		ampPreviewBtnSelector: '#amp-post-preview'
 	};
+
+	/**
+	 * Boot plugin.
+	 *
+	 * @since 0.6
+	 * @param {Object} data Object data.
+	 * @return {void}
+	 */
+	component.boot = function boot( data ) {
+		component.data = data;
+		$( document ).ready( function() {
+			if ( ! component.data.disabled ) {
+				component.addPreviewButton();
+			}
+			component.listen();
+		} );
+	};
+
+	/**
+	 * Events listener.
+	 *
+	 * @since 0.6
+	 * @return {void}
+	 */
+	component.listen = function listen() {
+		$( component.ampPreviewBtnSelector ).on( 'click.amp-post-preview', function( e ) {
+			e.preventDefault();
+			component.onAmpPreviewButtonClick();
+		} );
+
+		$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
+			e.preventDefault();
+			component.toggleAmpStatus( $( e.target ) );
+		} );
+
+		$( '#submitpost input[type="submit"]' ).on( 'click', function() {
+			$( component.ampPreviewBtnSelector ).addClass( 'amp-disabled' );
+		} );
+	};
+
+	/**
+	 * Add AMP Preview button.
+	 *
+	 * @since 0.6
+	 * @return {void}
+	 */
+	component.addPreviewButton = function addPreviewButton() {
+		var previewBtn = $( component.previewBtnSelector );
+		previewBtn
+			.clone()
+			.insertAfter( previewBtn )
+			.prop( {
+				'href': component.data.previewLink,
+				'id': component.ampPreviewBtnSelector.replace( '#', '' )
+			} )
+			.text( component.data.l10n.ampPreviewBtnLabel )
+			.parent()
+			.addClass( 'has-next-sibling' );
+		previewBtn.addClass( 'without-amp' );
+	};
+
+	/**
+	 * AMP Preview button click handler.
+	 *
+	 * We trigger the Core preview link for events propagation purposes.
+	 *
+	 * @since 0.6
+	 * @return {void}
+	 */
+	component.onAmpPreviewButtonClick = function onAmpPreviewButtonClick() {
+		var $input;
+
+		// Flag the AMP preview referer.
+		$input = $( '<input>' )
+			.prop( {
+				'type': 'hidden',
+				'name': 'amp-preview',
+				'value': 'do-preview'
+			} )
+			.insertAfter( component.ampPreviewBtnSelector );
+
+		// Trigger Core preview button and remove AMP flag.
+		$( component.previewBtnSelector ).click();
+		$input.remove();
+	};
+
+	/**
+	 * Add AMP status toggle.
+	 *
+	 * @since 0.6
+	 * @param {Object} $target Event target.
+	 * @return {void}
+	 */
+	component.toggleAmpStatus = function toggleAmpStatus( $target ) {
+		var $container = $( '#amp-status-select' ),
+			status = $container.data( 'amp-status' ),
+			$checked,
+			editAmpStatus = $( '.edit-amp-status' );
+
+		// Don't modify status on cancel button click.
+		if ( ! $target.hasClass( 'button-cancel' ) ) {
+			status = $( '[name="' + component.data.statusInputName + '"]:checked' ).val();
+		}
+
+		$checked = $( '#amp-status-' + status );
+
+		// Toggle elements.
+		editAmpStatus.fadeToggle( component.toggleSpeed, function() {
+			if ( editAmpStatus.is( ':visible' ) ) {
+				editAmpStatus.focus();
+			}
+		} );
+		$container.slideToggle( component.toggleSpeed );
+
+		// Update status.
+		$container.data( 'amp-status', status );
+		$checked.prop( 'checked', true );
+		$( '.amp-status-text' ).text( $checked.next().text() );
+	};
+
+	return component;
 })( window.jQuery );
