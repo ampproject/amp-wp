@@ -65,11 +65,21 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-facebook-comments' => array(
+				'<amp-facebook-comments width="486" height="657" data-href="http://example.com/baz" layout="responsive" data-numposts="5"></amp-facebook-comments>',
+			),
+
+			'amp-facebook-comments_missing_required_attribute' => array(
 				'<amp-facebook-comments width="486" height="657" layout="responsive" data-numposts="5"></amp-facebook-comments>',
+				'',
 			),
 
 			'amp-facebook-like' => array(
+				'<amp-facebook-like width="90" height="20" data-href="http://example.com/baz" layout="fixed" data-layout="button_count"></amp-facebook-like>',
+			),
+
+			'amp-facebook-like_missing_required_attribute' => array(
 				'<amp-facebook-like width="90" height="20" layout="fixed" data-layout="button_count"></amp-facebook-like>',
+				'',
 			),
 
 			'amp-fit-text' => array(
@@ -80,12 +90,22 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-gist layout="fixed-height" data-gistid="a19" height="1613"></amp-gist>',
 			),
 
+			'amp-gist_missing_mandatory_attribute' => array(
+				'<amp-gist layout="fixed-height" height="1613"></amp-gist>',
+				'',
+			),
+
 			'amp-gwd-animation' => array(
 				'<amp-gwd-animation id="4321" layout="nodisplay"></amp-gwd-animation>',
 			),
 
 			'amp-ima-video' => array(
+				'<amp-ima-video width="640" height="360" data-tag="https://example.com/foo" layout="responsive" data-src="https://example.com/bar"></amp-ima-video>',
+			),
+
+			'amp-ima-video_missing_required_attribute' => array(
 				'<amp-ima-video width="640" height="360" layout="responsive" data-src="https://example.com/bar"></amp-ima-video>',
+				'',
 			),
 
 			'amp-imgur' => array(
@@ -292,12 +312,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-ad type="adsense">something here</amp-ad>',
 			),
 
-			'remove_node_with_missing_mandatory_attribute' => array(
-				// script needs "type".
-				'<script></script>',
-				'',
-			),
-
 			'remove_node_with_invalid_mandatory_attribute' => array(
 				// script only allows application/json, nothing else.
 				'<script type="type/javascript">console.log()</script>',
@@ -343,7 +357,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'remove_node_with_disallowed_ancestor' => array(
-				'<amp-sidebar>The sidebar<amp-ad>This node is not allowed here.</amp-ad></amp-sidebar>',
+				'<amp-sidebar>The sidebar<amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
 				'<amp-sidebar>The sidebar</amp-sidebar>',
 			),
 
@@ -499,7 +513,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'data-gistid' => array(
 				'mandatory' => true,
 			),
-			'media'       => array(),
 			'noloading'   => array(),
 		);
 		$dom = new DomDocument();

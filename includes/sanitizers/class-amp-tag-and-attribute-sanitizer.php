@@ -138,17 +138,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				// This should not happen very often, but...
 				// If we're here, then we're not sure which spec should
 				// be used. Let's use the top scoring ones.
-				foreach( $spec_ids_sorted as $id ) {
-					$spec_list = $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ];
+				foreach ( $spec_ids_sorted as $id ) {
+					$spec_list = isset( $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ? $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ] : null;
 					if ( ! $this->is_missing_mandatory_attribute( $spec_list, $node ) ) {
 						$attr_spec_list = array_merge( $attr_spec_list, $spec_list );
 					}
 				}
-				if ( empty( $attr_spec_list ) ) {
-					$this->remove_node( $node );
-					return;
-				}
 			}
+		} // End if().
+
+		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
+			$this->remove_node( $node );
+			return;
 		}
 
 		// Remove any remaining disallowed attributes.
