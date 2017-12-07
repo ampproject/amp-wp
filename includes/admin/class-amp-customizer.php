@@ -58,6 +58,7 @@ class AMP_Template_Customizer {
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
 
 		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_scripts' ) );
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_template' ) );
 		add_action( 'amp_post_template_footer', array( $this, 'add_customizer_preview_script' ) );
 	}
 
@@ -87,8 +88,12 @@ class AMP_Template_Customizer {
 		);
 
 		wp_localize_script( 'amp-customizer', 'ampVars', array(
-			'post'  => amp_admin_get_preview_permalink(),
-			'query' => AMP_QUERY_VAR,
+			'post'    => amp_admin_get_preview_permalink(),
+			'query'   => AMP_QUERY_VAR,
+			'strings' => array(
+				'compat'   => __( 'This page is not AMP compatible', 'amp' ),
+				'navigate' => __( 'Navigate to an AMP compatible page', 'amp' ),
+			),
 		) );
 
 		wp_enqueue_style(
@@ -97,6 +102,28 @@ class AMP_Template_Customizer {
 		);
 
 		do_action( 'amp_customizer_enqueue_scripts', $this->wp_customize );
+	}
+
+
+	/**
+	 * HTML added into Customizer for our toggle.
+	 *
+	 * @since 0.6
+	 * @access public
+	 */
+	public function add_customizer_template() {
+		?>
+		<script type="text/html" id="tmpl-amp-customizer-elements">
+			<label class="amp-toggle">
+				<span class="tooltip">
+					{{ data.compat }}.<br>
+					<a data-post="{{{ data.url }}}">{{ data.navigate }}</a>
+				</span>
+				<input type="checkbox">
+				<span class="slider"></span>
+			</label>
+		</script>
+		<?php
 	}
 
 	/**

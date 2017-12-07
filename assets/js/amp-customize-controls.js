@@ -83,7 +83,7 @@
 		 *
 		 * @return {void}
 		 */
-		function toggleAmpView() {
+		function updatePreviewUrl() {
 			api.previewer.previewUrl.set( setCurrentAmpUrl( api.previewer.previewUrl.get() ) );
 		}
 
@@ -168,16 +168,12 @@
 		} )( api.previewer.previewUrl.validate );
 
 		// Adding checkbox toggle before device selection.
-		$( '.devices-wrapper' ).before( '<label class="amp-toggle">' +
-			'<input type="checkbox">' +
-			'<span class="slider"></span>' +
-		'</label>' );
-
-		// Notification tooltip for AMP toggle.
-		$( '.amp-toggle input' ).before( '<span class="tooltip">' +
-			'This page is not AMP compatible.<br>' +
-			'<a data-post="' + ampVars.post + '">Navigate to an AMP compatible page</a>' +
-		'</span>' );
+		var template = wp.template( 'amp-customizer-elements' );
+		$( '.devices-wrapper' ).before( template( {
+			compat: ampVars.strings.compat,
+			url: ampVars.post,
+			navigate: ampVars.strings.navigate
+		} ) );
 
 		$( '.amp-toggle .tooltip a' ).on( 'click', function() {
 			var url = $( this ).data( 'post' );
@@ -190,7 +186,7 @@
 		// Main control for toggling AMP preview.
 		$( '#customize-footer-actions' ).on( 'change', '.amp-toggle input', function( event ) {
 			ampToggle = $( this ).is( ':checked' );
-			toggleAmpView();
+			updatePreviewUrl();
 			event.stopPropagation();
 		} );
 	}

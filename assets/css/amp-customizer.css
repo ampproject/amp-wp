@@ -3,7 +3,7 @@
 	display: inline-block;
 	width: 30px;
 	height: 15px;
-	top: 11px;
+	top: 15px;
 	left: 130px;
 }
 
@@ -93,4 +93,8 @@
 
 .devices-wrapper .preview-desktop {
 	border-left: 1px solid #DDDDDD !important;
+}
+
+.wp-full-overlay-footer .devices button:before {
+	vertical-align: initial;
 }
