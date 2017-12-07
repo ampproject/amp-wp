@@ -107,7 +107,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'attribute_value_blacklisted_by_regex_removed' => array(
 				'<a href="__amp_source_origin">Click me.</a>',
-				'<a>Click me.</a>'
+				'<a href="">Click me.</a>'
 			),
 
 			'host_relative_url_allowed' => array(
@@ -230,8 +230,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'allow_node_with_valid_mandatory_attribute' => array(
-				// script only allows application/json
-				'<script type="application/json">{}</script>',
+				'<script type="application/json"></script>',
+				'<script type="application/json"></script>',
 				'',
 			),
 
@@ -285,28 +285,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
 			),
 
-			'amp-img_with_bad_protocols' => array(
-				'<amp-img srcset="https://somewhere.com/resource1, evil://somewhereelse.com/resource2"></amp-img>',
-				'',
-			),
-
-			// Test Cases from test-amp-blacklist-sanitizer.php
-
-			// 'disallowed_tag_with_innertext' => array(
-			// 	'<script>alert("")</script>',
-			// 	''
-			// ),
-
-			// 'multiple_disallowed_tags_only' => array(
-			// 	'<clearly_not_allowed /><script>alert("")</script><style>body{ color: red; }</style>',
-			// 	''
-			// ),
-
-			// 'multiple_disallowed_tags_only_in_child' => array(
-			// 	'<p><clearly_not_allowed /><script>alert("")</script><style>body{ color: red; }</style></p>',
-			// 	''
-			// ),
-
 			'allowed_tag_only' => array(
 				'<p>Text</p><img src="/path/to/file.jpg" />',
 				'<p>Text</p>'
@@ -332,19 +310,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
-			'javascript_protocol' => array(
-				'<a href="javascript:alert(\'Hello\');">Click</a>',
-				'<a>Click</a>'
-			),
-
 			'attribute_recursive' => array(
 				'<div style="border: 1px solid red;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
 				'<div><a href="/path/to/file.jpg">Hello World</a></div>'
-			),
-
-			'mixed_tags' => array(
-				'<input type="text"/><p>Text</p><style>body{ color: red; }</style>',
-				'<input type="text"/><p>Text</p>'
 			),
 
 			'no_strip_amp_tags' => array(
@@ -395,11 +363,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'a_with_href_invalid' => array(
 				'<a href="some random text">Link</a>',
 				'<a href="some random text">Link</a>',
-			),
-
-			'a_with_href_scheme_invalid' => array(
-				'<a href="wp://alinktosomething">Link</a>',
-				'<a>Link</a>',
 			),
 
 			'a_with_href_scheme_tel' => array(
