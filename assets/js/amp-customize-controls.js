@@ -3,6 +3,9 @@
 
 	var ampVars = window.ampVars;
 
+	api.state.add( 'ampEnabled', new api.Value() ).set( false );
+	api.state.add( 'ampAvailable', new api.Value() ).set( false );
+
 	/**
 	 * Check if the URL is AMPified.
 	 *
@@ -61,8 +64,6 @@
 	 * @return {void}
 	 */
 	function panelReady( panel ) {
-		var ampToggle = false;
-
 		/**
 		 * Make current URL AMPified if toggle is on.
 		 *
@@ -70,6 +71,7 @@
 		 * @return {string} AMPified URL.
 		 */
 		function setCurrentAmpUrl( url ) {
+			var ampToggle = api.state( 'ampEnabled' ).get() && api.state( 'ampAvailable' ).get();
 			if ( ! ampToggle && isAmpUrl( url ) ) {
 				return unampifyUrl( url );
 			} else if ( ampToggle && ! isAmpUrl( url ) ) {
@@ -93,63 +95,19 @@
 		 * @return {void}
 		 */
 		function isPageAmpified() {
-			var ampEnabled = false,
-				headContent = $( api.previewer.preview.iframe ).contents().find( 'head' ).html();
-
-			if ( headContent.search( '<meta name="generator" content="AMP Plugin' ) >= 0 ) {
-				ampEnabled = true;
-			}
-
-			// Update tooltip display based on above IF it's currently toggled on.
-			if ( ampToggle && ! ampEnabled ) {
-				toggleControl( false, true, true );
-			} else if ( ! ampToggle && ! ampEnabled ) {
-
-				// Enable toggle but don't trigger anything else.
-				$( '.amp-toggle input' ).prop( 'disabled', false );
-			}
-		}
-
-		/**
-		 * Central function to control UI toggle elements.
-		 *
-		 * @param {bool} checked If toggle input should be checked.
-		 * @param {bool} disabled If toggle input should be disabled.
-		 * @param {bool} notification If tooltip notification should appear.
-		 * @return {void}
-		 */
-		function toggleControl( checked, disabled, notification ) {
-			var $input = $( '.amp-toggle input' ),
-				$tooltip = $( '.amp-toggle .tooltip' ),
-				tooltipTimer = 5000;
-
-			$input.prop( 'checked', checked );
-			$input.prop( 'disabled', disabled );
-
-			if ( notification ) {
-				$tooltip.fadeIn();
-				setTimeout( function() {
-					$tooltip.fadeOut();
-				}, tooltipTimer );
-			} else {
-				$tooltip.hide();
-			}
-
-			$input.trigger( 'change' );
+			// TODO, set true for now.
+			// Handle tooltip display in here if page isn't able to be AMP'd.
+			api.state( 'ampAvailable' ).set( true );
 		}
 
 		// AMP panel triggers the input toggle for AMP preview.
 		panel.expanded.bind( function() {
-			var panelOpen = panel.expanded.get();
-			toggleControl( panelOpen, panelOpen, false );
+			api.state( 'ampEnabled' ).set( panel.expanded.get() );
 		} );
 
-		// If AMP panel is open, let it handle enable/disable of the toggle,
-		// otherwise auto enable toggle when mobile device is selected.
+		// Open AMP panel if mobile device selected.
 		api.previewedDevice.bind( function( device ) {
-			if ( ! panel.expanded.get() && ! ampToggle ) {
-				toggleControl( 'mobile' === device, false, false );
-			}
+			panel.expanded.set( 'mobile' === device );
 		} );
 
 		// Preview is ready, check if it's AMP'd in case we need to show tooltip.
@@ -167,6 +125,16 @@
 			};
 		} )( api.previewer.previewUrl.validate );
 
+		// Listen for ampEnabled state changes.
+		api.state( 'ampEnabled' ).bind( function( enabled ) {
+			$( '.amp-toggle input' ).prop( 'checked', enabled );
+			updatePreviewUrl();
+		} );
+
+		api.state( 'ampAvailable' ).bind( function( available ) {
+			$( '.amp-toggle input' ).prop( 'disabled', ! available );
+		} );
+
 		// Adding checkbox toggle before device selection.
 		var template = wp.template( 'amp-customizer-elements' );
 		$( '.devices-wrapper' ).before( template( {
@@ -175,19 +143,17 @@
 			navigate: ampVars.strings.navigate
 		} ) );
 
+		// User clicked link within tooltip, go to linked post in preview.
 		$( '.amp-toggle .tooltip a' ).on( 'click', function() {
 			var url = $( this ).data( 'post' );
 			if ( url.length ) {
-				api.previewer.previewUrl.set( setCurrentAmpUrl( url ) );
-				toggleControl( false, false, false );
+				api.previewer.previewUrl.set( url );
 			}
 		} );
 
 		// Main control for toggling AMP preview.
-		$( '#customize-footer-actions' ).on( 'change', '.amp-toggle input', function( event ) {
-			ampToggle = $( this ).is( ':checked' );
-			updatePreviewUrl();
-			event.stopPropagation();
+		$( '#customize-footer-actions' ).on( 'click', '.amp-toggle input', function() {
+			api.state( 'ampEnabled' ).set( ! api.state( 'ampEnabled' ).get() );
 		} );
 	}
 
