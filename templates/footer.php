@@ -17,7 +17,7 @@
 		<p>
 			<a href="<?php echo esc_url( esc_html__( 'https://wordpress.org/', 'amp' ) ); ?>">
 				<?php
-				// translators: %1$s is WordPress.
+				// translators: %s is WordPress.
 				echo esc_html( sprintf( __( 'Powered by %s', 'amp' ), 'WordPress' ) );
 				?>
 			</a>
