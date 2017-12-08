@@ -1,9 +1,24 @@
-( function( api, $ ) {
+var ampCustomizePreview = ( function( api, $ ) {
 	'use strict';
 
-	api.bind( 'preview-ready', function() {
-		var available = ampVars.ampAvailable === 'true';
-		api.preview.send( 'amp-status', available );
-	} );
+	var self = {};
+
+	/**
+	 * Boot using data sent inline.
+	 *
+	 * @param {Object} Object data.
+	 * @return {void}
+	 */
+	self.boot = function( data ) {
+		if ( ! _.isUndefined( data.ampAvailable ) ) {
+			api.bind( 'preview-ready', function() {
+				api.preview.bind( 'active', function() {
+					api.preview.send( 'amp-status', data.ampAvailable );
+				} );
+			} );
+		}
+	};
+
+	return self;
 
 } )( wp.customize, jQuery );

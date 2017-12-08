@@ -81,23 +81,22 @@ class AMP_Template_Customizer {
 	 */
 	public function add_customizer_scripts() {
 		wp_enqueue_script(
-			'amp-customizer',
+			'amp-customize-controls',
 			amp_get_asset_url( 'js/amp-customize-controls.js' ),
 			array( 'jquery', 'customize-controls' ),
-			$version = false,
-			$footer  = true
+			AMP__VERSION,
+			true
 		);
 
-		$amp_available = is_singular() && post_supports_amp( get_queried_object() );
-
-		wp_localize_script( 'amp-customizer', 'ampVars', array(
-			'post'         => amp_admin_get_preview_permalink(),
-			'query'        => AMP_QUERY_VAR,
-			'ampAvailable' => wp_json_encode( $amp_available ),
-			'strings'      => array(
-				'compat'   => __( 'This page is not AMP compatible', 'amp' ),
-				'navigate' => __( 'Navigate to an AMP compatible page', 'amp' ),
-			),
+		wp_add_inline_script( 'amp-customize-controls', sprintf( 'ampCustomizeControls.boot( %s );',
+			wp_json_encode( array(
+				'defaultPost' => amp_admin_get_preview_permalink(),
+				'query'       => AMP_QUERY_VAR,
+				'strings'     => array(
+					'compat'   => __( 'This page is not AMP compatible', 'amp' ),
+					'navigate' => __( 'Navigate to an AMP compatible page', 'amp' ),
+				),
+			) )
 		) );
 
 		wp_enqueue_style(
@@ -120,17 +119,17 @@ class AMP_Template_Customizer {
 		}
 
 		wp_enqueue_script(
-			'amp-customizer-preview',
+			'amp-customize-preview',
 			amp_get_asset_url( 'js/amp-customize-preview.js' ),
 			array( 'jquery', 'customize-preview' ),
-			$version = false,
-			$footer  = true
+			AMP__VERSION,
+			true
 		);
 
-		$amp_available = is_singular() && post_supports_amp( get_queried_object() );
-
-		wp_localize_script( 'amp-customizer-preview', 'ampVars', array(
-			'ampAvailable' => wp_json_encode( $amp_available ),
+		wp_add_inline_script( 'amp-customize-preview', sprintf( 'ampCustomizePreview.boot( %s );',
+			wp_json_encode( array(
+				'ampAvailable' => (bool) is_singular() && post_supports_amp( get_queried_object() ),
+			) )
 		) );
 	}
 
