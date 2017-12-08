@@ -49,6 +49,7 @@ function amp_get_permalink( $post_id ) {
  * Determine whether a given post supports AMP.
  *
  * @since 0.1
+ * @since 0.6 Returns false when post has meta to disable AMP or when page is homepage or page for posts.
  *
  * @param WP_Post $post Post.
  * @return bool Whether the post supports AMP.
@@ -62,6 +63,11 @@ function post_supports_amp( $post ) {
 
 	// Skip based on postmeta.
 	if ( ! isset( $post->ID ) || (bool) get_post_meta( $post->ID, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) ) {
+		return false;
+	}
+
+	// Homepage and page for posts are not supported yet.
+	if ( 'page' === get_post_type( $post ) && 'page' === get_option( 'show_on_front' ) && ( (int) get_option( 'page_for_posts' ) === (int) $post->ID || (int) get_option( 'page_on_front' ) === (int) $post->ID ) ) {
 		return false;
 	}
 
