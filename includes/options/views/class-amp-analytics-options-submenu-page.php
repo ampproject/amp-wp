@@ -1,6 +1,5 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
 
 class AMP_Analytics_Options_Submenu_Page {
 

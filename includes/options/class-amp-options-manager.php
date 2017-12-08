@@ -1,15 +1,8 @@
 <?php
 /**
- * AMP_Options_Manager class.
+ * class AMP_Options_Manager.
  *
- * @todo This file is located in the wrong directory.
  * @package AMP
- */
-
-require_once AMP__DIR__ . '/includes/utils/class-amp-html-utils.php';
-
-/**
- * Class AMP_Options_Manager
  */
 class AMP_Options_Manager {
 

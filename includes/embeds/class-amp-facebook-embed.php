@@ -1,6 +1,5 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
 
 class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://(www\.)?facebook\.com/.*#i';

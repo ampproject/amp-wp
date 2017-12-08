@@ -172,9 +172,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
-		if ( ! class_exists( 'FastImage' ) ) {
-			require_once( AMP__DIR__ . '/includes/lib/fastimage/class-fastimage.php' );
-		}
 
 		$image = new FastImage();
 		$urls = array_keys( $urls_to_fetch );

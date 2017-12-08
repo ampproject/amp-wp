@@ -1,7 +1,5 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/actions/class-amp-actions.php' );
-
 class AMP_Paired_Post_Actions extends AMP_Actions {
 	
 	public static function register_hooks() {

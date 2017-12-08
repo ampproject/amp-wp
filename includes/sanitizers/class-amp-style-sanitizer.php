@@ -1,6 +1,5 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
 
 /**
  * Collects inline styles and outputs them in the amp-custom stylesheet.

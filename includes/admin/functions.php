@@ -1,9 +1,6 @@
 <?php
 // Callbacks for adding AMP-related things to the admin.
 
-require_once AMP__DIR__ . '/includes/options/class-amp-options-menu.php';
-require_once AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php';
-
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
 add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
@@ -33,6 +30,9 @@ function amp_maybe_init_customizer() {
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
 }
 
+/**
+ * @return string|null
+ */
 function amp_admin_get_preview_permalink() {
 	/**
 	 * Filter the post type to retrieve the latest for use in the AMP template customizer.
@@ -42,7 +42,7 @@ function amp_admin_get_preview_permalink() {
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
 	if ( ! post_type_supports( $post_type, 'amp' ) ) {
-		return;
+		return null;
 	}
 
 	$post_ids = get_posts( array(
@@ -106,6 +106,11 @@ function amp_add_options_menu() {
 }
 add_action( 'wp_loaded', 'amp_add_options_menu' );
 
+/**
+ * @param array $analytics
+ *
+ * @return array
+ */
 function amp_add_custom_analytics( $analytics ) {
 	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 

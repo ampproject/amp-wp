@@ -1,7 +1,5 @@
 <?php
 
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php';
-
 /**
  * Converts Playbuzz embed to <amp-playbuzz>
  */

@@ -1,7 +1,6 @@
 <?php
 // Callbacks for adding AMP-related things to the main theme
 
-require_once( AMP__DIR__ . '/includes/actions/class-amp-actions.php' );
 
 class AMP_Frontend_Actions {
 	
