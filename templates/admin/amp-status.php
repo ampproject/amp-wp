@@ -30,8 +30,25 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 				<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME ); ?>
 			</fieldset>
 		<?php else : ?>
-			<div class="inline notice notice-warning">
-				<p><?php echo esc_html( $this->get_disabled_notice( $post ) ); ?></p>
+			<div class="inline notice notice-warning notice-alt">
+				<p>
+					<?php
+					switch ( amp_post_supports_error( $post ) ) {
+						case 'show-on-front':
+							esc_html_e( 'AMP cannot yet be enabled on homepage or page for posts.', 'amp' );
+							break;
+						case 'password-protected':
+							esc_html_e( 'AMP cannot be enabled on password protected posts.', 'amp' );
+							break;
+						case 'post-type-support':
+							/* translators: %s is URL to AMP settings screen */
+							echo wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), admin_url( 'admin.php?page=amp-options' ) ) );
+							break;
+						default:
+							esc_html_e( 'A plugin or theme has disabled AMP support.', 'amp' );
+					}
+					?>
+				</p>
 			</div>
 		<?php endif; ?>
 		<div class="amp-status-actions">
