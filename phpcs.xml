@@ -11,6 +11,13 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
+		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
+		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
+	</rule>
+
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>
