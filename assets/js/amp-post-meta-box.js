@@ -161,9 +161,11 @@ var ampPostMetaBox = ( function( $ ) {
 		$container.slideToggle( component.toggleSpeed );
 
 		// Update status.
-		$container.data( 'amp-status', status );
-		$checked.prop( 'checked', true );
-		$( '.amp-status-text' ).text( $checked.next().text() );
+		if ( ! component.data.disabled ) {
+			$container.data( 'amp-status', status );
+			$checked.prop( 'checked', true );
+			$( '.amp-status-text' ).text( $checked.next().text() );
+		}
 	};
 
 	return component;
