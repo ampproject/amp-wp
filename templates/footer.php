@@ -1,6 +1,6 @@
 <?php
 /**
- * Footer template.
+ * Footer template part.
  *
  * @package AMP
  */
@@ -25,8 +25,3 @@
 		<a href="#top" class="back-to-top"><?php esc_html_e( 'Back to top', 'amp' ); ?></a>
 	</div>
 </footer>
-
-<?php do_action( 'amp_post_template_footer', $this ); ?>
-
-</body>
-</html>

@@ -10,7 +10,10 @@
  *
  * @var AMP_Post_Template $this
  */
+
+$this->load_parts( array( 'html-start' ) );
 ?>
+
 <?php $this->load_parts( array( 'header' ) ); ?>
 
 <article class="amp-wp-article">
@@ -26,3 +29,6 @@
 </article>
 
 <?php $this->load_parts( array( 'footer' ) ); ?>
+
+<?php
+$this->load_parts( array( 'html-end' ) );
