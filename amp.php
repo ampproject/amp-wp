@@ -99,7 +99,6 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
-	amp_after_setup_theme();
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
@@ -199,6 +198,13 @@ function amp_render_post( $post ) {
 
 	amp_load_classes();
 
+	/**
+	 * Fires before rendering a post in AMP.
+	 *
+	 * @since 0.2
+	 *
+	 * @param int $post_id Post ID.
+	 */
 	do_action( 'pre_amp_render_post', $post_id );
 
 	amp_add_post_template_actions();
