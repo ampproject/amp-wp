@@ -95,8 +95,6 @@ class AMP_Post_Meta_Box {
 			isset( $screen->base )
 			&&
 			'post' === $screen->base
-			&&
-			post_type_supports( $post->post_type, AMP_QUERY_VAR )
 		);
 		if ( ! $validate ) {
 			return;
@@ -138,10 +136,6 @@ class AMP_Post_Meta_Box {
 	public function render_status( $post ) {
 		$verify = (
 			isset( $post->ID )
-			&&
-			isset( $post->post_type )
-			&&
-			post_type_supports( $post->post_type, AMP_QUERY_VAR )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 		);
