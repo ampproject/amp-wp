@@ -14,11 +14,10 @@
 	 */
 	function isAmpUrl( url ) {
 		var urlParser = document.createElement( 'a' ),
-			regexParam = new RegExp( '(^|\\?|&)' + ampVars.query + '=1(?=&|$)' ),
 			regexEndpoint = new RegExp( '\\/' + ampVars.query + '\\/?$' );
 
 		urlParser.href = url;
-		if ( regexParam.test( urlParser.search ) ) {
+		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ ampVars.query ] ) ) {
 			return true;
 		}
 		return regexEndpoint.test( urlParser.pathname );
@@ -32,12 +31,17 @@
 	 */
 	function unampifyUrl( url ) {
 		var urlParser = document.createElement( 'a' ),
-			regexParam = new RegExp( '(^|\\?|&)' + ampVars.query + '=1' ),
 			regexEndpoint = new RegExp( '\\/' + ampVars.query + '\\/?$' );
 
 		urlParser.href = url;
 		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
-		urlParser.search = urlParser.search.replace( regexParam, '' );
+
+		if ( urlParser.search.length > 1 ) {
+			var params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
+			delete params[ ampVars.query ];
+			urlParser.search = $.param( params );
+		}
+
 		return urlParser.href;
 	}
 
@@ -94,9 +98,11 @@
 			api.state( 'ampEnabled' ).set( panel.expanded.get() );
 		} );
 
-		// Open AMP panel if mobile device selected.
+		// Enable AMP toggle if available and mobile device selected.
 		api.previewedDevice.bind( function( device ) {
-			panel.expanded.set( 'mobile' === device );
+			if ( 'mobile' === device && api.state( 'ampAvailable' ).get() ) {
+				api.state( 'ampEnabled' ).set( true );
+			}
 		} );
 
 		// Message coming from previewer.
