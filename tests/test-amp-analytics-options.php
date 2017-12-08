@@ -2,6 +2,14 @@
 
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
+	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		AMP_Options_Manager::register_settings();
+	}
+
 	private $vendor = 'googleanalytics';
 
 	private $config_one = '{
@@ -59,12 +67,16 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		return $amp_rendered;
 	}
 
-	private function insert_one_option( $vendor, $config ) {
-		$data = array();
-		$data['id-value'] = '';
-		$data['vendor-type'] = $vendor;
-		$data['config'] = $config;
-		AMP_Options_Manager::update_analytics_options( $data );
+	/**
+	 * Insert one analytics entry.
+	 *
+	 * @param string $type   Entry type (vendor).
+	 * @param string $config Entry config (JSON).
+	 */
+	private function insert_one_option( $type, $config ) {
+		AMP_Options_Manager::update_option( 'analytics', array(
+			'__new__' => compact( 'type', 'config' ),
+		) );
 	}
 
 	/**

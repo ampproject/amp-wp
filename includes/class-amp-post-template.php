@@ -1,48 +1,127 @@
 <?php
+/**
+ * AMP_Post_Template class.
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-string-utils.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-wp-utils.php' );
+require_once AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php';
+require_once AMP__DIR__ . '/includes/utils/class-amp-html-utils.php';
+require_once AMP__DIR__ . '/includes/utils/class-amp-string-utils.php';
+require_once AMP__DIR__ . '/includes/utils/class-amp-wp-utils.php';
 
-require_once( AMP__DIR__ . '/includes/class-amp-content.php' );
+require_once AMP__DIR__ . '/includes/class-amp-content.php';
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-tag-and-attribute-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php' );
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php' );
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php';
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php';
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-tag-and-attribute-sanitizer.php';
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php';
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php';
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php';
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php';
+require_once AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php';
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-dailymotion-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-vimeo-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-soundcloud-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-gallery-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php' );
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-pinterest-embed.php' );
+require_once AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-dailymotion-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-vimeo-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-soundcloud-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-gallery-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php';
+require_once AMP__DIR__ . '/includes/embeds/class-amp-pinterest-embed.php';
 
+/**
+ * Class AMP_Post_Template
+ *
+ * @since 0.2
+ */
 class AMP_Post_Template {
+
+	/**
+	 * Site icon size.
+	 *
+	 * @since 0.2
+	 * @var int
+	 */
 	const SITE_ICON_SIZE = 32;
+
+	/**
+	 * Content max width.
+	 *
+	 * @since 0.4
+	 * @var int
+	 */
 	const CONTENT_MAX_WIDTH = 600;
 
-	// Needed for 0.3 back-compat
+	/**
+	 * Default navbar background.
+	 *
+	 * Needed for 0.3 back-compat
+	 *
+	 * @since 0.4
+	 * @var string
+	 */
 	const DEFAULT_NAVBAR_BACKGROUND = '#0a89c0';
+
+	/**
+	 * Default navbar color.
+	 *
+	 * Needed for 0.3 back-compat
+	 *
+	 * @since 0.4
+	 * @var string
+	 */
 	const DEFAULT_NAVBAR_COLOR = '#fff';
 
+	/**
+	 * Template directory.
+	 *
+	 * @since 0.2
+	 * @var string
+	 */
 	private $template_dir;
+
+	/**
+	 * Post template data.
+	 *
+	 * @since 0.2
+	 * @var array
+	 */
 	private $data;
 
-	public function __construct( $post_id ) {
+	/**
+	 * Post ID.
+	 *
+	 * @since 0.2
+	 * @var int
+	 */
+	public $ID;
+
+	/**
+	 * Post.
+	 *
+	 * @since 0.2
+	 * @var WP_Post
+	 */
+	public $post;
+
+	/**
+	 * AMP_Post_Template constructor.
+	 *
+	 * @param WP_Post|int $post Post.
+	 */
+	public function __construct( $post ) {
+
 		$this->template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
 
-		$this->ID = $post_id;
-		$this->post = get_post( $post_id );
+		if ( $post instanceof WP_Post ) {
+			$this->post = $post;
+		} else {
+			$this->post = get_post( $post );
+		}
+		$this->ID = $this->post->ID;
 
 		$content_max_width = self::CONTENT_MAX_WIDTH;
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
@@ -51,34 +130,34 @@ class AMP_Post_Template {
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
 		$this->data = array(
-			'content_max_width' => $content_max_width,
+			'content_max_width'     => $content_max_width,
 
-			'document_title' => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // back-compat with 4.3
-			'canonical_url' => get_permalink( $post_id ),
-			'home_url' => home_url(),
-			'blog_name' => get_bloginfo( 'name' ),
+			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
+			'canonical_url'         => get_permalink( $this->ID ),
+			'home_url'              => home_url(),
+			'blog_name'             => get_bloginfo( 'name' ),
 			'generator_metadata'    => 'AMP Plugin v' . AMP__VERSION,
 
-			'html_tag_attributes' => array(),
-			'body_class' => '',
+			'html_tag_attributes'   => array(),
+			'body_class'            => '',
 
-			'site_icon_url' => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
+			'site_icon_url'         => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
-			'featured_image' => false,
-			'comments_link_url' => false,
-			'comments_link_text' => false,
+			'featured_image'        => false,
+			'comments_link_url'     => false,
+			'comments_link_text'    => false,
 
-			'amp_runtime_script' => 'https://cdn.ampproject.org/v0.js',
+			'amp_runtime_script'    => 'https://cdn.ampproject.org/v0.js',
 			'amp_component_scripts' => array(),
 
-			'customizer_settings' => array(),
+			'customizer_settings'   => array(),
 
-			'font_urls' => array(
+			'font_urls'             => array(
 				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
 			),
 
-			'post_amp_styles' => array(),
+			'post_amp_styles'       => array(),
 
 			/**
 			 * Add amp-analytics tags.
@@ -86,18 +165,26 @@ class AMP_Post_Template {
 			 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
 			 *
 			 * @since 0.4
-			 *.
-			 * @param	array	$analytics	An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
-			 * @param	object	$post	The current post.
+			 *
+			 * @param array   $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+			 * @param WP_Post $post      The current post.
 			 */
 			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
-			);
+		);
 
 		$this->build_post_content();
 		$this->build_post_data();
 		$this->build_customizer_settings();
 		$this->build_html_tag_attributes();
 
+		/**
+		 * Filters AMP template data.
+		 *
+		 * @since 0.2
+		 *
+		 * @param array   $data Template data.
+		 * @param WP_Post $post Post.
+		 */
 		$this->data = apply_filters( 'amp_post_template_data', $this->data, $this->post );
 	}
 
@@ -121,7 +208,8 @@ class AMP_Post_Template {
 	}
 
 	public function load() {
-		$this->load_parts( array( 'single' ) );
+		$template = is_page() ? 'page' : 'single';
+		$this->load_parts( array( $template ) );
 	}
 
 	public function load_parts( $templates ) {
@@ -151,6 +239,11 @@ class AMP_Post_Template {
 		}
 	}
 
+	/**
+	 * Build post data.
+	 *
+	 * @since 0.2
+	 */
 	private function build_post_data() {
 		$post_title = get_the_title( $this->ID );
 		$post_publish_timestamp = get_the_date( 'U', $this->ID );
@@ -167,21 +260,23 @@ class AMP_Post_Template {
 		) );
 
 		$metadata = array(
-			'@context' => 'http://schema.org',
-			'@type' => 'BlogPosting',
+			'@context'         => 'http://schema.org',
+			'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 			'mainEntityOfPage' => $this->get( 'canonical_url' ),
-			'publisher' => array(
+			'publisher'        => array(
 				'@type' => 'Organization',
-				'name' => $this->get( 'blog_name' ),
+				'name'  => $this->get( 'blog_name' ),
 			),
-			'headline' => $post_title,
-			'datePublished' => date( 'c', $post_publish_timestamp ),
-			'dateModified' => date( 'c', $post_modified_timestamp ),
-			'author' => array(
-				'@type' => 'Person',
-				'name' => $post_author->display_name,
-			),
+			'headline'         => $post_title,
+			'datePublished'    => date( 'c', $post_publish_timestamp ),
+			'dateModified'     => date( 'c', $post_modified_timestamp ),
 		);
+		if ( $post_author ) {
+			$metadata['author'] = array(
+				'@type' => 'Person',
+				'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			);
+		}
 
 		$site_icon_url = $this->get( 'site_icon_url' );
 		if ( $site_icon_url ) {

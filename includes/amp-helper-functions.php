@@ -27,8 +27,8 @@ function amp_get_permalink( $post_id ) {
 	}
 
 	$parsed_url = wp_parse_url( get_permalink( $post_id ) );
-	$structure = get_option( 'permalink_structure' );
-	if ( empty( $structure ) || ! empty( $parsed_url['query'] ) ) {
+	$structure  = get_option( 'permalink_structure' );
+	if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
 		$amp_url = add_query_arg( AMP_QUERY_VAR, '', get_permalink( $post_id ) );
 	} else {
 		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
@@ -45,21 +45,19 @@ function amp_get_permalink( $post_id ) {
 	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
 }
 
+/**
+ * Determine whether a given post supports AMP.
+ *
+ * @since 0.1
+ * @since 0.6 Returns false when post has meta to disable AMP or when page is homepage or page for posts.
+ * @see   AMP_Post_Type_Support::get_support_errors()
+ *
+ * @param WP_Post $post Post.
+ *
+ * @return bool Whether the post supports AMP.
+ */
 function post_supports_amp( $post ) {
-	// Because `add_rewrite_endpoint` doesn't let us target specific post_types :(
-	if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
-		return false;
-	}
-
-	if ( post_password_required( $post ) ) {
-		return false;
-	}
-
-	if ( true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
-		return false;
-	}
-
-	return true;
+	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
 }
 
 /**

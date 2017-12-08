@@ -1,10 +1,12 @@
 <?php
 // Callbacks for adding AMP-related things to the admin.
 
-require_once( AMP__DIR__ . '/includes/options/class-amp-options-menu.php' );
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
+require_once AMP__DIR__ . '/includes/options/class-amp-options-menu.php';
+require_once AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php';
 
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
+
+add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 
 /**
  * Sets up the AMP template editor for the Customizer.
@@ -69,15 +71,22 @@ function amp_add_customizer_link() {
 }
 
 /**
- * Registers a top-level menu for AMP configuration options
+ * Registers AMP settings.
  */
 function amp_add_options_menu() {
 	if ( ! is_admin() ) {
 		return;
 	}
 
-	$show_options_menu = apply_filters( 'amp_options_menu_is_enabled', true );
-	if ( true !== $show_options_menu ) {
+	/**
+	 * Filter whether to enable the AMP settings.
+	 *
+	 * @since 0.5
+	 * @param bool $enable Whether to enable the AMP settings. Default true.
+	 */
+	$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
+
+	if ( true !== $short_circuit ) {
 		return;
 	}
 
@@ -104,3 +113,16 @@ function amp_add_custom_analytics( $analytics ) {
 	return $analytics;
 }
 add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
+
+/**
+ * Bootstrap AMP post meta box.
+ *
+ * This function must be invoked only once through the 'wp_loaded' action.
+ *
+ * @since 0.6
+ */
+function amp_post_meta_box() {
+	$post_meta_box = new AMP_Post_Meta_Box();
+	$post_meta_box->init();
+}
+add_action( 'wp_loaded', 'amp_post_meta_box' );
