@@ -71,6 +71,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
+	/**
+	 * @param $node
+	 */
 	private function process_node( $node ) {
 		// Don't process text or comment nodes
 		if ( ( XML_TEXT_NODE == $node->nodeType ) ||
