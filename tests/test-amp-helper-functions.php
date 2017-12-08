@@ -34,14 +34,22 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$drafted_post   = $this->factory()->post->create( array(
 			'post_name'   => 'draft',
 			'post_status' => 'draft',
+			'post_type'   => 'post',
 		) );
 		$published_post = $this->factory()->post->create( array(
 			'post_name'   => 'publish',
 			'post_status' => 'publish',
+			'post_type'   => 'post',
+		) );
+		$published_page = $this->factory()->post->create( array(
+			'post_name'   => 'publish',
+			'post_status' => 'publish',
+			'post_type'   => 'page',
 		) );
 
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
 
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
@@ -61,9 +69,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_permalink_with_pretty_permalinks() {
 		global $wp_rewrite;
-		$wp_rewrite->use_trailing_slashes = true;
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
-		flush_rewrite_rules();
+		$wp_rewrite->use_trailing_slashes = true;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules();
 
 		$drafted_post   = $this->factory()->post->create( array(
 			'post_name'   => 'draft',
@@ -73,9 +82,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_name'   => 'publish',
 			'post_status' => 'publish',
 		) );
+		$published_page = $this->factory()->post->create( array(
+			'post_name'   => 'publish',
+			'post_status' => 'publish',
+			'post_type'   => 'page',
+		) );
 
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
 
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );

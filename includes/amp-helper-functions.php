@@ -28,7 +28,7 @@ function amp_get_permalink( $post_id ) {
 
 	$parsed_url = wp_parse_url( get_permalink( $post_id ) );
 	$structure = get_option( 'permalink_structure' );
-	if ( empty( $structure ) || ! empty( $parsed_url['query'] ) ) {
+	if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
 		$amp_url = add_query_arg( AMP_QUERY_VAR, '', get_permalink( $post_id ) );
 	} else {
 		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
