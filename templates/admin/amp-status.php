@@ -31,7 +31,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 			</fieldset>
 		<?php else : ?>
 			<div class="inline notice notice-warning">
-				<p><?php esc_html_e( 'AMP cannot be enabled on home page, front page, password protected posts and post types which do not support AMP.', 'amp' ); ?></p>
+				<p><?php echo esc_html( $this->get_disabled_notice( $post ) ); ?></p>
 			</div>
 		<?php endif; ?>
 		<div class="amp-status-actions">

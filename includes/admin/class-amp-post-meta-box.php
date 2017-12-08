@@ -210,4 +210,27 @@ class AMP_Post_Meta_Box {
 		return $link;
 	}
 
+	/**
+	 * Getter for the disabled notice.
+	 *
+	 * @since 0.6
+	 *
+	 * @param WP_Post $post Post.
+	 * @return string The disabled notice.
+	 */
+	protected function get_disabled_notice( $post ) {
+		$error = amp_post_supports_error( $post );
+
+		switch ( $error ) {
+			case 'show-on-front':
+				return __( 'AMP cannot yet be enabled on homepage or page for posts.', 'amp' );
+			case 'password-protected':
+				return __( 'AMP cannot be enabled on password protected posts.', 'amp' );
+			case 'post-type-support':
+				return __( 'AMP cannot be enabled on post types which do not support AMP.', 'amp' );
+			default:
+				return __( 'A plugin or theme has disabled AMP support.', 'amp' );
+		}
+	}
+
 }
