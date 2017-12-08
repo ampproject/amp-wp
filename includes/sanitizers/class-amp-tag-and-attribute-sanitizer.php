@@ -369,8 +369,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$mandatory_attributes = array();
-
 		foreach( $node->attributes as $attr_name => $attr_node ) {
 
 			if ( ! isset( $attr_spec_list[$attr_name] ) ) {
