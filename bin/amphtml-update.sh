@@ -10,6 +10,17 @@ BIN_PATH="$(pwd)"
 PROJECT_PATH=$(dirname $PWD)
 VENDOR_PATH=$PROJECT_PATH/vendor
 
+if ! apt-get > /dev/null; then
+	echo -e "The AMP HTML uses the apt-get, make sure to run this script in a Linux environment"
+	exit
+fi
+
+# Install dependencies.
+sudo apt-get install git
+sudo apt-get install python
+sudo apt-get install protobuf-compiler
+sudo apt-get install python-protobuf
+
 # Create and go to vendor.
 if [[ ! -e $VENDOR_PATH ]]; then
 	mkdir $VENDOR_PATH
@@ -29,11 +40,6 @@ cd $VENDOR_PATH/amphtml/validator
 if [ ! -f $VENDOR_PATH/amphtml/validator/validator_gen_md.py ]; then
 	git apply $BIN_PATH/amphtml-fix.diff
 fi
-
-# Install dependencies.
-sudo apt-get install python
-sudo apt-get install protobuf-compiler
-sudo apt-get install python-protobuf
 
 # Run script.
 python amphtml-update.py
