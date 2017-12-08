@@ -2,24 +2,19 @@
 set -e
 
 # Go to the right location.
-if [[ '.' != $(dirname "$0") ]]; then
-	cd bin
-fi
+cd "$(dirname "$0")"
 
 BIN_PATH="$(pwd)"
 PROJECT_PATH=$(dirname $PWD)
 VENDOR_PATH=$PROJECT_PATH/vendor
 
-if ! apt-get > /dev/null; then
-	echo -e "The AMP HTML uses the apt-get, make sure to run this script in a Linux environment"
-	exit
+if ! command -v apt-get >/dev/null 2>&1; then
+	echo "The AMP HTML uses apt-get, make sure to run this script in a Linux environment"
+	exit 1
 fi
 
 # Install dependencies.
-sudo apt-get install git
-sudo apt-get install python
-sudo apt-get install protobuf-compiler
-sudo apt-get install python-protobuf
+sudo apt-get install git python protobuf-compiler python-protobuf
 
 # Create and go to vendor.
 if [[ ! -e $VENDOR_PATH ]]; then
@@ -30,6 +25,9 @@ cd $VENDOR_PATH
 # Clone amphtml repo.
 if [[ ! -e $VENDOR_PATH/amphtml ]]; then
 	git clone https://github.com/ampproject/amphtml amphtml
+else
+	cd $VENDOR_PATH/amphtml/validator
+	git pull
 fi
 
 # Copy script to location and go there.
