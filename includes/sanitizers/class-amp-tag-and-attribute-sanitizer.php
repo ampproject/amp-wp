@@ -89,7 +89,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Compile a list of rule_specs to validate for this node based on
 		// tag name of the node.
-		$rule_spec_list_to_validate = array();
+		$rule_spec_list = $rule_spec_list_to_validate = array();
 		if ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
 			$rule_spec_list = $this->allowed_tags[ $node->nodeName ];
 		}
