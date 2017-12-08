@@ -6,7 +6,7 @@ class WPCOM_AMP_Polldaddy_Embed extends AMP_Base_Embed_Handler {
 	}
 
 	public function unregister_embed() {
-		remove_shortcode( 'polldaddy', array( $this, 'shortcode' ) );
+		remove_shortcode( 'polldaddy' );
 	}
 
 	public function shortcode( $attr ) {
