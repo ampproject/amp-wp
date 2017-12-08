@@ -119,7 +119,9 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 		// AMP panel triggers the input toggle for AMP preview.
 		panel.expanded.bind( function() {
-			api.state( 'ampEnabled' ).set( panel.expanded.get() );
+			if ( api.state( 'ampAvailable' ).get() ) {
+				api.state( 'ampEnabled' ).set( panel.expanded.get() );
+			}
 		} );
 
 		// Enable AMP toggle if available and mobile device selected.

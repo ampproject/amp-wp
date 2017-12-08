@@ -20,13 +20,13 @@ You can tweak small pieces of the template or the entire thing depending on your
 
 The plugin ships with its own Customizer that you can use to tweak various parts of the default template like colors.
 
-#### Disabling the AMP Customizer
+#### Disabling the AMP Customizer Settings
 
-If you're using a completely custom template, you may want to disable the AMP Customizer:
+If you're using a completely custom template, you may want to disable the AMP Customizer Settings:
 
 ```
 add_filter( 'amp_customizer_is_enabled', '__return_false' );
-``` 
+```
 
 Note that this needs to be called before the `after_setup_theme` hook to work.
 

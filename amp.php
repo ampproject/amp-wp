@@ -154,7 +154,7 @@ function amp_render_post( $post_id ) {
  * @since 0.4
  */
 function _amp_bootstrap_customizer() {
-	add_action( 'after_setup_theme', 'amp_maybe_init_customizer' );
+	add_action( 'after_setup_theme', 'amp_init_customizer' );
 }
 add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
 

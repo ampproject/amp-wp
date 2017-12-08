@@ -13,7 +13,18 @@ class AMP_Customizer_Design_Settings {
 
 	public static function init_customizer() {
 		add_action( 'amp_customizer_register_settings', array( __CLASS__, 'register_customizer_settings' ) );
-		add_action( 'amp_customizer_register_ui', array( __CLASS__, 'register_customizer_ui' ) );
+
+		/**
+		 * Filter whether to enable the AMP default template design settings.
+		 *
+		 * @param bool $enable Whether to enable the AMP default template design settings. Default true.
+		 */
+		$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
+
+		if ( true === $amp_customizer_enabled ) {
+			add_action( 'amp_customizer_register_ui', array( __CLASS__, 'register_customizer_ui' ) );
+		}
+
 		add_action( 'amp_customizer_enqueue_preview_scripts', array( __CLASS__, 'enqueue_customizer_preview_scripts' ) );
 	}
 

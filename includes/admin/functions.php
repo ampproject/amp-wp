@@ -9,25 +9,14 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 /**
  * Sets up the AMP template editor for the Customizer.
  */
-function amp_maybe_init_customizer() {
-	/**
-	 * Filter whether to enable the AMP template customizer functionality.
-	 *
-	 * @param bool $enable Whether to enable the AMP customizer. Default true.
-	 */
-	$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
-
-	if ( true !== $amp_customizer_enabled ) {
-		return;
-	}
-
-	// Fire up the AMP Customizer
+function amp_init_customizer() {
+	// Fire up the AMP Customizer.
 	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );
 
-	// Add some basic design settings + controls to the Customizer
+	// Add some basic design settings + controls to the Customizer.
 	add_action( 'amp_init', array( 'AMP_Customizer_Design_Settings', 'init' ) );
 
-	// Add a link to the Customizer
+	// Add a link to the Customizer.
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
 }
 
