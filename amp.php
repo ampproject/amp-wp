@@ -154,8 +154,13 @@ function amp_prepare_render() {
  */
 function amp_render() {
 
-	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
-	amp_render_post( get_queried_object() );
+	/**
+	 * Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
+	 *
+	 * @var WP_Post $post
+	 */
+	$post = get_queried_object();
+	amp_render_post( $post );
 	exit;
 }
 
