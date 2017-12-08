@@ -962,14 +962,5 @@ abstract class AMP_Rule_Spec {
 			),
 			'tag_spec' => array(),
 		),
-		'script' => array(
-			'attr_spec_list' => array(
-				'type' => array(
-					'mandatory' => true,
-					'value_casei' => 'application/json',
-				),
-			),
-			'tag_spec' => array(),
-		),
 	);
 }
