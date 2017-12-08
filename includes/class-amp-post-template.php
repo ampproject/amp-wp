@@ -239,6 +239,11 @@ class AMP_Post_Template {
 		}
 	}
 
+	/**
+	 * Build post data.
+	 *
+	 * @since 0.2
+	 */
 	private function build_post_data() {
 		$post_title = get_the_title( $this->ID );
 		$post_publish_timestamp = get_the_date( 'U', $this->ID );
@@ -256,23 +261,20 @@ class AMP_Post_Template {
 
 		$metadata = array(
 			'@context'         => 'http://schema.org',
+			'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 			'mainEntityOfPage' => $this->get( 'canonical_url' ),
-			'headline'         => $post_title,
 			'publisher'        => array(
 				'@type' => 'Organization',
 				'name'  => $this->get( 'blog_name' ),
 			),
+			'headline'         => $post_title,
+			'datePublished'    => date( 'c', $post_publish_timestamp ),
+			'dateModified'     => date( 'c', $post_modified_timestamp ),
 		);
-
-		if ( is_page() ) {
-			$metadata['@type'] = 'WebPage';
-		} else {
-			$metadata['@type']         = 'BlogPosting';
-			$metadata['datePublished'] = date( 'c', $post_publish_timestamp );
-			$metadata['dateModified']  = date( 'c', $post_modified_timestamp );
-			$metadata['author']        = array(
+		if ( $post_author ) {
+			$metadata['author'] = array(
 				'@type' => 'Person',
-				'name'  => $post_author->display_name,
+				'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
 			);
 		}
 
