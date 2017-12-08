@@ -59,7 +59,8 @@ class AMP_Template_Customizer {
 
 		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_scripts' ) );
 		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_template' ) );
-		add_action( 'amp_post_template_footer', array( $this, 'add_customizer_preview_script' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'add_customizer_preview_scripts' ) );
+		add_action( 'amp_post_template_footer', array( $this, 'template_required_scripts' ) );
 	}
 
 	/**
@@ -87,10 +88,13 @@ class AMP_Template_Customizer {
 			$footer  = true
 		);
 
+		$amp_available = is_singular() && post_supports_amp( get_queried_object() );
+
 		wp_localize_script( 'amp-customizer', 'ampVars', array(
-			'post'    => amp_admin_get_preview_permalink(),
-			'query'   => AMP_QUERY_VAR,
-			'strings' => array(
+			'post'         => amp_admin_get_preview_permalink(),
+			'query'        => AMP_QUERY_VAR,
+			'ampAvailable' => wp_json_encode( $amp_available ),
+			'strings'      => array(
 				'compat'   => __( 'This page is not AMP compatible', 'amp' ),
 				'navigate' => __( 'Navigate to an AMP compatible page', 'amp' ),
 			),
@@ -104,6 +108,31 @@ class AMP_Template_Customizer {
 		do_action( 'amp_customizer_enqueue_scripts', $this->wp_customize );
 	}
 
+	/**
+	 * Enqueue files needed within Previewer.
+	 *
+	 * @since 0.6
+	 * @access public
+	 */
+	public function add_customizer_preview_scripts() {
+		if ( ! is_customize_preview() ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'amp-customizer-preview',
+			amp_get_asset_url( 'js/amp-customize-preview.js' ),
+			array( 'jquery', 'customize-preview' ),
+			$version = false,
+			$footer  = true
+		);
+
+		$amp_available = is_singular() && post_supports_amp( get_queried_object() );
+
+		wp_localize_script( 'amp-customizer-preview', 'ampVars', array(
+			'ampAvailable' => wp_json_encode( $amp_available ),
+		) );
+	}
 
 	/**
 	 * HTML added into Customizer for our toggle.
@@ -132,7 +161,7 @@ class AMP_Template_Customizer {
 	 * @since 0.6
 	 * @access public
 	 */
-	public function add_customizer_preview_script() {
+	public function template_required_scripts() {
 		if ( is_customize_preview() ) {
 			global $wp_customize;
 			$wp_customize->customize_preview_settings();
