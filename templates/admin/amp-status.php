@@ -9,6 +9,15 @@
 if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 	return;
 }
+
+/**
+ * Inherited template vars.
+ *
+ * @var array  $labels    Labels for enabled or disabled.
+ * @var string $status    Enabled or disabled.
+ * @var bool   $available Whether AMP is available.
+ */
+
 ?>
 <div class="misc-pub-section misc-amp-status">
 	<span class="amp-icon"></span>
@@ -33,20 +42,22 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 			<div class="inline notice notice-warning notice-alt">
 				<p>
 					<?php
-					switch ( amp_post_supports_error( $post ) ) {
-						case 'show-on-front':
-							esc_html_e( 'AMP cannot yet be enabled on homepage or page for posts.', 'amp' );
-							break;
-						case 'password-protected':
-							esc_html_e( 'AMP cannot be enabled on password protected posts.', 'amp' );
-							break;
-						case 'post-type-support':
-							/* translators: %s is URL to AMP settings screen */
-							echo wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), admin_url( 'admin.php?page=amp-options' ) ) );
-							break;
-						default:
-							esc_html_e( 'A plugin or theme has disabled AMP support.', 'amp' );
+					$support_errors_codes = AMP_Post_Type_Support::get_support_errors( $post );
+					$support_errors       = array();
+					if ( in_array( 'page-on-front', $support_errors_codes, true ) || in_array( 'page-for-posts', $support_errors_codes, true ) ) {
+						$support_errors[] = __( 'AMP cannot yet be enabled on homepage or page for posts.', 'amp' );
 					}
+					if ( in_array( 'password-protected', $support_errors_codes, true ) ) {
+						$support_errors[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
+					}
+					if ( in_array( 'post-type-support', $support_errors_codes, true ) ) {
+						/* translators: %s is URL to AMP settings screen */
+						$support_errors[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), admin_url( 'admin.php?page=amp-options' ) ) );
+					}
+					if ( in_array( 'skip-post', $support_errors_codes, true ) ) {
+						$support_errors[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
+					}
+					echo implode( ' ', $support_errors ); // WPCS: xss ok.
 					?>
 				</p>
 			</div>

@@ -50,68 +50,14 @@ function amp_get_permalink( $post_id ) {
  *
  * @since 0.1
  * @since 0.6 Returns false when post has meta to disable AMP or when page is homepage or page for posts.
- * @see   post_supports_amp_error()
+ * @see   AMP_Post_Type_Support::get_support_errors()
  *
  * @param WP_Post $post Post.
+ *
  * @return bool Whether the post supports AMP.
  */
 function post_supports_amp( $post ) {
-	return false === amp_post_supports_error( $post );
-}
-
-/**
- * Return an error if a given post does not have AMP support.
- *
- * @since 0.6
- *
- * @param WP_Post $post Post.
- * @return string|bool Error if a given post does not have AMP support.
- */
-function amp_post_supports_error( $post ) {
-	// Because `add_rewrite_endpoint` doesn't let us target specific post_types.
-	if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
-		return 'post-type-support';
-	}
-
-	// Skip based on postmeta.
-	if ( ! isset( $post->ID ) || (bool) get_post_meta( $post->ID, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) ) {
-		return 'post-disabled';
-	}
-
-	// Homepage and page for posts are not supported yet.
-	$show_on_front = (
-		'page' === get_post_type( $post )
-		&&
-		'page' === get_option( 'show_on_front' )
-		&&
-		(
-			(int) get_option( 'page_for_posts' ) === (int) $post->ID
-			||
-			(int) get_option( 'page_on_front' ) === (int) $post->ID
-		)
-	);
-	if ( $show_on_front ) {
-		return 'show-on-front';
-	}
-
-	if ( post_password_required( $post ) ) {
-		return 'password-protected';
-	}
-
-	/**
-	 * Filters whether to skip the post from AMP.
-	 *
-	 * @since 0.3
-	 *
-	 * @param bool    $skipped Skipped.
-	 * @param int     $post_id Post ID.
-	 * @param WP_Post $post    Post.
-	 */
-	if ( true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
-		return 'skip-post';
-	}
-
-	return false;
+	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
 }
 
 /**

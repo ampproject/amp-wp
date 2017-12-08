@@ -77,10 +77,14 @@ class AMP_Post_Meta_Box {
 	 * @return bool Whether or not AMP is available.
 	 */
 	protected function is_amp_available( $post ) {
-		add_filter( 'get_post_metadata', '__return_empty_string', 1000 );
-		$available = post_supports_amp( $post );
-		remove_filter( 'get_post_metadata', '__return_empty_string', 1000 );
-		return $available;
+		$support_errors = AMP_Post_Type_Support::get_support_errors( $post );
+		if ( empty( $support_errors ) ) {
+			return true;
+		}
+		if ( 1 === count( $support_errors ) && 'post-disabled' === $support_errors[0] ) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
