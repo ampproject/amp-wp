@@ -57,6 +57,9 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 					if ( in_array( 'skip-post', $support_errors_codes, true ) ) {
 						$support_errors[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 					}
+					if ( count( array_diff( $support_errors_codes, array( 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post' ) ) ) > 0 ) {
+						$support_errors[] = __( 'Unavailable for an unknown reason.', 'amp' );
+					}
 					echo implode( ' ', $support_errors ); // WPCS: xss ok.
 					?>
 				</p>
