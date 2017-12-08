@@ -1,4 +1,6 @@
-var ampCustomizePreview = ( function( api, $ ) {
+/* exported ampCustomizePreview */
+
+var ampCustomizePreview = ( function( api ) {
 	'use strict';
 
 	var self = {};
@@ -21,4 +23,4 @@ var ampCustomizePreview = ( function( api, $ ) {
 
 	return self;
 
-} )( wp.customize, jQuery );
+} )( wp.customize );

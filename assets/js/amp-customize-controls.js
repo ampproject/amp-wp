@@ -1,3 +1,5 @@
+/* exported ampCustomizeControls */
+
 var ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
 
@@ -45,7 +47,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			return true;
 		}
 		return regexEndpoint.test( urlParser.pathname );
-	}
+	};
 
 	/**
 	 * Create an non-AMP version of a URL.
@@ -55,19 +57,20 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 */
 	self.unampifyUrl = function( url ) {
 		var urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + self.data.query + '\\/?$' );
+			regexEndpoint = new RegExp( '\\/' + self.data.query + '\\/?$' ),
+			params;
 
 		urlParser.href = url;
 		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
 
 		if ( urlParser.search.length > 1 ) {
-			var params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
+			params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
 			delete params[ self.data.query ];
 			urlParser.search = $.param( params );
 		}
 
 		return urlParser.href;
-	}
+	};
 
 	/**
 	 * Create an AMP version of a URL.
@@ -83,7 +86,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		}
 		urlParser.search += self.data.query + '=1';
 		return urlParser.href;
-	}
+	};
 
 	/**
 	 * Hook up all AMP preview interactions once panel is ready.
@@ -160,8 +163,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		} );
 
 		// Adding checkbox toggle before device selection.
-		var template = wp.template( 'amp-customizer-elements' );
-		$( '.devices-wrapper' ).before( template( {
+		$( '.devices-wrapper' ).before( wp.template( 'amp-customizer-elements' )( {
 			compat: self.data.strings.compat,
 			url: self.data.defaultPost,
 			navigate: self.data.strings.navigate
@@ -177,9 +179,9 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 		// Main controls for toggling AMP preview.
 		$( '#customize-footer-actions' ).on( 'click', '.amp-toggle', function() {
-			var $input = $( 'input', $( this ) );
-			var $tooltip = $( '.tooltip', $( this ) );
-			var tooltipTimer = 5000;
+			var $input = $( 'input', $( this ) ),
+				$tooltip = $( '.tooltip', $( this ) ),
+				tooltipTimer = 5000;
 
 			if ( $input.prop( 'disabled' ) ) {
 				$tooltip.fadeIn();
@@ -194,7 +196,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		$( '#customize-footer-actions' ).on( 'click', '.amp-toggle input', function() {
 			api.state( 'ampEnabled' ).set( ! api.state( 'ampEnabled' ).get() );
 		} );
-	}
+	};
 
 	return self;
 
