@@ -106,11 +106,6 @@ function amp_add_options_menu() {
 }
 add_action( 'wp_loaded', 'amp_add_options_menu' );
 
-/**
- * @param array $analytics
- *
- * @return array
- */
 function amp_add_custom_analytics( $analytics ) {
 	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
