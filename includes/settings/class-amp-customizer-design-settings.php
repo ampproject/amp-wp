@@ -1,35 +1,73 @@
 <?php
+/**
+ * Class AMP_Customizer_Design_Settings
+ *
+ * @package AMP
+ */
 
+/**
+ * Class AMP_Customizer_Design_Settings
+ */
 class AMP_Customizer_Design_Settings {
+
+	/**
+	 * Default header color.
+	 *
+	 * @var string
+	 */
 	const DEFAULT_HEADER_COLOR = '#fff';
+
+	/**
+	 * Default header background color.
+	 *
+	 * @var string
+	 */
 	const DEFAULT_HEADER_BACKGROUND_COLOR = '#0a89c0';
+
+	/**
+	 * Default color scheme.
+	 *
+	 * @var string
+	 */
 	const DEFAULT_COLOR_SCHEME = 'light';
 
+	/**
+	 * Init.
+	 */
 	public static function init() {
 		add_action( 'amp_customizer_init', array( __CLASS__, 'init_customizer' ) );
-
-		add_filter( 'amp_customizer_get_settings', array( __CLASS__, 'append_settings' ) );
 	}
 
+	/**
+	 * Init customizer.
+	 */
 	public static function init_customizer() {
-		add_action( 'amp_customizer_register_settings', array( __CLASS__, 'register_customizer_settings' ) );
 
 		/**
 		 * Filter whether to enable the AMP default template design settings.
 		 *
+		 * @since 0.4
+		 * @since 0.6 This filter now controls whether or not the default settings, controls, and sections are registered for the Customizer. The AMP panel will be registered regardless.
 		 * @param bool $enable Whether to enable the AMP default template design settings. Default true.
 		 */
 		$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
 
 		if ( true === $amp_customizer_enabled ) {
+			add_filter( 'amp_customizer_get_settings', array( __CLASS__, 'append_settings' ) );
+			add_action( 'amp_customizer_register_settings', array( __CLASS__, 'register_customizer_settings' ) );
 			add_action( 'amp_customizer_register_ui', array( __CLASS__, 'register_customizer_ui' ) );
+			add_action( 'amp_customizer_enqueue_preview_scripts', array( __CLASS__, 'enqueue_customizer_preview_scripts' ) );
 		}
-
-		add_action( 'amp_customizer_enqueue_preview_scripts', array( __CLASS__, 'enqueue_customizer_preview_scripts' ) );
 	}
 
+	/**
+	 * Register default Customizer settings for AMP.
+	 *
+	 * @param WP_Customize_Manager $wp_customize Manager.
+	 */
 	public static function register_customizer_settings( $wp_customize ) {
-		// Header text color setting
+
+		// Header text color setting.
 		$wp_customize->add_setting( 'amp_customizer[header_color]', array(
 			'type'              => 'option',
 			'default'           => self::DEFAULT_HEADER_COLOR,
@@ -37,7 +75,7 @@ class AMP_Customizer_Design_Settings {
 			'transport'         => 'postMessage',
 		) );
 
-		// Header background color
+		// Header background color.
 		$wp_customize->add_setting( 'amp_customizer[header_background_color]', array(
 			'type'              => 'option',
 			'default'           => self::DEFAULT_HEADER_BACKGROUND_COLOR,
@@ -45,15 +83,20 @@ class AMP_Customizer_Design_Settings {
 			'transport'         => 'postMessage',
 		) );
 
-		// Background color scheme
+		// Background color scheme.
 		$wp_customize->add_setting( 'amp_customizer[color_scheme]', array(
 			'type'              => 'option',
 			'default'           => self::DEFAULT_COLOR_SCHEME,
-			'sanitize_callback' => array( __CLASS__ , 'sanitize_color_scheme' ),
+			'sanitize_callback' => array( __CLASS__, 'sanitize_color_scheme' ),
 			'transport'         => 'postMessage',
 		) );
 	}
 
+	/**
+	 * Register default Customizer sections and controls for AMP.
+	 *
+	 * @param WP_Customize_Manager $wp_customize Manager.
+	 */
 	public static function register_customizer_ui( $wp_customize ) {
 		$wp_customize->add_section( 'amp_design', array(
 			'title' => __( 'Design', 'amp' ),
@@ -80,7 +123,7 @@ class AMP_Customizer_Design_Settings {
 			) )
 		);
 
-		// Background color scheme
+		// Background color scheme.
 		$wp_customize->add_control( 'amp_color_scheme', array(
 			'settings'   => 'amp_customizer[color_scheme]',
 			'label'      => __( 'Color Scheme', 'amp' ),
@@ -91,11 +134,14 @@ class AMP_Customizer_Design_Settings {
 		));
 	}
 
+	/**
+	 * Enqueue scripts for default AMP Customizer preview.
+	 */
 	public static function enqueue_customizer_preview_scripts() {
 		wp_enqueue_script(
 			'amp-customizer-design-preview',
 			amp_get_asset_url( 'js/amp-customizer-design-preview.js' ),
-			array( 'amp-customizer' ),
+			array( 'amp-customize-preview' ),
 			false,
 			true
 		);
@@ -104,6 +150,14 @@ class AMP_Customizer_Design_Settings {
 		) );
 	}
 
+	/**
+	 * Merge default Customizer settings on top of settings for merging into AMP post template.
+	 *
+	 * @see AMP_Post_Template::build_customizer_settings()
+	 *
+	 * @param array $settings Settings.
+	 * @return array Merged settings.
+	 */
 	public static function append_settings( $settings ) {
 		$settings = wp_parse_args( $settings, array(
 			'header_color' => self::DEFAULT_HEADER_COLOR,
@@ -118,6 +172,11 @@ class AMP_Customizer_Design_Settings {
 		) );
 	}
 
+	/**
+	 * Get color scheme names.
+	 *
+	 * @return array Color scheme names.
+	 */
 	protected static function get_color_scheme_names() {
 		return array(
 			'light'   => __( 'Light', 'amp' ),
@@ -125,17 +184,22 @@ class AMP_Customizer_Design_Settings {
 		);
 	}
 
+	/**
+	 * Get color schemes.
+	 *
+	 * @return array Color schemes.
+	 */
 	protected static function get_color_schemes() {
 		return array(
 			'light' => array(
-				// Convert colors to greyscale for light theme color; see http://goo.gl/2gDLsp
+				// Convert colors to greyscale for light theme color; see <http://goo.gl/2gDLsp>.
 				'theme_color'      => '#fff',
 				'text_color'       => '#353535',
 				'muted_text_color' => '#696969',
 				'border_color'     => '#c2c2c2',
 			),
 			'dark' => array(
-				// Convert and invert colors to greyscale for dark theme color; see http://goo.gl/uVB2cO
+				// Convert and invert colors to greyscale for dark theme color; see <http://goo.gl/uVB2cO>.
 				'theme_color'      => '#0a0a0a',
 				'text_color'       => '#dedede',
 				'muted_text_color' => '#b1b1b1',
@@ -144,6 +208,12 @@ class AMP_Customizer_Design_Settings {
 		);
 	}
 
+	/**
+	 * Get colors for color scheme.
+	 *
+	 * @param string $scheme Color scheme.
+	 * @return array Colors.
+	 */
 	protected static function get_colors_for_color_scheme( $scheme ) {
 		$color_schemes = self::get_color_schemes();
 
@@ -154,6 +224,12 @@ class AMP_Customizer_Design_Settings {
 		return $color_schemes[ self::DEFAULT_COLOR_SCHEME ];
 	}
 
+	/**
+	 * Sanitize color scheme.
+	 *
+	 * @param string $value Color scheme name.
+	 * @return string Sanitized name.
+	 */
 	public static function sanitize_color_scheme( $value ) {
 		$schemes = self::get_color_scheme_names();
 		$scheme_slugs = array_keys( $schemes );

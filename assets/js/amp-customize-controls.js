@@ -164,7 +164,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		} );
 
 		// Adding checkbox toggle before device selection.
-		$( '.devices-wrapper' ).before( wp.template( 'amp-customizer-elements' )( {
+		$( '.devices-wrapper' ).before( wp.template( 'customize-amp-enabled-toggle' )( {
 			compat: component.data.strings.compat,
 			url: component.data.defaultPost,
 			navigate: component.data.strings.navigate
