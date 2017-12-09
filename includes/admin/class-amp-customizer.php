@@ -53,6 +53,8 @@ class AMP_Template_Customizer {
 		$self->register_settings();
 		$self->register_ui();
 
+		add_action( 'customize_controls_enqueue_scripts', array( $self, 'add_customizer_scripts' ) );
+		add_action( 'customize_controls_print_footer_scripts', array( $self, 'print_controls_templates' ) );
 		add_action( 'customize_preview_init', array( $self, 'init_preview' ) );
 	}
 
@@ -93,11 +95,6 @@ class AMP_Template_Customizer {
 		 * @param WP_Customize_Manager $manager Manager.
 		 */
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
-
-		add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_customizer_scripts' ) );
-		add_action( 'customize_controls_enqueue_scripts', array( $this, 'print_controls_templates' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'add_customizer_preview_scripts' ) );
-		add_action( 'amp_post_template_footer', array( $this, 'template_required_scripts' ) );
 	}
 
 	/**
@@ -176,7 +173,7 @@ class AMP_Template_Customizer {
 		wp_enqueue_script(
 			'amp-customize-preview',
 			amp_get_asset_url( 'js/amp-customize-preview.js' ),
-			array( 'jquery', 'customize-preview' ),
+			array( 'jquery', 'customize-preview', 'customize-selective-refresh' ),
 			AMP__VERSION,
 			true
 		);
@@ -196,6 +193,7 @@ class AMP_Template_Customizer {
 		do_action( 'amp_customizer_enqueue_preview_scripts', $this->wp_customize );
 
 		$this->wp_customize->customize_preview_settings();
+		$this->wp_customize->selective_refresh->export_preview_data();
 
 		wp_print_footer_scripts();
 	}

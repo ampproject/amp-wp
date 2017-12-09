@@ -117,7 +117,7 @@ class AMP_Customizer_Design_Settings {
 		// Header text color control.
 		$wp_customize->add_control(
 			new WP_Customize_Color_Control( $wp_customize, 'amp_header_color', array(
-				'settings'   => 'amp_customizer[header_color]',
+				'settings' => 'amp_customizer[header_color]',
 				'label'    => __( 'Header Text Color', 'amp' ),
 				'section'  => 'amp_design',
 				'priority' => 10,
@@ -127,7 +127,7 @@ class AMP_Customizer_Design_Settings {
 		// Header background color control.
 		$wp_customize->add_control(
 			new WP_Customize_Color_Control( $wp_customize, 'amp_header_background_color', array(
-				'settings'   => 'amp_customizer[header_background_color]',
+				'settings' => 'amp_customizer[header_background_color]',
 				'label'    => __( 'Header Background & Link Color', 'amp' ),
 				'section'  => 'amp_design',
 				'priority' => 20,
@@ -142,7 +142,24 @@ class AMP_Customizer_Design_Settings {
 			'type'       => 'radio',
 			'priority'   => 30,
 			'choices'    => self::get_color_scheme_names(),
-		));
+		) );
+
+		// Partials.
+		$wp_customize->selective_refresh->add_partial( 'amp-wp-header', array(
+			'selector'        => '.amp-wp-header',
+			'settings'        => array( 'blogname' ), // @todo Site Icon.
+			'render_callback' => array( __CLASS__, 'render_header_bar' ),
+		) );
+	}
+
+	/**
+	 * Render header bar template.
+	 */
+	public static function render_header_bar() {
+		if ( is_singular() ) {
+			$post_template = new AMP_Post_Template( get_post() );
+			$post_template->load_parts( array( 'header-bar' ) );
+		}
 	}
 
 	/**
