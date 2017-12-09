@@ -35,10 +35,11 @@ function amp_admin_get_preview_permalink() {
 	}
 
 	$post_ids = get_posts( array(
-		'post_status'      => 'publish',
-		'post_type'        => $post_type,
-		'posts_per_page'   => 1,
-		'fields'           => 'ids',
+		'post_status'    => 'publish',
+		'post_password'  => '',
+		'post_type'      => $post_type,
+		'posts_per_page' => 1,
+		'fields'         => 'ids',
 	) );
 
 	if ( empty( $post_ids ) ) {

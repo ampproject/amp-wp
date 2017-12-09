@@ -66,6 +66,8 @@ class AMP_Template_Customizer {
 	 */
 	public function init_preview() {
 		add_action( 'amp_post_template_head', 'wp_no_robots' );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_preview_scripts' ) );
+		add_action( 'amp_customizer_enqueue_preview_scripts', array( $this, 'enqueue_preview_scripts' ) );
 
 		// Output scripts and styles which will break AMP validation only when preview is opened with controls for manipulation.
 		if ( $this->wp_customize->get_messenger_channel() ) {
@@ -131,12 +133,7 @@ class AMP_Template_Customizer {
 
 		wp_add_inline_script( 'amp-customize-controls', sprintf( 'ampCustomizeControls.boot( %s );',
 			wp_json_encode( array(
-				'defaultPost' => amp_admin_get_preview_permalink(),
-				'query'       => AMP_QUERY_VAR,
-				'strings'     => array(
-					'compat'   => __( 'This page is not AMP compatible', 'amp' ),
-					'navigate' => __( 'Navigate to an AMP compatible page', 'amp' ),
-				),
+				'query' => AMP_QUERY_VAR,
 			) )
 		) );
 
@@ -156,8 +153,37 @@ class AMP_Template_Customizer {
 		do_action( 'amp_customizer_enqueue_scripts', $this->wp_customize );
 	}
 
+
 	/**
-	 * Enqueues scripts and fires the 'wp_footer' action so we can output customizer scripts.
+	 * Enqueues scripts used in both the AMP and non-AMP Customizer preview.
+	 *
+	 * @since 0.6
+	 */
+	public function enqueue_preview_scripts() {
+
+		// Bail if user can't customize anyway.
+		if ( ! current_user_can( 'customize' ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'amp-customize-preview',
+			amp_get_asset_url( 'js/amp-customize-preview.js' ),
+			array( 'jquery', 'customize-preview' ),
+			AMP__VERSION,
+			true
+		);
+
+		wp_add_inline_script( 'amp-customize-preview', sprintf( 'ampCustomizePreview.boot( %s );',
+			wp_json_encode( array(
+				'available' => (bool) is_singular() && post_supports_amp( get_queried_object() ),
+				'enabled'   => is_amp_endpoint(),
+			) )
+		) );
+	}
+
+	/**
+	 * Enqueues scripts and does wp_print_footer_scripts() so we can output customizer scripts.
 	 *
 	 * This breaks AMP validation in the customizer but is necessary for the live preview.
 	 *
@@ -170,19 +196,8 @@ class AMP_Template_Customizer {
 			return;
 		}
 
-		wp_enqueue_script(
-			'amp-customize-preview',
-			amp_get_asset_url( 'js/amp-customize-preview.js' ),
-			array( 'jquery', 'customize-preview', 'customize-selective-refresh' ),
-			AMP__VERSION,
-			true
-		);
-
-		wp_add_inline_script( 'amp-customize-preview', sprintf( 'ampCustomizePreview.boot( %s );',
-			wp_json_encode( array(
-				'ampAvailable' => (bool) is_singular() && post_supports_amp( get_queried_object() ),
-			) )
-		) );
+		wp_enqueue_script( 'customize-selective-refresh' );
+		wp_enqueue_script( 'amp-customize-preview' );
 
 		/**
 		 * Fires when plugins should enqueue their own scripts for the AMP Customizer preview.
@@ -208,8 +223,8 @@ class AMP_Template_Customizer {
 		<script type="text/html" id="tmpl-customize-amp-enabled-toggle">
 			<label class="amp-toggle">
 				<span class="tooltip">
-					{{ data.compat }}.<br>
-					<a data-post="{{{ data.url }}}">{{ data.navigate }}</a>
+					<?php esc_html_e( 'This page is not AMP compatible', 'amp' ); ?>.<br>
+					<a data-post="<?php echo esc_url( amp_admin_get_preview_permalink() ); ?>"><?php esc_html_e( 'Navigate to an AMP compatible page', 'amp' ); ?></a>
 				</span>
 				<input type="checkbox">
 				<span class="slider"></span>

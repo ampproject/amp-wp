@@ -6,12 +6,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 	var component = {
 		data: {
-			defaultPost: '',
-			query: '',
-			strings: {
-				compat: '',
-				navigate: ''
-			}
+			query: ''
 		}
 	};
 
@@ -103,10 +98,10 @@ var ampCustomizeControls = ( function( api, $ ) {
 		 * @return {string} AMPified URL.
 		 */
 		function setCurrentAmpUrl( url ) {
-			var ampToggle = api.state( 'ampEnabled' ).get() && api.state( 'ampAvailable' ).get();
-			if ( ! ampToggle && component.isAmpUrl( url ) ) {
+			var enabled = api.state( 'ampEnabled' ).get();
+			if ( ! enabled && component.isAmpUrl( url ) ) {
 				return component.unampifyUrl( url );
-			} else if ( ampToggle && ! component.isAmpUrl( url ) ) {
+			} else if ( enabled && ! component.isAmpUrl( url ) ) {
 				return component.ampifyUrl( url );
 			}
 			return url;
@@ -136,9 +131,14 @@ var ampCustomizeControls = ( function( api, $ ) {
 		} );
 
 		// Message coming from previewer.
-		api.previewer.bind( 'amp-status', function( available ) {
-			api.state( 'ampAvailable' ).set( available );
+		api.previewer.bind( 'amp-status', function( data ) {
+			api.state( 'ampAvailable' ).set( data.available );
 		} );
+		function setInitialAmpEnabledState( data ) {
+			api.state( 'ampEnabled' ).set( data.enabled );
+			api.previewer.unbind( 'amp-status', setInitialAmpEnabledState );
+		}
+		api.previewer.bind( 'amp-status', setInitialAmpEnabledState );
 
 		// Persist the presence or lack of the amp=1 param when navigating in the preview,
 		// even if current page is not yet supported.
@@ -164,16 +164,13 @@ var ampCustomizeControls = ( function( api, $ ) {
 		} );
 
 		// Adding checkbox toggle before device selection.
-		$( '.devices-wrapper' ).before( wp.template( 'customize-amp-enabled-toggle' )( {
-			compat: component.data.strings.compat,
-			url: component.data.defaultPost,
-			navigate: component.data.strings.navigate
-		} ) );
+		$( '.devices-wrapper' ).before( wp.template( 'customize-amp-enabled-toggle' ) );
 
 		// User clicked link within tooltip, go to linked post in preview.
 		$( '.amp-toggle .tooltip a' ).on( 'click', function() {
 			var url = $( this ).data( 'post' );
 			if ( url.length ) {
+				api.state( 'ampEnabled' ).set( true );
 				api.previewer.previewUrl.set( url );
 			}
 		} );
