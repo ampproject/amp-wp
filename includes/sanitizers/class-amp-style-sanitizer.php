@@ -167,7 +167,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * Remove `!important`; not allowed in AMP
 		 */
 		if ( false !== strpos( $value, 'important' ) ) {
-			$value = preg_replace( '#\!\s*important#', '', $value );
+			$value = preg_replace( '/\s*\!\s*important$/', '', $value );
 		}
 
 		return array( $property, $value );
