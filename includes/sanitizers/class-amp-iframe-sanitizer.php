@@ -179,7 +179,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				default;
 					break;
-			}`
+			}
 		}
 
 		if ( ! isset( $out['sandbox'] ) ) {
