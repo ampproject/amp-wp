@@ -25,6 +25,25 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_empty' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'bbmi',
+							'fb-messenger',
+							'ftp',
+							'http',
+							'https',
+							'intent',
+							'line',
+							'mailto',
+							'skype',
+							'sms',
+							'snapchat',
+							'tel',
+							'tg',
+							'threema',
+							'twitter',
+							'viber',
+							'whatsapp',
+						),
 					),
 					'hreflang' => array(),
 					'media' => array(),
@@ -123,6 +142,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(
 						'mandatory' => true,
@@ -153,6 +175,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(
 						'mandatory' => true,
@@ -202,6 +227,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_empty' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(),
 				),
@@ -232,6 +260,11 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'data',
+							'http',
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -333,6 +366,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -370,6 +406,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -402,6 +441,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -503,6 +545,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'media' => array(),
 					'noloading' => array(
@@ -607,6 +652,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(
 						'mandatory' => true,
@@ -638,6 +686,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(
 						'mandatory' => true,
@@ -717,6 +768,10 @@ class AMP_Allowed_Tags_Generated {
 					'data-href' => array(
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'media' => array(),
 					'noloading' => array(
@@ -910,6 +965,10 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'data',
+							'https',
+						),
 					),
 					'srcdoc' => array(),
 				),
@@ -927,10 +986,16 @@ class AMP_Allowed_Tags_Generated {
 					'data-src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'data-tag' => array(
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'media' => array(),
 					'noloading' => array(
@@ -984,6 +1049,11 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'data',
+							'http',
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -1041,11 +1111,17 @@ class AMP_Allowed_Tags_Generated {
 					'data-iframe-src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -1171,6 +1247,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'template' => array(),
 				),
@@ -1222,6 +1301,10 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'data-origin' => array(
 						'allow_empty' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'data-seek-to' => array(),
 					'data-streamtype' => array(
@@ -1322,6 +1405,9 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'allow_empty' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -1493,6 +1579,24 @@ class AMP_Allowed_Tags_Generated {
 					'data-share-endpoint' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'bbmi',
+							'fb-messenger',
+							'ftp',
+							'http',
+							'https',
+							'intent',
+							'line',
+							'mailto',
+							'skype',
+							'sms',
+							'snapchat',
+							'tel',
+							'tg',
+							'threema',
+							'viber',
+							'whatsapp',
+						),
 					),
 					'media' => array(),
 					'noloading' => array(
@@ -1590,6 +1694,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -1625,8 +1732,18 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story' => array(
 			array(
 				'attr_spec_list' => array(
-					'background-audio' => array(),
-					'bookend-config-src' => array(),
+					'background-audio' => array(
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
+					),
+					'bookend-config-src' => array(
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
+					),
 					'standalone' => array(
 						'mandatory' => true,
 						'value' => '',
@@ -1662,7 +1779,12 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'auto-advance-after' => array(),
-					'background-audio' => array(),
+					'background-audio' => array(
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
+					),
 					'id' => array(
 						'mandatory' => true,
 					),
@@ -1726,10 +1848,16 @@ class AMP_Allowed_Tags_Generated {
 					'data-dismiss-href' => array(
 						'allow_empty' => false,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'data-show-if-href' => array(
 						'allow_empty' => false,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'enctype' => array(
 						'value' => 'application/x-www-form-urlencoded',
@@ -1796,6 +1924,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -1860,6 +1991,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -1938,6 +2072,9 @@ class AMP_Allowed_Tags_Generated {
 					'helper-iframe-url' => array(
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'id' => array(
 						'mandatory' => true,
@@ -1950,10 +2087,16 @@ class AMP_Allowed_Tags_Generated {
 					'permission-dialog-url' => array(
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'service-worker-url' => array(
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -2032,6 +2175,10 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'data',
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -2087,6 +2234,10 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_empty' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(),
@@ -2502,6 +2653,10 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_empty' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'datetime' => array(),
 				),
@@ -3379,6 +3534,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -3508,10 +3667,16 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'action-xhr' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'autocomplete' => array(),
 					'custom-validation-reporting' => array(
@@ -3530,6 +3695,9 @@ class AMP_Allowed_Tags_Generated {
 					'verify-xhr' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -3552,6 +3720,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'autocomplete' => array(),
 					'custom-validation-reporting' => array(
@@ -3571,6 +3742,9 @@ class AMP_Allowed_Tags_Generated {
 					'verify-xhr' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -3843,6 +4017,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -3997,6 +4175,10 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'data',
+							'https',
+						),
 					),
 					'srcdoc' => array(),
 					'width' => array(),
@@ -4096,6 +4278,11 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '(^|\\s)data:image\\/svg\\+xml',
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'data',
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -4128,6 +4315,10 @@ class AMP_Allowed_Tags_Generated {
 					'longdesc' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'src' => array(
 						'alternative_names' => array(
@@ -4136,6 +4327,10 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'data',
+							'https',
+						),
 					),
 					'width' => array(),
 				),
@@ -4221,6 +4416,10 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_empty' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'datetime' => array(),
 				),
@@ -4436,6 +4635,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -4790,6 +4993,12 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'content' => array(
 						'mandatory' => true,
+						'chrome' => array(
+							'value',
+						),
+						'ie' => array(
+							'value',
+						),
 					),
 					'http-equiv' => array(
 						'mandatory' => true,
@@ -5365,6 +5574,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -5589,6 +5802,10 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_empty' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 				),
 				'tag_spec' => array(),
@@ -5679,6 +5896,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -7329,6 +7550,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(),
 				),
@@ -7351,6 +7575,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(),
 				),
@@ -7372,6 +7599,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(
 						'mandatory' => true,
@@ -7395,6 +7625,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(
 						'mandatory' => true,
@@ -7419,6 +7652,9 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'type' => array(),
 				),
@@ -8104,6 +8340,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -8223,6 +8463,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(),
 				),
@@ -8250,6 +8493,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(
 						'mandatory' => true,
@@ -8278,6 +8524,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(),
 				),
@@ -8305,6 +8554,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(
 						'mandatory' => true,
@@ -8336,6 +8588,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(),
 				),
@@ -8366,6 +8621,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(
 						'mandatory' => true,
@@ -8397,6 +8655,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(),
 				),
@@ -8427,6 +8688,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(
 						'mandatory' => true,
@@ -8459,6 +8723,9 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'https',
+						),
 					),
 					'srclang' => array(
 						'mandatory' => true,
@@ -8554,6 +8821,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -8775,6 +9046,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'allow_empty' => false,
 						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
 					),
 					'xlink:role' => array(),
 					'xlink:show' => array(),
@@ -8818,6 +9093,10 @@ class AMP_Allowed_Tags_Generated {
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'allow_relative' => false,
+						'allowed_protocol' => array(
+							'data',
+							'https',
+						),
 					),
 					'width' => array(),
 				),

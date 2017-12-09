@@ -282,7 +282,7 @@ def GenerateValuesPHP(out, values, indent_level = 6):
 			if isinstance(value, (str, bool)):
 				out.append('%s\'%s\' => \'%s\',' % (indent, key.lower(), value))
 
-			if isinstance(value, list):
+			else:
 				out.append('%s\'%s\' => array(' % (indent, key.lower()))
 				sorted_value = sorted(value)
 				for v in sorted_value:
