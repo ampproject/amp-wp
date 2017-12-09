@@ -144,11 +144,21 @@ class AMP_Customizer_Design_Settings {
 			'choices'    => self::get_color_scheme_names(),
 		) );
 
-		// Partials.
+		// Header.
 		$wp_customize->selective_refresh->add_partial( 'amp-wp-header', array(
-			'selector'        => '.amp-wp-header',
-			'settings'        => array( 'blogname' ), // @todo Site Icon.
-			'render_callback' => array( __CLASS__, 'render_header_bar' ),
+			'selector'         => '.amp-wp-header',
+			'settings'         => array( 'blogname' ), // @todo Site Icon.
+			'render_callback'  => array( __CLASS__, 'render_header_bar' ),
+			'fallback_refresh' => false,
+		) );
+
+		// Header.
+		$wp_customize->selective_refresh->add_partial( 'amp-wp-footer', array(
+			'selector'            => '.amp-wp-footer',
+			'settings'            => array( 'blogname' ),
+			'render_callback'     => array( __CLASS__, 'render_footer' ),
+			'fallback_refresh'    => false,
+			'container_inclusive' => true,
 		) );
 	}
 
@@ -157,15 +167,31 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function render_header_bar() {
 		if ( is_singular() ) {
+			amp_load_classes();
 			$post_template = new AMP_Post_Template( get_post() );
 			$post_template->load_parts( array( 'header-bar' ) );
 		}
 	}
 
 	/**
+	 * Render footer template.
+	 */
+	public static function render_footer() {
+		if ( is_singular() ) {
+			amp_load_classes();
+			$post_template = new AMP_Post_Template( get_post() );
+			$post_template->load_parts( array( 'footer' ) );
+		}
+	}
+
+	/**
 	 * Enqueue scripts for default AMP Customizer preview.
+	 *
+	 * @global WP_Customize_Manager $wp_customize
 	 */
 	public static function enqueue_customizer_preview_scripts() {
+		global $wp_customize;
+
 		wp_enqueue_script(
 			'amp-customizer-design-preview',
 			amp_get_asset_url( 'js/amp-customizer-design-preview.js' ),
@@ -176,6 +202,12 @@ class AMP_Customizer_Design_Settings {
 		wp_localize_script( 'amp-customizer-design-preview', 'amp_customizer_design', array(
 			'color_schemes' => self::get_color_schemes(),
 		) );
+
+		// Prevent a theme's registered blogname partial from causing full page refreshes.
+		$blogname_partial = $wp_customize->selective_refresh->get_partial( 'blogname' );
+		if ( $blogname_partial ) {
+			$blogname_partial->fallback_refresh = false;
+		}
 	}
 
 	/**

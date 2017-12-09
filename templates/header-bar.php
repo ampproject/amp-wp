@@ -14,7 +14,7 @@
 				<amp-img src="<?php echo esc_url( $site_icon_url ); ?>" width="32" height="32" class="amp-wp-site-icon"></amp-img>
 			<?php endif; ?>
 			<span class="amp-site-title">
-				<?php echo esc_html( $this->get( 'blog_name' ) ); ?>
+				<?php echo esc_html( wptexturize( $this->get( 'blog_name' ) ) ); ?>
 			</span>
 		</a>
 	</div>

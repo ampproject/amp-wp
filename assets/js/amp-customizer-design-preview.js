@@ -42,7 +42,7 @@
 	// Site title.
 	wp.customize( 'blogname', function( setting ) {
 		setting.bind( function( title ) {
-			$( '.amp-wp-header .amp-site-title' ).text( title );
+			$( '.amp-wp-header .amp-site-title, .amp-wp-footer h2' ).text( title );
 		} );
 	} );
 
