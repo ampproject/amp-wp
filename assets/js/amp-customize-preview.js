@@ -3,15 +3,15 @@
 var ampCustomizePreview = ( function( api ) {
 	'use strict';
 
-	var self = {};
+	var component = {};
 
 	/**
 	 * Boot using data sent inline.
 	 *
-	 * @param {Object} Object data.
+	 * @param {Object} data Object data.
 	 * @return {void}
 	 */
-	self.boot = function( data ) {
+	component.boot = function boot( data ) {
 		if ( ! _.isUndefined( data.ampAvailable ) ) {
 			api.bind( 'preview-ready', function() {
 				api.preview.bind( 'active', function() {
@@ -21,6 +21,6 @@ var ampCustomizePreview = ( function( api ) {
 		}
 	};
 
-	return self;
+	return component;
 
 } )( wp.customize );

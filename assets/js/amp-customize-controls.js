@@ -1,9 +1,10 @@
 /* exported ampCustomizeControls */
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 1 ] } ] */
 
 var ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
 
-	var self = {
+	var component = {
 		data: {
 			defaultPost: '',
 			query: '',
@@ -17,18 +18,18 @@ var ampCustomizeControls = ( function( api, $ ) {
 	/**
 	 * Boot using data sent inline.
 	 *
-	 * @param {Object} Object data.
+	 * @param {Object} data Object data.
 	 * @return {void}
 	 */
-	self.boot = function( data ) {
-		self.data = data;
+	component.boot = function boot( data ) {
+		component.data = data;
 
 		// Defaults.
 		api.state.add( 'ampEnabled', new api.Value() ).set( false );
 		api.state.add( 'ampAvailable', new api.Value() ).set( true );
 
 		api.bind( 'ready', function() {
-			api.panel( 'amp_panel', self.panelReady );
+			api.panel( 'amp_panel', component.panelReady );
 		} );
 	};
 
@@ -38,12 +39,12 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url URL.
 	 * @return {boolean} whether it is an AMP URL.
 	 */
-	self.isAmpUrl = function( url ) {
+	component.isAmpUrl = function isAmpUrl( url ) {
 		var urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + self.data.query + '\\/?$' );
+			regexEndpoint = new RegExp( '\\/' + component.data.query + '\\/?$' );
 
 		urlParser.href = url;
-		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ self.data.query ] ) ) {
+		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ component.data.query ] ) ) {
 			return true;
 		}
 		return regexEndpoint.test( urlParser.pathname );
@@ -55,9 +56,9 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url URL.
 	 * @return {string} non-AMPified URL.
 	 */
-	self.unampifyUrl = function( url ) {
+	component.unampifyUrl = function unampifyUrl( url ) {
 		var urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + self.data.query + '\\/?$' ),
+			regexEndpoint = new RegExp( '\\/' + component.data.query + '\\/?$' ),
 			params;
 
 		urlParser.href = url;
@@ -65,7 +66,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 		if ( urlParser.search.length > 1 ) {
 			params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
-			delete params[ self.data.query ];
+			delete params[ component.data.query ];
 			urlParser.search = $.param( params );
 		}
 
@@ -78,13 +79,13 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url URL.
 	 * @return {string} AMPified URL.
 	 */
-	self.ampifyUrl = function( url ) {
+	component.ampifyUrl = function ampifyUrl( url ) {
 		var urlParser = document.createElement( 'a' );
-		urlParser.href = self.unampifyUrl( url );
+		urlParser.href = component.unampifyUrl( url );
 		if ( urlParser.search.length ) {
 			urlParser.search += '&';
 		}
-		urlParser.search += self.data.query + '=1';
+		urlParser.search += component.data.query + '=1';
 		return urlParser.href;
 	};
 
@@ -94,7 +95,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 * @param {wp.customize.Panel} panel The AMP panel.
 	 * @return {void}
 	 */
-	self.panelReady = function( panel ) {
+	component.panelReady = function panelReady( panel ) {
 		/**
 		 * Make current URL AMPified if toggle is on.
 		 *
@@ -103,10 +104,10 @@ var ampCustomizeControls = ( function( api, $ ) {
 		 */
 		function setCurrentAmpUrl( url ) {
 			var ampToggle = api.state( 'ampEnabled' ).get() && api.state( 'ampAvailable' ).get();
-			if ( ! ampToggle && self.isAmpUrl( url ) ) {
-				return self.unampifyUrl( url );
-			} else if ( ampToggle && ! self.isAmpUrl( url ) ) {
-				return self.ampifyUrl( url );
+			if ( ! ampToggle && component.isAmpUrl( url ) ) {
+				return component.unampifyUrl( url );
+			} else if ( ampToggle && ! component.isAmpUrl( url ) ) {
+				return component.ampifyUrl( url );
 			}
 			return url;
 		}
@@ -164,9 +165,9 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 		// Adding checkbox toggle before device selection.
 		$( '.devices-wrapper' ).before( wp.template( 'amp-customizer-elements' )( {
-			compat: self.data.strings.compat,
-			url: self.data.defaultPost,
-			navigate: self.data.strings.navigate
+			compat: component.data.strings.compat,
+			url: component.data.defaultPost,
+			navigate: component.data.strings.navigate
 		} ) );
 
 		// User clicked link within tooltip, go to linked post in preview.
@@ -198,6 +199,6 @@ var ampCustomizeControls = ( function( api, $ ) {
 		} );
 	};
 
-	return self;
+	return component;
 
 } )( wp.customize, jQuery );
