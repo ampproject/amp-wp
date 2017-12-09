@@ -64,10 +64,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$style = $this->process_style( $style );
 				if ( ! empty( $style ) ) {
 					$class_name = $this->generate_class_name( $style );
-					$new_class  = trim( "{$class} {$class_name}" );
+					$new_class  = trim( $class . ' ' . $class_name );
 
 					$node->setAttribute( 'class', $new_class );
-					$this->styles[ ".{$class_name}" ] = $style;
+					$this->styles[ '.' . $class_name ] = $style;
 				}
 				$node->removeAttribute( 'style' );
 			}
