@@ -4,6 +4,12 @@
 require_once AMP__DIR__ . '/includes/options/class-amp-options-menu.php';
 require_once AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php';
 
+/**
+ * Obsolete constant for flagging when Customizer is opened for AMP.
+ *
+ * @deprecated
+ * @var string
+ */
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
 add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
@@ -55,11 +61,10 @@ function amp_admin_get_preview_permalink() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
-	// Teensy little hack on menu_slug, but it works. No redirect!
 	$menu_slug = add_query_arg( array(
-		'autofocus[panel]'         => AMP_Template_Customizer::PANEL_ID,
-		'return'                   => rawurlencode( admin_url() ),
-		AMP_CUSTOMIZER_QUERY_VAR   => true,
+		'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
+		'url'              => rawurlencode( amp_admin_get_preview_permalink() ),
+		'return'           => rawurlencode( admin_url() ),
 	), 'customize.php' );
 
 	// Add the theme page.
