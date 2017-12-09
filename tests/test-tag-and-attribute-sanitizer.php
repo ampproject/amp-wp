@@ -120,6 +120,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 			),
 
+			'amp-playbuzz'                                              => array(
+				'<amp-playbuzz src="id-from-the-content-here" height="500" data-item-info="true" data-share-buttons="true" data-comments="true"></amp-playbuzz>',
+			),
+
+			'amp-playbuzz_no_src'                                       => array(
+				'<amp-playbuzz height="500" data-item-info="true"></amp-playbuzz>',
+			),
+
 			'amp-position-observer'                                     => array(
 				'<amp-position-observer intersection-ratios="1"></amp-position-observer>',
 			),
