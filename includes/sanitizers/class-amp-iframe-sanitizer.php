@@ -104,7 +104,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
 
 			if ( true === $this->args['add_placeholder'] ) {
-				$placeholder_node = $this->_build_placeholder( $new_attributes );
+				$placeholder_node = $this->build_placeholder( $new_attributes );
 				$new_node->appendChild( $placeholder_node );
 			}
 
@@ -179,7 +179,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				default;
 					break;
-			}
+			}`
 		}
 
 		if ( ! isset( $out['sandbox'] ) ) {
@@ -200,7 +200,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 * @return DOMElement|false
 	 */
-	private function _build_placeholder( $parent_attributes ) {
+	private function build_placeholder( $parent_attributes ) {
 		$attributes = wp_parse_args( $parent_attributes, array(
 			'placeholder' => '',
 			'class' => 'amp-wp-iframe-placeholder',
