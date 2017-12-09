@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * Retrieves the full AMP-specific permalink for the current post or post ID.
+ *
+ * @since 0.2
+ *
  * @param int $post_id
  *
  * @return string
