@@ -32,16 +32,12 @@ class AMP_Customizer_Design_Settings {
 	const DEFAULT_COLOR_SCHEME = 'light';
 
 	/**
-	 * Init.
+	 * Returns whether the AMP design settings are enabled.
+	 *
+	 * @since 0.6
+	 * @return bool AMP Customizer design settings enabled.
 	 */
-	public static function init() {
-		add_action( 'amp_customizer_init', array( __CLASS__, 'init_customizer' ) );
-	}
-
-	/**
-	 * Init customizer.
-	 */
-	public static function init_customizer() {
+	public static function is_amp_customizer_enabled() {
 
 		/**
 		 * Filter whether to enable the AMP default template design settings.
@@ -50,10 +46,25 @@ class AMP_Customizer_Design_Settings {
 		 * @since 0.6 This filter now controls whether or not the default settings, controls, and sections are registered for the Customizer. The AMP panel will be registered regardless.
 		 * @param bool $enable Whether to enable the AMP default template design settings. Default true.
 		 */
-		$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
+		return apply_filters( 'amp_customizer_is_enabled', true );
+	}
 
-		if ( true === $amp_customizer_enabled ) {
+	/**
+	 * Init.
+	 */
+	public static function init() {
+		add_action( 'amp_customizer_init', array( __CLASS__, 'init_customizer' ) );
+
+		if ( self::is_amp_customizer_enabled() ) {
 			add_filter( 'amp_customizer_get_settings', array( __CLASS__, 'append_settings' ) );
+		}
+	}
+
+	/**
+	 * Init customizer.
+	 */
+	public static function init_customizer() {
+		if ( self::is_amp_customizer_enabled() ) {
 			add_action( 'amp_customizer_register_settings', array( __CLASS__, 'register_customizer_settings' ) );
 			add_action( 'amp_customizer_register_ui', array( __CLASS__, 'register_customizer_ui' ) );
 			add_action( 'amp_customizer_enqueue_preview_scripts', array( __CLASS__, 'enqueue_customizer_preview_scripts' ) );
