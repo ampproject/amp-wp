@@ -72,6 +72,7 @@ class AMP_Template_Customizer {
 		// Output scripts and styles which will break AMP validation only when preview is opened with controls for manipulation.
 		if ( $this->wp_customize->get_messenger_channel() ) {
 			add_action( 'amp_post_template_head', array( $this->wp_customize, 'customize_preview_loading_style' ) );
+			add_action( 'amp_post_template_css', array( $this, 'add_customize_preview_styles' ) );
 			add_action( 'amp_post_template_head', array( $this->wp_customize, 'remove_frameless_preview_messenger_channel' ) );
 			add_action( 'amp_post_template_footer', array( $this, 'add_preview_scripts' ) );
 		}
@@ -180,6 +181,28 @@ class AMP_Template_Customizer {
 				'enabled'   => is_amp_endpoint(),
 			) )
 		) );
+	}
+
+	/**
+	 * Add AMP Customizer preview styles.
+	 */
+	public function add_customize_preview_styles() {
+		?>
+		/* Text meant only for screen readers; this is needed for wp.a11y.speak() */
+		.screen-reader-text {
+			border: 0;
+			clip: rect(1px, 1px, 1px, 1px);
+			-webkit-clip-path: inset(50%);
+			clip-path: inset(50%);
+			height: 1px;
+			margin: -1px;
+			overflow: hidden;
+			padding: 0;
+			position: absolute;
+			width: 1px;
+			word-wrap: normal !important;
+		}
+		<?php
 	}
 
 	/**
