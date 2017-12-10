@@ -38,7 +38,7 @@ class AMP_Autoloader {
 		'AMP_Vimeo_Embed_Handler'                                        => 'embeds/class-amp-vimeo-embed',
 		'AMP_Vine_Embed_Handler'                                         => 'embeds/class-amp-vine-embed',
 		'AMP_YouTube_Embed_Handler'                                      => 'embeds/class-amp-youtube-embed',
-		'FastImage'                                                      => '/lib/fastimage/class-fastimage.php',
+		'FastImage'                                                      => 'lib/fastimage/class-fastimage',
 		'WillWashburn\\Stream\\Exception\\StreamBufferTooSmallException' => 'lib/fasterimage/Stream/Exception/StreamBufferTooSmallException',
 		'WillWashburn\\Stream\\StreamableInterface'                      => 'lib/fasterimage/Stream/StreamableInterface',
 		'WillWashburn\\Stream\\Stream'                                   => 'lib/fasterimage/Stream/Stream',
@@ -72,30 +72,35 @@ class AMP_Autoloader {
 		'AMP_Image_Dimension_Extractor'                                  => 'utils/class-amp-image-dimension-extractor',
 		'AMP_String_Utils'                                               => 'utils/class-amp-string-utils',
 		'AMP_WP_Utils'                                                   => 'utils/class-amp-wp-utils',
-		'WPCOM_AMP_Polldaddy_Embed'                                      => 'wpcom/class-amp-polldaddy-embed.php',
+		'WPCOM_AMP_Polldaddy_Embed'                                      => 'wpcom/class-amp-polldaddy-embed',
 	);
 
+	/**
+	 * Is registered.
+	 *
+	 * @var bool
+	 */
 	public static $is_registered = false;
 
 	/**
 	 * Perform the autoload on demand when requested by PHP runtime.
 	 *
 	 * Design Goal: Execute as few lines of code as possible each call.
-	 * 
+	 *
 	 * @since 0.6.0
 	 *
-	 * @note If $class_name has first char as '!' strip it and assume 
-	 *       a full path with extension otherwise assume a subdir of 
+	 * @note If $class_name has first char as '!' strip it and assume
+	 *       a full path with extension otherwise assume a subdir of
 	 *       /includes/ that does not contain an extension.
 	 *
-	 * @param string $class_name
+	 * @param string $class_name Class name.
 	 */
-	protected static function _autoload( $class_name ) {
+	protected static function autoload( $class_name ) {
 		if ( ! isset( self::$_classmap[ $class_name ] ) ) {
 			return;
 		}
 		$filepath = self::$_classmap[ $class_name ];
-		require( '!' !== $filepath[ 0 ] ? __DIR__ . "/includes/{$filepath}.php" : substr( $filepath, 1 ) );
+		require '!' !== $filepath[0] ? __DIR__ . "/includes/{$filepath}.php" : substr( $filepath, 1 );
 	}
 
 	/**
@@ -107,7 +112,7 @@ class AMP_Autoloader {
 	 */
 	public static function register() {
 		if ( ! self::$is_registered ) {
-			spl_autoload_register( array( self::class, '_autoload' ) );
+			spl_autoload_register( array( __CLASS__, 'autoload' ) );
 			self::$is_registered = true;
 		}
 	}
@@ -117,13 +122,12 @@ class AMP_Autoloader {
 	 *
 	 * @since 0.6.0
 	 *
-	 * @param string $class_name Full classname (include namespace if applicable)
-	 * @param string $filepath Absolute filepath to class file, including .php extension
+	 * @param string $class_name Full classname (include namespace if applicable).
+	 * @param string $filepath   Absolute filepath to class file, including .php extension.
 	 */
 	public static function register_autoload_class( $class_name, $filepath ) {
 		self::$_classmap[ $class_name ] = '!' . $filepath;
 	}
-
 }
 
 /**
