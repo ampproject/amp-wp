@@ -11,6 +11,10 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
+		<severity>0</severity>
+	</rule>
+
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>
