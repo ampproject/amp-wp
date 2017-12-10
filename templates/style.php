@@ -160,7 +160,7 @@ blockquote p:last-child {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
-	margin: 1.5em 16px 1.5em;
+	margin: 1.5em 16px 0;
 }
 
 .amp-wp-title {
@@ -180,7 +180,7 @@ blockquote p:last-child {
 	flex: 2 1 50%;
 	font-size: .875em;
 	line-height: 1.5em;
-	margin: 0;
+	margin: 0 0 1.5em;
 	padding: 0;
 }
 

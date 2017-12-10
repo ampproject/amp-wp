@@ -181,7 +181,8 @@ class AMP_Post_Template {
 	}
 
 	public function load() {
-		$this->load_parts( array( 'single' ) );
+		$template = is_page() ? 'page' : 'single';
+		$this->load_parts( array( $template ) );
 	}
 
 	public function load_parts( $templates ) {
@@ -211,6 +212,11 @@ class AMP_Post_Template {
 		}
 	}
 
+	/**
+	 * Build post data.
+	 *
+	 * @since 0.2
+	 */
 	private function build_post_data() {
 		$post_title = get_the_title( $this->ID );
 		$post_publish_timestamp = get_the_date( 'U', $this->ID );
@@ -227,21 +233,23 @@ class AMP_Post_Template {
 		) );
 
 		$metadata = array(
-			'@context' => 'http://schema.org',
-			'@type' => 'BlogPosting',
+			'@context'         => 'http://schema.org',
+			'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 			'mainEntityOfPage' => $this->get( 'canonical_url' ),
-			'publisher' => array(
+			'publisher'        => array(
 				'@type' => 'Organization',
-				'name' => $this->get( 'blog_name' ),
+				'name'  => $this->get( 'blog_name' ),
 			),
-			'headline' => $post_title,
-			'datePublished' => date( 'c', $post_publish_timestamp ),
-			'dateModified' => date( 'c', $post_modified_timestamp ),
-			'author' => array(
-				'@type' => 'Person',
-				'name' => $post_author->display_name,
-			),
+			'headline'         => $post_title,
+			'datePublished'    => date( 'c', $post_publish_timestamp ),
+			'dateModified'     => date( 'c', $post_modified_timestamp ),
 		);
+		if ( $post_author ) {
+			$metadata['author'] = array(
+				'@type' => 'Person',
+				'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			);
+		}
 
 		$site_icon_url = $this->get( 'site_icon_url' );
 		if ( $site_icon_url ) {
