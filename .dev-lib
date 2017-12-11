@@ -1,1 +1,5 @@
 SYNC_README_MD=0
+PATH_EXCLUDES_PATTERN=includes/lib/*
+
+# Temporary to avoid having to fix all phpcs issues for touched files in <https://github.com/Automattic/amp-wp/pull/828>.
+DEV_LIB_SKIP=phpcs
