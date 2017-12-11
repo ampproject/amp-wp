@@ -238,8 +238,3 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 
 	return $link;
 }
-
-// Unconditionally load code required when running unit tests.
-if ( function_exists( 'tests_add_filter' ) ) {
-	require_once dirname( __FILE__ ) . '/tests/stubs.php';
-}
