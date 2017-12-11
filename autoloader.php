@@ -107,7 +107,7 @@ class AMP_Autoloader {
 	 */
 	public static function register() {
 		if ( ! self::$is_registered ) {
-			spl_autoload_register( array( self::class, '_autoload' ) );
+			spl_autoload_register( array( 'AMP_Autoloader', '_autoload' ) );
 			self::$is_registered = true;
 		}
 	}
