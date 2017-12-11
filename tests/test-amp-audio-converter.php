@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Class AMP_Audio_Converter_Test
+ *
+ * This is here because PhpStorm cannot find them because of phpunit6-compat.php
+ *
+ * @method void assertEquals( mixed $expected, mixed $actual, string $errorMessage=null )
+ *
+ */
 class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(

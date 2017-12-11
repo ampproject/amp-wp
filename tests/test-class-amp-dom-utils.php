@@ -97,9 +97,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node = $dom->createAttribute( 'src' );
 		$expected = ' src=""';
 
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+//		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+//		$this->assertEquals( $expected, $dom->saveXML($node) );
 
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 		$this->assertEquals( $expected, $actual );
 	}
 
@@ -108,8 +109,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node = $dom->createElement( 'br' );
 		$expected = '<br/>';
 
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 
 		$this->assertEquals( $expected, $actual );
 	}
@@ -121,8 +121,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node->appendChild( $text );
 		$expected = '<p>Hello</p>';
 
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 
 		$this->assertEquals( $expected, $actual );
 
@@ -150,8 +149,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node->appendChild( $child_self_closing );
 		$expected = '<div><amp-img></amp-img><br/></div>';
 
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 
 		$this->assertEquals( $expected, $actual );
 	}
