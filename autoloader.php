@@ -10,7 +10,11 @@ class AMP_Autoloader {
 	/**
 	 * Map of Classname to relative filepath sans extension.
 	 *
-	 * @example Format:
+	 * @note We omitted the leading slash and the .php extension from each
+	 *       relative filepath because they are redundant and to include
+	 *       them would take up unnecessary bytes of memory at runtime.
+	 *
+	 * @example Format (note no leading / and no .php extension):
 	 *
 	 *  array(
 	 *      'Class_Name1' =>  'subdir-of-includes/filename1',
