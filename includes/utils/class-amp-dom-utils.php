@@ -68,6 +68,13 @@ class AMP_DOM_Utils {
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
 		/**
+		 * The DOMDocument may contain no body. In which case return nothing.
+		 */
+		if ( is_null( $body ) ) {
+			return $out;
+		}
+
+		/**
 		 * Most AMP elements need closing tags. To force them, we cannot use
 		 * saveHTML (node support is 5.3+) and LIBXML_NOEMPTYTAG results in
 		 * issues with self-closing tags like `br` and `hr`. So, we're manually
