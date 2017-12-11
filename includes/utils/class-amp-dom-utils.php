@@ -83,7 +83,14 @@ class AMP_DOM_Utils {
 			 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
 			 * This does not happen in my (@mikeschinkel) local testing, btw.
 			 */
-			$html = preg_replace( '#<(b|h)r></\1r>#', '<$1r/>', $html );
+			$html = preg_replace( '#<(br|hr)></\1>#', '<$1/>', $html );
+
+			/**
+			 * Travis w/PHP 7.x generates <source ...></source> vs. <source ... />.
+			 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
+			 * This does not happen in my (@mikeschinkel) local testing, btw.
+			 */
+			$html = preg_replace( '#></source>#', '/>', $html );
 
 			$out .= $html;
 		}
