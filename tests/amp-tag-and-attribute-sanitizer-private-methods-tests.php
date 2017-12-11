@@ -1943,7 +1943,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 	// Use this to call private methods
 	public function invoke_method(&$object, $methodName, array $parameters = array()) {
-	    $reflection = new \ReflectionClass(get_class($object));
+	    $reflection = new ReflectionClass(get_class($object));
 	    $method = $reflection->getMethod($methodName);
 	    $method->setAccessible(true);
 
