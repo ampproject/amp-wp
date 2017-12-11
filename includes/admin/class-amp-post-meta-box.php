@@ -66,6 +66,28 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
+	 * Get whether AMP is available for a given post.
+	 *
+	 * This is just calling `post_supports_amp()` but ignoring any user-supplied opt-out for AMP.
+	 *
+	 * @since 0.6
+	 * @see post_supports_amp()
+	 *
+	 * @param WP_Post $post Post.
+	 * @return bool Whether or not AMP is available.
+	 */
+	protected function is_amp_available( $post ) {
+		$support_errors = AMP_Post_Type_Support::get_support_errors( $post );
+		if ( empty( $support_errors ) ) {
+			return true;
+		}
+		if ( 1 === count( $support_errors ) && 'post-disabled' === $support_errors[0] ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Enqueue admin assets.
 	 *
 	 * @since 0.6
@@ -77,8 +99,6 @@ class AMP_Post_Meta_Box {
 			isset( $screen->base )
 			&&
 			'post' === $screen->base
-			&&
-			post_type_supports( $post->post_type, AMP_QUERY_VAR )
 		);
 		if ( ! $validate ) {
 			return;
@@ -102,7 +122,7 @@ class AMP_Post_Meta_Box {
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
-				'disabled'        => (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true ),
+				'disabled'        => (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true ) || ! $this->is_amp_available( $post ),
 				'statusInputName' => self::STATUS_INPUT_NAME,
 				'l10n'            => array(
 					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
@@ -121,10 +141,6 @@ class AMP_Post_Meta_Box {
 		$verify = (
 			isset( $post->ID )
 			&&
-			isset( $post->post_type )
-			&&
-			post_type_supports( $post->post_type, AMP_QUERY_VAR )
-			&&
 			current_user_can( 'edit_post', $post->ID )
 		);
 
@@ -132,14 +148,15 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		// The following variables are used inside amp-status.php template.
-		$disabled = (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true );
-		$status   = $disabled ? 'disabled' : 'enabled';
-		$labels   = array(
+		$available = $this->is_amp_available( $post );
+		$disabled  = (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true );
+		$status    = $disabled || ! $available ? 'disabled' : 'enabled';
+		$labels    = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),
 		);
 
+		// The preceding variables are used inside the following amp-status.php template.
 		include_once AMP__DIR__ . '/templates/admin/amp-status.php';
 	}
 

@@ -42,8 +42,12 @@
 	margin: 0 8px 0 1px;
 }
 
-#amp-status-select {
-	margin-top: 4px;
+#amp-status-select fieldset {
+	margin: 7px 0 0 1px;
+}
+
+#amp-status-select .notice {
+	margin: 10px 0 -5px 3px;
 }
 
 .amp-status-actions {
