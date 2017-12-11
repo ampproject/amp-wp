@@ -100,7 +100,7 @@ class AMP_Autoloader {
 			return;
 		}
 		$filepath = self::$_classmap[ $class_name ];
-		require '!' !== $filepath[0] ? __DIR__ . "/includes/{$filepath}.php" : substr( $filepath, 1 );
+		require '!' !== $filepath[0] ? dirname( __FILE__ ) . "/includes/{$filepath}.php" : substr( $filepath, 1 );
 	}
 
 	/**
