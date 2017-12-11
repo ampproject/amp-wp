@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Class AMP_DOM_Utils_Test
+ *
+ * These are here because PhpStorm cannot find them because of phpunit6-compat.php
+ *
+ * @method void assertEquals( mixed $expected, mixed $actual, string $errorMessage=null )
+ * @method void assertTrue( bool $expectsTrue, string $errorMessage=null )
+ * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
+ */
 class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	public function test_utf8_content() {
 		$source = '<p>Iñtërnâtiônàlizætiøn</p>';
@@ -87,9 +96,8 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node = $dom->createAttribute( 'src' );
 		$expected = ' src=""';
 
-		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	public function test__recursive_force_closing_tags__ignore_self_closing() {
@@ -97,9 +105,9 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node = $dom->createElement( 'br' );
 		$expected = '<br/>';
 
-		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	public function test__recursive_force_closing_tags__ignore_non_empty() {
@@ -109,9 +117,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node->appendChild( $text );
 		$expected = '<p>Hello</p>';
 
-		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		$this->assertEquals( $expected, $actual );
+
 	}
 
 	public function test__recursive_force_closing_tags__force_close() {
@@ -136,8 +145,8 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$node->appendChild( $child_self_closing );
 		$expected = '<div><amp-img></amp-img><br/></div>';
 
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		$this->assertEquals( $expected, $actual );
 	}
 }

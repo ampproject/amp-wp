@@ -17,16 +17,12 @@ define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '0.6.0-alpha' );
 
+require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
+AMP_Autoloader::register();
+
 require_once AMP__DIR__ . '/back-compat/back-compat.php';
 require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
-require_once AMP__DIR__ . '/includes/class-amp-post-type-support.php';
 require_once AMP__DIR__ . '/includes/admin/functions.php';
-require_once AMP__DIR__ . '/includes/admin/class-amp-customizer.php';
-require_once AMP__DIR__ . '/includes/admin/class-amp-post-meta-box.php';
-require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php';
-require_once AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php';
-require_once AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php';
-require_once AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
@@ -150,7 +146,7 @@ function amp_maybe_add_actions() {
 }
 
 function amp_load_classes() {
-	require_once( AMP__DIR__ . '/includes/class-amp-post-template.php' ); // this loads everything else
+	_deprecated_function( __FUNCTION__, '0.6.0' );
 }
 
 function amp_add_frontend_actions() {
@@ -195,8 +191,6 @@ function amp_render_post( $post ) {
 		}
 	}
 	$post_id = $post->ID;
-
-	amp_load_classes();
 
 	/**
 	 * Fires before rendering a post in AMP.
@@ -245,10 +239,4 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 	}
 
 	return $link;
-}
-
-// Unconditionally load code required when running unit tests.
-if ( function_exists( 'tests_add_filter' ) ) {
-	amp_load_classes();
-	require_once dirname( __FILE__ ) . '/tests/stubs.php';
 }

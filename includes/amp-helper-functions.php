@@ -1,11 +1,17 @@
 <?php
+/**
+ * AMP Helper Functions
+ *
+ * @package AMP
+ */
 
 /**
- * Get AMP permalink.
+ * Retrieves the full AMP-specific permalink for the given post ID.
  *
  * @since 0.1
  *
  * @param int $post_id Post ID.
+ *
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
@@ -27,7 +33,7 @@ function amp_get_permalink( $post_id ) {
 	}
 
 	$parsed_url = wp_parse_url( get_permalink( $post_id ) );
-	$structure = get_option( 'permalink_structure' );
+	$structure  = get_option( 'permalink_structure' );
 	if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
 		$amp_url = add_query_arg( AMP_QUERY_VAR, '', get_permalink( $post_id ) );
 	} else {
@@ -64,6 +70,8 @@ function post_supports_amp( $post ) {
  * Are we currently on an AMP URL?
  *
  * Note: will always return `false` if called before the `parse_query` hook.
+ *
+ * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
 	if ( 0 === did_action( 'parse_query' ) ) {
@@ -73,6 +81,12 @@ function is_amp_endpoint() {
 	return false !== get_query_var( AMP_QUERY_VAR, false );
 }
 
+/**
+ * Get AMP asset URL.
+ *
+ * @param string $file Relative path to file in assets directory.
+ * @return string URL.
+ */
 function amp_get_asset_url( $file ) {
 	return plugins_url( sprintf( 'assets/%s', $file ), AMP__FILE__ );
 }

@@ -5,33 +5,6 @@
  * @package AMP
  */
 
-require_once AMP__DIR__ . '/includes/utils/class-amp-dom-utils.php';
-require_once AMP__DIR__ . '/includes/utils/class-amp-html-utils.php';
-require_once AMP__DIR__ . '/includes/utils/class-amp-string-utils.php';
-require_once AMP__DIR__ . '/includes/utils/class-amp-wp-utils.php';
-
-require_once AMP__DIR__ . '/includes/class-amp-content.php';
-
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-style-sanitizer.php';
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-blacklist-sanitizer.php';
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-tag-and-attribute-sanitizer.php';
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-img-sanitizer.php';
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-video-sanitizer.php';
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-iframe-sanitizer.php';
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-audio-sanitizer.php';
-require_once AMP__DIR__ . '/includes/sanitizers/class-amp-playbuzz-sanitizer.php';
-
-require_once AMP__DIR__ . '/includes/embeds/class-amp-twitter-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-youtube-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-dailymotion-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-vimeo-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-soundcloud-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-gallery-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-instagram-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-vine-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-facebook-embed.php';
-require_once AMP__DIR__ . '/includes/embeds/class-amp-pinterest-embed.php';
-
 /**
  * Class AMP_Post_Template
  *
@@ -188,16 +161,32 @@ class AMP_Post_Template {
 		$this->data = apply_filters( 'amp_post_template_data', $this->data, $this->post );
 	}
 
+	/**
+	 * Getter.
+	 *
+	 * @param string $property Property name.
+	 * @param mixed  $default  Default value.
+	 *
+	 * @return mixed Value.
+	 */
 	public function get( $property, $default = null ) {
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
 		} else {
-			_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Called for non-existant key ("%s").', 'amp' ), esc_html( $property ) ), '0.1' );
+			/* translators: %s is key name */
+			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Called for non-existent key ("%s").', 'amp' ), $property ) ), '0.1' );
 		}
 
 		return $default;
 	}
 
+	/**
+	 * Get customizer setting.
+	 *
+	 * @param string $name    Name.
+	 * @param mixed  $default Default value.
+	 * @return mixed value.
+	 */
 	public function get_customizer_setting( $name, $default = null ) {
 		$settings = $this->get( 'customizer_settings' );
 		if ( ! empty( $settings[ $name ] ) ) {
@@ -207,11 +196,19 @@ class AMP_Post_Template {
 		return $default;
 	}
 
+	/**
+	 * Load and print the template parts for the given post.
+	 */
 	public function load() {
 		$template = is_page() ? 'page' : 'single';
 		$this->load_parts( array( $template ) );
 	}
 
+	/**
+	 * Load template parts.
+	 *
+	 * @param string[] $templates Templates.
+	 */
 	public function load_parts( $templates ) {
 		foreach ( $templates as $template ) {
 			$file = $this->get_template_path( $template );
@@ -219,18 +216,41 @@ class AMP_Post_Template {
 		}
 	}
 
+	/**
+	 * Get template path.
+	 *
+	 * @param string $template Template name.
+	 * @return string Template path.
+	 */
 	private function get_template_path( $template ) {
 		return sprintf( '%s/%s.php', $this->template_dir, $template );
 	}
 
+	/**
+	 * Add data.
+	 *
+	 * @param array $data Data.
+	 */
 	private function add_data( $data ) {
 		$this->data = array_merge( $this->data, $data );
 	}
 
+	/**
+	 * Add data by key.
+	 *
+	 * @param string $key   Key.
+	 * @param mixed  $value Value.
+	 */
 	private function add_data_by_key( $key, $value ) {
 		$this->data[ $key ] = $value;
 	}
 
+	/**
+	 * Merge data for key.
+	 *
+	 * @param string $key   Key.
+	 * @param mixed  $value Value.
+	 */
 	private function merge_data_for_key( $key, $value ) {
 		if ( is_array( $this->data[ $key ] ) ) {
 			$this->data[ $key ] = array_merge( $this->data[ $key ], $value );
@@ -245,10 +265,10 @@ class AMP_Post_Template {
 	 * @since 0.2
 	 */
 	private function build_post_data() {
-		$post_title = get_the_title( $this->ID );
-		$post_publish_timestamp = get_the_date( 'U', $this->ID );
+		$post_title              = get_the_title( $this->ID );
+		$post_publish_timestamp  = get_the_date( 'U', $this->ID );
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
-		$post_author = get_userdata( $this->post->post_author );
+		$post_author             = get_userdata( $this->post->post_author );
 
 		$this->add_data( array(
 			'post' => $this->post,
@@ -299,6 +319,9 @@ class AMP_Post_Template {
 		$this->build_post_commments_data();
 	}
 
+	/**
+	 * Buuild post comments data.
+	 */
 	private function build_post_commments_data() {
 		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
 			return;
@@ -306,13 +329,13 @@ class AMP_Post_Template {
 
 		$comments_open = comments_open( $this->ID );
 
-		// Don't show link if close and no comments
+		// Don't show link if close and no comments.
 		if ( ! $comments_open
 			&& ! $this->post->comment_count ) {
 			return;
 		}
 
-		$comments_link_url = get_comments_link( $this->ID );
+		$comments_link_url  = get_comments_link( $this->ID );
 		$comments_link_text = $comments_open
 			? __( 'Leave a Comment', 'amp' )
 			: __( 'View Comments', 'amp' );
@@ -323,6 +346,9 @@ class AMP_Post_Template {
 		) );
 	}
 
+	/**
+	 * Build post content.
+	 */
 	private function build_post_content() {
 		$amp_content = new AMP_Content( $this->post->post_content,
 			apply_filters( 'amp_content_embed_handlers', array(
@@ -338,16 +364,15 @@ class AMP_Post_Template {
 				'AMP_Gallery_Embed_Handler' => array(),
 			), $this->post ),
 			apply_filters( 'amp_content_sanitizers', array(
-				 'AMP_Style_Sanitizer' => array(),
-				 // 'AMP_Blacklist_Sanitizer' => array(),
-				 'AMP_Img_Sanitizer' => array(),
-				 'AMP_Video_Sanitizer' => array(),
-				 'AMP_Audio_Sanitizer' => array(),
-				 'AMP_Playbuzz_Sanitizer' => array(),
-				 'AMP_Iframe_Sanitizer' => array(
-					 'add_placeholder' => true,
-				 ),
-				 'AMP_Tag_And_Attribute_Sanitizer' => array(),
+				'AMP_Style_Sanitizer'             => array(),
+				'AMP_Img_Sanitizer'               => array(),
+				'AMP_Video_Sanitizer'             => array(),
+				'AMP_Audio_Sanitizer'             => array(),
+				'AMP_Playbuzz_Sanitizer'          => array(),
+				'AMP_Tag_And_Attribute_Sanitizer' => array(),
+				'AMP_Iframe_Sanitizer'            => array(
+					'add_placeholder' => true,
+				),
 			), $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
@@ -359,8 +384,11 @@ class AMP_Post_Template {
 		$this->merge_data_for_key( 'post_amp_styles', $amp_content->get_amp_styles() );
 	}
 
+	/**
+	 * Build post featured image.
+	 */
 	private function build_post_featured_image() {
-		$post_id = $this->ID;
+		$post_id       = $this->ID;
 		$featured_html = get_the_post_thumbnail( $post_id, 'large' );
 
 		// Skip featured image if no featured image is available.
@@ -403,6 +431,9 @@ class AMP_Post_Template {
 		}
 	}
 
+	/**
+	 * Build customizer settings.
+	 */
 	private function build_customizer_settings() {
 		$settings = AMP_Customizer_Settings::get_settings();
 
@@ -430,7 +461,7 @@ class AMP_Post_Template {
 	 */
 	private function get_post_image_metadata() {
 		$post_image_meta = null;
-		$post_image_id = false;
+		$post_image_id   = false;
 
 		if ( has_post_thumbnail( $this->ID ) ) {
 			$post_image_id = get_post_thumbnail_id( $this->ID );
@@ -469,6 +500,9 @@ class AMP_Post_Template {
 		return $post_image_meta;
 	}
 
+	/**
+	 * Build HTML tag attributes.
+	 */
 	private function build_html_tag_attributes() {
 		$attributes = array();
 
@@ -484,6 +518,12 @@ class AMP_Post_Template {
 		$this->add_data_by_key( 'html_tag_attributes', $attributes );
 	}
 
+	/**
+	 * Verify and include.
+	 *
+	 * @param string $file          File.
+	 * @param string $template_type Template type.
+	 */
 	private function verify_and_include( $file, $template_type ) {
 		$located_file = $this->locate_template( $file );
 		if ( $located_file ) {
@@ -498,15 +538,26 @@ class AMP_Post_Template {
 		}
 
 		do_action( 'amp_post_template_include_' . $template_type, $this );
-		include( $file );
+		include $file;
 	}
 
-
+	/**
+	 * Locate template.
+	 *
+	 * @param string $file File.
+	 * @return string The template filename if one is located.
+	 */
 	private function locate_template( $file ) {
 		$search_file = sprintf( 'amp/%s', basename( $file ) );
 		return locate_template( array( $search_file ), false );
 	}
 
+	/**
+	 * Is valid template.
+	 *
+	 * @param string $template Template name.
+	 * @return bool Whether valid.
+	 */
 	private function is_valid_template( $template ) {
 		if ( false !== strpos( $template, '..' ) ) {
 			return false;
