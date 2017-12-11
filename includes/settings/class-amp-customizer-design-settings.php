@@ -167,7 +167,6 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function render_header_bar() {
 		if ( is_singular() ) {
-			amp_load_classes();
 			$post_template = new AMP_Post_Template( get_post() );
 			$post_template->load_parts( array( 'header-bar' ) );
 		}
@@ -178,7 +177,6 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function render_footer() {
 		if ( is_singular() ) {
-			amp_load_classes();
 			$post_template = new AMP_Post_Template( get_post() );
 			$post_template->load_parts( array( 'footer' ) );
 		}
