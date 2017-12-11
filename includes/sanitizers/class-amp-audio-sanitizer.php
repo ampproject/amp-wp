@@ -86,6 +86,12 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 'source' !== $new_child_node->tagName ) {
 					continue;
 				}
+
+				/**
+				 * textContent is invalid for `source` nodes
+				 */
+				$new_child_node->textContent = null;
+
 				/**
 				 * Only append source tags with a valid src attribute
 				 */
