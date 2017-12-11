@@ -17,7 +17,9 @@ define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '0.6.0-alpha' );
 
-require_once AMP__DIR__ . '/autoloader.php';
+require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
+AMP_Autoloader::register();
+
 require_once AMP__DIR__ . '/back-compat/back-compat.php';
 require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
 require_once AMP__DIR__ . '/includes/admin/functions.php';

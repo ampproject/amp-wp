@@ -1,10 +1,14 @@
 <?php
+/**
+ * Class AMP_DOM_Utils.
+ *
+ * @package AMP
+ */
 
 /**
  * Class AMP_DOM_Utils
  *
  * Functionality to simplify working with DOMDocuments and DOMElements.
- *
  */
 class AMP_DOM_Utils {
 
@@ -15,14 +19,14 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param string $content Valid HTML content to be represented by a DOMDocument
+	 * @param string $content Valid HTML content to be represented by a DOMDocument.
 	 *
 	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
 	 */
 	public static function get_dom_from_content( $content ) {
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 
 		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
@@ -85,19 +89,20 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.6.0
 	 *
-	 * @param DOMDocument $dom Represents an HTML document
-	 * @param DOMNode $node Represents an HTML element of the $dom from which to extract HTML content.
-	 *
+	 * @param DOMDocument $dom  Represents an HTML document.
+	 * @param DOMNode     $node Represents an HTML element of the $dom from which to extract HTML content.
 	 * @return string Returns the HTML content represented in the DOMNode
 	 */
 	public static function get_content_from_dom_node( $dom, $node ) {
 		/**
+		 * Self closing tags regex.
+		 *
 		 * @var string Regular expression to match self-closing tags
 		 *      that saveXML() has generated a closing tag for.
 		 */
 		static $self_closing_tags_regex;
 
-		/**
+		/*
 		 * Most AMP elements need closing tags. To force them, we cannot use
 		 * saveHTML (node support is 5.3+) and LIBXML_NOEMPTYTAG results in
 		 * issues with self-closing tags like `br` and `hr`. So, we're manually
@@ -115,14 +120,12 @@ class AMP_DOM_Utils {
 
 		$html = $dom->saveXML( $node );
 
-		/**
-		 * Whitespace just causes unit tests to fail... so whitespace begone.
-		 */
+		// Whitespace just causes unit tests to fail... so whitespace begone.
 		if ( '' === trim( $html ) ) {
 			return '';
 		}
 
-		/**
+		/*
 		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
 		 * Travis w/PHP 7.x generates <source ...></source> vs. <source ... />.  Etc.
 		 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
@@ -139,9 +142,9 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMDocument $dom A representation of an HTML document to add the new node to.
-	 * @param string $tag A valid HTML element tag for the element to be added
-	 * @param string[] $attributes One of more valid attributes for the new node.
+	 * @param DOMDocument $dom        A representation of an HTML document to add the new node to.
+	 * @param string      $tag        A valid HTML element tag for the element to be added.
+	 * @param string[]    $attributes One of more valid attributes for the new node.
 	 *
 	 * @return DOMElement|false The DOMElement for the given $tag, or false on failure
 	 */
@@ -180,8 +183,8 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMElement $node Represents an HTML element
-	 * @param string[] $attributes One or more attributes for the node's HTML element
+	 * @param DOMElement $node       Represents an HTML element.
+	 * @param string[]   $attributes One or more attributes for the node's HTML element.
 	 */
 	public static function add_attributes_to_node( $node, $attributes ) {
 		foreach ( $attributes as $name => $value ) {
@@ -194,15 +197,13 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMElement $node Represents an HTML element
-	 *
+	 * @param DOMElement $node Represents an HTML element.
 	 * @return bool Returns true if the DOMElement has no child nodes and
 	 *              the textContent property of the DOMElement is empty;
 	 *              Otherwise it returns false.
 	 */
 	public static function is_node_empty( $node ) {
-		return false === $node->hasChildNodes()
-		       && empty( $node->textContent );
+		return false === $node->hasChildNodes() && empty( $node->textContent );
 	}
 
 	/**
@@ -210,10 +211,9 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMDocument $dom Represents HTML document on which to force closing tags.
-	 * @param DOMElement $node Represents HTML element to start closing tags on.
-	 *                         If not passed, defaults to first child of body.
-	 *
+	 * @param DOMDocument $dom  Represents HTML document on which to force closing tags.
+	 * @param DOMElement  $node Represents HTML element to start closing tags on.
+	 *                          If not passed, defaults to first child of body.
 	 */
 	public static function recursive_force_closing_tags( $dom, $node = null ) {
 
@@ -253,8 +253,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param string $tag
-	 *
+	 * @param string $tag Tag.
 	 * @return bool Returns true if a valid self-closing tag, false if not.
 	 */
 	private static function is_self_closing_tag( $tag ) {
@@ -275,7 +274,7 @@ class AMP_DOM_Utils {
 		 */
 		static $self_closing_tags;
 		if ( ! isset( $self_closing_tags ) ) {
-			/**
+			/*
 			 * https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
 			 * Not all are valid AMP, but we include them for completeness.
 			 */

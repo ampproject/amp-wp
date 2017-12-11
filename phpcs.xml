@@ -14,6 +14,14 @@
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
 		<severity>0</severity>
 	</rule>
+	<rule ref="WordPress.WP.EnqueuedResources">
+		<exclude-pattern>includes/actions/class-amp-paired-post-actions.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS" />
+		</properties>
+	</rule>
 
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>

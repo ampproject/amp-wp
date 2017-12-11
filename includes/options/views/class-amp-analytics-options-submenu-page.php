@@ -1,6 +1,13 @@
 <?php
+/**
+ * Class AMP_Analytics_Options_Submenu_Page
+ *
+ * @package AMP
+ */
 
-
+/**
+ * Class AMP_Analytics_Options_Submenu_Page
+ */
 class AMP_Analytics_Options_Submenu_Page {
 
 	private function render_entry( $id = '', $type = '', $config = '' ) {

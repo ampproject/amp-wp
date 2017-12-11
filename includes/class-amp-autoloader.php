@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class AMP_Autoloader
+ *
+ * @package AMP
+ */
 
 /**
  * Autoload the classes used by the AMP plugin.
@@ -101,7 +106,7 @@ class AMP_Autoloader {
 			return;
 		}
 		$filepath = self::$_classmap[ $class_name ];
-		require dirname( __FILE__ ) . "/{$filepath}.php";
+		require AMP__DIR__ . "/{$filepath}.php";
 	}
 
 	/**
@@ -130,8 +135,3 @@ class AMP_Autoloader {
 		self::$_classmap[ $class_name ] = '!' . $filepath;
 	}
 }
-
-/**
- * Call method to register this autoloader with PHP.
- */
-AMP_Autoloader::register();

@@ -1,5 +1,11 @@
 <?php
 /**
+ * Class AMP_Video_Sanitizer.
+ *
+ * @package AMP
+ */
+
+/**
  * Class AMP_Video_Sanitizer
  *
  * @since 0.2
@@ -18,6 +24,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	const FALLBACK_HEIGHT = 400;
 
 	/**
+	 * Tag.
+	 *
 	 * @var string HTML <video> tag to identify and replace with AMP version.
 	 *
 	 * @since 0.2
@@ -25,6 +33,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
 	/**
+	 * Script tag.
+	 *
 	 * @var string AMP HTML tag to use in place of HTML's <video> tag.
 	 *
 	 * @since 0.2
@@ -32,6 +42,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-video';
 
 	/**
+	 * Script src.
+	 *
 	 * @var string URL to AMP Project's Video element's JavaScript file found at cdn.ampproject.org
 	 *
 	 * @since 0.2
@@ -62,14 +74,14 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$nodes = $this->dom->getElementsByTagName( self::$tag );
+		$nodes     = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 		if ( 0 === $num_nodes ) {
 			return;
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
+			$node           = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
@@ -79,12 +91,14 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 
-			/**
-			 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
-			 *
-			 * @var DOMNode $child_node
-			 */
 			foreach ( $node->childNodes as $child_node ) {
+				/**
+				 * Child node.
+				 *
+				 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
+				 *
+				 * @var DOMNode $child_node
+				 */
 				$new_child_node = $child_node->cloneNode( true );
 				if ( ! $new_child_node instanceof DOMElement ) {
 					continue;
@@ -107,12 +121,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			}
 
-			/**
+			/*
 			 * If the node has at least one valid source, replace the old node with it.
 			 * Otherwise, just remove the node.
 			 *
-			 * @todo: Add a fallback handler.
-			 * @see: https://github.com/ampproject/amphtml/issues/2261
+			 * TODO: Add a fallback handler.
+			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
 				$node->parentNode->removeChild( $node );
@@ -131,6 +145,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type string $src Video URL - Empty if HTTPS required per $this->args['require_https_src']
 	 *      @type int $width <video> attribute - Set to numeric value if px or %
 	 *      @type int $height <video> attribute - Set to numeric value if px or %
@@ -172,7 +188,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
-				default;
+				default:
 					break;
 			}
 		}

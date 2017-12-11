@@ -1,9 +1,14 @@
 <?php
 /**
+ * Class AMP_Img_Sanitizer.
+ *
+ * @package AMP
+ */
+
+/**
  * Class AMP_Img_Sanitizer
  *
  * Converts <img> tags to <amp-img> or <amp-anim>
- *
  */
 class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -26,15 +31,24 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	const FALLBACK_HEIGHT = 400;
 
 	/**
+	 * Tag.
+	 *
 	 * @var string HTML <img> tag to identify and replace with AMP version.
 	 *
 	 * @since 0.2
 	 */
 	public static $tag = 'img';
 
+	/**
+	 * Animation extension.
+	 *
+	 * @var string
+	 */
 	private static $anim_extension = '.gif';
 
 	/**
+	 * Script slug.
+	 *
 	 * @var string AMP HTML tag to use in place of HTML's <img> tag.
 	 *
 	 * @since 0.2
@@ -42,6 +56,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-anim';
 
 	/**
+	 * Script src.
+	 *
 	 * @var string URL to AMP Project's Image element's JavaScript file found at cdn.ampproject.org
 	 *
 	 * @since 0.2
@@ -75,9 +91,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 
 		/**
+		 * Node list.
+		 *
 		 * @var DOMNodeList $node
 		 */
-		$nodes = $this->dom->getElementsByTagName( self::$tag );
+		$nodes           = $this->dom->getElementsByTagName( self::$tag );
 		$need_dimensions = array();
 
 		$num_nodes = $nodes->length;
@@ -97,9 +115,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			/**
-			 * Determine which images need their dimensions determined/extracted.
-			 */
+			// Determine which images need their dimensions determined/extracted.
 			if ( '' === $node->getAttribute( 'width' ) || '' === $node->getAttribute( 'height' ) ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
@@ -117,6 +133,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type string $src Image URL - Pass along if found
 	 *      @type string $alt <img> `alt` attribute - Pass along if found
 	 *      @type string $class <img> `class` attribute - Pass along if found
@@ -149,7 +167,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
 					break;
 
-				default;
+				default:
 					break;
 			}
 		}
@@ -173,14 +191,13 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $node instanceof DOMElement ) {
 					continue;
 				}
-				/**
-				 *  Provide default dimensions for images whose dimensions we couldn't fetch.
-				 */
+
+				// Provide default dimensions for images whose dimensions we couldn't fetch.
 				if ( false !== $dimensions ) {
-					$node->setAttribute( 'width', $dimensions[ 'width' ] );
-					$node->setAttribute( 'height', $dimensions[ 'height' ] );
+					$node->setAttribute( 'width', $dimensions['width'] );
+					$node->setAttribute( 'height', $dimensions['height'] );
 				} else {
-					$width = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
+					$width  = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
 					$height = self::FALLBACK_HEIGHT;
 					$node->setAttribute( 'width', $width );
 					$node->setAttribute( 'height', $height );
@@ -207,7 +224,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMNode $node The DOMNode to adjust and replace
+	 * @param DOMNode $node The DOMNode to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
@@ -215,6 +232,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
+
 			$new_tag = 'amp-anim';
 		} else {
 			$new_tag = 'amp-img';
@@ -233,7 +251,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Returns true if $url ends in `.gif`
 	 */
 	private function is_gif_url( $url ) {
-		$ext = self::$anim_extension;
+		$ext  = self::$anim_extension;
 		$path = AMP_WP_Utils::parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
 	}

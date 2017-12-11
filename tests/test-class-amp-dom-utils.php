@@ -8,7 +8,6 @@
  * @method void assertEquals( mixed $expected, mixed $actual, string $errorMessage=null )
  * @method void assertTrue( bool $expectsTrue, string $errorMessage=null )
  * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
- *
  */
 class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	public function test_utf8_content() {
@@ -96,9 +95,6 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$dom = new DOMDocument;
 		$node = $dom->createAttribute( 'src' );
 		$expected = ' src=""';
-
-//		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-//		$this->assertEquals( $expected, $dom->saveXML($node) );
 
 		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
 		$this->assertEquals( $expected, $actual );

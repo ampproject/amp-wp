@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class AMP_Base_Sanitizer
+ *
+ * @package AMP
+ */
 
 /**
  * Class AMP_Base_Sanitizer
@@ -7,6 +12,7 @@ abstract class AMP_Base_Sanitizer {
 
 	/**
 	 * Value used with the height attribute in an $attributes parameter is empty.
+	 *
 	 * @since 0.3.3
 	 *
 	 * @const int
@@ -23,6 +29,8 @@ abstract class AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = array();
 
 	/**
+	 * DOM.
+	 *
 	 * @var DOMDocument A standard PHP representation of an HTML document in object form.
 	 *
 	 * @since 0.2
@@ -58,8 +66,10 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMDocument $dom Represents the HTML document to sanitize
-	 * @param array $args array {
+	 * @param DOMDocument $dom Represents the HTML document to sanitize.
+	 * @param array       $args array {
+	 *      Args.
+	 *
 	 *      @type int $content_max_width
 	 *      @type bool $add_placeholder
 	 *      @type bool $require_https_src
@@ -67,9 +77,9 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string[] $amp_globally_allowed_attributes
 	 *      @type string[] $amp_layout_allowed_attributes
 	 * }
-x	 */
+	 */
 	public function __construct( $dom, $args = array() ) {
-		$this->dom = $dom;
+		$this->dom  = $dom;
 		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
 	}
 
@@ -144,7 +154,11 @@ x	 */
 	}
 
 	/**
+	 * Enforce fixed height.
+	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type int $height
 	 *      @type int $width
 	 *      @type string $sizes
@@ -175,6 +189,8 @@ x	 */
 	 * See https://github.com/Automattic/amp-wp/issues/101
 	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type int $height
 	 *      @type int $width
 	 *      @type string $sizes
@@ -207,15 +223,17 @@ x	 */
 	 * it concatenates to existing attribute separator by a space or other supplied separator.
 	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type int $height
 	 *      @type int $width
 	 *      @type string $sizes
 	 *      @type string $class
 	 *      @type string $layout
 	 * }
-	 * @param string $key Valid associative array index to add.
-	 * @param string $value Value to add or append to array indexed at the key
-	 * @param string $separator Optional; defaults to space but some other separator if needed.
+	 * @param string   $key       Valid associative array index to add.
+	 * @param string   $value     Value to add or append to array indexed at the key.
+	 * @param string   $separator Optional; defaults to space but some other separator if needed.
 	 */
 	public function add_or_append_attribute( &$attributes, $key, $value, $separator = ' ' ) {
 		if ( isset( $attributes[ $key ] ) ) {
@@ -230,20 +248,20 @@ x	 */
 	 *
 	 * If not required, the implementing class may want to try and force https instead.
 	 *
-	 * @param string $src URL to convert to HTTPS if forced, or made empty if $args['require_https_src'].
+	 * @param string  $src         URL to convert to HTTPS if forced, or made empty if $args['require_https_src'].
 	 * @param boolean $force_https Force setting of HTTPS if true.
 	 * @return string URL which may have been updated with HTTPS, or may have been made empty.
 	 */
 	public function maybe_enforce_https_src( $src, $force_https = false ) {
 		$protocol = strtok( $src, ':' );
 		if ( 'https' !== $protocol ) {
-			// Check if https is required
+			// Check if https is required.
 			if ( isset( $this->args['require_https_src'] ) && true === $this->args['require_https_src'] ) {
 				// Remove the src. Let the implementing class decide what do from here.
 				$src = '';
 			} elseif ( ( ! isset( $this->args['require_https_src'] ) || false === $this->args['require_https_src'] )
 				&& true === $force_https ) {
-				// Don't remove the src, but force https instead
+				// Don't remove the src, but force https instead.
 				$src = set_url_scheme( $src, 'https' );
 			}
 		}

@@ -2,6 +2,12 @@
 /**
  * Class AMP_Iframe_Sanitizer
  *
+ * @package AMP
+ */
+
+/**
+ * Class AMP_Iframe_Sanitizer
+ *
  * Converts <iframe> tags to <amp-iframe>
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
@@ -17,6 +23,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Default values for sandboxing IFrame.
+	 *
 	 * @since 0.2
 	 *
 	 * @const int
@@ -24,6 +31,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	const SANDBOX_DEFAULTS = 'allow-scripts allow-same-origin';
 
 	/**
+	 * Tag.
+	 *
 	 * @var string HTML <iframe> tag to identify and replace with AMP version.
 	 *
 	 * @since 0.2
@@ -31,6 +40,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'iframe';
 
 	/**
+	 * Script slug.
+	 *
 	 * @var string AMP HTML tag to use in place of HTML's <iframe> tag.
 	 *
 	 * @since 0.2
@@ -38,12 +49,19 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-iframe';
 
 	/**
+	 * Script src.
+	 *
 	 * @var string URL to AMP Project's IFrame element's JavaScript file found at cdn.ampproject.org
 	 *
 	 * @since 0.2
 	 */
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
 
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
 	protected $DEFAULT_ARGS = array(
 		'add_placeholder' => false,
 	);
@@ -72,14 +90,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$nodes = $this->dom->getElementsByTagName( self::$tag );
+		$nodes     = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 		if ( 0 === $num_nodes ) {
 			return;
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
+			$node           = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
@@ -112,9 +130,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'p' !== strtolower( $parent_node->tagName ) ) {
 				$parent_node->replaceChild( $new_node, $node );
 			} else {
-				/**
-				 * AMP does not like iframes in <p> tags
-				 */
+				// AMP does not like iframes in <p> tags.
 				$parent_node->removeChild( $node );
 				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
 
@@ -131,6 +147,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type string $src IFrame URL - Empty if HTTPS required per $this->args['require_https_src']
 	 *      @type int $width <iframe> width attribute - Set to numeric value if px or %
 	 *      @type int $height <iframe> width attribute - Set to numeric value if px or %
@@ -177,7 +195,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
-				default;
+				default:
 					break;
 			}
 		}
@@ -195,6 +213,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 *
 	 * @param string[] $parent_attributes {
+	 *      Attributes.
+	 *
 	 *      @type string $placeholder AMP HTML <amp-iframe> `placeholder` attribute; default to 'amp-wp-iframe-placeholder'
 	 *      @type string $class AMP HTML <amp-iframe> `class` attribute; default to 'amp-wp-iframe-placeholder'
 	 * }

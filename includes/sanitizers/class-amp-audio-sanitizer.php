@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class AMP_Audio_Sanitizer
+ *
+ * @package AMP
+ */
 
 /**
  * Class AMP_Audio_Sanitizer
@@ -8,12 +13,16 @@
 class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Tag.
+	 *
 	 * @var string HTML audio tag to identify and replace with AMP version.
 	 * @since 0.2
 	 */
 	public static $tag = 'audio';
 
 	/**
+	 * Script slug.
+	 *
 	 * @var string AMP HTML audio tag to use in place of HTML's 'audio' tag.
 	 *
 	 * @since 0.2
@@ -21,6 +30,8 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-audio';
 
 	/**
+	 * Script src.
+	 *
 	 * @var string URL to AMP Project's Audio element javascript file found at cdn.ampproject.org
 	 *
 	 * @since 0.2
@@ -51,26 +62,29 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$nodes = $this->dom->getElementsByTagName( self::$tag );
+		$nodes     = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 		if ( 0 === $num_nodes ) {
 			return;
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
+			$node           = $nodes->item( $i );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
 
-			/**
-			 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
-			 *
-			 * @var DOMNode $child_node
-			 */
 			foreach ( $node->childNodes as $child_node ) {
+
+				/**
+				 * Child node.
+				 *
+				 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
+				 *
+				 * @var DOMNode $child_node
+				 */
 
 				$new_child_node = $child_node->cloneNode( true );
 				if ( ! $new_child_node instanceof DOMElement ) {
@@ -87,14 +101,10 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				/**
-				 * textContent is invalid for `source` nodes
-				 */
+				// The textContent is invalid for `source` nodes.
 				$new_child_node->textContent = null;
 
-				/**
-				 * Only append source tags with a valid src attribute
-				 */
+				// Only append source tags with a valid src attribute.
 				$new_node->appendChild( $new_child_node );
 
 			}
@@ -122,6 +132,8 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type string $src Audio URL - Empty if HTTPS required per $this->args['require_https_src']
 	 *      @type int $width <audio> attribute - Set to numeric value if px or %
 	 *      @type int $height <audio> attribute - Set to numeric value if px or %
@@ -157,7 +169,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
-				default;
+				default:
 					break;
 			}
 		}

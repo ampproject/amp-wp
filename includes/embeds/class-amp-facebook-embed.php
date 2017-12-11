@@ -1,6 +1,13 @@
 <?php
+/**
+ * Class AMP_Facebook_Embed_Handler
+ *
+ * @package AMP
+ */
 
-
+/**
+ * Class AMP_Facebook_Embed_Handler
+ */
 class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://(www\.)?facebook\.com/.*#i';
 

@@ -1,6 +1,13 @@
 <?php
+/**
+ * Class AMP_Analytics_Options_Submenu
+ *
+ * @package AMP
+ */
 
-
+/**
+ * Class AMP_Analytics_Options_Submenu
+ */
 class AMP_Analytics_Options_Submenu {
 
 	private $parent_menu_slug;

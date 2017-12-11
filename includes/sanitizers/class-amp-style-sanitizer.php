@@ -2,19 +2,27 @@
 /**
  * Class AMP_Style_Sanitizer
  *
+ * @package AMP
+ */
+
+/**
+ * Class AMP_Style_Sanitizer
+ *
  * Collects inline styles and outputs them in the amp-custom stylesheet.
  */
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * @var string[] List of CSS styles in HTML content of DOMDocument ($this->dom)
+	 * Styles.
+	 *
+	 * @var string[] List of CSS styles in HTML content of DOMDocument ($this->dom).
 	 *
 	 * @since 0.4
 	 */
 	private $styles = array();
 
 	/**
-	 * Get list of CSS styles in HTML content of DOMDocument ($this->dom)
+	 * Get list of CSS styles in HTML content of DOMDocument ($this->dom).
 	 *
 	 * @since 0.4
 	 *
@@ -49,7 +57,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @note Uses recursion to traverse down the tree of DOMDocument nodes.
 	 *
-	 * @param DOMNode $node
+	 * @param DOMNode $node Node.
 	 */
 	private function collect_styles_recursive( $node ) {
 		if ( XML_ELEMENT_NODE !== $node->nodeType ) {
@@ -81,12 +89,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize and convert individual styles
-	 *
-	 * @param $string
+	 * Sanitize and convert individual styles.
 	 *
 	 * @since 0.4
 	 *
+	 * @param string $string Style string.
 	 * @return array
 	 */
 	private function process_style( $string ) {
@@ -100,23 +107,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return array();
 		}
 
-		/**
+		/*
 		 * safecss returns a string but we want individual rules.
 		 * Use preg_split to break up rules by `;` but only if the
 		 * semi-colon is not inside parens (like a data-encoded image).
 		 */
-		$styles = array_map( 'trim', preg_split( "/;(?![^(]*\))/", $string ) );
+		$styles = array_map( 'trim', preg_split( '/;(?![^(]*\))/', $string ) );
 
-		/**
-		 *  Normalize the order of the styles
-		 */
+		// Normalize the order of the styles.
 		sort( $styles );
 
 		$processed_styles = array();
 
-		/**
-		 * Normalize whitespace and filter rules
-		 */
+		// Normalize whitespace and filter rules.
 		foreach ( $styles as $index => $rule ) {
 			$arr2 = array_map( 'trim', explode( ':', $rule, 2 ) );
 			if ( 2 !== count( $arr2 ) ) {
@@ -141,11 +144,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *   - Change `width` to `max-width`
 	 *   - Remove !important
 	 *
-	 * @param string $property
-	 * @param string $value
-	 *
 	 * @since 0.4
 	 *
+	 * @param string $property Property.
+	 * @param string $value    Value.
 	 * @return array
 	 */
 	private function filter_style( $property, $value ) {
@@ -178,11 +180,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * Use the md5() of the $data parameter
 	 *
-	 * @param string $data
-	 *
 	 * @since 0.4
 	 *
-	 * @return string
+	 * @param string $data Data.
+	 * @return string Class name.
 	 */
 	private function generate_class_name( $data ) {
 		$string = maybe_serialize( $data );

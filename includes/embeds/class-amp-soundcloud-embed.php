@@ -1,6 +1,13 @@
 <?php
+/**
+ * Class AMP_SoundCloud_Embed_Handler
+ *
+ * @package AMP
+ */
 
-
+/**
+ * Class AMP_SoundCloud_Embed_Handler
+ */
 class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://api\.soundcloud\.com/tracks/.*#i';
 	protected $DEFAULT_HEIGHT = 200;

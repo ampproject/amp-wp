@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class AMP_Playbuzz_Sanitizer
+ *
+ * @package AMP
+ */
 
 /**
  * Class AMP_Playbuzz_Sanitizer
@@ -10,12 +15,16 @@
 class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Tag.
+	 *
 	 * @var string HTML tag to identify and replace with AMP version.
 	 * @since 0.2
 	 */
 	public static $tag = 'div';
 
 	/**
+	 * PlayBuzz class.
+	 *
 	 * @var string CSS class to identify Playbuzz <div> to replace with AMP version.
 	 *
 	 * @since 0.2
@@ -23,6 +32,8 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	public static $pb_class = 'pb_feed';
 
 	/**
+	 * Script slug.
+	 *
 	 * @var string AMP HTML audio tag to use in place of HTML's 'audio' tag.
 	 *
 	 * @since 0.2
@@ -30,6 +41,8 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	private static $script_slug = 'amp-playbuzz';
 
 	/**
+	 * Script src.
+	 *
 	 * @var string URL to AMP Project's Playbuzz element javascript file found at cdn.ampproject.org
 	 *
 	 * @since 0.2
@@ -71,7 +84,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 
-		$nodes = $this->dom->getElementsByTagName( self::$tag );
+		$nodes     = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
 
 		if ( 0 === $num_nodes ) {
@@ -81,7 +94,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
-			if ( self::$pb_class !== $node -> getAttribute( 'class' ) ) {
+			if ( self::$pb_class !== $node->getAttribute( 'class' ) ) {
 				continue;
 			}
 
@@ -109,6 +122,8 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 *
 	 * @param string[] $attributes {
+	 *      Attributes.
+	 *
 	 *      @type string $data-item Playbuzz <div> attribute - Pass along if found and not empty.
 	 *      @type string $data-game Playbuzz <div> attribute - Assign to its value to $attributes['src'] if found and not empty.
 	 *      @type string $data-game-info Playbuzz <div> attribute - Assign to its value to $attributes['data-item-info'] if found.
@@ -127,28 +142,28 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 					if ( ! empty( $value ) ) {
 						$out['data-item'] = $value;
 					}
-				break;
+					break;
 
 				case 'data-game':
 					if ( ! empty( $value ) ) {
 						$out['src'] = $value;
 					}
-				break;
+					break;
 
 				case 'data-game-info':
 					$out['data-item-info'] = $value;
-				break;
+					break;
 
 				case 'data-shares':
 					$out['data-share-buttons'] = $value;
-				break;
+					break;
 
 				case 'data-comments':
 					$out['data-comments'] = $value;
-				break;
+					break;
 
-				default;
-				break;
+				default:
+					break;
 			}
 		}
 

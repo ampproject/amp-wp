@@ -1,8 +1,12 @@
 <?php
 /**
- * class AMP_Options_Manager.
+ * Class AMP_Options_Manager.
  *
  * @package AMP
+ */
+
+/**
+ * Class AMP_Options_Manager
  */
 class AMP_Options_Manager {
 
