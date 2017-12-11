@@ -1,13 +1,18 @@
 <?php
+/**
+ * Class AMP_Analytics_Options_Submenu_Page
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
-
+/**
+ * Class AMP_Analytics_Options_Submenu_Page
+ */
 class AMP_Analytics_Options_Submenu_Page {
 
 	private function render_entry( $id = '', $type = '', $config = '' ) {
 		$is_existing_entry = ! empty( $id );
 
-		$analytics_title = false;
 		if ( $is_existing_entry ) {
 			$entry_slug = sprintf( '%s%s', ( $type ? $type . '-' : '' ), substr( $id, -6 ) );
 			$analytics_title = sprintf( __( 'Analytics: %s', 'amp' ), $entry_slug );

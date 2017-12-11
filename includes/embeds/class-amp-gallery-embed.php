@@ -1,7 +1,13 @@
 <?php
+/**
+ * Class AMP_Gallery_Embed_Handler
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
-
+/**
+ * Class AMP_Gallery_Embed_Handler
+ */
 class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	private static $script_slug = 'amp-carousel';
 	private static $script_src = 'https://cdn.ampproject.org/v0/amp-carousel-0.1.js';

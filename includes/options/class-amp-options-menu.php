@@ -5,10 +5,6 @@
  * @package AMP
  */
 
-// Includes.
-require_once AMP__DIR__ . '/includes/options/class-amp-analytics-options-submenu.php';
-require_once AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php';
-
 /**
  * AMP_Options_Menu class.
  */

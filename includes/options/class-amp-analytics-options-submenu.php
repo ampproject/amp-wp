@@ -1,8 +1,13 @@
 <?php
+/**
+ * Class AMP_Analytics_Options_Submenu
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-submenu-page.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-
+/**
+ * Class AMP_Analytics_Options_Submenu
+ */
 class AMP_Analytics_Options_Submenu {
 
 	private $parent_menu_slug;

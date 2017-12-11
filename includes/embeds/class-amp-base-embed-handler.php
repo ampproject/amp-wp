@@ -1,8 +1,15 @@
 <?php
+/**
+ * Class AMP_Base_Embed_Handler
+ *
+ * Used by some children.
+ *
+ * @package  AMP
+ */
 
-// Used by some children
-require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-
+/**
+ * Class AMP_Base_Embed_Handler
+ */
 abstract class AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 600;
 	protected $DEFAULT_HEIGHT = 480;
