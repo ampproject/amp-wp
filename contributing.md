@@ -1,5 +1,7 @@
 # AMP Contributing Guide
 
+Thanks for taking the time to contribute!
+
 To clone this repository
 ``` bash
 $ git clone --recursive git@github.com:Automattic/amp-wp.git
@@ -14,6 +16,8 @@ To update that file:
 That script is intended for a Linux environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
 ### PHPUnit Testing
+
+Please run these tests in an environment with WordPress unit tests installed, like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
 Run tests:
 
