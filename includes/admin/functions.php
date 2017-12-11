@@ -3,8 +3,6 @@
 
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
-add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
-
 /**
  * Sets up the AMP template editor for the Customizer.
  */
@@ -106,7 +104,6 @@ function amp_add_options_menu() {
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
-add_action( 'wp_loaded', 'amp_add_options_menu' );
 
 function amp_add_custom_analytics( $analytics ) {
 	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
@@ -125,7 +122,6 @@ function amp_add_custom_analytics( $analytics ) {
 
 	return $analytics;
 }
-add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
 
 /**
  * Bootstrap AMP post meta box.
@@ -138,4 +134,3 @@ function amp_post_meta_box() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
 }
-add_action( 'wp_loaded', 'amp_post_meta_box' );

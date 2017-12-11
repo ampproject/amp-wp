@@ -12,13 +12,6 @@
 class AMP_Post_Type_Support {
 
 	/**
-	 * Add hooks.
-	 */
-	public static function init() {
-		add_action( 'after_setup_theme', array( __CLASS__, 'add_post_type_support' ), 5 );
-	}
-
-	/**
 	 * Get post types that plugin supports out of the box (which cannot be disabled).
 	 *
 	 * @return string[] Post types.
