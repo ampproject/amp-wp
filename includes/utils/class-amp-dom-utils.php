@@ -56,6 +56,12 @@ class AMP_DOM_Utils {
 	 */
 	public static function get_content_from_dom( $dom ) {
 		/**
+		 * @var string Regular expression to match self-closing tags
+		 *      that saveXML() has generated a closing tag for.
+		 */
+		static $self_closing_tags_regex;
+
+		/**
 		 * We only want children of the body tag, since we have a subset of HTML.
 		 */
 		$out  = '';
@@ -69,6 +75,14 @@ class AMP_DOM_Utils {
 		 */
 		self::recursive_force_closing_tags( $dom, $body );
 
+		/*
+		 * Cache this regex so we don't have to recreate it every call.
+		 */
+		if ( ! isset( $self_closing_tags_regex ) ) {
+			$self_closing_tags       = implode( '|', self::get_self_closing_tags() );
+			$self_closing_tags_regex = "#></({$self_closing_tags})>#i";
+		}
+
 		foreach ( $body->childNodes as $node ) {
 			$html = $dom->saveXML( $node );
 			/**
@@ -80,17 +94,11 @@ class AMP_DOM_Utils {
 
 			/**
 			 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
+			 * Travis w/PHP 7.x generates <source ...></source> vs. <source ... />.  Etc.
 			 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
 			 * This does not happen in my (@mikeschinkel) local testing, btw.
 			 */
-			$html = preg_replace( '#<(br|hr)></\1>#', '<$1/>', $html );
-
-			/**
-			 * Travis w/PHP 7.x generates <source ...></source> vs. <source ... />.
-			 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
-			 * This does not happen in my (@mikeschinkel) local testing, btw.
-			 */
-			$html = preg_replace( '#></source>#', '/>', $html );
+			$html = preg_replace( $self_closing_tags_regex, '/>', $html );
 
 			$out .= $html;
 		}
@@ -222,11 +230,27 @@ class AMP_DOM_Utils {
 	 * @return bool Returns true if a valid self-closing tag, false if not.
 	 */
 	private static function is_self_closing_tag( $tag ) {
-		// This function is called a lot; the static var prevents having to re-create the array every time.
+		return in_array( $tag, self::get_self_closing_tags(), true );
+	}
+
+	/**
+	 * Returns array of self closing tags
+	 *
+	 * @since 0.6.0
+	 *
+	 * @return string[]
+	 */
+	private static function get_self_closing_tags() {
+		/*
+		 * As this function is called a lot the static var
+		 * prevents having to re-create the array every time.
+		 */
 		static $self_closing_tags;
 		if ( ! isset( $self_closing_tags ) ) {
-			// https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
-			// Not all are valid AMP, but we include them for completeness.
+			/**
+			 * https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
+			 * Not all are valid AMP, but we include them for completeness.
+			 */
 			$self_closing_tags = array(
 				'area',
 				'base',
@@ -248,7 +272,6 @@ class AMP_DOM_Utils {
 				'wbr',
 			);
 		}
-
-		return in_array( $tag, $self_closing_tags, true );
+		return $self_closing_tags;
 	}
 }
