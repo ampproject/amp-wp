@@ -70,7 +70,14 @@ class AMP_DOM_Utils {
 		self::recursive_force_closing_tags( $dom, $body );
 
 		foreach ( $body->childNodes as $node ) {
-			$out .= $dom->saveXML( $node );
+			$html = $dom->saveXML( $node );
+			if ( '' === trim( $html ) ) {
+				/**
+				 * Whitespace just causes unit tests to fail... so whitespace begone.
+				 */
+				continue;
+			}
+			$out .= $html;
 		}
 
 		return $out;
@@ -168,6 +175,10 @@ class AMP_DOM_Utils {
 		}
 
 		if ( self::is_self_closing_tag( $node->nodeName ) ) {
+			/*
+			 * Ensure there is no text content to accidentally force a child
+			 */
+			$node->textContent = null;
 			return;
 		}
 
