@@ -38,7 +38,7 @@ class AMP_Autoloader {
 		'AMP_Vimeo_Embed_Handler'                                        => 'embeds/class-amp-vimeo-embed',
 		'AMP_Vine_Embed_Handler'                                         => 'embeds/class-amp-vine-embed',
 		'AMP_YouTube_Embed_Handler'                                      => 'embeds/class-amp-youtube-embed',
-		'FastImage'                                                      => '/lib/fastimage/class-fastimage.php',
+		'FastImage'                                                      => 'lib/fastimage/class-fastimage',
 		'WillWashburn\\Stream\\Exception\\StreamBufferTooSmallException' => 'lib/fasterimage/Stream/Exception/StreamBufferTooSmallException',
 		'WillWashburn\\Stream\\StreamableInterface'                      => 'lib/fasterimage/Stream/StreamableInterface',
 		'WillWashburn\\Stream\\Stream'                                   => 'lib/fasterimage/Stream/Stream',
