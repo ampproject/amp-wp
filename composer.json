@@ -3,11 +3,5 @@
     "description": "WordPress plugin for adding AMP support",
     "homepage": "https://github.com/Automattic/amp-wp",
     "type": "wordpress-plugin",
-    "license": "GPL-2.0",
-    "require-dev": {
-        "wp-coding-standards/wpcs": "*",
-        "wimg/php-compatibility": "*",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
-        "phpunit/phpunit": "5.7.25"
-    }
+    "license": "GPL-2.0"
 }
