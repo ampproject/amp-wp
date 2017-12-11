@@ -31,6 +31,8 @@ function amp_maybe_init_customizer() {
 }
 
 /**
+ * Get permalink for the first AMP-eligible post.
+ *
  * @return string|null
  */
 function amp_admin_get_preview_permalink() {
