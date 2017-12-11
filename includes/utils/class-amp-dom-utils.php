@@ -55,6 +55,42 @@ class AMP_DOM_Utils {
 	 * @return string Returns the HTML content represented in the DOMDocument
 	 */
 	public static function get_content_from_dom( $dom ) {
+
+		/**
+		 * We only want children of the body tag, since we have a subset of HTML.
+		 */
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+
+		/**
+		 * The DOMDocument may contain no body. In which case return nothing.
+		 */
+		if ( is_null( $body ) ) {
+			return '';
+		}
+
+		$out = '';
+
+		foreach ( $body->childNodes as $child_node ) {
+			$out .= self::get_content_from_dom_node( $dom, $child_node );
+		}
+
+		return $out;
+	}
+
+
+	/**
+	 * Return valid HTML content extracted from the DOMNode passed as a parameter.
+	 *
+	 * @see Called by function get_content_from_dom()
+	 *
+	 * @since 0.6.0
+	 *
+	 * @param DOMDocument $dom Represents an HTML document
+	 * @param DOMNode $node Represents an HTML element of the $dom from which to extract HTML content.
+	 *
+	 * @return string Returns the HTML content represented in the DOMNode
+	 */
+	public static function get_content_from_dom_node( $dom, $node ) {
 		/**
 		 * @var string Regular expression to match self-closing tags
 		 *      that saveXML() has generated a closing tag for.
@@ -62,25 +98,12 @@ class AMP_DOM_Utils {
 		static $self_closing_tags_regex;
 
 		/**
-		 * We only want children of the body tag, since we have a subset of HTML.
-		 */
-		$out  = '';
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-
-		/**
-		 * The DOMDocument may contain no body. In which case return nothing.
-		 */
-		if ( is_null( $body ) ) {
-			return $out;
-		}
-
-		/**
 		 * Most AMP elements need closing tags. To force them, we cannot use
 		 * saveHTML (node support is 5.3+) and LIBXML_NOEMPTYTAG results in
 		 * issues with self-closing tags like `br` and `hr`. So, we're manually
 		 * forcing closing tags.
 		 */
-		self::recursive_force_closing_tags( $dom, $body );
+		self::recursive_force_closing_tags( $dom, $node );
 
 		/*
 		 * Cache this regex so we don't have to recreate it every call.
@@ -90,27 +113,25 @@ class AMP_DOM_Utils {
 			$self_closing_tags_regex = "#></({$self_closing_tags})>#i";
 		}
 
-		foreach ( $body->childNodes as $node ) {
-			$html = $dom->saveXML( $node );
-			/**
-			 * Whitespace just causes unit tests to fail... so whitespace begone.
-			 */
-			if ( '' === trim( $html ) ) {
-				continue;
-			}
+		$html = $dom->saveXML( $node );
 
-			/**
-			 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
-			 * Travis w/PHP 7.x generates <source ...></source> vs. <source ... />.  Etc.
-			 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
-			 * This does not happen in my (@mikeschinkel) local testing, btw.
-			 */
-			$html = preg_replace( $self_closing_tags_regex, '/>', $html );
-
-			$out .= $html;
+		/**
+		 * Whitespace just causes unit tests to fail... so whitespace begone.
+		 */
+		if ( '' === trim( $html ) ) {
+			return '';
 		}
 
-		return $out;
+		/**
+		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
+		 * Travis w/PHP 7.x generates <source ...></source> vs. <source ... />.  Etc.
+		 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
+		 * This does not happen in my (@mikeschinkel) local testing, btw.
+		 */
+		$html = preg_replace( $self_closing_tags_regex, '/>', $html );
+
+		return $html;
+
 	}
 
 	/**
