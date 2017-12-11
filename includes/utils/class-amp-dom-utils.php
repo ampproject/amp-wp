@@ -62,7 +62,7 @@ class AMP_DOM_Utils {
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
 		/**
-		 * AMP elements always need closing tags. To force them, we cannot use
+		 * Most AMP elements need closing tags. To force them, we cannot use
 		 * saveHTML (node support is 5.3+) and LIBXML_NOEMPTYTAG results in
 		 * issues with self-closing tags like `br` and `hr`. So, we're manually
 		 * forcing closing tags.
@@ -71,12 +71,20 @@ class AMP_DOM_Utils {
 
 		foreach ( $body->childNodes as $node ) {
 			$html = $dom->saveXML( $node );
+			/**
+			 * Whitespace just causes unit tests to fail... so whitespace begone.
+			 */
 			if ( '' === trim( $html ) ) {
-				/**
-				 * Whitespace just causes unit tests to fail... so whitespace begone.
-				 */
 				continue;
 			}
+
+			/**
+			 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
+			 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
+			 * This does not happen in my (@mikeschinkel) local testing, btw.
+			 */
+			$html = preg_replace( '#<(b|h)r></\1r>#', '<$1r/>', $html );
+
 			$out .= $html;
 		}
 
