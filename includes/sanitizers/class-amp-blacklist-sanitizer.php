@@ -1,6 +1,9 @@
 <?php
-
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' );
+/**
+ * Class AMP_Blacklist_Sanitizer
+ *
+ * @package AMP
+ */
 
 /**
  * Strips blacklisted tags and attributes from content.
@@ -8,28 +11,43 @@ require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-base-sanitizer.php' )
  * See following for blacklist:
  *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
  *
- * As of AMP 0.5 this has been replaced by AMP_Tag_And_Attribute_Sanitizer but is kept around for back-compat.
- *
+ * @since 0.5 This has been replaced by AMP_Tag_And_Attribute_Sanitizer but is kept around for back-compat.
+ * @deprecated
  */
 class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	const PATTERN_REL_WP_ATTACHMENT = '#wp-att-([\d]+)#';
 
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
 	protected $DEFAULT_ARGS = array(
 		'add_blacklisted_protocols' => array(),
 		'add_blacklisted_tags' => array(),
 		'add_blacklisted_attributes' => array(),
 	);
 
+	/**
+	 * Sanitize.
+	 */
 	public function sanitize() {
-		$blacklisted_tags = $this->get_blacklisted_tags();
+		$blacklisted_tags       = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
-		$blacklisted_protocols = $this->get_blacklisted_protocols();
+		$blacklisted_protocols  = $this->get_blacklisted_protocols();
 
 		$body = $this->get_body_node();
 		$this->strip_tags( $body, $blacklisted_tags );
 		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
 	}
 
+	/**
+	 * Strip attributes recursively.
+	 *
+	 * @param DOMNode $node DOM Node.
+	 * @param array   $bad_attributes Bad attributes.
+	 * @param array   $bad_protocols  Bad protocols.
+	 */
 	private function strip_attributes_recursive( $node, $bad_attributes, $bad_protocols ) {
 		if ( XML_ELEMENT_NODE !== $node->nodeType ) {
 			return;
@@ -50,14 +68,14 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $node->hasAttributes() ) {
 			$length = $node->attributes->length;
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
-				$attribute = $node->attributes->item( $i );
+				$attribute      = $node->attributes->item( $i );
 				$attribute_name = strtolower( $attribute->name );
 				if ( in_array( $attribute_name, $bad_attributes, true ) ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
 				}
 
-				// on* attributes (like onclick) are a special case
+				// The on* attributes (like onclick) are a special case.
 				if ( 0 === stripos( $attribute_name, 'on' ) && 'on' !== $attribute_name ) {
 					$node->removeAttribute( $attribute_name );
 					continue;
@@ -75,16 +93,22 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
+	/**
+	 * Strip tags.
+	 *
+	 * @param DOMElement $node      Node.
+	 * @param string[]   $tag_names Tag names.
+	 */
 	private function strip_tags( $node, $tag_names ) {
 		foreach ( $tag_names as $tag_name ) {
 			$elements = $node->getElementsByTagName( $tag_name );
-			$length = $elements->length;
+			$length   = $elements->length;
 			if ( 0 === $length ) {
 				continue;
 			}
 
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
-				$element = $elements->item( $i );
+				$element     = $elements->item( $i );
 				$parent_node = $element->parentNode;
 				$parent_node->removeChild( $element );
 
@@ -95,6 +119,12 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
+	/**
+	 * Sanitize attribute.
+	 *
+	 * @param DOMElement $node      Node.
+	 * @param DOMAttr    $attribute Attribute.
+	 */
 	private function sanitize_a_attribute( $node, $attribute ) {
 		$attribute_name = strtolower( $attribute->name );
 
@@ -117,23 +147,31 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				// _new is not allowed; swap with _blank
 				$node->setAttribute( $attribute_name, '_blank' );
 			} else {
-				// only _blank is allowed
+				// Only _blank is allowed.
 				$node->removeAttribute( $attribute_name );
 			}
 		}
 	}
 
+	/**
+	 * Validate node.
+	 *
+	 * @param DOMElement $node Node.
+	 * @return bool
+	 */
 	private function validate_a_node( $node ) {
-		// Get the href attribute
+		// Get the href attribute.
 		$href = $node->getAttribute( 'href' );
 
 		if ( empty( $href ) ) {
-			// If no href, check that a is an anchor or not.
-			// We don't need to validate anchors any further.
+			/*
+			 * If no href, check that a is an anchor or not.
+			 * We don't need to validate anchors any further.
+			 */
 			return $node->hasAttribute( 'name' ) || $node->hasAttribute( 'id' );
 		}
 
-		// If this is an anchor link, just return true
+		// If this is an anchor link, just return true.
 		if ( 0 === strpos( $href, '#' ) ) {
 			return true;
 		}
@@ -143,9 +181,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			$href = untrailingslashit( get_home_url() ) . $href;
 		}
 
-		$valid_protocols = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
-		$special_protocols = array( 'tel', 'sms' ); // these ones don't valid with `filter_var+FILTER_VALIDATE_URL`
-		$protocol = strtok( $href, ':' );
+		$valid_protocols   = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
+		$special_protocols = array( 'tel', 'sms' ); // These ones don't valid with `filter_var+FILTER_VALIDATE_URL`.
+		$protocol          = strtok( $href, ':' );
 
 		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
 			&& ! in_array( $protocol, $special_protocols, true ) ) {
@@ -159,6 +197,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		return true;
 	}
 
+	/**
+	 * Replace node with children.
+	 *
+	 * @param DOMElement $node           Node.
+	 * @param array      $bad_attributes Bad attributes.
+	 * @param array      $bad_protocols  Bad protocols.
+	 */
 	private function replace_node_with_children( $node, $bad_attributes, $bad_protocols ) {
 		// If the node has children and also has a parent node,
 		// clone and re-add all the children just before current node.
@@ -176,8 +221,15 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
+	/**
+	 * Merge defaults with args.
+	 *
+	 * @param string $key    Key.
+	 * @param array  $values Values.
+	 * @return array Merged args.
+	 */
 	private function merge_defaults_with_args( $key, $values ) {
-		// Merge default values with user specified args
+		// Merge default values with user specified args.
 		if ( ! empty( $this->args[ $key ] )
 			&& is_array( $this->args[ $key ] ) ) {
 			$values = array_merge( $values, $this->args[ $key ] );
@@ -186,12 +238,22 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		return $values;
 	}
 
+	/**
+	 * Get blacklisted protocols.
+	 *
+	 * @return array Protocols.
+	 */
 	private function get_blacklisted_protocols() {
 		return $this->merge_defaults_with_args( 'add_blacklisted_protocols', array(
 			'javascript',
 		) );
 	}
 
+	/**
+	 * Get blacklisted tags.
+	 *
+	 * @return array Tags.
+	 */
 	private function get_blacklisted_tags() {
 		return $this->merge_defaults_with_args( 'add_blacklisted_tags', array(
 			'script',
@@ -215,17 +277,16 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			'embed',
 			'embedvideo',
 
-			// Other weird ones
+			// Other weird ones.
 			'comments-count',
-
-			// These are converted into amp-* versions
-			//'img',
-			//'video',
-			//'audio',
-			//'iframe',
 		) );
 	}
 
+	/**
+	 * Get blacklisted attributes.
+	 *
+	 * @return array Attributes.
+	 */
 	private function get_blacklisted_attributes() {
 		return $this->merge_defaults_with_args( 'add_blacklisted_attributes', array(
 			'style',

@@ -1,9 +1,6 @@
 <?php
 // Callbacks for adding AMP-related things to the admin.
 
-require_once( AMP__DIR__ . '/includes/options/class-amp-options-menu.php' );
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-options-manager.php' );
-
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
 /**
@@ -31,6 +28,11 @@ function amp_maybe_init_customizer() {
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
 }
 
+/**
+ * Get permalink for the first AMP-eligible post.
+ *
+ * @return string|null
+ */
 function amp_admin_get_preview_permalink() {
 	/**
 	 * Filter the post type to retrieve the latest for use in the AMP template customizer.
@@ -40,7 +42,7 @@ function amp_admin_get_preview_permalink() {
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
 	if ( ! post_type_supports( $post_type, 'amp' ) ) {
-		return;
+		return null;
 	}
 
 	$post_ids = get_posts( array(
@@ -80,22 +82,28 @@ function amp_add_customizer_link() {
 }
 
 /**
- * Registers a top-level menu for AMP configuration options
+ * Registers AMP settings.
  */
 function amp_add_options_menu() {
 	if ( ! is_admin() ) {
 		return;
 	}
 
-	$show_options_menu = apply_filters( 'amp_options_menu_is_enabled', true );
-	if ( true !== $show_options_menu ) {
+	/**
+	 * Filter whether to enable the AMP settings.
+	 *
+	 * @since 0.5
+	 * @param bool $enable Whether to enable the AMP settings. Default true.
+	 */
+	$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
+
+	if ( true !== $short_circuit ) {
 		return;
 	}
 
 	$amp_options = new AMP_Options_Menu();
 	$amp_options->init();
 }
-add_action( 'wp_loaded', 'amp_add_options_menu' );
 
 function amp_add_custom_analytics( $analytics ) {
 	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
@@ -114,4 +122,15 @@ function amp_add_custom_analytics( $analytics ) {
 
 	return $analytics;
 }
-add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
+
+/**
+ * Bootstrap AMP post meta box.
+ *
+ * This function must be invoked only once through the 'wp_loaded' action.
+ *
+ * @since 0.6
+ */
+function amp_post_meta_box() {
+	$post_meta_box = new AMP_Post_Meta_Box();
+	$post_meta_box->init();
+}

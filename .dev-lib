@@ -1,0 +1,2 @@
+SYNC_README_MD=0
+PATH_EXCLUDES_PATTERN=includes/lib/*

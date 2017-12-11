@@ -1,7 +1,5 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
-
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
 
 	protected $allowed_tags;
@@ -1700,15 +1698,21 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->assertEquals( $expected, $got );
 	}
 
-	// Use this to call private methods
-	public function invoke_method(&$object, $methodName, array $parameters = array()) {
-	    $reflection = new \ReflectionClass(get_class($object));
-	    $method = $reflection->getMethod($methodName);
-	    $method->setAccessible(true);
+	/**
+	 * Use this to call private methods.
+	 *
+	 * @param object $object      Object.
+	 * @param string $method_name Method name.
+	 * @param array  $parameters  Parameters.
+	 * @return mixed Result.
+	 */
+	public function invoke_method( &$object, $method_name, array $parameters = array() ) {
+		$reflection = new ReflectionClass( get_class( $object ) );
 
-	    return $method->invokeArgs($object, $parameters);
+		$method = $reflection->getMethod( $method_name );
+		$method->setAccessible( true );
+
+		return $method->invokeArgs( $object, $parameters );
 	}
 
 }
-
-?>

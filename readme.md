@@ -24,7 +24,7 @@ The plugin ships with its own Customizer that you can use to tweak various parts
 
 If you're using a completely custom template, you may want to disable the AMP Customizer:
 
-```
+```php
 add_filter( 'amp_customizer_is_enabled', '__return_false' );
 ``` 
 
@@ -650,7 +650,11 @@ Each analytics entry must include a unique array key and the following attribute
 
 ## Custom Post Type Support
 
-By default, the plugin only creates AMP content for posts. You can add support for other post_types using the post_type parameter used when registering the custom post type (assume our post_type is `xyz-review`):
+By default, the plugin only creates AMP content for posts.
+
+*NEW* You can enable AMP support for other post types via the AMP settings admin screen. Just enable the checkbox with each post type which is able to be served as AMP.
+
+You can also add support for other post types by adding `add_post_type_support()` calls in PHP for the desired post types. For example, assuming our post type is `xyz-review` you can add AMP support by adding the following to a theme or plugin:
 
 ```php
 add_action( 'amp_init', 'xyz_amp_add_review_cpt' );
@@ -659,7 +663,7 @@ function xyz_amp_add_review_cpt() {
 }
 ```
 
-You'll need to flush your rewrite rules after this.
+You'll need to flush your rewrite rules after this. You can do this by accessing the Permalinks admin screen or via running `wp rewrite flush` in WP-CLI.
 
 If you want a custom template for your post type:
 

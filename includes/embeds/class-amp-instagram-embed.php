@@ -1,8 +1,15 @@
 <?php
+/**
+ * Class AMP_Instagram_Embed_Handler
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
-
-// Much of this class is borrowed from Jetpack embeds
+/**
+ * Class AMP_Instagram_Embed_Handler
+ *
+ * Much of this class is borrowed from Jetpack embeds
+ */
 class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'instagr.am';
 	const URL_PATTERN = '#http(s?)://(www\.)?instagr(\.am|am\.com)/p/([^/?]+)#i';

@@ -5,28 +5,28 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.5.1
+ * Version: 0.6.0-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
+ *
+ * @package AMP
  */
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.5.1' );
+define( 'AMP__VERSION', '0.6.0-alpha' );
 
-require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
-require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
+require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
+AMP_Autoloader::register();
 
-require_once( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
-require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
+require_once AMP__DIR__ . '/back-compat/back-compat.php';
+require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
+require_once AMP__DIR__ . '/includes/admin/functions.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
+	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
 		amp_init();
 	}
@@ -47,20 +47,55 @@ function amp_deactivate() {
 	flush_rewrite_rules();
 }
 
-add_action( 'init', 'amp_init' );
-function amp_init() {
+/**
+ * Set up AMP.
+ *
+ * This function must be invoked through the 'after_setup_theme' action to allow
+ * the AMP setting to declare the post types support earlier than plugins/theme.
+ *
+ * @since 0.6
+ */
+function amp_after_setup_theme() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
 
-	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+	if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+		/**
+		 * Filter the AMP query variable.
+		 *
+		 * @since 0.3.2
+		 * @param string $query_var The AMP query variable.
+		 */
+		define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+	}
 
+	add_action( 'init', 'amp_init' );
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
+	add_action( 'wp_loaded', 'amp_post_meta_box' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	AMP_Post_Type_Support::add_post_type_support();
+}
+add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
+
+/**
+ * Init AMP.
+ *
+ * @since 0.1
+ */
+function amp_init() {
+
+	/**
+	 * Triggers on init when AMP plugin is active.
+	 *
+	 * @since 0.3
+	 */
 	do_action( 'amp_init' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
-	add_post_type_support( 'post', AMP_QUERY_VAR );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );
@@ -111,7 +146,7 @@ function amp_maybe_add_actions() {
 }
 
 function amp_load_classes() {
-	require_once( AMP__DIR__ . '/includes/class-amp-post-template.php' ); // this loads everything else
+	_deprecated_function( __FUNCTION__, '0.6.0' );
 }
 
 function amp_add_frontend_actions() {
@@ -127,24 +162,47 @@ function amp_prepare_render() {
 	add_action( 'template_redirect', 'amp_render' );
 }
 
+/**
+ * Render AMP for queried post.
+ *
+ * @since 0.1
+ */
 function amp_render() {
-	$post_id = get_queried_object_id();
-	amp_render_post( $post_id );
-	exit;
+	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
+	$post = get_queried_object();
+	if ( $post instanceof WP_Post ) {
+		amp_render_post( $post );
+		exit;
+	}
 }
 
-function amp_render_post( $post_id ) {
-	$post = get_post( $post_id );
-	if ( ! $post ) {
-		return;
+/**
+ * Render AMP post template.
+ *
+ * @since 0.5
+ * @param WP_Post|int $post Post.
+ */
+function amp_render_post( $post ) {
+
+	if ( ! ( $post instanceof WP_Post ) ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return;
+		}
 	}
+	$post_id = $post->ID;
 
-	amp_load_classes();
-
+	/**
+	 * Fires before rendering a post in AMP.
+	 *
+	 * @since 0.2
+	 *
+	 * @param int $post_id Post ID.
+	 */
 	do_action( 'pre_amp_render_post', $post_id );
 
 	amp_add_post_template_actions();
-	$template = new AMP_Post_Template( $post_id );
+	$template = new AMP_Post_Template( $post );
 	$template->load();
 }
 
@@ -181,10 +239,4 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 	}
 
 	return $link;
-}
-
-// Unconditionally load code required when running unit tests.
-if ( function_exists( 'tests_add_filter' ) ) {
-	amp_load_classes();
-	require_once dirname( __FILE__ ) . '/tests/stubs.php';
 }

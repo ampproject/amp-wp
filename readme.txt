@@ -47,11 +47,16 @@ Many plugins are adding AMP support already. If you handling analytics yourself,
 
 The best place to start is to open a new discussion in the [support forum](https://wordpress.org/support/plugin/amp) with details on what the specific validation error is.
 
-= Why aren't Pages supported yet =
-
-A wise green Yoda once said, "Patience you must have, my young padawan." We're working on it :)
-
 == Changelog ==
+
+= 0.6.0 (unreleased) =
+
+- Add support for the "page" post type, except when used as homepage or page for posts. A new `page.php` is introduced with template parts factored out (`html-start.php`, `header.php`, `footer.php`, `html-end.php`) and re-used from `single.php`. Note that AMP URLs will end in `?amp` instead of `/amp/`. See [#825](https://github.com/Automattic/amp-wp/pull/825). Props technosailor, ThierryA, westonruter.
+- Add AMP post preview button alongside non-AMP preview button. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
+- Add ability to disable AMP on a per-post basis via toggle in publish metabox. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
+- Add AMP settings admin screen for managing which post types have AMP support, eliminating the requirement to add `add_post_type_support()` calls in theme or plugin. See [#811](https://github.com/Automattic/amp-wp/pull/811). Props ThierryA, westonruter.
+- Add generator meta tag for AMP. See [#810](https://github.com/Automattic/amp-wp/pull/810). Props vaporwavre.
+- Add code quality checking via phpcs, eslint, jscs, and jshint. See [#795](https://github.com/Automattic/amp-wp/pull/795). Props westonruter.
 
 = 0.5.1 (2017-08-17) =
 
