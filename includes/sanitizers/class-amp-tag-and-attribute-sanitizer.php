@@ -220,39 +220,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 1 === count( $spec_ids_sorted ) ) {
 				$attr_spec_list = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 			} else {
-				/*
-				 * This should not happen very often, but...
-				 * If we're here, then we're not sure which spec should be used.
-				 * Let's use the top scoring ones.
-				 */
+				// This should not happen very often, but...
+				// If we're here, then we're not sure which spec should
+				// be used. Let's use the top scoring ones.
 				foreach ( $spec_ids_sorted as $id ) {
-					$attr_spec_list = array_merge( $attr_spec_list, $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
+					$spec_list = isset( $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ? $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ] : null;
+					if ( ! $this->is_missing_mandatory_attribute( $spec_list, $node ) ) {
+						$attr_spec_list = array_merge( $attr_spec_list, $spec_list );
+					}
 				}
 			}
-		}
+		} // End if().
 
-		/*
-		 * If an attribute is mandatory and we don't have it,
-		 * just remove the node and move on.
-		 */
-		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule_value ) {
-
-			$is_mandatory = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] )
-				? (bool) $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ]
-				: false;
-			if ( ! $is_mandatory ) {
-				continue;
-			}
-
-			$attribute_exists = $node instanceof DOMElement && $node->hasAttribute( $attr_name );
-
-			if ( $attribute_exists ) {
-				continue;
-			}
-
+		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
 			return;
-
 		}
 
 		// Remove any remaining disallowed attributes.
@@ -260,6 +242,27 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove values that don't conform to the attr_spec.
 		$this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
+	}
+
+	/**
+	 * Whether a node is missing a mandatory attribute.
+	 *
+	 * @param array  $attr_spec The attribute specification.
+	 * @param object $node The DOMElement of the node to check.
+	 * @return boolean $is_missing boolean Whether a required attribute is missing.
+	 */
+	public function is_missing_mandatory_attribute( $attr_spec, $node ) {
+		if ( ! is_array( $attr_spec ) ) {
+			return false;
+		}
+		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
+			$is_mandatory     = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? ( true === $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
+			$attribute_exists = method_exists( $node, 'hasAttribute' ) && $node->hasAttribute( $attr_name );
+			if ( $is_mandatory && ! $attribute_exists ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -272,11 +275,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMNode          $node     Node.
-	 * @param array[]|string[] $tag_spec Tag spec.
-	 *
-	 * @return bool If any of the tests on the restrictions fail return false,
-	 *              otherwise return true.
+	 * @param object $node The node to validate.
+	 * @param array  $tag_spec The sepecification.
+	 * @return boolean $valid Whether the node's placement is valid.
 	 */
 	private function validate_tag_spec_for_node( $node, $tag_spec ) {
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
@@ -602,9 +603,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove the disallowed values.
 		foreach ( $attrs_to_remove as $attr_name ) {
-			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
-				$attr                      = $node->attributes;
-				$attr[ $attr_name ]->value = '';
+			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
+				( true === $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
+				$node->setAttribute( $attr_name, '' );
 			} else {
 				$node->removeAttribute( $attr_name );
 			}

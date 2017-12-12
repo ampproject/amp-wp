@@ -11,6 +11,12 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
+		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
+		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
+	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
 		<severity>0</severity>
 	</rule>
@@ -31,4 +37,5 @@
 	<exclude-pattern>*/dev-lib/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
 </ruleset>
