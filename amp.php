@@ -209,18 +209,10 @@ function amp_render_post( $post ) {
 /**
  * Bootstraps the AMP customizer.
  *
- * If the AMP customizer is enabled, initially drop the core widgets and menus panels. If the current
- * preview page isn't flagged as an AMP template, the core panels will be re-added and the AMP panel
- * hidden.
- *
  * @since 0.4
  */
 function _amp_bootstrap_customizer() {
-	// Drop core panels (menus, widgets) from the AMP customizer
-	// `customize_loaded_components` runs super early so we need to call this regardless of whether the AMP customizer is enabled or not
-	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
-
-	add_action( 'after_setup_theme', 'amp_maybe_init_customizer' );
+	add_action( 'after_setup_theme', 'amp_init_customizer' );
 }
 add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
 

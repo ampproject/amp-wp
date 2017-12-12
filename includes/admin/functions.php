@@ -1,30 +1,29 @@
 <?php
-// Callbacks for adding AMP-related things to the admin.
+/**
+ * Callbacks for adding AMP-related things to the admin.
+ *
+ * @package AMP
+ */
 
+/**
+ * Obsolete constant for flagging when Customizer is opened for AMP.
+ *
+ * @deprecated
+ * @var string
+ */
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
 /**
  * Sets up the AMP template editor for the Customizer.
  */
-function amp_maybe_init_customizer() {
-	/**
-	 * Filter whether to enable the AMP template customizer functionality.
-	 *
-	 * @param bool $enable Whether to enable the AMP customizer. Default true.
-	 */
-	$amp_customizer_enabled = apply_filters( 'amp_customizer_is_enabled', true );
-
-	if ( true !== $amp_customizer_enabled ) {
-		return;
-	}
-
-	// Fire up the AMP Customizer
+function amp_init_customizer() {
+	// Fire up the AMP Customizer.
 	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );
 
-	// Add some basic design settings + controls to the Customizer
+	// Add some basic design settings + controls to the Customizer.
 	add_action( 'amp_init', array( 'AMP_Customizer_Design_Settings', 'init' ) );
 
-	// Add a link to the Customizer
+	// Add a link to the Customizer.
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
 }
 
@@ -41,15 +40,16 @@ function amp_admin_get_preview_permalink() {
 	 */
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
-	if ( ! post_type_supports( $post_type, 'amp' ) ) {
+	if ( ! post_type_supports( $post_type, AMP_QUERY_VAR ) ) {
 		return null;
 	}
 
 	$post_ids = get_posts( array(
-		'post_status'      => 'publish',
-		'post_type'        => $post_type,
-		'posts_per_page'   => 1,
-		'fields'           => 'ids',
+		'post_status'    => 'publish',
+		'post_password'  => '',
+		'post_type'      => $post_type,
+		'posts_per_page' => 1,
+		'fields'         => 'ids',
 	) );
 
 	if ( empty( $post_ids ) ) {
@@ -65,11 +65,10 @@ function amp_admin_get_preview_permalink() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
-	// Teensy little hack on menu_slug, but it works. No redirect!
 	$menu_slug = add_query_arg( array(
-		'autofocus[panel]'         => AMP_Template_Customizer::PANEL_ID,
-		'return'                   => rawurlencode( admin_url() ),
-		AMP_CUSTOMIZER_QUERY_VAR   => true,
+		'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
+		'url'              => rawurlencode( amp_admin_get_preview_permalink() ),
+		'return'           => rawurlencode( admin_url() ),
 	), 'customize.php' );
 
 	// Add the theme page.
@@ -105,6 +104,12 @@ function amp_add_options_menu() {
 	$amp_options->init();
 }
 
+/**
+ * Add custom analytics.
+ *
+ * @param array $analytics Analytics.
+ * @return array Analytics.
+ */
 function amp_add_custom_analytics( $analytics ) {
 	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
