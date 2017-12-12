@@ -1,5 +1,5 @@
 /* exported ampCustomizeControls */
-/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1 ] } ] */
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 250] } ] */
 
 var ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
@@ -144,9 +144,16 @@ var ampCustomizeControls = ( function( api, $ ) {
 			tooltipLink = tooltip.find( 'a' );
 
 		// AMP panel triggers the input toggle for AMP preview.
-		panel.expanded.bind( function() {
+		panel.expanded.bind( function( expanded ) {
+			if ( ! expanded ) {
+				return;
+			}
 			if ( api.state( 'ampAvailable' ).get() ) {
 				api.state( 'ampEnabled' ).set( panel.expanded.get() );
+			} else {
+				setTimeout( function() {
+					component.tooltipVisible.set( true );
+				}, 250 );
 			}
 		} );
 

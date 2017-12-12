@@ -86,6 +86,14 @@
 	cursor: default;
 	display: none;
 }
+.amp-toggle .tooltip a {
+	color: #00a0d2;
+}
+.amp-toggle .tooltip a:hover,
+.amp-toggle .tooltip a:focus,
+.amp-toggle .tooltip a:active {
+	color: #54cbf1;
+}
 
 .amp-toggle .tooltip:before {
 	position: absolute;
