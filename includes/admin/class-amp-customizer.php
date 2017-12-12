@@ -202,6 +202,9 @@ class AMP_Template_Customizer {
 			width: 1px;
 			word-wrap: normal !important;
 		}
+		body.wp-customizer-unloading {
+			opacity: 0.25 !important; /* Because AMP sets body to opacity:1 once layout complete. */
+		}
 		<?php
 	}
 
@@ -248,9 +251,8 @@ class AMP_Template_Customizer {
 			<div class="amp-toggle">
 				<# var elementIdPrefix = _.uniqueId( 'customize-amp-enabled-toggle' ); #>
 				<div id="{{ elementIdPrefix }}tooltip" aria-hidden="true" class="tooltip" role="tooltip">
-					<?php esc_html_e( 'This page is not AMP compatible.', 'amp' ); ?>
+					<?php esc_html_e( 'This page is not compatible with AMP.', 'amp' ); ?>
 					<?php if ( $url ) : ?>
-						<br>
 						<a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Navigate to an AMP compatible page', 'amp' ); ?></a>
 					<?php endif; ?>
 				</div>

@@ -6,8 +6,9 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 	var component = {
 		data: {
-			query: ''
+			query: 'amp'
 		},
+		tooltipTimeout: 5000,
 		tooltipVisible: new api.Value( false ),
 		tooltipFocused: new api.Value( 0 )
 	};
@@ -87,6 +88,50 @@ var ampCustomizeControls = ( function( api, $ ) {
 	};
 
 	/**
+	 * Try to close the tooltip after a given timeout.
+	 *
+	 * @returns {void}
+	 */
+	component.tryToCloseTooltip = function tryToCloseTooltip() {
+		clearTimeout( component.tooltipTimeoutId );
+		component.tooltipTimeoutId = setTimeout( function() {
+			if ( ! component.tooltipVisible.get() ) {
+				return;
+			}
+			if ( component.tooltipFocused.get() > 0 ) {
+				component.tryToCloseTooltip();
+			} else {
+				component.tooltipVisible.set( false );
+			}
+		}, component.tooltipTimeout );
+	};
+
+	/**
+	 * Make current URL AMPified if toggle is on.
+	 *
+	 * @param {string} url URL.
+	 * @return {string} AMPified URL.
+	 */
+	component.setCurrentAmpUrl = function setCurrentAmpUrl( url ) {
+		var enabled = api.state( 'ampEnabled' ).get();
+		if ( ! enabled && component.isAmpUrl( url ) ) {
+			return component.unampifyUrl( url );
+		} else if ( enabled && ! component.isAmpUrl( url ) ) {
+			return component.ampifyUrl( url );
+		}
+		return url;
+	};
+
+	/**
+	 * Swap to AMP version of URL in preview.
+	 *
+	 * @return {void}
+	 */
+	component.updatePreviewUrl = function updatePreviewUrl() {
+		api.previewer.previewUrl.set( component.setCurrentAmpUrl( api.previewer.previewUrl.get() ) );
+	};
+
+	/**
 	 * Hook up all AMP preview interactions once panel is ready.
 	 *
 	 * @param {wp.customize.Panel} panel The AMP panel.
@@ -96,34 +141,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		var ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )() ),
 			checkbox = ampToggleContainer.find( 'input[type=checkbox]' ),
 			tooltip = ampToggleContainer.find( '.tooltip' ),
-			tooltipLink = tooltip.find( 'a' ),
-			tooltipTimer = 5000,
-			tooltipTimeoutId;
-
-		/**
-		 * Make current URL AMPified if toggle is on.
-		 *
-		 * @param {string} url URL.
-		 * @return {string} AMPified URL.
-		 */
-		function setCurrentAmpUrl( url ) {
-			var enabled = api.state( 'ampEnabled' ).get();
-			if ( ! enabled && component.isAmpUrl( url ) ) {
-				return component.unampifyUrl( url );
-			} else if ( enabled && ! component.isAmpUrl( url ) ) {
-				return component.ampifyUrl( url );
-			}
-			return url;
-		}
-
-		/**
-		 * Swap to AMP version of URL in preview.
-		 *
-		 * @return {void}
-		 */
-		function updatePreviewUrl() {
-			api.previewer.previewUrl.set( setCurrentAmpUrl( api.previewer.previewUrl.get() ) );
-		}
+			tooltipLink = tooltip.find( 'a' );
 
 		// AMP panel triggers the input toggle for AMP preview.
 		panel.expanded.bind( function() {
@@ -157,7 +175,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			return function( value ) {
 				var val = prevValidate.call( this, value );
 				if ( val ) {
-					val = setCurrentAmpUrl( val );
+					val = component.setCurrentAmpUrl( val );
 				}
 				return val;
 			};
@@ -166,13 +184,17 @@ var ampCustomizeControls = ( function( api, $ ) {
 		// Listen for ampEnabled state changes.
 		api.state( 'ampEnabled' ).bind( function( enabled ) {
 			checkbox.prop( 'checked', enabled );
-			updatePreviewUrl();
+			component.updatePreviewUrl();
 		} );
 
 		// Listen for ampAvailable state changes.
 		api.state( 'ampAvailable' ).bind( function( available ) {
 			checkbox.toggleClass( 'disabled', ! available );
-			component.tooltipVisible.set( ! available );
+
+			// Show the unavailable tooltip if AMP is enabled.
+			if ( api.state( 'ampEnabled' ).get() ) {
+				component.tooltipVisible.set( ! available );
+			}
 		} );
 
 		// Adding checkbox toggle before device selection.
@@ -185,25 +207,6 @@ var ampCustomizeControls = ( function( api, $ ) {
 			api.previewer.previewUrl.set( $( this ).prop( 'href' ) );
 		} );
 
-		/**
-		 * Try closing the tooltip after the timeout.
-		 *
-		 * @returns {void}
-		 */
-		function tryToClose() {
-			clearTimeout( tooltipTimeoutId );
-			tooltipTimeoutId = setTimeout( function() {
-				if ( ! component.tooltipVisible.get() ) {
-					return;
-				}
-				if ( component.tooltipFocused.get() > 0 ) {
-					tryToClose();
-				} else {
-					component.tooltipVisible.set( false );
-				}
-			}, tooltipTimer );
-		}
-
 		// Toggle visibility of tooltip based on tooltipVisible state.
 		component.tooltipVisible.bind( function( visible ) {
 			tooltip.attr( 'aria-hidden', visible ? 'false' : 'true' );
@@ -214,7 +217,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 					}
 				} );
 				tooltip.fadeIn();
-				tryToClose();
+				component.tryToCloseTooltip();
 			} else {
 				tooltip.fadeOut();
 				component.tooltipFocused.set( 0 );
