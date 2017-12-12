@@ -159,8 +159,8 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 		// Enable AMP toggle if available and mobile device selected.
 		api.previewedDevice.bind( function( device ) {
-			if ( 'mobile' === device && api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( true );
+			if ( api.state( 'ampAvailable' ).get() ) {
+				api.state( 'ampEnabled' ).set( 'mobile' === device );
 			}
 		} );
 
