@@ -245,17 +245,19 @@ class AMP_Template_Customizer {
 		$url = amp_admin_get_preview_permalink();
 		?>
 		<script type="text/html" id="tmpl-customize-amp-enabled-toggle">
-			<label class="amp-toggle">
-				<span class="tooltip">
+			<div class="amp-toggle">
+				<# var elementIdPrefix = _.uniqueId( 'customize-amp-enabled-toggle' ); #>
+				<div id="{{ elementIdPrefix }}tooltip" aria-hidden="true" class="tooltip" role="tooltip">
 					<?php esc_html_e( 'This page is not AMP compatible.', 'amp' ); ?>
 					<?php if ( $url ) : ?>
 						<br>
 						<a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Navigate to an AMP compatible page', 'amp' ); ?></a>
 					<?php endif; ?>
-				</span>
-				<input type="checkbox">
+				</div>
+				<input id="{{ elementIdPrefix }}checkbox" type="checkbox" class="disabled" aria-describedby="{{ elementIdPrefix }}tooltip">
 				<span class="slider"></span>
-			</label>
+				<label for="{{ elementIdPrefix }}checkbox" class="screen-reader-text"><?php esc_html_e( 'AMP preview enabled', 'amp' ); ?></label>
+			</div>
 		</script>
 		<?php
 	}

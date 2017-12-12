@@ -1,5 +1,5 @@
 /* exported ampCustomizeControls */
-/* eslint no-magic-numbers: [ "error", { "ignore": [ 1 ] } ] */
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1 ] } ] */
 
 var ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
@@ -7,7 +7,9 @@ var ampCustomizeControls = ( function( api, $ ) {
 	var component = {
 		data: {
 			query: ''
-		}
+		},
+		tooltipVisible: new api.Value( false ),
+		tooltipFocused: new api.Value( 0 )
 	};
 
 	/**
@@ -20,8 +22,8 @@ var ampCustomizeControls = ( function( api, $ ) {
 		component.data = data;
 
 		// Defaults.
-		api.state.add( 'ampEnabled', new api.Value() ).set( false );
-		api.state.add( 'ampAvailable', new api.Value() ).set( true );
+		api.state.add( 'ampEnabled', new api.Value( false ) );
+		api.state.add( 'ampAvailable', new api.Value( false ) );
 
 		api.bind( 'ready', function() {
 			api.panel( 'amp_panel', component.panelReady );
@@ -91,6 +93,13 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 * @return {void}
 	 */
 	component.panelReady = function panelReady( panel ) {
+		var ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )() ),
+			checkbox = ampToggleContainer.find( 'input[type=checkbox]' ),
+			tooltip = ampToggleContainer.find( '.tooltip' ),
+			tooltipLink = tooltip.find( 'a' ),
+			tooltipTimer = 5000,
+			tooltipTimeoutId;
+
 		/**
 		 * Make current URL AMPified if toggle is on.
 		 *
@@ -140,8 +149,10 @@ var ampCustomizeControls = ( function( api, $ ) {
 		}
 		api.previewer.bind( 'amp-status', setInitialAmpEnabledState );
 
-		// Persist the presence or lack of the amp=1 param when navigating in the preview,
-		// even if current page is not yet supported.
+		/*
+		 * Persist the presence or lack of the amp=1 param when navigating in the preview,
+		 * even if current page is not yet supported.
+		 */
 		api.previewer.previewUrl.validate = ( function( prevValidate ) {
 			return function( value ) {
 				var val = prevValidate.call( this, value );
@@ -154,43 +165,91 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 		// Listen for ampEnabled state changes.
 		api.state( 'ampEnabled' ).bind( function( enabled ) {
-			$( '.amp-toggle input' ).prop( 'checked', enabled );
+			checkbox.prop( 'checked', enabled );
 			updatePreviewUrl();
 		} );
 
 		// Listen for ampAvailable state changes.
 		api.state( 'ampAvailable' ).bind( function( available ) {
-			$( '.amp-toggle input' ).prop( 'disabled', ! available );
+			checkbox.toggleClass( 'disabled', ! available );
+			component.tooltipVisible.set( ! available );
 		} );
 
 		// Adding checkbox toggle before device selection.
-		$( '.devices-wrapper' ).before( wp.template( 'customize-amp-enabled-toggle' ) );
+		$( '.devices-wrapper' ).before( ampToggleContainer );
 
 		// User clicked link within tooltip, go to linked post in preview.
-		$( '.amp-toggle .tooltip a' ).on( 'click', function( event ) {
+		tooltipLink.on( 'click', function( event ) {
 			event.preventDefault();
 			api.state( 'ampEnabled' ).set( true );
 			api.previewer.previewUrl.set( $( this ).prop( 'href' ) );
 		} );
 
-		// Main controls for toggling AMP preview.
-		$( '#customize-footer-actions' ).on( 'click', '.amp-toggle', function() {
-			var $input = $( 'input', $( this ) ),
-				$tooltip = $( '.tooltip', $( this ) ),
-				tooltipTimer = 5000;
+		/**
+		 * Try closing the tooltip after the timeout.
+		 *
+		 * @returns {void}
+		 */
+		function tryToClose() {
+			clearTimeout( tooltipTimeoutId );
+			tooltipTimeoutId = setTimeout( function() {
+				if ( ! component.tooltipVisible.get() ) {
+					return;
+				}
+				if ( component.tooltipFocused.get() > 0 ) {
+					tryToClose();
+				} else {
+					component.tooltipVisible.set( false );
+				}
+			}, tooltipTimer );
+		}
 
-			if ( $input.prop( 'disabled' ) ) {
-				$tooltip.fadeIn();
-				setTimeout( function() {
-					$tooltip.fadeOut();
-				}, tooltipTimer );
+		// Toggle visibility of tooltip based on tooltipVisible state.
+		component.tooltipVisible.bind( function( visible ) {
+			tooltip.attr( 'aria-hidden', visible ? 'false' : 'true' );
+			if ( visible ) {
+				$( document ).on( 'click.amp-toggle-outside', function( event ) {
+					if ( ! $.contains( ampToggleContainer[0], event.target ) ) {
+						component.tooltipVisible.set( false );
+					}
+				} );
+				tooltip.fadeIn();
+				tryToClose();
 			} else {
-				$tooltip.hide();
+				tooltip.fadeOut();
+				component.tooltipFocused.set( 0 );
+				$( document ).off( 'click.amp-toggle-outside' );
 			}
 		} );
 
-		$( '#customize-footer-actions' ).on( 'click', '.amp-toggle input', function() {
-			api.state( 'ampEnabled' ).set( ! api.state( 'ampEnabled' ).get() );
+		// Handle click on checkbox to either enable the AMP preview or show the tooltip.
+		checkbox.on( 'click', function() {
+			this.checked = ! this.checked; // Undo what we just did, since state is managed in ampAvailable change handler.
+			if ( api.state( 'ampAvailable' ).get() ) {
+				api.state( 'ampEnabled' ).set( ! api.state( 'ampEnabled' ).get() );
+			} else {
+				component.tooltipVisible.set( true );
+			}
+		} );
+
+		// Keep track of the user's state interacting with the tooltip.
+		tooltip.on( 'mouseenter', function() {
+			if ( ! api.state( 'ampAvailable' ).get() ) {
+				component.tooltipVisible.set( true );
+			}
+			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
+		} );
+		tooltip.on( 'mouseleave', function() {
+			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
+		} );
+		tooltipLink.on( 'focus', function() {
+			if ( ! api.state( 'ampAvailable' ).get() ) {
+				component.tooltipVisible.set( true );
+			}
+			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
+		} );
+		tooltipLink.on( 'blur', function() {
+			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
 		} );
 	};
 
