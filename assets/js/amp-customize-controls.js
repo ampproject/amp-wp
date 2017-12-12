@@ -6,7 +6,13 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 	var component = {
 		data: {
-			query: 'amp'
+			queryVar: 'amp',
+			panelId: '',
+			ampUrl: '',
+			l10n: {
+				unavailableMessage: '',
+				unavailableLinkText: ''
+			}
 		},
 		tooltipTimeout: 5000,
 		tooltipVisible: new api.Value( false ),
@@ -27,7 +33,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		api.state.add( 'ampAvailable', new api.Value( false ) );
 
 		api.bind( 'ready', function() {
-			api.panel( 'amp_panel', component.panelReady );
+			api.panel( component.data.panelId, component.panelReady );
 		} );
 	};
 
@@ -39,10 +45,10 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 */
 	component.isAmpUrl = function isAmpUrl( url ) {
 		var urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + component.data.query + '\\/?$' );
+			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
 
 		urlParser.href = url;
-		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ component.data.query ] ) ) {
+		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ component.data.queryVar ] ) ) {
 			return true;
 		}
 		return regexEndpoint.test( urlParser.pathname );
@@ -56,7 +62,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 */
 	component.unampifyUrl = function unampifyUrl( url ) {
 		var urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + component.data.query + '\\/?$' ),
+			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' ),
 			params;
 
 		urlParser.href = url;
@@ -64,7 +70,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 
 		if ( urlParser.search.length > 1 ) {
 			params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
-			delete params[ component.data.query ];
+			delete params[ component.data.queryVar ];
 			urlParser.search = $.param( params );
 		}
 
@@ -83,7 +89,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		if ( urlParser.search.length ) {
 			urlParser.search += '&';
 		}
-		urlParser.search += component.data.query + '=1';
+		urlParser.search += component.data.queryVar + '=1';
 		return urlParser.href;
 	};
 
@@ -132,16 +138,66 @@ var ampCustomizeControls = ( function( api, $ ) {
 	};
 
 	/**
+	 * Enable AMP and navigate to the given URL.
+	 *
+	 * @param {string} url - URL.
+	 * @returns {void}
+	 */
+	component.enableAndNavigateToUrl = function enableAndNavigateToUrl( url ) {
+		api.state( 'ampEnabled' ).set( true );
+		api.previewer.previewUrl.set( url );
+	};
+
+	/**
+	 * Update panel notifications.
+	 *
+	 * @returns {void}
+	 */
+	component.updatePanelNotifications = function updatePanelNotifications() {
+		var panel = api.panel( component.data.panelId ), containers;
+		containers = panel.sections().concat( [ panel ] );
+		if ( api.state( 'ampAvailable' ).get() ) {
+			_.each( containers, function( container ) {
+				container.notifications.remove( 'amp_unavailable' );
+			} );
+		} else {
+			_.each( containers, function( container ) {
+				container.notifications.add( new api.Notification( 'amp_unavailable', {
+					message: component.data.l10n.unavailableMessage,
+					type: 'info',
+					linkText: component.data.l10n.unavailableLinkText,
+					url: component.data.ampUrl,
+					templateId: 'customize-amp-unavailable-notification',
+					render: function() {
+						var li = api.Notification.prototype.render.call( this );
+						li.find( 'a' ).on( 'click', function( event ) {
+							event.preventDefault();
+							component.enableAndNavigateToUrl( this.href );
+						} );
+						return li;
+					}
+				} ) );
+			} );
+		}
+	};
+
+	/**
 	 * Hook up all AMP preview interactions once panel is ready.
 	 *
 	 * @param {wp.customize.Panel} panel The AMP panel.
 	 * @return {void}
 	 */
 	component.panelReady = function panelReady( panel ) {
-		var ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )() ),
-			checkbox = ampToggleContainer.find( 'input[type=checkbox]' ),
-			tooltip = ampToggleContainer.find( '.tooltip' ),
-			tooltipLink = tooltip.find( 'a' );
+		var ampToggleContainer, checkbox, tooltip, tooltipLink;
+
+		ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )( {
+			message: component.data.l10n.unavailableMessage,
+			linkText: component.data.l10n.unavailableLinkText,
+			url: component.data.ampUrl
+		} ) );
+		checkbox = ampToggleContainer.find( 'input[type=checkbox]' );
+		tooltip = ampToggleContainer.find( '.tooltip' );
+		tooltipLink = tooltip.find( 'a' );
 
 		// AMP panel triggers the input toggle for AMP preview.
 		panel.expanded.bind( function( expanded ) {
@@ -150,12 +206,24 @@ var ampCustomizeControls = ( function( api, $ ) {
 			}
 			if ( api.state( 'ampAvailable' ).get() ) {
 				api.state( 'ampEnabled' ).set( panel.expanded.get() );
-			} else {
+			} else if ( ! panel.notifications ) {
+
+				/*
+				 * This is only done if panel notifications aren't supported.
+				 * If they are (as of 4.9) then a notification will be shown
+				 * in the panel and its sections when AMP is not available.
+				 */
 				setTimeout( function() {
 					component.tooltipVisible.set( true );
 				}, 250 );
 			}
 		} );
+
+		if ( panel.notifications ) {
+			api.state( 'ampAvailable' ).bind( component.updatePanelNotifications );
+			component.updatePanelNotifications();
+			api.section.bind( 'add', component.updatePanelNotifications );
+		}
 
 		// Enable AMP toggle if available and mobile device selected.
 		api.previewedDevice.bind( function( device ) {
@@ -210,8 +278,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		// User clicked link within tooltip, go to linked post in preview.
 		tooltipLink.on( 'click', function( event ) {
 			event.preventDefault();
-			api.state( 'ampEnabled' ).set( true );
-			api.previewer.previewUrl.set( $( this ).prop( 'href' ) );
+			component.enableAndNavigateToUrl( this.href );
 		} );
 
 		// Toggle visibility of tooltip based on tooltipVisible state.
