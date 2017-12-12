@@ -242,12 +242,16 @@ class AMP_Template_Customizer {
 	 * @since 0.6
 	 */
 	public function print_controls_templates() {
+		$url = amp_admin_get_preview_permalink();
 		?>
 		<script type="text/html" id="tmpl-customize-amp-enabled-toggle">
 			<label class="amp-toggle">
 				<span class="tooltip">
-					<?php esc_html_e( 'This page is not AMP compatible', 'amp' ); ?>.<br>
-					<a data-post="<?php echo esc_url( amp_admin_get_preview_permalink() ); ?>"><?php esc_html_e( 'Navigate to an AMP compatible page', 'amp' ); ?></a>
+					<?php esc_html_e( 'This page is not AMP compatible.', 'amp' ); ?>
+					<?php if ( $url ) : ?>
+						<br>
+						<a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Navigate to an AMP compatible page', 'amp' ); ?></a>
+					<?php endif; ?>
 				</span>
 				<input type="checkbox">
 				<span class="slider"></span>

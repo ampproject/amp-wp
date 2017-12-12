@@ -167,12 +167,10 @@ var ampCustomizeControls = ( function( api, $ ) {
 		$( '.devices-wrapper' ).before( wp.template( 'customize-amp-enabled-toggle' ) );
 
 		// User clicked link within tooltip, go to linked post in preview.
-		$( '.amp-toggle .tooltip a' ).on( 'click', function() {
-			var url = $( this ).data( 'post' );
-			if ( url.length ) {
-				api.state( 'ampEnabled' ).set( true );
-				api.previewer.previewUrl.set( url );
-			}
+		$( '.amp-toggle .tooltip a' ).on( 'click', function( event ) {
+			event.preventDefault();
+			api.state( 'ampEnabled' ).set( true );
+			api.previewer.previewUrl.set( $( this ).prop( 'href' ) );
 		} );
 
 		// Main controls for toggling AMP preview.
