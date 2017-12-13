@@ -223,7 +223,7 @@ function amp_test_prepare_image_attachments( $data ) {
  */
 function amp_image_markup() {
 	$image_posts = amp_get_media_items( 'image', 1 );
-	$image = reset( $image_posts );
+	$image       = reset( $image_posts );
 	return isset( $image->ID ) ? wp_get_attachment_image( $image->ID ) : null;
 }
 
