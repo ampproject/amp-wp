@@ -134,7 +134,13 @@ class AMP_Template_Customizer {
 
 		wp_add_inline_script( 'amp-customize-controls', sprintf( 'ampCustomizeControls.boot( %s );',
 			wp_json_encode( array(
-				'query' => AMP_QUERY_VAR,
+				'queryVar' => AMP_QUERY_VAR,
+				'panelId'  => self::PANEL_ID,
+				'ampUrl'   => amp_admin_get_preview_permalink(),
+				'l10n'     => array(
+					'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
+					'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
+				),
 			) )
 		) );
 
@@ -153,7 +159,6 @@ class AMP_Template_Customizer {
 		 */
 		do_action( 'amp_customizer_enqueue_scripts', $this->wp_customize );
 	}
-
 
 	/**
 	 * Enqueues scripts used in both the AMP and non-AMP Customizer preview.
@@ -245,21 +250,30 @@ class AMP_Template_Customizer {
 	 * @since 0.6
 	 */
 	public function print_controls_templates() {
-		$url = amp_admin_get_preview_permalink();
 		?>
 		<script type="text/html" id="tmpl-customize-amp-enabled-toggle">
 			<div class="amp-toggle">
 				<# var elementIdPrefix = _.uniqueId( 'customize-amp-enabled-toggle' ); #>
 				<div id="{{ elementIdPrefix }}tooltip" aria-hidden="true" class="tooltip" role="tooltip">
-					<?php esc_html_e( 'This page is not compatible with AMP.', 'amp' ); ?>
-					<?php if ( $url ) : ?>
-						<a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Navigate to an AMP compatible page', 'amp' ); ?></a>
-					<?php endif; ?>
+					{{ data.message }}
+					<# if ( data.url ) { #>
+						<a href="{{ data.url }}">{{ data.linkText }}</a>
+					<# } #>
 				</div>
 				<input id="{{ elementIdPrefix }}checkbox" type="checkbox" class="disabled" aria-describedby="{{ elementIdPrefix }}tooltip">
 				<span class="slider"></span>
 				<label for="{{ elementIdPrefix }}checkbox" class="screen-reader-text"><?php esc_html_e( 'AMP preview enabled', 'amp' ); ?></label>
 			</div>
+		</script>
+		<script type="text/html" id="tmpl-customize-amp-unavailable-notification">
+			<li class="notice notice-{{ data.type || 'info' }} {{ data.alt ? 'notice-alt' : '' }} {{ data.containerClasses || '' }}" data-code="{{ data.code }}" data-type="{{ data.type }}">
+				<div class="notification-message">
+					{{ data.message }}
+					<# if ( data.url ) { #>
+						<a href="{{ data.url }}">{{ data.linkText }}</a>
+					<# } #>
+				</div>
+			</li>
 		</script>
 		<?php
 	}
