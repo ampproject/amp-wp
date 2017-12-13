@@ -12,19 +12,16 @@ if ( ! defined( 'WP_CLI' ) ) {
 
 $data_entries = array(
 	array(
-		'prepare' => 'amp_test_prepare_image_attachments',
 		'heading' => 'Media Gallery',
-		'content' => function( $data ) {
-			return sprintf( '[gallery ids="%s"]', implode( ',', $data['ids'] ) );
-		},
+		'content' => sprintf( '[gallery ids="%s"]', amp_get_media_items_ids( 'image' ) ),
 	),
 	array(
 		'heading' => 'Media Image',
-		'content' => amp_image_markup(),
+		'content' => wp_get_attachment_image( amp_get_media_items_ids( 'image', 1 ) ),
 	),
 	array(
 		'heading' => 'Media Caption',
-		'content' => '[caption width=150]' . amp_image_markup() . 'Example image caption[/caption]',
+		'content' => sprintf( '[caption width=150]%sExample image caption[/caption]', wp_get_attachment_image( amp_get_media_items_ids( 'image', 1 ) ) ),
 	),
 	array(
 		'heading' => 'Media Video',
@@ -35,18 +32,12 @@ $data_entries = array(
 		'content' => '[audio src=https://wptavern.com/wp-content/uploads/2017/11/EPISODE-296-Gutenberg-Telemetry-Calypso-and-More-With-Matt-Mullenweg.mp3]',
 	),
 	array(
-		'prepare' => 'amp_test_prepare_video_attachments',
 		'heading' => 'Video Playlist',
-		'content' => function( $data ) {
-			return isset( $data['ids'] ) ? sprintf( '[playlist type="video" ids="%s"]', implode( ',', $data['ids'] ) ) : 'There are no videos, so no playlist is expected';
-		},
+		'content' => sprintf( '[playlist type="video" ids="%s"]', amp_get_media_items_ids( 'video' ) ),
 	),
 	array(
-		'prepare' => 'amp_test_prepare_audio_attachments',
 		'heading' => 'Audio Playlist',
-		'content' => function( $data ) {
-			return isset( $data['ids'] ) ? sprintf( '[playlist ids="%s"]', implode( ',', $data['ids'] ) ) : 'There audio files, so no playlist is expected';
-		},
+		'content' => sprintf( '[playlist ids="%s"]', amp_get_media_items_ids( 'audio' ) ),
 	),
 	array(
 		'heading' => 'WordPress Post Embed',
@@ -199,75 +190,32 @@ $data_entries = array(
 );
 
 /**
- * Prepare test by ensuring attachments exist.
- *
- * @param array $data Entry data.
- * @return array Data.
- */
-function amp_test_prepare_image_attachments( $data ) {
-	$attachments = get_children( array(
-		'post_parent' => 0,
-		'post_status' => 'inherit',
-		'post_type' => 'attachment',
-		'post_mime_type' => 'image',
-	) );
-	$data['ids'] = wp_list_pluck( $attachments, 'ID' );
-
-	$image_count_needed = 5;
-	if ( count( $data['ids'] ) < $image_count_needed ) {
-		$data['ids'] = wp_list_pluck( amp_get_media_items( 'image', $image_count_needed ), 'ID' );
-	}
-	return $data;
-}
-
-/**
- * Get the markup for an image.
- *
- * @return string $image Markup for the image.
- */
-function amp_image_markup() {
-	$image_posts = amp_get_media_items( 'image', 1 );
-	$image       = reset( $image_posts );
-	return isset( $image->ID ) ? wp_get_attachment_image( $image->ID ) : null;
-}
-
-/**
- * Get video IDs to test a video playlist.
- *
- * @param array $data Entry data.
- * @return array $data Entry data, with video IDs.
- */
-function amp_test_prepare_video_attachments( $data ) {
-	$data['ids'] = wp_list_pluck( amp_get_media_items( 'video' ), 'ID' );
-	return $data;
-}
-
-/**
- * Get audio IDs to test an audio playlist.
- *
- * @param array $data Entry data.
- * @return array $data Data, with video IDs.
- */
-function amp_test_prepare_audio_attachments( $data ) {
-	$data['ids'] = wp_list_pluck( amp_get_media_items( 'audio' ), 'ID' );
-	return $data;
-}
-
-/**
- * Get media items, using a \WP_Query.
+ * Get media item ids, using a \WP_Query.
  *
  * @param integer $type The post_mime_type of the media item.
  * @param integer $image_count The number of images for which to query.
- * @return array $media_items The media items from the query.
+ * @return string|WP_CLI::error The media item ids separated by comma on success; error otherwise.
  */
-function amp_get_media_items( $type, $image_count = 10 ) {
+function amp_get_media_items_ids( $type, $image_count = 3 ) {
 	$query = new \WP_Query( array(
 		'post_type'      => 'attachment',
 		'post_mime_type' => $type,
 		'post_status'    => 'inherit',
 		'posts_per_page' => $image_count,
+		'fields'         => 'ids',
 	) );
-	return $query->get_posts();
+
+	$posts       = $query->get_posts();
+	$posts_count = count( $posts );
+	if ( $posts_count < $image_count ) {
+		WP_CLI::error( sprintf(
+			'%1$s "2$s" expected, %3$s found. Please make sure at least %1$s "2$s" are accessible and run this script again.',
+			$image_count,
+			$type,
+			$posts_count
+		) );
+	}
+	return implode( ',', $posts );
 }
 
 // Run the script.
@@ -276,33 +224,35 @@ if ( $page ) {
 	$page_id = $page->ID;
 } else {
 	$page_id = wp_insert_post( array(
-		'post_name' => 'amp-test-embeds',
+		'post_name'  => 'amp-test-embeds',
 		'post_title' => 'AMP Test Embeds',
-		'post_type' => 'page',
+		'post_type'  => 'page',
 	) );
+
+	if ( ! $page_id || is_wp_error( $page_id ) ) {
+		WP_CLI::error( 'The test page could not be added, please try again.' );
+	}
 }
 
+// Build and update content.
 $content = '';
-foreach ( $data_entries as $data_entry ) {
-	if ( isset( $data_entry['prepare'] ) ) {
-		$data_entry = array_merge(
-			$data_entry,
-			call_user_func( $data_entry['prepare'], $data_entry )
+foreach ( $data_entries as $entry ) {
+	if ( isset( $entry['heading'], $entry['content'] ) ) {
+		$content .= sprintf(
+			"<h1>%s</h1>\n%s\n\n",
+			$entry['heading'],
+			$entry['content']
 		);
 	}
-
-	$content .= sprintf( "<h1>%s</h1>\n", $data_entry['heading'] );
-	if ( is_callable( $data_entry['content'] ) ) {
-		$content .= call_user_func( $data_entry['content'], $data_entry );
-	} else {
-		$content .= $data_entry['content'];
-	}
-	$content .= "\n\n";
 }
 
-wp_update_post( wp_slash( array(
-	'ID' => $page_id,
+$update = wp_update_post( wp_slash( array(
+	'ID'           => $page_id,
 	'post_content' => $content,
 ) ) );
+
+if ( ! $update ) {
+	WP_CLI::error( 'The test page could not be updated, please try again.' );
+}
 
 WP_CLI::success( sprintf( 'Please take a look at: %s', get_permalink( $page_id ) ) );
