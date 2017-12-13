@@ -49,6 +49,10 @@ $data_entries = array(
 		},
 	),
 	array(
+		'heading' => 'WordPress Post Embed',
+		'content' => 'https://make.wordpress.org/core/2017/12/11/whats-new-in-gutenberg-11th-december/',
+	),
+	array(
 		'heading' => 'CloudUp Image Embed',
 		'content' => 'https://cloudup.com/iWn3EIpgjev',
 	),
@@ -101,7 +105,7 @@ $data_entries = array(
 		'content' => 'https://www.instagram.com/p/bNd86MSFv6/',
 	),
 	array(
-		'heading' => 'Isuu Embed',
+		'heading' => 'Issuu Embed',
 		'content' => 'https://issuu.com/ajcwfu/docs/seatatthetablefinal',
 	),
 	array(
