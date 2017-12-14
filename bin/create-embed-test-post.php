@@ -129,7 +129,7 @@ $data_entries = array(
 	),
 	array(
 		'heading' => 'Photobucket Embed',
-		'content' => 'http://s1284.photobucket.com/user/adonchin/media/20171116_181841_zpsrjuop6u7.jpg.html',
+		'content' => 'http://i69.photobucket.com/albums/i70/apheli0n/quick%20uploads/addsiteerror.jpg',
 	),
 	array(
 		'heading' => 'Polldaddy Poll oEmbed',
@@ -157,7 +157,7 @@ $data_entries = array(
 	),
 	array(
 		'heading' => 'Scribd Embed',
-		'content' => '[scribd id=124550852 key=key-1hh4hsgsvzz8jdl28w3v mode=scroll]',
+		'content' => 'http://www.scribd.com/doc/110799637/Synthesis-of-Knowledge-Effects-of-Fire-and-Thinning-Treatments-on-Understory-Vegetation-in-Dry-U-S-Forests',
 	),
 	array(
 		'heading' => 'SlideShare Embed',
