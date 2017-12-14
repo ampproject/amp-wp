@@ -142,7 +142,7 @@ class AMP_Post_Template {
 			 * @param array   $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
 			 * @param WP_Post $post      The current post.
 			 */
-			'amp_analytics' => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
+			'amp_analytics'         => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
 		);
 
 		$this->build_post_content();
@@ -270,14 +270,16 @@ class AMP_Post_Template {
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
-		$this->add_data( array(
-			'post' => $this->post,
-			'post_id' => $this->ID,
-			'post_title' => $post_title,
-			'post_publish_timestamp' => $post_publish_timestamp,
-			'post_modified_timestamp' => $post_modified_timestamp,
-			'post_author' => $post_author,
-		) );
+		$this->add_data(
+			array(
+				'post'                    => $this->post,
+				'post_id'                 => $this->ID,
+				'post_title'              => $post_title,
+				'post_publish_timestamp'  => $post_publish_timestamp,
+				'post_modified_timestamp' => $post_modified_timestamp,
+				'post_author'             => $post_author,
+			)
+		);
 
 		$metadata = array(
 			'@context'         => 'http://schema.org',
@@ -301,10 +303,10 @@ class AMP_Post_Template {
 		$site_icon_url = $this->get( 'site_icon_url' );
 		if ( $site_icon_url ) {
 			$metadata['publisher']['logo'] = array(
-				'@type' => 'ImageObject',
-				'url' => $site_icon_url,
+				'@type'  => 'ImageObject',
+				'url'    => $site_icon_url,
 				'height' => self::SITE_ICON_SIZE,
-				'width' => self::SITE_ICON_SIZE,
+				'width'  => self::SITE_ICON_SIZE,
 			);
 		}
 
@@ -340,41 +342,48 @@ class AMP_Post_Template {
 			? __( 'Leave a Comment', 'amp' )
 			: __( 'View Comments', 'amp' );
 
-		$this->add_data( array(
-			'comments_link_url' => $comments_link_url,
-			'comments_link_text' => $comments_link_text,
-		) );
+		$this->add_data(
+			array(
+				'comments_link_url'  => $comments_link_url,
+				'comments_link_text' => $comments_link_text,
+			)
+		);
 	}
 
 	/**
 	 * Build post content.
 	 */
 	private function build_post_content() {
-		$amp_content = new AMP_Content( $this->post->post_content,
-			apply_filters( 'amp_content_embed_handlers', array(
-				'AMP_Twitter_Embed_Handler' => array(),
-				'AMP_YouTube_Embed_Handler' => array(),
-				'AMP_DailyMotion_Embed_Handler' => array(),
-				'AMP_Vimeo_Embed_Handler' => array(),
-				'AMP_SoundCloud_Embed_Handler' => array(),
-				'AMP_Instagram_Embed_Handler' => array(),
-				'AMP_Vine_Embed_Handler' => array(),
-				'AMP_Facebook_Embed_Handler' => array(),
-				'AMP_Pinterest_Embed_Handler' => array(),
-				'AMP_Gallery_Embed_Handler' => array(),
-				'WPCOM_AMP_Polldaddy_Embed' => array(),
-			), $this->post ),
-			apply_filters( 'amp_content_sanitizers', array(
-				'AMP_Style_Sanitizer'             => array(),
-				'AMP_Img_Sanitizer'               => array(),
-				'AMP_Video_Sanitizer'             => array(),
-				'AMP_Audio_Sanitizer'             => array(),
-				'AMP_Playbuzz_Sanitizer'          => array(),
-				'AMP_Tag_And_Attribute_Sanitizer' => array(),
-				'AMP_Iframe_Sanitizer'            => array(
-					'add_placeholder' => true,
-				),
-			), $this->post ),
+		$amp_content = new AMP_Content(
+			$this->post->post_content,
+			apply_filters(
+				'amp_content_embed_handlers', array(
+					'AMP_Twitter_Embed_Handler'     => array(),
+					'AMP_YouTube_Embed_Handler'     => array(),
+					'AMP_DailyMotion_Embed_Handler' => array(),
+					'AMP_Vimeo_Embed_Handler'       => array(),
+					'AMP_SoundCloud_Embed_Handler'  => array(),
+					'AMP_Instagram_Embed_Handler'   => array(),
+					'AMP_Vine_Embed_Handler'        => array(),
+					'AMP_Facebook_Embed_Handler'    => array(),
+					'AMP_Pinterest_Embed_Handler'   => array(),
+					'AMP_Gallery_Embed_Handler'     => array(),
+					'WPCOM_AMP_Polldaddy_Embed'     => array(),
+				), $this->post
+			),
+			apply_filters(
+				'amp_content_sanitizers', array(
+					'AMP_Style_Sanitizer'             => array(),
+					'AMP_Img_Sanitizer'               => array(),
+					'AMP_Video_Sanitizer'             => array(),
+					'AMP_Audio_Sanitizer'             => array(),
+					'AMP_Playbuzz_Sanitizer'          => array(),
+					'AMP_Iframe_Sanitizer'            => array(
+						'add_placeholder' => true,
+					),
+					'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+				), $this->post
+			),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
@@ -418,10 +427,12 @@ class AMP_Post_Template {
 			)
 		);
 
-		$this->add_data_by_key( 'featured_image', array(
-			'amp_html' => $sanitized_html,
-			'caption' => $featured_image->post_excerpt,
-		) );
+		$this->add_data_by_key(
+			'featured_image', array(
+				'amp_html' => $sanitized_html,
+				'caption'  => $featured_image->post_excerpt,
+			)
+		);
 
 		if ( $featured_scripts ) {
 			$this->merge_data_for_key( 'amp_component_scripts', $featured_scripts );
@@ -467,16 +478,18 @@ class AMP_Post_Template {
 		if ( has_post_thumbnail( $this->ID ) ) {
 			$post_image_id = get_post_thumbnail_id( $this->ID );
 		} else {
-			$attached_image_ids = get_posts( array(
-				'post_parent' => $this->ID,
-				'post_type' => 'attachment',
-				'post_mime_type' => 'image',
-				'posts_per_page' => 1,
-				'orderby' => 'menu_order',
-				'order' => 'ASC',
-				'fields' => 'ids',
-				'suppress_filters' => false,
-			) );
+			$attached_image_ids = get_posts(
+				array(
+					'post_parent'      => $this->ID,
+					'post_type'        => 'attachment',
+					'post_mime_type'   => 'image',
+					'posts_per_page'   => 1,
+					'orderby'          => 'menu_order',
+					'order'            => 'ASC',
+					'fields'           => 'ids',
+					'suppress_filters' => false,
+				)
+			);
 
 			if ( ! empty( $attached_image_ids ) ) {
 				$post_image_id = array_shift( $attached_image_ids );
@@ -491,9 +504,9 @@ class AMP_Post_Template {
 
 		if ( is_array( $post_image_src ) ) {
 			$post_image_meta = array(
-				'@type' => 'ImageObject',
-				'url' => $post_image_src[0],
-				'width' => $post_image_src[1],
+				'@type'  => 'ImageObject',
+				'url'    => $post_image_src[0],
+				'width'  => $post_image_src[1],
 				'height' => $post_image_src[2],
 			);
 		}

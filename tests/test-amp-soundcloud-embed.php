@@ -28,7 +28,7 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 		 * So on WP<4.9 we set a post global to ensure oEmbeds get processed.
 		 */
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
-			$post = get_post( $this->factory()->post->create() );
+			$post = $this->factory()->post->create_and_get();
 		}
 
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
@@ -43,7 +43,7 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 */
 	public function get_conversion_data() {
 		$data = array(
-			'no_embed' => array(
+			'no_embed'   => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
@@ -69,7 +69,7 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 					),
 
 					// This apparently only works on WordPress.com.
-					'shortcode_with_id' => array(
+					'shortcode_with_id'             => array(
 						'[soundcloud id=89299804]' . PHP_EOL,
 						'<amp-soundcloud data-trackid="89299804" layout="fixed-height" height="200"></amp-soundcloud>' . PHP_EOL,
 					),
@@ -110,7 +110,7 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello World.</p>',
 				array(),
 			),
-			'converted' => array(
+			'converted'     => array(
 				'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor' . PHP_EOL,
 				array( 'amp-soundcloud' => 'https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js' ),
 			),
