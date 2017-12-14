@@ -174,6 +174,14 @@ function amp_get_test_data_entries() {
 			'content' => 'https://stuckincustoms.smugmug.com/Portfolio/i-GnwtS8R/A',
 		),
 		array(
+			'heading' => 'Someecards Embed',
+			'content' => 'https://www.someecards.com/usercards/viewcard/mjaxmi1jmgy2y2exm2m2ngu2ntfi/?tagSlug=christmas',
+		),
+		array(
+			'heading' => 'Someecards Short URL Embed',
+			'content' => 'https://some.ly/V3RZUq/',
+		),
+		array(
 			'heading' => 'SoundCloud Embed',
 			'content' => 'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor',
 		),
