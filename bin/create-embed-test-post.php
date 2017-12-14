@@ -106,10 +106,6 @@ function amp_get_test_data_entries() {
 			'content' => 'https://www.hulu.com/watch/807443',
 		),
 		array(
-			'heading' => 'Imgur Embed',
-			'content' => 'https://imgur.com/HNQ2WRt',
-		),
-		array(
 			'heading' => 'Instagram Embed',
 			'content' => 'https://www.instagram.com/p/bNd86MSFv6/',
 		),
@@ -131,7 +127,7 @@ function amp_get_test_data_entries() {
 		),
 		array(
 			'heading' => 'Photobucket Embed',
-			'content' => 'http://i69.photobucket.com/albums/i70/apheli0n/quick%20uploads/addsiteerror.jpg',
+			'content' => 'http://i1259.photobucket.com/albums/ii543/iamnotpeterpan/EditPostlsaquoDennisDoesCricketmdashWordPress_zpsf72cc13d.png',
 		),
 		array(
 			'heading' => 'Polldaddy Poll Embed',
@@ -191,7 +187,7 @@ function amp_get_test_data_entries() {
 		),
 		array(
 			'heading' => 'Tumblr Post Embed',
-			'content' => 'https://embed.tumblr.com/embed/post/CHB7nLkCLl-ODZ7tdPU9SQ/168290317795',
+			'content' => 'http://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930',
 		),
 		array(
 			'heading' => 'Twitter Embed',
