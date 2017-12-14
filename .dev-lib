@@ -1,2 +1,7 @@
 SYNC_README_MD=0
 PATH_EXCLUDES_PATTERN=includes/lib/
+
+function after_wp_install {
+    echo "Installing REST API..."
+    svn export -q https://plugins.svn.wordpress.org/jetpack/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/jetpack"
+}

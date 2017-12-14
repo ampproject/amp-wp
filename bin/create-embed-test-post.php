@@ -140,8 +140,12 @@ $data_entries = array(
 		'content' => 'https://stuckincustoms.smugmug.com/Portfolio/i-GnwtS8R/A',
 	),
 	array(
-		'heading' => 'Soundcloud Embed',
+		'heading' => 'SoundCloud Embed',
 		'content' => 'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor',
+	),
+	array(
+		'heading' => 'SoundCloud Shortcode',
+		'content' => '[soundcloud url="https://api.soundcloud.com/tracks/89299804"]',
 	),
 	array(
 		'heading' => 'Speaker Deck Embed',
@@ -209,7 +213,7 @@ function amp_get_media_items_ids( $type, $image_count = 3 ) {
 	$posts_count = count( $posts );
 	if ( $posts_count < $image_count ) {
 		WP_CLI::error( sprintf(
-			'%1$s "2$s" expected, %3$s found. Please make sure at least %1$s "2$s" are accessible and run this script again.',
+			'Please make sure at least %1$s "%2$s" attachments are accessible and run this script again.',
 			$image_count,
 			$type,
 			$posts_count
