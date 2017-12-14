@@ -6,10 +6,12 @@ add_action( 'pre_amp_render_post', 'jetpack_amp_disable_the_content_filters' );
 // Disable admin menu
 add_filter( 'amp_options_menu_is_enabled', '__return_false', 9999 );
 
+/**
+ * Disable the_content filters for Jetpack.
+ *
+ * @param int $post_id Post ID.
+ */
 function jetpack_amp_disable_the_content_filters( $post_id ) {
-	// Shortcode overrides.
-	require_once( dirname( __FILE__ ) . '/wpcom/shortcodes.php' );
-
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	add_filter( 'videopress_show_2015_player', '__return_true' );
 	add_filter( 'protected_embeds_use_form_post', '__return_false' );

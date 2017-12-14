@@ -5,16 +5,16 @@
  * @package AMP
  */
 
-add_filter( 'amp_content_embed_handlers', 'wpcom_amp_add_custom_embeds', 10, 2 );
+_deprecated_file( __FILE__, '0.6.0' );
 
 /**
  * Add custom embeds for WordPress.com.
  *
- * @param array   $embed_handler_classes Embed handler classes.
- * @param WP_Post $post                  Post.
+ * @deprecated Now PollDaddy is supported in core AMP.
+ * @param array $embed_handler_classes Embed handler classes.
  * @return mixed
  */
-function wpcom_amp_add_custom_embeds( $embed_handler_classes, $post ) {
-	$embed_handler_classes['WPCOM_AMP_Polldaddy_Embed'] = array();
+function wpcom_amp_add_custom_embeds( $embed_handler_classes ) {
+	_deprecated_function( __FUNCTION__, '0.6.0' );
 	return $embed_handler_classes;
 }
