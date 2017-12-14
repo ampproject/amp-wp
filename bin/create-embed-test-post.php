@@ -131,7 +131,7 @@ function amp_get_test_data_entries() {
 		),
 		array(
 			'heading' => 'Photobucket Embed',
-			'content' => 'http://s1284.photobucket.com/user/adonchin/media/20171116_181841_zpsrjuop6u7.jpg.html',
+			'content' => 'http://i69.photobucket.com/albums/i70/apheli0n/quick%20uploads/addsiteerror.jpg',
 		),
 		array(
 			'heading' => 'Polldaddy Poll oEmbed',
@@ -156,6 +156,10 @@ function amp_get_test_data_entries() {
 		array(
 			'heading' => 'Reverb Nation Embed',
 			'content' => 'https://www.reverbnation.com/fernandotorresleiva/song/28755694-breve-amor-new-version',
+		),
+		array(
+			'heading' => 'Screencast Embed',
+			'content' => 'http://screencast.com/t/nMCYr3N3uF',
 		),
 		array(
 			'heading' => 'Scribd Embed',
@@ -204,10 +208,6 @@ function amp_get_test_data_entries() {
 		array(
 			'heading' => 'Vimeo Embed',
 			'content' => 'https://vimeo.com/59172123',
-		),
-		array(
-			'heading' => 'Vine Embed',
-			'content' => '[vine url="https://vine.co/v/bEIHZpD2JWz"]',
 		),
 		array(
 			'heading' => 'WordPress Plugin Directory Embed',
