@@ -62,7 +62,7 @@ class WPCOM_AMP_Polldaddy_Embed extends AMP_Base_Embed_Handler {
 	 */
 	public function filter_embed_oembed_html( $cache, $url, $attr ) {
 		$parsed_url = wp_parse_url( $url );
-		if ( $url && false === strpos( $parsed_url['host'], 'polldaddy.com' ) ) {
+		if ( false === strpos( $parsed_url['host'], 'polldaddy.com' ) ) {
 			return $cache;
 		}
 
