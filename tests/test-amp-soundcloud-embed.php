@@ -14,9 +14,22 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 
 	/**
 	 * Set up.
+	 *
+	 * @global WP_Post $post
 	 */
 	public function setUp() {
+		global $post;
 		parent::setUp();
+
+		/*
+		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()
+		 * method would short-circuit when this is the case:
+		 * https://github.com/WordPress/wordpress-develop/blob/4.8.4/src/wp-includes/class-wp-embed.php#L192-L193
+		 * So on WP<4.9 we set a post global to ensure oEmbeds get processed.
+		 */
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
+			$post = get_post( $this->factory()->post->create() );
+		}
 
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
 			add_shortcode( 'soundcloud', 'soundcloud_shortcode' );
