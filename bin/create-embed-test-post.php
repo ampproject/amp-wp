@@ -61,7 +61,7 @@ $data_entries = array(
 	),
 	array(
 		'heading' => 'DailyMotion Embed',
-		'content' => 'http://www.dailymotion.com/embed/video/x6bacgf',
+		'content' => 'http://www.dailymotion.com/video/x6bacgf',
 	),
 	array(
 		'heading' => 'Facebook Post Embed',
@@ -81,7 +81,7 @@ $data_entries = array(
 	),
 	array(
 		'heading' => 'Funny Or Die Video Embed',
-		'content' => 'http://FunnyOrDie.com/m/b1dn',
+		'content' => 'http://www.funnyordie.com/videos/2977012a20/i-still-haven-t-found-the-droids-i-m-looking-for',
 	),
 	array(
 		'heading' => 'Hulu Embed',
@@ -116,8 +116,20 @@ $data_entries = array(
 		'content' => 'http://s1284.photobucket.com/user/adonchin/media/20171116_181841_zpsrjuop6u7.jpg.html',
 	),
 	array(
-		'heading' => 'Polldaddy Embed',
+		'heading' => 'Polldaddy Poll oEmbed',
 		'content' => 'https://polldaddy.com/poll/7012505/',
+	),
+	array(
+		'heading' => 'Polldaddy Survey oEmbed',
+		'content' => 'https://polldaddy.com/s/689f136963604d4f',
+	),
+	array(
+		'heading' => 'Polldaddy Poll Shortcode',
+		'content' => '[polldaddy poll=7012505 title="Custom poll title"]',
+	),
+	array(
+		'heading' => 'Polldaddy Survey Shortcode',
+		'content' => '[polldaddy survey=689f136963604d4f title="Custom survey title"]',
 	),
 	array(
 		'heading' => 'Reddit Embed',

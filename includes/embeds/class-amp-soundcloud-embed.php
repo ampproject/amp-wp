@@ -82,10 +82,10 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Filter oEmbed HTML for SoundCloud to convert to AMP.
 	 *
 	 * @param string $cache Cache for oEmbed.
-	 * @param string $url   Embed URL. Optional.
+	 * @param string $url   Embed URL.
 	 * @return string Embed.
 	 */
-	public function filter_embed_oembed_html( $cache, $url = null ) {
+	public function filter_embed_oembed_html( $cache, $url ) {
 		$parsed_url = wp_parse_url( $url );
 		if ( $url && false === strpos( $parsed_url['host'], 'soundcloud.com' ) ) {
 			return $cache;
