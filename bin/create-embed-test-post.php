@@ -44,6 +44,22 @@ $data_entries = array(
 		'content' => 'https://make.wordpress.org/core/2017/12/11/whats-new-in-gutenberg-11th-december/',
 	),
 	array(
+		'heading' => 'Amazon Com Smile Embed',
+		'content' => 'https://smile.amazon.com/dp/B00DPM7TIG',
+	),
+	array(
+		'heading' => 'Amazon Co Smile Embed',
+		'content' => 'https://smile.amazon.co.uk/dp/B00DPM7TIG',
+	),
+	array(
+		'heading' => 'Amazon Read CN Embed',
+		'content' => 'https://read.amazon.cn/kp/embed?asin=B00DPM7TIG',
+	),
+	array(
+		'heading' => 'Animoto Embed',
+		'content' => 'https://animoto.com/play/TDfViXkPqIwYj5EjamYjnw',
+	),
+	array(
 		'heading' => 'CloudUp Image Embed',
 		'content' => 'https://cloudup.com/iWn3EIpgjev',
 	),
@@ -161,7 +177,7 @@ $data_entries = array(
 	),
 	array(
 		'heading' => 'Speaker Deck Embed',
-		'content' => 'https://speakerdeck.com/caitiem20/distributed-sagas-a-protocol-for-coordinating-microservices',
+		'content' => 'https://speakerdeck.com/wallat/why-backbone',
 	),
 	array(
 		'heading' => 'Spotify Embed',
