@@ -181,8 +181,10 @@ function amp_render() {
  *
  * @since 0.5
  * @param WP_Post|int $post Post.
+ * @global WP_Query $wp_query
  */
 function amp_render_post( $post ) {
+	global $wp_query;
 
 	if ( ! ( $post instanceof WP_Post ) ) {
 		$post = get_post( $post );
@@ -191,6 +193,16 @@ function amp_render_post( $post ) {
 		}
 	}
 	$post_id = $post->ID;
+
+	/*
+	 * If amp_render_post is called directly outside of the standard endpoint, is_amp_endpoint() will return false,
+	 * which is not ideal for any code that expects to run in an AMP context.
+	 * Let's force the value to be true while we render AMP.
+	 */
+	$was_set = isset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+	if ( ! $was_set ) {
+		$wp_query->query_vars[ AMP_QUERY_VAR ] = true;
+	}
 
 	/**
 	 * Fires before rendering a post in AMP.
@@ -204,6 +216,10 @@ function amp_render_post( $post ) {
 	amp_add_post_template_actions();
 	$template = new AMP_Post_Template( $post );
 	$template->load();
+
+	if ( ! $was_set ) {
+		unset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+	}
 }
 
 /**
