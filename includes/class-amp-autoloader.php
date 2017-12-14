@@ -80,7 +80,7 @@ class AMP_Autoloader {
 		'AMP_Image_Dimension_Extractor'                                  => 'includes/utils/class-amp-image-dimension-extractor',
 		'AMP_String_Utils'                                               => 'includes/utils/class-amp-string-utils',
 		'AMP_WP_Utils'                                                   => 'includes/utils/class-amp-wp-utils',
-		'WPCOM_AMP_Polldaddy_Embed'                                      => 'includes/wpcom/class-amp-polldaddy-embed',
+		'WPCOM_AMP_Polldaddy_Embed'                                      => 'wpcom/class-amp-polldaddy-embed',
 		'AMP_Test_Stub_Sanitizer'                                        => 'tests/stubs',
 		'AMP_Test_World_Sanitizer'                                       => 'tests/stubs',
 	);

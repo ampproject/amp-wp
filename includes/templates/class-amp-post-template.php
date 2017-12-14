@@ -362,6 +362,7 @@ class AMP_Post_Template {
 				'AMP_Facebook_Embed_Handler' => array(),
 				'AMP_Pinterest_Embed_Handler' => array(),
 				'AMP_Gallery_Embed_Handler' => array(),
+				'WPCOM_AMP_Polldaddy_Embed' => array(),
 			), $this->post ),
 			apply_filters( 'amp_content_sanitizers', array(
 				'AMP_Style_Sanitizer'             => array(),

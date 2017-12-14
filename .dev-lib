@@ -1,6 +1,7 @@
 SYNC_README_MD=0
 PATH_EXCLUDES_PATTERN=includes/lib/
 
-if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.2" ]]; then
-	PATH_EXCLUDES_PATTERN="$PATH_EXCLUDES_PATTERN|bin/create-embed-test-post\.php"
-fi
+function after_wp_install {
+    echo "Installing REST API..."
+    svn export -q https://plugins.svn.wordpress.org/jetpack/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/jetpack"
+}
