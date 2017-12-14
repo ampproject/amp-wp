@@ -92,20 +92,20 @@ abstract class AMP_Rule_Spec {
 		 */
 		'amp-share-tracking' => array(
 			'attr_spec_list' => array(),
-			'tag_spec' => array(),
+			'tag_spec'       => array(),
 		),
 
 		/**
 		 *  Needed for some tags such as analytics
 		 */
-		'script' => array(
+		'script'             => array(
 			'attr_spec_list' => array(
 				'type' => array(
-					'mandatory' => true,
+					'mandatory'   => true,
 					'value_casei' => 'text/javascript',
 				),
 			),
-			'tag_spec' => array(),
+			'tag_spec'       => array(),
 		),
 	);
 }
