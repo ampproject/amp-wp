@@ -302,7 +302,7 @@ function amp_create_embed_test_post( $data_entries ) {
 if ( defined( 'WP_CLI' ) ) {
 	try {
 		$post_id = amp_create_embed_test_post( amp_get_test_data_entries() );
-		WP_CLI::success( sprintf( 'Please take a look at: %s', get_permalink( $post_id ) ) );
+		WP_CLI::success( sprintf( 'Please take a look at: %s', amp_get_permalink( $post_id ) ) );
 	} catch ( Exception $e ) {
 		WP_CLI::error( $e->getMessage() );
 	}

@@ -378,10 +378,10 @@ class AMP_Post_Template {
 					'AMP_Video_Sanitizer'             => array(),
 					'AMP_Audio_Sanitizer'             => array(),
 					'AMP_Playbuzz_Sanitizer'          => array(),
-					'AMP_Tag_And_Attribute_Sanitizer' => array(),
 					'AMP_Iframe_Sanitizer'            => array(
 						'add_placeholder' => true,
 					),
+					'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 				), $this->post
 			),
 			array(
