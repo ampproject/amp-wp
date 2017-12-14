@@ -15,6 +15,15 @@ To update that file:
 2. run `bash bin/amphtml-update.sh`
 That script is intended for a Linux environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
 
+### Testing Media And Embed Support
+
+The following script creates a post in order to test support for WordPress media and embeds.
+To run it:
+1. `ssh` into an environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV)
+2. `cd` to the root of this plugin
+3. run `wp eval-file bin/create-embed-test-post.php`
+4. go to the URL that is output in the command line
+
 ### PHPUnit Testing
 
 Please run these tests in an environment with WordPress unit tests installed, like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
