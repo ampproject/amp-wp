@@ -107,7 +107,7 @@ function amp_get_test_data_entries() {
 		),
 		array(
 			'heading' => 'Imgur Embed',
-			'content' => '<blockquote class="imgur-embed-pub" lang="en" data-id="HNQ2WRt"><a href="//imgur.com/HNQ2WRt">Takeoff</a></blockquote>',
+			'content' => 'https://imgur.com/HNQ2WRt',
 		),
 		array(
 			'heading' => 'Instagram Embed',
@@ -134,20 +134,12 @@ function amp_get_test_data_entries() {
 			'content' => 'http://i69.photobucket.com/albums/i70/apheli0n/quick%20uploads/addsiteerror.jpg',
 		),
 		array(
-			'heading' => 'Polldaddy Poll oEmbed',
+			'heading' => 'Polldaddy Poll Embed',
 			'content' => 'https://polldaddy.com/poll/7012505/',
 		),
 		array(
-			'heading' => 'Polldaddy Survey oEmbed',
-			'content' => 'https://polldaddy.com/s/689f136963604d4f',
-		),
-		array(
-			'heading' => 'Polldaddy Poll Shortcode',
-			'content' => '[polldaddy poll=7012505 title="Custom poll title"]',
-		),
-		array(
-			'heading' => 'Polldaddy Survey Shortcode',
-			'content' => '[polldaddy survey=689f136963604d4f title="Custom survey title"]',
+			'heading' => 'Polldaddy Survey Embed',
+			'content' => 'https://rydk.polldaddy.com/s/test-survey',
 		),
 		array(
 			'heading' => 'Reddit Embed',
@@ -159,7 +151,7 @@ function amp_get_test_data_entries() {
 		),
 		array(
 			'heading' => 'Screencast Embed',
-			'content' => 'http://screencast.com/t/nMCYr3N3uF',
+			'content' => 'http://www.screencast.com/t/nMCYr3N3uF',
 		),
 		array(
 			'heading' => 'Scribd Embed',
@@ -184,10 +176,6 @@ function amp_get_test_data_entries() {
 		array(
 			'heading' => 'SoundCloud Embed',
 			'content' => 'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor',
-		),
-		array(
-			'heading' => 'SoundCloud Shortcode',
-			'content' => '[soundcloud url="https://api.soundcloud.com/tracks/89299804"]',
 		),
 		array(
 			'heading' => 'Speaker Deck Embed',
