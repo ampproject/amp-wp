@@ -2,6 +2,7 @@
 /**
  * Create embed test post.
  *
+ * @codeCoverageIgnore
  * @package AMP
  */
 
