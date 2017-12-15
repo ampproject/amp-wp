@@ -1,5 +1,5 @@
 === AMP for WordPress ===
-Contributors: batmoo, joen, automattic, potatomaster, albertomedina
+Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp, westonruter
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.9

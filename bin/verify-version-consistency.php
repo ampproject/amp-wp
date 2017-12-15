@@ -3,6 +3,7 @@
 /**
  * Verify versions referenced in plugin match.
  *
+ * @codeCoverageIgnore
  * @package AMP
  */
 
