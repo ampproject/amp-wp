@@ -15,8 +15,7 @@ module.exports = function( grunt ) {
 			},
 			all: [
 				'Gruntfile.js',
-				'js/*.js',
-				'!js/*.min.js'
+				'assets/**/*.js'
 			]
 		},
 
@@ -35,6 +34,12 @@ module.exports = function( grunt ) {
 			},
 			readme: {
 				command: './dev-lib/generate-markdown-readme' // Generate the readme.md.
+			},
+			phpunit: {
+				command: 'phpunit'
+			},
+			verify_matching_versions: {
+				command: 'php bin/verify-version-consistency.php'
 			}
 		},
 
@@ -99,6 +104,8 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'deploy', [
 		'build',
 		'jshint',
+		'shell:phpunit',
+		'shell:verify_matching_versions',
 		'wp_deploy',
 		'clean'
 	] );
