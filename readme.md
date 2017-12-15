@@ -11,7 +11,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.2  
 
-[![Build Status](https://travis-ci.org/Automattic/amp-wp.svg?branch=master)](https://travis-ci.org/Automattic/amp-wp) 
+[![Build Status](https://travis-ci.org/Automattic/amp-wp.svg?branch=master)](https://travis-ci.org/Automattic/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com) 
 
 ## Description ##
 
@@ -24,6 +24,28 @@ Note #1: homepage, the blog index, and archives are not currently supported.
 Note #2: this plugin only creates AMP content but does not automatically display it to your users when they visit from a mobile device. That is handled by AMP consumers such as Google Search. For more details, see the [AMP Project FAQ](https://www.ampproject.org/docs/support/faqs.html).
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
+
+## Screenshots ##
+
+### Post rendered in AMP template.
+
+![Post rendered in AMP template.](wp-assets/screenshot-1.png)
+
+### Customizing appearance of AMP template.
+
+![Customizing appearance of AMP template.](wp-assets/screenshot-2.png)
+
+### Article from New York Post showing customized AMP template.
+
+![Article from New York Post showing customized AMP template.](wp-assets/screenshot-3.png)
+
+### Article from TNW showing customized AMP template.
+
+![Article from TNW showing customized AMP template.](wp-assets/screenshot-4.png)
+
+### Article from Halfbrick showing customized AMP template.
+
+![Article from Halfbrick showing customized AMP template.](wp-assets/screenshot-5.png)
 
 ## Installation ##
 

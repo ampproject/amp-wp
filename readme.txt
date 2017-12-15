@@ -22,6 +22,14 @@ Note #2: this plugin only creates AMP content but does not automatically display
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
 
+== Screenshots ==
+
+1. Post rendered in AMP template.
+1. Customizing appearance of AMP template.
+1. Article from New York Post showing customized AMP template.
+1. Article from TNW showing customized AMP template.
+1. Article from Halfbrick showing customized AMP template.
+
 == Installation ==
 
 1. Upload the folder to the `/wp-content/plugins/` directory
