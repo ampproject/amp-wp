@@ -48,6 +48,6 @@ Contributors who want to make a new release, follow these steps:
 
 1. Bump plugin versions in `package.json` (×1), `package-lock.json` (×1, just do `npm install` first), `composer.json` (×1), and in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 2. Add changelog entry to readme.
-3. Run `grunt deploy` to to commit the plugin to WordPress.org.
-4. Merge code into `master`.
-5. [Create new release](https://github.com/Automattic/amp-wp/releases/new) on GitHub targeting `master`, with the new plugin version as the tag and release title. Publish the release.
+3. Merge release branch into `master`.
+4. Run `grunt deploy` to to commit the plugin to WordPress.org.
+5. [Create new release](https://github.com/Automattic/amp-wp/releases/new) on GitHub targeting `master`, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Publish.

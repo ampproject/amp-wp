@@ -7,6 +7,11 @@
  * @package AMP
  */
 
+if ( 'cli' !== php_sapi_name() ) {
+	fwrite( STDERR, "Must run from CLI.\n" );
+	exit( 1 );
+}
+
 $versions = array();
 
 $versions['package.json']      = json_decode( file_get_contents( dirname( __FILE__ ) . '/../package.json' ) )->version;

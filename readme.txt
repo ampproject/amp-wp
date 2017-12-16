@@ -46,6 +46,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Add AMP settings admin screen for managing which post types have AMP support, eliminating the requirement to add `add_post_type_support()` calls in theme or plugin. See [#811](https://github.com/Automattic/amp-wp/pull/811). Props ThierryA, westonruter.
 - Add generator meta tag for AMP. See [#810](https://github.com/Automattic/amp-wp/pull/810). Props vaporwavre.
 - Add code quality checking via phpcs, eslint, jscs, and jshint. See [#795](https://github.com/Automattic/amp-wp/pull/795). Props westonruter.
+- TODO: Add remaining entries.
+
+See [0.6 milestone](https://github.com/Automattic/amp-wp/milestone/5?closed=1).
 
 = 0.5.1 (2017-08-17) =
 

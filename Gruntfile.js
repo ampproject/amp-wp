@@ -40,6 +40,9 @@ module.exports = function( grunt ) {
 			},
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php'
+			},
+			create_release_zip: {
+				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
 			}
 		},
 
@@ -96,10 +99,16 @@ module.exports = function( grunt ) {
 				} );
 				grunt.task.run( 'readme' );
 				grunt.task.run( 'copy' );
+				grunt.task.run( 'shell:create_release_zip' );
 				done();
 			}
 		);
 	} );
+
+	grunt.registerTask( 'create-release-zip', [
+		'build',
+		'shell:create_release_zip'
+	] );
 
 	grunt.registerTask( 'deploy', [
 		'build',
