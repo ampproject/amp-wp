@@ -238,7 +238,7 @@ class AMP_Options_Manager {
 	 * @return bool Whether options were updated.
 	 */
 	public static function update_analytics_options( $data ) {
-		_deprecated_function( __METHOD__, '0.6.0', __CLASS__ . '::update_option' );
+		_deprecated_function( __METHOD__, '0.6', __CLASS__ . '::update_option' );
 		return self::update_option( 'analytics', wp_unslash( $data ) );
 	}
 }

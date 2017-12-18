@@ -97,7 +97,7 @@ class AMP_Autoloader {
 	 *
 	 * Design Goal: Execute as few lines of code as possible each call.
 	 *
-	 * @since 0.6.0
+	 * @since 0.6
 	 *
 	 * @param string $class_name Class name.
 	 */
@@ -112,7 +112,7 @@ class AMP_Autoloader {
 	/**
 	 * Registers this autoloader to PHP.
 	 *
-	 * @since 0.6.0
+	 * @since 0.6
 	 *
 	 * Called at the end of this file; calling a second time has no effect.
 	 */
@@ -126,7 +126,7 @@ class AMP_Autoloader {
 	/**
 	 * Allows an extensions plugin to register a class and its file for autoloading
 	 *
-	 * @since 0.6.0
+	 * @since 0.6
 	 *
 	 * @param string $class_name Full classname (include namespace if applicable).
 	 * @param string $filepath   Absolute filepath to class file, including .php extension.

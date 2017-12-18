@@ -87,7 +87,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @see Called by function get_content_from_dom()
 	 *
-	 * @since 0.6.0
+	 * @since 0.6
 	 *
 	 * @param DOMDocument $dom  Represents an HTML document.
 	 * @param DOMNode     $node Represents an HTML element of the $dom from which to extract HTML content.
@@ -263,7 +263,7 @@ class AMP_DOM_Utils {
 	/**
 	 * Returns array of self closing tags
 	 *
-	 * @since 0.6.0
+	 * @since 0.6
 	 *
 	 * @return string[]
 	 */

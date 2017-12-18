@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-_deprecated_file( __FILE__, '0.6.0' );
+_deprecated_file( __FILE__, '0.6' );
 
 /**
  * Add custom embeds for WordPress.com.
@@ -15,6 +15,6 @@ _deprecated_file( __FILE__, '0.6.0' );
  * @return mixed
  */
 function wpcom_amp_add_custom_embeds( $embed_handler_classes ) {
-	_deprecated_function( __FUNCTION__, '0.6.0' );
+	_deprecated_function( __FUNCTION__, '0.6' );
 	return $embed_handler_classes;
 }
