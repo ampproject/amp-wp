@@ -1,24 +1,24 @@
 {
-  "name": "amp-wp",
-  "title": "AMP for WordPress",
-  "homepage": "https://github.com/Automattic/amp-wp",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Automattic/amp-wp.git"
-  },
-  "version": "0.6",
-  "license": "GPL-2.0+",
-  "private": true,
-  "devDependencies": {
-    "eslint": "^4.13.1",
-    "grunt": "^1.0.1",
-    "grunt-contrib-clean": "^1.1.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-jshint": "^1.1.0",
-    "grunt-shell": "^2.1.0",
-    "grunt-wp-deploy": "^1.2.1"
-  },
-  "scripts": {
-    "build": "grunt build"
-  }
+ "name": "amp-wp",
+ "title": "AMP for WordPress",
+ "homepage": "https://github.com/Automattic/amp-wp",
+ "repository": {
+  "type": "git",
+  "url": "https://github.com/Automattic/amp-wp.git"
+ },
+ "version": "0.6.0",
+ "license": "GPL-2.0+",
+ "private": true,
+ "devDependencies": {
+  "eslint": "^4.13.1",
+  "grunt": "^1.0.1",
+  "grunt-contrib-clean": "^1.1.0",
+  "grunt-contrib-copy": "^1.0.0",
+  "grunt-contrib-jshint": "^1.1.0",
+  "grunt-shell": "^2.1.0",
+  "grunt-wp-deploy": "^1.2.1"
+ },
+ "scripts": {
+  "build": "grunt build"
+ }
 }
