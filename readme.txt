@@ -40,13 +40,20 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 = 0.6 (unreleased) =
 
-- Add support for the "page" post type, except when used as homepage or page for posts. A new `page.php` is introduced with template parts factored out (`html-start.php`, `header.php`, `footer.php`, `html-end.php`) and re-used from `single.php`. Note that AMP URLs will end in `?amp` instead of `/amp/`. See [#825](https://github.com/Automattic/amp-wp/pull/825). Props technosailor, ThierryA, westonruter.
-- Add AMP post preview button alongside non-AMP preview button. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
-- Add ability to disable AMP on a per-post basis via toggle in publish metabox. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
-- Add AMP settings admin screen for managing which post types have AMP support, eliminating the requirement to add `add_post_type_support()` calls in theme or plugin. See [#811](https://github.com/Automattic/amp-wp/pull/811). Props ThierryA, westonruter.
-- Add generator meta tag for AMP. See [#810](https://github.com/Automattic/amp-wp/pull/810). Props vaporwavre.
-- Add code quality checking via phpcs, eslint, jscs, and jshint. See [#795](https://github.com/Automattic/amp-wp/pull/795). Props westonruter.
-- TODO: Add remaining entries.
+- Add: support for the "page" post type, except when used as homepage or page for posts. A new `page.php` is introduced with template parts factored out (`html-start.php`, `header.php`, `footer.php`, `html-end.php`) and re-used from `single.php`. Note that AMP URLs will end in `?amp` instead of `/amp/`. See [#825](https://github.com/Automattic/amp-wp/pull/825). Props technosailor, ThierryA, westonruter.
+- Add: AMP post preview button alongside non-AMP preview button. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
+- Add: ability to disable AMP on a per-post basis via toggle in publish metabox. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
+- Add: AMP settings admin screen for managing which post types have AMP support, eliminating the requirement to add `add_post_type_support()` calls in theme or plugin. See [#811](https://github.com/Automattic/amp-wp/pull/811). Props ThierryA, westonruter.
+- Add: generator meta tag for AMP. See [#810](https://github.com/Automattic/amp-wp/pull/810). Props vaporwavre.
+- Add: code quality checking via phpcs, eslint, jscs, and jshint. See [#795](https://github.com/Automattic/amp-wp/pull/795). Props westonruter.
+- Add: autoloader to reduce complexity. See [#828](https://github.com/Automattic/amp-wp/pull/828). Props mikeschinkel, westonruter, ThierryA.
+- Add: Vanilla WordPress "embed" test page. A new `bin/create-embed-test-post.php` wp-cli script is introduced. See [#829](https://github.com/Automattic/amp-wp/pull/829). Props kienstra, westonruter, ThierryA.
+- Move: AMP Customizer into main Customizer. See [#819](https://github.com/Automattic/amp-wp/pull/819). Props kaitnyl, westonruter.
+- Update: AMP HTML tags and attributes. A new `bin/amphtml-update.sh` bash script is introduced. See [#823](https://github.com/Automattic/amp-wp/pull/823). Props kienstra, ThierryA, westonruter.
+- Fix: SoundCloud embed
+- Fix: Polldaddy embed
+- Fix: Playbuzz not working
+- Fix: not allowed script tag
 
 See [0.6 milestone](https://github.com/Automattic/amp-wp/milestone/5?closed=1).
 
@@ -166,7 +173,7 @@ See [0.6 milestone](https://github.com/Automattic/amp-wp/milestone/5?closed=1).
 
 <pre lang="php">
 if ( function_exists( 'amp_backcompat_use_v03_templates' ) ) {
-    amp_backcompat_use_v03_templates();
+	amp_backcompat_use_v03_templates();
 }
 </pre>
 
