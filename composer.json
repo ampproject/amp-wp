@@ -3,5 +3,6 @@
     "description": "WordPress plugin for adding AMP support.",
     "homepage": "https://github.com/Automattic/amp-wp",
     "type": "wordpress-plugin",
-    "license": "GPL-2.0"
+    "license": "GPL-2.0",
+    "version": "0.6.0"
 }

@@ -281,11 +281,11 @@ class AMP_Template_Customizer {
 	/**
 	 * Whether the Customizer is AMP. This is always true since the AMP Customizer has been merged with the main Customizer.
 	 *
-	 * @deprecated 0.6.0
+	 * @deprecated 0.6
 	 * @return bool
 	 */
 	public static function is_amp_customizer() {
-		_deprecated_function( __METHOD__, '0.6.0' );
+		_deprecated_function( __METHOD__, '0.6' );
 		return true;
 	}
 }

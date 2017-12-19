@@ -13,7 +13,7 @@
  * @deprecated
  */
 function amp_load_fasterimage_classes() {
-	_deprecated_function( __FUNCTION__, '0.6.0' );
+	_deprecated_function( __FUNCTION__, '0.6' );
 }
 
 /**

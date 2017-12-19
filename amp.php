@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.6.0-alpha
+ * Version: 0.6-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.6.0-alpha' );
+define( 'AMP__VERSION', '0.6-alpha' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -146,7 +146,7 @@ function amp_maybe_add_actions() {
 }
 
 function amp_load_classes() {
-	_deprecated_function( __FUNCTION__, '0.6.0' );
+	_deprecated_function( __FUNCTION__, '0.6' );
 }
 
 function amp_add_frontend_actions() {

@@ -25,7 +25,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_permalink() without pretty permalinks.
 	 *
-	 * @covers amp_get_permalink()
+	 * @covers \amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_without_pretty_permalinks() {
 		delete_option( 'permalink_structure' );
@@ -65,7 +65,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_permalink() with pretty permalinks.
 	 *
-	 * @covers amp_get_permalink()
+	 * @covers \amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_with_pretty_permalinks() {
 		global $wp_rewrite;

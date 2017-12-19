@@ -31,12 +31,13 @@ class WPCOM_AMP_Polldaddy_Embed extends AMP_Base_Embed_Handler {
 	 *
 	 * @param array $attr Shortcode attributes.
 	 * @return string Shortcode.
+	 * @global WP_Embed $wp_embed
 	 */
 	public function shortcode( $attr ) {
 		global $wp_embed;
 
 		$output = '';
-		$url = 'https://polldaddy.com/';
+		$url    = 'https://polldaddy.com/';
 		if ( ! empty( $attr['poll'] ) ) {
 			$url .= 'poll/' . $attr['poll'] . '/';
 		} elseif ( ! empty( $attr['survey'] ) ) {
