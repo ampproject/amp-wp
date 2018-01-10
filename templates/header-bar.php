@@ -6,7 +6,7 @@
  */
 
 ?>
-<header id="#top" class="amp-wp-header">
+<header id="top" class="amp-wp-header">
 	<div>
 		<a href="<?php echo esc_url( $this->get( 'home_url' ) ); ?>">
 			<?php $site_icon_url = $this->get( 'site_icon_url' ); ?>
