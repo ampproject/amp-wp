@@ -99,6 +99,8 @@ class AMP_Post_Meta_Box {
 			isset( $screen->base )
 			&&
 			'post' === $screen->base
+			&&
+			! amp_is_canonical()
 		);
 		if ( ! $validate ) {
 			return;
@@ -142,6 +144,8 @@ class AMP_Post_Meta_Box {
 			isset( $post->ID )
 			&&
 			current_user_can( 'edit_post', $post->ID )
+			&&
+			! amp_is_canonical()
 		);
 
 		if ( true !== $verify ) {
