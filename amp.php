@@ -127,7 +127,7 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
-	if ( ! is_singular() || is_feed() ) {
+	if ( amp_is_canonical() || ! is_singular() || is_feed() ) {
 		return;
 	}
 
@@ -137,7 +137,7 @@ function amp_maybe_add_actions() {
 	global $wp_query;
 	$post = $wp_query->post;
 
-	$supports = post_supports_amp( $post ) && ! amp_is_canonical();
+	$supports = post_supports_amp( $post );
 
 	if ( ! $supports ) {
 		if ( $is_amp_endpoint ) {
