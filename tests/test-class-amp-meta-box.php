@@ -55,15 +55,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$post            = self::factory()->post->create_and_get();
 		$GLOBALS['post'] = $post;
 		set_current_screen( 'post.php' );
-		$GLOBALS['_wp_theme_features']['amp'] = true;
-		$this->instance->enqueue_admin_assets();
-
-		// AMP is in 'canonical mode,' so these assets shouldn't be enqueued.
-		$this->assertFalse( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
-		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
-
-		// AMP is not 'canonical mode'.
-		unset( $GLOBALS['_wp_theme_features']['amp'] );
 		$this->instance->enqueue_admin_assets();
 		$this->assertTrue( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
