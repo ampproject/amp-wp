@@ -38,6 +38,10 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 == Changelog ==
 
+= 0.7 (unreleased) =
+
+- Add support for canonical AMP.
+
 = 0.6 (unreleased) =
 
 - Add: support for the "page" post type, except when used as homepage or page for posts. A new `page.php` is introduced with template parts factored out (`html-start.php`, `header.php`, `footer.php`, `html-end.php`) and re-used from `single.php`. Note that AMP URLs will end in `?amp` instead of `/amp/`. See [#825](https://github.com/Automattic/amp-wp/pull/825). Props technosailor, ThierryA, westonruter.
