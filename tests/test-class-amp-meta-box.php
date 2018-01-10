@@ -91,13 +91,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 
 		// This is in AMP 'canonical mode,' so it shouldn't have the AMP status.
-		$GLOBALS['_wp_theme_features']['amp'] = true;
+		add_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
 		$this->assertNotContains( $amp_status_markup, ob_get_clean() );
 
 		// This is not in AMP 'canonical mode'.
-		unset( $GLOBALS['_wp_theme_features']['amp'] );
+		remove_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
 		$this->assertContains( $amp_status_markup, ob_get_clean() );
