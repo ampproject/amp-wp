@@ -176,7 +176,6 @@ function amp_is_canonical() {
 			return true;
 		}
 	}
-
 	return false;
 }
 

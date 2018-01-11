@@ -102,9 +102,9 @@ class AMP_Post_Template {
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
-		$this->template_dir           = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
-		$this->custom_template_dir    = false;
-		$this->custom_template_active = false;
+		$this->active              = true;
+		$this->template_dir        = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
+		$this->custom_template_dir = false;
 
 		/**
 		 * These may be configured within theme code.
