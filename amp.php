@@ -127,7 +127,7 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
-	if ( amp_is_canonical() || ! is_singular() || is_feed() ) {
+	if ( amp_is_canonical() || is_feed() ) {
 		return;
 	}
 
@@ -140,7 +140,7 @@ function amp_maybe_add_actions() {
 	$supports = post_supports_amp( $post );
 
 	if ( ! $supports ) {
-		if ( $is_amp_endpoint ) {
+		if ( $is_amp_endpoint && isset( $post->ID ) ) {
 			wp_safe_redirect( get_permalink( $post->ID ), 301 );
 			exit;
 		}
@@ -207,7 +207,6 @@ function amp_render() {
 	$post = get_queried_object();
 	if ( $post instanceof WP_Post ) {
 		amp_render_post( $post );
-		exit;
 	}
 }
 
@@ -250,7 +249,13 @@ function amp_render_post( $post ) {
 
 	amp_add_post_template_actions();
 	$template = new AMP_Post_Template( $post );
-	$template->load();
+
+	if ( $template->custom_template ) {
+		add_filter( 'template_include', array( $template, 'load_custom' ) );
+	} else {
+		$template->load_default();
+		exit;
+	}
 
 	if ( ! $was_set ) {
 		unset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
