@@ -250,11 +250,14 @@ function amp_render_post( $post ) {
 	amp_add_post_template_actions();
 	$template = new AMP_Post_Template( $post );
 
-	if ( $template->custom_template ) {
-		add_filter( 'template_include', array( $template, 'load_custom' ) );
-	} else {
-		$template->load_default();
-		exit;
+	// Default AMP templates or use custom folder and follow WP template hierarchy.
+	if ( $template->active ) {
+		if ( $template->custom_template_dir ) {
+			add_filter( 'template_include', array( $template, 'load_custom' ) );
+		} else {
+			$template->load_default();
+			exit;
+		}
 	}
 
 	if ( ! $was_set ) {

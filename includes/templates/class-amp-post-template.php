@@ -81,12 +81,20 @@ class AMP_Post_Template {
 	public $post;
 
 	/**
-	 * Loading custom template.
+	 * Custom template root.
 	 *
 	 * @since 0.7
 	 * @var bool
 	 */
-	public $custom_template;
+	public $custom_template_dir;
+
+	/**
+	 * If template system is currently active.
+	 *
+	 * @since 0.7
+	 * @var bool
+	 */
+	public $active;
 
 	/**
 	 * AMP_Post_Template constructor.
@@ -94,16 +102,26 @@ class AMP_Post_Template {
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
-		$this->template_dir    = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
-		$this->custom_template = false;
+		$this->template_dir           = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
+		$this->custom_template_dir    = false;
+		$this->custom_template_active = false;
 
-		// Custom template root added via theme support will take priority over above filter.
+		/**
+		 * These may be configured within theme code.
+		 *
+		 * Custom template root added via theme support.
+		 * Can also further control if custom templates are applicable depending on $post.
+		 */
 		$support = get_theme_support( 'amp' );
 		if ( is_array( $support ) ) {
 			$args = array_shift( $support );
+
 			if ( ! empty( $args['template_path'] ) ) {
-				$this->template_dir    = $args['template_path'];
-				$this->custom_template = true;
+				$this->custom_template_dir = $args['template_path'];
+			}
+
+			if ( isset( $args['active_callback'] ) ) {
+				$this->active = $args['active_callback']();
 			}
 		}
 
@@ -231,7 +249,7 @@ class AMP_Post_Template {
 		$parts     = explode( '/', $default_template );
 		$file_name = end( $parts );
 
-		return sprintf( '%s%s', $this->template_dir, $file_name );
+		return sprintf( '%s%s', $this->custom_template_dir, $file_name );
 	}
 
 	/**
