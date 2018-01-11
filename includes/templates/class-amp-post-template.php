@@ -89,6 +89,15 @@ class AMP_Post_Template {
 
 		$this->template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
 
+		// Custom template root added via theme support will take priority over above filter.
+		$support = get_theme_support( 'amp' );
+		if ( is_array( $support ) ) {
+			$args = array_shift( $support );
+			if ( ! empty( $args['template_path'] ) ) {
+				$this->template_dir = $args['template_path'];
+			}
+		}
+
 		if ( $post instanceof WP_Post ) {
 			$this->post = $post;
 		} else {
@@ -200,8 +209,38 @@ class AMP_Post_Template {
 	 * Load and print the template parts for the given post.
 	 */
 	public function load() {
-		$template = is_page() ? 'page' : 'single';
-		$this->load_parts( array( $template ) );
+		$template = false;
+
+		/**
+		 * Follow WP core hierarchy process for template decisions.
+		 *
+		 * @see template-loader.php
+		 */
+		if     ( is_embed()             && $template = get_query_template( 'embed' )      ) :
+		elseif ( is_404()               && $template = get_query_template( '404' )        ) :
+		elseif ( is_search()            && $template = get_query_template( 'search' )     ) :
+		elseif ( is_front_page()        && $template = get_query_template( 'frontpage' )  ) :
+		elseif ( is_home()              && $template = get_query_template( 'home')        ) :
+		elseif ( is_post_type_archive() && $template = get_query_template( 'archive' )    ) :
+		elseif ( is_tax()               && $template = get_query_template( 'taxonomy' )   ) :
+		elseif ( is_attachment()        && $template = get_query_template( 'attachment' ) ) :
+			remove_filter( 'the_content', 'prepend_attachment' );
+		elseif ( is_single()            && $template = get_query_template( 'single' )     ) :
+		elseif ( is_page()              && $template = get_query_template( 'page' )       ) :
+		elseif ( is_singular()          && $template = get_query_template( 'singular' )   ) :
+		elseif ( is_category()          && $template = get_query_template( 'category' )   ) :
+		elseif ( is_tag()               && $template = get_query_template( 'tag' )        ) :
+		elseif ( is_author()            && $template = get_query_template( 'author' )     ) :
+		elseif ( is_date()              && $template = get_query_template( 'date' )       ) :
+		elseif ( is_archive()           && $template = get_query_template( 'archive' )    ) :
+		else :
+			$template = get_query_template( 'index' );
+		endif;
+
+		$parts     = explode( '/', $template );
+		$file_name = str_replace( '.php', '', end( $parts ) );
+
+		$this->load_parts( array( $file_name ) );
 	}
 
 	/**
