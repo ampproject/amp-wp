@@ -18,6 +18,7 @@ var ampPostMetaBox = ( function( $ ) {
 		 * @since 0.6
 		 */
 		data: {
+			canonical: false,
 			previewLink: '',
 			disabled: false,
 			statusInputName: '',
@@ -58,7 +59,7 @@ var ampPostMetaBox = ( function( $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 		$( document ).ready( function() {
-			if ( ! component.data.disabled ) {
+			if ( ! component.data.disabled && ! component.data.canonical ) {
 				component.addPreviewButton();
 			}
 			component.listen();

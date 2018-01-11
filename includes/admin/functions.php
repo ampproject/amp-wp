@@ -15,8 +15,16 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
 /**
  * Sets up the AMP template editor for the Customizer.
+ *
+ * If this is in AMP canonical mode, exit.
+ * There's no need for the 'AMP' Customizer panel,
+ * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
+	if ( amp_is_canonical() ) {
+		return;
+	}
+
 	// Fire up the AMP Customizer.
 	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );
 

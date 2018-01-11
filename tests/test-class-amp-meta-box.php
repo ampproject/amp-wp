@@ -79,10 +79,19 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory->user->create( array(
 			'role' => 'administrator',
 		) ) );
+		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 
+		// This is in AMP 'canonical mode,' so it shouldn't have the AMP status.
+		add_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
-		$this->assertContains( '<div class="misc-pub-section misc-amp-status"', ob_get_clean() );
+		$this->assertNotContains( $amp_status_markup, ob_get_clean() );
+
+		// This is not in AMP 'canonical mode'.
+		remove_theme_support( 'amp' );
+		ob_start();
+		$this->instance->render_status( $post );
+		$this->assertContains( $amp_status_markup, ob_get_clean() );
 
 		remove_post_type_support( 'post', AMP_QUERY_VAR );
 

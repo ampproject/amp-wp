@@ -122,6 +122,7 @@ class AMP_Post_Meta_Box {
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
+				'canonical'       => amp_is_canonical(),
 				'disabled'        => (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true ) || ! $this->is_amp_available( $post ),
 				'statusInputName' => self::STATUS_INPUT_NAME,
 				'l10n'            => array(
@@ -142,6 +143,8 @@ class AMP_Post_Meta_Box {
 			isset( $post->ID )
 			&&
 			current_user_can( 'edit_post', $post->ID )
+			&&
+			! amp_is_canonical()
 		);
 
 		if ( true !== $verify ) {

@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.6-alpha
+ * Version: 0.7-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.6-alpha' );
+define( 'AMP__VERSION', '0.7-alpha' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -117,8 +117,17 @@ function amp_force_query_var_value( $query_vars ) {
 	return $query_vars;
 }
 
+/**
+ * Conditionally add AMP actions or render the 'paired mode' template(s).
+ *
+ * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
+ * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
+ *
+ * @since 0.2
+ * @return void
+ */
 function amp_maybe_add_actions() {
-	if ( ! is_singular() || is_feed() ) {
+	if ( amp_is_canonical() || ! is_singular() || is_feed() ) {
 		return;
 	}
 
@@ -143,6 +152,31 @@ function amp_maybe_add_actions() {
 	} else {
 		amp_add_frontend_actions();
 	}
+}
+
+/**
+ * Whether this is in 'canonical mode.'
+ *
+ * Themes can register support for this with `add_theme_support( 'amp' )`.
+ * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
+ * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
+ * `add_theme_support( 'amp', array( 'template_path' => get_template_directory() . 'my-amp-templates/' ) )`
+ * it will retain 'paired mode.
+ *
+ * @return boolean Whether this is in AMP 'canonical mode'.
+ */
+function amp_is_canonical() {
+	$support = get_theme_support( 'amp' );
+	if ( true === $support ) {
+		return true;
+	}
+	if ( is_array( $support ) ) {
+		$args = array_shift( $support );
+		if ( empty( $args['template_path'] ) ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function amp_load_classes() {
@@ -225,10 +259,16 @@ function amp_render_post( $post ) {
 /**
  * Bootstraps the AMP customizer.
  *
+ * Uses the priority of 12 for the 'after_setup_theme' action.
+ * Many themes run `add_theme_support()` on the 'after_setup_theme' hook, at the default priority of 10.
+ * And that function's documentation suggests adding it to that action.
+ * So this enables themes to `add_theme_support( 'amp' )`.
+ * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
+ *
  * @since 0.4
  */
 function _amp_bootstrap_customizer() {
-	add_action( 'after_setup_theme', 'amp_init_customizer' );
+	add_action( 'after_setup_theme', 'amp_init_customizer', 12 );
 }
 add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
 
