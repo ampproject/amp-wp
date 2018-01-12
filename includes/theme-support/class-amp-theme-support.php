@@ -1,16 +1,16 @@
 <?php
 /**
- * Class AMP_Canonical_Mode_Actions
+ * Class AMP_Theme_Support
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Canonical_Mode_Actions
+ * Class AMP_Theme_Support
  *
- * Callbacks for adding AMP-related things to the theme when in canonical mode.
+ * Callbacks for adding AMP-related things when theme support is added.
  */
-class AMP_Canonical_Mode_Actions {
+class AMP_Theme_Support {
 
 	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!--AMP_COMPONENT_SCRIPTS_PLACEHOLDER-->';
 
