@@ -127,13 +127,25 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
-	if ( amp_is_canonical() || is_feed() ) {
+
+	// Add hooks for when a themes that support AMP.
+	if ( current_theme_supports( 'amp' ) ) {
+		if ( amp_is_canonical() || is_amp_endpoint() ) {
+			AMP_Theme_Support::register_hooks();
+		} else {
+			AMP_Frontend_Actions::register_hooks();
+		}
+		return;
+	}
+
+	// The remaining logic here is for paired mode running in themes that don't support AMP, the template system in AMP<=0.6.
+	if ( ! is_singular() || is_feed() ) {
 		return;
 	}
 
 	$is_amp_endpoint = is_amp_endpoint();
 
-	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
+	// Cannot use `get_queried_object` before canonical redirect; see <https://core.trac.wordpress.org/ticket/35344>.
 	global $wp_query;
 	$post = $wp_query->post;
 
