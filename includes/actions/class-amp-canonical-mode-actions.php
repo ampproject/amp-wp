@@ -37,8 +37,11 @@ class AMP_Canonical_Mode_Actions {
 		add_action( 'wp_head', array( __CLASS__, 'print_amp_scripts' ), 4 );
 		add_action( 'wp_head', array( __CLASS__, 'print_amp_custom_style' ), 5 );
 
-		add_action( 'admin_bar_init', array( __CLASS__, 'admin_bar_init' ) );
-		add_theme_support( 'admin-bar', array( 'callback' => '__return_false' ) );
+		/*
+		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
+		 * combine to surpass the 50K limit imposed for the amp-custom style.
+		 */
+		add_filter( 'show_admin_bar', '__return_false', 100 );
 
 		// @todo Add output buffering.
 		// @todo Add character conversion.
@@ -151,41 +154,5 @@ class AMP_Canonical_Mode_Actions {
 			echo '/* end:wp_get_custom_css */';
 		}
 		echo '</style>';
-	}
-
-	/**
-	 * Fix up admin bar.
-	 */
-	public static function admin_bar_init() {
-		remove_action( 'wp_head', 'wp_admin_bar_header' );
-		add_action( 'admin_bar_menu', array( __CLASS__, 'remove_customize_support_script' ), 100 ); // See WP_Admin_Bar::add_menus().
-		add_filter( 'body_class', array( __CLASS__, array( __CLASS__, 'filter_body_class_to_force_customize_support' ) ) );
-	}
-
-	/**
-	 * Let the body class include customize-support by default since support script won't be able to dynamically add it.
-	 *
-	 * @see wp_customize_support_script()
-	 *
-	 * @param array $classes Body classes.
-	 * @return array Classes.
-	 */
-	public static function filter_body_class_to_force_customize_support( $classes ) {
-		$i = array_search( 'no-customize-support', $classes, true );
-		if ( false !== $i ) {
-			array_splice( $classes, $i, 1 );
-		}
-		$classes[] = 'customize-support';
-		return $classes;
-	}
-
-	/**
-	 * Remove Customizer support script.
-	 *
-	 * @see WP_Admin_Bar::add_menus()
-	 * @see wp_customize_support_script()
-	 */
-	public static function remove_customize_support_script() {
-		remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
 	}
 }
