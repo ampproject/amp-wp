@@ -130,10 +130,8 @@ function amp_maybe_add_actions() {
 
 	// Add hooks for when a themes that support AMP.
 	if ( current_theme_supports( 'amp' ) ) {
-		if ( amp_is_canonical() ) {
-			AMP_Canonical_Theme_Support::register_hooks();
-		} elseif ( is_amp_endpoint() ) {
-			AMP_Paired_Theme_Support::register_hooks();
+		if ( amp_is_canonical() || is_amp_endpoint() ) {
+			AMP_Theme_Support::register_hooks();
 		} else {
 			AMP_Frontend_Actions::register_hooks();
 		}
