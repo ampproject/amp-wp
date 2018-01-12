@@ -32,13 +32,14 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', 'rel_canonical' );
 		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
 
-		// @todo Add add_schemaorg_metadata(), add_analytics_data(), add_generator_metadata() etc.
+		// @todo Add add_schemaorg_metadata(), add_analytics_data(), etc.
 		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 2 );
 		add_action( 'wp_head', 'amp_print_boilerplate_code', 3 );
 		add_action( 'wp_head', array( __CLASS__, 'add_scripts' ), 4 );
 		add_action( 'wp_head', array( __CLASS__, 'add_styles' ), 5 );
+		add_action( 'wp_head', array( __CLASS__, 'add_meta_generator' ), 6 );
 
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
@@ -161,6 +162,13 @@ class AMP_Theme_Support {
 			echo '/* end:wp_get_custom_css */';
 		}
 		echo '</style>';
+	}
+
+	/**
+	 * Print AMP meta generator tag.
+	 */
+	public static function add_meta_generator() {
+		printf( '<meta name="generator" content="%s" />', esc_attr( 'AMP Plugin v' . AMP__VERSION ) );
 	}
 
 	/**
