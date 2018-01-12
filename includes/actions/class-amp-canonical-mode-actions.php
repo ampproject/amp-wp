@@ -30,14 +30,15 @@ class AMP_Canonical_Mode_Actions {
 
 		// Replace core's canonical link functionality with one that outputs links for non-singular queries as well. See WP Core #18660.
 		remove_action( 'wp_head', 'rel_canonical' );
-		add_action( 'wp_head', array( __CLASS__, 'rel_canonical' ), 1 );
+		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
 
+		// @todo Add add_schemaorg_metadata(), add_analytics_data(), add_generator_metadata() etc.
 		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
-		add_action( 'wp_head', array( __CLASS__, 'print_meta_charset' ), 0 );
-		add_action( 'wp_head', array( __CLASS__, 'print_meta_viewport' ), 2 );
-		add_action( 'wp_head', array( __CLASS__, 'print_amp_boilerplate_code' ), 3 );
-		add_action( 'wp_head', array( __CLASS__, 'print_amp_scripts' ), 4 );
-		add_action( 'wp_head', array( __CLASS__, 'print_amp_custom_style' ), 5 );
+		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
+		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 2 );
+		add_action( 'wp_head', 'amp_print_boilerplate_code', 3 );
+		add_action( 'wp_head', array( __CLASS__, 'add_scripts' ), 4 );
+		add_action( 'wp_head', array( __CLASS__, 'add_styles' ), 5 );
 
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
@@ -45,7 +46,8 @@ class AMP_Canonical_Mode_Actions {
 		 */
 		add_filter( 'show_admin_bar', '__return_false', 100 );
 
-		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ) );
+		// Start output buffering at very low priority for sake of plugins and themes that use template_redirect instead of template_include.
+		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		// @todo Add output buffering.
 		// @todo Add character conversion.
@@ -56,7 +58,7 @@ class AMP_Canonical_Mode_Actions {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#chrs
 	 */
-	public static function print_meta_charset() {
+	public static function add_meta_charset() {
 		echo '<meta charset="utf-8">';
 	}
 
@@ -65,18 +67,8 @@ class AMP_Canonical_Mode_Actions {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#vprt
 	 */
-	public static function print_meta_viewport() {
+	public static function add_meta_viewport() {
 		echo '<meta name="viewport" content="width=device-width,minimum-scale=1">';
-	}
-
-	/**
-	 * Print AMP boilerplate code.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#boilerplate
-	 */
-	public static function print_amp_boilerplate_code() {
-		echo '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>';
-		echo '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
 	}
 
 	/**
@@ -84,7 +76,7 @@ class AMP_Canonical_Mode_Actions {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
 	 */
-	public static function print_amp_scripts() {
+	public static function add_scripts() {
 		echo '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Replaced after output buffering with all AMP component scripts.
@@ -104,7 +96,7 @@ class AMP_Canonical_Mode_Actions {
 	 * @global WP $wp
 	 * @global WP_Rewrite $wp_rewrite
 	 */
-	public static function rel_canonical() {
+	public static function add_canonical_link() {
 		global $wp, $wp_rewrite;
 
 		$url = null;
@@ -142,7 +134,7 @@ class AMP_Canonical_Mode_Actions {
 	 *
 	 * @see wp_custom_css_cb()
 	 */
-	public static function print_amp_custom_style() {
+	public static function add_styles() {
 		echo '<style amp-custom>';
 
 		// @todo Grab source of all enqueued styles and concatenate here?
@@ -168,7 +160,7 @@ class AMP_Canonical_Mode_Actions {
 	 * @param string $html Output HTML.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public function get_required_amp_scripts( $html ) {
+	public static function get_required_amp_scripts( $html ) {
 
 		// @todo This should be integrated with the existing Sanitizer classes so that duplication is not done here.
 		$amp_scripts = array(
