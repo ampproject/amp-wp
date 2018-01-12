@@ -127,7 +127,20 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
-	if ( amp_is_canonical() || ! is_singular() || is_feed() ) {
+
+	// Add hooks for when a themes that support AMP.
+	if ( current_theme_supports( 'amp' ) ) {
+		if ( amp_is_canonical() ) {
+			AMP_Canonical_Mode_Actions::register_hooks();
+		} elseif ( is_amp_endpoint() ) {
+			AMP_Paired_Mode_Actions::register_hooks();
+		} else {
+			AMP_Frontend_Actions::register_hooks();
+		}
+		return;
+	}
+
+	if ( ! is_singular() || is_feed() ) {
 		return;
 	}
 
