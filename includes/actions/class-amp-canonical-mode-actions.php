@@ -12,6 +12,8 @@
  */
 class AMP_Canonical_Mode_Actions {
 
+	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!--AMP_COMPONENT_SCRIPTS_PLACEHOLDER-->';
+
 	/**
 	 * Register hooks.
 	 */
@@ -42,6 +44,8 @@ class AMP_Canonical_Mode_Actions {
 		 * combine to surpass the 50K limit imposed for the amp-custom style.
 		 */
 		add_filter( 'show_admin_bar', '__return_false', 100 );
+
+		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ) );
 
 		// @todo Add output buffering.
 		// @todo Add character conversion.
@@ -82,7 +86,9 @@ class AMP_Canonical_Mode_Actions {
 	 */
 	public static function print_amp_scripts() {
 		echo '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		echo '<!--AMP_PLUGIN_SCRIPTS_PLACEHOLDER-->'; // Replaced after output buffering with all AMP component scripts.
+
+		// Replaced after output buffering with all AMP component scripts.
+		echo self::COMPONENT_SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
 	}
 
 	/**
@@ -154,5 +160,61 @@ class AMP_Canonical_Mode_Actions {
 			echo '/* end:wp_get_custom_css */';
 		}
 		echo '</style>';
+	}
+
+	/**
+	 * Determine required AMP scripts.
+	 *
+	 * @param string $html Output HTML.
+	 * @return string Scripts to inject into the HEAD.
+	 */
+	public function get_required_amp_scripts( $html ) {
+
+		// @todo This should be integrated with the existing Sanitizer classes so that duplication is not done here.
+		$amp_scripts = array(
+			'amp-form' => array(
+				'pattern' => '#<(form|input)\b#i',
+				'source'  => 'https://cdn.ampproject.org/v0/amp-form-0.1.js',
+			),
+			// @todo Add more.
+		);
+
+		$scripts = '';
+		foreach ( $amp_scripts as $component => $props ) {
+			if ( preg_match( '#<(form|input)\b#i', $html ) ) {
+				$scripts .= sprintf(
+					'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+					$component,
+					$props['source']
+				);
+			}
+		}
+
+		return $scripts;
+	}
+
+	/**
+	 * Start output buffering.
+	 */
+	public static function start_output_buffering() {
+		ob_start( array( __CLASS__, 'finish_output_buffering' ) );
+	}
+
+	/**
+	 * Finish output buffering.
+	 *
+	 * @param string $output Buffered output.
+	 * @return string Finalized output.
+	 */
+	public static function finish_output_buffering( $output ) {
+		$output = preg_replace(
+			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
+			self::get_required_amp_scripts( $output ),
+			$output,
+			1
+		);
+
+		// @todo Add more validation checking and potentially the whitelist sanitizer.
+		return $output;
 	}
 }
