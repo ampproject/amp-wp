@@ -223,7 +223,7 @@ function amp_get_widgets() {
  *
  * Can apply to 'audio' or 'video' widgets.
  * Queries for a single post of the media type.
- * If none exists, amp_get_media() will throw an error.
+ * If none exists, amp_media() will throw an error.
  *
  * @param  string $type The type of media. like 'audio' or 'video'.
  * @return array $audio_widget The settings for the media widget.
@@ -240,7 +240,7 @@ function amp_media_widget( $type ) {
 /**
  * Get the settings for the gallery widget.
  *
- * @return array $audio_widget The settings for the audio widget.
+ * @return array $audio_widget The settings for the gallery widget.
  */
 function amp_gallery_widget() {
 	$images = amp_media( 'image', 3 );
@@ -252,7 +252,7 @@ function amp_gallery_widget() {
 /**
  * Gets the settings for the image widget.
  *
- * @return array $image_widget The settings for the audio widget.
+ * @return array $image_widget The settings for the image widget.
  */
 function amp_image_widget() {
 	$all_images        = amp_media( 'image', 1 );
@@ -261,9 +261,9 @@ function amp_image_widget() {
 	$default_dimension = 100;
 	return array(
 		'attachment_id' => $image->ID,
-		'height'        => isset( $metadata->height ) ? $metadata->height : $default_dimension,
-		'width'         => isset( $metadata->width ) ? $metadata->width : $default_dimension,
-		'url'           => $image->guid,
+		'height'        => isset( $metadata['height'] ) ? $metadata['height'] : $default_dimension,
+		'width'         => isset( $metadata['width'] ) ? $metadata['width'] : $default_dimension,
+		'url'           => wp_get_attachment_url( $image->ID ),
 	);
 }
 
@@ -303,7 +303,7 @@ function amp_media( $type, $count = 3 ) {
  * Iterates through all of the menus.
  * And returns the first that has 4 items.
  *
- * @throws Exception When there is no registered sidebar.
+ * @throws Exception When there is no menu with 4 items.
  * @return integer|WP_CLI::error $menu_id The menu ID, or an error if no menu has at least 4 items.
  */
 function amp_menu() {
@@ -336,7 +336,7 @@ function amp_widget_already_in_sidebar( $widget, $sidebar ) {
 	}
 
 	$id_base         = $widget['widget'];
-	$all_widget_data = get_option( 'widget_' . $id_base );
+	$all_widget_data = get_option( 'widget_' . $id_base, array() );
 
 	foreach ( $widgets_in_sidebar as $possible_widget ) {
 		if ( false !== strpos( $possible_widget, $id_base ) ) {
@@ -378,7 +378,7 @@ function amp_create_widget( $widget ) {
 
 	$id_base    = $widget['widget'];
 	$option_key = 'widget_' . $id_base;
-	$widgets    = get_option( $option_key );
+	$widgets    = get_option( $option_key, array() );
 	$settings   = isset( $widget['settings'] ) ? $widget['settings'] : array();
 
 	if ( ! isset( $settings['title'] ) ) {
