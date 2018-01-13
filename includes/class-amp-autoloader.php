@@ -29,9 +29,6 @@ class AMP_Autoloader {
 	 * @var string[]
 	 */
 	private static $_classmap = array(
-		'AMP_Actions'                                 => 'includes/actions/class-amp-actions',
-		'AMP_Frontend_Actions'                        => 'includes/actions/class-amp-frontend-actions',
-		'AMP_Paired_Post_Actions'                     => 'includes/actions/class-amp-paired-post-actions',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                           => 'includes/admin/class-amp-post-meta-box',
 		'AMP_Post_Type_Support'                       => 'includes/class-amp-post-type-support',
