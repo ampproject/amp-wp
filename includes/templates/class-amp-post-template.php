@@ -81,49 +81,13 @@ class AMP_Post_Template {
 	public $post;
 
 	/**
-	 * Custom template root.
-	 *
-	 * @since 0.7
-	 * @var bool
-	 */
-	public $custom_template_dir;
-
-	/**
-	 * If template system is currently active.
-	 *
-	 * @since 0.7
-	 * @var bool
-	 */
-	public $active;
-
-	/**
 	 * AMP_Post_Template constructor.
 	 *
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
-		$this->active              = true;
-		$this->template_dir        = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
-		$this->custom_template_dir = false;
 
-		/**
-		 * These may be configured within theme code.
-		 *
-		 * Custom template root added via theme support.
-		 * Can also further control if custom templates are applicable depending on $post.
-		 */
-		$support = get_theme_support( 'amp' );
-		if ( is_array( $support ) ) {
-			$args = array_shift( $support );
-
-			if ( ! empty( $args['template_path'] ) ) {
-				$this->custom_template_dir = $args['template_path'];
-			}
-
-			if ( isset( $args['active_callback'] ) ) {
-				$this->active = $args['active_callback']();
-			}
-		}
+		$this->template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
 
 		if ( $post instanceof WP_Post ) {
 			$this->post = $post;
@@ -233,23 +197,11 @@ class AMP_Post_Template {
 	}
 
 	/**
-	 * Load and print the default template parts for the given post.
+	 * Load and print the template parts for the given post.
 	 */
-	public function load_default() {
+	public function load() {
 		$template = is_page() ? 'page' : 'single';
 		$this->load_parts( array( $template ) );
-	}
-
-	/**
-	 * Use default WP template that should load and replace root dir with custom.
-	 *
-	 * @param string $default_template Template that WP would be referencing.
-	 */
-	public function load_custom( $default_template ) {
-		$parts     = explode( '/', $default_template );
-		$file_name = end( $parts );
-
-		return sprintf( '%s%s', $this->custom_template_dir, $file_name );
 	}
 
 	/**

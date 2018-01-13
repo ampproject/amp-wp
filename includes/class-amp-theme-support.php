@@ -15,6 +15,77 @@ class AMP_Theme_Support {
 	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!--AMP_COMPONENT_SCRIPTS_PLACEHOLDER-->';
 
 	/**
+	 * Template types.
+	 *
+	 * @var array
+	 */
+	protected static $template_types = array(
+		'paged', // Deprecated.
+		'index',
+		'404',
+		'archive',
+		'author',
+		'category',
+		'tag',
+		'taxonomy',
+		'date',
+		'home',
+		'front_page',
+		'page',
+		'search',
+		'single',
+		'embed',
+		'singular',
+		'attachment',
+	);
+
+	/**
+	 * Initialize.
+	 */
+	public static function init() {
+		if ( ! amp_is_canonical() ) {
+			self::register_paired_hooks();
+		}
+		self::register_hooks();
+	}
+
+	/**
+	 * Determines whether paired mode is available.
+	 *
+	 * When 'amp' theme support has not been added or canonical mode is enabled, then this returns false.
+	 * Returns true when there is a template_path defined in theme support, and if a defined active_callback
+	 * returns true.
+	 *
+	 * @todo Make sure this is used when determining whether to show the amphtml link.
+	 *
+	 * @return bool Whether available.
+	 */
+	public static function is_paired_available() {
+		$support = get_theme_support( 'amp' );
+		if ( empty( $support ) || amp_is_canonical() ) {
+			return false;
+		}
+
+		$args = array_shift( $support );
+
+		// @todo We might want to rename active_callback to available_callback..
+		if ( isset( $args['active_callback'] ) && is_callable( $args['active_callback'] ) ) {
+			return $args['active_callback']();
+		}
+		return true;
+	}
+
+	/**
+	 * Register hooks for paired mode.
+	 */
+	public static function register_paired_hooks() {
+		foreach ( self::$template_types as $template_type ) {
+			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_paired_template_hierarchy' ) );
+		}
+		add_filter( 'template_include', array( __CLASS__, 'filter_paired_template_include' ), 100 );
+	}
+
+	/**
 	 * Register hooks.
 	 */
 	public static function register_hooks() {
@@ -55,6 +126,44 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Prepends template hierarchy with template_path for AMP paired mode templates.
+	 *
+	 * @see get_query_template()
+	 *
+	 * @param array $templates Template hierarchy.
+	 * @returns array Templates.
+	 */
+	public static function filter_paired_template_hierarchy( $templates ) {
+		$support = get_theme_support( 'amp' );
+		$args    = array_shift( $support );
+		if ( isset( $args['template_path'] ) ) {
+			$amp_templates = array();
+			foreach ( $templates as $template ) {
+				$amp_templates[] = $args['template_path'] . '/' . $template;
+			}
+			$templates = $amp_templates;
+		}
+		return $templates;
+	}
+
+	/**
+	 * Redirect to the non-canonical URL when the template to include is empty.
+	 *
+	 * This is a failsafe in case an index.php is not located in the AMP template_path,
+	 * and the active_callback fails to omit a given request from being available in AMP.
+	 *
+	 * @param string $template Template to include.
+	 * @return string Template to include.
+	 */
+	public static function filter_paired_template_include( $template ) {
+		if ( empty( $template ) || ! self::is_paired_available() ) {
+			wp_safe_redirect( self::get_current_canonical_url() );
+			exit;
+		}
+		return $template;
+	}
+
+	/**
 	 * Print meta charset tag.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#chrs
@@ -85,19 +194,15 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Add canonical link.
-	 *
-	 * Replaces `rel_canonical()` which only outputs canonical URLs for singular posts and pages.
-	 * This can be removed once WP Core #18660 lands.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#canon.
-	 * @link https://core.trac.wordpress.org/ticket/18660
+	 * Get canonical URL for current request.
 	 *
 	 * @see rel_canonical()
 	 * @global WP $wp
 	 * @global WP_Rewrite $wp_rewrite
+	 *
+	 * @return string Canonical non-AMP URL.
 	 */
-	public static function add_canonical_link() {
+	public static function get_current_canonical_url() {
 		global $wp, $wp_rewrite;
 
 		$url = null;
@@ -136,7 +241,23 @@ class AMP_Theme_Support {
 			$url = remove_query_arg( AMP_QUERY_VAR, $url );
 		}
 
-		echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . "\n";
+		return $url;
+	}
+
+	/**
+	 * Add canonical link.
+	 *
+	 * Replaces `rel_canonical()` which only outputs canonical URLs for singular posts and pages.
+	 * This can be removed once WP Core #18660 lands.
+	 *
+	 * @link https://www.ampproject.org/docs/reference/spec#canon.
+	 * @link https://core.trac.wordpress.org/ticket/18660
+	 */
+	public static function add_canonical_link() {
+		$url = self::get_current_canonical_url();
+		if ( ! empty( $url ) ) {
+			printf( '<link rel="canonical" href="%s">', esc_url( $url ) );
+		}
 	}
 
 	/**
