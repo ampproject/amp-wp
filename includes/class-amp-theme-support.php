@@ -43,7 +43,15 @@ class AMP_Theme_Support {
 	 * Initialize.
 	 */
 	public static function init() {
-		if ( ! amp_is_canonical() ) {
+		if ( amp_is_canonical() ) {
+			$is_amp_endpoint = ( false !== get_query_var( AMP_QUERY_VAR, false ) ); // Because is_amp_endpoint() now returns true if amp_is_canonical().
+
+			// Permanently redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+			if ( $is_amp_endpoint ) {
+				wp_safe_redirect( self::get_current_canonical_url(), 301 );
+				exit;
+			}
+		} else {
 			self::register_paired_hooks();
 		}
 		self::register_hooks();
