@@ -65,8 +65,6 @@ class AMP_Theme_Support {
 	 * Returns true when there is a template_path defined in theme support, and if a defined active_callback
 	 * returns true.
 	 *
-	 * @todo Make sure this is used when determining whether to show the amphtml link.
-	 *
 	 * @return bool Whether available.
 	 */
 	public static function is_paired_available() {

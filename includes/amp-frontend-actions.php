@@ -14,6 +14,11 @@ add_action( 'wp_head', 'amp_frontend_add_canonical' );
  */
 function amp_frontend_add_canonical() {
 
+	// Prevent showing amphtml link if theme supports AMP but paired mode is not available.
+	if ( current_theme_supports( 'amp' ) && ! AMP_Theme_Support::is_paired_available() ) {
+		return;
+	}
+
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
 	 *
