@@ -133,7 +133,7 @@ function amp_maybe_add_actions() {
 		if ( amp_is_canonical() || is_amp_endpoint() ) {
 			AMP_Theme_Support::init();
 		} else {
-			AMP_Frontend_Actions::register_hooks();
+			amp_add_frontend_actions();
 		}
 		return;
 	}
@@ -196,12 +196,13 @@ function amp_load_classes() {
 }
 
 function amp_add_frontend_actions() {
-	AMP_Frontend_Actions::register_hooks();
+	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
 }
 
 function amp_add_post_template_actions() {
-	AMP_Paired_Post_Actions::register_hooks();
-	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
+	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+	amp_post_template_init_hooks();
 }
 
 function amp_prepare_render() {
