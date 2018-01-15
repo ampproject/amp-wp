@@ -329,7 +329,7 @@ function amp_menu() {
  * @return boolean $in_sidebar Whether the widget is in the sidebar.
  */
 function amp_widget_already_in_sidebar( $widget, $sidebar ) {
-	$sidebars           = wp_get_sidebars_widgets();
+	$sidebars = wp_get_sidebars_widgets();
 	if ( empty( $sidebars[ $sidebar ] ) ) {
 		return false;
 	}
