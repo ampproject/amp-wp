@@ -127,13 +127,14 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
+	$is_amp_endpoint = is_amp_endpoint();
 
 	// Add hooks for when a themes that support AMP.
 	if ( current_theme_supports( 'amp' ) ) {
-		if ( amp_is_canonical() || is_amp_endpoint() ) {
-			AMP_Theme_Support::register_hooks();
+		if ( $is_amp_endpoint ) {
+			AMP_Theme_Support::init();
 		} else {
-			AMP_Frontend_Actions::register_hooks();
+			amp_add_frontend_actions();
 		}
 		return;
 	}
@@ -143,8 +144,6 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	$is_amp_endpoint = is_amp_endpoint();
-
 	// Cannot use `get_queried_object` before canonical redirect; see <https://core.trac.wordpress.org/ticket/35344>.
 	global $wp_query;
 	$post = $wp_query->post;
@@ -152,7 +151,7 @@ function amp_maybe_add_actions() {
 	$supports = post_supports_amp( $post );
 
 	if ( ! $supports ) {
-		if ( $is_amp_endpoint ) {
+		if ( $is_amp_endpoint && isset( $post->ID ) ) {
 			wp_safe_redirect( get_permalink( $post->ID ), 301 );
 			exit;
 		}
@@ -172,7 +171,7 @@ function amp_maybe_add_actions() {
  * Themes can register support for this with `add_theme_support( 'amp' )`.
  * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
  * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
- * `add_theme_support( 'amp', array( 'template_path' => get_template_directory() . 'my-amp-templates/' ) )`
+ * `add_theme_support( 'amp', array( 'template_dir' => 'my-amp-templates' ) )`
  * it will retain 'paired mode.
  *
  * @return boolean Whether this is in AMP 'canonical mode'.
@@ -184,7 +183,7 @@ function amp_is_canonical() {
 	}
 	if ( is_array( $support ) ) {
 		$args = array_shift( $support );
-		if ( empty( $args['template_path'] ) ) {
+		if ( empty( $args['template_dir'] ) ) {
 			return true;
 		}
 	}
@@ -196,12 +195,13 @@ function amp_load_classes() {
 }
 
 function amp_add_frontend_actions() {
-	AMP_Frontend_Actions::register_hooks();
+	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
 }
 
 function amp_add_post_template_actions() {
-	AMP_Paired_Post_Actions::register_hooks();
-	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
+	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+	amp_post_template_init_hooks();
 }
 
 function amp_prepare_render() {

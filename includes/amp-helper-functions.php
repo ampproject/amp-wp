@@ -63,6 +63,10 @@ function amp_get_permalink( $post_id ) {
  * @return bool Whether the post supports AMP.
  */
 function post_supports_amp( $post ) {
+	if ( amp_is_canonical() ) {
+		return true;
+	}
+
 	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
 }
 
@@ -74,6 +78,10 @@ function post_supports_amp( $post ) {
  * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
+	if ( amp_is_canonical() ) {
+		return true;
+	}
+
 	if ( 0 === did_action( 'parse_query' ) ) {
 		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
