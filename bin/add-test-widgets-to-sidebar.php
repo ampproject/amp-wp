@@ -310,7 +310,7 @@ function amp_menu() {
 	$menus         = wp_get_nav_menus();
 	$minimum_count = 4;
 	foreach ( $menus as $menu ) {
-		if ( $menu->count > $minimum_count ) {
+		if ( $menu->count >= $minimum_count ) {
 			return $menu->term_id;
 		}
 	}
@@ -330,15 +330,14 @@ function amp_menu() {
  */
 function amp_widget_already_in_sidebar( $widget, $sidebar ) {
 	$sidebars           = wp_get_sidebars_widgets();
-	$widgets_in_sidebar = $sidebars[ $sidebar ];
-	if ( empty( $widgets_in_sidebar ) ) {
+	if ( empty( $sidebars[ $sidebar ] ) ) {
 		return false;
 	}
 
 	$id_base         = $widget['widget'];
 	$all_widget_data = get_option( 'widget_' . $id_base, array() );
 
-	foreach ( $widgets_in_sidebar as $possible_widget ) {
+	foreach ( $sidebars[ $sidebar ] as $possible_widget ) {
 		if ( false !== strpos( $possible_widget, $id_base ) ) {
 			/*
 			* If there aren't any settings for the widget, any instance of it is enough.
