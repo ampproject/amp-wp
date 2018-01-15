@@ -62,7 +62,7 @@ class AMP_Theme_Support {
 	 * Determines whether paired mode is available.
 	 *
 	 * When 'amp' theme support has not been added or canonical mode is enabled, then this returns false.
-	 * Returns true when there is a template_dir defined in theme support, and if a defined active_callback
+	 * Returns true when there is a template_dir defined in theme support, and if a defined available_callback
 	 * returns true.
 	 *
 	 * @return bool Whether available.
@@ -75,9 +75,8 @@ class AMP_Theme_Support {
 
 		$args = array_shift( $support );
 
-		// @todo We might want to rename active_callback to available_callback..
-		if ( isset( $args['active_callback'] ) && is_callable( $args['active_callback'] ) ) {
-			return $args['active_callback']();
+		if ( isset( $args['available_callback'] ) && is_callable( $args['available_callback'] ) ) {
+			return $args['available_callback']();
 		}
 		return true;
 	}
@@ -157,7 +156,7 @@ class AMP_Theme_Support {
 	 * Redirect to the non-canonical URL when the template to include is empty.
 	 *
 	 * This is a failsafe in case an index.php is not located in the AMP template_dir,
-	 * and the active_callback fails to omit a given request from being available in AMP.
+	 * and the available_callback fails to omit a given request from being available in AMP.
 	 *
 	 * @param string $template Template to include.
 	 * @return string Template to include.
