@@ -127,10 +127,11 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
+	$is_amp_endpoint = is_amp_endpoint();
 
 	// Add hooks for when a themes that support AMP.
 	if ( current_theme_supports( 'amp' ) ) {
-		if ( amp_is_canonical() || is_amp_endpoint() ) {
+		if ( $is_amp_endpoint ) {
 			AMP_Theme_Support::init();
 		} else {
 			amp_add_frontend_actions();
@@ -142,8 +143,6 @@ function amp_maybe_add_actions() {
 	if ( ! is_singular() || is_feed() ) {
 		return;
 	}
-
-	$is_amp_endpoint = is_amp_endpoint();
 
 	// Cannot use `get_queried_object` before canonical redirect; see <https://core.trac.wordpress.org/ticket/35344>.
 	global $wp_query;

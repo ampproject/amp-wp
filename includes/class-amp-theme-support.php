@@ -12,6 +12,11 @@
  */
 class AMP_Theme_Support {
 
+	/**
+	 * Replaced with the necessary scripts depending on components used in output.
+	 *
+	 * @var string
+	 */
 	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!--AMP_COMPONENT_SCRIPTS_PLACEHOLDER-->';
 
 	/**
@@ -45,10 +50,9 @@ class AMP_Theme_Support {
 	public static function init() {
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 		if ( amp_is_canonical() ) {
-			$is_amp_endpoint = ( false !== get_query_var( AMP_QUERY_VAR, false ) ); // Because is_amp_endpoint() now returns true if amp_is_canonical().
 
 			// Permanently redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
-			if ( $is_amp_endpoint ) {
+			if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
 				wp_safe_redirect( self::get_current_canonical_url(), 301 );
 				exit;
 			}
@@ -76,7 +80,7 @@ class AMP_Theme_Support {
 		$args = array_shift( $support );
 
 		if ( isset( $args['available_callback'] ) && is_callable( $args['available_callback'] ) ) {
-			return $args['available_callback']();
+			return call_user_func( $args['available_callback'] );
 		}
 		return true;
 	}
