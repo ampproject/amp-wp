@@ -172,7 +172,7 @@ function amp_maybe_add_actions() {
  * Themes can register support for this with `add_theme_support( 'amp' )`.
  * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
  * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
- * `add_theme_support( 'amp', array( 'template_path' => get_template_directory() . 'my-amp-templates/' ) )`
+ * `add_theme_support( 'amp', array( 'template_dir' => 'my-amp-templates' ) )`
  * it will retain 'paired mode.
  *
  * @return boolean Whether this is in AMP 'canonical mode'.
@@ -184,7 +184,7 @@ function amp_is_canonical() {
 	}
 	if ( is_array( $support ) ) {
 		$args = array_shift( $support );
-		if ( empty( $args['template_path'] ) ) {
+		if ( empty( $args['template_dir'] ) ) {
 			return true;
 		}
 	}

@@ -62,7 +62,7 @@ class AMP_Theme_Support {
 	 * Determines whether paired mode is available.
 	 *
 	 * When 'amp' theme support has not been added or canonical mode is enabled, then this returns false.
-	 * Returns true when there is a template_path defined in theme support, and if a defined active_callback
+	 * Returns true when there is a template_dir defined in theme support, and if a defined active_callback
 	 * returns true.
 	 *
 	 * @return bool Whether available.
@@ -133,7 +133,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Prepends template hierarchy with template_path for AMP paired mode templates.
+	 * Prepends template hierarchy with template_dir for AMP paired mode templates.
 	 *
 	 * @see get_query_template()
 	 *
@@ -143,10 +143,10 @@ class AMP_Theme_Support {
 	public static function filter_paired_template_hierarchy( $templates ) {
 		$support = get_theme_support( 'amp' );
 		$args    = array_shift( $support );
-		if ( isset( $args['template_path'] ) ) {
+		if ( isset( $args['template_dir'] ) ) {
 			$amp_templates = array();
 			foreach ( $templates as $template ) {
-				$amp_templates[] = $args['template_path'] . '/' . $template;
+				$amp_templates[] = $args['template_dir'] . '/' . $template;
 			}
 			$templates = $amp_templates;
 		}
@@ -156,7 +156,7 @@ class AMP_Theme_Support {
 	/**
 	 * Redirect to the non-canonical URL when the template to include is empty.
 	 *
-	 * This is a failsafe in case an index.php is not located in the AMP template_path,
+	 * This is a failsafe in case an index.php is not located in the AMP template_dir,
 	 * and the active_callback fails to omit a given request from being available in AMP.
 	 *
 	 * @param string $template Template to include.
