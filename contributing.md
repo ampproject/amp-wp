@@ -24,6 +24,15 @@ To run it:
 3. run `wp eval-file bin/create-embed-test-post.php`
 4. go to the URL that is output in the command line
 
+## Testing Widgets Support
+
+The following script adds an instance of every default WordPress widget to the first registered sidebar.
+To run it:
+1. `ssh` into an environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV)
+2. `cd` to the root of this plugin
+3. run `wp eval-file bin/add-test-widgets-to-sidebar.php`
+4. visit a page with the sidebar: Blog Sidebar.
+
 ## PHPUnit Testing
 
 Please run these tests in an environment with WordPress unit tests installed, like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
