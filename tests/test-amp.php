@@ -32,7 +32,7 @@ class Test_AMP extends WP_UnitTestCase {
 
 		remove_theme_support( 'amp' );
 		add_theme_support( 'amp', array(
-			'template_path' => get_template_directory() . 'amp-templates/',
+			'template_dir' => 'amp-templates',
 		) );
 		$this->assertFalse( amp_is_canonical() );
 
