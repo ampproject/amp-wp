@@ -20,6 +20,41 @@ class AMP_Theme_Support {
 	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!--AMP_COMPONENT_SCRIPTS_PLACEHOLDER-->';
 
 	/**
+	 * Replaced with the necessary styles.
+	 *
+	 * @var string
+	 */
+	const SANITIZED_STYLES_PLACEHOLDER = '/* SANITIZED_STYLES_PLACEHOLDER */';
+
+	/**
+	 * AMP Scripts.
+	 *
+	 * @var array
+	 */
+	protected static $amp_scripts = array();
+
+	/**
+	 * AMP Styles.
+	 *
+	 * @var array
+	 */
+	protected static $amp_styles = array();
+
+	/**
+	 * Sanitizer classes.
+	 *
+	 * @var array
+	 */
+	protected static $sanitizer_classes = array();
+
+	/**
+	 * Embed handlers.
+	 *
+	 * @var AMP_Base_Embed_Handler[]
+	 */
+	protected static $embed_handlers = array();
+
+	/**
 	 * Template types.
 	 *
 	 * @var array
@@ -71,7 +106,10 @@ class AMP_Theme_Support {
 		} else {
 			self::register_paired_hooks();
 		}
+
 		self::register_hooks();
+		self::$embed_handlers    = self::register_content_embed_handlers();
+		self::$sanitizer_classes = amp_get_content_sanitizers();
 	}
 
 	/**
@@ -143,8 +181,50 @@ class AMP_Theme_Support {
 		// Start output buffering at very low priority for sake of plugins and themes that use template_redirect instead of template_include.
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
-		// @todo Add output buffering.
+		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
+
 		// @todo Add character conversion.
+	}
+
+	/**
+	 * Register content embed handlers.
+	 *
+	 * This was copied from `AMP_Content::register_embed_handlers()` due to being a private method
+	 * and due to `AMP_Content` not being well suited for use in AMP canonical.
+	 *
+	 * @see AMP_Content::register_embed_handlers()
+	 * @global int $content_width
+	 * @return AMP_Base_Embed_Handler[] Handlers.
+	 */
+	public static function register_content_embed_handlers() {
+		global $content_width;
+
+		$embed_handlers = array();
+		foreach ( amp_get_content_embed_handlers() as $embed_handler_class => $args ) {
+
+			/**
+			 * Embed handler.
+			 *
+			 * @type AMP_Base_Embed_Handler $embed_handler
+			 */
+			$embed_handler = new $embed_handler_class( array_merge(
+				array(
+					'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				),
+				$args
+			) );
+
+			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
+				/* translators: %s is embed handler */
+				_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Embed Handler (%s) must extend `AMP_Embed_Handler`', 'amp' ), $embed_handler_class ) ), '0.1' );
+				continue;
+			}
+
+			$embed_handler->register_embed();
+			$embed_handlers[] = $embed_handler;
+		}
+
+		return $embed_handlers;
 	}
 
 	/**
@@ -301,7 +381,30 @@ class AMP_Theme_Support {
 			echo wp_strip_all_tags( wp_get_custom_css() ); // WPCS: XSS OK.
 			echo '/* end:wp_get_custom_css */';
 		}
+
+		// Sanitizer-supplied CSS gets added here.
+		echo self::SANITIZED_STYLES_PLACEHOLDER; // WPCS: XSS OK.
+
 		echo '</style>';
+	}
+
+	/**
+	 * Filter the content to be valid AMP.
+	 *
+	 * @param string $content Content.
+	 * @return string Amplified content.
+	 */
+	public static function filter_the_content( $content ) {
+		$args = array(
+			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+		);
+
+		list( $sanitized_content, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $content, self::$sanitizer_classes, $args );
+
+		self::$amp_scripts = array_merge( self::$amp_scripts, $scripts );
+		self::$amp_styles  = array_merge( self::$amp_styles, $styles );
+
+		return $sanitized_content;
 	}
 
 	/**
@@ -310,10 +413,10 @@ class AMP_Theme_Support {
 	 * @param string $html Output HTML.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public static function get_required_amp_scripts( $html ) {
+	public static function get_amp_component_scripts( $html ) {
 
 		// @todo This should be integrated with the existing Sanitizer classes so that duplication is not done here.
-		$amp_scripts = array(
+		$amp_components = array(
 			'amp-form' => array(
 				'pattern' => '#<(form|input)\b#i',
 				'source'  => 'https://cdn.ampproject.org/v0/amp-form-0.1.js',
@@ -321,18 +424,48 @@ class AMP_Theme_Support {
 			// @todo Add more.
 		);
 
-		$scripts = '';
-		foreach ( $amp_scripts as $component => $props ) {
+		$amp_scripts = self::$amp_scripts;
+
+		foreach ( self::$embed_handlers as $embed_handler ) {
+			$amp_scripts = array_merge(
+				$amp_scripts,
+				$embed_handler->get_scripts()
+			);
+		}
+
+		foreach ( $amp_components as $component => $props ) {
 			if ( preg_match( '#<(form|input)\b#i', $html ) ) {
-				$scripts .= sprintf(
-					'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
-					$component,
-					$props['source']
-				);
+				$amp_scripts[ $component ] = $props['source'];
 			}
 		}
 
+		$scripts = '';
+		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
+			$scripts .= sprintf(
+				'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				$amp_script_component,
+				$amp_script_source
+			);
+		}
+
 		return $scripts;
+	}
+
+	/**
+	 * Get AMP sanitizer styles.
+	 *
+	 * @return string CSS.
+	 */
+	public static function get_amp_sanitized_styles() {
+		$styles = '';
+		foreach ( self::$amp_styles as $selector => $properties ) {
+			$styles .= sprintf(
+				'%s{%s}',
+				$selector,
+				join( ';', $properties ) . ';'
+			);
+		}
+		return $styles;
 	}
 
 	/**
@@ -345,13 +478,25 @@ class AMP_Theme_Support {
 	/**
 	 * Finish output buffering.
 	 *
+	 * @todo Do this in shutdown instead of output buffering callback?
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
 	 */
 	public static function finish_output_buffering( $output ) {
+
+		// Inject required scripts.
 		$output = preg_replace(
 			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_required_amp_scripts( $output ),
+			self::get_amp_component_scripts( $output ),
+			$output,
+			1
+		);
+
+		// @todo Allow for styles to be filtered andfor additional styles to be injected by scripts.
+		// Inject styles.
+		$output = preg_replace(
+			'#' . preg_quote( self::SANITIZED_STYLES_PLACEHOLDER, '#' ) . '#',
+			self::get_amp_sanitized_styles(),
 			$output,
 			1
 		);
