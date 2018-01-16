@@ -17,14 +17,14 @@ class AMP_Theme_Support {
 	 *
 	 * @var string
 	 */
-	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!--AMP_COMPONENT_SCRIPTS_PLACEHOLDER-->';
+	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!-- AMP:COMPONENT_SCRIPTS_PLACEHOLDER -->';
 
 	/**
 	 * Replaced with the necessary styles.
 	 *
 	 * @var string
 	 */
-	const SANITIZED_STYLES_PLACEHOLDER = '/* SANITIZED_STYLES_PLACEHOLDER */';
+	const CUSTOM_STYLES_PLACEHOLDER = '/* AMP:CUSTOM_STYLES_PLACEHOLDER */';
 
 	/**
 	 * AMP Scripts.
@@ -168,8 +168,8 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 2 );
 		add_action( 'wp_head', 'amp_print_boilerplate_code', 3 );
-		add_action( 'wp_head', array( __CLASS__, 'add_scripts' ), 4 );
-		add_action( 'wp_head', array( __CLASS__, 'add_styles' ), 5 );
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 4 );
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 5 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 6 );
 
 		/*
@@ -288,7 +288,7 @@ class AMP_Theme_Support {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
 	 */
-	public static function add_scripts() {
+	public static function add_amp_component_scripts() {
 		echo '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Replaced after output buffering with all AMP component scripts.
@@ -360,32 +360,57 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Print Custom AMP styles.
+	 * Print placeholder for Custom AMP styles.
+	 *
+	 * The actual styles for the page injected into the placeholder when output buffering is completed.
+	 *
+	 * @see AMP_Theme_Support::finish_output_buffering()
+	 */
+	public static function add_amp_custom_style_placeholder() {
+		echo '<style amp-custom>';
+		echo self::CUSTOM_STYLES_PLACEHOLDER; // WPCS: XSS OK.
+		echo '</style>';
+	}
+
+	/**
+	 * Get custom styles.
 	 *
 	 * @see wp_custom_css_cb()
+	 * @return string Styles.
 	 */
-	public static function add_styles() {
-		echo '<style amp-custom>';
+	public static function get_amp_custom_styles() {
 
 		// @todo Grab source of all enqueued styles and concatenate here?
 		// @todo Print contents of get_locale_stylesheet_uri()?
-		// @todo Allow this to be filtered after output buffering is complete so additional styles can be added by widgets and other components just-in-time?
 		$path = get_template_directory() . '/style.css'; // @todo Honor filter in get_stylesheet_directory_uri()? Style must be local.
 		$css  = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- It's not a remote file.
 		echo wp_strip_all_tags( $css ); // WPCS: XSS OK.
 
-		// Implement AMP version of wp_custom_css_cb().
-		$custom_css = trim( wp_get_custom_css() );
-		if ( ! empty( $custom_css ) ) {
-			echo '/* start:wp_get_custom_css */';
-			echo wp_strip_all_tags( wp_get_custom_css() ); // WPCS: XSS OK.
-			echo '/* end:wp_get_custom_css */';
+		// Add styles gleaned from sanitizers.
+		foreach ( self::$amp_styles as $selector => $properties ) {
+			$css .= sprintf(
+				'%s{%s}',
+				$selector,
+				join( ';', $properties ) . ';'
+			);
 		}
 
-		// Sanitizer-supplied CSS gets added here.
-		echo self::SANITIZED_STYLES_PLACEHOLDER; // WPCS: XSS OK.
+		// Do AMP version of wp_custom_css_cb().
+		$css .= wp_get_custom_css();
 
-		echo '</style>';
+		/**
+		 * Filters AMP custom CSS before it is injected onto the output buffer for the response.
+		 *
+		 * Plugins may add their own styles, such as for rendered widgets, by amending them via this filter.
+		 *
+		 * @since 0.7
+		 *
+		 * @param string $css AMP CSS.
+		 */
+		$css = apply_filters( 'amp_custom_styles', $css );
+
+		$css = wp_strip_all_tags( $css );
+		return $css;
 	}
 
 	/**
@@ -439,6 +464,17 @@ class AMP_Theme_Support {
 			}
 		}
 
+		/**
+		 * Filters AMP component scripts before they are injected onto the output buffer for the response.
+		 *
+		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet recognize.
+		 *
+		 * @since 0.7
+		 *
+		 * @param string $amp_scripts AMP Component scripts, mapping component names to component source URLs.
+		 */
+		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
+
 		$scripts = '';
 		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
 			$scripts .= sprintf(
@@ -449,23 +485,6 @@ class AMP_Theme_Support {
 		}
 
 		return $scripts;
-	}
-
-	/**
-	 * Get AMP sanitizer styles.
-	 *
-	 * @return string CSS.
-	 */
-	public static function get_amp_sanitized_styles() {
-		$styles = '';
-		foreach ( self::$amp_styles as $selector => $properties ) {
-			$styles .= sprintf(
-				'%s{%s}',
-				$selector,
-				join( ';', $properties ) . ';'
-			);
-		}
-		return $styles;
 	}
 
 	/**
@@ -492,11 +511,10 @@ class AMP_Theme_Support {
 			1
 		);
 
-		// @todo Allow for styles to be filtered andfor additional styles to be injected by scripts.
 		// Inject styles.
 		$output = preg_replace(
-			'#' . preg_quote( self::SANITIZED_STYLES_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_sanitized_styles(),
+			'#' . preg_quote( self::CUSTOM_STYLES_PLACEHOLDER, '#' ) . '#',
+			self::get_amp_custom_styles(),
 			$output,
 			1
 		);
