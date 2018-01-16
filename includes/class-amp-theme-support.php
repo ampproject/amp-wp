@@ -49,6 +49,18 @@ class AMP_Theme_Support {
 	 */
 	public static function init() {
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+
+		// Validate theme support usage.
+		$support = get_theme_support( 'amp' );
+		if ( WP_DEBUG && is_array( $support ) ) {
+			$args = array_shift( $support );
+			if ( ! is_array( $args ) ) {
+				trigger_error( esc_html__( 'Expected amp theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback' ) ) ) !== 0 ) {
+				trigger_error( esc_html__( 'Expected amp theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			}
+		}
+
 		if ( amp_is_canonical() ) {
 
 			// Permanently redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
