@@ -90,9 +90,9 @@ class AMP_Theme_Support {
 		if ( WP_DEBUG && is_array( $support ) ) {
 			$args = array_shift( $support );
 			if ( ! is_array( $args ) ) {
-				trigger_error( esc_html__( 'Expected amp theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback' ) ) ) !== 0 ) {
-				trigger_error( esc_html__( 'Expected amp theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
 
@@ -159,7 +159,10 @@ class AMP_Theme_Support {
 		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		// Replace core's canonical link functionality with one that outputs links for non-singular queries as well. See WP Core #18660.
+		/*
+		 * Replace core's canonical link functionality with one that outputs links for non-singular queries as well.
+		 * See WP Core #18660.
+		 */
 		remove_action( 'wp_head', 'rel_canonical' );
 		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
 
@@ -178,7 +181,10 @@ class AMP_Theme_Support {
 		 */
 		add_filter( 'show_admin_bar', '__return_false', 100 );
 
-		// Start output buffering at very low priority for sake of plugins and themes that use template_redirect instead of template_include.
+		/*
+		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
+		 * instead of template_include.
+		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
@@ -467,7 +473,8 @@ class AMP_Theme_Support {
 		/**
 		 * Filters AMP component scripts before they are injected onto the output buffer for the response.
 		 *
-		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet recognize.
+		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet
+		 * recognize.
 		 *
 		 * @since 0.7
 		 *

@@ -114,7 +114,8 @@ function amp_print_boilerplate_code() {
  *
  * @since 0.7
  *
- * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as embeds may apply to non-post data (e.g. Text widget).
+ * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as embeds may apply
+ *                      to non-post data (e.g. Text widget).
  * @return array Embed handlers.
  */
 function amp_get_content_embed_handlers( $post = null ) {
@@ -155,7 +156,8 @@ function amp_get_content_embed_handlers( $post = null ) {
  *
  * @since 0.7
  *
- * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as sanitizers apply to non-post data (e.g. Text widget).
+ * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as sanitizers apply
+ *                      to non-post data (e.g. Text widget).
  * @return array Embed handlers.
  */
 function amp_get_content_sanitizers( $post = null ) {
