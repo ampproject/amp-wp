@@ -390,7 +390,6 @@ class AMP_Theme_Support {
 		// @todo Print contents of get_locale_stylesheet_uri()?
 		$path = get_template_directory() . '/style.css'; // @todo Honor filter in get_stylesheet_directory_uri()? Style must be local.
 		$css  = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- It's not a remote file.
-		echo wp_strip_all_tags( $css ); // WPCS: XSS OK.
 
 		// Add styles gleaned from sanitizers.
 		foreach ( self::$amp_styles as $selector => $properties ) {
@@ -465,7 +464,7 @@ class AMP_Theme_Support {
 		}
 
 		foreach ( $amp_components as $component => $props ) {
-			if ( preg_match( '#<(form|input)\b#i', $html ) ) {
+			if ( preg_match( $props['pattern'], $html ) ) {
 				$amp_scripts[ $component ] = $props['source'];
 			}
 		}
