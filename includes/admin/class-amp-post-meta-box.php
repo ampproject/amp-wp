@@ -22,12 +22,28 @@ class AMP_Post_Meta_Box {
 	const ASSETS_HANDLE = 'amp-post-meta-box';
 
 	/**
-	 * The post meta key for whether the post is skipped.
+	 * The enabled status post meta value.
 	 *
 	 * @since 0.6
 	 * @var string
 	 */
-	const DISABLED_POST_META_KEY = 'amp_disabled';
+	const ENABLED_STATUS = 'enabled';
+
+	/**
+	 * The disabled status post meta value.
+	 *
+	 * @since 0.6
+	 * @var string
+	 */
+	const DISABLED_STATUS = 'disabled';
+
+	/**
+	 * The status post meta key.
+	 *
+	 * @since 0.6
+	 * @var string
+	 */
+	const STATUS_POST_META_KEY = 'amp_status';
 
 	/**
 	 * The field name for the enabled/disabled radio buttons.
@@ -64,29 +80,6 @@ class AMP_Post_Meta_Box {
 		add_action( 'save_post', array( $this, 'save_amp_status' ) );
 		add_filter( 'preview_post_link', array( $this, 'preview_post_link' ) );
 	}
-
-	/**
-	 * Get whether AMP is available for a given post.
-	 *
-	 * This is just calling `post_supports_amp()` but ignoring any user-supplied opt-out for AMP.
-	 *
-	 * @since 0.6
-	 * @see post_supports_amp()
-	 *
-	 * @param WP_Post $post Post.
-	 * @return bool Whether or not AMP is available.
-	 */
-	protected function is_amp_available( $post ) {
-		$support_errors = AMP_Post_Type_Support::get_support_errors( $post );
-		if ( empty( $support_errors ) ) {
-			return true;
-		}
-		if ( 1 === count( $support_errors ) && 'post-disabled' === $support_errors[0] ) {
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * Enqueue admin assets.
 	 *
@@ -122,7 +115,7 @@ class AMP_Post_Meta_Box {
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
-				'disabled'        => (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true ) || ! $this->is_amp_available( $post ),
+				'enabled'         => post_supports_amp( $post ),
 				'statusInputName' => self::STATUS_INPUT_NAME,
 				'l10n'            => array(
 					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
@@ -148,10 +141,9 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$available = $this->is_amp_available( $post );
-		$disabled  = (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true );
-		$status    = $disabled || ! $available ? 'disabled' : 'enabled';
-		$labels    = array(
+		$errors = AMP_Post_Type_Support::get_support_errors( $post );
+		$status = post_supports_amp( $post ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+		$labels = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),
 		);
@@ -182,11 +174,11 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( true === $verify ) {
-			if ( 'disabled' === $_POST[ self::STATUS_INPUT_NAME ] ) {
-				update_post_meta( $post_id, self::DISABLED_POST_META_KEY, true );
-			} else {
-				delete_post_meta( $post_id, self::DISABLED_POST_META_KEY );
-			}
+			update_post_meta(
+				$post_id,
+				self::STATUS_POST_META_KEY,
+				sanitize_key( wp_unslash( $_POST[ self::STATUS_INPUT_NAME ] ) )
+			);
 		}
 	}
 

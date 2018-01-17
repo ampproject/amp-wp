@@ -19,7 +19,7 @@ var ampPostMetaBox = ( function( $ ) {
 		 */
 		data: {
 			previewLink: '',
-			disabled: false,
+			enabled: '',
 			statusInputName: '',
 			l10n: {
 				ampPreviewBtnLabel: ''
@@ -58,7 +58,7 @@ var ampPostMetaBox = ( function( $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 		$( document ).ready( function() {
-			if ( ! component.data.disabled ) {
+			if ( component.data.enabled ) {
 				component.addPreviewButton();
 			}
 			component.listen();
@@ -161,7 +161,7 @@ var ampPostMetaBox = ( function( $ ) {
 		$container.slideToggle( component.toggleSpeed );
 
 		// Update status.
-		if ( ! component.data.disabled ) {
+		if ( component.data.enabled ) {
 			$container.data( 'amp-status', status );
 			$checked.prop( 'checked', true );
 			$( '.amp-status-text' ).text( $checked.next().text() );

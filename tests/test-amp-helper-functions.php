@@ -102,4 +102,28 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
 	}
+
+	/**
+	 * Test post_supports_amp().
+	 *
+	 * @covers \post_supports_amp()
+	 */
+	public function test_post_supports_amp() {
+		// Test disabled by default for page for posts and show on front.
+		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
+		$this->assertTrue( post_supports_amp( $post ) );
+		update_option( 'show_on_front', 'page' );
+		$this->assertTrue( post_supports_amp( $post ) );
+		update_option( 'page_for_posts', $post->ID );
+		$this->assertFalse( post_supports_amp( $post ) );
+		update_option( 'page_for_posts', '' );
+		update_option( 'page_on_front', $post->ID );
+		$this->assertFalse( post_supports_amp( $post ) );
+		update_option( 'show_on_front', 'posts' );
+		$this->assertTrue( post_supports_amp( $post ) );
+
+		// Test disabled by default for page templates.
+		update_post_meta( $post->ID, '_wp_page_template', 'foo.php' );
+		$this->assertFalse( post_supports_amp( $post ) );
+	}
 }

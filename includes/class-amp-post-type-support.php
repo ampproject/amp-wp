@@ -76,20 +76,6 @@ class AMP_Post_Type_Support {
 			$errors[] = 'post-type-support';
 		}
 
-		// Skip based on postmeta.
-		if ( ! isset( $post->ID ) || (bool) get_post_meta( $post->ID, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) ) {
-			$errors[] = 'post-disabled';
-		}
-
-		// Homepage and page for posts are not supported yet.
-		if ( 'page' === get_post_type( $post ) && 'page' === get_option( 'show_on_front' ) ) {
-			if ( (int) get_option( 'page_for_posts' ) === (int) $post->ID ) {
-				$errors[] = 'page-for-posts';
-			} elseif ( (int) get_option( 'page_on_front' ) === (int) $post->ID ) {
-				$errors[] = 'page-on-front';
-			}
-		}
-
 		if ( post_password_required( $post ) ) {
 			$errors[] = 'password-protected';
 		}
