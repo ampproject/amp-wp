@@ -58,6 +58,7 @@ var ampPostMetaBox = ( function( $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 		$( document ).ready( function() {
+			component.statusRadioInputs = $( '[name="' + component.data.statusInputName + '"]' );
 			if ( component.data.enabled ) {
 				component.addPreviewButton();
 			}
@@ -77,8 +78,10 @@ var ampPostMetaBox = ( function( $ ) {
 			component.onAmpPreviewButtonClick();
 		} );
 
+		component.statusRadioInputs.prop( 'disabled', true ); // Prevent cementing setting default status as overridden status.
 		$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
 			e.preventDefault();
+			component.statusRadioInputs.prop( 'disabled', false );
 			component.toggleAmpStatus( $( e.target ) );
 		} );
 
@@ -147,7 +150,7 @@ var ampPostMetaBox = ( function( $ ) {
 
 		// Don't modify status on cancel button click.
 		if ( ! $target.hasClass( 'button-cancel' ) ) {
-			status = $( '[name="' + component.data.statusInputName + '"]:checked' ).val();
+			status = component.statusRadioInputs.filter( ':checked' ).val();
 		}
 
 		$checked = $( '#amp-status-' + status );
