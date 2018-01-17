@@ -127,6 +127,10 @@ class AMP_Theme_Support {
 			return false;
 		}
 
+		if ( is_singular() && ! post_supports_amp( get_queried_object() ) ) {
+			return false;
+		}
+
 		$args = array_shift( $support );
 
 		if ( isset( $args['available_callback'] ) && is_callable( $args['available_callback'] ) ) {
