@@ -347,7 +347,14 @@ class AMP_Theme_Support {
 			1
 		);
 
+		$dom = AMP_DOM_Utils::get_dom( $output );
+		// Sanitize forms in the document.
+		$sanitizer = new AMP_Form_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
 		// @todo Add more validation checking and potentially the whitelist sanitizer.
+		$output = $dom->saveHTML();
+
 		return $output;
 	}
 }
