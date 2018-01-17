@@ -13,17 +13,15 @@
 class AMP_DOM_Utils {
 
 	/**
-	 * Return a valid DOMDocument representing arbitrary HTML content passed as a parameter.
+	 * Return a valid DOMDocument representing HTML document passed as a parameter.
 	 *
-	 * @see Reciprocal function get_content_from_dom()
+	 * @since 0.7
 	 *
-	 * @since 0.2
-	 *
-	 * @param string $content Valid HTML content to be represented by a DOMDocument.
+	 * @param string $document Valid HTML document to be represented by a DOMDocument.
 	 *
 	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
 	 */
-	public static function get_dom_from_content( $content ) {
+	public static function get_dom( $document ) {
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
 		$dom = new DOMDocument();
@@ -35,7 +33,7 @@ class AMP_DOM_Utils {
 		 * Add utf-8 charset so loadHTML does not have problems parsing it.
 		 * See: http://php.net/manual/en/domdocument.loadhtml.php#78243
 		 */
-		$result = $dom->loadHTML( '<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>' . $content . '</body></html>' );
+		$result = $dom->loadHTML( $document );
 
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
@@ -45,6 +43,31 @@ class AMP_DOM_Utils {
 		}
 
 		return $dom;
+	}
+
+	/**
+	 * Return a valid DOMDocument representing arbitrary HTML content passed as a parameter.
+	 *
+	 * @see Reciprocal function get_content_from_dom()
+	 *
+	 * @since 0.2
+	 *
+	 * @param string $content Valid HTML content to be represented by a DOMDocument.
+	 *
+	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
+	 */
+	public static function get_dom_from_content( $content ) {
+		/*
+		 * Wrap in dummy tags, since XML needs one parent node.
+		 * It also makes it easier to loop through nodes.
+		 * We can later use this to extract our nodes.
+		 * Add utf-8 charset so loadHTML does not have problems parsing it.
+		 * See: http://php.net/manual/en/domdocument.loadhtml.php#78243
+		 */
+		$document = '<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>' . $content . '</body></html>';
+
+		return self::get_dom( $document );
+
 	}
 
 	/**
