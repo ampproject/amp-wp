@@ -13,6 +13,38 @@
 class AMP_DOM_Utils {
 
 	/**
+	 * Return a valid DOMDocument representing HTML document passed as a parameter.
+	 *
+	 * @since 0.7
+	 *
+	 * @param string $document Valid HTML document to be represented by a DOMDocument.
+	 *
+	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
+	 */
+	public static function get_dom( $document ) {
+		$libxml_previous_state = libxml_use_internal_errors( true );
+
+		$dom = new DOMDocument();
+
+		/*
+		 * Wrap in dummy tags, since XML needs one parent node.
+		 * It also makes it easier to loop through nodes.
+		 * We can later use this to extract our nodes.
+		 * Add charset so loadHTML does not have problems parsing it.
+		 */
+		$result = $dom->loadHTML( $document );
+
+		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
+
+		if ( ! $result ) {
+			return false;
+		}
+
+		return $dom;
+	}
+
+	/**
 	 * Return a valid DOMDocument representing arbitrary HTML content passed as a parameter.
 	 *
 	 * @see Reciprocal function get_content_from_dom()
@@ -24,32 +56,21 @@ class AMP_DOM_Utils {
 	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
 	 */
 	public static function get_dom_from_content( $content ) {
-		$libxml_previous_state = libxml_use_internal_errors( true );
-
-		$dom = new DOMDocument();
-
 		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
 		 * We can later use this to extract our nodes.
-		 * Add charset so loadHTML does not have problems parsing it.
+		 * Add utf-8 charset so loadHTML does not have problems parsing it.
+		 * See: http://php.net/manual/en/domdocument.loadhtml.php#78243
 		 */
-		$result = $dom->loadHTML(
-			sprintf(
-				'<html><head><meta http-equiv="content-type" content="text/html; charset=%s"></head><body>%s</body></html>',
-				get_bloginfo( 'charset' ),
-				$content
-			)
+		$document = sprintf(
+			'<html><head><meta http-equiv="content-type" content="text/html; charset=%s"></head><body>%s</body></html>',
+			get_bloginfo( 'charset' ),
+			$content
 		);
 
-		libxml_clear_errors();
-		libxml_use_internal_errors( $libxml_previous_state );
+		return self::get_dom( $document );
 
-		if ( ! $result ) {
-			return false;
-		}
-
-		return $dom;
 	}
 
 	/**
