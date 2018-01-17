@@ -130,7 +130,8 @@ class AMP_Theme_Support {
 
 		// Start output buffering at very low priority for sake of plugins and themes that use template_redirect instead of template_include.
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
-
+		// Sanitize avatar html.
+		add_filter( 'get_avatar', array( __CLASS__, 'filter_avatar' ), PHP_INT_MAX );
 		// @todo Add output buffering.
 		// @todo Add character conversion.
 	}
@@ -173,6 +174,20 @@ class AMP_Theme_Support {
 		return $template;
 	}
 
+	/**
+	 * Sanitize the avatar image to use amp-img component
+	 *
+	 * @param string $avatar Avatar html string to sanitize.
+	 * @return string AMP sanitized HTML string.
+	 */
+	public static function filter_avatar( $avatar ) {
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $avatar );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		return AMP_DOM_Utils::get_content_from_dom( $dom );
+
+	}
 	/**
 	 * Print meta charset tag.
 	 *
