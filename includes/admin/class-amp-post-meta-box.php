@@ -116,6 +116,7 @@ class AMP_Post_Meta_Box {
 			wp_json_encode( array(
 				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
 				'enabled'         => post_supports_amp( $post ),
+				'canSupport'      => count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0,
 				'statusInputName' => self::STATUS_INPUT_NAME,
 				'l10n'            => array(
 					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),

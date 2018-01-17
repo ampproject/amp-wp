@@ -19,7 +19,8 @@ var ampPostMetaBox = ( function( $ ) {
 		 */
 		data: {
 			previewLink: '',
-			enabled: '',
+			enabled: true, // Overridden by post_supports_amp( $post ).
+			canSupport: true, // Overridden by count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0.
 			statusInputName: '',
 			l10n: {
 				ampPreviewBtnLabel: ''
@@ -164,7 +165,7 @@ var ampPostMetaBox = ( function( $ ) {
 		$container.slideToggle( component.toggleSpeed );
 
 		// Update status.
-		if ( component.data.enabled ) {
+		if ( component.data.canSupport ) {
 			$container.data( 'amp-status', status );
 			$checked.prop( 'checked', true );
 			$( '.amp-status-text' ).text( $checked.next().text() );
