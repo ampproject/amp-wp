@@ -63,8 +63,10 @@ function amp_get_permalink( $post_id ) {
  * @return bool Whether the post supports AMP.
  */
 function post_supports_amp( $post ) {
+	$errors = AMP_Post_Type_Support::get_support_errors( $post );
+
 	// Return false if an error is found.
-	if ( ! empty( AMP_Post_Type_Support::get_support_errors( $post ) ) ) {
+	if ( ! empty( $errors ) ) {
 		return false;
 	}
 
