@@ -8,9 +8,10 @@
 /**
  * Tests for class AMP_Widget_Categories.
  *
- * @package WidgetLiveEditor
+ * @package AMP
  */
 class Test_AMP_Widget_Categories extends WP_UnitTestCase {
+
 	/**
 	 * Instance of the widget.
 	 *
@@ -68,4 +69,5 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 
 		$this->assertFalse( strpos( $output, '<script type=' ) );
 	}
+
 }

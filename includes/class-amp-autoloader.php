@@ -80,6 +80,7 @@ class AMP_Autoloader {
 		'AMP_WP_Utils'                                => 'includes/utils/class-amp-wp-utils',
 		'AMP_Widget_Archives'                         => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'                       => 'includes/widgets/class-amp-widget-categories',
+		'AMP_Widget_Recent_Comments'                  => 'includes/widgets/class-amp-widget-recent-comments',
 		'AMP_Widgets'                                 => 'includes/widgets/class-amp-widgets',
 		'WPCOM_AMP_Polldaddy_Embed'                   => 'wpcom/class-amp-polldaddy-embed',
 		'AMP_Test_Stub_Sanitizer'                     => 'tests/stubs',

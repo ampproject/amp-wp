@@ -17,8 +17,6 @@ class AMP_Widgets {
 	 */
 	public function init() {
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
-		add_action( 'show_recent_comments_widget_style', '__return_false' );
-		add_action( 'wp_footer', array( $this, 'dequeue_scripts' ) );
 	}
 
 	/**
@@ -41,23 +39,10 @@ class AMP_Widgets {
 	 */
 	public function get_widgets() {
 		return array(
-			'WP_Widget_Archives'   => 'AMP_Widget_Archives',
-			'WP_Widget_Categories' => 'AMP_Widget_Categories',
+			'WP_Widget_Archives'        => 'AMP_Widget_Archives',
+			'WP_Widget_Categories'      => 'AMP_Widget_Categories',
+			'WP_Widget_Recent_Comments' => 'AMP_Widget_Recent_Comments',
 		);
-	}
-
-	/**
-	 * Dequeue widget scripts and styles, which aren't allowed in AMP.
-	 *
-	 * Uses the action 'wp_footer' in order to prevent
-	 * 'wp_print_footer_scripts' from outputting the scripts.
-	 *
-	 * @return void.
-	 */
-	public function dequeue_scripts() {
-		wp_dequeue_script( 'wp-mediaelement' );
-		wp_dequeue_script( 'mediaelement-vimeo' );
-		wp_dequeue_style( 'wp-mediaelement' );
 	}
 
 }
