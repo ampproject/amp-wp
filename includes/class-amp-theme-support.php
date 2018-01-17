@@ -17,7 +17,42 @@ class AMP_Theme_Support {
 	 *
 	 * @var string
 	 */
-	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!--AMP_COMPONENT_SCRIPTS_PLACEHOLDER-->';
+	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!-- AMP:COMPONENT_SCRIPTS_PLACEHOLDER -->';
+
+	/**
+	 * Replaced with the necessary styles.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_STYLES_PLACEHOLDER = '/* AMP:CUSTOM_STYLES_PLACEHOLDER */';
+
+	/**
+	 * AMP Scripts.
+	 *
+	 * @var array
+	 */
+	protected static $amp_scripts = array();
+
+	/**
+	 * AMP Styles.
+	 *
+	 * @var array
+	 */
+	protected static $amp_styles = array();
+
+	/**
+	 * Sanitizer classes.
+	 *
+	 * @var array
+	 */
+	protected static $sanitizer_classes = array();
+
+	/**
+	 * Embed handlers.
+	 *
+	 * @var AMP_Base_Embed_Handler[]
+	 */
+	protected static $embed_handlers = array();
 
 	/**
 	 * Template types.
@@ -49,6 +84,18 @@ class AMP_Theme_Support {
 	 */
 	public static function init() {
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+
+		// Validate theme support usage.
+		$support = get_theme_support( 'amp' );
+		if ( WP_DEBUG && is_array( $support ) ) {
+			$args = array_shift( $support );
+			if ( ! is_array( $args ) ) {
+				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback' ) ) ) !== 0 ) {
+				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			}
+		}
+
 		if ( amp_is_canonical() ) {
 
 			// Permanently redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
@@ -59,7 +106,10 @@ class AMP_Theme_Support {
 		} else {
 			self::register_paired_hooks();
 		}
+
 		self::register_hooks();
+		self::$embed_handlers    = self::register_content_embed_handlers();
+		self::$sanitizer_classes = amp_get_content_sanitizers();
 	}
 
 	/**
@@ -109,7 +159,10 @@ class AMP_Theme_Support {
 		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		// Replace core's canonical link functionality with one that outputs links for non-singular queries as well. See WP Core #18660.
+		/*
+		 * Replace core's canonical link functionality with one that outputs links for non-singular queries as well.
+		 * See WP Core #18660.
+		 */
 		remove_action( 'wp_head', 'rel_canonical' );
 		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
 
@@ -118,8 +171,8 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 2 );
 		add_action( 'wp_head', 'amp_print_boilerplate_code', 3 );
-		add_action( 'wp_head', array( __CLASS__, 'add_scripts' ), 4 );
-		add_action( 'wp_head', array( __CLASS__, 'add_styles' ), 5 );
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 4 );
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 5 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 6 );
 
 		/*
@@ -128,11 +181,56 @@ class AMP_Theme_Support {
 		 */
 		add_filter( 'show_admin_bar', '__return_false', 100 );
 
-		// Start output buffering at very low priority for sake of plugins and themes that use template_redirect instead of template_include.
+		/*
+		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
+		 * instead of template_include.
+		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
-		// @todo Add output buffering.
+		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
+
 		// @todo Add character conversion.
+	}
+
+	/**
+	 * Register content embed handlers.
+	 *
+	 * This was copied from `AMP_Content::register_embed_handlers()` due to being a private method
+	 * and due to `AMP_Content` not being well suited for use in AMP canonical.
+	 *
+	 * @see AMP_Content::register_embed_handlers()
+	 * @global int $content_width
+	 * @return AMP_Base_Embed_Handler[] Handlers.
+	 */
+	public static function register_content_embed_handlers() {
+		global $content_width;
+
+		$embed_handlers = array();
+		foreach ( amp_get_content_embed_handlers() as $embed_handler_class => $args ) {
+
+			/**
+			 * Embed handler.
+			 *
+			 * @type AMP_Base_Embed_Handler $embed_handler
+			 */
+			$embed_handler = new $embed_handler_class( array_merge(
+				array(
+					'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				),
+				$args
+			) );
+
+			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
+				/* translators: %s is embed handler */
+				_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Embed Handler (%s) must extend `AMP_Embed_Handler`', 'amp' ), $embed_handler_class ) ), '0.1' );
+				continue;
+			}
+
+			$embed_handler->register_embed();
+			$embed_handlers[] = $embed_handler;
+		}
+
+		return $embed_handlers;
 	}
 
 	/**
@@ -196,7 +294,7 @@ class AMP_Theme_Support {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
 	 */
-	public static function add_scripts() {
+	public static function add_amp_component_scripts() {
 		echo '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Replaced after output buffering with all AMP component scripts.
@@ -242,14 +340,11 @@ class AMP_Theme_Support {
 			$url = add_query_arg( $added_query_vars, $url );
 		}
 
-		if ( ! amp_is_canonical() ) {
+		// Strip endpoint.
+		$url = preg_replace( ':/' . preg_quote( AMP_QUERY_VAR, ':' ) . '(?=/?(\?|#|$)):', '', $url );
 
-			// Strip endpoint.
-			$url = preg_replace( ':/' . preg_quote( AMP_QUERY_VAR, ':' ) . '(?=/?(\?|#|$)):', '', $url );
-
-			// Strip query var.
-			$url = remove_query_arg( AMP_QUERY_VAR, $url );
-		}
+		// Strip query var.
+		$url = remove_query_arg( AMP_QUERY_VAR, $url );
 
 		return $url;
 	}
@@ -271,28 +366,75 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Print Custom AMP styles.
+	 * Print placeholder for Custom AMP styles.
+	 *
+	 * The actual styles for the page injected into the placeholder when output buffering is completed.
+	 *
+	 * @see AMP_Theme_Support::finish_output_buffering()
+	 */
+	public static function add_amp_custom_style_placeholder() {
+		echo '<style amp-custom>';
+		echo self::CUSTOM_STYLES_PLACEHOLDER; // WPCS: XSS OK.
+		echo '</style>';
+	}
+
+	/**
+	 * Get custom styles.
 	 *
 	 * @see wp_custom_css_cb()
+	 * @return string Styles.
 	 */
-	public static function add_styles() {
-		echo '<style amp-custom>';
+	public static function get_amp_custom_styles() {
 
 		// @todo Grab source of all enqueued styles and concatenate here?
 		// @todo Print contents of get_locale_stylesheet_uri()?
-		// @todo Allow this to be filtered after output buffering is complete so additional styles can be added by widgets and other components just-in-time?
 		$path = get_template_directory() . '/style.css'; // @todo Honor filter in get_stylesheet_directory_uri()? Style must be local.
 		$css  = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- It's not a remote file.
-		echo wp_strip_all_tags( $css ); // WPCS: XSS OK.
 
-		// Implement AMP version of wp_custom_css_cb().
-		$custom_css = trim( wp_get_custom_css() );
-		if ( ! empty( $custom_css ) ) {
-			echo '/* start:wp_get_custom_css */';
-			echo wp_strip_all_tags( wp_get_custom_css() ); // WPCS: XSS OK.
-			echo '/* end:wp_get_custom_css */';
+		// Add styles gleaned from sanitizers.
+		foreach ( self::$amp_styles as $selector => $properties ) {
+			$css .= sprintf(
+				'%s{%s}',
+				$selector,
+				join( ';', $properties ) . ';'
+			);
 		}
-		echo '</style>';
+
+		// Do AMP version of wp_custom_css_cb().
+		$css .= wp_get_custom_css();
+
+		/**
+		 * Filters AMP custom CSS before it is injected onto the output buffer for the response.
+		 *
+		 * Plugins may add their own styles, such as for rendered widgets, by amending them via this filter.
+		 *
+		 * @since 0.7
+		 *
+		 * @param string $css AMP CSS.
+		 */
+		$css = apply_filters( 'amp_custom_styles', $css );
+
+		$css = wp_strip_all_tags( $css );
+		return $css;
+	}
+
+	/**
+	 * Filter the content to be valid AMP.
+	 *
+	 * @param string $content Content.
+	 * @return string Amplified content.
+	 */
+	public static function filter_the_content( $content ) {
+		$args = array(
+			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+		);
+
+		list( $sanitized_content, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $content, self::$sanitizer_classes, $args );
+
+		self::$amp_scripts = array_merge( self::$amp_scripts, $scripts );
+		self::$amp_styles  = array_merge( self::$amp_styles, $styles );
+
+		return $sanitized_content;
 	}
 
 	/**
@@ -301,10 +443,10 @@ class AMP_Theme_Support {
 	 * @param string $html Output HTML.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public static function get_required_amp_scripts( $html ) {
+	public static function get_amp_component_scripts( $html ) {
 
 		// @todo This should be integrated with the existing Sanitizer classes so that duplication is not done here.
-		$amp_scripts = array(
+		$amp_components = array(
 			'amp-form' => array(
 				'pattern' => '#<(form|input)\b#i',
 				'source'  => 'https://cdn.ampproject.org/v0/amp-form-0.1.js',
@@ -312,15 +454,40 @@ class AMP_Theme_Support {
 			// @todo Add more.
 		);
 
-		$scripts = '';
-		foreach ( $amp_scripts as $component => $props ) {
-			if ( preg_match( '#<(form|input)\b#i', $html ) ) {
-				$scripts .= sprintf(
-					'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
-					$component,
-					$props['source']
-				);
+		$amp_scripts = self::$amp_scripts;
+
+		foreach ( self::$embed_handlers as $embed_handler ) {
+			$amp_scripts = array_merge(
+				$amp_scripts,
+				$embed_handler->get_scripts()
+			);
+		}
+
+		foreach ( $amp_components as $component => $props ) {
+			if ( preg_match( $props['pattern'], $html ) ) {
+				$amp_scripts[ $component ] = $props['source'];
 			}
+		}
+
+		/**
+		 * Filters AMP component scripts before they are injected onto the output buffer for the response.
+		 *
+		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet
+		 * recognize.
+		 *
+		 * @since 0.7
+		 *
+		 * @param string $amp_scripts AMP Component scripts, mapping component names to component source URLs.
+		 */
+		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
+
+		$scripts = '';
+		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
+			$scripts .= sprintf(
+				'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				$amp_script_component,
+				$amp_script_source
+			);
 		}
 
 		return $scripts;
@@ -336,13 +503,24 @@ class AMP_Theme_Support {
 	/**
 	 * Finish output buffering.
 	 *
+	 * @todo Do this in shutdown instead of output buffering callback?
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
 	 */
 	public static function finish_output_buffering( $output ) {
+
+		// Inject required scripts.
 		$output = preg_replace(
 			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_required_amp_scripts( $output ),
+			self::get_amp_component_scripts( $output ),
+			$output,
+			1
+		);
+
+		// Inject styles.
+		$output = preg_replace(
+			'#' . preg_quote( self::CUSTOM_STYLES_PLACEHOLDER, '#' ) . '#',
+			self::get_amp_custom_styles(),
 			$output,
 			1
 		);

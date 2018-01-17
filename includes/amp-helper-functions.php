@@ -108,3 +108,85 @@ function amp_print_boilerplate_code() {
 	echo '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>';
 	echo '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
 }
+
+/**
+ * Get content embed handlers.
+ *
+ * @since 0.7
+ *
+ * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as embeds may apply
+ *                      to non-post data (e.g. Text widget).
+ * @return array Embed handlers.
+ */
+function amp_get_content_embed_handlers( $post = null ) {
+	if ( current_theme_supports( 'amp' ) && $post ) {
+		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
+		$post = null;
+	}
+
+	/**
+	 * Filters the content embed handlers.
+	 *
+	 * @since 0.2
+	 * @since 0.7 Deprecated $post parameter.
+	 *
+	 * @param array   $handlers Handlers.
+	 * @param WP_Post $post     Post. Deprecated. It will be null when `amp_is_canonical()`.
+	 */
+	return apply_filters( 'amp_content_embed_handlers',
+		array(
+			'AMP_Twitter_Embed_Handler'     => array(),
+			'AMP_YouTube_Embed_Handler'     => array(),
+			'AMP_DailyMotion_Embed_Handler' => array(),
+			'AMP_Vimeo_Embed_Handler'       => array(),
+			'AMP_SoundCloud_Embed_Handler'  => array(),
+			'AMP_Instagram_Embed_Handler'   => array(),
+			'AMP_Vine_Embed_Handler'        => array(),
+			'AMP_Facebook_Embed_Handler'    => array(),
+			'AMP_Pinterest_Embed_Handler'   => array(),
+			'AMP_Gallery_Embed_Handler'     => array(),
+			'WPCOM_AMP_Polldaddy_Embed'     => array(),
+		),
+		$post
+	);
+}
+
+/**
+ * Get content sanitizers.
+ *
+ * @since 0.7
+ *
+ * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as sanitizers apply
+ *                      to non-post data (e.g. Text widget).
+ * @return array Embed handlers.
+ */
+function amp_get_content_sanitizers( $post = null ) {
+	if ( current_theme_supports( 'amp' ) && $post ) {
+		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
+		$post = null;
+	}
+
+	/**
+	 * Filters the content sanitizers.
+	 *
+	 * @since 0.2
+	 * @since 0.7 Deprecated $post parameter. It will be null when `amp_is_canonical()`.
+	 *
+	 * @param array   $handlers Handlers.
+	 * @param WP_Post $post     Post. Deprecated.
+	 */
+	return apply_filters( 'amp_content_sanitizers',
+		array(
+			'AMP_Style_Sanitizer'             => array(),
+			'AMP_Img_Sanitizer'               => array(),
+			'AMP_Video_Sanitizer'             => array(),
+			'AMP_Audio_Sanitizer'             => array(),
+			'AMP_Playbuzz_Sanitizer'          => array(),
+			'AMP_Iframe_Sanitizer'            => array(
+				'add_placeholder' => true,
+			),
+			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		),
+		$post
+	);
+}
