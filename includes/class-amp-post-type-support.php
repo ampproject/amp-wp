@@ -17,7 +17,7 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types.
 	 */
 	public static function get_builtin_supported_post_types() {
-		return array_filter( array( 'post', 'page' ), 'post_type_exists' );
+		return array_filter( array( 'post' ), 'post_type_exists' );
 	}
 
 	/**
@@ -29,6 +29,7 @@ class AMP_Post_Type_Support {
 	public static function get_eligible_post_types() {
 		return array_merge(
 			self::get_builtin_supported_post_types(),
+			array( 'page' ),
 			array_values( get_post_types(
 				array(
 					'public'   => true,
@@ -74,20 +75,6 @@ class AMP_Post_Type_Support {
 		// Because `add_rewrite_endpoint` doesn't let us target specific post_types.
 		if ( isset( $post->post_type ) && ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
 			$errors[] = 'post-type-support';
-		}
-
-		// Skip based on postmeta.
-		if ( ! isset( $post->ID ) || (bool) get_post_meta( $post->ID, AMP_Post_Meta_Box::DISABLED_POST_META_KEY, true ) ) {
-			$errors[] = 'post-disabled';
-		}
-
-		// Homepage and page for posts are not supported yet.
-		if ( 'page' === get_post_type( $post ) && 'page' === get_option( 'show_on_front' ) ) {
-			if ( (int) get_option( 'page_for_posts' ) === (int) $post->ID ) {
-				$errors[] = 'page-for-posts';
-			} elseif ( (int) get_option( 'page_on_front' ) === (int) $post->ID ) {
-				$errors[] = 'page-on-front';
-			}
 		}
 
 		if ( post_password_required( $post ) ) {
