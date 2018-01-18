@@ -82,6 +82,7 @@ class AMP_Autoloader {
 		'AMP_Widget_Categories'                       => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Media_Gallery'                    => 'includes/widgets/class-amp-widget-media-gallery',
 		'AMP_Widget_Media_Image'                      => 'includes/widgets/class-amp-widget-media-image',
+		'AMP_Widget_Media_Video'                      => 'includes/widgets/class-amp-widget-media-video',
 		'AMP_Widget_Recent_Comments'                  => 'includes/widgets/class-amp-widget-recent-comments',
 		'AMP_Widgets'                                 => 'includes/widgets/class-amp-widgets',
 		'WPCOM_AMP_Polldaddy_Embed'                   => 'wpcom/class-amp-polldaddy-embed',

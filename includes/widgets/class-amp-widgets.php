@@ -43,6 +43,7 @@ class AMP_Widgets {
 			'WP_Widget_Categories'      => 'AMP_Widget_Categories',
 			'WP_Widget_Media_Gallery'   => 'AMP_Widget_Media_Gallery',
 			'WP_Widget_Media_Image'     => 'AMP_Widget_Media_Image',
+			'WP_Widget_Media_Video'     => 'AMP_Widget_Media_Video',
 			'WP_Widget_Recent_Comments' => 'AMP_Widget_Recent_Comments',
 		);
 	}
