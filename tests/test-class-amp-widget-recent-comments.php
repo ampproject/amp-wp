@@ -38,13 +38,13 @@ class Test_AMP_Widget_Recent_Comments extends WP_UnitTestCase {
 	 */
 	public function test_construct() {
 		global $wp_widget_factory;
-		$amp_categories = $wp_widget_factory->widgets['AMP_Widget_Recent_Comments'];
+		$amp_widget = $wp_widget_factory->widgets['AMP_Widget_Recent_Comments'];
 
-		$this->assertEquals( 'recent-comments', $amp_categories->id_base );
-		$this->assertEquals( 'Recent Comments', $amp_categories->name );
-		$this->assertEquals( 'widget_recent_comments', $amp_categories->widget_options['classname'] );
-		$this->assertEquals( true, $amp_categories->widget_options['customize_selective_refresh'] );
-		$this->assertEquals( 'Your site&#8217;s most recent comments.', $amp_categories->widget_options['description'] );
+		$this->assertEquals( 'recent-comments', $amp_widget->id_base );
+		$this->assertEquals( 'Recent Comments', $amp_widget->name );
+		$this->assertEquals( 'widget_recent_comments', $amp_widget->widget_options['classname'] );
+		$this->assertEquals( true, $amp_widget->widget_options['customize_selective_refresh'] );
+		$this->assertEquals( 'Your site&#8217;s most recent comments.', $amp_widget->widget_options['description'] );
 		$this->assertFalse( apply_filters( 'show_recent_comments_widget_style', true ) );
 	}
 
