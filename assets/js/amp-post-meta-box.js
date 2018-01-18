@@ -19,7 +19,8 @@ var ampPostMetaBox = ( function( $ ) {
 		 */
 		data: {
 			previewLink: '',
-			disabled: false,
+			enabled: true, // Overridden by post_supports_amp( $post ).
+			canSupport: true, // Overridden by count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0.
 			statusInputName: '',
 			l10n: {
 				ampPreviewBtnLabel: ''
@@ -58,7 +59,8 @@ var ampPostMetaBox = ( function( $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 		$( document ).ready( function() {
-			if ( ! component.data.disabled ) {
+			component.statusRadioInputs = $( '[name="' + component.data.statusInputName + '"]' );
+			if ( component.data.enabled ) {
 				component.addPreviewButton();
 			}
 			component.listen();
@@ -77,8 +79,10 @@ var ampPostMetaBox = ( function( $ ) {
 			component.onAmpPreviewButtonClick();
 		} );
 
+		component.statusRadioInputs.prop( 'disabled', true ); // Prevent cementing setting default status as overridden status.
 		$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
 			e.preventDefault();
+			component.statusRadioInputs.prop( 'disabled', false );
 			component.toggleAmpStatus( $( e.target ) );
 		} );
 
@@ -147,7 +151,7 @@ var ampPostMetaBox = ( function( $ ) {
 
 		// Don't modify status on cancel button click.
 		if ( ! $target.hasClass( 'button-cancel' ) ) {
-			status = $( '[name="' + component.data.statusInputName + '"]:checked' ).val();
+			status = component.statusRadioInputs.filter( ':checked' ).val();
 		}
 
 		$checked = $( '#amp-status-' + status );
@@ -161,7 +165,7 @@ var ampPostMetaBox = ( function( $ ) {
 		$container.slideToggle( component.toggleSpeed );
 
 		// Update status.
-		if ( ! component.data.disabled ) {
+		if ( component.data.canSupport ) {
 			$container.data( 'amp-status', status );
 			$checked.prop( 'checked', true );
 			$( '.amp-status-text' ).text( $checked.next().text() );

@@ -22,12 +22,28 @@ class AMP_Post_Meta_Box {
 	const ASSETS_HANDLE = 'amp-post-meta-box';
 
 	/**
-	 * The post meta key for whether the post is skipped.
+	 * The enabled status post meta value.
 	 *
 	 * @since 0.6
 	 * @var string
 	 */
-	const DISABLED_POST_META_KEY = 'amp_disabled';
+	const ENABLED_STATUS = 'enabled';
+
+	/**
+	 * The disabled status post meta value.
+	 *
+	 * @since 0.6
+	 * @var string
+	 */
+	const DISABLED_STATUS = 'disabled';
+
+	/**
+	 * The status post meta key.
+	 *
+	 * @since 0.6
+	 * @var string
+	 */
+	const STATUS_POST_META_KEY = 'amp_status';
 
 	/**
 	 * The field name for the enabled/disabled radio buttons.
@@ -59,6 +75,14 @@ class AMP_Post_Meta_Box {
 	 * @since 0.6
 	 */
 	public function init() {
+		register_meta( 'post', self::STATUS_POST_META_KEY, array(
+			'sanitize_callback' => array( $this, 'sanitize_status' ),
+			'type'              => 'string',
+			'description'       => __( 'AMP status.', 'amp' ),
+			'show_in_rest'      => true,
+			'single'            => true,
+		) );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'render_status' ) );
 		add_action( 'save_post', array( $this, 'save_amp_status' ) );
@@ -66,25 +90,23 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
-	 * Get whether AMP is available for a given post.
+	 * Sanitize status.
 	 *
-	 * This is just calling `post_supports_amp()` but ignoring any user-supplied opt-out for AMP.
-	 *
-	 * @since 0.6
-	 * @see post_supports_amp()
-	 *
-	 * @param WP_Post $post Post.
-	 * @return bool Whether or not AMP is available.
+	 * @param string $status Status.
+	 * @return string Sanitized status. Empty string when invalid.
 	 */
-	protected function is_amp_available( $post ) {
-		$support_errors = AMP_Post_Type_Support::get_support_errors( $post );
-		if ( empty( $support_errors ) ) {
-			return true;
+	public function sanitize_status( $status ) {
+		$status = strtolower( trim( $status ) );
+		if ( ! in_array( $status, array( 'enabled', 'disabled' ), true ) ) {
+			/*
+			 * In lieu of actual validation being available, clear the status entirely
+			 * so that the underlying default status will be used instead.
+			 * In the future it would be ideal if register_meta() accepted a
+			 * validate_callback as well which the REST API could leverage.
+			 */
+			$status = '';
 		}
-		if ( 1 === count( $support_errors ) && 'post-disabled' === $support_errors[0] ) {
-			return true;
-		}
-		return false;
+		return $status;
 	}
 
 	/**
@@ -122,7 +144,8 @@ class AMP_Post_Meta_Box {
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
-				'disabled'        => (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true ) || ! $this->is_amp_available( $post ),
+				'enabled'         => post_supports_amp( $post ),
+				'canSupport'      => count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0,
 				'statusInputName' => self::STATUS_INPUT_NAME,
 				'l10n'            => array(
 					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
@@ -148,10 +171,9 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$available = $this->is_amp_available( $post );
-		$disabled  = (bool) get_post_meta( $post->ID, self::DISABLED_POST_META_KEY, true );
-		$status    = $disabled || ! $available ? 'disabled' : 'enabled';
-		$labels    = array(
+		$errors = AMP_Post_Type_Support::get_support_errors( $post );
+		$status = post_supports_amp( $post ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+		$labels = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),
 		);
@@ -182,11 +204,11 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( true === $verify ) {
-			if ( 'disabled' === $_POST[ self::STATUS_INPUT_NAME ] ) {
-				update_post_meta( $post_id, self::DISABLED_POST_META_KEY, true );
-			} else {
-				delete_post_meta( $post_id, self::DISABLED_POST_META_KEY );
-			}
+			update_post_meta(
+				$post_id,
+				self::STATUS_POST_META_KEY,
+				$_POST[ self::STATUS_INPUT_NAME ] // Note: The sanitize_callback has been supplied in the register_meta() call above.
+			);
 		}
 	}
 
