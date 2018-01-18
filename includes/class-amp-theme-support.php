@@ -98,9 +98,9 @@ class AMP_Theme_Support {
 
 		if ( amp_is_canonical() ) {
 
-			// Permanently redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+			// Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
 			if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
-				wp_safe_redirect( self::get_current_canonical_url(), 301 );
+				wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because canonical may change in future.
 				exit;
 			}
 		} else {
@@ -265,7 +265,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_paired_template_include( $template ) {
 		if ( empty( $template ) || ! self::is_paired_available() ) {
-			wp_safe_redirect( self::get_current_canonical_url() );
+			wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because support may come later.
 			exit;
 		}
 		return $template;

@@ -28,13 +28,29 @@ var ampCustomizeControls = ( function( api, $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 
-		// Defaults.
+		function initPanel() {
+			api.panel( component.data.panelId, component.panelReady );
+		}
+
+		if ( api.state ) {
+			component.addState();
+			api.bind( 'ready', initPanel );
+		} else { // WP<4.9.
+			api.bind( 'ready', function() {
+				component.addState(); // Needed for WP<4.9.
+				initPanel();
+			} );
+		}
+	};
+
+	/**
+	 * Add state for AMP.
+	 *
+	 * @returns {void}
+	 */
+	component.addState = function addState() {
 		api.state.add( 'ampEnabled', new api.Value( false ) );
 		api.state.add( 'ampAvailable', new api.Value( false ) );
-
-		api.bind( 'ready', function() {
-			api.panel( component.data.panelId, component.panelReady );
-		} );
 	};
 
 	/**
