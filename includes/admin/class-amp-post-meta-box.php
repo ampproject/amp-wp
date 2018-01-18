@@ -75,11 +75,40 @@ class AMP_Post_Meta_Box {
 	 * @since 0.6
 	 */
 	public function init() {
+		register_meta( 'post', self::STATUS_POST_META_KEY, array(
+			'sanitize_callback' => array( $this, 'sanitize_status' ),
+			'type'              => 'string',
+			'description'       => __( 'AMP status.', 'amp' ),
+			'show_in_rest'      => true,
+			'single'            => true,
+		) );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'render_status' ) );
 		add_action( 'save_post', array( $this, 'save_amp_status' ) );
 		add_filter( 'preview_post_link', array( $this, 'preview_post_link' ) );
 	}
+
+	/**
+	 * Sanitize status.
+	 *
+	 * @param string $status Status.
+	 * @return string Sanitized status. Empty string when invalid.
+	 */
+	public function sanitize_status( $status ) {
+		$status = strtolower( trim( $status ) );
+		if ( ! in_array( $status, array( 'enabled', 'disabled' ), true ) ) {
+			/*
+			 * In lieu of actual validation being available, clear the status entirely
+			 * so that the underlying default status will be used instead.
+			 * In the future it would be ideal if register_meta() accepted a
+			 * validate_callback as well which the REST API could leverage.
+			 */
+			$status = '';
+		}
+		return $status;
+	}
+
 	/**
 	 * Enqueue admin assets.
 	 *
@@ -178,7 +207,7 @@ class AMP_Post_Meta_Box {
 			update_post_meta(
 				$post_id,
 				self::STATUS_POST_META_KEY,
-				sanitize_key( wp_unslash( $_POST[ self::STATUS_INPUT_NAME ] ) )
+				$_POST[ self::STATUS_INPUT_NAME ] // Note: The sanitize_callback has been supplied in the register_meta() call above.
 			);
 		}
 	}
