@@ -24,7 +24,7 @@ class AMP_Widget_Media_Gallery extends WP_Widget_Media_Gallery {
 		ob_start();
 		parent::render_media( $instance );
 		$output = ob_get_clean();
-		echo $output; // WPCS: XSS ok.
+		echo AMP_Theme_Support::filter_the_content( $output ); // WPCS: XSS ok.
 	}
 
 }

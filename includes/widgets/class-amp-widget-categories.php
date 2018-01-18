@@ -25,7 +25,7 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 		ob_start();
 		parent::widget( $args, $instance );
 		$output = ob_get_clean();
-		echo $output; // WPCS: XSS ok.
+		echo AMP_Theme_Support::filter_the_content( $output ); // WPCS: XSS ok.
 	}
 
 }

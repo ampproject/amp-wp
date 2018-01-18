@@ -26,6 +26,7 @@ class Test_AMP_Widget_Recent_Comments extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		AMP_Theme_Support::init();
 		$amp_widgets = new AMP_Widgets();
 		$amp_widgets->register_widgets();
 		$this->instance = new AMP_Widget_Recent_Comments();

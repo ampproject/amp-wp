@@ -41,10 +41,12 @@ class AMP_Widgets {
 		return array(
 			'WP_Widget_Archives'        => 'AMP_Widget_Archives',
 			'WP_Widget_Categories'      => 'AMP_Widget_Categories',
+			'WP_Widget_Media_Audio'     => 'AMP_Widget_Media_Audio',
 			'WP_Widget_Media_Gallery'   => 'AMP_Widget_Media_Gallery',
 			'WP_Widget_Media_Image'     => 'AMP_Widget_Media_Image',
 			'WP_Widget_Media_Video'     => 'AMP_Widget_Media_Video',
 			'WP_Widget_Recent_Comments' => 'AMP_Widget_Recent_Comments',
+			'WP_Widget_RSS'             => 'AMP_Widget_RSS',
 		);
 	}
 

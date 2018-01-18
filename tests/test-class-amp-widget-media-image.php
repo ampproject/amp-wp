@@ -26,6 +26,7 @@ class Test_AMP_Widget_Media_Image extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		AMP_Theme_Support::init();
 		$amp_widgets = new AMP_Widgets();
 		$amp_widgets->register_widgets();
 		$this->instance = new AMP_Widget_Media_Image();
@@ -48,11 +49,11 @@ class Test_AMP_Widget_Media_Image extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test widget().
+	 * Test render_media().
 	 *
 	 * Mock image logic mainly copied from Test_WP_Widget_Media_image::test_render_media().
 	 *
-	 * @see AMP_Widget_Media_Image::widget().
+	 * @see AMP_Widget_Media_Image::render_media().
 	 */
 	public function test_render_media() {
 		$first_test_image = '/tmp/test-image.jpg';
