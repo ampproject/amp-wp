@@ -75,6 +75,7 @@ function amp_after_setup_theme() {
 	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	AMP_Post_Type_Support::add_post_type_support();
 }
 add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
@@ -115,6 +116,46 @@ function amp_force_query_var_value( $query_vars ) {
 		$query_vars[ AMP_QUERY_VAR ] = 1;
 	}
 	return $query_vars;
+}
+
+/**
+ * Fix up WP_Query for front page when amp query var is present.
+ *
+ * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
+ *
+ * @since 0.6
+ * @see WP_Query::parse_query()
+ * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
+ *
+ * @param WP_Query $query Query.
+ */
+function amp_correct_query_when_is_front_page( WP_Query $query ) {
+	$is_front_page_query = (
+		$query->is_main_query()
+		&&
+		$query->is_home()
+		&&
+		// Is AMP endpoint.
+		false !== $query->get( AMP_QUERY_VAR, false )
+		&&
+		// Is query not yet fixed uo up to be front page.
+		! $query->is_front_page()
+		&&
+		// Is showing pages on front.
+		'page' === get_option( 'show_on_front' )
+		&&
+		// Has page on front set.
+		get_option( 'page_on_front' )
+		&&
+		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
+		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), array( AMP_QUERY_VAR, 'preview', 'page', 'paged', 'cpage' ) ) )
+	);
+	if ( $is_front_page_query ) {
+		$query->is_home     = false;
+		$query->is_page     = true;
+		$query->is_singular = true;
+		$query->set( 'page_id', get_option( 'page_on_front' ) );
+	}
 }
 
 function amp_maybe_add_actions() {
