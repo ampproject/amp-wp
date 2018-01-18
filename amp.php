@@ -158,20 +158,27 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 	}
 }
 
+/**
+ * Add AMP actions when the request can be served as AMP.
+ *
+ * Actions will only be added if the request is for a singular post (including front page and page for posts), excluding feeds.
+ *
+ * @since 0.2
+ */
 function amp_maybe_add_actions() {
-	if ( ! is_singular() || is_feed() ) {
+	global $wp_query;
+	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
 		return;
 	}
-
 	$is_amp_endpoint = is_amp_endpoint();
 
-	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
-	global $wp_query;
-	$post = $wp_query->post;
-
-	$supports = post_supports_amp( $post );
-
-	if ( ! $supports ) {
+	/**
+	 * Queried post object.
+	 *
+	 * @var WP_Post $post
+	 */
+	$post = get_queried_object();
+	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
 			wp_safe_redirect( get_permalink( $post->ID ), 301 );
 			exit;
