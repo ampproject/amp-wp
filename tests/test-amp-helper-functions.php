@@ -109,7 +109,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \post_supports_amp()
 	 */
 	public function test_post_supports_amp() {
+		add_post_type_support( 'page', AMP_QUERY_VAR );
+
 		// Test disabled by default for page for posts and show on front.
+		update_option( 'show_on_front', 'page' );
 		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
 		$this->assertTrue( post_supports_amp( $post ) );
 		update_option( 'show_on_front', 'page' );
@@ -125,5 +128,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Test disabled by default for page templates.
 		update_post_meta( $post->ID, '_wp_page_template', 'foo.php' );
 		$this->assertFalse( post_supports_amp( $post ) );
+
+		// Reset.
+		remove_post_type_support( 'page', AMP_QUERY_VAR );
 	}
 }

@@ -17,7 +17,7 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types.
 	 */
 	public static function get_builtin_supported_post_types() {
-		return array_filter( array( 'post', 'page' ), 'post_type_exists' );
+		return array_filter( array( 'post' ), 'post_type_exists' );
 	}
 
 	/**
@@ -29,6 +29,7 @@ class AMP_Post_Type_Support {
 	public static function get_eligible_post_types() {
 		return array_merge(
 			self::get_builtin_supported_post_types(),
+			array( 'page' ),
 			array_values( get_post_types(
 				array(
 					'public'   => true,
