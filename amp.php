@@ -180,7 +180,7 @@ function amp_maybe_add_actions() {
 	$post = get_queried_object();
 	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ), 301 );
+			wp_safe_redirect( get_permalink( $post->ID ), 302 ); // Temporary redirect because AMP may be supported in future.
 			exit;
 		}
 		return;
