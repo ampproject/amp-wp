@@ -102,7 +102,7 @@ function post_supports_amp( $post ) {
 			 * @param string  $status Status.
 			 * @param WP_Post $post   Post.
 			 */
-			return apply_filters( 'amp_status_default_enabled', $enabled, $post );
+			return apply_filters( 'amp_post_status_default_enabled', $enabled, $post );
 	}
 }
 
