@@ -355,34 +355,8 @@ class AMP_Post_Template {
 	private function build_post_content() {
 		$amp_content = new AMP_Content(
 			$this->post->post_content,
-			apply_filters(
-				'amp_content_embed_handlers', array(
-					'AMP_Twitter_Embed_Handler'     => array(),
-					'AMP_YouTube_Embed_Handler'     => array(),
-					'AMP_DailyMotion_Embed_Handler' => array(),
-					'AMP_Vimeo_Embed_Handler'       => array(),
-					'AMP_SoundCloud_Embed_Handler'  => array(),
-					'AMP_Instagram_Embed_Handler'   => array(),
-					'AMP_Vine_Embed_Handler'        => array(),
-					'AMP_Facebook_Embed_Handler'    => array(),
-					'AMP_Pinterest_Embed_Handler'   => array(),
-					'AMP_Gallery_Embed_Handler'     => array(),
-					'WPCOM_AMP_Polldaddy_Embed'     => array(),
-				), $this->post
-			),
-			apply_filters(
-				'amp_content_sanitizers', array(
-					'AMP_Style_Sanitizer'             => array(),
-					'AMP_Img_Sanitizer'               => array(),
-					'AMP_Video_Sanitizer'             => array(),
-					'AMP_Audio_Sanitizer'             => array(),
-					'AMP_Playbuzz_Sanitizer'          => array(),
-					'AMP_Iframe_Sanitizer'            => array(
-						'add_placeholder' => true,
-					),
-					'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
-				), $this->post
-			),
+			amp_get_content_embed_handlers( $this->post ),
+			amp_get_content_sanitizers( $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
