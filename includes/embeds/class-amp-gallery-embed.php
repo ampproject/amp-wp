@@ -9,8 +9,6 @@
  * Class AMP_Gallery_Embed_Handler
  */
 class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
-	private static $script_slug = 'amp-carousel';
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-carousel-0.1.js';
 
 	public function register_embed() {
 		add_shortcode( 'gallery', array( $this, 'shortcode' ) );
@@ -18,14 +16,6 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	public function unregister_embed() {
 		remove_shortcode( 'gallery' );
-	}
-
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-
-		return array( self::$script_slug => self::$script_src );
 	}
 
 	public function shortcode( $attr ) {
