@@ -197,7 +197,7 @@ class AMP_Theme_Support {
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
 
 		// Add Comments hooks.
-		add_action( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
 		// @todo Add character conversion.
 	}
 
