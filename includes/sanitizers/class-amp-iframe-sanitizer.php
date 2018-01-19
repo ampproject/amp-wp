@@ -40,22 +40,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'iframe';
 
 	/**
-	 * Script slug.
+	 * Sanitized tag.
 	 *
-	 * @var string AMP HTML tag to use in place of HTML's <iframe> tag.
-	 *
-	 * @since 0.2
+	 * @since 0.7
+	 * @var string
 	 */
-	private static $script_slug = 'amp-iframe';
-
-	/**
-	 * Script src.
-	 *
-	 * @var string URL to AMP Project's IFrame element's JavaScript file found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 */
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
+	protected $sanitized_tag = 'amp-iframe';
 
 	/**
 	 * Default args.
@@ -65,24 +55,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = array(
 		'add_placeholder' => false,
 	);
-
-	/**
-	 * Return one element array containing AMP HTML iframe tag and respective Javascript URL
-	 *
-	 * HTML tags and Javascript URLs found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 *
-	 * @return string[] Returns AMP HTML iframe tag as array key and Javascript URL as array value,
-	 *                  respectively. Will return an empty array if sanitization has yet to be run
-	 *                  or if it did not find any HTML iframe elements to convert to AMP equivalents.
-	 */
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-		return array( self::$script_slug => self::$script_src );
-	}
 
 	/**
 	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
@@ -119,7 +91,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$new_attributes = $this->enforce_fixed_height( $new_attributes );
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, $this->sanitized_tag, $new_attributes );
 
 			if ( true === $this->args['add_placeholder'] ) {
 				$placeholder_node = $this->build_placeholder( $new_attributes );

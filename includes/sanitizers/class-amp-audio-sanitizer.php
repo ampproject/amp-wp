@@ -21,40 +21,12 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'audio';
 
 	/**
-	 * Script slug.
+	 * Sanitized tag.
 	 *
-	 * @var string AMP HTML audio tag to use in place of HTML's 'audio' tag.
-	 *
-	 * @since 0.2
+	 * @since 0.7
+	 * @var string
 	 */
-	private static $script_slug = 'amp-audio';
-
-	/**
-	 * Script src.
-	 *
-	 * @var string URL to AMP Project's Audio element javascript file found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 */
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-audio-0.1.js';
-
-	/**
-	 * Return one element array containing AMP HTML audio tag and respective Javascript URL
-	 *
-	 * HTML tags and Javascript URLs found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 *
-	 * @return string[] Returns AMP HTML audio tag as array key and Javascript URL as array value,
-	 *                  respectively. Will return an empty array if sanitization has yet to be run
-	 *                  or if it did not find any HTML audio elements to convert to AMP equivalents.
-	 */
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-		return array( self::$script_slug => self::$script_src );
-	}
+	protected $sanitized_tag = 'amp-audio';
 
 	/**
 	 * Sanitize the <audio> elements from the HTML contained in this instance's DOMDocument.
@@ -74,7 +46,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, $this->sanitized_tag, $new_attributes );
 
 			foreach ( $node->childNodes as $child_node ) {
 

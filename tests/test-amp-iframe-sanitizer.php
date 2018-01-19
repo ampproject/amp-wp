@@ -135,7 +135,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	public function test_get_scripts__did_convert() {
 		$source = '<iframe src="https://example.com/embed/132886713" width="500" height="281"></iframe>';
-		$expected = array( 'amp-iframe' => 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js' );
+		$expected = array( 'amp-iframe' => 'https://cdn.ampproject.org/v0/amp-iframe-latest.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );

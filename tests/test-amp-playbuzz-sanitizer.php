@@ -85,17 +85,18 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 
     }
 
-    public function test_get_scripts__did_convert(){
-        $source = '<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>';
-        $expected = array( 'amp-playbuzz' => 'https://cdn.ampproject.org/v0/amp-playbuzz-0.1.js');
+	/**
+	 * Test that get_scripts() did convert.
+	 */
+	public function test_get_scripts__did_convert() {
+		$source   = '<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>';
+		$expected = array( 'amp-playbuzz' => 'https://cdn.ampproject.org/v0/amp-playbuzz-latest.js' );
 
-        $dom = AMP_DOM_Utils::get_dom_from_content( $source );
-        $sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
-        $sanitizer->sanitize();
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
+		$sanitizer->sanitize();
 
-        $scripts = $sanitizer->get_scripts();
-        $this->assertEquals( $expected, $scripts );
-    }
-
-
+		$scripts = $sanitizer->get_scripts();
+		$this->assertEquals( $expected, $scripts );
+	}
 }

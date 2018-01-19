@@ -1062,6 +1062,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
+	 * @todo The $ancestor_tag_name here is not sufficient as it is not just a tag name but an entire selector that is used.
 	 * @param DOMNode $node              Node.
 	 * @param string  $ancestor_tag_name Ancestor tag name.
 	 * @return bool Return true if given node has any ancestor with the give name, false otherwise.

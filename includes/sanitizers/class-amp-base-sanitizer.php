@@ -29,6 +29,14 @@ abstract class AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = array();
 
 	/**
+	 * Sanitized tag.
+	 *
+	 * @since 0.7
+	 * @var string
+	 */
+	protected $sanitized_tag = '';
+
+	/**
 	 * DOM.
 	 *
 	 * @var DOMDocument A standard PHP representation of an HTML document in object form.
@@ -53,7 +61,7 @@ abstract class AMP_Base_Sanitizer {
 
 	/**
 	 * Flag to be set in child class' sanitize() method indicating if the
-	 * HTML contained in the DOMDocument has been santized yet or not.
+	 * HTML contained in the DOMDocument has been sanitized yet or not.
 	 *
 	 * @since 0.2
 	 *
@@ -96,10 +104,31 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @return string[] This are empty in this the base class.
+	 * @return string[] Returns component name as array key and JavaScript URL as array value,
+	 *                  respectively. Will return an empty array if sanitization has yet to be run
+	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
-		return array();
+		$scripts = array();
+		if ( $this->did_convert_elements && ! empty( $this->sanitized_tag ) ) {
+			$allowed_tags = AMP_Allowed_Tags_Generated::get_allowed_tag_data( $this->sanitized_tag );
+			$components   = array();
+			if ( $allowed_tags ) {
+				foreach ( $allowed_tags as $tag_variation ) {
+					if ( isset( $tag_variation['tag_spec']['requires_extension'] ) ) {
+						$components = array_merge( $components, $tag_variation['tag_spec']['requires_extension'] );
+					}
+				}
+			}
+			foreach ( $components as $component ) {
+				$scripts[ $component ] = sprintf(
+					'https://cdn.ampproject.org/v0/%s-%s.js',
+					$component,
+					'latest'
+				);
+			}
+		}
+		return $scripts;
 	}
 
 	/**

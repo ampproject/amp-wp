@@ -117,7 +117,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	public function test_get_scripts__did_convert() {
 		$source = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';
-		$expected = array( 'amp-video' => 'https://cdn.ampproject.org/v0/amp-video-0.1.js' );
+		$expected = array( 'amp-video' => 'https://cdn.ampproject.org/v0/amp-video-latest.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
