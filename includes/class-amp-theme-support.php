@@ -641,6 +641,9 @@ class AMP_Theme_Support {
 		$sanitizer = new AMP_Form_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
+		$sanitizer = new AMP_Comments_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
 		// @todo Add more validation checking and potentially the whitelist sanitizer.
 		$output = $dom->saveHTML();
 

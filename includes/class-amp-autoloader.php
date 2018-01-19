@@ -66,6 +66,7 @@ class AMP_Autoloader {
 		'AMP_Iframe_Sanitizer'                        => 'includes/sanitizers/class-amp-iframe-sanitizer',
 		'AMP_Img_Sanitizer'                           => 'includes/sanitizers/class-amp-img-sanitizer',
 		'AMP_Form_Sanitizer'                          => 'includes/sanitizers/class-amp-form-sanitizer',
+		'AMP_Comments_Sanitizer'                      => 'includes/sanitizers/class-amp-comments-sanitizer',
 		'AMP_Playbuzz_Sanitizer'                      => 'includes/sanitizers/class-amp-playbuzz-sanitizer',
 		'AMP_Style_Sanitizer'                         => 'includes/sanitizers/class-amp-style-sanitizer',
 		'AMP_Tag_And_Attribute_Sanitizer'             => 'includes/sanitizers/class-amp-tag-and-attribute-sanitizer',
