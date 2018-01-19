@@ -137,6 +137,16 @@ function amp_add_custom_analytics( $analytics ) {
 }
 
 /**
+ * Bootstraps AMP widget support class, which registers AMP-compliant widgets.
+ *
+ * @since 0.7
+ */
+function amp_add_widget_support() {
+	$amp_widgets = new AMP_Widgets();
+	$amp_widgets->init();
+}
+
+/**
  * Bootstrap AMP post meta box.
  *
  * This function must be invoked only once through the 'wp_loaded' action.

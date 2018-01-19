@@ -49,6 +49,20 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test modify_select().
+	 *
+	 * @see AMP_Widget_Categories::modify_select().
+	 */
+	public function test_modify_select() {
+		$categories             = wp_dropdown_categories( array(
+			'echo' => 0,
+		) );
+		$number                 = 3;
+		$this->instance->number = $number;
+		$this->assertContains( strval( $number ), $this->instance->modify_select( $categories ) );
+	}
+
+	/**
 	 * Test widget().
 	 *
 	 * @see AMP_Widget_Categories::widget().
