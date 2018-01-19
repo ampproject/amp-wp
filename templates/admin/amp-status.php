@@ -13,11 +13,10 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 /**
  * Inherited template vars.
  *
- * @var array  $labels    Labels for enabled or disabled.
- * @var string $status    Enabled or disabled.
- * @var bool   $available Whether AMP is available.
+ * @var array  $labels Labels for enabled or disabled.
+ * @var string $status Enabled or disabled.
+ * @var array  $errors Support errors.
  */
-
 ?>
 <div class="misc-pub-section misc-amp-status">
 	<span class="amp-icon"></span>
@@ -28,12 +27,12 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 		<span class="screen-reader-text"><?php esc_html_e( 'Edit Status', 'amp' ); ?></span>
 	</a>
 	<div id="amp-status-select" class="hide-if-js" data-amp-status="<?php echo esc_attr( $status ); ?>">
-		<?php if ( $available ) : ?>
+		<?php if ( empty( $errors ) ) : ?>
 			<fieldset>
-				<input id="amp-status-enabled" type="radio" name="<?php echo esc_attr( self::STATUS_INPUT_NAME ); ?>" value="enabled" <?php checked( ! $disabled ); ?>>
+				<input id="amp-status-enabled" type="radio" name="<?php echo esc_attr( self::STATUS_INPUT_NAME ); ?>" value="<?php echo esc_attr( self::ENABLED_STATUS ); ?>" <?php checked( self::ENABLED_STATUS, $status ); ?>>
 				<label for="amp-status-enabled" class="selectit"><?php echo esc_html( $labels['enabled'] ); ?></label>
 				<br />
-				<input id="amp-status-disabled" type="radio" name="<?php echo esc_attr( self::STATUS_INPUT_NAME ); ?>" value="disabled" <?php checked( $disabled ); ?>>
+				<input id="amp-status-disabled" type="radio" name="<?php echo esc_attr( self::STATUS_INPUT_NAME ); ?>" value="<?php echo esc_attr( self::DISABLED_STATUS ); ?>" <?php checked( self::DISABLED_STATUS, $status ); ?>>
 				<label for="amp-status-disabled" class="selectit"><?php echo esc_html( $labels['disabled'] ); ?></label>
 				<br />
 				<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME ); ?>
@@ -44,9 +43,6 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 					<?php
 					$support_errors_codes = AMP_Post_Type_Support::get_support_errors( $post );
 					$support_errors       = array();
-					if ( in_array( 'page-on-front', $support_errors_codes, true ) || in_array( 'page-for-posts', $support_errors_codes, true ) ) {
-						$support_errors[] = __( 'AMP cannot yet be enabled on homepage or page for posts.', 'amp' );
-					}
 					if ( in_array( 'password-protected', $support_errors_codes, true ) ) {
 						$support_errors[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
 					}
@@ -66,7 +62,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 			</div>
 		<?php endif; ?>
 		<div class="amp-status-actions">
-			<?php if ( $available ) : ?>
+			<?php if ( empty( $errors ) ) : ?>
 				<a href="#amp_status" class="save-amp-status hide-if-no-js button"><?php esc_html_e( 'OK', 'amp' ); ?></a>
 			<?php endif; ?>
 			<a href="#amp_status" class="cancel-amp-status hide-if-no-js button-cancel"><?php esc_html_e( 'Cancel', 'amp' ); ?></a>
