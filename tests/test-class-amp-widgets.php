@@ -23,6 +23,7 @@ class Test_AMP_Widgets extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		wp_maybe_load_widgets();
 		$this->instance = new AMP_Widgets();
 	}
 
@@ -34,7 +35,6 @@ class Test_AMP_Widgets extends WP_UnitTestCase {
 	public function test_init() {
 		$this->instance->init();
 		$this->assertEquals( 10, has_filter( 'widgets_init', array( $this->instance, 'register_widgets' ) ) );
-		$this->assertEquals( 10, has_filter( 'show_recent_comments_widget_style', '__return_false' ) );
 	}
 
 	/**

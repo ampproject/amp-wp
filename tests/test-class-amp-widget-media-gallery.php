@@ -26,6 +26,7 @@ class Test_AMP_Widget_Media_Gallery extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
 		$amp_widgets = new AMP_Widgets();
 		$amp_widgets->register_widgets();
