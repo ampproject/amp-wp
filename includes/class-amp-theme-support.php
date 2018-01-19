@@ -361,7 +361,7 @@ class AMP_Theme_Support {
 			$comment = new stdClass();
 			foreach ( $_comment as $key => $value ) {
 				if ( 'comment_ID' === $key ) {
-					$value .= $i + 1;
+					$value = $i + 1;
 				}
 				if ( 'comment_parent' === $key && $i > 0 ) {
 					$value = $i;

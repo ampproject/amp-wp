@@ -93,6 +93,15 @@ class AMP_Comment_Walker extends Walker_Comment {
 		$template .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
 		$template .= '</comments-template>';
 
+		$url = get_rest_url( get_current_blog_id(), 'amp/v1/comments/' . get_the_ID() );
+		if ( strpos( $url, 'http:' ) === 0 ) {
+			$url = substr( $url, 5 );
+		}
+		// @todo Identify arguments and make filterable/settable.
+		$template .= '<amp-list src="' . esc_attr( $url ) . '" height="400" single-item="true" layout="fixed-height">';
+		$template .= '<template type="amp-mustache"></template>';
+		$template .= '</amp-list>';
+
 		return $template;
 	}
 }
