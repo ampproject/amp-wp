@@ -159,6 +159,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'also_requires_tag_warning' => array(
+							'amp-ad extension .js script',
+					),
 					'disallowed_ancestor' => array(
 							'amp-app-banner',
 					),
@@ -195,6 +198,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'also_requires_tag_warning' => array(
+							'amp-ad extension .js script',
+					),
 					'disallowed_ancestor' => array(
 							'amp-app-banner',
 							'amp-carousel',
@@ -720,6 +726,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'also_requires_tag_warning' => array(
+							'amp-ad extension .js script',
+					),
 					'disallowed_ancestor' => array(
 							'amp-app-banner',
 					),
@@ -757,6 +766,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'also_requires_tag_warning' => array(
+							'amp-ad extension .js script',
+					),
 					'disallowed_ancestor' => array(
 							'amp-app-banner',
 							'amp-carousel',
@@ -2125,6 +2137,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'also_requires_tag_warning' => array(
+							'amp-video extension .js script',
+					),
 					'disallowed_ancestor' => array(
 							'amp-story',
 					),

@@ -72,6 +72,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = array();
 
 	/**
+	 * AMP script components that are discovered being required through sanitization.
+	 *
+	 * @var string[]
+	 */
+	protected $script_components = array();
+
+	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
 	 *
 	 * @since 0.5
@@ -81,9 +88,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function __construct( $dom, $args = array() ) {
 		$this->DEFAULT_ARGS = array(
-			'amp_allowed_tags' => AMP_Allowed_Tags_Generated::get_allowed_tags(),
+			'amp_allowed_tags'                => AMP_Allowed_Tags_Generated::get_allowed_tags(),
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
-			'amp_layout_allowed_attributes' => AMP_Allowed_Tags_Generated::get_layout_attributes(),
+			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
 		);
 
 		parent::__construct( $dom, $args );
@@ -94,6 +101,30 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$this->allowed_tags                = $this->args['amp_allowed_tags'];
 		$this->globally_allowed_attributes = $this->args['amp_globally_allowed_attributes'];
 		$this->layout_allowed_attributes   = $this->args['amp_layout_allowed_attributes'];
+	}
+
+	/**
+	 * Return array of values that would be valid as an HTML `script` element.
+	 *
+	 * Array keys are AMP element names and array values are their respective
+	 * Javascript URLs from https://cdn.ampproject.org
+	 *
+	 * @since 0.7
+	 *
+	 * @return string[] Returns component name as array key and JavaScript URL as array value,
+	 *                  respectively. Will return an empty array if sanitization has yet to be run
+	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
+	 */
+	public function get_scripts() {
+		$scripts = array();
+		foreach ( $this->script_components as $component ) {
+			$scripts[ $component ] = sprintf(
+				'https://cdn.ampproject.org/v0/%s-%s.js',
+				$component,
+				'latest'
+			);
+		}
+		return $scripts;
 	}
 
 	/**
@@ -188,6 +219,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// The remaining validations all have to do with attributes.
 		$attr_spec_list = array();
+		$tag_spec       = array();
 
 		/*
 		 * If we have exactly one rule_spec, use it's attr_spec_list
@@ -196,6 +228,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 1 === count( $rule_spec_list_to_validate ) ) {
 			$rule_spec      = array_pop( $rule_spec_list_to_validate );
 			$attr_spec_list = $rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
+			$tag_spec       = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ];
 
 		} else {
 			/*
@@ -219,6 +252,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// If there is exactly one attr_spec with a max score, use that one.
 			if ( 1 === count( $spec_ids_sorted ) ) {
 				$attr_spec_list = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::ATTR_SPEC_LIST ];
+				$tag_spec       = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::TAG_SPEC ];
 			} else {
 				// This should not happen very often, but...
 				// If we're here, then we're not sure which spec should
@@ -227,6 +261,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$spec_list = isset( $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ? $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::ATTR_SPEC_LIST ] : null;
 					if ( ! $this->is_missing_mandatory_attribute( $spec_list, $node ) ) {
 						$attr_spec_list = array_merge( $attr_spec_list, $spec_list );
+						$tag_spec       = array_merge(
+							$tag_spec,
+							$rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::TAG_SPEC ]
+						);
 					}
 				}
 			}
@@ -235,6 +273,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
 			return;
+		}
+
+		// Obtain list of component scripts required.
+		if ( ! empty( $tag_spec['also_requires_tag_warning'] ) ) {
+			$this->script_components[] = strtok( $tag_spec['also_requires_tag_warning'][0], ' ' );
+		}
+		if ( ! empty( $tag_spec['requires_extension'] ) ) {
+			$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
 		}
 
 		// Remove any remaining disallowed attributes.

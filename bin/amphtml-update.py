@@ -472,6 +472,12 @@ def GetTagRules(tag_spec):
 			requires_extension_list.append(requires_extension)
 		tag_rules['requires_extension'] = {'requires_extension': requires_extension_list}
 
+	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
+		also_requires_tag_warning_list = []
+		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
+			also_requires_tag_warning_list.append(also_requires_tag_warning)
+		tag_rules['also_requires_tag_warning'] = {'also_requires_tag_warning': also_requires_tag_warning_list}
+
 	if tag_spec.disallowed_ancestor:
 		disallowed_ancestor_list = []
 		for disallowed_ancestor in tag_spec.disallowed_ancestor:
