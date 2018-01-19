@@ -32,14 +32,6 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	public static $pb_class = 'pb_feed';
 
 	/**
-	 * Sanitized tag.
-	 *
-	 * @var string
-	 * @since 0.7
-	 */
-	protected $sanitized_tag = 'amp-playbuzz';
-
-	/**
 	 * Hardcoded height to set for Playbuzz elements.
 	 *
 	 * @var string
@@ -77,7 +69,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, $this->sanitized_tag, $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-playbuzz', $new_attributes );
 
 			$node->parentNode->replaceChild( $new_node, $node );
 

@@ -40,14 +40,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'iframe';
 
 	/**
-	 * Sanitized tag.
-	 *
-	 * @since 0.7
-	 * @var string
-	 */
-	protected $sanitized_tag = 'amp-iframe';
-
-	/**
 	 * Default args.
 	 *
 	 * @var array
@@ -91,7 +83,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$new_attributes = $this->enforce_fixed_height( $new_attributes );
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, $this->sanitized_tag, $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
 
 			if ( true === $this->args['add_placeholder'] ) {
 				$placeholder_node = $this->build_placeholder( $new_attributes );

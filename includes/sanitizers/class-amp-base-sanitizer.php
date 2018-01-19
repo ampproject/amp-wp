@@ -29,14 +29,6 @@ abstract class AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = array();
 
 	/**
-	 * Sanitized tag.
-	 *
-	 * @since 0.7
-	 * @var string
-	 */
-	protected $sanitized_tag = '';
-
-	/**
 	 * DOM.
 	 *
 	 * @var DOMDocument A standard PHP representation of an HTML document in object form.

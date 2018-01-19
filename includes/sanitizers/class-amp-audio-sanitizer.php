@@ -21,14 +21,6 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'audio';
 
 	/**
-	 * Sanitized tag.
-	 *
-	 * @since 0.7
-	 * @var string
-	 */
-	protected $sanitized_tag = 'amp-audio';
-
-	/**
 	 * Sanitize the <audio> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
@@ -46,7 +38,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, $this->sanitized_tag, $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
 
 			foreach ( $node->childNodes as $child_node ) {
 

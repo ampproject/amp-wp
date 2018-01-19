@@ -33,14 +33,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
 	/**
-	 * Sanitized tag.
-	 *
-	 * @var string
-	 * @since 0.2
-	 */
-	protected $sanitized_tag = 'amp-video';
-
-	/**
 	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
@@ -61,7 +53,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$new_attributes = $this->enforce_fixed_height( $new_attributes );
 			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, $this->sanitized_tag, $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 
 			foreach ( $node->childNodes as $child_node ) {
 				/**
