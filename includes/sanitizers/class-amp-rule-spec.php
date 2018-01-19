@@ -87,22 +87,18 @@ abstract class AMP_Rule_Spec {
 	 */
 	public static $additional_allowed_tags = array(
 
-		/**
-		 * An experimental tag with no protoascii
-		 */
+		// An experimental tag with no protoascii.
 		'amp-share-tracking' => array(
 			'attr_spec_list' => array(),
 			'tag_spec'       => array(),
 		),
 
-		/**
-		 *  Needed for some tags such as analytics
-		 */
+		// Needed for some tags such as analytics.
 		'script'             => array(
 			'attr_spec_list' => array(
 				'type' => array(
 					'mandatory'   => true,
-					'value_casei' => 'text/javascript',
+					'value_casei' => 'application/json',
 				),
 			),
 			'tag_spec'       => array(),
