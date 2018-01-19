@@ -27,6 +27,13 @@ class AMP_Theme_Support {
 	const CUSTOM_STYLES_PLACEHOLDER = '/* AMP:CUSTOM_STYLES_PLACEHOLDER */';
 
 	/**
+	 * Replaced with the comments template.
+	 *
+	 * @var string
+	 */
+	const COMMENTS_TEMPLATE_PLACEHOLDER = '/* AMP:COMMENTS_TEMPLATE_PLACEHOLDER */';
+
+	/**
 	 * AMP Scripts.
 	 *
 	 * @var array
@@ -189,6 +196,8 @@ class AMP_Theme_Support {
 
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
 
+		// Add Comments hooks.
+		add_action( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
 		// @todo Add character conversion.
 	}
 
@@ -299,6 +308,100 @@ class AMP_Theme_Support {
 
 		// Replaced after output buffering with all AMP component scripts.
 		echo self::COMPONENT_SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
+	}
+
+	/**
+	 * Add the comments template placeholder marker
+	 *
+	 * @param array $args the args for the comments list..
+	 * @return array Args to return.
+	 */
+	public static function add_amp_comments_template( $args ) {
+		if ( ! isset( $args['amp_comments'] ) ) {
+			$amp_walker           = new AMP_Comment_Walker();
+			$args['walker']       = $amp_walker;
+			$args['amp_comments'] = true;
+			$template             = self::get_comments_template( $args );
+			wp_cache_add( 'amp_comments_template', $template, 'amp' );
+			$args['comments_template_placeholder'] = self::COMMENTS_TEMPLATE_PLACEHOLDER;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Generate a threaded mustache template based on the themes settings.
+	 *
+	 * @param array $args the args for the comments list.
+	 * @return string HTML mustache template.
+	 */
+	public static function get_comments_template( $args ) {
+
+		$_comment = array(
+			'comment_ID'           => '{{comment_ID}}',
+			'comment_post_ID'      => get_the_ID(),
+			'comment_author'       => '{{comment_author}}',
+			'comment_author_email' => '{{comment_author_email}}',
+			'comment_author_url'   => '{{comment_author_url}}',
+			'comment_author_IP'    => '{{comment_author_IP}}',
+			'comment_date'         => '{{comment_date}}',
+			'comment_date_gmt'     => '{{comment_date_gmt}}',
+			'comment_content'      => '{{comment_content}}',
+			'comment_karma'        => '{{comment_karma}}',
+			'comment_approved'     => '{{comment_approved}}',
+			'comment_agent'        => '{{comment_agent}}',
+			'comment_type'         => '{{comment_type}}',
+			'comment_parent'       => '',
+			'user_id'              => '{{user_id}}',
+		);
+
+		$comments = array();
+		$depth    = ( $args['max_depth'] ? $args['max_depth'] : 5 );
+		for ( $i = 0; $i < $depth; $i ++ ) {
+			$comment = new stdClass();
+			foreach ( $_comment as $key => $value ) {
+				if ( 'comment_ID' === $key ) {
+					$value .= $i + 1;
+				}
+				if ( 'comment_parent' === $key && $i > 0 ) {
+					$value = $i;
+				}
+				$comment->{$key} = $value;
+			}
+			$comments[] = $comment;
+		}
+
+		$args['echo']     = false;
+		$args['amp_pass'] = true;
+		if ( empty( $args['walker'] ) ) {
+			$args['walker'] = new AMP_Comment_Walker();
+		}
+
+		// Filter dynamic data with musatche variable strings.
+		// @todo add additional filters for dynamic data like "get_comment_author_link", "get_comment_author_IP" etc...
+		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date_template_string' ) );
+		add_filter( 'get_comment_time', array( __CLASS__, 'get_comment_time_template_string' ) );
+
+		return wp_list_comments( $args, $comments );
+
+	}
+
+	/**
+	 * Get somment date string for template.
+	 *
+	 * @return string Mustache template string.
+	 */
+	public static function get_comment_date_template_string() {
+		return '{{comment_date}}';
+	}
+
+	/**
+	 * Get somment time string for template.
+	 *
+	 * @return string Mustache template string.
+	 */
+	public static function get_comment_time_template_string() {
+		return '{{comment_time}}';
 	}
 
 	/**
@@ -521,6 +624,14 @@ class AMP_Theme_Support {
 		$output = preg_replace(
 			'#' . preg_quote( self::CUSTOM_STYLES_PLACEHOLDER, '#' ) . '#',
 			self::get_amp_custom_styles(),
+			$output,
+			1
+		);
+
+		// Inject comments template.
+		$output   = preg_replace(
+			'#' . preg_quote( self::COMMENTS_TEMPLATE_PLACEHOLDER, '#' ) . '#',
+			$args = wp_cache_get( 'amp_comments_template', 'amp' ),
 			$output,
 			1
 		);
