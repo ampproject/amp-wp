@@ -30,6 +30,7 @@ class AMP_Autoloader {
 	 */
 	private static $_classmap = array(
 		'AMP_Theme_Support'                           => 'includes/class-amp-theme-support',
+		'AMP_Comment_Walker'                          => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                           => 'includes/admin/class-amp-post-meta-box',
 		'AMP_Post_Type_Support'                       => 'includes/class-amp-post-type-support',
