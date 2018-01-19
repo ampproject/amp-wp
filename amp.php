@@ -71,6 +71,7 @@ function amp_after_setup_theme() {
 	}
 
 	add_action( 'init', 'amp_init' );
+	add_action( 'rest_api_init', 'amp_rest_init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
@@ -107,6 +108,16 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
+}
+
+/**
+ * Init AMP Rest endpoints.
+ *
+ * @since 0.1
+ */
+function amp_rest_init() {
+	require_once AMP__DIR__ . '/includes/amp-rest-functions.php';
+	amp_register_endpoints();
 }
 
 // Make sure the `amp` query var has an explicit value.
