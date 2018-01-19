@@ -68,9 +68,15 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
         $sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
         $sanitizer->sanitize();
 
-        $scripts = $sanitizer->get_scripts();
-        $this->assertEquals( $expected, $scripts );
-    }
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
+
+		$scripts = array_merge(
+			$sanitizer->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
+		$this->assertEquals( $expected, $scripts );
+	}
 
     public function test_get_scripts__didnt_convert(){
         $source = '<h1>Im A Not Playbuzz Embed</h1>';
@@ -80,10 +86,15 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
         $sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
         $sanitizer->sanitize();
 
-        $scripts = $sanitizer->get_scripts();
-        $this->assertEquals( $expected, $scripts );
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
 
-    }
+		$scripts = array_merge(
+			$sanitizer->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
+		$this->assertEquals( $expected, $scripts );
+	}
 
 	/**
 	 * Test that get_scripts() did convert.
@@ -95,8 +106,13 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
 		$sanitizer->sanitize();
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
 
-		$scripts = $sanitizer->get_scripts();
+		$scripts = array_merge(
+			$sanitizer->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
 		$this->assertEquals( $expected, $scripts );
 	}
 }

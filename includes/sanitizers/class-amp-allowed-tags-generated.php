@@ -9606,20 +9606,6 @@ class AMP_Allowed_Tags_Generated {
 	}
 
 	/**
-	 * Get allowed tag data.
-	 *
-	 * @since 0.7
-	 * @param string $tag_name Tag name.
-	 * @return array|null Allowed tag data.
-	 */
-	public static function get_allowed_tag_data( $tag_name ) {
-		if ( isset( self::$allowed_tags[ $tag_name ] ) ) {
-			return self::$allowed_tags[ $tag_name ];
-		}
-		return null;
-	}
-
-	/**
 	 * Get list of globally-allowed attributes.
 	 *
 	 * @since 0.5

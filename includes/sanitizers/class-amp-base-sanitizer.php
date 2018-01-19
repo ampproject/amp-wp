@@ -109,26 +109,7 @@ abstract class AMP_Base_Sanitizer {
 	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
-		$scripts = array();
-		if ( $this->did_convert_elements && ! empty( $this->sanitized_tag ) ) {
-			$allowed_tags = AMP_Allowed_Tags_Generated::get_allowed_tag_data( $this->sanitized_tag );
-			$components   = array();
-			if ( $allowed_tags ) {
-				foreach ( $allowed_tags as $tag_variation ) {
-					if ( isset( $tag_variation['tag_spec']['requires_extension'] ) ) {
-						$components = array_merge( $components, $tag_variation['tag_spec']['requires_extension'] );
-					}
-				}
-			}
-			foreach ( $components as $component ) {
-				$scripts[ $component ] = sprintf(
-					'https://cdn.ampproject.org/v0/%s-%s.js',
-					$component,
-					'latest'
-				);
-			}
-		}
-		return $scripts;
+		return array();
 	}
 
 	/**
