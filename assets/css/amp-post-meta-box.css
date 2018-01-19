@@ -8,7 +8,12 @@
 .wp-core-ui #preview-action.has-amp-preview #post-preview {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
+	border-right-width: 0;
 	float: none;
+}
+
+.wp-core-ui #post-preview:hover + #amp-post-preview {
+	border-left: 1px solid #999 !important;
 }
 
 /* AMP preview button */
