@@ -444,16 +444,6 @@ class AMP_Theme_Support {
 	 * @return string Scripts to inject into the HEAD.
 	 */
 	public static function get_amp_component_scripts( $html ) {
-
-		// @todo This should be integrated with the existing Sanitizer classes so that duplication is not done here.
-		$amp_components = array(
-			'amp-form' => array(
-				'pattern' => '#<(form|input)\b#i',
-				'source'  => 'https://cdn.ampproject.org/v0/amp-form-0.1.js',
-			),
-			// @todo Add more.
-		);
-
 		$amp_scripts = self::$amp_scripts;
 
 		foreach ( self::$embed_handlers as $embed_handler ) {
@@ -461,12 +451,6 @@ class AMP_Theme_Support {
 				$amp_scripts,
 				$embed_handler->get_scripts()
 			);
-		}
-
-		foreach ( $amp_components as $component => $props ) {
-			if ( preg_match( $props['pattern'], $html ) ) {
-				$amp_scripts[ $component ] = $props['source'];
-			}
 		}
 
 		/**

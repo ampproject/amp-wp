@@ -32,24 +32,6 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	public static $pb_class = 'pb_feed';
 
 	/**
-	 * Script slug.
-	 *
-	 * @var string AMP HTML audio tag to use in place of HTML's 'audio' tag.
-	 *
-	 * @since 0.2
-	 */
-	private static $script_slug = 'amp-playbuzz';
-
-	/**
-	 * Script src.
-	 *
-	 * @var string URL to AMP Project's Playbuzz element javascript file found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 */
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-playbuzz-0.1.js';
-
-	/**
 	 * Hardcoded height to set for Playbuzz elements.
 	 *
 	 * @var string
@@ -57,25 +39,6 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	private static $height = '500';
-
-	/**
-	 * Return one element array containing AMP HTML audio tag and respective Javascript URL
-	 *
-	 * HTML tags and Javascript URLs found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 *
-	 * @return string[] Returns AMP Playbuzz tag as array key and Javascript URL as array value,
-	 *                  respectively. Will return an empty array if sanitization has yet to be run
-	 *                  or if it did not find any HTML Playbuzz elements to convert to AMP equivalents.
-	 */
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-		return array( self::$script_slug => self::$script_src );
-	}
-
 
 	/**
 	 * Sanitize the Playbuzz elements from the HTML contained in this instance's DOMDocument.
@@ -106,7 +69,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, self::$script_slug, $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-playbuzz', $new_attributes );
 
 			$node->parentNode->replaceChild( $new_node, $node );
 
