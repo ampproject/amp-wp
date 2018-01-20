@@ -38,7 +38,7 @@ class AMP_Widgets {
 	 * @return array $widgets An associative array, with the previous WP widget mapped to the new AMP widget.
 	 */
 	public function get_widgets() {
-		$widgets = array(
+		$widgets        = array(
 			'Archives',
 			'Categories',
 			'Media_Audio',

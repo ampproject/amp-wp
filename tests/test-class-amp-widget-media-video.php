@@ -25,6 +25,10 @@ class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 	 * @inheritdoc
 	 */
 	public function setUp() {
+		$wp_widget = 'WP_Widget_Media_Video';
+		if ( ! class_exists( $wp_widget ) ) {
+			$this->markTestSkipped( sprintf( 'The widget %s is not present, so neither is its child class.', $wp_widget ) );
+		}
 		parent::setUp();
 		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
