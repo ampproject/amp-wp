@@ -58,7 +58,7 @@ class AMP_WP_Styles extends WP_Styles {
 
 		if ( ! preg_match( '/\.(css|less|scss|sass)$/i', $css_path ) ) {
 			/* translators: %1$s is stylesheet handle, %2$s is stylesheet URL */
-			return new WP_Error( 'amp_css_path_not_found', sprintf( __( 'Skipped stylesheet %1$s which does not have recognized CSS file extension (%2$s).', 'amp' ), $handle, $src ) );
+			return new WP_Error( 'amp_css_bad_file_extension', sprintf( __( 'Skipped stylesheet %1$s which does not have recognized CSS file extension (%2$s).', 'amp' ), $handle, $src ) );
 		}
 
 		if ( ! $css_path || false !== strpos( '../', $css_path ) || 0 !== validate_file( $css_path ) || ! file_exists( $css_path ) ) {
@@ -135,7 +135,7 @@ class AMP_WP_Styles extends WP_Styles {
 		foreach ( array_filter( array( $css_file_path, $css_rtl_file_path ) ) as $css_path ) {
 			$css = file_get_contents( $css_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 			if ( 'all' !== $media ) {
-				$css .= sprintf( '@media %s { %s }', $media, $css );
+				$css = sprintf( '@media %s { %s }', $media, $css );
 			}
 			$this->print_code .= $css;
 		}
@@ -150,22 +150,45 @@ class AMP_WP_Styles extends WP_Styles {
 	}
 
 	/**
+	 * Whether the locale stylesheet was done.
+	 *
+	 * @since 0.7
+	 * @var bool
+	 */
+	protected $did_locale_stylesheet = false;
+
+	/**
 	 * Get the locale stylesheet if it exists.
 	 *
 	 * @since 0.7
-	 * @return string CSS.
+	 * @see locale_stylesheet()
+	 * @return bool Whether locale stylesheet was done.
 	 */
 	public function do_locale_stylesheet() {
+		if ( $this->did_locale_stylesheet ) {
+			return true;
+		}
+
 		$src = get_locale_stylesheet_uri();
 		if ( ! $src ) {
-			return;
+			return false;
 		}
 		$path = $this->get_validated_css_file_path( $src, get_stylesheet() . '-' . get_locale() );
 		if ( is_wp_error( $path ) ) {
-			return;
+			return false;
 		}
 		$this->print_code .= file_get_contents( $path ); // phpcs:ignore -- The path has been validated, and it is not a remote path.
+		$this->did_locale_stylesheet = true;
+		return true;
 	}
+
+	/**
+	 * Whether the Custom CSS was done.
+	 *
+	 * @since 0.7
+	 * @var bool
+	 */
+	protected $did_custom_css = false;
 
 	/**
 	 * Append Customizer Custom CSS.
@@ -173,8 +196,21 @@ class AMP_WP_Styles extends WP_Styles {
 	 * @since 0.7
 	 * @see wp_custom_css()
 	 * @see wp_custom_css_cb()
+	 * @return bool Whether locale Custom CSS was done.
 	 */
 	public function do_custom_css() {
-		$this->print_code .= wp_get_custom_css();
+		if ( $this->did_custom_css ) {
+			return true;
+		}
+
+		$css = trim( wp_get_custom_css() );
+		if ( ! $css ) {
+			return false;
+		}
+
+		$this->print_code .= $css;
+
+		$this->did_custom_css = true;
+		return true;
 	}
 }
