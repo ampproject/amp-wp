@@ -16,7 +16,9 @@
   "grunt-contrib-copy": "^1.0.0",
   "grunt-contrib-jshint": "^1.1.0",
   "grunt-shell": "^2.1.0",
-  "grunt-wp-deploy": "^1.2.1"
+  "grunt-wp-deploy": "^1.2.1",
+  "pegjs": "^0.10.0",
+  "phpegjs": "github:nylen/phpegjs"
  },
  "scripts": {
   "build": "grunt build"
