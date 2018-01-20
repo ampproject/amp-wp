@@ -39,23 +39,24 @@ class AMP_Widgets {
 	 */
 	public function get_widgets() {
 		$widgets = array(
-			'WP_Widget_Archives'        => 'AMP_Widget_Archives',
-			'WP_Widget_Categories'      => 'AMP_Widget_Categories',
-			'WP_Widget_Media_Audio'     => 'AMP_Widget_Media_Audio',
-			'WP_Widget_Media_Gallery'   => 'AMP_Widget_Media_Gallery',
-			'WP_Widget_Media_Image'     => 'AMP_Widget_Media_Image',
-			'WP_Widget_Media_Video'     => 'AMP_Widget_Media_Video',
-			'WP_Widget_Recent_Comments' => 'AMP_Widget_Recent_Comments',
-			'WP_Widget_RSS'             => 'AMP_Widget_RSS',
+			'Archives',
+			'Categories',
+			'Media_Audio',
+			'Media_Gallery',
+			'Media_Image',
+			'Media_Video',
+			'Recent_Comments',
+			'RSS',
 		);
+		$mapped_widgets = array();
 
-		// If a widget doesn't exist, remove it from the array.
-		foreach ( $widgets as $native_wp_widget ) {
-			if ( ! class_exists( $native_wp_widget ) ) {
-				unset( $widgets[ $native_wp_widget ] );
+		foreach ( $widgets as $widget ) {
+			$wp_widget = 'WP_Widget_' . $widget;
+			if ( class_exists( $wp_widget ) ) {
+				$mapped_widgets[ $wp_widget ] = 'AMP_Widget_' . $widget;
 			}
 		}
-		return $widgets;
+		return $mapped_widgets;
 	}
 
 }
