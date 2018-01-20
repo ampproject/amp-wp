@@ -61,17 +61,8 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 			echo '<label class="screen-reader-text" for="' . esc_attr( $dropdown_id ) . '">' . esc_html( $title ) . '</label>';
 			$cat_args['show_option_none'] = __( 'Select Category', 'default' );
 			$cat_args['id']               = $dropdown_id;
-			/**
-			 * Filters the arguments for the Categories widget drop-down.
-			 *
-			 * @since 2.8.0
-			 * @since 4.9.0 Added the `$instance` parameter.
-			 *
-			 * @see wp_dropdown_categories()
-			 *
-			 * @param array $cat_args An array of Categories widget drop-down arguments.
-			 * @param array $instance Array of settings for the current widget.
-			 */
+
+			/** This filter is documented in wp-includes/widgets/class-wp-widget-categories.php */
 			wp_dropdown_categories( apply_filters( 'widget_categories_dropdown_args', $cat_args, $instance ) );
 			remove_filter( 'wp_dropdown_cats', array( $this, 'modify_select' ) );
 			echo '</form>';

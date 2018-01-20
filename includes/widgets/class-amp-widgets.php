@@ -38,7 +38,7 @@ class AMP_Widgets {
 	 * @return array $widgets An associative array, with the previous WP widget mapped to the new AMP widget.
 	 */
 	public function get_widgets() {
-		return array(
+		$widgets = array(
 			'WP_Widget_Archives'        => 'AMP_Widget_Archives',
 			'WP_Widget_Categories'      => 'AMP_Widget_Categories',
 			'WP_Widget_Media_Audio'     => 'AMP_Widget_Media_Audio',
@@ -48,6 +48,14 @@ class AMP_Widgets {
 			'WP_Widget_Recent_Comments' => 'AMP_Widget_Recent_Comments',
 			'WP_Widget_RSS'             => 'AMP_Widget_RSS',
 		);
+
+		// If a widget doesn't exist, remove it from the array.
+		foreach ( $widgets as $native_wp_widget ) {
+			if ( ! class_exists( $native_wp_widget ) ) {
+				unset( $widgets[ $native_wp_widget ] );
+			}
+		}
+		return $widgets;
 	}
 
 }
