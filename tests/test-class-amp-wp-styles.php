@@ -124,17 +124,6 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 		$this->assertTrue( $wp_styles->do_item( 'admin-bar-print' ) );
 		$this->assertStringStartsWith( '@media x_virtual_reality {', $wp_styles->print_code );
 
-		// RTL.
-		$wp_styles->print_code                   = '';
-		$wp_styles->registered['buttons-arabic'] = clone $wp_styles->registered['buttons'];
-		$this->assertTrue( $wp_styles->do_item( 'buttons-arabic' ) );
-		$this->assertContains( 'text-align: left;', $wp_styles->print_code );
-		$wp_styles->print_code     = '';
-		$wp_styles->text_direction = 'rtl';
-		$this->assertTrue( $wp_styles->do_item( 'buttons-arabic' ) );
-		$this->assertContains( 'text-align: right;', $wp_styles->print_code );
-		$wp_styles->text_direction = 'ltr';
-
 		// Inline style.
 		$wp_styles->print_code = '';
 		$inline                = '/* INLINE STYLE FOR BUTTONS */';
