@@ -62,12 +62,11 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$action_url = substr( $action_url, 5 );
 			}
 
-			$node->setAttribute( 'action', $action_url );
 			if ( 'post' === $method ) {
 				$node->setAttribute( 'action-xhr', $action_url );
 				$node->removeAttribute( 'action' );
 			} else {
-				$node->setAttribute( 'action-xhr', $action_url );
+				$node->setAttribute( 'action', $action_url );
 			}
 
 			// Set a target if needed.
