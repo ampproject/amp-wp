@@ -1,6 +1,9 @@
 # Tell Travis CI we're using PHP
 language: php
 
+# Opt to use Travis container-based environment.
+sudo: false
+
 # PHP version used in first build configuration.
 php:
     - "7.1"
@@ -26,16 +29,27 @@ dist: precise
 # along with 2 versions of WordPress (which would build 8 configs otherwise).
 # This takes half as long to run while still providing adequate coverage.
 
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+cache:
+  directories:
+    - node_modules
+    - vendor
+    - $HOME/phpunit-bin
+
 matrix:
   include:
    - php: "5.2"
-     env: WP_VERSION=latest
+     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
    - php: "5.2"
-     env: WP_VERSION=4.7
+     env: WP_VERSION=4.7 DEV_LIB_SKIP=phpcs
    - php: "5.3"
-     env: WP_VERSION=latest
+     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
    - php: "5.3"
-     env: WP_VERSION=4.7
+     env: WP_VERSION=4.7 DEV_LIB_SKIP=phpcs
    - php: "5.4"
      env: WP_VERSION=latest
    - php: "5.4"
@@ -48,15 +62,13 @@ matrix:
    - php: "7.1"
      env: WP_VERSION=4.7
 
-before_script:
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - |
-      if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
-        composer global require "phpunit/phpunit=5.7.*"
-      elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
-        composer global require "phpunit/phpunit=4.8.*"
-      fi
-  - phpunit --version
-  - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION 
+install:
+  - nvm install 6 && nvm use 6
+  - export DEV_LIB_PATH=dev-lib
+  - source $DEV_LIB_PATH/travis.install.sh
 
-script: phpunit
+script:
+  - source $DEV_LIB_PATH/travis.script.sh
+
+after_script:
+  - source $DEV_LIB_PATH/travis.after_script.sh
