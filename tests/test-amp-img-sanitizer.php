@@ -110,19 +110,31 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$scripts = $sanitizer->get_scripts();
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
+
+		$scripts = array_merge(
+			$sanitizer->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
 		$this->assertEquals( $expected, $scripts );
 	}
 
 	public function test_no_gif_image_scripts() {
 		$source = '<img src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />';
-		$expected = array( 'amp-anim' => 'https://cdn.ampproject.org/v0/amp-anim-0.1.js' );
+		$expected = array( 'amp-anim' => 'https://cdn.ampproject.org/v0/amp-anim-latest.js' );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$scripts = $sanitizer->get_scripts();
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
+
+		$scripts = array_merge(
+			$sanitizer->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
 		$this->assertEquals( $expected, $scripts );
 	}
 }
