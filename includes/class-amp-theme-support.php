@@ -541,6 +541,23 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Determine the type of component script.
+	 *
+	 * @param string $component The component name.
+	 * @return string the type of component.
+	 */
+	public static function get_component_type( $component ) {
+		$component_types = apply_filters( 'amp_component_types', array(
+			'amp-mustache' => 'template',
+		) );
+
+		if ( ! empty( $component_types[ $component ] ) ) {
+			return $component_types[ $component ];
+		}
+		return 'element';
+	}
+
+	/**
 	 * Determine required AMP scripts.
 	 *
 	 * @param string $html Output HTML.
@@ -571,7 +588,8 @@ class AMP_Theme_Support {
 		$scripts = '';
 		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
 			$scripts .= sprintf(
-				'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				'<script async custom-%s="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				self::get_component_type( $amp_script_component ),
 				$amp_script_component,
 				$amp_script_source
 			);
