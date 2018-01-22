@@ -40,35 +40,40 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+		for ( $i = $num_nodes - 1; $i >= 0; $i -- ) {
 			$node = $nodes->item( $i );
 			if ( ! $node instanceof DOMElement ) {
 				continue;
 			}
 
-			if ( ! $node->hasAttribute( 'action' ) || '' === $node->getAttribute( 'action' ) ) {
-				$node->parentNode->removeChild( $node );
-				continue;
+			$method = 'get';
+			if ( $node->hasAttribute( 'method' ) ) {
+				$method = strtolower( $node->getAttribute( 'method' ) );
 			}
 
-			// Correct action.
-			if ( $node->hasAttribute( 'action' ) && ! $node->hasAttribute( 'action-xhr' ) ) {
+			// Get the action URL.
+			if ( ! $node->hasAttribute( 'action' ) ) {
+				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ); // WPCS: ignore. input var okay, sanitization ok.
+			} else {
 				$action_url = $node->getAttribute( 'action' );
-				$action_url = str_replace( 'http:', '', $action_url );
-				$node->setAttribute( 'action', $action_url );
+			}
 
-				if ( 'post' === $node->getAttribute( 'method' ) ) {
-					$node->setAttribute( 'action-xhr', $action_url );
-					$node->removeAttribute( 'action' );
-				}
+			if ( strpos( $action_url, 'http:' ) === 0 ) {
+				$action_url = substr( $action_url, 5 );
+			}
+
+			$node->setAttribute( 'action', $action_url );
+			if ( 'post' === $method ) {
+				$node->setAttribute( 'action-xhr', $action_url );
+				$node->removeAttribute( 'action' );
+			} else {
+				$node->setAttribute( 'action-xhr', $action_url );
 			}
 
 			// Set a target if needed.
 			if ( ! $node->hasAttribute( 'target' ) ) {
-				$node->setAttribute( 'target', '_blank' );
+				$node->setAttribute( 'target', '_top' );
 			}
 		}
-
 	}
-
 }
