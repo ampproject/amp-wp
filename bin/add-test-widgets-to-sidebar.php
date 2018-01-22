@@ -385,7 +385,12 @@ function amp_create_widget( $widget ) {
 		$title             = str_replace( '-', ' ', $title );
 		$settings['title'] = sprintf( 'Test %s Widget', ucwords( $title ) );
 	}
-	$widgets[] = $settings;
+
+	$number = max( array_keys( $widgets ) );
+	$number = max( 2, $number );
+	$number++;
+
+	$widgets[ $number ] = $settings;
 	update_option( $option_key, $widgets );
 }
 

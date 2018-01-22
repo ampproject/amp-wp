@@ -477,7 +477,7 @@ class AMP_Theme_Support {
 		 *
 		 * @since 0.7
 		 *
-		 * @param string $amp_scripts AMP Component scripts, mapping component names to component source URLs.
+		 * @param array $amp_scripts AMP Component scripts, mapping component names to component source URLs.
 		 */
 		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
 
