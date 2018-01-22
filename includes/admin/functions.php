@@ -142,8 +142,10 @@ function amp_add_custom_analytics( $analytics ) {
  * @since 0.7
  */
 function amp_add_widget_support() {
-	$amp_widgets = new AMP_Widgets();
-	$amp_widgets->init();
+	if ( is_amp_endpoint() ) {
+		$amp_widgets = new AMP_Widgets();
+		$amp_widgets->init();
+	}
 }
 
 /**
