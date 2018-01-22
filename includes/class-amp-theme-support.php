@@ -195,14 +195,18 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Preemtively define $wp_styles as AMP_WP_Styles.
+	 * Override $wp_styles as AMP_WP_Styles, ideally before first instantiated as WP_Styles.
 	 *
 	 * @see wp_styles()
 	 * @global AMP_WP_Styles $wp_styles
+	 * @return AMP_WP_Styles Instance.
 	 */
 	public static function override_wp_styles() {
 		global $wp_styles;
-		$wp_styles = new AMP_WP_Styles(); // WPCS: global override ok.
+		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
+			$wp_styles = new AMP_WP_Styles(); // WPCS: global override ok.
+		}
+		return $wp_styles;
 	}
 
 	/**

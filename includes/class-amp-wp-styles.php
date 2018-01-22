@@ -21,6 +21,22 @@ class AMP_WP_Styles extends WP_Styles {
 	public $do_concat = true;
 
 	/**
+	 * Whether the locale stylesheet was done.
+	 *
+	 * @since 0.7
+	 * @var bool
+	 */
+	protected $did_locale_stylesheet = false;
+
+	/**
+	 * Whether the Custom CSS was done.
+	 *
+	 * @since 0.7
+	 * @var bool
+	 */
+	protected $did_custom_css = false;
+
+	/**
 	 * Generates an enqueued style's fully-qualified file path.
 	 *
 	 * @since 0.7
@@ -31,7 +47,14 @@ class AMP_WP_Styles extends WP_Styles {
 	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_css_file_path( $src, $handle ) {
-		if ( ! is_bool( $src ) && ! preg_match( '|^(https?:)?//|', $src ) && ! ( $this->content_url && 0 === strpos( $src, $this->content_url ) ) ) {
+		$needs_base_url = (
+			! is_bool( $src )
+			&&
+			! preg_match( '|^(https?:)?//|', $src )
+			&&
+			! ( $this->content_url && 0 === strpos( $src, $this->content_url ) )
+		);
+		if ( $needs_base_url ) {
 			$src = $this->base_url . $src;
 		}
 
@@ -40,10 +63,8 @@ class AMP_WP_Styles extends WP_Styles {
 
 		// Strip query and fragment from URL.
 		$src = preg_replace( ':[\?#].+:', '', $src );
-
 		$src = esc_url_raw( $src );
 
-		// @todo Explicitly not using includes_url() or content_url() since filters may point outside filesystem?
 		$includes_url = includes_url( '/' );
 		$content_url  = content_url( '/' );
 		$admin_url    = get_admin_url( null, '/' );
@@ -150,14 +171,6 @@ class AMP_WP_Styles extends WP_Styles {
 	}
 
 	/**
-	 * Whether the locale stylesheet was done.
-	 *
-	 * @since 0.7
-	 * @var bool
-	 */
-	protected $did_locale_stylesheet = false;
-
-	/**
 	 * Get the locale stylesheet if it exists.
 	 *
 	 * @since 0.7
@@ -181,14 +194,6 @@ class AMP_WP_Styles extends WP_Styles {
 		$this->did_locale_stylesheet = true;
 		return true;
 	}
-
-	/**
-	 * Whether the Custom CSS was done.
-	 *
-	 * @since 0.7
-	 * @var bool
-	 */
-	protected $did_custom_css = false;
 
 	/**
 	 * Append Customizer Custom CSS.

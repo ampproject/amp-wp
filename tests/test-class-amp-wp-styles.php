@@ -23,24 +23,12 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get wp_styles().
-	 *
-	 * @return WP_Styles|AMP_WP_Styles Styles.
-	 */
-	protected function amp_wp_styles() {
-		global $wp_styles;
-		$wp_styles = new AMP_WP_Styles(); // phpcs:ignore
-		return $wp_styles;
-	}
-
-	/**
 	 * Test that wp_styles() returns AMP_WP_Styles.
 	 *
 	 * @covers wp_styles()
 	 */
 	public function test_wp_styles() {
-		$this->amp_wp_styles();
-		$this->assertInstanceOf( 'AMP_WP_Styles', $this->amp_wp_styles() );
+		AMP_Theme_Support::override_wp_styles();
 		$this->assertInstanceOf( 'AMP_WP_Styles', wp_styles() );
 	}
 
@@ -59,7 +47,7 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 	 * @covers AMP_WP_Styles::get_validated_css_file_path()
 	 */
 	public function test_get_validated_css_file_path() {
-		$wp_styles = $this->amp_wp_styles();
+		$wp_styles = AMP_Theme_Support::override_wp_styles();
 
 		// Theme.
 		$expected = WP_CONTENT_DIR . '/themes/twentyseventeen/style.css';
@@ -104,7 +92,7 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 	 * @covers AMP_WP_Styles::do_item()
 	 */
 	public function test_do_item() {
-		$wp_styles = $this->amp_wp_styles();
+		$wp_styles = AMP_Theme_Support::override_wp_styles();
 		$this->assertFalse( $wp_styles->do_item( 'non-existent' ) );
 
 		// Conditional stylesheets are ignored.
@@ -149,7 +137,7 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 	 * @covers AMP_WP_Styles::do_locale_stylesheet()
 	 */
 	public function test_do_locale_stylesheet() {
-		$wp_styles = $this->amp_wp_styles();
+		$wp_styles = AMP_Theme_Support::override_wp_styles();
 		add_filter( 'locale_stylesheet_uri', '__return_false' );
 		$this->assertFalse( $wp_styles->do_locale_stylesheet() );
 		$this->assertEmpty( $wp_styles->print_code );
@@ -166,12 +154,13 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 	 * @covers AMP_WP_Styles::do_custom_css()
 	 */
 	public function test_do_custom_css() {
-		$wp_styles = $this->amp_wp_styles();
+		$wp_styles = AMP_Theme_Support::override_wp_styles();
 		$this->assertFalse( $wp_styles->do_custom_css() );
 		$this->assertEmpty( $wp_styles->print_code );
 
 		add_filter( 'wp_get_custom_css', array( $this, 'return_css_rule' ) );
-		$wp_styles = $this->amp_wp_styles();
+		$wp_styles = null;
+		$wp_styles = AMP_Theme_Support::override_wp_styles();
 		$wp_styles->do_custom_css();
 		$this->assertEquals( $this->return_css_rule(), $wp_styles->print_code );
 		$wp_styles->do_custom_css();
