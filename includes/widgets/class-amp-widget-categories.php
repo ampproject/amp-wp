@@ -71,15 +71,8 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 			<ul>
 			<?php
 			$cat_args['title_li'] = '';
-			/**
-			 * Filters the arguments for the Categories widget.
-			 *
-			 * @since 2.8.0
-			 * @since 4.9.0 Added the `$instance` parameter.
-			 *
-			 * @param array $cat_args An array of Categories widget options.
-			 * @param array $instance Array of settings for the current widget.
-			 */
+
+			/** This filter is documented in wp-includes/widgets/class-wp-widget-categories.php */
 			wp_list_categories( apply_filters( 'widget_categories_args', $cat_args, $instance ) );
 			?>
 			</ul>

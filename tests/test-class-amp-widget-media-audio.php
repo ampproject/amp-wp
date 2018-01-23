@@ -50,7 +50,7 @@ class Test_AMP_Widget_Media_Audio extends WP_UnitTestCase {
 	 */
 	public function test_render_media() {
 		$widget = new AMP_Widget_Media_Audio();
-		$audio = '/tmp/small-audio.mp3';
+		$audio  = '/tmp/small-audio.mp3';
 		copy( DIR_TESTDATA . '/uploads/small-audio.mp3', $audio );
 		$attachment_id = self::factory()->attachment->create_object( array(
 			'file'           => $audio,
