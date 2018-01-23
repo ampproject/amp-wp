@@ -495,13 +495,16 @@ class AMP_Theme_Support {
 		 * from outside the body from being part of the whitelist sanitizer when it runs when theme support is not present,
 		 * as otherwise elements from the HEAD could get added to the BODY.
 		 */
-		$sanitized_inner_body = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$output = preg_replace( '#(<body.*?>)(.+)(</body>)#si', '$1' . $sanitized_inner_body . '$3', $output );
+		$output = preg_replace(
+			'#(<body.*?>)(.+)(</body>)#si',
+			'$1' . AMP_DOM_Utils::get_content_from_dom( $dom ) . '$3',
+			$output
+		);
 
 		// Inject required scripts.
 		$output = preg_replace(
 			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_component_scripts( $output ),
+			self::get_amp_component_scripts(),
 			$output,
 			1
 		);
