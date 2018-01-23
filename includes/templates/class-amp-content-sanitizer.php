@@ -13,16 +13,20 @@ class AMP_Content_Sanitizer {
 	/**
 	 * Sanitize.
 	 *
-	 * @param string   $content           Content.
-	 * @param string[] $sanitizer_classes Sanitizer classes.
-	 * @param array    $global_args       Global args.
+	 * @param string|DOMDocument $content HTML content string or DOM document.
+	 * @param string[]           $sanitizer_classes Sanitizer classes.
+	 * @param array              $global_args       Global args.
 	 *
 	 * @return array
 	 */
 	public static function sanitize( $content, array $sanitizer_classes, $global_args = array() ) {
 		$scripts = array();
 		$styles  = array();
-		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
+		if ( $content instanceof DOMDocument ) {
+			$dom = $content;
+		} else {
+			$dom = AMP_DOM_Utils::get_dom_from_content( $content );
+		}
 
 		foreach ( $sanitizer_classes as $sanitizer_class => $args ) {
 			if ( ! class_exists( $sanitizer_class ) ) {
@@ -31,6 +35,11 @@ class AMP_Content_Sanitizer {
 				continue;
 			}
 
+			/**
+			 * Sanitizer.
+			 *
+			 * @type AMP_Base_Sanitizer $sanitizer
+			 */
 			$sanitizer = new $sanitizer_class( $dom, array_merge( $global_args, $args ) );
 
 			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {

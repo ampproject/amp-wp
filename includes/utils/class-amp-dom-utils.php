@@ -88,6 +88,8 @@ class AMP_DOM_Utils {
 
 		/**
 		 * We only want children of the body tag, since we have a subset of HTML.
+		 *
+		 * @todo We will want to get the full HTML eventually.
 		 */
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
