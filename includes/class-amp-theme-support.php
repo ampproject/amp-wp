@@ -154,6 +154,8 @@ class AMP_Theme_Support {
 	 */
 	public static function register_hooks() {
 
+		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'locale_stylesheet' );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
@@ -194,6 +196,29 @@ class AMP_Theme_Support {
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
 
 		// @todo Add character conversion.
+	}
+
+	/**
+	 * Register/override widgets.
+	 *
+	 * @global WP_Widget_Factory
+	 * @return void
+	 */
+	public static function register_widgets() {
+		global $wp_widget_factory;
+		foreach ( $wp_widget_factory->widgets as $registered_widget ) {
+			$registered_widget_class_name = get_class( $registered_widget );
+			if ( ! preg_match( '/^WP_Widget_(.+)$/', $registered_widget_class_name, $matches ) ) {
+				continue;
+			}
+			$amp_class_name = 'AMP_Widget_' . $matches[1];
+			if ( ! class_exists( $amp_class_name ) || is_a( $amp_class_name, $registered_widget_class_name ) ) {
+				continue;
+			}
+
+			unregister_widget( $registered_widget_class_name );
+			register_widget( $amp_class_name );
+		}
 	}
 
 	/**

@@ -86,7 +86,6 @@ class AMP_Autoloader {
 		'AMP_Widget_Media_Video'                      => 'includes/widgets/class-amp-widget-media-video',
 		'AMP_Widget_Recent_Comments'                  => 'includes/widgets/class-amp-widget-recent-comments',
 		'AMP_Widget_RSS'                              => 'includes/widgets/class-amp-widget-rss',
-		'AMP_Widgets'                                 => 'includes/widgets/class-amp-widgets',
 		'WPCOM_AMP_Polldaddy_Embed'                   => 'wpcom/class-amp-polldaddy-embed',
 		'AMP_Test_Stub_Sanitizer'                     => 'tests/stubs',
 		'AMP_Test_World_Sanitizer'                    => 'tests/stubs',

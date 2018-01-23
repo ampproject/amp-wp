@@ -13,40 +13,17 @@
 class Test_AMP_Widget_RSS extends WP_UnitTestCase {
 
 	/**
-	 * Instance of the widget.
-	 *
-	 * @var object
-	 */
-	public $instance;
-
-	/**
-	 * Setup.
-	 *
-	 * @inheritdoc
-	 */
-	public function setUp() {
-		parent::setUp();
-		wp_maybe_load_widgets();
-		AMP_Theme_Support::init();
-		$amp_widgets = new AMP_Widgets();
-		$amp_widgets->register_widgets();
-		$this->instance = new AMP_Widget_RSS();
-	}
-
-	/**
 	 * Test construct().
 	 *
 	 * @see AMP_Widget_RSS::__construct().
 	 */
 	public function test_construct() {
-		global $wp_widget_factory;
-		$amp_widget = $wp_widget_factory->widgets['AMP_Widget_RSS'];
-
-		$this->assertEquals( 'rss', $amp_widget->id_base );
-		$this->assertEquals( 'RSS', $amp_widget->name );
-		$this->assertEquals( 'widget_rss', $amp_widget->widget_options['classname'] );
-		$this->assertEquals( true, $amp_widget->widget_options['customize_selective_refresh'] );
-		$this->assertEquals( 'Entries from any RSS or Atom feed.', $amp_widget->widget_options['description'] );
+		$widget = new AMP_Widget_RSS();
+		$this->assertEquals( 'rss', $widget->id_base );
+		$this->assertEquals( 'RSS', $widget->name );
+		$this->assertEquals( 'widget_rss', $widget->widget_options['classname'] );
+		$this->assertEquals( true, $widget->widget_options['customize_selective_refresh'] );
+		$this->assertEquals( 'Entries from any RSS or Atom feed.', $widget->widget_options['description'] );
 	}
 
 	/**
@@ -57,6 +34,8 @@ class Test_AMP_Widget_RSS extends WP_UnitTestCase {
 	 * @see AMP_Widget_RSS::widget().
 	 */
 	public function test_widget() {
+		$widget = new AMP_Widget_RSS();
+
 		$args     = array(
 			'before_widget' => '<div>',
 			'after_widget'  => '</div>',
@@ -72,7 +51,7 @@ class Test_AMP_Widget_RSS extends WP_UnitTestCase {
 		);
 
 		ob_start();
-		$this->instance->widget( $args, $instance );
+		$widget->widget( $args, $instance );
 		$output = ob_get_clean();
 
 		$this->assertFalse( strpos( $output, '<img' ) );

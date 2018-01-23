@@ -13,13 +13,6 @@
 class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 
 	/**
-	 * Instance of the widget.
-	 *
-	 * @var object
-	 */
-	public $instance;
-
-	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
@@ -30,11 +23,7 @@ class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 			$this->markTestSkipped( sprintf( 'The widget %s is not present, so neither is its child class.', $wp_widget ) );
 		}
 		parent::setUp();
-		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
-		$amp_widgets = new AMP_Widgets();
-		$amp_widgets->register_widgets();
-		$this->instance = new AMP_Widget_Media_Video();
 	}
 
 	/**
@@ -43,14 +32,12 @@ class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 	 * @see AMP_Widget_Media_Video::__construct().
 	 */
 	public function test_construct() {
-		global $wp_widget_factory;
-		$amp_widget = $wp_widget_factory->widgets['AMP_Widget_Media_Video'];
-
-		$this->assertEquals( 'media_video', $amp_widget->id_base );
-		$this->assertEquals( 'Video', $amp_widget->name );
-		$this->assertEquals( 'widget_media_video', $amp_widget->widget_options['classname'] );
-		$this->assertEquals( true, $amp_widget->widget_options['customize_selective_refresh'] );
-		$this->assertEquals( 'Displays a video from the media library or from YouTube, Vimeo, or another provider.', $amp_widget->widget_options['description'] );
+		$widget = new AMP_Widget_Media_Video();
+		$this->assertEquals( 'media_video', $widget->id_base );
+		$this->assertEquals( 'Video', $widget->name );
+		$this->assertEquals( 'widget_media_video', $widget->widget_options['classname'] );
+		$this->assertEquals( true, $widget->widget_options['customize_selective_refresh'] );
+		$this->assertEquals( 'Displays a video from the media library or from YouTube, Vimeo, or another provider.', $widget->widget_options['description'] );
 	}
 
 	/**
@@ -61,7 +48,8 @@ class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 	 * @see AMP_Widget_Media_Video::render_media().
 	 */
 	public function test_render_media() {
-		$video = '/tmp/small-video.mp4';
+		$widget = new AMP_Widget_Media_Video();
+		$video  = '/tmp/small-video.mp4';
 		copy( DIR_TESTDATA . '/uploads/small-video.mp4', $video );
 		$attachment_id = self::factory()->attachment->create_object( array(
 			'file'           => $video,
@@ -77,11 +65,11 @@ class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 		);
 
 		ob_start();
-		$this->instance->render_media( $instance );
+		$widget->render_media( $instance );
 		$output = ob_get_clean();
 
-		$this->assertFalse( strpos( $output, '<video' ) );
-		$this->assertFalse( strpos( $output, 'style=' ) );
+		$this->assertNotContains( '<video', $output );
+		$this->assertNotContains( 'style=', $output );
 	}
 
 }

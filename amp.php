@@ -71,7 +71,6 @@ function amp_after_setup_theme() {
 	}
 
 	add_action( 'init', 'amp_init' );
-	add_action( 'init', 'amp_add_widget_support' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );

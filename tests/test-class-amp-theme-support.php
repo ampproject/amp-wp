@@ -67,4 +67,21 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( is_search() );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 	}
+
+	/**
+	 * Test register_widgets().
+	 *
+	 * @covers AMP_Theme_Support::register_widgets()
+	 * @global WP_Widget_Factory $wp_widget_factory
+	 */
+	public function test_register_widgets() {
+		global $wp_widget_factory;
+		remove_all_actions( 'widgets_init' );
+		$wp_widget_factory->widgets = array();
+		wp_widgets_init();
+		AMP_Theme_Support::register_widgets();
+
+		$this->assertArrayNotHasKey( 'WP_Widget_Categories', $wp_widget_factory->widgets );
+		$this->assertArrayHasKey( 'AMP_Widget_Categories', $wp_widget_factory->widgets );
+	}
 }

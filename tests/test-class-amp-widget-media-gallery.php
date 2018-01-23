@@ -13,13 +13,6 @@
 class Test_AMP_Widget_Media_Gallery extends WP_UnitTestCase {
 
 	/**
-	 * Instance of the widget.
-	 *
-	 * @var object
-	 */
-	public $instance;
-
-	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
@@ -32,9 +25,6 @@ class Test_AMP_Widget_Media_Gallery extends WP_UnitTestCase {
 		parent::setUp();
 		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
-		$amp_widgets = new AMP_Widgets();
-		$amp_widgets->register_widgets();
-		$this->instance = new AMP_Widget_Media_Gallery();
 	}
 
 	/**
@@ -43,14 +33,12 @@ class Test_AMP_Widget_Media_Gallery extends WP_UnitTestCase {
 	 * @see AMP_Widget_Media_Gallery::__construct().
 	 */
 	public function test_construct() {
-		global $wp_widget_factory;
-		$amp_widget = $wp_widget_factory->widgets['AMP_Widget_Media_Gallery'];
-
-		$this->assertEquals( 'media_gallery', $amp_widget->id_base );
-		$this->assertEquals( 'Gallery', $amp_widget->name );
-		$this->assertEquals( 'widget_media_gallery', $amp_widget->widget_options['classname'] );
-		$this->assertEquals( true, $amp_widget->widget_options['customize_selective_refresh'] );
-		$this->assertEquals( 'Displays an image gallery.', $amp_widget->widget_options['description'] );
+		$widget = new AMP_Widget_Media_Gallery();
+		$this->assertEquals( 'media_gallery', $widget->id_base );
+		$this->assertEquals( 'Gallery', $widget->name );
+		$this->assertEquals( 'widget_media_gallery', $widget->widget_options['classname'] );
+		$this->assertEquals( true, $widget->widget_options['customize_selective_refresh'] );
+		$this->assertEquals( 'Displays an image gallery.', $widget->widget_options['description'] );
 	}
 
 	/**
@@ -61,6 +49,7 @@ class Test_AMP_Widget_Media_Gallery extends WP_UnitTestCase {
 	 * @see AMP_Widget_Media_Gallery::render_media().
 	 */
 	public function test_render_media() {
+		$widget           = new AMP_Widget_Media_Gallery();
 		$first_test_image = '/tmp/test-image.jpg';
 		copy( DIR_TESTDATA . '/images/test-image.jpg', $first_test_image );
 		$first_attachment_id = self::factory()->attachment->create_object( array(
@@ -88,11 +77,11 @@ class Test_AMP_Widget_Media_Gallery extends WP_UnitTestCase {
 		);
 
 		ob_start();
-		$this->instance->render_media( $instance );
+		$widget->render_media( $instance );
 		$output = ob_get_clean();
 
-		$this->assertFalse( strpos( $output, '<img' ) );
-		$this->assertFalse( strpos( $output, '<style' ) );
+		$this->assertNotContains( '<img', $output );
+		$this->assertNotContains( '<style', $output );
 	}
 
 }

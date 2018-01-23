@@ -13,13 +13,6 @@
 class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 
 	/**
-	 * Instance of the widget.
-	 *
-	 * @var object
-	 */
-	public $instance;
-
-	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
@@ -28,9 +21,6 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 		parent::setUp();
 		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
-		$amp_widgets = new AMP_Widgets();
-		$amp_widgets->register_widgets();
-		$this->instance = new AMP_Widget_Categories();
 	}
 
 	/**
@@ -39,14 +29,13 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 * @see AMP_Widget_Categories::__construct().
 	 */
 	public function test_construct() {
-		global $wp_widget_factory;
-		$amp_categories = $wp_widget_factory->widgets['AMP_Widget_Categories'];
-		$this->assertEquals( 'AMP_Widget_Categories', get_class( $amp_categories ) );
-		$this->assertEquals( 'categories', $amp_categories->id_base );
-		$this->assertEquals( 'Categories', $amp_categories->name );
-		$this->assertEquals( 'widget_categories', $amp_categories->widget_options['classname'] );
-		$this->assertEquals( true, $amp_categories->widget_options['customize_selective_refresh'] );
-		$this->assertEquals( 'A list or dropdown of categories.', $amp_categories->widget_options['description'] );
+		$widget = new AMP_Widget_Categories();
+		$this->assertEquals( 'AMP_Widget_Categories', get_class( $widget ) );
+		$this->assertEquals( 'categories', $widget->id_base );
+		$this->assertEquals( 'Categories', $widget->name );
+		$this->assertEquals( 'widget_categories', $widget->widget_options['classname'] );
+		$this->assertEquals( true, $widget->widget_options['customize_selective_refresh'] );
+		$this->assertEquals( 'A list or dropdown of categories.', $widget->widget_options['description'] );
 	}
 
 	/**
@@ -55,12 +44,13 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 * @see AMP_Widget_Categories::modify_select().
 	 */
 	public function test_modify_select() {
-		$categories             = wp_dropdown_categories( array(
+		$widget         = new AMP_Widget_Categories();
+		$categories     = wp_dropdown_categories( array(
 			'echo' => 0,
 		) );
-		$number                 = 3;
-		$this->instance->number = $number;
-		$this->assertContains( strval( $number ), $this->instance->modify_select( $categories ) );
+		$number         = 3;
+		$widget->number = $number;
+		$this->assertContains( strval( $number ), $widget->modify_select( $categories ) );
 	}
 
 	/**
@@ -69,6 +59,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 * @see AMP_Widget_Categories::widget().
 	 */
 	public function test_widget() {
+		$widget    = new AMP_Widget_Categories();
 		$arguments = array(
 			'before_widget' => '<div>',
 			'after_widget'  => '</div>',
@@ -80,10 +71,10 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 			'dropdown' => 1,
 		);
 		ob_start();
-		$this->instance->widget( $arguments, $instance );
+		$widget->widget( $arguments, $instance );
 		$output = ob_get_clean();
 
-		$this->assertFalse( strpos( $output, '<script type=' ) );
+		$this->assertNotContains( '<script type=', $output );
 	}
 
 }
