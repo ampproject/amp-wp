@@ -13,6 +13,29 @@
 class AMP_Widget_Archives extends WP_Widget_Archives {
 
 	/**
+	 * AMP_Widget_Archives constructor.
+	 *
+	 * @return void.
+	 */
+	public function __construct() {
+		parent::__construct();
+		add_filter( 'amp_component_scripts', array( $this, 'form_script' ) );
+	}
+
+	/**
+	 * Add a form extension script for AMP to output.
+	 *
+	 * @param array $scripts The AMP scripts.
+	 * @return array $scripts The filtered AMP scripts.
+	 */
+	public function form_script( $scripts ) {
+		if ( ! isset( $scripts['amp-form'] ) ) {
+			$scripts['amp-form'] = 'https://cdn.ampproject.org/v0/amp-form-latest.js';
+		}
+		return $scripts;
+	}
+
+	/**
 	 * Echoes the markup of the widget.
 	 *
 	 * Mainly copied from WP_Widget_Archives::widget()
@@ -33,7 +56,6 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 			return;
 		}
 
-		ob_start();
 		$c = ! empty( $instance['count'] ) ? '1' : '0';
 		$d = ! empty( $instance['dropdown'] ) ? '1' : '0';
 
@@ -95,8 +117,6 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 		<?php
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
-		$output = ob_get_clean();
-		echo AMP_Theme_Support::filter_the_content( $output ); // WPCS: XSS ok.
 	}
 
 }

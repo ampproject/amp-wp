@@ -13,6 +13,29 @@
 class AMP_Widget_Categories extends WP_Widget_Categories {
 
 	/**
+	 * AMP_Widget_Categories constructor.
+	 *
+	 * @return void.
+	 */
+	public function __construct() {
+		parent::__construct();
+		add_filter( 'amp_component_scripts', array( $this, 'form_script' ) );
+	}
+
+	/**
+	 * Add a form extension script for AMP to output.
+	 *
+	 * @param array $scripts The AMP scripts.
+	 * @return array $scripts The filtered AMP scripts.
+	 */
+	public function form_script( $scripts ) {
+		if ( ! isset( $scripts['amp-form'] ) ) {
+			$scripts['amp-form'] = 'https://cdn.ampproject.org/v0/amp-form-latest.js';
+		}
+		return $scripts;
+	}
+
+	/**
 	 * Adds an 'on' attribute to the category dropdown's <select>.
 	 *
 	 * @param string $dropdown The markup of the category dropdown.
@@ -42,7 +65,6 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 			return;
 		}
 
-		ob_start();
 		static $first_dropdown = true;
 		$title                 = ! empty( $instance['title'] ) ? $instance['title'] : __( 'Categories', 'default' );
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
@@ -85,8 +107,6 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 		<?php
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
-		$output = ob_get_clean();
-		echo AMP_Theme_Support::filter_the_content( $output ); // WPCS: XSS ok.
 	}
 
 }
