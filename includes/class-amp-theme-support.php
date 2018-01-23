@@ -198,6 +198,11 @@ class AMP_Theme_Support {
 
 		// Add Comments hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
+		add_filter( 'comments_array', array( __CLASS__, 'get_comments_template' ) );
+		// Filter dynamic data with mustache variable strings.
+		// @todo add additional filters for dynamic data like "get_comment_author_link", "get_comment_author_IP" etc...
+		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date_template_string' ) );
+		add_filter( 'get_comment_time', array( __CLASS__, 'get_comment_time_template_string' ) );
 		// @todo Add character conversion.
 	}
 
@@ -332,10 +337,9 @@ class AMP_Theme_Support {
 	/**
 	 * Generate a threaded mustache template based on the themes settings.
 	 *
-	 * @param array $args the args for the comments list.
 	 * @return string HTML mustache template.
 	 */
-	public static function get_comments_template( $args ) {
+	public static function get_comments_template() {
 
 		$_comment = array(
 			'comment_ID'           => '{{comment_ID}}',
@@ -356,7 +360,7 @@ class AMP_Theme_Support {
 		);
 
 		$comments = array();
-		$depth    = ( $args['max_depth'] ? $args['max_depth'] : 5 );
+		$depth    = 5;
 		for ( $i = 0; $i < $depth; $i ++ ) {
 			$comment = new stdClass();
 			foreach ( $_comment as $key => $value ) {
@@ -371,18 +375,7 @@ class AMP_Theme_Support {
 			$comments[] = $comment;
 		}
 
-		$args['echo']     = false;
-		$args['amp_pass'] = true;
-		if ( empty( $args['walker'] ) ) {
-			$args['walker'] = new AMP_Comment_Walker();
-		}
-
-		// Filter dynamic data with musatche variable strings.
-		// @todo add additional filters for dynamic data like "get_comment_author_link", "get_comment_author_IP" etc...
-		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date_template_string' ) );
-		add_filter( 'get_comment_time', array( __CLASS__, 'get_comment_time_template_string' ) );
-
-		return wp_list_comments( $args, $comments );
+		return $comments;
 
 	}
 
@@ -630,19 +623,7 @@ class AMP_Theme_Support {
 			1
 		);
 
-		// Inject comments template.
-		$output   = preg_replace(
-			'#' . preg_quote( self::COMMENTS_TEMPLATE_PLACEHOLDER, '#' ) . '#',
-			$args = wp_cache_get( 'amp_comments_template', 'amp' ),
-			$output,
-			1
-		);
-
-		$dom = AMP_DOM_Utils::get_dom( $output );
-		// Sanitize forms in the document.
-		$sanitizer = new AMP_Form_Sanitizer( $dom );
-		$sanitizer->sanitize();
-
+		$dom       = AMP_DOM_Utils::get_dom( $output );
 		$sanitizer = new AMP_Comments_Sanitizer( $dom );
 		$sanitizer->sanitize();
 

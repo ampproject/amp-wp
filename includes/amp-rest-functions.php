@@ -62,6 +62,7 @@ function amp_get_comments_recursive( $parent, $comments ) {
 		$GLOBALS['comment']    = $comment; // WPCS: override ok.
 		$comment->comment_date = get_comment_date();
 		$comment->comment_time = get_comment_time();
+		$comment->avatar_url   = get_avatar_url( $comment->comment_ID );
 		$comment->comment      = amp_get_comments_recursive( $comment->comment_ID, $comments );
 		$return[]              = $comment;
 	}
