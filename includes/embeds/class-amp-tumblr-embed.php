@@ -1,14 +1,14 @@
 <?php
 /**
- * Class AMP_Tumblr_Embed_Handler
+ * Class AMP_Tumblr_Embed
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Tumblr_Embed_Handler
+ * Class AMP_Tumblr_Embed
  */
-class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Tumblr_Embed extends AMP_Base_Embed_Handler {
 	/**
 	 * Regex matched to produce output amp-iframe.
 	 *

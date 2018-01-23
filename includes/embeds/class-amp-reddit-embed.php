@@ -1,14 +1,14 @@
 <?php
 /**
- * Class AMP_Reddit_Embed_Handler
+ * Class AMP_Reddit_Embed
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Reddit_Embed_Handler
+ * Class AMP_Reddit_Embed
  */
-class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Reddit_Embed extends AMP_Base_Embed_Handler {
 	/**
 	 * Regex matched to produce output amp-reddit.
 	 *
@@ -21,14 +21,14 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var int
 	 */
-	protected $DEFAULT_WIDTH = 596;
+	protected $DEFAULT_WIDTH = 596; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase.
 
 	/**
 	 * Default height for Reddit embeds.
 	 *
 	 * @var int
 	 */
-	protected $DEFAULT_HEIGHT = 141;
+	protected $DEFAULT_HEIGHT = 141; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase.
 
 	/**
 	 * Script slug.
