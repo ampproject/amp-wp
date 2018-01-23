@@ -27,7 +27,9 @@ if [[ ! -e $VENDOR_PATH/amphtml ]]; then
 	git clone https://github.com/ampproject/amphtml amphtml
 else
 	cd $VENDOR_PATH/amphtml/validator
-	git pull
+	if [ 'master' == $( git rev-parse --abbrev-ref HEAD ) ]; then
+		git pull origin master
+	fi
 fi
 
 # Copy script to location and go there.
