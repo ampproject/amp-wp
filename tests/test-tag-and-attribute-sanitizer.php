@@ -329,6 +329,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 			),
 
+			'remove_node_without_mandatory_attribute'                   => array(
+				'<script>console.log()</script>',
+				'',
+			),
+
 			'allow_node_with_valid_mandatory_attribute'                 => array(
 				'<amp-analytics><script type="application/json"></script></amp-analytics>',
 			),
