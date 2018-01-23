@@ -84,4 +84,53 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'WP_Widget_Categories', $wp_widget_factory->widgets );
 		$this->assertArrayHasKey( 'AMP_Widget_Categories', $wp_widget_factory->widgets );
 	}
+
+	/**
+	 * Test finish_output_buffering.
+	 *
+	 * @covers AMP_Theme_Support::finish_output_buffering()
+	 */
+	public function test_finish_output_buffering() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html amp <?php language_attributes(); ?>>
+			<head>
+				<?php wp_head(); ?>
+				<script data-head>document.write('TODO: This needs to be sanitized as well once.');</script>
+			</head>
+			<body>
+				<img width="100" height="100" src="https://example.com/test.png">
+				<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
+				<amp-ad type="a9"
+					width="300"
+					height="250"
+					data-aax_size="300x250"
+					data-aax_pubname="test123"
+					data-aax_src="302"></amp-ad>
+				<?php wp_footer(); ?>
+			</body>
+		</html>
+		<?php
+		$original_html  = trim( ob_get_clean() );
+		$sanitized_html = AMP_Theme_Support::finish_output_buffering( $original_html );
+
+		$this->assertContains( '<meta charset="utf-8">', $sanitized_html );
+		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
+		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
+		$this->assertContains( '<style amp-custom>', $sanitized_html );
+		$this->assertContains( '<script async src="https://cdn.ampproject.org/v0.js"', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
+
+		$this->assertNotContains( '<img', $sanitized_html );
+		$this->assertContains( '<amp-img', $sanitized_html );
+
+		$this->assertNotContains( '<audio', $sanitized_html );
+		$this->assertContains( '<amp-audio', $sanitized_html );
+		$this->assertContains( '<script async custom-element="amp-audio"', $sanitized_html );
+
+		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
+	}
 }

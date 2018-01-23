@@ -155,13 +155,15 @@ class AMP_Theme_Support {
 	public static function register_hooks() {
 
 		// Remove core actions which are invalid AMP.
-		remove_action( 'wp_head', 'locale_stylesheet' );
+		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_styles', 8 );
+		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_head', 'wp_custom_css_cb', 101 );
+		remove_action( 'wp_head', 'wp_custom_css_cb', 101 ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'override_wp_styles' ), -1 );
 
 		/*
 		 * Replace core's canonical link functionality with one that outputs links for non-singular queries as well.
@@ -173,11 +175,11 @@ class AMP_Theme_Support {
 		// @todo Add add_schemaorg_metadata(), add_analytics_data(), etc.
 		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
-		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 2 );
-		add_action( 'wp_head', 'amp_print_boilerplate_code', 3 );
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 4 );
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 5 );
-		add_action( 'wp_head', 'amp_add_generator_metadata', 6 );
+		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 5 );
+		add_action( 'wp_head', 'amp_print_boilerplate_code', 7 );
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
+		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
@@ -190,8 +192,6 @@ class AMP_Theme_Support {
 		 * instead of template_include.
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
-
-		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
 
 		// @todo Add character conversion.
 	}
@@ -217,6 +217,21 @@ class AMP_Theme_Support {
 			unregister_widget( $registered_widget_class_name );
 			register_widget( $amp_class_name );
 		}
+	}
+
+	/**
+	 * Override $wp_styles as AMP_WP_Styles, ideally before first instantiated as WP_Styles.
+	 *
+	 * @see wp_styles()
+	 * @global AMP_WP_Styles $wp_styles
+	 * @return AMP_WP_Styles Instance.
+	 */
+	public static function override_wp_styles() {
+		global $wp_styles;
+		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
+			$wp_styles = new AMP_WP_Styles(); // WPCS: global override ok.
+		}
+		return $wp_styles;
 	}
 
 	/**
@@ -403,6 +418,16 @@ class AMP_Theme_Support {
 		echo '<style amp-custom>';
 		echo self::CUSTOM_STYLES_PLACEHOLDER; // WPCS: XSS OK.
 		echo '</style>';
+
+		$wp_styles = wp_styles();
+		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
+			trigger_error( esc_html__( 'wp_styles() does not return an instance of AMP_WP_Styles as required.', 'amp' ), E_USER_WARNING ); // phpcs:ignore
+			return;
+		}
+
+		$wp_styles->do_items(); // Normally done at wp_head priority 8.
+		$wp_styles->do_locale_stylesheet(); // Normally done at wp_head priority 10.
+		$wp_styles->do_custom_css(); // Normally done at wp_head priority 101.
 	}
 
 	/**
@@ -412,11 +437,7 @@ class AMP_Theme_Support {
 	 * @return string Styles.
 	 */
 	public static function get_amp_custom_styles() {
-
-		// @todo Grab source of all enqueued styles and concatenate here?
-		// @todo Print contents of get_locale_stylesheet_uri()?
-		$path = get_template_directory() . '/style.css'; // @todo Honor filter in get_stylesheet_directory_uri()? Style must be local.
-		$css  = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- It's not a remote file.
+		$css = wp_styles()->print_code;
 
 		// Add styles gleaned from sanitizers.
 		foreach ( self::$amp_styles as $selector => $properties ) {
@@ -426,9 +447,6 @@ class AMP_Theme_Support {
 				join( ';', $properties ) . ';'
 			);
 		}
-
-		// Do AMP version of wp_custom_css_cb().
-		$css .= wp_get_custom_css();
 
 		/**
 		 * Filters AMP custom CSS before it is injected onto the output buffer for the response.
@@ -446,31 +464,11 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Filter the content to be valid AMP.
-	 *
-	 * @param string $content Content.
-	 * @return string Amplified content.
-	 */
-	public static function filter_the_content( $content ) {
-		$args = array(
-			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-		);
-
-		list( $sanitized_content, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $content, self::$sanitizer_classes, $args );
-
-		self::$amp_scripts = array_merge( self::$amp_scripts, $scripts );
-		self::$amp_styles  = array_merge( self::$amp_styles, $styles );
-
-		return $sanitized_content;
-	}
-
-	/**
 	 * Determine required AMP scripts.
 	 *
-	 * @param string $html Output HTML.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public static function get_amp_component_scripts( $html ) {
+	public static function get_amp_component_scripts() {
 		$amp_scripts = self::$amp_scripts;
 
 		foreach ( self::$embed_handlers as $embed_handler ) {
@@ -515,15 +513,41 @@ class AMP_Theme_Support {
 	 * Finish output buffering.
 	 *
 	 * @todo Do this in shutdown instead of output buffering callback?
+	 * @global int $content_width
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
 	 */
 	public static function finish_output_buffering( $output ) {
+		global $content_width;
+
+		$dom  = AMP_DOM_Utils::get_dom( $output );
+		$args = array(
+			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+		);
+
+		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		self::$amp_scripts = array_merge( self::$amp_scripts, $assets['scripts'] );
+		self::$amp_styles  = array_merge( self::$amp_styles, $assets['styles'] );
+
+		/*
+		 * @todo The sanitize method needs to be updated to sanitize the entire HTML element and not just the BODY.
+		 * This will require updating mandatory_parent_blacklist in amphtml-update.py to include elements that appear in the HEAD.
+		 * This will ensure that the scripts and styles that plugins output via wp_head() will be sanitized as well. However,
+		 * since the the old paired mode is sending content from the *body* we'll need to be able to filter out the elements
+		 * from outside the body from being part of the whitelist sanitizer when it runs when theme support is not present,
+		 * as otherwise elements from the HEAD could get added to the BODY.
+		 */
+		$output = preg_replace(
+			'#(<body.*?>)(.+)(</body>)#si',
+			'$1' . AMP_DOM_Utils::get_content_from_dom( $dom ) . '$3',
+			$output
+		);
 
 		// Inject required scripts.
 		$output = preg_replace(
 			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_component_scripts( $output ),
+			self::get_amp_component_scripts(),
 			$output,
 			1
 		);
@@ -536,7 +560,6 @@ class AMP_Theme_Support {
 			1
 		);
 
-		// @todo Add more validation checking and potentially the whitelist sanitizer.
 		return $output;
 	}
 }
