@@ -99,6 +99,10 @@ blockquote {
 	padding: 16px;
 }
 
+blockquote.wp-embedded-content {
+	display: none;
+}
+
 blockquote p:last-child {
 	margin-bottom: 0;
 }

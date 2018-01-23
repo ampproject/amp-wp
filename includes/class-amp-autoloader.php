@@ -38,6 +38,7 @@ class AMP_Autoloader {
 		'AMP_Facebook_Embed_Handler'                  => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'                   => 'includes/embeds/class-amp-gallery-embed',
 		'AMP_Instagram_Embed_Handler'                 => 'includes/embeds/class-amp-instagram-embed',
+		'AMP_Issuu_Embed_Handler'                     => 'includes/embeds/class-amp-issuu-embed',
 		'AMP_Pinterest_Embed_Handler'                 => 'includes/embeds/class-amp-pinterest-embed',
 		'AMP_SoundCloud_Embed_Handler'                => 'includes/embeds/class-amp-soundcloud-embed',
 		'AMP_Twitter_Embed_Handler'                   => 'includes/embeds/class-amp-twitter-embed',

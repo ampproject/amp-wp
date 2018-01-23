@@ -141,6 +141,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Vimeo_Embed_Handler'       => array(),
 			'AMP_SoundCloud_Embed_Handler'  => array(),
 			'AMP_Instagram_Embed_Handler'   => array(),
+			'AMP_Issuu_Embed_Handler'       => array(),
 			'AMP_Vine_Embed_Handler'        => array(),
 			'AMP_Facebook_Embed_Handler'    => array(),
 			'AMP_Pinterest_Embed_Handler'   => array(),
