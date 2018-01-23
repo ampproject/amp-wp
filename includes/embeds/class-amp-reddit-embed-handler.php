@@ -17,20 +17,6 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://(www\.)?reddit\.com/r/[^/]+/comments/.*#i';
 
 	/**
-	 * Default width for Reddit embeds.
-	 *
-	 * @var int
-	 */
-	protected $DEFAULT_WIDTH = 596; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase.
-
-	/**
-	 * Default height for Reddit embeds.
-	 *
-	 * @var int
-	 */
-	protected $DEFAULT_HEIGHT = 141; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase.
-
-	/**
 	 * Script slug.
 	 *
 	 * @var string
@@ -88,8 +74,8 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 			array(
 				'layout'         => 'responsive',
 				'data-embedtype' => 'post',
-				'width'          => $this->args['width'],
-				'height'         => $this->args['height'],
+				'width'          => '596',
+				'height'         => '141',
 				'data-src'       => $args['url'],
 			)
 		);
