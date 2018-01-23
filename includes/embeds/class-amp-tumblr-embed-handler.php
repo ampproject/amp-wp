@@ -1,33 +1,33 @@
 <?php
 /**
- * Class AMP_Issuu_Embed
+ * Class AMP_Tumblr_Embed_Handler
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Issuu_Embed
+ * Class AMP_Tumblr_Embed_Handler
  */
-class AMP_Issuu_Embed extends AMP_Base_Embed_Handler {
+class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Regex matched to produce output amp-iframe.
 	 *
 	 * @const string
 	 */
-	const URL_PATTERN = '#https?://(www\.)?issuu\.com/.+/docs/.+#i';
+	const URL_PATTERN = '#https?://(.+)\.tumblr\.com/post/(.*)#i';
 
 	/**
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'issuu', self::URL_PATTERN, array( $this, 'oembed' ) );
+		wp_embed_register_handler( 'tumblr', self::URL_PATTERN, array( $this, 'oembed' ) );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'issuu' );
+		wp_embed_unregister_handler( 'tumblr' );
 	}
 
 	/**
@@ -42,7 +42,7 @@ class AMP_Issuu_Embed extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Output the Issuu iframe.
+	 * Output the Tumblr iframe.
 	 *
 	 * @param array $args parameters used for output.
 	 */
@@ -55,13 +55,15 @@ class AMP_Issuu_Embed extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
+		// Must enforce https for amp-iframe, but editors can supply either on desktop.
+		$args['url'] = str_replace( 'http://', 'https://', $args['url'] );
+
 		return AMP_HTML_Utils::build_tag(
 			'amp-iframe',
 			array(
-				'width'   => $this->args['width'],
-				'height'  => $this->args['height'],
-				'src'     => $args['url'],
-				'sandbox' => 'allow-scripts allow-same-origin',
+				'width'  => $this->args['width'],
+				'height' => $this->args['height'],
+				'src'    => $args['url'],
 			)
 		);
 	}

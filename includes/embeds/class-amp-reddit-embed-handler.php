@@ -1,14 +1,14 @@
 <?php
 /**
- * Class AMP_Reddit_Embed
+ * Class AMP_Reddit_Embed_Handler
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Reddit_Embed
+ * Class AMP_Reddit_Embed_Handler
  */
-class AMP_Reddit_Embed extends AMP_Base_Embed_Handler {
+class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Regex matched to produce output amp-reddit.
 	 *
