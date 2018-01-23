@@ -13,6 +13,36 @@
 class AMP_DOM_Utils {
 
 	/**
+	 * HTML elements that are self-closing.
+	 *
+	 * Not all are valid AMP, but we include them for completeness.
+	 *
+	 * @since 0.6
+	 * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
+	 * @var array
+	 */
+	private static $self_closing_tags = array(
+		'area',
+		'base',
+		'basefont',
+		'bgsound',
+		'br',
+		'col',
+		'embed',
+		'frame',
+		'hr',
+		'img',
+		'input',
+		'keygen',
+		'link',
+		'meta',
+		'param',
+		'source',
+		'track',
+		'wbr',
+	);
+
+	/**
 	 * Return a valid DOMDocument representing HTML document passed as a parameter.
 	 *
 	 * @since 0.7
@@ -142,7 +172,7 @@ class AMP_DOM_Utils {
 		 * Cache this regex so we don't have to recreate it every call.
 		 */
 		if ( ! isset( $self_closing_tags_regex ) ) {
-			$self_closing_tags       = implode( '|', self::get_self_closing_tags() );
+			$self_closing_tags       = implode( '|', self::$self_closing_tags );
 			$self_closing_tags_regex = "#></({$self_closing_tags})>#i";
 		}
 
@@ -285,48 +315,6 @@ class AMP_DOM_Utils {
 	 * @return bool Returns true if a valid self-closing tag, false if not.
 	 */
 	private static function is_self_closing_tag( $tag ) {
-		return in_array( $tag, self::get_self_closing_tags(), true );
-	}
-
-	/**
-	 * Returns array of self closing tags
-	 *
-	 * @since 0.6
-	 *
-	 * @return string[]
-	 */
-	private static function get_self_closing_tags() {
-		/*
-		 * As this function is called a lot the static var
-		 * prevents having to re-create the array every time.
-		 */
-		static $self_closing_tags;
-		if ( ! isset( $self_closing_tags ) ) {
-			/*
-			 * https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
-			 * Not all are valid AMP, but we include them for completeness.
-			 */
-			$self_closing_tags = array(
-				'area',
-				'base',
-				'basefont',
-				'bgsound',
-				'br',
-				'col',
-				'embed',
-				'frame',
-				'hr',
-				'img',
-				'input',
-				'keygen',
-				'link',
-				'meta',
-				'param',
-				'source',
-				'track',
-				'wbr',
-			);
-		}
-		return $self_closing_tags;
+		return in_array( strtolower( $tag ), self::$self_closing_tags, true );
 	}
 }
