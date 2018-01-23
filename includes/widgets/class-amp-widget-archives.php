@@ -28,6 +28,12 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 	 * @return void.
 	 */
 	public function widget( $args, $instance ) {
+		if ( ! is_amp_endpoint() ) {
+			parent::widget( $args, $instance );
+			return;
+		}
+
+		ob_start();
 		$c = ! empty( $instance['count'] ) ? '1' : '0';
 		$d = ! empty( $instance['dropdown'] ) ? '1' : '0';
 
@@ -89,6 +95,8 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 		<?php
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
+		$output = ob_get_clean();
+		echo AMP_Theme_Support::filter_the_content( $output ); // WPCS: XSS ok.
 	}
 
 }

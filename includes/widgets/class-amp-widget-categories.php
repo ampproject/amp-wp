@@ -37,6 +37,12 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 	 * @return void.
 	 */
 	public function widget( $args, $instance ) {
+		if ( ! is_amp_endpoint() ) {
+			parent::widget( $args, $instance );
+			return;
+		}
+
+		ob_start();
 		static $first_dropdown = true;
 		$title                 = ! empty( $instance['title'] ) ? $instance['title'] : __( 'Categories', 'default' );
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
@@ -79,6 +85,8 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 		<?php
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
+		$output = ob_get_clean();
+		echo AMP_Theme_Support::filter_the_content( $output ); // WPCS: XSS ok.
 	}
 
 }

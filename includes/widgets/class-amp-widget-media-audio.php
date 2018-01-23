@@ -20,6 +20,11 @@ if ( class_exists( 'WP_Widget_Media_Audio' ) ) {
 		 * @return void.
 		 */
 		public function render_media( $instance ) {
+			if ( ! is_amp_endpoint() ) {
+				parent::render_media( $instance );
+				return;
+			}
+
 			ob_start();
 			parent::render_media( $instance );
 			$output = ob_get_clean();

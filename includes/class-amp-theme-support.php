@@ -154,8 +154,6 @@ class AMP_Theme_Support {
 	 */
 	public static function register_hooks() {
 
-		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
-
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'locale_stylesheet' );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );

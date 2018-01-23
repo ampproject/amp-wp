@@ -17,7 +17,9 @@ class AMP_Widget_Recent_Comments extends WP_Widget_Recent_Comments {
 	 */
 	public function __construct() {
 		parent::__construct();
-		add_filter( 'show_recent_comments_widget_style', '__return_false' );
+		if ( is_amp_endpoint() ) {
+			add_filter( 'show_recent_comments_widget_style', '__return_false' );
+		}
 	}
 
 }

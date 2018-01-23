@@ -20,6 +20,11 @@ class AMP_Widget_RSS extends WP_Widget_RSS {
 	 * @return void.
 	 */
 	public function widget( $args, $instance ) {
+		if ( is_amp_endpoint() ) {
+			parent::widget( $args, $instance );
+			return;
+		}
+
 		ob_start();
 		parent::widget( $args, $instance );
 		$output = ob_get_clean();
