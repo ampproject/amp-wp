@@ -334,6 +334,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 			),
 
+			'remove_script_with_async_attribute'                        => array(
+				'<script async src="//cdn.someecards.com/assets/embed/embed-v1.07.min.js" charset="utf-8"></script>', // phpcs:ignore
+				'',
+			),
+
 			'allow_node_with_valid_mandatory_attribute'                 => array(
 				'<amp-analytics><script type="application/json"></script></amp-analytics>',
 			),
