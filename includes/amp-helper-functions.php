@@ -145,6 +145,8 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Vine_Embed_Handler'        => array(),
 			'AMP_Facebook_Embed_Handler'    => array(),
 			'AMP_Pinterest_Embed_Handler'   => array(),
+			'AMP_Reddit_Embed_Handler'      => array(),
+			'AMP_Tumblr_Embed_Handler'      => array(),
 			'AMP_Gallery_Embed_Handler'     => array(),
 			'WPCOM_AMP_Polldaddy_Embed'     => array(),
 		),
