@@ -15,8 +15,6 @@ class AMP_Widget_RSS extends WP_Widget_RSS {
 	/**
 	 * Echoes the markup of the widget.
 	 *
-	 * @todo filter $output, to convert <img> to <amp-img>.
-	 * @see https://github.com/Automattic/amp-wp/issues/864
 	 * @param array $args Widget display data.
 	 * @param array $instance Data for widget.
 	 * @return void.

@@ -16,11 +16,7 @@ if ( class_exists( 'WP_Widget_Media_Image' ) ) {
 		/**
 		 * Echoes the markup of the widget.
 		 *
-		 * @todo filter $output, to convert <imp> to <amp-img> and remove the 'style' attribute.
-		 * @see https://github.com/Automattic/amp-wp/issues/864
-		 *
 		 * @param array $instance Data for widget.
-		 *
 		 * @return void.
 		 */
 		public function render_media( $instance ) {
