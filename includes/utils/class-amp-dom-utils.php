@@ -161,22 +161,14 @@ class AMP_DOM_Utils {
 		static $self_closing_tags_regex;
 
 		/*
-		 * Most AMP elements need closing tags. To force them, we cannot use
-		 * saveHTML (node support is 5.3+) and LIBXML_NOEMPTYTAG results in
-		 * issues with self-closing tags like `br` and `hr`. So, we're manually
-		 * forcing closing tags.
-		 */
-		self::recursive_force_closing_tags( $dom, $node );
-
-		/*
 		 * Cache this regex so we don't have to recreate it every call.
 		 */
 		if ( ! isset( $self_closing_tags_regex ) ) {
 			$self_closing_tags       = implode( '|', self::$self_closing_tags );
-			$self_closing_tags_regex = "#></({$self_closing_tags})>#i";
+			$self_closing_tags_regex = "#</({$self_closing_tags})>#i";
 		}
 
-		$html = $dom->saveXML( $node );
+		$html = $dom->saveHTML( $node );
 
 		// Whitespace just causes unit tests to fail... so whitespace begone.
 		if ( '' === trim( $html ) ) {
@@ -189,10 +181,9 @@ class AMP_DOM_Utils {
 		 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
 		 * This does not happen in my (@mikeschinkel) local testing, btw.
 		 */
-		$html = preg_replace( $self_closing_tags_regex, '/>', $html );
+		$html = preg_replace( $self_closing_tags_regex, '', $html );
 
 		return $html;
-
 	}
 
 	/**
@@ -268,12 +259,14 @@ class AMP_DOM_Utils {
 	 * Forces HTML element closing tags given a DOMDocument and optional DOMElement
 	 *
 	 * @since 0.2
+	 * @deprecated
 	 *
 	 * @param DOMDocument $dom  Represents HTML document on which to force closing tags.
 	 * @param DOMElement  $node Represents HTML element to start closing tags on.
 	 *                          If not passed, defaults to first child of body.
 	 */
 	public static function recursive_force_closing_tags( $dom, $node = null ) {
+		_deprecated_function( __METHOD__, '0.7' );
 
 		if ( is_null( $node ) ) {
 			$node = $dom->getElementsByTagName( 'body' )->item( 0 );
