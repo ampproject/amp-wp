@@ -482,6 +482,11 @@ class AMP_Theme_Support {
 			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 		);
 
+		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		self::$amp_scripts = array_merge( self::$amp_scripts, $assets['scripts'] );
+		self::$amp_styles  = array_merge( self::$amp_styles, $assets['styles'] );
+
 		/*
 		 * @todo The sanitize method needs to be updated to sanitize the entire HTML element and not just the BODY.
 		 * This will require updating mandatory_parent_blacklist in amphtml-update.py to include elements that appear in the HEAD.
@@ -490,11 +495,7 @@ class AMP_Theme_Support {
 		 * from outside the body from being part of the whitelist sanitizer when it runs when theme support is not present,
 		 * as otherwise elements from the HEAD could get added to the BODY.
 		 */
-		list( $sanitized_inner_body, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $dom, self::$sanitizer_classes, $args );
-
-		self::$amp_scripts = array_merge( self::$amp_scripts, $scripts );
-		self::$amp_styles  = array_merge( self::$amp_styles, $styles );
-
+		$sanitized_inner_body = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$output = preg_replace( '#(<body.*?>)(.+)(</body>)#si', '$1' . $sanitized_inner_body . '$3', $output );
 
 		// Inject required scripts.

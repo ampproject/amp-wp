@@ -17,7 +17,7 @@ class AMP_DOM_Utils {
 	 *
 	 * Not all are valid AMP, but we include them for completeness.
 	 *
-	 * @since 0.6
+	 * @since 0.7
 	 * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
 	 * @var array
 	 */
