@@ -53,7 +53,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Get the action URL.
 			if ( ! $node->hasAttribute( 'action' ) ) {
-				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ); // WPCS: ignore. input var okay, sanitization ok.
+				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) ); // WPCS: ignore. input var okay, sanitization ok.
 			} else {
 				$action_url = $node->getAttribute( 'action' );
 			}
