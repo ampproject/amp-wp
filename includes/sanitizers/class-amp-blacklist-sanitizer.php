@@ -32,6 +32,8 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize.
 	 */
 	public function sanitize() {
+		_deprecated_function( __METHOD__, '0.7', 'AMP_Tag_And_Attribute_Sanitizer::sanitize' );
+
 		$blacklisted_tags       = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
 		$blacklisted_protocols  = $this->get_blacklisted_protocols();
