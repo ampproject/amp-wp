@@ -155,13 +155,15 @@ class AMP_Theme_Support {
 	public static function register_hooks() {
 
 		// Remove core actions which are invalid AMP.
-		remove_action( 'wp_head', 'locale_stylesheet' );
+		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_styles', 8 );
+		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_head', 'wp_custom_css_cb', 101 );
+		remove_action( 'wp_head', 'wp_custom_css_cb', 101 ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'override_wp_styles' ), -1 );
 
 		/*
 		 * Replace core's canonical link functionality with one that outputs links for non-singular queries as well.
@@ -173,11 +175,11 @@ class AMP_Theme_Support {
 		// @todo Add add_schemaorg_metadata(), add_analytics_data(), etc.
 		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
-		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 2 );
-		add_action( 'wp_head', 'amp_print_boilerplate_code', 3 );
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 4 );
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 5 );
-		add_action( 'wp_head', 'amp_add_generator_metadata', 6 );
+		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 5 );
+		add_action( 'wp_head', 'amp_print_boilerplate_code', 7 );
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
+		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
@@ -194,6 +196,21 @@ class AMP_Theme_Support {
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
 
 		// @todo Add character conversion.
+	}
+
+	/**
+	 * Override $wp_styles as AMP_WP_Styles, ideally before first instantiated as WP_Styles.
+	 *
+	 * @see wp_styles()
+	 * @global AMP_WP_Styles $wp_styles
+	 * @return AMP_WP_Styles Instance.
+	 */
+	public static function override_wp_styles() {
+		global $wp_styles;
+		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
+			$wp_styles = new AMP_WP_Styles(); // WPCS: global override ok.
+		}
+		return $wp_styles;
 	}
 
 	/**
@@ -380,6 +397,16 @@ class AMP_Theme_Support {
 		echo '<style amp-custom>';
 		echo self::CUSTOM_STYLES_PLACEHOLDER; // WPCS: XSS OK.
 		echo '</style>';
+
+		$wp_styles = wp_styles();
+		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
+			trigger_error( esc_html__( 'wp_styles() does not return an instance of AMP_WP_Styles as required.', 'amp' ), E_USER_WARNING ); // phpcs:ignore
+			return;
+		}
+
+		$wp_styles->do_items(); // Normally done at wp_head priority 8.
+		$wp_styles->do_locale_stylesheet(); // Normally done at wp_head priority 10.
+		$wp_styles->do_custom_css(); // Normally done at wp_head priority 101.
 	}
 
 	/**
@@ -389,11 +416,7 @@ class AMP_Theme_Support {
 	 * @return string Styles.
 	 */
 	public static function get_amp_custom_styles() {
-
-		// @todo Grab source of all enqueued styles and concatenate here?
-		// @todo Print contents of get_locale_stylesheet_uri()?
-		$path = get_template_directory() . '/style.css'; // @todo Honor filter in get_stylesheet_directory_uri()? Style must be local.
-		$css  = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- It's not a remote file.
+		$css = wp_styles()->print_code;
 
 		// Add styles gleaned from sanitizers.
 		foreach ( self::$amp_styles as $selector => $properties ) {
@@ -403,9 +426,6 @@ class AMP_Theme_Support {
 				join( ';', $properties ) . ';'
 			);
 		}
-
-		// Do AMP version of wp_custom_css_cb().
-		$css .= wp_get_custom_css();
 
 		/**
 		 * Filters AMP custom CSS before it is injected onto the output buffer for the response.
