@@ -193,8 +193,6 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
-		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ), PHP_INT_MAX );
-
 		// @todo Add character conversion.
 	}
 
@@ -443,31 +441,11 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Filter the content to be valid AMP.
-	 *
-	 * @param string $content Content.
-	 * @return string Amplified content.
-	 */
-	public static function filter_the_content( $content ) {
-		$args = array(
-			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-		);
-
-		list( $sanitized_content, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $content, self::$sanitizer_classes, $args );
-
-		self::$amp_scripts = array_merge( self::$amp_scripts, $scripts );
-		self::$amp_styles  = array_merge( self::$amp_styles, $styles );
-
-		return $sanitized_content;
-	}
-
-	/**
 	 * Determine required AMP scripts.
 	 *
-	 * @param string $html Output HTML.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public static function get_amp_component_scripts( $html ) {
+	public static function get_amp_component_scripts() {
 		$amp_scripts = self::$amp_scripts;
 
 		foreach ( self::$embed_handlers as $embed_handler ) {
@@ -512,15 +490,41 @@ class AMP_Theme_Support {
 	 * Finish output buffering.
 	 *
 	 * @todo Do this in shutdown instead of output buffering callback?
+	 * @global int $content_width
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
 	 */
 	public static function finish_output_buffering( $output ) {
+		global $content_width;
+
+		$dom  = AMP_DOM_Utils::get_dom( $output );
+		$args = array(
+			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+		);
+
+		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		self::$amp_scripts = array_merge( self::$amp_scripts, $assets['scripts'] );
+		self::$amp_styles  = array_merge( self::$amp_styles, $assets['styles'] );
+
+		/*
+		 * @todo The sanitize method needs to be updated to sanitize the entire HTML element and not just the BODY.
+		 * This will require updating mandatory_parent_blacklist in amphtml-update.py to include elements that appear in the HEAD.
+		 * This will ensure that the scripts and styles that plugins output via wp_head() will be sanitized as well. However,
+		 * since the the old paired mode is sending content from the *body* we'll need to be able to filter out the elements
+		 * from outside the body from being part of the whitelist sanitizer when it runs when theme support is not present,
+		 * as otherwise elements from the HEAD could get added to the BODY.
+		 */
+		$output = preg_replace(
+			'#(<body.*?>)(.+)(</body>)#si',
+			'$1' . AMP_DOM_Utils::get_content_from_dom( $dom ) . '$3',
+			$output
+		);
 
 		// Inject required scripts.
 		$output = preg_replace(
 			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_component_scripts( $output ),
+			self::get_amp_component_scripts(),
 			$output,
 			1
 		);
@@ -533,7 +537,6 @@ class AMP_Theme_Support {
 			1
 		);
 
-		// @todo Add more validation checking and potentially the whitelist sanitizer.
 		return $output;
 	}
 }
