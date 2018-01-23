@@ -33,42 +33,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
 	/**
-	 * Script tag.
-	 *
-	 * @var string AMP HTML tag to use in place of HTML's <video> tag.
-	 *
-	 * @since 0.2
-	 */
-	private static $script_slug = 'amp-video';
-
-	/**
-	 * Script src.
-	 *
-	 * @var string URL to AMP Project's Video element's JavaScript file found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 */
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
-
-	/**
-	 * Return one element array containing AMP HTML video tag and respective Javascript URL
-	 *
-	 * HTML tags and Javascript URLs found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 *
-	 * @return string[] Returns AMP HTML video tag as array key and Javascript URL as array value,
-	 *                  respectively. Will return an empty array if sanitization has yet to be run
-	 *                  or if it did not find any HTML video elements to convert to AMP equivalents.
-	 */
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-		return array( self::$script_slug => self::$script_src );
-	}
-
-	/**
 	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2

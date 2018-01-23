@@ -98,9 +98,9 @@ class AMP_Theme_Support {
 
 		if ( amp_is_canonical() ) {
 
-			// Permanently redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+			// Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
 			if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
-				wp_safe_redirect( self::get_current_canonical_url(), 301 );
+				wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because canonical may change in future.
 				exit;
 			}
 		} else {
@@ -124,6 +124,10 @@ class AMP_Theme_Support {
 	public static function is_paired_available() {
 		$support = get_theme_support( 'amp' );
 		if ( empty( $support ) || amp_is_canonical() ) {
+			return false;
+		}
+
+		if ( is_singular() && ! post_supports_amp( get_queried_object() ) ) {
 			return false;
 		}
 
@@ -265,7 +269,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_paired_template_include( $template ) {
 		if ( empty( $template ) || ! self::is_paired_available() ) {
-			wp_safe_redirect( self::get_current_canonical_url() );
+			wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because support may come later.
 			exit;
 		}
 		return $template;
@@ -444,16 +448,6 @@ class AMP_Theme_Support {
 	 * @return string Scripts to inject into the HEAD.
 	 */
 	public static function get_amp_component_scripts( $html ) {
-
-		// @todo This should be integrated with the existing Sanitizer classes so that duplication is not done here.
-		$amp_components = array(
-			'amp-form' => array(
-				'pattern' => '#<(form|input)\b#i',
-				'source'  => 'https://cdn.ampproject.org/v0/amp-form-0.1.js',
-			),
-			// @todo Add more.
-		);
-
 		$amp_scripts = self::$amp_scripts;
 
 		foreach ( self::$embed_handlers as $embed_handler ) {
@@ -461,12 +455,6 @@ class AMP_Theme_Support {
 				$amp_scripts,
 				$embed_handler->get_scripts()
 			);
-		}
-
-		foreach ( $amp_components as $component => $props ) {
-			if ( preg_match( $props['pattern'], $html ) ) {
-				$amp_scripts[ $component ] = $props['source'];
-			}
 		}
 
 		/**

@@ -53,7 +53,7 @@ abstract class AMP_Base_Sanitizer {
 
 	/**
 	 * Flag to be set in child class' sanitize() method indicating if the
-	 * HTML contained in the DOMDocument has been santized yet or not.
+	 * HTML contained in the DOMDocument has been sanitized yet or not.
 	 *
 	 * @since 0.2
 	 *
@@ -96,7 +96,9 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @return string[] This are empty in this the base class.
+	 * @return string[] Returns component name as array key and JavaScript URL as array value,
+	 *                  respectively. Will return an empty array if sanitization has yet to be run
+	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
 		return array();

@@ -5,7 +5,7 @@ file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
 Follow the steps below to generate a new version of the allowed tags class:
 
 - Download a copy of the latet AMPHTML repository from github:
-	
+
 	git clone git@github.com:ampproject/amphtml.git
 
 - Copy this file into the repo's validator subdirectory:
@@ -149,6 +149,8 @@ def GenerateHeaderPHP(out):
 	out.append(' * Note: This file only contains tags that are relevant to the `body` of')
 	out.append(' * an AMP page. To include additional elements modify the variable')
 	out.append(' * `mandatory_parent_blacklist` in the amp_wp_build.py script.')
+	out.append(' *')
+	out.append(' * phpcs:ignoreFile')
 	out.append(' */')
 	out.append('class AMP_Allowed_Tags_Generated {')
 	out.append('')
@@ -223,7 +225,7 @@ def GenerateAttributesPHP(out, attributes, indent_level = 4):
 	indent = ''
 	for i in range(0,indent_level):
 		indent += '\t'
-	
+
 	sorted_attributes = sorted(attributes.items())
 	for (attribute, values) in collections.OrderedDict(sorted_attributes).iteritems():
 		logging.info('generating php for attribute: %s...' % attribute.lower())
@@ -231,7 +233,7 @@ def GenerateAttributesPHP(out, attributes, indent_level = 4):
 		GeneratePropertiesPHP(out, values)
 		out.append('%s),' % indent)
 		logging.info('...done with: %s' % attribute.lower())
-	
+
 	out.append('')
 	logging.info('... done')
 
@@ -305,26 +307,42 @@ def GenerateFooterPHP(out):
 	logging.info('entering ...')
 
 	# Output the footer.
-	out.append('\tpublic static function get_allowed_tags() {')
-	out.append('\t\treturn self::$allowed_tags;')
-	out.append('\t}')
-	out.append('')
+	out.append('''
+	/**
+	 * Get allowed tags.
+	 *
+	 * @since 0.5
+	 * @return array Allowed tags.
+	 */
+	public static function get_allowed_tags() {
+		return self::$allowed_tags;
+	}
 
-	out.append('\tpublic static function get_allowed_attributes() {')
-	out.append('\t\treturn self::$globally_allowed_attrs;')
-	out.append('\t}')
-	out.append('')
+	/**
+	 * Get list of globally-allowed attributes.
+	 *
+	 * @since 0.5
+	 * @return array Allowed tag.
+	 */
+	public static function get_allowed_attributes() {
+		return self::$globally_allowed_attrs;
+	}
 
-	out.append('\tpublic static function get_layout_attributes() {')
-	out.append('\t\treturn self::$layout_allowed_attrs;')
-	out.append('\t}')
+	/**
+	 * Get layout attributes.
+	 *
+	 * @since 0.5
+	 * @return array Allowed tag.
+	 */
+	public static function get_layout_attributes() {
+		return self::$layout_allowed_attrs;
+	}''')
+
 	out.append('')
 
 	out.append('}')
 	out.append('')
 
-	out.append('?>')
-	out.append('')
 	logging.info('... done')
 
 
@@ -433,6 +451,18 @@ def GetTagRules(tag_spec):
 		for also_requires_tag in tag_spec.also_requires_tag:
 			also_requires_tag_list.append(UnicodeEscape(also_requires_tag))
 		tag_rules['also_requires_tag'] = {'also_requires_tag': also_requires_tag_list}
+
+	if hasattr(tag_spec, 'requires_extension') and len( tag_spec.requires_extension ) != 0:
+		requires_extension_list = []
+		for requires_extension in tag_spec.requires_extension:
+			requires_extension_list.append(requires_extension)
+		tag_rules['requires_extension'] = {'requires_extension': requires_extension_list}
+
+	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
+		also_requires_tag_warning_list = []
+		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
+			also_requires_tag_warning_list.append(also_requires_tag_warning)
+		tag_rules['also_requires_tag_warning'] = {'also_requires_tag_warning': also_requires_tag_warning_list}
 
 	if tag_spec.disallowed_ancestor:
 		disallowed_ancestor_list = []
