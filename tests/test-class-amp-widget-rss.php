@@ -13,6 +13,18 @@
 class Test_AMP_Widget_RSS extends WP_UnitTestCase {
 
 	/**
+	 * Setup.
+	 *
+	 * @inheritdoc
+	 */
+	public function setUp() {
+		parent::setUp();
+		add_theme_support( 'amp' );
+		wp_maybe_load_widgets();
+		AMP_Theme_Support::init();
+	}
+
+	/**
 	 * Test construct().
 	 *
 	 * @see AMP_Widget_RSS::__construct().
@@ -54,7 +66,7 @@ class Test_AMP_Widget_RSS extends WP_UnitTestCase {
 		$widget->widget( $args, $instance );
 		$output = ob_get_clean();
 
-		$this->assertFalse( strpos( $output, '<img' ) );
+		$this->assertNotContains( '<img', $output );
 		$this->assertContains( '<amp-img', $output );
 	}
 

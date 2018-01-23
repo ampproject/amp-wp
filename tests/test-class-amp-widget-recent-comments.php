@@ -13,6 +13,16 @@
 class Test_AMP_Widget_Recent_Comments extends WP_UnitTestCase {
 
 	/**
+	 * Setup.
+	 *
+	 * @inheritdoc
+	 */
+	public function setUp() {
+		parent::setUp();
+		add_theme_support( 'amp' );
+	}
+
+	/**
 	 * Test construct().
 	 *
 	 * @see AMP_Widget_Recent_Comments::__construct().

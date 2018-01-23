@@ -19,6 +19,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		add_theme_support( 'amp ' );
 		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
 	}

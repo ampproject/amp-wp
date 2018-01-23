@@ -23,6 +23,7 @@ class Test_AMP_Widget_Media_Image extends WP_UnitTestCase {
 			$this->markTestSkipped( sprintf( 'The widget %s is not present, so neither is its child class.', $wp_widget ) );
 		}
 		parent::setUp();
+		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 	}
 
