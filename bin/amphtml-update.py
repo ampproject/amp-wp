@@ -258,6 +258,8 @@ def GeneratePropertiesPHP(out, properties, indent_level = 5):
 					if isinstance(value, str):
 						value = value.lower()
 					out.append('%s\t\'%s\' => \'%s\',' % (indent, value_type, value))
+				elif isinstance(value, int):
+					out.append('%s\t\'%s\' => %d,' % (indent, value_type, value))
 				else:
 					GenerateValuesPHP(out, value)
 			out.append('%s),' % indent)
