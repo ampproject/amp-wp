@@ -36,11 +36,6 @@ fi
 cp $BIN_PATH/amphtml-update.py $VENDOR_PATH/amphtml/validator
 cd $VENDOR_PATH/amphtml/validator
 
-# Temporary fix until https://github.com/ampproject/amphtml/issues/12371 is addressed.
-if [ ! -f $VENDOR_PATH/amphtml/validator/validator_gen_md.py ]; then
-	git apply $BIN_PATH/amphtml-fix.diff
-fi
-
 # Run script.
 python amphtml-update.py
 cp amp_wp/class-amp-allowed-tags-generated.php ../../../includes/sanitizers/

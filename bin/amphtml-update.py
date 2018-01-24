@@ -5,7 +5,7 @@ file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
 Follow the steps below to generate a new version of the allowed tags class:
 
 - Download a copy of the latet AMPHTML repository from github:
-	
+
 	git clone git@github.com:ampproject/amphtml.git
 
 - Copy this file into the repo's validator subdirectory:
@@ -99,7 +99,7 @@ def GenValidatorProtoascii(out_dir):
 
 
 def GeneratePHP(out_dir):
-	"""Calls validator_gen_md to generate validator-generated.md.
+	"""Generates PHP for WordPress AMP plugin to consume.
 
 	Args:
 		out_dir: directory name of the output directory. Must not have slashes,
@@ -223,7 +223,7 @@ def GenerateAttributesPHP(out, attributes, indent_level = 4):
 	indent = ''
 	for i in range(0,indent_level):
 		indent += '\t'
-	
+
 	sorted_attributes = sorted(attributes.items())
 	for (attribute, values) in collections.OrderedDict(sorted_attributes).iteritems():
 		logging.info('generating php for attribute: %s...' % attribute.lower())
@@ -231,7 +231,7 @@ def GenerateAttributesPHP(out, attributes, indent_level = 4):
 		GeneratePropertiesPHP(out, values)
 		out.append('%s),' % indent)
 		logging.info('...done with: %s' % attribute.lower())
-	
+
 	out.append('')
 	logging.info('... done')
 
@@ -336,7 +336,6 @@ def ParseRules(out_dir):
 	# are checked by CheckPrereqs.
 	from google.protobuf import text_format
 	from amp_wp import validator_pb2
-	import validator_gen_md
 
 	allowed_tags = {}
 	attr_lists = {}
