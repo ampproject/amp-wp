@@ -365,7 +365,7 @@ function amp_hook_comments_maybe() {
 	$method        = filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING );
 	$is_amp_submit = filter_input( INPUT_GET, '__amp_source_origin', FILTER_VALIDATE_URL );
 
-	if ( 'POST' !== strtolower( $method ) || is_null( $is_amp_submit ) ) {
+	if ( 'post' !== strtolower( $method ) || is_null( $is_amp_submit ) ) {
 		return;
 	}
 
