@@ -19,7 +19,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 */
-	public static $tag = 'comments-template';
+	public static $tag = 'comment-template';
 
 	/**
 	 * Sanitize the <img> elements from the HTML contained in this instance's DOMDocument.
@@ -40,35 +40,54 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		for ( $i = 0; $i < $nodes->length; $i ++ ) {
+		for ( $i = 0; $i < $nodes->length; $i++ ) {
 			$node = $nodes->item( $i );
 			if ( ! $node instanceof DOMElement ) {
 				continue;
 			}
 
-			// Get the comment template parts.
-			$comment_items = $node->cloneNode( true )->childNodes;
-			$parent        = $node->parentNode;
-			$parent->removeChild( $node );
-			// Get the internal amp-list.
-			$list = $parent->firstChild->cloneNode( true );
-			// Get the internal template.
-			$template = $list->firstChild;
-			// Remove the holder template so we have an empty parent wrapper.
-			$parent->removeChild( $parent->firstChild );
-			$new_parent = $parent->cloneNode();
+			// Get the comment template layer parts. (wrapper, amp-list, template, comments-template).
+			$ol           = $node->parentNode;
+			$new_wrap     = $node->parentNode->cloneNode();
+			$amp_list     = $ol->getElementsByTagName( 'amp-list' )->item( 0 );
+			$amp_template = $ol->getElementsByTagName( 'template' )->item( 0 );
 
-			// Add each of the template parts.
-			for ( $c = 0; $c < $comment_items->length; $c ++ ) {
-				$item = $comment_items->item( $c )->cloneNode( true );
-				$new_parent->appendChild( $item );
+			// Move Dom parts to an AMP structure.
+			$new_wrap->appendChild( $node );
+			$amp_template->appendChild( $new_wrap );
+			$ol->parentNode->replaceChild( $amp_list, $ol );
+
+			// Convert Links for templating.
+			$links = $amp_template->getElementsByTagName( 'a' );
+			$this->convert_urls( $links, 'href' );
+
+			// Convert image src for templating.
+			$imgs = $amp_template->getElementsByTagName( 'amp-img' );
+			$this->convert_urls( $imgs, 'src' );
+
+			// Convert image src for templating.
+			$imgs = $amp_template->getElementsByTagName( 'amp-img' );
+			$this->convert_urls( $imgs, 'srcset' );
+
+		}
+	}
+
+	/**
+	 * Convert comment_[field]_url to mustache template strings.
+	 *
+	 * @since 0.2
+	 * @param DOMNodeList $node_list The list of nodes to convert.
+	 * @param string      $type The type of attribute to convert.
+	 */
+	private function convert_urls( $node_list, $type = 'href' ) {
+
+		for ( $a = 0; $a < $node_list->length; $a++ ) {
+			$node = $node_list->item( $a );
+			if ( ! $node->hasAttribute( $type ) ) {
+				continue;
 			}
-
-			// Add wrapped template to the template element.
-			$template->appendChild( $new_parent );
-			// Replace the old comments wrapper with the new one.
-			$parent->parentNode->replaceChild( $list, $parent );
-
+			$url = preg_replace( '/http[s]?:\/\/(comment_[a-z_]+_url)/', '{{$1}}', $node->getAttribute( $type ) );
+			$node->setAttribute( $type, $url );
 		}
 	}
 }
