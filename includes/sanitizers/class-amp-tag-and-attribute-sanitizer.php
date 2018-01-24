@@ -573,10 +573,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$this->delegated_sanitize_disallowed_attribute_values_in_node( $node, $this->globally_allowed_attributes );
-		if ( ! empty( $attr_spec_list ) ) {
-			$this->delegated_sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
-		}
+		$this->delegated_sanitize_disallowed_attribute_values_in_node( $node, array_merge(
+			$this->globally_allowed_attributes,
+			$attr_spec_list
+		) );
 	}
 
 	/**

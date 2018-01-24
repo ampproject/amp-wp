@@ -202,8 +202,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'form'                                                      => array(
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" name="term" required=""/></label><input type="submit" value="Search"/></fieldset></form>',
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" name="term" required=""/></label><input type="submit" value="Search"/></fieldset></form>',
+				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required=""/></label><input type="submit" value="Search"/></fieldset></form>',
+				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required=""/></label><input type="submit" value="Search"/></fieldset></form>',
 			),
 
 			'gfycat'                                                    => array(
