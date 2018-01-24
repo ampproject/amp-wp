@@ -205,9 +205,10 @@ class AMP_Theme_Support {
 		add_filter( 'comments_array', array( __CLASS__, 'get_comments_template' ) );
 		// Filter dynamic data with mustache variable strings.
 		// @todo add additional filters for dynamic data like "get_comment_author_link", "get_comment_author_IP" etc...
-		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date_template_string' ) );
-		add_filter( 'get_comment_time', array( __CLASS__, 'get_comment_time_template_string' ) );
-
+		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date_template_string' ), PHP_INT_MAX );
+		add_filter( 'get_comment_time', array( __CLASS__, 'get_comment_time_template_string' ), PHP_INT_MAX );
+		add_filter( 'get_avatar_data', array( __CLASS__, 'get_avatar_data' ), PHP_INT_MAX );
+		add_filter( 'get_comment_ID', array( __CLASS__, 'get_comment_id_template_string' ), PHP_INT_MAX );
 		// @todo Add character conversion.
 	}
 
@@ -400,7 +401,28 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Get somment date string for template.
+	 * Get avatar URL template string.
+	 *
+	 * @param array $args Avatar data args.
+	 * @return array Avatar data with url added.
+	 */
+	public static function get_avatar_data( $args ) {
+		$args['url'] = '{{comment_avatar_url}}';
+
+		return $args;
+	}
+
+	/**
+	 * Get comment ID string for template.
+	 *
+	 * @return string Mustache template string.
+	 */
+	public static function get_comment_id_template_string() {
+		return '{{comment_ID}}';
+	}
+
+	/**
+	 * Get comment date string for template.
 	 *
 	 * @return string Mustache template string.
 	 */
