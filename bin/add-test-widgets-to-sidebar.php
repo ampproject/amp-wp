@@ -386,10 +386,13 @@ function amp_create_widget( $widget ) {
 		$settings['title'] = sprintf( 'Test %s Widget', ucwords( $title ) );
 	}
 
-	$number = max( array_keys( $widgets ) );
-	$number = max( 2, $number );
+	$number = 1;
+	unset( $widgets['_multiwidget'] );
+	if ( ! empty( $widgets ) ) {
+		$number = max( array_keys( $widgets ) );
+		$number = max( 1, $number );
+	}
 	$number++;
-
 	$widgets[ $number ] = $settings;
 	update_option( $option_key, $widgets );
 }
