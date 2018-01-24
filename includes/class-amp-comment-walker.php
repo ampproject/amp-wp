@@ -85,23 +85,20 @@ class AMP_Comment_Walker extends Walker_Comment {
 		}
 
 		$args = array_slice( func_get_args(), 4 );
-		if ( ! empty( $args[0]['comments_template_placeholder'] ) ) {
-			return $args[0]['comments_template_placeholder'];
-		}
-
-		$template  = '<comments-template>';
-		$template .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
-		$template .= '</comments-template>';
 
 		$url = get_rest_url( get_current_blog_id(), 'amp/v1/comments/' . get_the_ID() );
 		if ( strpos( $url, 'http:' ) === 0 ) {
 			$url = substr( $url, 5 );
 		}
 		// @todo Identify arguments and make filterable/settable.
-		$template .= '<amp-list src="' . esc_attr( $url ) . '" height="400" single-item="true" layout="fixed-height">';
-		$template .= '<template type="amp-mustache"></template>';
-		$template .= '</amp-list>';
+		$output  = '<amp-list src="' . esc_attr( $url ) . '" height="400" single-item="true" layout="fixed-height">';
+		$output .= '<template type="amp-mustache"></template>';
+		$output .= '<div overflow role="button" aria-label="' . esc_attr__( 'Show more', 'amp' ) . '" class="list-overflow ampstart-btn caps">' . esc_html__( 'Show more', 'amp' ) . '</div>';
+		$output .= '</amp-list>';
+		$output .= '<comment-template>';
+		$output .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
+		$output .= '</comment-template>';
 
-		return $template;
+		return $output;
 	}
 }
