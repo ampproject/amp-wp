@@ -202,8 +202,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'form'                                                      => array(
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required=""/></label><input type="submit" value="Search"/></fieldset></form>',
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required=""/></label><input type="submit" value="Search"/></fieldset></form>',
+				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
+				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
 			),
 
 			'gfycat'                                                    => array(
@@ -216,7 +216,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'empty_element'                                             => array(
-				'<br/>',
+				'<br>',
 			),
 
 			'merge_two_attr_specs'                                      => array(
@@ -370,7 +370,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'leave_attribute_on_node_with_present_mandatory_parent'     => array(
 				'<form action="form.php" target="_top"><div submit-success>This is a test.</div></form>',
-				'<form action="form.php" target="_top"><div submit-success="">This is a test.</div></form>',
+				'<form action="form.php" target="_top"><div submit-success>This is a test.</div></form>',
 			),
 
 			'disallowed_empty_attr_removed'                             => array(
@@ -397,7 +397,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'allowed_tag_only'                                          => array(
-				'<p>Text</p><img src="/path/to/file.jpg" />',
+				'<p>Text</p><img src="/path/to/file.jpg">',
 				'<p>Text</p>',
 			),
 
@@ -465,7 +465,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'a_with_href_invalid'                                       => array(
-				'<a href="some random text">Link</a>',
+				'<a href="some%20random%20text">Link</a>',
 			),
 
 			'a_with_href_scheme_tel'                                    => array(
@@ -568,6 +568,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 		$this->assertEquals( $expected, $content );
 	}
 }

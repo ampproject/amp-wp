@@ -103,6 +103,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 		$this->assertEquals( $expected, $content );
 	}
 
