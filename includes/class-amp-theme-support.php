@@ -344,21 +344,17 @@ class AMP_Theme_Support {
 	 */
 	public static function add_amp_comments_template( $args ) {
 		if ( ! isset( $args['amp_comments'] ) ) {
-			$amp_walker           = new AMP_Comment_Walker();
-			$args['walker']       = $amp_walker;
-			$args['amp_comments'] = true;
-			$template             = self::get_comments_template( $args );
-			wp_cache_add( 'amp_comments_template', $template, 'amp' );
-			$args['comments_template_placeholder'] = self::COMMENTS_TEMPLATE_PLACEHOLDER;
+			$amp_walker     = new AMP_Comment_Walker();
+			$args['walker'] = $amp_walker;
 		}
 
 		return $args;
 	}
 
 	/**
-	 * Generate a threaded mustache template based on the themes settings.
+	 * Create a comments_flat array for generating the comment mustache template.
 	 *
-	 * @return string HTML mustache template.
+	 * @return array Flat array of comment placeholders.
 	 */
 	public static function get_comments_template() {
 
