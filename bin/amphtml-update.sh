@@ -27,17 +27,14 @@ if [[ ! -e $VENDOR_PATH/amphtml ]]; then
 	git clone https://github.com/ampproject/amphtml amphtml
 else
 	cd $VENDOR_PATH/amphtml/validator
-	git pull
+	if [ 'master' == $( git rev-parse --abbrev-ref HEAD ) ]; then
+		git pull origin master
+	fi
 fi
 
 # Copy script to location and go there.
 cp $BIN_PATH/amphtml-update.py $VENDOR_PATH/amphtml/validator
 cd $VENDOR_PATH/amphtml/validator
-
-# Temporary fix until https://github.com/ampproject/amphtml/issues/12371 is addressed.
-if [ ! -f $VENDOR_PATH/amphtml/validator/validator_gen_md.py ]; then
-	git apply $BIN_PATH/amphtml-fix.diff
-fi
 
 # Run script.
 python amphtml-update.py

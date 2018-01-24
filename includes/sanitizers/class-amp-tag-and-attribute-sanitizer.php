@@ -229,6 +229,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						$attr_spec_list = array_merge( $attr_spec_list, $spec_list );
 					}
 				}
+				$first_spec = reset( $rule_spec_list_to_validate );
+				if ( empty( $attr_spec_list ) && isset( $first_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
+					$attr_spec_list = $first_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
+				}
 			}
 		} // End if().
 
