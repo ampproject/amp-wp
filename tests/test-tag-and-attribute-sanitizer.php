@@ -339,6 +339,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 			),
 
+			'remove_invalid_json_script'                                => array(
+				'<script type="application/json" class="wp-playlist-script">{}</script>',
+				'',
+			),
+
 			'allow_node_with_valid_mandatory_attribute'                 => array(
 				'<amp-analytics><script type="application/json"></script></amp-analytics>',
 			),

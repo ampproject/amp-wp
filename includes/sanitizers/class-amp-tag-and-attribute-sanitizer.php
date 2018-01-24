@@ -325,8 +325,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param object $node The node to validate.
-	 * @param array  $tag_spec The sepecification.
+	 * @param DOMNode $node The node to validate.
+	 * @param array   $tag_spec The specification.
 	 * @return boolean $valid Whether the node's placement is valid.
 	 */
 	private function validate_tag_spec_for_node( $node, $tag_spec ) {
