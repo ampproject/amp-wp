@@ -2,12 +2,14 @@
 /**
  * Class AMP_Widget_Categories
  *
+ * @since 0.7.0
  * @package AMP
  */
 
 /**
  * Class AMP_Widget_Categories
  *
+ * @since 0.7.0
  * @package AMP
  */
 class AMP_Widget_Categories extends WP_Widget_Categories {
@@ -21,9 +23,11 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 	 * This enables adding an 'on' attribute, with the id of the form.
 	 * So changing the dropdown value will redirect to the category page, with valid AMP.
 	 *
+	 * @since 0.7.0
+	 *
 	 * @param array $args Widget display data.
 	 * @param array $instance Data for widget.
-	 * @return void.
+	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		if ( ! is_amp_endpoint() ) {

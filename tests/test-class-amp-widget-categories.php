@@ -35,7 +35,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	/**
 	 * Test construct().
 	 *
-	 * @see AMP_Widget_Categories::__construct().
+	 * @covers AMP_Widget_Categories::__construct()
 	 */
 	public function test_construct() {
 		$this->assertEquals( 'AMP_Widget_Categories', get_class( $this->widget ) );
@@ -49,7 +49,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	/**
 	 * Test widget().
 	 *
-	 * @see AMP_Widget_Categories::widget().
+	 * @covers AMP_Widget_Categories::widget()
 	 */
 	public function test_widget() {
 		$arguments = array(

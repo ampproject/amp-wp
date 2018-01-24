@@ -2,12 +2,14 @@
 /**
  * Class AMP_Widget_Archives
  *
+ * @since 0.7.0
  * @package AMP
  */
 
 /**
  * Class AMP_Widget_Archives
  *
+ * @since 0.7.0
  * @package AMP
  */
 class AMP_Widget_Archives extends WP_Widget_Archives {
@@ -22,6 +24,8 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 	 * The dropdown is now filtered with 'wp_dropdown_cats.'
 	 * This enables adding an 'on' attribute, with the id of the form.
 	 * So changing the dropdown value will redirect to the category page, with valid AMP.
+	 *
+	 * @since 0.7.0
 	 *
 	 * @param array $args Widget display data.
 	 * @param array $instance Data for widget.
