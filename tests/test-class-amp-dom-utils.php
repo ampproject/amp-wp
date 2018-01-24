@@ -97,7 +97,6 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * @covers \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @covers \AMP_DOM_Utils::restore_amp_bind_attributes()
 	 * @covers \AMP_DOM_Utils::get_amp_bind_placeholder_attribute_prefix()
-	 * \AMP_DOM_Utils::restore_amp_bind_attributes()
 	 */
 	public function test_amp_bind_conversion() {
 		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';

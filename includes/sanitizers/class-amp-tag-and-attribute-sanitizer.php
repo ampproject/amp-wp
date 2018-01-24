@@ -279,19 +279,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// Obtain list of component scripts required.
-		if ( ! empty( $tag_spec['also_requires_tag_warning'] ) ) {
-			$this->script_components[] = strtok( $tag_spec['also_requires_tag_warning'][0], ' ' );
-		}
-		if ( ! empty( $tag_spec['requires_extension'] ) ) {
-			$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
-		}
-
 		// Remove any remaining disallowed attributes.
 		$this->sanitize_disallowed_attributes_in_node( $node, $attr_spec_list );
 
 		// Remove values that don't conform to the attr_spec.
 		$this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
+
+		// Add required AMP component scripts if the element is still in the document.
+		if ( $node->parentNode ) {
+			if ( ! empty( $tag_spec['also_requires_tag_warning'] ) ) {
+				$this->script_components[] = strtok( $tag_spec['also_requires_tag_warning'][0], ' ' );
+			}
+			if ( ! empty( $tag_spec['requires_extension'] ) ) {
+				$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
+			}
+		}
 	}
 
 	/**
