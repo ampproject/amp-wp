@@ -13,6 +13,7 @@
  * @return array Data entries.
  */
 function amp_get_test_data_entries() {
+	list( $img_src ) = wp_get_attachment_image_src( amp_get_media_items_ids( 'image', 1 ) );
 	return array(
 		array(
 			'heading' => 'Media Gallery',
@@ -28,7 +29,7 @@ function amp_get_test_data_entries() {
 		),
 		array(
 			'heading' => 'Media Video',
-			'content' => '[video src=https://videos.files.wordpress.com/DK5mLrbr/video-ca6dc0ab4a_hd.mp4]',
+			'content' => sprintf( '[video poster="%s" src=https://videos.files.wordpress.com/DK5mLrbr/video-ca6dc0ab4a_hd.mp4]', $img_src ),
 		),
 		array(
 			'heading' => 'Media Audio',
@@ -295,7 +296,7 @@ function amp_create_embed_test_post( $data_entries ) {
 if ( defined( 'WP_CLI' ) ) {
 	try {
 		$post_id = amp_create_embed_test_post( amp_get_test_data_entries() );
-		WP_CLI::success( sprintf( 'Please take a look at: %s', amp_get_permalink( $post_id ) ) );
+		WP_CLI::success( sprintf( 'Please take a look at: %s', amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( Exception $e ) {
 		WP_CLI::error( $e->getMessage() );
 	}
