@@ -423,6 +423,7 @@ class AMP_Theme_Support {
 
 	/**
 	 * Adds the form submit success and fail templates.
+	 *
 	 * @param string $post_id The post ID if action is 'comment_form'.
 	 */
 	public static function add_amp_comment_form_templates( $post_id ) {
