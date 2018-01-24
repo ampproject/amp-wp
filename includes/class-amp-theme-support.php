@@ -172,7 +172,7 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', 'rel_canonical' );
 		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
 
-		// @todo Add add_schemaorg_metadata(), add_analytics_data(), etc.
+		// @todo Add add_schemaorg_metadata().
 		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 5 );
@@ -180,6 +180,8 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
+
+		add_action( 'wp_footer', array( __CLASS__, 'add_analytics_data' ) );
 
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
@@ -330,6 +332,37 @@ class AMP_Theme_Support {
 	public static function add_meta_viewport() {
 		echo '<meta name="viewport" content="width=device-width,minimum-scale=1">';
 	}
+
+	/**
+	 * Print analytics data.
+	 */
+	public static function add_analytics_data() {
+		$analytics_entries = apply_filters( 'amp_post_template_analytics', array() );
+
+		if ( empty( $analytics_entries ) ) {
+			return;
+		}
+
+		// Can enter multiple configs within backend.
+		foreach ( $analytics_entries as $id => $analytics_entry ) {
+			if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
+				/* translators: %1$s is analytics entry ID, %2$s is actual entry keys. */
+				_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
+				continue;
+			}
+			$script_element = AMP_HTML_Utils::build_tag( 'script', array(
+				'type' => 'application/json',
+			), wp_json_encode( $analytics_entry['config_data'] ) );
+
+			$amp_analytics_attr = array_merge( array(
+				'id'   => $id,
+				'type' => $analytics_entry['type'],
+			), $analytics_entry['attributes'] );
+
+			echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
+		}
+	}
+
 
 	/**
 	 * Print AMP script and placeholder for others.
