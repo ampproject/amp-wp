@@ -46,9 +46,9 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 		if ( $d ) :
 			$dropdown_id = "{$this->id_base}-dropdown-{$this->number}";
 			?>
-			<form action="<?php echo esc_url( home_url() ); ?>" method="get" id="widget-archives-dropdown-<?php echo esc_attr( $this->number ); ?>">
+			<form action="<?php echo esc_url( home_url() ); ?>" method="get" target="_top">
 				<label class="screen-reader-text" for="<?php echo esc_attr( $dropdown_id ); ?>"><?php echo esc_html( $title ); ?></label>
-				<select id="<?php echo esc_attr( $dropdown_id ); ?>" name="archive-dropdown" on="change:widget-archives-dropdown-<?php echo esc_attr( $this->number ); ?>.submit">
+				<select id="<?php echo esc_attr( $dropdown_id ); ?>" name="archive-dropdown" on="change:AMP.navigateTo(url=event.value)">
 					<?php
 
 					/** This filter is documented in wp-includes/widgets/class-wp-widget-archives.php */

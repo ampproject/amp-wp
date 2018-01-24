@@ -12,18 +12,6 @@
  */
 class AMP_Widget_Categories extends WP_Widget_Categories {
 
-
-	/**
-	 * Adds an 'on' attribute to the category dropdown's <select>.
-	 *
-	 * @param string $dropdown The markup of the category dropdown.
-	 * @return string $dropdown The filtered markup of the dropdown.
-	 */
-	public function modify_select( $dropdown ) {
-		$new_select = sprintf( '<select on="change:widget-categories-dropdown-%d.submit"', esc_attr( $this->number ) );
-		return str_replace( '<select', $new_select, $dropdown );
-	}
-
 	/**
 	 * Echoes the markup of the widget.
 	 *
@@ -60,17 +48,26 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 			'hierarchical' => $h,
 		);
 		if ( $d ) :
-			echo sprintf( '<form action="%s" method="get" id="widget-categories-dropdown-%d">', esc_url( home_url() ), esc_attr( $this->number ) );
-			add_filter( 'wp_dropdown_cats', array( $this, 'modify_select' ) );
+			$form_id = sprintf( 'widget-categories-dropdown-%d', $this->number );
+			printf( '<form action="%s" method="get" target="_top" id="%s">', esc_url( home_url() ), esc_attr( $form_id ) );
 			$dropdown_id    = ( $first_dropdown ) ? 'cat' : "{$this->id_base}-dropdown-{$this->number}";
 			$first_dropdown = false;
 			echo '<label class="screen-reader-text" for="' . esc_attr( $dropdown_id ) . '">' . esc_html( $title ) . '</label>';
 			$cat_args['show_option_none'] = __( 'Select Category', 'default' );
 			$cat_args['id']               = $dropdown_id;
 
-			/** This filter is documented in wp-includes/widgets/class-wp-widget-categories.php */
-			wp_dropdown_categories( apply_filters( 'widget_categories_dropdown_args', $cat_args, $instance ) );
-			remove_filter( 'wp_dropdown_cats', array( $this, 'modify_select' ) );
+			$dropdown = wp_dropdown_categories( array_merge(
+				/** This filter is documented in wp-includes/widgets/class-wp-widget-categories.php */
+				apply_filters( 'widget_categories_dropdown_args', $cat_args, $instance ),
+				array( 'echo' => false )
+			) );
+			$dropdown = preg_replace(
+				'/(?<=<select\b)/',
+				sprintf( '<select on="change:%s.submit"', esc_attr( $form_id ) ),
+				$dropdown,
+				1
+			);
+			echo $dropdown; // WPCS: XSS OK.
 			echo '</form>';
 		else :
 			?>
