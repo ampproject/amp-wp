@@ -520,6 +520,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<font size="1">Headline</font><span style="color: blue">Span</span>',
 				'Headline<span>Span</span>',
 			),
+
+			'amp_bind_attr' => array(
+				'<p [text]="\'Hello \' + foo">Hello World</p><button on="tap:AMP.setState({foo: \'amp-bind\'})">Update</button>',
+			),
 		);
 	}
 
