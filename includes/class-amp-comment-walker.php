@@ -91,9 +91,10 @@ class AMP_Comment_Walker extends Walker_Comment {
 			$url = substr( $url, 5 );
 		}
 		// @todo Identify arguments and make filterable/settable.
-		$output  = '<amp-list src="' . esc_attr( $url ) . '" height="400" single-item="true" layout="fixed-height">';
+		$output  = '<amp-list src="' . esc_attr( $url ) . '" height="200" width="auto" single-item="true" layout="flex-item">';
 		$output .= '<template type="amp-mustache"></template>';
 		$output .= '<div overflow role="button" aria-label="' . esc_attr__( 'Show more', 'amp' ) . '" class="list-overflow ampstart-btn caps">' . esc_html__( 'Show more', 'amp' ) . '</div>';
+		$output .= '<div fallback class="amp-fallback amp-comments-notice amp-error"><p>' . esc_html__( 'Could not load comments.', 'amp' ) . '</p></div>';
 		$output .= '</amp-list>';
 		$output .= '<comment-template>';
 		$output .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
