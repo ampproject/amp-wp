@@ -99,7 +99,7 @@ def GenValidatorProtoascii(out_dir):
 
 
 def GeneratePHP(out_dir):
-	"""Calls validator_gen_md to generate validator-generated.md.
+	"""Generates PHP for WordPress AMP plugin to consume.
 
 	Args:
 		out_dir: directory name of the output directory. Must not have slashes,
@@ -354,7 +354,6 @@ def ParseRules(out_dir):
 	# are checked by CheckPrereqs.
 	from google.protobuf import text_format
 	from amp_wp import validator_pb2
-	import validator_gen_md
 
 	allowed_tags = {}
 	attr_lists = {}
@@ -417,7 +416,14 @@ def ParseRules(out_dir):
 				else:
 					tag_list = allowed_tags[UnicodeEscape(tag_spec.tag_name)]
 				# AddTag(allowed_tags, tag_spec, attr_lists)
-				tag_list.append(GetTagSpec(tag_spec, attr_lists))
+
+				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
+
+				# Temporarily skip extension SCRIPT elemeents which appear in the HEAD.
+				if 'SCRIPT' == tag_spec.tag_name and gotten_tag_spec['tag_spec'].get( '_is_extension_spec', False ):
+					continue
+
+				tag_list.append(gotten_tag_spec)
 				allowed_tags[UnicodeEscape(tag_spec.tag_name)] = tag_list
 
 	logging.info('... done')
@@ -478,6 +484,9 @@ def GetTagRules(tag_spec):
 			elif 2 == html_format:
 				html_format_list.append('amp4ads')
 		tag_rules['html_format'] = {'html_format': html_format_list}
+
+	if tag_spec.HasField('extension_spec'):
+		tag_rules['_is_extension_spec'] = True;
 
 	if tag_spec.HasField('mandatory'):
 		tag_rules['mandatory'] = tag_spec.mandatory

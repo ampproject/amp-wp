@@ -215,6 +215,29 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Register/override widgets.
+	 *
+	 * @global WP_Widget_Factory
+	 * @return void
+	 */
+	public static function register_widgets() {
+		global $wp_widget_factory;
+		foreach ( $wp_widget_factory->widgets as $registered_widget ) {
+			$registered_widget_class_name = get_class( $registered_widget );
+			if ( ! preg_match( '/^WP_Widget_(.+)$/', $registered_widget_class_name, $matches ) ) {
+				continue;
+			}
+			$amp_class_name = 'AMP_Widget_' . $matches[1];
+			if ( ! class_exists( $amp_class_name ) || is_a( $amp_class_name, $registered_widget_class_name ) ) {
+				continue;
+			}
+
+			unregister_widget( $registered_widget_class_name );
+			register_widget( $amp_class_name );
+		}
+	}
+
+	/**
 	 * Override $wp_styles as AMP_WP_Styles, ideally before first instantiated as WP_Styles.
 	 *
 	 * @see wp_styles()
@@ -619,7 +642,7 @@ class AMP_Theme_Support {
 		 *
 		 * @since 0.7
 		 *
-		 * @param string $amp_scripts AMP Component scripts, mapping component names to component source URLs.
+		 * @param array $amp_scripts AMP Component scripts, mapping component names to component source URLs.
 		 */
 		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
 
