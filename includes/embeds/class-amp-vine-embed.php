@@ -1,7 +1,13 @@
 <?php
+/**
+ * Class AMP_Vine_Embed_Handler
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
-
+/**
+ * Class AMP_Vine_Embed_Handler
+ */
 class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://vine\.co/v/([^/?]+)#i';
 

@@ -1,8 +1,15 @@
 <?php
+/**
+ * Class AMP_Twitter_Embed_Handler
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
-
-// Much of this class is borrowed from Jetpack embeds
+/**
+ * Class AMP_Twitter_Embed_Handler
+ *
+ *  Much of this class is borrowed from Jetpack embeds
+ */
 class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)#i';
 

@@ -1,25 +1,34 @@
-=== AMP ===
-Contributors: batmoo, joen, automattic, potatomaster, albertomedina
+=== AMP for WordPress ===
+Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp, westonruter
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 0.5.1
+Stable tag: 0.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Requires PHP: 5.2
 
 Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
 == Description ==
 
-This plugin adds support for the [Accelerated Mobile Pages](https://www.ampproject.org) (AMP) Project, which is an an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
+This plugin adds support for the [Accelerated Mobile Pages](https://www.ampproject.org) (AMP) Project, which is an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
 
 With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
 
-Note #1: that Pages and archives are not currently supported. Pages support is being worked on.
+Note #1: homepage, the blog index, and archives are not currently supported.
 
 Note #2: this plugin only creates AMP content but does not automatically display it to your users when they visit from a mobile device. That is handled by AMP consumers such as Google Search. For more details, see the [AMP Project FAQ](https://www.ampproject.org/docs/support/faqs.html).
 
-Follow along with or contribute to the development of this plugin at https://github.com/Automattic/amp-wp
+Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
+
+== Screenshots ==
+
+1. Post rendered in AMP template.
+1. Customizing appearance of AMP template.
+1. Article from New York Post showing customized AMP template.
+1. Article from TNW showing customized AMP template.
+1. Article from Halfbrick showing customized AMP template.
 
 == Installation ==
 
@@ -27,31 +36,23 @@ Follow along with or contribute to the development of this plugin at https://git
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
 
-== Frequently Asked Questions ==
-
-= How do I customize the AMP output for my site? =
-
-You can tweak a few things like colors from the AMP Customizer. From the Dashboard, go to `Appearance > AMP`.
-
-For deeper level customizations, please see the readme at https://github.com/Automattic/amp-wp/blob/master/readme.md
-
-= What about ads and shortcodes and such? =
-
-Check out https://github.com/Automattic/amp-wp/blob/master/readme.md#handling-media
-
-= What about analytics? =
-
-Many plugins are adding AMP support already. If you handling analytics yourself, please see https://github.com/Automattic/amp-wp/blob/master/readme.md#analytics
-
-= Google Webmaster Tools is reporting validation errors for my site. How do I fix them? =
-
-The best place to start is to open a new discussion in the [support forum](https://wordpress.org/support/plugin/amp) with details on what the specific validation error is.
-
-= Why aren't Pages supported yet =
-
-A wise green Yoda once said, "Patience you must have, my young padawan." We're working on it :)
-
 == Changelog ==
+
+= 0.6.0 (2018-01-23) =
+
+- Add support for the "page" post type. A new `page.php` is introduced with template parts factored out (`html-start.php`, `header.php`, `footer.php`, `html-end.php`) and re-used from `single.php`. Note that AMP URLs will end in `?amp` instead of `/amp/`. See [#825](https://github.com/Automattic/amp-wp/pull/825). Props technosailor, ThierryA, westonruter.
+- Add AMP post preview button alongside non-AMP preview button. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
+- Add ability to disable AMP on a per-post basis via toggle in publish metabox. See [#813](https://github.com/Automattic/amp-wp/pull/813). Props ThierryA, westonruter.
+- Add AMP settings admin screen for managing which post types have AMP support, eliminating the requirement to add `add_post_type_support()` calls in theme or plugin. See [#811](https://github.com/Automattic/amp-wp/pull/811). Props ThierryA, westonruter.
+- Add generator meta tag for AMP. See [#810](https://github.com/Automattic/amp-wp/pull/810). Props vaporwavre.
+- Add code quality checking via phpcs, eslint, jscs, and jshint. See [#795](https://github.com/Automattic/amp-wp/pull/795). Props westonruter.
+- Add autoloader to reduce complexity. See [#828](https://github.com/Automattic/amp-wp/pull/828). Props mikeschinkel, westonruter, ThierryA.
+- Fix Polldaddy amd SoundCloud embeds. Add vanilla WordPress "embed" test page. A new `bin/create-embed-test-post.php` wp-cli script is introduced. See [#829](https://github.com/Automattic/amp-wp/pull/829). Props kienstra, westonruter, ThierryA.
+- Merge AMP Customizer into main Customizer. See [#819](https://github.com/Automattic/amp-wp/pull/819). Props kaitnyl, westonruter.
+- Update AMP HTML tags and attributes. A new `bin/amphtml-update.sh` bash script is introduced. Fixes Playbuzz. See [#823](https://github.com/Automattic/amp-wp/pull/823). Props kienstra, ThierryA, westonruter.
+- Remove erroneous hash from id on amp-wp-header. See [#853](https://github.com/Automattic/amp-wp/pull/853). Props eshannon3.
+
+See [0.6 milestone](https://github.com/Automattic/amp-wp/milestone/5?closed=1).
 
 = 0.5.1 (2017-08-17) =
 
@@ -167,11 +168,11 @@ A wise green Yoda once said, "Patience you must have, my young padawan." We're w
 
 * Breaking change: The new template has changes to markup, class names, and styles that may not work with existing customizations. If you want to stay on the old template for now, you can use the following code snippet:
 
-```
+<pre lang="php">
 if ( function_exists( 'amp_backcompat_use_v03_templates' ) ) {
-    amp_backcompat_use_v03_templates();
+	amp_backcompat_use_v03_templates();
 }
-```
+</pre>
 
 For more details, please see https://wordpress.org/support/topic/v0-4-whats-new-and-possible-breaking-changes/
 

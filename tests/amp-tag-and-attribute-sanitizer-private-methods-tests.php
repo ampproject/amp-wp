@@ -1,7 +1,5 @@
 <?php
 
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
-
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
 
 	protected $allowed_tags;
@@ -246,136 +244,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-
-
-
-
-			'test_attr_spec_rule_allowed_protocol_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'a',
-					'attribute_name' => 'href',
-					'attribute_value' => 'http://example.com',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_allowed_protocol_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'a',
-					'attribute_name' => 'href',
-					'attribute_value' => 'evil://example.com',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_na' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'a',
-					'attribute_name' => 'href',
-					'attribute_value' => 'invalid',
-					'include_attr' => false,
-					'include_attr_value' => false,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-
-
-			'test_attr_spec_rule_allowed_protocol_srcset_single_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'http://veryunique.com/img.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'http://example.com/img.jpg, https://example.com/whatever.jpg, image.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_single_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'bad://example.com/img.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'bad://example.com/img.jpg, evil://example.com/whatever.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_good_first' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'https://example.com/img.jpg, evil://example.com/whatever.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_bad_first' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'evil://example.com/img.jpg, https://example.com/whatever.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_na' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'invalid',
-					'include_attr' => false,
-					'include_attr_value' => false,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-
-
-
-
 			'test_attr_spec_rule_disallowed_relative_pass' => array(
 				array(
 					'rule_spec_index' => 0,
@@ -451,61 +319,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-
-
-
-			'test_attr_spec_rule_disallowed_domain_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => 'https://example.com',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_disallowed_domain_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => '//cdn.ampproject.org',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_disallowed_domain_fail_2' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => 'https://cdn.ampproject.org',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_disallowed_domain_na' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => 'invalid',
-					'include_attr' => false,
-					'include_attr_value' => false,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-
-
-
-
 			'test_attr_spec_rule_blacklisted_value_regex_pass' => array(
 				array(
 					'rule_spec_index' => 0,
@@ -1169,36 +982,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				1,
 			),
-			'attributes_allowed_protocol_pass' => array(
-				array(
-					'source' => '<div attribute1="http://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'allowed_protocol' => array(
-								'http',
-								'https',
-							),
-						),
-					),
-				),
-				1,
-			),
-			'attributes_allowed_protocol_fail' => array(
-				array(
-					'source' => '<div attribute1="bad://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'allowed_protocol' => array(
-								'http',
-								'https',
-							),
-						),
-					),
-				),
-				0,
-			),
 			'attributes_allow_relative_false_pass' => array(
 				array(
 					'source' => '<div attribute1="http://example.com/relative/path/to/resource"></div>',
@@ -1242,34 +1025,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_spec_list' => array(
 						'attribute1' => array(
 							'allow_empty' => false,
-						),
-					),
-				),
-				0,
-			),
-			'attributes_disallowed_domain_pass' => array(
-				array(
-					'source' => '<div attribute1="http://example.com/relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'disallowed_domain' => array(
-								'dis.allow.ed'
-							),
-						),
-					),
-				),
-				1,
-			),
-			'attributes_disallowed_domain_fail' => array(
-				array(
-					'source' => '<div attribute1="http://dis.allow.ed/relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'disallowed_domain' => array(
-								'dis.allow.ed'
-							),
 						),
 					),
 				),
@@ -1943,15 +1698,21 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->assertEquals( $expected, $got );
 	}
 
-	// Use this to call private methods
-	public function invoke_method(&$object, $methodName, array $parameters = array()) {
-	    $reflection = new \ReflectionClass(get_class($object));
-	    $method = $reflection->getMethod($methodName);
-	    $method->setAccessible(true);
+	/**
+	 * Use this to call private methods.
+	 *
+	 * @param object $object      Object.
+	 * @param string $method_name Method name.
+	 * @param array  $parameters  Parameters.
+	 * @return mixed Result.
+	 */
+	public function invoke_method( &$object, $method_name, array $parameters = array() ) {
+		$reflection = new ReflectionClass( get_class( $object ) );
 
-	    return $method->invokeArgs($object, $parameters);
+		$method = $reflection->getMethod( $method_name );
+		$method->setAccessible( true );
+
+		return $method->invokeArgs( $object, $parameters );
 	}
 
 }
-
-?>

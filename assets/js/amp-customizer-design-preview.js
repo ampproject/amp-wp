@@ -1,3 +1,5 @@
+/* global amp_customizer_design, console */
+
 ( function( $ ) {
 	'use strict';
 
@@ -34,6 +36,13 @@
 			$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', colors.muted_text_color );
 			$( '.wp-caption .wp-caption-text, .amp-wp-comments-link a, .amp-wp-footer' ).css( 'border-color', colors.border_color );
 			$( '.amp-wp-iframe-placeholder, amp-carousel, amp-iframe, amp-youtube, amp-instagram, amp-vine' ).css( 'background-color', colors.border_color );
+		} );
+	} );
+
+	// Site title.
+	wp.customize( 'blogname', function( setting ) {
+		setting.bind( function( title ) {
+			$( '.amp-wp-header .amp-site-title, .amp-wp-footer h2' ).text( title );
 		} );
 	} );
 

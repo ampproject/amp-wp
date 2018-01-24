@@ -5,7 +5,7 @@ file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
 Follow the steps below to generate a new version of the allowed tags class:
 
 - Download a copy of the latet AMPHTML repository from github:
-	
+
 	git clone git@github.com:ampproject/amphtml.git
 
 - Copy this file into the repo's validator subdirectory:
@@ -83,11 +83,11 @@ def GenValidatorProtoascii(out_dir):
 	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
 	protoascii_segments = [open('validator-main.protoascii').read()]
-	extensions = glob.glob('extensions/*/0.1/validator-*.protoascii')
+	extensions = glob.glob('extensions/*/validator-*.protoascii')
 	# In the Github project, the extensions are located in a sibling directory
 	# to the validator rather than a child directory.
 	if not extensions:
-		extensions = glob.glob('../extensions/*/0.1/validator-*.protoascii')
+		extensions = glob.glob('../extensions/*/validator-*.protoascii')
 	extensions.sort()
 	for extension in extensions:
 		protoascii_segments.append(open(extension).read())
@@ -99,7 +99,7 @@ def GenValidatorProtoascii(out_dir):
 
 
 def GeneratePHP(out_dir):
-	"""Calls validator_gen_md to generate validator-generated.md.
+	"""Generates PHP for WordPress AMP plugin to consume.
 
 	Args:
 		out_dir: directory name of the output directory. Must not have slashes,
@@ -223,7 +223,7 @@ def GenerateAttributesPHP(out, attributes, indent_level = 4):
 	indent = ''
 	for i in range(0,indent_level):
 		indent += '\t'
-	
+
 	sorted_attributes = sorted(attributes.items())
 	for (attribute, values) in collections.OrderedDict(sorted_attributes).iteritems():
 		logging.info('generating php for attribute: %s...' % attribute.lower())
@@ -231,7 +231,7 @@ def GenerateAttributesPHP(out, attributes, indent_level = 4):
 		GeneratePropertiesPHP(out, values)
 		out.append('%s),' % indent)
 		logging.info('...done with: %s' % attribute.lower())
-	
+
 	out.append('')
 	logging.info('... done')
 
@@ -282,7 +282,7 @@ def GenerateValuesPHP(out, values, indent_level = 6):
 			if isinstance(value, (str, bool)):
 				out.append('%s\'%s\' => \'%s\',' % (indent, key.lower(), value))
 
-			if isinstance(value, list):
+			else:
 				out.append('%s\'%s\' => array(' % (indent, key.lower()))
 				sorted_value = sorted(value)
 				for v in sorted_value:
@@ -336,7 +336,6 @@ def ParseRules(out_dir):
 	# are checked by CheckPrereqs.
 	from google.protobuf import text_format
 	from amp_wp import validator_pb2
-	import validator_gen_md
 
 	allowed_tags = {}
 	attr_lists = {}
@@ -399,7 +398,14 @@ def ParseRules(out_dir):
 				else:
 					tag_list = allowed_tags[UnicodeEscape(tag_spec.tag_name)]
 				# AddTag(allowed_tags, tag_spec, attr_lists)
-				tag_list.append(GetTagSpec(tag_spec, attr_lists))
+
+				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
+
+				# Temporarily skip extension SCRIPT elemeents which appear in the HEAD.
+				if 'SCRIPT' == tag_spec.tag_name and gotten_tag_spec['tag_spec'].get( '_is_extension_spec', False ):
+					continue
+
+				tag_list.append(gotten_tag_spec)
 				allowed_tags[UnicodeEscape(tag_spec.tag_name)] = tag_list
 
 	logging.info('... done')
@@ -428,7 +434,7 @@ def GetTagRules(tag_spec):
 
 	tag_rules = {}
 
-	if tag_spec.also_requires_tag:
+	if hasattr(tag_spec, 'also_requires_tag') and tag_spec.also_requires_tag:
 		also_requires_tag_list = []
 		for also_requires_tag in tag_spec.also_requires_tag:
 			also_requires_tag_list.append(UnicodeEscape(also_requires_tag))
@@ -448,6 +454,9 @@ def GetTagRules(tag_spec):
 			elif 2 == html_format:
 				html_format_list.append('amp4ads')
 		tag_rules['html_format'] = {'html_format': html_format_list}
+
+	if tag_spec.HasField('extension_spec'):
+		tag_rules['_is_extension_spec'] = True;
 
 	if tag_spec.HasField('mandatory'):
 		tag_rules['mandatory'] = tag_spec.mandatory

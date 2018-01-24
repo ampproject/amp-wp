@@ -1,0 +1,8 @@
+PATH_EXCLUDES_PATTERN=includes/lib/
+DEFAULT_BASE_BRANCH=develop
+ASSETS_DIR=wp-assets
+
+function after_wp_install {
+    echo "Installing REST API..."
+    svn export -q https://plugins.svn.wordpress.org/jetpack/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/jetpack"
+}

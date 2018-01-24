@@ -5,28 +5,28 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.5.1
+ * Version: 0.6.0
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
+ *
+ * @package AMP
  */
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.5.1' );
+define( 'AMP__VERSION', '0.6.0' );
 
-require_once( AMP__DIR__ . '/back-compat/back-compat.php' );
-require_once( AMP__DIR__ . '/includes/amp-helper-functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/functions.php' );
-require_once( AMP__DIR__ . '/includes/admin/class-amp-customizer.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-settings.php' );
-require_once( AMP__DIR__ . '/includes/settings/class-amp-customizer-design-settings.php' );
+require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
+AMP_Autoloader::register();
 
-require_once( AMP__DIR__ . '/includes/actions/class-amp-frontend-actions.php' );
-require_once( AMP__DIR__ . '/includes/actions/class-amp-paired-post-actions.php' );
+require_once AMP__DIR__ . '/back-compat/back-compat.php';
+require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
+require_once AMP__DIR__ . '/includes/admin/functions.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
 function amp_activate() {
+	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
 		amp_init();
 	}
@@ -47,20 +47,56 @@ function amp_deactivate() {
 	flush_rewrite_rules();
 }
 
-add_action( 'init', 'amp_init' );
-function amp_init() {
+/**
+ * Set up AMP.
+ *
+ * This function must be invoked through the 'after_setup_theme' action to allow
+ * the AMP setting to declare the post types support earlier than plugins/theme.
+ *
+ * @since 0.6
+ */
+function amp_after_setup_theme() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
 
-	define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+	if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+		/**
+		 * Filter the AMP query variable.
+		 *
+		 * @since 0.3.2
+		 * @param string $query_var The AMP query variable.
+		 */
+		define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
+	}
 
+	add_action( 'init', 'amp_init' );
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
+	add_action( 'wp_loaded', 'amp_post_meta_box' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+	AMP_Post_Type_Support::add_post_type_support();
+}
+add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
+
+/**
+ * Init AMP.
+ *
+ * @since 0.1
+ */
+function amp_init() {
+
+	/**
+	 * Triggers on init when AMP plugin is active.
+	 *
+	 * @since 0.3
+	 */
 	do_action( 'amp_init' );
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
-	add_post_type_support( 'post', AMP_QUERY_VAR );
 
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'wp', 'amp_maybe_add_actions' );
@@ -82,22 +118,69 @@ function amp_force_query_var_value( $query_vars ) {
 	return $query_vars;
 }
 
+/**
+ * Fix up WP_Query for front page when amp query var is present.
+ *
+ * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
+ *
+ * @since 0.6
+ * @see WP_Query::parse_query()
+ * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
+ *
+ * @param WP_Query $query Query.
+ */
+function amp_correct_query_when_is_front_page( WP_Query $query ) {
+	$is_front_page_query = (
+		$query->is_main_query()
+		&&
+		$query->is_home()
+		&&
+		// Is AMP endpoint.
+		false !== $query->get( AMP_QUERY_VAR, false )
+		&&
+		// Is query not yet fixed uo up to be front page.
+		! $query->is_front_page()
+		&&
+		// Is showing pages on front.
+		'page' === get_option( 'show_on_front' )
+		&&
+		// Has page on front set.
+		get_option( 'page_on_front' )
+		&&
+		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
+		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), array( AMP_QUERY_VAR, 'preview', 'page', 'paged', 'cpage' ) ) )
+	);
+	if ( $is_front_page_query ) {
+		$query->is_home     = false;
+		$query->is_page     = true;
+		$query->is_singular = true;
+		$query->set( 'page_id', get_option( 'page_on_front' ) );
+	}
+}
+
+/**
+ * Add AMP actions when the request can be served as AMP.
+ *
+ * Actions will only be added if the request is for a singular post (including front page and page for posts), excluding feeds.
+ *
+ * @since 0.2
+ */
 function amp_maybe_add_actions() {
-	if ( ! is_singular() || is_feed() ) {
+	global $wp_query;
+	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
 		return;
 	}
-
 	$is_amp_endpoint = is_amp_endpoint();
 
-	// Cannot use `get_queried_object` before canonical redirect; see https://core.trac.wordpress.org/ticket/35344
-	global $wp_query;
-	$post = $wp_query->post;
-
-	$supports = post_supports_amp( $post );
-
-	if ( ! $supports ) {
+	/**
+	 * Queried post object.
+	 *
+	 * @var WP_Post $post
+	 */
+	$post = get_queried_object();
+	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ), 301 );
+			wp_safe_redirect( get_permalink( $post->ID ), 302 ); // Temporary redirect because AMP may be supported in future.
 			exit;
 		}
 		return;
@@ -111,58 +194,90 @@ function amp_maybe_add_actions() {
 }
 
 function amp_load_classes() {
-	require_once( AMP__DIR__ . '/includes/class-amp-post-template.php' ); // this loads everything else
+	_deprecated_function( __FUNCTION__, '0.6' );
 }
 
 function amp_add_frontend_actions() {
-	AMP_Frontend_Actions::register_hooks();
+	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
 }
 
 function amp_add_post_template_actions() {
-	AMP_Paired_Post_Actions::register_hooks();
-	require_once( AMP__DIR__ . '/includes/amp-post-template-functions.php' );
+	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+	amp_post_template_init_hooks();
 }
 
 function amp_prepare_render() {
 	add_action( 'template_redirect', 'amp_render' );
 }
 
+/**
+ * Render AMP for queried post.
+ *
+ * @since 0.1
+ */
 function amp_render() {
-	$post_id = get_queried_object_id();
-	amp_render_post( $post_id );
-	exit;
+	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
+	$post = get_queried_object();
+	if ( $post instanceof WP_Post ) {
+		amp_render_post( $post );
+		exit;
+	}
 }
 
-function amp_render_post( $post_id ) {
-	$post = get_post( $post_id );
-	if ( ! $post ) {
-		return;
+/**
+ * Render AMP post template.
+ *
+ * @since 0.5
+ * @param WP_Post|int $post Post.
+ * @global WP_Query $wp_query
+ */
+function amp_render_post( $post ) {
+	global $wp_query;
+
+	if ( ! ( $post instanceof WP_Post ) ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return;
+		}
+	}
+	$post_id = $post->ID;
+
+	/*
+	 * If amp_render_post is called directly outside of the standard endpoint, is_amp_endpoint() will return false,
+	 * which is not ideal for any code that expects to run in an AMP context.
+	 * Let's force the value to be true while we render AMP.
+	 */
+	$was_set = isset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+	if ( ! $was_set ) {
+		$wp_query->query_vars[ AMP_QUERY_VAR ] = true;
 	}
 
-	amp_load_classes();
-
+	/**
+	 * Fires before rendering a post in AMP.
+	 *
+	 * @since 0.2
+	 *
+	 * @param int $post_id Post ID.
+	 */
 	do_action( 'pre_amp_render_post', $post_id );
 
 	amp_add_post_template_actions();
-	$template = new AMP_Post_Template( $post_id );
+	$template = new AMP_Post_Template( $post );
 	$template->load();
+
+	if ( ! $was_set ) {
+		unset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+	}
 }
 
 /**
  * Bootstraps the AMP customizer.
  *
- * If the AMP customizer is enabled, initially drop the core widgets and menus panels. If the current
- * preview page isn't flagged as an AMP template, the core panels will be re-added and the AMP panel
- * hidden.
- *
  * @since 0.4
  */
 function _amp_bootstrap_customizer() {
-	// Drop core panels (menus, widgets) from the AMP customizer
-	// `customize_loaded_components` runs super early so we need to call this regardless of whether the AMP customizer is enabled or not
-	add_filter( 'customize_loaded_components', array( 'AMP_Template_Customizer', '_unregister_core_panels' ) );
-
-	add_action( 'after_setup_theme', 'amp_maybe_init_customizer' );
+	add_action( 'after_setup_theme', 'amp_init_customizer' );
 }
 add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
 
@@ -181,10 +296,4 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 	}
 
 	return $link;
-}
-
-// Unconditionally load code required when running unit tests.
-if ( function_exists( 'tests_add_filter' ) ) {
-	amp_load_classes();
-	require_once dirname( __FILE__ ) . '/tests/stubs.php';
 }
