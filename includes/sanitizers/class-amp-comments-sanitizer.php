@@ -70,6 +70,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$this->convert_urls( $imgs, 'srcset' );
 
 		}
+
+		// cleanup comments form.
+		$comment_form = $this->dom->getElementById( 'commentform' );
+		if ( $comment_form instanceof DOMElement ) {
+			$comment_form->setAttribute( 'on', 'submit-success:amp-comment-form-fields.hide' );
+		}
 	}
 
 	/**

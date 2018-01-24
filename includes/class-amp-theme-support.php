@@ -203,6 +203,8 @@ class AMP_Theme_Support {
 		// Add Comments hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
 		add_filter( 'comments_array', array( __CLASS__, 'get_comments_template' ) );
+		add_action( 'comment_form_top', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
+		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
 		// Filter dynamic data with mustache variable strings.
 		// @todo add additional filters for dynamic data like "get_comment_author_link", "get_comment_author_IP" etc...
 		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date_template_string' ), PHP_INT_MAX );
@@ -394,6 +396,28 @@ class AMP_Theme_Support {
 
 		return $comments;
 
+	}
+
+	/**
+	 * Adds the form submit success and fail templates.
+	 * @param string $post_id The post ID if action is 'comment_form'.
+	 */
+	public static function add_amp_comment_form_templates( $post_id ) {
+		$output = '';
+		if ( empty( $post_id ) ) {
+			$output .= '<div id="amp-comment-form-fields">';
+		} else {
+			$output .= '</div>';
+			$output .= '<div submit-success><template type="amp-mustache">';
+			$output .= esc_html__( 'Your comment has been posted.', 'amp' );
+			$output .= sprintf( '<a class="amp-view-new-comment" href="{{comment_link}}">%s</a>', esc_html__( 'View Comment', 'amp' ) );
+			$output .= '</div></template>';
+			$output .= '<div submit-error><template type="amp-mustache">';
+			$output .= '<p class="amp-comment-submit-error">{{{error}}}</p>';
+			$output .= '</div></template>';
+		}
+
+		echo $output; // WPCS: XSS OK.
 	}
 
 	/**
