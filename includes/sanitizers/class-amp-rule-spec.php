@@ -92,16 +92,5 @@ abstract class AMP_Rule_Spec {
 			'attr_spec_list' => array(),
 			'tag_spec'       => array(),
 		),
-
-		// Needed for some tags such as analytics.
-		'script'             => array(
-			'attr_spec_list' => array(
-				'type' => array(
-					'mandatory'   => true,
-					'value_casei' => 'application/json',
-				),
-			),
-			'tag_spec'       => array(),
-		),
 	);
 }

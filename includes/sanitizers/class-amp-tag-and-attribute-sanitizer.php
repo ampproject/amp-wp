@@ -267,6 +267,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						);
 					}
 				}
+				$first_spec = reset( $rule_spec_list_to_validate );
+				if ( empty( $attr_spec_list ) && isset( $first_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
+					$attr_spec_list = $first_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
+				}
 			}
 		} // End if().
 
@@ -321,8 +325,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param object $node The node to validate.
-	 * @param array  $tag_spec The sepecification.
+	 * @param DOMNode $node The node to validate.
+	 * @param array   $tag_spec The specification.
 	 * @return boolean $valid Whether the node's placement is valid.
 	 */
 	private function validate_tag_spec_for_node( $node, $tag_spec ) {
