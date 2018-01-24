@@ -38,28 +38,12 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 * @see AMP_Widget_Categories::__construct().
 	 */
 	public function test_construct() {
-		$this->assertEquals( 10, has_action( 'amp_component_scripts', array( $this->widget, 'form_script' ) ) );
 		$this->assertEquals( 'AMP_Widget_Categories', get_class( $this->widget ) );
 		$this->assertEquals( 'categories', $this->widget->id_base );
 		$this->assertEquals( 'Categories', $this->widget->name );
 		$this->assertEquals( 'widget_categories', $this->widget->widget_options['classname'] );
 		$this->assertEquals( true, $this->widget->widget_options['customize_selective_refresh'] );
 		$this->assertEquals( 'A list or dropdown of categories.', $this->widget->widget_options['description'] );
-	}
-
-	/**
-	 * Test form_script().
-	 *
-	 * @see AMP_Widget_Categories::form_script().
-	 */
-	public function test_form_script() {
-		$expected_key    = 'amp-form';
-		$expected_script = 'https://cdn.ampproject.org/v0/amp-form-latest.js';
-		$scripts         = array(
-			$expected_key => $expected_script,
-		);
-		$this->assertEquals( $scripts, $this->widget->form_script( $scripts ) );
-		$this->assertEquals( $scripts, $this->widget->form_script( array() ) );
 	}
 
 	/**

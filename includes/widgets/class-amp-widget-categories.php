@@ -12,28 +12,6 @@
  */
 class AMP_Widget_Categories extends WP_Widget_Categories {
 
-	/**
-	 * AMP_Widget_Categories constructor.
-	 *
-	 * @return void.
-	 */
-	public function __construct() {
-		parent::__construct();
-		add_filter( 'amp_component_scripts', array( $this, 'form_script' ) );
-	}
-
-	/**
-	 * Add a form extension script for AMP to output.
-	 *
-	 * @param array $scripts The AMP scripts.
-	 * @return array $scripts The filtered AMP scripts.
-	 */
-	public function form_script( $scripts ) {
-		if ( ! isset( $scripts['amp-form'] ) ) {
-			$scripts['amp-form'] = 'https://cdn.ampproject.org/v0/amp-form-latest.js';
-		}
-		return $scripts;
-	}
 
 	/**
 	 * Adds an 'on' attribute to the category dropdown's <select>.
