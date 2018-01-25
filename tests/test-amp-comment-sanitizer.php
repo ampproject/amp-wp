@@ -1,4 +1,9 @@
 <?php
+/**
+ * Form Sanitizer tests
+ *
+ * @package AMP
+ */
 
 /**
  * Class AMP_Form_Sanitizer_Test
@@ -50,6 +55,7 @@ class AMP_Comment_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
+
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Comments_Sanitizer( $dom );
 		$sanitizer->sanitize();

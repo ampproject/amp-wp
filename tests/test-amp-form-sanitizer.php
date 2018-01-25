@@ -24,10 +24,6 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 			),
-			'form_with_only_get_method'         => array(
-				'<form method="GET"></form>',
-				'<form method="GET" action="//example.org" target="_top"></form>',
-			),
 			'form_with_get_method_http_action'  => array(
 				'<form method="GET" action="http://example.org/example-page/"></form>',
 				'<form method="GET" action="//example.org/example-page/" target="_top"></form>',
