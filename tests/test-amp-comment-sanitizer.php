@@ -8,6 +8,11 @@
  */
 class AMP_Comment_Sanitizer_Test extends WP_UnitTestCase {
 
+	/**
+	 * Data strings for testing converter.
+	 *
+	 * @return array
+	 */
 	public function get_data() {
 		return array(
 			'no_comments'                            => array(
@@ -38,6 +43,10 @@ class AMP_Comment_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test html conversion.
+	 *
+	 * @param string $source The source HTML.
+	 * @param string $expected The expected HTML after conversion.
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
@@ -48,6 +57,9 @@ class AMP_Comment_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	/**
+	 * Test amp-list template build.
+	 */
 	public function test_template_build() {
 
 		$this->navigate_to_post();
@@ -64,6 +76,9 @@ class AMP_Comment_Sanitizer_Test extends WP_UnitTestCase {
 
 	}
 
+	/**
+	 * Test the scripts are added.
+	 */
 	public function test_scripts() {
 		$this->navigate_to_post();
 		$template = '<div class="comments">' . get_echo( 'comments_template' ) . '</div>';
@@ -85,6 +100,9 @@ class AMP_Comment_Sanitizer_Test extends WP_UnitTestCase {
 
 	}
 
+	/**
+	 * Helper to navigate to a test post.
+	 */
 	public function navigate_to_post() {
 		$post_id = $this->factory()->post->create( array( 'post_title' => 'Test' ) );
 		add_theme_support( 'amp' );

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Tests for form sanitisation.
+ *
+ * @package AMP
+ */
 
 /**
  * Class AMP_Form_Sanitizer_Test
@@ -8,6 +13,11 @@
  */
 class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 
+	/**
+	 * Data strings for testing converter.
+	 *
+	 * @return array
+	 */
 	public function get_data() {
 		return array(
 			'no_form'                           => array(
@@ -31,6 +41,10 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test html conversion.
+	 *
+	 * @param string $source The source HTML.
+	 * @param string $expected The expected HTML after conversion.
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
