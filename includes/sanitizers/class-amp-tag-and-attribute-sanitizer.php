@@ -745,7 +745,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $node           Node.
 	 * @param string     $attr_name      Attribute name.
-	 * @param array[]    $attr_spec_rule Attribute spec rule.
+	 * @param array      $attr_spec_rule Attribute spec rule.
 	 *
 	 * @return string:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
@@ -756,7 +756,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				if ( $node->getAttribute( $attr_name ) === $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) {
+				if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $attr_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 					return AMP_Rule_Spec::PASS;
 				} else {
 					return AMP_Rule_Spec::FAIL;
@@ -764,7 +764,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
-						if ( $node->getAttribute( $alternative_name ) === $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) {
+						if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $alternative_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 							return AMP_Rule_Spec::PASS;
 						} else {
 							return AMP_Rule_Spec::FAIL;
@@ -774,6 +774,33 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Check that an attribute's value matches is given spec value.
+	 *
+	 * This takes into account boolean attributes where value can match name (e.g. selected="selected").
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param string $attr_name  Attribute name.
+	 * @param string $attr_value Attribute value.
+	 * @param string $spec_value Attribute spec value.
+	 * @return bool Is value valid.
+	 */
+	private function check_matching_attribute_value( $attr_name, $attr_value, $spec_value ) {
+		if ( $spec_value === $attr_value ) {
+			return true;
+		}
+
+		// Check for boolean attribute.
+		return (
+			'' === $spec_value
+			&&
+			in_array( $attr_name, AMP_Rule_Spec::$boolean_attributes, true )
+			&&
+			strtolower( $attr_value ) === strtolower( $attr_name )
+		);
 	}
 
 	/**
