@@ -619,10 +619,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'remove_bad_tag_leave_empty_siblings_and_parent' => array(
 				array(
-					'source' => '<div><br/><bad-tag></bad-tag></div>',
+					'source'   => '<div><br><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
 				),
-				'<div><br/></div>',
+				'<div><br></div>',
 			),
 			'remove_single_bad_tag_with_non-empty_parent' => array(
 				array(
@@ -759,10 +759,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'no_children_leave_empty_siblings_and_parent' => array(
 				array(
-					'source' => '<div><br/><bad-tag></bad-tag></div>',
+					'source'   => '<div><br><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
 				),
-				'<div><br/></div>',
+				'<div><br></div>',
 			),
 			'no_childreng_with_non-empty_parent' => array(
 				array(
@@ -780,7 +780,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'no_children_and_empty_grandparent_leave_non-empty_greatgrandparent' => array(
 				array(
-					'source' => '<div><div><div><bad-tag></bad-tag></div></div><p>Good Data</p></div>',
+					'source'   => '<div><div><div><bad-tag></bad-tag></div></div><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
 				),
 				'<div><p>Good Data</p></div>',
@@ -800,6 +800,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->invoke_method( $sanitizer, 'replace_node_with_children', array( $node ) );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$got = preg_replace( '/(?<=>)\s+(?=<)/', '', $got );
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );

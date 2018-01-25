@@ -13,6 +13,23 @@
  * @package AMP
  */
 
+/**
+ * Print admin notice regarding having an old version of PHP.
+ *
+ * @since 0.7
+ */
+function _amp_print_php_version_admin_notice() {
+	?>
+	<div class="notice notice-error">
+			<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		</div>
+	<?php
+}
+if ( version_compare( phpversion(), '5.3', '<' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
+	return;
+}
+
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '0.7-alpha' );
