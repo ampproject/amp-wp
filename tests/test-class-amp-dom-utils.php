@@ -96,13 +96,13 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @covers \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @covers \AMP_DOM_Utils::restore_amp_bind_attributes()
-	 * @covers \AMP_DOM_Utils::get_amp_bind_placeholder_attribute_prefix()
+	 * @covers \AMP_DOM_Utils::get_amp_bind_placeholder_prefix()
 	 */
 	public function test_amp_bind_conversion() {
 		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
 		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
 		$this->assertNotEquals( $converted, $original );
-		$this->assertContains( AMP_DOM_Utils::get_amp_bind_placeholder_attribute_prefix() . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
+		$this->assertContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
 		$this->assertContains( 'width=300 height="200" data-foo="bar" selected', $converted );
 		$restored = AMP_DOM_Utils::restore_amp_bind_attributes( $converted );
 		$this->assertEquals( $original, $restored );
@@ -115,7 +115,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		);
 		foreach ( $malformed_html as $html ) {
 			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
-			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_attribute_prefix(), $converted );
+			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted );
 		}
 	}
 }

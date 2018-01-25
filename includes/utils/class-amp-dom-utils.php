@@ -89,10 +89,10 @@ class AMP_DOM_Utils {
 	 *
 	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
 	 */
-	public static function get_amp_bind_placeholder_attribute_prefix() {
+	public static function get_amp_bind_placeholder_prefix() {
 		static $attribute_prefix;
 		if ( ! isset( $attribute_prefix ) ) {
-			$attribute_prefix = sprintf( 'data-amp-binding-%s-', md5( wp_rand() ) );
+			$attribute_prefix = sprintf( 'amp-binding-%s-', md5( wp_rand() ) );
 		}
 		return $attribute_prefix;
 	}
@@ -113,7 +113,7 @@ class AMP_DOM_Utils {
 	 * @return string HTML with AMP binding attributes replaced with HTML5 data-* attributes.
 	 */
 	public static function convert_amp_bind_attributes( $html ) {
-		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_attribute_prefix();
+		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_prefix();
 
 		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
 		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*"|\'[^\']*\'|[^\'"\s]+))?#';
@@ -151,7 +151,7 @@ class AMP_DOM_Utils {
 
 		$html = preg_replace_callback(
 			// Match all start tags that probably contain a binding attribute.
-			'#<(?P<name>\w\S+)(?P<attrs>\s+[^<]+\]=[^<]+)\s*>#',
+			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s+[^>]+\]=[^>]+)\s*>#',
 			$replace_callback,
 			$html
 		);
@@ -173,7 +173,7 @@ class AMP_DOM_Utils {
 	 */
 	public static function restore_amp_bind_attributes( $html ) {
 		$html = preg_replace(
-			'#\s' . self::get_amp_bind_placeholder_attribute_prefix() . '([a-zA-Z0-9_\-]+)#',
+			'#\s' . self::get_amp_bind_placeholder_prefix() . '([a-zA-Z0-9_\-]+)#',
 			' [$1]',
 			$html
 		);

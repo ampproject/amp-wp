@@ -91,16 +91,27 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			'amp_allowed_tags'                => AMP_Allowed_Tags_Generated::get_allowed_tags(),
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
+			'amp_bind_placeholder_prefix'     => AMP_DOM_Utils::get_amp_bind_placeholder_prefix(),
 		);
 
 		parent::__construct( $dom, $args );
 
-		/**
-		 * Prepare whitelists
-		 */
-		$this->allowed_tags                = $this->args['amp_allowed_tags'];
-		$this->globally_allowed_attributes = $this->args['amp_globally_allowed_attributes'];
-		$this->layout_allowed_attributes   = $this->args['amp_layout_allowed_attributes'];
+		// Prepare whitelists.
+		$this->allowed_tags = $this->args['amp_allowed_tags'];
+		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
+			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
+		}
+
+		// @todo Add the placeholder bind attribute to the alternative names instead.
+		foreach ( $this->allowed_tags as &$tag_specs ) {
+			foreach ( $tag_specs as &$tag_spec ) {
+				if ( isset( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
+					$tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] = $this->convert_bind_attributes( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
+				}
+			}
+		}
+		$this->globally_allowed_attributes = $this->convert_bind_attributes( $this->args['amp_globally_allowed_attributes'] );
+		$this->layout_allowed_attributes   = $this->convert_bind_attributes( $this->args['amp_layout_allowed_attributes'] );
 	}
 
 	/**
@@ -128,15 +139,31 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Modify attribute spec list to replace AMP binding attributes with the placeholders.
+	 *
+	 * @since 0.7
+	 *
+	 * @param array $attr_spec_list Attribute spec list.
+	 * @return array Modified attribute spec list.
+	 */
+	private function convert_bind_attributes( $attr_spec_list ) {
+		foreach ( array_keys( $attr_spec_list ) as $attr_name ) {
+			if ( '[' === $attr_name[0] ) {
+				$actual_attr_name = $this->args['amp_bind_placeholder_prefix'] . trim( $attr_name, '[]' );
+
+				$attr_spec_list[ $actual_attr_name ] = $attr_spec_list[ $attr_name ];
+				unset( $attr_spec_list[ $attr_name ] );
+			}
+		}
+		return $attr_spec_list;
+	}
+
+	/**
 	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.5
 	 */
 	public function sanitize() {
-
-		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
-			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
-		}
 
 		/**
 		 * Add root of content to the stack.

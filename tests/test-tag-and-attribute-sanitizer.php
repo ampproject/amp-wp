@@ -612,8 +612,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp_bad_bind_attr' => array(
-				'<p [unrecognized]="123">Hello World</p>',
-				'<p>Hello World</p>',
+				'<a [unrecognized] [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
+				'<a [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
 			),
 		);
 	}
