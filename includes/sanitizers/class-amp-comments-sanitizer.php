@@ -67,9 +67,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			// Convert image src for templating.
 			$imgs = $amp_template->getElementsByTagName( 'amp-img' );
 			$this->convert_urls( $imgs, 'src' );
-
-			// Convert image src for templating.
-			$imgs = $amp_template->getElementsByTagName( 'amp-img' );
 			$this->convert_urls( $imgs, 'srcset' );
 
 		}
