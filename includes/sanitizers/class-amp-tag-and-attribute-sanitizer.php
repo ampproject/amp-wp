@@ -54,6 +54,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $layout_allowed_attributes;
 
 	/**
+	 * Mapping of alternative names back to their primary names.
+	 *
+	 * @since 0.7
+	 * @var array
+	 */
+	protected $rev_alternate_attr_name_lookup = array();
+
+	/**
 	 * Stack.
 	 *
 	 * @since 0.5
@@ -102,16 +110,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
 		}
 
-		// @todo Add the placeholder bind attribute to the alternative names instead.
 		foreach ( $this->allowed_tags as &$tag_specs ) {
 			foreach ( $tag_specs as &$tag_spec ) {
 				if ( isset( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
-					$tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] = $this->convert_bind_attributes( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
+					$tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] = $this->process_alternate_names( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
 				}
 			}
 		}
-		$this->globally_allowed_attributes = $this->convert_bind_attributes( $this->args['amp_globally_allowed_attributes'] );
-		$this->layout_allowed_attributes   = $this->convert_bind_attributes( $this->args['amp_layout_allowed_attributes'] );
+		$this->globally_allowed_attributes = $this->process_alternate_names( $this->args['amp_globally_allowed_attributes'] );
+		$this->layout_allowed_attributes   = $this->process_alternate_names( $this->args['amp_layout_allowed_attributes'] );
 	}
 
 	/**
@@ -139,20 +146,28 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Modify attribute spec list to replace AMP binding attributes with the placeholders.
+	 * Process alternative names in attribute spec list.
 	 *
 	 * @since 0.7
 	 *
 	 * @param array $attr_spec_list Attribute spec list.
 	 * @return array Modified attribute spec list.
 	 */
-	private function convert_bind_attributes( $attr_spec_list ) {
-		foreach ( array_keys( $attr_spec_list ) as $attr_name ) {
+	private function process_alternate_names( $attr_spec_list ) {
+		foreach ( $attr_spec_list as $attr_name => &$attr_spec ) {
 			if ( '[' === $attr_name[0] ) {
-				$actual_attr_name = $this->args['amp_bind_placeholder_prefix'] . trim( $attr_name, '[]' );
+				$placeholder_attr_name = $this->args['amp_bind_placeholder_prefix'] . trim( $attr_name, '[]' );
+				if ( ! isset( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+					$attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] = array();
+				}
+				$attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ][] = $placeholder_attr_name;
+			}
 
-				$attr_spec_list[ $actual_attr_name ] = $attr_spec_list[ $attr_name ];
-				unset( $attr_spec_list[ $attr_name ] );
+			// Save all alternative names in lookup to improve performance.
+			if ( isset( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+				foreach ( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
+					$this->rev_alternate_attr_name_lookup[ $alternative_name ] = $attr_name;
+				}
 			}
 		}
 		return $attr_spec_list;
@@ -306,11 +321,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$merged_attr_spec_list = array_merge(
+			$this->globally_allowed_attributes,
+			$attr_spec_list
+		);
+
 		// Remove any remaining disallowed attributes.
-		$this->sanitize_disallowed_attributes_in_node( $node, $attr_spec_list );
+		$this->sanitize_disallowed_attributes_in_node( $node, $merged_attr_spec_list );
 
 		// Remove values that don't conform to the attr_spec.
-		$this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
+		$this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list );
 
 		// Add required AMP component scripts if the element is still in the document.
 		if ( $node->parentNode ) {
@@ -554,33 +574,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$attrs_to_remove = array();
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
 			if ( ! $this->is_amp_allowed_attribute( $attr_name, $attr_spec_list ) ) {
-				/**
-				 * This attribute is not allowed for this node; plan to remove it.
-				 */
 				$attrs_to_remove[] = $attr_name;
 			}
 		}
 
-		if ( ! empty( $attrs_to_remove ) ) {
-			/*
-			 * Ensure we are not removing attributes listed as an alternate
-			 * or allowed attributes, e.g. 'srcset' is an alternate for 'src'.
-			 */
-			foreach ( $attr_spec_list as $attr_name => $attr_spec_rule_value ) {
-				if ( isset( $attr_spec_rule_value[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
-					foreach ( $attr_spec_rule_value[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
-						$alt_name_keys = array_keys( $attrs_to_remove, $alternative_name, true );
-						if ( ! empty( $alt_name_keys ) ) {
-							unset( $attrs_to_remove[ $alt_name_keys[0] ] );
-						}
-					}
-				}
-			}
-
-			// Remove the disallowed attributes.
-			foreach ( $attrs_to_remove as $attr_name ) {
-				$node->removeAttribute( $attr_name );
-			}
+		foreach ( $attrs_to_remove as $attr_name ) {
+			$node->removeAttribute( $attr_name );
 		}
 	}
 
@@ -1094,6 +1093,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
+
+		$is_allowed_alt_name_attr = (
+			isset( $this->rev_alternate_attr_name_lookup[ $attr_name ] )
+			&&
+			isset( $attr_spec_list[ $this->rev_alternate_attr_name_lookup[ $attr_name ] ] )
+		);
+		if ( $is_allowed_alt_name_attr ) {
+			return true;
+		}
+
 		return false;
 	}
 
