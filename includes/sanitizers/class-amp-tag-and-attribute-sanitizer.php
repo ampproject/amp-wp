@@ -340,6 +340,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! empty( $tag_spec['requires_extension'] ) ) {
 				$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
 			}
+
+			// Check if element needs amp-bind component.
+			if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
+				foreach ( $node->attributes as $name => $value ) {
+					$is_bind_attribute = (
+						'[' === $name[0]
+						||
+						( isset( $this->rev_alternate_attr_name_lookup[ $name ] ) && '[' === $this->rev_alternate_attr_name_lookup[ $name ][0] )
+					);
+					if ( $is_bind_attribute ) {
+						$this->script_components[] = 'amp-bind';
+						break;
+					}
+				}
+			}
 		}
 	}
 
