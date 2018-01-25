@@ -56,6 +56,9 @@ class AMP_DOM_Utils {
 
 		$dom = new DOMDocument();
 
+		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
+		$document = self::convert_amp_bind_attributes( $document );
+
 		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
@@ -72,6 +75,110 @@ class AMP_DOM_Utils {
 		}
 
 		return $dom;
+	}
+
+	/**
+	 * Get attribute prefix for converted amp-bind attributes.
+	 *
+	 * This contains a random string to prevent HTML content containing this data- attribute
+	 * originally from being mutated to contain an amp-bind attribute when attributes are restored.
+	 *
+	 * @since 0.7
+	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
+	 *
+	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
+	 */
+	public static function get_amp_bind_placeholder_prefix() {
+		static $attribute_prefix;
+		if ( ! isset( $attribute_prefix ) ) {
+			$attribute_prefix = sprintf( 'amp-binding-%s-', md5( wp_rand() ) );
+		}
+		return $attribute_prefix;
+	}
+
+	/**
+	 * Replace AMP binding attributes with something that libxml can parse (as HTML5 data-* attributes).
+	 *
+	 * This is necessary because attributes in square brackets are not understood in PHP and
+	 * get dropped with an error raised:
+	 * > Warning: DOMDocument::loadHTML(): error parsing attribute name
+	 * This is a reciprocal function of AMP_DOM_Utils::restore_amp_bind_attributes().
+	 *
+	 * @since 0.7
+	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
+	 *
+	 * @param string $html HTML containing amp-bind attributes.
+	 * @return string HTML with AMP binding attributes replaced with HTML5 data-* attributes.
+	 */
+	public static function convert_amp_bind_attributes( $html ) {
+		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_prefix();
+
+		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
+		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*"|\'[^\']*\'|[^\'"\s]+))?#';
+
+		/**
+		 * Replace callback.
+		 *
+		 * @param array $tag_matches Tag matches.
+		 * @return string Replacement.
+		 */
+		$replace_callback = function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
+			$old_attrs = rtrim( $tag_matches['attrs'] );
+			$new_attrs = '';
+			$offset    = 0;
+			while ( preg_match( $attr_regex, substr( $old_attrs, $offset ), $attr_matches ) ) {
+				$offset += strlen( $attr_matches[0] );
+
+				if ( '[' === $attr_matches['name'][0] ) {
+					$new_attrs .= ' ' . $amp_bind_attr_prefix . trim( $attr_matches['name'], '[]' );
+					if ( isset( $attr_matches['value'] ) ) {
+						$new_attrs .= $attr_matches['value'];
+					}
+				} else {
+					$new_attrs .= $attr_matches[0];
+				}
+			}
+
+			// Bail on parse error which occurs when the regex isn't able to consume the entire $new_attrs string.
+			if ( strlen( $old_attrs ) !== $offset ) {
+				return $tag_matches[0];
+			}
+
+			return '<' . $tag_matches['name'] . $new_attrs . '>';
+		};
+
+		$html = preg_replace_callback(
+			// Match all start tags that probably contain a binding attribute.
+			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s+[^>]+\]=[^>]+)\s*>#',
+			$replace_callback,
+			$html
+		);
+
+		return $html;
+	}
+
+	/**
+	 * Convert AMP bind-attributes back to their original syntax.
+	 *
+	 * This is a reciprocal function of AMP_DOM_Utils::convert_amp_bind_attributes().
+	 *
+	 * @since 0.7
+	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
+	 *
+	 * @param string $html HTML with amp-bind attributes converted.
+	 * @return string HTML with amp-bind attributes restored.
+	 */
+	public static function restore_amp_bind_attributes( $html ) {
+		$html = preg_replace(
+			'#\s' . self::get_amp_bind_placeholder_prefix() . '([a-zA-Z0-9_\-]+)#',
+			' [$1]',
+			$html
+		);
+		return $html;
 	}
 
 	/**
@@ -146,6 +253,7 @@ class AMP_DOM_Utils {
 	 * @see Called by function get_content_from_dom()
 	 *
 	 * @since 0.6
+	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 	 *
 	 * @param DOMDocument $dom  Represents an HTML document.
 	 * @param DOMNode     $node Represents an HTML element of the $dom from which to extract HTML content.
@@ -174,6 +282,8 @@ class AMP_DOM_Utils {
 		if ( '' === trim( $html ) ) {
 			return '';
 		}
+
+		$html = self::restore_amp_bind_attributes( $html );
 
 		/*
 		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
