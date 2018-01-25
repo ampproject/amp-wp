@@ -235,6 +235,29 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Enqueues Gutenberg integration script.
+	 *
+	 * @return void.
+	 */
+	public static function enqueue_gutenberg() {
+		$slug = 'amp-gutenberg';
+		wp_enqueue_script(
+			$slug,
+			amp_get_asset_url( 'js/amp-gutenberg.js' ),
+			array( 'jquery' ),
+			AMP__VERSION,
+			true
+		);
+		wp_add_inline_script( $slug, sprintf( 'ampGutenberg.boot( %s );',
+			wp_json_encode( array(
+				'i18n' => array(
+					'notice' => __( 'This is not valid AMP', 'amp' ),
+				),
+			) )
+		) );
+	}
+
+	/**
 	 * Register content embed handlers.
 	 *
 	 * This was copied from `AMP_Content::register_embed_handlers()` due to being a private method

@@ -133,4 +133,22 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
 	}
+
+	/**
+	 * Test enqueue_gutenberg.
+	 *
+	 * @covers AMP_Theme_Support::enqueue_gutenberg()
+	 */
+	public function test_enqueue_gutenberg() {
+		AMP_Theme_Support::enqueue_gutenberg();
+		$slug = 'amp-gutenberg';
+		$script = wp_scripts()->registered[ $slug ];
+		$this->assertContains( 'js/amp-gutenberg.js', $script->src );
+		$this->assertEquals( array( 'jquery' ), $script->deps );
+		$this->assertEquals( AMP__VERSION, $script->ver );
+		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
+		$this->assertContains( 'ampGutenberg.boot', $script->extra['after'][1] );
+		$this->assertContains( 'This is not valid AMP', $script->extra['after'][1] );
+	}
+
 }
