@@ -266,7 +266,7 @@ class AMP_Post_Template {
 	 */
 	private function build_post_data() {
 		$post_title              = get_the_title( $this->ID );
-		$post_publish_timestamp  = get_the_date( 'U', $this->ID );
+		$post_publish_timestamp  = get_post_time( 'U', false, $this->post );
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
