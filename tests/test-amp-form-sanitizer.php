@@ -51,6 +51,9 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	/**
+	 * Test scripts.
+	 */
 	public function test_scripts() {
 		$source   = '<form method="POST" action-xhr="//example.org/example-page/" target="_top"></form>';
 		$expected = array( 'amp-form' => 'https://cdn.ampproject.org/v0/amp-form-latest.js' );
