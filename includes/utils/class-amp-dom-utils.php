@@ -56,6 +56,7 @@ class AMP_DOM_Utils {
 
 		$dom = new DOMDocument();
 
+		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 		$document = self::convert_amp_bind_attributes( $document );
 
 		/*
@@ -100,7 +101,7 @@ class AMP_DOM_Utils {
 	/**
 	 * Replace AMP binding attributes with something that libxml can parse (as HTML5 data-* attributes).
 	 *
-	 * This is necessary necessary because attributes in square brackets are not understood in PHP and
+	 * This is necessary because attributes in square brackets are not understood in PHP and
 	 * get dropped with an error raised:
 	 * > Warning: DOMDocument::loadHTML(): error parsing attribute name
 	 * This is a reciprocal function of AMP_DOM_Utils::restore_amp_bind_attributes().
@@ -252,6 +253,7 @@ class AMP_DOM_Utils {
 	 * @see Called by function get_content_from_dom()
 	 *
 	 * @since 0.6
+	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 	 *
 	 * @param DOMDocument $dom  Represents an HTML document.
 	 * @param DOMNode     $node Represents an HTML element of the $dom from which to extract HTML content.
