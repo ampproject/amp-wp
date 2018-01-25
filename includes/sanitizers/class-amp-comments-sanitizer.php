@@ -51,6 +51,9 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$new_wrap     = $node->parentNode->cloneNode();
 			$amp_list     = $ol->getElementsByTagName( 'amp-list' )->item( 0 );
 			$amp_template = $ol->getElementsByTagName( 'template' )->item( 0 );
+			if ( ! $amp_list instanceof DOMElement || ! $amp_template instanceof DOMElement ) {
+				continue;
+			}
 
 			// Move Dom parts to an AMP structure.
 			$new_wrap->appendChild( $node );
