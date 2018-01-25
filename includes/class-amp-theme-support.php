@@ -368,10 +368,8 @@ class AMP_Theme_Support {
 	 * @return array Args to return.
 	 */
 	public static function add_amp_comments_template( $args ) {
-		if ( ! isset( $args['amp_comments'] ) ) {
-			$amp_walker     = new AMP_Comment_Walker();
-			$args['walker'] = $amp_walker;
-		}
+		$amp_walker     = new AMP_Comment_Walker();
+		$args['walker'] = $amp_walker;
 
 		return $args;
 	}
