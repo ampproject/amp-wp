@@ -317,7 +317,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'attribute_value_valid'                                     => array(
-				'<template type="amp-mustache">Template Data</template>',
+				'<template type="amp-mustache">Hello {{world}}! <a href="{{user_url}}" title="{{user_name}}">Homepage</a> User content: {{{some_formatting}}} A guy with Mustache: :-{). {{#returning}}Welcome back!{{/returning}} {{^returning}}Welcome for the first time!{{/returning}} </template>',
 				null,
 				array( 'amp-mustache' ),
 			),
@@ -605,16 +605,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'Headline<span>Span</span>',
 			),
 
-			'amp_bind_attr' => array(
+			'amp_bind_attr'                                             => array(
 				'<p [text]="\'Hello \' + foo">Hello World</p><button on="tap:AMP.setState({foo: \'amp-bind\'})">Update</button>',
 				null, // No change.
 				array( 'amp-bind' ),
 			),
 
-			'amp_bad_bind_attr' => array(
+			'amp_bad_bind_attr'                                         => array(
 				'<a [unrecognized] [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
 				'<a [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
 				array( 'amp-bind' ),
+			),
+
+			// Adapted from <https://www.ampproject.org/docs/reference/components/amp-selector>.
+			'amp_selector_and_carousel_with_boolean_attributes'         => array(
+				'<form action="/" method="get" target="_blank" id="form1"><amp-selector layout="container" name="single_image_select"><ul><li><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img></li><li><amp-img src="/img2.png" width="50" height="50" option="2"></amp-img></li><li option="na" selected>None of the Above</li></ul></amp-selector><amp-selector layout="container" name="multi_image_select" multiple><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img><amp-img src="/img2.png" width="50" height="50" option="2"></amp-img><amp-img src="/img3.png" width="50" height="50" option="3"></amp-img></amp-selector><amp-selector layout="container" name="multi_image_select_1" multiple><amp-carousel id="carousel-1" width="200" height="60" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d" disabled></amp-img></amp-carousel></amp-selector></form><amp-selector layout="container" name="multi_image_select_2" multiple form="form1"><amp-carousel id="carousel-1" width="400" height="300" type="slides" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d"></amp-img></amp-carousel></amp-selector>',
+				null, // No change.
+				array( 'amp-selector', 'amp-form', 'amp-carousel' ),
 			),
 		);
 	}

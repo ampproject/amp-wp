@@ -60,6 +60,22 @@ class AMP_DOM_Utils {
 		$document = self::convert_amp_bind_attributes( $document );
 
 		/*
+		 * Prevent amp-mustache syntax from getting URL-encoded in attributes when saveHTML is done.
+		 * While this is applying to the entire document, it only really matters inside of <template>
+		 * elements, since URL-encoding of curly braces in href attributes would not normally matter.
+		 * But when this is done inside of a <template> then it breaks Mustache. Since Mustache
+		 * is logic-less and curly braces are not unsafe for HTML, we can do a global replacement.
+		 * The replacement is done on the entire HTML document instead of just inside of the <template>
+		 * elements since it is faster and wouldn't change the outcome.
+		 */
+		$placeholders = self::get_mustache_tag_placeholders();
+		$document     = str_replace(
+			array_keys( $placeholders ),
+			array_values( $placeholders ),
+			$document
+		);
+
+		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
 		 * We can later use this to extract our nodes.
@@ -96,6 +112,38 @@ class AMP_DOM_Utils {
 			$attribute_prefix = sprintf( 'amp-binding-%s-', md5( wp_rand() ) );
 		}
 		return $attribute_prefix;
+	}
+
+	/**
+	 * Get amp-mustache tag/placeholder mappings.
+	 *
+	 * @since 0.7
+	 * @see \wpdb::placeholder_escape()
+	 *
+	 * @return array Mapping of mustache tag token to its placeholder.
+	 */
+	private static function get_mustache_tag_placeholders() {
+		static $placeholders;
+		if ( ! isset( $placeholders ) ) {
+			$salt = wp_rand();
+
+			// Note: The order of these tokens is important, as it determines the order of the order of the replacements.
+			$tokens       = array(
+				'{{{',
+				'}}}',
+				'{{#',
+				'{{^',
+				'{{/',
+				'{{/',
+				'{{',
+				'}}',
+			);
+			$placeholders = array();
+			foreach ( $tokens as $token ) {
+				$placeholders[ $token ] = '_amp_mustache_' . md5( $salt . $token );
+			}
+		}
+		return $placeholders;
 	}
 
 	/**
@@ -284,6 +332,14 @@ class AMP_DOM_Utils {
 		}
 
 		$html = self::restore_amp_bind_attributes( $html );
+
+		// Restore amp-mustache placeholders which were replaced to prevent URL-encoded corruption by saveHTML.
+		$placeholders = self::get_mustache_tag_placeholders();
+		$html         = str_replace(
+			array_values( $placeholders ),
+			array_keys( $placeholders ),
+			$html
+		);
 
 		/*
 		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.

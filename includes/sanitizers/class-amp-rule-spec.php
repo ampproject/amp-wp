@@ -77,7 +77,60 @@ abstract class AMP_Rule_Spec {
 	 */
 	public static $whitelisted_attr_regex = array(
 		'@^data-[a-zA-Z][\\w:.-]*$@uis',
-		'(update|item|pagination)', // Allowed for live reference points.
+		'(update|item|pagination|option|selected|disabled)', // Allowed for live reference points.
+	);
+
+	/**
+	 * List of boolean attributes.
+	 *
+	 * @since 0.7
+	 * @var array
+	 */
+	public static $boolean_attributes = array(
+		'allowfullscreen',
+		'async',
+		'autofocus',
+		'autoplay',
+		'checked',
+		'compact',
+		'controls',
+		'declare',
+		'default',
+		'defaultchecked',
+		'defaultmuted',
+		'defaultselected',
+		'defer',
+		'disabled',
+		'draggable',
+		'enabled',
+		'formnovalidate',
+		'hidden',
+		'indeterminate',
+		'inert',
+		'ismap',
+		'itemscope',
+		'loop',
+		'multiple',
+		'muted',
+		'nohref',
+		'noresize',
+		'noshade',
+		'novalidate',
+		'nowrap',
+		'open',
+		'pauseonexit',
+		'readonly',
+		'required',
+		'reversed',
+		'scoped',
+		'seamless',
+		'selected',
+		'sortable',
+		'spellcheck',
+		'translate',
+		'truespeed',
+		'typemustmatch',
+		'visible',
 	);
 
 	/**
