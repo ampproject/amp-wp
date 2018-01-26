@@ -3,6 +3,7 @@
  * Class AMP_Tumblr_Embed_Handler
  *
  * @package AMP
+ * @since 0.7
  */
 
 /**

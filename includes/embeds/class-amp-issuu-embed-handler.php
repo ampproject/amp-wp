@@ -3,6 +3,7 @@
  * Class AMP_Issuu_Embed_Handler
  *
  * @package AMP
+ * @since 0.7
  */
 
 /**

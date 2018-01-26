@@ -3,6 +3,7 @@
  * Class AMP_Reddit_Embed_Handler
  *
  * @package AMP
+ * @since 0.7
  */
 
 /**
@@ -17,11 +18,18 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#https?://(www\.)?reddit\.com/r/[^/]+/comments/.*#i';
 
 	/**
-	 * Script slug.
+	 * Default height.
 	 *
-	 * @var string
+	 * @var int
 	 */
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-reddit-0.1.js';
+	protected $DEFAULT_HEIGHT = 141; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase
+
+	/**
+	 * Default width.
+	 *
+	 * @var int
+	 */
+	protected $DEFAULT_WIDTH = 596; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase
 
 	/**
 	 * Register embed.
@@ -35,13 +43,6 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-reddit' );
-	}
-
-	/**
-	 * Include the required AMP Reddit scripts.
-	 */
-	public function get_scripts() {
-		return array( 'amp-reddit' => self::$script_src );
 	}
 
 	/**
@@ -74,8 +75,8 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 			array(
 				'layout'         => 'responsive',
 				'data-embedtype' => 'post',
-				'width'          => '596',
-				'height'         => '141',
+				'width'          => $this->args['width'],
+				'height'         => $this->args['height'],
 				'data-src'       => $args['url'],
 			)
 		);
