@@ -62,5 +62,10 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$node->replaceChild( $wrapper, $node->firstChild );
 			$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
 		}
+
+		$form = $this->dom->getElementById( 'commentform' );
+		if ( $form instanceof DOMElement ) {
+			$form->setAttribute( 'on', 'submit-success:amp-live-comments-list.update' );
+		}
 	}
 }

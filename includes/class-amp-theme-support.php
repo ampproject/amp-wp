@@ -193,7 +193,9 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
-		add_filter( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
+		add_action( 'comment_form_top', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
+		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
 
 		// @todo Add character conversion.
 	}
@@ -283,11 +285,36 @@ class AMP_Theme_Support {
 	 * @param array $args the args for the comments list..
 	 * @return array Args to return.
 	 */
-	public static function add_amp_comments_template( $args ) {
+	public static function amp_set_comments_walker( $args ) {
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
+		// @todo Make threaded work by setting 'data-update-time' of the parent first level parent with the last timestamp.
+		$args['max_depth'] = 1;
 
 		return $args;
+	}
+
+	/**
+	 * Adds the form submit success and fail templates.
+	 *
+	 * @param string $post_id The post ID if action is 'comment_form'.
+	 */
+	public static function add_amp_comment_form_templates( $post_id ) {
+		$output = '';
+		if ( empty( $post_id ) ) {
+			$output .= '<div id="amp-comment-form-fields">';
+		} else {
+			$output .= '</div>';
+			$output .= '<div submit-success><template type="amp-mustache">';
+			$output .= esc_html__( 'Your comment has been posted.', 'amp' );
+			$output .= sprintf( '<a class="amp-view-new-comment" href="{{comment_link}}">%s</a>', esc_html__( 'View Comment', 'amp' ) );
+			$output .= '</div></template>';
+			$output .= '<div submit-error><template type="amp-mustache">';
+			$output .= '<p class="amp-comment-submit-error">{{{error}}}</p>';
+			$output .= '</div></template>';
+		}
+
+		echo $output; // WPCS: XSS OK.
 	}
 
 	/**
