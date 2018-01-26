@@ -113,30 +113,6 @@ function amp_add_options_menu() {
 }
 
 /**
- * Add custom analytics.
- *
- * @param array $analytics Analytics.
- * @return array Analytics.
- */
-function amp_add_custom_analytics( $analytics ) {
-	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
-
-	if ( ! $analytics_entries ) {
-		return $analytics;
-	}
-
-	foreach ( $analytics_entries as $entry_id => $entry ) {
-		$analytics[ $entry_id ] = array(
-			'type' => $entry['type'],
-			'attributes' => array(),
-			'config_data' => json_decode( $entry['config'] ),
-		);
-	}
-
-	return $analytics;
-}
-
-/**
  * Bootstrap AMP post meta box.
  *
  * This function must be invoked only once through the 'wp_loaded' action.
