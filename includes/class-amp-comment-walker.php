@@ -56,11 +56,11 @@ class AMP_Comment_Walker extends Walker_Comment {
 
 		$args = array_slice( func_get_args(), 4 );
 
-		$output  = '<amp-live-list layout="container" data-poll-interval="15000" data-max-items-per-page="2" id="amp-live-list-insert-blog">';
+		$output  = '<amp-live-list layout="container" data-poll-interval="15000" data-max-items-per-page="20" id="amp-live-comments-list">';
 		$output .= '<div items>';
 		$output .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
 		$output .= '</div>';
-		$output .= '<button update on="tap:amp-live-list-insert-blog.update" class="ampstart-btn ml1 caps">You have updates</button>';
+		$output .= '<button update on="tap:amp-live-comments-list.update" class="ampstart-btn ml1 caps">' . esc_html__( 'You have updates', 'amp' ) . '</button>';
 		$output .= '<div pagination></div>';
 		$output .= '</amp-live-list>';
 
