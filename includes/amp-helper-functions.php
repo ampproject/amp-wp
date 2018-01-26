@@ -222,6 +222,8 @@ function amp_get_content_sanitizers( $post = null ) {
 			'AMP_Video_Sanitizer'             => array(),
 			'AMP_Audio_Sanitizer'             => array(),
 			'AMP_Playbuzz_Sanitizer'          => array(),
+			'AMP_Form_Sanitizer'              => array(),
+			'AMP_Comments_Sanitizer'          => array(),
 			'AMP_Iframe_Sanitizer'            => array(
 				'add_placeholder' => true,
 			),

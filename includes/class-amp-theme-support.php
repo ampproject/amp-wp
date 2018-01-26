@@ -27,6 +27,13 @@ class AMP_Theme_Support {
 	const CUSTOM_STYLES_PLACEHOLDER = '/* AMP:CUSTOM_STYLES_PLACEHOLDER */';
 
 	/**
+	 * Replaced with the comments template.
+	 *
+	 * @var string
+	 */
+	const COMMENTS_TEMPLATE_PLACEHOLDER = '/* AMP:COMMENTS_TEMPLATE_PLACEHOLDER */';
+
+	/**
 	 * AMP Scripts.
 	 *
 	 * @var array
@@ -193,6 +200,17 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
+		// Add Comments hooks.
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
+		add_filter( 'comments_array', array( __CLASS__, 'get_comments_template' ) );
+		add_action( 'comment_form_top', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
+		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
+		// Filter dynamic data with mustache variable strings.
+		// @todo add additional filters for dynamic data like "get_comment_author_link", "get_comment_author_IP" etc...
+		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date_template_string' ), PHP_INT_MAX );
+		add_filter( 'get_comment_time', array( __CLASS__, 'get_comment_time_template_string' ), PHP_INT_MAX );
+		add_filter( 'get_avatar_data', array( __CLASS__, 'get_avatar_data' ), PHP_INT_MAX );
+		add_filter( 'get_comment_ID', array( __CLASS__, 'get_comment_id_template_string' ), PHP_INT_MAX );
 		// @todo Add character conversion.
 	}
 
@@ -344,6 +362,126 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Add the comments template placeholder marker
+	 *
+	 * @param array $args the args for the comments list..
+	 * @return array Args to return.
+	 */
+	public static function add_amp_comments_template( $args ) {
+		$amp_walker     = new AMP_Comment_Walker();
+		$args['walker'] = $amp_walker;
+
+		return $args;
+	}
+
+	/**
+	 * Create a comments_flat array for generating the comment mustache template.
+	 *
+	 * @return array Flat array of comment placeholders.
+	 */
+	public static function get_comments_template() {
+
+		$_comment = array(
+			'comment_ID'           => '{{comment_ID}}',
+			'comment_post_ID'      => get_the_ID(),
+			'comment_author'       => '{{comment_author}}',
+			'comment_author_email' => '{{comment_author_email}}',
+			'comment_author_url'   => '{{comment_author_url}}',
+			'comment_author_IP'    => '{{comment_author_IP}}',
+			'comment_date'         => '{{comment_date}}',
+			'comment_date_gmt'     => '{{comment_date_gmt}}',
+			'comment_content'      => '{{comment_content}}',
+			'comment_karma'        => '{{comment_karma}}',
+			'comment_approved'     => '{{comment_approved}}',
+			'comment_agent'        => '{{comment_agent}}',
+			'comment_type'         => '{{comment_type}}',
+			'comment_parent'       => '',
+			'user_id'              => '{{user_id}}',
+		);
+
+		$comments = array();
+		$depth    = 5;
+		for ( $i = 0; $i < $depth; $i ++ ) {
+			$comment = new stdClass();
+			foreach ( $_comment as $key => $value ) {
+				if ( 'comment_ID' === $key ) {
+					$value = $i + 1;
+				}
+				if ( 'comment_parent' === $key && $i > 0 ) {
+					$value = $i;
+				}
+				$comment->{$key} = $value;
+			}
+			$comments[] = $comment;
+		}
+
+		return $comments;
+
+	}
+
+	/**
+	 * Adds the form submit success and fail templates.
+	 *
+	 * @param string $post_id The post ID if action is 'comment_form'.
+	 */
+	public static function add_amp_comment_form_templates( $post_id ) {
+		$output = '';
+		if ( empty( $post_id ) ) {
+			$output .= '<div id="amp-comment-form-fields">';
+		} else {
+			$output .= '</div>';
+			$output .= '<div submit-success><template type="amp-mustache">';
+			$output .= esc_html__( 'Your comment has been posted.', 'amp' );
+			$output .= sprintf( '<a class="amp-view-new-comment" href="{{comment_link}}">%s</a>', esc_html__( 'View Comment', 'amp' ) );
+			$output .= '</div></template>';
+			$output .= '<div submit-error><template type="amp-mustache">';
+			$output .= '<p class="amp-comment-submit-error">{{{error}}}</p>';
+			$output .= '</div></template>';
+		}
+
+		echo $output; // WPCS: XSS OK.
+	}
+
+	/**
+	 * Get avatar URL template string.
+	 *
+	 * @param array $args Avatar data args.
+	 * @return array Avatar data with url added.
+	 */
+	public static function get_avatar_data( $args ) {
+		$args['url'] = '{{comment_avatar_url}}';
+
+		return $args;
+	}
+
+	/**
+	 * Get comment ID string for template.
+	 *
+	 * @return string Mustache template string.
+	 */
+	public static function get_comment_id_template_string() {
+		return '{{comment_ID}}';
+	}
+
+	/**
+	 * Get comment date string for template.
+	 *
+	 * @return string Mustache template string.
+	 */
+	public static function get_comment_date_template_string() {
+		return '{{comment_date}}';
+	}
+
+	/**
+	 * Get somment time string for template.
+	 *
+	 * @return string Mustache template string.
+	 */
+	public static function get_comment_time_template_string() {
+		return '{{comment_time}}';
+	}
+
+	/**
 	 * Get canonical URL for current request.
 	 *
 	 * @see rel_canonical()
@@ -464,6 +602,23 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Determine the type of component script.
+	 *
+	 * @param string $component The component name.
+	 * @return string the type of component.
+	 */
+	public static function get_component_type( $component ) {
+		$component_types = apply_filters( 'amp_component_types', array(
+			'amp-mustache' => 'template',
+		) );
+
+		if ( ! empty( $component_types[ $component ] ) ) {
+			return $component_types[ $component ];
+		}
+		return 'element';
+	}
+
+	/**
 	 * Determine required AMP scripts.
 	 *
 	 * @return string Scripts to inject into the HEAD.
@@ -493,7 +648,8 @@ class AMP_Theme_Support {
 		$scripts = '';
 		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
 			$scripts .= sprintf(
-				'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				'<script async custom-%s="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				self::get_component_type( $amp_script_component ),
 				$amp_script_component,
 				$amp_script_source
 			);

@@ -88,6 +88,7 @@ function amp_after_setup_theme() {
 	}
 
 	add_action( 'init', 'amp_init' );
+	add_action( 'rest_api_init', 'amp_rest_init' );
 	add_action( 'widgets_init', 'AMP_Theme_Support::register_widgets' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
@@ -125,6 +126,18 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
+
+	amp_hook_comments_maybe();
+}
+
+/**
+ * Init AMP Rest endpoints.
+ *
+ * @since 0.1
+ */
+function amp_rest_init() {
+	require_once AMP__DIR__ . '/includes/amp-rest-functions.php';
+	amp_register_endpoints();
 }
 
 // Make sure the `amp` query var has an explicit value.
@@ -360,4 +373,65 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 	}
 
 	return $link;
+}
+
+/**
+ * Hook into a comment submission if an AMP xhr post request.
+ */
+function amp_hook_comments_maybe() {
+
+	$method        = filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING );
+	$is_amp_submit = filter_input( INPUT_GET, '__amp_source_origin', FILTER_VALIDATE_URL );
+
+	if ( 'post' !== strtolower( $method ) || is_null( $is_amp_submit ) ) {
+		return;
+	}
+
+	// Add amp comment hooks.
+	add_filter( 'comment_post_redirect', 'amp_comment_post_redirect', PHP_INT_MAX, 2 );
+	add_filter( 'wp_die_handler', 'amp_set_comment_submit_die_handler' );
+
+	// Send amp header.
+	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $is_amp_submit, true );
+
+}
+
+/**
+ * Set the die handler on comment submit to output the error in json and send AMP headers.
+ */
+function amp_set_comment_submit_die_handler() {
+	return 'amp_send_error_json';
+}
+
+/**
+ * Send error creating message.
+ *
+ * @param string $message The error message to send.
+ */
+function amp_send_error_json( $message ) {
+	header( 'HTTP/1.1 400 BAD REQUEST' );
+	wp_send_json( array( 'error' => strip_tags( $message, 'strong' ) ) );
+}
+
+/**
+ * Redirect after comment submission.
+ *
+ * @param string     $location The location to redirect to.
+ * @param WP_Comment $comment The comment that was posted.
+ * @return string The location URL or void if send json.
+ */
+function amp_comment_post_redirect( $location, $comment ) {
+	$is_amp_submit = filter_input( INPUT_GET, '__amp_source_origin', FILTER_VALIDATE_URL );
+	if ( is_null( $is_amp_submit ) ) {
+		return $location;
+	}
+
+	// AMP-Redirect only works if https. If not, we simply render the success.
+	if ( is_ssl() ) {
+		$location = strtok( $location, '#' );
+		header( 'AMP-Redirect-To: ' . $location );
+		header( 'Access-Control-Expose-Headers: AMP-Redirect-To', false );
+	}
+	$comment->comment_link = get_comment_link( $comment->comment_ID );
+	wp_send_json( $comment );
 }
