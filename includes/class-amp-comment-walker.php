@@ -21,29 +21,9 @@ class AMP_Comment_Walker extends Walker_Comment {
 	public $args;
 
 	/**
-	 * Starts the element output.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @see Walker::start_el()
-	 * @see wp_list_comments()
-	 * @global int        $comment_depth
-	 * @global WP_Comment $comment
-	 *
-	 * @param string     $output  Used to append additional content. Passed by reference.
-	 * @param WP_Comment $comment Comment data object.
-	 * @param int        $depth   Optional. Depth of the current comment in reference to parents. Default 0.
-	 * @param array      $args    Optional. An array of arguments. Default empty array.
-	 * @param int        $id      Optional. ID of the current comment. Default 0 (unused).
-	 */
-	public function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
-		$output .= '{{#comment}}';
-		parent::start_el( $output, $comment, $depth, $args, $id );
-	}
-	/**
 	 * Ends the element output, if needed.
 	 *
-	 * @since 2.7.0
+	 * @since 0.7
 	 *
 	 * @see Walker::end_el()
 	 * @see wp_list_comments()
@@ -54,18 +34,8 @@ class AMP_Comment_Walker extends Walker_Comment {
 	 * @param array      $args    Optional. An array of arguments. Default empty array.
 	 */
 	public function end_el( &$output, $comment, $depth = 0, $args = array() ) {
-		if ( ! empty( $args['end-callback'] ) ) {
-			ob_start();
-			call_user_func( $args['end-callback'], $comment, $args, $depth );
-			$output .= ob_get_clean();
-		} else {
-			if ( 'div' === $args['style'] ) {
-				$output .= "</div><!-- #comment-## -->\n";
-			} else {
-				$output .= "</li><!-- #comment-## -->\n";
-			}
-		}
-		$output .= '{{/comment}}';
+		$output .= '<amp-comment data-sort-time="' . strtotime( $comment->comment_date ) . '"  />';
+		parent::end_el( $output, $comment, $depth, $args );
 	}
 
 	/**
@@ -86,19 +56,13 @@ class AMP_Comment_Walker extends Walker_Comment {
 
 		$args = array_slice( func_get_args(), 4 );
 
-		$url = get_rest_url( get_current_blog_id(), 'amp/v1/comments/' . get_the_ID() );
-		if ( strpos( $url, 'http:' ) === 0 ) {
-			$url = substr( $url, 5 );
-		}
-		// @todo Identify arguments and make filterable/settable.
-		$output  = '<amp-list src="' . esc_attr( $url ) . '" height="200" width="auto" single-item="true" layout="flex-item">';
-		$output .= '<template type="amp-mustache"></template>';
-		$output .= '<div overflow role="button" aria-label="' . esc_attr__( 'Show more', 'amp' ) . '" class="list-overflow ampstart-btn caps">' . esc_html__( 'Show more', 'amp' ) . '</div>';
-		$output .= '<div fallback class="amp-fallback amp-comments-notice amp-error"><p>' . esc_html__( 'Could not load comments.', 'amp' ) . '</p></div>';
-		$output .= '</amp-list>';
-		$output .= '<comment-template>';
+		$output  = '<amp-live-list layout="container" data-poll-interval="15000" data-max-items-per-page="2" id="amp-live-list-insert-blog">';
+		$output .= '<div items>';
 		$output .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
-		$output .= '</comment-template>';
+		$output .= '</div>';
+		$output .= '<button update on="tap:amp-live-list-insert-blog.update" class="ampstart-btn ml1 caps">You have updates</button>';
+		$output .= '<div pagination></div>';
+		$output .= '</amp-live-list>';
 
 		return $output;
 	}

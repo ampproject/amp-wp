@@ -193,6 +193,8 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'add_amp_comments_template' ), PHP_INT_MAX );
+
 		// @todo Add character conversion.
 	}
 
@@ -273,6 +275,19 @@ class AMP_Theme_Support {
 		}
 
 		return $embed_handlers;
+	}
+
+	/**
+	 * Add the comments template placeholder marker
+	 *
+	 * @param array $args the args for the comments list..
+	 * @return array Args to return.
+	 */
+	public static function add_amp_comments_template( $args ) {
+		$amp_walker     = new AMP_Comment_Walker();
+		$args['walker'] = $amp_walker;
+
+		return $args;
 	}
 
 	/**
