@@ -53,7 +53,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				for ( $c = 0; $c < $items->length; ) {
 					$child = $items->item( $c );
 					if ( $child instanceof DOMElement ) {
-						$time = $child->lastChild->getAttributeNode( 'data-sort-time' );
+						$time = $child->getElementsByTagName( 'amp-comment' )->item( 0 )->getAttributeNode( 'data-sort-time' );
 						$child->setAttributeNode( $time );
 					}
 					$wrapper->appendChild( $child );
