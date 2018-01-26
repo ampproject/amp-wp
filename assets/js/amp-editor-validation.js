@@ -8,7 +8,7 @@
  */
 
 /* exported ampGutenberg */
-var ampGutenberg = ( function( $ ) {
+var ampEditorValidation = ( function( $ ) {
 	'use strict';
 
 	var component = {
@@ -16,6 +16,11 @@ var ampGutenberg = ( function( $ ) {
 		 * Holds data.
 		 */
 		data: {},
+
+		/**
+		 * The response from the amp.validator for valid AMP.
+		 */
+		validStatus: 'PASS',
 
 		/**
 		 * Boot module.
@@ -39,17 +44,18 @@ var ampGutenberg = ( function( $ ) {
 		 * @returns void.
 		 */
 		getScript: function() {
-			var previousWp = wp;
 			$.getScript( 'https://cdn.ampproject.org/v0/validator.js', function() {
-				wp = previousWp;
-				component.processBlocks();
+				component.validatePage();
+				if ( 'undefined' !== typeof wp.blocks ) {
+					component.processBlocks();
+				}
 			} );
 		},
 
 		/**
 		 * Gets all of the registered blocks, and overwrites their edit() functions.
 		 *
-		 * THe new edit() functions will check if the content is AMP-compliant.
+		 * The new edit() functions will check if the content is AMP-compliant.
 		 * If not, the block will display a notice.
 		 *
 		 * @returns {void}
@@ -90,7 +96,7 @@ var ampGutenberg = ( function( $ ) {
 				}
 
 				// If validation fails, prepend a Notice to the block.
-				if ( ! component.isValidAMP( content ) ) {
+				if ( ! component.isValidAMP( content, true ) ) {
 					result.unshift( el(
 						Notice,
 						{
@@ -113,18 +119,42 @@ var ampGutenberg = ( function( $ ) {
 		 * Then, validates that page.
 		 *
 		 * @param {string} markup The markup to test.
+		 * @param {boolean} doWrap Whether to wrap the passed markup in a basic AMP document.
 		 * @returns {boolean} $valid Whether the passed markup is valid AMP.
 		 */
-		isValidAMP: function( markup ) {
-			var ampDocument = `<!doctype html><html ⚡><head><meta charset="utf-8"><link rel="canonical" href="./regular-html-version.html"><meta name="viewport" content="width=device-width,minimum-scale=1"><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><script async src="https://cdn.ampproject.org/v0.js"></script></head><body>${markup}</body></html>`,
-				validated = amp.validator.validateString( ampDocument ),
+		isValidAMP: function( markup, doWrap = false ) {
+			var validated,
 				validKey = 'status';
-			return ( validated.hasOwnProperty( validKey ) && 'PASS' === validated[ validKey ] );
+			if ( true === doWrap ) {
+				markup = `<!doctype html><html ⚡><head><meta charset="utf-8"><link rel="canonical" href="./regular-html-version.html"><meta name="viewport" content="width=device-width,minimum-scale=1"><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><script async src="https://cdn.ampproject.org/v0.js"></script></head><body>${markup}</body></html>`;
+			}
+			validated = amp.validator.validateString( markup );
+			return ( validated.hasOwnProperty( validKey ) && component.validStatus === validated[ validKey ] );
+		},
+
+		/**
+		 * Validate the entire page that a URL produces.
+		 *
+		 * @returns {void}
+		 */
+		validatePage: function() {
+			if ( ! component.data.hasOwnProperty( 'doValidatePage' ) || true !== component.data.doValidatePage ) {
+				return;
+			}
+
+			$.get( component.data.permalink, function( data ) {
+				if ( 'string' === typeof data && ! component.isValidAMP( data ) ) {
+					let $notice = $( '<div>' )
+						.addClass( 'notice notice-warning is-dismissible' )
+						.append( $( '<p>' )
+							.text( component.data.i18n.notice )
+						);
+					$( '.wp-header-end' ).after( $notice );
+				}
+			} );
 		}
 	};
 
-	return {
-		boot: component.boot
-	};
+	return component;
 
 } )( window.jQuery );

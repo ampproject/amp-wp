@@ -235,26 +235,60 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Enqueues Gutenberg integration script.
+	 * Enqueues the script on post.php.
+	 *
+	 * This enables AMP validation in the editor.
+	 * Both in Gutenberg and the 'Classic' editor.
 	 *
 	 * @return void.
 	 */
-	public static function enqueue_gutenberg() {
-		$slug = 'amp-gutenberg';
+	public static function enqueue_editor() {
+		global $pagenow;
+		$slug = 'amp-editor-validation';
+
+		if ( 'post.php' !== $pagenow ) {
+			return;
+		}
+
 		wp_enqueue_script(
 			$slug,
-			amp_get_asset_url( 'js/amp-gutenberg.js' ),
+			amp_get_asset_url( 'js/amp-editor-validation.js' ),
 			array( 'jquery' ),
 			AMP__VERSION,
 			true
 		);
-		wp_add_inline_script( $slug, sprintf( 'ampGutenberg.boot( %s );',
-			wp_json_encode( array(
-				'i18n' => array(
-					'notice' => __( 'This is not valid AMP', 'amp' ),
-				),
-			) )
+
+		$data = wp_json_encode( array(
+			'i18n'           => array(
+				'notice' => __( 'This is not valid AMP', 'amp' ),
+			),
+			'permalink'      => esc_url( get_the_permalink() ),
+			'doValidatePage' => self::do_validate_page(),
 		) );
+		wp_add_inline_script( $slug, sprintf( 'ampEditorValidation.boot( %s );', $data ) );
+	}
+
+	/**
+	 * Whether to check the permalink of a post for AMP compliance.
+	 *
+	 * On saving a post in post.php, there should be a message if the entire document isn't valid AMP.
+	 * The request for post.php usually has a value for 'message.'
+	 * This number corresponds to the change in the post.
+	 * For example, 1 applies when the post is updated.
+	 * There are some 'messages' that this should not apply to, like 8 (Post submitted).
+	 * This is called on enqueuing a script for post.php.
+	 * There is no nonce for the page, so this has no nonce verification.
+	 *
+	 * @see $messages in edit-form-advanced.php
+	 * @return boolean $do_validate Whether to validate the post.
+	 */
+	public static function do_validate_page() {
+		$accepted = array( 1, 4, 7, 10 );
+		if ( ! isset( $_GET['message'] ) ) { // WPCS: CSRF ok.
+			return false;
+		}
+		$message = intval( wp_unslash( $_GET['message'] ) ); // WPCS: CSRF ok.
+		return in_array( $message, $accepted, true );
 	}
 
 	/**
