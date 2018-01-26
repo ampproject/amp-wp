@@ -199,7 +199,8 @@ class AMP_Post_Template {
 	 * Load and print the template parts for the given post.
 	 */
 	public function load() {
-		$template = is_page() ? 'page' : 'single';
+		global $wp_query;
+		$template = is_page() || $wp_query->is_posts_page ? 'page' : 'single';
 		$this->load_parts( array( $template ) );
 	}
 

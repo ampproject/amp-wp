@@ -66,7 +66,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://twitter.com/altjoen/status/118252236836061184' . PHP_EOL,
-				array( 'amp-twitter' => 'https://cdn.ampproject.org/v0/amp-twitter-0.1.js' ),
+				array( 'amp-twitter' => 'https://cdn.ampproject.org/v0/amp-twitter-latest.js' ),
 			),
 		);
 	}
@@ -77,8 +77,15 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Twitter_Embed_Handler();
 		$embed->register_embed();
-		apply_filters( 'the_content', $source );
-		$scripts = $embed->get_scripts();
+		$source = apply_filters( 'the_content', $source );
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$whitelist_sanitizer->sanitize();
+
+		$scripts = array_merge(
+			$embed->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
 
 		$this->assertEquals( $expected, $scripts );
 	}

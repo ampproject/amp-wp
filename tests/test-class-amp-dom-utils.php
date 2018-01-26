@@ -82,8 +82,8 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function test__get_content_from_dom__br_no_closing_tag() {
-		$source = '<br/>';
-		$expected = '<br/>';
+		$source   = '<br>';
+		$expected = '<br>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -91,62 +91,31 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $actual );
 	}
 
-	public function test__recursive_force_closing_tags__ignore_non_elements() {
-		$dom = new DOMDocument;
-		$node = $dom->createAttribute( 'src' );
-		$expected = ' src=""';
+	/**
+	 * Test convert_amp_bind_attributes.
+	 *
+	 * @covers \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @covers \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @covers \AMP_DOM_Utils::get_amp_bind_placeholder_prefix()
+	 */
+	public function test_amp_bind_conversion() {
+		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
+		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
+		$this->assertNotEquals( $converted, $original );
+		$this->assertContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
+		$this->assertContains( 'width=300 height="200" data-foo="bar" selected', $converted );
+		$restored = AMP_DOM_Utils::restore_amp_bind_attributes( $converted );
+		$this->assertEquals( $original, $restored );
 
-		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
-		$this->assertEquals( $expected, $actual );
-	}
-
-	public function test__recursive_force_closing_tags__ignore_self_closing() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'br' );
-		$expected = '<br/>';
-
-		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
-
-		$this->assertEquals( $expected, $actual );
-	}
-
-	public function test__recursive_force_closing_tags__ignore_non_empty() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'p' );
-		$text = $dom->createTextNode( 'Hello' );
-		$node->appendChild( $text );
-		$expected = '<p>Hello</p>';
-
-		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
-
-		$this->assertEquals( $expected, $actual );
-
-	}
-
-	public function test__recursive_force_closing_tags__force_close() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'amp-img' );
-		$expected = '<amp-img></amp-img>';
-
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
-		// Extra test to confirm we added the child node
-		$this->assertTrue( $node->hasChildNodes() );
-		$this->assertEquals( '', $node->firstChild->nodeValue );
-	}
-
-	public function test__recursive_force_closing_tags__force_close_with_children() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'div' );
-		$child_with_closing = $dom->createElement( 'amp-img' );
-		$child_self_closing = $dom->createElement( 'br' );
-		$node->appendChild( $child_with_closing );
-		$node->appendChild( $child_self_closing );
-		$expected = '<div><amp-img></amp-img><br/></div>';
-
-		$actual = AMP_DOM_Utils::get_content_from_dom_node( $dom, $node );
-
-		$this->assertEquals( $expected, $actual );
+		// Test malformed.
+		$malformed_html = array(
+			'<amp-img width="123" [text]="..."</amp-img>',
+			'<amp-img width="123" [text] data-test="asd"></amp-img>',
+			'<amp-img width="123" [text]="..." *bad*></amp-img>',
+		);
+		foreach ( $malformed_html as $html ) {
+			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
+			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted );
+		}
 	}
 }

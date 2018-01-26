@@ -7,7 +7,7 @@
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" value="amp" />
+			<property name="text_domain" value="amp,default" />
 		</properties>
 	</rule>
 
@@ -30,7 +30,7 @@
 	</rule>
 
 	<!-- Include sniffs for PHP cross-version compatibility. -->
-	<config name="testVersion" value="5.2-99.0"/>
+	<config name="testVersion" value="5.3-99.0"/>
 	<rule ref="PHPCompatibility">
 		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>

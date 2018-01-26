@@ -17,21 +17,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var int
 	 */
-	protected $DEFAULT_HEIGHT = 200;
-
-	/**
-	 * Script slug.
-	 *
-	 * @var string
-	 */
-	private static $script_slug = 'amp-soundcloud';
-
-	/**
-	 * Script source.
-	 *
-	 * @var string
-	 */
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js';
+	protected $DEFAULT_HEIGHT = 200; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase
 
 	/**
 	 * Register embed.
@@ -47,19 +33,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function unregister_embed() {
 		remove_shortcode( 'soundcloud' );
 		remove_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10 );
-	}
-
-	/**
-	 * Get scripts needed by component.
-	 *
-	 * @return array Scripts.
-	 */
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-
-		return array( self::$script_slug => self::$script_src );
 	}
 
 	/**

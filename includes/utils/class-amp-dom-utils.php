@@ -13,6 +13,223 @@
 class AMP_DOM_Utils {
 
 	/**
+	 * HTML elements that are self-closing.
+	 *
+	 * Not all are valid AMP, but we include them for completeness.
+	 *
+	 * @since 0.7
+	 * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
+	 * @var array
+	 */
+	private static $self_closing_tags = array(
+		'area',
+		'base',
+		'basefont',
+		'bgsound',
+		'br',
+		'col',
+		'embed',
+		'frame',
+		'hr',
+		'img',
+		'input',
+		'keygen',
+		'link',
+		'meta',
+		'param',
+		'source',
+		'track',
+		'wbr',
+	);
+
+	/**
+	 * Return a valid DOMDocument representing HTML document passed as a parameter.
+	 *
+	 * @since 0.7
+	 *
+	 * @param string $document Valid HTML document to be represented by a DOMDocument.
+	 *
+	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
+	 */
+	public static function get_dom( $document ) {
+		$libxml_previous_state = libxml_use_internal_errors( true );
+
+		$dom = new DOMDocument();
+
+		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
+		$document = self::convert_amp_bind_attributes( $document );
+
+		/*
+		 * Prevent amp-mustache syntax from getting URL-encoded in attributes when saveHTML is done.
+		 * While this is applying to the entire document, it only really matters inside of <template>
+		 * elements, since URL-encoding of curly braces in href attributes would not normally matter.
+		 * But when this is done inside of a <template> then it breaks Mustache. Since Mustache
+		 * is logic-less and curly braces are not unsafe for HTML, we can do a global replacement.
+		 * The replacement is done on the entire HTML document instead of just inside of the <template>
+		 * elements since it is faster and wouldn't change the outcome.
+		 */
+		$placeholders = self::get_mustache_tag_placeholders();
+		$document     = str_replace(
+			array_keys( $placeholders ),
+			array_values( $placeholders ),
+			$document
+		);
+
+		/*
+		 * Wrap in dummy tags, since XML needs one parent node.
+		 * It also makes it easier to loop through nodes.
+		 * We can later use this to extract our nodes.
+		 * Add charset so loadHTML does not have problems parsing it.
+		 */
+		$result = $dom->loadHTML( $document );
+
+		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
+
+		if ( ! $result ) {
+			return false;
+		}
+
+		return $dom;
+	}
+
+	/**
+	 * Get attribute prefix for converted amp-bind attributes.
+	 *
+	 * This contains a random string to prevent HTML content containing this data- attribute
+	 * originally from being mutated to contain an amp-bind attribute when attributes are restored.
+	 *
+	 * @since 0.7
+	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
+	 *
+	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
+	 */
+	public static function get_amp_bind_placeholder_prefix() {
+		static $attribute_prefix;
+		if ( ! isset( $attribute_prefix ) ) {
+			$attribute_prefix = sprintf( 'amp-binding-%s-', md5( wp_rand() ) );
+		}
+		return $attribute_prefix;
+	}
+
+	/**
+	 * Get amp-mustache tag/placeholder mappings.
+	 *
+	 * @since 0.7
+	 * @see \wpdb::placeholder_escape()
+	 *
+	 * @return array Mapping of mustache tag token to its placeholder.
+	 */
+	private static function get_mustache_tag_placeholders() {
+		static $placeholders;
+		if ( ! isset( $placeholders ) ) {
+			$salt = wp_rand();
+
+			// Note: The order of these tokens is important, as it determines the order of the order of the replacements.
+			$tokens       = array(
+				'{{{',
+				'}}}',
+				'{{#',
+				'{{^',
+				'{{/',
+				'{{/',
+				'{{',
+				'}}',
+			);
+			$placeholders = array();
+			foreach ( $tokens as $token ) {
+				$placeholders[ $token ] = '_amp_mustache_' . md5( $salt . $token );
+			}
+		}
+		return $placeholders;
+	}
+
+	/**
+	 * Replace AMP binding attributes with something that libxml can parse (as HTML5 data-* attributes).
+	 *
+	 * This is necessary because attributes in square brackets are not understood in PHP and
+	 * get dropped with an error raised:
+	 * > Warning: DOMDocument::loadHTML(): error parsing attribute name
+	 * This is a reciprocal function of AMP_DOM_Utils::restore_amp_bind_attributes().
+	 *
+	 * @since 0.7
+	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
+	 *
+	 * @param string $html HTML containing amp-bind attributes.
+	 * @return string HTML with AMP binding attributes replaced with HTML5 data-* attributes.
+	 */
+	public static function convert_amp_bind_attributes( $html ) {
+		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_prefix();
+
+		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
+		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*"|\'[^\']*\'|[^\'"\s]+))?#';
+
+		/**
+		 * Replace callback.
+		 *
+		 * @param array $tag_matches Tag matches.
+		 * @return string Replacement.
+		 */
+		$replace_callback = function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
+			$old_attrs = rtrim( $tag_matches['attrs'] );
+			$new_attrs = '';
+			$offset    = 0;
+			while ( preg_match( $attr_regex, substr( $old_attrs, $offset ), $attr_matches ) ) {
+				$offset += strlen( $attr_matches[0] );
+
+				if ( '[' === $attr_matches['name'][0] ) {
+					$new_attrs .= ' ' . $amp_bind_attr_prefix . trim( $attr_matches['name'], '[]' );
+					if ( isset( $attr_matches['value'] ) ) {
+						$new_attrs .= $attr_matches['value'];
+					}
+				} else {
+					$new_attrs .= $attr_matches[0];
+				}
+			}
+
+			// Bail on parse error which occurs when the regex isn't able to consume the entire $new_attrs string.
+			if ( strlen( $old_attrs ) !== $offset ) {
+				return $tag_matches[0];
+			}
+
+			return '<' . $tag_matches['name'] . $new_attrs . '>';
+		};
+
+		$html = preg_replace_callback(
+			// Match all start tags that probably contain a binding attribute.
+			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s+[^>]+\]=[^>]+)\s*>#',
+			$replace_callback,
+			$html
+		);
+
+		return $html;
+	}
+
+	/**
+	 * Convert AMP bind-attributes back to their original syntax.
+	 *
+	 * This is a reciprocal function of AMP_DOM_Utils::convert_amp_bind_attributes().
+	 *
+	 * @since 0.7
+	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
+	 *
+	 * @param string $html HTML with amp-bind attributes converted.
+	 * @return string HTML with amp-bind attributes restored.
+	 */
+	public static function restore_amp_bind_attributes( $html ) {
+		$html = preg_replace(
+			'#\s' . self::get_amp_bind_placeholder_prefix() . '([a-zA-Z0-9_\-]+)#',
+			' [$1]',
+			$html
+		);
+		return $html;
+	}
+
+	/**
 	 * Return a valid DOMDocument representing arbitrary HTML content passed as a parameter.
 	 *
 	 * @see Reciprocal function get_content_from_dom()
@@ -24,32 +241,21 @@ class AMP_DOM_Utils {
 	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
 	 */
 	public static function get_dom_from_content( $content ) {
-		$libxml_previous_state = libxml_use_internal_errors( true );
-
-		$dom = new DOMDocument();
-
 		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
 		 * We can later use this to extract our nodes.
-		 * Add charset so loadHTML does not have problems parsing it.
+		 * Add utf-8 charset so loadHTML does not have problems parsing it.
+		 * See: http://php.net/manual/en/domdocument.loadhtml.php#78243
 		 */
-		$result = $dom->loadHTML(
-			sprintf(
-				'<html><head><meta http-equiv="content-type" content="text/html; charset=%s"></head><body>%s</body></html>',
-				get_bloginfo( 'charset' ),
-				$content
-			)
+		$document = sprintf(
+			'<html><head><meta http-equiv="content-type" content="text/html; charset=%s"></head><body>%s</body></html>',
+			get_bloginfo( 'charset' ),
+			$content
 		);
 
-		libxml_clear_errors();
-		libxml_use_internal_errors( $libxml_previous_state );
+		return self::get_dom( $document );
 
-		if ( ! $result ) {
-			return false;
-		}
-
-		return $dom;
 	}
 
 	/**
@@ -67,6 +273,8 @@ class AMP_DOM_Utils {
 
 		/**
 		 * We only want children of the body tag, since we have a subset of HTML.
+		 *
+		 * @todo We will want to get the full HTML eventually.
 		 */
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
@@ -93,6 +301,7 @@ class AMP_DOM_Utils {
 	 * @see Called by function get_content_from_dom()
 	 *
 	 * @since 0.6
+	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 	 *
 	 * @param DOMDocument $dom  Represents an HTML document.
 	 * @param DOMNode     $node Represents an HTML element of the $dom from which to extract HTML content.
@@ -108,27 +317,29 @@ class AMP_DOM_Utils {
 		static $self_closing_tags_regex;
 
 		/*
-		 * Most AMP elements need closing tags. To force them, we cannot use
-		 * saveHTML (node support is 5.3+) and LIBXML_NOEMPTYTAG results in
-		 * issues with self-closing tags like `br` and `hr`. So, we're manually
-		 * forcing closing tags.
-		 */
-		self::recursive_force_closing_tags( $dom, $node );
-
-		/*
 		 * Cache this regex so we don't have to recreate it every call.
 		 */
 		if ( ! isset( $self_closing_tags_regex ) ) {
-			$self_closing_tags       = implode( '|', self::get_self_closing_tags() );
-			$self_closing_tags_regex = "#></({$self_closing_tags})>#i";
+			$self_closing_tags       = implode( '|', self::$self_closing_tags );
+			$self_closing_tags_regex = "#</({$self_closing_tags})>#i";
 		}
 
-		$html = $dom->saveXML( $node );
+		$html = $dom->saveHTML( $node );
 
 		// Whitespace just causes unit tests to fail... so whitespace begone.
 		if ( '' === trim( $html ) ) {
 			return '';
 		}
+
+		$html = self::restore_amp_bind_attributes( $html );
+
+		// Restore amp-mustache placeholders which were replaced to prevent URL-encoded corruption by saveHTML.
+		$placeholders = self::get_mustache_tag_placeholders();
+		$html         = str_replace(
+			array_values( $placeholders ),
+			array_keys( $placeholders ),
+			$html
+		);
 
 		/*
 		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
@@ -136,10 +347,9 @@ class AMP_DOM_Utils {
 		 * Seems like LIBXML_NOEMPTYTAG was passed, but as you can see it was not.
 		 * This does not happen in my (@mikeschinkel) local testing, btw.
 		 */
-		$html = preg_replace( $self_closing_tags_regex, '/>', $html );
+		$html = preg_replace( $self_closing_tags_regex, '', $html );
 
 		return $html;
-
 	}
 
 	/**
@@ -215,12 +425,14 @@ class AMP_DOM_Utils {
 	 * Forces HTML element closing tags given a DOMDocument and optional DOMElement
 	 *
 	 * @since 0.2
+	 * @deprecated
 	 *
 	 * @param DOMDocument $dom  Represents HTML document on which to force closing tags.
 	 * @param DOMElement  $node Represents HTML element to start closing tags on.
 	 *                          If not passed, defaults to first child of body.
 	 */
 	public static function recursive_force_closing_tags( $dom, $node = null ) {
+		_deprecated_function( __METHOD__, '0.7' );
 
 		if ( is_null( $node ) ) {
 			$node = $dom->getElementsByTagName( 'body' )->item( 0 );
@@ -262,48 +474,6 @@ class AMP_DOM_Utils {
 	 * @return bool Returns true if a valid self-closing tag, false if not.
 	 */
 	private static function is_self_closing_tag( $tag ) {
-		return in_array( $tag, self::get_self_closing_tags(), true );
-	}
-
-	/**
-	 * Returns array of self closing tags
-	 *
-	 * @since 0.6
-	 *
-	 * @return string[]
-	 */
-	private static function get_self_closing_tags() {
-		/*
-		 * As this function is called a lot the static var
-		 * prevents having to re-create the array every time.
-		 */
-		static $self_closing_tags;
-		if ( ! isset( $self_closing_tags ) ) {
-			/*
-			 * https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
-			 * Not all are valid AMP, but we include them for completeness.
-			 */
-			$self_closing_tags = array(
-				'area',
-				'base',
-				'basefont',
-				'bgsound',
-				'br',
-				'col',
-				'embed',
-				'frame',
-				'hr',
-				'img',
-				'input',
-				'keygen',
-				'link',
-				'meta',
-				'param',
-				'source',
-				'track',
-				'wbr',
-			);
-		}
-		return $self_closing_tags;
+		return in_array( strtolower( $tag ), self::$self_closing_tags, true );
 	}
 }

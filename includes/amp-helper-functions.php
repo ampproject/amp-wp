@@ -55,7 +55,7 @@ function amp_get_permalink( $post_id ) {
  * Determine whether a given post supports AMP.
  *
  * @since 0.1
- * @since 0.6 Returns false when post has meta to disable AMP or when page is homepage or page for posts.
+ * @since 0.6 Returns false when post has meta to disable AMP.
  * @see   AMP_Post_Type_Support::get_support_errors()
  *
  * @param WP_Post $post Post.
@@ -67,7 +67,47 @@ function post_supports_amp( $post ) {
 		return true;
 	}
 
-	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
+	$errors = AMP_Post_Type_Support::get_support_errors( $post );
+
+	// Return false if an error is found.
+	if ( ! empty( $errors ) ) {
+		return false;
+	}
+
+	switch ( get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
+		case AMP_Post_Meta_Box::ENABLED_STATUS:
+			return true;
+
+		case AMP_Post_Meta_Box::DISABLED_STATUS:
+			return false;
+
+		// Disabled by default for custom page templates, page on front and page for posts.
+		default:
+			$enabled = (
+				! (bool) get_page_template_slug( $post )
+				&&
+				! (
+					'page' === $post->post_type
+					&&
+					'page' === get_option( 'show_on_front' )
+					&&
+					in_array( (int) $post->ID, array(
+						(int) get_option( 'page_on_front' ),
+						(int) get_option( 'page_for_posts' ),
+					), true )
+				)
+			);
+
+			/**
+			 * Filters whether default AMP status should be enabled or not.
+			 *
+			 * @since 0.6
+			 *
+			 * @param string  $status Status.
+			 * @param WP_Post $post   Post.
+			 */
+			return apply_filters( 'amp_post_status_default_enabled', $enabled, $post );
+	}
 }
 
 /**

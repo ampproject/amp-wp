@@ -42,10 +42,6 @@ cache:
 
 matrix:
   include:
-   - php: "5.2"
-     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
-   - php: "5.2"
-     env: WP_VERSION=4.7 DEV_LIB_SKIP=phpcs
    - php: "5.3"
      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
    - php: "5.3"

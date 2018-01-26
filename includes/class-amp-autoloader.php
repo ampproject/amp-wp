@@ -30,6 +30,7 @@ class AMP_Autoloader {
 	 */
 	private static $_classmap = array(
 		'AMP_Theme_Support'                           => 'includes/class-amp-theme-support',
+		'AMP_WP_Styles'                               => 'includes/class-amp-wp-styles',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                           => 'includes/admin/class-amp-post-meta-box',
 		'AMP_Post_Type_Support'                       => 'includes/class-amp-post-type-support',
@@ -81,6 +82,9 @@ class AMP_Autoloader {
 		'AMP_Image_Dimension_Extractor'               => 'includes/utils/class-amp-image-dimension-extractor',
 		'AMP_String_Utils'                            => 'includes/utils/class-amp-string-utils',
 		'AMP_WP_Utils'                                => 'includes/utils/class-amp-wp-utils',
+		'AMP_Widget_Archives'                         => 'includes/widgets/class-amp-widget-archives',
+		'AMP_Widget_Categories'                       => 'includes/widgets/class-amp-widget-categories',
+		'AMP_Widget_Recent_Comments'                  => 'includes/widgets/class-amp-widget-recent-comments',
 		'WPCOM_AMP_Polldaddy_Embed'                   => 'wpcom/class-amp-polldaddy-embed',
 		'AMP_Test_Stub_Sanitizer'                     => 'tests/stubs',
 		'AMP_Test_World_Sanitizer'                    => 'tests/stubs',

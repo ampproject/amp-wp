@@ -19,9 +19,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 600;
 	protected $DEFAULT_HEIGHT = 338;
 
-	private static $script_slug = 'amp-youtube';
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-youtube-0.1.js';
-
 	function __construct( $args = array() ) {
 		parent::__construct( $args );
 
@@ -40,14 +37,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-youtube', -1 );
 		remove_shortcode( 'youtube' );
-	}
-
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-
-		return array( self::$script_slug => self::$script_src );
 	}
 
 	public function shortcode( $attr ) {
