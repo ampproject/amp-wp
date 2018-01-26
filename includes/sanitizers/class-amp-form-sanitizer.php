@@ -3,12 +3,15 @@
  * Class AMP_Form_Sanitizer.
  *
  * @package AMP
+ * @since 0.7
  */
 
 /**
  * Class AMP_Form_Sanitizer
  *
  * Strips and corrects attributes in forms.
+ *
+ * @since 0.7
  */
 class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -17,14 +20,14 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var string HTML <form> tag to identify and process.
 	 *
-	 * @since 0.2
+	 * @since 0.7
 	 */
 	public static $tag = 'form';
 
 	/**
-	 * Sanitize the <img> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <form> elements from the HTML contained in this instance's DOMDocument.
 	 *
-	 * @since 0.2
+	 * @since 0.7
 	 */
 	public function sanitize() {
 

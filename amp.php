@@ -418,10 +418,9 @@ function amp_send_error_json( $message ) {
  *
  * @param string     $location The location to redirect to.
  * @param WP_Comment $comment The comment that was posted.
- * @return string|void The location URL or void if send json.
+ * @return string The location URL or void if send json.
  */
 function amp_comment_post_redirect( $location, $comment ) {
-
 	$is_amp_submit = filter_input( INPUT_GET, '__amp_source_origin', FILTER_VALIDATE_URL );
 	if ( is_null( $is_amp_submit ) ) {
 		return $location;
