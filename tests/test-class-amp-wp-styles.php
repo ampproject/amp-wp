@@ -84,6 +84,10 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 		$r = $wp_styles->get_validated_css_file_path( content_url( 'themes/twentyseventeen/404.css' ), 'bad' );
 		$this->assertInstanceOf( 'WP_Error', $r );
 		$this->assertEquals( 'amp_css_path_not_found', $r->get_error_code() );
+
+		$r = $wp_styles->get_validated_css_file_path( get_template_directory() . '/style.css', 'bad' );
+		$this->assertInstanceOf( 'WP_Error', $r );
+		$this->assertEquals( 'amp_css_path_not_found', $r->get_error_code() );
 	}
 
 	/**
