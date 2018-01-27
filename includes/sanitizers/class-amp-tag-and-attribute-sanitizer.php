@@ -100,6 +100,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
 			'amp_bind_placeholder_prefix'     => AMP_DOM_Utils::get_amp_bind_placeholder_prefix(),
+			'mutation_callback'               => null,
 		);
 
 		parent::__construct( $dom, $args );
@@ -595,6 +596,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attrs_to_remove as $attr_name ) {
 			$node->removeAttribute( $attr_name );
+			if ( isset( $this->args['mutation_callback'] ) ) {
+				call_user_func( $this->args['mutation_callback'], $node, $attr_name, 'removed_attr' );
+			}
 		}
 	}
 
@@ -701,6 +705,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$node->setAttribute( $attr_name, '' );
 			} else {
 				$node->removeAttribute( $attr_name );
+				if ( isset( $this->args['mutation_callback'] ) ) {
+					call_user_func( $this->args['mutation_callback'], $node, $attr_name, 'removed_attr' );
+				}
 			}
 		}
 	}
@@ -1279,12 +1286,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$parent = $node->parentNode;
 		if ( $node && $parent ) {
 			$parent->removeChild( $node );
+			if ( isset( $this->args['mutation_callback'] ) ) {
+				call_user_func( $this->args['mutation_callback'], $node, 'removed' );
+			}
 		}
 		while ( $parent && ! $parent->hasChildNodes() && 'body' !== $parent->nodeName ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;
 			if ( $parent ) {
 				$parent->removeChild( $node );
+				if ( isset( $this->args['mutation_callback'] ) ) {
+					call_user_func( $this->args['mutation_callback'], $node, 'removed' );
+				}
 			}
 		}
 	}
