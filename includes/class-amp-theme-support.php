@@ -141,6 +141,7 @@ class AMP_Theme_Support {
 	public static function register_hooks() {
 
 		// Remove core actions which are invalid AMP.
+		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_custom_style_placeholder() method.
