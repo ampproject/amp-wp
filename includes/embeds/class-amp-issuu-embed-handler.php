@@ -21,52 +21,45 @@ class AMP_Issuu_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'issuu', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		add_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10, 3 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'issuu', -1 );
+		remove_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10 );
 	}
 
 	/**
-	 * Embed found with matching URL callback.
+	 * Filter oEmbed HTML for MeetUp to prepare it for AMP.
 	 *
-	 * @param array $matches URL regex matches.
-	 * @param array $attr    Additional parameters.
-	 * @param array $url     URL.
+	 * @param mixed  $return The shortcode callback function to call.
+	 * @param string $url    The attempted embed URL.
+	 * @param array  $attr   An array of shortcode attributes.
 	 * @return string Embed.
 	 */
-	public function oembed( $matches, $attr, $url ) {
-		return $this->render( array( 'url' => $url ) );
-	}
+	public function filter_embed_oembed_html( $return, $url, $attr ) {
+		$parsed_url = wp_parse_url( $url );
+		if ( false !== strpos( $parsed_url['host'], 'issuu.com' ) ) {
+			if ( preg_match( '/width\s*:\s*(\d+)px/', $return, $matches ) ) {
+				$attr['width'] = $matches[1];
+			}
+			if ( preg_match( '/height\s*:\s*(\d+)px/', $return, $matches ) ) {
+				$attr['height'] = $matches[1];
+			}
 
-	/**
-	 * Output the Issuu iframe.
-	 *
-	 * @param array $args parameters used for output.
-	 * @return string Rendered content.
-	 */
-	public function render( $args ) {
-		$args = wp_parse_args( $args, array(
-			'url' => false,
-		) );
-
-		if ( empty( $args['url'] ) ) {
-			return '';
+			$return = AMP_HTML_Utils::build_tag(
+				'amp-iframe',
+				array(
+					'width'   => $attr['width'],
+					'height'  => $attr['height'],
+					'src'     => $url,
+					'sandbox' => 'allow-scripts allow-same-origin',
+				)
+			);
 		}
-
-		return AMP_HTML_Utils::build_tag(
-			'amp-iframe',
-			array(
-				'width'   => $this->args['width'],
-				'height'  => $this->args['height'],
-				'src'     => $args['url'],
-				'sandbox' => 'allow-scripts allow-same-origin',
-			)
-		);
+		return $return;
 	}
 }
 
