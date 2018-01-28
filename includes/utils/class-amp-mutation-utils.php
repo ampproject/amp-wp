@@ -8,7 +8,7 @@
 /**
  * Class AMP_Mutation_Utils
  *
- * @package AMP
+ * @since 0.7
  */
 class AMP_Mutation_Utils {
 
@@ -65,6 +65,23 @@ class AMP_Mutation_Utils {
 	 */
 	public static function was_node_removed() {
 		return ! empty( self::$removed_nodes );
+	}
+
+	/**
+	 * Processes markup, to determine AMP validity.
+	 *
+	 * Passes $markup through the AMP sanitizers.
+	 * Also passes a 'mutation_callback' to keep track of stripped attributes and nodes.
+	 *
+	 * @param string $markup The markup to process.
+	 * @return void.
+	 */
+	public static function process_markup( $markup ) {
+		$args = array(
+			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			'mutation_callback' => 'AMP_Mutation_Utils::track_removed',
+		);
+		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
 	}
 
 }

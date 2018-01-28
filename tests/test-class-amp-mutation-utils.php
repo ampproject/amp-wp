@@ -8,7 +8,7 @@
 /**
  * Tests for AMP_Mutation_Utils class.
  *
- * @package AMP
+ * @since 0.7
  */
 class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 
@@ -69,6 +69,41 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		$this->assertFalse( AMP_Mutation_Utils::was_node_removed() );
 		AMP_Mutation_Utils::track_removed( $this->node, AMP_Mutation_Utils::NODE_REMOVED );
 		$this->assertTrue( AMP_Mutation_Utils::was_node_removed() );
+	}
+
+	/**
+	 * Test process_markup.
+	 *
+	 * @see AMP_Mutation_Utils::process_markup()
+	 */
+	public function test_process_markup() {
+		$valid_amp_img = '<amp-img id="img-123" media="(min-width: 600x)" src="/assets/example.jpg" width=200 height=500 layout="responsive"></amp-img>';
+		AMP_Mutation_Utils::process_markup( $valid_amp_img );
+		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+
+		$video = '<video src="https://example.com/video">';
+		AMP_Mutation_Utils::process_markup( $valid_amp_img );
+		// This isn't valid AMP, but the sanitizer should convert it to an <amp-video>, without stripping anything.
+		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+
+		$disallowed_script = '<script async src="https://example.com/script"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		AMP_Mutation_Utils::process_markup( $disallowed_script );
+		$removed_node = reset( AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEquals( 'script', $removed_node->nodeName );  // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+
+		AMP_Mutation_Utils::$removed_nodes      = null;
+		AMP_Mutation_Utils::$removed_attributes = null;
+		$disallowed_style                       = '<div style="display:none"></div>';
+		AMP_Mutation_Utils::process_markup( $disallowed_style );
+		$removed_attribute           = reset( AMP_Mutation_Utils::$removed_attributes );
+		$expected_removed_attributes = array(
+			'div' => 'style',
+		);
+		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEquals( $expected_removed_attributes, $removed_attribute );
 	}
 
 }

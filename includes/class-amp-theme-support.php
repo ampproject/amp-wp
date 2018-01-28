@@ -523,6 +523,7 @@ class AMP_Theme_Support {
 		$dom  = AMP_DOM_Utils::get_dom( $output );
 		$args = array(
 			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+			'mutation_callback' => 'AMP_Mutation_Utils::track_removed',
 		);
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
