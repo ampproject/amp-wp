@@ -35,8 +35,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		parent::setUp();
 		$dom_document                           = new DOMDocument( '1.0', 'utf-8' );
 		$this->node                             = $dom_document->createElement( self::TAG_NAME );
-		AMP_Mutation_Utils::$removed_nodes      = null;
-		AMP_Mutation_Utils::$removed_attributes = null;
+		$this->reset_removed();
 	}
 
 	/**
@@ -82,20 +81,21 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
 
+		$this->reset_removed();
 		$video = '<video src="https://example.com/video">';
 		AMP_Mutation_Utils::process_markup( $valid_amp_img );
 		// This isn't valid AMP, but the sanitizer should convert it to an <amp-video>, without stripping anything.
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
 
+		$this->reset_removed();
 		$disallowed_script = '<script async src="https://example.com/script"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		AMP_Mutation_Utils::process_markup( $disallowed_script );
 		$removed_node = reset( AMP_Mutation_Utils::$removed_nodes );
-		$this->assertEquals( 'script', $removed_node->nodeName );  // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		$this->assertEquals( 'script', $removed_node->nodeName );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
 
-		AMP_Mutation_Utils::$removed_nodes      = null;
-		AMP_Mutation_Utils::$removed_attributes = null;
+		$this->reset_removed();
 		$disallowed_style                       = '<div style="display:none"></div>';
 		AMP_Mutation_Utils::process_markup( $disallowed_style );
 		$removed_attribute           = reset( AMP_Mutation_Utils::$removed_attributes );
@@ -104,6 +104,23 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		);
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
 		$this->assertEquals( $expected_removed_attributes, $removed_attribute );
+
+		$this->reset_removed();
+		$invalid_video = '<video width="200" height="100"></video>';
+		AMP_Mutation_Utils::process_markup( $invalid_video );
+		$removed_node = reset( AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEquals( 'video', $removed_node->nodeName ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+	}
+
+	/**
+	 * Set the removed nodes and attributes to null.
+	 *
+	 * @return void.
+	 */
+	public function reset_removed() {
+		AMP_Mutation_Utils::$removed_nodes      = null;
+		AMP_Mutation_Utils::$removed_attributes = null;
 	}
 
 }

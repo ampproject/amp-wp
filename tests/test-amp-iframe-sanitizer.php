@@ -171,4 +171,40 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $content );
 	}
+
+	/**
+	 * Tests remove_child.
+	 *
+	 * @see AMP_Iframe_Sanitizer::remove_child()
+	 */
+	public function test_remove_child() {
+		$parent_tag_name = 'div';
+		$child_tag_name  = 'h1';
+		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
+		$parent          = $dom_document->createElement( $parent_tag_name );
+		$child           = $dom_document->createElement( 'h1' );
+		$parent->appendChild( $child );
+
+		// To ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+		// @codingStandardsIgnoreStart
+
+		$this->assertEquals( $child, $parent->firstChild );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom_document, array(
+			'mutation_callback' => 'AMP_Mutation_Utils::track_removed',
+		) );
+		$sanitizer->remove_child( $child );
+		$expected_removed = reset( AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEquals( null, $parent->firstChild );
+		$this->assertEquals( $child_tag_name, $expected_removed->tagName );
+
+		$parent->appendChild( $child );
+		$this->assertEquals( $child, $parent->firstChild );
+		$sanitizer->remove_child( $child, $parent );
+
+		$this->assertEquals( null, $parent->firstChild );
+		$this->assertEquals( null, $child->parentNode );
+		// @codingStandardsIgnoreEnd
+		AMP_Mutation_Utils::$removed_nodes = null;
+	}
+
 }

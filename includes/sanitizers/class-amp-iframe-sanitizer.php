@@ -74,7 +74,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $new_attributes['src'] ) ) {
-				$node->parentNode->removeChild( $node );
+				$this->remove_child( $node );
 				continue;
 			}
 
@@ -95,11 +95,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$parent_node->replaceChild( $new_node, $node );
 			} else {
 				// AMP does not like iframes in <p> tags.
-				$parent_node->removeChild( $node );
+				$this->remove_child( $node, $parent_node );
 				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
 
 				if ( AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$parent_node->parentNode->removeChild( $parent_node );
+					$this->remove_child( $parent_node, $parent_node->parentNode );  // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
 				}
 			}
 		}
@@ -191,5 +191,29 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		) );
 
 		return $placeholder_node;
+	}
+
+	/**
+	 * Removes a child of a node.
+	 *
+	 * Also, calls the mutation callback for it.
+	 * This tracks all the nodes that were removed.
+	 *
+	 * @since 0.7
+	 *
+	 * @param object $child The node to remove.
+	 * @param object $parent The parent node for which to remove the child (optional).
+	 * @return void.
+	 */
+	public function remove_child( $child, $parent = null ) {
+		if ( ( null === $parent ) && method_exists( $child->parentNode, 'removeChild' ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+			$child->parentNode->removeChild( $child ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+		} elseif ( method_exists( $parent, 'removeChild' ) ) {
+			$parent->removeChild( $child );
+		}
+
+		if ( isset( $this->args['mutation_callback'] ) ) {
+			call_user_func( $this->args['mutation_callback'], $child, 'removed' );
+		}
 	}
 }
