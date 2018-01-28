@@ -109,10 +109,28 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.4
 	 *
-	 * @return string[] This are empty in this the base class.
+	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */
 	public function get_styles() {
 		return array();
+	}
+
+	/**
+	 * Get stylesheets.
+	 *
+	 * @since 0.7
+	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
+	 */
+	public function get_stylesheets() {
+		$stylesheets = array();
+
+		foreach ( $this->get_styles() as $selector => $properties ) {
+			$stylesheet = sprintf( '%s { %s }', $selector, join( '; ', $properties ) . ';' );
+
+			$stylesheets[ md5( $stylesheet ) ] = $stylesheet;
+		}
+
+		return $stylesheets;
 	}
 
 	/**
