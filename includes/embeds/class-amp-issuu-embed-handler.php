@@ -32,7 +32,7 @@ class AMP_Issuu_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Filter oEmbed HTML for MeetUp to prepare it for AMP.
+	 * Filter oEmbed HTML for Meetup to prepare it for AMP.
 	 *
 	 * @param mixed  $return The shortcode callback function to call.
 	 * @param string $url    The attempted embed URL.

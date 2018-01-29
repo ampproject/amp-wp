@@ -40,7 +40,7 @@ class AMP_Autoloader {
 		'AMP_Gallery_Embed_Handler'                   => 'includes/embeds/class-amp-gallery-embed',
 		'AMP_Instagram_Embed_Handler'                 => 'includes/embeds/class-amp-instagram-embed',
 		'AMP_Issuu_Embed_Handler'                     => 'includes/embeds/class-amp-issuu-embed-handler',
-		'AMP_MeetUp_Embed_Handler'                    => 'includes/embeds/class-amp-meetup-embed-handler',
+		'AMP_Meetup_Embed_Handler'                    => 'includes/embeds/class-amp-meetup-embed-handler',
 		'AMP_Pinterest_Embed_Handler'                 => 'includes/embeds/class-amp-pinterest-embed',
 		'AMP_Reddit_Embed_Handler'                    => 'includes/embeds/class-amp-reddit-embed-handler',
 		'AMP_SoundCloud_Embed_Handler'                => 'includes/embeds/class-amp-soundcloud-embed',

@@ -1,15 +1,15 @@
 <?php
 /**
- * Class AMP_MeetUp_Embed_Handler
+ * Class AMP_Meetup_Embed_Handler
  *
  * @package AMP
  * @since 0.7
  */
 
 /**
- * Class AMP_MeetUp_Embed_Handler
+ * Class AMP_Meetup_Embed_Handler
  */
-class AMP_MeetUp_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Meetup_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
 	 * Regex matched.
@@ -33,7 +33,7 @@ class AMP_MeetUp_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Filter oEmbed HTML for MeetUp to prepare it for AMP.
+	 * Filter oEmbed HTML for Meetup to prepare it for AMP.
 	 *
 	 * @param string $cache Cache for oEmbed.
 	 * @param string $url   Embed URL.
