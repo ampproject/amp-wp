@@ -8,6 +8,7 @@
 /**
  * Class AMP_Style_Sanitizer
  *
+ * @todo This needs to also run on the CSS that is gathered for amp-custom.
  * Collects inline styles and outputs them in the amp-custom stylesheet.
  */
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
@@ -22,11 +23,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $styles = array();
 
 	/**
+	 * Stylesheets.
+	 *
+	 * Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets
+	 *
+	 * @since 0.7
+	 * @var string[]
+	 */
+	private $stylesheets = array();
+
+	/**
 	 * Get list of CSS styles in HTML content of DOMDocument ($this->dom).
 	 *
 	 * @since 0.4
 	 *
-	 * @return string[]
+	 * @return string[] Mapping CSS selectors to array of properties, or mapping of keys starting with 'stylesheet:' with value being the stylesheet.
 	 */
 	public function get_styles() {
 		if ( ! $this->did_convert_elements ) {
@@ -36,18 +47,66 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get stylesheets.
+	 *
+	 * @since 0.7
+	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
+	 */
+	public function get_stylesheets() {
+		return array_merge( parent::get_stylesheets(), $this->stylesheets );
+	}
+
+	/**
 	 * Sanitize CSS styles within the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.4
 	 */
 	public function sanitize() {
 		$body = $this->get_body_node();
+
+		$this->collect_style_elements();
+
 		$this->collect_styles_recursive( $body );
 		$this->did_convert_elements = true;
 	}
 
 	/**
-	 * Collect and store all CSS styles.
+	 * Collect and sanitize all style elements.
+	 */
+	public function collect_style_elements() {
+		$style_elements  = $this->dom->getElementsByTagName( 'style' );
+		$nodes_to_remove = array();
+
+		foreach ( $style_elements as $style_element ) {
+			/**
+			 * Style element.
+			 *
+			 * @var DOMElement $style_element
+			 */
+
+			if ( 'head' === $style_element->parentNode->nodeName && ( $style_element->hasAttribute( 'amp-boilerplate' ) || $style_element->hasAttribute( 'amp-custom' ) ) ) {
+				continue;
+			}
+
+			$nodes_to_remove[] = $style_element;
+
+			// @todo This should perhaps be done in document order to ensure proper cascade.
+			$rules = trim( $style_element->textContent );
+
+			// @todo This needs proper CSS parser, and de-duplication with \AMP_Style_Sanitizer::filter_style().
+			$rules = preg_replace( '/\s*!important\s*(?=\s*;|})/', '', $rules );
+			$rules = preg_replace( '/overflow\s*:\s*(auto|scroll)\s*;?\s*/', '', $rules );
+
+			$this->stylesheets[ md5( $rules ) ] = $rules;
+		}
+
+		foreach ( $nodes_to_remove as $node_to_remove ) {
+			$node_to_remove->parentNode->removeChild( $node_to_remove );
+		}
+	}
+
+	/**
+	 * Collect and store all CSS style attributes.
 	 *
 	 * Collects the CSS styles from within the HTML contained in this instance's DOMDocument.
 	 *
@@ -56,6 +115,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.4
 	 *
 	 * @note Uses recursion to traverse down the tree of DOMDocument nodes.
+	 * @todo This could use XPath to more efficiently find all elements with style attributes.
 	 *
 	 * @param DOMNode $node Node.
 	 */
@@ -155,6 +215,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Remove overflow if value is `auto` or `scroll`; not allowed in AMP
 		 *
+		 * @todo This removal needs to be reported.
 		 * @see https://www.ampproject.org/docs/reference/spec.html#properties
 		 */
 		if ( preg_match( '#^overflow#i', $property ) && preg_match( '#^(auto|scroll)$#i', $value ) ) {
@@ -167,6 +228,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		/**
 		 * Remove `!important`; not allowed in AMP
+		 *
+		 * @todo This removal needs to be reported.
 		 */
 		if ( false !== strpos( $value, 'important' ) ) {
 			$value = preg_replace( '/\s*\!\s*important$/', '', $value );

@@ -27,20 +27,6 @@ class AMP_Theme_Support {
 	const CUSTOM_STYLES_PLACEHOLDER = '/* AMP:CUSTOM_STYLES_PLACEHOLDER */';
 
 	/**
-	 * AMP Scripts.
-	 *
-	 * @var array
-	 */
-	protected static $amp_scripts = array();
-
-	/**
-	 * AMP Styles.
-	 *
-	 * @var array
-	 */
-	protected static $amp_styles = array();
-
-	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -155,6 +141,7 @@ class AMP_Theme_Support {
 	public static function register_hooks() {
 
 		// Remove core actions which are invalid AMP.
+		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_custom_style_placeholder() method.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_custom_style_placeholder() method.
@@ -433,20 +420,14 @@ class AMP_Theme_Support {
 	/**
 	 * Get custom styles.
 	 *
+	 * @param string[] $stylesheets Initial stylesheets.
 	 * @see wp_custom_css_cb()
-	 * @return string Styles.
+	 * @return string Concatenated stylesheets.
 	 */
-	public static function get_amp_custom_styles() {
+	public static function get_amp_custom_styles( $stylesheets ) {
 		$css = wp_styles()->print_code;
 
-		// Add styles gleaned from sanitizers.
-		foreach ( self::$amp_styles as $selector => $properties ) {
-			$css .= sprintf(
-				'%s{%s}',
-				$selector,
-				join( ';', $properties ) . ';'
-			);
-		}
+		$css .= join( $stylesheets );
 
 		/**
 		 * Filters AMP custom CSS before it is injected onto the output buffer for the response.
@@ -466,10 +447,10 @@ class AMP_Theme_Support {
 	/**
 	 * Determine required AMP scripts.
 	 *
+	 * @param array $amp_scripts Initial scripts.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public static function get_amp_component_scripts() {
-		$amp_scripts = self::$amp_scripts;
+	public static function get_amp_component_scripts( $amp_scripts ) {
 
 		foreach ( self::$embed_handlers as $embed_handler ) {
 			$amp_scripts = array_merge(
@@ -527,9 +508,6 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
-		self::$amp_scripts = array_merge( self::$amp_scripts, $assets['scripts'] );
-		self::$amp_styles  = array_merge( self::$amp_styles, $assets['styles'] );
-
 		/*
 		 * @todo The sanitize method needs to be updated to sanitize the entire HTML element and not just the BODY.
 		 * This will require updating mandatory_parent_blacklist in amphtml-update.py to include elements that appear in the HEAD.
@@ -547,7 +525,7 @@ class AMP_Theme_Support {
 		// Inject required scripts.
 		$output = preg_replace(
 			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_component_scripts(),
+			self::get_amp_component_scripts( $assets['scripts'] ),
 			$output,
 			1
 		);
@@ -555,7 +533,7 @@ class AMP_Theme_Support {
 		// Inject styles.
 		$output = preg_replace(
 			'#' . preg_quote( self::CUSTOM_STYLES_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_custom_styles(),
+			self::get_amp_custom_styles( $assets['stylesheets'] ),
 			$output,
 			1
 		);
