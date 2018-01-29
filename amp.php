@@ -88,6 +88,7 @@ function amp_after_setup_theme() {
 	}
 
 	add_action( 'init', 'amp_init' );
+	add_action( 'rest_api_init', 'AMP_Mutation_Utils::amp_rest_validation' );
 	add_action( 'widgets_init', 'AMP_Theme_Support::register_widgets' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
