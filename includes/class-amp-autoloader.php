@@ -42,6 +42,7 @@ class AMP_Autoloader {
 		'AMP_Issuu_Embed_Handler'                     => 'includes/embeds/class-amp-issuu-embed-handler',
 		'AMP_Meetup_Embed_Handler'                    => 'includes/embeds/class-amp-meetup-embed-handler',
 		'AMP_Pinterest_Embed_Handler'                 => 'includes/embeds/class-amp-pinterest-embed',
+		'AMP_Post_Embed_Handler'                      => 'includes/embeds/class-amp-post-embed-handler',
 		'AMP_Reddit_Embed_Handler'                    => 'includes/embeds/class-amp-reddit-embed-handler',
 		'AMP_SoundCloud_Embed_Handler'                => 'includes/embeds/class-amp-soundcloud-embed',
 		'AMP_Tumblr_Embed_Handler'                    => 'includes/embeds/class-amp-tumblr-embed-handler',
