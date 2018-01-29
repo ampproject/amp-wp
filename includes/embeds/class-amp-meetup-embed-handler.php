@@ -12,13 +12,6 @@
 class AMP_Meetup_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
-	 * Regex matched.
-	 *
-	 * @const string
-	 */
-	const URL_PATTERN = '#https?://(www\.)?meetu(\.ps|p\.com)/.*#i';
-
-	/**
 	 * Register embed.
 	 */
 	public function register_embed() {

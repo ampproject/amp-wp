@@ -10,65 +10,51 @@
  * Class AMP_Tumblr_Embed_Handler
  */
 class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
-	/**
-	 * Regex matched to produce output amp-iframe.
-	 *
-	 * @const string
-	 */
-	const URL_PATTERN = '#https?://(.+)\.tumblr\.com/post/(.*)#i';
 
 	/**
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'tumblr', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		add_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10, 2 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'tumblr', -1 );
+		remove_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10 );
 	}
 
 	/**
-	 * Embed found with matching URL callback.
+	 * Filter oEmbed HTML for Tumblr to prepare it for AMP.
 	 *
-	 * @param array $matches URL regex matches.
-	 * @param array $attr    Additional parameters.
-	 * @param array $url     URL.
+	 * @param string $cache Cache for oEmbed.
+	 * @param string $url   Embed URL.
 	 * @return string Embed.
 	 */
-	public function oembed( $matches, $attr, $url ) {
-		return $this->render( array( 'url' => $url ) );
-	}
-
-	/**
-	 * Output the Tumblr iframe.
-	 *
-	 * @param array $args parameters used for output.
-	 * @return string Rendered content.
-	 */
-	public function render( $args ) {
-		$args = wp_parse_args( $args, array(
-			'url' => false,
-		) );
-
-		if ( empty( $args['url'] ) ) {
-			return '';
+	public function filter_embed_oembed_html( $cache, $url ) {
+		$parsed_url = wp_parse_url( $url );
+		if ( false === strpos( $parsed_url['host'], 'tumblr.com' ) ) {
+			return $cache;
 		}
 
-		// Must enforce https for amp-iframe, but editors can supply either on desktop.
-		$args['url'] = str_replace( 'http://', 'https://', $args['url'] );
+		// @todo The iframe will not get sized properly.
+		if ( preg_match( '#data-href="(?P<href>https://embed.tumblr.com/embed/post/\w+/\w+)"#', $cache, $matches ) ) {
+			$cache = AMP_HTML_Utils::build_tag(
+				'amp-iframe',
+				array(
+					'width'   => $this->args['width'],
+					'height'  => $this->args['height'],
+					'layout'  => 'responsive',
+					'sandbox' => 'allow-scripts allow-popups', // The allow-scripts is needed to allow the iframe to render; allow-popups needed to allow clicking.
+					'src'     => $matches['href'],
+				),
+				sprintf( '<a placeholder href="%s">Tumblr</a>', $url )
+			);
+		}
 
-		return AMP_HTML_Utils::build_tag(
-			'amp-iframe',
-			array(
-				'width'  => $this->args['width'],
-				'height' => $this->args['height'],
-				'src'    => $args['url'],
-			)
-		);
+		return $cache;
 	}
+
 }
 
