@@ -224,7 +224,7 @@ class AMP_Theme_Support {
 		if ( isset( $scrubbed ) ) {
 			$build_query = function( $query ) use ( $query_vars ) {
 				$pattern = '/^(' . join( '|', $query_vars ) . ')(?==|$)/';
-				$pairs = array();
+				$pairs   = array();
 				foreach ( explode( '&', $query ) as $pair ) {
 					if ( ! preg_match( $pattern, $pair ) ) {
 						$pairs[] = $pair;
