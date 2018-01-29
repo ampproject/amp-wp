@@ -212,44 +212,40 @@ class AMP_Theme_Support {
 		);
 
 		// Scrub input vars.
-		$removed_count = 0;
 		foreach ( $query_vars as $query_var ) {
 			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore
 				continue;
 			}
 			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore
-			unset( $_REQUEST[ $query_var ] );
-			unset( $_GET[ $query_var ] );
-			$removed_count++;
+			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] );
+			$scrubbed = true;
 		}
 
-		if ( $removed_count > 0 ) {
-			$pattern = '/^(' . join( '|', $query_vars ) . ')(?==|$)/';
-
-			// Scrub QUERY_STRING.
-			if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
-				$pairs = array();
-				foreach ( explode( '&', $_SERVER['QUERY_STRING'] ) as $pair ) {
-					if ( ! preg_match( $pattern, $pair ) ) {
-						$pairs[] = $pair;
-					}
-				}
-				$_SERVER['QUERY_STRING'] = join( '&', $pairs );
-			}
-
-			// Scrub REQUEST_URI.
-			if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
-				list( $path, $query ) = explode( '?', $_SERVER['REQUEST_URI'], 2 );
-
+		if ( isset( $scrubbed ) ) {
+			$build_query = function( $query ) use ( $query_vars ) {
+				$pattern = '/^(' . join( '|', $query_vars ) . ')(?==|$)/';
 				$pairs = array();
 				foreach ( explode( '&', $query ) as $pair ) {
 					if ( ! preg_match( $pattern, $pair ) ) {
 						$pairs[] = $pair;
 					}
 				}
+				return join( '&', $pairs );
+			};
+
+			// Scrub QUERY_STRING.
+			if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+				$_SERVER['QUERY_STRING'] = $build_query( $_SERVER['QUERY_STRING'] );
+			}
+
+			// Scrub REQUEST_URI.
+			if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
+				list( $path, $query ) = explode( '?', $_SERVER['REQUEST_URI'], 2 );
+
+				$pairs                  = $build_query( $query );
 				$_SERVER['REQUEST_URI'] = $path;
 				if ( ! empty( $pairs ) ) {
-					$_SERVER['REQUEST_URI'] .= '?' . join( '&', $pairs );
+					$_SERVER['REQUEST_URI'] .= "?{$pairs}";
 				}
 			}
 		}
