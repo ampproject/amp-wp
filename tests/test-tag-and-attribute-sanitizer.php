@@ -589,6 +589,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a><span>Red</span>&amp;<span>Orange</span></a>',
 			),
 
+			'spans_with_xml_namespaced_attributes'                      => array(
+				'<p><span lang="es" xml:lang="es">hola</span><span xml:space="preserve">mundo</span></p>',
+				'<p><span lang="es">hola</span><span>mundo</span></p>',
+			),
+
 			'h1_with_size'                                              => array(
 				'<h1 size="1">Headline</h1>',
 				'<h1>Headline</h1>',
