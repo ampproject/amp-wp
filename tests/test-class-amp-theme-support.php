@@ -133,4 +133,26 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
 	}
+
+	/**
+	 * Test enqueue_editor.
+	 *
+	 * @covers AMP_Theme_Support::enqueue_editor()
+	 */
+	public function test_enqueue_editor() {
+		global $post;
+		$post = $this->factory()->post->create();
+		AMP_Theme_Support::enqueue_editor();
+		$slug   = 'amp-editor-validation';
+		$script = wp_scripts()->registered[ $slug ];
+		$this->assertContains( 'js/amp-editor-validation.js', $script->src );
+		$this->assertEquals( array( 'jquery' ), $script->deps );
+		$this->assertEquals( AMP__VERSION, $script->ver );
+		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
+		$this->assertContains( 'ampGutenberg.boot', $script->extra['after'][1] );
+		$this->assertContains( 'This is not valid AMP', $script->extra['after'][1] );
+		$this->assertContains( wp_json_encode( get_the_permalink() ), $script->extra['after'][1] );
+		$this->assertContains( 'doValidatePage', $script->extra['after'][1] );
+	}
+
 }
