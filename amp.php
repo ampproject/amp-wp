@@ -403,13 +403,3 @@ function amp_handle_comment_post() {
 	$origin = filter_var( wp_unslash( $_GET['__amp_source_origin'] ), FILTER_SANITIZE_URL );// WPCS: CSRF ok, input var ok.
 	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
 }
-
-/**
- * Send error creating message.
- *
- * @param string $message The error message to send.
- */
-function amp_send_error_json( $message ) {
-	header( '400' );
-	wp_send_json( array( 'error' => strip_tags( $message, 'strong' ) ) );
-}
