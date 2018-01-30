@@ -191,10 +191,7 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
-		// Wrap fields in a hidable div. Closed in `contact_form` action.
-		add_action( 'comment_form_top', function() {
-			echo '<div id="amp-live-comments-list-' . get_queried_object_id() . '-fields">'; // WPCS: XSS OK.
-		}, PHP_INT_MAX );
+
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
 
 		// @todo Add character conversion.
@@ -389,9 +386,7 @@ class AMP_Theme_Support {
 	 * Adds the form submit success and fail templates.
 	 */
 	public static function add_amp_comment_form_templates() {
-		// The close div closes the field wrapper opened in `comment_form_top` action.
 		?>
-		</div>
 		<div submit-success>
 			<template type="amp-mustache">
 				<?php esc_html_e( 'Your comment has been posted, but may be subject to moderation.', 'amp' ); ?>
