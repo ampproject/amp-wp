@@ -182,4 +182,26 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
 	}
+
+	/**
+	 * Test get_amp_component_scripts().
+	 *
+	 * @covers AMP_Theme_Support::get_amp_component_scripts()
+	 */
+	public function test_get_amp_component_scripts() {
+		add_filter( 'amp_component_scripts', function( $scripts ) {
+			$scripts['amp-video'] = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
+			return $scripts;
+		} );
+
+		$scripts = AMP_Theme_Support::get_amp_component_scripts( array(
+			'amp-mustache' => 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+			'amp-bind'     => 'https://cdn.ampproject.org/v0/amp-bind-0.1.js',
+		) );
+
+		$this->assertEquals(
+			'<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
+			$scripts
+		);
+	}
 }

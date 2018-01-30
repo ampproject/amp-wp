@@ -603,6 +603,16 @@ class AMP_Theme_Support {
 		}
 
 		/**
+		 * List of components that are custom elements.
+		 *
+		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template.
+		 *
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
+		 */
+		$custom_templates = array( 'amp-mustache' );
+
+		/**
 		 * Filters AMP component scripts before they are injected onto the output buffer for the response.
 		 *
 		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet
@@ -616,8 +626,15 @@ class AMP_Theme_Support {
 
 		$scripts = '';
 		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
+
+			$custom_type = 'custom-element';
+			if ( in_array( $amp_script_component, $custom_templates, true ) ) {
+				$custom_type = 'custom-template';
+			}
+
 			$scripts .= sprintf(
-				'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				'<script async %s="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				$custom_type,
 				$amp_script_component,
 				$amp_script_source
 			);
