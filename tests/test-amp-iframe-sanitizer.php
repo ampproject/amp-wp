@@ -193,9 +193,8 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			'mutation_callback' => 'AMP_Mutation_Utils::track_removed',
 		) );
 		$sanitizer->remove_child( $child );
-		$expected_removed = reset( AMP_Mutation_Utils::$removed_nodes );
 		$this->assertEquals( null, $parent->firstChild );
-		$this->assertEquals( $child_tag_name, $expected_removed->tagName );
+		$this->assertEquals( 1, AMP_Mutation_Utils::$removed_nodes[ $child_tag_name ] );
 
 		$parent->appendChild( $child );
 		$this->assertEquals( $child, $parent->firstChild );

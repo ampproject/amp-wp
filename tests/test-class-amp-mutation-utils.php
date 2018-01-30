@@ -66,17 +66,35 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_track_removed() {
 		$attr_name             = 'invalid-attr';
-		$expected_removed_attr = array(
-			array(
-				$this->node->nodeName => $attr_name, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-			),
+		$expected_removed_attrs = array(
+			$attr_name => 1,
+		);
+		$expected_removed_nodes = array(
+			'img' => 1,
 		);
 		$this->assertEmpty( AMP_Mutation_Utils::$removed_attributes );
 		$this->assertEmpty( AMP_Mutation_Utils::$removed_nodes );
 		AMP_Mutation_Utils::track_removed( $this->node, AMP_Mutation_Utils::ATTRIBUTE_REMOVED, $attr_name );
-		$this->assertEquals( $expected_removed_attr, AMP_Mutation_Utils::$removed_attributes );
+		$this->assertEquals( $expected_removed_attrs, AMP_Mutation_Utils::$removed_attributes );
 		AMP_Mutation_Utils::track_removed( $this->node, AMP_Mutation_Utils::NODE_REMOVED );
-		$this->assertEquals( array( $this->node ), AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEquals( $expected_removed_nodes, AMP_Mutation_Utils::$removed_nodes );
+	}
+
+	/**
+	 * Test increment_count.
+	 *
+	 * @see AMP_Mutation_Utils::increment_count()
+	 */
+	public function test_increment_count() {
+		$attribute     = 'script';
+		$one_attribute = array(
+			$attribute => 1,
+		);
+		$expected      = array(
+			$attribute => 2,
+		);
+		$this->assertEquals( $one_attribute, AMP_Mutation_Utils::increment_count( array(), $attribute ) );
+		$this->assertEquals( $expected, AMP_Mutation_Utils::increment_count( $one_attribute, $attribute ) );
 	}
 
 	/**
@@ -112,16 +130,15 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		AMP_Mutation_Utils::reset_removed();
 
 		AMP_Mutation_Utils::process_markup( $this->disallowed_tag );
-		$removed_node = reset( AMP_Mutation_Utils::$removed_nodes );
-		$this->assertEquals( 'script', $removed_node->nodeName );
+		$this->assertEquals( 1, AMP_Mutation_Utils::$removed_nodes['script'] );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
 
 		AMP_Mutation_Utils::reset_removed();
 		$disallowed_style = '<div style="display:none"></div>';
 		AMP_Mutation_Utils::process_markup( $disallowed_style );
-		$removed_attribute           = reset( AMP_Mutation_Utils::$removed_attributes );
+		$removed_attribute           = AMP_Mutation_Utils::$removed_attributes;
 		$expected_removed_attributes = array(
-			'div' => 'style',
+			'style' => 1,
 		);
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
 		$this->assertEquals( $expected_removed_attributes, $removed_attribute );
@@ -129,8 +146,8 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		AMP_Mutation_Utils::reset_removed();
 		$invalid_video = '<video width="200" height="100"></video>';
 		AMP_Mutation_Utils::process_markup( $invalid_video );
-		$removed_node = reset( AMP_Mutation_Utils::$removed_nodes );
-		$this->assertEquals( 'video', $removed_node->nodeName ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+		$removed_node = AMP_Mutation_Utils::$removed_nodes;
+		$this->assertEquals( 1, AMP_Mutation_Utils::$removed_nodes['video'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
 	}
 
@@ -180,6 +197,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
+		$error_key = 'has_error';
 		$request = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
@@ -187,7 +205,11 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Mutation_Utils::validate_markup( $request );
 		$expected_response = array(
-			'is_error' => true,
+			$error_key           => true,
+			'removed_nodes'      => array(
+				'script' => 1,
+			),
+			'removed_attributes' => null,
 		);
 		$this->assertEquals( $expected_response, $response );
 
@@ -196,7 +218,9 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Mutation_Utils::validate_markup( $request );
 		$expected_response = array(
-			'is_error' => false,
+			$error_key           => false,
+			'removed_nodes'      => null,
+			'removed_attributes' => null,
 		);
 		$this->assertEquals( $expected_response, $response );
 	}

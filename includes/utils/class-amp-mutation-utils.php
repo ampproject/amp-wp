@@ -56,13 +56,24 @@ class AMP_Mutation_Utils {
 	 * @return void.
 	 */
 	public static function track_removed( $node, $removal_type, $attr_name = null ) {
-		if ( ( self::ATTRIBUTE_REMOVED === $removal_type ) && isset( $node->nodeName, $attr_name ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-			self::$removed_attributes[] = array(
-				$node->nodeName => $attr_name, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-			);
-		} elseif ( self::NODE_REMOVED === $removal_type ) {
-			self::$removed_nodes[] = $node;
+		if ( ( self::ATTRIBUTE_REMOVED === $removal_type ) && isset( $attr_name ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			self::$removed_attributes = self::increment_count( self::$removed_attributes, $attr_name );
+		} elseif ( ( self::NODE_REMOVED === $removal_type ) && isset( $node->nodeName ) ) {
+			self::$removed_nodes = self::increment_count( self::$removed_nodes, $node->nodeName ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 		}
+	}
+
+	/**
+	 * Tracks when a sanitizer removes an attribute or node.
+	 *
+	 * @param array  $histogram The count of attributes or nodes removed.
+	 * @param string $key The attribute or node name removed.
+	 * @return array $histogram The incremented histogram.
+	 */
+	public static function increment_count( $histogram, $key ) {
+		$current_value     = isset( $histogram[ $key ] ) ? $histogram[ $key ] : 0;
+		$histogram[ $key ] = $current_value + 1;
+		return $histogram;
 	}
 
 	/**
@@ -134,7 +145,9 @@ class AMP_Mutation_Utils {
 
 		self::process_markup( $json[ self::MARKUP_KEY ] );
 		$response = array(
-			'is_error' => self::was_node_removed(),
+			'has_error'          => self::was_node_removed(),
+			'removed_nodes'      => self::$removed_nodes,
+			'removed_attributes' => self::$removed_attributes,
 		);
 		self::reset_removed();
 
