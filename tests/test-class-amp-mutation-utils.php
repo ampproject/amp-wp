@@ -204,7 +204,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
-		$request   = new WP_REST_Request( 'POST', $this->expected_route );
+		$request = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
 			AMP_Mutation_Utils::MARKUP_KEY => $this->disallowed_tag,
