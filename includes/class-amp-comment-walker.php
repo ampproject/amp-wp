@@ -54,13 +54,13 @@ class AMP_Comment_Walker extends Walker_Comment {
 		} else {
 			$tag = 'li';
 		}
-		$new_tag = '<' . $tag . ' data-sort-time="' . strtotime( $comment->comment_date ) . '" ';
+		$new_tag = '<' . $tag . ' data-sort-time="' . strtotime( $comment->comment_date ) . '"';
 
 		if ( ! empty( $this->comment_thread_age[ $comment->comment_ID ] ) ) {
-			$new_tag .= 'data-update-time="' . $this->comment_thread_age[ $comment->comment_ID ] . '" ';
+			$new_tag .= 'data-update-time="' . $this->comment_thread_age[ $comment->comment_ID ] . '"';
 		}
 
-		$output .= $new_tag . substr( ltrim( $new_out ), strlen( $tag ) + 1 );
+		$output .= $new_tag . substr( ltrim( $new_out ), strlen( $tag ) );
 
 	}
 
@@ -84,16 +84,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 
 		$args = array_slice( func_get_args(), 4 );
 
-		$wrapper_id = 'amp-live-comments-list-' . get_queried_object_id();
-		$output     = '<amp-live-list layout="container" data-poll-interval="15000" data-max-items-per-page="20" id="' . esc_attr( $wrapper_id ) . '">';
-		$output    .= '<' . esc_attr( $args[0]['style'] ) . ' items>';
-		$output    .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
-		$output    .= '</' . esc_attr( $args[0]['style'] ) . '>';
-		$output    .= '<button update on="tap:' . esc_attr( $wrapper_id ) . '.update" class="ampstart-btn ml1 caps">' . esc_html__( 'New comments posted.', 'amp' ) . '</button>';
-		$output    .= '<div pagination>' . get_the_comments_navigation() . '</div>';
-		$output    .= '</amp-live-list>';
-
-		return $output;
+		return parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
 	}
 
 	/**
