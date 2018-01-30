@@ -41,6 +41,13 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	public $valid_amp_img = '<amp-img id="img-123" media="(min-width: 600x)" src="/assets/example.jpg" width=200 height=500 layout="responsive"></amp-img>';
 
 	/**
+	 * The key in the response for whether it has an AMP error.
+	 *
+	 * @var string
+	 */
+	public $error_key = 'has_error';
+
+	/**
 	 * The name of the tag to test.
 	 *
 	 * @var string
@@ -197,7 +204,6 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
-		$error_key = 'has_error';
 		$request   = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
@@ -205,7 +211,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Mutation_Utils::validate_markup( $request );
 		$expected_response = array(
-			$error_key           => true,
+			$this->error_key     => true,
 			'removed_nodes'      => array(
 				'script' => 1,
 			),
@@ -218,8 +224,25 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Mutation_Utils::validate_markup( $request );
 		$expected_response = array(
-			$error_key           => false,
+			$this->error_key     => false,
 			'removed_nodes'      => null,
+			'removed_attributes' => null,
+		);
+		$this->assertEquals( $expected_response, $response );
+	}
+
+	/**
+	 * Test get_response.
+	 *
+	 * @see AMP_Mutation_Utils::get_response()
+	 */
+	public function test_get_response() {
+		$response          = AMP_Mutation_Utils::get_response( $this->disallowed_tag );
+		$expected_response = array(
+			$this->error_key     => true,
+			'removed_nodes'      => array(
+				'script' => 1,
+			),
 			'removed_attributes' => null,
 		);
 		$this->assertEquals( $expected_response, $response );

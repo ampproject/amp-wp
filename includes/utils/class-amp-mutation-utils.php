@@ -143,14 +143,28 @@ class AMP_Mutation_Utils {
 			) );
 		}
 
-		self::process_markup( $json[ self::MARKUP_KEY ] );
+		return self::get_response( $json[ self::MARKUP_KEY ] );
+	}
+
+	/**
+	 * Gets the AMP validation response.
+	 *
+	 * If $markup isn't passed,
+	 * It will return the validation errors the sanitizers found in rendering the page.
+	 *
+	 * @param string $markup To validate for AMP compatibility (optional).
+	 * @return array $response The AMP validity of the markup.
+	 */
+	public static function get_response( $markup = null ) {
+		if ( isset( $markup ) ) {
+			self::process_markup( $markup );
+		}
 		$response = array(
 			'has_error'          => self::was_node_removed(),
 			'removed_nodes'      => self::$removed_nodes,
 			'removed_attributes' => self::$removed_attributes,
 		);
 		self::reset_removed();
-
 		return $response;
 	}
 
