@@ -589,12 +589,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$attrs_to_remove = array();
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
 			if ( ! $this->is_amp_allowed_attribute( $attr_name, $attr_spec_list ) ) {
-				$attrs_to_remove[] = $attr_name;
+				$attrs_to_remove[] = $attr_node;
 			}
 		}
 
-		foreach ( $attrs_to_remove as $attr_name ) {
-			$node->removeAttribute( $attr_name );
+		foreach ( $attrs_to_remove as $attr ) {
+			$node->removeAttributeNode( $attr );
 		}
 	}
 

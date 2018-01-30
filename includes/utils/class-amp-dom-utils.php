@@ -75,6 +75,13 @@ class AMP_DOM_Utils {
 			$document
 		);
 
+		// Force all self-closing tags to have closing tags since DOMDocument isn't fully aware.
+		$document = preg_replace(
+			'#<(' . join( self::$self_closing_tags, '|' ) . ')[^>]*>(?!</\1>)#',
+			'$0</$1>',
+			$document
+		);
+
 		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
