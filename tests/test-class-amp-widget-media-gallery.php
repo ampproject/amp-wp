@@ -28,6 +28,9 @@ class Test_AMP_Widget_Media_Gallery extends WP_UnitTestCase {
 		parent::setUp();
 		AMP_Theme_Support::register_widgets();
 		$this->instance = new AMP_Widget_Media_Gallery();
+		if ( ! class_exists( 'WP_Widget_Media_Gallery' ) ) {
+			$this->markTestSkipped( 'This WordPress version does not have a Gallery widget' );
+		}
 	}
 
 	/**
