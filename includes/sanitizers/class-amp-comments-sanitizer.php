@@ -45,22 +45,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $node instanceof DOMElement ) {
 				continue;
 			}
-
-			$wrapper = $node->parentNode->cloneNode();
-			$items   = $node->firstChild->childNodes;
-			$wrapper->setAttribute( 'items', '' );
-			if ( $items->length ) {
-				for ( $c = 0; $c < $items->length; ) {
-					$child = $items->item( $c );
-					if ( $child instanceof DOMElement ) {
-						$time = $child->getElementsByTagName( 'amp-comment' )->item( 0 )->getAttributeNode( 'data-sort-time' );
-						$child->setAttributeNode( $time );
-					}
-					$wrapper->appendChild( $child );
-				}
-			}
-			$node->replaceChild( $wrapper, $node->firstChild );
-			$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
 		}
 
 		$form = $this->dom->getElementById( 'commentform' );

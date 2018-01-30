@@ -288,8 +288,6 @@ class AMP_Theme_Support {
 	public static function amp_set_comments_walker( $args ) {
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
-		// @todo Make threaded work by setting 'data-update-time' of the parent first level parent with the last timestamp.
-		$args['max_depth'] = 1;
 
 		return $args;
 	}
@@ -308,10 +306,10 @@ class AMP_Theme_Support {
 			$output .= '<div submit-success><template type="amp-mustache">';
 			$output .= esc_html__( 'Your comment has been posted.', 'amp' );
 			$output .= sprintf( '<a class="amp-view-new-comment" href="{{comment_link}}">%s</a>', esc_html__( 'View Comment', 'amp' ) );
-			$output .= '</div></template>';
+			$output .= '</template></div>';
 			$output .= '<div submit-error><template type="amp-mustache">';
 			$output .= '<p class="amp-comment-submit-error">{{{error}}}</p>';
-			$output .= '</div></template>';
+			$output .= '</template></div>';
 		}
 
 		echo $output; // WPCS: XSS OK.
