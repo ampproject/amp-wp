@@ -7,17 +7,31 @@
 
 /**
  * Class AMP_Gallery_Embed_Handler
+ *
+ * @since 0.2
  */
 class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 
+	/**
+	 * Register embed.
+	 */
 	public function register_embed() {
 		add_shortcode( 'gallery', array( $this, 'shortcode' ) );
 	}
 
+	/**
+	 * Unregister embed.
+	 */
 	public function unregister_embed() {
 		remove_shortcode( 'gallery' );
 	}
 
+	/**
+	 * Shortcode handler.
+	 *
+	 * @param array $attr Shortcode attributes.
+	 * @return string Rendered gallery.
+	 */
 	public function shortcode( $attr ) {
 		$post = get_post();
 
@@ -30,46 +44,47 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$atts = shortcode_atts( array(
-			'order'      => 'ASC',
-			'orderby'    => 'menu_order ID',
-			'id'         => $post ? $post->ID : 0,
-			'include'    => '',
-			'exclude'    => '',
-			'size'       => array( $this->args['width'], $this->args['height'] ),
+			'order'   => 'ASC',
+			'orderby' => 'menu_order ID',
+			'id'      => $post ? $post->ID : 0,
+			'include' => '',
+			'exclude' => '',
+			'size'    => array( $this->args['width'], $this->args['height'] ),
+			'link'    => 'none',
 		), $attr, 'gallery' );
 
 		$id = intval( $atts['id'] );
 
 		if ( ! empty( $atts['include'] ) ) {
 			$attachments = get_posts( array(
-				'include' => $atts['include'],
-				'post_status' => 'inherit',
-				'post_type' => 'attachment',
+				'include'        => $atts['include'],
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
 				'post_mime_type' => 'image',
-				'order' => $atts['order'],
-				'orderby' => $atts['orderby'],
-				'fields' => 'ids',
+				'order'          => $atts['order'],
+				'orderby'        => $atts['orderby'],
+				'fields'         => 'ids',
 			) );
 		} elseif ( ! empty( $atts['exclude'] ) ) {
 			$attachments = get_children( array(
-				'post_parent' => $id,
-				'exclude' => $atts['exclude'],
-				'post_status' => 'inherit',
-				'post_type' => 'attachment',
+				'post_parent'    => $id,
+				'exclude'        => $atts['exclude'],
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
 				'post_mime_type' => 'image',
-				'order' => $atts['order'],
-				'orderby' => $atts['orderby'],
-				'fields' => 'ids',
+				'order'          => $atts['order'],
+				'orderby'        => $atts['orderby'],
+				'fields'         => 'ids',
 			) );
 		} else {
 			$attachments = get_children( array(
-				'post_parent' => $id,
-				'post_status' => 'inherit',
-				'post_type' => 'attachment',
+				'post_parent'    => $id,
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
 				'post_mime_type' => 'image',
-				'order' => $atts['order'],
-				'orderby' => $atts['orderby'],
-				'fields' => 'ids',
+				'order'          => $atts['order'],
+				'orderby'        => $atts['orderby'],
+				'fields'         => 'ids',
 			) );
 		}
 
@@ -85,9 +100,17 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				continue;
 			}
 
+			$href = null;
+			if ( ! empty( $atts['link'] ) && 'file' === $atts['link'] ) {
+				$href = $url;
+			} elseif ( ! empty( $atts['link'] ) && 'post' === $atts['link'] ) {
+				$href = get_attachment_link( $attachment_id );
+			}
+
 			$urls[] = array(
-				'url' => $url,
-				'width' => $width,
+				'href'   => $href,
+				'url'    => $url,
+				'width'  => $width,
 				'height' => $height,
 			);
 		}
@@ -97,6 +120,12 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		) );
 	}
 
+	/**
+	 * Render.
+	 *
+	 * @param array $args Args.
+	 * @return string Rendered.
+	 */
 	public function render( $args ) {
 		$this->did_convert_elements = true;
 
@@ -109,24 +138,36 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$images = array();
-		foreach ( $args['images'] as $image ) {
-			$images[] = AMP_HTML_Utils::build_tag(
+		foreach ( $args['images'] as $props ) {
+			$image = AMP_HTML_Utils::build_tag(
 				'amp-img',
 				array(
-					'src' => $image['url'],
-					'width' => $image['width'],
-					'height' => $image['height'],
+					'src'    => $props['url'],
+					'width'  => $props['width'],
+					'height' => $props['height'],
 					'layout' => 'responsive',
 				)
 			);
+
+			if ( ! empty( $props['href'] ) ) {
+				$image = AMP_HTML_Utils::build_tag(
+					'a',
+					array(
+						'href' => $props['href'],
+					),
+					$image
+				);
+			}
+
+			$images[] = $image;
 		}
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-carousel',
 			array(
-				'width' => $this->args['width'],
+				'width'  => $this->args['width'],
 				'height' => $this->args['height'],
-				'type' => 'slides',
+				'type'   => 'slides',
 				'layout' => 'responsive',
 			),
 			implode( PHP_EOL, $images )
