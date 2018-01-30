@@ -147,3 +147,22 @@ function amp_post_meta_box() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
 }
+
+/**
+ * Enqueue Disable changing comments scripts and notices.
+ *
+ * @since 0.7
+ */
+function amp_comments_order_disable_scripts() {
+	wp_enqueue_script(
+		'amp-admin-comments',
+		amp_get_asset_url( 'js/amp-admin-comments.js' ),
+		array( 'jquery' ),
+		false,
+		true
+	);
+	?>
+	<div class="notice notice-info inline" id="amp-comment-notice"><p><?php echo wp_kses_post( __( 'Note: AMP does not yet <a href="https://github.com/ampproject/amphtml/issues/5396" target="_blank">support ascending</a> comments with newer entries appearing at the bottom.', 'amp' ) ); ?></p></div>
+	<?php
+}
+

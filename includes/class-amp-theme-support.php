@@ -346,6 +346,8 @@ class AMP_Theme_Support {
 	public static function amp_set_comments_walker( $args ) {
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
+		// Add reverse order here as well, in case theme overrides it.
+		$args['reverse_top_level'] = true;
 
 		return $args;
 	}
