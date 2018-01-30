@@ -65,7 +65,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::track_removed()
 	 */
 	public function test_track_removed() {
-		$attr_name             = 'invalid-attr';
+		$attr_name              = 'invalid-attr';
 		$expected_removed_attrs = array(
 			$attr_name => 1,
 		);
@@ -198,7 +198,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_validate_markup() {
 		$error_key = 'has_error';
-		$request = new WP_REST_Request( 'POST', $this->expected_route );
+		$request   = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
 			AMP_Mutation_Utils::MARKUP_KEY => $this->disallowed_tag,
