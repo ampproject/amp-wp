@@ -194,7 +194,10 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
-		add_action( 'comment_form_top', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
+		// Wrap fields in a hidable div. Closed in `contact_form` action.
+		add_action( 'comment_form_top', function() {
+			echo '<div id="amp-live-comments-list-' . get_queried_object_id() . '-fields">'; // WPCS: XSS OK.
+		}, PHP_INT_MAX );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
 
 		// @todo Add character conversion.
@@ -294,25 +297,22 @@ class AMP_Theme_Support {
 
 	/**
 	 * Adds the form submit success and fail templates.
-	 *
-	 * @param string $post_id The post ID if action is 'comment_form'.
 	 */
-	public static function add_amp_comment_form_templates( $post_id ) {
-		$output = '';
-		if ( empty( $post_id ) ) {
-			$output .= '<div id="amp-comment-form-fields">';
-		} else {
-			$output .= '</div>';
-			$output .= '<div submit-success><template type="amp-mustache">';
-			$output .= esc_html__( 'Your comment has been posted.', 'amp' );
-			$output .= sprintf( '<a class="amp-view-new-comment" href="{{comment_link}}">%s</a>', esc_html__( 'View Comment', 'amp' ) );
-			$output .= '</template></div>';
-			$output .= '<div submit-error><template type="amp-mustache">';
-			$output .= '<p class="amp-comment-submit-error">{{{error}}}</p>';
-			$output .= '</template></div>';
-		}
-
-		echo $output; // WPCS: XSS OK.
+	public static function add_amp_comment_form_templates() {
+		// The close div closes the field wrapper opened in `comment_form_top` action.
+		?>
+		</div>
+		<div submit-success>
+			<template type="amp-mustache">
+				<?php esc_html_e( 'Your comment has been posted, but may be subject to moderation.', 'amp' ); ?>
+			</template>
+		</div>
+		<div submit-error>
+			<template type="amp-mustache">
+				<p class="amp-comment-submit-error">{{{error}}}</p>
+			</template>
+		</div>
+		<?php
 	}
 
 	/**

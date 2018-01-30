@@ -40,16 +40,15 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		for ( $i = 0; $i < $nodes->length; $i++ ) {
-			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement ) {
-				continue;
-			}
+		$node = $nodes->item( 0 );
+		if ( ! $node instanceof DOMElement ) {
+			return;
 		}
 
 		$form = $this->dom->getElementById( 'commentform' );
 		if ( $form instanceof DOMElement ) {
-			$form->setAttribute( 'on', 'submit-success:amp-live-comments-list.update' );
+			$list_id = $node->getAttribute( 'id' ) . '-fields';
+			$form->setAttribute( 'on', 'submit-success:' . $list_id . '.hide' );
 		}
 	}
 }

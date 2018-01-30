@@ -21,7 +21,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	public $args;
 
 	/**
-	 * Holds the
+	 * Holds the timestamp of the most reacent comment in a thread.
 	 *
 	 * @since 0.7
 	 * @var array
@@ -84,13 +84,14 @@ class AMP_Comment_Walker extends Walker_Comment {
 
 		$args = array_slice( func_get_args(), 4 );
 
-		$output  = '<amp-live-list layout="container" data-poll-interval="15000" data-max-items-per-page="20" id="amp-live-comments-list-' . get_queried_object_id() . '">';
-		$output .= '<' . esc_attr( $args[0]['style'] ) . ' items>';
-		$output .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
-		$output .= '</' . esc_attr( $args[0]['style'] ) . '>';
-		$output .= '<button update on="tap:amp-live-comments-list.update" class="ampstart-btn ml1 caps">' . esc_html__( 'You have updates', 'amp' ) . '</button>';
-		$output .= '<div pagination>' . get_the_comments_navigation() . '</div>';
-		$output .= '</amp-live-list>';
+		$wrapper_id = 'amp-live-comments-list-' . get_queried_object_id();
+		$output     = '<amp-live-list layout="container" data-poll-interval="15000" data-max-items-per-page="20" id="' . esc_attr( $wrapper_id ) . '">';
+		$output    .= '<' . esc_attr( $args[0]['style'] ) . ' items>';
+		$output    .= parent::paged_walk( $elements, $max_depth, $page_num, $per_page, $args[0] );
+		$output    .= '</' . esc_attr( $args[0]['style'] ) . '>';
+		$output    .= '<button update on="tap:' . esc_attr( $wrapper_id ) . '.update" class="ampstart-btn ml1 caps">' . esc_html__( 'New comments posted.', 'amp' ) . '</button>';
+		$output    .= '<div pagination>' . get_the_comments_navigation() . '</div>';
+		$output    .= '</amp-live-list>';
 
 		return $output;
 	}

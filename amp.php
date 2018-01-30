@@ -104,7 +104,7 @@ add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
  * @since 0.1
  */
 function amp_init() {
-
+	global $pagenow;
 	/**
 	 * Triggers on init when AMP plugin is active.
 	 *
@@ -125,8 +125,9 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once( AMP__DIR__ . '/jetpack-helper.php' );
 	}
-
-	amp_hook_comments_maybe();
+	if ( 'wp-comments-post.php' === $pagenow ) {
+		amp_handle_comment_post();
+	}
 }
 
 // Make sure the `amp` query var has an explicit value.
@@ -367,29 +368,40 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 /**
  * Hook into a comment submission if an AMP xhr post request.
  */
-function amp_hook_comments_maybe() {
+function amp_handle_comment_post() {
+	global $pagenow;
 
-	$method        = filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING );
-	$is_amp_submit = filter_input( INPUT_GET, '__amp_source_origin', FILTER_VALIDATE_URL );
+	$is_amp_submit = isset( $_GET['__amp_source_origin'] ); // WPCS: CSRF ok, input var ok.
 
-	if ( 'post' !== strtolower( $method ) || is_null( $is_amp_submit ) ) {
+	if ( 'wp-comments-post.php' !== $pagenow || false === $is_amp_submit ) {
 		return;
 	}
 
 	// Add amp comment hooks.
-	add_filter( 'comment_post_redirect', 'amp_comment_post_handler', PHP_INT_MAX, 2 );
-	add_filter( 'wp_die_handler', 'amp_set_comment_submit_die_handler' );
+	add_filter( 'comment_post_redirect', function() {
+		// We don't need any data, so just send a success.
+		wp_send_json_success();
+	}, PHP_INT_MAX, 2 );
+	// Add amp die handler for error display.
+	add_filter( 'wp_die_handler', function() {
+		/**
+		 * New error handler for AMP form submission.
+		 *
+		 * @param WP_Error $error The error to handle.
+		 */
+		return function( $error ) {
+			status_header( 400 );
+			if ( is_wp_error( $error ) ) {
+				$error = $error->get_error_message();
+			}
+			$error = strip_tags( $error, 'strong' );
+			wp_send_json( compact( 'error' ) );
+		};
+	} );
 
 	// Send amp header.
-	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $is_amp_submit, true );
-
-}
-
-/**
- * Set the die handler on comment submit to output the error in json and send AMP headers.
- */
-function amp_set_comment_submit_die_handler() {
-	return 'amp_send_error_json';
+	$origin = filter_var( wp_unslash( $_GET['__amp_source_origin'] ), FILTER_SANITIZE_URL );// WPCS: CSRF ok, input var ok.
+	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
 }
 
 /**
@@ -398,17 +410,6 @@ function amp_set_comment_submit_die_handler() {
  * @param string $message The error message to send.
  */
 function amp_send_error_json( $message ) {
-	header( 'HTTP/1.1 400 BAD REQUEST' );
+	header( '400' );
 	wp_send_json( array( 'error' => strip_tags( $message, 'strong' ) ) );
-}
-
-/**
- * Handle the comment return.
- *
- * @param string     $location The location to redirect to.
- * @param WP_Comment $comment The comment that was posted.
- */
-function amp_comment_post_handler( $location, $comment ) {
-	$comment->comment_link = get_comment_link( $comment->comment_ID );
-	wp_send_json( $comment );
 }
