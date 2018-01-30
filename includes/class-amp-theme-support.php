@@ -259,6 +259,39 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Set up commenting.
+	 */
+	public static function setup_commenting() {
+		if ( ! current_theme_supports( AMP_QUERY_VAR ) ) {
+			return;
+		}
+
+		/*
+		 * Temporarily force comments to be listed in descending order.
+		 *
+		 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
+		 */
+		add_filter( 'option_comment_order', function() {
+			return 'desc';
+		}, PHP_INT_MAX );
+
+		add_action( 'admin_print_footer_scripts-options-discussion.php', function() {
+			?>
+			<div class="notice notice-info inline" id="amp-comment-notice"><p><?php echo wp_kses_post( __( 'Note: AMP does not yet <a href="https://github.com/ampproject/amphtml/issues/5396" target="_blank">support ascending</a> comments with newer entries appearing at the bottom.', 'amp' ) ); ?></p></div>
+			<script>
+			// Move the notice below the selector and disable selector.
+			jQuery( function( $ ) {
+				var orderSelect = $( '#comment_order' ),
+					notice = $( '#amp-comment-notice' );
+				orderSelect.prop( 'disabled', true );
+				orderSelect.closest( 'fieldset' ).append( notice );
+			} );
+			</script>
+			<?php
+		} );
+	}
+
+	/**
 	 * Register/override widgets.
 	 *
 	 * @global WP_Widget_Factory

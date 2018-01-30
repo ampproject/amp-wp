@@ -162,7 +162,7 @@ function amp_comments_order_disable_scripts() {
 		true
 	);
 	?>
-	<div class="notice notice-info inline" id="amp-comment-notice"><p><?php echo wp_kses_post( __( 'Note: AMP does not yet <a href="https://github.com/ampproject/amphtml/issues/5396" target="_blank">support ascending</a> comments with newer entries appearing at the bottom.', 'amp' ) ); ?></p></div>
+
 	<?php
 }
 
