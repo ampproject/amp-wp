@@ -191,8 +191,9 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
-
-		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), PHP_INT_MAX );
+		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
+		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
+		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
 
 		// @todo Add character conversion.
 	}
@@ -530,6 +531,93 @@ class AMP_Theme_Support {
 		if ( ! empty( $url ) ) {
 			printf( '<link rel="canonical" href="%s">', esc_url( $url ) );
 		}
+	}
+
+	/**
+	 * Get the ID for the amp-state.
+	 *
+	 * @since 0.7
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string ID for amp-state.
+	 */
+	public static function get_comment_form_state_id( $post_id ) {
+		return sprintf( 'commentform_post_%d', $post_id );
+	}
+
+	/**
+	 * Modify the comment reply link for AMP.
+	 *
+	 * @since 0.7
+	 * @see get_comment_reply_link()
+	 *
+	 * @param string     $link    The HTML markup for the comment reply link.
+	 * @param array      $args    An array of arguments overriding the defaults.
+	 * @param WP_Comment $comment The object of the comment being replied.
+	 * @return string Comment reply link.
+	 */
+	public static function filter_comment_reply_link( $link, $args, $comment ) {
+
+		// Continue to show default link to wp-login when user is not logged-in.
+		if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
+			return $link;
+		}
+
+		$state_id  = self::get_comment_form_state_id( get_the_ID() );
+		$tap_state = array(
+			$state_id => array(
+				'values' => array(
+					'comment_parent' => (string) $comment->comment_ID,
+				),
+			),
+		);
+
+		// @todo Figure out how to support add_below. Instead of moving the form, what about letting the form get a fixed position?
+		$link = sprintf(
+			'<a rel="nofollow" class="comment-reply-link" href="%s" on="%s" aria-label="%s">%s</a>',
+			esc_attr( '#' . $args['respond_id'] ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
+			$args['reply_text']
+		);
+		return $link;
+	}
+
+	/**
+	 * Filters the cancel comment reply link HTML.
+	 *
+	 * @since 0.7
+	 * @see get_cancel_comment_reply_link()
+	 *
+	 * @param string $formatted_link The HTML-formatted cancel comment reply link.
+	 * @param string $link           Cancel comment reply link URL.
+	 * @param string $text           Cancel comment reply link text.
+	 * @return string Cancel reply link.
+	 */
+	public function filter_cancel_comment_reply_link( $formatted_link, $link, $text ) {
+		unset( $formatted_link, $link );
+		if ( empty( $text ) ) {
+			$text = __( 'Click here to cancel reply.', 'default' );
+		}
+
+		$state_id  = self::get_comment_form_state_id( get_the_ID() );
+		$tap_state = array(
+			$state_id => array(
+				'values' => array(
+					'comment_parent' => '0',
+				),
+			),
+		);
+
+		$respond_id = 'respond'; // Hard-coded in comment_form() and default value in get_comment_reply_link().
+		return sprintf(
+			'<a id="cancel-comment-reply-link" href="%s" %s [hidden]="%s" on="%s">%s</a>',
+			esc_url( remove_query_arg( 'replytocom' ) . '#' . $respond_id ),
+			isset( $_GET['replytocom'] ) ? '' : ' hidden', // phpcs:ignore
+			esc_attr( sprintf( '%s.values.comment_parent == "0"', self::get_comment_form_state_id( get_the_ID() ) ) ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_html( $text )
+		);
 	}
 
 	/**
