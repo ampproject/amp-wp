@@ -13,7 +13,7 @@
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Sanitize the comments list from the HTML contained in this instance's DOMDocument.
+	 * Pre-process the comment form and comment list for AMP.
 	 *
 	 * @since 0.7
 	 */
@@ -35,15 +35,19 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$amp_state = $this->dom->createElement( 'amp-state' );
-			$state_id  = sanitize_key( $comment_form->getAttribute( 'id' ) ) . 'Values';
+			$state_id  = sanitize_key( $comment_form->getAttribute( 'id' ) ) . '_props';
 			$amp_state->setAttribute( 'id', $state_id );
 
 			$script = $this->dom->createElement( 'script' );
 			$script->setAttribute( 'type', 'application/json' );
 			$amp_state->appendChild( $script );
 
-			$form_state = array();
+			$form_state = array(
+				'values'     => array(),
+				'submitting' => false,
+			);
 
+			$amp_bind_attr_format = AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . '%s';
 			foreach ( $comment_form->getElementsByTagName( 'input' ) as $input ) {
 				/**
 				 * Input.
@@ -55,18 +59,19 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				// @todoRadio and checkbox inputs are not supported yet.
+				// @todo Radio and checkbox inputs are not supported yet.
 				$type = strtolower( $input->getAttribute( 'type' ) );
-				if ( 'radio' === $type || 'checkbox' === $type ) {
+				if ( in_array( $type, array( 'checkbox', 'radio' ), true ) ) {
 					continue;
 				}
 
-				$form_state[ $name ] = $input->getAttribute( 'value' );
-				if ( ! isset( $form_state[ $name ] ) ) {
-					$form_state[ $name ] = '';
+				$form_state['values'][ $name ] = $input->getAttribute( 'value' );
+				if ( ! isset( $form_state['values'][ $name ] ) ) {
+					$form_state['values'][ $name ] = '';
 				}
 
-				$input->setAttribute( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'value', "$state_id.$name" );
+				$input->setAttribute( sprintf( $amp_bind_attr_format, 'value' ), "$state_id.values.$name" );
+				$input->setAttribute( sprintf( $amp_bind_attr_format, 'disabled' ), "$state_id.submitting" );
 			}
 			foreach ( $comment_form->getElementsByTagName( 'textarea' ) as $textarea ) {
 				/**
@@ -78,13 +83,14 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $name ) {
 					continue;
 				}
-				$form_state[ $name ] = $textarea->textContent;
+				$form_state['values'][ $name ] = $textarea->textContent;
 
-				$textarea->setAttribute( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'text', "$state_id.$name" );
+				$textarea->setAttribute( sprintf( $amp_bind_attr_format, 'text' ), "$state_id.values.$name" );
+				$textarea->setAttribute( sprintf( $amp_bind_attr_format, 'disabled' ), "$state_id.submitting" );
 
 				// Update the state in response to changing the input.
 				$textarea->setAttribute( 'on', sprintf(
-					'change:AMP.setState({ %s: { %s: event.value } })',
+					'change:AMP.setState( { %s: { values: { %s: event.value } } } )',
 					$state_id,
 					wp_json_encode( $name )
 				) );
@@ -93,14 +99,32 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$script->appendChild( $this->dom->createTextNode( wp_json_encode( $form_state ) ) );
 			$comment_form->insertBefore( $amp_state, $comment_form->firstChild );
 
-			// Reset the form when successful.
-			$reset_state = $form_state;
-			unset( $reset_state['author'], $reset_state['email'], $reset_state['url'] ); // These remain the same after a submission.
-			$comment_form->setAttribute( 'on', sprintf(
-				'submit-success:AMP.setState( { %s: %s } )',
-				wp_json_encode( $state_id ),
-				wp_json_encode( $reset_state )
-			) );
+			// Update state when submitting form.
+			$form_reset_state = $form_state;
+			unset(
+				$form_reset_state['values']['author'],
+				$form_reset_state['values']['email'],
+				$form_reset_state['values']['url']
+			);
+			$on = array(
+				// Disable the form when submitting.
+				sprintf(
+					'submit:AMP.setState( { %s: { submitting: true } } )',
+					wp_json_encode( $state_id )
+				),
+				// Re-enable the form fields when the submission fails.
+				sprintf(
+					'submit-error:AMP.setState( { %s: { submitting: false } } )',
+					wp_json_encode( $state_id )
+				),
+				// Reset the form to its initial state (with enabled form fields), except for the author, email, and url.
+				sprintf(
+					'submit-success:AMP.setState( { %s: %s } )',
+					$state_id,
+					wp_json_encode( $form_reset_state )
+				),
+			);
+			$comment_form->setAttribute( 'on', implode( ';', $on ) );
 		}
 	}
 }
