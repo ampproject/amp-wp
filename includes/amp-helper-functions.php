@@ -302,6 +302,9 @@ function amp_get_post_image_metadata( $post = null ) {
  */
 function amp_get_schemaorg_metadata() {
 	$post = get_queried_object();
+	if ( ! $post ) {
+		return array();
+	}
 
 	$metadata = array(
 		'@context'         => 'http://schema.org',
