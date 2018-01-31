@@ -172,7 +172,6 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', 'rel_canonical' );
 		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
 
-		// @todo Add add_schemaorg_metadata(), add_analytics_data(), etc.
 		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 5 );
@@ -180,6 +179,7 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
+		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone

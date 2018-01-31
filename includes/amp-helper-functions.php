@@ -230,3 +230,125 @@ function amp_get_content_sanitizers( $post = null ) {
 		$post
 	);
 }
+
+/**
+ * Grabs featured image or the first attached image for the post.
+ *
+ * @since 0.7
+ *
+ * @param WP_Post $post            Post or post ID.
+ * @return array  $post_image_meta Post image metadata.
+ */
+function amp_get_post_image_metadata( $post = null ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return;
+	}
+
+	$post_image_meta = null;
+	$post_image_id   = false;
+
+	if ( has_post_thumbnail( $post->ID ) ) {
+		$post_image_id = get_post_thumbnail_id( $post->ID );
+	} else {
+		$attached_image_ids = get_posts(
+			array(
+				'post_parent'      => $post->ID,
+				'post_type'        => 'attachment',
+				'post_mime_type'   => 'image',
+				'posts_per_page'   => 1,
+				'orderby'          => 'menu_order',
+				'order'            => 'ASC',
+				'fields'           => 'ids',
+				'suppress_filters' => false,
+			)
+		);
+
+		if ( ! empty( $attached_image_ids ) ) {
+			$post_image_id = array_shift( $attached_image_ids );
+		}
+	}
+
+	if ( ! $post_image_id ) {
+		return false;
+	}
+
+	$post_image_src = wp_get_attachment_image_src( $post_image_id, 'full' );
+
+	if ( is_array( $post_image_src ) ) {
+		$post_image_meta = array(
+			'@type'  => 'ImageObject',
+			'url'    => $post_image_src[0],
+			'width'  => $post_image_src[1],
+			'height' => $post_image_src[2],
+		);
+	}
+
+	return $post_image_meta;
+}
+
+/**
+ * Get schema.org metadata.
+ *
+ * @since 0.7
+ *
+ * @return array $metadata All schema.org metadata for the post.
+ */
+function amp_get_schemaorg_metadata() {
+	$post = get_queried_object();
+
+	$metadata = array(
+		'@context'         => 'http://schema.org',
+		'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
+		'mainEntityOfPage' => get_permalink(),
+		'publisher'        => array(
+			'@type' => 'Organization',
+			'name'  => get_bloginfo( 'name' ),
+		),
+		'headline'         => get_the_title(),
+		'datePublished'    => date( 'c', get_the_date( 'U', $post->ID ) ),
+		'dateModified'     => date( 'c', get_the_date( 'U', $post->ID ) ),
+	);
+
+	$post_author = get_userdata( $post->post_author );
+	if ( $post_author ) {
+		$metadata['author'] = array(
+			'@type' => 'Person',
+			'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
+		);
+	}
+
+	$site_icon_size = AMP_Post_Template::SITE_ICON_SIZE;
+	$site_icon_url  = apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( $site_icon_size ) : '' );
+	if ( $site_icon_url ) {
+		$metadata['publisher']['logo'] = array(
+			'@type'  => 'ImageObject',
+			'url'    => $site_icon_url,
+			'height' => $site_icon_size,
+			'width'  => $site_icon_size,
+		);
+	}
+
+	$image_metadata = amp_get_post_image_metadata( $post );
+	if ( $image_metadata ) {
+		$metadata['image'] = $image_metadata;
+	}
+
+	$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $post );
+	return $metadata;
+}
+
+/**
+ * Output schema.org metadata.
+ *
+ * @since 0.7
+ */
+function amp_print_schemaorg_metadata() {
+	$metadata = amp_get_schemaorg_metadata();
+	if ( empty( $metadata ) ) {
+		return;
+	}
+	?>
+	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
+	<?php
+}

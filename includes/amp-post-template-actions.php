@@ -14,7 +14,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_post_template_add_scripts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
-	add_action( 'amp_post_template_head', 'amp_post_template_add_schemaorg_metadata' );
+	add_action( 'amp_post_template_head', 'amp_print_schemaorg_metadata' );
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
@@ -83,21 +83,6 @@ function amp_post_template_add_fonts( $amp_template ) {
 function amp_post_template_add_boilerplate_css() {
 	?>
 	<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-	<?php
-}
-
-/**
- * Print Schema.org metadata.
- *
- * @param AMP_Post_Template $amp_template Template.
- */
-function amp_post_template_add_schemaorg_metadata( $amp_template ) {
-	$metadata = $amp_template->get( 'metadata' );
-	if ( empty( $metadata ) ) {
-		return;
-	}
-	?>
-	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
 	<?php
 }
 
