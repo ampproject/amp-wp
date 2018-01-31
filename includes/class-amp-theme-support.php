@@ -487,7 +487,7 @@ class AMP_Theme_Support {
 	 * @return string $markup The markup to output.
 	 */
 	public static function video_override( $html, $attr ) {
-		if ( ! isset( $attr['src'] ) ) {
+		if ( ! is_amp_endpoint() || ! isset( $attr['src'] ) ) {
 			return '';
 		}
 		$src             = $attr['src'];

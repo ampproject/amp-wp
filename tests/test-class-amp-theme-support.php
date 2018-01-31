@@ -93,12 +93,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::video_override()
 	 */
 	public function test_video_override() {
+		global $_wp_theme_features;
 		AMP_Theme_Support::register_content_embed_handlers();
 		$youtube_id        = 'XOY3ZUO6P0k';
 		$youtube_src       = 'https://youtu.be/' . $youtube_id;
 		$attr_youtube      = array(
 			'src' => $youtube_src,
 		);
+
+		// This isn't an AMP endpoint, so there should be no filtering of the shortcode.
+		$non_overridden = AMP_Theme_Support::video_override( '', $attr_youtube );
+		$this->assertEquals( '', $non_overridden );
+
+		$_wp_theme_features['amp'] = true; // WPCS: global override ok.
 		$youtube_shortcode = AMP_Theme_Support::video_override( '', $attr_youtube );
 		$this->assertContains( '<amp-youtube', $youtube_shortcode );
 		$this->assertContains( $youtube_id, $youtube_shortcode );
