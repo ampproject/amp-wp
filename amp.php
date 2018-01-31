@@ -103,9 +103,11 @@ add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
  * Init AMP.
  *
  * @since 0.1
+ * @global string $pagenow
  */
 function amp_init() {
 	global $pagenow;
+
 	/**
 	 * Triggers on init when AMP plugin is active.
 	 *
@@ -124,10 +126,10 @@ function amp_init() {
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
-		require_once( AMP__DIR__ . '/jetpack-helper.php' );
+		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
-	if ( 'wp-comments-post.php' === $pagenow ) {
-		amp_handle_comment_post();
+	if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
+		amp_prepare_comment_post();
 	}
 }
 

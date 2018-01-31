@@ -80,9 +80,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		if ( ! empty( $form_fields['comment_parent'] ) ) {
-			$reply_comment = get_comment( $form_fields['comment_parent'][0]->getAttribute( 'value' ) );
-			if ( $reply_comment ) {
-				$form_state['replyToName'] = $reply_comment->comment_author;
+			$comment_id = (int) $form_fields['comment_parent'][0]->getAttribute( 'value' );
+			if ( $comment_id ) {
+				$reply_comment = get_comment( $comment_id );
+				if ( $reply_comment ) {
+					$form_state['replyToName'] = $reply_comment->comment_author;
+				}
 			}
 		}
 
