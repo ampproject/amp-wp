@@ -177,6 +177,7 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
+		add_filter( 'wp_video_shortcode_override', array( __CLASS__, 'video_override' ), 10, 2 );
 
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
@@ -468,6 +469,36 @@ class AMP_Theme_Support {
 
 		// Replaced after output buffering with all AMP component scripts.
 		echo self::COMPONENT_SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
+	}
+
+	/**
+	 * Overrides the output of 'Video' widgets for YouTube and Vimeo.
+	 *
+	 * WP_Widget_Media_Video::render() has a different output for YouTube and Vimeo.
+	 * It calls wp_video_shortcode(), instead of wp_oembed_get() like the rest of the videos.
+	 * So this callback overrides the output of wp_video_shortcode().
+	 * It produces 'youtube' or 'vimeo' shortcodes,
+	 * which this plugin's embed handlers render as <amp-youtube> or <amp-vimeo>.
+	 * This sometimes returns an empty string: ''.
+	 * If the value is anything other than '', wp_video_shortcode() exits and returns the value.
+	 *
+	 * @param string $html Empty string.
+	 * @param array  $attr The shortcode attributes.
+	 * @return string $markup The markup to output.
+	 */
+	public static function video_override( $html, $attr ) {
+		if ( ! isset( $attr['src'] ) ) {
+			return '';
+		}
+		$src             = $attr['src'];
+		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
+		$vimeo_pattern   = '#^https?://(.+\.)?vimeo\.com/.*#';
+		if ( 1 === preg_match( $youtube_pattern, $src ) ) {
+			return do_shortcode( sprintf( '[youtube %s]', $src ) );
+		} elseif ( 1 === preg_match( $vimeo_pattern, $src ) ) {
+			return do_shortcode( sprintf( '[vimeo %s]', $src ) );
+		}
+		return '';
 	}
 
 	/**
