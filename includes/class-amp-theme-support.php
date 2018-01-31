@@ -102,7 +102,7 @@ class AMP_Theme_Support {
 			self::register_paired_hooks();
 		}
 
-		self::purge_amp_query_vars();
+		self::purge_amp_query_vars(); // Note that amp_prepare_comment_post() still looks at $_GET['__amp_source_origin'].
 		self::register_hooks();
 		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
@@ -190,6 +190,12 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
+		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
+		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
+		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
+		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+
 		// @todo Add character conversion.
 	}
 
@@ -249,6 +255,39 @@ class AMP_Theme_Support {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Set up commenting.
+	 */
+	public static function setup_commenting() {
+		if ( ! current_theme_supports( AMP_QUERY_VAR ) ) {
+			return;
+		}
+
+		/*
+		 * Temporarily force comments to be listed in descending order.
+		 *
+		 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
+		 */
+		add_filter( 'option_comment_order', function() {
+			return 'desc';
+		}, PHP_INT_MAX );
+
+		add_action( 'admin_print_footer_scripts-options-discussion.php', function() {
+			?>
+			<div class="notice notice-info inline" id="amp-comment-notice"><p><?php echo wp_kses_post( __( 'Note: AMP does not yet <a href="https://github.com/ampproject/amphtml/issues/5396" target="_blank">support ascending</a> comments with newer entries appearing at the bottom.', 'amp' ) ); ?></p></div>
+			<script>
+			// Move the notice below the selector and disable selector.
+			jQuery( function( $ ) {
+				var orderSelect = $( '#comment_order' ),
+					notice = $( '#amp-comment-notice' );
+				orderSelect.prop( 'disabled', true );
+				orderSelect.closest( 'fieldset' ).append( notice );
+			} );
+			</script>
+			<?php
+		} );
 	}
 
 	/**
@@ -328,6 +367,39 @@ class AMP_Theme_Support {
 		}
 
 		return $embed_handlers;
+	}
+
+	/**
+	 * Add the comments template placeholder marker
+	 *
+	 * @param array $args the args for the comments list..
+	 * @return array Args to return.
+	 */
+	public static function amp_set_comments_walker( $args ) {
+		$amp_walker     = new AMP_Comment_Walker();
+		$args['walker'] = $amp_walker;
+		// Add reverse order here as well, in case theme overrides it.
+		$args['reverse_top_level'] = true;
+
+		return $args;
+	}
+
+	/**
+	 * Adds the form submit success and fail templates.
+	 */
+	public static function add_amp_comment_form_templates() {
+		?>
+		<div submit-success>
+			<template type="amp-mustache">
+				<?php esc_html_e( 'Your comment has been posted, but may be subject to moderation.', 'amp' ); ?>
+			</template>
+		</div>
+		<div submit-error>
+			<template type="amp-mustache">
+				<p class="amp-comment-submit-error">{{{error}}}</p>
+			</template>
+		</div>
+		<?php
 	}
 
 	/**
@@ -463,6 +535,126 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Get the ID for the amp-state.
+	 *
+	 * @since 0.7
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string ID for amp-state.
+	 */
+	public static function get_comment_form_state_id( $post_id ) {
+		return sprintf( 'commentform_post_%d', $post_id );
+	}
+
+	/**
+	 * Filter comment form args to an element with [text] AMP binding wrap the title reply.
+	 *
+	 * @since 0.7
+	 * @see comment_form()
+	 *
+	 * @param array $args Comment form args.
+	 * @return array Filtered comment form args.
+	 */
+	public static function filter_comment_form_defaults( $args ) {
+		$state_id = self::get_comment_form_state_id( get_the_ID() );
+
+		$text_binding = sprintf(
+			'%s.replyToName ? %s : %s',
+			$state_id,
+			str_replace(
+				'%s',
+				sprintf( '" + %s.replyToName + "', $state_id ),
+				wp_json_encode( $args['title_reply_to'] )
+			),
+			wp_json_encode( $args['title_reply'] )
+		);
+
+		$args['title_reply_before'] .= sprintf(
+			'<span [text]="%s">',
+			esc_attr( $text_binding )
+		);
+		$args['cancel_reply_before'] = '</span>' . $args['cancel_reply_before'];
+		return $args;
+	}
+
+	/**
+	 * Modify the comment reply link for AMP.
+	 *
+	 * @since 0.7
+	 * @see get_comment_reply_link()
+	 *
+	 * @param string     $link    The HTML markup for the comment reply link.
+	 * @param array      $args    An array of arguments overriding the defaults.
+	 * @param WP_Comment $comment The object of the comment being replied.
+	 * @return string Comment reply link.
+	 */
+	public static function filter_comment_reply_link( $link, $args, $comment ) {
+
+		// Continue to show default link to wp-login when user is not logged-in.
+		if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
+			return $link;
+		}
+
+		$state_id  = self::get_comment_form_state_id( get_the_ID() );
+		$tap_state = array(
+			$state_id => array(
+				'replyToName' => $comment->comment_author,
+				'values'      => array(
+					'comment_parent' => (string) $comment->comment_ID,
+				),
+			),
+		);
+
+		// @todo Figure out how to support add_below. Instead of moving the form, what about letting the form get a fixed position?
+		$link = sprintf(
+			'<a rel="nofollow" class="comment-reply-link" href="%s" on="%s" aria-label="%s">%s</a>',
+			esc_attr( '#' . $args['respond_id'] ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
+			$args['reply_text']
+		);
+		return $link;
+	}
+
+	/**
+	 * Filters the cancel comment reply link HTML.
+	 *
+	 * @since 0.7
+	 * @see get_cancel_comment_reply_link()
+	 *
+	 * @param string $formatted_link The HTML-formatted cancel comment reply link.
+	 * @param string $link           Cancel comment reply link URL.
+	 * @param string $text           Cancel comment reply link text.
+	 * @return string Cancel reply link.
+	 */
+	public static function filter_cancel_comment_reply_link( $formatted_link, $link, $text ) {
+		unset( $formatted_link, $link );
+		if ( empty( $text ) ) {
+			$text = __( 'Click here to cancel reply.', 'default' );
+		}
+
+		$state_id  = self::get_comment_form_state_id( get_the_ID() );
+		$tap_state = array(
+			$state_id => array(
+				'replyToName' => '',
+				'values'      => array(
+					'comment_parent' => '0',
+				),
+			),
+		);
+
+		$respond_id = 'respond'; // Hard-coded in comment_form() and default value in get_comment_reply_link().
+		return sprintf(
+			'<a id="cancel-comment-reply-link" href="%s" %s [hidden]="%s" on="%s">%s</a>',
+			esc_url( remove_query_arg( 'replytocom' ) . '#' . $respond_id ),
+			isset( $_GET['replytocom'] ) ? '' : ' hidden', // phpcs:ignore
+			esc_attr( sprintf( '%s.values.comment_parent == "0"', self::get_comment_form_state_id( get_the_ID() ) ) ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_html( $text )
+		);
+	}
+
+	/**
 	 * Print placeholder for Custom AMP styles.
 	 *
 	 * The actual styles for the page injected into the placeholder when output buffering is completed.
@@ -528,6 +720,16 @@ class AMP_Theme_Support {
 		}
 
 		/**
+		 * List of components that are custom elements.
+		 *
+		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template.
+		 *
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
+		 */
+		$custom_templates = array( 'amp-mustache' );
+
+		/**
 		 * Filters AMP component scripts before they are injected onto the output buffer for the response.
 		 *
 		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet
@@ -541,8 +743,15 @@ class AMP_Theme_Support {
 
 		$scripts = '';
 		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
+
+			$custom_type = 'custom-element';
+			if ( in_array( $amp_script_component, $custom_templates, true ) ) {
+				$custom_type = 'custom-template';
+			}
+
 			$scripts .= sprintf(
-				'<script async custom-element="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				'<script async %s="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
+				$custom_type,
 				$amp_script_component,
 				$amp_script_source
 			);

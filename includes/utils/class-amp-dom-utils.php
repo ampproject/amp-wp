@@ -77,7 +77,7 @@ class AMP_DOM_Utils {
 
 		// Force all self-closing tags to have closing tags since DOMDocument isn't fully aware.
 		$document = preg_replace(
-			'#<(' . join( self::$self_closing_tags, '|' ) . ')[^>]*>(?!</\1>)#',
+			'#<(' . implode( '|', self::$self_closing_tags ) . ')[^>]*>(?!</\1>)#',
 			'$0</$1>',
 			$document
 		);

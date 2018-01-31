@@ -223,15 +223,56 @@ function amp_get_content_sanitizers( $post = null ) {
 		array(
 			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Img_Sanitizer'               => array(),
+			'AMP_Form_Sanitizer'              => array(),
+			'AMP_Comments_Sanitizer'          => array(),
 			'AMP_Video_Sanitizer'             => array(),
 			'AMP_Audio_Sanitizer'             => array(),
 			'AMP_Playbuzz_Sanitizer'          => array(),
 			'AMP_Iframe_Sanitizer'            => array(
 				'add_placeholder' => true,
 			),
-			'AMP_Form_Sanitizer'              => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 		),
 		$post
 	);
+}
+
+/**
+ * Hook into a comment submission of an AMP XHR post request.
+ *
+ * This only runs on wp-comments-post.php.
+ *
+ * @since 0.7.0
+ */
+function amp_prepare_comment_post() {
+	if ( ! isset( $_GET['__amp_source_origin'] ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
+		return;
+	}
+
+	// Add amp comment hooks.
+	add_filter( 'comment_post_redirect', function() {
+		// We don't need any data, so just send a success.
+		wp_send_json_success();
+	}, PHP_INT_MAX, 2 );
+
+	// Add die handler for AMP error display.
+	add_filter( 'wp_die_handler', function() {
+		/**
+		 * New error handler for AMP form submission.
+		 *
+		 * @param WP_Error|string $error The error to handle.
+		 */
+		return function( $error ) {
+			status_header( 400 );
+			if ( is_wp_error( $error ) ) {
+				$error = $error->get_error_message();
+			}
+			$error = strip_tags( $error, 'strong' );
+			wp_send_json( compact( 'error' ) );
+		};
+	} );
+
+	// Send AMP header.
+	$origin = esc_url_raw( wp_unslash( $_GET['__amp_source_origin'] ) ); // WPCS: CSRF ok.
+	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
 }
