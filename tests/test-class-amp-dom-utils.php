@@ -90,4 +90,59 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * Test convert_amp_bind_attributes.
+	 *
+	 * @covers \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @covers \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @covers \AMP_DOM_Utils::get_amp_bind_placeholder_prefix()
+	 */
+	public function test_amp_bind_conversion() {
+		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
+		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
+		$this->assertNotEquals( $converted, $original );
+		$this->assertContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
+		$this->assertContains( 'width=300 height="200" data-foo="bar" selected', $converted );
+		$restored = AMP_DOM_Utils::restore_amp_bind_attributes( $converted );
+		$this->assertEquals( $original, $restored );
+
+		// Test malformed.
+		$malformed_html = array(
+			'<amp-img width="123" [text]="..."</amp-img>',
+			'<amp-img width="123" [text] data-test="asd"></amp-img>',
+			'<amp-img width="123" [text]="..." *bad*></amp-img>',
+		);
+		foreach ( $malformed_html as $html ) {
+			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
+			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted );
+		}
+	}
+
+	/**
+	 * Test handling of empty elements.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 */
+	public function test_html5_empty_elements() {
+		$original  = '<amp-video width="432" height="987">';
+		$original .= '<track kind="subtitles" src="https://example.com/sampleChapters.vtt" srclang="en">';
+		$original .= '<source src="foo.webm" type="video/webm">';
+		$original .= '<source src="foo.ogg" type="video/ogg" />';
+		$original .= '<source src="foo.mpg" type="video/mpeg"></source>';
+		$original .= '<div placeholder>Placeholder</div>';
+		$original .= '<span fallback>Fallback</span>';
+		$original .= '</amp-video>';
+		$document  = AMP_DOM_Utils::get_dom_from_content( $original );
+
+		$video = $document->getElementsByTagName( 'amp-video' )->item( 0 );
+		$this->assertNotEmpty( $video );
+		$this->assertEquals( 6, $video->childNodes->length );
+		$this->assertEquals( 'track', $video->childNodes->item( 0 )->nodeName );
+		$this->assertEquals( 'source', $video->childNodes->item( 1 )->nodeName );
+		$this->assertEquals( 'source', $video->childNodes->item( 2 )->nodeName );
+		$this->assertEquals( 'source', $video->childNodes->item( 3 )->nodeName );
+		$this->assertEquals( 'div', $video->childNodes->item( 4 )->nodeName );
+		$this->assertEquals( 'span', $video->childNodes->item( 5 )->nodeName );
+	}
 }

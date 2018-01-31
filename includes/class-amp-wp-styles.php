@@ -60,10 +60,15 @@ class AMP_WP_Styles extends WP_Styles {
 
 		/** This filter is documented in wp-includes/class.wp-styles.php */
 		$src = apply_filters( 'style_loader_src', $src, $handle );
+		$src = esc_url_raw( $src );
 
 		// Strip query and fragment from URL.
-		$src = preg_replace( ':[\?#].+:', '', $src );
-		$src = esc_url_raw( $src );
+		$src = preg_replace( ':[\?#].*$:', '', $src );
+
+		if ( ! preg_match( '/\.(css|less|scss|sass)$/i', $src ) ) {
+			/* translators: %1$s is stylesheet handle, %2$s is stylesheet URL */
+			return new WP_Error( 'amp_css_bad_file_extension', sprintf( __( 'Skipped stylesheet %1$s which does not have recognized CSS file extension (%2$s).', 'amp' ), $handle, $src ) );
+		}
 
 		$includes_url = includes_url( '/' );
 		$content_url  = content_url( '/' );
@@ -75,11 +80,6 @@ class AMP_WP_Styles extends WP_Styles {
 			$css_path = ABSPATH . WPINC . substr( $src, strlen( $includes_url ) - 1 );
 		} elseif ( 0 === strpos( $src, $admin_url ) ) {
 			$css_path = ABSPATH . 'wp-admin' . substr( $src, strlen( $admin_url ) - 1 );
-		}
-
-		if ( ! preg_match( '/\.(css|less|scss|sass)$/i', $css_path ) ) {
-			/* translators: %1$s is stylesheet handle, %2$s is stylesheet URL */
-			return new WP_Error( 'amp_css_bad_file_extension', sprintf( __( 'Skipped stylesheet %1$s which does not have recognized CSS file extension (%2$s).', 'amp' ), $handle, $src ) );
 		}
 
 		if ( ! $css_path || false !== strpos( '../', $css_path ) || 0 !== validate_file( $css_path ) || ! file_exists( $css_path ) ) {

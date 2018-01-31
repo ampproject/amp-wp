@@ -181,9 +181,13 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Vimeo_Embed_Handler'       => array(),
 			'AMP_SoundCloud_Embed_Handler'  => array(),
 			'AMP_Instagram_Embed_Handler'   => array(),
+			'AMP_Issuu_Embed_Handler'       => array(),
+			'AMP_Meetup_Embed_Handler'      => array(),
 			'AMP_Vine_Embed_Handler'        => array(),
 			'AMP_Facebook_Embed_Handler'    => array(),
 			'AMP_Pinterest_Embed_Handler'   => array(),
+			'AMP_Reddit_Embed_Handler'      => array(),
+			'AMP_Tumblr_Embed_Handler'      => array(),
 			'AMP_Gallery_Embed_Handler'     => array(),
 			'WPCOM_AMP_Polldaddy_Embed'     => array(),
 		),
@@ -219,6 +223,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		array(
 			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Img_Sanitizer'               => array(),
+			'AMP_Form_Sanitizer'              => array(),
+			'AMP_Comments_Sanitizer'          => array(),
 			'AMP_Video_Sanitizer'             => array(),
 			'AMP_Audio_Sanitizer'             => array(),
 			'AMP_Playbuzz_Sanitizer'          => array(),
@@ -351,4 +357,44 @@ function amp_print_schemaorg_metadata() {
 	?>
 	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
 	<?php
+}
+
+/**
+ * Hook into a comment submission of an AMP XHR post request.
+ *
+ * This only runs on wp-comments-post.php.
+ *
+ * @since 0.7.0
+ */
+function amp_prepare_comment_post() {
+	if ( ! isset( $_GET['__amp_source_origin'] ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
+		return;
+	}
+
+	// Add amp comment hooks.
+	add_filter( 'comment_post_redirect', function() {
+		// We don't need any data, so just send a success.
+		wp_send_json_success();
+	}, PHP_INT_MAX, 2 );
+
+	// Add die handler for AMP error display.
+	add_filter( 'wp_die_handler', function() {
+		/**
+		 * New error handler for AMP form submission.
+		 *
+		 * @param WP_Error|string $error The error to handle.
+		 */
+		return function( $error ) {
+			status_header( 400 );
+			if ( is_wp_error( $error ) ) {
+				$error = $error->get_error_message();
+			}
+			$error = strip_tags( $error, 'strong' );
+			wp_send_json( compact( 'error' ) );
+		};
+	} );
+
+	// Send AMP header.
+	$origin = esc_url_raw( wp_unslash( $_GET['__amp_source_origin'] ) ); // WPCS: CSRF ok.
+	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
 }
