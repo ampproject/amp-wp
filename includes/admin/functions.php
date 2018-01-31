@@ -147,22 +147,3 @@ function amp_post_meta_box() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
 }
-
-/**
- * Enqueue Disable changing comments scripts and notices.
- *
- * @since 0.7
- */
-function amp_comments_order_disable_scripts() {
-	wp_enqueue_script(
-		'amp-admin-comments',
-		amp_get_asset_url( 'js/amp-admin-comments.js' ),
-		array( 'jquery' ),
-		false,
-		true
-	);
-	?>
-
-	<?php
-}
-

@@ -102,7 +102,7 @@ class AMP_Theme_Support {
 			self::register_paired_hooks();
 		}
 
-		self::purge_amp_query_vars();
+		self::purge_amp_query_vars(); // Note that amp_prepare_comment_post() still looks at $_GET['__amp_source_origin'].
 		self::register_hooks();
 		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
