@@ -488,7 +488,7 @@ class AMP_Theme_Support {
 	 */
 	public static function video_override( $html, $attr ) {
 		if ( ! is_amp_endpoint() || ! isset( $attr['src'] ) ) {
-			return '';
+			return $html;
 		}
 		$src             = $attr['src'];
 		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
@@ -498,7 +498,7 @@ class AMP_Theme_Support {
 		} elseif ( 1 === preg_match( $vimeo_pattern, $src ) ) {
 			return do_shortcode( sprintf( '[vimeo %s]', $src ) );
 		}
-		return '';
+		return $html;
 	}
 
 	/**
