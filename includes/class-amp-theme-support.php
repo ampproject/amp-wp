@@ -482,7 +482,7 @@ class AMP_Theme_Support {
 	 * This sometimes returns an empty string: ''.
 	 * If the value is anything other than '', wp_video_shortcode() exits and returns the value.
 	 *
-	 * @param string $html Empty string.
+	 * @param string $html Markup to possibly override.
 	 * @param array  $attr The shortcode attributes.
 	 * @return string $markup The markup to output.
 	 */

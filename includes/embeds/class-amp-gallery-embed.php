@@ -16,15 +16,13 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_shortcode( 'gallery', array( $this, 'shortcode' ) );
+		add_filter( 'post_gallery', array( $this, 'override_gallery' ), 10, 2 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
-	public function unregister_embed() {
-		remove_shortcode( 'gallery' );
-	}
+	public function unregister_embed() {}
 
 	/**
 	 * Shortcode handler.
@@ -118,6 +116,20 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		return $this->render( array(
 			'images' => $urls,
 		) );
+	}
+
+	/**
+	 * Override the output of gallery_shortcode().
+	 *
+	 * The 'Gallery' widget also uses this function.
+	 * This ensures that it outputs an <amp-carousel>.
+	 *
+	 * @param string $html Markup to filter, possibly ''.
+	 * @param array  $attributes Shortcode attributes.
+	 * @return string $html Markup for the gallery.
+	 */
+	public function override_gallery( $html, $attributes ) {
+		return $this->shortcode( $attributes );
 	}
 
 	/**
