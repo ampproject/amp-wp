@@ -31,7 +31,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	/**
 	 * Starts the element output.
 	 *
-	 * @since 2.7.0
+	 * @since 0.7.0
 	 *
 	 * @see Walker::start_el()
 	 * @see wp_list_comments()
@@ -50,14 +50,14 @@ class AMP_Comment_Walker extends Walker_Comment {
 		parent::start_el( $new_out, $comment, $depth, $args, $id );
 
 		if ( 'div' === $args['style'] ) {
-			$tag = 'div';
+			$tag = '<div';
 		} else {
-			$tag = 'li';
+			$tag = '<li';
 		}
-		$new_tag = '<' . $tag . ' data-sort-time="' . strtotime( $comment->comment_date ) . '"';
+		$new_tag = $tag . ' data-sort-time="' . esc_attr( strtotime( $comment->comment_date ) ) . '"';
 
 		if ( ! empty( $this->comment_thread_age[ $comment->comment_ID ] ) ) {
-			$new_tag .= 'data-update-time="' . $this->comment_thread_age[ $comment->comment_ID ] . '"';
+			$new_tag .= ' data-update-time="' . esc_attr( $this->comment_thread_age[ $comment->comment_ID ] ) . '"';
 		}
 
 		$output .= $new_tag . substr( ltrim( $new_out ), strlen( $tag ) );
@@ -67,7 +67,9 @@ class AMP_Comment_Walker extends Walker_Comment {
 	/**
 	 * Output amp-list template code and place holder for comments.
 	 *
+	 * @since 0.7
 	 * @see Walker::paged_walk()
+	 *
 	 * @param WP_Comment[] $elements List of comment Elements.
 	 * @param int          $max_depth The maximum hierarchical depth.
 	 * @param int          $page_num The specific page number, beginning with 1.
@@ -91,12 +93,13 @@ class AMP_Comment_Walker extends Walker_Comment {
 	 * Find the timestamp of the latest child comment of a thread to set the updated time.
 	 *
 	 * @since 0.7
+	 *
 	 * @param WP_Comment[] $elements The list of comments to get thread times for.
 	 * @param int          $time $the timestamp to check against.
 	 * @param bool         $is_child Flag used to set the the value or return the time.
-	 * @return false|int
+	 * @return int Latest time.
 	 */
-	public function build_thread_latest_date( $elements, $time = 0, $is_child = false ) {
+	protected function build_thread_latest_date( $elements, $time = 0, $is_child = false ) {
 
 		foreach ( $elements as $element ) {
 
