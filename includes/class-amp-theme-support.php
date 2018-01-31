@@ -191,6 +191,7 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
+		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
@@ -546,6 +547,37 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Filter comment form args to an element with [text] AMP binding wrap the title reply.
+	 *
+	 * @since 0.7
+	 * @see comment_form()
+	 *
+	 * @param array $args Comment form args.
+	 * @return array Filtered comment form args.
+	 */
+	public static function filter_comment_form_defaults( $args ) {
+		$state_id = self::get_comment_form_state_id( get_the_ID() );
+
+		$text_binding = sprintf(
+			'%s.replyToName ? %s : %s',
+			$state_id,
+			str_replace(
+				'%s',
+				sprintf( '" + %s.replyToName + "', $state_id ),
+				wp_json_encode( $args['title_reply_to'] )
+			),
+			wp_json_encode( $args['title_reply'] )
+		);
+
+		$args['title_reply_before'] .= sprintf(
+			'<span [text]="%s">',
+			esc_attr( $text_binding )
+		);
+		$args['cancel_reply_before'] = '</span>' . $args['cancel_reply_before'];
+		return $args;
+	}
+
+	/**
 	 * Modify the comment reply link for AMP.
 	 *
 	 * @since 0.7
@@ -566,7 +598,8 @@ class AMP_Theme_Support {
 		$state_id  = self::get_comment_form_state_id( get_the_ID() );
 		$tap_state = array(
 			$state_id => array(
-				'values' => array(
+				'replyToName' => $comment->comment_author,
+				'values'      => array(
 					'comment_parent' => (string) $comment->comment_ID,
 				),
 			),
@@ -594,7 +627,7 @@ class AMP_Theme_Support {
 	 * @param string $text           Cancel comment reply link text.
 	 * @return string Cancel reply link.
 	 */
-	public function filter_cancel_comment_reply_link( $formatted_link, $link, $text ) {
+	public static function filter_cancel_comment_reply_link( $formatted_link, $link, $text ) {
 		unset( $formatted_link, $link );
 		if ( empty( $text ) ) {
 			$text = __( 'Click here to cancel reply.', 'default' );
@@ -603,7 +636,8 @@ class AMP_Theme_Support {
 		$state_id  = self::get_comment_form_state_id( get_the_ID() );
 		$tap_state = array(
 			$state_id => array(
-				'values' => array(
+				'replyToName' => '',
+				'values'      => array(
 					'comment_parent' => '0',
 				),
 			),

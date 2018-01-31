@@ -74,9 +74,17 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$state_id = AMP_Theme_Support::get_comment_form_state_id( $post_id );
 
 		$form_state = array(
-			'values'     => array(),
-			'submitting' => false,
+			'values'      => array(),
+			'submitting'  => false,
+			'replyToName' => '',
 		);
+
+		if ( ! empty( $form_fields['comment_parent'] ) ) {
+			$reply_comment = get_comment( $form_fields['comment_parent'][0]->getAttribute( 'value' ) );
+			if ( $reply_comment ) {
+				$form_state['replyToName'] = $reply_comment->comment_author;
+			}
+		}
 
 		$amp_bind_attr_format = AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . '%s';
 		foreach ( $form_fields as $name => $form_field ) {
