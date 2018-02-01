@@ -87,6 +87,16 @@ function amp_post_template_add_boilerplate_css() {
 }
 
 /**
+ * Print Schema.org metadata.
+ *
+ * @deprecated Since 0.7
+ */
+function amp_post_template_add_schemaorg_metadata() {
+	_deprecated_function( __FUNCTION__, '0.7', 'amp_print_schemaorg_metadata' );
+	amp_print_schemaorg_metadata();
+}
+
+/**
  * Print styles.
  *
  * @param AMP_Post_Template $amp_template Template.

@@ -240,15 +240,15 @@ function amp_get_content_sanitizers( $post = null ) {
 /**
  * Grabs featured image or the first attached image for the post.
  *
- * @since 0.7
+ * @since 0.7 This originally was located in the private method AMP_Post_Template::get_post_image_metadata().
  *
- * @param WP_Post $post            Post or post ID.
- * @return array  $post_image_meta Post image metadata.
+ * @param WP_Post|int $post Post or post ID.
+ * @return array|false $post_image_meta Post image metadata, or false if not found.
  */
 function amp_get_post_image_metadata( $post = null ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
-		return;
+		return false;
 	}
 
 	$post_image_meta = null;
@@ -294,56 +294,93 @@ function amp_get_post_image_metadata( $post = null ) {
 }
 
 /**
- * Get schema.org metadata.
+ * Get schema.org metadata for the current query.
  *
  * @since 0.7
+ * @see AMP_Post_Template::build_post_data() Where the logic in this function originally existed.
  *
  * @return array $metadata All schema.org metadata for the post.
  */
 function amp_get_schemaorg_metadata() {
-	$post = get_queried_object();
-	if ( ! $post ) {
-		return array();
-	}
-
 	$metadata = array(
-		'@context'         => 'http://schema.org',
-		'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
-		'mainEntityOfPage' => get_permalink(),
-		'publisher'        => array(
+		'@context'  => 'http://schema.org',
+		'publisher' => array(
 			'@type' => 'Organization',
 			'name'  => get_bloginfo( 'name' ),
 		),
-		'headline'         => get_the_title(),
-		'datePublished'    => date( 'c', get_the_date( 'U', $post->ID ) ),
-		'dateModified'     => date( 'c', get_the_date( 'U', $post->ID ) ),
 	);
 
-	$post_author = get_userdata( $post->post_author );
-	if ( $post_author ) {
-		$metadata['author'] = array(
-			'@type' => 'Person',
-			'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
-		);
-	}
-
-	$site_icon_size = AMP_Post_Template::SITE_ICON_SIZE;
-	$site_icon_url  = apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( $site_icon_size ) : '' );
+	/**
+	 * Filters the site icon used in AMP responses.
+	 *
+	 * In general the `get_site_icon_url` filter should be used instead.
+	 *
+	 * @since 0.3
+	 * @todo Why is the size set to 32px?
+	 *
+	 * @param string $site_icon_url
+	 */
+	$site_icon_url = apply_filters( 'amp_site_icon_url', get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ) );
 	if ( $site_icon_url ) {
 		$metadata['publisher']['logo'] = array(
 			'@type'  => 'ImageObject',
 			'url'    => $site_icon_url,
-			'height' => $site_icon_size,
-			'width'  => $site_icon_size,
+			'height' => AMP_Post_Template::SITE_ICON_SIZE,
+			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
 		);
 	}
 
-	$image_metadata = amp_get_post_image_metadata( $post );
-	if ( $image_metadata ) {
-		$metadata['image'] = $image_metadata;
+	$post = get_queried_object();
+	if ( $post instanceof WP_Post ) {
+		$metadata = array_merge(
+			$metadata,
+			array(
+				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
+				'mainEntityOfPage' => get_permalink(),
+				'headline'         => get_the_title(),
+				'datePublished'    => date( 'c', get_the_date( 'U', $post->ID ) ),
+				'dateModified'     => date( 'c', get_the_date( 'U', $post->ID ) ),
+			)
+		);
+
+		$post_author = get_userdata( $post->post_author );
+		if ( $post_author ) {
+			$metadata['author'] = array(
+				'@type' => 'Person',
+				'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			);
+		}
+
+		$image_metadata = amp_get_post_image_metadata( $post );
+		if ( $image_metadata ) {
+			$metadata['image'] = $image_metadata;
+		}
+
+		/**
+		 * Filters Schema.org metadata for a post.
+		 *
+		 * The 'post_template' in the filter name here is due to this filter originally being introduced in `AMP_Post_Template`.
+		 * In general the `amp_schemaorg_metadata` filter should be used instead.
+		 *
+		 * @since 0.3
+		 *
+		 * @param array   $metadata Metadata.
+		 * @param WP_Post $post     Post.
+		 */
+		$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $post );
 	}
 
-	$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $post );
+	/**
+	 * Filters Schema.org metadata for a query.
+	 *
+	 * Check the the main query for the context for which metadata should be added.
+	 *
+	 * @since 0.7
+	 *
+	 * @param array   $metadata Metadata.
+	 */
+	$metadata = apply_filters( 'amp_schemaorg_metadata', $metadata );
+
 	return $metadata;
 }
 
