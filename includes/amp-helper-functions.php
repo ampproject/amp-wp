@@ -421,10 +421,10 @@ function amp_prepare_xhr_post() {
 	} elseif ( ! isset( $_GET['_wp_amp_action_xhr_converted'] ) ) { // WPCS: CSRF ok.
 		// submission was from a set action-xhr, implying it's being handled already.
 		return;
+	} else {
+		// Add amp comment hooks.
+		add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
 	}
-	// Add amp comment hooks.
-	add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
-
 	// Add die handler for AMP error display.
 	add_filter( 'wp_die_handler', function() {
 		/**
