@@ -102,7 +102,7 @@ class AMP_Theme_Support {
 			self::register_paired_hooks();
 		}
 
-		self::purge_amp_query_vars(); // Note that amp_prepare_comment_post() still looks at $_GET['__amp_source_origin'].
+		self::purge_amp_query_vars(); // Note that amp_prepare_xhr_post() still looks at $_GET['__amp_source_origin'].
 		self::register_hooks();
 		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
@@ -214,6 +214,7 @@ class AMP_Theme_Support {
 	public static function purge_amp_query_vars() {
 		$query_vars = array(
 			'__amp_source_origin',
+			'_wp_amp_action_xhr_converted',
 			'amp_latest_update_time',
 		);
 

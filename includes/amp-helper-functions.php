@@ -424,6 +424,14 @@ function amp_prepare_xhr_post() {
 	} else {
 		// Add amp comment hooks.
 		add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
+		add_action( 'template_redirect', function() {
+			/*
+			 * Buffering starts here, so unlikely the form has a redirect,
+			 * so force a redirect to the same page.
+			 */
+			$location = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // WPCS: CSRF ok, input var ok.
+			amp_handle_general_post( $location );
+		}, 0 );
 	}
 	// Add die handler for AMP error display.
 	add_filter( 'wp_die_handler', function() {
