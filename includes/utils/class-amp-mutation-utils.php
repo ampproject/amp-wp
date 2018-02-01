@@ -156,15 +156,18 @@ class AMP_Mutation_Utils {
 	 * @return array $response The AMP validity of the markup.
 	 */
 	public static function get_response( $markup = null ) {
+		$response = array();
 		if ( isset( $markup ) ) {
 			self::process_markup( $markup );
+			$response['processed_markup'] = esc_html( $markup );
 		}
-		$response = array(
+		$response = array_merge( $response, array(
 			'has_error'          => self::was_node_removed(),
 			'removed_nodes'      => self::$removed_nodes,
 			'removed_attributes' => self::$removed_attributes,
-		);
+		) );
 		self::reset_removed();
+
 		return $response;
 	}
 

@@ -216,6 +216,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 				'script' => 1,
 			),
 			'removed_attributes' => null,
+			'processed_markup'   => esc_html( $this->disallowed_tag ),
 		);
 		$this->assertEquals( $expected_response, $response );
 
@@ -227,6 +228,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 			$this->error_key     => false,
 			'removed_nodes'      => null,
 			'removed_attributes' => null,
+			'processed_markup'   => esc_html( $this->valid_amp_img ),
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
@@ -244,6 +246,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 				'script' => 1,
 			),
 			'removed_attributes' => null,
+			'processed_markup'   => esc_html( $this->disallowed_tag ),
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
