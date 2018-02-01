@@ -203,7 +203,7 @@ class AMP_Mutation_Utils {
 	 * The sanitizers run after the 'send_headers' action.
 	 * So it's not possible to call this function on that hook.
 	 *
-	 * @return void. $header The filtered response header.
+	 * @return void.
 	 */
 	public static function add_header() {
 		header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
