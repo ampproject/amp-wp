@@ -285,7 +285,7 @@ def GenerateValuesPHP(out, values, indent_level = 6):
 
 			logging.info('generating php for value: %s...' % key.lower())
 
-			if isinstance(value, (str, bool)):
+			if isinstance(value, (str, bool, unicode)):
 				out.append('%s\'%s\' => \'%s\',' % (indent, key.lower(), value))
 
 			elif isinstance(value, (int)):
@@ -425,10 +425,6 @@ def ParseRules(out_dir):
 
 				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
 
-				# Temporarily skip extension SCRIPT elemeents which appear in the HEAD.
-				if 'SCRIPT' == tag_spec.tag_name and gotten_tag_spec['tag_spec'].get( '_is_extension_spec', False ):
-					continue
-
 				tag_list.append(gotten_tag_spec)
 				allowed_tags[UnicodeEscape(tag_spec.tag_name)] = tag_list
 
@@ -506,7 +502,10 @@ def GetTagRules(tag_spec):
 		tag_rules['html_format'] = {'html_format': html_format_list}
 
 	if tag_spec.HasField('extension_spec'):
-		tag_rules['_is_extension_spec'] = True;
+		extension_spec = {}
+		for field in tag_spec.extension_spec.ListFields():
+			extension_spec[ field[0].name ] = field[1]
+		tag_rules['extension_spec'] = {'extension_spec':extension_spec}
 
 	if tag_spec.HasField('mandatory'):
 		tag_rules['mandatory'] = tag_spec.mandatory
