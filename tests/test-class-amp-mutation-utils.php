@@ -67,6 +67,17 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test init.
+	 *
+	 * @see AMP_Mutation_Utils::init()
+	 */
+	public function test_init() {
+		$this->assertEquals( 10, has_action( 'rest_api_init', 'AMP_Mutation_Utils::amp_rest_validation' ) );
+		$this->assertEquals( 10, has_action( 'save_post', 'AMP_Mutation_Utils::validate_content' ) );
+		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Mutation_Utils::display_error' ) );
+	}
+
+	/**
 	 * Test track_removed.
 	 *
 	 * @see AMP_Mutation_Utils::track_removed()
@@ -122,7 +133,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::process_markup()
 	 */
 	public function test_process_markup() {
-
+		$this->add_nonce();
 		AMP_Mutation_Utils::process_markup( $this->valid_amp_img );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
@@ -204,6 +215,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
+		$this->add_nonce();
 		$request = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
@@ -216,7 +228,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 				'script' => 1,
 			),
 			'removed_attributes' => null,
-			'processed_markup'   => esc_html( $this->disallowed_tag ),
+			'processed_markup'   => $this->disallowed_tag,
 		);
 		$this->assertEquals( $expected_response, $response );
 
@@ -228,7 +240,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 			$this->error_key     => false,
 			'removed_nodes'      => null,
 			'removed_attributes' => null,
-			'processed_markup'   => esc_html( $this->valid_amp_img ),
+			'processed_markup'   => $this->valid_amp_img,
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
@@ -239,6 +251,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::get_response()
 	 */
 	public function test_get_response() {
+		$this->add_nonce();
 		$response          = AMP_Mutation_Utils::get_response( $this->disallowed_tag );
 		$expected_response = array(
 			$this->error_key     => true,
@@ -246,7 +259,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 				'script' => 1,
 			),
 			'removed_attributes' => null,
-			'processed_markup'   => esc_html( $this->disallowed_tag ),
+			'processed_markup'   => $this->disallowed_tag,
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
@@ -280,6 +293,17 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test authorized_nonce
+	 *
+	 * @see AMP_Mutation_Utils::authorized_nonce()
+	 */
+	public function test_authorized_nonce() {
+		$this->assertFalse( AMP_Mutation_Utils::authorized_nonce() );
+		$this->add_nonce();
+		$this->assertTrue( AMP_Mutation_Utils::authorized_nonce() );
+	}
+
+	/**
 	 * Test add_header
 	 *
 	 * The headers are output by the time this function executes,
@@ -291,6 +315,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::add_header()
 	 */
 	public function test_add_header() {
+		$this->add_nonce();
 		AMP_Mutation_Utils::process_markup( $this->disallowed_tag );
 		try {
 			AMP_Mutation_Utils::add_header();
@@ -298,6 +323,51 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertContains( 'header', $e->getMessage() );
+	}
+
+	/**
+	 * Test error_message().
+	 *
+	 * @see AMP_Mutation_Utils::error_message().
+	 */
+	public function test_error_message() {
+		$url            = 'https://example.org/am';
+		$with_query_arg = wp_parse_url( AMP_Mutation_Utils::error_message( $url ) );
+		$this->assertContains( AMP_Mutation_Utils::ERROR_QUERY_KEY, $with_query_arg['query'] );
+		$this->assertContains( AMP_Mutation_Utils::ERROR_QUERY_VALUE, $with_query_arg['query'] );
+	}
+
+	/**
+	 * Test display_error().
+	 *
+	 * @see AMP_Mutation_Utils::display_error().
+	 */
+	public function test_display_error() {
+		unset( $_GET[ AMP_Mutation_Utils::ERROR_QUERY_KEY ] );
+		ob_start();
+		AMP_Mutation_Utils::display_error();
+		$output = ob_get_clean();
+		$this->assertFalse( strpos( $output, 'notice notice-error' ) );
+		$this->assertFalse( strpos( $output, 'Notice: your post fails AMP validation' ) );
+
+		$_GET[ AMP_Mutation_Utils::ERROR_QUERY_KEY ] = AMP_Mutation_Utils::ERROR_QUERY_VALUE;
+		ob_start();
+		AMP_Mutation_Utils::display_error();
+		$output = ob_get_clean();
+		$this->assertContains( 'notice notice-error', $output );
+		$this->assertContains( 'Notice: this post fails AMP validation', $output );
+	}
+
+	/**
+	 * Add a nonce to the $_REQUEST, so that authorized_nonce() returns true.
+	 *
+	 * @return void.
+	 */
+	public function add_nonce() {
+		global $_REQUEST, $post; // WPCS: CSRF ok.
+		$post_id              = $this->factory()->post->create();
+		$post                 = get_post( $post_id ); // WPCS: global override ok.
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'update-post_' . $post_id ); // WPCS: global override ok.
 	}
 
 }

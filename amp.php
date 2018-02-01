@@ -88,7 +88,6 @@ function amp_after_setup_theme() {
 	}
 
 	add_action( 'init', 'amp_init' );
-	add_action( 'rest_api_init', 'AMP_Mutation_Utils::amp_rest_validation' );
 	add_action( 'widgets_init', 'AMP_Theme_Support::register_widgets' ); // @todo Let this be called by AMP_Theme_Support::init().
 	add_action( 'init', 'AMP_Theme_Support::setup_commenting' ); // @todo Let this be called by AMP_Theme_Support::init().
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
@@ -97,6 +96,7 @@ function amp_after_setup_theme() {
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	AMP_Post_Type_Support::add_post_type_support();
+	AMP_Mutation_Utils::init();
 }
 add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 

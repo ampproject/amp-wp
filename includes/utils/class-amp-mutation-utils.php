@@ -15,23 +15,44 @@ class AMP_Mutation_Utils {
 	/**
 	 * The argument if an attribute was removed.
 	 *
-	 * @var array.
+	 * @const array.
 	 */
 	const ATTRIBUTE_REMOVED = 'removed_attr';
 
 	/**
 	 * The argument if a node was removed.
 	 *
-	 * @var array.
+	 * @const array.
 	 */
 	const NODE_REMOVED = 'removed';
 
 	/**
 	 * Key for the markup value in the REST API endpoint.
 	 *
-	 * @var string.
+	 * @const string.
 	 */
 	const MARKUP_KEY = 'markup';
+
+	/**
+	 * Key for the error value in the response.
+	 *
+	 * @const string.
+	 */
+	const ERROR_KEY = 'has_error';
+
+	/**
+	 * Key of the AMP error query var.
+	 *
+	 * @const string.
+	 */
+	const ERROR_QUERY_KEY = 'amp_error';
+
+	/**
+	 * Query arg value if there is an AMP error in the post content.
+	 *
+	 * @const string.
+	 */
+	const ERROR_QUERY_VALUE = '1';
 
 	/**
 	 * The attributes that the sanitizer removed.
@@ -46,6 +67,17 @@ class AMP_Mutation_Utils {
 	 * @var array.
 	 */
 	public static $removed_nodes;
+
+	/**
+	 * Add the actions.
+	 *
+	 * @return void.
+	 */
+	public static function init() {
+		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
+		add_action( 'save_post', array( __CLASS__, 'validate_content' ), 10, 2 );
+		add_action( 'edit_form_top', array( __CLASS__, 'display_error' ) );
+	}
 
 	/**
 	 * Tracks when a sanitizer removes an attribute or node.
@@ -97,8 +129,10 @@ class AMP_Mutation_Utils {
 	public static function process_markup( $markup ) {
 		$args = array(
 			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
-			'mutation_callback' => 'AMP_Mutation_Utils::track_removed',
 		);
+		if ( self::authorized_nonce() ) {
+			$args['mutation_callback'] = 'AMP_Mutation_Utils::track_removed';
+		}
 		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
 	}
 
@@ -159,10 +193,10 @@ class AMP_Mutation_Utils {
 		$response = array();
 		if ( isset( $markup ) ) {
 			self::process_markup( $markup );
-			$response['processed_markup'] = esc_html( $markup );
+			$response['processed_markup'] = $markup;
 		}
 		$response = array_merge( array(
-			'has_error'          => self::was_node_removed(),
+			self::ERROR_KEY      => self::was_node_removed(),
 			'removed_nodes'      => self::$removed_nodes,
 			'removed_attributes' => self::$removed_attributes,
 		), $response );
@@ -199,6 +233,40 @@ class AMP_Mutation_Utils {
 	}
 
 	/**
+	 * On updating a post, this checks the AMP validity of the content.
+	 *
+	 * If it's not valid AMP, it adds a query arg to the redirect URL.
+	 * This will cause an error message to appear above the 'Classic' editor.
+	 *
+	 * @param integer $post_id The ID of the updated post.
+	 * @param WP_Post $post The updated post.
+	 * @return void.
+	 */
+	public static function validate_content( $post_id, $post ) {
+		$filtered_content = apply_filters( 'the_content', $post->post_content );
+		$response         = self::get_response( $filtered_content );
+		if ( isset( $response[ self::ERROR_KEY ] ) ) {
+			add_filter( 'redirect_post_location', array( __CLASS__, 'error_message' ) );
+		}
+	}
+
+	/**
+	 * Whether the current user has a nonce that allows validation.
+	 *
+	 * This will only return true when updating the post on:
+	 * wp-admin/post.php
+	 * Avoids using check_admin_referer().
+	 * This function might be called in different places,
+	 * and it can't cause it to die() if the nonce is invalid.
+	 *
+	 * @return boolean $is_valid True if the nonce is valid.
+	 */
+	public static function authorized_nonce() {
+		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : ''; // WPCS: CSRF ok.
+		return ( false !== wp_verify_nonce( $nonce, 'update-post_' . get_the_ID() ) );
+	}
+
+	/**
 	 * Output AMP validation data in the response header of a frontend GET request.
 	 *
 	 * This must be called before the document output begins.
@@ -209,7 +277,41 @@ class AMP_Mutation_Utils {
 	 * @return void.
 	 */
 	public static function add_header() {
-		header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
+		if ( self::authorized_nonce() ) {
+			header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
+		}
+	}
+
+	/**
+	 * Adds an error message to the URL if it's not valid AMP.
+	 *
+	 * When redirecting after saving a post, the content was validated for AMP compliance.
+	 * If it wasn't valid AMP, this will add a query arg to the URL.
+	 * And an error message will display on /wp-admin/post.php.
+	 *
+	 * @param string $url The URL of the redirect.
+	 * @return string $url The filtered URL, including the AMP error message query var.
+	 */
+	public static function error_message( $url ) {
+		return add_query_arg(
+			self::ERROR_QUERY_KEY,
+			self::ERROR_QUERY_VALUE,
+			$url
+		);
+	}
+
+	/**
+	 * Displays an error message on /wp-admin/post.php if the saved content is not valid AMP.
+	 *
+	 * Use $_GET, as get_query_var won't return the value.
+	 * This displays at the top of the 'Classic' editor.
+	 *
+	 * @return void.
+	 */
+	public static function display_error() {
+		if ( isset( $_GET[ self::ERROR_QUERY_KEY ] ) && ( self::ERROR_QUERY_VALUE === $_GET[ self::ERROR_QUERY_KEY ] ) ) { // WPCS: CSRF ok.
+			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'Notice: this post fails AMP validation', 'amp' ) );
+		}
 	}
 
 }
