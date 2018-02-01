@@ -398,7 +398,6 @@ def ParseRules(out_dir):
 		'$ROOT',
 		'!DOCTYPE',
 		'HTML',
-		'HEAD',
 	]
 
 	for (field_desc, field_val) in rules.ListFields():

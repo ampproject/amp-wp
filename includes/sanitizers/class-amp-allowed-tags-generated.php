@@ -2434,6 +2434,27 @@ class AMP_Allowed_Tags_Generated {
 
 			),
 		),
+		'base' => array(
+			array(
+				'attr_spec_list' => array(
+					'href' => array(
+						'value' => '/',
+					),
+					'target' => array(
+						'value_regex_casei' => '(_blank|_self|_top)',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'unique' => true,
+				),
+
+			),
+		),
 		'bdi' => array(
 			array(
 				'attr_spec_list' => array(),
@@ -4945,6 +4966,107 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'color' => array(),
 					'href' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'http',
+							'https',
+						),
+					),
+					'hreflang' => array(),
+					'media' => array(),
+					'rel' => array(
+						'mandatory' => true,
+						'value_casei' => 'canonical',
+					),
+					'sizes' => array(),
+					'target' => array(),
+					'type' => array(),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory' => true,
+					'mandatory_parent' => 'head',
+					'spec_name' => 'link rel=canonical',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'charset' => array(
+						'value_casei' => 'utf-8',
+					),
+					'color' => array(),
+					'href' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'allow_relative' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
+					),
+					'hreflang' => array(),
+					'media' => array(),
+					'rel' => array(
+						'mandatory' => true,
+						'value_casei' => 'manifest',
+					),
+					'sizes' => array(),
+					'target' => array(),
+					'type' => array(),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'link rel=manifest',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(),
+					'crossorigin' => array(),
+					'href' => array(
+						'mandatory' => true,
+						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://use\\.typekit\\.net/[\\w\\p{l}\\p{n}_]+\\.css',
+					),
+					'integrity' => array(),
+					'media' => array(),
+					'rel' => array(
+						'mandatory' => true,
+						'value_casei' => 'stylesheet',
+					),
+					'type' => array(
+						'value_casei' => 'text/css',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'link rel=stylesheet for fonts',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#custom-fonts',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'charset' => array(
+						'value_casei' => 'utf-8',
+					),
+					'color' => array(),
+					'href' => array(
 						'mandatory' => true,
 					),
 					'hreflang' => array(),
@@ -5237,6 +5359,59 @@ class AMP_Allowed_Tags_Generated {
 		'meta' => array(
 			array(
 				'attr_spec_list' => array(
+					'charset' => array(
+						'mandatory' => true,
+						'value_casei' => 'utf-8',
+					),
+				),
+				'tag_spec' => array(
+					'mandatory' => true,
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta charset=utf-8',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+						'height' => array(),
+						'initial-scale' => array(),
+						'maximum-scale' => array(),
+						'minimum-scale' => array(
+							'mandatory',
+							'value_double',
+						),
+						'shrink-to-fit' => array(),
+						'user-scalable' => array(),
+						'viewport-fit' => array(),
+						'width' => array(
+							'mandatory',
+							'value',
+						),
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value' => 'viewport',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+							'amp4ads',
+					),
+					'mandatory' => true,
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=viewport',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
 					'content' => array(
 						'mandatory' => true,
 						'chrome' => array(
@@ -5260,6 +5435,147 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=x-ua-compatible',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+						'value_regex' => '.*app-id=.*',
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => 'apple-itunes-app',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=apple-itunes-app',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => 'amp-experiments-opt-in',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-experiments-opt-in',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+						'allowed_protocol' => array(
+							'https',
+						),
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => 'amp-3p-iframe-src',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-3p-iframe-src',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-ad',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => 'amp-experiment-token',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-experiment-token',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => 'amp-link-variable-allowed-origin',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-link-variable-allowed-origin',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => 'amp-google-client-id-api',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-google-clientid-id-api',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => 'amp4ads-id',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp4ads-id',
 				),
 
 			),
@@ -5557,6 +5873,20 @@ class AMP_Allowed_Tags_Generated {
 			),
 		),
 		'noscript' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory' => true,
+					'mandatory_parent' => 'head',
+					'spec_name' => 'noscript enclosure for boilerplate',
+					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md',
+					'unique' => true,
+				),
+
+			),
 			array(
 				'attr_spec_list' => array(),
 				'tag_spec' => array(
@@ -6323,6 +6653,60 @@ class AMP_Allowed_Tags_Generated {
 		'script' => array(
 			array(
 				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'src' => array(
+						'mandatory' => true,
+						'value' => 'https://cdn.ampproject.org/v0.js',
+					),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory' => true,
+					'mandatory_parent' => 'head',
+					'spec_name' => 'amphtml engine v0.js script',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'src' => array(
+						'mandatory' => true,
+						'value' => 'https://cdn.ampproject.org/amp4ads-v0.js',
+					),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp4ads',
+					),
+					'mandatory' => true,
+					'mandatory_parent' => 'head',
+					'spec_name' => 'amp4ads engine amp4ads-v0.js script',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 2,
@@ -6338,6 +6722,28 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'spec_name' => 'script type=application/ld+json',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'id' => array(
+						'mandatory' => true,
+						'value_casei' => 'amp-rtc',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'mandatory' => true,
+						'value_casei' => 'application/json',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'script id=amp-rtc',
+					'unique' => true,
 				),
 
 			),
@@ -6361,6 +6767,32 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'mandatory_parent' => 'amp-ima-video',
 					'spec_name' => 'amp-ima-video > script[type=application/json]',
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'id' => array(
+						'mandatory' => true,
+						'value' => 'amp-access',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'mandatory' => true,
+						'value_casei' => 'application/json',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_parent' => 'head',
+					'requires_extension' => array(
+							'amp-access',
+							'amp-analytics',
+					),
+					'spec_name' => 'amp-access extension .json script',
+					'unique' => true,
 				),
 
 			),
@@ -6853,6 +7285,89 @@ class AMP_Allowed_Tags_Generated {
 			),
 		),
 		'style' => array(
+			array(
+				'attr_spec_list' => array(
+					'amp-custom' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/css',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'style amp-custom',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#stylesheets',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'amp-custom' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/css',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'style amp-custom (amp4ads)',
+					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#css',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'amp-boilerplate' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory_alternatives' => 'head > style[amp-boilerplate]',
+					'mandatory_parent' => 'head',
+					'spec_name' => 'head > style[amp-boilerplate]',
+					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'amp4ads-boilerplate' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp4ads',
+					),
+					'mandatory_parent' => 'head',
+					'spec_name' => 'head > style[amp4ads-boilerplate]',
+					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#boilerplate',
+					'unique' => true,
+				),
+
+			),
 			array(
 				'attr_spec_list' => array(
 					'amp-boilerplate' => array(
