@@ -95,11 +95,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$parent_node->replaceChild( $new_node, $node );
 			} else {
 				// AMP does not like iframes in <p> tags.
-				$this->remove_child( $node, $parent_node );
+				$this->remove_child( $node );
 				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
 
 				if ( AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$this->remove_child( $parent_node, $parent_node->parentNode );  // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+					$this->remove_child( $parent_node );  // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
 				}
 			}
 		}
@@ -201,19 +201,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param object $child The node to remove.
-	 * @param object $parent The parent node for which to remove the child (optional).
+	 * @param DOMNode $child The node to remove.
 	 * @return void.
 	 */
-	public function remove_child( $child, $parent = null ) {
-		if ( ( null === $parent ) && method_exists( $child->parentNode, 'removeChild' ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+	public function remove_child( $child ) {
+		if ( method_exists( $child->parentNode, 'removeChild' ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
 			$child->parentNode->removeChild( $child ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
-		} elseif ( method_exists( $parent, 'removeChild' ) ) {
-			$parent->removeChild( $child );
-		}
-
-		if ( isset( $this->args['mutation_callback'] ) ) {
-			call_user_func( $this->args['mutation_callback'], $child, 'removed' );
+			if ( isset( $this->args['mutation_callback'] ) ) {
+				call_user_func( $this->args['mutation_callback'], $child, 'removed' );
+			}
 		}
 	}
+
 }

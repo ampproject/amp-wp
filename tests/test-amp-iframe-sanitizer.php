@@ -198,7 +198,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 		$parent->appendChild( $child );
 		$this->assertEquals( $child, $parent->firstChild );
-		$sanitizer->remove_child( $child, $parent );
+		$sanitizer->remove_child( $child );
 
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertEquals( null, $child->parentNode );
