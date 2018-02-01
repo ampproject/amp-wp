@@ -238,22 +238,27 @@ function amp_get_content_sanitizers( $post = null ) {
 }
 
 /**
- * Hook into a comment submission of an AMP XHR post request.
- *
- * This only runs on wp-comments-post.php.
+ * Hook into a submission of an AMP XHR post request.
  *
  * @since 0.7.0
  */
-function amp_prepare_comment_post() {
-	if ( ! isset( $_GET['__amp_source_origin'] ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
+function amp_prepare_post() {
+	global $pagenow;
+	if ( ! isset( $_GET['__amp_source_origin'] ) || ! isset( $pagenow ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
 		return;
 	}
 
-	// Add amp comment hooks.
-	add_filter( 'comment_post_redirect', function() {
-		// We don't need any data, so just send a success.
-		wp_send_json_success();
-	}, PHP_INT_MAX, 2 );
+	if ( 'wp-comments-post.php' === $pagenow ) {
+		// This only runs on wp-comments-post.php.
+		add_filter( 'comment_post_redirect', function() {
+			// We don't need any data, so just send a success.
+			wp_send_json_success();
+		}, PHP_INT_MAX, 2 );
+
+	} else {
+		// Add amp comment hooks.
+		add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
+	}
 
 	// Add die handler for AMP error display.
 	add_filter( 'wp_die_handler', function() {
@@ -275,4 +280,20 @@ function amp_prepare_comment_post() {
 	// Send AMP header.
 	$origin = esc_url_raw( wp_unslash( $_GET['__amp_source_origin'] ) ); // WPCS: CSRF ok.
 	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
+
+}
+
+/**
+ * Handle a general, non comment AMP XHR post.
+ *
+ * @since 0.7.0
+ * @param string $location The location to redirect to.
+ */
+function amp_handle_general_post( $location ) {
+
+	$url = site_url( $location );
+	header( 'AMP-Redirect-To: ' . $url );
+	header( 'Access-Control-Expose-Headers: AMP-Redirect-To;' );
+	// Send json success.
+	wp_send_json_success();
 }
