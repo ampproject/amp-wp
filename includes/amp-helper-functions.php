@@ -406,7 +406,7 @@ function amp_print_schemaorg_metadata() {
  *
  * @since 0.7.0
  */
-function amp_prepare_post() {
+function amp_prepare_xhr_post() {
 	global $pagenow;
 	if ( ! isset( $_GET['__amp_source_origin'] ) || ! isset( $pagenow ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
 		return;

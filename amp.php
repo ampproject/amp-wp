@@ -127,7 +127,7 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
-	amp_prepare_post();
+	amp_prepare_xhr_post();
 }
 
 // Make sure the `amp` query var has an explicit value.
