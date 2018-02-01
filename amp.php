@@ -88,7 +88,8 @@ function amp_after_setup_theme() {
 	}
 
 	add_action( 'init', 'amp_init' );
-	add_action( 'widgets_init', 'AMP_Theme_Support::register_widgets' );
+	add_action( 'widgets_init', 'AMP_Theme_Support::register_widgets' ); // @todo Let this be called by AMP_Theme_Support::init().
+	add_action( 'init', 'AMP_Theme_Support::setup_commenting' ); // @todo Let this be called by AMP_Theme_Support::init().
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
@@ -101,8 +102,10 @@ add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
  * Init AMP.
  *
  * @since 0.1
+ * @global string $pagenow
  */
 function amp_init() {
+	global $pagenow;
 
 	/**
 	 * Triggers on init when AMP plugin is active.
@@ -122,7 +125,10 @@ function amp_init() {
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
-		require_once( AMP__DIR__ . '/jetpack-helper.php' );
+		require_once AMP__DIR__ . '/jetpack-helper.php';
+	}
+	if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
+		amp_prepare_comment_post();
 	}
 }
 
