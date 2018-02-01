@@ -506,7 +506,7 @@ class AMP_Theme_Support {
 	 * Start output buffering.
 	 */
 	public static function start_output_buffering() {
-		ob_start( array( __CLASS__, 'finish_buffer_add_header' ) );
+		ob_start( array( __CLASS__, 'finish_output_buffering' ) );
 	}
 
 	/**
@@ -516,8 +516,8 @@ class AMP_Theme_Support {
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
 	 */
-	public static function finish_buffer_add_header( $output ) {
-		$markup = self::finish_output_buffering( $output );
+	public static function finish_output_buffering( $output ) {
+		$markup = self::get_buffer( $output );
 		AMP_Mutation_Utils::add_header();
 		return $markup;
 	}
@@ -529,7 +529,7 @@ class AMP_Theme_Support {
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
 	 */
-	public static function finish_output_buffering( $output ) {
+	public static function get_buffer( $output ) {
 		global $content_width;
 
 		$dom  = AMP_DOM_Utils::get_dom( $output );

@@ -86,12 +86,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test finish_output_buffering.
+	 * Test get_buffer.
 	 *
 	 * @covers AMP_Theme_Support::finish_output_buffering()
-	 * @covers AMP_Theme_Support::finish_buffer_and_header()
+	 * @covers AMP_Theme_Support::get_buffer()
 	 */
-	public function test_finish_output_buffering() {
+	public function test_get_buffer() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		ob_start();
@@ -116,7 +116,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		</html>
 		<?php
 		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::finish_output_buffering( $original_html );
+		$sanitized_html = AMP_Theme_Support::get_buffer( $original_html );
 
 		$this->assertContains( '<meta charset="utf-8">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );

@@ -99,7 +99,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
 
 				if ( AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$this->remove_child( $parent_node );  // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+					$this->remove_child( $parent_node );
 				}
 			}
 		}
