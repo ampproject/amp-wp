@@ -133,7 +133,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::process_markup()
 	 */
 	public function test_process_markup() {
-		$this->add_nonce();
+		$this->set_authorized();
 		AMP_Mutation_Utils::process_markup( $this->valid_amp_img );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
@@ -189,24 +189,24 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( $args, $route['args'] );
 		$this->assertEquals( array( 'AMP_Mutation_Utils', 'validate_markup' ), $route['callback'] );
 		$this->assertEquals( $methods, $route['methods'] );
-		$this->assertEquals( array( 'AMP_Mutation_Utils', 'permission' ), $route['permission_callback'] );
+		$this->assertEquals( array( 'AMP_Mutation_Utils', 'has_cap' ), $route['permission_callback'] );
 	}
 
 	/**
-	 * Test permission.
+	 * Test has_cap.
 	 *
-	 * @see AMP_Mutation_Utils::permission()
+	 * @see AMP_Mutation_Utils::has_cap()
 	 */
-	public function test_permission() {
+	public function test_has_cap() {
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'subscriber',
 		) ) );
-		$this->assertFalse( AMP_Mutation_Utils::permission() );
+		$this->assertFalse( AMP_Mutation_Utils::has_cap() );
 
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'administrator',
 		) ) );
-		$this->assertTrue( AMP_Mutation_Utils::permission() );
+		$this->assertTrue( AMP_Mutation_Utils::has_cap() );
 	}
 
 	/**
@@ -215,7 +215,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
-		$this->add_nonce();
+		$this->set_authorized();
 		$request = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
@@ -251,7 +251,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::get_response()
 	 */
 	public function test_get_response() {
-		$this->add_nonce();
+		$this->set_authorized();
 		$response          = AMP_Mutation_Utils::get_response( $this->disallowed_tag );
 		$expected_response = array(
 			$this->error_key     => true,
@@ -293,14 +293,14 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test authorized_nonce
+	 * Test is_authorized
 	 *
-	 * @see AMP_Mutation_Utils::authorized_nonce()
+	 * @see AMP_Mutation_Utils::is_authorized()
 	 */
-	public function test_authorized_nonce() {
-		$this->assertFalse( AMP_Mutation_Utils::authorized_nonce() );
-		$this->add_nonce();
-		$this->assertTrue( AMP_Mutation_Utils::authorized_nonce() );
+	public function test_is_authorized() {
+		$this->assertFalse( AMP_Mutation_Utils::is_authorized() );
+		$this->set_authorized();
+		$this->assertTrue( AMP_Mutation_Utils::is_authorized() );
 	}
 
 	/**
@@ -315,7 +315,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Mutation_Utils::add_header()
 	 */
 	public function test_add_header() {
-		$this->add_nonce();
+		$this->set_authorized();
 		AMP_Mutation_Utils::process_markup( $this->disallowed_tag );
 		try {
 			AMP_Mutation_Utils::add_header();
@@ -359,12 +359,17 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Add a nonce to the $_REQUEST, so that authorized_nonce() returns true.
+	 * Add a nonce to the $_REQUEST, so that is_authorized() returns true.
 	 *
 	 * @return void.
 	 */
-	public function add_nonce() {
+	public function set_authorized() {
 		global $_REQUEST, $post; // WPCS: CSRF ok.
+		if ( ! AMP_Mutation_Utils::has_cap() ) {
+			wp_set_current_user( $this->factory()->user->create( array(
+				'role' => 'administrator',
+			) ) );
+		}
 		$post_id              = $this->factory()->post->create();
 		$post                 = get_post( $post_id ); // WPCS: global override ok.
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'update-post_' . $post_id ); // WPCS: global override ok.

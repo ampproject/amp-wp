@@ -794,7 +794,7 @@ class AMP_Theme_Support {
 		$args = array(
 			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 		);
-		if ( AMP_Mutation_Utils::authorized_nonce() ) {
+		if ( AMP_Mutation_Utils::is_authorized() ) {
 			$args['mutation_callback'] = 'AMP_Mutation_Utils::track_removed';
 		}
 

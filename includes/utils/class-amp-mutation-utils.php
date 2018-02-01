@@ -130,7 +130,7 @@ class AMP_Mutation_Utils {
 		$args = array(
 			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
 		);
-		if ( self::authorized_nonce() ) {
+		if ( self::is_authorized() ) {
 			$args['mutation_callback'] = 'AMP_Mutation_Utils::track_removed';
 		}
 		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
@@ -150,16 +150,19 @@ class AMP_Mutation_Utils {
 					'validate_callback' => array( __CLASS__, 'validate_arg' ),
 				),
 			),
-			'permission_callback' => array( __CLASS__, 'permission' ),
+			'permission_callback' => array( __CLASS__, 'has_cap' ),
 		) );
 	}
 
 	/**
-	 * The permission callback for the REST request.
+	 * Whether the user has the required capability.
 	 *
-	 * @return boolean $has_permission Whether the current user has the permission.
+	 * Checks for permissions before validating.
+	 * Also serves as the permission callback for REST requests.
+	 *
+	 * @return boolean $has_cap Whether the current user has the capability.
 	 */
-	public static function permission() {
+	public static function has_cap() {
 		return current_user_can( 'edit_posts' );
 	}
 
@@ -243,6 +246,9 @@ class AMP_Mutation_Utils {
 	 * @return void.
 	 */
 	public static function validate_content( $post_id, $post ) {
+		if ( ! self::is_authorized() ) {
+			return;
+		}
 		$filtered_content = apply_filters( 'the_content', $post->post_content );
 		$response         = self::get_response( $filtered_content );
 		if ( isset( $response[ self::ERROR_KEY ] ) ) {
@@ -251,9 +257,10 @@ class AMP_Mutation_Utils {
 	}
 
 	/**
-	 * Whether the current user has a nonce that allows validation.
+	 * Whether the current user is authorized.
 	 *
-	 * This will only return true when updating the post on:
+	 * This checks that the user has a certain capability and the nonce is valid.
+	 * It will only return true when updating the post on:
 	 * wp-admin/post.php
 	 * Avoids using check_admin_referer().
 	 * This function might be called in different places,
@@ -261,9 +268,9 @@ class AMP_Mutation_Utils {
 	 *
 	 * @return boolean $is_valid True if the nonce is valid.
 	 */
-	public static function authorized_nonce() {
+	public static function is_authorized() {
 		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : ''; // WPCS: CSRF ok.
-		return ( false !== wp_verify_nonce( $nonce, 'update-post_' . get_the_ID() ) );
+		return ( self::has_cap() && ( false !== wp_verify_nonce( $nonce, 'update-post_' . get_the_ID() ) ) );
 	}
 
 	/**
@@ -277,7 +284,7 @@ class AMP_Mutation_Utils {
 	 * @return void.
 	 */
 	public static function add_header() {
-		if ( self::authorized_nonce() ) {
+		if ( self::is_authorized() ) {
 			header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
 		}
 	}
