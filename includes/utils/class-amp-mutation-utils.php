@@ -161,11 +161,11 @@ class AMP_Mutation_Utils {
 			self::process_markup( $markup );
 			$response['processed_markup'] = esc_html( $markup );
 		}
-		$response = array_merge( $response, array(
+		$response = array_merge( array(
 			'has_error'          => self::was_node_removed(),
 			'removed_nodes'      => self::$removed_nodes,
 			'removed_attributes' => self::$removed_attributes,
-		) );
+		), $response );
 		self::reset_removed();
 
 		return $response;
