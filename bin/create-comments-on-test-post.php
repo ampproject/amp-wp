@@ -58,8 +58,9 @@ function amp_add_comments( $post_id ) {
 	$data = amp_get_test_comment_entries();
 	$ids  = array();
 	// get some paragraphs.
-	$content = array_filter( file( 'https://loripsum.net/api/' . count( $data ) . '/short' ), function ( $s ) {
-		return ! empty( trim( $s ) );
+	$content = array_filter( file( 'https://loripsum.net/api/' . count( $data ) . '/short' ), function ( $string ) {
+		$string = trim( $string );
+		return ! empty( $string );
 	} );
 	sort( $content );
 	$content = array_filter( $content );
