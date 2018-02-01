@@ -422,7 +422,7 @@ function amp_prepare_xhr_post() {
 		// submission was from a set action-xhr, implying it's being handled already.
 		return;
 	} else {
-		// Add amp comment hooks.
+		// Add amp redirect hooks.
 		add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
 		add_action( 'template_redirect', function() {
 			/*
@@ -466,6 +466,6 @@ function amp_handle_general_post( $location ) {
 	$url = site_url( $location );
 	header( 'AMP-Redirect-To: ' . $url );
 	header( 'Access-Control-Expose-Headers: AMP-Redirect-To;' );
-	// Send json success.
+	// Send json success as no data is required.
 	wp_send_json_success();
 }
