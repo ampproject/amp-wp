@@ -9,7 +9,7 @@
 /**
  * Create comments test post.
  *
- * @throws Exception But when database doesn't have enough attachments or in case of error.
+ * @throws Exception But when post can't be created or content can't be pulled or updated.
  * @return int Post ID.
  */
 function amp_create_comments_test_post() {
