@@ -89,6 +89,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test finish_output_buffering.
 	 *
 	 * @covers AMP_Theme_Support::finish_output_buffering()
+	 * @covers AMP_Theme_Support::finish_buffer_and_header()
 	 */
 	public function test_finish_output_buffering() {
 		add_theme_support( 'amp' );

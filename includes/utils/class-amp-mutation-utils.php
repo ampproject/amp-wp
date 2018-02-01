@@ -195,4 +195,18 @@ class AMP_Mutation_Utils {
 		return is_string( $arg );
 	}
 
+	/**
+	 * Output AMP validation data in the response header of a frontend GET request.
+	 *
+	 * This must be called before the document output begins.
+	 * Because the document is buffered,
+	 * The sanitizers run after the 'send_headers' action.
+	 * So it's not possible to call this function on that hook.
+	 *
+	 * @return void. $header The filtered response header.
+	 */
+	public static function add_header() {
+		header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
+	}
+
 }

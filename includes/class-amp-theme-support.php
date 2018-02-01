@@ -506,13 +506,25 @@ class AMP_Theme_Support {
 	 * Start output buffering.
 	 */
 	public static function start_output_buffering() {
-		ob_start( array( __CLASS__, 'finish_output_buffering' ) );
+		ob_start( array( __CLASS__, 'finish_buffer_add_header' ) );
+	}
+
+	/**
+	 * Get the result of the output buffering, and add a header.
+	 *
+	 * @todo Do this in shutdown instead of output buffering callback?
+	 * @param string $output Buffered output.
+	 * @return string Finalized output.
+	 */
+	public static function finish_buffer_add_header( $output ) {
+		$markup = self::finish_output_buffering( $output );
+		AMP_Mutation_Utils::add_header();
+		return $markup;
 	}
 
 	/**
 	 * Finish output buffering.
 	 *
-	 * @todo Do this in shutdown instead of output buffering callback?
 	 * @global int $content_width
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.

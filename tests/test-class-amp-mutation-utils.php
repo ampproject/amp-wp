@@ -276,4 +276,25 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		$this->assertTrue( AMP_Mutation_Utils::validate_arg( $valid_string ) );
 	}
 
+	/**
+	 * Test add_header
+	 *
+	 * The headers are output by the time this function executes,
+	 * And the tested method calls header().
+	 * This produces an error.
+	 * So simply check that the error message includes 'header,'
+	 * meaning that the method called header() as expected.
+	 *
+	 * @see AMP_Mutation_Utils::add_header()
+	 */
+	public function test_add_header() {
+		AMP_Mutation_Utils::process_markup( $this->disallowed_tag );
+		try {
+			AMP_Mutation_Utils::add_header();
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'header', $e->getMessage() );
+	}
+
 }
