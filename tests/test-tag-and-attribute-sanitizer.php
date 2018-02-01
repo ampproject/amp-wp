@@ -208,6 +208,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-video' ),
 			),
 
+			'amp_video_children'                                        => array(
+				'<amp-video width="432" height="987"><track kind="subtitles" src="https://example.com/sampleChapters.vtt" srclang="en"><source src="foo.webm" type="video/webm"><source src="foo.ogg" type="video/ogg"><div placeholder>Placeholder</div><span fallback>Fallback</span></amp-video>',
+				null, // No change.
+				array( 'amp-video' ),
+			),
+
+			'amp_audio_children'                                        => array(
+				'<amp-audio><track kind="subtitles" src="https://example.com/sampleChapters.vtt" srclang="en"><source src="foo.mp3" type="audio/mp3"><source src="foo.wav" type="audio/wav"><div placeholder>Placeholder</div><span fallback>Fallback</span></amp-audio>',
+				null, // No change.
+				array( 'amp-audio' ),
+			),
+
 			'amp-vk'                                                    => array(
 				'<amp-vk width="500" height="300" data-embedtype="post" layout="responsive"></amp-vk>',
 				null, // No change.
@@ -587,6 +599,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'a_empty_with_children_with_restricted_attributes'          => array(
 				'<a><span style="color: red;">Red</span>&amp;<span style="color: blue;">Orange</span></a>',
 				'<a><span>Red</span>&amp;<span>Orange</span></a>',
+			),
+
+			'spans_with_xml_namespaced_attributes'                      => array(
+				'<p><span lang="es" xml:lang="es">hola</span><span xml:space="preserve">mundo</span></p>',
+				'<p><span lang="es">hola</span><span>mundo</span></p>',
 			),
 
 			'h1_with_size'                                              => array(

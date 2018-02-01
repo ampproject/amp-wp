@@ -14,7 +14,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_post_template_add_scripts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
-	add_action( 'amp_post_template_head', 'amp_post_template_add_schemaorg_metadata' );
+	add_action( 'amp_post_template_head', 'amp_print_schemaorg_metadata' );
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
@@ -89,16 +89,11 @@ function amp_post_template_add_boilerplate_css() {
 /**
  * Print Schema.org metadata.
  *
- * @param AMP_Post_Template $amp_template Template.
+ * @deprecated Since 0.7
  */
-function amp_post_template_add_schemaorg_metadata( $amp_template ) {
-	$metadata = $amp_template->get( 'metadata' );
-	if ( empty( $metadata ) ) {
-		return;
-	}
-	?>
-	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
-	<?php
+function amp_post_template_add_schemaorg_metadata() {
+	_deprecated_function( __FUNCTION__, '0.7', 'amp_print_schemaorg_metadata' );
+	amp_print_schemaorg_metadata();
 }
 
 /**

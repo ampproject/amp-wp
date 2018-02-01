@@ -19,6 +19,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 		remove_theme_support( 'amp' );
+		$_REQUEST                = array(); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		$_SERVER['QUERY_STRING'] = '';
 	}
 
 	/**
@@ -133,5 +135,74 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script async custom-element="amp-audio"', $sanitized_html );
 
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
+	}
+
+	/**
+	 * Test purge_amp_query_vars.
+	 *
+	 * @covers AMP_Theme_Support::purge_amp_query_vars()
+	 */
+	public function test_purge_amp_query_vars() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		$bad_query_vars = array(
+			'amp_latest_update_time' => '1517199956',
+			'__amp_source_origin'    => home_url(),
+		);
+		$ok_query_vars  = array(
+			'bar' => 'baz',
+		);
+		$all_query_vars = array_merge( $bad_query_vars, $ok_query_vars );
+
+		$_SERVER['QUERY_STRING'] = build_query( $all_query_vars );
+
+		remove_action( 'wp', 'amp_maybe_add_actions' );
+		$this->go_to( add_query_arg( $all_query_vars, home_url( '/foo/' ) ) );
+		$_REQUEST = $_GET; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		foreach ( $all_query_vars as $key => $value ) {
+			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+		}
+
+		AMP_Theme_Support::$purged_amp_query_vars = array();
+		AMP_Theme_Support::purge_amp_query_vars();
+		$this->assertEqualSets( AMP_Theme_Support::$purged_amp_query_vars, $bad_query_vars );
+
+		foreach ( $bad_query_vars as $key => $value ) {
+			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+		}
+		foreach ( $ok_query_vars as $key => $value ) {
+			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
+	}
+
+	/**
+	 * Test get_amp_component_scripts().
+	 *
+	 * @covers AMP_Theme_Support::get_amp_component_scripts()
+	 */
+	public function test_get_amp_component_scripts() {
+		add_filter( 'amp_component_scripts', function( $scripts ) {
+			$scripts['amp-video'] = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
+			return $scripts;
+		} );
+
+		$scripts = AMP_Theme_Support::get_amp_component_scripts( array(
+			'amp-mustache' => 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+			'amp-bind'     => 'https://cdn.ampproject.org/v0/amp-bind-0.1.js',
+		) );
+
+		$this->assertEquals(
+			'<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
+			$scripts
+		);
 	}
 }
