@@ -239,4 +239,127 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Reset.
 		remove_post_type_support( 'page', AMP_QUERY_VAR );
 	}
+
+	/**
+	 * Test amp_get_post_image_metadata()
+	 *
+	 * @covers \amp_get_post_image_metadata()
+	 */
+	public function test_amp_get_post_image_metadata() {
+		$post_id = $this->factory()->post->create();
+		$this->assertFalse( amp_get_post_image_metadata( $post_id ) );
+
+		$first_test_image = '/tmp/test-image.jpg';
+		copy( DIR_TESTDATA . '/images/test-image.jpg', $first_test_image );
+		$attachment_id = self::factory()->attachment->create_object( array(
+			'file'           => $first_test_image,
+			'post_parent'    => 0,
+			'post_mime_type' => 'image/jpeg',
+			'post_title'     => 'Test Image',
+		) );
+		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $first_test_image ) );
+
+		set_post_thumbnail( $post_id, $attachment_id );
+		$metadata = amp_get_post_image_metadata( $post_id );
+		$this->assertEquals( 'ImageObject', $metadata['@type'] );
+		$this->assertEquals( 50, $metadata['width'] );
+		$this->assertEquals( 50, $metadata['height'] );
+		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
+
+		delete_post_thumbnail( $post_id );
+		$this->assertFalse( amp_get_post_image_metadata( $post_id ) );
+		wp_update_post( array(
+			'ID'          => $attachment_id,
+			'post_parent' => $post_id,
+		) );
+		$metadata = amp_get_post_image_metadata( $post_id );
+		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
+	}
+
+	/**
+	 * Test amp_get_schemaorg_metadata().
+	 *
+	 * @covers \amp_get_schemaorg_metadata()
+	 */
+	public function test_amp_get_schemaorg_metadata() {
+		update_option( 'blogname', 'Foo' );
+		$expected_publisher = array(
+			'@type' => 'Organization',
+			'name'  => 'Foo',
+		);
+
+		$user_id = $this->factory()->user->create( array(
+			'first_name' => 'John',
+			'last_name'  => 'Smith',
+		) );
+		$page_id = $this->factory()->post->create( array(
+			'post_type'   => 'page',
+			'post_title'  => 'Example Page',
+			'post_author' => $user_id,
+		) );
+		$post_id = $this->factory()->post->create( array(
+			'post_type'   => 'post',
+			'post_title'  => 'Example Post',
+			'post_author' => $user_id,
+		) );
+
+		// Test non-singular.
+		$this->go_to( home_url() );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
+		$this->assertArrayNotHasKey( '@type', $metadata );
+		$this->assertArrayHasKey( 'publisher', $metadata );
+		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+
+		// Test page.
+		$this->go_to( get_permalink( $page_id ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
+		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+		$this->assertEquals( 'WebPage', $metadata['@type'] );
+		$this->assertArrayHasKey( 'author', $metadata );
+		$this->assertEquals( get_permalink( $page_id ), $metadata['mainEntityOfPage'] );
+		$this->assertEquals( get_the_title( $page_id ), $metadata['headline'] );
+		$this->assertArrayHasKey( 'datePublished', $metadata );
+		$this->assertArrayHasKey( 'dateModified', $metadata );
+
+		// Test post.
+		$this->go_to( get_permalink( $post_id ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
+		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+		$this->assertEquals( 'BlogPosting', $metadata['@type'] );
+		$this->assertEquals( get_permalink( $post_id ), $metadata['mainEntityOfPage'] );
+		$this->assertEquals( get_the_title( $post_id ), $metadata['headline'] );
+		$this->assertArrayHasKey( 'datePublished', $metadata );
+		$this->assertArrayHasKey( 'dateModified', $metadata );
+		$this->assertEquals(
+			array(
+				'@type' => 'Person',
+				'name'  => 'John Smith',
+			),
+			$metadata['author']
+		);
+
+		// Test override.
+		$this->go_to( get_permalink( $post_id ) );
+		$self = $this;
+		add_filter( 'amp_post_template_metadata', function( $meta, $post ) use ( $self, $post_id ) {
+			$self->assertEquals( $post_id, $post->ID );
+			$meta['did_amp_post_template_metadata'] = true;
+			$self->assertArrayNotHasKey( 'amp_schemaorg_metadata', $meta );
+			return $meta;
+		}, 10, 2 );
+		add_filter( 'amp_schemaorg_metadata', function( $meta ) use ( $self ) {
+			$meta['did_amp_schemaorg_metadata'] = true;
+			$self->assertArrayHasKey( 'did_amp_post_template_metadata', $meta );
+			$meta['author']['name'] = 'George';
+			return $meta;
+		} );
+
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
+		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
+		$this->assertEquals( 'George', $metadata['author']['name'] );
+	}
 }
