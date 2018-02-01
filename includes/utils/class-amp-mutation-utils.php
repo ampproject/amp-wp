@@ -318,7 +318,7 @@ class AMP_Mutation_Utils {
 	public static function display_error() {
 		$error = isset( $_GET[ self::ERROR_QUERY_KEY ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::ERROR_QUERY_KEY ] ) ) : ''; // WPCS: CSRF ok.
 		if ( self::ERROR_QUERY_VALUE === $error ) {
-			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'Notice: this content fails AMP validation', 'amp' ) );
+			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'Notice: this post fails AMP validation', 'amp' ) );
 		}
 	}
 
