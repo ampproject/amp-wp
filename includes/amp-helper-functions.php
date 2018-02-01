@@ -418,11 +418,12 @@ function amp_prepare_post() {
 			// We don't need any data, so just send a success.
 			wp_send_json_success();
 		}, PHP_INT_MAX, 2 );
-
-	} else {
-		// Add amp comment hooks.
-		add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
+	} elseif ( ! isset( $_GET['_wp_amp_action_xhr_converted'] ) ) { // WPCS: CSRF ok.
+		// submission was from a set action-xhr, implying it's being handled already.
+		return;
 	}
+	// Add amp comment hooks.
+	add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
 
 	// Add die handler for AMP error display.
 	add_filter( 'wp_die_handler', function() {
@@ -444,7 +445,6 @@ function amp_prepare_post() {
 	// Send AMP header.
 	$origin = esc_url_raw( wp_unslash( $_GET['__amp_source_origin'] ) ); // WPCS: CSRF ok.
 	header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
-
 }
 
 /**
