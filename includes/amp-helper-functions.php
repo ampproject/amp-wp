@@ -158,19 +158,17 @@ function amp_print_boilerplate_code() {
 function amp_get_analytics( $analytics ) {
 	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
-	if ( is_singular() ) {
-		/**
-		 * Add amp-analytics tags.
-		 *
-		 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
-		 *
-		 * @since 0.4
-		 *
-		 * @param array   $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
-		 * @param WP_Post $post      The current post.
-		 */
-		$analytics_entries = apply_filters( 'amp_post_template_analytics', $analytics_entries, get_queried_object() );
-	}
+	/**
+	 * Add amp-analytics tags.
+	 *
+	 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
+	 * This filter should be used to alter entries for paired mode.
+	 *
+	 * @since 0.7
+	 *
+	 * @param array $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 */
+	$analytics_entries = apply_filters( 'amp_analytics_entries', $analytics_entries );
 
 	if ( ! $analytics_entries ) {
 		return $analytics;

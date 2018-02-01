@@ -131,7 +131,7 @@ class AMP_Post_Template {
 
 			'post_amp_styles'       => array(),
 
-			'amp_analytics'         => amp_get_analytics( array() ),
+			'amp_analytics'         => amp_add_custom_analytics(),
 		);
 
 		$this->build_post_content();

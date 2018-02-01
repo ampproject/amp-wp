@@ -127,12 +127,10 @@ function amp_post_template_add_analytics_script( $data ) {
 
 /**
  * Print analytics data.
- *
- * @param AMP_Post_Template $amp_template Template.
  */
-function amp_post_template_add_analytics_data( $amp_template ) {
-	$analytics_entries = $amp_template->get( 'amp_analytics' );
-	amp_print_analytics( $analytics_entries );
+function amp_post_template_add_analytics_data() {
+	$analytics = amp_add_custom_analytics();
+	amp_print_analytics( $analytics );
 }
 
 /**
