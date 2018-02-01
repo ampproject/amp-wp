@@ -90,6 +90,8 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					// record that action was converted tp action-xhr.
 					$action_url = add_query_arg( '_wp_amp_action_xhr_converted', 1, $action_url );
 					$node->setAttribute( 'action-xhr', $action_url );
+					// Append error handler if not found.
+					$this->error_handler( $node );
 				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {
 					$node->setAttribute( 'action-xhr', substr( $xhr_action, 5 ) );
 				}
@@ -109,5 +111,44 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Checks if the form has an error handler else create one if not.
+	 *
+	 * @link https://www.ampproject.org/docs/reference/components/amp-form
+	 * @since 0.7
+	 * @param DOMElement $node The form node to check.
+	 */
+	public function error_handler( $node ) {
+		$templates = $node->getElementsByTagName( 'template' );
+		if ( $templates->length ) {
+			for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
+				if ( $templates->item( $i )->parentNode->hasAttribute( 'submit-error' ) ) {
+					return; // Found error template, do nothing.
+				}
+			}
+		}
+		$node->appendChild( $this->create_error_template() );
+	}
+
+	/**
+	 * Creates a error handler element node.
+	 *
+	 * @link https://www.ampproject.org/docs/reference/components/amp-form
+	 * @since 0.7
+	 *
+	 * return DOMElement
+	 */
+	public function create_error_template() {
+		$node     = $this->dom->createElement( 'div' );
+		$template = $this->dom->createElement( 'template' );
+		$mustache = $this->dom->createTextNode( '{{{error}}}' );
+		$node->setAttribute( 'submit-error', '' );
+		$template->setAttribute( 'type', 'amp-mustache' );
+		$template->appendChild( $mustache );
+		$node->appendChild( $template );
+
+		return $node;
 	}
 }
