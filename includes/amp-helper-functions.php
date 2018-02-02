@@ -408,6 +408,14 @@ function amp_print_schemaorg_metadata() {
  */
 function amp_handle_xhr_request() {
 	global $pagenow;
+	if ( isset( $_GET['__amp_redirect'] ) ) { // WPCS: CSRF ok.
+		add_action( 'template_redirect', function() {
+			// grab post data.
+			$transint_name = wp_unslash( $_GET['__amp_redirect'] ); // WPCS: CSRF ok, input var ok.
+			$_POST         = get_transient( $transint_name );
+			delete_transient( $transint_name );
+		}, 0 );
+	}
 	if ( ! isset( $_GET['__amp_source_origin'] ) || ! isset( $pagenow ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
 		return;
 	}
@@ -423,12 +431,17 @@ function amp_handle_xhr_request() {
 		// Add amp redirect hooks.
 		add_filter( 'wp_redirect', 'amp_intercept_post_request_redirect', PHP_INT_MAX, 2 );
 		add_action( 'template_redirect', function() {
+			// grab post data.
+			$transient_name = uniqid();
+			set_transient( $transient_name, wp_unslash( $_POST ), 60 ); // WPCS: CSRF ok, input var ok.
+
 			/*
 			 * Buffering starts here, so unlikely the form has a redirect,
 			 * so force a redirect to the same page.
 			 */
 			$location = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // WPCS: CSRF ok, input var ok.
-			amp_handle_general_post( $location );
+			$location = add_query_arg( '__amp_redirect', $transient_name, $location );
+			amp_intercept_post_request_redirect( $location );
 		}, 0 );
 		amp_handle_xhr_headers_output();
 	}
