@@ -406,7 +406,7 @@ function amp_print_schemaorg_metadata() {
  *
  * @since 0.7.0
  */
-function amp_prepare_xhr_post() {
+function amp_handle_xhr_request() {
 	global $pagenow;
 	if ( ! isset( $_GET['__amp_source_origin'] ) || ! isset( $pagenow ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
 		return;
@@ -418,10 +418,8 @@ function amp_prepare_xhr_post() {
 			// We don't need any data, so just send a success.
 			wp_send_json_success();
 		}, PHP_INT_MAX, 2 );
-	} elseif ( ! isset( $_GET['_wp_amp_action_xhr_converted'] ) ) { // WPCS: CSRF ok.
-		// submission was from a set action-xhr, implying it's being handled already.
-		return;
-	} else {
+		amp_handle_xhr_headers_output();
+	} elseif ( isset( $_GET['_wp_amp_action_xhr_converted'] ) ) { // WPCS: CSRF ok.
 		// Add amp redirect hooks.
 		add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
 		add_action( 'template_redirect', function() {
@@ -432,7 +430,17 @@ function amp_prepare_xhr_post() {
 			$location = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // WPCS: CSRF ok, input var ok.
 			amp_handle_general_post( $location );
 		}, 0 );
+		amp_handle_xhr_headers_output();
 	}
+
+}
+
+/**
+ * Handle the AMP XHR headers and output errors.
+ *
+ * @since 0.7.0
+ */
+function amp_handle_xhr_headers_output() {
 	// Add die handler for AMP error display.
 	add_filter( 'wp_die_handler', function() {
 		/**
