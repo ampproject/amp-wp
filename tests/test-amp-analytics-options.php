@@ -230,12 +230,13 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
 
 		add_theme_support( 'amp' );
-		add_filter( 'amp_analytics_entries', function( $analytics ) {
+		$self = $this;
+		add_filter( 'amp_analytics_entries', function( $analytics ) use ( $self ) {
 			$key                       = key( $analytics );
 			$analytics[ $key ]['test'] = 'sample';
 
-			$this->assertArrayHasKey( 'test', $analytics[ $key ] );
-			$this->assertEquals( 'sample', $analytics[ $key ]['test'] );
+			$self->assertArrayHasKey( 'test', $analytics[ $key ] );
+			$self->assertEquals( 'sample', $analytics[ $key ]['test'] );
 
 			return $analytics;
 		} );
