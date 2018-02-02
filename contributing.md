@@ -33,6 +33,15 @@ To run it:
 3. run `wp eval-file bin/add-test-widgets-to-sidebar.php`
 4. There will be a message indicating which sidebar has the widgets. Please visit a page with that sidebar.
 
+## Testing Comments Support
+
+The following script creates a post with comments in order to test support for WordPress comments.
+To run it:
+1. `ssh` into an environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV)
+2. `cd` to the root of this plugin
+3. run `wp eval-file bin/create-comments-on-test-post.php`
+4. go to the URL that is output in the command line
+
 ## PHPUnit Testing
 
 Please run these tests in an environment with WordPress unit tests installed, like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
