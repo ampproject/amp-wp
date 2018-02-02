@@ -412,7 +412,7 @@ function amp_handle_xhr_request() {
 	}
 
 	if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
-		// This only runs on wp-comments-post.php.
+		// We don't need any data, so just send a success.
 		add_filter( 'comment_post_redirect', function() {
 			// We don't need any data, so just send a success.
 			wp_send_json_success();
@@ -422,7 +422,6 @@ function amp_handle_xhr_request() {
 		add_filter( 'wp_redirect', 'amp_intercept_post_request_redirect', PHP_INT_MAX, 2 );
 		amp_handle_xhr_headers_output();
 	}
-
 }
 
 /**
@@ -456,18 +455,37 @@ function amp_handle_xhr_headers_output() {
 }
 
 /**
- * Handle a general, non comment AMP XHR post.
+ * Intercept the response to a non-comment POST request.
  *
  * @since 0.7.0
  * @param string $location The location to redirect to.
  */
 function amp_intercept_post_request_redirect( $location ) {
-	$host = wp_parse_url( $location, PHP_URL_HOST );
-	if ( is_null( $host ) ) {
-		$location = home_url( $location );
+
+	// Make sure relative redirects get made absolute.
+	$parsed_location = array_merge(
+		array(
+			'scheme' => 'https',
+			'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
+			'path'   => strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ),
+		),
+		wp_parse_url( $location )
+	);
+
+	$absolute_location = $parsed_location['scheme'] . '://' . $parsed_location['host'];
+	if ( isset( $parsed_location['port'] ) ) {
+		$absolute_location .= ':' . $parsed_location['port'];
 	}
-	header( 'AMP-Redirect-To: ' . $location );
-	header( 'Access-Control-Expose-Headers: AMP-Redirect-To;' );
+	$absolute_location .= $parsed_location['path'];
+	if ( isset( $parsed_location['query'] ) ) {
+		$absolute_location .= '?' . $parsed_location['query'];
+	}
+	if ( isset( $parsed_location['fragment'] ) ) {
+		$absolute_location .= '#' . $parsed_location['fragment'];
+	}
+
+	header( 'AMP-Redirect-To: ' . $absolute_location );
+	header( 'Access-Control-Expose-Headers: AMP-Redirect-To' );
 	// Send json success as no data is required.
 	wp_send_json_success();
 }
