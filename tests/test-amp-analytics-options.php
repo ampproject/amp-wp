@@ -212,4 +212,51 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		libxml_use_internal_errors( $libxml_previous_state );
 
 	}
+
+	/**
+	 * Test amp_get_analytics()
+	 */
+	public function test_amp_get_analytics() {
+		$this->insert_one_option(
+			$this->vendor,
+			$this->config_one
+		);
+
+		$analytics = amp_get_analytics();
+		$this->assertEquals( 1, count( $analytics ) );
+
+		$key = key( $analytics );
+		$this->assertArrayHasKey( 'type', $analytics[ $key ] );
+		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
+
+		add_theme_support( 'amp' );
+		add_filter( 'amp_analytics_entries', function( $analytics ) {
+			$key                       = key( $analytics );
+			$analytics[ $key ]['test'] = 'sample';
+
+			$this->assertArrayHasKey( 'test', $analytics[ $key ] );
+			$this->assertEquals( 'sample', $analytics[ $key ]['test'] );
+
+			return $analytics;
+		} );
+	}
+
+	/**
+	 * Test amp_print_analytics()
+	 */
+	public function test_amp_print_analytics() {
+		$this->insert_one_option(
+			$this->vendor,
+			$this->config_one
+		);
+
+		$analytics = amp_get_analytics();
+
+		ob_start();
+		amp_print_analytics( $analytics );
+		$output = ob_get_clean();
+
+		$this->assertEquals( 0, strpos( $output, '<amp-analytics' ) );
+	}
+
 }

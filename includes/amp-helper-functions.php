@@ -155,7 +155,7 @@ function amp_print_boilerplate_code() {
  * @param array $analytics Analytics.
  * @return array Analytics.
  */
-function amp_get_analytics( $analytics ) {
+function amp_get_analytics( $analytics = array() ) {
 	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
 	/**
