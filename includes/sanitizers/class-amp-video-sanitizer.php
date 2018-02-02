@@ -24,6 +24,15 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	const FALLBACK_HEIGHT = 400;
 
 	/**
+	 * 16:9 ratio for videos.
+	 *
+	 * @since 0.7
+	 *
+	 * @const float
+	 */
+	const ASPECT_RATIO = 1.7777;
+
+	/**
 	 * Tag.
 	 *
 	 * @var string HTML <video> tag to identify and replace with AMP version.
@@ -49,9 +58,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
-
-			$new_attributes = $this->enforce_fixed_height( $new_attributes );
-			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+			$new_attributes = $this->size_attributes( $new_attributes );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 
@@ -159,4 +166,37 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 		return $out;
 	}
+
+	/**
+	 * Handles the size attributes of <amp-video>.
+	 *
+	 * Makes the <amp-video> responsive if it lacks 'height' and 'width' attributes.
+	 * Video widgets don't have 'height' or 'width' attributes,
+	 * because inject_video_max_width_style() removes them.
+	 * So if there are no width or height attributes,
+	 * Set them and make the layout responsive.
+	 * The 'else' block handles the 'video' shortcode, not video widgets.
+	 * wp_video_shortcode() always outputs a height and width, unless it's filtered.
+	 *
+	 * @since 0.7
+	 *
+	 * @param array $attributes The element's attributes.
+	 * @return array $attributes The attributes, possibly changed.
+	 */
+	public function size_attributes( $attributes ) {
+		if ( ! isset( $attributes['width'] ) && ! isset( $attributes['height'] ) ) {
+			$width      = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : round( self::FALLBACK_HEIGHT * self::ASPECT_RATIO );
+			$attributes = array_merge( $attributes, array(
+				'width'  => $width,
+				'height' => round( $width / self::ASPECT_RATIO ),
+				'layout' => 'responsive',
+			) );
+		} else {
+			$attributes = $this->enforce_fixed_height( $attributes );
+			$attributes = $this->enforce_sizes_attribute( $attributes );
+		}
+
+		return $attributes;
+	}
+
 }
