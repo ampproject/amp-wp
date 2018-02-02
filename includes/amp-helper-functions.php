@@ -466,8 +466,10 @@ function amp_handle_xhr_headers_output() {
 			if ( is_wp_error( $error ) ) {
 				$error = $error->get_error_message();
 			}
-			$error = strip_tags( $error, 'strong' );
-			wp_send_json( compact( 'error' ) );
+			$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
+			wp_send_json( array(
+				'error' => wp_kses( $error, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) ),
+			) );
 		};
 	} );
 
