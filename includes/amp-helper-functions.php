@@ -400,27 +400,18 @@ function amp_print_schemaorg_metadata() {
 }
 
 /**
- * Hook into a comment submission of an AMP XHR post request.
- *
- * This only runs on wp-comments-post.php.
+ * Hook into a form submissions, such as comment the form or some other .
  *
  * @since 0.7.0
+ * @global string $pagenow
  */
 function amp_handle_xhr_request() {
 	global $pagenow;
-	if ( isset( $_GET['__amp_redirect'] ) ) { // WPCS: CSRF ok.
-		add_action( 'template_redirect', function() {
-			// grab post data.
-			$transint_name = wp_unslash( $_GET['__amp_redirect'] ); // WPCS: CSRF ok, input var ok.
-			$_POST         = get_transient( $transint_name );
-			delete_transient( $transint_name );
-		}, 0 );
-	}
-	if ( ! isset( $_GET['__amp_source_origin'] ) || ! isset( $pagenow ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
+	if ( ! isset( $_GET['__amp_source_origin'] ) ) { // WPCS: CSRF ok. Beware of AMP_Theme_Support::purge_amp_query_vars().
 		return;
 	}
 
-	if ( 'wp-comments-post.php' === $pagenow ) {
+	if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
 		// This only runs on wp-comments-post.php.
 		add_filter( 'comment_post_redirect', function() {
 			// We don't need any data, so just send a success.
@@ -428,21 +419,7 @@ function amp_handle_xhr_request() {
 		}, PHP_INT_MAX, 2 );
 		amp_handle_xhr_headers_output();
 	} elseif ( isset( $_GET['_wp_amp_action_xhr_converted'] ) ) { // WPCS: CSRF ok.
-		// Add amp redirect hooks.
 		add_filter( 'wp_redirect', 'amp_intercept_post_request_redirect', PHP_INT_MAX, 2 );
-		add_action( 'template_redirect', function() {
-			// grab post data.
-			$transient_name = uniqid();
-			set_transient( $transient_name, wp_unslash( $_POST ), 60 ); // WPCS: CSRF ok, input var ok.
-
-			/*
-			 * Buffering starts here, so unlikely the form has a redirect,
-			 * so force a redirect to the same page.
-			 */
-			$location = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // WPCS: CSRF ok, input var ok.
-			$location = add_query_arg( '__amp_redirect', $transient_name, $location );
-			amp_intercept_post_request_redirect( $location );
-		}, 0 );
 		amp_handle_xhr_headers_output();
 	}
 

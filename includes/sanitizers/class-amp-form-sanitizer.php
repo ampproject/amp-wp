@@ -91,7 +91,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$action_url = add_query_arg( '_wp_amp_action_xhr_converted', 1, $action_url );
 					$node->setAttribute( 'action-xhr', $action_url );
 					// Append error handler if not found.
-					$this->error_handler( $node );
+					$this->ensure_submit_error_element( $node );
 				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {
 					$node->setAttribute( 'action-xhr', substr( $xhr_action, 5 ) );
 				}
@@ -118,37 +118,24 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form#success/error-response-rendering
 	 * @since 0.7
-	 * @param DOMElement $node The form node to check.
+	 *
+	 * @param DOMElement $form The form node to check.
 	 */
-	public function error_handler( $node ) {
-		$templates = $node->getElementsByTagName( 'template' );
-		if ( $templates->length ) {
-			for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
-				if ( $templates->item( $i )->parentNode->hasAttribute( 'submit-error' ) ) {
-					return; // Found error template, do nothing.
-				}
+	public function ensure_submit_error_element( $form ) {
+		$templates = $form->getElementsByTagName( 'template' );
+		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
+			if ( $templates->item( $i )->parentNode->hasAttribute( 'submit-error' ) ) {
+				return; // Found error template, do nothing.
 			}
 		}
-		$node->appendChild( $this->create_error_template() );
-	}
 
-	/**
-	 * Creates a error handler element node.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/components/amp-form#success/error-response-rendering
-	 * @since 0.7
-	 *
-	 * @return DOMElement The div[submit-error] element.
-	 */
-	public function create_error_template() {
-		$node     = $this->dom->createElement( 'div' );
+		$div      = $this->dom->createElement( 'div' );
 		$template = $this->dom->createElement( 'template' );
 		$mustache = $this->dom->createTextNode( '{{{error}}}' );
-		$node->setAttribute( 'submit-error', '' );
+		$div->setAttribute( 'submit-error', '' );
 		$template->setAttribute( 'type', 'amp-mustache' );
 		$template->appendChild( $mustache );
-		$node->appendChild( $template );
-
-		return $node;
+		$div->appendChild( $template );
+		$form->appendChild( $div );
 	}
 }
