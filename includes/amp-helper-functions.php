@@ -483,9 +483,11 @@ function amp_handle_xhr_headers_output() {
  * @param string $location The location to redirect to.
  */
 function amp_intercept_post_request_redirect( $location ) {
-
-	$url = site_url( $location );
-	header( 'AMP-Redirect-To: ' . $url );
+	$host = wp_parse_url( $location, PHP_URL_HOST );
+	if ( is_null( $host ) ) {
+		$location = home_url( $location );
+	}
+	header( 'AMP-Redirect-To: ' . $location );
 	header( 'Access-Control-Expose-Headers: AMP-Redirect-To;' );
 	// Send json success as no data is required.
 	wp_send_json_success();
