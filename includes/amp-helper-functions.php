@@ -421,7 +421,7 @@ function amp_handle_xhr_request() {
 		amp_handle_xhr_headers_output();
 	} elseif ( isset( $_GET['_wp_amp_action_xhr_converted'] ) ) { // WPCS: CSRF ok.
 		// Add amp redirect hooks.
-		add_filter( 'wp_redirect', 'amp_handle_general_post', PHP_INT_MAX, 2 );
+		add_filter( 'wp_redirect', 'amp_intercept_post_request_redirect', PHP_INT_MAX, 2 );
 		add_action( 'template_redirect', function() {
 			/*
 			 * Buffering starts here, so unlikely the form has a redirect,
@@ -469,7 +469,7 @@ function amp_handle_xhr_headers_output() {
  * @since 0.7.0
  * @param string $location The location to redirect to.
  */
-function amp_handle_general_post( $location ) {
+function amp_intercept_post_request_redirect( $location ) {
 
 	$url = site_url( $location );
 	header( 'AMP-Redirect-To: ' . $url );
