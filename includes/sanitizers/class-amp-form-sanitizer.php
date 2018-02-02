@@ -116,7 +116,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Checks if the form has an error handler else create one if not.
 	 *
-	 * @link https://www.ampproject.org/docs/reference/components/amp-form
+	 * @link https://www.ampproject.org/docs/reference/components/amp-form#success/error-response-rendering
 	 * @since 0.7
 	 * @param DOMElement $node The form node to check.
 	 */
@@ -135,7 +135,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Creates a error handler element node.
 	 *
-	 * @link https://www.ampproject.org/docs/reference/components/amp-form
+	 * @link https://www.ampproject.org/docs/reference/components/amp-form#success/error-response-rendering
 	 * @since 0.7
 	 *
 	 * @return DOMElement The div[submit-error] element.
