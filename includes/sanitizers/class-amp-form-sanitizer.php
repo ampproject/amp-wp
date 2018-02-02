@@ -138,7 +138,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form
 	 * @since 0.7
 	 *
-	 * return DOMElement
+	 * @return DOMElement The div[submit-error] element.
 	 */
 	public function create_error_template() {
 		$node     = $this->dom->createElement( 'div' );
