@@ -88,6 +88,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			if ( 'body' === $style_element->parentNode->nodeName && $style_element->hasAttribute( 'amp-keyframes' ) ) {
+				$validity = $this->validate_amp_keyframe( $style_element );
+				if ( true === $validity ) {
+					continue;
+				}
+			}
+
 			$nodes_to_remove[] = $style_element;
 
 			// @todo This should perhaps be done in document order to ensure proper cascade.
@@ -103,6 +110,33 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $nodes_to_remove as $node_to_remove ) {
 			$node_to_remove->parentNode->removeChild( $node_to_remove );
 		}
+	}
+
+	/**
+	 * Validate amp-keyframe style.
+	 *
+	 * @since 0.7
+	 * @link https://github.com/ampproject/amphtml/blob/b685a0780a7f59313666225478b2b79b463bcd0b/validator/validator-main.protoascii#L1002-L1043
+	 *
+	 * @param DOMElement $style Style element.
+	 * @return true|WP_Error Validity.
+	 */
+	private function validate_amp_keyframe( $style ) {
+		if ( strlen( $style->textContent ) > 500000 ) {
+			return new WP_Error( 'max_bytes' );
+		}
+
+		// This logic could be in AMP_Tag_And_Attribute_Sanitizer, but since it only applies to amp-keyframes it seems unnecessary.
+		$next_sibling = $style->nextSibling;
+		while ( $next_sibling ) {
+			if ( $next_sibling instanceof DOMElement ) {
+				return new WP_Error( 'mandatory_last_child' );
+			}
+			$next_sibling = $next_sibling->nextSibling;
+		}
+
+		// @todo Also add validation of the CSS spec itself.
+		return true;
 	}
 
 	/**

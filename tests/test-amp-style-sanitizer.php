@@ -143,4 +143,45 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		// Test stylesheet.
 		$this->assertEquals( $expected_stylesheets, array_values( $sanitizer->get_stylesheets() ) );
 	}
+
+	/**
+	 * Get amp-keyframe styles.
+	 *
+	 * @return array
+	 */
+	public function get_keyframe_data() {
+		return array(
+			'style_amp_keyframes'              => array(
+				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes foo {} }</style>',
+				null, // No Change.
+			),
+
+			'style_amp_keyframes_max_overflow' => array(
+				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes ' . str_repeat( 'a', 500000 ) . ' {} }</style>',
+				'',
+			),
+
+			'style_amp_keyframes_last_child'   => array(
+				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes foo {} }</style> as <b>after</b>',
+				' as <b>after</b>',
+			),
+		);
+	}
+
+	/**
+	 * Test amp-keyframe styles.
+	 *
+	 * @dataProvider get_keyframe_data
+	 * @param string $source   Markup to process.
+	 * @param string $expected The markup to expect.
+	 */
+	public function test_keyframe_sanitizer( $source, $expected = null ) {
+		$expected  = isset( $expected ) ? $expected : $source;
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Style_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		$this->assertEquals( $expected, $content );
+	}
 }

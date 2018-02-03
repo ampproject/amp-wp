@@ -457,8 +457,6 @@ def GetTagSpec(tag_spec, attr_lists):
 			if isinstance(field_value, (unicode, str, bool, int)):
 				cdata_dict[ field_descriptor.name ] = field_value
 			else:
-				if 'css_spec' == field_descriptor.name:
-					continue
 				if hasattr( field_value, '_values' ):
 					cdata_dict[ field_descriptor.name ] = {}
 					for _value in field_value._values:
