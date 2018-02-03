@@ -38,7 +38,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
 		$blacklisted_protocols  = $this->get_blacklisted_protocols();
 
-		$body = $this->get_body_node();
+		$body = $this->root_element;
 		$this->strip_tags( $body, $blacklisted_tags );
 		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
 	}

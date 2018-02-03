@@ -62,7 +62,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.4
 	 */
 	public function sanitize() {
-		$body = $this->get_body_node();
+		$body = $this->root_element;
 
 		$this->collect_style_elements();
 

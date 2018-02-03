@@ -392,12 +392,11 @@ def ParseRules(out_dir):
 	# attributes, values and other criteria.
 
 	# Don't include tags that have a mandatory parent with one of these tag names
-	# since we're only concerned with using this tag list to validate the body
+	# since we're only concerned with using this tag list to validate the HTML
 	# of the DOM
 	mandatory_parent_blacklist = [
 		'$ROOT',
 		'!DOCTYPE',
-		'HTML',
 	]
 
 	for (field_desc, field_val) in rules.ListFields():
@@ -405,7 +404,7 @@ def ParseRules(out_dir):
 			for tag_spec in field_val:
 
 				# Ignore tags that are outside of the body
-				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist and tag_spec.tag_name != 'BODY':
+				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist and tag_spec.tag_name != 'HTML':
 					continue
 
 				# Ignore the special $REFERENCE_POINT tag

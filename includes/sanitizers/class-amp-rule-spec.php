@@ -21,6 +21,8 @@ abstract class AMP_Rule_Spec {
 
 	/**
 	 * AMP attr_spec value check results
+	 *
+	 * @todo Replacing these with integers could speed things up a bit.
 	 */
 	const PASS           = 'pass';
 	const FAIL           = 'fail';

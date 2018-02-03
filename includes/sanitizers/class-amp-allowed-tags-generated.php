@@ -4363,6 +4363,18 @@ class AMP_Allowed_Tags_Generated {
 
 			),
 		),
+		'head' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'mandatory' => true,
+					'mandatory_parent' => 'html',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
+					'unique' => true,
+				),
+
+			),
+		),
 		'header' => array(
 			array(
 				'attr_spec_list' => array(),
@@ -4412,6 +4424,52 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(),
 				'tag_spec' => array(),
+
+			),
+		),
+		'html' => array(
+			array(
+				'attr_spec_list' => array(
+					'\u26a1' => array(
+						'alternative_names' => array(
+							'amp',
+						),
+						'mandatory' => true,
+						'value' => '',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp',
+					),
+					'mandatory' => true,
+					'mandatory_parent' => '!doctype',
+					'spec_name' => 'html \u26a1 for top-level html',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
+					'unique' => true,
+				),
+
+			),
+			array(
+				'attr_spec_list' => array(
+					'\u26a14ads' => array(
+						'alternative_names' => array(
+							'amp4ads',
+						),
+						'mandatory' => true,
+						'value' => '',
+					),
+				),
+				'tag_spec' => array(
+					'html_format' => array(
+							'amp4ads',
+					),
+					'mandatory' => true,
+					'mandatory_parent' => '!doctype',
+					'spec_name' => 'html \u26a14ads for top-level html',
+					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#a4a-format-rules',
+					'unique' => true,
+				),
 
 			),
 		),

@@ -109,6 +109,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
 		}
 
+		// @todo Do the same for body when !use_document_element?
+		if ( ! empty( $this->args['use_document_element'] ) ) {
+			foreach ( $this->allowed_tags['html'] as &$rule_spec ) {
+				unset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ][ AMP_Rule_Spec::MANDATORY_PARENT ] );
+			}
+		}
+
 		foreach ( $this->allowed_tags as &$tag_specs ) {
 			foreach ( $tag_specs as &$tag_spec ) {
 				if ( isset( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
@@ -179,14 +186,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 
-		/**
-		 * Add root of content to the stack.
-		 *
-		 * @var DOMElement $body
-		 */
-		$body = $this->get_body_node();
-
-		$this->stack[] = $body;
+		// Add root of content to the stack.
+		$this->stack[] = $this->root_element;
 
 		/**
 		 * This loop traverses through the DOM tree iteratively.
@@ -378,8 +379,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Whether a node is missing a mandatory attribute.
 	 *
-	 * @param array  $attr_spec The attribute specification.
-	 * @param object $node The DOMElement of the node to check.
+	 * @param array      $attr_spec The attribute specification.
+	 * @param DOMElement $node      The DOMElement of the node to check.
 	 * @return boolean $is_missing boolean Whether a required attribute is missing.
 	 */
 	public function is_missing_mandatory_attribute( $attr_spec, $node ) {
@@ -387,8 +388,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
+			if ( '\u' === substr( $attr_name, 0, 2 ) ) {
+				$attr_name = html_entity_decode( '&#x' . substr( $attr_name, 2 ) . ';' ); // Probably ⚡.
+			}
 			$is_mandatory     = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? ( true === $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
-			$attribute_exists = method_exists( $node, 'hasAttribute' ) && $node->hasAttribute( $attr_name );
+			$attribute_exists = false;
+			if ( method_exists( $node, 'hasAttribute' ) ) {
+				$attribute_exists = $node->hasAttribute( $attr_name );
+				if ( ! $attribute_exists && ! empty( $attr_spec_rule_value[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+					foreach ( $attr_spec_rule_value[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_attr_name ) {
+						if ( $node->hasAttribute( $alternative_attr_name ) ) {
+							$attribute_exists = true;
+							break;
+						}
+					}
+				}
+			}
 			if ( $is_mandatory && ! $attribute_exists ) {
 				return true;
 			}
@@ -550,8 +565,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * specified by the value of rule to pass.
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) ) {
-				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
+				$result = $this->check_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule );
+				if ( AMP_Rule_Spec::PASS === $result ) {
 					$score++;
+				} elseif ( AMP_Rule_Spec::FAIL === $result && AMP_Rule_Spec::NAME_VALUE_DISPATCH === $dispatch_key ) {
+					return 0;
 				}
 			}
 
@@ -561,8 +579,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * the rule to pass.
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) ) {
-				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) ) {
+				$result = $this->check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule );
+				if ( AMP_Rule_Spec::PASS === $result ) {
 					$score++;
+				} elseif ( AMP_Rule_Spec::FAIL === $result && AMP_Rule_Spec::NAME_VALUE_DISPATCH === $dispatch_key ) {
+					return 0;
 				}
 			}
 
@@ -572,8 +593,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * pattern specified by the value of the rule to pass.
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) ) {
-				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) ) {
+				$result = $this->check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule );
+				if ( AMP_Rule_Spec::PASS === $result ) {
 					$score++;
+				} elseif ( AMP_Rule_Spec::FAIL === $result && AMP_Rule_Spec::NAME_VALUE_DISPATCH === $dispatch_key ) {
+					return 0;
 				}
 			}
 
@@ -1346,7 +1370,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $node && $parent ) {
 			$parent->removeChild( $node );
 		}
-		while ( $parent && ! $parent->hasChildNodes() && 'body' !== $parent->nodeName ) {
+		while ( $parent && ! $parent->hasChildNodes() && $this->root_element !== $parent ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;
 			if ( $parent ) {

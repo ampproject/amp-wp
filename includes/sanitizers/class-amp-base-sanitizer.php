@@ -43,6 +43,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @var array {
 	 *      @type int $content_max_width
 	 *      @type bool $add_placeholder
+	 *      @type bool $use_document_element
 	 *      @type bool $require_https_src
 	 *      @type string[] $amp_allowed_tags
 	 *      @type string[] $amp_globally_allowed_attributes
@@ -60,6 +61,13 @@ abstract class AMP_Base_Sanitizer {
 	 * @var bool
 	 */
 	protected $did_convert_elements = false;
+
+	/**
+	 * The root element used for sanitization. Either html or body.
+	 *
+	 * @var DOMElement
+	 */
+	protected $root_element;
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
@@ -81,6 +89,12 @@ abstract class AMP_Base_Sanitizer {
 	public function __construct( $dom, $args = array() ) {
 		$this->dom  = $dom;
 		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
+
+		if ( ! empty( $this->args['use_document_element'] ) ) {
+			$this->root_element = $this->dom->documentElement;
+		} else {
+			$this->root_element = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		}
 	}
 
 	/**
@@ -136,10 +150,12 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Get HTML body as DOMElement from DOMDocument received by the constructor.
 	 *
-	 * @return DOMElement
+	 * @deprecated Just reference $root_element instead.
+	 * @return DOMElement The body or html element.
 	 */
 	protected function get_body_node() {
-		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		_deprecated_function( __METHOD__, 'AMP_Base_Sanitizer::$root_element', '0.7' );
+		return $this->root_element;
 	}
 
 	/**
