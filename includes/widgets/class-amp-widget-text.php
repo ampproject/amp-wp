@@ -22,7 +22,10 @@ if ( class_exists( 'WP_Widget_Text' ) ) {
 		 * @return string $html The markup, unaltered.
 		 */
 		public function inject_video_max_width_style( $matches ) {
-			return $matches[0];
+			if ( is_amp_endpoint() ) {
+				return $matches[0];
+			}
+			return parent::inject_video_max_width_style( $matches );
 		}
 
 	}

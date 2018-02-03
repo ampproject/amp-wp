@@ -22,7 +22,10 @@ if ( class_exists( 'WP_Widget_Media_Video' ) ) {
 		 * @return string HTML Output.
 		 */
 		public function inject_video_max_width_style( $html ) {
-			return $html;
+			if ( is_amp_endpoint() ) {
+				return $html;
+			}
+			return parent::inject_video_max_width_style( $html );
 		}
 
 	}
