@@ -427,9 +427,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function validate_attr_spec_list_for_node( $node, $attr_spec_list ) {
 
-		/**
-		 * If node has no attributes there is no point in continuing.
-		 */
+		// If node has no attributes there is no point in continuing.
 		if ( ! $node->hasAttributes() ) {
 			return 0;
 		}
@@ -461,6 +459,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
 
+			$dispatch_key = isset( $attr_spec_rule['dispatch_key'] ) ? $attr_spec_rule['dispatch_key'] : AMP_Rule_Spec::NONE_DISPATCH;
+
 			// If a mandatory attribute is required, and attribute exists, pass.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
 				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule ) ) {
@@ -473,8 +473,33 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * Given attribute's value must exactly equal value of the rule to pass.
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
-				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
+				$result = $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule );
+				if ( AMP_Rule_Spec::PASS === $result ) {
 					$score++;
+				} elseif ( AMP_Rule_Spec::FAIL === $result && AMP_Rule_Spec::NAME_VALUE_DISPATCH === $dispatch_key ) {
+					/*
+					 * Per gregable in the AMP Slack: https://amphtml.slack.com/archives/C0ADR0A0K/p1517464216000087
+					 * > The "dispatch_key: NAME_VALUE_DISPATCH" field on that attribute indicates that this attribute should
+					 * > be used for choosing if the tagspec should be used for validation or not.
+					 * >
+					 * > What it's telling the validator is that if we see an <amp-ad> tag, consider *only* this tagspec for
+					 * > validating if the tag has a data-multi-size attribute with an empty value.
+					 * > And if we don't see a data-multi-size attribute with an empty value, don't even consider this tagspec
+					 * > for validating, use the others.
+					 * >
+					 * > Note that the validator allows all tags by default to have any data-* attributes, without constraint.
+					 * > We know these attributes are inert in HTML, so we allow the developer to use them for generic markup.
+					 * >
+					 * > So, the other tagspecs for <amp-ad> have an implicit attr spec of:
+					 * >
+					 * > attrs: {
+					 * >   name: 'data-multi-size'
+					 * > }
+					 * >
+					 * > So, if the user provides data-multi-size="320x50", this tagspec is no longer considered, but all of the
+					 * > other <amp-ad> tagspecs are."
+					 */
+					return 0;
 				}
 			}
 

@@ -252,6 +252,8 @@ def GeneratePropertiesPHP(out, properties, indent_level = 5):
 			if isinstance(values, str):
 				values = values.lower()
 			out.append('%s\'%s\' => \'%s\',' % (indent, prop.lower(), values))
+		elif isinstance(values, (int)):
+			out.append('%s\'%s\' => %d,' % (indent, prop.lower(), values))
 		else:
 			out.append('%s\'%s\' => array(' % (indent, prop.lower()))
 			sorted_values = sorted(values.items())
@@ -260,6 +262,8 @@ def GeneratePropertiesPHP(out, properties, indent_level = 5):
 					if isinstance(value, str):
 						value = value.lower()
 					out.append('%s\t\'%s\' => \'%s\',' % (indent, value_type, value))
+				elif isinstance(value, (int)):
+					out.append('%s\t\'%s\' => %d,' % (indent, value_type, value))
 				else:
 					GenerateValuesPHP(out, value)
 			out.append('%s),' % indent)
@@ -283,6 +287,9 @@ def GenerateValuesPHP(out, values, indent_level = 6):
 
 			if isinstance(value, (str, bool)):
 				out.append('%s\'%s\' => \'%s\',' % (indent, key.lower(), value))
+
+			elif isinstance(value, (int)):
+				out.append('%s\'%s\' => %d,' % (indent, key.lower(), value))
 
 			else:
 				out.append('%s\'%s\' => array(' % (indent, key.lower()))
@@ -552,7 +559,7 @@ def GetValues(attr_spec):
 	if attr_spec.HasField('blacklisted_value_regex'):
 		value_dict['blacklisted_value_regex'] = UnicodeEscape(attr_spec.blacklisted_value_regex)
 
-	# dispatch_key is a boolean
+	# dispatch_key is an int
 	if attr_spec.HasField('dispatch_key'):
 		value_dict['dispatch_key'] = attr_spec.dispatch_key
 

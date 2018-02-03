@@ -179,7 +179,9 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'alt' => array(),
 					'data-multi-size' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
+						'value' => '',
 					),
 					'json' => array(),
 					'media' => array(),
@@ -746,6 +748,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'alt' => array(),
 					'data-multi-size' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value' => '',
 					),
@@ -2948,6 +2951,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'align' => array(),
 					'submitting' => array(
+						'dispatch_key' => 1,
 						'mandatory' => true,
 					),
 				),
@@ -2961,6 +2965,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'align' => array(),
 					'submit-success' => array(
+						'dispatch_key' => 1,
 						'mandatory' => true,
 					),
 				),
@@ -2974,6 +2979,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'align' => array(),
 					'submit-error' => array(
+						'dispatch_key' => 1,
 						'mandatory' => true,
 					),
 				),
@@ -3965,6 +3971,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'enctype' => array(),
 					'method' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'post',
 					),
@@ -4942,6 +4949,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'hreflang' => array(),
 					'itemprop' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'sameas',
 					),
@@ -5239,6 +5247,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'x-ua-compatible',
 					),
@@ -5279,6 +5288,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_casei' => 'text/html; charset=utf-8',
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'content-type',
 					),
@@ -5300,6 +5310,7 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'content-language',
 					),
@@ -5321,6 +5332,7 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'pics-label',
 					),
@@ -5342,6 +5354,7 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'imagetoolbar',
 					),
@@ -5364,6 +5377,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_casei' => 'text/css',
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'content-style-type',
 					),
@@ -5386,6 +5400,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_casei' => 'text/javascript',
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'content-script-type',
 					),
@@ -5407,6 +5422,7 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'origin-trial',
 					),
@@ -5428,6 +5444,7 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'http-equiv' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'resource-type',
 					),
@@ -5500,6 +5517,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'toolbar' => array(
+						'dispatch_key' => 1,
 						'mandatory' => true,
 					),
 					'toolbar-target' => array(
@@ -6307,6 +6325,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value_casei' => 'application/ld+json',
 					),
@@ -6319,6 +6338,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'type' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
 					),
@@ -6336,6 +6356,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value' => 'application/json',
 					),
@@ -6357,6 +6378,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
 					),
@@ -6379,6 +6401,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
 					),
@@ -6396,6 +6419,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
 					),
@@ -6417,6 +6441,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
 					),
@@ -6795,6 +6820,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'amp-boilerplate' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value' => '',
 					),
@@ -6816,6 +6842,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'amp-keyframes' => array(
+						'dispatch_key' => 1,
 						'mandatory' => true,
 						'value' => '',
 					),
