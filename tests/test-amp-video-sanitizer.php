@@ -8,37 +8,27 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 			),
 
-			'simple_video'                                => array(
+			'simple_video' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4"></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'video_without_dimensions_like_video_widget'  => array(
+			'video_without_dimensions' => array(
 				'<video src="https://example.com/file.mp4"></video>',
-				'<amp-video src="https://example.com/file.mp4" width="711" height="400" layout="responsive"></amp-video>',
-			),
-
-			'video_only_width'                            => array(
-				'<video src="https://example.com/file.mp4" width="300"></video>',
 				'<amp-video src="https://example.com/file.mp4" height="400" layout="fixed-height"></amp-video>',
 			),
 
-			'video_only_height'                           => array(
-				'<video src="https://example.com/file.mp4" height="300"></video>',
-				'<amp-video src="https://example.com/file.mp4" height="300" layout="fixed-height"></amp-video>',
-			),
-
-			'autoplay_attribute'                          => array(
+			'autoplay_attribute' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'autoplay_attribute__false'                   => array(
+			'autoplay_attribute__false' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay="false"></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'video_with_whitelisted_attributes__enabled'  => array(
+			'video_with_whitelisted_attributes__enabled' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
@@ -48,17 +38,17 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'video_with_blacklisted_attribute'            => array(
+			'video_with_blacklisted_attribute' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" style="border-color: red;"></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'video_with_sizes_attribute_is_overridden'    => array(
+			'video_with_sizes_attribute_is_overridden' => array(
 				'<video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 100px) 200px, 90vw"></video>',
 				'<amp-video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'video_with_children'                         => array(
+			'video_with_children' => array(
 				'<video width="480" height="300" poster="https://example.com/video-image.gif">
 	<source src="https://example.com/video.mp4" type="video/mp4">
 	<source src="https://example.com/video.ogv" type="video/ogg">
@@ -66,7 +56,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="480" height="300" poster="https://example.com/video-image.gif" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
 			),
 
-			'multiple_same_video'                         => array(
+			'multiple_same_video' => array(
 				'<video src="https://example.com/video.mp4" width="480" height="300"></video>
 <video src="https://example.com/video.mp4" width="480" height="300"></video>
 <video src="https://example.com/video.mp4" width="480" height="300"></video>
@@ -74,14 +64,14 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'multiple_different_videos'                   => array(
+			'multiple_different_videos' => array(
 				'<video src="https://example.com/video1.mp4" width="480" height="300"></video>
 <video src="https://example.com/video2.ogv" width="300" height="480"></video>
 <video src="https://example.com/video3.webm" height="100" width="200"></video>',
 				'<amp-video src="https://example.com/video1.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video2.ogv" width="300" height="480" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video3.webm" height="100" width="200" sizes="(min-width: 200px) 200px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
 
-			'https_not_required'                          => array(
+			'https_not_required' => array(
 				'<video width="300" height="300" src="http://example.com/video.mp4"></video>',
 				'<amp-video width="300" height="300" src="http://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
 			),
