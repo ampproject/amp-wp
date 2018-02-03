@@ -6330,6 +6330,12 @@ class AMP_Allowed_Tags_Generated {
 						'value_casei' => 'application/ld+json',
 					),
 				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
+					),
+				),
 				'tag_spec' => array(
 					'spec_name' => 'script type=application/ld+json',
 				),
@@ -6341,6 +6347,12 @@ class AMP_Allowed_Tags_Generated {
 						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
+					),
+				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
 					),
 				),
 				'tag_spec' => array(
@@ -6383,6 +6395,12 @@ class AMP_Allowed_Tags_Generated {
 						'value_casei' => 'application/json',
 					),
 				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
+					),
+				),
 				'tag_spec' => array(
 					'html_format' => array(
 							'amp',
@@ -6406,6 +6424,12 @@ class AMP_Allowed_Tags_Generated {
 						'value_casei' => 'application/json',
 					),
 				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
+					),
+				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-animation',
 					'requires_extension' => array(
@@ -6422,6 +6446,12 @@ class AMP_Allowed_Tags_Generated {
 						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
+					),
+				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
 					),
 				),
 				'tag_spec' => array(
@@ -6444,6 +6474,12 @@ class AMP_Allowed_Tags_Generated {
 						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value_casei' => 'application/json',
+					),
+				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
 					),
 				),
 				'tag_spec' => array(
@@ -6826,6 +6862,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'nonce' => array(),
 				),
+				'cdata' => array(
+					'cdata_regex' => '\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\s*',
+				),
 				'tag_spec' => array(
 					'html_format' => array(
 							'amp',
@@ -6846,6 +6885,10 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => '',
 					),
+				),
+				'cdata' => array(
+					'max_bytes' => 500000,
+					'max_bytes_spec_url' => 'https://www.ampproject.org/docs/reference/spec#keyframes-stylesheet',
 				),
 				'tag_spec' => array(
 					'html_format' => array(
