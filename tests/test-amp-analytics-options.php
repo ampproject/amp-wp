@@ -215,6 +215,8 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test amp_get_analytics()
+	 *
+	 * @covers amp_get_analytics()
 	 */
 	public function test_amp_get_analytics() {
 		$this->insert_one_option(
@@ -230,20 +232,18 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
 
 		add_theme_support( 'amp' );
-		$self = $this;
-		add_filter( 'amp_analytics_entries', function( $analytics ) use ( $self ) {
-			$key                       = key( $analytics );
-			$analytics[ $key ]['test'] = 'sample';
-
-			$self->assertArrayHasKey( 'test', $analytics[ $key ] );
-			$self->assertEquals( 'sample', $analytics[ $key ]['test'] );
-
+		add_filter( 'amp_analytics_entries', function( $analytics ) use ( $key ) {
+			$analytics[ $key ]['type'] = 'test';
 			return $analytics;
 		} );
+		$analytics = amp_get_analytics();
+		$this->assertEquals( 'test', $analytics[ $key ]['type'] );
 	}
 
 	/**
 	 * Test amp_print_analytics()
+	 *
+	 * @covers amp_print_analytics()
 	 */
 	public function test_amp_print_analytics() {
 		$this->insert_one_option(

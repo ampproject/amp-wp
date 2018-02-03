@@ -152,7 +152,9 @@ function amp_print_boilerplate_code() {
 /**
  * Retrieve analytics data added in backend.
  *
- * @param array $analytics Analytics.
+ * @since 0.7
+ *
+ * @param array $analytics Analytics entries.
  * @return array Analytics.
  */
 function amp_get_analytics( $analytics = array() ) {
@@ -166,7 +168,7 @@ function amp_get_analytics( $analytics = array() ) {
 	 *
 	 * @since 0.7
 	 *
-	 * @param array $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
 	 */
 	$analytics_entries = apply_filters( 'amp_analytics_entries', $analytics_entries );
 
@@ -188,7 +190,9 @@ function amp_get_analytics( $analytics = array() ) {
 /**
  * Print analytics data.
  *
- * @param array $analytics Analytics.
+ * @since 0.7
+ *
+ * @param array $analytics Analytics entries.
  */
 function amp_print_analytics( $analytics ) {
 	$analytics_entries = amp_get_analytics( $analytics );

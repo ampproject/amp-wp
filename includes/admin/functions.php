@@ -114,7 +114,11 @@ function amp_add_options_menu() {
 
 /**
  * Add custom analytics.
- * This is currently only used for legacy AMP templates.
+ *
+ * This is currently only used for legacy AMP post templates.
+ *
+ * @since 0.5
+ * @see amp_get_analytics()
  *
  * @param array $analytics Analytics.
  * @return array Analytics.

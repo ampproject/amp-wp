@@ -127,6 +127,8 @@ function amp_post_template_add_analytics_script( $data ) {
 
 /**
  * Print analytics data.
+ *
+ * @since 0.3.2
  */
 function amp_post_template_add_analytics_data() {
 	$analytics = amp_add_custom_analytics();
