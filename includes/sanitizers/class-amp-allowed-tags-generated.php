@@ -335,10 +335,10 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'data-apester-channel-token' => array(
-						'value_regex' => '[0-9a-za-z]+',
+						'value_regex' => '[0-9a-zA-Z]+',
 					),
 					'data-apester-media-id' => array(
-						'value_regex' => '[0-9a-za-z]+',
+						'value_regex' => '[0-9a-zA-Z]+',
 					),
 					'media' => array(),
 					'noloading' => array(
@@ -499,7 +499,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 							'amp-audio',
 					),
-					'spec_name' => 'amp-audio (a4a)',
+					'spec_name' => 'amp-audio (A4A)',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-audio',
 				),
 
@@ -1710,7 +1710,7 @@ class AMP_Allowed_Tags_Generated {
 						'value' => '',
 					),
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 					'noloading' => array(
 						'value' => '',
@@ -1808,7 +1808,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-9]+',
 					),
 					'data-secret-token' => array(
-						'value_regex' => '[a-za-z0-9_-]+',
+						'value_regex' => '[A-Za-z0-9_-]+',
 					),
 					'data-trackid' => array(
 						'value_regex' => '[0-9]+',
@@ -2007,7 +2007,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'datetime' => array(
 						'mandatory' => true,
-						'value_regex' => '\\d{4}-[01]\\d-[0-3]\\dt[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(z|[+-][0-1][0-9]:[0-5][0-9])',
+						'value_regex' => '\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])',
 					),
 					'locale' => array(),
 					'media' => array(),
@@ -2529,7 +2529,7 @@ class AMP_Allowed_Tags_Generated {
 						'value' => '',
 					),
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 					'role' => array(),
 					'tabindex' => array(),
@@ -2542,7 +2542,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 					'open-button' => array(
 						'value' => '',
@@ -2978,7 +2978,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'form',
-					'spec_name' => 'form > div [submitting]',
+					'spec_name' => 'FORM > DIV [submitting]',
 				),
 
 			),
@@ -2992,7 +2992,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'form',
-					'spec_name' => 'form > div [submit-success]',
+					'spec_name' => 'FORM > DIV [submit-success]',
 				),
 
 			),
@@ -3006,7 +3006,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'form',
-					'spec_name' => 'form > div [submit-error]',
+					'spec_name' => 'FORM > DIV [submit-error]',
 				),
 
 			),
@@ -3691,7 +3691,7 @@ class AMP_Allowed_Tags_Generated {
 					'[disabled]' => array(),
 					'disabled' => array(),
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 				),
 				'tag_spec' => array(),
@@ -3970,7 +3970,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 							'amp-form',
 					),
-					'spec_name' => 'form [method=get]',
+					'spec_name' => 'FORM [method=GET]',
 				),
 
 			),
@@ -4021,7 +4021,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 							'amp-form',
 					),
-					'spec_name' => 'form [method=post]',
+					'spec_name' => 'FORM [method=POST]',
 				),
 
 			),
@@ -4710,7 +4710,7 @@ class AMP_Allowed_Tags_Generated {
 					'minlength' => array(),
 					'multiple' => array(),
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 					'pattern' => array(),
 					'placeholder' => array(),
@@ -5097,7 +5097,7 @@ class AMP_Allowed_Tags_Generated {
 					'crossorigin' => array(),
 					'href' => array(
 						'mandatory' => true,
-						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://use\\.typekit\\.net/[\\w\\p{l}\\p{n}_]+\\.css',
+						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css',
 					),
 					'integrity' => array(),
 					'media' => array(),
@@ -5146,7 +5146,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp',
 							'amp4ads',
 					),
-					'spec_name' => 'link itemprop=sameas',
+					'spec_name' => 'link itemprop=sameAs',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
 				),
 
@@ -5496,7 +5496,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp4ads',
 					),
 					'mandatory_ancestor' => 'head',
-					'spec_name' => 'meta http-equiv=x-ua-compatible',
+					'spec_name' => 'meta http-equiv=X-UA-Compatible',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
 				),
 
@@ -5685,7 +5685,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp4ads',
 					),
 					'mandatory_ancestor' => 'head',
-					'spec_name' => 'meta http-equiv=content-type',
+					'spec_name' => 'meta http-equiv=Content-Type',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
 				),
 
@@ -5774,7 +5774,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp4ads',
 					),
 					'mandatory_ancestor' => 'head',
-					'spec_name' => 'meta http-equiv=content-style-type',
+					'spec_name' => 'meta http-equiv=Content-Style-Type',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
 				),
 
@@ -5797,7 +5797,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp4ads',
 					),
 					'mandatory_ancestor' => 'head',
-					'spec_name' => 'meta http-equiv=content-script-type',
+					'spec_name' => 'meta http-equiv=Content-Script-Type',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
 				),
 
@@ -5992,7 +5992,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-9]*',
 					),
 					'type' => array(
-						'value_regex' => '[1aaii]',
+						'value_regex' => '[1AaIi]',
 					),
 				),
 				'tag_spec' => array(),
@@ -6038,7 +6038,7 @@ class AMP_Allowed_Tags_Generated {
 					'for' => array(),
 					'form' => array(),
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 				),
 				'tag_spec' => array(),
@@ -7041,7 +7041,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 							'amp-ad-exit',
 					),
-					'spec_name' => 'amp-ad-exit configuration json',
+					'spec_name' => 'amp-ad-exit configuration JSON',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-ad-exit',
 				),
 
@@ -8874,7 +8874,7 @@ class AMP_Allowed_Tags_Generated {
 					'disabled' => array(),
 					'multiple' => array(),
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 					'required' => array(),
 					'size' => array(),
@@ -9253,7 +9253,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp4ads',
 					),
 					'mandatory_parent' => 'head',
-					'spec_name' => 'style amp-custom (amp4ads)',
+					'spec_name' => 'style amp-custom (AMP4ADS)',
 					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#css',
 					'unique' => true,
 				),
@@ -9811,7 +9811,7 @@ class AMP_Allowed_Tags_Generated {
 					'maxlength' => array(),
 					'minlength' => array(),
 					'name' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
 					'placeholder' => array(),
 					'readonly' => array(),
@@ -10856,7 +10856,7 @@ class AMP_Allowed_Tags_Generated {
 		'aria-valuenow' => array(),
 		'aria-valuetext' => array(),
 		'class' => array(
-					'blacklisted_value_regex' => '(^|\\w)i-amphtml-',
+					'blacklisted_value_regex' => '(^|\\W)i-amphtml-',
 		),
 		'content' => array(),
 		'datatype' => array(),
@@ -10870,7 +10870,7 @@ class AMP_Allowed_Tags_Generated {
 		),
 		'i-amp-access-id' => array(),
 		'id' => array(
-					'blacklisted_value_regex' => '(^|\\s)(__amp_\\s*|__count__|__definegetter__|__definesetter__|__lookupgetter__|__lookupsetter__|__nosuchmethod__|__parent__|__proto__|__amp_\\s*|\\$p|\\$proxy|acceptcharset|addeventlistener|appendchild|assignedslot|attachshadow|amp|baseuri|checkvalidity|childelementcount|childnodes|classlist|classname|clientheight|clientleft|clienttop|clientwidth|comparedocumentposition|computedname|computedrole|contenteditable|createshadowroot|enqueaction|firstchild|firstelementchild|getanimations|getattribute|getattributens|getattributenode|getattributenodens|getboundingclientrect|getclientrects|getdestinationinsertionpoints|getelementsbyclassname|getelementsbytagname|getelementsbytagnamens|getrootnode|hasattribute|hasattributens|hasattributes|haschildnodes|haspointercapture|i-amphtml-\\s*|innerhtml|innertext|inputmode|insertadjacentelement|insertadjacenthtml|insertadjacenttext|iscontenteditable|isdefaultnamespace|isequalnode|issamenode|lastchild|lastelementchild|lookupnamespaceuri|namespaceuri|nextelementsibling|nextsibling|nodename|nodetype|nodevalue|offsetheight|offsetleft|offsetparent|offsettop|offsetwidth|outerhtml|outertext|ownerdocument|parentelement|parentnode|previouselementsibling|previoussibling|queryselector|queryselectorall|releasepointercapture|removeattribute|removeattributens|removeattributenode|removechild|removeeventlistener|replacechild|reportvalidity|requestpointerlock|scrollheight|scrollintoview|scrollintoviewifneeded|scrollleft|scrollwidth|setattribute|setattributens|setattributenode|setattributenodens|setpointercapture|shadowroot|stylemap|tabindex|tagname|textcontent|tostring|valueof|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)matchesselector|(webkit|moz|ms|o)requestfullscreen|(webkit|moz|ms|o)requestfullscreen)(\\s|$)',
+					'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|AMP|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|i-amphtml-\\S*|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 		),
 		'inlist' => array(),
 		'itemid' => array(),
@@ -10899,7 +10899,7 @@ class AMP_Allowed_Tags_Generated {
 		'typeof' => array(),
 		'validation-for' => array(),
 		'visible-when-invalid' => array(
-					'value_regex' => '(badinput|customerror|patternmismatch|rangeoverflow|rangeunderflow|stepmismatch|toolong|typemismatch|valuemissing)',
+					'value_regex' => '(badInput|customError|patternMismatch|rangeOverflow|rangeUnderflow|stepMismatch|tooLong|typeMismatch|valueMissing)',
 		),
 		'vocab' => array(),
 

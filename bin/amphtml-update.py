@@ -248,8 +248,8 @@ def GeneratePropertiesPHP(out, properties, indent_level = 5):
 	sorted_properties = sorted(properties.items())
 	for (prop, values) in collections.OrderedDict(sorted_properties).iteritems():
 		logging.info('generating php for property: %s...' % prop.lower())
-		if isinstance(values, (unicode,str, bool)):
-			if isinstance(values, (unicode,str)):
+		if isinstance(values, (unicode, str, bool)):
+			if isinstance(values, (unicode, str) ) and prop in ( 'mandatory_parent', 'mandatory_ancestor', 'mandatory_ancestor_suggested_alternative' ):
 				values = values.lower()
 			out.append('%s\'%s\' => \'%s\',' % (indent, prop.lower(), values))
 		elif isinstance(values, (int)):
@@ -259,8 +259,6 @@ def GeneratePropertiesPHP(out, properties, indent_level = 5):
 			sorted_values = sorted(values.items())
 			for(key, value) in collections.OrderedDict(sorted_values).iteritems():
 				if isinstance(value, (unicode, str, bool)):
-					if isinstance(value, str):
-						value = value.lower()
 					out.append('%s\t\'%s\' => \'%s\',' % (indent, key, value))
 				elif isinstance(value, (int)):
 					out.append('%s\t\'%s\' => %d,' % (indent, key, value))
