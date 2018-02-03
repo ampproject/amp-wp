@@ -16,7 +16,7 @@ if ( class_exists( 'WP_Widget_Media_Video' ) ) {
 	class AMP_Widget_Media_Video extends WP_Widget_Media_Video {
 
 		/**
-		 * Override the parent callback that strips width and height values.
+		 * Overrides the parent callback that strips width and height values.
 		 *
 		 * @param string $html Video shortcode HTML output.
 		 * @return string HTML Output.
