@@ -429,6 +429,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return boolean $valid Whether the node's placement is valid.
 	 */
 	private function validate_tag_spec_for_node( $node, $tag_spec ) {
+
+		// Always skip extension spec scripts since we manage the injection of these ourselves.
+		if ( isset( $tag_spec['extension_spec'] ) ) {
+			return false;
+		}
+
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return false;
 		}

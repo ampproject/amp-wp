@@ -17,14 +17,14 @@ class AMP_Theme_Support {
 	 *
 	 * @var string
 	 */
-	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!-- AMP:COMPONENT_SCRIPTS_PLACEHOLDER -->';
+	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
 
 	/**
 	 * Replaced with the necessary styles.
 	 *
 	 * @var string
 	 */
-	const CUSTOM_STYLES_PLACEHOLDER = '/* AMP:CUSTOM_STYLES_PLACEHOLDER */';
+	const STYLES_PLACEHOLDER = '<!-- AMP:STYLES_PLACEHOLDER -->';
 
 	/**
 	 * Sanitizer classes.
@@ -152,11 +152,11 @@ class AMP_Theme_Support {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
-		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_custom_style_placeholder() method.
+		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_custom_style_placeholder() method.
+		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_head', 'wp_custom_css_cb', 101 ); // Replaced below in add_amp_custom_style_placeholder() method.
+		remove_action( 'wp_head', 'wp_custom_css_cb', 101 ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
@@ -172,8 +172,7 @@ class AMP_Theme_Support {
 		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
 		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 5 );
-		add_action( 'wp_head', 'amp_print_boilerplate_code', 7 );
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_styles_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
@@ -466,10 +465,8 @@ class AMP_Theme_Support {
 	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
 	 */
 	public static function add_amp_component_scripts() {
-		echo '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-
 		// Replaced after output buffering with all AMP component scripts.
-		echo self::COMPONENT_SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
+		echo self::SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
 	}
 
 	/**
@@ -663,10 +660,8 @@ class AMP_Theme_Support {
 	 *
 	 * @see AMP_Theme_Support::finish_output_buffering()
 	 */
-	public static function add_amp_custom_style_placeholder() {
-		echo '<style amp-custom>';
-		echo self::CUSTOM_STYLES_PLACEHOLDER; // WPCS: XSS OK.
-		echo '</style>';
+	public static function add_amp_styles_placeholder() {
+		echo self::STYLES_PLACEHOLDER; // WPCS: XSS OK.
 
 		$wp_styles = wp_styles();
 		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
@@ -680,13 +675,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Get custom styles.
+	 * Get AMP boilerplate and custom styles.
 	 *
 	 * @param string[] $stylesheets Initial stylesheets.
 	 * @see wp_custom_css_cb()
 	 * @return string Concatenated stylesheets.
 	 */
-	public static function get_amp_custom_styles( $stylesheets ) {
+	public static function get_amp_styles( $stylesheets ) {
 		$css = wp_styles()->print_code;
 
 		$css .= join( $stylesheets );
@@ -703,7 +698,9 @@ class AMP_Theme_Support {
 		$css = apply_filters( 'amp_custom_styles', $css );
 
 		$css = wp_strip_all_tags( $css );
-		return $css;
+
+		return amp_get_boilerplate_code() . "\n"
+			. '<style amp-custom>' . $css . '</style>';
 	}
 
 	/**
@@ -712,7 +709,7 @@ class AMP_Theme_Support {
 	 * @param array $amp_scripts Initial scripts.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public static function get_amp_component_scripts( $amp_scripts ) {
+	public static function get_amp_scripts( $amp_scripts ) {
 
 		foreach ( self::$embed_handlers as $embed_handler ) {
 			$amp_scripts = array_merge(
@@ -743,7 +740,7 @@ class AMP_Theme_Support {
 		 */
 		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
 
-		$scripts = '';
+		$scripts = '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
 
 			$custom_type = 'custom-element';
@@ -795,24 +792,21 @@ class AMP_Theme_Support {
 		 * from outside the body from being part of the whitelist sanitizer when it runs when theme support is not present,
 		 * as otherwise elements from the HEAD could get added to the BODY.
 		 */
-		$output = preg_replace(
-			'#(<body.*?>)(.+)(</body>)#si',
-			'$1' . AMP_DOM_Utils::get_content_from_dom( $dom ) . '$3',
-			$output
-		);
+		$output  = "<!DOCTYPE html>\n";
+		$output .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
 		// Inject required scripts.
 		$output = preg_replace(
-			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_component_scripts( $assets['scripts'] ),
+			'#' . preg_quote( self::SCRIPTS_PLACEHOLDER, '#' ) . '#',
+			self::get_amp_scripts( $assets['scripts'] ),
 			$output,
 			1
 		);
 
 		// Inject styles.
 		$output = preg_replace(
-			'#' . preg_quote( self::CUSTOM_STYLES_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_custom_styles( $assets['stylesheets'] ),
+			'#' . preg_quote( self::STYLES_PLACEHOLDER, '#' ) . '#',
+			self::get_amp_styles( $assets['stylesheets'] ),
 			$output,
 			1
 		);

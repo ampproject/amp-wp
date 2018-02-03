@@ -184,23 +184,42 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_amp_component_scripts().
+	 * Test get_amp_styles().
 	 *
-	 * @covers AMP_Theme_Support::get_amp_component_scripts()
+	 * @covers AMP_Theme_Support::get_amp_styles()
 	 */
-	public function test_get_amp_component_scripts() {
+	public function test_get_amp_styles() {
+		$styles = AMP_Theme_Support::get_amp_styles( array() );
+		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
+
+		$injected_css = 'b strong { color: red; }';
+		add_filter( 'amp_custom_styles', function( $css ) use ( $injected_css ) {
+			return $css . $injected_css;
+		} );
+		$styles = AMP_Theme_Support::get_amp_styles( array() );
+
+		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
+		$this->assertContains( $injected_css, $styles );
+	}
+
+	/**
+	 * Test get_amp_scripts().
+	 *
+	 * @covers AMP_Theme_Support::get_amp_scripts()
+	 */
+	public function test_get_amp_scripts() {
 		add_filter( 'amp_component_scripts', function( $scripts ) {
 			$scripts['amp-video'] = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
 			return $scripts;
 		} );
 
-		$scripts = AMP_Theme_Support::get_amp_component_scripts( array(
+		$scripts = AMP_Theme_Support::get_amp_scripts( array(
 			'amp-mustache' => 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
 			'amp-bind'     => 'https://cdn.ampproject.org/v0/amp-bind-0.1.js',
 		) );
 
 		$this->assertEquals(
-			'<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
+			'<script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
 			$scripts
 		);
 	}
