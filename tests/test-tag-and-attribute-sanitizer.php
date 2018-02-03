@@ -264,7 +264,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			// Try to test for NAME_VALUE_PARENT_DISPATCH.
 			'amp_ima_video'                                             => array(
 				'<amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml" data-poster="poster.png"><source src="foo.mp4" type="video/mp4"><source src="foo.webm" type="video/webm"><track label="English subtitles" kind="subtitles" srclang="en" src="https://example.com/subtitles.vtt"><script type="application/json">{"locale": "en", "numRedirects": 4}</script></amp-ima-video>',
-				null,
+				null, // No change.
 				array( 'amp-ima-video' ),
 			),
 
@@ -279,6 +279,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'nav_dispatch_key'                                          => array(
 				'<nav><a href="https://example.com">Example</a></nav>',
 				null,
+			),
+
+			'json_linked_data'                                          => array(
+				'<script type="application/ld+json">{"@context":"http:\/\/schema.org"}</script>',
+				null, // No Change.
+			),
+
+			'json_linked_data_with_bad_cdata'                          => array(
+				'<script type="application/ld+json"><!-- {"@context":"http:\/\/schema.org"} --></script>',
+				'',
 			),
 
 			'facebook'                                                  => array(

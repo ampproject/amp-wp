@@ -17,6 +17,7 @@ abstract class AMP_Rule_Spec {
 	 */
 	const ATTR_SPEC_LIST = 'attr_spec_list';
 	const TAG_SPEC       = 'tag_spec';
+	const CDATA          = 'cdata';
 
 	/**
 	 * AMP attr_spec value check results

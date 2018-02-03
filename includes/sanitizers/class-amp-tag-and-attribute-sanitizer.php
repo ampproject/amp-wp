@@ -17,7 +17,6 @@
  * @todo Need to check the following items that are not yet checked by this sanitizer:
  *
  *     - `also_requires_attr` - if one attribute is present, this requires another.
- *     - `CdataSpec`          - CDATA is not validated or sanitized.
  *     - `ChildTagSpec`       - Places restrictions on the number and type of child tags.
  *     - `if_value_regex`     - if one attribute value matches, this places a restriction
  *                              on another attribute/value.
@@ -262,6 +261,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// The remaining validations all have to do with attributes.
 		$attr_spec_list = array();
 		$tag_spec       = array();
+		$cdata          = array();
 
 		/*
 		 * If we have exactly one rule_spec, use it's attr_spec_list
@@ -271,7 +271,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$rule_spec      = array_pop( $rule_spec_list_to_validate );
 			$attr_spec_list = $rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 			$tag_spec       = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ];
-
+			if ( isset( $rule_spec[ AMP_Rule_Spec::CDATA ] ) ) {
+				$cdata = $rule_spec[ AMP_Rule_Spec::CDATA ];
+			}
 		} else {
 			/*
 			 * If there is more than one valid rule_spec for this node,
@@ -295,6 +297,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 1 === count( $spec_ids_sorted ) ) {
 				$attr_spec_list = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 				$tag_spec       = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::TAG_SPEC ];
+				if ( isset( $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::CDATA ] ) ) {
+					$cdata = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::CDATA ];
+				}
 			} else {
 				// This should not happen very often, but...
 				// If we're here, then we're not sure which spec should
@@ -307,6 +312,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 							$tag_spec,
 							$rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::TAG_SPEC ]
 						);
+						if ( isset( $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::CDATA ] ) ) {
+							$cdata = array_merge( $cdata, $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::CDATA ] );
+						}
 					}
 				}
 				$first_spec = reset( $rule_spec_list_to_validate );
@@ -319,6 +327,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
 			return;
+		}
+
+		// Remove element if it has illegal CDATA.
+		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
+			$validity = $this->validate_cdata_for_node( $node, $cdata );
+			if ( is_wp_error( $validity ) ) {
+				$this->remove_node( $node );
+				return;
+			}
 		}
 
 		$merged_attr_spec_list = array_merge(
@@ -377,6 +394,24 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Validate element for its CDATA.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMElement $element    Element.
+	 * @param array      $cdata_spec CDATA.
+	 * @return true|WP_Error True when valid or error when invalid.
+	 */
+	private function validate_cdata_for_node( $element, $cdata_spec ) {
+		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
+			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
+				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
+			}
+		}
+		return true;
 	}
 
 	/**
