@@ -178,6 +178,8 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
+		add_action( 'wp_footer', 'amp_print_analytics' );
+
 		/*
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
 		 * combine to surpass the 50K limit imposed for the amp-custom style.

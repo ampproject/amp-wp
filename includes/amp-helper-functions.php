@@ -150,6 +150,78 @@ function amp_print_boilerplate_code() {
 }
 
 /**
+ * Retrieve analytics data added in backend.
+ *
+ * @since 0.7
+ *
+ * @param array $analytics Analytics entries.
+ * @return array Analytics.
+ */
+function amp_get_analytics( $analytics = array() ) {
+	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
+
+	/**
+	 * Add amp-analytics tags.
+	 *
+	 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
+	 * This filter should be used to alter entries for paired mode.
+	 *
+	 * @since 0.7
+	 *
+	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 */
+	$analytics_entries = apply_filters( 'amp_analytics_entries', $analytics_entries );
+
+	if ( ! $analytics_entries ) {
+		return $analytics;
+	}
+
+	foreach ( $analytics_entries as $entry_id => $entry ) {
+		$analytics[ $entry_id ] = array(
+			'type'        => $entry['type'],
+			'attributes'  => array(),
+			'config_data' => json_decode( $entry['config'] ),
+		);
+	}
+
+	return $analytics;
+}
+
+/**
+ * Print analytics data.
+ *
+ * @since 0.7
+ *
+ * @param array $analytics Analytics entries.
+ */
+function amp_print_analytics( $analytics ) {
+	$analytics_entries = amp_get_analytics( $analytics );
+
+	if ( empty( $analytics_entries ) ) {
+		return;
+	}
+
+	// Can enter multiple configs within backend.
+	foreach ( $analytics_entries as $id => $analytics_entry ) {
+		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
+			/* translators: %1$s is analytics entry ID, %2$s is actual entry keys. */
+			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
+			continue;
+		}
+		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
+			'type' => 'application/json',
+		), wp_json_encode( $analytics_entry['config_data'] ) );
+
+		$amp_analytics_attr = array_merge( array(
+			'id'   => $id,
+			'type' => $analytics_entry['type'],
+		), $analytics_entry['attributes'] );
+
+		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
+	}
+}
+
+/**
  * Get content embed handlers.
  *
  * @since 0.7

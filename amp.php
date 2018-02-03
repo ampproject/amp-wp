@@ -91,7 +91,6 @@ function amp_after_setup_theme() {
 	add_action( 'widgets_init', 'AMP_Theme_Support::register_widgets' ); // @todo Let this be called by AMP_Theme_Support::init().
 	add_action( 'init', 'AMP_Theme_Support::setup_commenting' ); // @todo Let this be called by AMP_Theme_Support::init().
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
-	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );

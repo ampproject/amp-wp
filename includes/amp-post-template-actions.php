@@ -128,31 +128,11 @@ function amp_post_template_add_analytics_script( $data ) {
 /**
  * Print analytics data.
  *
- * @param AMP_Post_Template $amp_template Template.
+ * @since 0.3.2
  */
-function amp_post_template_add_analytics_data( $amp_template ) {
-	$analytics_entries = $amp_template->get( 'amp_analytics' );
-	if ( empty( $analytics_entries ) ) {
-		return;
-	}
-
-	foreach ( $analytics_entries as $id => $analytics_entry ) {
-		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
-			/* translators: %1$s is analytics entry ID, %2$s is actual entry keys. */
-			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
-			continue;
-		}
-		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
-			'type' => 'application/json',
-		), wp_json_encode( $analytics_entry['config_data'] ) );
-
-		$amp_analytics_attr = array_merge( array(
-			'id'   => $id,
-			'type' => $analytics_entry['type'],
-		), $analytics_entry['attributes'] );
-
-		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
-	}
+function amp_post_template_add_analytics_data() {
+	$analytics = amp_add_custom_analytics();
+	amp_print_analytics( $analytics );
 }
 
 /**

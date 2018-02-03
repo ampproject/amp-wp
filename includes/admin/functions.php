@@ -115,23 +115,29 @@ function amp_add_options_menu() {
 /**
  * Add custom analytics.
  *
+ * This is currently only used for legacy AMP post templates.
+ *
+ * @since 0.5
+ * @see amp_get_analytics()
+ *
  * @param array $analytics Analytics.
  * @return array Analytics.
  */
-function amp_add_custom_analytics( $analytics ) {
-	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
+function amp_add_custom_analytics( $analytics = array() ) {
+	$analytics = amp_get_analytics( $analytics );
 
-	if ( ! $analytics_entries ) {
-		return $analytics;
-	}
-
-	foreach ( $analytics_entries as $entry_id => $entry ) {
-		$analytics[ $entry_id ] = array(
-			'type' => $entry['type'],
-			'attributes' => array(),
-			'config_data' => json_decode( $entry['config'] ),
-		);
-	}
+	/**
+	 * Add amp-analytics tags.
+	 *
+	 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
+	 * This filter should be used to alter entries for legacy AMP templates.
+	 *
+	 * @since 0.4
+	 *
+	 * @param array   $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 * @param WP_Post $post      The current post.
+	 */
+	$analytics = apply_filters( 'amp_post_template_analytics', $analytics, get_queried_object() );
 
 	return $analytics;
 }
