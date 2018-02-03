@@ -293,7 +293,6 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	return apply_filters( 'amp_content_sanitizers',
 		array(
-			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Img_Sanitizer'               => array(),
 			'AMP_Form_Sanitizer'              => array(),
 			'AMP_Comments_Sanitizer'          => array(),
@@ -303,6 +302,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'AMP_Iframe_Sanitizer'            => array(
 				'add_placeholder' => true,
 			),
+			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 		),
 		$post

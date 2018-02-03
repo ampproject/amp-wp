@@ -32,6 +32,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	function register_embed() {
 		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 		add_shortcode( 'vimeo', array( $this, 'shortcode' ) );
+		add_filter( 'wp_video_shortcode_override', array( $this, 'video_override' ), 10, 2 );
 	}
 
 	public function unregister_embed() {
@@ -107,4 +108,27 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return $video_id;
 	}
+
+	/**
+	 * Override the output of Vimeo videos.
+	 *
+	 * This overrides the value in wp_video_shortcode().
+	 * The pattern matching is copied from WP_Widget_Media_Video::render().
+	 *
+	 * @param string $html Empty variable to be replaced with shortcode markup.
+	 * @param array  $attr The shortcode attributes.
+	 * @return string|null $markup The markup to output.
+	 */
+	public function video_override( $html, $attr ) {
+		if ( ! isset( $attr['src'] ) ) {
+			return $html;
+		}
+		$src           = $attr['src'];
+		$vimeo_pattern = '#^https?://(.+\.)?vimeo\.com/.*#';
+		if ( 1 === preg_match( $vimeo_pattern, $src ) ) {
+			return $this->shortcode( array( $src ) );
+		}
+		return $html;
+	}
+
 }
