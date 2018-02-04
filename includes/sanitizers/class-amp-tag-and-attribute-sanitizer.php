@@ -1284,19 +1284,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$parent = $node->parentNode;
 		if ( $node && $parent ) {
-			$parent->removeChild( $node );
-			if ( isset( $this->args['mutation_callback'] ) ) {
-				call_user_func( $this->args['mutation_callback'], $node, 'removed' );
-			}
+			$this->remove_child( $node );
 		}
 		while ( $parent && ! $parent->hasChildNodes() && 'body' !== $parent->nodeName ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;
 			if ( $parent ) {
-				$parent->removeChild( $node );
-				if ( isset( $this->args['mutation_callback'] ) ) {
-					call_user_func( $this->args['mutation_callback'], $node, 'removed' );
-				}
+				$this->remove_child( $node );
 			}
 		}
 	}

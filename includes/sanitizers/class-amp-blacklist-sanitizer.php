@@ -112,10 +112,10 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
 				$element     = $elements->item( $i );
 				$parent_node = $element->parentNode;
-				$parent_node->removeChild( $element );
+				$this->remove_child( $element );
 
 				if ( 'body' !== $parent_node->nodeName && AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$parent_node->parentNode->removeChild( $parent_node );
+					$this->remove_child( $parent_node );
 				}
 			}
 		}
@@ -219,7 +219,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove the node from the parent, if defined.
 		if ( $node->parentNode ) {
-			$node->parentNode->removeChild( $node );
+			$this->remove_child( $node );
 		}
 	}
 

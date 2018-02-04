@@ -193,24 +193,4 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		return $placeholder_node;
 	}
 
-	/**
-	 * Removes a child of a node.
-	 *
-	 * Also, calls the mutation callback for it.
-	 * This tracks all the nodes that were removed.
-	 *
-	 * @since 0.7
-	 *
-	 * @param DOMNode $child The node to remove.
-	 * @return void.
-	 */
-	public function remove_child( $child ) {
-		if ( method_exists( $child->parentNode, 'removeChild' ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
-			$child->parentNode->removeChild( $child ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
-			if ( isset( $this->args['mutation_callback'] ) ) {
-				call_user_func( $this->args['mutation_callback'], $child, 'removed' );
-			}
-		}
-	}
-
 }
