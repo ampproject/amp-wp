@@ -37,6 +37,28 @@ class AMP_WP_Styles extends WP_Styles {
 	protected $did_custom_css = false;
 
 	/**
+	 * Regex for allowed font stylesheet URL.
+	 *
+	 * @var string
+	 */
+	protected $allowed_font_src_regex;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		parent::__construct();
+
+		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$this->allowed_font_src_regex = '@^(' . $spec_rule[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] . ')$@';
+				break;
+			}
+		}
+	}
+
+	/**
 	 * Generates an enqueued style's fully-qualified file path.
 	 *
 	 * @since 0.7
@@ -123,6 +145,14 @@ class AMP_WP_Styles extends WP_Styles {
 				$this->print_code .= $inline_style;
 			}
 			return true;
+		}
+
+		// Allow font URLs.
+		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $obj->src ) ) {
+			$this->do_concat = false;
+			$result          = parent::do_item( $handle );
+			$this->do_concat = true;
+			return $result;
 		}
 
 		$css_file_path = $this->get_validated_css_file_path( $obj->src, $handle );

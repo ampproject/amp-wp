@@ -324,6 +324,22 @@ def GenerateFooterPHP(out):
 	}
 
 	/**
+	 * Get allowed tag.
+	 *
+	 * Get the rules for a single tag so that the entire data structure needn't be passed around.
+	 *
+	 * @since 0.7
+	 * @param string $node_name Tag name.
+	 * @return array|null Allowed tag, or null if the tag does not exist.
+	 */
+	public static function get_allowed_tag( $node_name ) {
+		if ( isset( self::$allowed_tags[ $node_name ] ) ) {
+			return self::$allowed_tags[ $node_name ];
+		}
+		return null;
+	}
+
+	/**
 	 * Get list of globally-allowed attributes.
 	 *
 	 * @since 0.5
