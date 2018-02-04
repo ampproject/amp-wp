@@ -421,9 +421,9 @@ def ParseRules(out_dir):
 				# AddTag(allowed_tags, tag_spec, attr_lists)
 
 				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
-
-				tag_list.append(gotten_tag_spec)
-				allowed_tags[UnicodeEscape(tag_spec.tag_name)] = tag_list
+				if gotten_tag_spec is not None:
+					tag_list.append(gotten_tag_spec)
+					allowed_tags[UnicodeEscape(tag_spec.tag_name)] = tag_list
 
 	logging.info('... done')
 	return allowed_tags, attr_lists, versions
@@ -433,6 +433,8 @@ def GetTagSpec(tag_spec, attr_lists):
 	logging.info('entering ...')
 
 	tag_dict = GetTagRules(tag_spec)
+	if tag_dict is None:
+		return None
 	attr_dict = GetAttrs(tag_spec.attrs)
 
 	# Now add attributes from any attribute lists to this tag.
@@ -491,12 +493,12 @@ def GetTagRules(tag_spec):
 
 	if tag_spec.html_format:
 		html_format_list = []
+		has_amp_format = False
 		for html_format in tag_spec.html_format:
 			if 1 == html_format:
-				html_format_list.append('amp')
-			elif 2 == html_format:
-				html_format_list.append('amp4ads')
-		tag_rules['html_format'] = {'html_format': html_format_list}
+				has_amp_format = True
+		if not has_amp_format:
+			return None
 
 	if tag_spec.HasField('extension_spec'):
 		extension_spec = {}

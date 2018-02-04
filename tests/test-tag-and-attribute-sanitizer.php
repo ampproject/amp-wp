@@ -47,14 +47,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-ad' ),
 			),
 
-			'amp-ad-exit'                                               => array(
-				'<amp-ad-exit id="exit-api"><script type="application/json"></script></amp-ad-exit>',
-				null, // No change.
-				array( 'amp-ad-exit' ),
-			),
-
 			'amp-animation'                                             => array(
-				'<amp-animation layout="nodisplay"><script type="application/json"></script></amp-animation>',
+				'<amp-animation layout="nodisplay"><script type="application/json">{}</script></amp-animation>',
 				null, // No change.
 				array( 'amp-animation' ),
 			),
@@ -117,12 +111,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-gist layout="fixed-height" height="1613"></amp-gist>',
 				'',
 				array(),
-			),
-
-			'amp-gwd-animation'                                         => array(
-				'<amp-gwd-animation id="4321" layout="nodisplay"></amp-gwd-animation>',
-				null, // No change.
-				array( 'amp-gwd-animation' ),
 			),
 
 			'amp-iframe'                                                => array(
