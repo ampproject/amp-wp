@@ -171,7 +171,6 @@ class AMP_Theme_Support {
 		 * in this case too we should defer to the theme as well to output the meta charset because it is possible the
 		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
-		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 ); // @todo Remove this to add just-in-time with possible encoding conversion.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_styles_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
@@ -439,15 +438,6 @@ class AMP_Theme_Support {
 			exit;
 		}
 		return $template;
-	}
-
-	/**
-	 * Print meta charset tag.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#chrs
-	 */
-	public static function add_meta_charset() {
-		echo '<meta charset="utf-8">';
 	}
 
 	/**
@@ -739,7 +729,9 @@ class AMP_Theme_Support {
 	/**
 	 * Ensure markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 	 *
-	 * Ensure meta[charset] and meta[name=viewport]; if a the whitelist sanitizer may have removed an illegal meta[http-equiv] or meta[name=viewport].
+	 * Ensure meta[charset], meta[name=viewport], and link[rel=canonical]; a the whitelist sanitizer
+	 * may have removed an illegal meta[http-equiv] or meta[name=viewport]. Core only outputs a
+	 * canonical URL by default if a singular post.
 	 *
 	 * @since 0.7
 	 *
@@ -759,7 +751,7 @@ class AMP_Theme_Support {
 			 *
 			 * @var DOMElement $meta
 			 */
-			if ( 'utf-8' === $meta->getAttribute( 'charset' ) ) { // @todo Also look for meta[http-equiv="Content-Type"]?
+			if ( $meta->hasAttribute( 'charset' ) && 'utf-8' === strtolower( $meta->getAttribute( 'charset' ) ) ) { // @todo Also look for meta[http-equiv="Content-Type"]?
 				$meta_charset = $meta;
 			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
 				$meta_viewport = $meta;
@@ -815,13 +807,26 @@ class AMP_Theme_Support {
 	public static function finish_output_buffering( $output ) {
 		global $content_width;
 
+		/*
+		 * Make sure that <meta charset> is present in output prior to parsing.
+		 * Note that the meta charset is supposed to appear within the first 1024 bytes.
+		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
+		 */
+		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $output, 0, 1024 ) ) ) {
+			$output = preg_replace(
+				'/(<head[^>]*>)/i',
+				'$1' . sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) ),
+				$output,
+				1
+			);
+		}
 		$dom  = AMP_DOM_Utils::get_dom( $output );
 		$args = array(
 			'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 			'use_document_element' => true,
 		);
 
-		// Make sure amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
@@ -829,6 +834,12 @@ class AMP_Theme_Support {
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
 		self::ensure_required_markup( $dom );
+
+		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
+		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
+			/* translators: %s is the charset of the current site */
+			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ), E_USER_WARNING ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		}
 
 		$output  = "<!DOCTYPE html>\n";
 		$output .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );

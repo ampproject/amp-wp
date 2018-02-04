@@ -119,7 +119,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::finish_output_buffering( $original_html );
 
-		$this->assertContains( '<meta charset="utf-8">', $sanitized_html );
+		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
 		$this->assertContains( '<style amp-custom>', $sanitized_html );
