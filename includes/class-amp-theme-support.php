@@ -163,15 +163,15 @@ class AMP_Theme_Support {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'override_wp_styles' ), -1 );
 
 		/*
-		 * Replace core's canonical link functionality with one that outputs links for non-singular queries as well.
-		 * See WP Core #18660.
+		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
+		 * Note that the meta[name=viewport] is not added here because a theme may want to define one with additional
+		 * properties than included in the default configuration. If a theme doesn't include one, then the meta viewport
+		 * will be added when output buffering is finished. Note that meta charset _is_ output here because the output
+		 * buffer will need it to parse the document properly, and it must be exactly as is to be valid AMP. Nevertheless,
+		 * in this case too we should defer to the theme as well to output the meta charset because it is possible the
+		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
-		remove_action( 'wp_head', 'rel_canonical' );
-		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
-
-		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
-		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
-		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 5 );
+		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 ); // @todo Remove this to add just-in-time with possible encoding conversion.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_styles_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
@@ -451,15 +451,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Print meta charset tag.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#vprt
-	 */
-	public static function add_meta_viewport() {
-		echo '<meta name="viewport" content="width=device-width,minimum-scale=1">';
-	}
-
-	/**
 	 * Print AMP script and placeholder for others.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
@@ -475,6 +466,8 @@ class AMP_Theme_Support {
 	 * @see rel_canonical()
 	 * @global WP $wp
 	 * @global WP_Rewrite $wp_rewrite
+	 * @link https://www.ampproject.org/docs/reference/spec#canon.
+	 * @link https://core.trac.wordpress.org/ticket/18660
 	 *
 	 * @return string Canonical non-AMP URL.
 	 */
@@ -515,22 +508,6 @@ class AMP_Theme_Support {
 		$url = remove_query_arg( AMP_QUERY_VAR, $url );
 
 		return $url;
-	}
-
-	/**
-	 * Add canonical link.
-	 *
-	 * Replaces `rel_canonical()` which only outputs canonical URLs for singular posts and pages.
-	 * This can be removed once WP Core #18660 lands.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#canon.
-	 * @link https://core.trac.wordpress.org/ticket/18660
-	 */
-	public static function add_canonical_link() {
-		$url = self::get_current_canonical_url();
-		if ( ! empty( $url ) ) {
-			printf( '<link rel="canonical" href="%s">', esc_url( $url ) );
-		}
 	}
 
 	/**
@@ -760,6 +737,67 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Ensure markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
+	 *
+	 * Ensure meta[charset] and meta[name=viewport]; if a the whitelist sanitizer may have removed an illegal meta[http-equiv] or meta[name=viewport].
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMDocument $dom Doc.
+	 */
+	protected static function ensure_required_markup( DOMDocument $dom ) {
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		if ( ! $head ) {
+			$head = $dom->createElement( 'head' );
+			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
+		}
+		$meta_charset  = null;
+		$meta_viewport = null;
+		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
+			/**
+			 * Meta.
+			 *
+			 * @var DOMElement $meta
+			 */
+			if ( 'utf-8' === $meta->getAttribute( 'charset' ) ) { // @todo Also look for meta[http-equiv="Content-Type"]?
+				$meta_charset = $meta;
+			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
+				$meta_viewport = $meta;
+			}
+		}
+		if ( ! $meta_charset ) {
+			// Warning: This probably means the character encoding needs to be converted.
+			$meta_charset = AMP_DOM_Utils::create_node( $dom, 'meta', array(
+				'charset' => 'utf-8',
+			) );
+			$head->insertBefore( $meta_charset, $head->firstChild );
+		}
+		if ( ! $meta_viewport ) {
+			$meta_viewport = AMP_DOM_Utils::create_node( $dom, 'meta', array(
+				'name'    => 'viewport',
+				'content' => 'width=device-width,minimum-scale=1',
+			) );
+			$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
+		}
+
+		// Ensure rel=canonical link.
+		$rel_canonical = null;
+		foreach ( $head->getElementsByTagName( 'link' ) as $link ) {
+			if ( 'canonical' === $link->getAttribute( 'rel' ) ) {
+				$rel_canonical = $link;
+				break;
+			}
+		}
+		if ( ! $rel_canonical ) {
+			$rel_canonical = AMP_DOM_Utils::create_node( $dom, 'link', array(
+				'rel'  => 'canonical',
+				'href' => self::get_current_canonical_url(),
+			) );
+			$head->appendChild( $rel_canonical );
+		}
+	}
+
+	/**
 	 * Start output buffering.
 	 */
 	public static function start_output_buffering() {
@@ -783,13 +821,14 @@ class AMP_Theme_Support {
 			'use_document_element' => true,
 		);
 
-		// @todo Remove any existing meta[viewport] and meta[charset] to be supplied by us here?
 		// Make sure amp attribute is present on the html element, as otherwise it will be stripped entirely.
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		self::ensure_required_markup( $dom );
 
 		$output  = "<!DOCTYPE html>\n";
 		$output .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
