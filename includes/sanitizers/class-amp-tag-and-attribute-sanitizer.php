@@ -605,7 +605,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * If given attribute's value is a URL with a protocol, the protocol must
 			 * be in the array specified by the rule's value to pass.
 			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
+			if ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
 				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
 					$score++;
 				}
@@ -615,7 +615,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * If the given attribute's value is *not* a relative path, and the rule's
 			 * value is `false`, then pass.
 			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
+			if ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
 				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 					$score++;
 				}
@@ -625,7 +625,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * If the given attribute's value exists, is non-empty and the rule's value
 			 * is false, then pass.
 			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
+			if ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
 				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
 					$score++;
 				}
@@ -752,13 +752,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) &&
+			} elseif ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
+			} elseif ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
+			} elseif ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) &&
@@ -786,8 +786,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove the disallowed values.
 		foreach ( $attrs_to_remove as $attr_name ) {
-			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
-				( true === $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
+			if ( isset( $attr_spec_list[ $attr_name ]['value_url'][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
+				( true === $attr_spec_list[ $attr_name ]['value_url'][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
 				$node->setAttribute( $attr_name, '' );
 			} else {
 				$node->removeAttribute( $attr_name );
@@ -1012,7 +1012,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
+		if ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value   = $node->getAttribute( $attr_name );
 				$attr_value   = preg_replace( '/\s*,\s*/', ',', $attr_value );
@@ -1024,7 +1024,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					 */
 					$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
 					if ( $url_scheme ) {
-						if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
+						if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 							return AMP_Rule_Spec::FAIL;
 						}
 					}
@@ -1043,7 +1043,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 							 */
 							$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
 							if ( $url_scheme ) {
-								if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
+								if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 									return AMP_Rule_Spec::FAIL;
 								}
 							}
@@ -1070,7 +1070,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
+		if ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! ( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value   = $node->getAttribute( $attr_name );
 				$attr_value   = preg_replace( '/\s*,\s*/', ',', $attr_value );
@@ -1124,7 +1124,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::ALLOW_EMPTY ] ) && $node->hasAttribute( $attr_name ) ) {
+		if ( isset( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! ( $attr_spec_rule['value_url'][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
 			if ( empty( $attr_value ) ) {
 				return AMP_Rule_Spec::FAIL;
