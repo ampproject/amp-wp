@@ -783,6 +783,12 @@ class AMP_Theme_Support {
 			'use_document_element' => true,
 		);
 
+		// @todo Remove any existing meta[viewport] and meta[charset] to be supplied by us here?
+		// Make sure amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
+			$dom->documentElement->setAttribute( 'amp', '' );
+		}
+
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
 		$output  = "<!DOCTYPE html>\n";

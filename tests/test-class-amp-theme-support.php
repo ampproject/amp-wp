@@ -137,6 +137,26 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test finish_output_buffering to inject html[amp] attribute and ensure HTML5 doctype.
+	 *
+	 * @covers AMP_Theme_Support::finish_output_buffering()
+	 */
+	public function test_finish_output_buffering_to_add_html5_doctype_and_amp_attribute() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		ob_start();
+		?>
+		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+		<html><head><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
+		<?php
+		$original_html  = trim( ob_get_clean() );
+		$sanitized_html = AMP_Theme_Support::finish_output_buffering( $original_html );
+
+		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
+		$this->assertContains( '<html amp', $sanitized_html );
+	}
+
+	/**
 	 * Test purge_amp_query_vars.
 	 *
 	 * @covers AMP_Theme_Support::purge_amp_query_vars()
