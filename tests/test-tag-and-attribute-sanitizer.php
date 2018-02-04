@@ -261,10 +261,34 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-dailymotion' ),
 			),
 
+			// Try to test for NAME_VALUE_PARENT_DISPATCH.
+			'amp_ima_video'                                             => array(
+				'<amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml" data-poster="poster.png"><source src="foo.mp4" type="video/mp4"><source src="foo.webm" type="video/webm"><track label="English subtitles" kind="subtitles" srclang="en" src="https://example.com/subtitles.vtt"><script type="application/json">{"locale": "en", "numRedirects": 4}</script></amp-ima-video>',
+				null, // No change.
+				array( 'amp-ima-video' ),
+			),
+
+			// Try to test for NAME_VALUE_DISPATCH.
 			'doubleclick-1'                                             => array(
 				'<amp-ad width="480" height="75" type="doubleclick" data-slot="/4119129/mobile_ad_banner" data-multi-size="320x50" class="dashedborder"></amp-ad>',
 				'<amp-ad width="480" height="75" type="doubleclick" data-slot="/4119129/mobile_ad_banner" data-multi-size="320x50" class="dashedborder"></amp-ad>',
 				array( 'amp-ad' ),
+			),
+
+			// Try to test for NAME_DISPATCH.
+			'nav_dispatch_key'                                          => array(
+				'<nav><a href="https://example.com">Example</a></nav>',
+				null,
+			),
+
+			'json_linked_data'                                          => array(
+				'<script type="application/ld+json">{"@context":"http:\/\/schema.org"}</script>',
+				null, // No Change.
+			),
+
+			'json_linked_data_with_bad_cdata'                          => array(
+				'<script type="application/ld+json"><!-- {"@context":"http:\/\/schema.org"} --></script>',
+				'',
 			),
 
 			'facebook'                                                  => array(

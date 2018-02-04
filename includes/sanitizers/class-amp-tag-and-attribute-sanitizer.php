@@ -17,7 +17,6 @@
  * @todo Need to check the following items that are not yet checked by this sanitizer:
  *
  *     - `also_requires_attr` - if one attribute is present, this requires another.
- *     - `CdataSpec`          - CDATA is not validated or sanitized.
  *     - `ChildTagSpec`       - Places restrictions on the number and type of child tags.
  *     - `if_value_regex`     - if one attribute value matches, this places a restriction
  *                              on another attribute/value.
@@ -262,6 +261,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// The remaining validations all have to do with attributes.
 		$attr_spec_list = array();
 		$tag_spec       = array();
+		$cdata          = array();
 
 		/*
 		 * If we have exactly one rule_spec, use it's attr_spec_list
@@ -271,7 +271,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$rule_spec      = array_pop( $rule_spec_list_to_validate );
 			$attr_spec_list = $rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 			$tag_spec       = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ];
-
+			if ( isset( $rule_spec[ AMP_Rule_Spec::CDATA ] ) ) {
+				$cdata = $rule_spec[ AMP_Rule_Spec::CDATA ];
+			}
 		} else {
 			/*
 			 * If there is more than one valid rule_spec for this node,
@@ -295,6 +297,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 1 === count( $spec_ids_sorted ) ) {
 				$attr_spec_list = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 				$tag_spec       = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::TAG_SPEC ];
+				if ( isset( $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::CDATA ] ) ) {
+					$cdata = $rule_spec_list_to_validate[ $spec_ids_sorted[0] ][ AMP_Rule_Spec::CDATA ];
+				}
 			} else {
 				// This should not happen very often, but...
 				// If we're here, then we're not sure which spec should
@@ -307,6 +312,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 							$tag_spec,
 							$rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::TAG_SPEC ]
 						);
+						if ( isset( $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::CDATA ] ) ) {
+							$cdata = array_merge( $cdata, $rule_spec_list_to_validate[ $id ][ AMP_Rule_Spec::CDATA ] );
+						}
 					}
 				}
 				$first_spec = reset( $rule_spec_list_to_validate );
@@ -319,6 +327,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
 			return;
+		}
+
+		// Remove element if it has illegal CDATA.
+		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
+			$validity = $this->validate_cdata_for_node( $node, $cdata );
+			if ( is_wp_error( $validity ) ) {
+				$this->remove_node( $node );
+				return;
+			}
 		}
 
 		$merged_attr_spec_list = array_merge(
@@ -380,6 +397,24 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Validate element for its CDATA.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMElement $element    Element.
+	 * @param array      $cdata_spec CDATA.
+	 * @return true|WP_Error True when valid or error when invalid.
+	 */
+	private function validate_cdata_for_node( $element, $cdata_spec ) {
+		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
+			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
+				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Determines is a node is currently valid per its tag specification.
 	 *
 	 * Checks to see if a node's placement with the DOM is be valid for the
@@ -427,9 +462,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function validate_attr_spec_list_for_node( $node, $attr_spec_list ) {
 
-		/**
-		 * If node has no attributes there is no point in continuing.
-		 */
+		// If node has no attributes there is no point in continuing.
 		if ( ! $node->hasAttributes() ) {
 			return 0;
 		}
@@ -461,6 +494,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
 
+			$dispatch_key = isset( $attr_spec_rule['dispatch_key'] ) ? $attr_spec_rule['dispatch_key'] : AMP_Rule_Spec::NONE_DISPATCH;
+
 			// If a mandatory attribute is required, and attribute exists, pass.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
 				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule ) ) {
@@ -473,8 +508,33 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * Given attribute's value must exactly equal value of the rule to pass.
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
-				if ( AMP_Rule_Spec::PASS === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
+				$result = $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule );
+				if ( AMP_Rule_Spec::PASS === $result ) {
 					$score++;
+				} elseif ( AMP_Rule_Spec::FAIL === $result && AMP_Rule_Spec::NAME_VALUE_DISPATCH === $dispatch_key ) {
+					/*
+					 * Per gregable in the AMP Slack: https://amphtml.slack.com/archives/C0ADR0A0K/p1517464216000087
+					 * > The "dispatch_key: NAME_VALUE_DISPATCH" field on that attribute indicates that this attribute should
+					 * > be used for choosing if the tagspec should be used for validation or not.
+					 * >
+					 * > What it's telling the validator is that if we see an <amp-ad> tag, consider *only* this tagspec for
+					 * > validating if the tag has a data-multi-size attribute with an empty value.
+					 * > And if we don't see a data-multi-size attribute with an empty value, don't even consider this tagspec
+					 * > for validating, use the others.
+					 * >
+					 * > Note that the validator allows all tags by default to have any data-* attributes, without constraint.
+					 * > We know these attributes are inert in HTML, so we allow the developer to use them for generic markup.
+					 * >
+					 * > So, the other tagspecs for <amp-ad> have an implicit attr spec of:
+					 * >
+					 * > attrs: {
+					 * >   name: 'data-multi-size'
+					 * > }
+					 * >
+					 * > So, if the user provides data-multi-size="320x50", this tagspec is no longer considered, but all of the
+					 * > other <amp-ad> tagspecs are."
+					 */
+					return 0;
 				}
 			}
 

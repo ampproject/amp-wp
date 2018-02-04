@@ -17,6 +17,7 @@ abstract class AMP_Rule_Spec {
 	 */
 	const ATTR_SPEC_LIST = 'attr_spec_list';
 	const TAG_SPEC       = 'tag_spec';
+	const CDATA          = 'cdata';
 
 	/**
 	 * AMP attr_spec value check results
@@ -46,6 +47,23 @@ abstract class AMP_Rule_Spec {
 	const VALUE_CASEI             = 'value_casei';
 	const VALUE_REGEX             = 'value_regex';
 	const VALUE_REGEX_CASEI       = 'value_regex_casei';
+
+	/*
+	 * DispatchKeyTypes:
+	 * https://github.com/ampproject/amphtml/blob/eda1daa8c40f830207edc8d8088332b32a15c1a4/validator/validator.proto#L111-L120
+	 */
+
+	// Indicates that the attribute does not form a dispatch key.
+	const NONE_DISPATCH = 0;
+
+	// Indicates that the name of the attribute alone forms a dispatch key.
+	const NAME_DISPATCH = 1;
+
+	// Indicates that the name + value of the attribute forms a dispatch key.
+	const NAME_VALUE_DISPATCH = 2;
+
+	// Indicates that the name + value + mandatory parent forms a dispatch key.
+	const NAME_VALUE_PARENT_DISPATCH = 3;
 
 	/**
 	 * If a node type listed here is invalid, it and it's subtree will be

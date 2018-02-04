@@ -248,18 +248,22 @@ def GeneratePropertiesPHP(out, properties, indent_level = 5):
 	sorted_properties = sorted(properties.items())
 	for (prop, values) in collections.OrderedDict(sorted_properties).iteritems():
 		logging.info('generating php for property: %s...' % prop.lower())
-		if isinstance(values, (str, bool)):
-			if isinstance(values, str):
+		if isinstance(values, (unicode,str, bool)):
+			if isinstance(values, (unicode,str)):
 				values = values.lower()
 			out.append('%s\'%s\' => \'%s\',' % (indent, prop.lower(), values))
+		elif isinstance(values, (int)):
+			out.append('%s\'%s\' => %d,' % (indent, prop.lower(), values))
 		else:
 			out.append('%s\'%s\' => array(' % (indent, prop.lower()))
 			sorted_values = sorted(values.items())
-			for(value_type, value) in collections.OrderedDict(sorted_values).iteritems():
-				if isinstance(value, (str, bool)):
+			for(key, value) in collections.OrderedDict(sorted_values).iteritems():
+				if isinstance(value, (unicode, str, bool)):
 					if isinstance(value, str):
 						value = value.lower()
-					out.append('%s\t\'%s\' => \'%s\',' % (indent, value_type, value))
+					out.append('%s\t\'%s\' => \'%s\',' % (indent, key, value))
+				elif isinstance(value, (int)):
+					out.append('%s\t\'%s\' => %d,' % (indent, key, value))
 				else:
 					GenerateValuesPHP(out, value)
 			out.append('%s),' % indent)
@@ -283,6 +287,9 @@ def GenerateValuesPHP(out, values, indent_level = 6):
 
 			if isinstance(value, (str, bool)):
 				out.append('%s\'%s\' => \'%s\',' % (indent, key.lower(), value))
+
+			elif isinstance(value, (int)):
+				out.append('%s\'%s\' => %d,' % (indent, key.lower(), value))
 
 			else:
 				out.append('%s\'%s\' => array(' % (indent, key.lower()))
@@ -435,7 +442,6 @@ def GetTagSpec(tag_spec, attr_lists):
 
 	tag_dict = GetTagRules(tag_spec)
 	attr_dict = GetAttrs(tag_spec.attrs)
-	# TODO: add CDATA section if validation of non-body elements is required.
 
 	# Now add attributes from any attribute lists to this tag.
 	for (tag_field_desc, tag_field_val) in tag_spec.ListFields():
@@ -444,7 +450,22 @@ def GetTagSpec(tag_spec, attr_lists):
 				attr_dict.update(attr_lists[UnicodeEscape(attr_list)])
 
 	logging.info('... done')
-	return {'tag_spec':tag_dict, 'attr_spec_list':attr_dict}
+	tag_spec_dict = {'tag_spec':tag_dict, 'attr_spec_list':attr_dict}
+	if tag_spec.HasField('cdata'):
+		cdata_dict = {}
+		for (field_descriptor, field_value) in tag_spec.cdata.ListFields():
+			if isinstance(field_value, (unicode, str, bool, int)):
+				cdata_dict[ field_descriptor.name ] = field_value
+			else:
+				if hasattr( field_value, '_values' ):
+					cdata_dict[ field_descriptor.name ] = {}
+					for _value in field_value._values:
+						for (key,val) in _value.ListFields():
+							cdata_dict[ field_descriptor.name ][ key.name ] = val
+		if len( cdata_dict ) > 0:
+			tag_spec_dict['cdata'] = cdata_dict
+
+	return tag_spec_dict
 
 
 def GetTagRules(tag_spec):
@@ -552,7 +573,7 @@ def GetValues(attr_spec):
 	if attr_spec.HasField('blacklisted_value_regex'):
 		value_dict['blacklisted_value_regex'] = UnicodeEscape(attr_spec.blacklisted_value_regex)
 
-	# dispatch_key is a boolean
+	# dispatch_key is an int
 	if attr_spec.HasField('dispatch_key'):
 		value_dict['dispatch_key'] = attr_spec.dispatch_key
 
