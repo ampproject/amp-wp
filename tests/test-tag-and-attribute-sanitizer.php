@@ -1,12 +1,23 @@
 <?php
+/**
+ * Class AMP_Tag_And_Attribute_Sanitizer_Test
+ *
+ * @package AMP
+ */
 
+/**
+ * Test AMP_Tag_And_Attribute_Sanitizer
+ *
+ * @covers AMP_Tag_And_Attribute_Sanitizer
+ */
 class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
-	protected $allowed_tags;
-	protected $globally_allowed_attrs;
-	protected $layout_allowed_attrs;
-
-	public function get_data() {
+	/**
+	 * Get data for testing sanitization in the body.
+	 *
+	 * @return array[] Each array item is a tuple containing pre-sanitized string, sanitized string, and scripts identified during sanitization.
+	 */
+	public function get_body_data() {
 		return array(
 			'empty_doc' => array(
 				'',
@@ -415,13 +426,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'attribute_bad_attr_with_no_value_removed'                  => array(
-				'<amp-ad type="adsense" bad-attr-no-value>something here</amp-alt>',
-				'<amp-ad type="adsense">something here</amp-ad>',
+				'<amp-ad type="adsense" bad-attr-no-value><div fallback>something here</div></amp-ad>',
+				'<amp-ad type="adsense"><div fallback>something here</div></amp-ad>',
 				array( 'amp-ad' ),
 			),
 
 			'attribute_bad_attr_with_value_removed'                     => array(
-				'<amp-ad type="adsense" bad-attr="some-value">something here</amp-alt>',
+				'<amp-ad type="adsense" bad-attr="some-value">something here</amp-ad>',
 				'<amp-ad type="adsense">something here</amp-ad>',
 				array( 'amp-ad' ),
 			),
@@ -655,12 +666,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		);
 	}
 
-	public function setUp() {
-		$this->allowed_tags = AMP_Allowed_Tags_Generated::get_allowed_tags();
-		$this->globally_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
-		$this->layout_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
-	}
-
 	/**
 	 * Tests is_missing_mandatory_attribute
 	 *
@@ -689,18 +694,94 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test sanitization of tags and attributes.
 	 *
-	 * @dataProvider get_data
+	 * @dataProvider get_body_data
 	 * @group allowed-tags
+	 *
 	 * @param string $source   Markup to process.
 	 * @param string $expected The markup to expect.
 	 * @param array  $scripts  The AMP component script names that are obtained through sanitization.
 	 */
-	public function test_sanitizer( $source, $expected = null, $scripts = array() ) {
+	public function test_body_sanitizer( $source, $expected = null, $scripts = array() ) {
 		$expected  = isset( $expected ) ? $expected : $source;
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		$this->assertEquals( $expected, $content );
+		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
+	}
+
+	/**
+	 * Get data for testing sanitization in the html.
+	 *
+	 * @return array[] Each array item is a tuple containing pre-sanitized string, sanitized string, and scripts identified during sanitization.
+	 */
+	public function get_html_data() {
+		$data = array(
+			'meta_charset_and_viewport_and_canonical' => array(
+				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>', // phpcs:ignore
+			),
+			'script_tag_externals' => array(
+				'<html amp><head><meta charset="utf-8"><script async type="text/javascript" src="illegal.js"></script><script async src="illegal.js"></script><script src="illegal.js"></script><script type="text/javascript" src="illegal.js"></script></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+			'script_tag_inline' => array(
+				'<html amp><head><meta charset="utf-8"><script type="text/javascript">document.write("bad");</script></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+			'style_external' => array(
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" src="https://example.com/test.css"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+			'style_inline' => array(
+				'<html amp><head><meta charset="utf-8"><style>body{}</style><style type="text/css">body{}</style></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+			'bad_external_font' => array(
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+		);
+
+		// Also include the body tests.
+		$html_doc_format = '<html amp><head><meta charset="utf-8"></head><body><!-- before -->%s<!-- after --></body></html>';
+		foreach ( $this->get_body_data() as $body_test ) {
+			$html_test = array(
+				sprintf( $html_doc_format, $body_test[0] ),
+			);
+			if ( isset( $body_test[1] ) ) {
+				$html_test[] = sprintf( $html_doc_format, $body_test[1] );
+			} else {
+				$html_test[] = null;
+			}
+			if ( 3 === count( $body_test ) ) {
+				$html_test[] = $body_test[2];
+			}
+			$data[] = $html_test;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Test sanitization of tags and attributes for the entire document, including the HEAD.
+	 *
+	 * @dataProvider get_html_data
+	 * @group allowed-tags
+	 *
+	 * @param string $source   Markup to process.
+	 * @param string $expected The markup to expect.
+	 * @param array  $scripts  The AMP component script names that are obtained through sanitization.
+	 */
+	public function test_html_sanitizer( $source, $expected = null, $scripts = array() ) {
+		$expected  = isset( $expected ) ? $expected : $source;
+		$dom       = AMP_DOM_Utils::get_dom( $source );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );

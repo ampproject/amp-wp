@@ -769,7 +769,7 @@ class AMP_Theme_Support {
 	/**
 	 * Finish output buffering.
 	 *
-	 * @todo Do this in shutdown instead of output buffering callback?
+	 * @todo Do this in shutdown instead of output buffering callback? This will make it easier to debug things since printing can be done in shutdown function but cannot in output buffer callback.
 	 * @global int $content_width
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
@@ -785,14 +785,6 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
-		/*
-		 * @todo The sanitize method needs to be updated to sanitize the entire HTML element and not just the BODY.
-		 * This will require updating mandatory_parent_blacklist in amphtml-update.py to include elements that appear in the HEAD.
-		 * This will ensure that the scripts and styles that plugins output via wp_head() will be sanitized as well. However,
-		 * since the the old paired mode is sending content from the *body* we'll need to be able to filter out the elements
-		 * from outside the body from being part of the whitelist sanitizer when it runs when theme support is not present,
-		 * as otherwise elements from the HEAD could get added to the BODY.
-		 */
 		$output  = "<!DOCTYPE html>\n";
 		$output .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
