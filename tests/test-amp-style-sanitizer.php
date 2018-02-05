@@ -150,6 +150,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_keyframe_data() {
+		$keyframes_max_size = 10;
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style[amp-keyframes]' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$keyframes_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+
 		return array(
 			'style_amp_keyframes'              => array(
 				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes foo {} }</style>',
@@ -157,7 +165,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'style_amp_keyframes_max_overflow' => array(
-				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes ' . str_repeat( 'a', 500000 ) . ' {} }</style>',
+				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes ' . str_repeat( 'a', $keyframes_max_size + 1 ) . ' {} }</style>',
 				'',
 			),
 

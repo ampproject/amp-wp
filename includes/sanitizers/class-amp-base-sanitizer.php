@@ -75,7 +75,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @since 0.2
 	 *
 	 * @param DOMDocument $dom Represents the HTML document to sanitize.
-	 * @param array       $args array {
+	 * @param array       $args {
 	 *      Args.
 	 *
 	 *      @type int $content_max_width
