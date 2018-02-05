@@ -791,20 +791,37 @@ class AMP_Theme_Support {
 
 	/**
 	 * Start output buffering.
+	 *
+	 * @since 0.7
+	 * @see AMP_Theme_Support::finish_output_buffering()
 	 */
 	public static function start_output_buffering() {
-		ob_start( array( __CLASS__, 'finish_output_buffering' ) );
+		ob_start();
+
+		// Note that the following must be at 0 because wp_ob_end_flush_all() runs at shutdown:1.
+		add_action( 'shutdown', array( __CLASS__, 'finish_output_buffering' ), 0 );
 	}
 
 	/**
 	 * Finish output buffering.
 	 *
-	 * @todo Do this in shutdown instead of output buffering callback? This will make it easier to debug things since printing can be done in shutdown function but cannot in output buffer callback.
-	 * @global int $content_width
-	 * @param string $output Buffered output.
-	 * @return string Finalized output.
+	 * @since 0.7
+	 * @see AMP_Theme_Support::start_output_buffering()
 	 */
-	public static function finish_output_buffering( $output ) {
+	public static function finish_output_buffering() {
+		echo self::prepare_response( ob_get_clean() ); // WPCS: xss ok.
+	}
+
+	/**
+	 * Process response to ensure AMP validity.
+	 *
+	 * @since 0.7
+	 *
+	 * @param string $response HTML document response.
+	 * @return string AMP document response.
+	 * @global int $content_width
+	 */
+	public static function prepare_response( $response ) {
 		global $content_width;
 
 		/*
@@ -812,15 +829,15 @@ class AMP_Theme_Support {
 		 * Note that the meta charset is supposed to appear within the first 1024 bytes.
 		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
 		 */
-		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $output, 0, 1024 ) ) ) {
-			$output = preg_replace(
+		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $response, 0, 1024 ) ) ) {
+			$response = preg_replace(
 				'/(<head[^>]*>)/i',
 				'$1' . sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) ),
-				$output,
+				$response,
 				1
 			);
 		}
-		$dom  = AMP_DOM_Utils::get_dom( $output );
+		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$args = array(
 			'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 			'use_document_element' => true,
@@ -841,25 +858,25 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ), E_USER_WARNING ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		$output  = "<!DOCTYPE html>\n";
-		$output .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$response  = "<!DOCTYPE html>\n";
+		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
 		// Inject required scripts.
-		$output = preg_replace(
+		$response = preg_replace(
 			'#' . preg_quote( self::SCRIPTS_PLACEHOLDER, '#' ) . '#',
 			self::get_amp_scripts( $assets['scripts'] ),
-			$output,
+			$response,
 			1
 		);
 
 		// Inject styles.
-		$output = preg_replace(
+		$response = preg_replace(
 			'#' . preg_quote( self::STYLES_PLACEHOLDER, '#' ) . '#',
 			self::get_amp_styles( $assets['stylesheets'] ),
-			$output,
+			$response,
 			1
 		);
 
-		return $output;
+		return $response;
 	}
 }
