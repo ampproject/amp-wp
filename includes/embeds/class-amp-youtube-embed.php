@@ -24,7 +24,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( isset( $this->args['content_max_width'] ) ) {
 			$max_width = $this->args['content_max_width'];
-			$this->args['width'] = $max_width;
+			$this->args['width']  = $max_width;
 			$this->args['height'] = round( $max_width * self::RATIO );
 		}
 	}
@@ -32,6 +32,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	function register_embed() {
 		wp_embed_register_handler( 'amp-youtube', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 		add_shortcode( 'youtube', array( $this, 'shortcode' ) );
+		add_filter( 'wp_video_shortcode_override', array( $this, 'video_override' ), 10, 2 );
 	}
 
 	public function unregister_embed() {
@@ -125,4 +126,27 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return $value;
 	}
+
+	/**
+	 * Override the output of YouTube videos.
+	 *
+	 * This overrides the value in wp_video_shortcode().
+	 * The pattern matching is copied from WP_Widget_Media_Video::render().
+	 *
+	 * @param string $html Empty variable to be replaced with shortcode markup.
+	 * @param array  $attr The shortcode attributes.
+	 * @return string|null $markup The markup to output.
+	 */
+	public function video_override( $html, $attr ) {
+		if ( ! isset( $attr['src'] ) ) {
+			return $html;
+		}
+		$src             = $attr['src'];
+		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
+		if ( 1 === preg_match( $youtube_pattern, $src ) ) {
+			return $this->shortcode( array( $src ) );
+		}
+		return $html;
+	}
+
 }

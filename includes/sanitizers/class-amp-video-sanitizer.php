@@ -124,7 +124,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out = array();
+		$out          = array();
+		$out['style'] = 'max-width:100%'; // Note that this will get moved to amp-custom style by AMP_Style_Sanitizer.
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {

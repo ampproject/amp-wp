@@ -140,13 +140,87 @@ function amp_get_asset_url( $file ) {
 }
 
 /**
- * Print AMP boilerplate code.
+ * Get AMP boilerplate code.
  *
+ * @since 0.7
  * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ * @return string Boilerplate code.
  */
-function amp_print_boilerplate_code() {
-	echo '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>';
-	echo '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+function amp_get_boilerplate_code() {
+	return '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
+		. '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+}
+
+/**
+ * Retrieve analytics data added in backend.
+ *
+ * @since 0.7
+ *
+ * @param array $analytics Analytics entries.
+ * @return array Analytics.
+ */
+function amp_get_analytics( $analytics = array() ) {
+	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
+
+	/**
+	 * Add amp-analytics tags.
+	 *
+	 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
+	 * This filter should be used to alter entries for paired mode.
+	 *
+	 * @since 0.7
+	 *
+	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 */
+	$analytics_entries = apply_filters( 'amp_analytics_entries', $analytics_entries );
+
+	if ( ! $analytics_entries ) {
+		return $analytics;
+	}
+
+	foreach ( $analytics_entries as $entry_id => $entry ) {
+		$analytics[ $entry_id ] = array(
+			'type'        => $entry['type'],
+			'attributes'  => array(),
+			'config_data' => json_decode( $entry['config'] ),
+		);
+	}
+
+	return $analytics;
+}
+
+/**
+ * Print analytics data.
+ *
+ * @since 0.7
+ *
+ * @param array $analytics Analytics entries.
+ */
+function amp_print_analytics( $analytics ) {
+	$analytics_entries = amp_get_analytics( $analytics );
+
+	if ( empty( $analytics_entries ) ) {
+		return;
+	}
+
+	// Can enter multiple configs within backend.
+	foreach ( $analytics_entries as $id => $analytics_entry ) {
+		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
+			/* translators: %1$s is analytics entry ID, %2$s is actual entry keys. */
+			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
+			continue;
+		}
+		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
+			'type' => 'application/json',
+		), wp_json_encode( $analytics_entry['config_data'] ) );
+
+		$amp_analytics_attr = array_merge( array(
+			'id'   => $id,
+			'type' => $analytics_entry['type'],
+		), $analytics_entry['attributes'] );
+
+		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
+	}
 }
 
 /**
@@ -221,7 +295,6 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	return apply_filters( 'amp_content_sanitizers',
 		array(
-			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Img_Sanitizer'               => array(),
 			'AMP_Form_Sanitizer'              => array(),
 			'AMP_Comments_Sanitizer'          => array(),
@@ -231,6 +304,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'AMP_Iframe_Sanitizer'            => array(
 				'add_placeholder' => true,
 			),
+			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 		),
 		$post

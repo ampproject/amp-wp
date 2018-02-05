@@ -126,7 +126,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out = array();
+		$out          = array();
+		$out['style'] = 'max-width:100%'; // AMP_Style_Sanitizer will move this to the amp-custom style.
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {

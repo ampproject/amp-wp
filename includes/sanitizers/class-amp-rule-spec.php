@@ -17,13 +17,16 @@ abstract class AMP_Rule_Spec {
 	 */
 	const ATTR_SPEC_LIST = 'attr_spec_list';
 	const TAG_SPEC       = 'tag_spec';
+	const CDATA          = 'cdata';
 
 	/**
-	 * AMP attr_spec value check results
+	 * AMP attr_spec value check results.
+	 *
+	 * In 0.7 these changed from strings to integers to speed up comparisons.
 	 */
-	const PASS           = 'pass';
-	const FAIL           = 'fail';
-	const NOT_APPLICABLE = 'not_applicable';
+	const PASS           = 1;
+	const FAIL           = 0;
+	const NOT_APPLICABLE = -1;
 
 	/**
 	 * HTML Element Tag rule names
@@ -46,6 +49,8 @@ abstract class AMP_Rule_Spec {
 	const VALUE_CASEI             = 'value_casei';
 	const VALUE_REGEX             = 'value_regex';
 	const VALUE_REGEX_CASEI       = 'value_regex_casei';
+	const VALUE_PROPERTIES        = 'value_properties';
+	const VALUE_URL               = 'value_url';
 
 	/**
 	 * If a node type listed here is invalid, it and it's subtree will be

@@ -33,6 +33,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $stylesheets = array();
 
 	/**
+	 * Maximum number of bytes allowed for a keyframes style.
+	 *
+	 * @since 0.7
+	 * @var int
+	 */
+	private $keyframes_max_size;
+
+	/**
+	 * AMP_Base_Sanitizer constructor.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMDocument $dom  Represents the HTML document to sanitize.
+	 * @param array       $args Args.
+	 */
+	public function __construct( DOMDocument $dom, array $args = array() ) {
+		parent::__construct( $dom, $args );
+
+		$spec_name = 'style[amp-keyframes]';
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$this->keyframes_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+	}
+
+	/**
 	 * Get list of CSS styles in HTML content of DOMDocument ($this->dom).
 	 *
 	 * @since 0.4
@@ -62,7 +90,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.4
 	 */
 	public function sanitize() {
-		$body = $this->get_body_node();
+		$body = $this->root_element;
 
 		$this->collect_style_elements();
 
@@ -84,8 +112,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var DOMElement $style_element
 			 */
 
-			if ( 'head' === $style_element->parentNode->nodeName && ( $style_element->hasAttribute( 'amp-boilerplate' ) || $style_element->hasAttribute( 'amp-custom' ) ) ) {
-				continue;
+			if ( 'body' === $style_element->parentNode->nodeName && $style_element->hasAttribute( 'amp-keyframes' ) ) {
+				$validity = $this->validate_amp_keyframe( $style_element );
+				if ( true === $validity ) {
+					continue;
+				}
 			}
 
 			$nodes_to_remove[] = $style_element;
@@ -103,6 +134,33 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $nodes_to_remove as $node_to_remove ) {
 			$node_to_remove->parentNode->removeChild( $node_to_remove );
 		}
+	}
+
+	/**
+	 * Validate amp-keyframe style.
+	 *
+	 * @since 0.7
+	 * @link https://github.com/ampproject/amphtml/blob/b685a0780a7f59313666225478b2b79b463bcd0b/validator/validator-main.protoascii#L1002-L1043
+	 *
+	 * @param DOMElement $style Style element.
+	 * @return true|WP_Error Validity.
+	 */
+	private function validate_amp_keyframe( $style ) {
+		if ( $this->keyframes_max_size && strlen( $style->textContent ) > $this->keyframes_max_size ) {
+			return new WP_Error( 'max_bytes' );
+		}
+
+		// This logic could be in AMP_Tag_And_Attribute_Sanitizer, but since it only applies to amp-keyframes it seems unnecessary.
+		$next_sibling = $style->nextSibling;
+		while ( $next_sibling ) {
+			if ( $next_sibling instanceof DOMElement ) {
+				return new WP_Error( 'mandatory_last_child' );
+			}
+			$next_sibling = $next_sibling->nextSibling;
+		}
+
+		// @todo Also add validation of the CSS spec itself.
+		return true;
 	}
 
 	/**

@@ -136,6 +136,35 @@ class Test_AMP_WP_Styles extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests test_do_item for stylesheets.
+	 *
+	 * @covers AMP_WP_Styles::do_item()
+	 */
+	public function test_do_item_font_stylesheet() {
+		$wp_styles = AMP_Theme_Support::override_wp_styles();
+
+		$ok_styles = array(
+			'tangerine'   => 'https://fonts.googleapis.com/css?family=Tangerine',
+			'typekit'     => 'https://use.typekit.net/abc.css',
+			'fontscom'    => 'https://fast.fonts.net/abc.css',
+			'fontawesome' => 'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
+		);
+		foreach ( $ok_styles as $handle => $src ) {
+			$wp_styles->add( $handle, $src );
+			ob_start();
+			$this->assertTrue( $wp_styles->do_item( $handle ) );
+			$output = ob_get_clean();
+			$this->assertContains( '<link', $output );
+			$this->assertContains( $src, $output );
+		}
+
+		$this->setExpectedException( 'PHPUnit_Framework_Error_Warning', 'Unable to locate filesystem path for stylesheet fontillegal (https://illegal.example.com/forbidden.css).' );
+		$handle = 'fontillegal';
+		$wp_styles->add( $handle, 'https://illegal.example.com/forbidden.css' );
+		$this->assertFalse( $wp_styles->do_item( $handle ) );
+	}
+
+	/**
 	 * Tests do_locale_stylesheet.
 	 *
 	 * @covers AMP_WP_Styles::do_locale_stylesheet()

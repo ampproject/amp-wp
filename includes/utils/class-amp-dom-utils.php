@@ -311,7 +311,7 @@ class AMP_DOM_Utils {
 	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 	 *
 	 * @param DOMDocument $dom  Represents an HTML document.
-	 * @param DOMNode     $node Represents an HTML element of the $dom from which to extract HTML content.
+	 * @param DOMElement  $node Represents an HTML element of the $dom from which to extract HTML content.
 	 * @return string Returns the HTML content represented in the DOMNode
 	 */
 	public static function get_content_from_dom_node( $dom, $node ) {
