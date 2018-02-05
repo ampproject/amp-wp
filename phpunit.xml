@@ -1,5 +1,4 @@
 <phpunit
-	processIsolation="true"
 	bootstrap="dev-lib/phpunit-plugin-bootstrap.php"
 	backupGlobals="false"
 	colors="true"
