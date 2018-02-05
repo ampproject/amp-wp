@@ -796,6 +796,17 @@ class AMP_Theme_Support {
 	 * @see AMP_Theme_Support::finish_output_buffering()
 	 */
 	public static function start_output_buffering() {
+		/*
+		 * Disable the New Relic Browser agent on AMP responses.
+		 * This prevents th New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset:
+		 * https://docs.newrelic.com/docs/browser/new-relic-browser/troubleshooting/google-amp-validator-fails-due-3rd-party-script
+		 * Sites with New Relic will need to specially configure New Relic for AMP:
+		 * https://docs.newrelic.com/docs/browser/new-relic-browser/installation/monitor-amp-pages-new-relic-browser
+		 */
+		if ( extension_loaded( 'newrelic' ) ) {
+			newrelic_disable_autorum();
+		}
+
 		ob_start();
 
 		// Note that the following must be at 0 because wp_ob_end_flush_all() runs at shutdown:1.
