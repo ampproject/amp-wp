@@ -809,8 +809,7 @@ class AMP_Theme_Support {
 	 * @see AMP_Theme_Support::start_output_buffering()
 	 */
 	public static function finish_output_buffering() {
-		$output = ob_get_clean();
-		echo self::prepare_response( $output ); // WPCS: xss ok.
+		echo self::prepare_response( ob_get_clean() ); // WPCS: xss ok.
 	}
 
 	/**
