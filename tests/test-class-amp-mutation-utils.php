@@ -154,12 +154,9 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		AMP_Mutation_Utils::reset_removed();
 		$disallowed_style = '<div style="display:none"></div>';
 		AMP_Mutation_Utils::process_markup( $disallowed_style );
-		$removed_attribute           = AMP_Mutation_Utils::$removed_attributes;
-		$expected_removed_attributes = array(
-			'style' => 1,
-		);
+		$removed_attribute = AMP_Mutation_Utils::$removed_attributes;
 		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
-		$this->assertEquals( $expected_removed_attributes, $removed_attribute );
+		$this->assertEquals( null, $removed_attribute );
 
 		AMP_Mutation_Utils::reset_removed();
 		$invalid_video = '<video width="200" height="100"></video>';

@@ -196,9 +196,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$this->styles[ '.' . $class_name ] = $style;
 				}
 				$node->removeAttribute( 'style' );
-				if ( isset( $this->args['mutation_callback'] ) ) {
-					call_user_func( $this->args['mutation_callback'], $node, 'removed_attr', 'style' );
-				}
 			}
 		}
 

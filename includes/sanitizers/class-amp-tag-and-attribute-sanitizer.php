@@ -812,10 +812,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				( true === $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
 				$node->setAttribute( $attr_name, '' );
 			} else {
-				$node->removeAttribute( $attr_name );
-				if ( isset( $this->args['mutation_callback'] ) ) {
-					call_user_func( $this->args['mutation_callback'], $node, 'removed_attr', $attr_name );
-				}
+				$this->remove_attribute( $node, $attr_name );
 			}
 		}
 	}

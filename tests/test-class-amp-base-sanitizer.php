@@ -276,4 +276,32 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		AMP_Mutation_Utils::$removed_nodes = null;
 	}
 
+	/**
+	 * Tests remove_child.
+	 *
+	 * @see AMP_Base_Sanitizer::remove_child()
+	 */
+	public function test_remove_attribute() {
+		AMP_Mutation_Utils::reset_removed();
+		$video_name   = 'amp-video';
+		$attribute    = 'onload';
+		$dom_document = new DOMDocument( '1.0', 'utf-8' );
+		$video        = $dom_document->createElement( $video_name );
+		$video->setAttribute( $attribute, 'someFunction()' );
+
+		// To ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+		// @codingStandardsIgnoreStart
+		$args = array(
+			'mutation_callback' => 'AMP_Mutation_Utils::track_removed',
+		);
+		$expected_removed = array(
+			$attribute => 1,
+		);
+		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
+		$sanitizer->remove_attribute( $video, $attribute );
+		$this->assertEquals( null, $video->getAttribute( $attribute ) );
+		$this->assertEquals( $expected_removed, AMP_Mutation_Utils::$removed_attributes );
+		AMP_Mutation_Utils::reset_removed();
+	}
+
 }

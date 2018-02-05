@@ -85,10 +85,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$node->setAttribute( 'action', $action_url );
 				}
 			} elseif ( 'post' === $method ) {
-				$node->removeAttribute( 'action' );
-				if ( isset( $this->args['mutation_callback'] ) ) {
-					call_user_func( $this->args['mutation_callback'], $node, 'removed_attr', 'action' );
-				}
+				$this->remove_attribute( $node, 'action' );
 				if ( ! $xhr_action ) {
 					$node->setAttribute( 'action-xhr', $action_url );
 				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {

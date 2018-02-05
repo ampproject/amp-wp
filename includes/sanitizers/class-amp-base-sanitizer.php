@@ -325,4 +325,25 @@ abstract class AMP_Base_Sanitizer {
 		}
 	}
 
+	/**
+	 * Removes an attribute of a node.
+	 *
+	 * Also, calls the mutation callback for it.
+	 * This tracks all the attributes that were removed.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMNode $node The node for which to remove the attribute.
+	 * @param string  $attribute The attribute to remove from the node.
+	 * @return void.
+	 */
+	public function remove_attribute( $node, $attribute ) {
+		if ( method_exists( $node, 'removeAttribute' ) ) {
+			$node->removeAttribute( $attribute );
+			if ( isset( $this->args['mutation_callback'] ) ) {
+				call_user_func( $this->args['mutation_callback'], $node, 'removed_attr', $attribute );
+			}
+		}
+	}
+
 }
