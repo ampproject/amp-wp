@@ -317,6 +317,11 @@ function amp_render_post( $post ) {
 		$wp_query->query_vars[ AMP_QUERY_VAR ] = true;
 	}
 
+	// Prevent New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset.
+	if ( extension_loaded( 'newrelic' ) ) {
+		newrelic_disable_autorum();
+	}
+
 	/**
 	 * Fires before rendering a post in AMP.
 	 *
