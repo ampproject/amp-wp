@@ -112,10 +112,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var DOMElement $style_element
 			 */
 
-			if ( 'head' === $style_element->parentNode->nodeName && ( $style_element->hasAttribute( 'amp-boilerplate' ) || $style_element->hasAttribute( 'amp-custom' ) ) ) {
-				continue;
-			}
-
 			if ( 'body' === $style_element->parentNode->nodeName && $style_element->hasAttribute( 'amp-keyframes' ) ) {
 				$validity = $this->validate_amp_keyframe( $style_element );
 				if ( true === $validity ) {
