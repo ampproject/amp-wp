@@ -17,14 +17,14 @@ class AMP_Theme_Support {
 	 *
 	 * @var string
 	 */
-	const COMPONENT_SCRIPTS_PLACEHOLDER = '<!-- AMP:COMPONENT_SCRIPTS_PLACEHOLDER -->';
+	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
 
 	/**
 	 * Replaced with the necessary styles.
 	 *
 	 * @var string
 	 */
-	const CUSTOM_STYLES_PLACEHOLDER = '/* AMP:CUSTOM_STYLES_PLACEHOLDER */';
+	const STYLES_PLACEHOLDER = '<!-- AMP:STYLES_PLACEHOLDER -->';
 
 	/**
 	 * Sanitizer classes.
@@ -152,28 +152,26 @@ class AMP_Theme_Support {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
-		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_custom_style_placeholder() method.
+		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_custom_style_placeholder() method.
+		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_head', 'wp_custom_css_cb', 101 ); // Replaced below in add_amp_custom_style_placeholder() method.
+		remove_action( 'wp_head', 'wp_custom_css_cb', 101 ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'override_wp_styles' ), -1 );
 
 		/*
-		 * Replace core's canonical link functionality with one that outputs links for non-singular queries as well.
-		 * See WP Core #18660.
+		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
+		 * Note that the meta[name=viewport] is not added here because a theme may want to define one with additional
+		 * properties than included in the default configuration. If a theme doesn't include one, then the meta viewport
+		 * will be added when output buffering is finished. Note that meta charset _is_ output here because the output
+		 * buffer will need it to parse the document properly, and it must be exactly as is to be valid AMP. Nevertheless,
+		 * in this case too we should defer to the theme as well to output the meta charset because it is possible the
+		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
-		remove_action( 'wp_head', 'rel_canonical' );
-		add_action( 'wp_head', array( __CLASS__, 'add_canonical_link' ), 1 );
-
-		// Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
-		add_action( 'wp_head', array( __CLASS__, 'add_meta_charset' ), 0 );
-		add_action( 'wp_head', array( __CLASS__, 'add_meta_viewport' ), 5 );
-		add_action( 'wp_head', 'amp_print_boilerplate_code', 7 );
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_custom_style_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
+		add_action( 'wp_head', array( __CLASS__, 'add_amp_styles_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
@@ -443,33 +441,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Print meta charset tag.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#chrs
-	 */
-	public static function add_meta_charset() {
-		echo '<meta charset="utf-8">';
-	}
-
-	/**
-	 * Print meta charset tag.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#vprt
-	 */
-	public static function add_meta_viewport() {
-		echo '<meta name="viewport" content="width=device-width,minimum-scale=1">';
-	}
-
-	/**
 	 * Print AMP script and placeholder for others.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
 	 */
 	public static function add_amp_component_scripts() {
-		echo '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-
 		// Replaced after output buffering with all AMP component scripts.
-		echo self::COMPONENT_SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
+		echo self::SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
 	}
 
 	/**
@@ -478,6 +456,8 @@ class AMP_Theme_Support {
 	 * @see rel_canonical()
 	 * @global WP $wp
 	 * @global WP_Rewrite $wp_rewrite
+	 * @link https://www.ampproject.org/docs/reference/spec#canon.
+	 * @link https://core.trac.wordpress.org/ticket/18660
 	 *
 	 * @return string Canonical non-AMP URL.
 	 */
@@ -518,22 +498,6 @@ class AMP_Theme_Support {
 		$url = remove_query_arg( AMP_QUERY_VAR, $url );
 
 		return $url;
-	}
-
-	/**
-	 * Add canonical link.
-	 *
-	 * Replaces `rel_canonical()` which only outputs canonical URLs for singular posts and pages.
-	 * This can be removed once WP Core #18660 lands.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#canon.
-	 * @link https://core.trac.wordpress.org/ticket/18660
-	 */
-	public static function add_canonical_link() {
-		$url = self::get_current_canonical_url();
-		if ( ! empty( $url ) ) {
-			printf( '<link rel="canonical" href="%s">', esc_url( $url ) );
-		}
 	}
 
 	/**
@@ -663,10 +627,8 @@ class AMP_Theme_Support {
 	 *
 	 * @see AMP_Theme_Support::finish_output_buffering()
 	 */
-	public static function add_amp_custom_style_placeholder() {
-		echo '<style amp-custom>';
-		echo self::CUSTOM_STYLES_PLACEHOLDER; // WPCS: XSS OK.
-		echo '</style>';
+	public static function add_amp_styles_placeholder() {
+		echo self::STYLES_PLACEHOLDER; // WPCS: XSS OK.
 
 		$wp_styles = wp_styles();
 		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
@@ -680,13 +642,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Get custom styles.
+	 * Get AMP boilerplate and custom styles.
 	 *
 	 * @param string[] $stylesheets Initial stylesheets.
 	 * @see wp_custom_css_cb()
 	 * @return string Concatenated stylesheets.
 	 */
-	public static function get_amp_custom_styles( $stylesheets ) {
+	public static function get_amp_styles( $stylesheets ) {
 		$css = wp_styles()->print_code;
 
 		$css .= join( $stylesheets );
@@ -703,7 +665,9 @@ class AMP_Theme_Support {
 		$css = apply_filters( 'amp_custom_styles', $css );
 
 		$css = wp_strip_all_tags( $css );
-		return $css;
+
+		return amp_get_boilerplate_code() . "\n"
+			. '<style amp-custom>' . $css . '</style>';
 	}
 
 	/**
@@ -712,7 +676,7 @@ class AMP_Theme_Support {
 	 * @param array $amp_scripts Initial scripts.
 	 * @return string Scripts to inject into the HEAD.
 	 */
-	public static function get_amp_component_scripts( $amp_scripts ) {
+	public static function get_amp_scripts( $amp_scripts ) {
 
 		foreach ( self::$embed_handlers as $embed_handler ) {
 			$amp_scripts = array_merge(
@@ -743,7 +707,7 @@ class AMP_Theme_Support {
 		 */
 		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
 
-		$scripts = '';
+		$scripts = '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
 
 			$custom_type = 'custom-element';
@@ -763,6 +727,69 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Ensure markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
+	 *
+	 * Ensure meta[charset], meta[name=viewport], and link[rel=canonical]; a the whitelist sanitizer
+	 * may have removed an illegal meta[http-equiv] or meta[name=viewport]. Core only outputs a
+	 * canonical URL by default if a singular post.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMDocument $dom Doc.
+	 */
+	protected static function ensure_required_markup( DOMDocument $dom ) {
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		if ( ! $head ) {
+			$head = $dom->createElement( 'head' );
+			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
+		}
+		$meta_charset  = null;
+		$meta_viewport = null;
+		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
+			/**
+			 * Meta.
+			 *
+			 * @var DOMElement $meta
+			 */
+			if ( $meta->hasAttribute( 'charset' ) && 'utf-8' === strtolower( $meta->getAttribute( 'charset' ) ) ) { // @todo Also look for meta[http-equiv="Content-Type"]?
+				$meta_charset = $meta;
+			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
+				$meta_viewport = $meta;
+			}
+		}
+		if ( ! $meta_charset ) {
+			// Warning: This probably means the character encoding needs to be converted.
+			$meta_charset = AMP_DOM_Utils::create_node( $dom, 'meta', array(
+				'charset' => 'utf-8',
+			) );
+			$head->insertBefore( $meta_charset, $head->firstChild );
+		}
+		if ( ! $meta_viewport ) {
+			$meta_viewport = AMP_DOM_Utils::create_node( $dom, 'meta', array(
+				'name'    => 'viewport',
+				'content' => 'width=device-width,minimum-scale=1',
+			) );
+			$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
+		}
+
+		// Ensure rel=canonical link.
+		$rel_canonical = null;
+		foreach ( $head->getElementsByTagName( 'link' ) as $link ) {
+			if ( 'canonical' === $link->getAttribute( 'rel' ) ) {
+				$rel_canonical = $link;
+				break;
+			}
+		}
+		if ( ! $rel_canonical ) {
+			$rel_canonical = AMP_DOM_Utils::create_node( $dom, 'link', array(
+				'rel'  => 'canonical',
+				'href' => self::get_current_canonical_url(),
+			) );
+			$head->appendChild( $rel_canonical );
+		}
+	}
+
+	/**
 	 * Start output buffering.
 	 */
 	public static function start_output_buffering() {
@@ -772,7 +799,7 @@ class AMP_Theme_Support {
 	/**
 	 * Finish output buffering.
 	 *
-	 * @todo Do this in shutdown instead of output buffering callback?
+	 * @todo Do this in shutdown instead of output buffering callback? This will make it easier to debug things since printing can be done in shutdown function but cannot in output buffer callback.
 	 * @global int $content_width
 	 * @param string $output Buffered output.
 	 * @return string Finalized output.
@@ -780,39 +807,55 @@ class AMP_Theme_Support {
 	public static function finish_output_buffering( $output ) {
 		global $content_width;
 
+		/*
+		 * Make sure that <meta charset> is present in output prior to parsing.
+		 * Note that the meta charset is supposed to appear within the first 1024 bytes.
+		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
+		 */
+		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $output, 0, 1024 ) ) ) {
+			$output = preg_replace(
+				'/(<head[^>]*>)/i',
+				'$1' . sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) ),
+				$output,
+				1
+			);
+		}
 		$dom  = AMP_DOM_Utils::get_dom( $output );
 		$args = array(
-			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+			'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+			'use_document_element' => true,
 		);
+
+		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
+			$dom->documentElement->setAttribute( 'amp', '' );
+		}
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
-		/*
-		 * @todo The sanitize method needs to be updated to sanitize the entire HTML element and not just the BODY.
-		 * This will require updating mandatory_parent_blacklist in amphtml-update.py to include elements that appear in the HEAD.
-		 * This will ensure that the scripts and styles that plugins output via wp_head() will be sanitized as well. However,
-		 * since the the old paired mode is sending content from the *body* we'll need to be able to filter out the elements
-		 * from outside the body from being part of the whitelist sanitizer when it runs when theme support is not present,
-		 * as otherwise elements from the HEAD could get added to the BODY.
-		 */
-		$output = preg_replace(
-			'#(<body.*?>)(.+)(</body>)#si',
-			'$1' . AMP_DOM_Utils::get_content_from_dom( $dom ) . '$3',
-			$output
-		);
+		self::ensure_required_markup( $dom );
+
+		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
+		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
+			/* translators: %s is the charset of the current site */
+			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ), E_USER_WARNING ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		}
+
+		$output  = "<!DOCTYPE html>\n";
+		$output .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
 		// Inject required scripts.
 		$output = preg_replace(
-			'#' . preg_quote( self::COMPONENT_SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_component_scripts( $assets['scripts'] ),
+			'#' . preg_quote( self::SCRIPTS_PLACEHOLDER, '#' ) . '#',
+			self::get_amp_scripts( $assets['scripts'] ),
 			$output,
 			1
 		);
 
 		// Inject styles.
 		$output = preg_replace(
-			'#' . preg_quote( self::CUSTOM_STYLES_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_custom_styles( $assets['stylesheets'] ),
+			'#' . preg_quote( self::STYLES_PLACEHOLDER, '#' ) . '#',
+			self::get_amp_styles( $assets['stylesheets'] ),
 			$output,
 			1
 		);

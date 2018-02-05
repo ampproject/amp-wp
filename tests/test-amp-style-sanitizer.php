@@ -11,7 +11,7 @@
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
-	 * Get data.
+	 * Get data for tests.
 	 *
 	 * @return array
 	 */
@@ -116,6 +116,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'div > span { font-weight:bold; font-style: italic; }',
 				),
 			),
+
+			'styles_in_head_and_body_both_handled' => array(
+				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style>u {color:green}</style></head><body><style>s {color:yellow}</style></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				array(
+					'b {color:red}',
+					'i {color:blue}',
+					'u {color:green}',
+					's {color:yellow}',
+				),
+			),
 		);
 	}
 
@@ -128,16 +139,25 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string $expected_stylesheets Expected stylesheets.
 	 */
 	public function test_sanitizer( $source, $expected_content, $expected_stylesheets ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$html_doc_format = '<html amp><head><meta charset="utf-8"></head><body><!-- before -->%s<!-- after --></body></html>';
+		if ( false === strpos( $source, '<html' ) ) {
+			$source           = sprintf( $html_doc_format, $source );
+			$expected_content = sprintf( $html_doc_format, $expected_content );
+		}
 
-		$sanitizer = new AMP_Style_Sanitizer( $dom );
+		$dom = AMP_DOM_Utils::get_dom( $source );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
 		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
 
 		// Test content.
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 		$this->assertEquals( $expected_content, $content );
 
 		// Test stylesheet.
@@ -150,6 +170,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_keyframe_data() {
+		$keyframes_max_size = 10;
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style[amp-keyframes]' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$keyframes_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+
 		return array(
 			'style_amp_keyframes'              => array(
 				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes foo {} }</style>',
@@ -157,7 +185,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'style_amp_keyframes_max_overflow' => array(
-				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes ' . str_repeat( 'a', 500000 ) . ' {} }</style>',
+				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes ' . str_repeat( 'a', $keyframes_max_size + 1 ) . ' {} }</style>',
 				'',
 			),
 

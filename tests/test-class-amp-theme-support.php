@@ -119,7 +119,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::finish_output_buffering( $original_html );
 
-		$this->assertContains( '<meta charset="utf-8">', $sanitized_html );
+		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
 		$this->assertContains( '<style amp-custom>', $sanitized_html );
@@ -134,6 +134,26 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script async custom-element="amp-audio"', $sanitized_html );
 
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
+	}
+
+	/**
+	 * Test finish_output_buffering to inject html[amp] attribute and ensure HTML5 doctype.
+	 *
+	 * @covers AMP_Theme_Support::finish_output_buffering()
+	 */
+	public function test_finish_output_buffering_to_add_html5_doctype_and_amp_attribute() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		ob_start();
+		?>
+		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+		<html><head><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
+		<?php
+		$original_html  = trim( ob_get_clean() );
+		$sanitized_html = AMP_Theme_Support::finish_output_buffering( $original_html );
+
+		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
+		$this->assertContains( '<html amp', $sanitized_html );
 	}
 
 	/**
@@ -184,23 +204,42 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_amp_component_scripts().
+	 * Test get_amp_styles().
 	 *
-	 * @covers AMP_Theme_Support::get_amp_component_scripts()
+	 * @covers AMP_Theme_Support::get_amp_styles()
 	 */
-	public function test_get_amp_component_scripts() {
+	public function test_get_amp_styles() {
+		$styles = AMP_Theme_Support::get_amp_styles( array() );
+		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
+
+		$injected_css = 'b strong { color: red; }';
+		add_filter( 'amp_custom_styles', function( $css ) use ( $injected_css ) {
+			return $css . $injected_css;
+		} );
+		$styles = AMP_Theme_Support::get_amp_styles( array() );
+
+		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
+		$this->assertContains( $injected_css, $styles );
+	}
+
+	/**
+	 * Test get_amp_scripts().
+	 *
+	 * @covers AMP_Theme_Support::get_amp_scripts()
+	 */
+	public function test_get_amp_scripts() {
 		add_filter( 'amp_component_scripts', function( $scripts ) {
 			$scripts['amp-video'] = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
 			return $scripts;
 		} );
 
-		$scripts = AMP_Theme_Support::get_amp_component_scripts( array(
+		$scripts = AMP_Theme_Support::get_amp_scripts( array(
 			'amp-mustache' => 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
 			'amp-bind'     => 'https://cdn.ampproject.org/v0/amp-bind-0.1.js',
 		) );
 
 		$this->assertEquals(
-			'<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
+			'<script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
 			$scripts
 		);
 	}
