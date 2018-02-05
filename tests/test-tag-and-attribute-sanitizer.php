@@ -299,6 +299,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'font'                                                      => array(
 				'<amp-font layout="nodisplay" font-family="Comic AMP" timeout="2000"></amp-font><amp-font layout="nodisplay" font-family="Comic AMP Bold" timeout="3000" font-weight="bold"></amp-font>',
 				'<amp-font layout="nodisplay" font-family="Comic AMP" timeout="2000"></amp-font><amp-font layout="nodisplay" font-family="Comic AMP Bold" timeout="3000" font-weight="bold"></amp-font>',
+				array( 'amp-font' ),
 			),
 
 			'form'                                                      => array(
@@ -634,9 +635,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<h1>Headline</h1>',
 			),
 
-			'font'                                                      => array(
+			'font_tag'                                                  => array(
 				'<font size="1">Headline</font>',
 				'Headline',
+			),
+
+			'span_with_custom_attr'                                     => array(
+				'<span class="foo" custom="not-allowed">value</span>',
+				'<span class="foo">value</span>',
+			),
+
+			'a_with_custom_protocol'                                    => array(
+				'<a class="foo" href="custom:bad">value</a>',
+				'<a class="foo" href="">value</a>',
 			),
 
 			// font is removed so we should check that other elements are checked as well.
@@ -719,7 +730,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_html_data() {
 		$data = array(
-			// @todo Update sanitizer to validate the contents of meta[content].
 			'meta_charset_and_viewport_and_canonical' => array(
 				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>', // phpcs:ignore
 			),
@@ -742,6 +752,26 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'bad_external_font' => array(
 				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>', // phpcs:ignore
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+			'bad_meta_ua_compatible' => array(
+				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+			'bad_meta_charset' => array(
+				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
+				'<html amp><head><title>Mojibake?</title></head><body></body></html>',
+			),
+			'bad_meta_viewport' => array(
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			),
+			'edge_meta_ua_compatible' => array(
+				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>',
+				null, // No change.
+			),
+			'meta_viewport_extras' => array(
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,height=device-height,initial-scale=2,maximum-scale=3,minimum-scale=1.0,shrink-to-fit=yes,user-scalable=yes,viewport-fit=cover"></head><body></body></html>',
+				null, // No change.
 			),
 		);
 

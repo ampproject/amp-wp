@@ -659,6 +659,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					return 0;
 				}
 			}
+
+			// If the attribute's value exists and it matches the value properties spec.
+			if ( isset( $attr_spec_rule['value_properties'] ) && $node->hasAttribute( $attr_name ) ) {
+				$result = $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule );
+				if ( AMP_Rule_Spec::PASS === $result ) {
+					$score++;
+				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
+					return 0;
+				}
+			}
 		}
 
 		return $score;
@@ -1211,6 +1221,67 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 			}
+		}
+		return AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Check if attribute has valid properties.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMElement       $node           Node.
+	 * @param string           $attr_name      Attribute name.
+	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
+	 *
+	 * @return string:
+	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
+	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
+	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
+	 *                                        is no rule for this attribute.
+	 */
+	private function check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule ) {
+		if ( isset( $attr_spec_rule['value_properties'] ) && $node->hasAttribute( $attr_name ) ) {
+			$properties = array();
+			foreach ( explode( ',', $node->getAttribute( $attr_name ) ) as $pair ) {
+				$pair_parts = explode( '=', $pair, 2 );
+				if ( 2 !== count( $pair_parts ) ) {
+					return 0;
+				}
+				$properties[ strtolower( $pair_parts[0] ) ] = $pair_parts[1];
+			}
+
+			// Fail if there are unrecognized properties.
+			if ( count( array_diff( array_keys( $properties ), array_keys( $attr_spec_rule['value_properties'] ) ) ) > 0 ) {
+				return AMP_Rule_Spec::FAIL;
+			}
+
+			foreach ( $attr_spec_rule['value_properties'] as $prop_name => $property_spec ) {
+
+				// Mandatory property is missing.
+				if ( ! empty( $property_spec['mandatory'] ) && ! isset( $properties[ $prop_name ] ) ) {
+					return AMP_Rule_Spec::FAIL;
+				}
+
+				if ( ! isset( $properties[ $prop_name ] ) ) {
+					continue;
+				}
+
+				$prop_value = $properties[ $prop_name ];
+
+				// Required value is absent, so fail.
+				$required_value = null;
+				if ( isset( $property_spec['value'] ) ) {
+					$required_value = $property_spec['value'];
+				} elseif ( isset( $property_spec['value_double'] ) ) {
+					$required_value = $property_spec['value_double'];
+					$prop_value     = (double) $prop_value;
+				}
+				if ( isset( $required_value ) && $prop_value !== $required_value ) {
+					return AMP_Rule_Spec::FAIL;
+				}
+			}
+			return AMP_Rule_Spec::PASS;
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
