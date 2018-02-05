@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+
 /**
  * Test AMP_Style_Sanitizer.
  */
@@ -15,7 +17,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function get_data() {
+	public function get_body_style_attribute_data() {
 		return array(
 			'empty' => array(
 				'',
@@ -116,10 +118,41 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'div > span { font-weight:bold; font-style: italic; }',
 				),
 			),
+		);
+	}
 
-			'styles_in_head_and_body_both_handled' => array(
-				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style>u {color:green}</style></head><body><style>s {color:yellow}</style></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+	/**
+	 * Test sanitizer for style attributes that appear in the body.
+	 *
+	 * @dataProvider get_body_style_attribute_data
+	 * @param string $source               Source.
+	 * @param string $expected_content     Expected content.
+	 * @param string $expected_stylesheets Expected stylesheets.
+	 */
+	public function test_body_style_attribute_sanitizer( $source, $expected_content, $expected_stylesheets ) {
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		// Test content.
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		$this->assertEquals( $expected_content, $content );
+
+		// Test stylesheet.
+		$this->assertEquals( $expected_stylesheets, array_values( $sanitizer->get_stylesheets() ) );
+	}
+
+	/**
+	 * Get link and style test data.
+	 *
+	 * @return array
+	 */
+	public function get_link_and_style_test_data() {
+		return array(
+			'multiple_amp_custom_andother_styles' => array(
+				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green}</style></head><body><style>s {color:yellow}</style></body></html>',
 				array(
 					'b {color:red}',
 					'i {color:blue}',
@@ -127,24 +160,29 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					's {color:yellow}',
 				),
 			),
+			array(
+				sprintf(
+					'<html amp><head><meta charset="utf-8"><style type="text/css">strong.before-dashicon {color:green}</style><link rel="stylesheet" href="%s"><style type="text/css">strong.after-dashicon {color:green}</style></head><body><style>s {color:yellow !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+					includes_url( 'css/dashicons.css' )
+				),
+				array(
+					'strong.before-dashicon',
+					'.dashicons-dashboard:before',
+					'strong.after-dashicon',
+					's {color:yellow}',
+				),
+			),
 		);
 	}
 
 	/**
-	 * Test sanitizer.
+	 * Test style elements and link elements.
 	 *
-	 * @dataProvider get_data
+	 * @dataProvider get_link_and_style_test_data
 	 * @param string $source               Source.
-	 * @param string $expected_content     Expected content.
-	 * @param string $expected_stylesheets Expected stylesheets.
+	 * @param array  $expected_stylesheets Expected stylesheets.
 	 */
-	public function test_sanitizer( $source, $expected_content, $expected_stylesheets ) {
-		$html_doc_format = '<html amp><head><meta charset="utf-8"></head><body><!-- before -->%s<!-- after --></body></html>';
-		if ( false === strpos( $source, '<html' ) ) {
-			$source           = sprintf( $html_doc_format, $source );
-			$expected_content = sprintf( $html_doc_format, $expected_content );
-		}
-
+	public function test_link_and_style_elements( $source, $expected_stylesheets ) {
 		$dom = AMP_DOM_Utils::get_dom( $source );
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
@@ -152,16 +190,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		) );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
-
-		// Test content.
-		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
-		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
-		$this->assertEquals( $expected_content, $content );
-
-		// Test stylesheet.
-		$this->assertEquals( $expected_stylesheets, array_values( $sanitizer->get_stylesheets() ) );
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
+		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
+			$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
+		}
 	}
 
 	/**
@@ -211,5 +244,125 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Get stylesheet URLs.
+	 *
+	 * @returns array Stylesheet URL data.
+	 */
+	public function get_stylesheet_urls() {
+		return array(
+			'theme_stylesheet_without_host' => array(
+				'/wp-content/themes/twentyseventeen/style.css',
+				WP_CONTENT_DIR . '/themes/twentyseventeen/style.css',
+			),
+			'theme_stylesheet_with_host' => array(
+				WP_CONTENT_URL . '/themes/twentyseventeen/style.css',
+				WP_CONTENT_DIR . '/themes/twentyseventeen/style.css',
+			),
+			'dashicons_without_host' => array(
+				'/wp-includes/css/dashicons.css',
+				ABSPATH . WPINC . '/css/dashicons.css',
+			),
+			'dashicons_with_host' => array(
+				includes_url( 'css/dashicons.css' ),
+				ABSPATH . WPINC . '/css/dashicons.css',
+			),
+			'admin_without_host' => array(
+				'/wp-admin/css/common.css',
+				ABSPATH . 'wp-admin/css/common.css',
+			),
+			'admin_with_host' => array(
+				admin_url( 'css/common.css' ),
+				ABSPATH . 'wp-admin/css/common.css',
+			),
+			'amp_css_bad_file_extension' => array(
+				content_url( 'themes/twentyseventeen/index.php' ),
+				null,
+				'amp_css_bad_file_extension',
+			),
+			'amp_css_path_not_found' => array(
+				content_url( 'themes/twentyseventeen/404.css' ),
+				null,
+				'amp_css_path_not_found',
+			),
+		);
+	}
+
+	/**
+	 * Tests get_validated_css_file_path.
+	 *
+	 * @dataProvider get_stylesheet_urls
+	 * @covers AMP_Style_Sanitizer::get_validated_css_file_path()
+	 * @param string      $source     Source URL.
+	 * @param string|null $expected   Expected path or null if error.
+	 * @param string      $error_code Error code. Optional.
+	 */
+	public function test_get_validated_css_file_path( $source, $expected, $error_code = null ) {
+		$dom = AMP_DOM_Utils::get_dom( '<html></html>' );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom );
+		$actual    = $sanitizer->get_validated_css_file_path( $source );
+		if ( isset( $error_code ) ) {
+			$this->assertInstanceOf( 'WP_Error', $actual );
+			$this->assertEquals( $error_code, $actual->get_error_code() );
+		} else {
+			$this->assertEquals( $expected, $actual );
+		}
+	}
+
+	/**
+	 * Get font url test data.
+	 *
+	 * @return array Data.
+	 */
+	public function get_font_urls() {
+		return array(
+			'tangerine'   => array(
+				'https://fonts.googleapis.com/css?family=Tangerine',
+				true,
+			),
+			'typekit'     => array(
+				'https://use.typekit.net/abc.css',
+				true,
+			),
+			'fontscom'    => array(
+				'https://fast.fonts.net/abc.css',
+				true,
+			),
+			'fontawesome' => array(
+				'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
+				true,
+			),
+			'fontbad' => array(
+				'https://bad.example.com/font.css',
+				false,
+			),
+		);
+	}
+
+	/**
+	 * Tests that font URLs get validated.
+	 *
+	 * @dataProvider get_font_urls
+	 * @param string $url  Font URL.
+	 * @param bool   $pass Whether the font URL is ok.
+	 */
+	public function test_font_urls( $url, $pass ) {
+		$dom = AMP_DOM_Utils::get_dom( sprintf( '<html><head><link rel="stylesheet" href="%s"></head></html>', $url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
+		$sanitizer->sanitize();
+
+		$link = $dom->getElementsByTagName( 'link' )->item( 0 );
+		if ( $pass ) {
+			$this->assertInstanceOf( 'DOMElement', $link );
+			$this->assertEquals( $url, $link->getAttribute( 'href' ) );
+		} else {
+			$this->assertEmpty( $link );
+		}
 	}
 }

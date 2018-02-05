@@ -204,25 +204,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_amp_styles().
-	 *
-	 * @covers AMP_Theme_Support::get_amp_styles()
-	 */
-	public function test_get_amp_styles() {
-		$styles = AMP_Theme_Support::get_amp_styles( array() );
-		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
-
-		$injected_css = 'b strong { color: red; }';
-		add_filter( 'amp_custom_styles', function( $css ) use ( $injected_css ) {
-			return $css . $injected_css;
-		} );
-		$styles = AMP_Theme_Support::get_amp_styles( array() );
-
-		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
-		$this->assertContains( $injected_css, $styles );
-	}
-
-	/**
 	 * Test get_amp_scripts().
 	 *
 	 * @covers AMP_Theme_Support::get_amp_scripts()
