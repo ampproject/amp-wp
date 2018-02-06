@@ -151,7 +151,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_link_and_style_test_data() {
 		return array(
-			'multiple_amp_custom_andother_styles' => array(
+			'multiple_amp_custom_and_other_styles' => array(
 				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green}</style></head><body><style>s {color:yellow} /* So !important! */</style></body></html>',
 				array(
 					'b {color:red}',
@@ -160,7 +160,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					's {color:yellow}',
 				),
 			),
-			array(
+			'style_eleemnts_with_link_elements' => array(
 				sprintf(
 					'<html amp><head><meta charset="utf-8"><style type="text/css">strong.before-dashicon {color:green}</style><link rel="stylesheet" href="%s"><style type="text/css">strong.after-dashicon {color:green}</style></head><body><style>s {color:yellow !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 					includes_url( 'css/dashicons.css' )

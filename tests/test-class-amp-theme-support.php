@@ -113,6 +113,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					data-aax_pubname="test123"
 					data-aax_src="302"></amp-ad>
 				<?php wp_footer(); ?>
+
+				<style>body { background: black; }</style>
 			</body>
 		</html>
 		<?php
@@ -122,7 +124,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
-		$this->assertContains( '<style amp-custom>', $sanitized_html );
+		$this->assertContains( '<style amp-custom>body { background: black; }', $sanitized_html );
 		$this->assertContains( '<script async src="https://cdn.ampproject.org/v0.js"', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
 

@@ -208,12 +208,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $total_size + $sheet_size > $this->custom_max_size ) {
 					$skipped[] = $key;
 				} else {
+					if ( $total_size ) {
+						$css .= ' ';
+					}
 					$css        .= $stylesheet;
 					$total_size += $sheet_size;
 				}
 			}
 
-			$this->amp_custom_style_element->textContent = $css;
+			/*
+			 * Let the style[amp-custom] be populated with the concatenated CSS.
+			 * !important: Updating the contents of this style element by setting textContent is not
+			 * reliable across PHP/libxml versions, so this is why the children are removed and the
+			 * text node is then explicitly added containing the CSS.
+			 */
+			while ( $this->amp_custom_style_element->firstChild ) {
+				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
+			}
+			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
 			// @todo This would be a candidate for sanitization reporting.
 			// Add comments to indicate which sheets were not included.
