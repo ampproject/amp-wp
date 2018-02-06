@@ -152,7 +152,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_link_and_style_test_data() {
 		return array(
 			'multiple_amp_custom_andother_styles' => array(
-				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green}</style></head><body><style>s {color:yellow}</style></body></html>',
+				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green}</style></head><body><style>s {color:yellow} /* So !important! */</style></body></html>',
 				array(
 					'b {color:red}',
 					'i {color:blue}',
@@ -190,10 +190,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		) );
 		$sanitizer->sanitize();
 
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
+		$whitelist_sanitizer->sanitize();
+
+		$sanitized_html     = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
 			$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
+			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
 	}
 

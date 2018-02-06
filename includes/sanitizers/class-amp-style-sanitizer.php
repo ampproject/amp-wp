@@ -356,7 +356,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string Scrubbed stylesheet.
 	 */
 	private function remove_illegal_css( $stylesheet ) {
-		$stylesheet = preg_replace( '/\s*!important\s*(?=\s*;|})/', '', $stylesheet );
+		$stylesheet = preg_replace( '/\s*!important/', '', $stylesheet ); // Note this has to also replace inside comments to be valid.
 		$stylesheet = preg_replace( '/overflow\s*:\s*(auto|scroll)\s*;?\s*/', '', $stylesheet );
 		return $stylesheet;
 	}
