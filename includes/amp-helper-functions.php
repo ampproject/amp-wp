@@ -293,7 +293,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 * @param array   $handlers Handlers.
 	 * @param WP_Post $post     Post. Deprecated.
 	 */
-	return apply_filters( 'amp_content_sanitizers',
+	$sanitizers = apply_filters( 'amp_content_sanitizers',
 		array(
 			'AMP_Img_Sanitizer'               => array(),
 			'AMP_Form_Sanitizer'              => array(),
@@ -309,6 +309,17 @@ function amp_get_content_sanitizers( $post = null ) {
 		),
 		$post
 	);
+
+	// Force style sanitizer and whitelist sanitizer to be at end.
+	foreach ( array( 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ) as $class_name ) {
+		if ( isset( $sanitizers[ $class_name ] ) ) {
+			$sanitizer = $sanitizers[ $class_name ];
+			unset( $sanitizers[ $class_name ] );
+			$sanitizers[ $class_name ] = $sanitizer;
+		}
+	}
+
+	return $sanitizers;
 }
 
 /**
