@@ -40,6 +40,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $keyframes_max_size;
 
 	/**
+	 * Maximum number of bytes allowed for a AMP Custom style.
+	 *
+	 * @since 0.7
+	 * @var int
+	 */
+	private $custom_max_size;
+
+	/**
 	 * The style[amp-custom] element.
 	 *
 	 * @var DOMElement
@@ -84,6 +92,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
 			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
 				$this->keyframes_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+
+		$spec_name = 'style amp-custom';
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$this->custom_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
 				break;
 			}
 		}
@@ -184,8 +200,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->dom->getElementsByTagName( 'head' )->item( 0 )->appendChild( $this->amp_custom_style_element );
 			}
 
-			$css = implode( "\n", $this->get_stylesheets() );
+			// Gather stylesheets to print as long as they don't surpass the limit.
+			$skipped    = array();
+			$css        = '';
+			$total_size = 0;
+			foreach ( $this->get_stylesheets() as $key => $stylesheet ) {
+				$sheet_size = strlen( $stylesheet );
+				if ( $total_size + $sheet_size > $this->custom_max_size ) {
+					$skipped[] = $key;
+				} else {
+					$css        .= $stylesheet;
+					$total_size += $sheet_size;
+				}
+			}
+
 			$this->amp_custom_style_element->textContent = $css;
+
+			// @todo This would be a candidate for sanitization reporting.
+			// Add comments to indicate which sheets were not included.
+			foreach ( array_reverse( $skipped ) as $skip ) {
+				$this->amp_custom_style_element->parentNode->insertBefore(
+					$this->dom->createComment( sprintf( 'Skipped including %s stylesheet since too large.', $skip ) ),
+					$this->amp_custom_style_element->nextSibling
+				);
+			}
 		}
 	}
 
@@ -287,7 +325,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_css_file_path( $href );
 		if ( is_wp_error( $css_file_path ) ) {
-			$element->parentNode->removeChild( $element ); // @todo Report removal.
+			$element->parentNode->removeChild( $element ); // @todo Report removal. Show HTML comment?
 			return;
 		}
 
@@ -302,7 +340,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css = sprintf( '@media %s { %s }', $media, $css );
 		}
 
-		$this->stylesheets[ md5( $css ) ] = $css;
+		$this->stylesheets[ $href ] = $css;
 
 		// Remove now that styles have been processed.
 		$element->parentNode->removeChild( $element );
