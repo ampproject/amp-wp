@@ -362,4 +362,53 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
 	}
+
+	/**
+	 * Test amp_intercept_post_request_redirect().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @group amp-submissions
+	 */
+	public function test_amp_intercept_post_request_redirect() {
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		add_theme_support( 'amp' );
+		$url = get_home_url();
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', function () {
+			return '__return_false';
+		} );
+
+		ob_start();
+		amp_intercept_post_request_redirect( $url );
+		ob_get_clean();
+		$this->assertContains( 'AMP-Redirect-To: ' . $url, xdebug_get_headers() );
+		$this->assertContains( 'Access-Control-Expose-Headers: AMP-Redirect-To', xdebug_get_headers() );
+
+		ob_start();
+		amp_intercept_post_request_redirect( '/new-location/' );
+		ob_get_clean();
+		$this->assertContains( 'AMP-Redirect-To: https://example.org/new-location/', xdebug_get_headers() );
+
+		ob_start();
+		amp_intercept_post_request_redirect( '//example.com/new-location/' );
+		ob_get_clean();
+		$headers = xdebug_get_headers();
+		$this->assertContains( 'AMP-Redirect-To: https://example.com/new-location/', $headers );
+
+		ob_start();
+		amp_intercept_post_request_redirect( '' );
+		ob_get_clean();
+		$this->assertContains( 'AMP-Redirect-To: https://example.org', xdebug_get_headers() );
+
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+		remove_filter( 'wp_die_ajax_handler', function () {
+			return '__return_false';
+		} );
+
+	}
 }
