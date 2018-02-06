@@ -150,7 +150,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.4
 	 */
 	public function sanitize() {
-
 		$elements = array();
 
 		/*
@@ -276,7 +275,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		return $css_path;
 	}
 
-
 	/**
 	 * Process style element.
 	 *
@@ -315,7 +313,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $element Link element.
 	 */
 	private function process_link_element( DOMElement $element ) {
-
 		$href = $element->getAttribute( 'href' );
 
 		// Allow font URLs.
@@ -351,7 +348,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @todo This needs proper CSS parser and to take an alternative approach to removing !important by extracting the rule into a separate style rule with a very specific selector.
+	 * @todo This needs proper CSS parser and to take an alternative approach to removing !important by extracting
+	 * the rule into a separate style rule with a very specific selector.
 	 * @param string $stylesheet Stylesheet.
 	 * @return string Scrubbed stylesheet.
 	 */
