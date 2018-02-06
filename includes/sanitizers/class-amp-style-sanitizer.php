@@ -292,7 +292,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Load the CSS from the filesystem.
-		$css = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+		$css  = "\n/* $href */\n";
+		$css .= file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 
 		$css = $this->remove_illegal_css( $css );
 
