@@ -190,7 +190,7 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Enforce fixed height.
+	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -203,14 +203,17 @@ abstract class AMP_Base_Sanitizer {
 	 * }
 	 * @return string[]
 	 */
-	public function enforce_fixed_height( $attributes ) {
+	public function set_layout( $attributes ) {
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
+			$attributes['layout'] = 'fixed-height';
 		}
-
 		if ( empty( $attributes['width'] ) ) {
 			$attributes['layout'] = 'fixed-height';
+		}
+		if ( ! empty( $attributes['width'] ) && ! empty( $attributes['height'] ) ) {
+			$attributes['layout'] = 'responsive';
 		}
 
 		return $attributes;

@@ -50,8 +50,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 
-			$new_attributes = $this->enforce_fixed_height( $new_attributes );
-			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+			$new_attributes = $this->set_layout( $new_attributes );
+			if ( isset( $new_attributes['width'] ) && isset( $new_attributes['height'] ) ) {
+				$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+			}
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 
@@ -124,8 +126,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out          = array();
-		$out['style'] = 'max-width:100%'; // Note that this will get moved to amp-custom style by AMP_Style_Sanitizer.
+		$out = array();
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {

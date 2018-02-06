@@ -112,12 +112,14 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 		return array(
 			'both_dimensions_included' => array(
 				array(
-					'width' => 100,
+					'width'  => 100,
 					'height' => 100,
+					'layout' => 'responsive',
 				),
 				array(
-					'width' => 100,
+					'width'  => 100,
 					'height' => 100,
+					'layout' => 'responsive',
 				),
 			),
 
@@ -165,9 +167,9 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 	/**
 	 * @dataProvider get_data
 	 */
-	public function test_enforce_fixed_height( $source_attributes, $expected_attributes, $args = array() ) {
+	public function test_set_layout( $source_attributes, $expected_attributes, $args = array() ) {
 		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
-		$returned_attributes = $sanitizer->enforce_fixed_height( $source_attributes );
+		$returned_attributes = $sanitizer->set_layout( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
