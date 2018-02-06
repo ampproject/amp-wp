@@ -368,7 +368,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
-	 * @group amp-submissions
 	 */
 	public function test_amp_intercept_post_request_redirect() {
 		if ( ! function_exists( 'xdebug_get_headers' ) ) {
@@ -409,6 +408,27 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'wp_die_ajax_handler', function () {
 			return '__return_false';
 		} );
+
+	}
+
+	/**
+	 * Test amp_handle_xhr_request().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @covers amp_handle_xhr_headers_output()
+	 */
+	public function test_amp_handle_xhr_request() {
+		global $pagenow;
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		$_GET['__amp_source_origin'] = 'https://example.org';
+		$pagenow                     = 'wp-comments-post.php';
+
+		amp_handle_xhr_request();
+		$this->assertContains( 'AMP-Access-Control-Allow-Source-Origin: https://example.org', xdebug_get_headers() );
 
 	}
 }
