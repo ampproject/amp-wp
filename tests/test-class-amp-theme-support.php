@@ -113,6 +113,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					data-aax_pubname="test123"
 					data-aax_src="302"></amp-ad>
 				<?php wp_footer(); ?>
+
+				<style>body { background: black; }</style>
 			</body>
 		</html>
 		<?php
@@ -122,7 +124,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
-		$this->assertContains( '<style amp-custom>', $sanitized_html );
+		$this->assertContains( '<style amp-custom>body { background: black; }', $sanitized_html );
 		$this->assertContains( '<script async src="https://cdn.ampproject.org/v0.js"', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
 
@@ -201,25 +203,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
-	}
-
-	/**
-	 * Test get_amp_styles().
-	 *
-	 * @covers AMP_Theme_Support::get_amp_styles()
-	 */
-	public function test_get_amp_styles() {
-		$styles = AMP_Theme_Support::get_amp_styles( array() );
-		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
-
-		$injected_css = 'b strong { color: red; }';
-		add_filter( 'amp_custom_styles', function( $css ) use ( $injected_css ) {
-			return $css . $injected_css;
-		} );
-		$styles = AMP_Theme_Support::get_amp_styles( array() );
-
-		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
-		$this->assertContains( $injected_css, $styles );
 	}
 
 	/**
