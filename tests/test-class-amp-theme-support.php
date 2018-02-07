@@ -140,11 +140,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test prepare_response to inject html[amp] attribute and ensure HTML5 doctype.
+	 * Test get_buffer to inject html[amp] attribute and ensure HTML5 doctype.
 	 *
-	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Theme_Support::get_buffer()
 	 */
-	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
+	public function test_get_buffer_to_add_html5_doctype_and_amp_attribute() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		ob_start();
@@ -153,7 +153,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<html><head><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
 		<?php
 		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+		$sanitized_html = AMP_Theme_Support::get_buffer( $original_html );
 
 		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
 		$this->assertContains( '<html amp', $sanitized_html );
