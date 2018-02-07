@@ -20,13 +20,6 @@ class AMP_Theme_Support {
 	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
 
 	/**
-	 * Replaced with the necessary styles.
-	 *
-	 * @var string
-	 */
-	const STYLES_PLACEHOLDER = '<!-- AMP:STYLES_PLACEHOLDER -->';
-
-	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -102,7 +95,7 @@ class AMP_Theme_Support {
 			self::register_paired_hooks();
 		}
 
-		self::purge_amp_query_vars(); // Note that amp_prepare_comment_post() still looks at $_GET['__amp_source_origin'].
+		self::purge_amp_query_vars(); // Note that amp_prepare_xhr_post() still looks at $_GET['__amp_source_origin'].
 		self::register_hooks();
 		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
@@ -152,15 +145,10 @@ class AMP_Theme_Support {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
-		remove_action( 'wp_head', 'locale_stylesheet' ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_styles', 8 ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_head', 'wp_custom_css_cb', 101 ); // Replaced below in add_amp_styles_placeholder() method.
 		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
-
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'override_wp_styles' ), -1 );
 
 		/*
 		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
@@ -171,8 +159,8 @@ class AMP_Theme_Support {
 		 * in this case too we should defer to the theme as well to output the meta charset because it is possible the
 		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_styles_placeholder' ), 8 ); // Because wp_print_styles() normally happens at 8.
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
+		add_action( 'wp_head', array( __CLASS__, 'print_amp_styles' ) );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
@@ -214,6 +202,7 @@ class AMP_Theme_Support {
 	public static function purge_amp_query_vars() {
 		$query_vars = array(
 			'__amp_source_origin',
+			'_wp_amp_action_xhr_converted',
 			'amp_latest_update_time',
 		);
 
@@ -311,21 +300,6 @@ class AMP_Theme_Support {
 			unregister_widget( $registered_widget_class_name );
 			register_widget( $amp_class_name );
 		}
-	}
-
-	/**
-	 * Override $wp_styles as AMP_WP_Styles, ideally before first instantiated as WP_Styles.
-	 *
-	 * @see wp_styles()
-	 * @global AMP_WP_Styles $wp_styles
-	 * @return AMP_WP_Styles Instance.
-	 */
-	public static function override_wp_styles() {
-		global $wp_styles;
-		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
-			$wp_styles = new AMP_WP_Styles(); // WPCS: global override ok.
-		}
-		return $wp_styles;
 	}
 
 	/**
@@ -621,53 +595,11 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Print placeholder for Custom AMP styles.
-	 *
-	 * The actual styles for the page injected into the placeholder when output buffering is completed.
-	 *
-	 * @see AMP_Theme_Support::finish_output_buffering()
+	 * Print AMP boilerplate and custom styles.
 	 */
-	public static function add_amp_styles_placeholder() {
-		echo self::STYLES_PLACEHOLDER; // WPCS: XSS OK.
-
-		$wp_styles = wp_styles();
-		if ( ! ( $wp_styles instanceof AMP_WP_Styles ) ) {
-			trigger_error( esc_html__( 'wp_styles() does not return an instance of AMP_WP_Styles as required.', 'amp' ), E_USER_WARNING ); // phpcs:ignore
-			return;
-		}
-
-		$wp_styles->do_items(); // Normally done at wp_head priority 8.
-		$wp_styles->do_locale_stylesheet(); // Normally done at wp_head priority 10.
-		$wp_styles->do_custom_css(); // Normally done at wp_head priority 101.
-	}
-
-	/**
-	 * Get AMP boilerplate and custom styles.
-	 *
-	 * @param string[] $stylesheets Initial stylesheets.
-	 * @see wp_custom_css_cb()
-	 * @return string Concatenated stylesheets.
-	 */
-	public static function get_amp_styles( $stylesheets ) {
-		$css = wp_styles()->print_code;
-
-		$css .= join( $stylesheets );
-
-		/**
-		 * Filters AMP custom CSS before it is injected onto the output buffer for the response.
-		 *
-		 * Plugins may add their own styles, such as for rendered widgets, by amending them via this filter.
-		 *
-		 * @since 0.7
-		 *
-		 * @param string $css AMP CSS.
-		 */
-		$css = apply_filters( 'amp_custom_styles', $css );
-
-		$css = wp_strip_all_tags( $css );
-
-		return amp_get_boilerplate_code() . "\n"
-			. '<style amp-custom>' . $css . '</style>';
+	public static function print_amp_styles() {
+		echo amp_get_boilerplate_code() . "\n"; // WPCS: XSS OK.
+		echo "<style amp-custom></style>\n"; // This will by populated by AMP_Style_Sanitizer.
 	}
 
 	/**
@@ -883,14 +815,6 @@ class AMP_Theme_Support {
 		$response = preg_replace(
 			'#' . preg_quote( self::SCRIPTS_PLACEHOLDER, '#' ) . '#',
 			self::get_amp_scripts( $assets['scripts'] ),
-			$response,
-			1
-		);
-
-		// Inject styles.
-		$response = preg_replace(
-			'#' . preg_quote( self::STYLES_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_styles( $assets['stylesheets'] ),
 			$response,
 			1
 		);

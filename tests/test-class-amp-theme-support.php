@@ -114,6 +114,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					data-aax_pubname="test123"
 					data-aax_src="302"></amp-ad>
 				<?php wp_footer(); ?>
+
+				<style>body { background: black; }</style>
 			</body>
 		</html>
 		<?php
@@ -123,7 +125,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
-		$this->assertContains( '<style amp-custom>', $sanitized_html );
+		$this->assertContains( '<style amp-custom>body { background: black; }', $sanitized_html );
 		$this->assertContains( '<script async src="https://cdn.ampproject.org/v0.js"', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
 
@@ -138,11 +140,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test finish_output_buffering to inject html[amp] attribute and ensure HTML5 doctype.
+	 * Test prepare_response to inject html[amp] attribute and ensure HTML5 doctype.
 	 *
-	 * @covers AMP_Theme_Support::finish_output_buffering()
+	 * @covers AMP_Theme_Support::prepare_response()
 	 */
-	public function test_finish_output_buffering_to_add_html5_doctype_and_amp_attribute() {
+	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		ob_start();
@@ -151,7 +153,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<html><head><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
 		<?php
 		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::finish_output_buffering( $original_html );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
 		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
 		$this->assertContains( '<html amp', $sanitized_html );
@@ -202,25 +204,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
-	}
-
-	/**
-	 * Test get_amp_styles().
-	 *
-	 * @covers AMP_Theme_Support::get_amp_styles()
-	 */
-	public function test_get_amp_styles() {
-		$styles = AMP_Theme_Support::get_amp_styles( array() );
-		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
-
-		$injected_css = 'b strong { color: red; }';
-		add_filter( 'amp_custom_styles', function( $css ) use ( $injected_css ) {
-			return $css . $injected_css;
-		} );
-		$styles = AMP_Theme_Support::get_amp_styles( array() );
-
-		$this->assertStringStartsWith( amp_get_boilerplate_code(), $styles );
-		$this->assertContains( $injected_css, $styles );
 	}
 
 	/**
