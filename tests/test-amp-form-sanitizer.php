@@ -46,7 +46,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'form_with_post_method_http_action_and_no_target' => array(
 				'<form method="post" action="http://example.org/example-page/"></form>',
-				'<form method="post" action-xhr="//example.org/example-page/" target="_top"></form>',
+				'<form method="post" action-xhr="//example.org/example-page/?_wp_amp_action_xhr_converted=1" target="_top"><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
 			),
 			'form_with_post_method_http_action_and_blank_target' => array(
 				'<form method="post" action-xhr="http://example.org/example-page/" target="_blank"></form>',
@@ -58,7 +58,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'form_with_post_method_https_action_and_custom_target' => array(
 				'<form method="post" action="https://example.org/" target="some_other_target"></form>',
-				'<form method="post" target="_blank" action-xhr="https://example.org/"></form>',
+				'<form method="post" target="_blank" action-xhr="https://example.org/?_wp_amp_action_xhr_converted=1"><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
 			),
 		);
 	}
