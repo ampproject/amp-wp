@@ -105,7 +105,6 @@ add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
  * @global string $pagenow
  */
 function amp_init() {
-	global $pagenow;
 
 	/**
 	 * Triggers on init when AMP plugin is active.
@@ -127,9 +126,7 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
-	if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
-		amp_prepare_comment_post();
-	}
+	amp_handle_xhr_request();
 }
 
 // Make sure the `amp` query var has an explicit value.
