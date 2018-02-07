@@ -251,7 +251,7 @@ class AMP_Mutation_Utils {
 		}
 		$filtered_content = apply_filters( 'the_content', $post->post_content );
 		$response         = self::get_response( $filtered_content );
-		if ( isset( $response[ self::ERROR_KEY ] ) ) {
+		if ( isset( $response[ self::ERROR_KEY ] ) && ( true === $response[ self::ERROR_KEY ] ) ) {
 			add_filter( 'redirect_post_location', array( __CLASS__, 'error_message' ) );
 		}
 	}
