@@ -333,7 +333,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMNode $node The node for which to remove the attribute.
+	 * @param DOMNode $node      The node for which to remove the attribute.
 	 * @param string  $attribute The attribute to remove from the node.
 	 * @return void.
 	 */

@@ -96,9 +96,9 @@ class AMP_Validation_Utils {
 	/**
 	 * Tracks when a sanitizer removes an attribute or node.
 	 *
-	 * @param DOMNode|DOMElement $node The node in which there was a removal.
+	 * @param DOMNode|DOMElement $node         The node in which there was a removal.
 	 * @param string             $removal_type The removal: 'removed_attr' for an attribute, or 'removed' for a node or element.
-	 * @param string             $attr_name The name of the attribute removed (optional).
+	 * @param string             $attr_name    The name of the attribute removed (optional).
 	 * @return void.
 	 */
 	public static function track_removed( $node, $removal_type, $attr_name = null ) {
@@ -113,7 +113,7 @@ class AMP_Validation_Utils {
 	 * Tracks when a sanitizer removes an attribute or node.
 	 *
 	 * @param array  $histogram The count of attributes or nodes removed.
-	 * @param string $key The attribute or node name removed.
+	 * @param string $key       The attribute or node name removed.
 	 * @return array $histogram The incremented histogram.
 	 */
 	public static function increment_count( $histogram, $key ) {
@@ -203,7 +203,7 @@ class AMP_Validation_Utils {
 	 * If $markup isn't passed,
 	 * It will return the validation errors the sanitizers found in rendering the page.
 	 *
-	 * @param string $markup To validate for AMP compatibility (optional).
+	 * @param string $markup   To validate for AMP compatibility (optional).
 	 * @return array $response The AMP validity of the markup.
 	 */
 	public static function get_response( $markup = null ) {
@@ -242,7 +242,7 @@ class AMP_Validation_Utils {
 	 * It would be ideal to simply pass 'is_string' in register_rest_route().
 	 * But it always returned false.
 	 *
-	 * @param mixed $arg The argument to validate.
+	 * @param mixed $arg      The argument to validate.
 	 * @return boolean $is_valid Whether the argument is valid.
 	 */
 	public static function validate_arg( $arg ) {
@@ -256,7 +256,7 @@ class AMP_Validation_Utils {
 	 * This will cause an error message to appear above the 'Classic' editor.
 	 *
 	 * @param integer $post_id The ID of the updated post.
-	 * @param WP_Post $post The updated post.
+	 * @param WP_Post $post    The updated post.
 	 * @return void.
 	 */
 	public static function validate_content( $post_id, $post ) {
