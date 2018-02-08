@@ -83,7 +83,7 @@ class AMP_Autoloader {
 		'AMP_DOM_Utils'                               => 'includes/utils/class-amp-dom-utils',
 		'AMP_HTML_Utils'                              => 'includes/utils/class-amp-html-utils',
 		'AMP_Image_Dimension_Extractor'               => 'includes/utils/class-amp-image-dimension-extractor',
-		'AMP_Mutation_Utils'                          => 'includes/utils/class-amp-mutation-utils',
+		'AMP_Validation_Utils'                        => 'includes/utils/class-amp-validation-utils',
 		'AMP_String_Utils'                            => 'includes/utils/class-amp-string-utils',
 		'AMP_WP_Utils'                                => 'includes/utils/class-amp-wp-utils',
 		'AMP_Widget_Archives'                         => 'includes/widgets/class-amp-widget-archives',

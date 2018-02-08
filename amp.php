@@ -95,7 +95,7 @@ function amp_after_setup_theme() {
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	AMP_Post_Type_Support::add_post_type_support();
-	AMP_Mutation_Utils::init();
+	AMP_Validation_Utils::init();
 }
 add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 

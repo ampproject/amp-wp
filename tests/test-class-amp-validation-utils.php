@@ -1,16 +1,16 @@
 <?php
 /**
- * Tests for AMP_Mutation_Utils class.
+ * Tests for AMP_Validation_Utils class.
  *
  * @package AMP
  */
 
 /**
- * Tests for AMP_Mutation_Utils class.
+ * Tests for AMP_Validation_Utils class.
  *
  * @since 0.7
  */
-class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
+class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 	/**
 	 * An instance of DOMElement to test.
@@ -63,24 +63,24 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		parent::setUp();
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
-		AMP_Mutation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_removed();
 	}
 
 	/**
 	 * Test init.
 	 *
-	 * @see AMP_Mutation_Utils::init()
+	 * @see AMP_Validation_Utils::init()
 	 */
 	public function test_init() {
-		$this->assertEquals( 10, has_action( 'rest_api_init', 'AMP_Mutation_Utils::amp_rest_validation' ) );
-		$this->assertEquals( 10, has_action( 'save_post', 'AMP_Mutation_Utils::validate_content' ) );
-		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Mutation_Utils::display_error' ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', 'AMP_Validation_Utils::amp_rest_validation' ) );
+		$this->assertEquals( 10, has_action( 'save_post', 'AMP_Validation_Utils::validate_content' ) );
+		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Validation_Utils::display_error' ) );
 	}
 
 	/**
 	 * Test track_removed.
 	 *
-	 * @see AMP_Mutation_Utils::track_removed()
+	 * @see AMP_Validation_Utils::track_removed()
 	 */
 	public function test_track_removed() {
 		$attr_name              = 'invalid-attr';
@@ -90,18 +90,18 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		$expected_removed_nodes = array(
 			'img' => 1,
 		);
-		$this->assertEmpty( AMP_Mutation_Utils::$removed_attributes );
-		$this->assertEmpty( AMP_Mutation_Utils::$removed_nodes );
-		AMP_Mutation_Utils::track_removed( $this->node, AMP_Mutation_Utils::ATTRIBUTE_REMOVED, $attr_name );
-		$this->assertEquals( $expected_removed_attrs, AMP_Mutation_Utils::$removed_attributes );
-		AMP_Mutation_Utils::track_removed( $this->node, AMP_Mutation_Utils::NODE_REMOVED );
-		$this->assertEquals( $expected_removed_nodes, AMP_Mutation_Utils::$removed_nodes );
+		$this->assertEmpty( AMP_Validation_Utils::$removed_attributes );
+		$this->assertEmpty( AMP_Validation_Utils::$removed_nodes );
+		AMP_Validation_Utils::track_removed( $this->node, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attr_name );
+		$this->assertEquals( $expected_removed_attrs, AMP_Validation_Utils::$removed_attributes );
+		AMP_Validation_Utils::track_removed( $this->node, AMP_Validation_Utils::NODE_REMOVED );
+		$this->assertEquals( $expected_removed_nodes, AMP_Validation_Utils::$removed_nodes );
 	}
 
 	/**
 	 * Test increment_count.
 	 *
-	 * @see AMP_Mutation_Utils::increment_count()
+	 * @see AMP_Validation_Utils::increment_count()
 	 */
 	public function test_increment_count() {
 		$attribute     = 'script';
@@ -111,65 +111,65 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		$expected      = array(
 			$attribute => 2,
 		);
-		$this->assertEquals( $one_attribute, AMP_Mutation_Utils::increment_count( array(), $attribute ) );
-		$this->assertEquals( $expected, AMP_Mutation_Utils::increment_count( $one_attribute, $attribute ) );
+		$this->assertEquals( $one_attribute, AMP_Validation_Utils::increment_count( array(), $attribute ) );
+		$this->assertEquals( $expected, AMP_Validation_Utils::increment_count( $one_attribute, $attribute ) );
 	}
 
 	/**
 	 * Test was_node_removed.
 	 *
-	 * @see AMP_Mutation_Utils::was_node_removed()
+	 * @see AMP_Validation_Utils::was_node_removed()
 	 */
 	public function test_was_node_removed() {
 		$attr_name = 'invalid-attr';
-		$this->assertFalse( AMP_Mutation_Utils::was_node_removed() );
-		AMP_Mutation_Utils::track_removed( $this->node, AMP_Mutation_Utils::NODE_REMOVED );
-		$this->assertTrue( AMP_Mutation_Utils::was_node_removed() );
+		$this->assertFalse( AMP_Validation_Utils::was_node_removed() );
+		AMP_Validation_Utils::track_removed( $this->node, AMP_Validation_Utils::NODE_REMOVED );
+		$this->assertTrue( AMP_Validation_Utils::was_node_removed() );
 	}
 
 	/**
 	 * Test process_markup.
 	 *
-	 * @see AMP_Mutation_Utils::process_markup()
+	 * @see AMP_Validation_Utils::process_markup()
 	 */
 	public function test_process_markup() {
 		$this->set_authorized();
-		AMP_Mutation_Utils::process_markup( $this->valid_amp_img );
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
 
-		AMP_Mutation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_removed();
 		$video = '<video src="https://example.com/video">';
-		AMP_Mutation_Utils::process_markup( $this->valid_amp_img );
+		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
 		// This isn't valid AMP, but the sanitizer should convert it to an <amp-video>, without stripping anything.
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
 
-		AMP_Mutation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_removed();
 
-		AMP_Mutation_Utils::process_markup( $this->disallowed_tag );
-		$this->assertEquals( 1, AMP_Mutation_Utils::$removed_nodes['script'] );
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
+		$this->assertEquals( 1, AMP_Validation_Utils::$removed_nodes['script'] );
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
 
-		AMP_Mutation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_removed();
 		$disallowed_style = '<div style="display:none"></div>';
-		AMP_Mutation_Utils::process_markup( $disallowed_style );
-		$removed_attribute = AMP_Mutation_Utils::$removed_attributes;
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
+		AMP_Validation_Utils::process_markup( $disallowed_style );
+		$removed_attribute = AMP_Validation_Utils::$removed_attributes;
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
 		$this->assertEquals( null, $removed_attribute );
 
-		AMP_Mutation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_removed();
 		$invalid_video = '<video width="200" height="100"></video>';
-		AMP_Mutation_Utils::process_markup( $invalid_video );
-		$removed_node = AMP_Mutation_Utils::$removed_nodes;
-		$this->assertEquals( 1, AMP_Mutation_Utils::$removed_nodes['video'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+		AMP_Validation_Utils::process_markup( $invalid_video );
+		$removed_node = AMP_Validation_Utils::$removed_nodes;
+		$this->assertEquals( 1, AMP_Validation_Utils::$removed_nodes['video'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
 	}
 
 	/**
 	 * Test amp_rest_validation.
 	 *
-	 * @see AMP_Mutation_Utils::amp_rest_validation()
+	 * @see AMP_Validation_Utils::amp_rest_validation()
 	 */
 	public function test_amp_rest_validation() {
 		$routes  = rest_get_server()->get_routes();
@@ -179,46 +179,46 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		);
 		$args    = array(
 			'markup' => array(
-				'validate_callback' => array( 'AMP_Mutation_Utils', 'validate_arg' ),
+				'validate_callback' => array( 'AMP_Validation_Utils', 'validate_arg' ),
 			),
 		);
 
 		$this->assertEquals( $args, $route['args'] );
-		$this->assertEquals( array( 'AMP_Mutation_Utils', 'validate_markup' ), $route['callback'] );
+		$this->assertEquals( array( 'AMP_Validation_Utils', 'validate_markup' ), $route['callback'] );
 		$this->assertEquals( $methods, $route['methods'] );
-		$this->assertEquals( array( 'AMP_Mutation_Utils', 'has_cap' ), $route['permission_callback'] );
+		$this->assertEquals( array( 'AMP_Validation_Utils', 'has_cap' ), $route['permission_callback'] );
 	}
 
 	/**
 	 * Test has_cap.
 	 *
-	 * @see AMP_Mutation_Utils::has_cap()
+	 * @see AMP_Validation_Utils::has_cap()
 	 */
 	public function test_has_cap() {
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'subscriber',
 		) ) );
-		$this->assertFalse( AMP_Mutation_Utils::has_cap() );
+		$this->assertFalse( AMP_Validation_Utils::has_cap() );
 
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'administrator',
 		) ) );
-		$this->assertTrue( AMP_Mutation_Utils::has_cap() );
+		$this->assertTrue( AMP_Validation_Utils::has_cap() );
 	}
 
 	/**
 	 * Test validate_markup.
 	 *
-	 * @see AMP_Mutation_Utils::validate_markup()
+	 * @see AMP_Validation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
 		$this->set_authorized();
 		$request = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
-			AMP_Mutation_Utils::MARKUP_KEY => $this->disallowed_tag,
+			AMP_Validation_Utils::MARKUP_KEY => $this->disallowed_tag,
 		) ) );
-		$response          = AMP_Mutation_Utils::validate_markup( $request );
+		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
 			$this->error_key     => true,
 			'removed_nodes'      => array(
@@ -230,9 +230,9 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( $expected_response, $response );
 
 		$request->set_body( wp_json_encode( array(
-			AMP_Mutation_Utils::MARKUP_KEY => $this->valid_amp_img,
+			AMP_Validation_Utils::MARKUP_KEY => $this->valid_amp_img,
 		) ) );
-		$response          = AMP_Mutation_Utils::validate_markup( $request );
+		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
 			$this->error_key     => false,
 			'removed_nodes'      => null,
@@ -245,11 +245,11 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test get_response.
 	 *
-	 * @see AMP_Mutation_Utils::get_response()
+	 * @see AMP_Validation_Utils::get_response()
 	 */
 	public function test_get_response() {
 		$this->set_authorized();
-		$response          = AMP_Mutation_Utils::get_response( $this->disallowed_tag );
+		$response          = AMP_Validation_Utils::get_response( $this->disallowed_tag );
 		$expected_response = array(
 			$this->error_key     => true,
 			'removed_nodes'      => array(
@@ -264,40 +264,40 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test reset_removed
 	 *
-	 * @see AMP_Mutation_Utils::reset_removed()
+	 * @see AMP_Validation_Utils::reset_removed()
 	 */
 	public function test_reset_removed() {
-		AMP_Mutation_Utils::$removed_nodes[]    = $this->node;
-		AMP_Mutation_Utils::$removed_attributes = array( 'onclick' );
-		AMP_Mutation_Utils::reset_removed();
+		AMP_Validation_Utils::$removed_nodes[]    = $this->node;
+		AMP_Validation_Utils::$removed_attributes = array( 'onclick' );
+		AMP_Validation_Utils::reset_removed();
 
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_nodes );
-		$this->assertEquals( null, AMP_Mutation_Utils::$removed_attributes );
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
 	}
 
 	/**
 	 * Test validate_arg
 	 *
-	 * @see AMP_Mutation_Utils::validate_arg()
+	 * @see AMP_Validation_Utils::validate_arg()
 	 */
 	public function test_validate_arg() {
 		$invalid_number = 54321;
 		$invalid_array  = array( 'foo', 'bar' );
 		$valid_string   = '<div class="baz"></div>';
-		$this->assertFalse( AMP_Mutation_Utils::validate_arg( $invalid_number ) );
-		$this->assertFalse( AMP_Mutation_Utils::validate_arg( $invalid_array ) );
-		$this->assertTrue( AMP_Mutation_Utils::validate_arg( $valid_string ) );
+		$this->assertFalse( AMP_Validation_Utils::validate_arg( $invalid_number ) );
+		$this->assertFalse( AMP_Validation_Utils::validate_arg( $invalid_array ) );
+		$this->assertTrue( AMP_Validation_Utils::validate_arg( $valid_string ) );
 	}
 
 	/**
 	 * Test is_authorized
 	 *
-	 * @see AMP_Mutation_Utils::is_authorized()
+	 * @see AMP_Validation_Utils::is_authorized()
 	 */
 	public function test_is_authorized() {
-		$this->assertFalse( AMP_Mutation_Utils::is_authorized() );
+		$this->assertFalse( AMP_Validation_Utils::is_authorized() );
 		$this->set_authorized();
-		$this->assertTrue( AMP_Mutation_Utils::is_authorized() );
+		$this->assertTrue( AMP_Validation_Utils::is_authorized() );
 	}
 
 	/**
@@ -309,13 +309,13 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 * So simply check that the error message includes 'header,'
 	 * meaning that the method called header() as expected.
 	 *
-	 * @see AMP_Mutation_Utils::add_header()
+	 * @see AMP_Validation_Utils::add_header()
 	 */
 	public function test_add_header() {
 		$this->set_authorized();
-		AMP_Mutation_Utils::process_markup( $this->disallowed_tag );
+		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
 		try {
-			AMP_Mutation_Utils::add_header();
+			AMP_Validation_Utils::add_header();
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
@@ -325,31 +325,31 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test error_message().
 	 *
-	 * @see AMP_Mutation_Utils::error_message().
+	 * @see AMP_Validation_Utils::error_message().
 	 */
 	public function test_error_message() {
 		$url            = 'https://example.org/am';
-		$with_query_arg = wp_parse_url( AMP_Mutation_Utils::error_message( $url ) );
-		$this->assertContains( AMP_Mutation_Utils::ERROR_QUERY_KEY, $with_query_arg['query'] );
-		$this->assertContains( AMP_Mutation_Utils::ERROR_QUERY_VALUE, $with_query_arg['query'] );
+		$with_query_arg = wp_parse_url( AMP_Validation_Utils::error_message( $url ) );
+		$this->assertContains( AMP_Validation_Utils::ERROR_QUERY_KEY, $with_query_arg['query'] );
+		$this->assertContains( AMP_Validation_Utils::ERROR_QUERY_VALUE, $with_query_arg['query'] );
 	}
 
 	/**
 	 * Test display_error().
 	 *
-	 * @see AMP_Mutation_Utils::display_error().
+	 * @see AMP_Validation_Utils::display_error().
 	 */
 	public function test_display_error() {
-		unset( $_GET[ AMP_Mutation_Utils::ERROR_QUERY_KEY ] );
+		unset( $_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] );
 		ob_start();
-		AMP_Mutation_Utils::display_error();
+		AMP_Validation_Utils::display_error();
 		$output = ob_get_clean();
 		$this->assertFalse( strpos( $output, 'notice notice-error' ) );
 		$this->assertFalse( strpos( $output, 'Notice: your post fails AMP validation' ) );
 
-		$_GET[ AMP_Mutation_Utils::ERROR_QUERY_KEY ] = AMP_Mutation_Utils::ERROR_QUERY_VALUE;
+		$_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] = AMP_Validation_Utils::ERROR_QUERY_VALUE;
 		ob_start();
-		AMP_Mutation_Utils::display_error();
+		AMP_Validation_Utils::display_error();
 		$output = ob_get_clean();
 		$this->assertContains( 'notice notice-error', $output );
 		$this->assertContains( 'Notice: this post fails AMP validation', $output );
@@ -362,7 +362,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	 */
 	public function set_authorized() {
 		global $_REQUEST, $post; // WPCS: CSRF ok.
-		if ( ! AMP_Mutation_Utils::has_cap() ) {
+		if ( ! AMP_Validation_Utils::has_cap() ) {
 			wp_set_current_user( $this->factory()->user->create( array(
 				'role' => 'administrator',
 			) ) );

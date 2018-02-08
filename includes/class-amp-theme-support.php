@@ -753,7 +753,7 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering() {
 		$output = self::prepare_response( ob_get_clean() );
-		AMP_Mutation_Utils::add_header();
+		AMP_Validation_Utils::add_header();
 		echo $output; // WPCS: xss ok.
 	}
 
@@ -787,8 +787,8 @@ class AMP_Theme_Support {
 			'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 			'use_document_element' => true,
 		);
-		if ( AMP_Mutation_Utils::is_authorized() ) {
-			$args['mutation_callback'] = 'AMP_Mutation_Utils::track_removed';
+		if ( AMP_Validation_Utils::is_authorized() ) {
+			$args['mutation_callback'] = 'AMP_Validation_Utils::track_removed';
 		}
 
 		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.

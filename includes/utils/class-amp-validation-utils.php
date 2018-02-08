@@ -1,16 +1,16 @@
 <?php
 /**
- * Class AMP_Mutation_Utils
+ * Class AMP_Validation_Utils
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Mutation_Utils
+ * Class AMP_Validation_Utils
  *
  * @since 0.7
  */
-class AMP_Mutation_Utils {
+class AMP_Validation_Utils {
 
 	/**
 	 * The argument if an attribute was removed.
@@ -131,7 +131,7 @@ class AMP_Mutation_Utils {
 			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
 		);
 		if ( self::is_authorized() ) {
-			$args['mutation_callback'] = 'AMP_Mutation_Utils::track_removed';
+			$args['mutation_callback'] = 'AMP_Validation_Utils::track_removed';
 		}
 		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
 	}
