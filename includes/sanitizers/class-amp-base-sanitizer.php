@@ -320,7 +320,7 @@ abstract class AMP_Base_Sanitizer {
 		if ( method_exists( $child->parentNode, 'removeChild' ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
 			$child->parentNode->removeChild( $child ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
 			if ( isset( $this->args['mutation_callback'] ) ) {
-				call_user_func( $this->args['mutation_callback'], $child, 'removed' );
+				call_user_func( $this->args['mutation_callback'], $child, AMP_Validation_Utils::NODE_REMOVED );
 			}
 		}
 	}
@@ -341,7 +341,7 @@ abstract class AMP_Base_Sanitizer {
 		if ( method_exists( $node, 'removeAttribute' ) ) {
 			$node->removeAttribute( $attribute );
 			if ( isset( $this->args['mutation_callback'] ) ) {
-				call_user_func( $this->args['mutation_callback'], $node, 'removed_attr', $attribute );
+				call_user_func( $this->args['mutation_callback'], $node, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attribute );
 			}
 		}
 	}

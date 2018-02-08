@@ -705,7 +705,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $attrs_to_remove as $attr ) {
 			$node->removeAttributeNode( $attr );
 			if ( isset( $this->args['mutation_callback'], $attr->name ) ) {
-				call_user_func( $this->args['mutation_callback'], $node, 'removed_attr', $attr->name );
+				call_user_func( $this->args['mutation_callback'], $node, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attr->name );
 			}
 		}
 	}
