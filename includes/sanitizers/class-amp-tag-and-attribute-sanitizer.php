@@ -530,6 +530,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
 
+			// If attr spec rule is empty, then it allows anything.
+			if ( empty( $attr_spec_rule ) && $node->hasAttribute( $attr_name ) ) {
+				$score++;
+				continue;
+			}
+
 			// If a mandatory attribute is required, and attribute exists, pass.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
 				$result = $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule );
