@@ -15,42 +15,42 @@ class AMP_Mutation_Utils {
 	/**
 	 * The argument if an attribute was removed.
 	 *
-	 * @const array.
+	 * @var array.
 	 */
 	const ATTRIBUTE_REMOVED = 'removed_attr';
 
 	/**
 	 * The argument if a node was removed.
 	 *
-	 * @const array.
+	 * @var array.
 	 */
 	const NODE_REMOVED = 'removed';
 
 	/**
 	 * Key for the markup value in the REST API endpoint.
 	 *
-	 * @const string.
+	 * @var string.
 	 */
 	const MARKUP_KEY = 'markup';
 
 	/**
 	 * Key for the error value in the response.
 	 *
-	 * @const string.
+	 * @var string.
 	 */
 	const ERROR_KEY = 'has_error';
 
 	/**
 	 * Key of the AMP error query var.
 	 *
-	 * @const string.
+	 * @var string.
 	 */
 	const ERROR_QUERY_KEY = 'amp_error';
 
 	/**
 	 * Query arg value if there is an AMP error in the post content.
 	 *
-	 * @const string.
+	 * @var string.
 	 */
 	const ERROR_QUERY_VALUE = '1';
 
