@@ -759,7 +759,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'bad_meta_charset' => array(
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
-				'<html amp><head><title>Mojibake?</title></head><body></body></html>',
+				'<html amp><head><meta><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.
 			),
 			'bad_meta_viewport' => array(
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
