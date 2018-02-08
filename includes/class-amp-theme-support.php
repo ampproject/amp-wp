@@ -746,29 +746,27 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Process response to ensure AMP validity.
+	 * Finish output buffering.
 	 *
-	 * @todo Do this in shutdown instead of output buffering callback? This will make it easier to debug things since printing can be done in shutdown function but cannot in output buffer callback.
 	 * @since 0.7
-	 *
-	 * @param string $output Buffered output.
-	 * @return string Finalized output.
-	 * @global int $content_width
+	 * @see AMP_Theme_Support::start_output_buffering()
 	 */
-	public static function finish_output_buffering( $output ) {
-		$markup = self::get_buffer( $output );
+	public static function finish_output_buffering() {
+		$output = self::prepare_response( ob_get_clean() );
 		AMP_Mutation_Utils::add_header();
-		return $markup;
+		echo $output; // WPCS: xss ok.
 	}
 
 	/**
-	 * Finish output buffering.
+	 * Process response to ensure AMP validity.
+-	 *
+-	 * @since 0.7
 	 *
+	 * @param string $response HTML document response.
+-	 * @return string AMP document response.
 	 * @global int $content_width
-	 * @param string $response Buffered output.
-	 * @return string Finalized output.
 	 */
-	public static function get_buffer( $response ) {
+	public static function prepare_response( $response ) {
 		global $content_width;
 
 		/*
