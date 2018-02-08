@@ -494,13 +494,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMNode $node           Node.
 	 * @param array[] $attr_spec_list Attribute Spec list.
 	 *
-	 * @return int Number of times the attribute spec list matched. If there was a mismatch, then 0 is returned.
+	 * @return float Number of times the attribute spec list matched. If there was a mismatch, then 0 is returned. 0.5 is returned if there is an implicit match.
 	 */
 	private function validate_attr_spec_list_for_node( $node, $attr_spec_list ) {
-
-		// If node has no attributes there is no point in continuing.
+		/*
+		 * If node has no attributes there is no point in continuing, but if none of attributes
+		 * in the spec list are mandatory, then we give this a score.
+		 */
 		if ( ! $node->hasAttributes() ) {
-			return 0;
+			foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
+				if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
+					return 0;
+				}
+			}
+			return 0.5;
 		}
 
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
@@ -523,6 +530,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$score = 0;
 
 		/*
+		 * Keep track of how many of the attribute spec rules are mandatory,
+		 * because if none are mandatory, then we will let this rule have a
+		 * score since all the invalid attributes can just be removed.
+		 */
+		$mandatory_count = 0;
+
+		/*
 		 * Iterate through each attribute rule in this attr spec list and run
 		 * the series of tests. Each filter is given a `$node`, an `$attr_name`,
 		 * and an `$attr_spec_rule`. If the `$attr_spec_rule` seems to be valid
@@ -530,8 +544,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		foreach ( $attr_spec_list as $attr_name => $attr_spec_rule ) {
 
+			// If attr spec rule is empty, then it allows anything.
+			if ( empty( $attr_spec_rule ) && $node->hasAttribute( $attr_name ) ) {
+				$score++;
+				continue;
+			}
+
 			// If a mandatory attribute is required, and attribute exists, pass.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
+				$mandatory_count++;
 				$result = $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule );
 				if ( AMP_Rule_Spec::PASS === $result ) {
 					$score++;
@@ -669,6 +690,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					return 0;
 				}
 			}
+		}
+
+		// Give the spec a score if it doesn't have any mandatory attributes.
+		if ( 0 === $mandatory_count && 0 === $score ) {
+			$score = 0.5;
 		}
 
 		return $score;
