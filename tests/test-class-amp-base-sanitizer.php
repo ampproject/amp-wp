@@ -301,6 +301,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$sanitizer->remove_attribute( $video, $attribute );
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
 		$this->assertEquals( $expected_removed, AMP_Mutation_Utils::$removed_attributes );
+		// @codingStandardsIgnoreEnd
 		AMP_Mutation_Utils::reset_removed();
 	}
 

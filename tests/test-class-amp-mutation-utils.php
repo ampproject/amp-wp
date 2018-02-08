@@ -15,7 +15,7 @@ class Test_AMP_Mutation_Utils extends \WP_UnitTestCase {
 	/**
 	 * An instance of DOMElement to test.
 	 *
-	 * @var DOMDocument
+	 * @var DOMElement
 	 */
 	public $node;
 

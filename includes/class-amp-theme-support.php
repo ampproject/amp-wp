@@ -759,11 +759,11 @@ class AMP_Theme_Support {
 
 	/**
 	 * Process response to ensure AMP validity.
--	 *
--	 * @since 0.7
+	 *
+	 * @since 0.7
 	 *
 	 * @param string $response HTML document response.
--	 * @return string AMP document response.
+	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
 	public static function prepare_response( $response ) {
