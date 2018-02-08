@@ -260,13 +260,25 @@ class AMP_Validation_Utils {
 	 * @return void.
 	 */
 	public static function validate_content( $post_id, $post ) {
+		unset( $post_id );
 		if ( ! self::is_authorized() ) {
 			return;
 		}
-		$filtered_content = apply_filters( 'the_content', $post->post_content );
+		/** This filter is documented in wp-includes/post-template.php */
+		$filtered_content = apply_filters( 'the_content', $post->post_content, $post->ID );
 		$response         = self::get_response( $filtered_content );
 		if ( isset( $response[ self::ERROR_KEY ] ) && ( true === $response[ self::ERROR_KEY ] ) ) {
-			add_filter( 'redirect_post_location', array( __CLASS__, 'error_message' ) );
+			add_filter( 'redirect_post_location', function( $location ) use ( $response ) {
+				$location = AMP_Validation_Utils::error_message( $location );
+				$location = add_query_arg(
+					array(
+						'removed_elements'   => array_keys( $response['removed_nodes'] ),
+						'removed_attributes' => array_keys( $response['removed_attributes'] ),
+					),
+					$location
+				);
+				return $location;
+			} );
 		}
 	}
 
@@ -336,7 +348,23 @@ class AMP_Validation_Utils {
 		check_admin_referer( self::ERROR_NONCE_ACTION, self::ERROR_NONCE );
 		$error = isset( $_GET[ self::ERROR_QUERY_KEY ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::ERROR_QUERY_KEY ] ) ) : ''; // WPCS: CSRF ok.
 		if ( self::ERROR_QUERY_VALUE === $error ) {
-			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'Notice: this post fails AMP validation', 'amp' ) );
+			echo '<div class="notice notice-warning">';
+			printf( '<p>%s</p>', esc_html__( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' ) );
+			if ( ! empty( $_GET['removed_elements'] ) && is_array( $_GET['removed_elements'] ) ) {
+				printf(
+					'<p>%s %s</p>',
+					esc_html__( 'Invalid elements:', 'amp' ),
+					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $_GET['removed_elements'] ) ) . '</code>'
+				);
+			}
+			if ( ! empty( $_GET['removed_attributes'] ) ) {
+				printf(
+					'<p>%s %s</p>',
+					esc_html__( 'Invalid attributes:', 'amp' ),
+					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $_GET['removed_attributes'] ) ) . '</code>'
+				);
+			}
+			echo '</div>';
 		}
 	}
 

@@ -356,8 +356,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Validation_Utils::display_error();
 		$output = ob_get_clean();
-		$this->assertContains( 'notice notice-error', $output );
-		$this->assertContains( 'Notice: this post fails AMP validation', $output );
+		$this->assertContains( 'notice notice-warning', $output );
+		$this->assertContains( 'Warning:', $output );
 	}
 
 	/**
