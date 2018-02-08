@@ -340,6 +340,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::display_error().
 	 */
 	public function test_display_error() {
+		wp_set_current_user( $this->factory()->user->create( array(
+			'role' => 'administrator',
+		) ) );
 		unset( $_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] );
 		ob_start();
 		AMP_Validation_Utils::display_error();
@@ -348,6 +351,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertFalse( strpos( $output, 'Notice: your post fails AMP validation' ) );
 
 		$_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] = AMP_Validation_Utils::ERROR_QUERY_VALUE;
+		$_REQUEST[ AMP_Validation_Utils::ERROR_NONCE ] = wp_create_nonce( AMP_Validation_Utils::ERROR_NONCE_ACTION );
+		$_REQUEST['_wp_http_referer']                  = admin_url();
 		ob_start();
 		AMP_Validation_Utils::display_error();
 		$output = ob_get_clean();

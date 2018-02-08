@@ -55,6 +55,20 @@ class AMP_Validation_Utils {
 	const ERROR_QUERY_VALUE = '1';
 
 	/**
+	 * Nonce name for the editor error message.
+	 *
+	 * @var string.
+	 */
+	const ERROR_NONCE = 'amp_nonce';
+
+	/**
+	 * Nonce action for displaying the invalid AMP message.
+	 *
+	 * @var string.
+	 */
+	const ERROR_NONCE_ACTION = 'invalid_amp_message';
+
+	/**
 	 * The attributes that the sanitizer removed.
 	 *
 	 * @var array.
@@ -300,11 +314,11 @@ class AMP_Validation_Utils {
 	 * @return string $url The filtered URL, including the AMP error message query var.
 	 */
 	public static function error_message( $url ) {
-		return add_query_arg(
-			self::ERROR_QUERY_KEY,
-			self::ERROR_QUERY_VALUE,
-			$url
+		$args = array(
+			self::ERROR_QUERY_KEY => self::ERROR_QUERY_VALUE,
+			self::ERROR_NONCE     => wp_create_nonce( self::ERROR_NONCE_ACTION ),
 		);
+		return add_query_arg( $args, $url );
 	}
 
 	/**
@@ -316,6 +330,10 @@ class AMP_Validation_Utils {
 	 * @return void.
 	 */
 	public static function display_error() {
+		if ( ! isset( $_GET[ self::ERROR_QUERY_KEY ] ) ) {
+			return;
+		}
+		check_admin_referer( self::ERROR_NONCE_ACTION, self::ERROR_NONCE );
 		$error = isset( $_GET[ self::ERROR_QUERY_KEY ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::ERROR_QUERY_KEY ] ) ) : ''; // WPCS: CSRF ok.
 		if ( self::ERROR_QUERY_VALUE === $error ) {
 			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html__( 'Notice: this post fails AMP validation', 'amp' ) );
