@@ -29,14 +29,6 @@ class AMP_Comment_Walker extends Walker_Comment {
 	private $comment_thread_age = array();
 
 	/**
-	 * Holds the count of comments processed.
-	 *
-	 * @since 0.7
-	 * @var int
-	 */
-	private $comments_processed = 0;
-
-	/**
 	 * Starts the element output.
 	 *
 	 * @since 0.7.0
@@ -53,7 +45,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	 * @param int        $id Optional. ID of the current comment. Default 0 (unused).
 	 */
 	public function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
-		$this->comments_processed++;
+
 		$new_out = '';
 		parent::start_el( $new_out, $comment, $depth, $args, $id );
 
@@ -68,13 +60,16 @@ class AMP_Comment_Walker extends Walker_Comment {
 		if ( ! empty( $this->comment_thread_age[ $comment->comment_ID ] ) && $this->comment_thread_age[ $comment->comment_ID ] !== $comment_time_stamp ) {
 			// Only add data-update-time if not the update time is not the same.
 			$new_tag .= ' data-update-time="' . esc_attr( $this->comment_thread_age[ $comment->comment_ID ] ) . '"';
-		} elseif ( count( $this->comment_thread_age ) === $this->comments_processed ) {
+		} elseif ( ! empty( $this->comment_thread_age[ $comment->comment_ID ] ) && count( $this->comment_thread_age ) === 1 ) {
 			// Add the current timestamp to the last item to defeat polling the same URL to defeat caching.
 			$new_tag .= ' data-update-time="' . esc_attr( current_time( 'timestamp' ) ) . '"';
 		}
 
 		$output .= $new_tag . substr( ltrim( $new_out ), strlen( $tag ) );
-
+		// Remove comment age if exists.
+		if ( isset( $this->comment_thread_age[ $comment->comment_ID ] ) ) {
+			unset( $this->comment_thread_age[ $comment->comment_ID ] );
+		}
 	}
 
 	/**
