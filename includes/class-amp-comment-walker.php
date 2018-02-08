@@ -21,12 +21,20 @@ class AMP_Comment_Walker extends Walker_Comment {
 	public $args;
 
 	/**
-	 * Holds the timestamp of the most reacent comment in a thread.
+	 * Holds the timestamp of the most recent comment in a thread.
 	 *
 	 * @since 0.7
 	 * @var array
 	 */
 	private $comment_thread_age = array();
+
+	/**
+	 * Holds the count of comments processed.
+	 *
+	 * @since 0.7
+	 * @var int
+	 */
+	private $comments_processed = 0;
 
 	/**
 	 * Starts the element output.
@@ -45,7 +53,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	 * @param int        $id Optional. ID of the current comment. Default 0 (unused).
 	 */
 	public function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
-
+		$this->comments_processed++;
 		$new_out = '';
 		parent::start_el( $new_out, $comment, $depth, $args, $id );
 
@@ -54,10 +62,15 @@ class AMP_Comment_Walker extends Walker_Comment {
 		} else {
 			$tag = '<li';
 		}
-		$new_tag = $tag . ' data-sort-time="' . esc_attr( strtotime( $comment->comment_date ) ) . '"';
+		$comment_time_stamp = strtotime( $comment->comment_date );
+		$new_tag            = $tag . ' data-sort-time="' . esc_attr( $comment_time_stamp ) . '"';
 
-		if ( ! empty( $this->comment_thread_age[ $comment->comment_ID ] ) ) {
+		if ( ! empty( $this->comment_thread_age[ $comment->comment_ID ] ) && $this->comment_thread_age[ $comment->comment_ID ] !== $comment_time_stamp ) {
+			// Only add data-update-time if not the update time is not the same.
 			$new_tag .= ' data-update-time="' . esc_attr( $this->comment_thread_age[ $comment->comment_ID ] ) . '"';
+		} elseif ( count( $this->comment_thread_age ) === $this->comments_processed ) {
+			// Add the current timestamp to the last item to defeat polling the same URL to defeat caching.
+			$new_tag .= ' data-update-time="' . esc_attr( current_time( 'timestamp' ) ) . '"';
 		}
 
 		$output .= $new_tag . substr( ltrim( $new_out ), strlen( $tag ) );
