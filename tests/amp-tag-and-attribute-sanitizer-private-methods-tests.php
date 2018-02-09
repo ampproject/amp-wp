@@ -881,7 +881,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(),
 				),
-				0,
+				0.5, // Because there are no mandatory attributes.
 			),
 			'attributes_no_spec' => array(
 				array(
@@ -889,7 +889,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(),
 				),
-				0,
+				0.5, // Because there are no mandatory attributes.
 			),
 			'attributes_alternative_names' => array(
 				array(
@@ -905,7 +905,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				0,
+				0.5, // Because there are no mandatory attributes.
 			),
 			'attributes_mandatory' => array(
 				array(
