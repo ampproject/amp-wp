@@ -177,19 +177,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-riddle-quiz' ),
 			),
 
-			'amp-wistia-player'                                        => array(
+			'amp-wistia-player'                                         => array(
 				'<amp-wistia-player data-media-hashed-id="u8p9wq6mq8" width="512" height="360"></amp-wistia-player>',
 				null, // No change.
 				array( 'amp-wistia-player' ),
 			),
 
-			'amp-byside-content'                                       => array(
+			'amp-byside-content'                                        => array(
 				'<amp-byside-content data-webcare-id="D6604AE5D0" data-channel="" data-lang="pt" data-fid="" data-label="amp-number" layout="fixed" width="120" height="40"></amp-byside-content>',
 				null, // No change.
 				array( 'amp-byside-content' ),
 			),
 
-			'amp-bind-macro'                                       => array(
+			'amp-bind-macro'                                            => array(
 				'<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>',
 				null, // No change.
 				array( 'amp-bind' ),
