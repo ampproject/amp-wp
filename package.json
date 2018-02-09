@@ -6,7 +6,7 @@
   "type": "git",
   "url": "https://github.com/Automattic/amp-wp.git"
  },
- "version": "0.6.0",
+ "version": "0.6.1",
  "license": "GPL-2.0+",
  "private": true,
  "devDependencies": {
