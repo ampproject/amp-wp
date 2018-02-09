@@ -139,6 +139,29 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test prepare_response for bad/non-HTML.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_bad_html() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+
+		// JSON.
+		$input = '{"success":true}';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// Nothing, for redirect.
+		$input = '';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but very stripped down.
+		$input  = '<html>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertContains( '<html amp', $output );
+	}
+
+	/**
 	 * Test prepare_response to inject html[amp] attribute and ensure HTML5 doctype.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
