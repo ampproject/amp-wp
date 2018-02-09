@@ -196,7 +196,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-facebook-page'                                       => array(
-				'<amp-facebook-page width="552" height="310" layout="responsive" data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373"></amp-facebook-page>',
+				'<amp-facebook-page width=90 height=20 layout="fixed" data-hide-cover="true" data-href="https://www.facebook.com/testesmegadivertidos/"></amp-facebook-page>',
 				null, // No change.
 				array( 'amp-facebook' ),
 			),
