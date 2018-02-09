@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 0.6.0
+Stable tag: 0.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.2
@@ -37,6 +37,10 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
 
 == Changelog ==
+
+= 0.6.1 (2018-02-09) =
+
+Bump version to re-release to ensure temporarily-broken 0.6.0 ZIP build is permanently fixed, without requiring a site to re-install the plugin.
 
 = 0.6.0 (2018-01-23) =
 

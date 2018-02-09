@@ -8,7 +8,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.7  
 **Tested up to:** 4.9  
-**Stable tag:** 0.6.0  
+**Stable tag:** 0.6.1  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.2  
 
@@ -55,6 +55,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
 
 ## Changelog ##
+
+### 0.6.1 (2018-02-09) ###
+Bump version to re-release to ensure temporarily-broken 0.6.0 ZIP build is permanently fixed, without requiring a site to re-install the plugin.
 
 ### 0.6.0 (2018-01-23) ###
 - Add support for the "page" post type. A new `page.php` is introduced with template parts factored out (`html-start.php`, `header.php`, `footer.php`, `html-end.php`) and re-used from `single.php`. Note that AMP URLs will end in `?amp` instead of `/amp/`. See [#825](https://github.com/Automattic/amp-wp/pull/825). Props technosailor, ThierryA, westonruter.
