@@ -81,7 +81,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
-				$this->remove_child( $node );
+				$this->remove_invalid_child( $node );
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 			}

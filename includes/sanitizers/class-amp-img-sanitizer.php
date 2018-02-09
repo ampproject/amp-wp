@@ -74,7 +74,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			if ( ! $node->hasAttribute( 'src' ) || '' === $node->getAttribute( 'src' ) ) {
-				$this->remove_child( $node );
+				$this->remove_invalid_child( $node );
 				continue;
 			}
 

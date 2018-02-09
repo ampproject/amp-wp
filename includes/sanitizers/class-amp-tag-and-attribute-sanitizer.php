@@ -812,7 +812,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				( true === $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
 				$node->setAttribute( $attr_name, '' );
 			} else {
-				$this->remove_attribute( $node, $attr_name );
+				$this->remove_invalid_attribute( $node, $attr_name );
 			}
 		}
 	}
@@ -1451,13 +1451,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$parent = $node->parentNode;
 		if ( $node && $parent ) {
-			$this->remove_child( $node );
+			$this->remove_invalid_child( $node );
 		}
 		while ( $parent && ! $parent->hasChildNodes() && $this->root_element !== $parent ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;
 			if ( $parent ) {
-				$this->remove_child( $node );
+				$this->remove_invalid_child( $node );
 			}
 		}
 	}

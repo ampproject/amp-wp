@@ -245,7 +245,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 	/**
 	 * Tests remove_child.
 	 *
-	 * @see AMP_Base_Sanitizer::remove_child()
+	 * @see AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_child() {
 		$parent_tag_name = 'div';
@@ -262,13 +262,13 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom_document, array(
 			'mutation_callback' => 'AMP_Validation_Utils::track_removed',
 		) );
-		$sanitizer->remove_child( $child );
+		$sanitizer->remove_invalid_child( $child );
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertEquals( 1, AMP_Validation_Utils::$removed_nodes[ $child_tag_name ] );
 
 		$parent->appendChild( $child );
 		$this->assertEquals( $child, $parent->firstChild );
-		$sanitizer->remove_child( $child );
+		$sanitizer->remove_invalid_child( $child );
 
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertEquals( null, $child->parentNode );
@@ -279,7 +279,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 	/**
 	 * Tests remove_child.
 	 *
-	 * @see AMP_Base_Sanitizer::remove_child()
+	 * @see AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_attribute() {
 		AMP_Validation_Utils::reset_removed();
@@ -298,7 +298,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 			$attribute => 1,
 		);
 		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
-		$sanitizer->remove_attribute( $video, $attribute );
+		$sanitizer->remove_invalid_attribute( $video, $attribute );
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
 		$this->assertEquals( $expected_removed, AMP_Validation_Utils::$removed_attributes );
 		// @codingStandardsIgnoreEnd

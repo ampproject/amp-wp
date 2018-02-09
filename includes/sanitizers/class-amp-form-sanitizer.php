@@ -85,7 +85,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$node->setAttribute( 'action', $action_url );
 				}
 			} elseif ( 'post' === $method ) {
-				$this->remove_attribute( $node, 'action' );
+				$node->removeAttribute( 'action' );
 				if ( ! $xhr_action ) {
 					// record that action was converted tp action-xhr.
 					$action_url = add_query_arg( '_wp_amp_action_xhr_converted', 1, $action_url );

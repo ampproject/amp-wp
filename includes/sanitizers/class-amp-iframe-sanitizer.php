@@ -74,7 +74,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $new_attributes['src'] ) ) {
-				$this->remove_child( $node );
+				$this->remove_invalid_child( $node );
 				continue;
 			}
 
@@ -95,11 +95,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$parent_node->replaceChild( $new_node, $node );
 			} else {
 				// AMP does not like iframes in <p> tags.
-				$this->remove_child( $node );
+				$parent_node->removeChild( $node );
 				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
 
 				if ( AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$this->remove_child( $parent_node );
+					$this->remove_invalid_child( $parent_node );
 				}
 			}
 		}
