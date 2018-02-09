@@ -165,16 +165,22 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-izlesene' ),
 			),
 
-			'amp-mathml'                                                 => array(
+			'amp-mathml'                                                => array(
 				'<amp-mathml layout="container" inline data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>',
 				null, // No change.
 				array( 'amp-mathml' ),
 			),
 
-			'amp-riddle-quiz'                                                 => array(
+			'amp-riddle-quiz'                                           => array(
 				'<amp-riddle-quiz layout="responsive" width="600" height="400" data-riddle-id="25799"></amp-riddle-quiz>',
 				null, // No change.
 				array( 'amp-riddle-quiz' ),
+			),
+
+			'amp-wistia-player'                                        => array(
+				'<amp-wistia-player data-media-hashed-id="u8p9wq6mq8" width="512" height="360"></amp-wistia-player>',
+				null, // No change.
+				array( 'amp-wistia-player' ),
 			),
 
 			'amp-nexxtv-player'                                         => array(
