@@ -57,12 +57,12 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 ## Changelog ##
 
 ### 0.7 (unreleased) ###
-- Add support for canonical AMP, if the theme registers support for it with `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#856](https://github.com/Automattic/amp-wp/pull/856). Props kaitnyl, ThierryA, westonruter.
-- Add support for all default WordPress widgets. See [#921](https://github.com/Automattic/amp-wp/pull/921), [#917](https://github.com/Automattic/amp-wp/pull/917). Props westonruter, kienstra.
+- Add support for canonical AMP, if the theme registers support for it with `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#856](https://github.com/Automattic/amp-wp/pull/856). Props westonruter, kaitnyl, ThierryA.
+- Add support for all default WordPress widgets. See [#921](https://github.com/Automattic/amp-wp/pull/921), [#917](https://github.com/Automattic/amp-wp/pull/917). Props kienstra, westonruter.
 - Add support for more default embeds: Issuu, Post, Meetup, Reddit, Screencast, Tumblr, and WordPress Plugin Directory. See [#889](https://github.com/Automattic/amp-wp/pull/889). Props kaitnyl.
 - Allow native WordPress commenting, in fully valid AMP. See [#871](https://github.com/Automattic/amp-wp/pull/871), [#909](https://github.com/Automattic/amp-wp/pull/909). Props DavidCramer, westonruter.
-- Creation of AMP-related notifications, on entering invalid content in the 'classic' editor. See [#912](https://github.com/Automattic/amp-wp/pull/912/). Props ThierryA, westonruter, kienstra.
-- Add output buffering, ensuring the entire page is valid AMP. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#857](https://github.com/Automattic/amp-wp/pull/857). Props ThierryA, westonruter.
+- Creation of AMP-related notifications, on entering invalid content in the 'classic' editor. See [#912](https://github.com/Automattic/amp-wp/pull/912/). Props kienstra, westonruter, ThierryA.
+- Add output buffering, ensuring the entire page is valid AMP. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#857](https://github.com/Automattic/amp-wp/pull/857). Props westonruter, ThierryA.
 - Update the generated sanitizer file to the AMP spec, and simplify the file that generates it. See [#929](https://github.com/Automattic/amp-wp/pull/929). Props westonruter.
 
 See [0.7 milestone](https://github.com/Automattic/amp-wp/milestone/6?closed=1).
