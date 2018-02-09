@@ -772,6 +772,15 @@ class AMP_Theme_Support {
 	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
 
+		/*
+		 * Check if the response starts with HTML markup.
+		 * Without this check, JSON responses will be erroneously corrupted,
+		 * being wrapped in HTML documents.
+		 */
+		if ( '<' !== substr( ltrim( $response ), 0, 1 ) ) {
+			return $response;
+		}
+
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
