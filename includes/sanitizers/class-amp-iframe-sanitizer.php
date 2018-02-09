@@ -74,7 +74,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $new_attributes['src'] ) ) {
-				$node->parentNode->removeChild( $node );
+				$this->remove_invalid_child( $node );
 				continue;
 			}
 
@@ -193,4 +193,5 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 		return $placeholder_node;
 	}
+
 }

@@ -760,12 +760,26 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 *
-	 * @param string $response HTML document response.
+	 * @param string $response HTML document response. By default it expects a complete document.
+	 * @param array  $args {
+	 *     Args to send to the preprocessor/sanitizer.
+	 *
+	 *     @type callable $remove_invalid_callback Function to call whenever a node is removed due to being invalid.
+	 * }
 	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
-	public static function prepare_response( $response ) {
+	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
+
+		$args = array_merge(
+			array(
+				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element'    => true,
+				'remove_invalid_callback' => null,
+			),
+			$args
+		);
 
 		/*
 		 * Make sure that <meta charset> is present in output prior to parsing.
@@ -780,11 +794,7 @@ class AMP_Theme_Support {
 				1
 			);
 		}
-		$dom  = AMP_DOM_Utils::get_dom( $response );
-		$args = array(
-			'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-			'use_document_element' => true,
-		);
+		$dom = AMP_DOM_Utils::get_dom( $response );
 
 		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
@@ -798,7 +808,7 @@ class AMP_Theme_Support {
 		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
 			/* translators: %s is the charset of the current site */
-			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ), E_USER_WARNING ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
 		$response  = "<!DOCTYPE html>\n";

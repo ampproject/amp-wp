@@ -730,6 +730,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attrs_to_remove as $attr ) {
 			$node->removeAttributeNode( $attr );
+			if ( isset( $this->args['remove_invalid_callback'], $attr->name ) ) {
+				call_user_func( $this->args['remove_invalid_callback'], $node, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attr->name );
+			}
 		}
 	}
 
@@ -835,7 +838,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				( true === $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
 				$node->setAttribute( $attr_name, '' );
 			} else {
-				$node->removeAttribute( $attr_name );
+				$this->remove_invalid_attribute( $node, $attr_name );
 			}
 		}
 	}
@@ -1474,13 +1477,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$parent = $node->parentNode;
 		if ( $node && $parent ) {
-			$parent->removeChild( $node );
+			$this->remove_invalid_child( $node );
 		}
 		while ( $parent && ! $parent->hasChildNodes() && $this->root_element !== $parent ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;
 			if ( $parent ) {
-				$parent->removeChild( $node );
+				$this->remove_invalid_child( $node );
 			}
 		}
 	}

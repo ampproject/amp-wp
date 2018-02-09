@@ -304,4 +304,42 @@ abstract class AMP_Base_Sanitizer {
 
 		return $src;
 	}
+
+	/**
+	 * Removes an invalid child of a node.
+	 *
+	 * Also, calls the mutation callback for it.
+	 * This tracks all the nodes that were removed.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMElement $child The node to remove.
+	 * @return void.
+	 */
+	public function remove_invalid_child( $child ) {
+		$child->parentNode->removeChild( $child );
+		if ( isset( $this->args['remove_invalid_callback'] ) ) {
+			call_user_func( $this->args['remove_invalid_callback'], $child, AMP_Validation_Utils::NODE_REMOVED );
+		}
+	}
+
+	/**
+	 * Removes an invalid attribute of a node.
+	 *
+	 * Also, calls the mutation callback for it.
+	 * This tracks all the attributes that were removed.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMElement $element   The node for which to remove the attribute.
+	 * @param string     $attribute The attribute to remove from the node.
+	 * @return void.
+	 */
+	public function remove_invalid_attribute( $element, $attribute ) {
+		$element->removeAttribute( $attribute );
+		if ( isset( $this->args['remove_invalid_callback'] ) ) {
+			call_user_func( $this->args['remove_invalid_callback'], $element, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attribute );
+		}
+	}
+
 }
