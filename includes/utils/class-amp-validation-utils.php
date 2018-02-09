@@ -13,20 +13,6 @@
 class AMP_Validation_Utils {
 
 	/**
-	 * The argument if an attribute was removed.
-	 *
-	 * @var array.
-	 */
-	const ATTRIBUTE_REMOVED = 'removed_attr';
-
-	/**
-	 * The argument if a node was removed.
-	 *
-	 * @var array.
-	 */
-	const NODE_REMOVED = 'removed';
-
-	/**
 	 * Key for the markup value in the REST API endpoint.
 	 *
 	 * @var string.
@@ -69,23 +55,16 @@ class AMP_Validation_Utils {
 	const ERROR_NONCE_ACTION = 'invalid_amp_message';
 
 	/**
-	 * The attributes that the sanitizer removed.
-	 *
-	 * @var array.
-	 */
-	public static $removed_attributes;
-
-	/**
 	 * The nodes that the sanitizer removed.
 	 *
-	 * @var array.
+	 * @var DOMNode[]
 	 */
-	public static $removed_nodes;
+	public static $removed_nodes = array();
 
 	/**
 	 * Add the actions.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
@@ -94,32 +73,13 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Tracks when a sanitizer removes an attribute or node.
+	 * Tracks when a sanitizer removes an node (element or attribute).
 	 *
-	 * @param DOMNode|DOMElement $node         The node in which there was a removal.
-	 * @param string             $removal_type The removal: 'removed_attr' for an attribute, or 'removed' for a node or element.
-	 * @param string             $attr_name    The name of the attribute removed (optional).
-	 * @return void.
+	 * @param DOMNode $node The node which was removed.
+	 * @return void
 	 */
-	public static function track_removed( $node, $removal_type, $attr_name = null ) {
-		if ( ( self::ATTRIBUTE_REMOVED === $removal_type ) && isset( $attr_name ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-			self::$removed_attributes = self::increment_count( self::$removed_attributes, $attr_name );
-		} elseif ( ( self::NODE_REMOVED === $removal_type ) && isset( $node->nodeName ) ) {
-			self::$removed_nodes = self::increment_count( self::$removed_nodes, $node->nodeName ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-		}
-	}
-
-	/**
-	 * Tracks when a sanitizer removes an attribute or node.
-	 *
-	 * @param array  $histogram The count of attributes or nodes removed.
-	 * @param string $key       The attribute or node name removed.
-	 * @return array $histogram The incremented histogram.
-	 */
-	public static function increment_count( $histogram, $key ) {
-		$current_value     = isset( $histogram[ $key ] ) ? $histogram[ $key ] : 0;
-		$histogram[ $key ] = $current_value + 1;
-		return $histogram;
+	public static function track_removed( $node ) {
+		self::$removed_nodes[] = $node;
 	}
 
 	/**
@@ -212,11 +172,34 @@ class AMP_Validation_Utils {
 			self::process_markup( $markup );
 			$response['processed_markup'] = $markup;
 		}
-		$response = array_merge( array(
-			self::ERROR_KEY      => self::was_node_removed(),
-			'removed_nodes'      => self::$removed_nodes,
-			'removed_attributes' => self::$removed_attributes,
-		), $response );
+
+		$removed_elements   = array();
+		$removed_attributes = array();
+		foreach ( self::$removed_nodes as $node ) {
+			if ( $node instanceof DOMAttr ) {
+				if ( ! isset( $removed_attributes[ $node->nodeName ] ) ) {
+					$removed_attributes[ $node->nodeName ] = 1;
+				} else {
+					$removed_attributes[ $node->nodeName ]++;
+				}
+			} elseif ( $node instanceof DOMElement ) {
+				if ( ! isset( $removed_elements[ $node->nodeName ] ) ) {
+					$removed_elements[ $node->nodeName ] = 1;
+				} else {
+					$removed_elements[ $node->nodeName ]++;
+				}
+			}
+		}
+
+		$response = array_merge(
+			array(
+				self::ERROR_KEY => self::was_node_removed(),
+			),
+			compact(
+				'removed_elements',
+				'removed_attributes'
+			),
+		$response );
 		self::reset_removed();
 
 		return $response;
@@ -232,8 +215,7 @@ class AMP_Validation_Utils {
 	 * @return void.
 	 */
 	public static function reset_removed() {
-		self::$removed_nodes      = null;
-		self::$removed_attributes = null;
+		self::$removed_nodes = array();
 	}
 
 	/**
@@ -272,7 +254,7 @@ class AMP_Validation_Utils {
 				$location = AMP_Validation_Utils::error_message( $location );
 				$location = add_query_arg(
 					array(
-						'removed_elements'   => array_keys( $response['removed_nodes'] ),
+						'removed_elements'   => array_keys( $response['removed_elements'] ),
 						'removed_attributes' => array_keys( $response['removed_attributes'] ),
 					),
 					$location

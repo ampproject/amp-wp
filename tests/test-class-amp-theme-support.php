@@ -101,7 +101,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<html amp <?php language_attributes(); ?>>
 			<head>
 				<?php wp_head(); ?>
-				<script data-head>document.write('TODO: This needs to be sanitized as well once.');</script>
+				<script data-head>document.write('Illegal');</script>
 			</head>
 			<body>
 				<img width="100" height="100" src="https://example.com/test.png">
@@ -114,12 +114,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					data-aax_src="302"></amp-ad>
 				<?php wp_footer(); ?>
 
+				<button onclick="alert('Illegal');">no-onclick</button>
+
 				<style>body { background: black; }</style>
 			</body>
 		</html>
 		<?php
 		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+		$removed_nodes  = array();
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
+			'remove_invalid_callback' => function( $node ) use ( &$removed_nodes ) {
+				$removed_nodes[ $node->nodeName ] = $node;
+			},
+		) );
 
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
@@ -136,6 +143,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script async custom-element="amp-audio"', $sanitized_html );
 
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
+
+		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
+		$this->assertCount( 2, $removed_nodes );
+		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
+		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 	}
 
 	/**
