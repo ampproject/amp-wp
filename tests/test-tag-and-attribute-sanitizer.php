@@ -166,7 +166,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-mathml'                                                 => array(
-				'<amp-mathml layout="container" inline data-formula="\[ \cos(θ+φ) \]"></amp-mathml>',
+				'<amp-mathml layout="container" inline data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>',
 				null, // No change.
 				array( 'amp-mathml' ),
 			),
