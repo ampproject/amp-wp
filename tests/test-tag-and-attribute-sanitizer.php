@@ -183,6 +183,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-wistia-player' ),
 			),
 
+			'amp-byside-content'                                       => array(
+				'<amp-byside-content data-webcare-id="D6604AE5D0" data-channel="" data-lang="pt" data-fid="" data-label="amp-number" layout="fixed" width="120" height="40"></amp-byside-content>',
+				null, // No change.
+				array( 'amp-byside-content' ),
+			),
+
+			'amp-bind-macro'                                       => array(
+				'<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>',
+				null, // No change.
+				array( 'amp-bind' ),
+			),
+
+			'amp-facebook-page'                                       => array(
+				'<amp-facebook-page width="552" height="310" layout="responsive" data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373"></amp-facebook-page>',
+				null, // No change.
+				array( 'amp-facebook' ),
+			),
+
 			'amp-nexxtv-player'                                         => array(
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.
