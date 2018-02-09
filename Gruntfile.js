@@ -91,7 +91,7 @@ module.exports = function( grunt ) {
 				grunt.config.set( 'copy', {
 					build: {
 						src: res.stdout.trim().split( /\n/ ).filter( function( file ) {
-							return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md)/.test( file );
+							return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
 						} ),
 						dest: 'build',
 						expand: true
