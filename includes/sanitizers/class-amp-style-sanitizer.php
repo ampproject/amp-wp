@@ -196,7 +196,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $this->amp_custom_style_element ) {
 				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
 				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
-				$this->dom->getElementsByTagName( 'head' )->item( 0 )->appendChild( $this->amp_custom_style_element );
+				$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+				if ( ! $head ) {
+					$head = $this->dom->createElement( 'head' );
+					$this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
+				}
+				$head->appendChild( $this->amp_custom_style_element );
 			}
 
 			// Gather stylesheets to print as long as they don't surpass the limit.

@@ -160,7 +160,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					's {color:yellow}',
 				),
 			),
-			'style_eleemnts_with_link_elements' => array(
+			'style_elements_with_link_elements' => array(
 				sprintf(
 					'<html amp><head><meta charset="utf-8"><style type="text/css">strong.before-dashicon {color:green}</style><link rel="stylesheet" href="%s"><style type="text/css">strong.after-dashicon {color:green}</style></head><body><style>s {color:yellow !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 					includes_url( 'css/dashicons.css' )
@@ -170,6 +170,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.dashicons-dashboard:before',
 					'strong.after-dashicon',
 					's {color:yellow}',
+				),
+			),
+			'style_with_no_head' => array(
+				'<html amp><body>Not good!<style>body{color:red}</style></body>',
+				array(
+					'body{color:red}',
 				),
 			),
 		);
