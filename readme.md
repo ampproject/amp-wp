@@ -63,6 +63,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Allow native WordPress commenting, in fully valid AMP. See [#871](https://github.com/Automattic/amp-wp/pull/871), [#909](https://github.com/Automattic/amp-wp/pull/909). Props DavidCramer, westonruter.
 - Creation of AMP-related notifications, on entering invalid content in the 'classic' editor. See [#912](https://github.com/Automattic/amp-wp/pull/912/). Props ThierryA, westonruter, kienstra.
 - Add output buffering, ensuring the entire page is valid AMP. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#857](https://github.com/Automattic/amp-wp/pull/857). Props ThierryA, westonruter.
+- Update the generated sanitizer file to the AMP spec, and simplify the file that generates it. See [#929](https://github.com/Automattic/amp-wp/pull/929). Props westonruter.
 
 See [0.7 milestone](https://github.com/Automattic/amp-wp/milestone/6?closed=1).
 
