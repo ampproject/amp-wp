@@ -195,12 +195,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-bind' ),
 			),
 
-			'amp-facebook-page'                                       => array(
-				'<amp-facebook-page width=90 height=20 layout="fixed" data-hide-cover="true" data-href="https://www.facebook.com/testesmegadivertidos/"></amp-facebook-page>',
-				null, // No change.
-				array( 'amp-facebook' ),
-			),
-
 			'amp-nexxtv-player'                                         => array(
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.
