@@ -261,7 +261,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function validate_content( $post_id, $post ) {
 		unset( $post_id );
-		if ( ! self::is_authorized() ) {
+		if ( ! post_supports_amp( $post ) || ! self::is_authorized() ) {
 			return;
 		}
 		/** This filter is documented in wp-includes/post-template.php */
