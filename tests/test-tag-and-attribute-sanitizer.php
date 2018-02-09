@@ -171,6 +171,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-mathml' ),
 			),
 
+			'amp-riddle-quiz'                                                 => array(
+				'<amp-riddle-quiz layout="responsive" width="600" height="400" data-riddle-id="25799"></amp-riddle-quiz>',
+				null, // No change.
+				array( 'amp-riddle-quiz' ),
+			),
+
 			'amp-nexxtv-player'                                         => array(
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.
