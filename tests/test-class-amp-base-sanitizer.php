@@ -260,7 +260,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom_document, array(
-			'mutation_callback' => 'AMP_Validation_Utils::track_removed',
+			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 		) );
 		$sanitizer->remove_invalid_child( $child );
 		$this->assertEquals( null, $parent->firstChild );
@@ -292,7 +292,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		// To ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
 		// @codingStandardsIgnoreStart
 		$args = array(
-			'mutation_callback' => 'AMP_Validation_Utils::track_removed',
+			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 		);
 		$expected_removed = array(
 			$attribute => 1,

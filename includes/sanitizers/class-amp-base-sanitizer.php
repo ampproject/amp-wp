@@ -313,15 +313,13 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMNode $child The node to remove.
+	 * @param DOMElement $child The node to remove.
 	 * @return void.
 	 */
 	public function remove_invalid_child( $child ) {
-		if ( method_exists( $child->parentNode, 'removeChild' ) ) {
-			$child->parentNode->removeChild( $child );
-			if ( isset( $this->args['mutation_callback'] ) ) {
-				call_user_func( $this->args['mutation_callback'], $child, AMP_Validation_Utils::NODE_REMOVED );
-			}
+		$child->parentNode->removeChild( $child );
+		if ( isset( $this->args['remove_invalid_callback'] ) ) {
+			call_user_func( $this->args['remove_invalid_callback'], $child, AMP_Validation_Utils::NODE_REMOVED );
 		}
 	}
 
@@ -333,16 +331,14 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMNode $node      The node for which to remove the attribute.
-	 * @param string  $attribute The attribute to remove from the node.
+	 * @param DOMElement $element   The node for which to remove the attribute.
+	 * @param string     $attribute The attribute to remove from the node.
 	 * @return void.
 	 */
-	public function remove_invalid_attribute( $node, $attribute ) {
-		if ( method_exists( $node, 'removeAttribute' ) ) {
-			$node->removeAttribute( $attribute );
-			if ( isset( $this->args['mutation_callback'] ) ) {
-				call_user_func( $this->args['mutation_callback'], $node, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attribute );
-			}
+	public function remove_invalid_attribute( $element, $attribute ) {
+		$element->removeAttribute( $attribute );
+		if ( isset( $this->args['remove_invalid_callback'] ) ) {
+			call_user_func( $this->args['remove_invalid_callback'], $element, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attribute );
 		}
 	}
 

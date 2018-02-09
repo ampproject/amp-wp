@@ -788,7 +788,7 @@ class AMP_Theme_Support {
 			'use_document_element' => true,
 		);
 		if ( AMP_Validation_Utils::is_authorized() ) {
-			$args['mutation_callback'] = 'AMP_Validation_Utils::track_removed';
+			$args['remove_invalid_callback'] = 'AMP_Validation_Utils::track_removed';
 		}
 
 		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.

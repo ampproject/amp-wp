@@ -135,7 +135,7 @@ class AMP_Validation_Utils {
 	 * Processes markup, to determine AMP validity.
 	 *
 	 * Passes $markup through the AMP sanitizers.
-	 * Also passes a 'mutation_callback' to keep track of stripped attributes and nodes.
+	 * Also passes a 'remove_invalid_callback' to keep track of stripped attributes and nodes.
 	 *
 	 * @param string $markup The markup to process.
 	 * @return void.
@@ -145,7 +145,7 @@ class AMP_Validation_Utils {
 			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
 		);
 		if ( self::is_authorized() ) {
-			$args['mutation_callback'] = 'AMP_Validation_Utils::track_removed';
+			$args['remove_invalid_callback'] = 'AMP_Validation_Utils::track_removed';
 		}
 		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
 	}
