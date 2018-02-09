@@ -300,22 +300,6 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Output AMP validation data in the response header of a frontend GET request.
-	 *
-	 * This must be called before the document output begins.
-	 * Because the document is buffered,
-	 * The sanitizers run after the 'send_headers' action.
-	 * So it's not possible to call this function on that hook.
-	 *
-	 * @return void.
-	 */
-	public static function add_header() {
-		if ( self::is_authorized() ) {
-			header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
-		}
-	}
-
-	/**
 	 * Adds an error message to the URL if it's not valid AMP.
 	 *
 	 * When redirecting after saving a post, the content was validated for AMP compliance.
