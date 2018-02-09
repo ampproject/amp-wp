@@ -165,6 +165,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-izlesene' ),
 			),
 
+			'amp-mathml'                                                 => array(
+				'<amp-mathml layout="container" inline data-formula="\[ \cos(θ+φ) \]"></amp-mathml>',
+				null, // No change.
+				array( 'amp-mathml' ),
+			),
+
 			'amp-nexxtv-player'                                         => array(
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.
