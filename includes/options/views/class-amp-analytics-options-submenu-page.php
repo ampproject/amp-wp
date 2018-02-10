@@ -52,9 +52,9 @@ class AMP_Analytics_Options_Submenu_Page {
 				<p>
 					<?php
 					wp_nonce_field( 'analytics-options', 'analytics-options' );
-					submit_button( __( 'Save', 'amp' ), 'primary', 'save', false );
+					submit_button( esc_html__( 'Save', 'amp' ), 'primary', 'save', false );
 					if ( $is_existing_entry ) {
-						submit_button( __( 'Delete', 'amp' ), 'delete button-primary', $id_base . '[delete]', false );
+						submit_button( esc_html__( 'Delete', 'amp' ), 'delete button-primary', esc_attr( $id_base . '[delete]' ), false );
 					}
 					?>
 				</p>
