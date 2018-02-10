@@ -129,6 +129,18 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Determine whether the user is in the Customizer preview iframe.
+	 *
+	 * @since 0.7
+	 *
+	 * @return bool Whether in Customizer preview iframe.
+	 */
+	public static function is_customize_preview_iframe() {
+		global $wp_customize;
+		return is_customize_preview() && ! $wp_customize->get_messenger_channel();
+	}
+
+	/**
 	 * Register hooks for paired mode.
 	 */
 	public static function register_paired_hooks() {
@@ -163,6 +175,10 @@ class AMP_Theme_Support {
 		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
+
+		if ( self::is_customize_preview_iframe() ) {
+			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
+		}
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
 
@@ -722,6 +738,23 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Dequeue Customizer assets which are not necessary outside the preview iframe.
+	 *
+	 * Prevent enqueueing customize-preview styles if not in customizer preview iframe.
+	 * These are only needed for when there is live editing of content, such as selective refresh.
+	 *
+	 * @since 0.7
+	 */
+	public static function dequeue_customize_preview_scripts() {
+		wp_dequeue_style( 'customize-preview' );
+		foreach ( wp_styles()->registered as $handle => $dependency ) {
+			if ( in_array( 'customize-preview', $dependency->deps, true ) ) {
+				wp_dequeue_style( $handle );
+			}
+		}
+	}
+
+	/**
 	 * Start output buffering.
 	 *
 	 * @since 0.7
@@ -786,7 +819,7 @@ class AMP_Theme_Support {
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element'    => true,
 				'remove_invalid_callback' => null,
-				'allow_dirty_styles'      => is_customize_preview() && $wp_customize->get_messenger_channel(), // When rendering in Customizer preview *iframe*.
+				'allow_dirty_styles'      => self::is_customize_preview_iframe(),
 			),
 			$args
 		);
