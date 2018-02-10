@@ -254,8 +254,8 @@ class AMP_Validation_Utils {
 				$location = AMP_Validation_Utils::error_message( $location );
 				$location = add_query_arg(
 					array(
-						'removed_elements'   => array_keys( $response['removed_elements'] ),
-						'removed_attributes' => array_keys( $response['removed_attributes'] ),
+						'removed_elements'   => $response['removed_elements'],
+						'removed_attributes' => $response['removed_attributes'],
 					),
 					$location
 				);
@@ -316,19 +316,31 @@ class AMP_Validation_Utils {
 		if ( self::ERROR_QUERY_VALUE === $error ) {
 			echo '<div class="notice notice-warning">';
 			printf( '<p>%s</p>', esc_html__( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' ) );
+			$removed_sets = array();
 			if ( ! empty( $_GET['removed_elements'] ) && is_array( $_GET['removed_elements'] ) ) {
-				printf(
-					'<p>%s %s</p>',
-					esc_html__( 'Invalid elements:', 'amp' ),
-					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $_GET['removed_elements'] ) ) . '</code>'
+				$removed_sets[] = array(
+					'label' => __( 'Invalid elements:', 'amp' ),
+					'names' => array_map( 'sanitize_key', $_GET['removed_elements'] ),
 				);
 			}
-			if ( ! empty( $_GET['removed_attributes'] ) ) {
-				printf(
-					'<p>%s %s</p>',
-					esc_html__( 'Invalid attributes:', 'amp' ),
-					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $_GET['removed_attributes'] ) ) . '</code>'
+			if ( ! empty( $_GET['removed_attributes'] ) && is_array( $_GET['removed_attributes'] ) ) {
+				$removed_sets[] = array(
+					'label' => __( 'Invalid attributes:', 'amp' ),
+					'names' => array_map( 'sanitize_key', $_GET['removed_attributes'] ),
 				);
+			}
+			foreach ( $removed_sets as $removed_set ) {
+				printf( '<p>%s ', esc_html( $removed_set['label'] ) );
+				$items = array();
+				foreach ( $removed_set['names'] as $name => $count ) {
+					if ( 1 === intval( $count ) ) {
+						$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+					} else {
+						$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+					}
+				}
+				echo implode( ', ', $items ); // WPCS: XSS OK.
+				echo '</p>';
 			}
 			echo '</div>';
 		}

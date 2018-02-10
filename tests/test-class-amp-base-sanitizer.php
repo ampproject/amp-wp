@@ -286,7 +286,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$video->setAttribute( $attribute, 'someFunction()' );
 		$attr_node = $video->getAttributeNode( $attribute );
 
-		$args = array(
+		$args      = array(
 			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 		);
 		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
