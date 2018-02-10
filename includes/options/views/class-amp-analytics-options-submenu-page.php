@@ -18,10 +18,7 @@ class AMP_Analytics_Options_Submenu_Page {
 			$analytics_title = sprintf( __( 'Analytics: %s', 'amp' ), $entry_slug );
 		} else {
 			$analytics_title = __( 'Add new entry:', 'amp' );
-		}
-
-		if ( ! $is_existing_entry ) {
-			$id = '__new__';
+            $id = '__new__';
 		}
 
 		$id_base = sprintf( '%s[analytics][%s]', AMP_Options_Manager::OPTION_NAME, $id );
