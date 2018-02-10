@@ -160,7 +160,7 @@ class AMP_Theme_Support {
 		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
-		add_action( 'wp_head', array( __CLASS__, 'print_amp_styles' ) );
+		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
@@ -770,7 +770,7 @@ class AMP_Theme_Support {
 	 * @global int $content_width
 	 */
 	public static function prepare_response( $response, $args = array() ) {
-		global $content_width;
+		global $content_width, $wp_customize;
 
 		/*
 		 * Check if the response starts with HTML markup.
@@ -786,6 +786,7 @@ class AMP_Theme_Support {
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element'    => true,
 				'remove_invalid_callback' => null,
+				'allow_dirty_styles'      => is_customize_preview() && $wp_customize->get_messenger_channel(), // When rendering in Customizer preview *iframe*.
 			),
 			$args
 		);

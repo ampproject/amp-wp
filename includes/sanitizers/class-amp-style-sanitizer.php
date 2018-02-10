@@ -152,6 +152,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$elements = array();
 
+		// Do nothing if inline styles are allowed.
+		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
+			return;
+		}
+
 		/*
 		 * Note that xpath is used to query the DOM so that the link and style elements will be
 		 * in document order. DOMNode::compareDocumentPosition() is not yet implemented.
