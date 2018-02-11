@@ -10,15 +10,23 @@
  */
 class AMP_Analytics_Options_Submenu_Page {
 
+	/**
+	 * Render entry.
+	 *
+	 * @param string $id     Entry ID.
+	 * @param string $type   Entry type.
+	 * @param string $config Entry config as serialized JSON.
+	 */
 	private function render_entry( $id = '', $type = '', $config = '' ) {
 		$is_existing_entry = ! empty( $id );
 
 		if ( $is_existing_entry ) {
-			$entry_slug = sprintf( '%s%s', ( $type ? $type . '-' : '' ), substr( $id, -6 ) );
+			$entry_slug = sprintf( '%s%s', ( $type ? $type . '-' : '' ), substr( $id, - 6 ) );
+			/* translators: %s is the entry slug */
 			$analytics_title = sprintf( __( 'Analytics: %s', 'amp' ), $entry_slug );
 		} else {
 			$analytics_title = __( 'Add new entry:', 'amp' );
-            $id = '__new__';
+			$id              = '__new__';
 		}
 
 		$id_base = sprintf( '%s[analytics][%s]', AMP_Options_Manager::OPTION_NAME, $id );
@@ -75,6 +83,9 @@ class AMP_Analytics_Options_Submenu_Page {
 		<?php
 	}
 
+	/**
+	 * Render.
+	 */
 	public function render() {
 		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 

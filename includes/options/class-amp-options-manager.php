@@ -30,7 +30,25 @@ class AMP_Options_Manager {
 			)
 		);
 
-		add_action( 'update_option_' . self::OPTION_NAME, 'flush_rewrite_rules' );
+		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
+	}
+
+	/**
+	 * Flush rewrite rules if the supported_post_types have changed.
+	 *
+	 * @since 0.6.2
+	 *
+	 * @param array $old_options Old options.
+	 * @param array $new_options New options.
+	 */
+	public static function maybe_flush_rewrite_rules( $old_options, $new_options ) {
+		$old_post_types = isset( $old_options['supported_post_types'] ) ? $old_options['supported_post_types'] : array();
+		$new_post_types = isset( $new_options['supported_post_types'] ) ? $new_options['supported_post_types'] : array();
+		sort( $old_post_types );
+		sort( $new_post_types );
+		if ( $old_post_types !== $new_post_types ) {
+			flush_rewrite_rules();
+		}
 	}
 
 	/**
