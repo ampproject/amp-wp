@@ -65,17 +65,29 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	/**
 	 * Test shortcode.
 	 *
-	 * Logic for creating the upload object copied from Tests_Media.
+	 * Logic for creating the videos copied from Tests_Media.
 	 *
 	 * @covers AMP_Playlist_Embed_Handler::shortcode()
 	 */
 	public function test_shortcode() {
-		$id_mp4   = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
-		$id_mkv   = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mkv' );
-		$ids      = array(
-			$id_mp4,
-			$id_mkv,
+		$file_1 = 'example-video-1.mp4';
+		$file_2 = 'example-video-2.mkv';
+		$files  = array(
+			$file_1,
+			$file_2,
 		);
+
+		$ids = array();
+		foreach ( $files as $file ) {
+			$ids[] = $this->factory()->attachment->create_object(
+				$file,
+				0,
+				array(
+					'post_mime_type' => 'video/mp4',
+					'post_type'      => 'attachment',
+				)
+			);
+		}
 		$attr     = array(
 			'ids'  => implode( ',', $ids ),
 			'type' => 'video',
@@ -83,7 +95,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$playlist = $this->instance->shortcode( $attr );
 		$this->assertContains( '<amp-video', $playlist );
 		$this->assertContains( '<amp-state', $playlist );
-		$this->assertContains( 'small-video', $playlist );
+		$this->assertContains( $file_1, $playlist );
+		$this->assertContains( $file_2, $playlist );
 		$this->assertContains( '[src]="playlist0[playlist0.currentVideo].videoUrl"', $playlist );
 		$this->assertContains( 'on="tap:AMP.setState({playlist0: {currentVideo: 0}})"', $playlist );
 	}
