@@ -150,7 +150,7 @@ class AMP_Theme_Support {
 	 */
 	public static function is_customize_preview_iframe() {
 		global $wp_customize;
-		return is_customize_preview() && ! $wp_customize->get_messenger_channel();
+		return is_customize_preview() && $wp_customize->get_messenger_channel();
 	}
 
 	/**
@@ -171,9 +171,8 @@ class AMP_Theme_Support {
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 
 		/*
 		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
@@ -189,7 +188,7 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
-		if ( self::is_customize_preview_iframe() ) {
+		if ( is_customize_preview() ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		}
 
@@ -207,6 +206,7 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
+		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
@@ -846,10 +846,14 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function dequeue_customize_preview_scripts() {
-		wp_dequeue_style( 'customize-preview' );
-		foreach ( wp_styles()->registered as $handle => $dependency ) {
-			if ( in_array( 'customize-preview', $dependency->deps, true ) ) {
-				wp_dequeue_style( $handle );
+
+		// Dequeue styles unnecessary unless in customizer preview iframe when editing (such as for edit shortcuts).
+		if ( ! self::is_customize_preview_iframe() ) {
+			wp_dequeue_style( 'customize-preview' );
+			foreach ( wp_styles()->registered as $handle => $dependency ) {
+				if ( in_array( 'customize-preview', $dependency->deps, true ) ) {
+					wp_dequeue_style( $handle );
+				}
 			}
 		}
 	}
@@ -903,7 +907,7 @@ class AMP_Theme_Support {
 	 * @global int $content_width
 	 */
 	public static function prepare_response( $response, $args = array() ) {
-		global $content_width, $wp_customize;
+		global $content_width;
 
 		/*
 		 * Check if the response starts with HTML markup.
@@ -919,7 +923,8 @@ class AMP_Theme_Support {
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element'    => true,
 				'remove_invalid_callback' => null,
-				'allow_dirty_styles'      => self::is_customize_preview_iframe(),
+				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 			),
 			$args
 		);

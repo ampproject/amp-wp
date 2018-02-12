@@ -146,6 +146,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		}
 
+		// Allow scripts if requested.
+		if ( ! empty( $this->args['allow_dirty_scripts'] ) ) {
+			$this->args['amp_allowed_tags']['script'][] = array(
+				'attr_spec_list' => array(
+					'type'  => array(),
+					'src'   => array(),
+					'async' => array(),
+					'defer' => array(),
+				),
+				'cdata'          => array(),
+				'tag_spec'       => array(
+					'spec_name' => 'scripts for Customizer preview',
+				),
+			);
+		}
+
 		// Prepare whitelists.
 		$this->allowed_tags = $this->args['amp_allowed_tags'];
 		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
