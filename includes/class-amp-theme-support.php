@@ -71,6 +71,20 @@ class AMP_Theme_Support {
 	 * Initialize.
 	 */
 	public static function init() {
+		if ( ! current_theme_supports( 'amp' ) ) {
+			return;
+		}
+
+		self::purge_amp_query_vars();
+		self::handle_xhr_request();
+
+		if ( ! is_amp_endpoint() ) {
+			amp_add_frontend_actions();
+		} else {
+			self::setup_commenting();
+			add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+		}
+
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
 		// Validate theme support usage.
@@ -95,7 +109,6 @@ class AMP_Theme_Support {
 			self::register_paired_hooks();
 		}
 
-		self::purge_amp_query_vars(); // Note that amp_prepare_xhr_post() still looks at $_GET['__amp_source_origin'].
 		self::register_hooks();
 		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
@@ -263,13 +276,100 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Set up commenting.
+	 * Hook into a form submissions, such as comment the form or some other .
+	 *
+	 * @since 0.7.0
+	 * @global string $pagenow
 	 */
-	public static function setup_commenting() {
-		if ( ! current_theme_supports( AMP_QUERY_VAR ) ) {
+	public static function handle_xhr_request() {
+		global $pagenow;
+		if ( empty( self::$purged_amp_query_vars['__amp_source_origin'] ) ) {
 			return;
 		}
 
+		if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
+			// We don't need any data, so just send a success.
+			add_filter( 'comment_post_redirect', function() {
+				// We don't need any data, so just send a success.
+				wp_send_json_success();
+			}, PHP_INT_MAX, 2 );
+			self::handle_xhr_headers_output();
+		} elseif ( ! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] ) ) {
+			add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX, 2 );
+			self::handle_xhr_headers_output();
+		}
+	}
+
+	/**
+	 * Handle the AMP XHR headers and output errors.
+	 *
+	 * @since 0.7.0
+	 */
+	public static function handle_xhr_headers_output() {
+		// Add die handler for AMP error display.
+		add_filter( 'wp_die_handler', function() {
+			/**
+			 * New error handler for AMP form submission.
+			 *
+			 * @param WP_Error|string $error The error to handle.
+			 */
+			return function( $error ) {
+				status_header( 400 );
+				if ( is_wp_error( $error ) ) {
+					$error = $error->get_error_message();
+				}
+				$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
+				wp_send_json( array(
+					'error' => wp_kses( $error, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) ),
+				) );
+			};
+		} );
+
+		// Send AMP header.
+		$origin = esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] );
+		header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
+	}
+
+	/**
+	 * Intercept the response to a non-comment POST request.
+	 *
+	 * @since 0.7.0
+	 * @param string $location The location to redirect to.
+	 */
+	public static function intercept_post_request_redirect( $location ) {
+
+		// Make sure relative redirects get made absolute.
+		$parsed_location = array_merge(
+			array(
+				'scheme' => 'https',
+				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'path'   => strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ),
+			),
+			wp_parse_url( $location )
+		);
+
+		$absolute_location = $parsed_location['scheme'] . '://' . $parsed_location['host'];
+		if ( isset( $parsed_location['port'] ) ) {
+			$absolute_location .= ':' . $parsed_location['port'];
+		}
+		$absolute_location .= $parsed_location['path'];
+		if ( isset( $parsed_location['query'] ) ) {
+			$absolute_location .= '?' . $parsed_location['query'];
+		}
+		if ( isset( $parsed_location['fragment'] ) ) {
+			$absolute_location .= '#' . $parsed_location['fragment'];
+		}
+
+		header( 'AMP-Redirect-To: ' . $absolute_location );
+		header( 'Access-Control-Expose-Headers: AMP-Redirect-To' );
+		// Send json success as no data is required.
+		wp_send_json_success();
+	}
+
+	/**
+	 * Set up commenting.
+	 */
+	public static function setup_commenting() {
 		/*
 		 * Temporarily force comments to be listed in descending order.
 		 *
