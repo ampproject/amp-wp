@@ -277,8 +277,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertNotContains( 'notice notice-warning', $output );
 		$this->assertNotContains( 'Warning:', $output );
 
-		$post_id            = $this->factory()->post->create();
-		$post               = get_post( $post_id );
 		$post->post_content = $this->disallowed_tag;
 		ob_start();
 		AMP_Validation_Utils::validate_content( $post );
@@ -287,6 +285,18 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( 'notice notice-warning', $output );
 		$this->assertContains( 'Warning:', $output );
 		$this->assertContains( '<code>script</code>', $output );
+		AMP_Validation_Utils::reset_removed();
+
+		$youtube            = 'https://www.youtube.com/watch?v=GGS-tKTXw4Y';
+		$post->post_content = $youtube;
+		ob_start();
+		AMP_Validation_Utils::validate_content( $post );
+		$output = ob_get_clean();
+
+		// The YouTube embed handler should convert the URL into a valid AMP element.
+		$this->assertNotContains( 'notice notice-warning', $output );
+		$this->assertNotContains( 'Warning:', $output );
+		AMP_Validation_Utils::reset_removed();
 	}
 
 	/**
