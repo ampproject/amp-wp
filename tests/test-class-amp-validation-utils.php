@@ -73,8 +73,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_init() {
 		$this->assertEquals( 10, has_action( 'rest_api_init', 'AMP_Validation_Utils::amp_rest_validation' ) );
-		$this->assertEquals( 10, has_action( 'save_post', 'AMP_Validation_Utils::validate_content' ) );
-		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Validation_Utils::display_error' ) );
+		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Validation_Utils::validate_content' ) );
 	}
 
 	/**
@@ -262,26 +261,32 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_authorized
+	 * Test validate_content
 	 *
-	 * @see AMP_Validation_Utils::is_authorized()
+	 * @see AMP_Validation_Utils::validate_content()
 	 */
-	public function test_is_authorized() {
-		$this->assertFalse( AMP_Validation_Utils::is_authorized() );
-		$this->set_authorized();
-		$this->assertTrue( AMP_Validation_Utils::is_authorized() );
-	}
+	public function test_validate_content() {
+		wp_set_current_user( $this->factory()->user->create( array(
+			'role' => 'administrator',
+		) ) );
+		$post = $this->factory()->post->create_and_get();
+		ob_start();
+		AMP_Validation_Utils::validate_content( $post );
+		$output = ob_get_clean();
 
-	/**
-	 * Test error_message().
-	 *
-	 * @see AMP_Validation_Utils::error_message().
-	 */
-	public function test_error_message() {
-		$url            = 'https://example.org/am';
-		$with_query_arg = wp_parse_url( AMP_Validation_Utils::error_message( $url ) );
-		$this->assertContains( AMP_Validation_Utils::ERROR_QUERY_KEY, $with_query_arg['query'] );
-		$this->assertContains( AMP_Validation_Utils::ERROR_QUERY_VALUE, $with_query_arg['query'] );
+		$this->assertNotContains( 'notice notice-warning', $output );
+		$this->assertNotContains( 'Warning:', $output );
+
+		$post_id            = $this->factory()->post->create();
+		$post               = get_post( $post_id );
+		$post->post_content = $this->disallowed_tag;
+		ob_start();
+		AMP_Validation_Utils::validate_content( $post );
+		$output = ob_get_clean();
+
+		$this->assertContains( 'notice notice-warning', $output );
+		$this->assertContains( 'Warning:', $output );
+		$this->assertContains( '<code>script</code>', $output );
 	}
 
 	/**
@@ -290,24 +295,33 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::display_error().
 	 */
 	public function test_display_error() {
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'administrator',
-		) ) );
-		unset( $_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] );
+		$response = array(
+			AMP_Validation_Utils::ERROR_KEY => false,
+		);
 		ob_start();
-		AMP_Validation_Utils::display_error();
+		AMP_Validation_Utils::display_error( $response );
 		$output = ob_get_clean();
 		$this->assertFalse( strpos( $output, 'notice notice-error' ) );
 		$this->assertFalse( strpos( $output, 'Notice: your post fails AMP validation' ) );
 
-		$_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] = AMP_Validation_Utils::ERROR_QUERY_VALUE;
-		$_REQUEST[ AMP_Validation_Utils::ERROR_NONCE ] = wp_create_nonce( AMP_Validation_Utils::ERROR_NONCE_ACTION );
-		$_REQUEST['_wp_http_referer']                  = admin_url();
+		$removed_element   = 'script';
+		$removed_attribute = 'onload';
+		$response          = array(
+			AMP_Validation_Utils::ERROR_KEY => true,
+			'removed_elements'              => array(
+				$removed_element => 1,
+			),
+			'removed_attributes'            => array(
+				$removed_attribute => 1,
+			),
+		);
 		ob_start();
-		AMP_Validation_Utils::display_error();
+		AMP_Validation_Utils::display_error( $response );
 		$output = ob_get_clean();
 		$this->assertContains( 'notice notice-warning', $output );
 		$this->assertContains( 'Warning:', $output );
+		$this->assertContains( $removed_element, $output );
+		$this->assertContains( $removed_attribute, $output );
 	}
 
 	/**
