@@ -211,7 +211,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * These typically appear below the player.
 	 * Clicking a track triggers the player to appear with its src.
 	 *
-	 * @param string $type The type of tracks: 'audio' or 'video'.
+	 * @param string $type         The type of tracks: 'audio' or 'video'.
 	 * @param string $container_id The ID of the container.
 	 * @return void.
 	 */
