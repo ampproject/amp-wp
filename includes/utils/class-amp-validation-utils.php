@@ -72,17 +72,19 @@ class AMP_Validation_Utils {
 	 * @return void.
 	 */
 	public static function process_markup( $markup ) {
+		if ( ! self::has_cap() ) {
+			return;
+		}
+
 		AMP_Theme_Support::register_content_embed_handlers();
 		remove_filter( 'the_content', 'wpautop' );
 
 		/** This filter is documented in wp-includes/post-template.php */
 		$markup = apply_filters( 'the_content', $markup );
 		$args   = array(
-			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 		);
-		if ( self::has_cap() ) {
-			$args['remove_invalid_callback'] = 'AMP_Validation_Utils::track_removed';
-		}
 		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
 	}
 
