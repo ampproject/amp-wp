@@ -219,42 +219,6 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * This is our workaround to enforce max sizing with layout=responsive.
-	 *
-	 * We want elements to not grow beyond their width and shrink to fill the screen on viewports smaller than their width.
-	 *
-	 * See https://github.com/ampproject/amphtml/issues/1280#issuecomment-171533526
-	 * See https://github.com/Automattic/amp-wp/issues/101
-	 *
-	 * @param string[] $attributes {
-	 *      Attributes.
-	 *
-	 *      @type int $height
-	 *      @type int $width
-	 *      @type string $sizes
-	 *      @type string $class
-	 *      @type string $layout
-	 * }
-	 * @return string[]
-	 */
-	public function enforce_sizes_attribute( $attributes ) {
-		if ( ! isset( $attributes['width'], $attributes['height'] ) ) {
-			return $attributes;
-		}
-
-		$max_width = $attributes['width'];
-		if ( isset( $this->args['content_max_width'] ) && $max_width >= $this->args['content_max_width'] ) {
-			$max_width = $this->args['content_max_width'];
-		}
-
-		$attributes['sizes'] = sprintf( '(min-width: %1$dpx) %1$dpx, 100vw', absint( $max_width ) );
-
-		$this->add_or_append_attribute( $attributes, 'class', 'amp-wp-enforced-sizes' );
-
-		return $attributes;
-	}
-
-	/**
 	 * Adds or appends key and value to list of attributes
 	 *
 	 * Adds key and value to list of attributes, or if the key already exists in the array
