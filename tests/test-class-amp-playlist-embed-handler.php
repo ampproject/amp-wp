@@ -63,6 +63,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$this->instance->register_embed();
 		$this->assertEquals( 'AMP_Playlist_Embed_Handler', get_class( $shortcode_tags[ $shortcode ][0] ) );
 		$this->assertEquals( 'shortcode', $shortcode_tags[ $shortcode ][1] );
+		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $this->instance, 'styling' ) ) );
 		$this->instance->unregister_embed();
 	}
 
@@ -76,6 +77,32 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$shortcode = 'playlist';
 		$this->instance->unregister_embed();
 		$this->assertFalse( isset( $shortcode_tags[ $shortcode ] ) );
+	}
+
+	/**
+	 * Test styling.
+	 *
+	 * @covers AMP_Playlist_Embed_Handler::styling()
+	 */
+	public function test_styling() {
+		global $post;
+		$playlist_shortcode = 'amp-playlist-shortcode';
+		$this->instance->register_embed();
+		$this->instance->styling();
+		$styles = wp_styles();
+		$this->assertFalse( in_array( 'wp-mediaelement', $styles->queue, true ) );
+		$this->assertFalse( in_array( $playlist_shortcode, $styles->queue, true ) );
+
+		$post               = $this->factory()->post->create_and_get(); // WPCS: global override OK.
+		$post->post_content = '[playlist ids="5,3"]';
+		$this->instance->styling();
+		$style = $styles->registered[ $playlist_shortcode ];
+		$this->assertTrue( in_array( 'wp-mediaelement', $styles->queue, true ) );
+		$this->assertTrue( in_array( $playlist_shortcode, $styles->queue, true ) );
+		$this->assertEquals( array(), $style->deps );
+		$this->assertEquals( $playlist_shortcode, $style->handle );
+		$this->assertEquals( amp_get_asset_url( 'css/amp-playlist-shortcode.css' ), $style->src );
+		$this->assertEquals( AMP__VERSION, $style->ver );
 	}
 
 	/**

@@ -16,6 +16,13 @@
 class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
+	 * The tag of the shortcode.
+	 *
+	 * @var string.
+	 */
+	const SHORTCODE = 'playlist';
+
+	/**
 	 * The max width of the audio thumbnail image.
 	 *
 	 * This corresponds to the max-width in wp-mediaelement.css:
@@ -57,7 +64,8 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers the playlist shortcode.
 	 */
 	public function register_embed() {
-		add_shortcode( 'playlist', array( $this, 'shortcode' ) );
+		add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'styling' ) );
 	}
 
 	/**
@@ -66,7 +74,27 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void.
 	 */
 	public function unregister_embed() {
-		remove_shortcode( 'playlist' );
+		remove_shortcode( self::SHORTCODE );
+	}
+
+	/**
+	 * Enqueues the playlist styling.
+	 *
+	 * @return void.
+	 */
+	public function styling() {
+		global $post;
+		if ( ! isset( $post->post_content ) || ! has_shortcode( $post->post_content, self::SHORTCODE ) ) {
+			return;
+		}
+
+		wp_enqueue_style( 'wp-mediaelement' );
+		wp_enqueue_style(
+			'amp-playlist-shortcode',
+			amp_get_asset_url( 'css/amp-playlist-shortcode.css' ),
+			array(),
+			AMP__VERSION
+		);
 	}
 
 	/**
