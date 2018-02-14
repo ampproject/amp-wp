@@ -52,7 +52,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_attributes = $this->set_layout( $new_attributes );
 			if ( isset( $new_attributes['width'] ) && isset( $new_attributes['height'] ) ) {
-				$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+				$new_attributes['layout'] = 'responsive';
 			}
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );

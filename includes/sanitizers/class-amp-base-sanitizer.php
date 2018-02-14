@@ -211,9 +211,6 @@ abstract class AMP_Base_Sanitizer {
 		if ( empty( $attributes['width'] ) ) {
 			$attributes['layout'] = 'fixed-height';
 		}
-		if ( ! empty( $attributes['width'] ) && ! empty( $attributes['height'] ) ) {
-			$attributes['layout'] = 'responsive';
-		}
 
 		return $attributes;
 	}
