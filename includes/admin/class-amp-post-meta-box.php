@@ -120,6 +120,8 @@ class AMP_Post_Meta_Box {
 		$validate = (
 			isset( $screen->base )
 			&&
+			is_post_type_viewable( $post->post_type )
+			&&
 			'post' === $screen->base
 		);
 		if ( ! $validate ) {
@@ -164,6 +166,8 @@ class AMP_Post_Meta_Box {
 	public function render_status( $post ) {
 		$verify = (
 			isset( $post->ID )
+			&&
+			is_post_type_viewable( $post->post_type )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 			&&
