@@ -43,12 +43,20 @@ class AMP_DOM_Utils {
 	);
 
 	/**
+	 * Stored noscript/comment replacements for libxml<2.8.
+	 *
+	 * @since 0.7
+	 * @var array
+	 */
+	public static $noscript_placeholder_comments = array();
+
+	/**
 	 * Return a valid DOMDocument representing HTML document passed as a parameter.
 	 *
 	 * @since 0.7
+	 * @see AMP_DOM_Utils::get_content_from_dom_node()
 	 *
 	 * @param string $document Valid HTML document to be represented by a DOMDocument.
-	 *
 	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
 	 */
 	public static function get_dom( $document ) {
@@ -81,6 +89,24 @@ class AMP_DOM_Utils {
 			'$0</$1>',
 			$document
 		);
+
+		/*
+		 * Replace noscript elements with placeholders since libxml<2.8 can parse them incorrectly.
+		 * When appearing in the head element, a noscript can cause the head to close prematurely
+		 * and the noscript gets moved to the body and anything after it which was in the head.
+		 * See <https://stackoverflow.com/questions/39013102/why-does-noscript-move-into-body-tag-instead-of-head-tag>.
+		 */
+		if ( version_compare( LIBXML_DOTTED_VERSION, '2.8', '<' ) ) {
+			$document = preg_replace_callback(
+				'#<noscript[^>]*>.*?</noscript>#si',
+				function( $matches ) {
+					$placeholder = sprintf( '<!--noscript:%s-->', (string) wp_rand() );
+					AMP_DOM_Utils::$noscript_placeholder_comments[ $placeholder ] = $matches[0];
+					return $placeholder;
+				},
+				$document
+			);
+		}
 
 		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
@@ -266,15 +292,14 @@ class AMP_DOM_Utils {
 	}
 
 	/**
-	 * Return valid HTML content extracted from the DOMDocument passed as a parameter.
-	 *
-	 * @see Reciprocal function get_dom_from_content()
+	 * Return valid HTML *body* content extracted from the DOMDocument passed as a parameter.
 	 *
 	 * @since 0.2
+	 * @see AMP_DOM_Utils::get_content_from_dom_node() Reciprocal function.
 	 *
 	 * @param DOMDocument $dom Represents an HTML document from which to extract HTML content.
 	 *
-	 * @return string Returns the HTML content represented in the DOMDocument
+	 * @return string Returns the HTML content of the body element represented in the DOMDocument.
 	 */
 	public static function get_content_from_dom( $dom ) {
 
@@ -305,9 +330,9 @@ class AMP_DOM_Utils {
 	/**
 	 * Return valid HTML content extracted from the DOMNode passed as a parameter.
 	 *
-	 * @see Called by function get_content_from_dom()
-	 *
 	 * @since 0.6
+	 * @see AMP_DOM_Utils::get_dom() Where the operations in this method are mirrored.
+	 * @see AMP_DOM_Utils::get_content_from_dom() Reciprocal function.
 	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 	 *
 	 * @param DOMDocument $dom  Represents an HTML document.
@@ -336,6 +361,15 @@ class AMP_DOM_Utils {
 		// Whitespace just causes unit tests to fail... so whitespace begone.
 		if ( '' === trim( $html ) ) {
 			return '';
+		}
+
+		// Restore noscript elements which were temporarily removed to prevent libxml<2.8 parsing problems.
+		if ( version_compare( LIBXML_DOTTED_VERSION, '2.8', '<' ) ) {
+			$html = str_replace(
+				array_keys( self::$noscript_placeholder_comments ),
+				array_values( self::$noscript_placeholder_comments ),
+				$html
+			);
 		}
 
 		$html = self::restore_amp_bind_attributes( $html );

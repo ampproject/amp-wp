@@ -95,7 +95,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
-				$node->parentNode->removeChild( $node );
+				$this->remove_invalid_child( $node );
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 			}

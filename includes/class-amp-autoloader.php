@@ -31,7 +31,6 @@ class AMP_Autoloader {
 	private static $_classmap = array(
 		'AMP_Theme_Support'                           => 'includes/class-amp-theme-support',
 		'AMP_Comment_Walker'                          => 'includes/class-amp-comment-walker',
-		'AMP_WP_Styles'                               => 'includes/class-amp-wp-styles',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                           => 'includes/admin/class-amp-post-meta-box',
 		'AMP_Post_Type_Support'                       => 'includes/class-amp-post-type-support',
@@ -84,6 +83,7 @@ class AMP_Autoloader {
 		'AMP_DOM_Utils'                               => 'includes/utils/class-amp-dom-utils',
 		'AMP_HTML_Utils'                              => 'includes/utils/class-amp-html-utils',
 		'AMP_Image_Dimension_Extractor'               => 'includes/utils/class-amp-image-dimension-extractor',
+		'AMP_Validation_Utils'                        => 'includes/utils/class-amp-validation-utils',
 		'AMP_String_Utils'                            => 'includes/utils/class-amp-string-utils',
 		'AMP_WP_Utils'                                => 'includes/utils/class-amp-wp-utils',
 		'AMP_Widget_Archives'                         => 'includes/widgets/class-amp-widget-archives',

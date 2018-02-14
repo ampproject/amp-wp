@@ -8,7 +8,6 @@
 /**
  * Class AMP_Style_Sanitizer
  *
- * @todo This needs to also run on the CSS that is gathered for amp-custom.
  * Collects inline styles and outputs them in the amp-custom stylesheet.
  */
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
@@ -41,6 +40,44 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $keyframes_max_size;
 
 	/**
+	 * Maximum number of bytes allowed for a AMP Custom style.
+	 *
+	 * @since 0.7
+	 * @var int
+	 */
+	private $custom_max_size;
+
+	/**
+	 * The style[amp-custom] element.
+	 *
+	 * @var DOMElement
+	 */
+	private $amp_custom_style_element;
+
+	/**
+	 * Regex for allowed font stylesheet URL.
+	 *
+	 * @var string
+	 */
+	private $allowed_font_src_regex;
+
+	/**
+	 * Base URL for styles.
+	 *
+	 * Full URL with trailing slash.
+	 *
+	 * @var string
+	 */
+	private $base_url;
+
+	/**
+	 * URL of the content directory.
+	 *
+	 * @var string
+	 */
+	private $content_url;
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.7
@@ -58,6 +95,29 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				break;
 			}
 		}
+
+		$spec_name = 'style amp-custom';
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$this->custom_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+
+		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$this->allowed_font_src_regex = '@^(' . $spec_rule[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] . ')$@';
+				break;
+			}
+		}
+
+		$guessurl = site_url();
+		if ( ! $guessurl ) {
+			$guessurl = wp_guess_url();
+		}
+		$this->base_url    = $guessurl;
+		$this->content_url = WP_CONTENT_URL;
 	}
 
 	/**
@@ -81,7 +141,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
 	 */
 	public function get_stylesheets() {
-		return array_merge( parent::get_stylesheets(), $this->stylesheets );
+		return array_merge( $this->stylesheets, parent::get_stylesheets() );
 	}
 
 	/**
@@ -90,50 +150,230 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.4
 	 */
 	public function sanitize() {
-		$body = $this->root_element;
+		$elements = array();
 
-		$this->collect_style_elements();
+		/*
+		 * Note that xpath is used to query the DOM so that the link and style elements will be
+		 * in document order. DOMNode::compareDocumentPosition() is not yet implemented.
+		 */
+		$xpath = new DOMXPath( $this->dom );
 
-		$this->collect_styles_recursive( $body );
+		$lower_case = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
+		$predicates = array(
+			sprintf( '( self::style and not( @amp-boilerplate ) and ( not( @type ) or %s = "text/css" ) )', sprintf( $lower_case, '@type' ) ),
+			sprintf( '( self::link and @href and %s = "stylesheet" )', sprintf( $lower_case, '@rel' ) ),
+		);
+
+		foreach ( $xpath->query( '//*[ ' . implode( ' or ', $predicates ) . ' ]' ) as $element ) {
+			$elements[] = $element;
+		}
+
+		/**
+		 * Element.
+		 *
+		 * @var DOMElement $element
+		 */
+		foreach ( $elements as $element ) {
+			$node_name = strtolower( $element->nodeName );
+			if ( 'style' === $node_name ) {
+				$this->process_style_element( $element );
+			} elseif ( 'link' === $node_name ) {
+				$this->process_link_element( $element );
+			}
+		}
+
+		$elements = array();
+		foreach ( $xpath->query( '//*[ @style ]' ) as $element ) {
+			$elements[] = $element;
+		}
+		foreach ( $elements as $element ) {
+			$this->collect_inline_styles( $element );
+		}
 		$this->did_convert_elements = true;
-	}
 
-	/**
-	 * Collect and sanitize all style elements.
-	 */
-	public function collect_style_elements() {
-		$style_elements  = $this->dom->getElementsByTagName( 'style' );
-		$nodes_to_remove = array();
+		// Now make sure the amp-custom style is in the DOM and populated, if we're working with the document element.
+		if ( ! empty( $this->args['use_document_element'] ) ) {
+			if ( ! $this->amp_custom_style_element ) {
+				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
+				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
+				$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+				if ( ! $head ) {
+					$head = $this->dom->createElement( 'head' );
+					$this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
+				}
+				$head->appendChild( $this->amp_custom_style_element );
+			}
 
-		foreach ( $style_elements as $style_element ) {
-			/**
-			 * Style element.
-			 *
-			 * @var DOMElement $style_element
-			 */
-
-			if ( 'body' === $style_element->parentNode->nodeName && $style_element->hasAttribute( 'amp-keyframes' ) ) {
-				$validity = $this->validate_amp_keyframe( $style_element );
-				if ( true === $validity ) {
-					continue;
+			// Gather stylesheets to print as long as they don't surpass the limit.
+			$skipped    = array();
+			$css        = '';
+			$total_size = 0;
+			foreach ( $this->get_stylesheets() as $key => $stylesheet ) {
+				$sheet_size = strlen( $stylesheet );
+				if ( $total_size + $sheet_size > $this->custom_max_size ) {
+					$skipped[] = $key;
+				} else {
+					if ( $total_size ) {
+						$css .= ' ';
+					}
+					$css        .= $stylesheet;
+					$total_size += $sheet_size;
 				}
 			}
 
-			$nodes_to_remove[] = $style_element;
+			/*
+			 * Let the style[amp-custom] be populated with the concatenated CSS.
+			 * !important: Updating the contents of this style element by setting textContent is not
+			 * reliable across PHP/libxml versions, so this is why the children are removed and the
+			 * text node is then explicitly added containing the CSS.
+			 */
+			while ( $this->amp_custom_style_element->firstChild ) {
+				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
+			}
+			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			// @todo This should perhaps be done in document order to ensure proper cascade.
-			$rules = trim( $style_element->textContent );
+			// @todo This would be a candidate for sanitization reporting.
+			// Add comments to indicate which sheets were not included.
+			foreach ( array_reverse( $skipped ) as $skip ) {
+				$this->amp_custom_style_element->parentNode->insertBefore(
+					$this->dom->createComment( sprintf( 'Skipped including %s stylesheet since too large.', $skip ) ),
+					$this->amp_custom_style_element->nextSibling
+				);
+			}
+		}
+	}
 
-			// @todo This needs proper CSS parser, and de-duplication with \AMP_Style_Sanitizer::filter_style().
-			$rules = preg_replace( '/\s*!important\s*(?=\s*;|})/', '', $rules );
-			$rules = preg_replace( '/overflow\s*:\s*(auto|scroll)\s*;?\s*/', '', $rules );
-
-			$this->stylesheets[ md5( $rules ) ] = $rules;
+	/**
+	 * Generates an enqueued style's fully-qualified file path.
+	 *
+	 * @since 0.7
+	 * @see WP_Styles::_css_href()
+	 *
+	 * @param string $src The source URL of the enqueued style.
+	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
+	 */
+	public function get_validated_css_file_path( $src ) {
+		$needs_base_url = (
+			! is_bool( $src )
+			&&
+			! preg_match( '|^(https?:)?//|', $src )
+			&&
+			! ( $this->content_url && 0 === strpos( $src, $this->content_url ) )
+		);
+		if ( $needs_base_url ) {
+			$src = $this->base_url . $src;
 		}
 
-		foreach ( $nodes_to_remove as $node_to_remove ) {
-			$node_to_remove->parentNode->removeChild( $node_to_remove );
+		// Strip query and fragment from URL.
+		$src = preg_replace( ':[\?#].*$:', '', $src );
+
+		if ( ! preg_match( '/\.(css|less|scss|sass)$/i', $src ) ) {
+			/* translators: %s is stylesheet URL */
+			return new WP_Error( 'amp_css_bad_file_extension', sprintf( __( 'Skipped stylesheet which does not have recognized CSS file extension (%s).', 'amp' ), $src ) );
 		}
+
+		$includes_url = includes_url( '/' );
+		$content_url  = content_url( '/' );
+		$admin_url    = get_admin_url( null, '/' );
+		$css_path     = null;
+		if ( 0 === strpos( $src, $content_url ) ) {
+			$css_path = WP_CONTENT_DIR . substr( $src, strlen( $content_url ) - 1 );
+		} elseif ( 0 === strpos( $src, $includes_url ) ) {
+			$css_path = ABSPATH . WPINC . substr( $src, strlen( $includes_url ) - 1 );
+		} elseif ( 0 === strpos( $src, $admin_url ) ) {
+			$css_path = ABSPATH . 'wp-admin' . substr( $src, strlen( $admin_url ) - 1 );
+		}
+
+		if ( ! $css_path || false !== strpos( '../', $css_path ) || 0 !== validate_file( $css_path ) || ! file_exists( $css_path ) ) {
+			/* translators: %s is stylesheet URL */
+			return new WP_Error( 'amp_css_path_not_found', sprintf( __( 'Unable to locate filesystem path for stylesheet %s.', 'amp' ), $src ) );
+		}
+
+		return $css_path;
+	}
+
+	/**
+	 * Process style element.
+	 *
+	 * @param DOMElement $element Style element.
+	 */
+	private function process_style_element( DOMElement $element ) {
+		if ( 'body' === $element->parentNode->nodeName && $element->hasAttribute( 'amp-keyframes' ) ) {
+			$validity = $this->validate_amp_keyframe( $element );
+			if ( true !== $validity ) {
+				$element->parentNode->removeChild( $element ); // @todo Add reporting.
+			}
+			return;
+		}
+
+		$rules = trim( $element->textContent );
+		$rules = $this->remove_illegal_css( $rules );
+
+		$this->stylesheets[ md5( $rules ) ] = $rules;
+
+		if ( $element->hasAttribute( 'amp-custom' ) ) {
+			if ( ! $this->amp_custom_style_element ) {
+				$this->amp_custom_style_element = $element;
+			} else {
+				$element->parentNode->removeChild( $element ); // There can only be one. #highlander.
+			}
+		} else {
+
+			// Remove from DOM since we'll be adding it to amp-custom.
+			$element->parentNode->removeChild( $element );
+		}
+	}
+
+	/**
+	 * Process link element.
+	 *
+	 * @param DOMElement $element Link element.
+	 */
+	private function process_link_element( DOMElement $element ) {
+		$href = $element->getAttribute( 'href' );
+
+		// Allow font URLs.
+		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $href ) ) {
+			return;
+		}
+
+		$css_file_path = $this->get_validated_css_file_path( $href );
+		if ( is_wp_error( $css_file_path ) ) {
+			$element->parentNode->removeChild( $element ); // @todo Report removal. Show HTML comment?
+			return;
+		}
+
+		// Load the CSS from the filesystem.
+		$css  = "\n/* $href */\n";
+		$css .= file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+
+		$css = $this->remove_illegal_css( $css );
+
+		$media = $element->getAttribute( 'media' );
+		if ( $media && 'all' !== $media ) {
+			$css = sprintf( '@media %s { %s }', $media, $css );
+		}
+
+		$this->stylesheets[ $href ] = $css;
+
+		// Remove now that styles have been processed.
+		$element->parentNode->removeChild( $element );
+	}
+
+	/**
+	 * Remove illegal CSS from the stylesheet.
+	 *
+	 * @since 0.7
+	 *
+	 * @todo This needs proper CSS parser and to take an alternative approach to removing !important by extracting
+	 * the rule into a separate style rule with a very specific selector.
+	 * @param string $stylesheet Stylesheet.
+	 * @return string Scrubbed stylesheet.
+	 */
+	private function remove_illegal_css( $stylesheet ) {
+		$stylesheet = preg_replace( '/\s*!important/', '', $stylesheet ); // Note this has to also replace inside comments to be valid.
+		$stylesheet = preg_replace( '/overflow\s*:\s*(auto|scroll)\s*;?\s*/', '', $stylesheet );
+		return $stylesheet;
 	}
 
 	/**
@@ -171,39 +411,28 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see Retrieve array of styles using $this->get_styles() after calling this method.
 	 *
 	 * @since 0.4
+	 * @since 0.7 Modified to use element passed by XPath query.
 	 *
 	 * @note Uses recursion to traverse down the tree of DOMDocument nodes.
-	 * @todo This could use XPath to more efficiently find all elements with style attributes.
 	 *
-	 * @param DOMNode $node Node.
+	 * @param DOMElement $element Node.
 	 */
-	private function collect_styles_recursive( $node ) {
-		if ( XML_ELEMENT_NODE !== $node->nodeType ) {
+	private function collect_inline_styles( $element ) {
+		$style = $element->getAttribute( 'style' );
+		if ( ! $style ) {
 			return;
 		}
+		$class = $element->getAttribute( 'class' );
 
-		if ( $node->hasAttributes() && $node instanceof DOMElement ) {
-			$style = $node->getAttribute( 'style' );
-			$class = $node->getAttribute( 'class' );
+		$style = $this->process_style( $style );
+		if ( ! empty( $style ) ) {
+			$class_name = $this->generate_class_name( $style );
+			$new_class  = trim( $class . ' ' . $class_name );
 
-			if ( $style ) {
-				$style = $this->process_style( $style );
-				if ( ! empty( $style ) ) {
-					$class_name = $this->generate_class_name( $style );
-					$new_class  = trim( $class . ' ' . $class_name );
-
-					$node->setAttribute( 'class', $new_class );
-					$this->styles[ '.' . $class_name ] = $style;
-				}
-				$node->removeAttribute( 'style' );
-			}
+			$element->setAttribute( 'class', $new_class );
+			$this->styles[ '.' . $class_name ] = $style;
 		}
-
-		$length = $node->childNodes->length;
-		for ( $i = $length - 1; $i >= 0; $i -- ) {
-			$child_node = $node->childNodes->item( $i );
-			$this->collect_styles_recursive( $child_node );
-		}
+		$element->removeAttribute( 'style' );
 	}
 
 	/**

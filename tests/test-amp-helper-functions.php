@@ -196,6 +196,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$this->assertEquals( $post, $this->last_filter_call['args'][1] );
+
+		// Make sure the style and whitelist sanitizers are always at the end, even after filtering.
+		add_filter( 'amp_content_sanitizers', function( $classes ) {
+			$classes['Even_After_Whitelist_Sanitizer'] = array();
+			return $classes;
+		} );
+		$orderd_sanitizers = array_keys( amp_get_content_sanitizers() );
+		$this->assertEquals( 'Even_After_Whitelist_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 3 ] );
+		$this->assertEquals( 'AMP_Style_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 2 ] );
+		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 1 ] );
 	}
 
 	/**
@@ -361,5 +371,70 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
+	}
+
+	/**
+	 * Test amp_intercept_post_request_redirect().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @covers amp_intercept_post_request_redirect()
+	 */
+	public function test_amp_intercept_post_request_redirect() {
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		add_theme_support( 'amp' );
+		$url = get_home_url();
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', function () {
+			return '__return_false';
+		} );
+
+		ob_start();
+		amp_intercept_post_request_redirect( $url );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+
+		$this->assertContains( 'AMP-Redirect-To: ' . $url, xdebug_get_headers() );
+		$this->assertContains( 'Access-Control-Expose-Headers: AMP-Redirect-To', xdebug_get_headers() );
+
+		ob_start();
+		amp_intercept_post_request_redirect( '/new-location/' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertContains( 'AMP-Redirect-To: https://example.org/new-location/', xdebug_get_headers() );
+
+		ob_start();
+		amp_intercept_post_request_redirect( '//example.com/new-location/' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$headers = xdebug_get_headers();
+		$this->assertContains( 'AMP-Redirect-To: https://example.com/new-location/', $headers );
+
+		ob_start();
+		amp_intercept_post_request_redirect( '' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertContains( 'AMP-Redirect-To: https://example.org', xdebug_get_headers() );
+	}
+
+	/**
+	 * Test amp_handle_xhr_request().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @covers amp_handle_xhr_headers_output()
+	 */
+	public function test_amp_handle_xhr_request() {
+		global $pagenow;
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		$_GET['__amp_source_origin'] = 'https://example.org';
+		$pagenow                     = 'wp-comments-post.php';
+
+		amp_handle_xhr_request();
+		$this->assertContains( 'AMP-Access-Control-Allow-Source-Origin: https://example.org', xdebug_get_headers() );
+
 	}
 }

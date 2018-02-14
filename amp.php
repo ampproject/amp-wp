@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: Automattic
  * Author URI: https://automattic.com
- * Version: 0.7-alpha
+ * Version: 0.7-beta1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -32,7 +32,7 @@ if ( version_compare( phpversion(), '5.3', '<' ) ) {
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.7-alpha' );
+define( 'AMP__VERSION', '0.7-beta1' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -95,6 +95,7 @@ function amp_after_setup_theme() {
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	AMP_Post_Type_Support::add_post_type_support();
+	AMP_Validation_Utils::init();
 }
 add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 
@@ -105,7 +106,6 @@ add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
  * @global string $pagenow
  */
 function amp_init() {
-	global $pagenow;
 
 	/**
 	 * Triggers on init when AMP plugin is active.
@@ -127,9 +127,7 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
-	if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
-		amp_prepare_comment_post();
-	}
+	amp_handle_xhr_request();
 }
 
 // Make sure the `amp` query var has an explicit value.
