@@ -191,6 +191,7 @@ class AMP_Theme_Support {
 		if ( is_customize_preview() ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		}
+		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
 
@@ -890,6 +891,31 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering() {
 		echo self::prepare_response( ob_get_clean() ); // WPCS: xss ok.
+	}
+
+	/**
+	 * Filter rendered partial to convert to AMP.
+	 *
+	 * @see WP_Customize_Partial::render()
+	 *
+	 * @param string|mixed $partial Rendered partial.
+	 * @return string|mixed Filtered partial.
+	 * @global int $content_width
+	 */
+	public static function filter_customize_partial_render( $partial ) {
+		global $content_width;
+		if ( is_string( $partial ) && preg_match( '/<\w/', $partial ) ) {
+			$dom  = AMP_DOM_Utils::get_dom_from_content( $partial );
+			$args = array(
+				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element' => false,
+				'allow_dirty_styles'   => true,
+				'allow_dirty_scripts'  => false,
+			);
+			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
+			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
+		}
+		return $partial;
 	}
 
 	/**
