@@ -120,9 +120,9 @@ class AMP_Post_Meta_Box {
 		$validate = (
 			isset( $screen->base )
 			&&
-			is_post_type_viewable( $post->post_type )
-			&&
 			'post' === $screen->base
+			&&
+			is_post_type_viewable( $post->post_type )
 		);
 		if ( ! $validate ) {
 			return;
