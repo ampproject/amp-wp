@@ -118,11 +118,11 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Gets an AMP-compliant audio playlist.
 	 *
-	 * @return string Playlist shortcode markup.
+	 * @return string Playlist shortcode markup, or an empty string.
 	 */
 	public function audio_playlist() {
 		if ( ! isset( $this->data['tracks'] ) ) {
-			return;
+			return '';
 		}
 		$container_id   = 'ampPlaylistCarousel' . self::$playlist_id;
 		$selected_slide = $container_id . '.selectedSlide';
@@ -164,7 +164,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * This uses similar markup to the native playlist shortcode output.
 	 * So the styles from wp-mediaelement.min.css will apply to it.
 	 *
-	 * @global content_width.
+	 * @global int content_width.
 	 * @return string $video_playlist Markup for the video playlist.
 	 */
 	public function video_playlist() {

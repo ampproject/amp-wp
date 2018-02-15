@@ -185,9 +185,12 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function test_audio_playlist() {
 		$attr                 = $this->get_attributes( 'audio' );
+		$this->instance->data = array();
+		$playlist             = $this->instance->audio_playlist();
+		$this->assertEquals( '', $playlist );
+
 		$this->instance->data = $this->instance->get_data( $attr );
 		$playlist             = $this->instance->audio_playlist();
-
 		$this->assertContains( '<amp-carousel', $playlist );
 		$this->assertContains( '<amp-audio', $playlist );
 		$this->assertContains( $this->file_1, $playlist );
