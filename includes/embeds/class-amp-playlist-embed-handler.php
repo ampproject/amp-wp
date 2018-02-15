@@ -251,10 +251,10 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 			foreach ( $this->data['tracks'] as $index => $track ) {
 				$title = $this->get_title( $track );
 				if ( 'audio' === $type ) {
-					$on         = 'tap:AMP.setState({' . $container_id . ': {selectedSlide: ' . $i . '}})';
+					$on         = 'tap:AMP.setState(' . wp_json_encode( array( $container_id => array( 'selectedSlide' => $i ) ) ) . ')';
 					$item_class = esc_attr( $i ) . ' == ' . esc_attr( $container_id ) . '.selectedSlide ? "wp-playlist-item wp-playlist-playing" : "wp-playlist-item"';
 				} elseif ( 'video' === $type ) {
-					$on         = 'tap:AMP.setState({' . $container_id . ': {currentVideo: ' . $index . '}})';
+					$on         = 'tap:AMP.setState(' . wp_json_encode( array( $container_id => array( 'currentVideo' => $index ) ) ) . ')';
 					$item_class = esc_attr( $index ) . ' == ' . esc_attr( $container_id ) . '.currentVideo ? "wp-playlist-item wp-playlist-playing" : "wp-playlist-item"';
 				}
 

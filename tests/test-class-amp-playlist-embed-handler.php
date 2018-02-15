@@ -135,7 +135,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$this->assertContains( $this->file_1, $playlist );
 		$this->assertContains( $this->file_2, $playlist );
 		$this->assertContains( '[src]="playlist0[playlist0.currentVideo].videoUrl"', $playlist );
-		$this->assertContains( 'on="tap:AMP.setState({playlist0: {currentVideo: 0}})"', $playlist );
+		$this->assertContains( 'on="tap:AMP.setState({&quot;playlist0&quot;:{&quot;currentVideo&quot;:0}})"', $playlist );
 	}
 
 	/**
@@ -192,7 +192,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$this->assertContains( '<amp-audio', $playlist );
 		$this->assertContains( $this->file_1, $playlist );
 		$this->assertContains( $this->file_2, $playlist );
-		$this->assertContains( 'tap:AMP.setState({ampPlaylistCarousel0: {selectedSlide: 0}})"', $playlist );
+		$this->assertContains( 'tap:AMP.setState({&quot;ampPlaylistCarousel0&quot;:{&quot;selectedSlide&quot;:0}})"', $playlist );
 	}
 
 	/**
@@ -205,7 +205,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$attr                 = $this->get_attributes( $type );
 		$this->instance->data = $this->instance->get_data( $attr );
 		$container_id         = 'fooContainerId0';
-		$expected_on          = 'tap:AMP.setState({' . $container_id . ': {currentVideo: 0}})';
+		$expected_on          = 'tap:AMP.setState({&quot;' . $container_id . '&quot;:{&quot;currentVideo&quot;:0}})';
 
 		ob_start();
 		$this->instance->tracks( $type, $container_id );
@@ -217,7 +217,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$type                 = 'audio';
 		$attr                 = $this->get_attributes( $type );
 		$this->instance->data = $this->instance->get_data( $attr );
-		$expected_on          = 'tap:AMP.setState({' . $container_id . ': {selectedSlide: 0}})';
+		$expected_on          = 'tap:AMP.setState({&quot;' . $container_id . '&quot;:{&quot;selectedSlide&quot;:0}})';
 
 		ob_start();
 		$this->instance->tracks( $type, $container_id );
