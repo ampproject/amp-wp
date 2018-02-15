@@ -58,12 +58,13 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function test_register_embed() {
 		global $shortcode_tags;
-		$shortcode = 'playlist';
-		$this->assertFalse( isset( $shortcode_tags[ $shortcode ] ) );
+		$removed_shortcode = 'wp_playlist_shortcode';
+		add_shortcode( 'playlist', $removed_shortcode );
 		$this->instance->register_embed();
-		$this->assertEquals( 'AMP_Playlist_Embed_Handler', get_class( $shortcode_tags[ $shortcode ][0] ) );
-		$this->assertEquals( 'shortcode', $shortcode_tags[ $shortcode ][1] );
+		$this->assertEquals( 'AMP_Playlist_Embed_Handler', get_class( $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] ) );
+		$this->assertEquals( 'shortcode', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][1] );
 		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $this->instance, 'styling' ) ) );
+		$this->assertEquals( $removed_shortcode, $this->instance->removed_shortcode );
 		$this->instance->unregister_embed();
 	}
 
@@ -74,9 +75,10 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function test_unregister_embed() {
 		global $shortcode_tags;
-		$shortcode = 'playlist';
+		$expected_removed_shortcode        = 'wp_playlist_shortcode';
+		$this->instance->removed_shortcode = $expected_removed_shortcode;
 		$this->instance->unregister_embed();
-		$this->assertFalse( isset( $shortcode_tags[ $shortcode ] ) );
+		$this->assertEquals( $expected_removed_shortcode, $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ] );
 	}
 
 	/**

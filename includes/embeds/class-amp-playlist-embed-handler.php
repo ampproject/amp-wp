@@ -18,7 +18,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * The tag of the shortcode.
 	 *
-	 * @var string.
+	 * @var string
 	 */
 	const SHORTCODE = 'playlist';
 
@@ -28,21 +28,21 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * This corresponds to the max-width in wp-mediaelement.css:
 	 * .wp-playlist .wp-playlist-current-item img
 	 *
-	 * @var string.
+	 * @var string
 	 */
 	const THUMB_MAX_WIDTH = 60;
 
 	/**
 	 * The height of the carousel.
 	 *
-	 * @var string.
+	 * @var string
 	 */
 	const CAROUSEL_HEIGHT = 160;
 
 	/**
 	 * The pattern to get the playlist data.
 	 *
-	 * @var string.
+	 * @var string
 	 */
 	const PLAYLIST_REGEX = ':<script type="application/json" class="wp-playlist-script">(.+?)</script>:s';
 
@@ -54,6 +54,13 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	public static $playlist_id = 0;
 
 	/**
+	 * The removed shortcode callback.
+	 *
+	 * @var string|array
+	 */
+	public $removed_shortcode;
+
+	/**
 	 * The parsed data for the playlist.
 	 *
 	 * @var array
@@ -62,8 +69,15 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
 	 * Registers the playlist shortcode.
+
+	 * @global array $shortcode_tags
+	 * @return void
 	 */
 	public function register_embed() {
+		global $shortcode_tags;
+		if ( shortcode_exists( self::SHORTCODE ) ) {
+			$this->removed_shortcode = $shortcode_tags[ self::SHORTCODE ];
+		}
 		add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'styling' ) );
 	}
@@ -74,7 +88,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void
 	 */
 	public function unregister_embed() {
-		remove_shortcode( self::SHORTCODE );
+		add_shortcode( self::SHORTCODE, $this->removed_shortcode );
 	}
 
 	/**
