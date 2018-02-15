@@ -176,6 +176,11 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 			'thumb' => $dimensions,
 		);
 		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
+
+		$track = array(
+			'thumb' => array(),
+		);
+		$this->assertEquals( array(), $this->instance->get_thumb_dimensions( $track ) );
 	}
 
 	/**

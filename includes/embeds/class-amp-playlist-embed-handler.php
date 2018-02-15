@@ -230,7 +230,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function get_thumb_dimensions( $track ) {
 		if ( ! isset( $track['thumb']['width'], $track['thumb']['height'] ) ) {
-			return;
+			return array();
 		}
 		$original_width  = intval( $track['thumb']['width'] );
 		$original_height = intval( $track['thumb']['height'] );
