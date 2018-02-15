@@ -16,7 +16,7 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 				),
 			),
 
-			'both_dimensions_missing' => array(
+			'both_dimensions_missing'  => array(
 				array(),
 				array(
 					'height' => 400,
@@ -24,7 +24,7 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 				),
 			),
 
-			'both_dimensions_empty' => array(
+			'both_dimensions_empty'    => array(
 				array(
 					'width' => '',
 					'height' => '',
@@ -35,7 +35,7 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 				),
 			),
 
-			'no_width' => array(
+			'no_width'                 => array(
 				array(
 					'height' => 100,
 				),
@@ -45,13 +45,25 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 				),
 			),
 
-			'no_height' => array(
+			'no_height'                => array(
 				array(
 					'width' => 200,
 				),
 				array(
 					'height' => 400,
 					'layout' => 'fixed-height',
+				),
+			),
+
+			'no_layout_specified'      => array(
+				array(
+					'width'  => 100,
+					'height' => 100,
+				),
+				array(
+					'width'  => 100,
+					'height' => 100,
+					'layout' => 'responsive',
 				),
 			),
 		);
