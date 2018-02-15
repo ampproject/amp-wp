@@ -162,8 +162,8 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 			<amp-carousel id="<?php echo esc_attr( $container_id ); ?>" [slide]="<?php echo esc_attr( $selected_slide ); ?>" height="<?php echo esc_attr( self::CAROUSEL_HEIGHT ); ?>" width="auto" type="slides">
 				<?php
 				foreach ( $this->data['tracks'] as $track ) :
-					$title            = $this->get_title( $track );
-					$image_url        = isset( $track['thumb']['src'] ) ? esc_url( $track['thumb']['src'] ) : '';
+					$title                              = $this->get_title( $track );
+					$image_url                          = isset( $track['thumb']['src'] ) ? esc_url( $track['thumb']['src'] ) : '';
 					list( $image_height, $image_width ) = $this->get_thumb_dimensions( $track );
 
 					?>
