@@ -44,7 +44,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var string.
 	 */
-	const PLAYLIST_REGEX = '/(?s)\<script [^>]* class="wp-playlist-script"\>[^<]*?(.*).*?\<\/script\>/';
+	const PLAYLIST_REGEX = ':<script type="application/json" class="wp-playlist-script">(.+?)</script>:s';
 
 	/**
 	 * The ID of individual playlist.
@@ -71,7 +71,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Unregisters the playlist shortcode.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public function unregister_embed() {
 		remove_shortcode( self::SHORTCODE );
@@ -80,7 +80,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Enqueues the playlist styling.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public function styling() {
 		global $post;
@@ -241,7 +241,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param string $type         The type of tracks: 'audio' or 'video'.
 	 * @param string $container_id The ID of the container.
-	 * @return void.
+	 * @return void
 	 */
 	public function tracks( $type, $container_id ) {
 		?>
