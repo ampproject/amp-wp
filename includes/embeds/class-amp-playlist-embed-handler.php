@@ -162,7 +162,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 								<span class="wp-playlist-item-meta wp-playlist-item-title"><?php echo esc_html( $title ); ?></span>
 							</div>
 						</div>
-						<amp-audio width="auto" height="50" src="<?php echo esc_url( isset( $track['src'] ) ? $track['src'] : '' ); ?>"></amp-audio>
+						<amp-audio width="auto" height="50" src="<?php echo esc_url( $track['src'] ); ?>"></amp-audio>
 					</div>
 				<?php endforeach; ?>
 			</amp-carousel>
@@ -194,7 +194,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 		foreach ( $this->data['tracks'] as $index => $track ) {
 			$amp_state[ $index ] = array(
-				'videoUrl' => isset( $track['src'] ) ? $track['src'] : '',
+				'videoUrl' => $track['src'],
 				'thumb'    => isset( $track['thumb']['src'] ) ? $track['thumb']['src'] : '',
 			);
 		}
