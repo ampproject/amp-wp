@@ -145,10 +145,10 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 						<div class="wp-playlist-current-item">
 							<amp-img src="<?php echo esc_url( $image_url ); ?>" height="<?php echo esc_attr( $image_height ); ?>" width="<?php echo esc_attr( $image_width ); ?>"></amp-img>
 							<div class="wp-playlist-caption">
-								<span class="wp-playlist-item-meta wp-playlist-item-title"><?php echo isset( $title ) ? esc_html( $title ) : ''; ?></span>
+								<span class="wp-playlist-item-meta wp-playlist-item-title"><?php echo esc_html( $title ); ?></span>
 							</div>
 						</div>
-						<amp-audio width="auto" height="50" src="<?php echo isset( $track['src'] ) ? esc_url( $track['src'] ) : ''; ?>"></amp-audio>
+						<amp-audio width="auto" height="50" src="<?php echo esc_url( isset( $track['src'] ) ? $track['src'] : '' ); ?>"></amp-audio>
 					</div>
 				<?php endforeach; ?>
 			</amp-carousel>
@@ -197,7 +197,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 					<?php echo wp_unslash( wp_json_encode( $amp_state ) ); // WPCS: XSS ok. ?>
 				</script>
 			</amp-state>
-			<amp-video id="amp-video" src="<?php echo esc_url( $this->data['tracks'][0]['src'] ); ?>" [src]="<?php echo esc_attr( $playlist ); ?>[<?php echo esc_attr( $playlist ); ?>.currentVideo].videoUrl" width="<?php echo esc_attr( $width ); ?>" height="<?php echo isset( $height ) ? esc_attr( $height ) : ''; ?>" controls></amp-video>
+			<amp-video id="amp-video" src="<?php echo esc_url( $this->data['tracks'][0]['src'] ); ?>" [src]="<?php echo esc_attr( $playlist ); ?>[<?php echo esc_attr( $playlist ); ?>.currentVideo].videoUrl" width="<?php echo esc_attr( $width ); ?>" height="<?php echo esc_attr( isset( $height ) ? $height : '' ); ?>" controls></amp-video>
 			<?php $this->tracks( 'video', $playlist ); ?>
 		</div>
 		<?php
@@ -259,9 +259,9 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 				}
 
 				?>
-				<div class="wp-playlist-item" [class]="<?php echo isset( $item_class ) ? esc_attr( $item_class ) : ''; ?>">
-					<a class="wp-playlist-caption" on="<?php echo isset( $on ) ? esc_attr( $on ) : ''; ?>">
-						<?php echo esc_html( strval( $i + 1 ) . '.' ); ?> <span class="wp-playlist-item-title"><?php echo isset( $title ) ? esc_html( $title ) : ''; ?></span>
+				<div class="wp-playlist-item" [class]="<?php echo esc_attr( isset( $item_class ) ? $item_class : '' ); ?>">
+					<a class="wp-playlist-caption" on="<?php echo esc_attr( isset( $on ) ? $on : '' ); ?>">
+						<?php echo esc_html( strval( $i + 1 ) . '.' ); ?> <span class="wp-playlist-item-title"><?php echo esc_html( $title ); ?></span>
 					</a>
 					<?php if ( isset( $track['meta']['length_formatted'] ) ) : ?>
 						<div class="wp-playlist-item-length"><?php echo esc_html( $track['meta']['length_formatted'] ); ?></div>
