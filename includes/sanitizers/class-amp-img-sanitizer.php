@@ -119,7 +119,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'alt':
 				case 'class':
 				case 'srcset':
-				case 'sizes':
 				case 'on':
 				case 'attribution':
 					$out[ $name ] = $value;
