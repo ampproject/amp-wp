@@ -23,6 +23,20 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORTCODE = 'playlist';
 
 	/**
+	 * The default height of the thumbnail image for 'audio' playlist tracks.
+	 *
+	 * @var string
+	 */
+	const DEFAULT_THUMB_HEIGHT = 64;
+
+	/**
+	 * The default width of the thumbnail image for 'audio' playlist tracks.
+	 *
+	 * @var string
+	 */
+	const DEFAULT_THUMB_WIDTH = 48;
+
+	/**
 	 * The max width of the audio thumbnail image.
 	 *
 	 * This corresponds to the max-width in wp-mediaelement.css:
@@ -150,9 +164,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 				foreach ( $this->data['tracks'] as $track ) :
 					$title            = $this->get_title( $track );
 					$image_url        = isset( $track['thumb']['src'] ) ? esc_url( $track['thumb']['src'] ) : '';
-					$thumb_dimensions = $this->get_thumb_dimensions( $track );
-					$image_height     = isset( $thumb_dimensions['height'] ) ? $thumb_dimensions['height'] : '';
-					$image_width      = isset( $thumb_dimensions['width'] ) ? $thumb_dimensions['width'] : '';
+					list( $image_height, $image_width ) = $this->get_thumb_dimensions( $track );
 
 					?>
 					<div>
@@ -229,21 +241,18 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return array $dimensions The height and width of the thumbnail image.
 	 */
 	public function get_thumb_dimensions( $track ) {
-		if ( ! isset( $track['thumb']['width'], $track['thumb']['height'] ) ) {
-			return array();
-		}
-		$original_width  = intval( $track['thumb']['width'] );
-		$original_height = intval( $track['thumb']['height'] );
+		$original_height = isset( $track['thumb']['height'] ) ? intval( $track['thumb']['height'] ) : self::DEFAULT_THUMB_HEIGHT;
+		$original_width  = isset( $track['thumb']['width'] ) ? intval( $track['thumb']['width'] ) : self::DEFAULT_THUMB_WIDTH;
 		$image_width     = min( self::THUMB_MAX_WIDTH, $original_width );
 		if ( $original_width > self::THUMB_MAX_WIDTH ) {
 			$ratio        = $original_width / self::THUMB_MAX_WIDTH;
-			$image_height = floor( $original_height / $ratio );
+			$image_height = intval( $original_height / $ratio );
 		} else {
 			$image_height = $original_height;
 		}
 		return array(
-			'height' => $image_height,
-			'width'  => $image_width,
+			$image_height,
+			$image_width,
 		);
 	}
 
@@ -299,7 +308,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		$markup = wp_playlist_shortcode( $attr );
 		preg_match( self::PLAYLIST_REGEX, $markup, $matches );
 		if ( empty( $matches[1] ) ) {
-			return;
+			return array();
 		}
 		return json_decode( $matches[1], true );
 	}

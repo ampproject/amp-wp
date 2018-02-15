@@ -153,7 +153,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$track      = array(
 			'thumb' => $dimensions,
 		);
-		$this->assertEquals( $dimensions, $this->instance->get_thumb_dimensions( $track ) );
+		$this->assertEquals( array_values( $dimensions ), $this->instance->get_thumb_dimensions( $track ) );
 
 		$dimensions = array(
 			'height' => 68,
@@ -162,25 +162,41 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$track      = array(
 			'thumb' => $dimensions,
 		);
-		$this->assertEquals( $dimensions, $this->instance->get_thumb_dimensions( $track ) );
+		$this->assertEquals( array_values( $dimensions ), $this->instance->get_thumb_dimensions( $track ) );
 
 		$dimensions          = array(
 			'height' => 70,
 			'width'  => 80.5,
 		);
 		$expected_dimensions = array(
-			'height' => 52,
-			'width'  => 60,
+			52,
+			60,
 		);
 		$track               = array(
 			'thumb' => $dimensions,
 		);
 		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
+		$dimensions          = array(
+			'width' => 80.5,
+		);
+		$track               = array(
+			'thumb' => $dimensions,
+		);
+		$expected_dimensions = array(
+			48,
+			60,
+		);
+		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
+
 		$track = array(
 			'thumb' => array(),
 		);
-		$this->assertEquals( array(), $this->instance->get_thumb_dimensions( $track ) );
+		$expected_dimensions = array(
+			AMP_Playlist_Embed_Handler::DEFAULT_THUMB_HEIGHT,
+			AMP_Playlist_Embed_Handler::DEFAULT_THUMB_WIDTH,
+		);
+		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
 	}
 
 	/**
