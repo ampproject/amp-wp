@@ -281,7 +281,7 @@ class AMP_Validation_Utils {
 	 * @return void.
 	 */
 	public static function reset_removed() {
-		self::$removed_nodes = array();
+		self::$removed_nodes  = array();
 		self::$removed_assets = array();
 	}
 
