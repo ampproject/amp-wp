@@ -342,7 +342,7 @@ abstract class AMP_Base_Sanitizer {
 			}
 			if ( $attribute ) {
 				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args['remove_invalid_callback'], $attribute );
+				call_user_func( $this->args['remove_invalid_callback'], $attribute, $element );
 			}
 		} elseif ( is_string( $attribute ) ) {
 			$element->removeAttribute( $attribute );

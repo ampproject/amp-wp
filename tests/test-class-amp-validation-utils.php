@@ -90,6 +90,108 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test removed_script.
+	 *
+	 * @see AMP_Validation_Utils::removed_script()
+	 */
+	public function test_removed_script() {
+		$attribute      = 'src';
+		$tag_name       = 'script';
+		$dom_document   = new DOMDocument( '1.0', 'utf-8' );
+		$script         = $dom_document->createElement( $tag_name );
+		$src            = $dom_document->createElement( $attribute );
+		$script_url     = get_home_url() . '/wp-content/plugins/foo/example-script.js';
+		$src->nodeValue = $script_url;
+		AMP_Validation_Utils::removed_script( $src, $script );
+		$this->assertEquals( $script_url, AMP_Validation_Utils::$removed_assets['plugins']['foo'][0] );
+		AMP_Validation_Utils::reset_removed();
+
+		$script_url     = get_home_url() . '/wp-content/themes/baz/example-script.js';
+		$src->nodeValue = $script_url;
+		AMP_Validation_Utils::removed_script( $src, $script );
+		$this->assertEquals( $script_url, AMP_Validation_Utils::$removed_assets['themes']['baz'][0] );
+		AMP_Validation_Utils::reset_removed();
+	}
+
+	/**
+	 * Test track_style.
+	 *
+	 * @see AMP_Validation_Utils::track_style()
+	 */
+	public function test_track_style() {
+		$theme_style = get_home_url() . '/wp-content/themes/wp-baz/style.css';
+		AMP_Validation_Utils::track_style( $theme_style );
+		$this->assertEquals( $theme_style, AMP_Validation_Utils::$removed_assets['themes']['wp-baz']['style'][0] );
+
+		$plugin_style = get_home_url() . '/wp-content/plugins/abc-plugin/assets/style.css';
+		AMP_Validation_Utils::track_style( $plugin_style );
+		$this->assertEquals( $plugin_style, AMP_Validation_Utils::$removed_assets['plugins']['abc-plugin']['style'][0] );
+
+		$core_style = get_home_url() . '/wp-includes/css/buttons.css';
+		AMP_Validation_Utils::track_style( $core_style );
+		$this->assertEquals( $core_style, AMP_Validation_Utils::$removed_assets['core']['style'][0] );
+		AMP_Validation_Utils::reset_removed();
+	}
+
+	/**
+	 * Test get_source.
+	 *
+	 * @dataProvider get_source_data
+	 * @see AMP_Validation_Utils::get_source()
+	 * @param string $url      The URL for which to get the source.
+	 * @param array  $expected The expected return value of the tested function.
+	 */
+	public function test_get_source( $url, $expected ) {
+		$this->assertEquals( $expected, AMP_Validation_Utils::get_source( $url ) );
+		AMP_Validation_Utils::reset_removed();
+	}
+
+	/**
+	 * Gets the test data for test_get_source().
+	 *
+	 * @return array $source_data The data for test_get_source().
+	 */
+	public function get_source_data() {
+		return array(
+			'theme'     => array(
+				get_home_url() . '/wp-content/themes/wp-baz/style.css',
+				array(
+					'themes',
+					'wp-baz',
+				),
+			),
+			'plugin'    => array(
+				get_home_url() . '/wp-content/plugins/abc-plugin/assets/style.css',
+				array(
+					'plugins',
+					'abc-plugin',
+				),
+			),
+			'core'      => array(
+				get_home_url() . '/wp-includes/css/buttons.css',
+				array(
+					'core',
+					'',
+				),
+			),
+			'mu-plugin' => array(
+				get_home_url() . '/mu-plugins/foo/assets/style.css',
+				array(
+					'mu-plugins',
+					'',
+				),
+			),
+			'external'  => array(
+				'https://example.com/style.css',
+				array(
+					'external',
+					'',
+				),
+			),
+		);
+	}
+
+	/**
 	 * Test was_node_removed.
 	 *
 	 * @see AMP_Validation_Utils::was_node_removed()
@@ -109,6 +211,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->set_authorized();
 		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
 		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( 10, has_filter( 'amp_content_sanitizers', 'AMP_Validation_Utils::style_callback' ) );
 
 		AMP_Validation_Utils::reset_removed();
 		$video = '<video src="https://example.com/video">';
@@ -132,8 +235,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::process_markup( $invalid_video );
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
 		$this->assertEquals( 'video', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
-
 		AMP_Validation_Utils::reset_removed();
+
 		AMP_Validation_Utils::process_markup( '<button onclick="evil()">Do it</button>' );
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
 		$this->assertEquals( 'onclick', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
@@ -174,9 +277,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$this->assertFalse( AMP_Validation_Utils::has_cap() );
 
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		$this->set_authorized();
 		$this->assertTrue( AMP_Validation_Utils::has_cap() );
 	}
 
@@ -241,9 +342,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::reset_removed()
 	 */
 	public function test_reset_removed() {
-		AMP_Validation_Utils::$removed_nodes[] = $this->node;
+		AMP_Validation_Utils::$removed_nodes[]  = $this->node;
+		AMP_Validation_Utils::$removed_assets[] = $this->node;
 		AMP_Validation_Utils::reset_removed();
 		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( array(), AMP_Validation_Utils::$removed_assets );
 	}
 
 	/**
@@ -266,9 +369,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::validate_content()
 	 */
 	public function test_validate_content() {
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		$this->set_authorized();
 		$post = $this->factory()->post->create_and_get();
 		ob_start();
 		AMP_Validation_Utils::validate_content( $post );
@@ -302,7 +403,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test display_error().
 	 *
-	 * @see AMP_Validation_Utils::display_error().
+	 * @see AMP_Validation_Utils::display_error()
 	 */
 	public function test_display_error() {
 		$response = array(
@@ -335,20 +436,35 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test style_callback().
+	 *
+	 * @see AMP_Validation_Utils::style_callback()
+	 */
+	public function test_style_callback() {
+		$sanitizers = array(
+			AMP_Validation_Utils::STYLE_SANITIZER => array(),
+		);
+		$this->assertEquals( $sanitizers, AMP_Validation_Utils::style_callback( $sanitizers ) );
+
+		$this->set_authorized();
+		$expected = array(
+			AMP_Validation_Utils::STYLE_SANITIZER => array(
+				'remove_style_callback' => 'AMP_Validation_Utils::track_style',
+			),
+		);
+		$this->assertEquals( $expected, AMP_Validation_Utils::style_callback( $sanitizers ) );
+		AMP_Validation_Utils::reset_removed();
+	}
+
+	/**
 	 * Add a nonce to the $_REQUEST, so that is_authorized() returns true.
 	 *
 	 * @return void.
 	 */
 	public function set_authorized() {
-		global $_REQUEST, $post; // WPCS: CSRF ok.
-		if ( ! AMP_Validation_Utils::has_cap() ) {
-			wp_set_current_user( $this->factory()->user->create( array(
-				'role' => 'administrator',
-			) ) );
-		}
-		$post_id              = $this->factory()->post->create();
-		$post                 = get_post( $post_id ); // WPCS: global override ok.
-		$_REQUEST['_wpnonce'] = wp_create_nonce( 'update-post_' . $post_id ); // WPCS: global override ok.
+		wp_set_current_user( $this->factory()->user->create( array(
+			'role' => 'administrator',
+		) ) );
 	}
 
 }

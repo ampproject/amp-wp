@@ -15,16 +15,23 @@ class AMP_Validation_Utils {
 	/**
 	 * Key for the markup value in the REST API endpoint.
 	 *
-	 * @var string.
+	 * @var string
 	 */
 	const MARKUP_KEY = 'markup';
 
 	/**
 	 * Key for the error value in the response.
 	 *
-	 * @var string.
+	 * @var string
 	 */
 	const ERROR_KEY = 'has_error';
+
+	/**
+	 * Class of the style sanitizer.
+	 *
+	 * @var string
+	 */
+	const STYLE_SANITIZER = 'AMP_Style_Sanitizer';
 
 	/**
 	 * The nodes that the sanitizer removed.
@@ -32,6 +39,13 @@ class AMP_Validation_Utils {
 	 * @var DOMNode[]
 	 */
 	public static $removed_nodes = array();
+
+	/**
+	 * The removed assets.
+	 *
+	 * @var array
+	 */
+	public static $removed_assets = array();
 
 	/**
 	 * Add the actions.
@@ -46,11 +60,84 @@ class AMP_Validation_Utils {
 	/**
 	 * Tracks when a sanitizer removes an node (element or attribute).
 	 *
-	 * @param DOMNode $node The node which was removed.
+	 * @param DOMNode $node           The node which was removed.
+	 * @param DOMNode $parent_element The parent element of a removed attribute (optional).
 	 * @return void
 	 */
-	public static function track_removed( $node ) {
+	public static function track_removed( $node, $parent_element = null ) {
 		self::$removed_nodes[] = $node;
+		self::removed_script( $node, $parent_element );
+	}
+
+	/**
+	 * Tracks when a script was removed.
+	 *
+	 * The $element argument is needed for a removed 'src' attribute.
+	 * The attribute node has no information about that $element.
+	 * If its parent $element is a <script>, that argument is needed to report removal of it.
+	 *
+	 * @param DOMNode      $node    The node which was removed.
+	 * @param DOMNode|null $element The parent element of a removed attribute, or null.
+	 * @return void
+	 */
+	public static function removed_script( $node, $element ) {
+		if ( ( 'src' === $node->nodeName ) && isset( $element ) && ( 'script' === $element->nodeName ) ) {
+			list( $source_type, $source ) = self::get_source( $node->nodeValue );
+			if ( ! empty( $source_type ) && ! empty( $source ) ) {
+				self::$removed_assets[ $source_type ][ $source ][] = $node->nodeValue;
+			} elseif ( ! empty( $source_type ) ) {
+				self::$removed_assets[ $source_type ][] = $node->nodeValue;
+			}
+		}
+	}
+
+	/**
+	 * Tracks when the style sanitizer removes a style.
+	 *
+	 * @param string $asset_url The URL of the removed asset.
+	 * @return void
+	 */
+	public static function track_style( $asset_url ) {
+		list( $source_type, $source ) = self::get_source( $asset_url );
+		if ( ! empty( $source_type ) && ! empty( $source ) ) {
+			self::$removed_assets[ $source_type ][ $source ]['style'][] = $asset_url;
+		} elseif ( ! empty( $source_type ) ) {
+			self::$removed_assets[ $source_type ]['style'][] = $asset_url;
+		}
+	}
+
+	/**
+	 * Gets the source of the asset.
+	 *
+	 * This attempts to find if it's from a theme or a plugin.
+	 * In that case, it also returns the name of the theme or plugin.
+	 *
+	 * @param string $asset The asset path to search for the source.
+	 * @return array $source The asset type and source.
+	 */
+	public static function get_source( $asset ) {
+		preg_match( ':wp-content/(themes|plugins|)/(.+?)/:s', $asset, $matches );
+		if ( isset( $matches[1], $matches[2] ) ) {
+			return array(
+				$matches[1],
+				$matches[2],
+			);
+		} elseif ( false !== strpos( $asset, 'mu-plugins' ) ) {
+			return array(
+				'mu-plugins',
+				'',
+			);
+		} elseif ( false !== strpos( $asset, get_home_url() ) ) {
+			return array(
+				'core',
+				'',
+			);
+		} else {
+			return array(
+				'external',
+				'',
+			);
+		}
 	}
 
 	/**
@@ -77,6 +164,7 @@ class AMP_Validation_Utils {
 		}
 
 		AMP_Theme_Support::register_content_embed_handlers();
+		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'style_callback' ), 10, 2 );
 		remove_filter( 'the_content', 'wpautop' );
 
 		/** This filter is documented in wp-includes/post-template.php */
@@ -194,6 +282,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function reset_removed() {
 		self::$removed_nodes = array();
+		self::$removed_assets = array();
 	}
 
 	/**
@@ -270,6 +359,19 @@ class AMP_Validation_Utils {
 			echo '</p>';
 		}
 		echo '</div>';
+	}
+
+	/**
+	 * Adds a callback to the style sanitizer, to track stylesheet removal.
+	 *
+	 * @param array $sanitizers The content sanitizers.
+	 * @return array $sanitizers The filtered content sanitizers.
+	 */
+	public static function style_callback( $sanitizers ) {
+		if ( self::has_cap() && isset( $sanitizers[ self::STYLE_SANITIZER ] ) && is_array( $sanitizers[ self::STYLE_SANITIZER ] ) ) {
+			$sanitizers[ self::STYLE_SANITIZER ]['remove_style_callback'] = __CLASS__ . '::track_style';
+		}
+		return $sanitizers;
 	}
 
 }

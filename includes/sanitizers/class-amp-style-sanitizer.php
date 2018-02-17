@@ -239,6 +239,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$this->dom->createComment( sprintf( 'Skipped including %s stylesheet since too large.', $skip ) ),
 					$this->amp_custom_style_element->nextSibling
 				);
+				if ( isset( $this->args['remove_style_callback'] ) ) {
+					call_user_func( $this->args['remove_style_callback'], $skip );
+				}
 			}
 		}
 	}
