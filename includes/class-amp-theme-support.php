@@ -147,6 +147,7 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 
 		/*
 		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
@@ -181,6 +182,7 @@ class AMP_Theme_Support {
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 
 		// @todo Add character conversion.
 	}

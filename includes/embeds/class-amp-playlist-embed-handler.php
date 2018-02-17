@@ -93,6 +93,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 			$this->removed_shortcode_callback = $shortcode_tags[ self::SHORTCODE ];
 		}
 		add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
+		remove_action( 'wp_playlist_scripts', 'wp_playlist_scripts' );
 	}
 
 	/**
@@ -105,6 +106,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 			add_shortcode( self::SHORTCODE, $this->removed_shortcode_callback );
 			$this->removed_shortcode_callback = null;
 		}
+		add_action( 'wp_playlist_scripts', 'wp_playlist_scripts' );
 	}
 
 	/**
@@ -113,11 +115,10 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( 'wp-mediaelement' );
 		wp_enqueue_style(
 			'amp-playlist-shortcode',
 			amp_get_asset_url( 'css/amp-playlist-shortcode.css' ),
-			array(),
+			array( 'wp-mediaelement' ),
 			AMP__VERSION
 		);
 	}
@@ -299,6 +300,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Gets the data for the playlist.
 	 *
+	 * @see wp_playlist_shortcode()
 	 * @param array $attr The shortcode attributes.
 	 * @return array $data The data for the playlist.
 	 */

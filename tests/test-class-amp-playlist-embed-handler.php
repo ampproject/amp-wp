@@ -45,8 +45,13 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 
 	/**
 	 * Tear down test.
+	 *
+	 * @global WP_Styles $wp_styles
 	 */
 	public function tearDown() {
+		global $wp_styles;
+		$wp_styles = null;
+
 		wp_dequeue_style( 'wp-mediaelement' );
 		AMP_Playlist_Embed_Handler::$playlist_id = 0;
 	}
@@ -96,9 +101,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$post->post_content = '[playlist ids="5,3"]';
 		$this->instance->enqueue_styles();
 		$style = wp_styles()->registered[ $playlist_shortcode ];
-		$this->assertTrue( in_array( 'wp-mediaelement', wp_styles()->queue, true ) );
-		$this->assertTrue( in_array( $playlist_shortcode, wp_styles()->queue, true ) );
-		$this->assertEquals( array(), $style->deps );
+		$this->assertContains( $playlist_shortcode, wp_styles()->queue );
+		$this->assertEquals( array( 'wp-mediaelement' ), $style->deps );
 		$this->assertEquals( $playlist_shortcode, $style->handle );
 		$this->assertEquals( amp_get_asset_url( 'css/amp-playlist-shortcode.css' ), $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
