@@ -75,13 +75,6 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	public $removed_shortcode_callback;
 
 	/**
-	 * The parsed data for the playlist.
-	 *
-	 * @var array
-	 */
-	public $data;
-
-	/**
 	 * Registers the playlist shortcode.
 	 *
 	 * @global array $shortcode_tags
@@ -133,21 +126,22 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Playlist shortcode markup.
 	 */
 	public function shortcode( $attr ) {
-		$this->data = $this->get_data( $attr );
-		if ( isset( $this->data['type'] ) && ( 'audio' === $this->data['type'] ) ) {
-			return $this->audio_playlist();
-		} elseif ( isset( $this->data['type'] ) && ( 'video' === $this->data['type'] ) ) {
-			return $this->video_playlist();
+		$data = $this->get_data( $attr );
+		if ( isset( $data['type'] ) && ( 'audio' === $data['type'] ) ) {
+			return $this->audio_playlist( $data );
+		} elseif ( isset( $data['type'] ) && ( 'video' === $data['type'] ) ) {
+			return $this->video_playlist( $data );
 		}
 	}
 
 	/**
 	 * Gets an AMP-compliant audio playlist.
 	 *
+	 * @param array $data Data.
 	 * @return string Playlist shortcode markup, or an empty string.
 	 */
-	public function audio_playlist() {
-		if ( ! isset( $this->data['tracks'] ) ) {
+	public function audio_playlist( $data ) {
+		if ( ! isset( $data['tracks'] ) ) {
 			return '';
 		}
 		$container_id   = 'ampPlaylistCarousel' . self::$playlist_id;
@@ -160,14 +154,16 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		<div class="wp-playlist wp-audio-playlist wp-playlist-light">
 			<amp-carousel id="<?php echo esc_attr( $container_id ); ?>" [slide]="<?php echo esc_attr( $selected_slide ); ?>" height="<?php echo esc_attr( self::CAROUSEL_HEIGHT ); ?>" width="auto" type="slides">
 				<?php
-				foreach ( $this->data['tracks'] as $track ) :
+				foreach ( $data['tracks'] as $track ) :
 					$title      = $this->get_title( $track );
-					$image_url  = isset( $track['thumb']['src'] ) ? esc_url( $track['thumb']['src'] ) : '';
+					$image_url  = isset( $track['thumb']['src'] ) ? $track['thumb']['src'] : '';
 					$dimensions = $this->get_thumb_dimensions( $track );
 					?>
 					<div>
 						<div class="wp-playlist-current-item">
-							<amp-img src="<?php echo esc_url( $image_url ); ?>" height="<?php echo esc_attr( $dimensions['height'] ); ?>" width="<?php echo esc_attr( $dimensions['width'] ); ?>"></amp-img>
+							<?php if ( $image_url ) : ?>
+								<amp-img src="<?php echo esc_url( $image_url ); ?>" height="<?php echo esc_attr( $dimensions['height'] ); ?>" width="<?php echo esc_attr( $dimensions['width'] ); ?>"></amp-img>
+							<?php endif; ?>
 							<div class="wp-playlist-caption">
 								<span class="wp-playlist-item-meta wp-playlist-item-title"><?php echo esc_html( $title ); ?></span>
 							</div>
@@ -176,7 +172,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 					</div>
 				<?php endforeach; ?>
 			</amp-carousel>
-			<?php $this->tracks( 'audio', $container_id ); ?>
+			<?php $this->tracks( 'audio', $container_id, $data['tracks'] ); ?>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -189,11 +185,12 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * So the styles from wp-mediaelement.min.css will apply to it.
 	 *
 	 * @global int $content_width
+	 * @param array $data Data.
 	 * @return string $video_playlist Markup for the video playlist.
 	 */
-	public function video_playlist() {
+	public function video_playlist( $data ) {
 		global $content_width;
-		if ( ! isset( $this->data['tracks'], $this->data['tracks'][0]['src'] ) ) {
+		if ( ! isset( $data['tracks'], $data['tracks'][0]['src'] ) ) {
 			return '';
 		}
 		$playlist = 'playlist' . self::$playlist_id;
@@ -202,14 +199,14 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		$amp_state = array(
 			'currentVideo' => '0',
 		);
-		foreach ( $this->data['tracks'] as $index => $track ) {
+		foreach ( $data['tracks'] as $index => $track ) {
 			$amp_state[ $index ] = array(
 				'videoUrl' => $track['src'],
 				'thumb'    => isset( $track['thumb']['src'] ) ? $track['thumb']['src'] : '',
 			);
 		}
 
-		$dimensions = isset( $this->data['tracks'][0]['dimensions']['resized'] ) ? $this->data['tracks'][0]['dimensions']['resized'] : null;
+		$dimensions = isset( $data['tracks'][0]['dimensions']['resized'] ) ? $data['tracks'][0]['dimensions']['resized'] : null;
 		$width      = isset( $dimensions['width'] ) ? $dimensions['width'] : $content_width;
 		$height     = isset( $dimensions['height'] ) ? $dimensions['height'] : null;
 
@@ -220,8 +217,8 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 			<amp-state id="<?php echo esc_attr( $playlist ); ?>">
 				<script type="application/json"><?php echo wp_unslash( wp_json_encode( $amp_state ) ); // WPCS: XSS ok. ?></script>
 			</amp-state>
-			<amp-video id="amp-video" src="<?php echo esc_url( $this->data['tracks'][0]['src'] ); ?>" [src]="<?php echo esc_attr( $playlist ); ?>[<?php echo esc_attr( $playlist ); ?>.currentVideo].videoUrl" width="<?php echo esc_attr( $width ); ?>" height="<?php echo esc_attr( isset( $height ) ? $height : '' ); ?>" controls></amp-video>
-			<?php $this->tracks( 'video', $playlist ); ?>
+			<amp-video id="amp-video" src="<?php echo esc_url( $data['tracks'][0]['src'] ); ?>" [src]="<?php echo esc_attr( $playlist ); ?>[<?php echo esc_attr( $playlist ); ?>.currentVideo].videoUrl" width="<?php echo esc_attr( $width ); ?>" height="<?php echo esc_attr( isset( $height ) ? $height : '' ); ?>" controls></amp-video>
+			<?php $this->tracks( 'video', $playlist, $data['tracks'] ); ?>
 		</div>
 		<?php
 		return ob_get_clean(); // WPCS: XSS ok.
@@ -263,14 +260,15 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param string $type         The type of tracks: 'audio' or 'video'.
 	 * @param string $container_id The ID of the container.
+	 * @param array  $tracks       Tracks.
 	 * @return void
 	 */
-	public function tracks( $type, $container_id ) {
+	public function tracks( $type, $container_id, $tracks ) {
 		?>
 		<div class="wp-playlist-tracks">
 			<?php
 			$i = 0;
-			foreach ( $this->data['tracks'] as $index => $track ) {
+			foreach ( $tracks as $index => $track ) {
 				$title = $this->get_title( $track );
 				if ( 'audio' === $type ) {
 					$on         = 'tap:AMP.setState(' . wp_json_encode( array( $container_id => array( 'selectedSlide' => $i ) ) ) . ')';
