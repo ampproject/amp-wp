@@ -63,8 +63,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$this->instance->register_embed();
 		$this->assertEquals( 'AMP_Playlist_Embed_Handler', get_class( $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] ) );
 		$this->assertEquals( 'shortcode', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][1] );
-		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $this->instance, 'styling' ) ) );
-		$this->assertEquals( $removed_shortcode, $this->instance->removed_shortcode );
+		$this->assertEquals( $removed_shortcode, $this->instance->removed_shortcode_callback );
 		$this->instance->unregister_embed();
 	}
 
@@ -75,8 +74,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function test_unregister_embed() {
 		global $shortcode_tags;
-		$expected_removed_shortcode        = 'wp_playlist_shortcode';
-		$this->instance->removed_shortcode = $expected_removed_shortcode;
+		$expected_removed_shortcode                 = 'wp_playlist_shortcode';
+		$this->instance->removed_shortcode_callback = $expected_removed_shortcode;
 		$this->instance->unregister_embed();
 		$this->assertEquals( $expected_removed_shortcode, $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ] );
 	}
@@ -84,23 +83,21 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	/**
 	 * Test styling.
 	 *
-	 * @covers AMP_Playlist_Embed_Handler::styling()
+	 * @covers AMP_Playlist_Embed_Handler::enqueue_styles()
 	 */
 	public function test_styling() {
 		global $post;
 		$playlist_shortcode = 'amp-playlist-shortcode';
 		$this->instance->register_embed();
-		$this->instance->styling();
-		$styles = wp_styles();
-		$this->assertFalse( in_array( 'wp-mediaelement', $styles->queue, true ) );
-		$this->assertFalse( in_array( $playlist_shortcode, $styles->queue, true ) );
+		$this->assertFalse( in_array( 'wp-mediaelement', wp_styles()->queue, true ) );
+		$this->assertFalse( in_array( $playlist_shortcode, wp_styles()->queue, true ) );
 
 		$post               = $this->factory()->post->create_and_get(); // WPCS: global override OK.
 		$post->post_content = '[playlist ids="5,3"]';
-		$this->instance->styling();
-		$style = $styles->registered[ $playlist_shortcode ];
-		$this->assertTrue( in_array( 'wp-mediaelement', $styles->queue, true ) );
-		$this->assertTrue( in_array( $playlist_shortcode, $styles->queue, true ) );
+		$this->instance->enqueue_styles();
+		$style = wp_styles()->registered[ $playlist_shortcode ];
+		$this->assertTrue( in_array( 'wp-mediaelement', wp_styles()->queue, true ) );
+		$this->assertTrue( in_array( $playlist_shortcode, wp_styles()->queue, true ) );
 		$this->assertEquals( array(), $style->deps );
 		$this->assertEquals( $playlist_shortcode, $style->handle );
 		$this->assertEquals( amp_get_asset_url( 'css/amp-playlist-shortcode.css' ), $style->src );
@@ -153,7 +150,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$track      = array(
 			'thumb' => $dimensions,
 		);
-		$this->assertEquals( array_values( $dimensions ), $this->instance->get_thumb_dimensions( $track ) );
+		$this->assertEquals( $dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
 		$dimensions = array(
 			'height' => 68,
@@ -162,15 +159,15 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$track      = array(
 			'thumb' => $dimensions,
 		);
-		$this->assertEquals( array_values( $dimensions ), $this->instance->get_thumb_dimensions( $track ) );
+		$this->assertEquals( $dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
 		$dimensions          = array(
 			'height' => 70,
 			'width'  => 80.5,
 		);
 		$expected_dimensions = array(
-			52,
-			60,
+			'height' => 52,
+			'width'  => 60,
 		);
 		$track               = array(
 			'thumb' => $dimensions,
@@ -184,8 +181,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 			'thumb' => $dimensions,
 		);
 		$expected_dimensions = array(
-			48,
-			60,
+			'height' => 48,
+			'width'  => 60,
 		);
 		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
@@ -193,8 +190,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 			'thumb' => array(),
 		);
 		$expected_dimensions = array(
-			AMP_Playlist_Embed_Handler::DEFAULT_THUMB_HEIGHT,
-			AMP_Playlist_Embed_Handler::DEFAULT_THUMB_WIDTH,
+			'height' => AMP_Playlist_Embed_Handler::DEFAULT_THUMB_HEIGHT,
+			'width'  => AMP_Playlist_Embed_Handler::DEFAULT_THUMB_WIDTH,
 		);
 		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
 	}

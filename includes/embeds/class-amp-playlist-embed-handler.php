@@ -25,14 +25,14 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * The default height of the thumbnail image for 'audio' playlist tracks.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	const DEFAULT_THUMB_HEIGHT = 64;
 
 	/**
 	 * The default width of the thumbnail image for 'audio' playlist tracks.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	const DEFAULT_THUMB_WIDTH = 48;
 
@@ -42,14 +42,14 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * This corresponds to the max-width in wp-mediaelement.css:
 	 * .wp-playlist .wp-playlist-current-item img
 	 *
-	 * @var string
+	 * @var int
 	 */
 	const THUMB_MAX_WIDTH = 60;
 
 	/**
 	 * The height of the carousel.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	const CAROUSEL_HEIGHT = 160;
 
@@ -70,9 +70,9 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * The removed shortcode callback.
 	 *
-	 * @var string|array
+	 * @var callable
 	 */
-	public $removed_shortcode;
+	public $removed_shortcode_callback;
 
 	/**
 	 * The parsed data for the playlist.
@@ -83,17 +83,16 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
 	 * Registers the playlist shortcode.
-
+	 *
 	 * @global array $shortcode_tags
 	 * @return void
 	 */
 	public function register_embed() {
 		global $shortcode_tags;
 		if ( shortcode_exists( self::SHORTCODE ) ) {
-			$this->removed_shortcode = $shortcode_tags[ self::SHORTCODE ];
+			$this->removed_shortcode_callback = $shortcode_tags[ self::SHORTCODE ];
 		}
 		add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'styling' ) );
 	}
 
 	/**
@@ -102,7 +101,10 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void
 	 */
 	public function unregister_embed() {
-		add_shortcode( self::SHORTCODE, $this->removed_shortcode );
+		if ( $this->removed_shortcode_callback ) {
+			add_shortcode( self::SHORTCODE, $this->removed_shortcode_callback );
+			$this->removed_shortcode_callback = null;
+		}
 	}
 
 	/**
@@ -110,12 +112,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @return void
 	 */
-	public function styling() {
-		global $post;
-		if ( ! isset( $post->post_content ) || ! has_shortcode( $post->post_content, self::SHORTCODE ) ) {
-			return;
-		}
-
+	public function enqueue_styles() {
 		wp_enqueue_style( 'wp-mediaelement' );
 		wp_enqueue_style(
 			'amp-playlist-shortcode',
@@ -156,20 +153,20 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		$selected_slide = $container_id . '.selectedSlide';
 		self::$playlist_id++;
 
+		$this->enqueue_styles();
 		ob_start();
 		?>
 		<div class="wp-playlist wp-audio-playlist wp-playlist-light">
 			<amp-carousel id="<?php echo esc_attr( $container_id ); ?>" [slide]="<?php echo esc_attr( $selected_slide ); ?>" height="<?php echo esc_attr( self::CAROUSEL_HEIGHT ); ?>" width="auto" type="slides">
 				<?php
 				foreach ( $this->data['tracks'] as $track ) :
-					$title                              = $this->get_title( $track );
-					$image_url                          = isset( $track['thumb']['src'] ) ? esc_url( $track['thumb']['src'] ) : '';
-					list( $image_height, $image_width ) = $this->get_thumb_dimensions( $track );
-
+					$title      = $this->get_title( $track );
+					$image_url  = isset( $track['thumb']['src'] ) ? esc_url( $track['thumb']['src'] ) : '';
+					$dimensions = $this->get_thumb_dimensions( $track );
 					?>
 					<div>
 						<div class="wp-playlist-current-item">
-							<amp-img src="<?php echo esc_url( $image_url ); ?>" height="<?php echo esc_attr( $image_height ); ?>" width="<?php echo esc_attr( $image_width ); ?>"></amp-img>
+							<amp-img src="<?php echo esc_url( $image_url ); ?>" height="<?php echo esc_attr( $dimensions['height'] ); ?>" width="<?php echo esc_attr( $dimensions['width'] ); ?>"></amp-img>
 							<div class="wp-playlist-caption">
 								<span class="wp-playlist-item-meta wp-playlist-item-title"><?php echo esc_html( $title ); ?></span>
 							</div>
@@ -190,13 +187,13 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * This uses similar markup to the native playlist shortcode output.
 	 * So the styles from wp-mediaelement.min.css will apply to it.
 	 *
-	 * @global int content_width.
+	 * @global int $content_width
 	 * @return string $video_playlist Markup for the video playlist.
 	 */
 	public function video_playlist() {
 		global $content_width;
 		if ( ! isset( $this->data['tracks'], $this->data['tracks'][0]['src'] ) ) {
-			return;
+			return '';
 		}
 		$playlist = 'playlist' . self::$playlist_id;
 		self::$playlist_id++;
@@ -215,13 +212,12 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		$width      = isset( $dimensions['width'] ) ? $dimensions['width'] : $content_width;
 		$height     = isset( $dimensions['height'] ) ? $dimensions['height'] : null;
 
+		$this->enqueue_styles();
 		ob_start();
 		?>
 		<div class="wp-playlist wp-video-playlist wp-playlist-light">
 			<amp-state id="<?php echo esc_attr( $playlist ); ?>">
-				<script type="application/json">
-					<?php echo wp_unslash( wp_json_encode( $amp_state ) ); // WPCS: XSS ok. ?>
-				</script>
+				<script type="application/json"><?php echo wp_unslash( wp_json_encode( $amp_state ) ); // WPCS: XSS ok. ?></script>
 			</amp-state>
 			<amp-video id="amp-video" src="<?php echo esc_url( $this->data['tracks'][0]['src'] ); ?>" [src]="<?php echo esc_attr( $playlist ); ?>[<?php echo esc_attr( $playlist ); ?>.currentVideo].videoUrl" width="<?php echo esc_attr( $width ); ?>" height="<?php echo esc_attr( isset( $height ) ? $height : '' ); ?>" controls></amp-video>
 			<?php $this->tracks( 'video', $playlist ); ?>
@@ -238,22 +234,24 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * And it proportionally reduces the height.
 	 *
 	 * @param array $track The data for the track.
-	 * @return array $dimensions The height and width of the thumbnail image.
+	 * @return array {
+	 *     Dimensions.
+	 *
+	 *     @type int $height Image height.
+	 *     @type int $width  Image width.
+	 * }
 	 */
 	public function get_thumb_dimensions( $track ) {
 		$original_height = isset( $track['thumb']['height'] ) ? intval( $track['thumb']['height'] ) : self::DEFAULT_THUMB_HEIGHT;
 		$original_width  = isset( $track['thumb']['width'] ) ? intval( $track['thumb']['width'] ) : self::DEFAULT_THUMB_WIDTH;
-		$image_width     = min( self::THUMB_MAX_WIDTH, $original_width );
 		if ( $original_width > self::THUMB_MAX_WIDTH ) {
-			$ratio        = $original_width / self::THUMB_MAX_WIDTH;
-			$image_height = intval( $original_height / $ratio );
+			$ratio  = $original_width / self::THUMB_MAX_WIDTH;
+			$height = intval( $original_height / $ratio );
 		} else {
-			$image_height = $original_height;
+			$height = $original_height;
 		}
-		return array(
-			$image_height,
-			$image_width,
-		);
+		$width = min( self::THUMB_MAX_WIDTH, $original_width );
+		return compact( 'height', 'width' );
 	}
 
 	/**

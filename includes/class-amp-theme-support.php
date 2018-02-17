@@ -146,8 +146,6 @@ class AMP_Theme_Support {
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		/*
