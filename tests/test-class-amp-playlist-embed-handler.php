@@ -52,7 +52,6 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		global $wp_styles;
 		$wp_styles = null;
 
-		wp_dequeue_style( 'wp-mediaelement' );
 		AMP_Playlist_Embed_Handler::$playlist_id = 0;
 	}
 
@@ -136,8 +135,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$this->assertContains( '<amp-state', $playlist );
 		$this->assertContains( $this->file_1, $playlist );
 		$this->assertContains( $this->file_2, $playlist );
-		$this->assertContains( '[src]="playlist0[playlist0.currentVideo].videoUrl"', $playlist );
-		$this->assertContains( 'on="tap:AMP.setState({&quot;playlist0&quot;:{&quot;currentVideo&quot;:0}})"', $playlist );
+		$this->assertContains( '[src]="wpPlaylist1[wpPlaylist1.selectedIndex].videoUrl"', $playlist );
+		$this->assertContains( 'on="tap:AMP.setState({&quot;wpPlaylist1&quot;:{&quot;selectedIndex&quot;:0}})"', $playlist );
 	}
 
 	/**
@@ -217,35 +216,35 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$this->assertContains( '<amp-audio', $playlist );
 		$this->assertContains( $this->file_1, $playlist );
 		$this->assertContains( $this->file_2, $playlist );
-		$this->assertContains( 'tap:AMP.setState({&quot;ampPlaylistCarousel0&quot;:{&quot;selectedSlide&quot;:0}})"', $playlist );
+		$this->assertContains( 'tap:AMP.setState({&quot;wpPlaylist1&quot;:{&quot;selectedIndex&quot;:0}})"', $playlist );
 	}
 
 	/**
 	 * Test tracks.
 	 *
-	 * @covers AMP_Playlist_Embed_Handler::tracks()
+	 * @covers AMP_Playlist_Embed_Handler::print_tracks()
 	 */
 	public function test_tracks() {
 		$type         = 'video';
 		$attr         = $this->get_attributes( $type );
 		$data         = $this->instance->get_data( $attr );
-		$container_id = 'fooContainerId0';
-		$expected_on  = 'tap:AMP.setState({&quot;' . $container_id . '&quot;:{&quot;currentVideo&quot;:0}})';
+		$container_id = 'fooContainerId1';
+		$state_id     = 'fooId1';
+		$expected_on  = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
 		ob_start();
-		$this->instance->tracks( $type, $container_id, $data['tracks'] );
+		$this->instance->print_tracks( $state_id, $data['tracks'] );
 		$tracks = ob_get_clean();
 		$this->assertContains( '<div class="wp-playlist-tracks">', $tracks );
-		$this->assertContains( $container_id, $tracks );
+		$this->assertContains( $state_id, $tracks );
 		$this->assertContains( $expected_on, $tracks );
 
-		$type                 = 'audio';
-		$attr                 = $this->get_attributes( $type );
-		$this->instance->data = $this->instance->get_data( $attr );
-		$expected_on          = 'tap:AMP.setState({&quot;' . $container_id . '&quot;:{&quot;selectedSlide&quot;:0}})';
+		$attr        = $this->get_attributes( $type );
+		$data        = $this->instance->get_data( $attr );
+		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
 		ob_start();
-		$this->instance->tracks( $type, $container_id, $data['tracks'] );
+		$this->instance->print_tracks( $state_id, $data['tracks'] );
 		$tracks = ob_get_clean();
 		$this->assertContains( $expected_on, $tracks );
 	}
