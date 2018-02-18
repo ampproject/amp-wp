@@ -73,8 +73,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_init() {
 		$this->assertEquals( 10, has_action( 'rest_api_init', 'AMP_Validation_Utils::amp_rest_validation' ) );
-		$this->assertEquals( 10, has_action( 'save_post', 'AMP_Validation_Utils::validate_content' ) );
-		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Validation_Utils::display_error' ) );
+		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Validation_Utils::validate_content' ) );
 	}
 
 	/**
@@ -83,36 +82,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::track_removed()
 	 */
 	public function test_track_removed() {
-		$attr_name              = 'invalid-attr';
-		$expected_removed_attrs = array(
-			$attr_name => 1,
-		);
-		$expected_removed_nodes = array(
-			'img' => 1,
-		);
-		$this->assertEmpty( AMP_Validation_Utils::$removed_attributes );
 		$this->assertEmpty( AMP_Validation_Utils::$removed_nodes );
-		AMP_Validation_Utils::track_removed( $this->node, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attr_name );
-		$this->assertEquals( $expected_removed_attrs, AMP_Validation_Utils::$removed_attributes );
-		AMP_Validation_Utils::track_removed( $this->node, AMP_Validation_Utils::NODE_REMOVED );
-		$this->assertEquals( $expected_removed_nodes, AMP_Validation_Utils::$removed_nodes );
-	}
-
-	/**
-	 * Test increment_count.
-	 *
-	 * @see AMP_Validation_Utils::increment_count()
-	 */
-	public function test_increment_count() {
-		$attribute     = 'script';
-		$one_attribute = array(
-			$attribute => 1,
-		);
-		$expected      = array(
-			$attribute => 2,
-		);
-		$this->assertEquals( $one_attribute, AMP_Validation_Utils::increment_count( array(), $attribute ) );
-		$this->assertEquals( $expected, AMP_Validation_Utils::increment_count( $one_attribute, $attribute ) );
+		AMP_Validation_Utils::track_removed( $this->node );
+		AMP_Validation_Utils::track_removed( $this->node );
+		$this->assertEquals( array( $this->node, $this->node ), AMP_Validation_Utils::$removed_nodes );
+		AMP_Validation_Utils::reset_removed();
 	}
 
 	/**
@@ -121,9 +95,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::was_node_removed()
 	 */
 	public function test_was_node_removed() {
-		$attr_name = 'invalid-attr';
 		$this->assertFalse( AMP_Validation_Utils::was_node_removed() );
-		AMP_Validation_Utils::track_removed( $this->node, AMP_Validation_Utils::NODE_REMOVED );
+		AMP_Validation_Utils::track_removed( $this->node );
 		$this->assertTrue( AMP_Validation_Utils::was_node_removed() );
 	}
 
@@ -135,35 +108,36 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function test_process_markup() {
 		$this->set_authorized();
 		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
+		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
 
 		AMP_Validation_Utils::reset_removed();
 		$video = '<video src="https://example.com/video">';
-		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
+		AMP_Validation_Utils::process_markup( $video );
 		// This isn't valid AMP, but the sanitizer should convert it to an <amp-video>, without stripping anything.
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
+		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
 
 		AMP_Validation_Utils::reset_removed();
 
 		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
-		$this->assertEquals( 1, AMP_Validation_Utils::$removed_nodes['script'] );
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
+		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( 'script', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
 
 		AMP_Validation_Utils::reset_removed();
 		$disallowed_style = '<div style="display:none"></div>';
 		AMP_Validation_Utils::process_markup( $disallowed_style );
-		$removed_attribute = AMP_Validation_Utils::$removed_attributes;
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( null, $removed_attribute );
+		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
 
 		AMP_Validation_Utils::reset_removed();
 		$invalid_video = '<video width="200" height="100"></video>';
 		AMP_Validation_Utils::process_markup( $invalid_video );
-		$removed_node = AMP_Validation_Utils::$removed_nodes;
-		$this->assertEquals( 1, AMP_Validation_Utils::$removed_nodes['video'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar.
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
+		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( 'video', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
+
+		AMP_Validation_Utils::reset_removed();
+		AMP_Validation_Utils::process_markup( '<button onclick="evil()">Do it</button>' );
+		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals( 'onclick', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
+		AMP_Validation_Utils::reset_removed();
 	}
 
 	/**
@@ -221,10 +195,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
 			$this->error_key     => true,
-			'removed_nodes'      => array(
+			'removed_elements'   => array(
 				'script' => 1,
 			),
-			'removed_attributes' => null,
+			'removed_attributes' => array(),
 			'processed_markup'   => $this->disallowed_tag,
 		);
 		$this->assertEquals( $expected_response, $response );
@@ -235,8 +209,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
 			$this->error_key     => false,
-			'removed_nodes'      => null,
-			'removed_attributes' => null,
+			'removed_elements'   => array(),
+			'removed_attributes' => array(),
 			'processed_markup'   => $this->valid_amp_img,
 		);
 		$this->assertEquals( $expected_response, $response );
@@ -252,10 +226,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$response          = AMP_Validation_Utils::get_response( $this->disallowed_tag );
 		$expected_response = array(
 			$this->error_key     => true,
-			'removed_nodes'      => array(
+			'removed_elements'   => array(
 				'script' => 1,
 			),
-			'removed_attributes' => null,
+			'removed_attributes' => array(),
 			'processed_markup'   => $this->disallowed_tag,
 		);
 		$this->assertEquals( $expected_response, $response );
@@ -267,12 +241,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::reset_removed()
 	 */
 	public function test_reset_removed() {
-		AMP_Validation_Utils::$removed_nodes[]    = $this->node;
-		AMP_Validation_Utils::$removed_attributes = array( 'onclick' );
+		AMP_Validation_Utils::$removed_nodes[] = $this->node;
 		AMP_Validation_Utils::reset_removed();
-
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( null, AMP_Validation_Utils::$removed_attributes );
+		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
 	}
 
 	/**
@@ -290,26 +261,42 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_authorized
+	 * Test validate_content
 	 *
-	 * @see AMP_Validation_Utils::is_authorized()
+	 * @see AMP_Validation_Utils::validate_content()
 	 */
-	public function test_is_authorized() {
-		$this->assertFalse( AMP_Validation_Utils::is_authorized() );
-		$this->set_authorized();
-		$this->assertTrue( AMP_Validation_Utils::is_authorized() );
-	}
+	public function test_validate_content() {
+		wp_set_current_user( $this->factory()->user->create( array(
+			'role' => 'administrator',
+		) ) );
+		$post = $this->factory()->post->create_and_get();
+		ob_start();
+		AMP_Validation_Utils::validate_content( $post );
+		$output = ob_get_clean();
 
-	/**
-	 * Test error_message().
-	 *
-	 * @see AMP_Validation_Utils::error_message().
-	 */
-	public function test_error_message() {
-		$url            = 'https://example.org/am';
-		$with_query_arg = wp_parse_url( AMP_Validation_Utils::error_message( $url ) );
-		$this->assertContains( AMP_Validation_Utils::ERROR_QUERY_KEY, $with_query_arg['query'] );
-		$this->assertContains( AMP_Validation_Utils::ERROR_QUERY_VALUE, $with_query_arg['query'] );
+		$this->assertNotContains( 'notice notice-warning', $output );
+		$this->assertNotContains( 'Warning:', $output );
+
+		$post->post_content = $this->disallowed_tag;
+		ob_start();
+		AMP_Validation_Utils::validate_content( $post );
+		$output = ob_get_clean();
+
+		$this->assertContains( 'notice notice-warning', $output );
+		$this->assertContains( 'Warning:', $output );
+		$this->assertContains( '<code>script</code>', $output );
+		AMP_Validation_Utils::reset_removed();
+
+		$youtube            = 'https://www.youtube.com/watch?v=GGS-tKTXw4Y';
+		$post->post_content = $youtube;
+		ob_start();
+		AMP_Validation_Utils::validate_content( $post );
+		$output = ob_get_clean();
+
+		// The YouTube embed handler should convert the URL into a valid AMP element.
+		$this->assertNotContains( 'notice notice-warning', $output );
+		$this->assertNotContains( 'Warning:', $output );
+		AMP_Validation_Utils::reset_removed();
 	}
 
 	/**
@@ -318,24 +305,33 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::display_error().
 	 */
 	public function test_display_error() {
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'administrator',
-		) ) );
-		unset( $_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] );
+		$response = array(
+			AMP_Validation_Utils::ERROR_KEY => false,
+		);
 		ob_start();
-		AMP_Validation_Utils::display_error();
+		AMP_Validation_Utils::display_error( $response );
 		$output = ob_get_clean();
 		$this->assertFalse( strpos( $output, 'notice notice-error' ) );
 		$this->assertFalse( strpos( $output, 'Notice: your post fails AMP validation' ) );
 
-		$_GET[ AMP_Validation_Utils::ERROR_QUERY_KEY ] = AMP_Validation_Utils::ERROR_QUERY_VALUE;
-		$_REQUEST[ AMP_Validation_Utils::ERROR_NONCE ] = wp_create_nonce( AMP_Validation_Utils::ERROR_NONCE_ACTION );
-		$_REQUEST['_wp_http_referer']                  = admin_url();
+		$removed_element   = 'script';
+		$removed_attribute = 'onload';
+		$response          = array(
+			AMP_Validation_Utils::ERROR_KEY => true,
+			'removed_elements'              => array(
+				$removed_element => 1,
+			),
+			'removed_attributes'            => array(
+				$removed_attribute => 1,
+			),
+		);
 		ob_start();
-		AMP_Validation_Utils::display_error();
+		AMP_Validation_Utils::display_error( $response );
 		$output = ob_get_clean();
 		$this->assertContains( 'notice notice-warning', $output );
 		$this->assertContains( 'Warning:', $output );
+		$this->assertContains( $removed_element, $output );
+		$this->assertContains( $removed_attribute, $output );
 	}
 
 	/**

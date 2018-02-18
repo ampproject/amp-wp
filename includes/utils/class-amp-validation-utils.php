@@ -13,20 +13,6 @@
 class AMP_Validation_Utils {
 
 	/**
-	 * The argument if an attribute was removed.
-	 *
-	 * @var array.
-	 */
-	const ATTRIBUTE_REMOVED = 'removed_attr';
-
-	/**
-	 * The argument if a node was removed.
-	 *
-	 * @var array.
-	 */
-	const NODE_REMOVED = 'removed';
-
-	/**
 	 * Key for the markup value in the REST API endpoint.
 	 *
 	 * @var string.
@@ -41,85 +27,30 @@ class AMP_Validation_Utils {
 	const ERROR_KEY = 'has_error';
 
 	/**
-	 * Key of the AMP error query var.
-	 *
-	 * @var string.
-	 */
-	const ERROR_QUERY_KEY = 'amp_error';
-
-	/**
-	 * Query arg value if there is an AMP error in the post content.
-	 *
-	 * @var string.
-	 */
-	const ERROR_QUERY_VALUE = '1';
-
-	/**
-	 * Nonce name for the editor error message.
-	 *
-	 * @var string.
-	 */
-	const ERROR_NONCE = 'amp_nonce';
-
-	/**
-	 * Nonce action for displaying the invalid AMP message.
-	 *
-	 * @var string.
-	 */
-	const ERROR_NONCE_ACTION = 'invalid_amp_message';
-
-	/**
-	 * The attributes that the sanitizer removed.
-	 *
-	 * @var array.
-	 */
-	public static $removed_attributes;
-
-	/**
 	 * The nodes that the sanitizer removed.
 	 *
-	 * @var array.
+	 * @var DOMNode[]
 	 */
-	public static $removed_nodes;
+	public static $removed_nodes = array();
 
 	/**
 	 * Add the actions.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
-		add_action( 'save_post', array( __CLASS__, 'validate_content' ), 10, 2 );
-		add_action( 'edit_form_top', array( __CLASS__, 'display_error' ) );
+		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
 	}
 
 	/**
-	 * Tracks when a sanitizer removes an attribute or node.
+	 * Tracks when a sanitizer removes an node (element or attribute).
 	 *
-	 * @param DOMNode|DOMElement $node         The node in which there was a removal.
-	 * @param string             $removal_type The removal: 'removed_attr' for an attribute, or 'removed' for a node or element.
-	 * @param string             $attr_name    The name of the attribute removed (optional).
-	 * @return void.
+	 * @param DOMNode $node The node which was removed.
+	 * @return void
 	 */
-	public static function track_removed( $node, $removal_type, $attr_name = null ) {
-		if ( ( self::ATTRIBUTE_REMOVED === $removal_type ) && isset( $attr_name ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-			self::$removed_attributes = self::increment_count( self::$removed_attributes, $attr_name );
-		} elseif ( ( self::NODE_REMOVED === $removal_type ) && isset( $node->nodeName ) ) {
-			self::$removed_nodes = self::increment_count( self::$removed_nodes, $node->nodeName ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-		}
-	}
-
-	/**
-	 * Tracks when a sanitizer removes an attribute or node.
-	 *
-	 * @param array  $histogram The count of attributes or nodes removed.
-	 * @param string $key       The attribute or node name removed.
-	 * @return array $histogram The incremented histogram.
-	 */
-	public static function increment_count( $histogram, $key ) {
-		$current_value     = isset( $histogram[ $key ] ) ? $histogram[ $key ] : 0;
-		$histogram[ $key ] = $current_value + 1;
-		return $histogram;
+	public static function track_removed( $node ) {
+		self::$removed_nodes[] = $node;
 	}
 
 	/**
@@ -141,12 +72,19 @@ class AMP_Validation_Utils {
 	 * @return void.
 	 */
 	public static function process_markup( $markup ) {
-		$args = array(
-			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
-		);
-		if ( self::is_authorized() ) {
-			$args['remove_invalid_callback'] = 'AMP_Validation_Utils::track_removed';
+		if ( ! self::has_cap() ) {
+			return;
 		}
+
+		AMP_Theme_Support::register_content_embed_handlers();
+		remove_filter( 'the_content', 'wpautop' );
+
+		/** This filter is documented in wp-includes/post-template.php */
+		$markup = apply_filters( 'the_content', $markup );
+		$args   = array(
+			'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
+		);
 		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
 	}
 
@@ -212,11 +150,34 @@ class AMP_Validation_Utils {
 			self::process_markup( $markup );
 			$response['processed_markup'] = $markup;
 		}
-		$response = array_merge( array(
-			self::ERROR_KEY      => self::was_node_removed(),
-			'removed_nodes'      => self::$removed_nodes,
-			'removed_attributes' => self::$removed_attributes,
-		), $response );
+
+		$removed_elements   = array();
+		$removed_attributes = array();
+		foreach ( self::$removed_nodes as $node ) {
+			if ( $node instanceof DOMAttr ) {
+				if ( ! isset( $removed_attributes[ $node->nodeName ] ) ) {
+					$removed_attributes[ $node->nodeName ] = 1;
+				} else {
+					$removed_attributes[ $node->nodeName ]++;
+				}
+			} elseif ( $node instanceof DOMElement ) {
+				if ( ! isset( $removed_elements[ $node->nodeName ] ) ) {
+					$removed_elements[ $node->nodeName ] = 1;
+				} else {
+					$removed_elements[ $node->nodeName ]++;
+				}
+			}
+		}
+
+		$response = array_merge(
+			array(
+				self::ERROR_KEY => self::was_node_removed(),
+			),
+			compact(
+				'removed_elements',
+				'removed_attributes'
+			),
+		$response );
 		self::reset_removed();
 
 		return $response;
@@ -232,8 +193,7 @@ class AMP_Validation_Utils {
 	 * @return void.
 	 */
 	public static function reset_removed() {
-		self::$removed_nodes      = null;
-		self::$removed_attributes = null;
+		self::$removed_nodes = array();
 	}
 
 	/**
@@ -250,106 +210,66 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * On updating a post, this checks the AMP validity of the content.
+	 * Checks the AMP validity of the post content.
 	 *
-	 * If it's not valid AMP, it adds a query arg to the redirect URL.
-	 * This will cause an error message to appear above the 'Classic' editor.
+	 * If it's not valid AMP,
+	 * it displays an error message above the 'Classic' editor.
 	 *
-	 * @param integer $post_id The ID of the updated post.
-	 * @param WP_Post $post    The updated post.
+	 * @param WP_Post $post The updated post.
 	 * @return void.
 	 */
-	public static function validate_content( $post_id, $post ) {
-		unset( $post_id );
-		if ( ! post_supports_amp( $post ) || ! self::is_authorized() ) {
+	public static function validate_content( $post ) {
+		if ( ! post_supports_amp( $post ) || ! self::has_cap() ) {
 			return;
 		}
+		AMP_Theme_Support::register_content_embed_handlers();
 		/** This filter is documented in wp-includes/post-template.php */
 		$filtered_content = apply_filters( 'the_content', $post->post_content, $post->ID );
 		$response         = self::get_response( $filtered_content );
 		if ( isset( $response[ self::ERROR_KEY ] ) && ( true === $response[ self::ERROR_KEY ] ) ) {
-			add_filter( 'redirect_post_location', function( $location ) use ( $response ) {
-				$location = AMP_Validation_Utils::error_message( $location );
-				$location = add_query_arg(
-					array(
-						'removed_elements'   => array_keys( $response['removed_nodes'] ),
-						'removed_attributes' => array_keys( $response['removed_attributes'] ),
-					),
-					$location
-				);
-				return $location;
-			} );
+			self::display_error( $response );
 		}
 	}
 
 	/**
-	 * Whether the current user is authorized.
+	 * Displays an error message on /wp-admin/post.php.
 	 *
-	 * This checks that the user has a certain capability and the nonce is valid.
-	 * It will only return true when updating the post on:
-	 * wp-admin/post.php
-	 * Avoids using check_admin_referer().
-	 * This function might be called in different places,
-	 * and it can't cause it to die() if the nonce is invalid.
+	 * Located at the top of the 'Classic' editor.
+	 * States that the content is not valid AMP.
 	 *
-	 * @return boolean $is_valid True if the nonce is valid.
-	 */
-	public static function is_authorized() {
-		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : ''; // WPCS: CSRF ok.
-		return ( self::has_cap() && ( false !== wp_verify_nonce( $nonce, 'update-post_' . get_the_ID() ) ) );
-	}
-
-	/**
-	 * Adds an error message to the URL if it's not valid AMP.
-	 *
-	 * When redirecting after saving a post, the content was validated for AMP compliance.
-	 * If it wasn't valid AMP, this will add a query arg to the URL.
-	 * And an error message will display on /wp-admin/post.php.
-	 *
-	 * @param string $url The URL of the redirect.
-	 * @return string $url The filtered URL, including the AMP error message query var.
-	 */
-	public static function error_message( $url ) {
-		$args = array(
-			self::ERROR_QUERY_KEY => self::ERROR_QUERY_VALUE,
-			self::ERROR_NONCE     => wp_create_nonce( self::ERROR_NONCE_ACTION ),
-		);
-		return add_query_arg( $args, $url );
-	}
-
-	/**
-	 * Displays an error message on /wp-admin/post.php if the saved content is not valid AMP.
-	 *
-	 * Use $_GET, as get_query_var won't return the value.
-	 * This displays at the top of the 'Classic' editor.
-	 *
+	 * @param array $response The validation response, an associative array.
 	 * @return void.
 	 */
-	public static function display_error() {
-		if ( ! isset( $_GET[ self::ERROR_QUERY_KEY ] ) ) {
-			return;
+	public static function display_error( $response ) {
+		echo '<div class="notice notice-warning">';
+		printf( '<p>%s</p>', esc_html__( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' ) );
+		$removed_sets = array();
+		if ( ! empty( $response['removed_elements'] ) && is_array( $response['removed_elements'] ) ) {
+			$removed_sets[] = array(
+				'label' => __( 'Invalid elements:', 'amp' ),
+				'names' => array_map( 'sanitize_key', $response['removed_elements'] ),
+			);
 		}
-		check_admin_referer( self::ERROR_NONCE_ACTION, self::ERROR_NONCE );
-		$error = isset( $_GET[ self::ERROR_QUERY_KEY ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::ERROR_QUERY_KEY ] ) ) : ''; // WPCS: CSRF ok.
-		if ( self::ERROR_QUERY_VALUE === $error ) {
-			echo '<div class="notice notice-warning">';
-			printf( '<p>%s</p>', esc_html__( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' ) );
-			if ( ! empty( $_GET['removed_elements'] ) && is_array( $_GET['removed_elements'] ) ) {
-				printf(
-					'<p>%s %s</p>',
-					esc_html__( 'Invalid elements:', 'amp' ),
-					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $_GET['removed_elements'] ) ) . '</code>'
-				);
-			}
-			if ( ! empty( $_GET['removed_attributes'] ) ) {
-				printf(
-					'<p>%s %s</p>',
-					esc_html__( 'Invalid attributes:', 'amp' ),
-					'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $_GET['removed_attributes'] ) ) . '</code>'
-				);
-			}
-			echo '</div>';
+		if ( ! empty( $response['removed_attributes'] ) && is_array( $response['removed_attributes'] ) ) {
+			$removed_sets[] = array(
+				'label' => __( 'Invalid attributes:', 'amp' ),
+				'names' => array_map( 'sanitize_key', $response['removed_attributes'] ),
+			);
 		}
+		foreach ( $removed_sets as $removed_set ) {
+			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
+			$items = array();
+			foreach ( $removed_set['names'] as $name => $count ) {
+				if ( 1 === intval( $count ) ) {
+					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+				} else {
+					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+				}
+			}
+			echo implode( ', ', $items ); // WPCS: XSS OK.
+			echo '</p>';
+		}
+		echo '</div>';
 	}
 
 }
