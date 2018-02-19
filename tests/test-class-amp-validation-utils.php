@@ -120,7 +120,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( 'script', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
+		$this->assertEquals( 'script', AMP_Validation_Utils::$removed_nodes[0]['node']->nodeName );
 
 		AMP_Validation_Utils::reset_removed();
 		$disallowed_style = '<div style="display:none"></div>';
@@ -131,12 +131,12 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$invalid_video = '<video width="200" height="100"></video>';
 		AMP_Validation_Utils::process_markup( $invalid_video );
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( 'video', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
+		$this->assertEquals( 'video', AMP_Validation_Utils::$removed_nodes[0]['node']->nodeName );
 
 		AMP_Validation_Utils::reset_removed();
 		AMP_Validation_Utils::process_markup( '<button onclick="evil()">Do it</button>' );
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( 'onclick', AMP_Validation_Utils::$removed_nodes[0]->nodeName );
+		$this->assertEquals( 'onclick', AMP_Validation_Utils::$removed_nodes[0]['node']->nodeName );
 		AMP_Validation_Utils::reset_removed();
 	}
 

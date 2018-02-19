@@ -313,13 +313,17 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMElement $child The node to remove.
+	 * @param DOMNode|DOMElement $child The node to remove.
 	 * @return void
 	 */
 	public function remove_invalid_child( $child ) {
+		$parent = $child->parentNode;
 		$child->parentNode->removeChild( $child );
 		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], $child );
+			call_user_func( $this->args['remove_invalid_callback'], array(
+				'node'   => $child,
+				'parent' => $parent,
+			) );
 		}
 	}
 
@@ -342,7 +346,10 @@ abstract class AMP_Base_Sanitizer {
 			}
 			if ( $attribute ) {
 				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args['remove_invalid_callback'], $attribute );
+				call_user_func( $this->args['remove_invalid_callback'], array(
+					'node'   => $attribute,
+					'parent' => $element,
+				) );
 			}
 		} elseif ( is_string( $attribute ) ) {
 			$element->removeAttribute( $attribute );
