@@ -401,6 +401,113 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test callback_wrappers
+	 *
+	 * @see AMP_Validation_Utils::callback_wrappers()
+	 */
+	public function test_callback_wrappers() {
+		global $post;
+		$post                 = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$action_non_plugin    = 'foo_action';
+		$action_no_output     = 'bar_action_no_output';
+		$action_no_argument   = 'test_action_no_argument';
+		$action_one_argument  = 'baz_action_one_argument';
+		$action_two_arguments = 'example_action_two_arguments';
+		$notice               = 'Example notice';
+
+		add_action( $action_no_argument, __CLASS__ . '::output_div' );
+		add_action( $action_one_argument, __CLASS__ . '::output_notice' );
+		add_action( $action_two_arguments, __CLASS__ . '::output_message', 10, 2 );
+		add_action( $action_non_plugin, 'the_ID' );
+		add_action( $action_no_output, '__return_false' );
+
+		$this->assertEquals( 10, has_action( $action_no_argument, __CLASS__ . '::output_div' ) );
+		$this->assertEquals( 10, has_action( $action_one_argument, __CLASS__ . '::output_notice' ) );
+		$this->assertEquals( 10, has_action( $action_two_arguments, __CLASS__ . '::output_message' ) );
+
+		AMP_Validation_Utils::callback_wrappers();
+		$this->assertEquals( 10, has_action( $action_non_plugin, 'the_ID' ) );
+		$this->assertEquals( 10, has_action( $action_no_output, '__return_false' ) );
+		$this->assertNotEquals( 10, has_action( $action_no_argument, __CLASS__ . '::output_div' ) );
+		$this->assertNotEquals( 10, has_action( $action_one_argument, __CLASS__ . '::output_notice' ) );
+		$this->assertNotEquals( 10, has_action( $action_two_arguments, __CLASS__ . '::output_message' ) );
+
+		ob_start();
+		do_action( $action_no_argument );
+		$output = ob_get_clean();
+		$this->assertContains( '<div></div>', $output );
+		$this->assertContains( '<!--before:amp-->', $output );
+		$this->assertContains( '<!--after:amp-->', $output );
+
+		ob_start();
+		do_action( $action_one_argument, $notice );
+		$output = ob_get_clean();
+		$this->assertContains( $notice, $output );
+		$this->assertContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
+		$this->assertContains( '<!--before:amp-->', $output );
+		$this->assertContains( '<!--after:amp-->', $output );
+
+		ob_start();
+		do_action( $action_two_arguments, $notice, get_the_ID() );
+		$output = ob_get_clean();
+		ob_start();
+		self::output_message( $notice, get_the_ID() );
+		$expected_output = ob_get_clean();
+		$this->assertContains( $expected_output, $output );
+		$this->assertContains( '<!--before:amp-->', $output );
+		$this->assertContains( '<!--after:amp-->', $output );
+
+		// This action's callback isn't from a plugin, so it shouldn't be wrapped in comments.
+		ob_start();
+		do_action( $action_non_plugin );
+		$output = ob_get_clean();
+		$this->assertNotContains( '<!--before:', $output );
+		$this->assertNotContains( '<!--after:', $output );
+
+		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
+		ob_start();
+		do_action( $action_no_output );
+		$output = ob_get_clean();
+		$this->assertNotContains( '<!--before:', $output );
+		$this->assertNotContains( '<!--after:', $output );
+	}
+
+	/**
+	 * Test validate_content
+	 *
+	 * @see AMP_Validation_Utils::validate_content()
+	 */
+	public function test_get_plugin() {
+		$plugin = AMP_Validation_Utils::get_plugin( 'amp_after_setup_theme' );
+		$this->assertEquals( 'amp', $plugin );
+		$the_content = AMP_Validation_Utils::get_plugin( 'the_content' );
+		$this->assertEquals( null, $the_content );
+		$core_function = AMP_Validation_Utils::get_plugin( 'the_content' );
+		$this->assertEquals( null, $core_function );
+	}
+	/**
+	 * Test wrapped_callback
+	 *
+	 * @see AMP_Validation_Utils::wrapped_callback()
+	 */
+	public function test_wrapped_callback() {
+		global $post;
+		$post             = $this->factory()->post->create_and_get(); // WPCS: global override OK.
+		$callback         = 'the_ID';
+		$plugin           = 'amp';
+		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback, $plugin );
+		$this->assertTrue( $wrapped_callback instanceof Closure );
+		ob_start();
+		call_user_func( $wrapped_callback );
+		$output = ob_get_clean();
+
+		$this->assertTrue( is_object( $wrapped_callback ) );
+		$this->assertContains( strval( get_the_ID() ), $output );
+		$this->assertContains( '<!--before:amp-->', $output );
+		$this->assertContains( '<!--after:amp-->', $output );
+		unset( $post );
+	}
+	/**
 	 * Test display_error().
 	 *
 	 * @see AMP_Validation_Utils::display_error()
@@ -459,12 +566,42 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Add a nonce to the $_REQUEST, so that is_authorized() returns true.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public function set_authorized() {
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'administrator',
 		) ) );
+	}
+
+	/**
+	 * Outputs a div.
+	 *
+	 * @return void
+	 */
+	public static function output_div() {
+		echo '<div></div>';
+	}
+
+	/**
+	 * Outputs a notice.
+	 *
+	 * @param string $message The message to output.
+	 * @return void
+	 */
+	public static function output_notice( $message ) {
+		printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_attr( $message ) );
+	}
+
+	/**
+	 * Outputs a message with an excerpt.
+	 *
+	 * @param string $message The message to output.
+	 * @param string $id      The ID of the post.
+	 * @return void
+	 */
+	public static function output_message( $message, $id ) {
+		printf( '<<p>%s</p><p>%s</p>', esc_attr( $message ), esc_html( $id ) );
 	}
 
 }

@@ -127,7 +127,7 @@ class AMP_Validation_Utils {
 				'mu-plugins',
 				'',
 			);
-		} elseif ( false !== strpos( $asset, get_home_url() ) ) {
+		} elseif ( ( false !== strpos( $asset, get_home_url() ) ) || ( false !== strpos( $asset, get_home_path() ) ) ) {
 			return array(
 				'core',
 				'',
@@ -156,7 +156,7 @@ class AMP_Validation_Utils {
 	 * Also passes a 'remove_invalid_callback' to keep track of stripped attributes and nodes.
 	 *
 	 * @param string $markup The markup to process.
-	 * @return void.
+	 * @return void
 	 */
 	public static function process_markup( $markup ) {
 		if ( ! self::has_cap() ) {
@@ -179,7 +179,7 @@ class AMP_Validation_Utils {
 	/**
 	 * Registers the REST API endpoint for validation.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public static function amp_rest_validation() {
 		register_rest_route( 'amp-wp/v1', '/validate', array(
@@ -278,7 +278,7 @@ class AMP_Validation_Utils {
 	 * these static values will remain.
 	 * So reset them in case another test is needed.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public static function reset_removed() {
 		self::$removed_nodes  = array();
@@ -305,7 +305,7 @@ class AMP_Validation_Utils {
 	 * it displays an error message above the 'Classic' editor.
 	 *
 	 * @param WP_Post $post The updated post.
-	 * @return void.
+	 * @return void
 	 */
 	public static function validate_content( $post ) {
 		if ( ! post_supports_amp( $post ) || ! self::has_cap() ) {
@@ -321,13 +321,105 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Wraps callbacks in comments, to indicate to the sanitizer which plugin added them.
+	 *
+	 * Iterates through all of the registered callbacks.
+	 * If a callback is from a plugin and outputs markup,
+	 * this wraps the markup in comments.
+	 * Later, the sanitizer can identify which plugin any illegal markup is from.
+	 *
+	 * @global array $wp_filter
+	 * @return void
+	 */
+	public static function callback_wrappers() {
+		global $wp_filter;
+		foreach ( $wp_filter as $filter_tag => $wp_hook ) {
+			if ( 'query' === $filter_tag ) {
+				continue;
+			}
+			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $callback ) {
+					$function = $callback['function'];
+					$plugin   = self::get_plugin( $function );
+					if ( isset( $plugin ) ) {
+						remove_action( $filter_tag, $function, $priority );
+						$wrapped_callback = self::wrapped_callback( $function, $plugin );
+						add_action( $filter_tag, $wrapped_callback, $priority, $callback['accepted_args'] );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Gets the plugin of the callback, if one exists.
+	 *
+	 * @param string|array $callback The callback for which to get the plugin.
+	 * @return string|null $plugin   The plugin to which the callback belongs, or null.
+	 */
+	public static function get_plugin( $callback ) {
+		// The $callback is a function or static method.
+		if ( is_string( $callback ) && is_callable( $callback ) ) {
+			$exploded_callback = explode( '::', $callback );
+			if ( count( $exploded_callback ) > 1 ) {
+				$reflection = new ReflectionClass( $exploded_callback[0] );
+				$file       = $reflection->getFileName();
+			} else {
+				$reflection = new ReflectionFunction( $callback );
+				$file       = $reflection->getFileName();
+			}
+		} elseif ( isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
+			$reflection = new ReflectionClass( $callback[0] );
+			$file       = $reflection->getFileName();
+		}
+
+		if ( ! isset( $file ) ) {
+			return null;
+		}
+		list( $source_type, $source ) = self::get_source( $file );
+		if ( 'plugins' === $source_type ) {
+			return $source;
+		}
+		return null;
+	}
+
+	/**
+	 * Wraps a callback in comments if it outputs markup.
+	 *
+	 * If the sanitizer removes markup,
+	 * this indicates which plugin it was from.
+	 *
+	 * @param string|array $callback The callback to wrap.
+	 * @param string       $plugin   The plugin where the callback is located.
+	 * @return closure $wrapped_callback The callback, wrapped in comments.
+	 */
+	public static function wrapped_callback( $callback, $plugin ) {
+		return function() use ( $callback, $plugin ) {
+			$args = func_get_args();
+			ob_start();
+			if ( false !== $args ) {
+				call_user_func_array( $callback, func_get_args() );
+			} else {
+				call_user_func( $callback );
+			}
+			$output = ob_get_clean();
+
+			if ( ! empty( $output ) ) {
+				printf( '<!--before:%s-->', esc_attr( $plugin ) );
+				echo $output; // WPCS: XSS ok.
+				printf( '<!--after:%s-->', esc_attr( $plugin ) );
+			}
+		};
+	}
+
+	/**
 	 * Displays an error message on /wp-admin/post.php.
 	 *
 	 * Located at the top of the 'Classic' editor.
 	 * States that the content is not valid AMP.
 	 *
 	 * @param array $response The validation response, an associative array.
-	 * @return void.
+	 * @return void
 	 */
 	public static function display_error( $response ) {
 		echo '<div class="notice notice-warning">';
