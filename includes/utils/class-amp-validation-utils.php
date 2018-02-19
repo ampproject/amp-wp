@@ -358,21 +358,22 @@ class AMP_Validation_Utils {
 	 * @return string|null $plugin   The plugin to which the callback belongs, or null.
 	 */
 	public static function get_plugin( $callback ) {
-		// The $callback is a function or static method.
 		if ( is_string( $callback ) && is_callable( $callback ) ) {
+			// The $callback is a function or static method.
 			$exploded_callback = explode( '::', $callback );
 			if ( count( $exploded_callback ) > 1 ) {
 				$reflection = new ReflectionClass( $exploded_callback[0] );
-				$file       = $reflection->getFileName();
 			} else {
 				$reflection = new ReflectionFunction( $callback );
-				$file       = $reflection->getFileName();
 			}
-		} elseif ( isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
+		} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
+			// The $callback is a method.
 			$reflection = new ReflectionClass( $callback[0] );
-			$file       = $reflection->getFileName();
+		} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
+			$reflection = new ReflectionFunction( $callback );
 		}
 
+		$file = isset( $reflection ) ? $reflection->getFileName() : null;
 		if ( ! isset( $file ) ) {
 			return null;
 		}

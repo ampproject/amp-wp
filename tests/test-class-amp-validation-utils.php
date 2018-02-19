@@ -436,16 +436,16 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
 		$this->assertContains( '<div></div>', $output );
-		$this->assertContains( '<!--before:amp-->', $output );
-		$this->assertContains( '<!--after:amp-->', $output );
+		$this->assertContains( '<!--before:amp', $output );
+		$this->assertContains( '<!--after:amp', $output );
 
 		ob_start();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
 		$this->assertContains( $notice, $output );
 		$this->assertContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
-		$this->assertContains( '<!--before:amp-->', $output );
-		$this->assertContains( '<!--after:amp-->', $output );
+		$this->assertContains( '<!--before:amp', $output );
+		$this->assertContains( '<!--after:amp', $output );
 
 		ob_start();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
@@ -454,8 +454,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
 		$this->assertContains( $expected_output, $output );
-		$this->assertContains( '<!--before:amp-->', $output );
-		$this->assertContains( '<!--after:amp-->', $output );
+		$this->assertContains( '<!--before:amp', $output );
+		$this->assertContains( '<!--after:amp', $output );
 
 		// This action's callback isn't from a plugin, so it shouldn't be wrapped in comments.
 		ob_start();
@@ -501,10 +501,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		call_user_func( $wrapped_callback );
 		$output = ob_get_clean();
 
+		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
 		$this->assertTrue( is_object( $wrapped_callback ) );
 		$this->assertContains( strval( get_the_ID() ), $output );
-		$this->assertContains( '<!--before:amp-->', $output );
-		$this->assertContains( '<!--after:amp-->', $output );
+		$this->assertContains( '<!--before:amp', $output );
+		$this->assertContains( '<!--after:amp', $output );
 		unset( $post );
 	}
 	/**
