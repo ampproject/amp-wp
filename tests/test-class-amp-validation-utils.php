@@ -479,7 +479,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_get_plugin() {
 		$plugin = AMP_Validation_Utils::get_plugin( 'amp_after_setup_theme' );
-		$this->assertEquals( 'amp', $plugin );
+		$this->assertContains( 'amp', $plugin );
 		$the_content = AMP_Validation_Utils::get_plugin( 'the_content' );
 		$this->assertEquals( null, $the_content );
 		$core_function = AMP_Validation_Utils::get_plugin( 'the_content' );
