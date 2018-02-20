@@ -125,8 +125,8 @@ class AMP_Validation_Utils {
 		/** This filter is documented in wp-includes/post-template.php */
 		$markup = apply_filters( 'the_content', $markup );
 		$args   = array(
-			'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
-			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
+			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			self::CALLBACK_KEY  => 'AMP_Validation_Utils::track_removed',
 		);
 		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
 	}

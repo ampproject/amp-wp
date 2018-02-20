@@ -783,9 +783,9 @@ class AMP_Theme_Support {
 
 		$args = array_merge(
 			array(
-				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element'    => true,
-				'remove_invalid_callback' => null,
+				'content_max_width'                => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element'             => true,
+				AMP_Validation_Utils::CALLBACK_KEY => null,
 			),
 			$args
 		);

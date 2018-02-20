@@ -325,8 +325,8 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function remove_invalid_child( $child ) {
 		$child->parentNode->removeChild( $child );
-		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], $child, $this->current_plugin_output );
+		if ( isset( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ] ) ) {
+			call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $child, $this->current_plugin_output );
 		}
 	}
 
@@ -343,13 +343,13 @@ abstract class AMP_Base_Sanitizer {
 	 * @return void
 	 */
 	public function remove_invalid_attribute( $element, $attribute ) {
-		if ( isset( $this->args['remove_invalid_callback'] ) ) {
+		if ( isset( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ] ) ) {
 			if ( is_string( $attribute ) ) {
 				$attribute = $element->getAttributeNode( $attribute );
 			}
 			if ( $attribute ) {
 				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args['remove_invalid_callback'], $attribute, $this->current_plugin_output );
+				call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $attribute, $this->current_plugin_output );
 			}
 		} elseif ( is_string( $attribute ) ) {
 			$element->removeAttribute( $attribute );
