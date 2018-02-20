@@ -304,7 +304,7 @@ class AMP_Validation_Utils {
 					$plugin   = self::get_plugin( $function );
 					if ( isset( $plugin ) ) {
 						remove_action( $filter_tag, $function, $priority );
-						$wrapped_callback = self::wrapped_callback( $function, $plugin );
+						$wrapped_callback = self::wrapped_callback( $callback, $plugin );
 						add_action( $filter_tag, $wrapped_callback, $priority, $callback['accepted_args'] );
 					}
 				}
@@ -350,19 +350,25 @@ class AMP_Validation_Utils {
 	 *
 	 * If the sanitizer removes markup,
 	 * this indicates which plugin it was from.
+	 * The call_user_func_array() logic is mainly copied from WP_Hook:apply_filters().
 	 *
-	 * @param string|array $callback The callback to wrap.
-	 * @param string       $plugin   The plugin where the callback is located.
+	 * @param array  $callback The callback data, including values for 'function' and 'accepted_args'.
+	 * @param string $plugin   The plugin where the callback is located.
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
 	 */
 	public static function wrapped_callback( $callback, $plugin ) {
 		return function() use ( $callback, $plugin ) {
-			$args = func_get_args();
+			$function      = $callback['function'];
+			$accepted_args = $callback['accepted_args'];
+			$args          = func_get_args();
+
 			ob_start();
-			if ( false !== $args ) {
-				$result = call_user_func_array( $callback, func_get_args() );
+			if ( 0 === $accepted_args ) {
+				$result = call_user_func_array( $function, array() );
+			} elseif ( $accepted_args >= func_num_args() ) {
+				$result = call_user_func_array( $function, $args );
 			} else {
-				$result = call_user_func( $callback );
+				$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
 			}
 			$output = ob_get_clean();
 

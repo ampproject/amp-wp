@@ -453,7 +453,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function test_wrapped_callback() {
 		global $post;
 		$post             = $this->factory()->post->create_and_get(); // WPCS: global override OK.
-		$callback         = 'the_ID';
+		$callback         = array(
+			'function'      => 'the_ID',
+			'accepted_args' => 0,
+		);
 		$plugin           = 'amp';
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback, $plugin );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
