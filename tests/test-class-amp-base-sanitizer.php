@@ -285,7 +285,6 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$video        = $dom_document->createElement( $video_name );
 		$video->setAttribute( $attribute, 'someFunction()' );
 		$attr_node = $video->getAttributeNode( $attribute );
-
 		$args      = array(
 			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 		);
@@ -294,6 +293,24 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
 		$this->assertEquals( array( $attr_node ), AMP_Validation_Utils::$removed_nodes );
 		AMP_Validation_Utils::reset_removed();
+	}
+
+	/**
+	 * Test set_plugin_output.
+	 *
+	 * @covers AMP_Base_Sanitizer::set_plugin_output()
+	 */
+	public function test_set_plugin_output() {
+		$dom             = new DomDocument();
+		$closing_comment = 'after:amp';
+		$node            = $dom->createComment( $closing_comment );
+		$sanitizer       = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$this->assertEquals( null, $sanitizer->current_plugin_output );
+		$sanitizer->set_plugin_output( $node );
+		$this->assertEquals( 'amp', $sanitizer->current_plugin_output );
+		$opening_comment = $dom->createComment( 'before:amp' );
+		$sanitizer->set_plugin_output( $opening_comment );
+		$this->assertEquals( null, $sanitizer->current_plugin_output );
 	}
 
 }

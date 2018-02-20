@@ -851,4 +851,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
+
+	/**
+	 * Test set_plugin_output.
+	 *
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::set_plugin_output()
+	 */
+	public function test_set_plugin_output() {
+		$dom            = new DomDocument();
+		$comment_before = 'before:amp';
+		$comment_after  = 'after:amp';
+		$node           = $dom->createComment( $comment_after );
+		$sanitizer      = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->set_plugin_output( $node );
+		$this->assertEquals( 'amp', $sanitizer->current_plugin_output );
+		$closing_comment = $dom->createComment( $comment_before );
+		$sanitizer->set_plugin_output( $closing_comment );
+		$this->assertEquals( null, $sanitizer->current_plugin_output );
+	}
+
 }

@@ -41,11 +41,11 @@ class AMP_Validation_Utils {
 	public static $removed_nodes = array();
 
 	/**
-	 * The removed assets.
+	 * The plugins that have had nodes removed.
 	 *
 	 * @var array
 	 */
-	public static $removed_assets = array();
+	public static $plugins_removed_nodes = array();
 
 	/**
 	 * Add the actions.
@@ -58,51 +58,16 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Tracks when a sanitizer removes an node (element or attribute).
+	 * Tracks when a sanitizer removes a node (element or attribute).
 	 *
-	 * @param DOMNode $node           The node which was removed.
-	 * @param DOMNode $parent_element The parent element of a removed attribute (optional).
+	 * @param DOMNode     $node   The node which was removed.
+	 * @param string|null $source The source of the removed element.
 	 * @return void
 	 */
-	public static function track_removed( $node, $parent_element = null ) {
+	public static function track_removed( $node, $source = null ) {
 		self::$removed_nodes[] = $node;
-		self::removed_script( $node, $parent_element );
-	}
-
-	/**
-	 * Tracks when a script was removed.
-	 *
-	 * The $element argument is needed for a removed 'src' attribute.
-	 * The attribute node has no information about that $element.
-	 * If its parent $element is a <script>, that argument is needed to report removal of it.
-	 *
-	 * @param DOMNode      $node    The node which was removed.
-	 * @param DOMNode|null $element The parent element of a removed attribute, or null.
-	 * @return void
-	 */
-	public static function removed_script( $node, $element ) {
-		if ( ( 'src' === $node->nodeName ) && isset( $element ) && ( 'script' === $element->nodeName ) ) {
-			list( $source_type, $source ) = self::get_source( $node->nodeValue );
-			if ( ! empty( $source_type ) && ! empty( $source ) ) {
-				self::$removed_assets[ $source_type ][ $source ][] = $node->nodeValue;
-			} elseif ( ! empty( $source_type ) ) {
-				self::$removed_assets[ $source_type ][] = $node->nodeValue;
-			}
-		}
-	}
-
-	/**
-	 * Tracks when the style sanitizer removes a style.
-	 *
-	 * @param string $asset_url The URL of the removed asset.
-	 * @return void
-	 */
-	public static function track_style( $asset_url ) {
-		list( $source_type, $source ) = self::get_source( $asset_url );
-		if ( ! empty( $source_type ) && ! empty( $source ) ) {
-			self::$removed_assets[ $source_type ][ $source ]['style'][] = $asset_url;
-		} elseif ( ! empty( $source_type ) ) {
-			self::$removed_assets[ $source_type ]['style'][] = $asset_url;
+		if ( isset( $source ) && ! in_array( $source, self::$plugins_removed_nodes, true ) ) {
+			self::$plugins_removed_nodes[] = $source;
 		}
 	}
 
@@ -127,7 +92,7 @@ class AMP_Validation_Utils {
 				'mu-plugins',
 				'',
 			);
-		} elseif ( ( false !== strpos( $asset, get_home_url() ) ) || ( false !== strpos( $asset, get_home_path() ) ) ) {
+		} elseif ( ( false !== strpos( $asset, get_home_url() ) ) || ( function_exists( 'get_home_path' ) && ( false !== strpos( $asset, get_home_path() ) ) ) ) {
 			return array(
 				'core',
 				'',
@@ -281,8 +246,8 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function reset_removed() {
-		self::$removed_nodes  = array();
-		self::$removed_assets = array();
+		self::$removed_nodes         = array();
+		self::$plugins_removed_nodes = array();
 	}
 
 	/**
@@ -399,9 +364,9 @@ class AMP_Validation_Utils {
 			$args = func_get_args();
 			ob_start();
 			if ( false !== $args ) {
-				call_user_func_array( $callback, func_get_args() );
+				$result = call_user_func_array( $callback, func_get_args() );
 			} else {
-				call_user_func( $callback );
+				$result = call_user_func( $callback );
 			}
 			$output = ob_get_clean();
 
@@ -410,6 +375,7 @@ class AMP_Validation_Utils {
 				echo $output; // WPCS: XSS ok.
 				printf( '<!--after:%s-->', esc_attr( $plugin ) );
 			}
+			return $result;
 		};
 	}
 

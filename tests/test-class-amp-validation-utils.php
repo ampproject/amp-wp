@@ -83,53 +83,15 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_track_removed() {
 		$this->assertEmpty( AMP_Validation_Utils::$removed_nodes );
-		AMP_Validation_Utils::track_removed( $this->node );
-		AMP_Validation_Utils::track_removed( $this->node );
+		$plugin           = 'amp';
+		$expected_plugins = array(
+			$plugin,
+		);
+		AMP_Validation_Utils::track_removed( $this->node, null );
+		$this->assertEquals( array(), AMP_Validation_Utils::$plugins_removed_nodes );
+		AMP_Validation_Utils::track_removed( $this->node, $plugin );
 		$this->assertEquals( array( $this->node, $this->node ), AMP_Validation_Utils::$removed_nodes );
-		AMP_Validation_Utils::reset_removed();
-	}
-
-	/**
-	 * Test removed_script.
-	 *
-	 * @see AMP_Validation_Utils::removed_script()
-	 */
-	public function test_removed_script() {
-		$attribute      = 'src';
-		$tag_name       = 'script';
-		$dom_document   = new DOMDocument( '1.0', 'utf-8' );
-		$script         = $dom_document->createElement( $tag_name );
-		$src            = $dom_document->createElement( $attribute );
-		$script_url     = get_home_url() . '/wp-content/plugins/foo/example-script.js';
-		$src->nodeValue = $script_url;
-		AMP_Validation_Utils::removed_script( $src, $script );
-		$this->assertEquals( $script_url, AMP_Validation_Utils::$removed_assets['plugins']['foo'][0] );
-		AMP_Validation_Utils::reset_removed();
-
-		$script_url     = get_home_url() . '/wp-content/themes/baz/example-script.js';
-		$src->nodeValue = $script_url;
-		AMP_Validation_Utils::removed_script( $src, $script );
-		$this->assertEquals( $script_url, AMP_Validation_Utils::$removed_assets['themes']['baz'][0] );
-		AMP_Validation_Utils::reset_removed();
-	}
-
-	/**
-	 * Test track_style.
-	 *
-	 * @see AMP_Validation_Utils::track_style()
-	 */
-	public function test_track_style() {
-		$theme_style = get_home_url() . '/wp-content/themes/wp-baz/style.css';
-		AMP_Validation_Utils::track_style( $theme_style );
-		$this->assertEquals( $theme_style, AMP_Validation_Utils::$removed_assets['themes']['wp-baz']['style'][0] );
-
-		$plugin_style = get_home_url() . '/wp-content/plugins/abc-plugin/assets/style.css';
-		AMP_Validation_Utils::track_style( $plugin_style );
-		$this->assertEquals( $plugin_style, AMP_Validation_Utils::$removed_assets['plugins']['abc-plugin']['style'][0] );
-
-		$core_style = get_home_url() . '/wp-includes/css/buttons.css';
-		AMP_Validation_Utils::track_style( $core_style );
-		$this->assertEquals( $core_style, AMP_Validation_Utils::$removed_assets['core']['style'][0] );
+		$this->assertEquals( $expected_plugins, AMP_Validation_Utils::$plugins_removed_nodes );
 		AMP_Validation_Utils::reset_removed();
 	}
 
@@ -343,10 +305,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_reset_removed() {
 		AMP_Validation_Utils::$removed_nodes[]  = $this->node;
-		AMP_Validation_Utils::$removed_assets[] = $this->node;
+		AMP_Validation_Utils::$plugins_removed_nodes[] = array( 'amp' );
 		AMP_Validation_Utils::reset_removed();
 		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( array(), AMP_Validation_Utils::$removed_assets );
+		$this->assertEquals( array(), AMP_Validation_Utils::$plugins_removed_nodes );
 	}
 
 	/**
@@ -485,6 +447,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$core_function = AMP_Validation_Utils::get_plugin( 'the_content' );
 		$this->assertEquals( null, $core_function );
 	}
+
 	/**
 	 * Test wrapped_callback
 	 *
@@ -508,6 +471,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( '<!--after:amp', $output );
 		unset( $post );
 	}
+
 	/**
 	 * Test display_error().
 	 *

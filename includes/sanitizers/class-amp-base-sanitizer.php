@@ -70,6 +70,13 @@ abstract class AMP_Base_Sanitizer {
 	protected $root_element;
 
 	/**
+	 * The plugin that is outputting markup, if any.
+	 *
+	 * @var null|string
+	 */
+	public $current_plugin_output = null;
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
@@ -319,7 +326,7 @@ abstract class AMP_Base_Sanitizer {
 	public function remove_invalid_child( $child ) {
 		$child->parentNode->removeChild( $child );
 		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], $child );
+			call_user_func( $this->args['remove_invalid_callback'], $child, $this->current_plugin_output );
 		}
 	}
 
@@ -342,12 +349,33 @@ abstract class AMP_Base_Sanitizer {
 			}
 			if ( $attribute ) {
 				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args['remove_invalid_callback'], $attribute, $element );
+				call_user_func( $this->args['remove_invalid_callback'], $attribute, $this->current_plugin_output );
 			}
 		} elseif ( is_string( $attribute ) ) {
 			$element->removeAttribute( $attribute );
 		} else {
 			$element->removeAttributeNode( $attribute );
+		}
+	}
+
+	/**
+	 * Sets the current plugin that is outputting markup, if there is one.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMNode $node The node to check for the presence of a plugin in a comment.
+	 * @return void
+	 */
+	public function set_plugin_output( $node ) {
+		if ( XML_COMMENT_NODE === $node->nodeType ) {
+			preg_match( ':(before|after)\:(.*):s', $node->nodeValue, $matches );
+			if ( ! isset( $matches[1], $matches[2] ) ) {
+				return;
+			} elseif ( 'after' === $matches[1] ) {
+				$this->current_plugin_output = $matches[2];
+			} elseif ( 'before' === $matches[1] ) {
+				$this->current_plugin_output = null;
+			}
 		}
 	}
 
