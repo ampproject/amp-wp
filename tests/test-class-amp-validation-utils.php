@@ -304,7 +304,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::reset_removed()
 	 */
 	public function test_reset_removed() {
-		AMP_Validation_Utils::$removed_nodes[]  = $this->node;
+		AMP_Validation_Utils::$removed_nodes[]         = $this->node;
 		AMP_Validation_Utils::$plugins_removed_nodes[] = array( 'amp' );
 		AMP_Validation_Utils::reset_removed();
 		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
