@@ -34,6 +34,20 @@ class AMP_Validation_Utils {
 	const STYLE_SANITIZER = 'AMP_Style_Sanitizer';
 
 	/**
+	 * Query var that triggers validation.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_QUERY_VAR = 'validate';
+
+	/**
+	 * Key of the callback to track invalid markup.
+	 *
+	 * @var string
+	 */
+	const CALLBACK_KEY = 'remove_invalid_callback';
+
+	/**
 	 * The nodes that the sanitizer removed.
 	 *
 	 * @var DOMNode[]
@@ -55,6 +69,8 @@ class AMP_Validation_Utils {
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
+		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
+		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 	}
 
 	/**
@@ -129,7 +145,6 @@ class AMP_Validation_Utils {
 		}
 
 		AMP_Theme_Support::register_content_embed_handlers();
-		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'style_callback' ), 10, 2 );
 		remove_filter( 'the_content', 'wpautop' );
 
 		/** This filter is documented in wp-includes/post-template.php */
@@ -202,6 +217,9 @@ class AMP_Validation_Utils {
 		if ( isset( $markup ) ) {
 			self::process_markup( $markup );
 			$response['processed_markup'] = $markup;
+		}
+		if ( self::do_validate_front_end() ) {
+			$response['plugins_with_invalid_output'] = self::$plugins_removed_nodes;
 		}
 
 		$removed_elements   = array();
@@ -298,6 +316,9 @@ class AMP_Validation_Utils {
 	 */
 	public static function callback_wrappers() {
 		global $wp_filter;
+		if ( ! self::do_validate_front_end() ) {
+			return;
+		}
 		foreach ( $wp_filter as $filter_tag => $wp_hook ) {
 			if ( 'query' === $filter_tag ) {
 				continue;
@@ -421,14 +442,43 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Adds a callback to the style sanitizer, to track stylesheet removal.
+	 * Whether to validate the front end response.
 	 *
-	 * @param array $sanitizers The content sanitizers.
-	 * @return array $sanitizers The filtered content sanitizers.
+	 * @return boolean
 	 */
-	public static function style_callback( $sanitizers ) {
-		if ( self::has_cap() && isset( $sanitizers[ self::STYLE_SANITIZER ] ) && is_array( $sanitizers[ self::STYLE_SANITIZER ] ) ) {
-			$sanitizers[ self::STYLE_SANITIZER ]['remove_style_callback'] = __CLASS__ . '::track_style';
+	public static function do_validate_front_end() {
+		$post = get_post();
+		return ( isset( $post ) && post_supports_amp( $post ) && self::has_cap() && ( isset( $_GET[ self::VALIDATION_QUERY_VAR ] ) ) ); // WPCS: CSRF ok.
+	}
+
+	/**
+	 * Outputs AMP validation data in the response header of a frontend GET request.
+	 *
+	 * This must be called before the document output begins.
+	 * Because the document is buffered,
+	 * The sanitizers run after the 'send_headers' action.
+	 * So it's not possible to call this function on that hook.
+	 *
+	 * @return void
+	 */
+	public static function add_header() {
+		if ( self::do_validate_front_end() ) {
+			header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
+		}
+	}
+
+	/**
+	 * Adds the validation callback if front-end validation is needed.
+	 *
+	 * @param array $sanitizers The AMP sanitizers.
+	 * @return array $sanitizers The filtered AMP sanitizers.
+	 */
+	public static function add_validation_callback( $sanitizers ) {
+		if ( self::do_validate_front_end() ) {
+			foreach ( $sanitizers as $sanitizer => $args ) {
+				$args[ self::CALLBACK_KEY ] = __CLASS__ . '::track_removed';
+				$sanitizers[ $sanitizer ]   = $args;
+			}
 		}
 		return $sanitizers;
 	}

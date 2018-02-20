@@ -72,8 +72,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::init()
 	 */
 	public function test_init() {
+		AMP_Validation_Utils::init();
 		$this->assertEquals( 10, has_action( 'rest_api_init', 'AMP_Validation_Utils::amp_rest_validation' ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Validation_Utils::validate_content' ) );
+		$this->assertEquals( 10, has_action( 'wp', 'AMP_Validation_Utils::callback_wrappers' ) );
+		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', 'AMP_Validation_Utils::add_validation_callback' ) );
 	}
 
 	/**
@@ -170,10 +173,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::process_markup()
 	 */
 	public function test_process_markup() {
-		$this->set_authorized();
+		$this->set_capability();
 		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
 		$this->assertEquals( array(), AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( 10, has_filter( 'amp_content_sanitizers', 'AMP_Validation_Utils::style_callback' ) );
 
 		AMP_Validation_Utils::reset_removed();
 		$video = '<video src="https://example.com/video">';
@@ -239,7 +241,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$this->assertFalse( AMP_Validation_Utils::has_cap() );
 
-		$this->set_authorized();
+		$this->set_capability();
 		$this->assertTrue( AMP_Validation_Utils::has_cap() );
 	}
 
@@ -249,7 +251,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
-		$this->set_authorized();
+		$this->set_capability();
 		$request = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( array(
@@ -285,7 +287,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::get_response()
 	 */
 	public function test_get_response() {
-		$this->set_authorized();
+		$this->set_capability();
 		$response          = AMP_Validation_Utils::get_response( $this->disallowed_tag );
 		$expected_response = array(
 			$this->error_key     => true,
@@ -331,7 +333,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::validate_content()
 	 */
 	public function test_validate_content() {
-		$this->set_authorized();
+		$this->set_capability();
 		$post = $this->factory()->post->create_and_get();
 		ob_start();
 		AMP_Validation_Utils::validate_content( $post );
@@ -369,7 +371,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_callback_wrappers() {
 		global $post;
-		$post                 = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$this->set_capability();
 		$action_non_plugin    = 'foo_action';
 		$action_no_output     = 'bar_action_no_output';
 		$action_no_argument   = 'test_action_no_argument';
@@ -387,6 +390,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( $action_one_argument, __CLASS__ . '::output_notice' ) );
 		$this->assertEquals( 10, has_action( $action_two_arguments, __CLASS__ . '::output_message' ) );
 
+		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
 		AMP_Validation_Utils::callback_wrappers();
 		$this->assertEquals( 10, has_action( $action_non_plugin, 'the_ID' ) );
 		$this->assertEquals( 10, has_action( $action_no_output, '__return_false' ) );
@@ -508,32 +512,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test style_callback().
-	 *
-	 * @see AMP_Validation_Utils::style_callback()
-	 */
-	public function test_style_callback() {
-		$sanitizers = array(
-			AMP_Validation_Utils::STYLE_SANITIZER => array(),
-		);
-		$this->assertEquals( $sanitizers, AMP_Validation_Utils::style_callback( $sanitizers ) );
-
-		$this->set_authorized();
-		$expected = array(
-			AMP_Validation_Utils::STYLE_SANITIZER => array(
-				'remove_style_callback' => 'AMP_Validation_Utils::track_style',
-			),
-		);
-		$this->assertEquals( $expected, AMP_Validation_Utils::style_callback( $sanitizers ) );
-		AMP_Validation_Utils::reset_removed();
-	}
-
-	/**
 	 * Add a nonce to the $_REQUEST, so that is_authorized() returns true.
 	 *
 	 * @return void
 	 */
-	public function set_authorized() {
+	public function set_capability() {
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'administrator',
 		) ) );
@@ -552,6 +535,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * Outputs a notice.
 	 *
 	 * @param string $message The message to output.
+	 *
 	 * @return void
 	 */
 	public static function output_notice( $message ) {
@@ -562,11 +546,87 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * Outputs a message with an excerpt.
 	 *
 	 * @param string $message The message to output.
-	 * @param string $id      The ID of the post.
+	 * @param string $id The ID of the post.
+	 *
 	 * @return void
 	 */
 	public static function output_message( $message, $id ) {
 		printf( '<<p>%s</p><p>%s</p>', esc_attr( $message ), esc_html( $id ) );
+	}
+
+	/**
+	 * Test add_header
+	 *
+	 * The headers are output by the time this function executes,
+	 * And the tested method calls header().
+	 * This produces an error.
+	 * So simply check that the error message includes 'header,'
+	 * meaning that the method called header() as expected.
+	 *
+	 * @see AMP_Validation_Utils::add_header()
+	 */
+	public function test_do_validate_front_end() {
+		global $post;
+		$post = $this->factory()->post->create(); // WPCS: global override ok.
+		add_theme_support( 'amp' );
+		$this->assertFalse( AMP_Validation_Utils::do_validate_front_end() );
+		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
+		$this->assertFalse( AMP_Validation_Utils::do_validate_front_end() );
+		$this->set_capability();
+		$this->assertTrue( AMP_Validation_Utils::do_validate_front_end() );
+		remove_theme_support( 'amp' );
+	}
+
+	/**
+	 * Test add_header
+	 *
+	 * The headers are output by the time this function executes,
+	 * And the tested method calls header().
+	 * This produces an error.
+	 * So simply check that the error message includes 'header,'
+	 * meaning that the method called header() as expected.
+	 *
+	 * @see AMP_Validation_Utils::add_header()
+	 */
+	public function test_add_header() {
+		global $post;
+		$post = $this->factory()->post->create(); // WPCS: global override ok.
+		add_theme_support( 'amp' );
+		$this->set_capability();
+		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
+		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
+		try {
+			AMP_Validation_Utils::add_header();
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'header', $e->getMessage() );
+		remove_theme_support( 'amp' );
+	}
+
+	/**
+	 * Test add_validation_callback
+	 *
+	 * @see AMP_Validation_Utils::add_validation_callback()
+	 */
+	public function test_add_validation_callback() {
+		global $post;
+		$post              = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$sanitizers        = array(
+			'AMP_Img_Sanitizer'      => array(),
+			'AMP_Form_Sanitizer'     => array(),
+			'AMP_Comments_Sanitizer' => array(),
+		);
+		$expected_callback = 'AMP_Validation_Utils::track_removed';
+		$this->assertEquals( $sanitizers, AMP_Validation_Utils::add_validation_callback( $sanitizers ) );
+		add_theme_support( 'amp' );
+		$this->set_capability();
+		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
+		$filtered_sanitizers                                = AMP_Validation_Utils::add_validation_callback( $sanitizers );
+		foreach ( $filtered_sanitizers as $sanitizer => $args ) {
+			$this->assertEquals( $expected_callback, $args[ AMP_Validation_Utils::CALLBACK_KEY ] );
+		}
+		remove_theme_support( 'amp' );
 	}
 
 }
