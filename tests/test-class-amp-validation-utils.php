@@ -121,36 +121,29 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'theme'     => array(
 				get_home_url() . '/wp-content/themes/wp-baz/style.css',
 				array(
-					'themes',
-					'wp-baz',
+					'type'   => 'themes',
+					'source' => 'wp-baz',
 				),
 			),
 			'plugin'    => array(
 				get_home_url() . '/wp-content/plugins/abc-plugin/assets/style.css',
 				array(
-					'plugins',
-					'abc-plugin',
+					'type'   => 'plugins',
+					'source' => 'abc-plugin',
 				),
 			),
 			'core'      => array(
 				get_home_url() . '/wp-includes/css/buttons.css',
 				array(
-					'core',
-					'',
-				),
-			),
-			'mu-plugin' => array(
-				get_home_url() . '/mu-plugins/foo/assets/style.css',
-				array(
-					'mu-plugins',
-					'',
+					'type'   => null,
+					'source' => null,
 				),
 			),
 			'external'  => array(
 				'https://example.com/style.css',
 				array(
-					'external',
-					'',
+					'type'   => null,
+					'source' => null,
 				),
 			),
 		);

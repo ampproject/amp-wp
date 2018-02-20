@@ -98,27 +98,9 @@ class AMP_Validation_Utils {
 	 */
 	public static function get_source( $asset ) {
 		preg_match( ':wp-content/(themes|plugins|)/(.+?)/:s', $asset, $matches );
-		if ( isset( $matches[1], $matches[2] ) ) {
-			return array(
-				$matches[1],
-				$matches[2],
-			);
-		} elseif ( false !== strpos( $asset, 'mu-plugins' ) ) {
-			return array(
-				'mu-plugins',
-				'',
-			);
-		} elseif ( ( false !== strpos( $asset, get_home_url() ) ) || ( function_exists( 'get_home_path' ) && ( false !== strpos( $asset, get_home_path() ) ) ) ) {
-			return array(
-				'core',
-				'',
-			);
-		} else {
-			return array(
-				'external',
-				'',
-			);
-		}
+		$type   = isset( $matches[1] ) ? $matches[1] : null;
+		$source = isset( $matches[2] ) ? $matches[2] : null;
+		return compact( 'type', 'source' );
 	}
 
 	/**
@@ -363,9 +345,9 @@ class AMP_Validation_Utils {
 		if ( ! isset( $file ) ) {
 			return null;
 		}
-		list( $source_type, $source ) = self::get_source( $file );
-		if ( 'plugins' === $source_type ) {
-			return $source;
+		$source_data = self::get_source( $file );
+		if ( 'plugins' === $source_data['type'] ) {
+			return $source_data['source'];
 		}
 		return null;
 	}
