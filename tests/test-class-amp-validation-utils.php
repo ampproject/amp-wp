@@ -118,28 +118,28 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function get_source_data() {
 		return array(
-			'theme'     => array(
+			'theme'    => array(
 				get_home_url() . '/wp-content/themes/wp-baz/style.css',
 				array(
 					'type'   => 'themes',
 					'source' => 'wp-baz',
 				),
 			),
-			'plugin'    => array(
+			'plugin'   => array(
 				get_home_url() . '/wp-content/plugins/abc-plugin/assets/style.css',
 				array(
 					'type'   => 'plugins',
 					'source' => 'abc-plugin',
 				),
 			),
-			'core'      => array(
+			'core'     => array(
 				get_home_url() . '/wp-includes/css/buttons.css',
 				array(
 					'type'   => null,
 					'source' => null,
 				),
 			),
-			'external'  => array(
+			'external' => array(
 				'https://example.com/style.css',
 				array(
 					'type'   => null,

@@ -27,13 +27,6 @@ class AMP_Validation_Utils {
 	const ERROR_KEY = 'has_error';
 
 	/**
-	 * Class of the style sanitizer.
-	 *
-	 * @var string
-	 */
-	const STYLE_SANITIZER = 'AMP_Style_Sanitizer';
-
-	/**
 	 * Query var that triggers validation.
 	 *
 	 * @var string
