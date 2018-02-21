@@ -373,23 +373,24 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$action_two_arguments = 'example_action_two_arguments';
 		$notice               = 'Example notice';
 
-		add_action( $action_no_argument, __CLASS__ . '::output_div' );
-		add_action( $action_one_argument, __CLASS__ . '::output_notice' );
-		add_action( $action_two_arguments, __CLASS__ . '::output_message', 10, 2 );
+		add_action( $action_no_argument, array( $this, 'output_div' ) );
+		add_action( $action_one_argument, array( $this, 'output_notice' ) );
+		add_action( $action_two_arguments, array( $this, 'output_message' ), 10, 2 );
+		add_action( $action_no_output, array( $this, 'get_string' ), 10, 2 );
 		add_action( $action_non_plugin, 'the_ID' );
 		add_action( $action_no_output, '__return_false' );
 
-		$this->assertEquals( 10, has_action( $action_no_argument, __CLASS__ . '::output_div' ) );
-		$this->assertEquals( 10, has_action( $action_one_argument, __CLASS__ . '::output_notice' ) );
-		$this->assertEquals( 10, has_action( $action_two_arguments, __CLASS__ . '::output_message' ) );
+		$this->assertEquals( 10, has_action( $action_no_argument, array( $this, 'output_div' ) ) );
+		$this->assertEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
+		$this->assertEquals( 10, has_action( $action_two_arguments, array( $this, 'output_message' ) ) );
 
 		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
 		AMP_Validation_Utils::callback_wrappers();
 		$this->assertEquals( 10, has_action( $action_non_plugin, 'the_ID' ) );
-		$this->assertEquals( 10, has_action( $action_no_output, '__return_false' ) );
-		$this->assertNotEquals( 10, has_action( $action_no_argument, __CLASS__ . '::output_div' ) );
-		$this->assertNotEquals( 10, has_action( $action_one_argument, __CLASS__ . '::output_notice' ) );
-		$this->assertNotEquals( 10, has_action( $action_two_arguments, __CLASS__ . '::output_message' ) );
+		$this->assertNotEquals( 10, has_action( $action_no_output, array( $this, 'get_string' ) ) );
+		$this->assertNotEquals( 10, has_action( $action_no_argument, array( $this, 'output_div' ) ) );
+		$this->assertNotEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
+		$this->assertNotEquals( 10, has_action( $action_two_arguments, array( $this, 'output_message' ) ) );
 
 		ob_start();
 		do_action( $action_no_argument );
@@ -465,10 +466,23 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
-		$this->assertTrue( is_object( $wrapped_callback ) );
 		$this->assertContains( strval( get_the_ID() ), $output );
 		$this->assertContains( '<!--before:amp', $output );
 		$this->assertContains( '<!--after:amp', $output );
+
+		$callback         = array(
+			'function'      => array( $this, 'get_string' ),
+			'accepted_args' => 0,
+			'plugin'        => 'amp',
+		);
+		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
+		$this->assertTrue( $wrapped_callback instanceof Closure );
+		ob_start();
+		$result = call_user_func( $wrapped_callback );
+		$output = ob_get_clean();
+		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
+		$this->assertEquals( '', $output );
+		$this->assertEquals( call_user_func( array( $this, 'get_string' ) ), $result );
 		unset( $post );
 	}
 
@@ -523,7 +537,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	public static function output_div() {
+	public function output_div() {
 		echo '<div></div>';
 	}
 
@@ -534,7 +548,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	public static function output_notice( $message ) {
+	public function output_notice( $message ) {
 		printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_attr( $message ) );
 	}
 
@@ -546,8 +560,17 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	public static function output_message( $message, $id ) {
+	public function output_message( $message, $id ) {
 		printf( '<<p>%s</p><p>%s</p>', esc_attr( $message ), esc_html( $id ) );
+	}
+
+	/**
+	 * Gets a string.
+	 *
+	 * @return string
+	 */
+	public function get_string() {
+		return 'Example string';
 	}
 
 	/**

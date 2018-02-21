@@ -296,9 +296,6 @@ class AMP_Validation_Utils {
 		}
 		$pending_wrap_callbacks = array();
 		foreach ( $wp_filter as $filter_tag => $wp_hook ) {
-			if ( 'query' === $filter_tag ) {
-				continue;
-			}
 			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
 				foreach ( $callbacks as $callback ) {
 					$plugin = self::get_plugin( $callback['function'] );
