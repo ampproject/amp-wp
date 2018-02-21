@@ -160,7 +160,7 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', array( __CLASS__, 'print_amp_styles' ) );
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_amp_default_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_amp_default_styles' ), 9 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
