@@ -160,6 +160,7 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_head', array( __CLASS__, 'print_amp_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_amp_default_styles' ), 9 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
@@ -600,6 +601,13 @@ class AMP_Theme_Support {
 	public static function print_amp_styles() {
 		echo amp_get_boilerplate_code() . "\n"; // WPCS: XSS OK.
 		echo "<style amp-custom></style>\n"; // This will by populated by AMP_Style_Sanitizer.
+	}
+
+	/**
+	 * Adds default styles expected by sanitizer.
+	 */
+	public static function enqueue_amp_default_styles() {
+		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ) );
 	}
 
 	/**
