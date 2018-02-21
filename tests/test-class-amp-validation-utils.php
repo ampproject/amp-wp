@@ -456,9 +456,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$callback         = array(
 			'function'      => 'the_ID',
 			'accepted_args' => 0,
+			'plugin'        => 'amp',
 		);
-		$plugin           = 'amp';
-		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback, $plugin );
+		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
 		ob_start();
 		call_user_func( $wrapped_callback );

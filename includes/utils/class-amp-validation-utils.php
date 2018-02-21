@@ -294,20 +294,30 @@ class AMP_Validation_Utils {
 		if ( ! self::do_validate_front_end() ) {
 			return;
 		}
+		$pending_wrap_callbacks = array();
 		foreach ( $wp_filter as $filter_tag => $wp_hook ) {
 			if ( 'query' === $filter_tag ) {
 				continue;
 			}
 			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
 				foreach ( $callbacks as $callback ) {
-					$function = $callback['function'];
-					$plugin   = self::get_plugin( $function );
+					$plugin = self::get_plugin( $callback['function'] );
 					if ( isset( $plugin ) ) {
-						remove_action( $filter_tag, $function, $priority );
-						$wrapped_callback = self::wrapped_callback( $callback, $plugin );
-						add_action( $filter_tag, $wrapped_callback, $priority, $callback['accepted_args'] );
+						$pending_wrap_callbacks[ $filter_tag ][] = array_merge(
+							$callback,
+							compact( 'plugin', 'priority' )
+						);
 					}
 				}
+			}
+		}
+
+		// Iterate over hooks to replace after iterating over all to begin with to prevent infinite loop in PHP<=5.4.
+		foreach ( $pending_wrap_callbacks as $hook => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				remove_action( $hook, $callback['function'], $callback['priority'] );
+				$wrapped_callback = self::wrapped_callback( $callback );
+				add_action( $hook, $wrapped_callback, $callback['priority'], $callback['accepted_args'] );
 			}
 		}
 	}
@@ -319,28 +329,32 @@ class AMP_Validation_Utils {
 	 * @return string|null $plugin   The plugin to which the callback belongs, or null.
 	 */
 	public static function get_plugin( $callback ) {
-		if ( is_string( $callback ) && is_callable( $callback ) ) {
-			// The $callback is a function or static method.
-			$exploded_callback = explode( '::', $callback );
-			if ( count( $exploded_callback ) > 1 ) {
-				$reflection = new ReflectionClass( $exploded_callback[0] );
-			} else {
+		try {
+			if ( is_string( $callback ) && is_callable( $callback ) ) {
+				// The $callback is a function or static method.
+				$exploded_callback = explode( '::', $callback );
+				if ( count( $exploded_callback ) > 1 ) {
+					$reflection = new ReflectionClass( $exploded_callback[0] );
+				} else {
+					$reflection = new ReflectionFunction( $callback );
+				}
+			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
+				// The $callback is a method.
+				$reflection = new ReflectionClass( $callback[0] );
+			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
 				$reflection = new ReflectionFunction( $callback );
 			}
-		} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
-			// The $callback is a method.
-			$reflection = new ReflectionClass( $callback[0] );
-		} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
-			$reflection = new ReflectionFunction( $callback );
-		}
 
-		$file = isset( $reflection ) ? $reflection->getFileName() : null;
-		if ( ! isset( $file ) ) {
+			$file = isset( $reflection ) ? $reflection->getFileName() : null;
+			if ( ! isset( $file ) ) {
+				return null;
+			}
+			$source_data = self::get_source( $file );
+			if ( 'plugins' === $source_data['type'] ) {
+				return $source_data['source'];
+			}
+		} catch ( Exception $e ) {
 			return null;
-		}
-		$source_data = self::get_source( $file );
-		if ( 'plugins' === $source_data['type'] ) {
-			return $source_data['source'];
 		}
 		return null;
 	}
@@ -352,12 +366,17 @@ class AMP_Validation_Utils {
 	 * this indicates which plugin it was from.
 	 * The call_user_func_array() logic is mainly copied from WP_Hook:apply_filters().
 	 *
-	 * @param array  $callback The callback data, including values for 'function' and 'accepted_args'.
-	 * @param string $plugin   The plugin where the callback is located.
+	 * @param array $callback {
+	 *     The callback data.
+	 *
+	 *     @type callable $function
+	 *     @type int      $accepted_args
+	 *     @type string   $plugin
+	 * }
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
 	 */
-	public static function wrapped_callback( $callback, $plugin ) {
-		return function() use ( $callback, $plugin ) {
+	public static function wrapped_callback( $callback ) {
+		return function() use ( $callback ) {
 			$function      = $callback['function'];
 			$accepted_args = $callback['accepted_args'];
 			$args          = func_get_args();
@@ -373,9 +392,9 @@ class AMP_Validation_Utils {
 			$output = ob_get_clean();
 
 			if ( ! empty( $output ) ) {
-				printf( '<!--before:%s-->', esc_attr( $plugin ) );
+				printf( '<!--before:%s-->', esc_attr( $callback['plugin'] ) );
 				echo $output; // WPCS: XSS ok.
-				printf( '<!--after:%s-->', esc_attr( $plugin ) );
+				printf( '<!--after:%s-->', esc_attr( $callback['plugin'] ) );
 			}
 			return $result;
 		};
