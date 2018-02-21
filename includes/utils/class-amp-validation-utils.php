@@ -41,6 +41,13 @@ class AMP_Validation_Utils {
 	const CALLBACK_KEY = 'remove_invalid_callback';
 
 	/**
+	 * The slug of the post type to store AMP errors.
+	 *
+	 * @var string
+	 */
+	const POST_TYPE_SLUG = 'amp_validation_error';
+
+	/**
 	 * The nodes that the sanitizer removed.
 	 *
 	 * @var DOMNode[]
@@ -64,6 +71,7 @@ class AMP_Validation_Utils {
 		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
 		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
+		add_filter( 'init', array( __CLASS__, 'post_type' ) );
 	}
 
 	/**
@@ -449,22 +457,6 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Outputs AMP validation data in the response header of a frontend GET request.
-	 *
-	 * This must be called before the document output begins.
-	 * Because the document is buffered,
-	 * The sanitizers run after the 'send_headers' action.
-	 * So it's not possible to call this function on that hook.
-	 *
-	 * @return void
-	 */
-	public static function add_header() {
-		if ( self::do_validate_front_end() ) {
-			header( sprintf( 'AMP-Validation-Error: %s', wp_json_encode( self::get_response() ) ) );
-		}
-	}
-
-	/**
 	 * Adds the validation callback if front-end validation is needed.
 	 *
 	 * @param array $sanitizers The AMP sanitizers.
@@ -478,6 +470,23 @@ class AMP_Validation_Utils {
 			}
 		}
 		return $sanitizers;
+	}
+
+	/**
+	 * Register the post type to store the validation errors.
+	 *
+	 * @return void.
+	 */
+	public static function post_type() {
+		register_post_type(
+			self::POST_TYPE_SLUG,
+			array(
+				'labels'   => array(
+					'name' => _x( 'AMP Validation Errors', 'post type general name', 'amp' ),
+				),
+				'supports' => false,
+			)
+		);
 	}
 
 }

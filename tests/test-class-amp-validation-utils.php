@@ -13,6 +13,13 @@
 class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 	/**
+	 * The name of the tested class.
+	 *
+	 * @var string
+	 */
+	const TESTED_CLASS = 'AMP_Validation_Utils';
+
+	/**
 	 * An instance of DOMElement to test.
 	 *
 	 * @var DOMElement
@@ -73,10 +80,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_init() {
 		AMP_Validation_Utils::init();
-		$this->assertEquals( 10, has_action( 'rest_api_init', 'AMP_Validation_Utils::amp_rest_validation' ) );
-		$this->assertEquals( 10, has_action( 'edit_form_top', 'AMP_Validation_Utils::validate_content' ) );
-		$this->assertEquals( 10, has_action( 'wp', 'AMP_Validation_Utils::callback_wrappers' ) );
-		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', 'AMP_Validation_Utils::add_validation_callback' ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::amp_rest_validation' ) );
+		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::validate_content' ) );
+		$this->assertEquals( 10, has_action( 'wp', self::TESTED_CLASS . '::callback_wrappers' ) );
+		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', self::TESTED_CLASS . '::add_validation_callback' ) );
+		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::post_type' ) );
 	}
 
 	/**
@@ -213,14 +221,14 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		);
 		$args    = array(
 			'markup' => array(
-				'validate_callback' => array( 'AMP_Validation_Utils', 'validate_arg' ),
+				'validate_callback' => array( self::TESTED_CLASS, 'validate_arg' ),
 			),
 		);
 
 		$this->assertEquals( $args, $route['args'] );
-		$this->assertEquals( array( 'AMP_Validation_Utils', 'validate_markup' ), $route['callback'] );
+		$this->assertEquals( array( self::TESTED_CLASS, 'validate_markup' ), $route['callback'] );
 		$this->assertEquals( $methods, $route['methods'] );
-		$this->assertEquals( array( 'AMP_Validation_Utils', 'has_cap' ), $route['permission_callback'] );
+		$this->assertEquals( array( self::TESTED_CLASS, 'has_cap' ), $route['permission_callback'] );
 	}
 
 	/**
@@ -574,15 +582,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_header
+	 * Test do_validate_front_end
 	 *
-	 * The headers are output by the time this function executes,
-	 * And the tested method calls header().
-	 * This produces an error.
-	 * So simply check that the error message includes 'header,'
-	 * meaning that the method called header() as expected.
-	 *
-	 * @see AMP_Validation_Utils::add_header()
+	 * @see AMP_Validation_Utils::do_validate_front_end()
 	 */
 	public function test_do_validate_front_end() {
 		global $post;
@@ -593,33 +595,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertFalse( AMP_Validation_Utils::do_validate_front_end() );
 		$this->set_capability();
 		$this->assertTrue( AMP_Validation_Utils::do_validate_front_end() );
-		remove_theme_support( 'amp' );
-	}
-
-	/**
-	 * Test add_header
-	 *
-	 * The headers are output by the time this function executes,
-	 * And the tested method calls header().
-	 * This produces an error.
-	 * So simply check that the error message includes 'header,'
-	 * meaning that the method called header() as expected.
-	 *
-	 * @see AMP_Validation_Utils::add_header()
-	 */
-	public function test_add_header() {
-		global $post;
-		$post = $this->factory()->post->create(); // WPCS: global override ok.
-		add_theme_support( 'amp' );
-		$this->set_capability();
-		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
-		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
-		try {
-			AMP_Validation_Utils::add_header();
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertContains( 'header', $e->getMessage() );
 		remove_theme_support( 'amp' );
 	}
 
@@ -636,7 +611,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'AMP_Form_Sanitizer'     => array(),
 			'AMP_Comments_Sanitizer' => array(),
 		);
-		$expected_callback = 'AMP_Validation_Utils::track_removed';
+		$expected_callback = self::TESTED_CLASS . '::track_removed';
 		$this->assertEquals( $sanitizers, AMP_Validation_Utils::add_validation_callback( $sanitizers ) );
 		add_theme_support( 'amp' );
 		$this->set_capability();
@@ -646,6 +621,24 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			$this->assertEquals( $expected_callback, $args[ AMP_Validation_Utils::CALLBACK_KEY ] );
 		}
 		remove_theme_support( 'amp' );
+	}
+
+	/**
+	 * Test for post_type()
+	 *
+	 * @see AMP_Validation_Utils::post_type()
+	 */
+	public function test_post_type() {
+		AMP_Validation_Utils::post_type();
+		$amp_post_type = get_post_type_object( AMP_Validation_Utils::POST_TYPE_SLUG );
+
+		$this->assertTrue( in_array( AMP_Validation_Utils::POST_TYPE_SLUG, get_post_types(), true ) );
+		$this->assertEquals( array(), get_all_post_type_supports( AMP_Validation_Utils::POST_TYPE_SLUG ) );
+		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $amp_post_type->name );
+		$this->assertEquals( 'AMP Validation Errors', $amp_post_type->label );
+		$this->assertFalse( $amp_post_type->show_ui );
+		$this->assertFalse( $amp_post_type->show_in_menu );
+		$this->assertFalse( $amp_post_type->show_in_admin_bar );
 	}
 
 }
