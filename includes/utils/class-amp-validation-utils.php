@@ -48,6 +48,20 @@ class AMP_Validation_Utils {
 	const POST_TYPE_SLUG = 'amp_validation_error';
 
 	/**
+	 * The key in the response for the plugins that have invalid output.
+	 *
+	 * @var string
+	 */
+	const PLUGINS_INVALID_OUTPUT = 'plugins_with_invalid_output';
+
+	/**
+	 * The key of the meta value for the URLs with the validation error.
+	 *
+	 * @var string
+	 */
+	const URLS_VALIDATION_ERROR = 'urls_amp_validation_error';
+
+	/**
 	 * The nodes that the sanitizer removed.
 	 *
 	 * @var DOMNode[]
@@ -202,7 +216,7 @@ class AMP_Validation_Utils {
 			$response['processed_markup'] = $markup;
 		}
 		if ( self::do_validate_front_end() ) {
-			$response['plugins_with_invalid_output'] = self::$plugins_removed_nodes;
+			$response[ self::PLUGINS_INVALID_OUTPUT ] = self::$plugins_removed_nodes;
 		}
 
 		$removed_elements   = array();
@@ -226,6 +240,7 @@ class AMP_Validation_Utils {
 		$response = array_merge(
 			array(
 				self::ERROR_KEY => self::was_node_removed(),
+				'url'           => get_permalink(),
 			),
 			compact(
 				'removed_elements',
@@ -473,7 +488,7 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Register the post type to store the validation errors.
+	 * Registers the post type to store the validation errors.
 	 *
 	 * @return void.
 	 */
@@ -487,6 +502,47 @@ class AMP_Validation_Utils {
 				'supports' => false,
 			)
 		);
+	}
+
+	/**
+	 * Stores the validation errors.
+	 *
+	 * After the preprocessors have run, this gets the validation response.
+	 * If a plugin output invalid markup, it stores the response in a custom post type.
+	 *
+	 * @return int|void $post_id The post ID of the custom post type used, or void.
+	 */
+	public static function store_validation_errors() {
+		$response = self::get_response();
+		if ( ! $response[ self::ERROR_KEY ] || empty( $response[ self::PLUGINS_INVALID_OUTPUT ] ) ) {
+			return;
+		}
+		$url = isset( $response['url'] ) ? $response['url'] : null;
+		unset( $response['url'] );
+		$encoded_errors = wp_json_encode( $response );
+		$post_name      = md5( $encoded_errors );
+		$post           = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
+		$post_id        = isset( $post->ID ) ? $post->ID : null;
+
+		// If there's no post storing these specific errors, create one.
+		if ( ! isset( $post_id ) ) {
+			$post_id = wp_insert_post( array(
+				'post_type'    => self::POST_TYPE_SLUG,
+				'post_name'    => $post_name,
+				'post_content' => $encoded_errors,
+			) );
+		}
+
+		// Store the URL where the error(s) appeared.
+		$meta = get_post_meta( $post_id, self::URLS_VALIDATION_ERROR, true );
+		if ( '' === $meta ) {
+			$meta = array();
+		}
+		if ( is_array( $meta ) && ! in_array( $url, $meta, true ) ) {
+			$meta[] = $url;
+			update_post_meta( $post_id, self::URLS_VALIDATION_ERROR, $meta );
+		}
+		return $post_id;
 	}
 
 }

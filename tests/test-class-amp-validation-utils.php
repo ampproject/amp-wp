@@ -48,13 +48,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public $valid_amp_img = '<amp-img id="img-123" media="(min-width: 600x)" src="/assets/example.jpg" width=200 height=500 layout="responsive"></amp-img>';
 
 	/**
-	 * The key in the response for whether it has an AMP error.
-	 *
-	 * @var string
-	 */
-	public $error_key = 'has_error';
-
-	/**
 	 * The name of the tag to test.
 	 *
 	 * @var string
@@ -252,6 +245,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
+		global $post;
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->set_capability();
 		$request = new WP_REST_Request( 'POST', $this->expected_route );
 		$request->set_header( 'content-type', 'application/json' );
@@ -260,12 +255,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
-			$this->error_key     => true,
-			'removed_elements'   => array(
+			AMP_Validation_Utils::ERROR_KEY => true,
+			'removed_elements'              => array(
 				'script' => 1,
 			),
-			'removed_attributes' => array(),
-			'processed_markup'   => $this->disallowed_tag,
+			'removed_attributes'            => array(),
+			'processed_markup'              => $this->disallowed_tag,
+			'url'                           => get_permalink(),
 		);
 		$this->assertEquals( $expected_response, $response );
 
@@ -274,10 +270,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
-			$this->error_key     => false,
-			'removed_elements'   => array(),
-			'removed_attributes' => array(),
-			'processed_markup'   => $this->valid_amp_img,
+			AMP_Validation_Utils::ERROR_KEY => false,
+			'removed_elements'              => array(),
+			'removed_attributes'            => array(),
+			'processed_markup'              => $this->valid_amp_img,
+			'url'                           => get_permalink(),
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
@@ -288,15 +285,18 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::get_response()
 	 */
 	public function test_get_response() {
+		global $post;
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->set_capability();
 		$response          = AMP_Validation_Utils::get_response( $this->disallowed_tag );
 		$expected_response = array(
-			$this->error_key     => true,
-			'removed_elements'   => array(
+			AMP_Validation_Utils::ERROR_KEY => true,
+			'removed_elements'              => array(
 				'script' => 1,
 			),
-			'removed_attributes' => array(),
-			'processed_markup'   => $this->disallowed_tag,
+			'removed_attributes'            => array(),
+			'processed_markup'              => $this->disallowed_tag,
+			'url'                           => get_permalink(),
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
@@ -639,6 +639,53 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertFalse( $amp_post_type->show_ui );
 		$this->assertFalse( $amp_post_type->show_in_menu );
 		$this->assertFalse( $amp_post_type->show_in_admin_bar );
+	}
+
+	/**
+	 * Test for store_validation_errors()
+	 *
+	 * @see AMP_Validation_Utils::store_validation_errors()
+	 */
+	public function test_store_validation_errors() {
+		global $post;
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
+		add_theme_support( 'amp' );
+		$this->set_capability();
+		$plugins_invalid_markup = array(
+			'foo',
+		);
+		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
+		AMP_Validation_Utils::$plugins_removed_nodes = $plugins_invalid_markup;
+		$post_id                                     = AMP_Validation_Utils::store_validation_errors();
+		$custom_post                                 = get_post( $post_id );
+		$validation                                  = json_decode( $custom_post->post_content, true );
+		$expected_removed_elements                   = array(
+			'script' => 1,
+		);
+		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $custom_post->post_type );
+		$this->assertEquals( $expected_removed_elements, $validation['removed_elements'] );
+		$this->assertEquals( true, $validation[ AMP_Validation_Utils::ERROR_KEY ] );
+		$this->assertEquals( array(), $validation['removed_attributes'] );
+		$this->assertEquals( $plugins_invalid_markup, $validation[ AMP_Validation_Utils::PLUGINS_INVALID_OUTPUT ] );
+		$meta            = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
+		$first_permalink = get_permalink();
+		$this->assertTrue( in_array( $first_permalink, $meta, true ) );
+
+		AMP_Validation_Utils::reset_removed();
+		AMP_Validation_Utils::$plugins_removed_nodes = $plugins_invalid_markup;
+		$post                                        = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$this->set_capability();
+		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
+		$custom_post_id   = AMP_Validation_Utils::store_validation_errors();
+		$second_permalink = get_permalink();
+		$meta             = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
+
+		// There is no new custom post created, as this has the same data.
+		$this->assertEquals( $post_id, $custom_post_id );
+		$this->assertTrue( in_array( $first_permalink, $meta, true ) );
+		$this->assertTrue( in_array( $second_permalink, $meta, true ) );
+		remove_theme_support( 'amp' );
 	}
 
 }
