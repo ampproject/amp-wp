@@ -663,29 +663,73 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$expected_removed_elements                   = array(
 			'script' => 1,
 		);
+
+		// This should create a new post for the errors.
 		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $custom_post->post_type );
 		$this->assertEquals( $expected_removed_elements, $validation['removed_elements'] );
 		$this->assertEquals( true, $validation[ AMP_Validation_Utils::ERROR_KEY ] );
 		$this->assertEquals( array(), $validation['removed_attributes'] );
 		$this->assertEquals( $plugins_invalid_markup, $validation[ AMP_Validation_Utils::PLUGINS_INVALID_OUTPUT ] );
-		$meta            = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
-		$first_permalink = get_permalink();
-		$this->assertTrue( in_array( $first_permalink, $meta, true ) );
+		$meta = get_post_meta( $post_id, AMP_Validation_Utils::AMP_URL_META, true );
+		$this->assertEquals( get_permalink(), $meta );
 
 		AMP_Validation_Utils::reset_removed();
 		AMP_Validation_Utils::$plugins_removed_nodes = $plugins_invalid_markup;
 		$post                                        = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->set_capability();
 		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
-		$custom_post_id   = AMP_Validation_Utils::store_validation_errors();
-		$second_permalink = get_permalink();
-		$meta             = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		$meta           = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
 
-		// There is no new custom post created, as this has the same data.
+		// A post exists for these errors, so the URL should be stored in the 'additional URLs' meta data.
 		$this->assertEquals( $post_id, $custom_post_id );
-		$this->assertTrue( in_array( $first_permalink, $meta, true ) );
-		$this->assertTrue( in_array( $second_permalink, $meta, true ) );
+		$this->assertTrue( in_array( get_permalink(), $meta, true ) );
+
+		AMP_Validation_Utils::reset_removed();
+		AMP_Validation_Utils::$plugins_removed_nodes = $plugins_invalid_markup;
+		AMP_Validation_Utils::process_markup( '<nonexistent></nonexistent>' );
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		$error_post     = get_post( $custom_post_id );
+		$this->assertTrue( true );
+		$validation                = json_decode( $error_post->post_content, true );
+		$url                       = get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true );
+		$expected_removed_elements = array(
+			'nonexistent' => 1,
+		);
+
+		// A post already exists for this URL, so it should be updated.
+		$this->assertEquals( $expected_removed_elements, $validation['removed_elements'] );
+		$this->assertTrue( $validation[ AMP_Validation_Utils::ERROR_KEY ] );
+		$this->assertEquals( $plugins_invalid_markup, $validation[ AMP_Validation_Utils::PLUGINS_INVALID_OUTPUT ] );
+		$this->assertEquals( get_permalink(), $url );
+
+		AMP_Validation_Utils::reset_removed();
+		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
+		$custom_post_id    = AMP_Validation_Utils::store_validation_errors();
+		$non_existent_post = get_post( $custom_post_id );
+
+		// There are no errors, so the existing error post should be deleted.
+		$this->assertEquals( null, $non_existent_post );
 		remove_theme_support( 'amp' );
+	}
+
+	/**
+	 * Test for existing_post()
+	 *
+	 * @see AMP_Validation_Utils::existing_post()
+	 */
+	public function test_existing_post() {
+		global $post;
+		$post           = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$custom_post_id = $this->factory()->post->create( array(
+			'post_type' => AMP_Validation_Utils::POST_TYPE_SLUG,
+		) );
+
+		$url = get_permalink( $custom_post_id );
+		$this->assertEquals( null, AMP_Validation_Utils::existing_post( $url ) );
+
+		update_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, $url );
+		$this->assertEquals( $custom_post_id, AMP_Validation_Utils::existing_post( $url ) );
 	}
 
 }

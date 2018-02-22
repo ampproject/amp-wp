@@ -55,11 +55,18 @@ class AMP_Validation_Utils {
 	const PLUGINS_INVALID_OUTPUT = 'plugins_with_invalid_output';
 
 	/**
+	 * The meta key for the primary AMP URL where the error occurred.
+	 *
+	 * @var string
+	 */
+	const AMP_URL_META = 'amp_url';
+
+	/**
 	 * The key of the meta value for the URLs with the validation error.
 	 *
 	 * @var string
 	 */
-	const URLS_VALIDATION_ERROR = 'urls_amp_validation_error';
+	const URLS_VALIDATION_ERROR = 'amp_additional_urls_validation_error';
 
 	/**
 	 * The nodes that the sanitizer removed.
@@ -507,42 +514,84 @@ class AMP_Validation_Utils {
 	/**
 	 * Stores the validation errors.
 	 *
-	 * After the preprocessors have run, this gets the validation response.
-	 * If a plugin output invalid markup, it stores the response in a custom post type.
+	 * After the preprocessors run, this gets the validation response.
+	 * It then stores the response in a custom post type.
+	 * If there's already an error post, but there's no error anymore, it deletes the post.
 	 *
-	 * @return int|void $post_id The post ID of the custom post type used, or void.
+	 * @return int|null $post_id The post ID of the custom post type used, or null.
 	 */
 	public static function store_validation_errors() {
 		$response = self::get_response();
-		if ( ! $response[ self::ERROR_KEY ] || empty( $response[ self::PLUGINS_INVALID_OUTPUT ] ) ) {
-			return;
-		}
-		$url = isset( $response['url'] ) ? $response['url'] : null;
+		$url      = isset( $response['url'] ) ? $response['url'] : null;
 		unset( $response['url'] );
-		$encoded_errors = wp_json_encode( $response );
-		$post_name      = md5( $encoded_errors );
-		$post           = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
-		$post_id        = isset( $post->ID ) ? $post->ID : null;
+		$encoded_errors            = wp_json_encode( $response );
+		$post_name                 = md5( $encoded_errors );
+		$different_post_same_error = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
+		$post_args                 = array(
+			'post_type'    => self::POST_TYPE_SLUG,
+			'post_name'    => $post_name,
+			'post_content' => $encoded_errors,
+		);
+		$existing_post_id          = self::existing_post( $url );
 
-		// If there's no post storing these specific errors, create one.
-		if ( ! isset( $post_id ) ) {
-			$post_id = wp_insert_post( array(
-				'post_type'    => self::POST_TYPE_SLUG,
-				'post_name'    => $post_name,
-				'post_content' => $encoded_errors,
-			) );
+		if ( isset( $existing_post_id ) ) {
+			// A post for the $url already exists.
+			if ( empty( $response[ self::PLUGINS_INVALID_OUTPUT ] ) ) {
+				wp_delete_post( $existing_post_id );
+			} else {
+				wp_insert_post( array_merge(
+					array(
+						'ID' => $existing_post_id,
+					),
+					$post_args
+				) );
+			}
+			return $existing_post_id;
+		} elseif ( isset( $different_post_same_error->ID ) ) {
+			// The error is already stored somewhere, so append it to the meta.
+			$meta = get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, true );
+			if ( '' === $meta ) {
+				$meta = array();
+			}
+			if ( is_array( $meta ) && ! in_array( $url, $meta, true ) ) {
+				$meta[] = $url;
+				update_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, $meta );
+			}
+			return $different_post_same_error->ID;
+		} elseif ( ! empty( $response[ self::PLUGINS_INVALID_OUTPUT ] ) ) {
+			// There are validation issues from a plugin, but no existing post for them, so create one.
+			$new_post_id = wp_insert_post( $post_args );
+			update_post_meta( $new_post_id, self::AMP_URL_META, $url );
+			return $new_post_id;
 		}
 
-		// Store the URL where the error(s) appeared.
-		$meta = get_post_meta( $post_id, self::URLS_VALIDATION_ERROR, true );
-		if ( '' === $meta ) {
-			$meta = array();
+		return null;
+	}
+
+	/**
+	 * Gets the existing custom post that stores errors for the $url, if it exists.
+	 *
+	 * @param string $url The URL of the post.
+	 * @return int|null $post_id The post ID of the existing custom post, or null.
+	 */
+	public static function existing_post( $url ) {
+		$meta_query = new WP_Query( array(
+			'post_type'  => self::POST_TYPE_SLUG,
+			'meta_query' => array(
+				array(
+					'key'     => self::AMP_URL_META,
+					'value'   => $url,
+					'compare' => '=',
+				),
+			),
+		) );
+
+		if ( $meta_query->have_posts() ) {
+			$posts = $meta_query->get_posts();
+			$post  = reset( $posts );
+			return $post->ID;
 		}
-		if ( is_array( $meta ) && ! in_array( $url, $meta, true ) ) {
-			$meta[] = $url;
-			update_post_meta( $post_id, self::URLS_VALIDATION_ERROR, $meta );
-		}
-		return $post_id;
+		return null;
 	}
 
 }
