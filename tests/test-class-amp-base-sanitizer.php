@@ -261,7 +261,7 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$sanitizer->remove_invalid_child( $child );
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( $child, AMP_Validation_Utils::$removed_nodes[0] );
+		$this->assertEquals( $child, AMP_Validation_Utils::$removed_nodes[0]['node'] );
 
 		$parent->appendChild( $child );
 		$this->assertEquals( $child, $parent->firstChild );
@@ -292,7 +292,13 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
 		$sanitizer->remove_invalid_attribute( $video, $attribute );
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
-		$this->assertEquals( array( $attr_node ), AMP_Validation_Utils::$removed_nodes );
+		$this->assertEquals(
+			array(
+				'node'   => $attr_node,
+				'parent' => $video,
+			),
+			AMP_Validation_Utils::$removed_nodes[0]
+		);
 		AMP_Validation_Utils::reset_removed();
 	}
 
