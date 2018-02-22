@@ -295,10 +295,10 @@ class AMP_Theme_Support {
 			add_filter( 'comment_post_redirect', function() {
 				// We don't need any data, so just send a success.
 				wp_send_json_success();
-			}, PHP_INT_MAX, 2 );
+			}, PHP_INT_MAX );
 			self::handle_xhr_headers_output();
 		} elseif ( ! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] ) ) {
-			add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX, 2 );
+			add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );
 			self::handle_xhr_headers_output();
 		}
 	}
