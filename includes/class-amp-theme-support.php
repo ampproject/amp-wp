@@ -185,6 +185,7 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_amp_default_styles' ), 9 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
@@ -213,6 +214,7 @@ class AMP_Theme_Support {
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 
 		// @todo Add character conversion.
 	}
@@ -717,6 +719,13 @@ class AMP_Theme_Support {
 	public static function print_amp_styles() {
 		echo amp_get_boilerplate_code() . "\n"; // WPCS: XSS OK.
 		echo "<style amp-custom></style>\n"; // This will by populated by AMP_Style_Sanitizer.
+	}
+
+	/**
+	 * Adds default styles expected by sanitizer.
+	 */
+	public static function enqueue_amp_default_styles() {
+		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ) );
 	}
 
 	/**
