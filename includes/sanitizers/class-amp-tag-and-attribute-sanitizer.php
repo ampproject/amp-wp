@@ -103,6 +103,65 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
+		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
+
+			// Allow style attribute on all elements.
+			$this->args['amp_globally_allowed_attributes']['style'] = array();
+
+			// Allow style elements.
+			$this->args['amp_allowed_tags']['style'][] = array(
+				'attr_spec_list' => array(
+					'type' => array(
+						'value_casei' => 'text/css',
+					),
+				),
+				'cdata'          => array(),
+				'tag_spec'       => array(
+					'spec_name' => 'style for Customizer preview',
+				),
+			);
+
+			// Allow stylesheet links.
+			$this->args['amp_allowed_tags']['link'][] = array(
+				'attr_spec_list' => array(
+					'async'       => array(),
+					'crossorigin' => array(),
+					'href'        => array(
+						'mandatory' => true,
+					),
+					'integrity'   => array(),
+					'media'       => array(),
+					'rel'         => array(
+						'dispatch_key' => 2,
+						'mandatory'    => true,
+						'value_casei'  => 'stylesheet',
+					),
+					'type'        => array(
+						'value_casei' => 'text/css',
+					),
+				),
+				'tag_spec'       => array(
+					'spec_name' => 'link rel=stylesheet for Customizer preview', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				),
+			);
+		}
+
+		// Allow scripts if requested.
+		if ( ! empty( $this->args['allow_dirty_scripts'] ) ) {
+			$this->args['amp_allowed_tags']['script'][] = array(
+				'attr_spec_list' => array(
+					'type'  => array(),
+					'src'   => array(),
+					'async' => array(),
+					'defer' => array(),
+				),
+				'cdata'          => array(),
+				'tag_spec'       => array(
+					'spec_name' => 'scripts for Customizer preview',
+				),
+			);
+		}
+
 		// Prepare whitelists.
 		$this->allowed_tags = $this->args['amp_allowed_tags'];
 		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {

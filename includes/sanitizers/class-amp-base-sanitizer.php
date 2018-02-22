@@ -48,6 +48,13 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string[] $amp_allowed_tags
 	 *      @type string[] $amp_globally_allowed_attributes
 	 *      @type string[] $amp_layout_allowed_attributes
+	 *      @type array $amp_allowed_tags
+	 *      @type array $amp_globally_allowed_attributes
+	 *      @type array $amp_layout_allowed_attributes
+	 *      @type array $amp_bind_placeholder_prefix
+	 *      @type bool $allow_dirty_styles
+	 *      @type bool $allow_dirty_scripts
+	 *      @type callable $remove_invalid_callback
 	 * }
 	 */
 	protected $args;

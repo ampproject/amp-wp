@@ -87,15 +87,7 @@ function amp_after_setup_theme() {
 		define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 	}
 
-	add_action( 'init', 'amp_init' );
-	add_action( 'widgets_init', 'AMP_Theme_Support::register_widgets' ); // @todo Let this be called by AMP_Theme_Support::init().
-	add_action( 'init', 'AMP_Theme_Support::setup_commenting' ); // @todo Let this be called by AMP_Theme_Support::init().
-	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'wp_loaded', 'amp_post_meta_box' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
-	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
-	AMP_Post_Type_Support::add_post_type_support();
-	AMP_Validation_Utils::init();
+	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
 }
 add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 
@@ -103,7 +95,6 @@ add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
  * Init AMP.
  *
  * @since 0.1
- * @global string $pagenow
  */
 function amp_init() {
 
@@ -118,8 +109,14 @@ function amp_init() {
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 
+	AMP_Theme_Support::init();
+	AMP_Post_Type_Support::add_post_type_support();
+	AMP_Validation_Utils::init();
 	add_filter( 'request', 'amp_force_query_var_value' );
-	add_action( 'wp', 'amp_maybe_add_actions' );
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_post_meta_box' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
@@ -127,7 +124,9 @@ function amp_init() {
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
 		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
-	amp_handle_xhr_request();
+
+	// Add actions for legacy post templates.
+	add_action( 'wp', 'amp_maybe_add_actions' );
 }
 
 // Make sure the `amp` query var has an explicit value.
@@ -150,15 +149,9 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
-	$is_amp_endpoint = is_amp_endpoint();
 
-	// Add hooks for when a themes that support AMP.
+	// Short-circuit when theme supports AMP, as everything is handled by AMP_Theme_Support.
 	if ( current_theme_supports( 'amp' ) ) {
-		if ( $is_amp_endpoint ) {
-			AMP_Theme_Support::init();
-		} else {
-			amp_add_frontend_actions();
-		}
 		return;
 	}
 
@@ -167,6 +160,8 @@ function amp_maybe_add_actions() {
 	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
 		return;
 	}
+
+	$is_amp_endpoint = is_amp_endpoint();
 
 	/**
 	 * Queried post object.
