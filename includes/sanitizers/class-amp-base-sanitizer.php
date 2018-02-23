@@ -367,15 +367,13 @@ abstract class AMP_Base_Sanitizer {
 	 * @return void
 	 */
 	public function set_plugin_output( $node ) {
-		if ( XML_COMMENT_NODE === $node->nodeType ) {
-			preg_match( ':(before|after)\:(.*):s', $node->nodeValue, $matches );
-			if ( ! isset( $matches[1], $matches[2] ) ) {
-				return;
-			} elseif ( 'after' === $matches[1] ) {
-				$this->current_plugin_output = $matches[2];
-			} elseif ( 'before' === $matches[1] ) {
-				$this->current_plugin_output = null;
-			}
+		preg_match( ':(before|after)\:(.*):s', $node->nodeValue, $matches );
+		if ( ! isset( $matches[1], $matches[2] ) ) {
+			return;
+		} elseif ( 'after' === $matches[1] ) {
+			$this->current_plugin_output = $matches[2];
+		} elseif ( 'before' === $matches[1] ) {
+			$this->current_plugin_output = null;
 		}
 	}
 
