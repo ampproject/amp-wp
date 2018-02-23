@@ -296,20 +296,20 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test set_plugin_output.
+	 * Test capture_current_source.
 	 *
-	 * @covers AMP_Base_Sanitizer::set_plugin_output()
+	 * @covers AMP_Base_Sanitizer::capture_current_source()
 	 */
-	public function test_set_plugin_output() {
+	public function test_capture_current_source() {
 		$dom             = new DomDocument();
 		$closing_comment = 'after:amp';
 		$node            = $dom->createComment( $closing_comment );
 		$sanitizer       = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$this->assertEquals( null, $sanitizer->current_plugin_output );
-		$sanitizer->set_plugin_output( $node );
+		$sanitizer->capture_current_source( $node );
 		$this->assertEquals( 'amp', $sanitizer->current_plugin_output );
 		$opening_comment = $dom->createComment( 'before:amp' );
-		$sanitizer->set_plugin_output( $opening_comment );
+		$sanitizer->capture_current_source( $opening_comment );
 		$this->assertEquals( null, $sanitizer->current_plugin_output );
 	}
 

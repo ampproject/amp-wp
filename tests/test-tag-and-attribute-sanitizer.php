@@ -853,20 +853,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test set_plugin_output.
+	 * Test capture_current_source.
 	 *
-	 * @covers AMP_Tag_And_Attribute_Sanitizer::set_plugin_output()
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::capture_current_source()
 	 */
-	public function test_set_plugin_output() {
+	public function test_capture_current_source() {
 		$dom            = new DomDocument();
 		$comment_before = 'before:amp';
 		$comment_after  = 'after:amp';
 		$node           = $dom->createComment( $comment_after );
 		$sanitizer      = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$sanitizer->set_plugin_output( $node );
+		$sanitizer->capture_current_source( $node );
 		$this->assertEquals( 'amp', $sanitizer->current_plugin_output );
 		$closing_comment = $dom->createComment( $comment_before );
-		$sanitizer->set_plugin_output( $closing_comment );
+		$sanitizer->capture_current_source( $closing_comment );
 		$this->assertEquals( null, $sanitizer->current_plugin_output );
 	}
 

@@ -366,7 +366,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @param DOMNode $node The node to check for the presence of a plugin in a comment.
 	 * @return void
 	 */
-	public function set_plugin_output( $node ) {
+	public function capture_current_source( $node ) {
 		preg_match( ':(before|after)\:(.*):s', $node->nodeValue, $matches );
 		if ( ! isset( $matches[1], $matches[2] ) ) {
 			return;

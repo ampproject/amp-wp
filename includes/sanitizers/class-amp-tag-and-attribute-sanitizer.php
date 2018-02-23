@@ -225,7 +225,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Don't process text or comment nodes.
 		if ( XML_COMMENT_NODE === $node->nodeType ) {
-			$this->set_plugin_output( $node );
+			$this->capture_current_source( $node );
 			return;
 		} elseif ( XML_TEXT_NODE === $node->nodeType || XML_CDATA_SECTION_NODE === $node->nodeType ) {
 			return;
