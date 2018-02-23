@@ -582,19 +582,19 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test do_validate_front_end
+	 * Test should_validate_front_end
 	 *
-	 * @see AMP_Validation_Utils::do_validate_front_end()
+	 * @see AMP_Validation_Utils::should_validate_front_end()
 	 */
-	public function test_do_validate_front_end() {
+	public function test_should_validate_front_end() {
 		global $post;
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
 		add_theme_support( 'amp' );
-		$this->assertFalse( AMP_Validation_Utils::do_validate_front_end() );
+		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
-		$this->assertFalse( AMP_Validation_Utils::do_validate_front_end() );
+		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$this->set_capability();
-		$this->assertTrue( AMP_Validation_Utils::do_validate_front_end() );
+		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
 		remove_theme_support( 'amp' );
 	}
 

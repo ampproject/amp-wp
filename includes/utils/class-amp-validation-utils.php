@@ -222,7 +222,7 @@ class AMP_Validation_Utils {
 			self::process_markup( $markup );
 			$response['processed_markup'] = $markup;
 		}
-		if ( self::do_validate_front_end() ) {
+		if ( self::should_validate_front_end() ) {
 			$response[ self::PLUGINS_INVALID_OUTPUT ] = self::$plugins_removed_nodes;
 		}
 
@@ -321,7 +321,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function callback_wrappers() {
 		global $wp_filter;
-		if ( ! self::do_validate_front_end() ) {
+		if ( ! self::should_validate_front_end() ) {
 			return;
 		}
 		$pending_wrap_callbacks = array();
@@ -473,7 +473,7 @@ class AMP_Validation_Utils {
 	 *
 	 * @return boolean
 	 */
-	public static function do_validate_front_end() {
+	public static function should_validate_front_end() {
 		$post = get_post();
 		return ( isset( $post ) && post_supports_amp( $post ) && self::has_cap() && ( isset( $_GET[ self::VALIDATION_QUERY_VAR ] ) ) ); // WPCS: CSRF ok.
 	}
@@ -485,7 +485,7 @@ class AMP_Validation_Utils {
 	 * @return array $sanitizers The filtered AMP sanitizers.
 	 */
 	public static function add_validation_callback( $sanitizers ) {
-		if ( self::do_validate_front_end() ) {
+		if ( self::should_validate_front_end() ) {
 			foreach ( $sanitizers as $sanitizer => $args ) {
 				$args[ self::CALLBACK_KEY ] = __CLASS__ . '::track_removed';
 				$sanitizers[ $sanitizer ]   = $args;
