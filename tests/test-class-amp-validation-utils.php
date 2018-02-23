@@ -77,7 +77,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::validate_content' ) );
 		$this->assertEquals( 10, has_action( 'wp', self::TESTED_CLASS . '::callback_wrappers' ) );
 		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', self::TESTED_CLASS . '::add_validation_callback' ) );
-		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::post_type' ) );
+		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::register_post_type' ) );
 	}
 
 	/**
@@ -624,18 +624,19 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for post_type()
+	 * Test for register_post_type()
 	 *
-	 * @see AMP_Validation_Utils::post_type()
+	 * @see AMP_Validation_Utils::register_post_type()
 	 */
-	public function test_post_type() {
-		AMP_Validation_Utils::post_type();
+	public function test_register_post_type() {
+		AMP_Validation_Utils::register_post_type();
 		$amp_post_type = get_post_type_object( AMP_Validation_Utils::POST_TYPE_SLUG );
 
 		$this->assertTrue( in_array( AMP_Validation_Utils::POST_TYPE_SLUG, get_post_types(), true ) );
 		$this->assertEquals( array(), get_all_post_type_supports( AMP_Validation_Utils::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $amp_post_type->name );
 		$this->assertEquals( 'AMP Validation Errors', $amp_post_type->label );
+		$this->assertEquals( false, $amp_post_type->public );
 		$this->assertFalse( $amp_post_type->show_ui );
 		$this->assertFalse( $amp_post_type->show_in_menu );
 		$this->assertFalse( $amp_post_type->show_in_admin_bar );

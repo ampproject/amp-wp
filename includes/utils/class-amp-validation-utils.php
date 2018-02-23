@@ -92,7 +92,7 @@ class AMP_Validation_Utils {
 		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
 		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
-		add_filter( 'init', array( __CLASS__, 'post_type' ) );
+		add_filter( 'init', array( __CLASS__, 'register_post_type' ) );
 	}
 
 	/**
@@ -499,7 +499,7 @@ class AMP_Validation_Utils {
 	 *
 	 * @return void.
 	 */
-	public static function post_type() {
+	public static function register_post_type() {
 		register_post_type(
 			self::POST_TYPE_SLUG,
 			array(
@@ -507,6 +507,7 @@ class AMP_Validation_Utils {
 					'name' => _x( 'AMP Validation Errors', 'post type general name', 'amp' ),
 				),
 				'supports' => false,
+				'public'   => false,
 			)
 		);
 	}
