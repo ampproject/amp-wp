@@ -864,10 +864,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$node           = $dom->createComment( $comment_after );
 		$sanitizer      = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->capture_current_source( $node );
-		$this->assertEquals( 'amp', $sanitizer->current_plugin_output );
+		$this->assertEquals( 'amp', $sanitizer->current_source );
 		$closing_comment = $dom->createComment( $comment_before );
 		$sanitizer->capture_current_source( $closing_comment );
-		$this->assertEquals( null, $sanitizer->current_plugin_output );
+		$this->assertEquals( null, $sanitizer->current_source );
 	}
 
 }

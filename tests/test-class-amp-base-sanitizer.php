@@ -305,12 +305,12 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$closing_comment = 'after:amp';
 		$node            = $dom->createComment( $closing_comment );
 		$sanitizer       = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$this->assertEquals( null, $sanitizer->current_plugin_output );
+		$this->assertEquals( null, $sanitizer->current_source );
 		$sanitizer->capture_current_source( $node );
-		$this->assertEquals( 'amp', $sanitizer->current_plugin_output );
+		$this->assertEquals( 'amp', $sanitizer->current_source );
 		$opening_comment = $dom->createComment( 'before:amp' );
 		$sanitizer->capture_current_source( $opening_comment );
-		$this->assertEquals( null, $sanitizer->current_plugin_output );
+		$this->assertEquals( null, $sanitizer->current_source );
 	}
 
 }
