@@ -371,6 +371,7 @@ class AMP_Validation_Utils {
 		$type   = isset( $matches[1] ) ? $matches[1] : null;
 		$source = isset( $matches[2] ) ? $matches[2] : null;
 		if ( ( 'plugins' === $type ) || ( 'themes' === $type ) ) {
+			$type = substr( $type, 0, -1 );
 			return compact( 'type', 'source' );
 		}
 		return null;
@@ -410,9 +411,9 @@ class AMP_Validation_Utils {
 			$output = ob_get_clean();
 
 			if ( ! empty( $output ) ) {
-				printf( '<!--before:%s-->', esc_attr( $callback['source'] ) );
+				printf( '<!--before:%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['source'] ) );
 				echo $output; // WPCS: XSS ok.
-				printf( '<!--after:%s-->', esc_attr( $callback['source'] ) );
+				printf( '<!--after:%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['source'] ) );
 			}
 			return $result;
 		};
