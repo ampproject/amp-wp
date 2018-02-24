@@ -323,13 +323,15 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->set_capability();
-		$action_non_plugin    = 'foo_action';
-		$action_no_output     = 'bar_action_no_output';
-		$action_no_argument   = 'test_action_no_argument';
-		$action_one_argument  = 'baz_action_one_argument';
-		$action_two_arguments = 'example_action_two_arguments';
-		$notice               = 'Example notice';
+		$action_non_plugin        = 'foo_action';
+		$action_no_output         = 'bar_action_no_output';
+		$action_function_callback = 'baz_action_function';
+		$action_no_argument       = 'test_action_no_argument';
+		$action_one_argument      = 'baz_action_one_argument';
+		$action_two_arguments     = 'example_action_two_arguments';
+		$notice                   = 'Example notice';
 
+		add_action( $action_function_callback, '_amp_print_php_version_admin_notice' );
 		add_action( $action_no_argument, array( $this, 'output_div' ) );
 		add_action( $action_one_argument, array( $this, 'output_notice' ) );
 		add_action( $action_two_arguments, array( $this, 'output_message' ), 10, 2 );
@@ -348,6 +350,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertNotEquals( 10, has_action( $action_no_argument, array( $this, 'output_div' ) ) );
 		$this->assertNotEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
 		$this->assertNotEquals( 10, has_action( $action_two_arguments, array( $this, 'output_message' ) ) );
+
+		ob_start();
+		do_action( $action_function_callback );
+		$output = ob_get_clean();
+		$this->assertContains( '<div class="notice notice-error">', $output );
+		$this->assertContains( '<!--before:plugin:amp-->', $output );
+		$this->assertContains( '<!--after:plugin:amp-->', $output );
 
 		ob_start();
 		do_action( $action_no_argument );
@@ -374,7 +383,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( '<!--before:plugin:amp', $output );
 		$this->assertContains( '<!--after:plugin:amp', $output );
 
-		// This action's callback isn't from a plugin, so it shouldn't be wrapped in comments.
+		// This action's callback isn't from a plugin or theme, so it shouldn't be wrapped in comments.
 		ob_start();
 		do_action( $action_non_plugin );
 		$output = ob_get_clean();

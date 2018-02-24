@@ -367,11 +367,22 @@ class AMP_Validation_Utils {
 			return null;
 		}
 
-		preg_match( ':wp-content/(themes|plugins)/([^/]+)/:s', $file, $matches );
-		$type   = isset( $matches[1] ) ? $matches[1] : null;
-		$source = isset( $matches[2] ) ? $matches[2] : null;
-		if ( ( 'plugins' === $type ) || ( 'themes' === $type ) ) {
-			$type = substr( $type, 0, -1 );
+		preg_match( ':' . wp_normalize_path( WP_PLUGIN_DIR ) . '([^/]+)/:s', $file, $plugin_matches );
+		preg_match( ':' . wp_normalize_path( get_theme_root() ) . '/([^/]+)/:s', $file, $theme_matches );
+		preg_match( ':' . wp_normalize_path( WPMU_PLUGIN_DIR ) . '/([^/]+)/:s', $file, $mu_plugin_matches );
+
+		if ( isset( $plugin_matches[1] ) ) {
+			$type   = 'plugin';
+			$source = $plugin_matches[1];
+		} elseif ( isset( $theme_matches[1] ) ) {
+			$type   = 'theme';
+			$source = $theme_matches[1];
+		} elseif ( isset( $mu_plugin_matches[1] ) ) {
+			$type   = 'mu-plugin';
+			$source = $mu_plugin_matches[1];
+		}
+
+		if ( isset( $type, $source ) ) {
 			return compact( 'type', 'source' );
 		}
 		return null;
