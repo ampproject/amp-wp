@@ -74,7 +74,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @var null|string
 	 */
-	public $current_source = null;
+	public $current_sources = array();
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
@@ -326,7 +326,7 @@ abstract class AMP_Base_Sanitizer {
 	public function remove_invalid_child( $child ) {
 		$child->parentNode->removeChild( $child );
 		if ( isset( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ] ) ) {
-			call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $child, $this->current_source );
+			call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $child, $this->current_sources );
 		}
 	}
 
@@ -349,7 +349,7 @@ abstract class AMP_Base_Sanitizer {
 			}
 			if ( $attribute ) {
 				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $attribute, $this->current_source );
+				call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $attribute, $this->current_sources );
 			}
 		} elseif ( is_string( $attribute ) ) {
 			$element->removeAttribute( $attribute );
@@ -371,9 +371,9 @@ abstract class AMP_Base_Sanitizer {
 		if ( ! isset( $matches[1], $matches[2] ) ) {
 			return;
 		} elseif ( 'after' === $matches[1] ) {
-			$this->current_source = $matches[2];
+			$this->current_sources[] = $matches[2];
 		} elseif ( 'before' === $matches[1] ) {
-			$this->current_source = null;
+			array_pop( $this->current_sources );
 		}
 	}
 

@@ -91,9 +91,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$expected_plugins = array(
 			$plugin,
 		);
-		AMP_Validation_Utils::track_removed( $this->node, null );
+		AMP_Validation_Utils::track_removed( $this->node, array() );
 		$this->assertEquals( array(), AMP_Validation_Utils::$plugins_removed_nodes );
-		AMP_Validation_Utils::track_removed( $this->node, $plugin );
+		AMP_Validation_Utils::track_removed( $this->node, $expected_plugins );
 		$this->assertEquals( array( $this->node, $this->node ), AMP_Validation_Utils::$removed_nodes );
 		$this->assertEquals( $expected_plugins, AMP_Validation_Utils::$plugins_removed_nodes );
 		AMP_Validation_Utils::reset_removed();

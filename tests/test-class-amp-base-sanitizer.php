@@ -305,12 +305,24 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$closing_comment = 'after:amp';
 		$node            = $dom->createComment( $closing_comment );
 		$sanitizer       = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$this->assertEquals( null, $sanitizer->current_source );
+		$this->assertEquals( array(), $sanitizer->current_sources );
 		$sanitizer->capture_current_source( $node );
-		$this->assertEquals( 'amp', $sanitizer->current_source );
-		$opening_comment = $dom->createComment( 'before:amp' );
-		$sanitizer->capture_current_source( $opening_comment );
-		$this->assertEquals( null, $sanitizer->current_source );
+		$this->assertEquals( array( 'amp' ), $sanitizer->current_sources );
+
+		$expected_sources = array(
+			'amp',
+			'foo',
+		);
+		$closing_comment  = 'after:foo';
+		$node             = $dom->createComment( $closing_comment );
+		$sanitizer->capture_current_source( $node );
+		$this->assertEquals( $expected_sources, $sanitizer->current_sources );
+		$before_comment_foo = $dom->createComment( 'before:foo' );
+		$before_comment_amp = $dom->createComment( 'before:amp' );
+		$sanitizer->capture_current_source( $before_comment_foo );
+		$this->assertEquals( array( 'amp' ), $sanitizer->current_sources );
+		$sanitizer->capture_current_source( $before_comment_amp );
+		$this->assertEquals( array(), $sanitizer->current_sources );
 	}
 
 }

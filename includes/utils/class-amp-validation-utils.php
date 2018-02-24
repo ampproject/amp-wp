@@ -98,12 +98,13 @@ class AMP_Validation_Utils {
 	/**
 	 * Tracks when a sanitizer removes a node (element or attribute).
 	 *
-	 * @param DOMNode     $node   The node which was removed.
-	 * @param string|null $source The source of the removed element.
+	 * @param DOMNode $node    The node which was removed.
+	 * @param array   $sources The plugins and/or themes of the removed elements.
 	 * @return void
 	 */
-	public static function track_removed( $node, $source = null ) {
+	public static function track_removed( $node, $sources = array() ) {
 		self::$removed_nodes[] = $node;
+		$source                = array_pop( $sources );
 		if ( isset( $source ) && ! in_array( $source, self::$plugins_removed_nodes, true ) ) {
 			self::$plugins_removed_nodes[] = $source;
 		}
