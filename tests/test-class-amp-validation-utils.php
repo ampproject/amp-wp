@@ -355,8 +355,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
 		$this->assertContains( '<div class="notice notice-error">', $output );
-		$this->assertContains( '<!--before:plugin:amp-->', $output );
-		$this->assertContains( '<!--after:plugin:amp-->', $output );
+		$this->assertContains( '<!--before:plugin:amp', $output );
+		$this->assertContains( '<!--after:plugin:amp', $output );
 
 		ob_start();
 		do_action( $action_no_argument );
