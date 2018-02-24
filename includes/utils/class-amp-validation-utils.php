@@ -111,22 +111,6 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Gets the source of the asset.
-	 *
-	 * This attempts to find if it's from a theme or a plugin.
-	 * In that case, it also returns the name of the theme or plugin.
-	 *
-	 * @param string $asset The asset path to search for the source.
-	 * @return array $source The asset type and source.
-	 */
-	public static function get_source( $asset ) {
-		preg_match( ':wp-content/(themes|plugins|)/(.+?)/:s', $asset, $matches );
-		$type   = isset( $matches[1] ) ? $matches[1] : null;
-		$source = isset( $matches[2] ) ? $matches[2] : null;
-		return compact( 'type', 'source' );
-	}
-
-	/**
 	 * Gets whether a node was removed in a sanitizer.
 	 *
 	 * @return boolean.
@@ -329,11 +313,12 @@ class AMP_Validation_Utils {
 		foreach ( $wp_filter as $filter_tag => $wp_hook ) {
 			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
 				foreach ( $callbacks as $callback ) {
-					$plugin = self::get_plugin( $callback['function'] );
-					if ( isset( $plugin ) ) {
+					$source_data = self::get_source( $callback['function'] );
+					if ( isset( $source_data['source'] ) ) {
 						$pending_wrap_callbacks[ $filter_tag ][] = array_merge(
 							$callback,
-							compact( 'plugin', 'priority' )
+							$source_data,
+							compact( 'priority' )
 						);
 					}
 				}
@@ -351,38 +336,42 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Gets the plugin of the callback, if one exists.
+	 * Gets the plugin or theme of the callback, if one exists.
 	 *
 	 * @param string|array $callback The callback for which to get the plugin.
-	 * @return string|null $plugin   The plugin to which the callback belongs, or null.
+	 * @return array|null $source_data {
+	 *     The source data.
+	 *
+	 *     @type string $type
+	 *     @type string $source
+	 * }
 	 */
-	public static function get_plugin( $callback ) {
-		try {
-			if ( is_string( $callback ) && is_callable( $callback ) ) {
-				// The $callback is a function or static method.
-				$exploded_callback = explode( '::', $callback );
-				if ( count( $exploded_callback ) > 1 ) {
-					$reflection = new ReflectionClass( $exploded_callback[0] );
-				} else {
-					$reflection = new ReflectionFunction( $callback );
-				}
-			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
-				// The $callback is a method.
-				$reflection = new ReflectionClass( $callback[0] );
-			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
+	public static function get_source( $callback ) {
+		if ( is_string( $callback ) && is_callable( $callback ) ) {
+			// The $callback is a function or static method.
+			$exploded_callback = explode( '::', $callback );
+			if ( count( $exploded_callback ) > 1 ) {
+				$reflection = new ReflectionClass( $exploded_callback[0] );
+			} else {
 				$reflection = new ReflectionFunction( $callback );
 			}
+		} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
+			// The $callback is a method.
+			$reflection = new ReflectionClass( $callback[0] );
+		} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
+			$reflection = new ReflectionFunction( $callback );
+		}
 
-			$file = isset( $reflection ) ? $reflection->getFileName() : null;
-			if ( ! isset( $file ) ) {
-				return null;
-			}
-			$source_data = self::get_source( $file );
-			if ( 'plugins' === $source_data['type'] ) {
-				return $source_data['source'];
-			}
-		} catch ( Exception $e ) {
+		$file = isset( $reflection ) ? $reflection->getFileName() : null;
+		if ( ! isset( $file ) ) {
 			return null;
+		}
+
+		preg_match( ':wp-content/(themes|plugins)/([^/]+)/:s', $file, $matches );
+		$type   = isset( $matches[1] ) ? $matches[1] : null;
+		$source = isset( $matches[2] ) ? $matches[2] : null;
+		if ( ( 'plugins' === $type ) || ( 'themes' === $type ) ) {
+			return compact( 'type', 'source' );
 		}
 		return null;
 	}
@@ -399,7 +388,8 @@ class AMP_Validation_Utils {
 	 *
 	 *     @type callable $function
 	 *     @type int      $accepted_args
-	 *     @type string   $plugin
+	 *     @type string   $type
+	 *     @type string   $source
 	 * }
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
 	 */
@@ -420,9 +410,9 @@ class AMP_Validation_Utils {
 			$output = ob_get_clean();
 
 			if ( ! empty( $output ) ) {
-				printf( '<!--before:%s-->', esc_attr( $callback['plugin'] ) );
+				printf( '<!--before:%s-->', esc_attr( $callback['source'] ) );
 				echo $output; // WPCS: XSS ok.
-				printf( '<!--after:%s-->', esc_attr( $callback['plugin'] ) );
+				printf( '<!--after:%s-->', esc_attr( $callback['source'] ) );
 			}
 			return $result;
 		};

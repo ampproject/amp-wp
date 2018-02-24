@@ -100,57 +100,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_source.
-	 *
-	 * @dataProvider get_source_data
-	 * @see AMP_Validation_Utils::get_source()
-	 * @param string $url      The URL for which to get the source.
-	 * @param array  $expected The expected return value of the tested function.
-	 */
-	public function test_get_source( $url, $expected ) {
-		$this->assertEquals( $expected, AMP_Validation_Utils::get_source( $url ) );
-		AMP_Validation_Utils::reset_removed();
-	}
-
-	/**
-	 * Gets the test data for test_get_source().
-	 *
-	 * @return array $source_data The data for test_get_source().
-	 */
-	public function get_source_data() {
-		return array(
-			'theme'    => array(
-				get_home_url() . '/wp-content/themes/wp-baz/style.css',
-				array(
-					'type'   => 'themes',
-					'source' => 'wp-baz',
-				),
-			),
-			'plugin'   => array(
-				get_home_url() . '/wp-content/plugins/abc-plugin/assets/style.css',
-				array(
-					'type'   => 'plugins',
-					'source' => 'abc-plugin',
-				),
-			),
-			'core'     => array(
-				get_home_url() . '/wp-includes/css/buttons.css',
-				array(
-					'type'   => null,
-					'source' => null,
-				),
-			),
-			'external' => array(
-				'https://example.com/style.css',
-				array(
-					'type'   => null,
-					'source' => null,
-				),
-			),
-		);
-	}
-
-	/**
 	 * Test was_node_removed.
 	 *
 	 * @see AMP_Validation_Utils::was_node_removed()
@@ -445,12 +394,16 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 *
 	 * @see AMP_Validation_Utils::validate_content()
 	 */
-	public function test_get_plugin() {
-		$plugin = AMP_Validation_Utils::get_plugin( 'amp_after_setup_theme' );
-		$this->assertContains( 'amp', $plugin );
-		$the_content = AMP_Validation_Utils::get_plugin( 'the_content' );
+	public function test_get_source() {
+		$plugin         = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
+		$plugin_sources = array(
+			'type'   => 'plugins',
+			'source' => 'amp',
+		);
+		$this->assertEquals( $plugin_sources, $plugin );
+		$the_content = AMP_Validation_Utils::get_source( 'the_content' );
 		$this->assertEquals( null, $the_content );
-		$core_function = AMP_Validation_Utils::get_plugin( 'the_content' );
+		$core_function = AMP_Validation_Utils::get_source( 'the_content' );
 		$this->assertEquals( null, $core_function );
 	}
 
@@ -465,7 +418,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$callback         = array(
 			'function'      => 'the_ID',
 			'accepted_args' => 0,
-			'plugin'        => 'amp',
+			'type'          => 'plugin',
+			'source'        => 'amp',
 		);
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
@@ -481,7 +435,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$callback         = array(
 			'function'      => array( $this, 'get_string' ),
 			'accepted_args' => 0,
-			'plugin'        => 'amp',
+			'type'          => 'plugin',
+			'source'        => 'amp',
 		);
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
