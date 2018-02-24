@@ -541,11 +541,10 @@ class AMP_Validation_Utils {
 			return $existing_post_id;
 		} elseif ( isset( $different_post_same_error->ID ) ) {
 			// The error is already stored somewhere, so append it to the meta.
-			$meta = get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, true );
-			if ( '' === $meta ) {
-				$meta = array();
-			}
-			if ( is_array( $meta ) && ! in_array( $url, $meta, true ) ) {
+			$updated_meta = add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, $url, true );
+			if ( ! $updated_meta ) {
+				$meta   = get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, true );
+				$meta   = is_array( $meta ) ? $meta : array( $meta );
 				$meta[] = $url;
 				update_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, $meta );
 			}

@@ -395,12 +395,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::validate_content()
 	 */
 	public function test_get_source() {
-		$plugin         = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
-		$plugin_sources = array(
-			'type'   => 'plugins',
-			'source' => 'amp',
-		);
-		$this->assertEquals( $plugin_sources, $plugin );
+		$plugin = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
+		$this->assertContains( 'amp', $plugin['source'] );
+		$this->assertEquals( 'plugins', $plugin['type'] );
 		$the_content = AMP_Validation_Utils::get_source( 'the_content' );
 		$this->assertEquals( null, $the_content );
 		$core_function = AMP_Validation_Utils::get_source( 'the_content' );
@@ -636,10 +633,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
 		$meta           = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
-
+		$url            = get_permalink();
 		// A post exists for these errors, so the URL should be stored in the 'additional URLs' meta data.
 		$this->assertEquals( $post_id, $custom_post_id );
+		$this->assertEquals( $url, $meta );
+
+		$post                                        = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		AMP_Validation_Utils::$plugins_removed_nodes = $plugins_invalid_markup;
+		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		$meta           = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
+
+		// The URL should again be stored in the 'additional URLs' meta data.
+		$this->assertEquals( $post_id, $custom_post_id );
 		$this->assertTrue( in_array( get_permalink(), $meta, true ) );
+		$this->assertTrue( in_array( $url, $meta, true ) );
 
 		AMP_Validation_Utils::reset_removed();
 		AMP_Validation_Utils::$plugins_removed_nodes = $plugins_invalid_markup;
