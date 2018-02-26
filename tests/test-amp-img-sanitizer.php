@@ -43,7 +43,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'image_with_decimal_width'                 => array(
-				'<p><img src="http://placehold.it/300x300" width="299" height="300" /></p>',
+				'<p><img src="http://placehold.it/300x300" width="299.5" height="300" /></p>',
 				'<p><amp-img src="http://placehold.it/300x300" width="299" height="300" sizes="(min-width: 299px) 299px, 100vw" class="amp-wp-enforced-sizes"></amp-img></p>',
 			),
 
