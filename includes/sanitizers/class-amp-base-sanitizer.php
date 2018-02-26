@@ -48,6 +48,13 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string[] $amp_allowed_tags
 	 *      @type string[] $amp_globally_allowed_attributes
 	 *      @type string[] $amp_layout_allowed_attributes
+	 *      @type array $amp_allowed_tags
+	 *      @type array $amp_globally_allowed_attributes
+	 *      @type array $amp_layout_allowed_attributes
+	 *      @type array $amp_bind_placeholder_prefix
+	 *      @type bool $allow_dirty_styles
+	 *      @type bool $allow_dirty_scripts
+	 *      @type callable $remove_invalid_callback
 	 * }
 	 */
 	protected $args;
@@ -320,13 +327,20 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMElement $child The node to remove.
+	 * @param DOMNode|DOMElement $child The node to remove.
 	 * @return void
 	 */
 	public function remove_invalid_child( $child ) {
+		$parent = $child->parentNode;
 		$child->parentNode->removeChild( $child );
 		if ( isset( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ] ) ) {
-			call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $child, $this->current_sources );
+			call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ],
+				array(
+					'node'   => $child,
+					'parent' => $parent,
+				),
+				$this->current_sources
+			);
 		}
 	}
 
@@ -349,7 +363,13 @@ abstract class AMP_Base_Sanitizer {
 			}
 			if ( $attribute ) {
 				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ], $attribute, $this->current_sources );
+				call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ],
+					array(
+						'node'   => $attribute,
+						'parent' => $element,
+					),
+					$this->current_sources
+				);
 			}
 		} elseif ( is_string( $attribute ) ) {
 			$element->removeAttribute( $attribute );

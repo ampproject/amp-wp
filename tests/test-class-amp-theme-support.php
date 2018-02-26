@@ -90,11 +90,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test prepare_response.
 	 *
+	 * @global WP_Widget_Factory $wp_widget_factory
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		$wp_widget_factory = new WP_Widget_Factory();
+		wp_widgets_init();
+
 		ob_start();
 		?>
 		<!DOCTYPE html>
@@ -123,8 +127,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$removed_nodes  = array();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
-			AMP_Validation_Utils::CALLBACK_KEY => function( $node ) use ( &$removed_nodes ) {
-				$removed_nodes[ $node->nodeName ] = $node;
+			AMP_Validation_Utils::CALLBACK_KEY => function( $removed ) use ( &$removed_nodes ) {
+				$removed_nodes[ $removed['node']->nodeName ] = $removed['node'];
 			},
 		) );
 
@@ -260,5 +264,70 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
 			$scripts
 		);
+	}
+
+	/**
+	 * Test intercept_post_request_redirect().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @covers AMP_Theme_Support::intercept_post_request_redirect()
+	 */
+	public function test_intercept_post_request_redirect() {
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		add_theme_support( 'amp' );
+		$url = get_home_url();
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', function () {
+			return '__return_false';
+		} );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( $url );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+
+		$this->assertContains( 'AMP-Redirect-To: ' . $url, xdebug_get_headers() );
+		$this->assertContains( 'Access-Control-Expose-Headers: AMP-Redirect-To', xdebug_get_headers() );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( '/new-location/' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertContains( 'AMP-Redirect-To: https://example.org/new-location/', xdebug_get_headers() );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( '//example.com/new-location/' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$headers = xdebug_get_headers();
+		$this->assertContains( 'AMP-Redirect-To: https://example.com/new-location/', $headers );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( '' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertContains( 'AMP-Redirect-To: https://example.org', xdebug_get_headers() );
+	}
+
+	/**
+	 * Test handle_xhr_request().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @covers AMP_Theme_Support::handle_xhr_request()
+	 */
+	public function test_handle_xhr_request() {
+		global $pagenow;
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		$_GET['__amp_source_origin'] = 'https://example.org';
+		$pagenow                     = 'wp-comments-post.php';
+		AMP_Theme_Support::purge_amp_query_vars();
+
+		AMP_Theme_Support::handle_xhr_request();
+		$this->assertContains( 'AMP-Access-Control-Allow-Source-Origin: https://example.org', xdebug_get_headers() );
 	}
 }

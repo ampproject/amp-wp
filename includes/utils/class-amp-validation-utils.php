@@ -71,7 +71,7 @@ class AMP_Validation_Utils {
 	/**
 	 * The nodes that the sanitizer removed.
 	 *
-	 * @var DOMNode[]
+	 * @var array[][]
 	 */
 	public static $removed_nodes = array();
 
@@ -213,7 +213,8 @@ class AMP_Validation_Utils {
 
 		$removed_elements   = array();
 		$removed_attributes = array();
-		foreach ( self::$removed_nodes as $node ) {
+		foreach ( self::$removed_nodes as $removed ) {
+			$node = $removed['node'];
 			if ( $node instanceof DOMAttr ) {
 				if ( ! isset( $removed_attributes[ $node->nodeName ] ) ) {
 					$removed_attributes[ $node->nodeName ] = 1;

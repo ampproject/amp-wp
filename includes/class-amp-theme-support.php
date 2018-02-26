@@ -71,6 +71,20 @@ class AMP_Theme_Support {
 	 * Initialize.
 	 */
 	public static function init() {
+		if ( ! current_theme_supports( 'amp' ) ) {
+			return;
+		}
+
+		self::purge_amp_query_vars();
+		self::handle_xhr_request();
+
+		if ( ! is_amp_endpoint() ) {
+			amp_add_frontend_actions();
+		} else {
+			self::setup_commenting();
+			add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+		}
+
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
 		// Validate theme support usage.
@@ -95,7 +109,6 @@ class AMP_Theme_Support {
 			self::register_paired_hooks();
 		}
 
-		self::purge_amp_query_vars(); // Note that amp_prepare_xhr_post() still looks at $_GET['__amp_source_origin'].
 		self::register_hooks();
 		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
@@ -129,6 +142,18 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Determine whether the user is in the Customizer preview iframe.
+	 *
+	 * @since 0.7
+	 *
+	 * @return bool Whether in Customizer preview iframe.
+	 */
+	public static function is_customize_preview_iframe() {
+		global $wp_customize;
+		return is_customize_preview() && $wp_customize->get_messenger_channel();
+	}
+
+	/**
 	 * Register hooks for paired mode.
 	 */
 	public static function register_paired_hooks() {
@@ -146,9 +171,8 @@ class AMP_Theme_Support {
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 
 		/*
 		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
@@ -160,9 +184,15 @@ class AMP_Theme_Support {
 		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
 		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
-		add_action( 'wp_head', array( __CLASS__, 'print_amp_styles' ) );
+		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_amp_default_styles' ), 9 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
+
+		if ( is_customize_preview() ) {
+			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
+		}
+		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
 
@@ -178,11 +208,13 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
+		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 
 		// @todo Add character conversion.
 	}
@@ -247,13 +279,100 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Set up commenting.
+	 * Hook into a form submissions, such as comment the form or some other .
+	 *
+	 * @since 0.7.0
+	 * @global string $pagenow
 	 */
-	public static function setup_commenting() {
-		if ( ! current_theme_supports( AMP_QUERY_VAR ) ) {
+	public static function handle_xhr_request() {
+		global $pagenow;
+		if ( empty( self::$purged_amp_query_vars['__amp_source_origin'] ) ) {
 			return;
 		}
 
+		if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
+			// We don't need any data, so just send a success.
+			add_filter( 'comment_post_redirect', function() {
+				// We don't need any data, so just send a success.
+				wp_send_json_success();
+			}, PHP_INT_MAX );
+			self::handle_xhr_headers_output();
+		} elseif ( ! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] ) ) {
+			add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );
+			self::handle_xhr_headers_output();
+		}
+	}
+
+	/**
+	 * Handle the AMP XHR headers and output errors.
+	 *
+	 * @since 0.7.0
+	 */
+	public static function handle_xhr_headers_output() {
+		// Add die handler for AMP error display.
+		add_filter( 'wp_die_handler', function() {
+			/**
+			 * New error handler for AMP form submission.
+			 *
+			 * @param WP_Error|string $error The error to handle.
+			 */
+			return function( $error ) {
+				status_header( 400 );
+				if ( is_wp_error( $error ) ) {
+					$error = $error->get_error_message();
+				}
+				$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
+				wp_send_json( array(
+					'error' => wp_kses( $error, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) ),
+				) );
+			};
+		} );
+
+		// Send AMP header.
+		$origin = esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] );
+		header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
+	}
+
+	/**
+	 * Intercept the response to a non-comment POST request.
+	 *
+	 * @since 0.7.0
+	 * @param string $location The location to redirect to.
+	 */
+	public static function intercept_post_request_redirect( $location ) {
+
+		// Make sure relative redirects get made absolute.
+		$parsed_location = array_merge(
+			array(
+				'scheme' => 'https',
+				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'path'   => strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ),
+			),
+			wp_parse_url( $location )
+		);
+
+		$absolute_location = $parsed_location['scheme'] . '://' . $parsed_location['host'];
+		if ( isset( $parsed_location['port'] ) ) {
+			$absolute_location .= ':' . $parsed_location['port'];
+		}
+		$absolute_location .= $parsed_location['path'];
+		if ( isset( $parsed_location['query'] ) ) {
+			$absolute_location .= '?' . $parsed_location['query'];
+		}
+		if ( isset( $parsed_location['fragment'] ) ) {
+			$absolute_location .= '#' . $parsed_location['fragment'];
+		}
+
+		header( 'AMP-Redirect-To: ' . $absolute_location );
+		header( 'Access-Control-Expose-Headers: AMP-Redirect-To' );
+		// Send json success as no data is required.
+		wp_send_json_success();
+	}
+
+	/**
+	 * Set up commenting.
+	 */
+	public static function setup_commenting() {
 		/*
 		 * Temporarily force comments to be listed in descending order.
 		 *
@@ -603,6 +722,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Adds default styles expected by sanitizer.
+	 */
+	public static function enqueue_amp_default_styles() {
+		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ) );
+	}
+
+	/**
 	 * Determine required AMP scripts.
 	 *
 	 * @param array $amp_scripts Initial scripts.
@@ -722,6 +848,27 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Dequeue Customizer assets which are not necessary outside the preview iframe.
+	 *
+	 * Prevent enqueueing customize-preview styles if not in customizer preview iframe.
+	 * These are only needed for when there is live editing of content, such as selective refresh.
+	 *
+	 * @since 0.7
+	 */
+	public static function dequeue_customize_preview_scripts() {
+
+		// Dequeue styles unnecessary unless in customizer preview iframe when editing (such as for edit shortcuts).
+		if ( ! self::is_customize_preview_iframe() ) {
+			wp_dequeue_style( 'customize-preview' );
+			foreach ( wp_styles()->registered as $handle => $dependency ) {
+				if ( in_array( 'customize-preview', $dependency->deps, true ) ) {
+					wp_dequeue_style( $handle );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Start output buffering.
 	 *
 	 * @since 0.7
@@ -756,6 +903,31 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Filter rendered partial to convert to AMP.
+	 *
+	 * @see WP_Customize_Partial::render()
+	 *
+	 * @param string|mixed $partial Rendered partial.
+	 * @return string|mixed Filtered partial.
+	 * @global int $content_width
+	 */
+	public static function filter_customize_partial_render( $partial ) {
+		global $content_width;
+		if ( is_string( $partial ) && preg_match( '/<\w/', $partial ) ) {
+			$dom  = AMP_DOM_Utils::get_dom_from_content( $partial );
+			$args = array(
+				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element' => false,
+				'allow_dirty_styles'   => true,
+				'allow_dirty_scripts'  => false,
+			);
+			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
+			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
+		}
+		return $partial;
+	}
+
+	/**
 	 * Process response to ensure AMP validity.
 	 *
 	 * @since 0.7
@@ -786,6 +958,11 @@ class AMP_Theme_Support {
 				'content_max_width'                => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element'             => true,
 				AMP_Validation_Utils::CALLBACK_KEY => null,
+				'content_max_width'                => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element'             => true,
+				AMP_Validation_Utils::CALLBACK_KEY => null,
+				'allow_dirty_styles'               => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'              => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 			),
 			$args
 		);
