@@ -174,11 +174,22 @@ abstract class AMP_Base_Sanitizer {
 	 * @return float|int|string Returns a numeric dimension value, or an empty string.
 	 */
 	public function sanitize_dimension( $value, $dimension ) {
-		if ( empty( $value ) ) {
+
+		/**
+		 * Allows 0 as valid dimension.
+		 */
+		if ( null === $value ) {
 			return '';
 		}
 
 		if ( false !== filter_var( $value, FILTER_VALIDATE_INT ) ) {
+			return absint( $value );
+		}
+
+		/**
+		 * Allows floats but parses them to integers.
+		 */
+		if ( false !== filter_var( $value, FILTER_VALIDATE_FLOAT ) ) {
 			return absint( $value );
 		}
 
