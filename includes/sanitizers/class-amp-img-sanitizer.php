@@ -165,8 +165,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size' : 'amp-wp-unknown-size';
 					$node->setAttribute( 'class', $class );
 				} elseif (
-					! is_numeric( $node->getAttribute( 'height' )
-				) ) {
+					! is_numeric( $node->getAttribute( 'height' ) ) ) {
 					$height = self::FALLBACK_HEIGHT;
 					$node->setAttribute( 'height', $height );
 					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-height' : 'amp-wp-unknown-size amp-wp-unknown-height';
