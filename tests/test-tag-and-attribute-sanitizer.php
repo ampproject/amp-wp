@@ -851,33 +851,4 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
-
-	/**
-	 * Test capture_current_source.
-	 *
-	 * @covers AMP_Tag_And_Attribute_Sanitizer::capture_current_source()
-	 */
-	public function test_capture_current_source() {
-		$dom           = new DomDocument();
-		$comment_after = 'after:amp';
-		$node          = $dom->createComment( $comment_after );
-		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$sanitizer->capture_current_source( $node );
-		$this->assertEquals( array( 'amp' ), $sanitizer->current_sources );
-
-		$foo_comment_after        = 'after:foo';
-		$expected_current_sources = array(
-			'amp',
-			'foo',
-		);
-		$node                     = $dom->createComment( $foo_comment_after );
-		$sanitizer->capture_current_source( $node );
-		$this->assertEquals( $expected_current_sources, $sanitizer->current_sources );
-
-		$foo_comment_before = 'before:foo';
-		$opening_comment    = $dom->createComment( $foo_comment_before );
-		$sanitizer->capture_current_source( $opening_comment );
-		$this->assertEquals( array( 'amp' ), $sanitizer->current_sources );
-	}
-
 }

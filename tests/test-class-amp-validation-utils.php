@@ -355,23 +355,23 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
 		$this->assertContains( '<div class="notice notice-error">', $output );
-		$this->assertContains( '<!--before:plugin:amp', $output );
-		$this->assertContains( '<!--after:plugin:amp', $output );
+		$this->assertContains( '<!--plugin:amp', $output );
+		$this->assertContains( '<!--/plugin:amp', $output );
 
 		ob_start();
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
 		$this->assertContains( '<div></div>', $output );
-		$this->assertContains( '<!--before:plugin:amp', $output );
-		$this->assertContains( '<!--after:plugin:amp', $output );
+		$this->assertContains( '<!--plugin:amp', $output );
+		$this->assertContains( '<!--/plugin:amp', $output );
 
 		ob_start();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
 		$this->assertContains( $notice, $output );
 		$this->assertContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
-		$this->assertContains( '<!--before:plugin:amp', $output );
-		$this->assertContains( '<!--after:plugin:amp', $output );
+		$this->assertContains( '<!--plugin:amp', $output );
+		$this->assertContains( '<!--/plugin:amp', $output );
 
 		ob_start();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
@@ -380,22 +380,22 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
 		$this->assertContains( $expected_output, $output );
-		$this->assertContains( '<!--before:plugin:amp', $output );
-		$this->assertContains( '<!--after:plugin:amp', $output );
+		$this->assertContains( '<!--plugin:amp', $output );
+		$this->assertContains( '<!--/plugin:amp', $output );
 
 		// This action's callback isn't from a plugin or theme, so it shouldn't be wrapped in comments.
 		ob_start();
 		do_action( $action_non_plugin );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--before:', $output );
-		$this->assertNotContains( '<!--after:', $output );
+		$this->assertNotContains( '<!--plugin:', $output );
+		$this->assertNotContains( '<!--/plugin:', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		ob_start();
 		do_action( $action_no_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--before:', $output );
-		$this->assertNotContains( '<!--after:', $output );
+		$this->assertNotContains( '<!--plugin:', $output );
+		$this->assertNotContains( '<!--/plugin:', $output );
 	}
 
 	/**
@@ -405,7 +405,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_get_source() {
 		$plugin = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
-		$this->assertContains( 'amp', $plugin['source'] );
+		$this->assertContains( 'amp', $plugin['name'] );
 		$this->assertEquals( 'plugin', $plugin['type'] );
 		$the_content = AMP_Validation_Utils::get_source( 'the_content' );
 		$this->assertEquals( null, $the_content );
@@ -425,7 +425,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'function'      => 'the_ID',
 			'accepted_args' => 0,
 			'type'          => 'plugin',
-			'source'        => 'amp',
+			'name'          => 'amp',
 		);
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
@@ -435,14 +435,14 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
 		$this->assertContains( strval( get_the_ID() ), $output );
-		$this->assertContains( '<!--before:plugin:amp', $output );
-		$this->assertContains( '<!--after:plugin:amp', $output );
+		$this->assertContains( '<!--plugin:amp', $output );
+		$this->assertContains( '<!--/plugin:amp', $output );
 
 		$callback         = array(
 			'function'      => array( $this, 'get_string' ),
 			'accepted_args' => 0,
 			'type'          => 'plugin',
-			'source'        => 'amp',
+			'name'          => 'amp',
 		);
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
@@ -678,11 +678,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		AMP_Validation_Utils::reset_removed();
 		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
-		$custom_post_id    = AMP_Validation_Utils::store_validation_errors();
-		$non_existent_post = get_post( $custom_post_id );
 
 		// There are no errors, so the existing error post should be deleted.
-		$this->assertEquals( null, $non_existent_post );
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+
+		$this->assertNull( $custom_post_id );
 		remove_theme_support( 'amp' );
 	}
 

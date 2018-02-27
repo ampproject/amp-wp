@@ -315,7 +315,7 @@ class AMP_Validation_Utils {
 			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
 				foreach ( $callbacks as $callback ) {
 					$source_data = self::get_source( $callback['function'] );
-					if ( isset( $source_data['source'] ) ) {
+					if ( isset( $source_data ) ) {
 						$pending_wrap_callbacks[ $filter_tag ][] = array_merge(
 							$callback,
 							$source_data,
@@ -340,28 +340,33 @@ class AMP_Validation_Utils {
 	 * Gets the plugin or theme of the callback, if one exists.
 	 *
 	 * @param string|array $callback The callback for which to get the plugin.
-	 * @return array|null $source_data {
+	 * @return array|null {
 	 *     The source data.
 	 *
-	 *     @type string $type
-	 *     @type string $source
+	 *     @type string $type Source type.
+	 *     @type string $name Source name.
 	 * }
 	 */
 	public static function get_source( $callback ) {
-		if ( is_string( $callback ) && is_callable( $callback ) ) {
-			// The $callback is a function or static method.
-			$exploded_callback = explode( '::', $callback );
-			if ( count( $exploded_callback ) > 1 ) {
-				$reflection = new ReflectionClass( $exploded_callback[0] );
-			} else {
+		try {
+			if ( is_string( $callback ) && is_callable( $callback ) ) {
+				// The $callback is a function or static method.
+				$exploded_callback = explode( '::', $callback );
+				if ( count( $exploded_callback ) > 1 ) {
+					$reflection = new ReflectionClass( $exploded_callback[0] );
+				} else {
+					$reflection = new ReflectionFunction( $callback );
+				}
+			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
+				// The $callback is a method.
+				$reflection = new ReflectionClass( $callback[0] );
+			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
 				$reflection = new ReflectionFunction( $callback );
 			}
-		} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
-			// The $callback is a method.
-			$reflection = new ReflectionClass( $callback[0] );
-		} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
-			$reflection = new ReflectionFunction( $callback );
+		} catch ( Exception $e ) {
+			return null;
 		}
+
 
 		$file = isset( $reflection ) ? $reflection->getFileName() : null;
 		if ( ! isset( $file ) ) {
@@ -373,18 +378,18 @@ class AMP_Validation_Utils {
 		preg_match( ':' . wp_normalize_path( WPMU_PLUGIN_DIR ) . '/([^/]+)/:s', $file, $mu_plugin_matches );
 
 		if ( isset( $plugin_matches[1] ) ) {
-			$type   = 'plugin';
-			$source = $plugin_matches[1];
+			$type = 'plugin';
+			$name = $plugin_matches[1];
 		} elseif ( isset( $theme_matches[1] ) ) {
-			$type   = 'theme';
-			$source = $theme_matches[1];
+			$type = 'theme';
+			$name = $theme_matches[1];
 		} elseif ( isset( $mu_plugin_matches[1] ) ) {
-			$type   = 'mu-plugin';
-			$source = $mu_plugin_matches[1];
+			$type = 'mu-plugin';
+			$name = $mu_plugin_matches[1];
 		}
 
-		if ( isset( $type, $source ) ) {
-			return compact( 'type', 'source' );
+		if ( isset( $type, $name ) ) {
+			return compact( 'type', 'name' );
 		}
 		return null;
 	}
@@ -423,9 +428,9 @@ class AMP_Validation_Utils {
 			$output = ob_get_clean();
 
 			if ( ! empty( $output ) ) {
-				printf( '<!--before:%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['source'] ) );
+				printf( '<!--%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['name'] ) );
 				echo $output; // WPCS: XSS ok.
-				printf( '<!--after:%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['source'] ) );
+				printf( '<!--/%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['name'] ) );
 			}
 			return $result;
 		};
@@ -542,7 +547,8 @@ class AMP_Validation_Utils {
 		if ( isset( $existing_post_id ) ) {
 			// A post for the $url already exists.
 			if ( empty( $response[ self::PLUGINS_INVALID_OUTPUT ] ) ) {
-				wp_delete_post( $existing_post_id );
+				wp_delete_post( $existing_post_id, true );
+				return null;
 			} else {
 				wp_insert_post( array_merge(
 					array(

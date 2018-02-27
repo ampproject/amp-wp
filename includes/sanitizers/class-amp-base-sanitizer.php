@@ -77,9 +77,11 @@ abstract class AMP_Base_Sanitizer {
 	protected $root_element;
 
 	/**
-	 * The plugin or theme that is outputting markup, if any.
+	 * Stack of the plugin or theme that is outputting markup, if any.
 	 *
-	 * @var null|string
+	 * Each item in the stack is an array containing the 'type' (theme, plugin, mu-plugin) and the 'name' of the extension.
+	 *
+	 * @var array[][]
 	 */
 	public $current_sources = array();
 
@@ -336,10 +338,10 @@ abstract class AMP_Base_Sanitizer {
 		if ( isset( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ] ) ) {
 			call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ],
 				array(
-					'node'   => $child,
-					'parent' => $parent,
-				),
-				$this->current_sources
+					'node'    => $child,
+					'parent'  => $parent,
+					'sources' => $this->current_sources,
+				)
 			);
 		}
 	}
@@ -365,10 +367,10 @@ abstract class AMP_Base_Sanitizer {
 				$element->removeAttributeNode( $attribute );
 				call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ],
 					array(
-						'node'   => $attribute,
-						'parent' => $element,
-					),
-					$this->current_sources
+						'node'    => $attribute,
+						'parent'  => $element,
+						'sources' => $this->current_sources,
+					)
 				);
 			}
 		} elseif ( is_string( $attribute ) ) {
@@ -379,22 +381,21 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sets the current plugin that is outputting markup, if there is one.
+	 * Updates the captured current plugin that is outputting markup.
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMNode $node The node to check for the presence of a plugin in a comment.
+	 * @param DOMComment $node The node to check for the presence of a plugin in a comment.
 	 * @return void
 	 */
 	public function capture_current_source( $node ) {
-		preg_match( ':(before|after)\:(.*):s', $node->nodeValue, $matches );
-		if ( ! isset( $matches[1], $matches[2] ) ) {
+		if ( ! preg_match( '#(?P<closing>/)?(?P<type>theme|plugin|mu-plugin):(?P<name>.*)#s', $node->nodeValue, $matches ) ) {
 			return;
-		} elseif ( 'after' === $matches[1] ) {
-			$this->current_sources[] = $matches[2];
-		} elseif ( 'before' === $matches[1] ) {
+		}
+		if ( ! empty( $matches['closing'] ) ) {
 			array_pop( $this->current_sources );
+		} else {
+			$this->current_sources[] = wp_array_slice_assoc( $matches, array( 'type', 'name' ) );
 		}
 	}
-
 }

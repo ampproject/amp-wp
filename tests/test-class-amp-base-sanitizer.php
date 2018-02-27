@@ -1,9 +1,25 @@
 <?php
+/**
+ * Class AMP_Base_Sanitizer_Test
+ *
+ * @package AMP
+ */
 
-class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase {
-	public function get_data() {
+/**
+ * Test AMP_Base_Sanitizer_Test
+ *
+ * @covers AMP_Base_Sanitizer
+ */
+class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
+
+	/**
+	 * Get enforce sizes data.
+	 *
+	 * @return array Data
+	 */
+	public function get_enforce_sizes_data() {
 		return array(
-			'already_has_sizes' => array(
+			'already_has_sizes'                            => array(
 				array(
 					'sizes' => 'blah',
 				),
@@ -12,12 +28,12 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 				),
 			),
 
-			'empty' => array(
+			'empty'                                        => array(
 				array(),
 				array(),
 			),
 
-			'no_width' => array(
+			'no_width'                                     => array(
 				array(
 					'height' => 100,
 				),
@@ -26,7 +42,7 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 				),
 			),
 
-			'no_height' => array(
+			'no_height'                                    => array(
 				array(
 					'width' => 200,
 				),
@@ -35,43 +51,43 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 				),
 			),
 
-			'enforce_sizes_no_class' => array(
+			'enforce_sizes_no_class'                       => array(
 				array(
-					'width' => 200,
+					'width'  => 200,
 					'height' => 100,
 				),
 				array(
-					'width' => 200,
+					'width'  => 200,
 					'height' => 100,
-					'sizes' => '(min-width: 200px) 200px, 100vw',
-					'class' => 'amp-wp-enforced-sizes',
-				),
-			),
-
-			'enforce_sizes_has_class' => array(
-				array(
-					'width' => 200,
-					'height' => 100,
-					'class' => 'my-class',
-				),
-				array(
-					'width' => 200,
-					'height' => 100,
-					'sizes' => '(min-width: 200px) 200px, 100vw',
-					'class' => 'my-class amp-wp-enforced-sizes',
+					'sizes'  => '(min-width: 200px) 200px, 100vw',
+					'class'  => 'amp-wp-enforced-sizes',
 				),
 			),
 
-			'enforce_sizes_with_bigger_content_max_width' => array(
+			'enforce_sizes_has_class'                      => array(
 				array(
-					'width' => 250,
+					'width'  => 200,
+					'height' => 100,
+					'class'  => 'my-class',
+				),
+				array(
+					'width'  => 200,
+					'height' => 100,
+					'sizes'  => '(min-width: 200px) 200px, 100vw',
+					'class'  => 'my-class amp-wp-enforced-sizes',
+				),
+			),
+
+			'enforce_sizes_with_bigger_content_max_width'  => array(
+				array(
+					'width'  => 250,
 					'height' => 100,
 				),
 				array(
-					'width' => 250,
+					'width'  => 250,
 					'height' => 100,
-					'sizes' => '(min-width: 250px) 250px, 100vw',
-					'class' => 'amp-wp-enforced-sizes',
+					'sizes'  => '(min-width: 250px) 250px, 100vw',
+					'class'  => 'amp-wp-enforced-sizes',
 				),
 				array(
 					'content_max_width' => 500,
@@ -80,14 +96,14 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 
 			'enforce_sizes_with_smaller_content_max_width' => array(
 				array(
-					'width' => 800,
+					'width'  => 800,
 					'height' => 350,
 				),
 				array(
-					'width' => 800,
+					'width'  => 800,
 					'height' => 350,
-					'sizes' => '(min-width: 675px) 675px, 100vw',
-					'class' => 'amp-wp-enforced-sizes',
+					'sizes'  => '(min-width: 675px) 675px, 100vw',
+					'class'  => 'amp-wp-enforced-sizes',
 				),
 				array(
 					'content_max_width' => 675,
@@ -97,31 +113,40 @@ class AMP_Base_Sanitizer__Enforce_Sizes_Attribute__Test extends WP_UnitTestCase 
 	}
 
 	/**
-	 * @dataProvider get_data
+	 * Test AMP_Base_Sanitizer::enforce_sizes_attribute().
+	 *
+	 * @dataProvider get_enforce_sizes_data
+	 * @param array $source_attributes   Source Attrs.
+	 * @param array $expected_attributes Expected Attrs.
+	 * @param array $args                Args.
+	 * @covers AMP_Base_Sanitizer::enforce_sizes_attribute()
 	 */
 	public function test_enforce_sizes_attribute( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
+		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
 		$returned_attributes = $sanitizer->enforce_sizes_attribute( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
-}
 
-class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
-	public function get_data() {
+	/**
+	 * Get enforce fixed data.
+	 *
+	 * @return array Data.
+	 */
+	public function get_enforce_fixed_data() {
 		return array(
 			'both_dimensions_included' => array(
 				array(
-					'width' => 100,
+					'width'  => 100,
 					'height' => 100,
 				),
 				array(
-					'width' => 100,
+					'width'  => 100,
 					'height' => 100,
 				),
 			),
 
-			'both_dimensions_missing' => array(
+			'both_dimensions_missing'  => array(
 				array(),
 				array(
 					'height' => 400,
@@ -129,9 +154,9 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 				),
 			),
 
-			'both_dimensions_empty' => array(
+			'both_dimensions_empty'    => array(
 				array(
-					'width' => '',
+					'width'  => '',
 					'height' => '',
 				),
 				array(
@@ -140,7 +165,7 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 				),
 			),
 
-			'no_width' => array(
+			'no_width'                 => array(
 				array(
 					'height' => 100,
 				),
@@ -150,7 +175,7 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 				),
 			),
 
-			'no_height' => array(
+			'no_height'                => array(
 				array(
 					'width' => 200,
 				),
@@ -163,40 +188,49 @@ class AMP_Base_Sanitizer__Enforce_Fixed_Height__Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @dataProvider get_data
+	 * Test AMP_Base_Sanitizer::enforce_fixed_height().
+	 *
+	 * @dataProvider get_enforce_fixed_data
+	 * @param array $source_attributes   Source Attrs.
+	 * @param array $expected_attributes Expected Attrs.
+	 * @param array $args                Args.
+	 * @covers AMP_Base_Sanitizer::enforce_fixed_height()
 	 */
 	public function test_enforce_fixed_height( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
+		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
 		$returned_attributes = $sanitizer->enforce_fixed_height( $source_attributes );
 
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
-}
 
-class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
-	public function get_data() {
+	/**
+	 * Get sanitize_dimension data.
+	 *
+	 * @return array Data.
+	 */
+	public function get_sanitize_dimension_data() {
 		return array(
-			'empty' => array(
+			'empty'                => array(
 				array( '', 'width' ),
 				'',
 			),
 
-			'empty_space' => array(
+			'empty_space'          => array(
 				array( ' ', 'width' ),
 				'',
 			),
 
-			'int' => array(
+			'int'                  => array(
 				array( 123, 'width' ),
 				123,
 			),
 
-			'int_as_string' => array(
+			'int_as_string'        => array(
 				array( '123', 'width' ),
 				123,
 			),
 
-			'with_px' => array(
+			'with_px'              => array(
 				array( '567px', 'width' ),
 				567,
 			),
@@ -207,23 +241,23 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 				array( 'content_max_width' => 600 ),
 			),
 
-			'100%_width__no_max' => array(
+			'100%_width__no_max'   => array(
 				array( '100%', 'width' ),
 				'',
 			),
 
-			'50%_width__with_max' => array(
+			'50%_width__with_max'  => array(
 				array( '50%', 'width' ),
 				300,
 				array( 'content_max_width' => 600 ),
 			),
 
-			'%_height' => array(
+			'%_height'             => array(
 				array( '100%', 'height' ),
 				'',
 			),
 
-			'non_int' => array(
+			'non_int'              => array(
 				array( 'abcd', 'width' ),
 				'',
 			),
@@ -231,10 +265,16 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @dataProvider get_data
+	 * Test AMP_Base_Sanitizer::sanitize_dimension().
+	 *
+	 * @param array $source_params  Source Attrs.
+	 * @param array $expected_value Expected Attrs.
+	 * @param array $args           Args.
+	 * @dataProvider get_sanitize_dimension_data
+	 * @covers AMP_Base_Sanitizer::sanitize_dimension()
 	 */
-	public function test_enforce_sizes_attribute( $source_params, $expected_value, $args = array() ) {
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
+	public function test_sanitize_dimension( $source_params, $expected_value, $args = array() ) {
+		$sanitizer                 = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
 		list( $value, $dimension ) = $source_params;
 
 		$actual_value = $sanitizer->sanitize_dimension( $value, $dimension );
@@ -255,9 +295,11 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$parent->appendChild( $child );
 
 		$this->assertEquals( $child, $parent->firstChild );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom_document, array(
-			AMP_Validation_Utils::CALLBACK_KEY => 'AMP_Validation_Utils::track_removed',
-		) );
+		$sanitizer = new AMP_Iframe_Sanitizer(
+			$dom_document, array(
+				AMP_Validation_Utils::CALLBACK_KEY => 'AMP_Validation_Utils::track_removed',
+			)
+		);
 		$sanitizer->remove_invalid_child( $child );
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
@@ -291,10 +333,11 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
 		$sanitizer->remove_invalid_attribute( $video, $attribute );
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
-		$this->assertEquals(
+		$this->assertSame(
 			array(
-				'node'   => $attr_node,
-				'parent' => $video,
+				'node'    => $attr_node,
+				'parent'  => $video,
+				'sources' => array(),
 			),
 			AMP_Validation_Utils::$removed_nodes[0]
 		);
@@ -307,27 +350,39 @@ class AMP_Base_Sanitizer__Sanitize_Dimension__Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::capture_current_source()
 	 */
 	public function test_capture_current_source() {
-		$dom             = new DomDocument();
-		$closing_comment = 'after:amp';
-		$node            = $dom->createComment( $closing_comment );
-		$sanitizer       = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$dom       = new DOMDocument();
+		$node      = $dom->createComment( 'plugin:amp' );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$this->assertEquals( array(), $sanitizer->current_sources );
 		$sanitizer->capture_current_source( $node );
-		$this->assertEquals( array( 'amp' ), $sanitizer->current_sources );
+		$this->assertCount( 1, $sanitizer->current_sources );
+
+		$amp_source = array(
+			'type' => 'plugin',
+			'name' => 'amp',
+		);
+		$foo_source = array(
+			'type' => 'theme',
+			'name' => 'foo',
+		);
+
+		$this->assertEquals(
+			$amp_source,
+			$sanitizer->current_sources[0]
+		);
 
 		$expected_sources = array(
-			'amp',
-			'foo',
+			$amp_source,
+			$foo_source,
 		);
-		$closing_comment  = 'after:foo';
-		$node             = $dom->createComment( $closing_comment );
+
+		$node = $dom->createComment( 'theme:foo' );
 		$sanitizer->capture_current_source( $node );
 		$this->assertEquals( $expected_sources, $sanitizer->current_sources );
-		$before_comment_foo = $dom->createComment( 'before:foo' );
-		$before_comment_amp = $dom->createComment( 'before:amp' );
-		$sanitizer->capture_current_source( $before_comment_foo );
-		$this->assertEquals( array( 'amp' ), $sanitizer->current_sources );
-		$sanitizer->capture_current_source( $before_comment_amp );
+
+		$sanitizer->capture_current_source( $dom->createComment( '/theme:foo' ) );
+		$this->assertEquals( array( $amp_source ), $sanitizer->current_sources );
+		$sanitizer->capture_current_source( $dom->createComment( '/plugin:amp' ) );
 		$this->assertEquals( array(), $sanitizer->current_sources );
 	}
 
