@@ -175,22 +175,14 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function sanitize_dimension( $value, $dimension ) {
 
-		/**
-		 * Allows 0 as valid dimension.
-		 */
+		// Allows 0 to be used as valid dimension.
 		if ( null === $value ) {
 			return '';
 		}
 
-		if ( false !== filter_var( $value, FILTER_VALIDATE_INT ) ) {
-			return absint( $value );
-		}
-
-		/**
-		 * Allows floats but parses them to integers.
-		 */
-		if ( false !== filter_var( $value, FILTER_VALIDATE_FLOAT ) ) {
-			return absint( $value );
+		// Accepts both integers and floats & prevents negative values.
+		if ( is_numeric( $value ) ) {
+			return max( 0, floatval( $value ) );
 		}
 
 		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
@@ -263,7 +255,12 @@ abstract class AMP_Base_Sanitizer {
 			$max_width = $this->args['content_max_width'];
 		}
 
-		$attributes['sizes'] = sprintf( '(min-width: %1$dpx) %1$dpx, 100vw', absint( $max_width ) );
+		// Allows floats and integers but prevents negative values.
+		// Uses string format to prevent additional modification.
+		$attributes['sizes'] = sprintf(
+			'(min-width: %1$spx) %1$spx, 100vw',
+			max( 0, floatval( $max_width ) )
+		);
 
 		$this->add_or_append_attribute( $attributes, 'class', 'amp-wp-enforced-sizes' );
 
