@@ -48,11 +48,11 @@ class AMP_Validation_Utils {
 	const POST_TYPE_SLUG = 'amp_validation_error';
 
 	/**
-	 * The key in the response for the plugins that have invalid output.
+	 * The key in the response for the sources that have invalid output.
 	 *
 	 * @var string
 	 */
-	const PLUGINS_INVALID_OUTPUT = 'plugins_with_invalid_output';
+	const SOURCES_INVALID_OUTPUT = 'sources_with_invalid_output';
 
 	/**
 	 * The meta key for the primary AMP URL where the error occurred.
@@ -76,11 +76,14 @@ class AMP_Validation_Utils {
 	public static $removed_nodes = array();
 
 	/**
-	 * The plugins that have had nodes removed.
+	 * The sources that have had nodes removed.
 	 *
-	 * @var array
+	 * @var array[][] {
+	 *     @type string $name The name of the source.
+	 *     @type string $type The type of the source.
+	 * }
 	 */
-	public static $plugins_removed_nodes = array();
+	public static $sources_removed_nodes = array();
 
 	/**
 	 * Add the actions.
@@ -92,22 +95,41 @@ class AMP_Validation_Utils {
 		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
 		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
-		add_filter( 'init', array( __CLASS__, 'register_post_type' ) );
+		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+		add_action( 'activate_plugin', array( __CLASS__, 'validate_home' ) );
+		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 	}
 
 	/**
 	 * Tracks when a sanitizer removes a node (element or attribute).
 	 *
-	 * @param DOMNode $node    The node which was removed.
-	 * @param array   $sources The plugins and/or themes of the removed elements.
+	 * @param array $removed {
+	 *     The data of the removed node.
+	 *
+	 *     @type DOMElement|DOMNode $node   The removed node.
+	 *     @type DOMElement|DOMNode $parent The parent of the removed node.
+	 *     @type array[][]          $sources {
+	 *           The data of the removed sources (theme, plugin, or mu-plugin).
+	 *
+	 *           @type string $name The name of the source.
+	 *           @type string $type The type of the source.
+	 *     }
+	 * }
 	 * @return void
 	 */
-	public static function track_removed( $node, $sources = array() ) {
-		self::$removed_nodes[] = $node;
-		$source                = array_pop( $sources );
-		if ( isset( $source ) && ! in_array( $source, self::$plugins_removed_nodes, true ) ) {
-			self::$plugins_removed_nodes[] = $source;
+	public static function track_removed( $removed ) {
+		$source = ! empty( $removed['sources'] ) ? array_pop( $removed['sources'] ) : null;
+		if ( isset( $source['name'], $source['type'] ) ) {
+			$removed['sources'] = $source;
+			$name               = $source['name'];
+			$type               = $source['type'];
+			if ( ! isset( self::$sources_removed_nodes[ $type ] ) ) {
+				self::$sources_removed_nodes[ $type ] = array( $name );
+			} elseif ( is_array( self::$sources_removed_nodes[ $type ] ) && ( ! in_array( $name, self::$sources_removed_nodes[ $type ], true ) ) ) {
+				self::$sources_removed_nodes[ $type ][] = $name;
+			}
 		}
+		self::$removed_nodes[] = $removed;
 	}
 
 	/**
@@ -202,13 +224,16 @@ class AMP_Validation_Utils {
 	 * @return array $response The AMP validity of the markup.
 	 */
 	public static function get_response( $markup = null ) {
+		global $wp;
 		$response = array();
 		if ( isset( $markup ) ) {
 			self::process_markup( $markup );
 			$response['processed_markup'] = $markup;
+		} elseif ( isset( $wp ) ) {
+			$response['url'] = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 		}
 		if ( self::should_validate_front_end() ) {
-			$response[ self::PLUGINS_INVALID_OUTPUT ] = self::$plugins_removed_nodes;
+			$response[ self::SOURCES_INVALID_OUTPUT ] = self::$sources_removed_nodes;
 		}
 
 		$removed_elements   = array();
@@ -233,7 +258,6 @@ class AMP_Validation_Utils {
 		$response = array_merge(
 			array(
 				self::ERROR_KEY => self::was_node_removed(),
-				'url'           => get_permalink(),
 			),
 			compact(
 				'removed_elements',
@@ -256,7 +280,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function reset_removed() {
 		self::$removed_nodes         = array();
-		self::$plugins_removed_nodes = array();
+		self::$sources_removed_nodes = array();
 	}
 
 	/**
@@ -367,15 +391,15 @@ class AMP_Validation_Utils {
 			return null;
 		}
 
-
 		$file = isset( $reflection ) ? $reflection->getFileName() : null;
 		if ( ! isset( $file ) ) {
 			return null;
 		}
 
-		preg_match( ':' . wp_normalize_path( WP_PLUGIN_DIR ) . '([^/]+)/:s', $file, $plugin_matches );
-		preg_match( ':' . wp_normalize_path( get_theme_root() ) . '/([^/]+)/:s', $file, $theme_matches );
-		preg_match( ':' . wp_normalize_path( WPMU_PLUGIN_DIR ) . '/([^/]+)/:s', $file, $mu_plugin_matches );
+		$closing_pattern = '([^/]+)/:s';
+		preg_match( ':' . trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ) . $closing_pattern, $file, $plugin_matches );
+		preg_match( ':' . trailingslashit( wp_normalize_path( get_theme_root() ) ) . $closing_pattern, $file, $theme_matches );
+		preg_match( ':' . trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ) . $closing_pattern, $file, $mu_plugin_matches );
 
 		if ( isset( $plugin_matches[1] ) ) {
 			$type = 'plugin';
@@ -483,8 +507,7 @@ class AMP_Validation_Utils {
 	 * @return boolean
 	 */
 	public static function should_validate_front_end() {
-		$post = get_post();
-		return ( isset( $post ) && post_supports_amp( $post ) && self::has_cap() && ( isset( $_GET[ self::VALIDATION_QUERY_VAR ] ) ) ); // WPCS: CSRF ok.
+		return ( self::has_cap() && ( isset( $_GET[ self::VALIDATION_QUERY_VAR ] ) ) ); // WPCS: CSRF ok.
 	}
 
 	/**
@@ -524,13 +547,17 @@ class AMP_Validation_Utils {
 	/**
 	 * Stores the validation errors.
 	 *
-	 * After the preprocessors run, this gets the validation response.
+	 * After the preprocessors run, this gets the validation response if the query var is present.
 	 * It then stores the response in a custom post type.
-	 * If there's already an error post, but there's no error anymore, it deletes the post.
+	 * If there's already an error post for the URL, but there's no error anymore, it deletes it.
 	 *
 	 * @return int|null $post_id The post ID of the custom post type used, or null.
 	 */
 	public static function store_validation_errors() {
+		if ( ! self::should_validate_front_end() ) {
+			return null;
+		}
+
 		$response = self::get_response();
 		$url      = isset( $response['url'] ) ? $response['url'] : null;
 		unset( $response['url'] );
@@ -541,12 +568,12 @@ class AMP_Validation_Utils {
 			'post_type'    => self::POST_TYPE_SLUG,
 			'post_name'    => $post_name,
 			'post_content' => $encoded_errors,
+			'post_status'  => 'publish',
 		);
 		$existing_post_id          = self::existing_post( $url );
-
 		if ( isset( $existing_post_id ) ) {
 			// A post for the $url already exists.
-			if ( empty( $response[ self::PLUGINS_INVALID_OUTPUT ] ) ) {
+			if ( empty( $response[ self::SOURCES_INVALID_OUTPUT ] ) ) {
 				wp_delete_post( $existing_post_id, true );
 				return null;
 			} else {
@@ -559,7 +586,7 @@ class AMP_Validation_Utils {
 			}
 			return $existing_post_id;
 		} elseif ( isset( $different_post_same_error->ID ) ) {
-			// The error is already stored somewhere, so append it to the meta.
+			// The error is already stored somewhere, so append it to the post meta.
 			$updated_meta = add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, $url, true );
 			if ( ! $updated_meta ) {
 				$meta   = get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, true );
@@ -568,10 +595,18 @@ class AMP_Validation_Utils {
 				update_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, $meta );
 			}
 			return $different_post_same_error->ID;
-		} elseif ( ! empty( $response[ self::PLUGINS_INVALID_OUTPUT ] ) ) {
+		} elseif ( ! empty( $response[ self::SOURCES_INVALID_OUTPUT ] ) ) {
 			// There are validation issues from a plugin, but no existing post for them, so create one.
-			$new_post_id = wp_insert_post( $post_args );
-			update_post_meta( $new_post_id, self::AMP_URL_META, $url );
+			$new_post_id = wp_insert_post(
+				array_merge(
+					array(
+						'meta_input' => array(
+							self::AMP_URL_META => $url,
+						),
+					),
+					$post_args
+				)
+			);
 			return $new_post_id;
 		}
 
@@ -585,23 +620,66 @@ class AMP_Validation_Utils {
 	 * @return int|null $post_id The post ID of the existing custom post, or null.
 	 */
 	public static function existing_post( $url ) {
-		$meta_query = new WP_Query( array(
+		$query = new WP_Query( array(
 			'post_type'  => self::POST_TYPE_SLUG,
 			'meta_query' => array(
 				array(
-					'key'     => self::AMP_URL_META,
-					'value'   => $url,
-					'compare' => '=',
+					'key'   => self::AMP_URL_META,
+					'value' => $url,
 				),
 			),
 		) );
 
-		if ( $meta_query->have_posts() ) {
-			$posts = $meta_query->get_posts();
+		if ( $query->have_posts() ) {
+			$posts = $query->get_posts();
 			$post  = reset( $posts );
 			return $post->ID;
 		}
 		return null;
+	}
+
+	/**
+	 * Validate the home page.
+	 *
+	 * @return WP_Error|array The response array, or WP_Error.
+	 */
+	public static function validate_home() {
+		return wp_remote_get( add_query_arg(
+			self::VALIDATION_QUERY_VAR,
+			1,
+			get_home_url()
+		) );
+	}
+
+	/**
+	 * On activating a plugin, display a notice if a plugin causes an AMP validation error.
+	 *
+	 * @return void
+	 */
+	public static function plugin_notice() {
+		global $pagenow;
+		if ( ( 'plugins.php' === $pagenow ) && isset( $_GET['activate'] ) && ( 'true' === wp_unslash( $_GET['activate'] ) ) ) { // WPCS: CSRF ok.
+			$home_errors = self::existing_post( get_home_url() );
+			if ( ! is_int( $home_errors ) ) {
+				return;
+			}
+			$error_post = get_post( $home_errors );
+			if ( ! isset( $error_post->post_content ) ) {
+				return;
+			}
+			$errors          = json_decode( $error_post->post_content, true );
+			$invalid_plugins = isset( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] : null;
+			if ( isset( $invalid_plugins ) ) {
+				echo '<div class="notice notice-warning"><p>';
+				$reported_plugins = array();
+				foreach ( $invalid_plugins as $plugin ) {
+					$reported_plugins[] = sprintf( '<code>%s</code>', esc_html( $plugin ) );
+				}
+				esc_html_e( 'Warning: the following plugins are incompatible with AMP: ', 'amp' );
+				echo implode( ', ', $reported_plugins ); // WPCS: XSS ok.
+				echo '</p></div>';
+			}
+		}
 	}
 
 }

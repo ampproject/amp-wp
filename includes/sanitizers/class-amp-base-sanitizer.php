@@ -393,9 +393,9 @@ abstract class AMP_Base_Sanitizer {
 			return;
 		}
 		if ( ! empty( $matches['closing'] ) ) {
-			array_pop( $this->current_sources );
-		} else {
 			$this->current_sources[] = wp_array_slice_assoc( $matches, array( 'type', 'name' ) );
+		} else {
+			array_pop( $this->current_sources );
 		}
 	}
 }

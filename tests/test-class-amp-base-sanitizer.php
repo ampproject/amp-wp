@@ -288,6 +288,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_child() {
+		AMP_Validation_Utils::reset_removed();
 		$parent_tag_name = 'div';
 		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
@@ -351,7 +352,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_capture_current_source() {
 		$dom       = new DOMDocument();
-		$node      = $dom->createComment( 'plugin:amp' );
+		$node      = $dom->createComment( '/plugin:amp' );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$this->assertEquals( array(), $sanitizer->current_sources );
 		$sanitizer->capture_current_source( $node );
@@ -371,18 +372,19 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			$sanitizer->current_sources[0]
 		);
 
-		$expected_sources = array(
-			$amp_source,
-			$foo_source,
+		$node = $dom->createComment( '/theme:foo' );
+		$sanitizer->capture_current_source( $node );
+		$this->assertEquals(
+			array(
+				$amp_source,
+				$foo_source,
+			),
+			$sanitizer->current_sources
 		);
 
-		$node = $dom->createComment( 'theme:foo' );
-		$sanitizer->capture_current_source( $node );
-		$this->assertEquals( $expected_sources, $sanitizer->current_sources );
-
-		$sanitizer->capture_current_source( $dom->createComment( '/theme:foo' ) );
+		$sanitizer->capture_current_source( $dom->createComment( 'theme:foo' ) );
 		$this->assertEquals( array( $amp_source ), $sanitizer->current_sources );
-		$sanitizer->capture_current_source( $dom->createComment( '/plugin:amp' ) );
+		$sanitizer->capture_current_source( $dom->createComment( 'plugin:amp' ) );
 		$this->assertEquals( array(), $sanitizer->current_sources );
 	}
 

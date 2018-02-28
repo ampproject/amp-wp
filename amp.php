@@ -109,9 +109,9 @@ function amp_init() {
 
 	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
 
+	AMP_Validation_Utils::init();
 	AMP_Theme_Support::init();
 	AMP_Post_Type_Support::add_post_type_support();
-	AMP_Validation_Utils::init();
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
