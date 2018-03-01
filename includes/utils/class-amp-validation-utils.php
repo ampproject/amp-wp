@@ -71,19 +71,12 @@ class AMP_Validation_Utils {
 	/**
 	 * The nodes that the sanitizer removed.
 	 *
-	 * @var array[][]
-	 */
-	public static $removed_nodes = array();
-
-	/**
-	 * The sources that have had nodes removed.
-	 *
 	 * @var array[][] {
-	 *     @type string $name The name of the source.
-	 *     @type string $type The type of the source.
+	 *     @type DOMElement|DOMAttr $node   Node removed.
+	 *     @type DOMElement         $parent Parent of removed node.
 	 * }
 	 */
-	public static $sources_removed_nodes = array();
+	public static $removed_nodes = array();
 
 	/**
 	 * Add the actions.
@@ -96,7 +89,11 @@ class AMP_Validation_Utils {
 		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
-		add_action( 'activate_plugin', array( __CLASS__, 'validate_home' ) );
+		add_action( 'activate_plugin', function() {
+			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_home' ) ) ) {
+				add_action( 'shutdown', array( __CLASS__, 'validate_home' ) ); // Shutdown so all plugins will have been activated.
+			}
+		} );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 	}
 
@@ -118,17 +115,6 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function track_removed( $removed ) {
-		$source = ! empty( $removed['sources'] ) ? array_pop( $removed['sources'] ) : null;
-		if ( isset( $source['name'], $source['type'] ) ) {
-			$removed['sources'] = $source;
-			$name               = $source['name'];
-			$type               = $source['type'];
-			if ( ! isset( self::$sources_removed_nodes[ $type ] ) ) {
-				self::$sources_removed_nodes[ $type ] = array( $name );
-			} elseif ( is_array( self::$sources_removed_nodes[ $type ] ) && ( ! in_array( $name, self::$sources_removed_nodes[ $type ], true ) ) ) {
-				self::$sources_removed_nodes[ $type ][] = $name;
-			}
-		}
 		self::$removed_nodes[] = $removed;
 	}
 
@@ -230,14 +216,12 @@ class AMP_Validation_Utils {
 			self::process_markup( $markup );
 			$response['processed_markup'] = $markup;
 		} elseif ( isset( $wp ) ) {
-			$response['url'] = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
-		}
-		if ( self::should_validate_front_end() ) {
-			$response[ self::SOURCES_INVALID_OUTPUT ] = self::$sources_removed_nodes;
+			$response['url'] = add_query_arg( $wp->query_string, '', home_url( user_trailingslashit( $wp->request ) ) );
 		}
 
 		$removed_elements   = array();
 		$removed_attributes = array();
+		$invalid_sources    = array();
 		foreach ( self::$removed_nodes as $removed ) {
 			$node = $removed['node'];
 			if ( $node instanceof DOMAttr ) {
@@ -253,11 +237,19 @@ class AMP_Validation_Utils {
 					$removed_elements[ $node->nodeName ]++;
 				}
 			}
+
+			// @todo It would be best if the invalid source was tied to the invalid elements and attributes.
+			if ( ! empty( $removed['sources'] ) ) {
+				$source = array_pop( $removed['sources'] );
+
+				$invalid_sources[ $source['type'] ][] = $source['name'];
+			}
 		}
 
 		$response = array_merge(
 			array(
-				self::ERROR_KEY => self::was_node_removed(),
+				self::ERROR_KEY              => self::was_node_removed(),
+				self::SOURCES_INVALID_OUTPUT => $invalid_sources,
 			),
 			compact(
 				'removed_elements',
@@ -279,8 +271,7 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function reset_removed() {
-		self::$removed_nodes         = array();
-		self::$sources_removed_nodes = array();
+		self::$removed_nodes = array();
 	}
 
 	/**
@@ -395,21 +386,18 @@ class AMP_Validation_Utils {
 		if ( ! isset( $file ) ) {
 			return null;
 		}
+		$file = wp_normalize_path( $file );
 
-		$closing_pattern = '([^/]+)/:s';
-		preg_match( ':' . trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ) . $closing_pattern, $file, $plugin_matches );
-		preg_match( ':' . trailingslashit( wp_normalize_path( get_theme_root() ) ) . $closing_pattern, $file, $theme_matches );
-		preg_match( ':' . trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ) . $closing_pattern, $file, $mu_plugin_matches );
-
-		if ( isset( $plugin_matches[1] ) ) {
+		$slug_pattern = '([^/]+)';
+		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 			$type = 'plugin';
-			$name = $plugin_matches[1];
-		} elseif ( isset( $theme_matches[1] ) ) {
+			$name = $matches[1];
+		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 			$type = 'theme';
-			$name = $theme_matches[1];
-		} elseif ( isset( $mu_plugin_matches[1] ) ) {
+			$name = $matches[1];
+		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 			$type = 'mu-plugin';
-			$name = $mu_plugin_matches[1];
+			$name = $matches[1];
 		}
 
 		if ( isset( $type, $name ) ) {
@@ -577,18 +565,18 @@ class AMP_Validation_Utils {
 				wp_delete_post( $existing_post_id, true );
 				return null;
 			} else {
-				wp_insert_post( array_merge(
+				wp_insert_post( wp_slash( array_merge(
 					array(
 						'ID' => $existing_post_id,
 					),
 					$post_args
-				) );
+				) ) );
 			}
 			return $existing_post_id;
 		} elseif ( isset( $different_post_same_error->ID ) ) {
 			// The error is already stored somewhere, so append it to the post meta.
-			$updated_meta = add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, $url, true );
-			if ( ! $updated_meta ) {
+			$updated_meta = add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, wp_slash( $url ), true );
+			if ( ! $updated_meta ) { // @todo This shouldn't be needed?
 				$meta   = get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, true );
 				$meta   = is_array( $meta ) ? $meta : array( $meta );
 				$meta[] = $url;
@@ -598,14 +586,14 @@ class AMP_Validation_Utils {
 		} elseif ( ! empty( $response[ self::SOURCES_INVALID_OUTPUT ] ) ) {
 			// There are validation issues from a plugin, but no existing post for them, so create one.
 			$new_post_id = wp_insert_post(
-				array_merge(
+				wp_slash( array_merge(
 					array(
 						'meta_input' => array(
 							self::AMP_URL_META => $url,
 						),
 					),
 					$post_args
-				)
+				) )
 			);
 			return $new_post_id;
 		}
@@ -621,21 +609,17 @@ class AMP_Validation_Utils {
 	 */
 	public static function existing_post( $url ) {
 		$query = new WP_Query( array(
-			'post_type'  => self::POST_TYPE_SLUG,
-			'meta_query' => array(
+			'post_type'   => self::POST_TYPE_SLUG,
+			'post_status' => 'publish',
+			'fields'      => 'ids',
+			'meta_query'  => array(
 				array(
 					'key'   => self::AMP_URL_META,
 					'value' => $url,
 				),
 			),
 		) );
-
-		if ( $query->have_posts() ) {
-			$posts = $query->get_posts();
-			$post  = reset( $posts );
-			return $post->ID;
-		}
-		return null;
+		return array_shift( $query->posts );
 	}
 
 	/**
@@ -644,10 +628,14 @@ class AMP_Validation_Utils {
 	 * @return WP_Error|array The response array, or WP_Error.
 	 */
 	public static function validate_home() {
-		return wp_remote_get( add_query_arg(
+		$url = add_query_arg(
 			self::VALIDATION_QUERY_VAR,
 			1,
-			get_home_url()
+			home_url( '/' )
+		);
+		return wp_remote_get( $url, array(
+			'cookies'   => wp_unslash( $_COOKIE ),
+			'sslverify' => false,
 		) );
 	}
 
@@ -658,8 +646,8 @@ class AMP_Validation_Utils {
 	 */
 	public static function plugin_notice() {
 		global $pagenow;
-		if ( ( 'plugins.php' === $pagenow ) && isset( $_GET['activate'] ) && ( 'true' === wp_unslash( $_GET['activate'] ) ) ) { // WPCS: CSRF ok.
-			$home_errors = self::existing_post( get_home_url() );
+		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
+			$home_errors = self::existing_post( home_url( '/' ) );
 			if ( ! is_int( $home_errors ) ) {
 				return;
 			}
