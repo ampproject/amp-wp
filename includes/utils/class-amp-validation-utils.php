@@ -69,6 +69,27 @@ class AMP_Validation_Utils {
 	const URLS_VALIDATION_ERROR = 'amp_additional_urls_validation_error';
 
 	/**
+	 * The key for removed elements.
+	 *
+	 * @var string
+	 */
+	const REMOVED_ELEMENTS = 'removed_elements';
+
+	/**
+	 * The key for removed attributes.
+	 *
+	 * @var string
+	 */
+	const REMOVED_ATTRIBUTES = 'removed_attributes';
+
+	/**
+	 * The key for removed sources.
+	 *
+	 * @var string
+	 */
+	const REMOVED_SOURCES = 'removed_sources';
+
+	/**
 	 * The nodes that the sanitizer removed.
 	 *
 	 * @var array[][] {
@@ -95,6 +116,9 @@ class AMP_Validation_Utils {
 			}
 		} );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
+		add_action( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
+		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
+		add_action( 'post_row_actions', array( __CLASS__, 'add_recheck' ), 10, 2 );
 	}
 
 	/**
@@ -475,18 +499,33 @@ class AMP_Validation_Utils {
 		}
 		foreach ( $removed_sets as $removed_set ) {
 			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
-			$items = array();
-			foreach ( $removed_set['names'] as $name => $count ) {
-				if ( 1 === intval( $count ) ) {
-					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
-				} else {
-					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
-				}
-			}
-			echo implode( ', ', $items ); // WPCS: XSS OK.
+			self::output_removed_set( $removed_set['names'] );
 			echo '</p>';
 		}
 		echo '</div>';
+	}
+
+	/**
+	 * Output a removed set, each wrapped in <code></code>.
+	 *
+	 * @param array[][] $set {
+	 *     The removed elements to output.
+	 *
+	 *     @type string $name  The name of the source.
+	 *     @type string $count The number that were invalid.
+	 * }
+	 * @return void
+	 */
+	public static function output_removed_set( $set ) {
+		$items = array();
+		foreach ( $set as $name => $count ) {
+			if ( 1 === intval( $count ) ) {
+				$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+			} else {
+				$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+			}
+		}
+		echo implode( ', ', $items ); // WPCS: XSS OK.
 	}
 
 	/**
@@ -523,11 +562,13 @@ class AMP_Validation_Utils {
 		register_post_type(
 			self::POST_TYPE_SLUG,
 			array(
-				'labels'   => array(
+				'labels'       => array(
 					'name' => _x( 'AMP Validation Errors', 'post type general name', 'amp' ),
 				),
-				'supports' => false,
-				'public'   => false,
+				'supports'     => false,
+				'public'       => false,
+				'show_ui'      => true,
+				'show_in_menu' => AMP_Options_Manager::OPTION_NAME,
 			)
 		);
 	}
@@ -567,7 +608,10 @@ class AMP_Validation_Utils {
 			} else {
 				wp_insert_post( wp_slash( array_merge(
 					array(
-						'ID' => $existing_post_id,
+						'ID'         => $existing_post_id,
+						'meta_input' => array(
+							self::AMP_URL_META => $url,
+						),
 					),
 					$post_args
 				) ) );
@@ -663,6 +707,92 @@ class AMP_Validation_Utils {
 				echo '</p></div>';
 			}
 		}
+	}
+
+	/**
+	 * Adds post columns to the UI for the validation errors.
+	 *
+	 * @param array $columns The post columns.
+	 * @return array $columns The new post columns.
+	 */
+	public static function add_post_columns( $columns ) {
+		return array(
+			'cb'                         => isset( $columns['cb'] ) ? $columns['cb'] : null,
+			'url'                        => esc_html__( 'URL', 'amp' ),
+			self::REMOVED_ELEMENTS       => esc_html__( 'Removed Elements', 'amp' ),
+			self::REMOVED_ATTRIBUTES     => esc_html__( 'Removed Attributes', 'amp' ),
+			self::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Source', 'amp' ),
+		);
+	}
+
+	/**
+	 * Outputs custom columns in the /wp-admin UI for the AMP validation errors.
+	 *
+	 * @param string $column_name The name of the column.
+	 * @param int    $post_id     The ID of the post for the column.
+	 * @return void
+	 */
+	public static function output_custom_column( $column_name, $post_id ) {
+		$post = get_post( $post_id );
+		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
+			return;
+		}
+		$errors = json_decode( $post->post_content, true );
+		$url    = get_post_meta( $post_id, self::AMP_URL_META, true );
+
+		switch ( $column_name ) {
+			case 'url':
+				if ( ! empty( $url ) ) {
+					printf( '<a href="%1$s">%1$s</a>', esc_url( $url ) );
+				}
+				break;
+			case self::REMOVED_ELEMENTS:
+				if ( isset( $errors[ self::REMOVED_ELEMENTS ] ) ) {
+					self::output_removed_set( $errors[ self::REMOVED_ELEMENTS ] );
+				}
+				break;
+			case self::REMOVED_ATTRIBUTES:
+				if ( isset( $errors[ self::REMOVED_ATTRIBUTES ] ) ) {
+					self::output_removed_set( $errors[ self::REMOVED_ATTRIBUTES ] );
+				}
+				break;
+			case self::SOURCES_INVALID_OUTPUT:
+				if ( isset( $errors[ self::SOURCES_INVALID_OUTPUT ] ) ) {
+					$sources = array();
+					foreach ( $errors[ self::SOURCES_INVALID_OUTPUT ] as $type => $names ) {
+						foreach ( $names as $name ) {
+							$sources[] = sprintf( '%s: <code>%s</code>', esc_html( $type ), esc_html( $name ) );
+						}
+					}
+					echo implode( ', ', $sources ); // WPCS: XSS ok.
+				}
+				break;
+		}
+	}
+
+	/**
+	 * Adds a 'Re-check' link to the edit.php row actions.
+	 *
+	 * @param array   $actions The actions in the edit.php page.
+	 * @param WP_Post $post    The post for the actions.
+	 * @return array $actions The filtered actions.
+	 */
+	public static function add_recheck( $actions, $post ) {
+		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
+			return $actions;
+		}
+		$trash   = isset( $actions['trash'] ) ? $actions['trash'] : null;
+		$url     = get_post_meta( $post->ID, self::AMP_URL_META, true );
+		$actions = array();
+
+		// @todo: $url needs to recheck the AMP validation of the page, and reload the edit.php page.
+		if ( ! empty( $url ) ) {
+			$actions['recheck'] = sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html__( 'Re-check', 'amp' ) );
+		}
+		if ( isset( $trash ) ) {
+			$actions['trash'] = $trash;
+		}
+		return $actions;
 	}
 
 }

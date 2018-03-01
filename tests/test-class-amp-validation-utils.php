@@ -41,6 +41,27 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public $disallowed_tag = '<script async src="https://example.com/script"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 	/**
+	 * The name of a tag that the sanitizer should strip.
+	 *
+	 * @var string
+	 */
+	public $disallowed_tag_name = 'script';
+
+	/**
+	 * The name of an attribute that the sanitizer should strip.
+	 *
+	 * @var string
+	 */
+	public $disallowed_attribute_name = 'onload';
+
+	/**
+	 * A mock plugin name that outputs invalid markup.
+	 *
+	 * @var string
+	 */
+	public $plugin_name = 'foo-bar';
+
+	/**
 	 * A valid image that sanitizers should not alter.
 	 *
 	 * @var string
@@ -607,9 +628,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $amp_post_type->name );
 		$this->assertEquals( 'AMP Validation Errors', $amp_post_type->label );
 		$this->assertEquals( false, $amp_post_type->public );
-		$this->assertFalse( $amp_post_type->show_ui );
-		$this->assertFalse( $amp_post_type->show_in_menu );
-		$this->assertFalse( $amp_post_type->show_in_admin_bar );
+		$this->assertTrue( $amp_post_type->show_ui );
+		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
+		$this->assertTrue( $amp_post_type->show_in_admin_bar );
 	}
 
 	/**
@@ -743,17 +764,113 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEmpty( $output );
 		$pagenow          = 'plugins.php'; // WPCS: global override ok.
 		$_GET['activate'] = 'true';
-		$plugin           = 'foo-plugin';
+
+		$this->create_custom_post();
+		ob_start();
+		AMP_Validation_Utils::plugin_notice();
+		$output = ob_get_clean();
+		$this->assertContains( 'Warning: the following plugins are incompatible with AMP', $output );
+		$this->assertContains( $this->plugin_name, $output );
+	}
+
+	/**
+	 * Test for add_post_columns()
+	 *
+	 * @see AMP_Validation_Utils::add_post_columns()
+	 */
+	public function test_add_post_columns() {
+		$initial_columns = array(
+			'cb' => '<input type="checkbox">',
+		);
+		$this->assertEquals(
+			array_merge(
+				$initial_columns,
+				array(
+					'url'                                  => 'URL',
+					AMP_Validation_Utils::REMOVED_ELEMENTS => 'Removed Elements',
+					AMP_Validation_Utils::REMOVED_ATTRIBUTES => 'Removed Attributes',
+					AMP_Validation_Utils::SOURCES_INVALID_OUTPUT => 'Incompatible Source',
+				)
+			),
+			AMP_Validation_Utils::add_post_columns( $initial_columns )
+		);
+	}
+
+	/**
+	 * Test for output_custom_column()
+	 *
+	 * @dataProvider get_custom_columns
+	 * @see AMP_Validation_Utils::output_custom_column()
+	 * @param string $column_name The name of the column.
+	 * @param string $expected_value The value that is expected to be present in the column markup.
+	 */
+	public function test_output_custom_column( $column_name, $expected_value ) {
+		ob_start();
+		AMP_Validation_Utils::output_custom_column( $column_name, $this->create_custom_post() );
+		$this->assertContains( $expected_value, ob_get_clean() );
+	}
+
+	/**
+	 * Gets the test data for test_output_custom_column().
+	 *
+	 * @return array $columns
+	 */
+	public function get_custom_columns() {
+		return array(
+			'url'                   => array(
+				'url',
+				get_home_url(),
+			),
+			'removed_elements'      => array(
+				AMP_Validation_Utils::REMOVED_ELEMENTS,
+				$this->disallowed_tag_name,
+			),
+			'removed_attributes'    => array(
+				AMP_Validation_Utils::REMOVED_ATTRIBUTES,
+				$this->disallowed_attribute_name,
+			),
+			'sources_invalid_input' => array(
+				AMP_Validation_Utils::SOURCES_INVALID_OUTPUT,
+				$this->plugin_name,
+			),
+		);
+	}
+
+	/**
+	 * Test for add_recheck()
+	 *
+	 * @see AMP_Validation_Utils::add_recheck()
+	 */
+	public function test_add_recheck() {
+		$initial_actions = array(
+			'trash' => '<a href="https://example.com">Trash</a>',
+		);
+		$post            = $this->factory()->post->create_and_get();
+		$this->assertEquals( $initial_actions, AMP_Validation_Utils::add_recheck( $initial_actions, $post ) );
+
+		$custom_post_id = $this->create_custom_post();
+		$actions        = AMP_Validation_Utils::add_recheck( $initial_actions, get_post( $custom_post_id ) );
+		$url            = get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true );
+		$this->assertContains( $url, $actions['recheck'] );
+		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
+	}
+
+	/**
+	 * Creates and inserts a custom post.
+	 *
+	 * @return int|WP_Error $error_post The ID of new custom post, or an error.
+	 */
+	public function create_custom_post() {
 		$response         = array(
 			AMP_Validation_Utils::ERROR_KEY              => true,
-			'removed_elements'                           => array(
-				$this->disallowed_tag => 1,
+			AMP_Validation_Utils::REMOVED_ELEMENTS       => array(
+				$this->disallowed_tag_name => 1,
 			),
-			'removed_attributes'                         => array(
-				'onload' => 1,
+			AMP_Validation_Utils::REMOVED_ATTRIBUTES     => array(
+				$this->disallowed_attribute_name => 1,
 			),
 			AMP_Validation_Utils::SOURCES_INVALID_OUTPUT => array(
-				'plugin' => array( $plugin ),
+				'plugin' => array( $this->plugin_name ),
 			),
 		);
 		$content          = wp_json_encode( $response );
@@ -764,15 +881,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'post_content' => $content,
 			'post_status'  => 'publish',
 		);
-		$error_post       = wp_insert_post( wp_slash( $post_args ) );
-		$url              = home_url();
-		add_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
-
-		ob_start();
-		AMP_Validation_Utils::plugin_notice();
-		$output = ob_get_clean();
-		$this->assertContains( 'Warning: the following plugins are incompatible with AMP', $output );
-		$this->assertContains( $plugin, $output );
+		$error_post     = wp_insert_post( $post_args );
+		$url            = get_home_url();
+		update_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
+		return $error_post;
 	}
 
 }
