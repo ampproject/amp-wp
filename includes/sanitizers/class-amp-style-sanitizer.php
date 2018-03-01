@@ -215,7 +215,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$total_size = 0;
 			foreach ( $this->get_stylesheets() as $key => $stylesheet ) {
 				$sheet_size = strlen( $stylesheet );
-				if ( $total_size + $sheet_size > $this->custom_max_size ) {
+				if ( empty( $this->args['unlimited_custom_style'] ) && $total_size + $sheet_size > $this->custom_max_size ) {
 					$skipped[] = $key;
 				} else {
 					if ( $total_size ) {
@@ -237,7 +237,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			// @todo This would be a candidate for sanitization reporting.
+			// @todo This would be a candidate for sanitization reporting, when ! empty( $skipped ) || $total_size > $this->custom_max_size.
 			// Add comments to indicate which sheets were not included.
 			foreach ( array_reverse( $skipped ) as $skip ) {
 				$this->amp_custom_style_element->parentNode->insertBefore(
