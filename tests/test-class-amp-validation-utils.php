@@ -666,13 +666,12 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$wp->query_string = 'foo-bar'; // WPCS: global override ok.
 		AMP_Validation_Utils::process_markup( '<!--plugin:foo-->' . $this->disallowed_tag . '<!--/plugin:foo-->' );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
-		$meta           = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
+		$meta           = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, false );
 		$url            = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 
 		// The URL should again be stored in the 'additional URLs' meta data.
 		$this->assertEquals( $post_id, $custom_post_id );
-		$this->assertTrue( in_array( $url, $meta, true ) );
-		$this->assertTrue( in_array( $url, $meta, true ) );
+		$this->assertContains( $url, $meta );
 
 		AMP_Validation_Utils::reset_removed();
 		AMP_Validation_Utils::process_markup( '<!--plugin:foo--><nonexistent></nonexistent><!--/plugin:foo-->' );
@@ -766,7 +765,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'post_status'  => 'publish',
 		);
 		$error_post       = wp_insert_post( wp_slash( $post_args ) );
-		$url              = home_url( '/' );
+		$url              = home_url();
 		add_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
 
 		ob_start();

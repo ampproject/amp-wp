@@ -216,7 +216,7 @@ class AMP_Validation_Utils {
 			self::process_markup( $markup );
 			$response['processed_markup'] = $markup;
 		} elseif ( isset( $wp ) ) {
-			$response['url'] = add_query_arg( $wp->query_string, '', home_url( user_trailingslashit( $wp->request ) ) );
+			$response['url'] = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 		}
 
 		$removed_elements   = array();
@@ -547,7 +547,7 @@ class AMP_Validation_Utils {
 		}
 
 		$response = self::get_response();
-		$url      = isset( $response['url'] ) ? $response['url'] : null;
+		$url      = isset( $response['url'] ) ? $response['url'] : null; // @todo If url is not defined then that should be an error.
 		unset( $response['url'] );
 		$encoded_errors            = wp_json_encode( $response );
 		$post_name                 = md5( $encoded_errors );
@@ -574,13 +574,8 @@ class AMP_Validation_Utils {
 			}
 			return $existing_post_id;
 		} elseif ( isset( $different_post_same_error->ID ) ) {
-			// The error is already stored somewhere, so append it to the post meta.
-			$updated_meta = add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, wp_slash( $url ), true );
-			if ( ! $updated_meta ) { // @todo This shouldn't be needed?
-				$meta   = get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, true );
-				$meta   = is_array( $meta ) ? $meta : array( $meta );
-				$meta[] = $url;
-				update_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, $meta );
+			if ( ! in_array( $url, get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, false ), true ) ) {
+				add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, wp_slash( $url ), false );
 			}
 			return $different_post_same_error->ID;
 		} elseif ( ! empty( $response[ self::SOURCES_INVALID_OUTPUT ] ) ) {
@@ -631,7 +626,7 @@ class AMP_Validation_Utils {
 		$url = add_query_arg(
 			self::VALIDATION_QUERY_VAR,
 			1,
-			home_url( '/' )
+			home_url()
 		);
 		return wp_remote_get( $url, array(
 			'cookies'   => wp_unslash( $_COOKIE ),
@@ -647,7 +642,7 @@ class AMP_Validation_Utils {
 	public static function plugin_notice() {
 		global $pagenow;
 		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
-			$home_errors = self::existing_post( home_url( '/' ) );
+			$home_errors = self::existing_post( home_url() );
 			if ( ! is_int( $home_errors ) ) {
 				return;
 			}
