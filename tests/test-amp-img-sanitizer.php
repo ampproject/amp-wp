@@ -12,42 +12,47 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 	public function get_data() {
 		return array(
-			'no_images' => array(
+			'no_images'                                => array(
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 			),
 
-			'image_without_src' => array(
+			'image_without_src'                        => array(
 				'<p><img width="300" height="300" /></p>',
 				'<p></p>',
 			),
 
-			'image_with_empty_src' => array(
+			'image_with_empty_src'                     => array(
 				'<p><img src="" width="300" height="300" /></p>',
 				'<p></p>',
 			),
 
-			'image_with_self_closing_tag' => array(
+			'image_with_layout'                        => array(
+				'<img src="http://placehold.it/100x100" data-amp-layout="fill" width="100" height="100" />',
+				'<amp-img src="http://placehold.it/100x100" layout="fill" width="100" height="100" class="amp-wp-enforced-sizes"></amp-img>',
+			),
+
+			'image_with_self_closing_tag'              => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!" />',
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
-			'image_with_no_end_tag' => array(
+			'image_with_no_end_tag'                    => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!">',
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
-			'image_with_end_tag' => array(
+			'image_with_end_tag'                       => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!"></img>',
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
-			'image_with_on_attribute' => array(
+			'image_with_on_attribute'                  => array(
 				'<img src="http://placehold.it/350x150" on="tap:my-lightbox" width="350" height="150" />',
 				'<amp-img src="http://placehold.it/350x150" on="tap:my-lightbox" width="350" height="150" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
-			'image_with_blacklisted_attribute' => array(
+			'image_with_blacklisted_attribute'         => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" style="border: 1px solid red;" />',
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes"></amp-img>',
 			),
@@ -62,17 +67,17 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
-			'gif_image_conversion' => array(
+			'gif_image_conversion'                     => array(
 				'<img src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />',
 				'<amp-anim src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" class="amp-wp-enforced-sizes"></amp-anim>',
 			),
 
-			'gif_image_url_with_querystring' => array(
+			'gif_image_url_with_querystring'           => array(
 				'<img src="http://placehold.it/350x150.gif?foo=bar" width="350" height="150" alt="Placeholder!" />',
 				'<amp-anim src="http://placehold.it/350x150.gif?foo=bar" width="350" height="150" alt="Placeholder!" class="amp-wp-enforced-sizes"></amp-anim>',
 			),
 
-			'multiple_same_image' => array(
+			'multiple_same_image'                      => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" />
 <img src="http://placehold.it/350x150" width="350" height="150" />
 <img src="http://placehold.it/350x150" width="350" height="150" />
@@ -81,7 +86,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes"></amp-img><amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
-			'multiple_different_images' => array(
+			'multiple_different_images'                => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" />
 <img src="http://placehold.it/360x160" width="360" height="160" />
 <img src="http://placehold.it/370x170" width="370" height="170" />

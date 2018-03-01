@@ -129,6 +129,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
 					break;
 
+				case 'data-amp-layout':
+					$out['layout'] = $value;
+					break;
+
 				default:
 					break;
 			}
