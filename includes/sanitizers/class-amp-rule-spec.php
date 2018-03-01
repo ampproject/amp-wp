@@ -45,6 +45,7 @@ abstract class AMP_Rule_Spec {
 	const BLACKLISTED_VALUE_REGEX = 'blacklisted_value_regex';
 	const DISALLOWED_DOMAIN       = 'disallowed_domain';
 	const MANDATORY               = 'mandatory';
+	const VALID_HOST              = 'valid_host';
 	const VALUE                   = 'value';
 	const VALUE_CASEI             = 'value_casei';
 	const VALUE_REGEX             = 'value_regex';

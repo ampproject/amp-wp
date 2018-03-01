@@ -680,6 +680,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a class="foo" href="">value</a>',
 			),
 
+			'a_with_wrong_host'                                         => array(
+				'<a class="foo" href="http://foo bar">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+
 			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements'                              => array(
 				'<font size="1">Headline</font><span style="color: blue">Span</span>',

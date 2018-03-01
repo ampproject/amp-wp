@@ -700,6 +700,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
+			 * If given attribute's value is a URL with a host, the host must
+			 * be valid
+			 */
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::VALID_HOST ] ) ) {
+				$result = $this->check_attr_spec_rule_valid_host( $node, $attr_name, $attr_spec_rule );
+				if ( AMP_Rule_Spec::PASS === $result ) {
+					$score++;
+				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
+					return 0;
+				}
+			}
+
+			/*
 			 * If the given attribute's value is *not* a relative path, and the rule's
 			 * value is `false`, then pass.
 			 */
@@ -876,6 +889,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$should_remove_node = true;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
+				$should_remove_node = true;
+			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALID_HOST ] ) &&
+				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_host( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
@@ -1119,6 +1135,40 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return AMP_Rule_Spec::FAIL;
 			}
 		}
+		return AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Check if attribute has a valid host value
+	 *
+	 * @param DOMElement       $node           Node.
+	 * @param string           $attr_name      Attribute name.
+	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
+	 *
+	 * @return string:
+	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
+	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
+	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
+	 *                                        is no rule for this attribute.
+	 */
+	private function check_attr_spec_rule_valid_host( $node, $attr_name, $attr_spec_rule ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALID_HOST ] ) ) {
+			if ( $node->hasAttribute( $attr_name ) ) {
+				$attr_value   = $node->getAttribute( $attr_name );
+				$attr_value   = preg_replace( '/\s*,\s*/', ',', $attr_value );
+				$urls_to_test = explode( ',', $attr_value );
+
+				foreach ( $urls_to_test as $url ) {
+					$url_host = AMP_WP_Utils::parse_url( $url, PHP_URL_HOST );
+					if ( $url_host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_host ) ) {
+						return AMP_Rule_Spec::FAIL;
+					}
+				}
+
+				return AMP_Rule_Spec::PASS;
+			}
+		}
+
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
 
