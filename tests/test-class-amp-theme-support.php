@@ -249,4 +249,39 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$scripts
 		);
 	}
+
+	/**
+	 * Test AMP_Theme_Support::add_layout().
+	 *
+	 * @see AMP_Theme_Support::add_layout()
+	 */
+	public function test_add_layout() {
+		$attribute             = 'data-amp-layout';
+		$image_no_dimensions   = array(
+			'img' => array(
+				$attribute => true,
+			),
+		);
+		$image_with_dimensions = array_merge(
+			$image_no_dimensions,
+			array(
+				'height' => '100',
+				'width'  => '100',
+			)
+		);
+
+		$this->assertEquals( array(), AMP_Theme_Support::add_layout( array() ) );
+		$this->assertEquals( $image_no_dimensions, AMP_Theme_Support::add_layout( $image_no_dimensions ) );
+
+		$context = AMP_Theme_Support::add_layout( $image_with_dimensions );
+		$this->assertTrue( $context['img'][ $attribute ] );
+
+		$context = AMP_Theme_Support::add_layout( $image_with_dimensions );
+		$this->assertTrue( $context['img'][ $attribute ] );
+
+		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::add_layout', 10, 2 );
+		$image = '<img data-amp-layout="fill">';
+		$this->assertEquals( $image, wp_kses_post( $image ) );
+	}
+
 }

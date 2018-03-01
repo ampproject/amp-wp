@@ -183,7 +183,7 @@ class AMP_Theme_Support {
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
-		add_filter( 'wp_kses_allowed_html', 'AMP_WP_Utils::add_layout', 10, 2 );
+		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'add_layout' ), 10 );
 
 		// @todo Add character conversion.
 	}
@@ -834,4 +834,20 @@ class AMP_Theme_Support {
 
 		return $response;
 	}
+
+	/**
+	 * Adds 'data-amp-layout' to the allowed <img> attributes for wp_kses().
+	 *
+	 * @since 0.7
+	 *
+	 * @param array $context Allowed tags and their allowed attributes.
+	 * @return array $context Filtered allowed tags and attributes.
+	 */
+	public static function add_layout( $context ) {
+		if ( ! empty( $context['img']['width'] ) && ! empty( $context['img']['height'] ) ) {
+			$context['img']['data-amp-layout'] = true;
+		}
+		return $context;
+	}
+
 }
