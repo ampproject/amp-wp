@@ -103,6 +103,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
+		if ( ! empty( $this->args['unlimited_custom_style'] ) ) {
+			foreach ( $this->args['amp_allowed_tags']['style'] as &$style ) {
+				if ( isset( $style[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['amp-custom'] ) ) {
+					unset( $style[ AMP_Rule_Spec::CDATA ]['max_bytes'] );
+					unset( $style[ AMP_Rule_Spec::CDATA ]['max_bytes_spec_url'] );
+					break;
+				}
+			}
+		}
+
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 
 			// Allow style attribute on all elements.

@@ -54,6 +54,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_bind_placeholder_prefix
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
+	 *      @type bool $unlimited_custom_style
 	 *      @type callable $remove_invalid_callback
 	 * }
 	 */

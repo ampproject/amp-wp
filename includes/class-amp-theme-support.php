@@ -960,6 +960,7 @@ class AMP_Theme_Support {
 				'remove_invalid_callback' => null,
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'unlimited_custom_style'  => true,
 			),
 			$args
 		);
