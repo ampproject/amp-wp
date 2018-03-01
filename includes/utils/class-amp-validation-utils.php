@@ -107,19 +107,23 @@ class AMP_Validation_Utils {
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
-		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
-		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
-		add_action( 'activate_plugin', function() {
-			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_home' ) ) ) {
-				add_action( 'shutdown', array( __CLASS__, 'validate_home' ) ); // Shutdown so all plugins will have been activated.
-			}
-		} );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'add_recheck' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
+
+		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
+		// Actions and filters involved in validation.
+		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
+		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
+		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
+		add_action( 'activate_plugin', function() {
+			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_home' ) ) ) {
+				add_action( 'shutdown', array( __CLASS__, 'validate_home' ) ); // Shutdown so all plugins will have been activated.
+			}
+		} );
 	}
 
 	/**
@@ -335,19 +339,18 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Wraps callbacks in comments, to indicate to the sanitizer which plugin added them.
+	 * Wraps callbacks in comments to indicate to the sanitizer which extension added them.
 	 *
-	 * Iterates through all of the registered callbacks.
-	 * If a callback is from a plugin and outputs markup,
-	 * this wraps the markup in comments.
-	 * Later, the sanitizer can identify which plugin any illegal markup is from.
+	 * Iterates through all of the registered callbacks for actions and filters.
+	 * If a callback is from a plugin and outputs markup, this wraps the markup in comments.
+	 * Later, the sanitizer can identify which theme or plugin the illegal markup is from.
 	 *
 	 * @global array $wp_filter
 	 * @return void
 	 */
 	public static function callback_wrappers() {
 		global $wp_filter;
-		if ( ! self::should_validate_front_end() ) {
+		if ( ! self::should_validate_front_end() ) { // @todo Better to just conditionally call callback_wrappers() based on whether should_validate_front_end(). Active request rather than passive.
 			return;
 		}
 		$pending_wrap_callbacks = array();
@@ -374,6 +377,36 @@ class AMP_Validation_Utils {
 				add_action( $hook, $wrapped_callback, $callback['priority'], $callback['accepted_args'] );
 			}
 		}
+	}
+
+	/**
+	 * Filters the output created by a shortcode callback.
+	 *
+	 * @since 0.7
+	 *
+	 * @param string $output Shortcode output.
+	 * @param string $tag    Shortcode name.
+	 * @return string Output.
+	 * @global array $shortcode_tags
+	 */
+	public static function decorate_shortcode_source( $output, $tag ) {
+		global $shortcode_tags;
+		if ( ! self::should_validate_front_end() ) { // @todo Better to just conditionally call callback_wrappers() based on whether should_validate_front_end(). Active request rather than passive.
+			return $output;
+		}
+		if ( ! isset( $shortcode_tags[ $tag ] ) ) {
+			return $output;
+		}
+		$source = self::get_source( $shortcode_tags[ $tag ] );
+		if ( empty( $source ) ) {
+			return $output;
+		}
+		$output = implode( '', array(
+			sprintf( '<!--%s:%s-->', esc_attr( $source['type'] ), esc_attr( $source['name'] ) ), // @todo Need to also include the offending shortcode $tag.
+			$output,
+			sprintf( '<!--/%s:%s-->', esc_attr( $source['type'] ), esc_attr( $source['name'] ) ),
+		) );
+		return $output;
 	}
 
 	/**
