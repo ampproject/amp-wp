@@ -236,13 +236,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
-			AMP_Validation_Utils::ERROR_KEY => true,
-			'removed_elements'              => array(
+			AMP_Validation_Utils::ERROR_KEY          => true,
+			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
 				'script' => 1,
 			),
-			'removed_attributes'            => array(),
-			'processed_markup'              => $markup,
-			'sources_with_invalid_output'   => array(),
+			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
+			'processed_markup'                       => $markup,
+			'sources_with_invalid_output'            => array(),
 		);
 		$this->assertEquals( $expected_response, $response );
 
@@ -251,11 +251,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Validation_Utils::validate_markup( $request );
 		$expected_response = array(
-			AMP_Validation_Utils::ERROR_KEY => false,
-			'removed_elements'              => array(),
-			'removed_attributes'            => array(),
-			'processed_markup'              => $this->valid_amp_img,
-			'sources_with_invalid_output'   => array(),
+			AMP_Validation_Utils::ERROR_KEY          => false,
+			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(),
+			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
+			'processed_markup'                       => $this->valid_amp_img,
+			'sources_with_invalid_output'            => array(),
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
@@ -271,13 +271,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->set_capability();
 		$response          = AMP_Validation_Utils::get_response( $this->disallowed_tag );
 		$expected_response = array(
-			AMP_Validation_Utils::ERROR_KEY => true,
-			'removed_elements'              => array(
+			AMP_Validation_Utils::ERROR_KEY          => true,
+			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
 				'script' => 1,
 			),
-			'removed_attributes'            => array(),
-			'processed_markup'              => $this->disallowed_tag,
-			'sources_with_invalid_output'   => array(),
+			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
+			'processed_markup'                       => $this->disallowed_tag,
+			'sources_with_invalid_output'            => array(),
 		);
 		$this->assertEquals( $expected_response, $response );
 	}
@@ -503,11 +503,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$removed_element   = 'script';
 		$removed_attribute = 'onload';
 		$response          = array(
-			AMP_Validation_Utils::ERROR_KEY => true,
-			'removed_elements'              => array(
+			AMP_Validation_Utils::ERROR_KEY          => true,
+			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
 				$removed_element => 1,
 			),
-			'removed_attributes'            => array(
+			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(
 				$removed_attribute => 1,
 			),
 		);
@@ -666,9 +666,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		// This should create a new post for the errors.
 		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $custom_post->post_type );
-		$this->assertEquals( $expected_removed_elements, $validation['removed_elements'] );
+		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Utils::REMOVED_ELEMENTS ] );
 		$this->assertEquals( true, $validation[ AMP_Validation_Utils::ERROR_KEY ] );
-		$this->assertEquals( array(), $validation['removed_attributes'] );
+		$this->assertEquals( array(), $validation[ AMP_Validation_Utils::REMOVED_ATTRIBUTES ] );
 		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Utils::SOURCES_INVALID_OUTPUT ]['plugin'] );
 		$meta = get_post_meta( $post_id, AMP_Validation_Utils::AMP_URL_META, true );
 		$this->assertEquals( $url, $meta );
@@ -707,7 +707,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		);
 
 		// A post already exists for this URL, so it should be updated.
-		$this->assertEquals( $expected_removed_elements, $validation['removed_elements'] );
+		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Utils::REMOVED_ELEMENTS ] );
 		$this->assertTrue( $validation[ AMP_Validation_Utils::ERROR_KEY ] );
 		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Utils::SOURCES_INVALID_OUTPUT ]['plugin'] );
 		$this->assertEquals( $expected_url, $url );
@@ -821,7 +821,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				'url',
 				get_home_url(),
 			),
-			'removed_elements'      => array(
+			'removed_element'       => array(
 				AMP_Validation_Utils::REMOVED_ELEMENTS,
 				$this->disallowed_tag_name,
 			),
@@ -861,7 +861,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @return int|WP_Error $error_post The ID of new custom post, or an error.
 	 */
 	public function create_custom_post() {
-		$response         = array(
+		$response       = array(
 			AMP_Validation_Utils::ERROR_KEY              => true,
 			AMP_Validation_Utils::REMOVED_ELEMENTS       => array(
 				$this->disallowed_tag_name => 1,
@@ -873,9 +873,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				'plugin' => array( $this->plugin_name ),
 			),
 		);
-		$content          = wp_json_encode( $response );
-		$encoded_errors   = md5( $content );
-		$post_args        = array(
+		$content        = wp_json_encode( $response );
+		$encoded_errors = md5( $content );
+		$post_args      = array(
 			'post_type'    => AMP_Validation_Utils::POST_TYPE_SLUG,
 			'post_name'    => $encoded_errors,
 			'post_content' => $content,

@@ -485,16 +485,16 @@ class AMP_Validation_Utils {
 		echo '<div class="notice notice-warning">';
 		printf( '<p>%s</p>', esc_html__( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' ) );
 		$removed_sets = array();
-		if ( ! empty( $response['removed_elements'] ) && is_array( $response['removed_elements'] ) ) {
+		if ( ! empty( $response[ self::REMOVED_ELEMENTS ] ) && is_array( $response[ self::REMOVED_ELEMENTS ] ) ) {
 			$removed_sets[] = array(
 				'label' => __( 'Invalid elements:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $response['removed_elements'] ),
+				'names' => array_map( 'sanitize_key', $response[ self::REMOVED_ELEMENTS ] ),
 			);
 		}
-		if ( ! empty( $response['removed_attributes'] ) && is_array( $response['removed_attributes'] ) ) {
+		if ( ! empty( $response[ self::REMOVED_ATTRIBUTES ] ) && is_array( $response[ self::REMOVED_ATTRIBUTES ] ) ) {
 			$removed_sets[] = array(
 				'label' => __( 'Invalid attributes:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $response['removed_attributes'] ),
+				'names' => array_map( 'sanitize_key', $response[ self::REMOVED_ATTRIBUTES ] ),
 			);
 		}
 		foreach ( $removed_sets as $removed_set ) {
