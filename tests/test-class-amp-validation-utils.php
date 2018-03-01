@@ -102,6 +102,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_content_sanitizers', self::TESTED_CLASS . '::add_validation_callback' ) );
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::register_post_type' ) );
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::plugin_notice' ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Utils::POST_TYPE_SLUG . '_posts_columns', self::TESTED_CLASS . '::add_post_columns' ) );
+		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', self::TESTED_CLASS . '::output_custom_column' ) );
+		$this->assertEquals( 10, has_filter( 'post_row_actions', self::TESTED_CLASS . '::add_recheck' ) );
+		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
 	}
 
 	/**
@@ -853,6 +857,20 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$url            = get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true );
 		$this->assertContains( $url, $actions['recheck'] );
 		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
+	}
+
+	/**
+	 * Test for add_bulk_action()
+	 *
+	 * @see AMP_Validation_Utils::add_bulk_action()
+	 */
+	public function test_add_bulk_action() {
+		$initial_action = array(
+			'edit' => 'Edit',
+		);
+		$actions        = AMP_Validation_Utils::add_bulk_action( $initial_action );
+		$this->assertFalse( isset( $action['edit'] ) );
+		$this->assertEquals( 'Re-check', $actions['recheck'] );
 	}
 
 	/**

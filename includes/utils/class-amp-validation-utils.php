@@ -116,9 +116,10 @@ class AMP_Validation_Utils {
 			}
 		} );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
-		add_action( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
+		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
-		add_action( 'post_row_actions', array( __CLASS__, 'add_recheck' ), 10, 2 );
+		add_filter( 'post_row_actions', array( __CLASS__, 'add_recheck' ), 10, 2 );
+		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
 	}
 
 	/**
@@ -789,6 +790,18 @@ class AMP_Validation_Utils {
 		if ( ! empty( $url ) ) {
 			$actions['recheck'] = sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html__( 'Re-check', 'amp' ) );
 		}
+		return $actions;
+	}
+
+	/**
+	 * Adds a 'Re-check' bulk action to the edit.php page.
+	 *
+	 * @param array $actions The bulk actions in the edit.php page.
+	 * @return array $actions The filtered bulk actions.
+	 */
+	public static function add_bulk_action( $actions ) {
+		unset( $actions['edit'] );
+		$actions['recheck'] = esc_html__( 'Re-check', 'amp' );
 		return $actions;
 	}
 
