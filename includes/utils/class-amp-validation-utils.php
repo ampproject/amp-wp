@@ -695,7 +695,7 @@ class AMP_Validation_Utils {
 				return;
 			}
 			$errors          = json_decode( $error_post->post_content, true );
-			$invalid_plugins = isset( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] : null;
+			$invalid_plugins = isset( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {
 				echo '<div class="notice notice-warning"><p>';
 				$reported_plugins = array();
@@ -781,16 +781,13 @@ class AMP_Validation_Utils {
 		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
 			return $actions;
 		}
-		$trash   = isset( $actions['trash'] ) ? $actions['trash'] : null;
-		$url     = get_post_meta( $post->ID, self::AMP_URL_META, true );
-		$actions = array();
+		unset( $actions['edit'] );
+		unset( $actions['inline hide-if-no-js'] );
+		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
 
 		// @todo: $url needs to recheck the AMP validation of the page, and reload the edit.php page.
 		if ( ! empty( $url ) ) {
 			$actions['recheck'] = sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html__( 'Re-check', 'amp' ) );
-		}
-		if ( isset( $trash ) ) {
-			$actions['trash'] = $trash;
 		}
 		return $actions;
 	}
