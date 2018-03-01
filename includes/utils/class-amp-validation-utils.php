@@ -761,7 +761,7 @@ class AMP_Validation_Utils {
 				if ( isset( $errors[ self::SOURCES_INVALID_OUTPUT ] ) ) {
 					$sources = array();
 					foreach ( $errors[ self::SOURCES_INVALID_OUTPUT ] as $type => $names ) {
-						foreach ( $names as $name ) {
+						foreach ( array_unique( $names ) as $name ) {
 							$sources[] = sprintf( '%s: <code>%s</code>', esc_html( $type ), esc_html( $name ) );
 						}
 					}
