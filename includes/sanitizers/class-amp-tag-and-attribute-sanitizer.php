@@ -1159,7 +1159,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$urls_to_test = explode( ',', $attr_value );
 
 				foreach ( $urls_to_test as $url ) {
-					$url_host = AMP_WP_Utils::parse_url( $url, PHP_URL_HOST );
+					$url_host = AMP_WP_Utils::parse_url( urldecode( $url ), PHP_URL_HOST );
 					if ( $url_host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_host ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
