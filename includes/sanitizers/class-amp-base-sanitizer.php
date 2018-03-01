@@ -48,6 +48,13 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string[] $amp_allowed_tags
 	 *      @type string[] $amp_globally_allowed_attributes
 	 *      @type string[] $amp_layout_allowed_attributes
+	 *      @type array $amp_allowed_tags
+	 *      @type array $amp_globally_allowed_attributes
+	 *      @type array $amp_layout_allowed_attributes
+	 *      @type array $amp_bind_placeholder_prefix
+	 *      @type bool $allow_dirty_styles
+	 *      @type bool $allow_dirty_scripts
+	 *      @type callable $remove_invalid_callback
 	 * }
 	 */
 	protected $args;
@@ -167,12 +174,15 @@ abstract class AMP_Base_Sanitizer {
 	 * @return float|int|string Returns a numeric dimension value, or an empty string.
 	 */
 	public function sanitize_dimension( $value, $dimension ) {
-		if ( empty( $value ) ) {
+
+		// Allows 0 to be used as valid dimension.
+		if ( null === $value ) {
 			return '';
 		}
 
-		if ( false !== filter_var( $value, FILTER_VALIDATE_INT ) ) {
-			return absint( $value );
+		// Accepts both integers and floats & prevents negative values.
+		if ( is_numeric( $value ) ) {
+			return max( 0, floatval( $value ) );
 		}
 
 		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
@@ -278,13 +288,17 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMElement $child The node to remove.
-	 * @return void.
+	 * @param DOMNode|DOMElement $child The node to remove.
+	 * @return void
 	 */
 	public function remove_invalid_child( $child ) {
+		$parent = $child->parentNode;
 		$child->parentNode->removeChild( $child );
 		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], $child, AMP_Validation_Utils::NODE_REMOVED );
+			call_user_func( $this->args['remove_invalid_callback'], array(
+				'node'   => $child,
+				'parent' => $parent,
+			) );
 		}
 	}
 
@@ -296,14 +310,26 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMElement $element   The node for which to remove the attribute.
-	 * @param string     $attribute The attribute to remove from the node.
-	 * @return void.
+	 * @param DOMElement     $element   The node for which to remove the attribute.
+	 * @param DOMAttr|string $attribute The attribute to remove from the element.
+	 * @return void
 	 */
 	public function remove_invalid_attribute( $element, $attribute ) {
-		$element->removeAttribute( $attribute );
 		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], $element, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attribute );
+			if ( is_string( $attribute ) ) {
+				$attribute = $element->getAttributeNode( $attribute );
+			}
+			if ( $attribute ) {
+				$element->removeAttributeNode( $attribute );
+				call_user_func( $this->args['remove_invalid_callback'], array(
+					'node'   => $attribute,
+					'parent' => $element,
+				) );
+			}
+		} elseif ( is_string( $attribute ) ) {
+			$element->removeAttribute( $attribute );
+		} else {
+			$element->removeAttributeNode( $attribute );
 		}
 	}
 

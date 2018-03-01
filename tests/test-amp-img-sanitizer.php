@@ -32,6 +32,36 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/100x100" layout="fill" width="100" height="100" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
+			'image_with_empty_width_and_height'        => array(
+				'<p><img src="http://placehold.it/300x300" width="" height="" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="600" height="400" class="amp-wp-unknown-size amp-wp-enforced-sizes"></amp-img></p>',
+			),
+
+			'image_with_empty_width'                   => array(
+				'<p><img src="http://placehold.it/300x300" width="" height="300" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="600" height="300" class="amp-wp-unknown-size amp-wp-unknown-width amp-wp-enforced-sizes"></amp-img></p>',
+			),
+
+			'image_with_empty_height'                  => array(
+				'<p><img src="http://placehold.it/300x300" width="300" height="" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="300" height="400" class="amp-wp-unknown-size amp-wp-unknown-height amp-wp-enforced-sizes"></amp-img></p>',
+			),
+
+			'image_with_zero_width'                    => array(
+				'<p><img src="http://placehold.it/300x300" width="0" height="300" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="0" height="300" class="amp-wp-enforced-sizes"></amp-img></p>',
+			),
+
+			'image_with_zero_width_and_height'         => array(
+				'<p><img src="http://placehold.it/300x300" width="0" height="0" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="0" height="0" class="amp-wp-enforced-sizes"></amp-img></p>',
+			),
+
+			'image_with_decimal_width'                 => array(
+				'<p><img src="http://placehold.it/300x300" width="299.5" height="300" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="299.5" height="300" class="amp-wp-enforced-sizes"></amp-img></p>',
+			),
+
 			'image_with_self_closing_tag'              => array(
 				'<img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!" />',
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" alt="Placeholder!" class="amp-wp-enforced-sizes"></amp-img>',

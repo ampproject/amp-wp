@@ -79,7 +79,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Determine which images need their dimensions determined/extracted.
-			if ( '' === $node->getAttribute( 'width' ) || '' === $node->getAttribute( 'height' ) ) {
+			if ( ! is_numeric( $node->getAttribute( 'width' ) ) || ! is_numeric( $node->getAttribute( 'height' ) ) ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
@@ -157,17 +157,29 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $node instanceof DOMElement ) {
 					continue;
 				}
-
-				// Provide default dimensions for images whose dimensions we couldn't fetch.
-				if ( false !== $dimensions ) {
-					$node->setAttribute( 'width', $dimensions['width'] );
-					$node->setAttribute( 'height', $dimensions['height'] );
-				} else {
-					$width  = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
+				if (
+					! is_numeric( $node->getAttribute( 'width' ) ) &&
+					! is_numeric( $node->getAttribute( 'height' ) )
+				) {
 					$height = self::FALLBACK_HEIGHT;
+					$width  = self::FALLBACK_WIDTH;
 					$node->setAttribute( 'width', $width );
 					$node->setAttribute( 'height', $height );
 					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size' : 'amp-wp-unknown-size';
+					$node->setAttribute( 'class', $class );
+				} elseif (
+					! is_numeric( $node->getAttribute( 'height' ) )
+				) {
+					$height = self::FALLBACK_HEIGHT;
+					$node->setAttribute( 'height', $height );
+					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-height' : 'amp-wp-unknown-size amp-wp-unknown-height';
+					$node->setAttribute( 'class', $class );
+				} elseif (
+					! is_numeric( $node->getAttribute( 'width' ) )
+				) {
+					$width = self::FALLBACK_WIDTH;
+					$node->setAttribute( 'width', $width );
+					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-width' : 'amp-wp-unknown-size amp-wp-unknown-width';
 					$node->setAttribute( 'class', $class );
 				}
 			}

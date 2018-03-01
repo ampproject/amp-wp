@@ -90,18 +90,22 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test prepare_response.
 	 *
+	 * @global WP_Widget_Factory $wp_widget_factory
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		$wp_widget_factory = new WP_Widget_Factory();
+		wp_widgets_init();
+
 		ob_start();
 		?>
 		<!DOCTYPE html>
 		<html amp <?php language_attributes(); ?>>
 			<head>
 				<?php wp_head(); ?>
-				<script data-head>document.write('TODO: This needs to be sanitized as well once.');</script>
+				<script data-head>document.write('Illegal');</script>
 			</head>
 			<body>
 				<img width="100" height="100" src="https://example.com/test.png">
@@ -114,12 +118,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					data-aax_src="302"></amp-ad>
 				<?php wp_footer(); ?>
 
+				<button onclick="alert('Illegal');">no-onclick</button>
+
 				<style>body { background: black; }</style>
 			</body>
 		</html>
 		<?php
 		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+		$removed_nodes  = array();
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
+			'remove_invalid_callback' => function( $removed ) use ( &$removed_nodes ) {
+				$removed_nodes[ $removed['node']->nodeName ] = $removed['node'];
+			},
+		) );
 
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
@@ -136,6 +147,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script async custom-element="amp-audio"', $sanitized_html );
 
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
+
+		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
+		$this->assertCount( 2, $removed_nodes );
+		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
+		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 	}
 
 	/**
@@ -251,6 +267,71 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test intercept_post_request_redirect().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @covers AMP_Theme_Support::intercept_post_request_redirect()
+	 */
+	public function test_intercept_post_request_redirect() {
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		add_theme_support( 'amp' );
+		$url = get_home_url();
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', function () {
+			return '__return_false';
+		} );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( $url );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+
+		$this->assertContains( 'AMP-Redirect-To: ' . $url, xdebug_get_headers() );
+		$this->assertContains( 'Access-Control-Expose-Headers: AMP-Redirect-To', xdebug_get_headers() );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( '/new-location/' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertContains( 'AMP-Redirect-To: https://example.org/new-location/', xdebug_get_headers() );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( '//example.com/new-location/' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$headers = xdebug_get_headers();
+		$this->assertContains( 'AMP-Redirect-To: https://example.com/new-location/', $headers );
+
+		ob_start();
+		AMP_Theme_Support::intercept_post_request_redirect( '' );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertContains( 'AMP-Redirect-To: https://example.org', xdebug_get_headers() );
+	}
+
+	/**
+	 * Test handle_xhr_request().
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 * @covers AMP_Theme_Support::handle_xhr_request()
+	 */
+	public function test_handle_xhr_request() {
+		global $pagenow;
+		if ( ! function_exists( 'xdebug_get_headers' ) ) {
+			$this->markTestSkipped( 'xdebug is required for this test' );
+		}
+
+		$_GET['__amp_source_origin'] = 'https://example.org';
+		$pagenow                     = 'wp-comments-post.php';
+		AMP_Theme_Support::purge_amp_query_vars();
+
+		AMP_Theme_Support::handle_xhr_request();
+		$this->assertContains( 'AMP-Access-Control-Allow-Source-Origin: https://example.org', xdebug_get_headers() );
+	}
+
+	/**
 	 * Test AMP_Theme_Support::add_layout().
 	 *
 	 * @see AMP_Theme_Support::add_layout()
@@ -283,5 +364,4 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$image = '<img data-amp-layout="fill">';
 		$this->assertEquals( $image, wp_kses_post( $image ) );
 	}
-
 }

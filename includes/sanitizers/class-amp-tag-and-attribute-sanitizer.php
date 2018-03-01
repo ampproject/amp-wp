@@ -103,6 +103,65 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
+		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
+
+			// Allow style attribute on all elements.
+			$this->args['amp_globally_allowed_attributes']['style'] = array();
+
+			// Allow style elements.
+			$this->args['amp_allowed_tags']['style'][] = array(
+				'attr_spec_list' => array(
+					'type' => array(
+						'value_casei' => 'text/css',
+					),
+				),
+				'cdata'          => array(),
+				'tag_spec'       => array(
+					'spec_name' => 'style for Customizer preview',
+				),
+			);
+
+			// Allow stylesheet links.
+			$this->args['amp_allowed_tags']['link'][] = array(
+				'attr_spec_list' => array(
+					'async'       => array(),
+					'crossorigin' => array(),
+					'href'        => array(
+						'mandatory' => true,
+					),
+					'integrity'   => array(),
+					'media'       => array(),
+					'rel'         => array(
+						'dispatch_key' => 2,
+						'mandatory'    => true,
+						'value_casei'  => 'stylesheet',
+					),
+					'type'        => array(
+						'value_casei' => 'text/css',
+					),
+				),
+				'tag_spec'       => array(
+					'spec_name' => 'link rel=stylesheet for Customizer preview', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				),
+			);
+		}
+
+		// Allow scripts if requested.
+		if ( ! empty( $this->args['allow_dirty_scripts'] ) ) {
+			$this->args['amp_allowed_tags']['script'][] = array(
+				'attr_spec_list' => array(
+					'type'  => array(),
+					'src'   => array(),
+					'async' => array(),
+					'defer' => array(),
+				),
+				'cdata'          => array(),
+				'tag_spec'       => array(
+					'spec_name' => 'scripts for Customizer preview',
+				),
+			);
+		}
+
 		// Prepare whitelists.
 		$this->allowed_tags = $this->args['amp_allowed_tags'];
 		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
@@ -359,11 +418,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$attr_spec_list
 		);
 
-		// Remove any remaining disallowed attributes.
-		$this->sanitize_disallowed_attributes_in_node( $node, $merged_attr_spec_list );
+		// Identify any remaining disallowed attributes.
+		$disallowed_attributes = $this->get_disallowed_attributes_in_node( $node, $merged_attr_spec_list );
 
-		// Remove values that don't conform to the attr_spec.
-		$this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list );
+		// Identify attribute values that don't conform to the attr_spec.
+		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list, $disallowed_attributes );
+
+		// If $disallowed_attributes is false then the entire element should be removed.
+		if ( false === $disallowed_attributes ) {
+			$this->remove_node( $node );
+			return;
+		}
+
+		// Remove all invalid attributes.
+		foreach ( $disallowed_attributes as $disallowed_attribute ) {
+			$this->remove_invalid_attribute( $node, $disallowed_attribute );
+		}
 
 		// Add required AMP component scripts if the element is still in the document.
 		if ( $node->parentNode ) {
@@ -705,15 +775,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMNode $node           Node.
 	 * @param array[] $attr_spec_list Attribute spec list.
+	 * @return DOMAttr[] Attributes to remove.
 	 */
-	private function sanitize_disallowed_attributes_in_node( $node, $attr_spec_list ) {
+	private function get_disallowed_attributes_in_node( $node, $attr_spec_list ) {
 
 		if ( ! $node instanceof DOMElement ) {
 			/**
 			 * If $node is only a DOMNode and not a DOMElement we can't
 			 * remove an attribute from it anyway.  So bail out now.
 			 */
-			return;
+			return array();
 		}
 
 		/*
@@ -728,12 +799,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		foreach ( $attrs_to_remove as $attr ) {
-			$node->removeAttributeNode( $attr );
-			if ( isset( $this->args['remove_invalid_callback'], $attr->name ) ) {
-				call_user_func( $this->args['remove_invalid_callback'], $node, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attr->name );
-			}
-		}
+		return $attrs_to_remove;
 	}
 
 	/**
@@ -741,23 +807,29 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * Allowed values are found $this->globally_allowed_attributes and in parameter $attr_spec_list
 	 *
-	 * @param DOMNode   $node           Node.
-	 * @param array[][] $attr_spec_list Attribute spec list.
+	 * @param DOMNode   $node                       Node.
+	 * @param array[][] $attr_spec_list             Attribute spec list.
+	 * @param DOMAttr[] $attributes_pending_removal Attributes pending removal.
+	 * @return DOMAttr[]|false Attributes to remove, or false if the element itself should be removed.
 	 */
-	private function sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list ) {
+	private function sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list, $attributes_pending_removal ) {
 
 		if ( ! $node instanceof DOMElement ) {
 			/*
 			 * If $node is only a DOMNode and not a DOMElement we can't
 			 * remove an attribute from it anyway.  So bail out now.
 			 */
-			return;
+			return $attributes_pending_removal;
 		}
 
-		$this->delegated_sanitize_disallowed_attribute_values_in_node( $node, array_merge(
-			$this->globally_allowed_attributes,
-			$attr_spec_list
-		) );
+		return $this->delegated_sanitize_disallowed_attribute_values_in_node(
+			$node,
+			array_merge(
+				$this->globally_allowed_attributes,
+				$attr_spec_list
+			),
+			$attributes_pending_removal
+		);
 	}
 
 	/**
@@ -765,10 +837,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @see $this->sanitize_disallowed_attribute_values_in_node() which delegates to this method
 	 *
-	 * @param DOMElement $node           Node.
-	 * @param array[][]  $attr_spec_list Attribute spec list.
+	 * @param DOMElement $node                       Node.
+	 * @param array[][]  $attr_spec_list             Attribute spec list.
+	 * @param DOMAttr[]  $attributes_pending_removal Attributes pending removal.
+	 * @return DOMAttr[]|false Attributes to remove, or false if the element itself should be removed.
 	 */
-	private function delegated_sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list ) {
+	private function delegated_sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list, $attributes_pending_removal ) {
 		$attrs_to_remove = array();
 
 		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
@@ -781,7 +855,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
 
-			if ( ! isset( $attr_spec_list[ $attr_name ] ) ) {
+			if ( ! isset( $attr_spec_list[ $attr_name ] ) || in_array( $attr_node, $attributes_pending_removal, true ) ) {
 				continue;
 			}
 
@@ -825,22 +899,24 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 				if ( $is_mandatory ) {
 					$this->remove_node( $node );
-					return;
+					return false;
 				}
 
-				$attrs_to_remove[] = $attr_name;
+				$attrs_to_remove[] = $attr_node;
 			}
 		}
 
 		// Remove the disallowed values.
-		foreach ( $attrs_to_remove as $attr_name ) {
-			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
-				( true === $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
-				$node->setAttribute( $attr_name, '' );
+		foreach ( $attrs_to_remove as $attr_node ) {
+			if ( isset( $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
+				( true === $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
+				$attr_node->nodeValue = '';
 			} else {
-				$this->remove_invalid_attribute( $node, $attr_name );
+				$attributes_pending_removal[] = $attr_node;
 			}
 		}
+
+		return $attributes_pending_removal;
 	}
 
 	/**
