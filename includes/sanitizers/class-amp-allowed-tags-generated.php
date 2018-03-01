@@ -28,6 +28,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_url' => array(
 							'allow_empty' => true,
 							'allow_relative' => true,
+							'valid_host' => true,
 							'allowed_protocol' => array(
 								'ftp',
 								'geo',
