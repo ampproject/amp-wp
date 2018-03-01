@@ -310,8 +310,8 @@ class AMP_Post_Template {
 	private function build_post_content() {
 		$amp_content = new AMP_Content(
 			$this->post->post_content,
-			amp_get_content_embed_handlers( $this->post ),
-			amp_get_content_sanitizers( $this->post ),
+			amp_get_content_embed_handlers(),
+			amp_get_content_sanitizers(),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
