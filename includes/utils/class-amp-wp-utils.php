@@ -69,16 +69,9 @@ class AMP_WP_Utils {
 	 * @return array $context      Filtered allowed tags and attributes.
 	 */
 	public static function add_layout( $context, $context_type ) {
-		if ( 'post' !== $context_type ) {
-			return $context;
+		if ( ! empty( $context['img']['width'] ) && ! empty( $context['img']['height'] ) ) {
+			$context['img']['data-amp-layout'] = true;
 		}
-		$img            = isset( $context['img'] ) ? $context['img'] : array();
-		$context['img'] = array_merge(
-			$img,
-			array(
-				'data-amp-layout' => true,
-			)
-		);
 		return $context;
 	}
 

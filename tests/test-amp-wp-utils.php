@@ -51,15 +51,28 @@ class AMP_WP_Utils__Parse_Url__Test extends WP_UnitTestCase {
 	 * @see AMP_WP_Utils::add_layout()
 	 */
 	public function test_add_layout() {
-		$this->assertEquals( array(), AMP_WP_Utils::add_layout( array(), 'explicit' ) );
-		$this->assertEquals(
-			array(
-				'img' => array(
-					'data-amp-layout' => true,
-				),
+		$attribute             = 'data-amp-layout';
+		$image_no_dimensions   = array(
+			'img' => array(
+				$attribute => true,
 			),
-			AMP_WP_Utils::add_layout( array(), 'post' )
 		);
+		$image_with_dimensions = array_merge(
+			$image_no_dimensions,
+			array(
+				'height' => '100',
+				'width'  => '100',
+			)
+		);
+
+		$this->assertEquals( array(), AMP_WP_Utils::add_layout( array(), 'explicit' ) );
+		$this->assertEquals( $image_no_dimensions, AMP_WP_Utils::add_layout( $image_no_dimensions, 'post' ) );
+
+		$context = AMP_WP_Utils::add_layout( $image_with_dimensions, 'post' );
+		$this->assertTrue( $context['img'][ $attribute ] );
+
+		$context = AMP_WP_Utils::add_layout( $image_with_dimensions, 'explicit' );
+		$this->assertTrue( $context['img'][ $attribute ] );
 
 		add_filter( 'wp_kses_allowed_html', 'AMP_WP_Utils::add_layout', 10, 2 );
 		$image = '<img data-amp-layout="fill">';
