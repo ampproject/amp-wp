@@ -58,4 +58,28 @@ class AMP_WP_Utils {
 
 		return false;
 	}
+
+	/**
+	 * Adds 'data-amp-layout' to the allowed <img> attributes for wp_kses() in a 'post' context.
+	 *
+	 * @since 0.7
+	 *
+	 * @param array  $context      Allowed tags and their allowed attributes.
+	 * @param string $context_type Type of context.
+	 * @return array $context      Filtered allowed tags and attributes.
+	 */
+	public static function add_layout( $context, $context_type ) {
+		if ( 'post' !== $context_type ) {
+			return $context;
+		}
+		$img            = isset( $context['img'] ) ? $context['img'] : array();
+		$context['img'] = array_merge(
+			$img,
+			array(
+				'data-amp-layout' => true,
+			)
+		);
+		return $context;
+	}
+
 }

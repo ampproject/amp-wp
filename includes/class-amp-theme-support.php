@@ -183,6 +183,7 @@ class AMP_Theme_Support {
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+		add_filter( 'wp_kses_allowed_html', 'AMP_WP_Utils::add_layout', 10, 2 );
 
 		// @todo Add character conversion.
 	}
