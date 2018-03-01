@@ -332,11 +332,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Theme_Support::add_layout().
+	 * Test AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html().
 	 *
-	 * @see AMP_Theme_Support::add_layout()
+	 * @see AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html()
 	 */
-	public function test_add_layout() {
+	public function test_whitelist_layout_in_wp_kses_allowed_html() {
 		$attribute             = 'data-amp-layout';
 		$image_no_dimensions   = array(
 			'img' => array(
@@ -351,16 +351,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertEquals( array(), AMP_Theme_Support::add_layout( array() ) );
-		$this->assertEquals( $image_no_dimensions, AMP_Theme_Support::add_layout( $image_no_dimensions ) );
+		$this->assertEquals( array(), AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( array() ) );
+		$this->assertEquals( $image_no_dimensions, AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( $image_no_dimensions ) );
 
-		$context = AMP_Theme_Support::add_layout( $image_with_dimensions );
+		$context = AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( $image_with_dimensions );
 		$this->assertTrue( $context['img'][ $attribute ] );
 
-		$context = AMP_Theme_Support::add_layout( $image_with_dimensions );
+		$context = AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( $image_with_dimensions );
 		$this->assertTrue( $context['img'][ $attribute ] );
 
-		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::add_layout', 10, 2 );
+		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html', 10, 2 );
 		$image = '<img data-amp-layout="fill">';
 		$this->assertEquals( $image, wp_kses_post( $image ) );
 	}
