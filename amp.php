@@ -74,6 +74,10 @@ function amp_deactivate() {
  */
 function amp_after_setup_theme() {
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+		// Set a fallback value to avoid constant not defined warnings
+		if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+			define( 'AMP_QUERY_VAR', false );
+		}
 		return;
 	}
 
