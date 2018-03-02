@@ -302,7 +302,7 @@ class AMP_Validation_Utils {
 		// @todo Add request param to indicate whether the supplied content is raw (and needs the_content filters applied).
 		$processed = self::process_markup( $json[ self::MARKUP_KEY ] );
 		$response  = self::summarize_validation_errors( self::$validation_errors );
-		self::reset_validation_errors();
+		self::reset_validation_results();
 		$response['processed_markup'] = $processed;
 		return $response;
 	}
@@ -380,11 +380,9 @@ class AMP_Validation_Utils {
 	 * these static values will remain.
 	 * So reset them in case another test is needed.
 	 *
-	 * @todo Rename to reset_validation_results().
-	 *
 	 * @return void
 	 */
-	public static function reset_validation_errors() {
+	public static function reset_validation_results() {
 		self::$validation_errors = array();
 	}
 
@@ -417,7 +415,7 @@ class AMP_Validation_Utils {
 
 		self::process_markup( $post->post_content );
 		$results = self::summarize_validation_errors( self::$validation_errors );
-		self::reset_validation_errors();
+		self::reset_validation_results();
 		if ( isset( $results[ self::ERROR_KEY ] ) && ( true === $results[ self::ERROR_KEY ] ) ) { // @todo Is not error implied by $results not being empty? ERROR_KEY seems redundant.
 			self::display_error( $results );
 		}
@@ -767,6 +765,7 @@ class AMP_Validation_Utils {
 			array(
 				'labels'       => array(
 					'name'               => _x( 'Validation Status', 'post type general name', 'amp' ),
+					'singular_name'      => __( 'validation error', 'amp' ),
 					'not_found'          => __( 'No validation errors found', 'amp' ),
 					'not_found_in_trash' => __( 'No validation errors found in trash', 'amp' ),
 				),

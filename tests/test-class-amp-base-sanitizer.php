@@ -288,7 +288,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_child() {
-		AMP_Validation_Utils::reset_validation_errors();
+		AMP_Validation_Utils::reset_validation_results();
 		$parent_tag_name = 'div';
 		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
@@ -321,7 +321,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_attribute() {
-		AMP_Validation_Utils::reset_validation_errors();
+		AMP_Validation_Utils::reset_validation_results();
 		$video_name   = 'amp-video';
 		$attribute    = 'onload';
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
@@ -343,6 +343,6 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			AMP_Validation_Utils::$validation_errors[0]
 		);
-		AMP_Validation_Utils::reset_validation_errors();
+		AMP_Validation_Utils::reset_validation_results();
 	}
 }
