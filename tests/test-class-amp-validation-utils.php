@@ -681,7 +681,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( AMP_Validation_Utils::POST_TYPE_SLUG, get_post_types(), true ) );
 		$this->assertEquals( array(), get_all_post_type_supports( AMP_Validation_Utils::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $amp_post_type->name );
-		$this->assertEquals( 'AMP Validation Errors', $amp_post_type->label );
+		$this->assertEquals( 'Validation Status', $amp_post_type->label );
 		$this->assertEquals( false, $amp_post_type->public );
 		$this->assertTrue( $amp_post_type->show_ui );
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
@@ -942,15 +942,19 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
-		$initial_redirect = admin_url( 'plugins.php' );
-		$items            = array( $this->create_custom_post(), $this->create_custom_post() );
+		$initial_redirect                          = admin_url( 'plugins.php' );
+		$items                                     = array( $this->create_custom_post() );
+		$urls_tested                               = '1';
+		$_GET[ AMP_Validation_Utils::URLS_TESTED ] = $urls_tested;
 
-		// The action isn't 'amp-recheck,' so the callback should return the URL unchanged.
+		// The action isn't correct, so the callback should return the URL unchanged.
 		$this->assertEquals( $initial_redirect, AMP_Validation_Utils::handle_bulk_action( $initial_redirect, 'trash', $items ) );
 		$this->assertEquals(
 			add_query_arg(
-				AMP_Validation_Utils::REMAINING_ERRORS,
-				AMP_Validation_Utils::REMAINING_ERROR_VALUE,
+				array(
+					AMP_Validation_Utils::REMAINING_ERRORS => count( $items ),
+					AMP_Validation_Utils::URLS_TESTED      => $urls_tested,
+				),
 				$initial_redirect
 			),
 			AMP_Validation_Utils::handle_bulk_action( $initial_redirect, AMP_Validation_Utils::RECHECK_ACTION, $items )
@@ -967,27 +971,48 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::remaining_error_notice();
 		$this->assertEmpty( ob_get_clean() );
 
-		$_GET['post_type']                              = 'post';
-		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = AMP_Validation_Utils::REMAINING_ERROR_VALUE;
+		$_GET['post_type'] = 'post';
 		ob_start();
 		AMP_Validation_Utils::remaining_error_notice();
 		$this->assertEmpty( ob_get_clean() );
 
-		$_GET['post_type'] = AMP_Validation_Utils::POST_TYPE_SLUG;
+		$_GET['post_type']                              = AMP_Validation_Utils::POST_TYPE_SLUG;
+		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = AMP_Validation_Utils::REMAINING_ERRORS_VALUE;
+		$_GET[ AMP_Validation_Utils::URLS_TESTED ]      = '1';
 		ob_start();
 		AMP_Validation_Utils::remaining_error_notice();
-		$output = ob_get_clean();
-		$this->assertContains( 'div class="notice is-dismissible', $output );
-		$this->assertContains( 'notice-warning', $output );
-		$this->assertContains( 'Warning: the rechecked URLs still have validation errors', $output );
+		$this->assertContains( 'The rechecked URL still has validation errors', ob_get_clean() );
 
-		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = 0;
+		$_GET[ AMP_Validation_Utils::URLS_TESTED ] = '2';
 		ob_start();
 		AMP_Validation_Utils::remaining_error_notice();
-		$output = ob_get_clean();
-		$this->assertContains( 'div class="notice is-dismissible', $output );
-		$this->assertContains( 'updated', $output );
-		$this->assertContains( 'The rechecked URLs have no validation error', $output );
+		$this->assertContains( 'The rechecked URLs still have validation errors', ob_get_clean() );
+
+		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = '0';
+		ob_start();
+		AMP_Validation_Utils::remaining_error_notice();
+		$this->assertContains( 'The rechecked URLs have no validation error', ob_get_clean() );
+
+		$_GET[ AMP_Validation_Utils::URLS_TESTED ] = '1';
+		ob_start();
+		AMP_Validation_Utils::remaining_error_notice();
+		$this->assertContains( 'The rechecked URL has no validation error', ob_get_clean() );
+	}
+
+	/**
+	 * Test for handle_inline_recheck()
+	 *
+	 * @see AMP_Validation_Utils::handle_inline_recheck()
+	 */
+	public function test_handle_inline_recheck() {
+		try {
+			AMP_Validation_Utils::handle_inline_recheck( $this->create_custom_post() );
+		} catch ( WPDieException $e ) {
+			$exception = $e;
+		}
+
+		// This calls wp_redirect(), which throws an exception.
+		$this->assertTrue( isset( $exception ) );
 	}
 
 	/**
