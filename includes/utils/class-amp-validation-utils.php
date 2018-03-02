@@ -182,6 +182,7 @@ class AMP_Validation_Utils {
 		add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
 		add_action( 'init', array( __CLASS__, 'schedule_cron' ) );
 		add_action( self::CRON_EVENT, array( __CLASS__, 'cron_validate_urls' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_styling' ) );
 
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
@@ -1192,6 +1193,23 @@ class AMP_Validation_Utils {
 				$url
 			) );
 		};
+	}
+
+	/**
+	 * Enqueues the stylesheet on the validation edit.php page, to hide the 'Add New' link.
+	 *
+	 * @param string $hook_suffix The hook of the current admin page.
+	 * @return void
+	 */
+	public static function enqueue_styling( $hook_suffix ) {
+		if ( ( 'edit.php' === $hook_suffix ) && isset( $_GET['post_type'] ) && ( self::POST_TYPE_SLUG === sanitize_key( wp_unslash( $_GET['post_type'] ) ) ) ) { // WPCS: CSRF ok.
+			wp_enqueue_style(
+				self::POST_TYPE_SLUG,
+				amp_get_asset_url( 'css/amp-validation-status.css' ),
+				array(),
+				AMP__VERSION
+			);
+		}
 	}
 
 }
