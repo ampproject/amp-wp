@@ -90,6 +90,27 @@ class AMP_Validation_Utils {
 	const REMOVED_SOURCES = 'removed_sources';
 
 	/**
+	 * The action to recheck URLs for AMP validity.
+	 *
+	 * @var string
+	 */
+	const RECHECK_ACTION = 'amp-recheck';
+
+	/**
+	 * The query arg for whether there are remaining errors after rechecking URLs.
+	 *
+	 * @var string
+	 */
+	const REMAINING_ERRORS = 'amp_remaining_errors';
+
+	/**
+	 * The query value for if there are remaining errors.
+	 *
+	 * @var string
+	 */
+	const REMAINING_ERROR_VALUE = '1';
+
+	/**
 	 * The nodes that the sanitizer removed.
 	 *
 	 * @var array[][] {
@@ -113,6 +134,8 @@ class AMP_Validation_Utils {
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'add_recheck' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
+		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
+		add_action( 'admin_notices', array( __CLASS__, 'remaining_error_notice' ) );
 
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
@@ -696,17 +719,27 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Validate the home page.
+	 * Validates the home page.
 	 *
-	 * @return WP_Error|array The response array, or WP_Error.
+	 * @return array|WP_Error The response array, or WP_Error.
 	 */
 	public static function validate_home() {
-		$url = add_query_arg(
+		return self::validate_url( home_url() );
+	}
+
+	/**
+	 * Validates a given URL, and stores its errors in a custom post.
+	 *
+	 * @param string $url The URL to validate.
+	 * @return array|WP_Error The response array, or WP_Error.
+	 */
+	public static function validate_url( $url ) {
+		$validation_url = add_query_arg(
 			self::VALIDATION_QUERY_VAR,
 			1,
-			home_url()
+			$url
 		);
-		return wp_remote_get( $url, array(
+		return wp_remote_get( $validation_url, array(
 			'cookies'   => wp_unslash( $_COOKIE ),
 			'sslverify' => false,
 		) );
@@ -821,7 +854,7 @@ class AMP_Validation_Utils {
 
 		// @todo: $url needs to recheck the AMP validation of the page, and reload the edit.php page.
 		if ( ! empty( $url ) ) {
-			$actions['recheck'] = sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html__( 'Re-check', 'amp' ) );
+			$actions[ self::RECHECK_ACTION ] = sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html__( 'Re-check', 'amp' ) );
 		}
 		return $actions;
 	}
@@ -834,8 +867,67 @@ class AMP_Validation_Utils {
 	 */
 	public static function add_bulk_action( $actions ) {
 		unset( $actions['edit'] );
-		$actions['recheck'] = esc_html__( 'Re-check', 'amp' );
+		$actions[ self::RECHECK_ACTION ] = esc_html__( 'Re-check', 'amp' );
 		return $actions;
+	}
+
+	/**
+	 * Handles the 'Re-check' bulk action on the edit.php page.
+	 *
+	 * @param string $redirect The URL of the redirect.
+	 * @param string $action   The action.
+	 * @param array  $items    The items on which to take the action.
+	 * @return string $redirect The filtered URL of the redirect.
+	 */
+	public static function handle_bulk_action( $redirect, $action, $items ) {
+		if ( self::RECHECK_ACTION !== $action ) {
+			return $redirect;
+		}
+		$urls = array();
+		foreach ( $items as $item ) {
+			$url = get_post_meta( $item, self::AMP_URL_META, true );
+			if ( ! empty( $url ) ) {
+				$urls[] = $url;
+				self::validate_url( $url );
+			}
+		}
+
+		// Get the URLs that still have errors after re-checking.
+		$remaining_error = false;
+		foreach ( $urls as $url ) {
+			$error_post_id = self::existing_post( $url );
+			if ( isset( $error_post_id ) ) {
+				$remaining_error = true;
+			}
+		}
+
+		return add_query_arg(
+			self::REMAINING_ERRORS,
+			$remaining_error ? self::REMAINING_ERROR_VALUE : '0',
+			$redirect
+		);
+	}
+
+	/**
+	 * Outputs an admin notice after rechecking URL(s) on the custom post page.
+	 *
+	 * @return void
+	 */
+	public static function remaining_error_notice() {
+		if ( ! isset( $_GET['post_type'], $_GET[ self::REMAINING_ERRORS ] ) || ( self::POST_TYPE_SLUG !== sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) ) ) { // WPCS: CSRF ok.
+			return;
+		}
+
+		$is_error = ( isset( $_GET[ self::REMAINING_ERRORS ] ) && ( self::REMAINING_ERROR_VALUE === sanitize_text_field( wp_unslash( $_GET[ self::REMAINING_ERRORS ] ) ) ) ); // WPCS: CSRF ok.
+		$class    = $is_error ? 'notice-warning' : 'updated';
+		$message  = $is_error ? __( 'Warning: the rechecked URLs still have validation errors', 'amp' ) : __( 'The rechecked URLs have no validation error', 'amp' );
+
+		printf(
+			'<div class="notice is-dismissible %s"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+			esc_attr( $class ),
+			esc_html( $message ),
+			esc_html__( 'Dismiss this notice.', 'amp' )
+		);
 	}
 
 }

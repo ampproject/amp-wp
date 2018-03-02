@@ -96,16 +96,17 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::init();
 		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::amp_rest_validation' ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::validate_content' ) );
-		$this->assertEquals( 10, has_action( 'wp', self::TESTED_CLASS . '::callback_wrappers' ) );
-		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', self::TESTED_CLASS . '::add_validation_callback' ) );
-		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::register_post_type' ) );
-		$this->assertEquals( 10, has_filter( 'amp_content_sanitizers', self::TESTED_CLASS . '::add_validation_callback' ) );
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::register_post_type' ) );
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::plugin_notice' ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Utils::POST_TYPE_SLUG . '_posts_columns', self::TESTED_CLASS . '::add_post_columns' ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', self::TESTED_CLASS . '::output_custom_column' ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', self::TESTED_CLASS . '::add_recheck' ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
+		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
+		$this->assertEquals( 10, has_action( 'wp', self::TESTED_CLASS . '::callback_wrappers' ) );
+		$this->assertEquals( -1, has_filter( 'do_shortcode_tag', self::TESTED_CLASS . '::decorate_shortcode_source' ) );
+		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', self::TESTED_CLASS . '::add_validation_callback' ) );
 	}
 
 	/**
@@ -751,7 +752,16 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::validate_home()
 	 */
 	public function test_validate_home() {
-		$response = AMP_Validation_Utils::validate_home();
+		$this->assertTrue( is_array( AMP_Validation_Utils::validate_home() ) );
+	}
+
+	/**
+	 * Test for validate_url()
+	 *
+	 * @see AMP_Validation_Utils::validate_url()
+	 */
+	public function test_validate_url() {
+		$response = AMP_Validation_Utils::validate_url( get_permalink( $this->factory()->post->create() ) );
 		$this->assertTrue( is_array( $response ) );
 	}
 
@@ -855,7 +865,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$custom_post_id = $this->create_custom_post();
 		$actions        = AMP_Validation_Utils::add_recheck( $initial_actions, get_post( $custom_post_id ) );
 		$url            = get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true );
-		$this->assertContains( $url, $actions['recheck'] );
+		$this->assertContains( $url, $actions[ AMP_Validation_Utils::RECHECK_ACTION ] );
 		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
 	}
 
@@ -870,7 +880,61 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		);
 		$actions        = AMP_Validation_Utils::add_bulk_action( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
-		$this->assertEquals( 'Re-check', $actions['recheck'] );
+		$this->assertEquals( 'Re-check', $actions[ AMP_Validation_Utils::RECHECK_ACTION ] );
+	}
+
+	/**
+	 * Test for handle_bulk_action()
+	 *
+	 * @see AMP_Validation_Utils::handle_bulk_action()
+	 */
+	public function test_handle_bulk_action() {
+		$initial_redirect = admin_url( 'plugins.php' );
+		$items            = array( $this->create_custom_post(), $this->create_custom_post() );
+
+		// The action isn't 'amp-recheck,' so the callback should return the URL unchanged.
+		$this->assertEquals( $initial_redirect, AMP_Validation_Utils::handle_bulk_action( $initial_redirect, 'trash', $items ) );
+		$this->assertEquals(
+			add_query_arg(
+				AMP_Validation_Utils::REMAINING_ERRORS,
+				AMP_Validation_Utils::REMAINING_ERROR_VALUE,
+				$initial_redirect
+			),
+			AMP_Validation_Utils::handle_bulk_action( $initial_redirect, AMP_Validation_Utils::RECHECK_ACTION, $items )
+		);
+	}
+
+	/**
+	 * Test for remaining_error_notice()
+	 *
+	 * @see AMP_Validation_Utils::remaining_error_notice()
+	 */
+	public function test_remaining_error_notice() {
+		ob_start();
+		AMP_Validation_Utils::remaining_error_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		$_GET['post_type']                              = 'post';
+		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = AMP_Validation_Utils::REMAINING_ERROR_VALUE;
+		ob_start();
+		AMP_Validation_Utils::remaining_error_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		$_GET['post_type'] = AMP_Validation_Utils::POST_TYPE_SLUG;
+		ob_start();
+		AMP_Validation_Utils::remaining_error_notice();
+		$output = ob_get_clean();
+		$this->assertContains( 'div class="notice is-dismissible', $output );
+		$this->assertContains( 'notice-warning', $output );
+		$this->assertContains( 'Warning: the rechecked URLs still have validation errors', $output );
+
+		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = 0;
+		ob_start();
+		AMP_Validation_Utils::remaining_error_notice();
+		$output = ob_get_clean();
+		$this->assertContains( 'div class="notice is-dismissible', $output );
+		$this->assertContains( 'updated', $output );
+		$this->assertContains( 'The rechecked URLs have no validation error', $output );
 	}
 
 	/**
