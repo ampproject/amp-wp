@@ -6,6 +6,36 @@
  */
 
 /**
+ * Get the slug used in AMP for the query var, endpoint, and post type support.
+ *
+ * The return value can be overridden by previously defining a AMP_QUERY_VAR
+ * constant or by adding a 'amp_query_var' filter, but *warning* this ability
+ * may be deprecated in the future. Normally the slug should be just 'amp'.
+ *
+ * @since 0.7
+ * @return string Slug used for query var, endpoint, and post type support.
+ */
+function amp_get_slug() {
+	if ( defined( 'AMP_QUERY_VAR' ) ) {
+		return AMP_QUERY_VAR;
+	}
+
+	/**
+	 * Filter the AMP query variable.
+	 *
+	 * Warning: This filter may become deprecated.
+	 *
+	 * @since 0.3.2
+	 * @param string $query_var The AMP query variable.
+	 */
+	$query_var = apply_filters( 'amp_query_var', 'amp' );
+
+	define( 'AMP_QUERY_VAR', $query_var );
+
+	return $query_var;
+}
+
+/**
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
  * @since 0.1
@@ -38,9 +68,9 @@ function amp_get_permalink( $post_id ) {
 		$parsed_url = wp_parse_url( get_permalink( $post_id ) );
 		$structure  = get_option( 'permalink_structure' );
 		if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
-			$amp_url = add_query_arg( AMP_QUERY_VAR, '', get_permalink( $post_id ) );
+			$amp_url = add_query_arg( amp_get_slug(), '', get_permalink( $post_id ) );
 		} else {
-			$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
+			$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
 		}
 	}
 
@@ -66,10 +96,10 @@ function amp_get_permalink( $post_id ) {
 function amp_remove_endpoint( $url ) {
 
 	// Strip endpoint.
-	$url = preg_replace( ':/' . preg_quote( AMP_QUERY_VAR, ':' ) . '(?=/?(\?|#|$)):', '', $url );
+	$url = preg_replace( ':/' . preg_quote( amp_get_slug(), ':' ) . '(?=/?(\?|#|$)):', '', $url );
 
 	// Strip query var.
-	$url = remove_query_arg( AMP_QUERY_VAR, $url );
+	$url = remove_query_arg( amp_get_slug(), $url );
 
 	return $url;
 }
@@ -149,7 +179,7 @@ function is_amp_endpoint() {
 		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
-	return false !== get_query_var( AMP_QUERY_VAR, false );
+	return false !== get_query_var( amp_get_slug(), false );
 }
 
 /**

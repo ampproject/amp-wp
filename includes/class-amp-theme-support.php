@@ -130,7 +130,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function redirect_canonical_amp() {
-		if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
+		if ( false !== get_query_var( amp_get_slug(), false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
 			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
 			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );

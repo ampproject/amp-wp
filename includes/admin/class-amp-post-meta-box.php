@@ -145,7 +145,7 @@ class AMP_Post_Meta_Box {
 		);
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
-				'previewLink'     => esc_url_raw( add_query_arg( AMP_QUERY_VAR, '', get_preview_post_link( $post ) ) ),
+				'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
 				'canonical'       => amp_is_canonical(),
 				'enabled'         => post_supports_amp( $post ),
 				'canSupport'      => count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0,
@@ -237,7 +237,7 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( $is_amp ) {
-			$link = add_query_arg( AMP_QUERY_VAR, true, $link );
+			$link = add_query_arg( amp_get_slug(), true, $link );
 		}
 
 		return $link;
