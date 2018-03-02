@@ -836,7 +836,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Validation_Utils::plugin_notice();
 		$output = ob_get_clean();
-		$this->assertContains( 'Warning: the following plugins are incompatible with AMP', $output );
+		$this->assertContains( 'Warning: the following plugin is incompatible with AMP', $output );
 		$this->assertContains( $this->plugin_name, $output );
 	}
 

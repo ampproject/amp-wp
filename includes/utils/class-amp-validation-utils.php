@@ -848,14 +848,16 @@ class AMP_Validation_Utils {
 			$errors          = json_decode( $error_post->post_content, true );
 			$invalid_plugins = isset( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {
-				echo '<div class="notice notice-warning"><p>';
 				$reported_plugins = array();
 				foreach ( $invalid_plugins as $plugin ) {
 					$reported_plugins[] = sprintf( '<code>%s</code>', esc_html( $plugin ) );
 				}
-				esc_html_e( 'Warning: the following plugins are incompatible with AMP: ', 'amp' );
-				echo implode( ', ', $reported_plugins ); // WPCS: XSS ok.
-				echo '</p></div>';
+				printf(
+					'<div class="notice notice-warning is-dismissible"><p>%s%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+					esc_html( _n( 'Warning: the following plugin is incompatible with AMP: ', 'Warning: the following plugins are incompatible with AMP: ', count( $invalid_plugins ), 'amp' ) ),
+					implode( ', ', $reported_plugins ),
+					esc_html__( 'Dismiss this notice.', 'amp' )
+				); // WPCS: XSS ok.
 			}
 		}
 	}
