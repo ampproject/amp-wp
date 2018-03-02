@@ -838,6 +838,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertContains( 'Warning: the following plugin is incompatible with AMP', $output );
 		$this->assertContains( $this->plugin_name, $output );
+		$this->assertContains( 'more details', $output );
+		$this->assertContains( admin_url( 'edit.php' ), $output );
 	}
 
 	/**
@@ -1005,8 +1007,14 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @see AMP_Validation_Utils::handle_inline_recheck()
 	 */
 	public function test_handle_inline_recheck() {
+		$post_id              = $this->create_custom_post();
+		$_REQUEST['_wpnonce'] = wp_create_nonce( AMP_Validation_Utils::NONCE_ACTION . $post_id );
+		wp_set_current_user( $this->factory()->user->create( array(
+			'role' => 'administrator',
+		) ) );
+
 		try {
-			AMP_Validation_Utils::handle_inline_recheck( $this->create_custom_post() );
+			AMP_Validation_Utils::handle_inline_recheck( $post_id );
 		} catch ( WPDieException $e ) {
 			$exception = $e;
 		}

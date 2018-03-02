@@ -705,7 +705,9 @@ class AMP_Validation_Utils {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name' => _x( 'Validation Status', 'post type general name', 'amp' ),
+					'name'               => _x( 'Validation Status', 'post type general name', 'amp' ),
+					'not_found'          => __( 'No validation errors found', 'amp' ),
+					'not_found_in_trash' => __( 'No validation errors found in trash', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -852,10 +854,21 @@ class AMP_Validation_Utils {
 				foreach ( $invalid_plugins as $plugin ) {
 					$reported_plugins[] = sprintf( '<code>%s</code>', esc_html( $plugin ) );
 				}
+
+				$more_details_link = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( add_query_arg(
+						'post_type',
+						self::POST_TYPE_SLUG,
+						admin_url( 'edit.php' )
+					) ),
+					__( 'more details', 'amp' )
+				);
 				printf(
-					'<div class="notice notice-warning is-dismissible"><p>%s%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html( _n( 'Warning: the following plugin is incompatible with AMP: ', 'Warning: the following plugins are incompatible with AMP: ', count( $invalid_plugins ), 'amp' ) ),
+					'<div class="notice notice-warning is-dismissible"><p>%s %s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+					esc_html( _n( 'Warning: the following plugin is incompatible with AMP:', 'Warning: the following plugins are incompatible with AMP: ', count( $invalid_plugins ), 'amp' ) ),
 					implode( ', ', $reported_plugins ),
+					$more_details_link,
 					esc_html__( 'Dismiss this notice.', 'amp' )
 				); // WPCS: XSS ok.
 			}
