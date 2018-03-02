@@ -54,6 +54,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_bind_placeholder_prefix
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
+	 *      @type bool $disable_invalid_removal
 	 *      @type callable $remove_invalid_callback
 	 * }
 	 */
@@ -75,15 +76,6 @@ abstract class AMP_Base_Sanitizer {
 	 * @var DOMElement
 	 */
 	protected $root_element;
-
-	/**
-	 * Stack of the plugin or theme that is outputting markup, if any.
-	 *
-	 * Each item in the stack is an array containing the 'type' (theme, plugin, mu-plugin) and the 'name' of the extension.
-	 *
-	 * @var array[][]
-	 */
-	public $current_sources = array();
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
@@ -334,15 +326,16 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function remove_invalid_child( $child ) {
 		$parent = $child->parentNode;
-		$child->parentNode->removeChild( $child );
-		if ( isset( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ] ) ) {
-			call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ],
+		if ( isset( $this->args['remove_invalid_callback'] ) ) {
+			call_user_func( $this->args['remove_invalid_callback'],
 				array(
-					'node'    => $child,
-					'parent'  => $parent,
-					'sources' => $this->current_sources,
+					'node'   => $child,
+					'parent' => $parent,
 				)
 			);
+		}
+		if ( empty( $this->args['disable_invalid_removal'] ) ) {
+			$child->parentNode->removeChild( $child );
 		}
 	}
 
@@ -359,43 +352,27 @@ abstract class AMP_Base_Sanitizer {
 	 * @return void
 	 */
 	public function remove_invalid_attribute( $element, $attribute ) {
-		if ( isset( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ] ) ) {
+		if ( isset( $this->args['remove_invalid_callback'] ) ) {
 			if ( is_string( $attribute ) ) {
 				$attribute = $element->getAttributeNode( $attribute );
 			}
 			if ( $attribute ) {
-				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args[ AMP_Validation_Utils::CALLBACK_KEY ],
+				call_user_func( $this->args['remove_invalid_callback'],
 					array(
-						'node'    => $attribute,
-						'parent'  => $element,
-						'sources' => $this->current_sources,
+						'node'   => $attribute,
+						'parent' => $element,
 					)
 				);
+				if ( empty( $this->args['disable_invalid_removal'] ) ) {
+					$element->removeAttributeNode( $attribute );
+				}
 			}
-		} elseif ( is_string( $attribute ) ) {
-			$element->removeAttribute( $attribute );
-		} else {
-			$element->removeAttributeNode( $attribute );
-		}
-	}
-
-	/**
-	 * Updates the captured current plugin that is outputting markup.
-	 *
-	 * @since 0.7
-	 *
-	 * @param DOMComment $node The node to check for the presence of a plugin in a comment.
-	 * @return void
-	 */
-	public function capture_current_source( $node ) {
-		if ( ! preg_match( '#(?P<closing>/)?(?P<type>theme|plugin|mu-plugin):(?P<name>.*)#s', $node->nodeValue, $matches ) ) {
-			return;
-		}
-		if ( ! empty( $matches['closing'] ) ) {
-			$this->current_sources[] = wp_array_slice_assoc( $matches, array( 'type', 'name' ) );
-		} else {
-			array_pop( $this->current_sources );
+		} elseif ( empty( $this->args['disable_invalid_removal'] ) ) {
+			if ( is_string( $attribute ) ) {
+				$element->removeAttribute( $attribute );
+			} else {
+				$element->removeAttributeNode( $attribute );
+			}
 		}
 	}
 }

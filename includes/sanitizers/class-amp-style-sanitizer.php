@@ -237,7 +237,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			// @todo This would be a candidate for sanitization reporting.
+			// @todo This would be a candidate for sanitization reporting, when ! empty( $skipped ) || $total_size > $this->custom_max_size.
 			// Add comments to indicate which sheets were not included.
 			foreach ( array_reverse( $skipped ) as $skip ) {
 				$this->amp_custom_style_element->parentNode->insertBefore(
@@ -306,7 +306,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 'body' === $element->parentNode->nodeName && $element->hasAttribute( 'amp-keyframes' ) ) {
 			$validity = $this->validate_amp_keyframe( $element );
 			if ( true !== $validity ) {
-				$element->parentNode->removeChild( $element ); // @todo Add reporting.
+				$this->remove_invalid_child( $element );
 			}
 			return;
 		}
@@ -344,7 +344,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_css_file_path( $href );
 		if ( is_wp_error( $css_file_path ) ) {
-			$element->parentNode->removeChild( $element ); // @todo Report removal. Show HTML comment?
+			$this->remove_invalid_child( $element );
 			return;
 		}
 

@@ -149,7 +149,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
 
 		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 2, $removed_nodes );
+		$this->assertCount( 3, $removed_nodes );
 		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 	}

@@ -66,7 +66,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 *
 	 * @var string
 	 */
-	public $valid_amp_img = '<amp-img id="img-123" media="(min-width: 600x)" src="/assets/example.jpg" width=200 height=500 layout="responsive"></amp-img>';
+	public $valid_amp_img = '<amp-img id="img-123" media="(min-width: 600x)" src="/assets/example.jpg" width="200" height="500" layout="responsive"></amp-img>';
 
 	/**
 	 * The name of the tag to test.
@@ -110,20 +110,27 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test init.
+	 *
+	 * @see AMP_Validation_Utils::add_validation_hooks()
+	 */
+	public function test_add_validation_hooks() {
+		AMP_Validation_Utils::add_validation_hooks();
+		$this->assertEquals( 10, has_action( 'wp', array( self::TESTED_CLASS, 'callback_wrappers' ) ) );
+		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', array( self::TESTED_CLASS, 'add_validation_callback' ) ) );
+		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
+	}
+
+	/**
 	 * Test track_removed.
 	 *
 	 * @see AMP_Validation_Utils::track_removed()
 	 */
 	public function test_track_removed() {
 		$this->assertEmpty( AMP_Validation_Utils::$removed_nodes );
-		$plugin  = 'amp';
-		$source  = array(
-			'type' => 'plugin',
-			'name' => $plugin,
-		);
 		$removed = array(
 			'node'    => $this->node,
-			'sources' => array( $source ),
+			'sources' => array(),
 		);
 		AMP_Validation_Utils::track_removed( $removed );
 
@@ -246,7 +253,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				'script' => 1,
 			),
 			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
-			'processed_markup'                       => $markup,
+			'processed_markup'                       => '',
 			'sources_with_invalid_output'            => array(),
 		);
 		$this->assertEquals( $expected_response, $response );
@@ -259,7 +266,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			AMP_Validation_Utils::ERROR_KEY          => false,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(),
 			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
-			'processed_markup'                       => $this->valid_amp_img,
+			'processed_markup'                       => '<p>' . $this->valid_amp_img . '</p>',
 			'sources_with_invalid_output'            => array(),
 		);
 		$this->assertEquals( $expected_response, $response );
@@ -268,20 +275,20 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test get_response.
 	 *
-	 * @see AMP_Validation_Utils::get_response()
+	 * @see AMP_Validation_Utils::get_validation_results()
 	 */
-	public function test_get_response() {
+	public function test_get_validation_results() {
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		$this->set_capability();
-		$response          = AMP_Validation_Utils::get_response( $this->disallowed_tag );
+		AMP_Validation_Utils::process_markup( $this->disallowed_tag );
+		$response = AMP_Validation_Utils::get_validation_results();
+		AMP_Validation_Utils::reset_removed();
 		$expected_response = array(
 			AMP_Validation_Utils::ERROR_KEY          => true,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
 				'script' => 1,
 			),
 			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
-			'processed_markup'                       => $this->disallowed_tag,
 			'sources_with_invalid_output'            => array(),
 		);
 		$this->assertEquals( $expected_response, $response );
@@ -350,6 +357,42 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_source_comment_start.
+	 *
+	 * @covers AMP_Validation_Utils::get_source_comment_start()
+	 */
+	public function test_get_source_comment_start() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test get_source_comment_end.
+	 *
+	 * @covers AMP_Validation_Utils::get_source_comment_end()
+	 */
+	public function test_get_source_comment_end() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test parse_source_comment.
+	 *
+	 * @covers AMP_Validation_Utils::parse_source_comment()
+	 */
+	public function test_parse_source_comment() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test locate_sources.
+	 *
+	 * @covers AMP_Validation_Utils::locate_sources()
+	 */
+	public function test_locate_sources() {
+		$this->markTestIncomplete();
+	}
+
+	/**
 	 * Test callback_wrappers
 	 *
 	 * @see AMP_Validation_Utils::callback_wrappers()
@@ -390,23 +433,23 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
 		$this->assertContains( '<div class="notice notice-error">', $output );
-		$this->assertContains( '<!--plugin:amp', $output );
-		$this->assertContains( '<!--/plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
 
 		ob_start();
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
 		$this->assertContains( '<div></div>', $output );
-		$this->assertContains( '<!--plugin:amp', $output );
-		$this->assertContains( '<!--/plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
 
 		ob_start();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
 		$this->assertContains( $notice, $output );
 		$this->assertContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
-		$this->assertContains( '<!--plugin:amp', $output );
-		$this->assertContains( '<!--/plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
 
 		ob_start();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
@@ -415,28 +458,37 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
 		$this->assertContains( $expected_output, $output );
-		$this->assertContains( '<!--plugin:amp', $output );
-		$this->assertContains( '<!--/plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
 
 		// This action's callback isn't from a plugin or theme, so it shouldn't be wrapped in comments.
 		ob_start();
 		do_action( $action_non_plugin );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--plugin:', $output );
-		$this->assertNotContains( '<!--/plugin:', $output );
+		$this->assertNotContains( '<!--amp-source-stack:plugin:', $output );
+		$this->assertNotContains( '<!--/amp-source-stack:plugin:', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		ob_start();
 		do_action( $action_no_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--plugin:', $output );
-		$this->assertNotContains( '<!--/plugin:', $output );
+		$this->assertNotContains( '<!--amp-source-stack:plugin:', $output );
+		$this->assertNotContains( '<!--/amp-source-stack:plugin:', $output );
+	}
+
+	/**
+	 * Test decorate_shortcode_source.
+	 *
+	 * @covers AMP_Validation_Utils::decorate_shortcode_source()
+	 */
+	public function test_decorate_shortcode_source() {
+		$this->markTestIncomplete();
 	}
 
 	/**
 	 * Test validate_content
 	 *
-	 * @see AMP_Validation_Utils::validate_content()
+	 * @covers AMP_Validation_Utils::validate_content()
 	 */
 	public function test_get_source() {
 		$plugin = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
@@ -451,17 +503,19 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test wrapped_callback
 	 *
-	 * @see AMP_Validation_Utils::wrapped_callback()
+	 * @covers AMP_Validation_Utils::wrapped_callback()
 	 */
 	public function test_wrapped_callback() {
-		global $post;
-		$post             = $this->factory()->post->create_and_get(); // WPCS: global override OK.
-		$callback         = array(
-			'function'      => 'the_ID',
+		$callback = array(
+			'function'      => function() {
+				echo '<b>Cool!</b>';
+			},
 			'accepted_args' => 0,
 			'type'          => 'plugin',
 			'name'          => 'amp',
+			'hook'          => 'bar',
 		);
+
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
 		ob_start();
@@ -469,16 +523,18 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
-		$this->assertContains( strval( get_the_ID() ), $output );
-		$this->assertContains( '<!--plugin:amp', $output );
-		$this->assertContains( '<!--/plugin:amp', $output );
+		$this->assertContains( '<b>Cool!</b>', $output );
+		$this->assertContains( '<!--amp-source-stack:plugin:amp {"hook":"bar"}', $output );
+		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
 
-		$callback         = array(
+		$callback = array(
 			'function'      => array( $this, 'get_string' ),
 			'accepted_args' => 0,
 			'type'          => 'plugin',
 			'name'          => 'amp',
+			'hook'          => 'bar',
 		);
+
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
 		ob_start();
@@ -493,7 +549,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test display_error().
 	 *
-	 * @see AMP_Validation_Utils::display_error()
+	 * @covers AMP_Validation_Utils::display_error()
 	 */
 	public function test_display_error() {
 		$response = array(
@@ -580,7 +636,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test should_validate_front_end
 	 *
-	 * @see AMP_Validation_Utils::should_validate_front_end()
+	 * @covers AMP_Validation_Utils::should_validate_front_end()
 	 */
 	public function test_should_validate_front_end() {
 		global $post;
@@ -597,22 +653,19 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test add_validation_callback
 	 *
-	 * @see AMP_Validation_Utils::add_validation_callback()
+	 * @covers AMP_Validation_Utils::add_validation_callback()
 	 */
 	public function test_add_validation_callback() {
 		global $post;
-		$post              = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		$sanitizers        = array(
+		$post       = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$sanitizers = array(
 			'AMP_Img_Sanitizer'      => array(),
 			'AMP_Form_Sanitizer'     => array(),
 			'AMP_Comments_Sanitizer' => array(),
 		);
-		$expected_callback = self::TESTED_CLASS . '::track_removed';
-		$this->assertEquals( $sanitizers, AMP_Validation_Utils::add_validation_callback( $sanitizers ) );
-		add_theme_support( 'amp' );
-		$this->set_capability();
-		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
-		$filtered_sanitizers                                = AMP_Validation_Utils::add_validation_callback( $sanitizers );
+
+		$expected_callback   = self::TESTED_CLASS . '::track_removed';
+		$filtered_sanitizers = AMP_Validation_Utils::add_validation_callback( $sanitizers );
 		foreach ( $filtered_sanitizers as $sanitizer => $args ) {
 			$this->assertEquals( $expected_callback, $args[ AMP_Validation_Utils::CALLBACK_KEY ] );
 		}
@@ -622,7 +675,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for register_post_type()
 	 *
-	 * @see AMP_Validation_Utils::register_post_type()
+	 * @covers AMP_Validation_Utils::register_post_type()
 	 */
 	public function test_register_post_type() {
 		AMP_Validation_Utils::register_post_type();
@@ -641,15 +694,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for store_validation_errors()
 	 *
-	 * @see AMP_Validation_Utils::store_validation_errors()
+	 * @covers AMP_Validation_Utils::store_validation_errors()
 	 */
 	public function test_store_validation_errors() {
 		global $post, $wp;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
 		add_theme_support( 'amp' );
-		$this->set_capability();
-		AMP_Validation_Utils::process_markup( '<!--plugin:foo-->' . $this->disallowed_tag . '<!--/plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
 
 		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
 		$this->assertEquals( 'script', AMP_Validation_Utils::$removed_nodes[0]['node']->nodeName );
@@ -668,6 +719,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'script' => 1,
 		);
 		$url                       = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
+		AMP_Validation_Utils::reset_removed();
 
 		// This should create a new post for the errors.
 		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $custom_post->post_type );
@@ -681,28 +733,31 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::reset_removed();
 		$wp->query_string = 'baz'; // WPCS: global override ok.
 		$this->set_capability();
-		AMP_Validation_Utils::process_markup( '<!--plugin:foo-->' . $this->disallowed_tag . '<!--/plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
-		$meta           = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
-		$url            = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
+		AMP_Validation_Utils::reset_removed();
+		$meta = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
+		$url  = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 		// A post exists for these errors, so the URL should be stored in the 'additional URLs' meta data.
 		$this->assertEquals( $post_id, $custom_post_id );
 		$this->assertEquals( $url, $meta );
 
 		$wp->query_string = 'foo-bar'; // WPCS: global override ok.
-		AMP_Validation_Utils::process_markup( '<!--plugin:foo-->' . $this->disallowed_tag . '<!--/plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
-		$meta           = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, false );
-		$url            = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
+		AMP_Validation_Utils::reset_removed();
+		$meta = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, false );
+		$url  = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 
 		// The URL should again be stored in the 'additional URLs' meta data.
 		$this->assertEquals( $post_id, $custom_post_id );
 		$this->assertContains( $url, $meta );
 
 		AMP_Validation_Utils::reset_removed();
-		AMP_Validation_Utils::process_markup( '<!--plugin:foo--><nonexistent></nonexistent><!--/plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo--><nonexistent></nonexistent><!--/amp-source-stack:plugin:foo-->' );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
-		$error_post     = get_post( $custom_post_id );
+		AMP_Validation_Utils::reset_removed();
+		$error_post = get_post( $custom_post_id );
 		$this->assertTrue( true );
 		$validation                = json_decode( $error_post->post_content, true );
 		$url                       = get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true );
@@ -722,6 +777,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		// There are no errors, so the existing error post should be deleted.
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		AMP_Validation_Utils::reset_removed();
 
 		$this->assertNull( $custom_post_id );
 		remove_theme_support( 'amp' );
@@ -730,7 +786,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for existing_post()
 	 *
-	 * @see AMP_Validation_Utils::existing_post()
+	 * @covers AMP_Validation_Utils::existing_post()
 	 */
 	public function test_existing_post() {
 		global $post;
@@ -749,7 +805,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for validate_home()
 	 *
-	 * @see AMP_Validation_Utils::validate_home()
+	 * @covers AMP_Validation_Utils::validate_home()
 	 */
 	public function test_validate_home() {
 		$this->assertTrue( is_array( AMP_Validation_Utils::validate_home() ) );
@@ -768,7 +824,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for plugin_notice()
 	 *
-	 * @see AMP_Validation_Utils::plugin_notice()
+	 * @covers AMP_Validation_Utils::plugin_notice()
 	 */
 	public function test_plugin_notice() {
 		global $pagenow;
@@ -790,7 +846,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for add_post_columns()
 	 *
-	 * @see AMP_Validation_Utils::add_post_columns()
+	 * @covers AMP_Validation_Utils::add_post_columns()
 	 */
 	public function test_add_post_columns() {
 		$initial_columns = array(
@@ -814,7 +870,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * Test for output_custom_column()
 	 *
 	 * @dataProvider get_custom_columns
-	 * @see AMP_Validation_Utils::output_custom_column()
+	 * @covers AMP_Validation_Utils::output_custom_column()
 	 * @param string $column_name The name of the column.
 	 * @param string $expected_value The value that is expected to be present in the column markup.
 	 */
@@ -853,7 +909,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for add_recheck()
 	 *
-	 * @see AMP_Validation_Utils::add_recheck()
+	 * @covers AMP_Validation_Utils::add_recheck()
 	 */
 	public function test_add_recheck() {
 		$initial_actions = array(
@@ -872,7 +928,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for add_bulk_action()
 	 *
-	 * @see AMP_Validation_Utils::add_bulk_action()
+	 * @covers AMP_Validation_Utils::add_bulk_action()
 	 */
 	public function test_add_bulk_action() {
 		$initial_action = array(

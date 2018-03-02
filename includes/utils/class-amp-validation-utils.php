@@ -139,14 +139,20 @@ class AMP_Validation_Utils {
 
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
-		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
-		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
-		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 		add_action( 'activate_plugin', function() {
 			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_home' ) ) ) {
 				add_action( 'shutdown', array( __CLASS__, 'validate_home' ) ); // Shutdown so all plugins will have been activated.
 			}
 		} );
+	}
+
+	/**
+	 * Add hooks for doing validation during preprocessing/sanitizing.
+	 */
+	public static function add_validation_hooks() {
+		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
+		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
+		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 	}
 
 	/**
@@ -157,16 +163,11 @@ class AMP_Validation_Utils {
 	 *
 	 *     @type DOMElement|DOMNode $node   The removed node.
 	 *     @type DOMElement|DOMNode $parent The parent of the removed node.
-	 *     @type array[][]          $sources {
-	 *           The data of the removed sources (theme, plugin, or mu-plugin).
-	 *
-	 *           @type string $name The name of the source.
-	 *           @type string $type The type of the source.
-	 *     }
 	 * }
 	 * @return void
 	 */
 	public static function track_removed( $removed ) {
+		$removed['sources']    = self::locate_sources( $removed['node'] );
 		self::$removed_nodes[] = $removed;
 	}
 
@@ -186,23 +187,20 @@ class AMP_Validation_Utils {
 	 * Also passes a 'remove_invalid_callback' to keep track of stripped attributes and nodes.
 	 *
 	 * @param string $markup The markup to process.
-	 * @return void
+	 * @return string Sanitized markup.
 	 */
 	public static function process_markup( $markup ) {
-		if ( ! self::has_cap() ) {
-			return;
-		}
-
 		AMP_Theme_Support::register_content_embed_handlers();
-		remove_filter( 'the_content', 'wpautop' );
 
 		/** This filter is documented in wp-includes/post-template.php */
 		$markup = apply_filters( 'the_content', $markup );
 		$args   = array(
-			'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
-			self::CALLBACK_KEY  => 'AMP_Validation_Utils::track_removed',
+			'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 		);
-		AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
+
+		$results = AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
+		return $results[0];
 	}
 
 	/**
@@ -238,6 +236,8 @@ class AMP_Validation_Utils {
 	/**
 	 * Validate the markup passed to the REST API.
 	 *
+	 * @todo Rename to handle_validate_request or something.
+	 *
 	 * @param WP_REST_Request $request The REST request.
 	 * @return array|WP_Error.
 	 */
@@ -249,28 +249,25 @@ class AMP_Validation_Utils {
 			) );
 		}
 
-		return self::get_response( $json[ self::MARKUP_KEY ] );
+		// @todo Add request param to indicate whether the supplied content is raw (and needs the_content filters applied).
+		$processed = self::process_markup( $json[ self::MARKUP_KEY ] );
+		$response  = self::get_validation_results();
+		self::reset_removed();
+		$response['processed_markup'] = $processed;
+		return $response;
 	}
 
 	/**
 	 * Gets the AMP validation response.
 	 *
-	 * If $markup isn't passed,
-	 * It will return the validation errors the sanitizers found in rendering the page.
+	 * Returns the current validation errors the sanitizers found in rendering the page.
 	 *
-	 * @param string $markup   To validate for AMP compatibility (optional).
-	 * @return array $response The AMP validity of the markup.
+	 * @todo Refactor this to return list of each element/attribute removed along with their sources. No need to normalize since information is list.
+	 *
+	 * @return array The AMP validity of the markup.
 	 */
-	public static function get_response( $markup = null ) {
-		global $wp;
-		$response = array();
-		if ( isset( $markup ) ) {
-			self::process_markup( $markup );
-			$response['processed_markup'] = $markup;
-		} elseif ( isset( $wp ) ) {
-			$response['url'] = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
-		}
-
+	public static function get_validation_results() {
+		$results            = array();
 		$removed_elements   = array();
 		$removed_attributes = array();
 		$invalid_sources    = array();
@@ -298,19 +295,18 @@ class AMP_Validation_Utils {
 			}
 		}
 
-		$response = array_merge(
+		$results = array_merge(
 			array(
-				self::ERROR_KEY              => self::was_node_removed(),
+				self::ERROR_KEY              => self::was_node_removed(), // @todo This should probably be eliminated.
 				self::SOURCES_INVALID_OUTPUT => $invalid_sources,
 			),
 			compact(
 				'removed_elements',
 				'removed_attributes'
 			),
-		$response );
-		self::reset_removed();
+		$results );
 
-		return $response;
+		return $results;
 	}
 
 	/**
@@ -319,6 +315,8 @@ class AMP_Validation_Utils {
 	 * After testing if the markup is valid,
 	 * these static values will remain.
 	 * So reset them in case another test is needed.
+	 *
+	 * @todo Rename to reset_validation_results().
 	 *
 	 * @return void
 	 */
@@ -349,16 +347,87 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function validate_content( $post ) {
-		if ( ! post_supports_amp( $post ) || ! self::has_cap() ) {
+		if ( ! post_supports_amp( $post ) ) {
 			return;
 		}
-		AMP_Theme_Support::register_content_embed_handlers();
-		/** This filter is documented in wp-includes/post-template.php */
-		$filtered_content = apply_filters( 'the_content', $post->post_content, $post->ID );
-		$response         = self::get_response( $filtered_content );
-		if ( isset( $response[ self::ERROR_KEY ] ) && ( true === $response[ self::ERROR_KEY ] ) ) {
-			self::display_error( $response );
+
+		self::process_markup( $post->post_content );
+		$results = self::get_validation_results();
+		self::reset_removed();
+		if ( isset( $results[ self::ERROR_KEY ] ) && ( true === $results[ self::ERROR_KEY ] ) ) { // @todo Is not error implied by $results not being empty? ERROR_KEY seems redundant.
+			self::display_error( $results );
 		}
+	}
+
+	/**
+	 * Get source start comment.
+	 *
+	 * @param string $type Extension type.
+	 * @param string $name Extension name.
+	 * @param array  $args Args.
+	 * @return string HTML Comment.
+	 */
+	public static function get_source_comment_start( $type, $name, $args = array() ) {
+		return sprintf( '<!--amp-source-stack:%s:%s %s-->', $type, $name, str_replace( '--', '', wp_json_encode( $args ) ) );
+	}
+
+	/**
+	 * Get source end comment.
+	 *
+	 * @param string $type Extension type.
+	 * @param string $name Extension name.
+	 * @return string HTML Comment.
+	 */
+	public static function get_source_comment_end( $type, $name ) {
+		return sprintf( '<!--/amp-source-stack:%s:%s-->', $type, $name );
+	}
+
+	/**
+	 * Parse source comment.
+	 *
+	 * @param DOMComment $comment Comment.
+	 * @return array|null Source info or null if not a source comment.
+	 */
+	public static function parse_source_comment( DOMComment $comment ) {
+		if ( ! preg_match( '#^\s*(?P<closing>/)?amp-source-stack:(?P<type>theme|plugin|mu-plugin):(?P<name>\S+)(?: (?P<args>{.+}))?\s*$#s', $comment->nodeValue, $matches ) ) {
+			return null;
+		}
+		$source = wp_array_slice_assoc( $matches, array( 'type', 'name' ) );
+
+		$source['closing'] = ! empty( $matches['closing'] );
+		if ( isset( $matches['args'] ) ) {
+			$source['args'] = json_decode( $matches['args'], true );
+		}
+		return $source;
+	}
+
+	/**
+	 * Walk back tree to find the open sources.
+	 *
+	 * @param DOMNode $node Node to look for.
+	 * @return array[][] {
+	 *       The data of the removed sources (theme, plugin, or mu-plugin).
+	 *
+	 *       @type string $name The name of the source.
+	 *       @type string $type The type of the source.
+	 * }
+	 */
+	public static function locate_sources( DOMNode $node ) {
+		$xpath    = new DOMXPath( $node->ownerDocument );
+		$comments = $xpath->query( 'preceding::comment()[ contains( ., "amp-source-stack:" ) ]', $node );
+		$sources  = array();
+		foreach ( $comments as $comment ) {
+			$source = self::parse_source_comment( $comment );
+			if ( $source ) {
+				if ( $source['closing'] ) {
+					array_pop( $sources );
+				} else {
+					unset( $source['closing'] );
+					$sources[] = $source;
+				}
+			}
+		}
+		return $sources;
 	}
 
 	/**
@@ -373,9 +442,6 @@ class AMP_Validation_Utils {
 	 */
 	public static function callback_wrappers() {
 		global $wp_filter;
-		if ( ! self::should_validate_front_end() ) { // @todo Better to just conditionally call callback_wrappers() based on whether should_validate_front_end(). Active request rather than passive.
-			return;
-		}
 		$pending_wrap_callbacks = array();
 		foreach ( $wp_filter as $filter_tag => $wp_hook ) {
 			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
@@ -385,6 +451,9 @@ class AMP_Validation_Utils {
 						$pending_wrap_callbacks[ $filter_tag ][] = array_merge(
 							$callback,
 							$source_data,
+							array(
+								'hook' => $filter_tag,
+							),
 							compact( 'priority' )
 						);
 					}
@@ -414,9 +483,6 @@ class AMP_Validation_Utils {
 	 */
 	public static function decorate_shortcode_source( $output, $tag ) {
 		global $shortcode_tags;
-		if ( ! self::should_validate_front_end() ) { // @todo Better to just conditionally call callback_wrappers() based on whether should_validate_front_end(). Active request rather than passive.
-			return $output;
-		}
 		if ( ! isset( $shortcode_tags[ $tag ] ) ) {
 			return $output;
 		}
@@ -425,9 +491,9 @@ class AMP_Validation_Utils {
 			return $output;
 		}
 		$output = implode( '', array(
-			sprintf( '<!--%s:%s-->', esc_attr( $source['type'] ), esc_attr( $source['name'] ) ), // @todo Need to also include the offending shortcode $tag.
+			self::get_source_comment_start( $source['type'], $source['name'], array( 'shortcode' => $tag ) ),
 			$output,
-			sprintf( '<!--/%s:%s-->', esc_attr( $source['type'] ), esc_attr( $source['name'] ) ),
+			self::get_source_comment_end( $source['type'], $source['name'] ),
 		) );
 		return $output;
 	}
@@ -501,6 +567,7 @@ class AMP_Validation_Utils {
 	 *     @type int      $accepted_args
 	 *     @type string   $type
 	 *     @type string   $source
+	 *     @type string   $hook
 	 * }
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
 	 */
@@ -516,14 +583,15 @@ class AMP_Validation_Utils {
 			} elseif ( $accepted_args >= func_num_args() ) {
 				$result = call_user_func_array( $function, $args );
 			} else {
-				$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
+				$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) ); // @todo Why not only do this?
 			}
 			$output = ob_get_clean();
 
-			if ( ! empty( $output ) ) {
-				printf( '<!--%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['name'] ) );
+			// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
+			if ( ! empty( $output ) && preg_match( '/<.+?>/', $output ) ) {
+				echo self::get_source_comment_start( $callback['type'], $callback['name'], array( 'hook' => $callback['hook'] ) ); // WPCS: XSS ok.
 				echo $output; // WPCS: XSS ok.
-				printf( '<!--/%s:%s-->', esc_attr( $callback['type'] ), esc_attr( $callback['name'] ) );
+				echo self::get_source_comment_end( $callback['type'], $callback['name'] ); // WPCS: XSS ok.
 			}
 			return $result;
 		};
@@ -601,11 +669,13 @@ class AMP_Validation_Utils {
 	 * @return array $sanitizers The filtered AMP sanitizers.
 	 */
 	public static function add_validation_callback( $sanitizers ) {
-		if ( self::should_validate_front_end() ) {
-			foreach ( $sanitizers as $sanitizer => $args ) {
-				$args[ self::CALLBACK_KEY ] = __CLASS__ . '::track_removed';
-				$sanitizers[ $sanitizer ]   = $args;
-			}
+		foreach ( $sanitizers as $sanitizer => $args ) {
+			$sanitizers[ $sanitizer ] = array_merge(
+				$args,
+				array(
+					'remove_invalid_callback' => __CLASS__ . '::track_removed',
+				)
+			);
 		}
 		return $sanitizers;
 	}
@@ -638,14 +708,13 @@ class AMP_Validation_Utils {
 	 * If there's already an error post for the URL, but there's no error anymore, it deletes it.
 	 *
 	 * @return int|null $post_id The post ID of the custom post type used, or null.
+	 * @global WP $wp
 	 */
 	public static function store_validation_errors() {
-		if ( ! self::should_validate_front_end() ) {
-			return null;
-		}
+		global $wp;
 
-		$response = self::get_response();
-		$url      = isset( $response['url'] ) ? $response['url'] : null; // @todo If url is not defined then that should be an error.
+		$response = self::get_validation_results();
+		$url      = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 		unset( $response['url'] );
 		$encoded_errors            = wp_json_encode( $response );
 		$post_name                 = md5( $encoded_errors );

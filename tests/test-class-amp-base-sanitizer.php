@@ -344,48 +344,4 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		AMP_Validation_Utils::reset_removed();
 	}
-
-	/**
-	 * Test capture_current_source.
-	 *
-	 * @covers AMP_Base_Sanitizer::capture_current_source()
-	 */
-	public function test_capture_current_source() {
-		$dom       = new DOMDocument();
-		$node      = $dom->createComment( '/plugin:amp' );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$this->assertEquals( array(), $sanitizer->current_sources );
-		$sanitizer->capture_current_source( $node );
-		$this->assertCount( 1, $sanitizer->current_sources );
-
-		$amp_source = array(
-			'type' => 'plugin',
-			'name' => 'amp',
-		);
-		$foo_source = array(
-			'type' => 'theme',
-			'name' => 'foo',
-		);
-
-		$this->assertEquals(
-			$amp_source,
-			$sanitizer->current_sources[0]
-		);
-
-		$node = $dom->createComment( '/theme:foo' );
-		$sanitizer->capture_current_source( $node );
-		$this->assertEquals(
-			array(
-				$amp_source,
-				$foo_source,
-			),
-			$sanitizer->current_sources
-		);
-
-		$sanitizer->capture_current_source( $dom->createComment( 'theme:foo' ) );
-		$this->assertEquals( array( $amp_source ), $sanitizer->current_sources );
-		$sanitizer->capture_current_source( $dom->createComment( 'plugin:amp' ) );
-		$this->assertEquals( array(), $sanitizer->current_sources );
-	}
-
 }

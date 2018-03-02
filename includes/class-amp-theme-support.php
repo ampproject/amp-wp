@@ -216,6 +216,10 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 
+		if ( AMP_Validation_Utils::should_validate_front_end() ) {
+			AMP_Validation_Utils::add_validation_hooks();
+		}
+
 		// @todo Add character conversion.
 	}
 
@@ -955,11 +959,12 @@ class AMP_Theme_Support {
 
 		$args = array_merge(
 			array(
-				'content_max_width'                => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element'             => true,
-				AMP_Validation_Utils::CALLBACK_KEY => null,
-				'allow_dirty_styles'               => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
-				'allow_dirty_scripts'              => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element'    => true,
+				'remove_invalid_callback' => null,
+				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'disable_invalid_removal' => ! empty( $_REQUEST['amp_disable_invalid_removal'] ), // WPCS: csrf ok.
 			),
 			$args
 		);
@@ -994,7 +999,15 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		AMP_Validation_Utils::store_validation_errors();
+		if ( AMP_Validation_Utils::should_validate_front_end() ) {
+			AMP_Validation_Utils::store_validation_errors();
+			$comment = $dom->createComment( "\nValidation Status:\n" . wp_json_encode( AMP_Validation_Utils::get_validation_results() ) );
+			$body    = $dom->getElementsByTagName( 'body' )->item( 0 );
+			if ( $body ) {
+				$body->appendChild( $comment );
+			}
+		}
+
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
