@@ -104,6 +104,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
+		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::schedule_cron' ) );
 	}
 
 	/**
@@ -647,13 +648,19 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function test_should_validate_front_end() {
 		global $post;
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
-		add_theme_support( 'amp' );
 		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
 		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$this->set_capability();
 		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
-		remove_theme_support( 'amp' );
+
+		wp_set_current_user( $this->factory()->user->create( array(
+			'role' => 'subscriber',
+		) ) );
+		$nonce = '123456789';
+		$_GET[ AMP_Validation_Utils::CUSTOM_CRON_NONCE ] = $nonce;
+		set_transient( AMP_Validation_Utils::NONCE_TRANSIENT_NAME, $nonce, 60 );
+		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
 	}
 
 	/**
@@ -1014,7 +1021,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for handle_inline_recheck()
 	 *
-	 * @see AMP_Validation_Utils::handle_inline_recheck()
+	 * @covers AMP_Validation_Utils::handle_inline_recheck()
 	 */
 	public function test_handle_inline_recheck() {
 		$post_id              = $this->create_custom_post();
@@ -1031,6 +1038,35 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		// This calls wp_redirect(), which throws an exception.
 		$this->assertTrue( isset( $exception ) );
+	}
+
+	/**
+	 * Test for schedule_cron()
+	 *
+	 * @covers AMP_Validation_Utils::schedule_cron()
+	 */
+	public function test_schedule_cron() {
+		AMP_Validation_Utils::schedule_cron();
+		$scheduled     = wp_next_scheduled( AMP_Validation_Utils::CRON_EVENT );
+		$cron_array    = _get_cron_array();
+		$cron_events   = array_shift( $cron_array[ $scheduled ] );
+		$cron_settings = array_shift( $cron_events );
+		$this->assertTrue( is_int( $scheduled ) );
+		$this->assertEquals( array(), $cron_settings['args'] );
+		$this->assertEquals( 'twicedaily', $cron_settings['schedule'] );
+	}
+
+	/**
+	 * Test for cron_validate_urls()
+	 *
+	 * @covers AMP_Validation_Utils::cron_validate_urls()
+	 */
+	public function test_cron_validate_urls() {
+		$doing_cron            = '123456789';
+		$_GET['doing_wp_cron'] = $doing_cron;
+		AMP_Validation_Utils::cron_validate_urls();
+		$transient = get_transient( AMP_Validation_Utils::NONCE_TRANSIENT_NAME );
+		$this->assertEquals( md5( $doing_cron ), $transient );
 	}
 
 	/**
