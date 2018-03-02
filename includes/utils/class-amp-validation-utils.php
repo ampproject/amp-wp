@@ -34,13 +34,6 @@ class AMP_Validation_Utils {
 	const VALIDATION_QUERY_VAR = 'validate';
 
 	/**
-	 * Key of the callback to track invalid markup.
-	 *
-	 * @var string
-	 */
-	const CALLBACK_KEY = 'remove_invalid_callback';
-
-	/**
 	 * The slug of the post type to store AMP errors.
 	 *
 	 * @var string
@@ -53,6 +46,20 @@ class AMP_Validation_Utils {
 	 * @var string
 	 */
 	const SOURCES_INVALID_OUTPUT = 'sources_with_invalid_output';
+
+	/**
+	 * Validation code for when element is removed.
+	 *
+	 * @var string
+	 */
+	const ELEMENT_REMOVED_CODE = 'element_removed';
+
+	/**
+	 * Validation code for when attribute is removed.
+	 *
+	 * @var string
+	 */
+	const ATTRIBUTE_REMOVED_CODE = 'attribute_removed';
 
 	/**
 	 * The meta key for the primary AMP URL where the error occurred.
@@ -125,14 +132,15 @@ class AMP_Validation_Utils {
 	const NONCE_ACTION = 'amp_recheck_';
 
 	/**
-	 * The nodes that the sanitizer removed.
+	 * The errors encountered when validating.
 	 *
 	 * @var array[][] {
-	 *     @type DOMElement|DOMAttr $node   Node removed.
-	 *     @type DOMElement         $parent Parent of removed node.
+	 *     @type string  $code        Error code.
+	 *     @type string  $node_name   Name of removed node.
+	 *     @type string  $parent_name Name of parent node.
 	 * }
 	 */
-	public static $removed_nodes = array();
+	public static $validation_errors = array();
 
 	/**
 	 * Add the actions.
@@ -182,17 +190,21 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function track_removed( $removed ) {
-		$removed['sources']    = self::locate_sources( $removed['node'] );
-		self::$removed_nodes[] = $removed;
-	}
+		$node  = $removed['node'];
+		$error = array(
+			'node_name' => $node->nodeName,
+			'sources'   => self::locate_sources( $node ),
+		);
+		if ( $node->parentNode ) {
+			$error['parent_name'] = $node->parentNode->nodeName;
+		}
+		if ( $removed['node'] instanceof DOMElement ) {
+			$error['code'] = self::ELEMENT_REMOVED_CODE;
+		} elseif ( $removed['node'] instanceof DOMAttr ) {
+			$error['code'] = self::ATTRIBUTE_REMOVED_CODE;
+		}
 
-	/**
-	 * Gets whether a node was removed in a sanitizer.
-	 *
-	 * @return boolean.
-	 */
-	public static function was_node_removed() {
-		return ! empty( self::$removed_nodes );
+		self::add_validation_error( $error );
 	}
 
 	/**
@@ -266,10 +278,26 @@ class AMP_Validation_Utils {
 
 		// @todo Add request param to indicate whether the supplied content is raw (and needs the_content filters applied).
 		$processed = self::process_markup( $json[ self::MARKUP_KEY ] );
-		$response  = self::get_validation_results();
-		self::reset_removed();
+		$response  = self::summarize_validation_errors( self::$validation_errors );
+		self::reset_validation_errors();
 		$response['processed_markup'] = $processed;
 		return $response;
+	}
+
+	/**
+	 * Add validation error.
+	 *
+	 * @param array $data {
+	 *     Data.
+	 *
+	 *     @type string $code Error code.
+	 * }
+	 */
+	public static function add_validation_error( array $data ) {
+		if ( ! isset( $data['code'] ) ) {
+			$data['code'] = 'unknown';
+		}
+		self::$validation_errors[] = $data;
 	}
 
 	/**
@@ -277,34 +305,32 @@ class AMP_Validation_Utils {
 	 *
 	 * Returns the current validation errors the sanitizers found in rendering the page.
 	 *
-	 * @todo Refactor this to return list of each element/attribute removed along with their sources. No need to normalize since information is list.
-	 *
+	 * @param array $validation_errors Validation errors.
 	 * @return array The AMP validity of the markup.
 	 */
-	public static function get_validation_results() {
+	public static function summarize_validation_errors( $validation_errors ) {
 		$results            = array();
 		$removed_elements   = array();
 		$removed_attributes = array();
 		$invalid_sources    = array();
-		foreach ( self::$removed_nodes as $removed ) {
-			$node = $removed['node'];
-			if ( $node instanceof DOMAttr ) {
-				if ( ! isset( $removed_attributes[ $node->nodeName ] ) ) {
-					$removed_attributes[ $node->nodeName ] = 1;
-				} else {
-					$removed_attributes[ $node->nodeName ]++;
+		foreach ( $validation_errors as $validation_error ) {
+			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
+
+			if ( self::ELEMENT_REMOVED_CODE === $code ) {
+				if ( ! isset( $removed_elements[ $validation_error['node_name'] ] ) ) {
+					$removed_elements[ $validation_error['node_name'] ] = 0;
 				}
-			} elseif ( $node instanceof DOMElement ) {
-				if ( ! isset( $removed_elements[ $node->nodeName ] ) ) {
-					$removed_elements[ $node->nodeName ] = 1;
-				} else {
-					$removed_elements[ $node->nodeName ]++;
+				$removed_elements[ $validation_error['node_name'] ] += 1;
+			} elseif ( self::ATTRIBUTE_REMOVED_CODE === $code ) {
+				if ( ! isset( $removed_attributes[ $validation_error['node_name'] ] ) ) {
+					$removed_attributes[ $validation_error['node_name'] ] = 0;
 				}
+				$removed_attributes[ $validation_error['node_name'] ] += 1;
 			}
 
 			// @todo It would be best if the invalid source was tied to the invalid elements and attributes.
-			if ( ! empty( $removed['sources'] ) ) {
-				$source = array_pop( $removed['sources'] );
+			if ( ! empty( $validation_error['sources'] ) ) {
+				$source = array_pop( $validation_error['sources'] );
 
 				$invalid_sources[ $source['type'] ][] = $source['name'];
 			}
@@ -312,7 +338,7 @@ class AMP_Validation_Utils {
 
 		$results = array_merge(
 			array(
-				self::ERROR_KEY              => self::was_node_removed(), // @todo This should probably be eliminated.
+				self::ERROR_KEY              => ! empty( $validation_errors ),
 				self::SOURCES_INVALID_OUTPUT => $invalid_sources,
 			),
 			compact(
@@ -335,8 +361,8 @@ class AMP_Validation_Utils {
 	 *
 	 * @return void
 	 */
-	public static function reset_removed() {
-		self::$removed_nodes = array();
+	public static function reset_validation_errors() {
+		self::$validation_errors = array();
 	}
 
 	/**
@@ -367,8 +393,8 @@ class AMP_Validation_Utils {
 		}
 
 		self::process_markup( $post->post_content );
-		$results = self::get_validation_results();
-		self::reset_removed();
+		$results = self::summarize_validation_errors( self::$validation_errors );
+		self::reset_validation_errors();
 		if ( isset( $results[ self::ERROR_KEY ] ) && ( true === $results[ self::ERROR_KEY ] ) ) { // @todo Is not error implied by $results not being empty? ERROR_KEY seems redundant.
 			self::display_error( $results );
 		}
@@ -724,16 +750,15 @@ class AMP_Validation_Utils {
 	 * It then stores the response in a custom post type.
 	 * If there's already an error post for the URL, but there's no error anymore, it deletes it.
 	 *
+	 * @todo Pass URL and $validation_errors as args.
 	 * @return int|null $post_id The post ID of the custom post type used, or null.
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors() {
 		global $wp;
 
-		$response = self::get_validation_results();
-		$url      = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
-		unset( $response['url'] );
-		$encoded_errors            = wp_json_encode( $response );
+		$url                       = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
+		$encoded_errors            = wp_json_encode( self::$validation_errors );
 		$post_name                 = md5( $encoded_errors );
 		$different_post_same_error = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
 		$post_args                 = array(
@@ -745,7 +770,7 @@ class AMP_Validation_Utils {
 		$existing_post_id          = self::existing_post( $url );
 		if ( isset( $existing_post_id ) ) {
 			// A post for the $url already exists.
-			if ( empty( $response[ self::SOURCES_INVALID_OUTPUT ] ) ) {
+			if ( empty( self::$validation_errors ) ) {
 				wp_delete_post( $existing_post_id, true );
 				return null;
 			} else {
@@ -765,7 +790,7 @@ class AMP_Validation_Utils {
 				add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, wp_slash( $url ), false );
 			}
 			return $different_post_same_error->ID;
-		} elseif ( ! empty( $response[ self::SOURCES_INVALID_OUTPUT ] ) ) {
+		} elseif ( ! empty( self::$validation_errors ) ) {
 			// There are validation issues from a plugin, but no existing post for them, so create one.
 			$new_post_id = wp_insert_post(
 				wp_slash( array_merge(
@@ -847,7 +872,11 @@ class AMP_Validation_Utils {
 			if ( ! isset( $error_post->post_content ) ) {
 				return;
 			}
-			$errors          = json_decode( $error_post->post_content, true );
+			$validation_errors = json_decode( $error_post->post_content, true );
+			if ( ! is_array( $validation_errors ) ) {
+				return;
+			}
+			$errors          = self::summarize_validation_errors( $validation_errors );
 			$invalid_plugins = isset( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {
 				$reported_plugins = array();
@@ -903,7 +932,11 @@ class AMP_Validation_Utils {
 		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
-		$errors = json_decode( $post->post_content, true );
+		$validation_errors = json_decode( $post->post_content, true );
+		if ( ! is_array( $validation_errors ) ) {
+			return;
+		}
+		$errors = self::summarize_validation_errors( $validation_errors );
 		$url    = get_post_meta( $post_id, self::AMP_URL_META, true );
 
 		switch ( $column_name ) {

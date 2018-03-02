@@ -288,7 +288,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_child() {
-		AMP_Validation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_validation_errors();
 		$parent_tag_name = 'div';
 		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
@@ -298,13 +298,13 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(
 			$dom_document, array(
-				AMP_Validation_Utils::CALLBACK_KEY => 'AMP_Validation_Utils::track_removed',
+				'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 			)
 		);
 		$sanitizer->remove_invalid_child( $child );
 		$this->assertEquals( null, $parent->firstChild );
-		$this->assertCount( 1, AMP_Validation_Utils::$removed_nodes );
-		$this->assertEquals( $child, AMP_Validation_Utils::$removed_nodes[0]['node'] );
+		$this->assertCount( 1, AMP_Validation_Utils::$validation_errors );
+		$this->assertEquals( $child->nodeName, AMP_Validation_Utils::$validation_errors[0]['node_name'] );
 
 		$parent->appendChild( $child );
 		$this->assertEquals( $child, $parent->firstChild );
@@ -312,7 +312,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertEquals( null, $child->parentNode );
-		AMP_Validation_Utils::$removed_nodes = null;
+		AMP_Validation_Utils::$validation_errors = null;
 	}
 
 	/**
@@ -321,7 +321,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_attribute() {
-		AMP_Validation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_validation_errors();
 		$video_name   = 'amp-video';
 		$attribute    = 'onload';
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
@@ -329,19 +329,20 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$video->setAttribute( $attribute, 'someFunction()' );
 		$attr_node = $video->getAttributeNode( $attribute );
 		$args      = array(
-			AMP_Validation_Utils::CALLBACK_KEY => 'AMP_Validation_Utils::track_removed',
+			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
 		);
 		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
 		$sanitizer->remove_invalid_attribute( $video, $attribute );
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
-		$this->assertSame(
+		$this->assertEquals(
 			array(
-				'node'    => $attr_node,
-				'parent'  => $video,
-				'sources' => array(),
+				'code'        => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
+				'node_name'   => $attr_node->nodeName,
+				'parent_name' => $video->nodeName,
+				'sources'     => array(),
 			),
-			AMP_Validation_Utils::$removed_nodes[0]
+			AMP_Validation_Utils::$validation_errors[0]
 		);
-		AMP_Validation_Utils::reset_removed();
+		AMP_Validation_Utils::reset_validation_errors();
 	}
 }

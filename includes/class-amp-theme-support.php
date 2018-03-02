@@ -1001,7 +1001,7 @@ class AMP_Theme_Support {
 
 		if ( AMP_Validation_Utils::should_validate_front_end() ) {
 			AMP_Validation_Utils::store_validation_errors();
-			$comment = $dom->createComment( "\nValidation Status:\n" . wp_json_encode( AMP_Validation_Utils::get_validation_results() ) );
+			$comment = $dom->createComment( "\nValidation Status:\n" . wp_json_encode( AMP_Validation_Utils::summarize_validation_errors( AMP_Validation_Utils::$validation_errors ) ) );
 			$body    = $dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( $body ) {
 				$body->appendChild( $comment );
