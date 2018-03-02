@@ -933,7 +933,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		);
 		$actions        = AMP_Validation_Utils::add_bulk_action( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
-		$this->assertEquals( 'Re-check', $actions[ AMP_Validation_Utils::RECHECK_ACTION ] );
+		$this->assertEquals( 'Recheck', $actions[ AMP_Validation_Utils::RECHECK_ACTION ] );
 	}
 
 	/**

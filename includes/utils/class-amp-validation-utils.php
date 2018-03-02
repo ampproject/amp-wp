@@ -922,7 +922,7 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Adds a 'Re-check' link to the edit.php row actions.
+	 * Adds a 'Recheck' link to the edit.php row actions.
 	 *
 	 * The logic to add the new action is mainly copied from WP_Posts_List_Table::handle_row_actions().
 	 *
@@ -961,19 +961,19 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Adds a 'Re-check' bulk action to the edit.php page.
+	 * Adds a 'Recheck' bulk action to the edit.php page.
 	 *
 	 * @param array $actions The bulk actions in the edit.php page.
 	 * @return array $actions The filtered bulk actions.
 	 */
 	public static function add_bulk_action( $actions ) {
 		unset( $actions['edit'] );
-		$actions[ self::RECHECK_ACTION ] = esc_html__( 'Re-check', 'amp' );
+		$actions[ self::RECHECK_ACTION ] = esc_html__( 'Recheck', 'amp' );
 		return $actions;
 	}
 
 	/**
-	 * Handles the 'Re-check' bulk action on the edit.php page.
+	 * Handles the 'Recheck' bulk action on the edit.php page.
 	 *
 	 * @param string $redirect The URL of the redirect.
 	 * @param string $action   The action.
@@ -993,7 +993,7 @@ class AMP_Validation_Utils {
 			}
 		}
 
-		// Get the URLs that still have errors after re-checking.
+		// Get the URLs that still have errors after rechecking.
 		$remaining_errors = false;
 		foreach ( $urls as $url ) {
 			$error_post_id = self::existing_post( $url );
