@@ -1049,7 +1049,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::schedule_cron();
 		$scheduled     = wp_next_scheduled( AMP_Validation_Utils::CRON_EVENT );
 		$cron_array    = _get_cron_array();
-		$cron_events   = array_shift( $cron_array[ $scheduled ] );
+		$cron_events   = $cron_array[ $scheduled ][ AMP_Validation_Utils::CRON_EVENT ];
 		$cron_settings = array_shift( $cron_events );
 		$this->assertTrue( is_int( $scheduled ) );
 		$this->assertEquals( array(), $cron_settings['args'] );
