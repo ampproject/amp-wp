@@ -90,7 +90,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test init.
 	 *
-	 * @see AMP_Validation_Utils::init()
+	 * @covers AMP_Validation_Utils::init()
 	 */
 	public function test_init() {
 		AMP_Validation_Utils::init();
@@ -104,15 +104,12 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
-		$this->assertEquals( 10, has_action( 'wp', self::TESTED_CLASS . '::callback_wrappers' ) );
-		$this->assertEquals( -1, has_filter( 'do_shortcode_tag', self::TESTED_CLASS . '::decorate_shortcode_source' ) );
-		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', self::TESTED_CLASS . '::add_validation_callback' ) );
 	}
 
 	/**
 	 * Test init.
 	 *
-	 * @see AMP_Validation_Utils::add_validation_hooks()
+	 * @covers AMP_Validation_Utils::add_validation_hooks()
 	 */
 	public function test_add_validation_hooks() {
 		AMP_Validation_Utils::add_validation_hooks();
@@ -124,7 +121,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test track_removed.
 	 *
-	 * @see AMP_Validation_Utils::track_removed()
+	 * @covers AMP_Validation_Utils::track_removed()
 	 */
 	public function test_track_removed() {
 		$this->assertEmpty( AMP_Validation_Utils::$removed_nodes );
@@ -141,7 +138,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test was_node_removed.
 	 *
-	 * @see AMP_Validation_Utils::was_node_removed()
+	 * @covers AMP_Validation_Utils::was_node_removed()
 	 */
 	public function test_was_node_removed() {
 		$this->assertFalse( AMP_Validation_Utils::was_node_removed() );
@@ -156,7 +153,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test process_markup.
 	 *
-	 * @see AMP_Validation_Utils::process_markup()
+	 * @covers AMP_Validation_Utils::process_markup()
 	 */
 	public function test_process_markup() {
 		$this->set_capability();
@@ -196,7 +193,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test amp_rest_validation.
 	 *
-	 * @see AMP_Validation_Utils::amp_rest_validation()
+	 * @covers AMP_Validation_Utils::amp_rest_validation()
 	 */
 	public function test_amp_rest_validation() {
 		$routes  = rest_get_server()->get_routes();
@@ -219,7 +216,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test has_cap.
 	 *
-	 * @see AMP_Validation_Utils::has_cap()
+	 * @covers AMP_Validation_Utils::has_cap()
 	 */
 	public function test_has_cap() {
 		wp_set_current_user( $this->factory()->user->create( array(
@@ -234,7 +231,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test validate_markup.
 	 *
-	 * @see AMP_Validation_Utils::validate_markup()
+	 * @covers AMP_Validation_Utils::validate_markup()
 	 */
 	public function test_validate_markup() {
 		global $post;
@@ -275,7 +272,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test get_response.
 	 *
-	 * @see AMP_Validation_Utils::get_validation_results()
+	 * @covers AMP_Validation_Utils::get_validation_results()
 	 */
 	public function test_get_validation_results() {
 		global $post;
@@ -297,7 +294,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test reset_removed
 	 *
-	 * @see AMP_Validation_Utils::reset_removed()
+	 * @covers AMP_Validation_Utils::reset_removed()
 	 */
 	public function test_reset_removed() {
 		AMP_Validation_Utils::$removed_nodes[] = $this->node;
@@ -308,7 +305,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test validate_arg
 	 *
-	 * @see AMP_Validation_Utils::validate_arg()
+	 * @covers AMP_Validation_Utils::validate_arg()
 	 */
 	public function test_validate_arg() {
 		$invalid_number = 54321;
@@ -322,7 +319,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test validate_content
 	 *
-	 * @see AMP_Validation_Utils::validate_content()
+	 * @covers AMP_Validation_Utils::validate_content()
 	 */
 	public function test_validate_content() {
 		$this->set_capability();
@@ -395,7 +392,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test callback_wrappers
 	 *
-	 * @see AMP_Validation_Utils::callback_wrappers()
+	 * @covers AMP_Validation_Utils::callback_wrappers()
 	 */
 	public function test_callback_wrappers() {
 		global $post;
@@ -814,7 +811,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for validate_url()
 	 *
-	 * @see AMP_Validation_Utils::validate_url()
+	 * @covers AMP_Validation_Utils::validate_url()
 	 */
 	public function test_validate_url() {
 		$response = AMP_Validation_Utils::validate_url( get_permalink( $this->factory()->post->create() ) );
@@ -942,7 +939,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for handle_bulk_action()
 	 *
-	 * @see AMP_Validation_Utils::handle_bulk_action()
+	 * @covers AMP_Validation_Utils::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
 		$initial_redirect = admin_url( 'plugins.php' );
@@ -963,7 +960,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for remaining_error_notice()
 	 *
-	 * @see AMP_Validation_Utils::remaining_error_notice()
+	 * @covers AMP_Validation_Utils::remaining_error_notice()
 	 */
 	public function test_remaining_error_notice() {
 		ob_start();
