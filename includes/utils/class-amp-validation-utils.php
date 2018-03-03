@@ -739,6 +739,7 @@ class AMP_Validation_Utils {
 					'not_found'          => __( 'No validation errors found', 'amp' ),
 					'not_found_in_trash' => __( 'No validation errors found in trash', 'amp' ),
 					'search_items'       => __( 'Search statuses', 'amp' ),
+					'edit_item'          => __( 'Validation Status', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -811,6 +812,7 @@ class AMP_Validation_Utils {
 		// Otherwise, create a new validation status post.
 		return wp_insert_post( wp_slash( array(
 			'post_type'    => self::POST_TYPE_SLUG,
+			'post_title'   => $url,
 			'post_name'    => $post_name,
 			'post_content' => $encoded_errors,
 			'post_status'  => 'publish',
@@ -919,13 +921,24 @@ class AMP_Validation_Utils {
 	 * @return array $columns The new post columns.
 	 */
 	public static function add_post_columns( $columns ) {
-		return array(
-			'cb'                         => isset( $columns['cb'] ) ? $columns['cb'] : null,
-			'url'                        => esc_html__( 'URL', 'amp' ),
-			self::REMOVED_ELEMENTS       => esc_html__( 'Removed Elements', 'amp' ),
-			self::REMOVED_ATTRIBUTES     => esc_html__( 'Removed Attributes', 'amp' ),
-			self::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Sources', 'amp' ),
+		$columns = array_merge(
+			$columns,
+			array(
+				'url_count'                  => esc_html__( 'Count', 'amp' ),
+				self::REMOVED_ELEMENTS       => esc_html__( 'Removed Elements', 'amp' ),
+				self::REMOVED_ATTRIBUTES     => esc_html__( 'Removed Attributes', 'amp' ),
+				self::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Sources', 'amp' ),
+			)
 		);
+
+		// Move date to end.
+		if ( isset( $columns['date'] ) ) {
+			$date = $columns['date'];
+			unset( $columns['date'] );
+			$columns['date'] = $date;
+		}
+
+		return $columns;
 	}
 
 	/**
@@ -948,30 +961,21 @@ class AMP_Validation_Utils {
 		$urls   = get_post_meta( $post_id, self::AMP_URL_META, false );
 
 		switch ( $column_name ) {
-			case 'url':
-				if ( empty( $urls ) ) {
-					esc_html_e( '(Unknown)', 'amp' );
-				} else {
-					printf( '<a href="%1$s">%1$s</a>', esc_url( $urls[0] ) );
-					$url_count = count( $urls );
-					if ( $url_count > 1 ) {
-						echo ' ';
-						echo esc_html( sprintf(
-							/* translators: %s is count of URLs */
-							_n( '(+%s)', '(+%s)', $url_count - 1, 'amp' ),
-							$url_count - 1
-						) );
-					}
-				}
+			case 'url_count':
+				echo count( $urls );
 				break;
 			case self::REMOVED_ELEMENTS:
-				if ( isset( $errors[ self::REMOVED_ELEMENTS ] ) ) {
+				if ( ! empty( $errors[ self::REMOVED_ELEMENTS ] ) ) {
 					self::output_removed_set( $errors[ self::REMOVED_ELEMENTS ] );
+				} else {
+					esc_html_e( '--', 'amp' );
 				}
 				break;
 			case self::REMOVED_ATTRIBUTES:
-				if ( isset( $errors[ self::REMOVED_ATTRIBUTES ] ) ) {
+				if ( ! empty( $errors[ self::REMOVED_ATTRIBUTES ] ) ) {
 					self::output_removed_set( $errors[ self::REMOVED_ATTRIBUTES ] );
+				} else {
+					esc_html_e( '--', 'amp' );
 				}
 				break;
 			case self::SOURCES_INVALID_OUTPUT:
@@ -1001,7 +1005,13 @@ class AMP_Validation_Utils {
 		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
 			return $actions;
 		}
-		unset( $actions['edit'] );
+
+		// @todo Add link to view frontend without sanitization applied to debug.
+		$actions['edit'] = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( get_edit_post_link( $post ) ),
+			esc_html__( 'Details', 'amp' )
+		);
 		unset( $actions['inline hide-if-no-js'] );
 		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
 
@@ -1079,7 +1089,7 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function remaining_error_notice() {
-		if ( ! isset( $_GET['post_type'], $_GET[ self::REMAINING_ERRORS ] ) || ( self::POST_TYPE_SLUG !== sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) ) ) { // WPCS: CSRF ok.
+		if ( ! isset( $_GET[ self::REMAINING_ERRORS ] ) || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // WPCS: CSRF ok.
 			return;
 		}
 

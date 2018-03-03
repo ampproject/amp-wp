@@ -853,7 +853,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			array_merge(
 				$initial_columns,
 				array(
-					'url'                                  => 'URL',
+					'url_count'                            => 'Count',
 					AMP_Validation_Utils::REMOVED_ELEMENTS => 'Removed Elements',
 					AMP_Validation_Utils::REMOVED_ATTRIBUTES => 'Removed Attributes',
 					AMP_Validation_Utils::SOURCES_INVALID_OUTPUT => 'Incompatible Sources',
@@ -884,9 +884,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function get_custom_columns() {
 		return array(
-			'url'                   => array(
-				'url',
-				get_home_url(),
+			'url_count'             => array(
+				'url_count',
+				'1',
 			),
 			'removed_element'       => array(
 				AMP_Validation_Utils::REMOVED_ELEMENTS,
@@ -976,7 +976,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::remaining_error_notice();
 		$this->assertEmpty( ob_get_clean() );
 
-		$_GET['post_type']                              = AMP_Validation_Utils::POST_TYPE_SLUG;
+		set_current_screen( 'edit.php' );
+		get_current_screen()->post_type = AMP_Validation_Utils::POST_TYPE_SLUG;
+
 		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = '1';
 		$_GET[ AMP_Validation_Utils::URLS_TESTED ]      = '1';
 		ob_start();
