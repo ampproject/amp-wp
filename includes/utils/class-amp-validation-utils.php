@@ -20,13 +20,6 @@ class AMP_Validation_Utils {
 	const MARKUP_KEY = 'markup';
 
 	/**
-	 * Key for the error value in the response.
-	 *
-	 * @var string
-	 */
-	const ERROR_KEY = 'has_error';
-
-	/**
 	 * Query var that triggers validation.
 	 *
 	 * @var string
@@ -360,7 +353,6 @@ class AMP_Validation_Utils {
 
 		$results = array_merge(
 			array(
-				self::ERROR_KEY              => ! empty( $validation_errors ),
 				self::SOURCES_INVALID_OUTPUT => $invalid_sources,
 			),
 			compact(
@@ -414,10 +406,10 @@ class AMP_Validation_Utils {
 
 		self::process_markup( $post->post_content );
 		$results = self::summarize_validation_errors( self::$validation_errors );
-		self::reset_validation_results();
-		if ( isset( $results[ self::ERROR_KEY ] ) && ( true === $results[ self::ERROR_KEY ] ) ) { // @todo Is not error implied by $results not being empty? ERROR_KEY seems redundant.
+		if ( ! empty( self::$validation_errors ) ) {
 			self::display_error( $results );
 		}
+		self::reset_validation_results();
 	}
 
 	/**
@@ -1019,7 +1011,6 @@ class AMP_Validation_Utils {
 		unset( $actions['inline hide-if-no-js'] );
 		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
 
-		// @todo: $url needs to recheck the AMP validation of the page, and reload the edit.php page.
 		if ( ! empty( $url ) ) {
 			$post_type_object                = get_post_type_object( $post->post_type );
 			$actions[ self::RECHECK_ACTION ] = sprintf(

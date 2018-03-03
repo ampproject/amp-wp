@@ -255,7 +255,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Validation_Utils::handle_validate_request( $request );
 		$expected_response = array(
-			AMP_Validation_Utils::ERROR_KEY          => true,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
 				'script' => 1,
 			),
@@ -270,7 +269,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) ) );
 		$response          = AMP_Validation_Utils::handle_validate_request( $request );
 		$expected_response = array(
-			AMP_Validation_Utils::ERROR_KEY          => false,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(),
 			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
 			'processed_markup'                       => '<p>' . $this->valid_amp_img . '</p>',
@@ -291,7 +289,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$response = AMP_Validation_Utils::summarize_validation_errors( AMP_Validation_Utils::$validation_errors );
 		AMP_Validation_Utils::reset_validation_results();
 		$expected_response = array(
-			AMP_Validation_Utils::ERROR_KEY          => true,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
 				'script' => 1,
 			),
@@ -561,19 +558,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::display_error()
 	 */
 	public function test_display_error() {
-		$response = array(
-			AMP_Validation_Utils::ERROR_KEY => false,
-		);
-		ob_start();
-		AMP_Validation_Utils::display_error( $response );
-		$output = ob_get_clean();
-		$this->assertFalse( strpos( $output, 'notice notice-error' ) );
-		$this->assertFalse( strpos( $output, 'Notice: your post fails AMP validation' ) );
-
 		$removed_element   = 'script';
 		$removed_attribute = 'onload';
 		$response          = array(
-			AMP_Validation_Utils::ERROR_KEY          => true,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
 				$removed_element => 1,
 			),
@@ -740,7 +727,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		// This should create a new post for the errors.
 		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $custom_post->post_type );
 		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Utils::REMOVED_ELEMENTS ] );
-		$this->assertEquals( true, $validation[ AMP_Validation_Utils::ERROR_KEY ] );
 		$this->assertEquals( array(), $validation[ AMP_Validation_Utils::REMOVED_ATTRIBUTES ] );
 		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Utils::SOURCES_INVALID_OUTPUT ]['plugin'] );
 		$meta = get_post_meta( $post_id, AMP_Validation_Utils::AMP_URL_META, true );
@@ -784,7 +770,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		// A post already exists for this URL, so it should be updated.
 		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Utils::REMOVED_ELEMENTS ] );
-		$this->assertTrue( $validation[ AMP_Validation_Utils::ERROR_KEY ] );
 		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Utils::SOURCES_INVALID_OUTPUT ]['plugin'] );
 		$this->assertEquals( $expected_url, $url );
 
