@@ -22,6 +22,7 @@ class AMP_Validation_Utils {
 	/**
 	 * Query var that triggers validation.
 	 *
+	 * @todo Add amp prefix to this.
 	 * @var string
 	 */
 	const VALIDATION_QUERY_VAR = 'validate';

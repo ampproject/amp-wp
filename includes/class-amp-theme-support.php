@@ -957,6 +957,9 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
+		// @todo Instead of amp_disable_invalid_removal this should be called like `amp_debug`. Add string to a constant.
+		$validation_debug_mode = ! empty( $_REQUEST['amp_disable_invalid_removal'] ); // WPCS: csrf ok.
+
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
@@ -964,7 +967,7 @@ class AMP_Theme_Support {
 				'remove_invalid_callback' => null,
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
-				'disable_invalid_removal' => ! empty( $_REQUEST['amp_disable_invalid_removal'] ), // WPCS: csrf ok.
+				'disable_invalid_removal' => $validation_debug_mode,
 			),
 			$args
 		);
@@ -1000,15 +1003,26 @@ class AMP_Theme_Support {
 		}
 
 		if ( AMP_Validation_Utils::should_validate_front_end() ) {
-			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
-			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
-			}
-			AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
-			$comment = $dom->createComment( "\nValidation Status:\n" . wp_json_encode( AMP_Validation_Utils::summarize_validation_errors( AMP_Validation_Utils::$validation_errors ) ) );
+
+			// Add comment with validation errors.
+			$report  = "\n# Validation Status\n";
+			$report .= "\n## Summary\n";
+			$report .= wp_json_encode( AMP_Validation_Utils::summarize_validation_errors( AMP_Validation_Utils::$validation_errors ), 128 /* JSON_PRETTY_PRINT */ ) . "\n";
+			$report .= "\n## Details\n";
+			$report .= wp_json_encode( AMP_Validation_Utils::$validation_errors, 128 /* JSON_PRETTY_PRINT */ ) . "\n";
+			$comment = $dom->createComment( $report );
 			$body    = $dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( $body ) {
 				$body->appendChild( $comment );
+			}
+
+			// Store validation errors if not in debug mode (since debug mode will skew validation results).
+			if ( ! $validation_debug_mode ) {
+				$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
+				if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+					$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
+				}
+				AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 			}
 		}
 
