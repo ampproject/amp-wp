@@ -104,13 +104,6 @@ class AMP_Validation_Utils {
 	const REMAINING_ERRORS = 'amp_remaining_errors';
 
 	/**
-	 * The query value for if there are remaining error(s).
-	 *
-	 * @var string
-	 */
-	const REMAINING_ERRORS_VALUE = '1';
-
-	/**
 	 * The query arg for the number of URLs tested.
 	 *
 	 * @var string
@@ -753,6 +746,7 @@ class AMP_Validation_Utils {
 					'singular_name'      => __( 'validation error', 'amp' ),
 					'not_found'          => __( 'No validation errors found', 'amp' ),
 					'not_found_in_trash' => __( 'No validation errors found in trash', 'amp' ),
+					'search_items'       => __( 'Search statuses', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -925,7 +919,7 @@ class AMP_Validation_Utils {
 			'url'                        => esc_html__( 'URL', 'amp' ),
 			self::REMOVED_ELEMENTS       => esc_html__( 'Removed Elements', 'amp' ),
 			self::REMOVED_ATTRIBUTES     => esc_html__( 'Removed Attributes', 'amp' ),
-			self::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Source', 'amp' ),
+			self::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Sources', 'amp' ),
 		);
 	}
 
@@ -946,12 +940,23 @@ class AMP_Validation_Utils {
 			return;
 		}
 		$errors = self::summarize_validation_errors( $validation_errors );
-		$url    = get_post_meta( $post_id, self::AMP_URL_META, true );
+		$urls   = get_post_meta( $post_id, self::AMP_URL_META, false );
 
 		switch ( $column_name ) {
 			case 'url':
-				if ( ! empty( $url ) ) {
-					printf( '<a href="%1$s">%1$s</a>', esc_url( $url ) );
+				if ( empty( $urls ) ) {
+					esc_html_e( '(Unknown)', 'amp' );
+				} else {
+					printf( '<a href="%1$s">%1$s</a>', esc_url( $urls[0] ) );
+					$url_count = count( $urls );
+					if ( $url_count > 1 ) {
+						echo ' ';
+						echo esc_html( sprintf(
+							/* translators: %s is count of URLs */
+							_n( '(+%s)', '(+%s)', $url_count - 1, 'amp' ),
+							$url_count
+						) );
+					}
 				}
 				break;
 			case self::REMOVED_ELEMENTS:
@@ -1007,7 +1012,6 @@ class AMP_Validation_Utils {
 					),
 					self::NONCE_ACTION . $post->ID
 				),
-				/* translators: %s: post title */
 				esc_html__( 'Recheck the URL for AMP validity', 'amp' ),
 				__( 'Recheck', 'amp' )
 			);
@@ -1050,21 +1054,17 @@ class AMP_Validation_Utils {
 		}
 
 		// Get the URLs that still have errors after rechecking.
-		$remaining_errors = false;
+		$args = array(
+			self::URLS_TESTED => count( $items ),
+		);
 		foreach ( $urls as $url ) {
 			$error_post_id = self::existing_post( $url );
 			if ( isset( $error_post_id ) ) {
-				$remaining_errors = true;
+				$args[ self::REMAINING_ERRORS ] = '1';
 			}
 		}
 
-		return add_query_arg(
-			array(
-				self::REMAINING_ERRORS => $remaining_errors ? self::REMAINING_ERRORS_VALUE : '0',
-				self::URLS_TESTED      => strval( count( $items ) ),
-			),
-			$redirect
-		);
+		return add_query_arg( $args, $redirect );
 	}
 
 	/**
@@ -1077,13 +1077,13 @@ class AMP_Validation_Utils {
 			return;
 		}
 
-		$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( sanitize_text_field( wp_unslash( $_GET[ self::URLS_TESTED ] ) ) ) : 1; // WPCS: CSRF ok.
-		$errors_remain     = ( isset( $_GET[ self::REMAINING_ERRORS ] ) && ( self::REMAINING_ERRORS_VALUE === sanitize_text_field( wp_unslash( $_GET[ self::REMAINING_ERRORS ] ) ) ) ); // WPCS: CSRF ok.
+		$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // WPCS: CSRF ok.
+		$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // WPCS: CSRF ok.
 		if ( $errors_remain ) {
 			$class   = 'notice-warning';
-			$message = esc_html( _n( 'The rechecked URL still has validation errors', 'The rechecked URLs still have validation errors', $count_urls_tested, 'amp' ) );
+			$message = _n( 'The rechecked URL still has validation errors.', 'The rechecked URLs still have validation errors.', $count_urls_tested, 'amp' );
 		} else {
-			$message = esc_html( _n( 'The rechecked URL has no validation error', 'The rechecked URLs have no validation error', $count_urls_tested, 'amp' ) );
+			$message = _n( 'The rechecked URL has no validation error.', 'The rechecked URLs have no validation error.', $count_urls_tested, 'amp' );
 			$class   = 'updated';
 		}
 
@@ -1107,13 +1107,14 @@ class AMP_Validation_Utils {
 		self::validate_url( $url );
 		$error_post = self::existing_post( $url );
 
-		wp_redirect( add_query_arg(
-			array(
-				self::REMAINING_ERRORS => isset( $error_post ) ? self::REMAINING_ERRORS_VALUE : '0',
-				self::URLS_TESTED      => '1',
-			),
-			wp_get_referer()
-		) );
+		$args = array(
+			self::URLS_TESTED => '1',
+		);
+		if ( $error_post ) {
+			$args[ self::REMAINING_ERRORS ] = '1';
+		}
+
+		wp_safe_redirect( add_query_arg( $args, wp_get_referer() ) );
 		exit();
 	}
 

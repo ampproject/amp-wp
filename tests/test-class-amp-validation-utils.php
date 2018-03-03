@@ -862,7 +862,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 					'url'                                  => 'URL',
 					AMP_Validation_Utils::REMOVED_ELEMENTS => 'Removed Elements',
 					AMP_Validation_Utils::REMOVED_ATTRIBUTES => 'Removed Attributes',
-					AMP_Validation_Utils::SOURCES_INVALID_OUTPUT => 'Incompatible Source',
+					AMP_Validation_Utils::SOURCES_INVALID_OUTPUT => 'Incompatible Sources',
 				)
 			),
 			AMP_Validation_Utils::add_post_columns( $initial_columns )
@@ -958,8 +958,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals(
 			add_query_arg(
 				array(
-					AMP_Validation_Utils::REMAINING_ERRORS => count( $items ),
 					AMP_Validation_Utils::URLS_TESTED      => $urls_tested,
+					AMP_Validation_Utils::REMAINING_ERRORS => count( $items ),
 				),
 				$initial_redirect
 			),
@@ -983,7 +983,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEmpty( ob_get_clean() );
 
 		$_GET['post_type']                              = AMP_Validation_Utils::POST_TYPE_SLUG;
-		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = AMP_Validation_Utils::REMAINING_ERRORS_VALUE;
+		$_GET[ AMP_Validation_Utils::REMAINING_ERRORS ] = '1';
 		$_GET[ AMP_Validation_Utils::URLS_TESTED ]      = '1';
 		ob_start();
 		AMP_Validation_Utils::remaining_error_notice();
