@@ -162,6 +162,7 @@ class AMP_Validation_Utils {
 		add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
 		add_action( 'init', array( __CLASS__, 'schedule_cron' ) );
 		add_action( self::CRON_EVENT, array( __CLASS__, 'cron_validate_urls' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'remove_publish_meta_box' ) );
 
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
@@ -1181,4 +1182,14 @@ class AMP_Validation_Utils {
 			) );
 		};
 	}
+
+	/**
+	 * Removes the 'Publish' meta box from the CPT post.php page.
+	 *
+	 * @return void
+	 */
+	public static function remove_publish_meta_box() {
+		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
+	}
+
 }

@@ -106,6 +106,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::schedule_cron' ) );
 		$this->assertEquals( 10, has_action( AMP_Validation_Utils::CRON_EVENT, self::TESTED_CLASS . '::cron_validate_urls' ) );
+		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
 	}
 
 	/**
@@ -1050,6 +1051,20 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::cron_validate_urls();
 		$transient = get_transient( AMP_Validation_Utils::NONCE_TRANSIENT_NAME );
 		$this->assertEquals( md5( $doing_cron ), $transient );
+	}
+
+	/**
+	 * Test for remove_publish_meta_box()
+	 *
+	 * @covers AMP_Validation_Utils::remove_publish_meta_box()
+	 */
+	public function test_remove_publish_meta_box() {
+		global $wp_meta_boxes;
+		AMP_Validation_Utils::remove_publish_meta_box();
+		$contexts = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['side'];
+		foreach ( $contexts as $context ) {
+			$this->assertFalse( $context['submitdiv'] );
+		}
 	}
 
 	/**
