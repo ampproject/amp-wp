@@ -262,7 +262,7 @@ class AMP_Validation_Utils {
 	public static function amp_rest_validation() {
 		register_rest_route( 'amp-wp/v1', '/validate', array(
 			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'validate_markup' ),
+			'callback'            => array( __CLASS__, 'handle_validate_request' ),
 			'args'                => array(
 				self::MARKUP_KEY => array(
 					'validate_callback' => array( __CLASS__, 'validate_arg' ),
@@ -287,12 +287,10 @@ class AMP_Validation_Utils {
 	/**
 	 * Validate the markup passed to the REST API.
 	 *
-	 * @todo Rename to handle_validate_request or something.
-	 *
 	 * @param WP_REST_Request $request The REST request.
 	 * @return array|WP_Error.
 	 */
-	public static function validate_markup( WP_REST_Request $request ) {
+	public static function handle_validate_request( WP_REST_Request $request ) {
 		$json = $request->get_json_params();
 		if ( empty( $json[ self::MARKUP_KEY ] ) ) {
 			return new WP_Error( 'no_markup', 'No markup passed to validator', array(

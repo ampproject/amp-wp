@@ -218,7 +218,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		);
 
 		$this->assertEquals( $args, $route['args'] );
-		$this->assertEquals( array( self::TESTED_CLASS, 'validate_markup' ), $route['callback'] );
+		$this->assertEquals( array( self::TESTED_CLASS, 'handle_validate_request' ), $route['callback'] );
 		$this->assertEquals( $methods, $route['methods'] );
 		$this->assertEquals( array( self::TESTED_CLASS, 'has_cap' ), $route['permission_callback'] );
 	}
@@ -239,11 +239,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test validate_markup.
+	 * Test handle_validate_request.
 	 *
-	 * @covers AMP_Validation_Utils::validate_markup()
+	 * @covers AMP_Validation_Utils::handle_validate_request()
 	 */
-	public function test_validate_markup() {
+	public function test_handle_validate_request() {
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->set_capability();
@@ -253,7 +253,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array(
 			AMP_Validation_Utils::MARKUP_KEY => $markup,
 		) ) );
-		$response          = AMP_Validation_Utils::validate_markup( $request );
+		$response          = AMP_Validation_Utils::handle_validate_request( $request );
 		$expected_response = array(
 			AMP_Validation_Utils::ERROR_KEY          => true,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
@@ -268,7 +268,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array(
 			AMP_Validation_Utils::MARKUP_KEY => $this->valid_amp_img,
 		) ) );
-		$response          = AMP_Validation_Utils::validate_markup( $request );
+		$response          = AMP_Validation_Utils::handle_validate_request( $request );
 		$expected_response = array(
 			AMP_Validation_Utils::ERROR_KEY          => false,
 			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(),
