@@ -1,7 +1,0 @@
-/**
-* Hides the 'Add New' link on the 'Validation Status' page.
-*/
-
-.post-type-amp_validation_error .page-title-action {
-	display: none;
-}

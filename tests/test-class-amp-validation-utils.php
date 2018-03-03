@@ -106,7 +106,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::schedule_cron' ) );
 		$this->assertEquals( 10, has_action( AMP_Validation_Utils::CRON_EVENT, self::TESTED_CLASS . '::cron_validate_urls' ) );
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', self::TESTED_CLASS . '::enqueue_styling' ) );
 	}
 
 	/**
@@ -1049,28 +1048,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::cron_validate_urls();
 		$transient = get_transient( AMP_Validation_Utils::NONCE_TRANSIENT_NAME );
 		$this->assertEquals( md5( $doing_cron ), $transient );
-	}
-
-	/**
-	 * Test for enqueue_styling()
-	 *
-	 * @covers AMP_Validation_Utils::enqueue_styling()
-	 */
-	public function test_enqueue_styling() {
-		AMP_Validation_Utils::enqueue_styling( 'post.php' );
-		$styles = wp_styles();
-		$this->assertFalse( in_array( AMP_Validation_Utils::POST_TYPE_SLUG, $styles->queue, true ) );
-		$this->assertFalse( isset( $styles->registered[ AMP_Validation_Utils::POST_TYPE_SLUG ] ) );
-
-		$_GET['post_type'] = AMP_Validation_Utils::POST_TYPE_SLUG;
-		AMP_Validation_Utils::enqueue_styling( 'edit.php' );
-		$styles        = wp_styles();
-		$wp_dependency = $styles->registered[ AMP_Validation_Utils::POST_TYPE_SLUG ];
-		$this->assertTrue( in_array( AMP_Validation_Utils::POST_TYPE_SLUG, $styles->queue, true ) );
-		$this->assertEquals( array(), $wp_dependency->deps );
-		$this->assertEquals( AMP_Validation_Utils::POST_TYPE_SLUG, $wp_dependency->handle );
-		$this->assertEquals( amp_get_asset_url( 'css/amp-validation-status.css' ), $wp_dependency->src );
-		$this->assertEquals( AMP__VERSION, $wp_dependency->ver );
 	}
 
 	/**
