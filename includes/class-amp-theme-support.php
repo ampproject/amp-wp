@@ -1000,7 +1000,11 @@ class AMP_Theme_Support {
 		}
 
 		if ( AMP_Validation_Utils::should_validate_front_end() ) {
-			AMP_Validation_Utils::store_validation_errors();
+			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
+			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
+			}
+			AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 			$comment = $dom->createComment( "\nValidation Status:\n" . wp_json_encode( AMP_Validation_Utils::summarize_validation_errors( AMP_Validation_Utils::$validation_errors ) ) );
 			$body    = $dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( $body ) {

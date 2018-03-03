@@ -55,18 +55,11 @@ class AMP_Validation_Utils {
 	const ATTRIBUTE_REMOVED_CODE = 'attribute_removed';
 
 	/**
-	 * The meta key for the primary AMP URL where the error occurred.
+	 * The meta key for the AMP URL where the error occurred.
 	 *
 	 * @var string
 	 */
 	const AMP_URL_META = 'amp_url';
-
-	/**
-	 * The key of the meta value for the URLs with the validation error.
-	 *
-	 * @var string
-	 */
-	const URLS_VALIDATION_ERROR = 'amp_additional_urls_validation_error';
 
 	/**
 	 * The key for removed elements.
@@ -763,18 +756,58 @@ class AMP_Validation_Utils {
 	 * It then stores the response in a custom post type.
 	 * If there's already an error post for the URL, but there's no error anymore, it deletes it.
 	 *
-	 * @todo Pass URL and $validation_errors as args.
+	 * @param array  $validation_errors Validation errors.
+	 * @param string $url               URL on which the validation errors occurred.
 	 * @return int|null $post_id The post ID of the custom post type used, or null.
 	 * @global WP $wp
 	 */
-	public static function store_validation_errors() {
-		global $wp;
+	public static function store_validation_errors( $validation_errors, $url ) {
 
-		$url                       = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
-		$encoded_errors            = wp_json_encode( self::$validation_errors );
-		$post_name                 = md5( $encoded_errors );
-		$different_post_same_error = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
-		$post_args                 = array(
+		// Remove query vars that are only used to initiate validation requests.
+		$url = remove_query_arg(
+			array(
+				self::VALIDATION_QUERY_VAR,
+				self::CUSTOM_CRON_NONCE,
+				'amp_disable_invalid_removal',
+			),
+			$url
+		);
+
+		$post_for_this_url = self::get_validation_status_post( $url );
+
+		// Since there are no validation errors and there is an existing $existing_post_id, just delete the post.
+		if ( empty( $validation_errors ) ) {
+			if ( $post_for_this_url ) {
+				wp_delete_post( $post_for_this_url->ID, true );
+			}
+			return null;
+		}
+
+		$encoded_errors = wp_json_encode( $validation_errors );
+		$post_name      = md5( $encoded_errors );
+
+		if ( $post_for_this_url ) {
+			if ( $post_for_this_url->post_name === $post_name ) {
+				// If the post name is unchanged then the errors are the same and there is nothing to do.
+				return $post_for_this_url->ID;
+			} else {
+				// Otherwise, if the post name is changed, then the errors are now different for the URL (and any other associated URLs) so delete and create anew.
+				wp_delete_post( $post_for_this_url->ID, true );
+				$post_for_this_url = null;
+			}
+		}
+
+		// If there already exists a post for the given validation errors, just amend the $url to the existing post.
+		$post_for_other_url = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
+		if ( $post_for_other_url ) {
+			if ( ! in_array( $url, get_post_meta( $post_for_other_url->ID, self::AMP_URL_META, false ), true ) ) {
+				add_post_meta( $post_for_other_url->ID, self::AMP_URL_META, wp_slash( $url ), false );
+			}
+			return $post_for_other_url->ID;
+		}
+
+		// Otherwise, create a new validation status post.
+		return wp_insert_post( wp_slash( array(
 			'post_type'    => self::POST_TYPE_SLUG,
 			'post_name'    => $post_name,
 			'post_content' => $encoded_errors,
@@ -782,47 +815,21 @@ class AMP_Validation_Utils {
 			'meta_input'   => array(
 				self::AMP_URL_META => $url,
 			),
-		);
-		$existing_post_id          = self::existing_post( $url );
-		if ( isset( $existing_post_id ) ) {
-			// A post for the $url already exists.
-			if ( empty( self::$validation_errors ) ) {
-				wp_delete_post( $existing_post_id, true );
-				return null;
-			} else {
-				wp_insert_post( wp_slash( array_merge(
-					array(
-						'ID' => $existing_post_id,
-					),
-					$post_args
-				) ) );
-			}
-			return $existing_post_id;
-		} elseif ( isset( $different_post_same_error->ID ) ) {
-			if ( ! in_array( $url, get_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, false ), true ) ) {
-				add_post_meta( $different_post_same_error->ID, self::URLS_VALIDATION_ERROR, wp_slash( $url ), false );
-			}
-			return $different_post_same_error->ID;
-		} elseif ( ! empty( self::$validation_errors ) ) {
-			// There are validation issues from a plugin, but no existing post for them, so create one.
-			return wp_insert_post( wp_slash( $post_args ) );
-		}
-
-		return null;
+		) ) );
 	}
 
 	/**
 	 * Gets the existing custom post that stores errors for the $url, if it exists.
 	 *
 	 * @param string $url The URL of the post.
-	 * @return int|null $post_id The post ID of the existing custom post, or null.
+	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
-	public static function existing_post( $url ) {
+	public static function get_validation_status_post( $url ) {
 		$query = new WP_Query( array(
-			'post_type'   => self::POST_TYPE_SLUG,
-			'post_status' => 'publish',
-			'fields'      => 'ids',
-			'meta_query'  => array(
+			'post_type'      => self::POST_TYPE_SLUG,
+			'post_status'    => 'publish',
+			'posts_per_page' => 1,
+			'meta_query'     => array(
 				array(
 					'key'   => self::AMP_URL_META,
 					'value' => $url,
@@ -867,12 +874,8 @@ class AMP_Validation_Utils {
 	public static function plugin_notice() {
 		global $pagenow;
 		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
-			$home_errors = self::existing_post( home_url() );
-			if ( ! is_int( $home_errors ) ) {
-				return;
-			}
-			$error_post = get_post( $home_errors );
-			if ( ! isset( $error_post->post_content ) ) {
+			$error_post = self::get_validation_status_post( home_url() );
+			if ( ! $error_post ) {
 				return;
 			}
 			$validation_errors = json_decode( $error_post->post_content, true );
@@ -954,7 +957,7 @@ class AMP_Validation_Utils {
 						echo esc_html( sprintf(
 							/* translators: %s is count of URLs */
 							_n( '(+%s)', '(+%s)', $url_count - 1, 'amp' ),
-							$url_count
+							$url_count - 1
 						) );
 					}
 				}
@@ -1055,12 +1058,13 @@ class AMP_Validation_Utils {
 
 		// Get the URLs that still have errors after rechecking.
 		$args = array(
-			self::URLS_TESTED => count( $items ),
+			self::URLS_TESTED      => count( $items ),
+			self::REMAINING_ERRORS => '0',
 		);
 		foreach ( $urls as $url ) {
-			$error_post_id = self::existing_post( $url );
-			if ( isset( $error_post_id ) ) {
+			if ( self::get_validation_status_post( $url ) ) {
 				$args[ self::REMAINING_ERRORS ] = '1';
+				break;
 			}
 		}
 
@@ -1105,15 +1109,11 @@ class AMP_Validation_Utils {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
 		$url = get_post_meta( $post_id, self::AMP_URL_META, true );
 		self::validate_url( $url );
-		$error_post = self::existing_post( $url );
 
 		$args = array(
-			self::URLS_TESTED => '1',
+			self::URLS_TESTED      => '1',
+			self::REMAINING_ERRORS => self::get_validation_status_post( $url ) ? '1' : '0',
 		);
-		if ( $error_post ) {
-			$args[ self::REMAINING_ERRORS ] = '1';
-		}
-
 		wp_safe_redirect( add_query_arg( $args, wp_get_referer() ) );
 		exit();
 	}

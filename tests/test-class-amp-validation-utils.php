@@ -714,14 +714,14 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			AMP_Validation_Utils::$validation_errors[0]['sources'][0]
 		);
 
-		$post_id = AMP_Validation_Utils::store_validation_errors();
+		$url     = home_url( '/' );
+		$post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		$this->assertNotEmpty( $post_id );
 		$custom_post               = get_post( $post_id );
 		$validation                = AMP_Validation_Utils::summarize_validation_errors( json_decode( $custom_post->post_content, true ) );
 		$expected_removed_elements = array(
 			'script' => 1,
 		);
-		$url                       = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 		AMP_Validation_Utils::reset_validation_results();
 
 		// This should create a new post for the errors.
@@ -733,23 +733,20 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( $url, $meta );
 
 		AMP_Validation_Utils::reset_validation_results();
-		$wp->query_string = 'baz'; // WPCS: global override ok.
-		$this->set_capability();
+		$url = home_url( '/?baz' );
 		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
-		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		AMP_Validation_Utils::reset_validation_results();
-		$meta = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, true );
-		$url  = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
+		$meta = get_post_meta( $post_id, AMP_Validation_Utils::AMP_URL_META, false );
 		// A post exists for these errors, so the URL should be stored in the 'additional URLs' meta data.
 		$this->assertEquals( $post_id, $custom_post_id );
-		$this->assertEquals( $url, $meta );
+		$this->assertContains( $url, $meta );
 
-		$wp->query_string = 'foo-bar'; // WPCS: global override ok.
+		$url = home_url( '/?foo-bar' );
 		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
-		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		AMP_Validation_Utils::reset_validation_results();
-		$meta = get_post_meta( $post_id, AMP_Validation_Utils::URLS_VALIDATION_ERROR, false );
-		$url  = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
+		$meta = get_post_meta( $post_id, AMP_Validation_Utils::AMP_URL_META, false );
 
 		// The URL should again be stored in the 'additional URLs' meta data.
 		$this->assertEquals( $post_id, $custom_post_id );
@@ -757,13 +754,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		AMP_Validation_Utils::reset_validation_results();
 		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo--><nonexistent></nonexistent><!--/amp-source-stack:plugin:foo-->' );
-		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		AMP_Validation_Utils::reset_validation_results();
-		$error_post = get_post( $custom_post_id );
-		$this->assertTrue( true );
+		$error_post                = get_post( $custom_post_id );
 		$validation                = AMP_Validation_Utils::summarize_validation_errors( json_decode( $error_post->post_content, true ) );
-		$url                       = get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true );
-		$expected_url              = add_query_arg( $wp->query_string, '', home_url( $wp->request ) );
 		$expected_removed_elements = array(
 			'nonexistent' => 1,
 		);
@@ -771,13 +765,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		// A post already exists for this URL, so it should be updated.
 		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Utils::REMOVED_ELEMENTS ] );
 		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Utils::SOURCES_INVALID_OUTPUT ]['plugin'] );
-		$this->assertEquals( $expected_url, $url );
+		$this->assertEquals( $url, get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true ) );
 
 		AMP_Validation_Utils::reset_validation_results();
 		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
 
 		// There are no errors, so the existing error post should be deleted.
-		$custom_post_id = AMP_Validation_Utils::store_validation_errors();
+		$custom_post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		AMP_Validation_Utils::reset_validation_results();
 
 		$this->assertNull( $custom_post_id );
@@ -785,11 +779,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for existing_post()
+	 * Test for get_validation_status_post().
 	 *
-	 * @covers AMP_Validation_Utils::existing_post()
+	 * @covers AMP_Validation_Utils::get_validation_status_post()
 	 */
-	public function test_existing_post() {
+	public function test_get_validation_status_post() {
 		global $post;
 		$post           = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$custom_post_id = $this->factory()->post->create( array(
@@ -797,10 +791,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) );
 
 		$url = get_permalink( $custom_post_id );
-		$this->assertEquals( null, AMP_Validation_Utils::existing_post( $url ) );
+		$this->assertEquals( null, AMP_Validation_Utils::get_validation_status_post( $url ) );
 
 		update_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, $url );
-		$this->assertEquals( $custom_post_id, AMP_Validation_Utils::existing_post( $url ) );
+		$this->assertEquals( $custom_post_id, AMP_Validation_Utils::get_validation_status_post( $url )->ID );
 	}
 
 	/**
