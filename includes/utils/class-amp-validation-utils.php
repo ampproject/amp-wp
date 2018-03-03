@@ -631,13 +631,7 @@ class AMP_Validation_Utils {
 			$args          = func_get_args();
 
 			ob_start();
-			if ( 0 === $accepted_args ) {
-				$result = call_user_func_array( $function, array() );
-			} elseif ( $accepted_args >= func_num_args() ) {
-				$result = call_user_func_array( $function, $args );
-			} else {
-				$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) ); // @todo Why not only do this?
-			}
+			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
 			$output = ob_get_clean();
 
 			// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
