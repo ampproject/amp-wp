@@ -512,9 +512,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::wrapped_callback()
 	 */
 	public function test_wrapped_callback() {
-		$callback = array(
-			'function'      => function() {
-				echo '<b>Cool!</b>';
+		$test_string = "<b class='\nfoo\nbar\n'>Cool!</b>";
+		$callback    = array(
+			'function'      => function() use ( $test_string ) {
+				echo $test_string; // WPCS: XSS OK.
 			},
 			'accepted_args' => 0,
 			'type'          => 'plugin',
@@ -529,7 +530,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
-		$this->assertContains( '<b>Cool!</b>', $output );
+		$this->assertContains( $test_string, $output );
 		$this->assertContains( '<!--amp-source-stack:plugin:amp {"hook":"bar"}', $output );
 		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
 

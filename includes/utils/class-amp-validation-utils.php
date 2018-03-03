@@ -621,7 +621,7 @@ class AMP_Validation_Utils {
 			$output = ob_get_clean();
 
 			// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
-			if ( ! empty( $output ) && preg_match( '/<.+?>/', $output ) ) {
+			if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
 				echo AMP_Validation_Utils::get_source_comment_start( $callback['type'], $callback['name'], array( 'hook' => $callback['hook'] ) ); // WPCS: XSS ok.
 				echo $output; // WPCS: XSS ok.
 				echo AMP_Validation_Utils::get_source_comment_end( $callback['type'], $callback['name'] ); // WPCS: XSS ok.
