@@ -785,6 +785,9 @@ class AMP_Validation_Utils {
 			'post_name'    => $post_name,
 			'post_content' => $encoded_errors,
 			'post_status'  => 'publish',
+			'meta_input'   => array(
+				self::AMP_URL_META => $url,
+			),
 		);
 		$existing_post_id          = self::existing_post( $url );
 		if ( isset( $existing_post_id ) ) {
@@ -795,10 +798,7 @@ class AMP_Validation_Utils {
 			} else {
 				wp_insert_post( wp_slash( array_merge(
 					array(
-						'ID'         => $existing_post_id,
-						'meta_input' => array(
-							self::AMP_URL_META => $url,
-						),
+						'ID' => $existing_post_id,
 					),
 					$post_args
 				) ) );
@@ -811,17 +811,7 @@ class AMP_Validation_Utils {
 			return $different_post_same_error->ID;
 		} elseif ( ! empty( self::$validation_errors ) ) {
 			// There are validation issues from a plugin, but no existing post for them, so create one.
-			$new_post_id = wp_insert_post(
-				wp_slash( array_merge(
-					array(
-						'meta_input' => array(
-							self::AMP_URL_META => $url,
-						),
-					),
-					$post_args
-				) )
-			);
-			return $new_post_id;
+			return wp_insert_post( wp_slash( $post_args ) );
 		}
 
 		return null;
