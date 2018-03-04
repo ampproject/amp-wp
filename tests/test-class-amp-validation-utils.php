@@ -107,6 +107,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::schedule_cron' ) );
 		$this->assertEquals( 10, has_action( AMP_Validation_Utils::CRON_EVENT, self::TESTED_CLASS . '::cron_validate_urls' ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
+		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_side_meta_box' ) );
 	}
 
 	/**
@@ -1108,6 +1109,74 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		foreach ( $contexts as $context ) {
 			$this->assertFalse( $context['submitdiv'] );
 		}
+	}
+
+	/**
+	 * Test for add_side_meta_box()
+	 *
+	 * @covers AMP_Validation_Utils::add_side_meta_box()
+	 */
+	public function test_add_side_meta_box() {
+		global $wp_meta_boxes;
+		AMP_Validation_Utils::add_side_meta_box();
+		$meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['side']['default'][ AMP_Validation_Utils::SIDE_META_BOX ];
+		$this->assertEquals( null, $meta_box['args'] );
+		$this->assertEquals( AMP_Validation_Utils::SIDE_META_BOX, $meta_box['id'] );
+		$this->assertEquals( 'Actions', $meta_box['title'] );
+		$this->assertEquals(
+			array(
+				self::TESTED_CLASS,
+				'output_side_meta_box',
+			),
+			$meta_box['callback']
+		);
+	}
+
+	/**
+	 * Test for output_side_meta_box()
+	 *
+	 * @covers AMP_Validation_Utils::output_side_meta_box()
+	 */
+	public function test_output_side_meta_box() {
+		$this->set_capability();
+		$post_storing_error = get_post( $this->create_custom_post() );
+		$url                = get_post_meta( $post_storing_error->ID, AMP_Validation_Utils::AMP_URL_META, true );
+		$post_with_error    = AMP_Validation_Utils::get_validation_status_post( $url );
+		ob_start();
+		AMP_Validation_Utils::output_side_meta_box( $post_storing_error );
+		$output = ob_get_clean();
+
+		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_with_error->post_date ) ), $output );
+		$this->assertContains( 'Published on:', $output );
+		$this->assertContains( 'Move to Trash', $output );
+		$this->assertContains( esc_url( get_delete_post_link( $post_storing_error->ID ) ), $output );
+		$this->assertContains( 'misc-pub-section', $output );
+		$this->assertContains(
+			AMP_Validation_Utils::get_recheck_link(
+				$post_with_error,
+				add_query_arg(
+					'post',
+					$post_with_error->ID,
+					admin_url( 'post.php' )
+				)
+			),
+			$output
+		);
+	}
+
+	/**
+	 * Test for get_recheck_link()
+	 *
+	 * @covers AMP_Validation_Utils::get_recheck_link()
+	 */
+	public function test_get_recheck_link() {
+		$this->set_capability();
+		$post_id = $this->create_custom_post();
+		$url     = get_edit_post_link( $post_id, 'raw' );
+		$link    = AMP_Validation_Utils::get_recheck_link( get_post( $post_id ), $url );
+		$this->assertContains( AMP_Validation_Utils::RECHECK_ACTION, $link );
+		$this->assertContains( wp_create_nonce( AMP_Validation_Utils::NONCE_ACTION . $post_id ), $link );
+		$this->assertContains( 'Recheck the URL for AMP validity', $link );
 	}
 
 	/**

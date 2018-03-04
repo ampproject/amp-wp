@@ -139,6 +139,13 @@ class AMP_Validation_Utils {
 	const NONCE_TRANSIENT_NAME = 'amp_validation_cron';
 
 	/**
+	 * The name of the side meta box on the CPT post.php page.
+	 *
+	 * @var string
+	 */
+	const SIDE_META_BOX = 'amp_side_meta_box';
+
+	/**
 	 * The errors encountered when validating.
 	 *
 	 * @var array[][] {
@@ -169,6 +176,7 @@ class AMP_Validation_Utils {
 		add_action( 'init', array( __CLASS__, 'schedule_cron' ) );
 		add_action( self::CRON_EVENT, array( __CLASS__, 'cron_validate_urls' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'remove_publish_meta_box' ) );
+		add_action( 'add_meta_boxes', array( __CLASS__, 'add_side_meta_box' ) );
 
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
@@ -1046,20 +1054,7 @@ class AMP_Validation_Utils {
 		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
 
 		if ( ! empty( $url ) ) {
-			$actions[ self::RECHECK_ACTION ] = sprintf(
-				'<a href="%s" aria-label="%s">%s</a>',
-				wp_nonce_url(
-					add_query_arg(
-						'action',
-						self::RECHECK_ACTION,
-						get_edit_post_link( $post->ID, 'raw' )
-					),
-					self::NONCE_ACTION . $post->ID
-				),
-				esc_html__( 'Recheck the URL for AMP validity', 'amp' ),
-				__( 'Recheck', 'amp' )
-			);
-
+			$actions[ self::RECHECK_ACTION ]  = self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ) );
 			$actions[ self::DEBUG_QUERY_VAR ] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
 				esc_url(
@@ -1165,12 +1160,24 @@ class AMP_Validation_Utils {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
 		$url = get_post_meta( $post_id, self::AMP_URL_META, true );
 		self::validate_url( $url );
+		$validation_post  = self::get_validation_status_post( $url );
+		$remaining_errors = $validation_post ? '1' : '0';
 
+		if ( $validation_post ) {
+			$redirect = wp_get_referer();
+		} else {
+			// If there are no remaining errors and the post was deleted, redirect to edit.php instead of post.php.
+			$redirect = add_query_arg(
+				'post_type',
+				self::POST_TYPE_SLUG,
+				admin_url( 'edit.php' )
+			);
+		}
 		$args = array(
 			self::URLS_TESTED      => '1',
-			self::REMAINING_ERRORS => self::get_validation_status_post( $url ) ? '1' : '0',
+			self::REMAINING_ERRORS => $remaining_errors,
 		);
-		wp_safe_redirect( add_query_arg( $args, wp_get_referer() ) );
+		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();
 	}
 
@@ -1232,6 +1239,71 @@ class AMP_Validation_Utils {
 	 */
 	public static function remove_publish_meta_box() {
 		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
+	}
+
+	/**
+	 * Adds the side meta box to the CPT post.php page.
+	 *
+	 * @return void
+	 */
+	public static function add_side_meta_box() {
+		add_meta_box( self::SIDE_META_BOX, __( 'Actions', 'amp' ), array( __CLASS__, 'output_side_meta_box' ), self::POST_TYPE_SLUG, 'side' );
+	}
+
+	/**
+	 * Outputs the markup of the side meta box in the CPT post.php page.
+	 *
+	 * This is partially copied from meta-boxes.php.
+	 * Adds 'Published on,' and links to move to trash and recheck.
+	 *
+	 * @param WP_Post $post The post for which to output the box.
+	 * @return void
+	 */
+	public static function output_side_meta_box( $post ) {
+		$url             = get_post_meta( $post->ID, self::AMP_URL_META, true );
+		$post_with_error = self::get_validation_status_post( $url );
+		if ( ! isset( $post_with_error->post_date ) ) {
+			return;
+		}
+		$redirect_url = add_query_arg(
+			'post',
+			$post_with_error->ID,
+			admin_url( 'post.php' )
+		);
+		/* translators: Meta box date format */
+		$date_format = __( 'M j, Y @ H:i', 'default' );
+		echo '<div class="curtime misc-pub-section"><span id="timestamp">';
+		/* translators: %s: The date this was published */
+		printf( __( 'Published on: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post_with_error->post_date ) ) ) ); // WPCS: XSS ok.
+		echo '</span></div>';
+		printf( '<div class="misc-pub-section"></div><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
+		printf( '<div class="misc-pub-section">%s</div>', self::get_recheck_link( $post_with_error, $redirect_url ) ); // WPCS: XSS ok.
+	}
+
+	/**
+	 * Gets the link to recheck the post for AMP validity.
+	 *
+	 * Appends a query var to $redirect_url.
+	 * On clicking the link, it checks if errors still exist for $post.
+	 *
+	 * @param  WP_Post $post         The post storing the validation error.
+	 * @param  string  $redirect_url The URL of the redirect.
+	 * @return string $link The link to recheck the post.
+	 */
+	public static function get_recheck_link( $post, $redirect_url ) {
+		return sprintf(
+			'<a href="%s" aria-label="%s">%s</a>',
+			wp_nonce_url(
+				add_query_arg(
+					'action',
+					self::RECHECK_ACTION,
+					$redirect_url
+				),
+				self::NONCE_ACTION . $post->ID
+			),
+			esc_html__( 'Recheck the URL for AMP validity', 'amp' ),
+			esc_html__( 'Recheck', 'amp' )
+		);
 	}
 
 }
