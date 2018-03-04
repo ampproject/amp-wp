@@ -876,9 +876,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Validation_Utils::plugin_notice();
 		$output = ob_get_clean();
-		$this->assertContains( 'Warning: the following plugin is incompatible with AMP', $output );
+		$this->assertContains( 'Warning: The following plugin may be incompatible with AMP', $output );
 		$this->assertContains( $this->plugin_name, $output );
-		$this->assertContains( 'more details', $output );
+		$this->assertContains( 'More details', $output );
 		$this->assertContains( admin_url( 'edit.php' ), $output );
 	}
 
@@ -1146,7 +1146,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'post_status'  => 'publish',
 		);
 		$error_post     = wp_insert_post( wp_slash( $post_args ) );
-		$url            = get_home_url();
+		$url            = home_url( '/' );
 		update_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
 		return $error_post;
 	}

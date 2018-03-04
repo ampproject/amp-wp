@@ -879,7 +879,7 @@ class AMP_Validation_Utils {
 	 * @return array|WP_Error The response array, or WP_Error.
 	 */
 	public static function validate_home() {
-		return self::validate_url( home_url() );
+		return self::validate_url( home_url( '/' ) );
 	}
 
 	/**
@@ -908,7 +908,7 @@ class AMP_Validation_Utils {
 	public static function plugin_notice() {
 		global $pagenow;
 		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
-			$error_post = self::get_validation_status_post( home_url() );
+			$error_post = self::get_validation_status_post( home_url( '/' ) );
 			if ( ! $error_post ) {
 				return;
 			}
@@ -931,11 +931,11 @@ class AMP_Validation_Utils {
 						self::POST_TYPE_SLUG,
 						admin_url( 'edit.php' )
 					) ),
-					__( 'more details', 'amp' )
+					__( 'More details', 'amp' )
 				);
 				printf(
 					'<div class="notice notice-warning is-dismissible"><p>%s %s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html( _n( 'Warning: the following plugin is incompatible with AMP:', 'Warning: the following plugins are incompatible with AMP: ', count( $invalid_plugins ), 'amp' ) ),
+					esc_html( _n( 'Warning: The following plugin may be incompatible with AMP:', 'Warning: The following plugins may be incompatible with AMP: ', count( $invalid_plugins ), 'amp' ) ),
 					implode( ', ', $reported_plugins ),
 					$more_details_link,
 					esc_html__( 'Dismiss this notice.', 'amp' )
@@ -1203,7 +1203,7 @@ class AMP_Validation_Utils {
 		$minute_in_seconds = 60;
 		set_transient( self::NONCE_TRANSIENT_NAME, $nonce, $minute_in_seconds );
 
-		$urls_to_validate           = array( get_home_url() );
+		$urls_to_validate           = array( home_url( '/' ) );
 		$recent_posts               = wp_get_recent_posts(
 			array(
 				'numberposts' => 1,
