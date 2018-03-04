@@ -526,11 +526,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		add_shortcode( 'test', function() {
 			return '<b>test</b>';
 		} );
-
-		$this->assertSame(
-			'before<!--amp-source-stack:plugin:amp {"shortcode":"test"}--><b>test</b><!--/amp-source-stack:plugin:amp-->after',
-			do_shortcode( 'before[test]after' )
-		);
+		$this->assertNotFalse( preg_match( '/before<!--amp-source-stack:plugin:amp(-wp)? {"shortcode":"test"}--><b>test<\/b><!--\/amp-source-stack:plugin:amp(-wp)?-->after/s', do_shortcode( 'before[test]after' ) ) );
 	}
 
 	/**
