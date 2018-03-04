@@ -363,39 +363,72 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_source_comment_start.
-	 *
-	 * @covers AMP_Validation_Utils::get_source_comment_start()
-	 */
-	public function test_get_source_comment_start() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test get_source_comment_end.
-	 *
-	 * @covers AMP_Validation_Utils::get_source_comment_end()
-	 */
-	public function test_get_source_comment_end() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test parse_source_comment.
-	 *
-	 * @covers AMP_Validation_Utils::parse_source_comment()
-	 */
-	public function test_parse_source_comment() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test locate_sources.
+	 * Test source comments.
 	 *
 	 * @covers AMP_Validation_Utils::locate_sources()
+	 * @covers AMP_Validation_Utils::parse_source_comment()
+	 * @covers AMP_Validation_Utils::get_source_comment_start()
+	 * @covers AMP_Validation_Utils::get_source_comment_end()
+	 * @covers AMP_Validation_Utils::remove_source_comments()
 	 */
-	public function test_locate_sources() {
-		$this->markTestIncomplete();
+	public function test_source_comments() {
+		$dom = AMP_DOM_Utils::get_dom_from_content( implode(
+			'',
+			array(
+				AMP_Validation_Utils::get_source_comment_start( 'plugin', 'foo', array( 'shortcode' => 'test' ) ),
+				AMP_Validation_Utils::get_source_comment_start( 'theme', 'bar', array( 'hook' => 'something' ) ),
+				'<b id="test">Test</b>',
+				AMP_Validation_Utils::get_source_comment_end( 'theme', 'bar' ),
+				AMP_Validation_Utils::get_source_comment_end( 'plugin', 'foo' ),
+			)
+		) );
+
+		/**
+		 * Comments.
+		 *
+		 * @var DOMComment[] $comments
+		 */
+		$comments = array();
+		$xpath    = new DOMXPath( $dom );
+		foreach ( $xpath->query( '//comment()' ) as $comment ) {
+			$comments[] = $comment;
+		}
+		$this->assertCount( 4, $comments );
+
+		$sources = AMP_Validation_Utils::locate_sources( $dom->getElementById( 'test' ) );
+		$this->assertInternalType( 'array', $sources );
+		$this->assertCount( 2, $sources );
+
+		$expected = array(
+			'type' => 'plugin',
+			'name' => 'foo',
+			'args' => array(
+				'shortcode' => 'test',
+			),
+		);
+		$this->assertEquals( $expected, $sources[0] );
+		$expected['closing'] = false;
+		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[0] ) );
+		$expected['closing'] = true;
+		unset( $expected['args'] );
+		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[3] ) );
+
+		$expected = array(
+			'type' => 'theme',
+			'name' => 'bar',
+			'args' => array(
+				'hook' => 'something',
+			),
+		);
+		$this->assertEquals( $expected, $sources[1] );
+		$expected['closing'] = false;
+		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[1] ) );
+		$expected['closing'] = true;
+		unset( $expected['args'] );
+		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[2] ) );
+
+		AMP_Validation_Utils::remove_source_comments( $dom );
+		$this->assertEquals( 0, $xpath->query( '//comment()' )->length );
 	}
 
 	/**
@@ -488,7 +521,15 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::decorate_shortcode_source()
 	 */
 	public function test_decorate_shortcode_source() {
-		$this->markTestIncomplete();
+		AMP_Validation_Utils::add_validation_hooks();
+		add_shortcode( 'test', function() {
+			return '<b>test</b>';
+		} );
+
+		$this->assertSame(
+			'before<!--amp-source-stack:plugin:amp {"shortcode":"test"}--><b>test</b><!--/amp-source-stack:plugin:amp-->after',
+			do_shortcode( 'before[test]after' )
+		);
 	}
 
 	/**

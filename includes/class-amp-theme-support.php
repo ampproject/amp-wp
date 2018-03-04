@@ -1017,6 +1017,7 @@ class AMP_Theme_Support {
 
 			// Store validation errors if not in debug mode (since debug mode will skew validation results).
 			if ( ! $is_validation_debug_mode ) {
+				AMP_Validation_Utils::remove_source_comments( $dom );
 				$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
 				if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 					$url .= wp_unslash( $_SERVER['REQUEST_URI'] );

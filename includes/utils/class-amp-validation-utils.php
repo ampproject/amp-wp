@@ -414,7 +414,11 @@ class AMP_Validation_Utils {
 	 * @return string HTML Comment.
 	 */
 	public static function get_source_comment_start( $type, $name, $args = array() ) {
-		return sprintf( '<!--amp-source-stack:%s:%s %s-->', $type, $name, str_replace( '--', '', wp_json_encode( $args ) ) );
+		$args_encoded = wp_json_encode( $args );
+		if ( '[]' === $args_encoded ) {
+			$args_encoded = '{}';
+		}
+		return sprintf( '<!--amp-source-stack:%s:%s %s-->', $type, $name, str_replace( '--', '', $args_encoded ) );
 	}
 
 	/**
@@ -474,6 +478,24 @@ class AMP_Validation_Utils {
 			}
 		}
 		return $sources;
+	}
+
+	/**
+	 * Remove source comments.
+	 *
+	 * @param DOMDocument $dom Document.
+	 */
+	public static function remove_source_comments( $dom ) {
+		$xpath    = new DOMXPath( $dom );
+		$comments = array();
+		foreach ( $xpath->query( '//comment()[ contains( ., "amp-source-stack:" ) ]' ) as $comment ) {
+			if ( self::parse_source_comment( $comment ) ) {
+				$comments[] = $comment;
+			}
+		}
+		foreach ( $comments as $comment ) {
+			$comment->parentNode->removeChild( $comment );
+		}
 	}
 
 	/**
