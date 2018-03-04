@@ -22,10 +22,16 @@ class AMP_Validation_Utils {
 	/**
 	 * Query var that triggers validation.
 	 *
-	 * @todo Add amp prefix to this.
 	 * @var string
 	 */
-	const VALIDATION_QUERY_VAR = 'validate';
+	const VALIDATE_QUERY_VAR = 'amp_validate';
+
+	/**
+	 * Query var that enables validation debug mode, to disable removal of invalid elements/attributes.
+	 *
+	 * @var string
+	 */
+	const DEBUG_QUERY_VAR = 'amp_debug';
 
 	/**
 	 * The slug of the post type to store AMP errors.
@@ -155,7 +161,7 @@ class AMP_Validation_Utils {
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
-		add_filter( 'post_row_actions', array( __CLASS__, 'add_recheck' ), 10, 2 );
+		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'remaining_error_notice' ) );
@@ -697,7 +703,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function should_validate_front_end() {
 		$should_validate = (
-			( self::has_cap() && ( isset( $_GET[ self::VALIDATION_QUERY_VAR ] ) ) )
+			( self::has_cap() && ( isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) )
 			||
 			(
 				isset( $_GET[ self::CUSTOM_CRON_NONCE ] )
@@ -771,9 +777,9 @@ class AMP_Validation_Utils {
 		// Remove query vars that are only used to initiate validation requests.
 		$url = remove_query_arg(
 			array(
-				self::VALIDATION_QUERY_VAR,
+				self::VALIDATE_QUERY_VAR,
 				self::CUSTOM_CRON_NONCE,
-				'amp_disable_invalid_removal',
+				self::DEBUG_QUERY_VAR,
 			),
 			$url
 		);
@@ -862,7 +868,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function validate_url( $url ) {
 		$validation_url = add_query_arg(
-			self::VALIDATION_QUERY_VAR,
+			self::VALIDATE_QUERY_VAR,
 			1,
 			$url
 		);
@@ -1003,7 +1009,7 @@ class AMP_Validation_Utils {
 	 * @param WP_Post $post    The post for the actions.
 	 * @return array $actions The filtered actions.
 	 */
-	public static function add_recheck( $actions, $post ) {
+	public static function filter_row_actions( $actions, $post ) {
 		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
 			return $actions;
 		}
@@ -1018,19 +1024,33 @@ class AMP_Validation_Utils {
 		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
 
 		if ( ! empty( $url ) ) {
-			$post_type_object                = get_post_type_object( $post->post_type );
 			$actions[ self::RECHECK_ACTION ] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
 				wp_nonce_url(
 					add_query_arg(
 						'action',
 						self::RECHECK_ACTION,
-						admin_url( sprintf( $post_type_object->_edit_link, $post->ID ) )
+						get_edit_post_link( $post->ID, 'raw' )
 					),
 					self::NONCE_ACTION . $post->ID
 				),
 				esc_html__( 'Recheck the URL for AMP validity', 'amp' ),
 				__( 'Recheck', 'amp' )
+			);
+
+			$actions[ self::DEBUG_QUERY_VAR ] = sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						array(
+							self::VALIDATE_QUERY_VAR => 1,
+							self::DEBUG_QUERY_VAR    => 1,
+						),
+						$url
+					) . '#development=1'
+				),
+				esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
+				esc_html__( 'Debug', 'amp' )
 			);
 		}
 

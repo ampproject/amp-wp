@@ -100,7 +100,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::plugin_notice' ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Utils::POST_TYPE_SLUG . '_posts_columns', self::TESTED_CLASS . '::add_post_columns' ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', self::TESTED_CLASS . '::output_custom_column' ) );
-		$this->assertEquals( 10, has_filter( 'post_row_actions', self::TESTED_CLASS . '::add_recheck' ) );
+		$this->assertEquals( 10, has_filter( 'post_row_actions', self::TESTED_CLASS . '::filter_row_actions' ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
@@ -427,7 +427,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
 		$this->assertEquals( 10, has_action( $action_two_arguments, array( $this, 'output_message' ) ) );
 
-		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
+		$_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] = 1;
 		AMP_Validation_Utils::callback_wrappers();
 		$this->assertEquals( 10, has_action( $action_non_plugin, 'the_ID' ) );
 		$this->assertNotEquals( 10, has_action( $action_no_output, array( $this, 'get_string' ) ) );
@@ -639,7 +639,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		global $post;
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
 		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
-		$_GET[ AMP_Validation_Utils::VALIDATION_QUERY_VAR ] = 1;
+		$_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] = 1;
 		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$this->set_capability();
 		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
@@ -905,19 +905,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for add_recheck()
+	 * Test for filter_row_actions()
 	 *
-	 * @covers AMP_Validation_Utils::add_recheck()
+	 * @covers AMP_Validation_Utils::filter_row_actions()
 	 */
-	public function test_add_recheck() {
+	public function test_filter_row_actions() {
+		$this->set_capability();
+
 		$initial_actions = array(
 			'trash' => '<a href="https://example.com">Trash</a>',
 		);
 		$post            = $this->factory()->post->create_and_get();
-		$this->assertEquals( $initial_actions, AMP_Validation_Utils::add_recheck( $initial_actions, $post ) );
+		$this->assertEquals( $initial_actions, AMP_Validation_Utils::filter_row_actions( $initial_actions, $post ) );
 
 		$custom_post_id = $this->create_custom_post();
-		$actions        = AMP_Validation_Utils::add_recheck( $initial_actions, get_post( $custom_post_id ) );
+		$actions        = AMP_Validation_Utils::filter_row_actions( $initial_actions, get_post( $custom_post_id ) );
 		$url            = get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true );
 		$this->assertContains( $url, $actions[ AMP_Validation_Utils::RECHECK_ACTION ] );
 		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );

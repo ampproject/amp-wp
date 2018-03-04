@@ -957,8 +957,7 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		// @todo Instead of amp_disable_invalid_removal this should be called like `amp_debug`. Add string to a constant.
-		$validation_debug_mode = ! empty( $_REQUEST['amp_disable_invalid_removal'] ); // WPCS: csrf ok.
+		$is_validation_debug_mode = ! empty( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
 
 		$args = array_merge(
 			array(
@@ -967,7 +966,7 @@ class AMP_Theme_Support {
 				'remove_invalid_callback' => null,
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
-				'disable_invalid_removal' => $validation_debug_mode,
+				'disable_invalid_removal' => $is_validation_debug_mode,
 			),
 			$args
 		);
@@ -1017,7 +1016,7 @@ class AMP_Theme_Support {
 			}
 
 			// Store validation errors if not in debug mode (since debug mode will skew validation results).
-			if ( ! $validation_debug_mode ) {
+			if ( ! $is_validation_debug_mode ) {
 				$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
 				if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 					$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
