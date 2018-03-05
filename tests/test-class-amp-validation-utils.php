@@ -1260,7 +1260,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_print_validation_errors_meta_box() {
 		$this->set_capability();
-		$post_storing_error = get_post( $this->create_custom_post() );
+		$post_storing_error     = get_post( $this->create_custom_post() );
+		$first_url              = get_post_meta( $post_storing_error->ID, AMP_Validation_Utils::AMP_URL_META, true );
+		$second_url_same_errors = get_permalink( $this->factory()->post->create() );
+		AMP_Validation_Utils::store_validation_errors( $this->get_mock_errors(), $second_url_same_errors );
 		ob_start();
 		AMP_Validation_Utils::print_validation_errors_meta_box( $post_storing_error );
 		$output = ob_get_clean();
@@ -1268,6 +1271,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( '<details', $output );
 		$this->assertContains( $this->disallowed_tag_name, $output );
 		$this->assertContains( $this->disallowed_attribute_name, $output );
+		$this->assertContains( 'URLs', $output );
+		$this->assertContains( $first_url, $output );
+		$this->assertContains( $second_url_same_errors, $output );
+		AMP_Validation_Utils::reset_validation_results();
 	}
 
 	/**
@@ -1291,28 +1298,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @return int|WP_Error $error_post The ID of new custom post, or an error.
 	 */
 	public function create_custom_post() {
-		$content        = wp_json_encode( array(
-			array(
-				'code'      => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
-				'node_name' => $this->disallowed_tag_name,
-				'sources'   => array(
-					array(
-						'type' => 'plugin',
-						'name' => $this->plugin_name,
-					),
-				),
-			),
-			array(
-				'code'      => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
-				'node_name' => $this->disallowed_attribute_name,
-				'sources'   => array(
-					array(
-						'type' => 'plugin',
-						'name' => $this->plugin_name,
-					),
-				),
-			),
-		) );
+		$content        = wp_json_encode( $this->get_mock_errors() );
 		$encoded_errors = md5( $content );
 		$post_args      = array(
 			'post_type'    => AMP_Validation_Utils::POST_TYPE_SLUG,
@@ -1324,6 +1310,45 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$url            = home_url( '/' );
 		update_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
 		return $error_post;
+	}
+
+	/**
+	 * Gets mock errors for tests.
+	 *
+	 * @return array $errors[][] {
+	 *     The data of the validation errors.
+	 *
+	 *     @type string    $code        Error code.
+	 *     @type string    $node_name   Name of removed node.
+	 *     @type string    $parent_name Name of parent node.
+	 *     @type array[][] $sources     Source data, including plugins and themes.
+	 * }
+	 */
+	public function get_mock_errors() {
+		return array(
+			array(
+				'code'        => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
+				'node_name'   => $this->disallowed_tag_name,
+				'parent_name' => 'div',
+				'sources'   => array(
+					array(
+						'type' => 'plugin',
+						'name' => $this->plugin_name,
+					),
+				),
+			),
+			array(
+				'code'      => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
+				'node_name' => $this->disallowed_attribute_name,
+				'parent_name' => 'div',
+				'sources'   => array(
+					array(
+						'type' => 'plugin',
+						'name' => $this->plugin_name,
+					),
+				),
+			),
+		);
 	}
 
 }

@@ -1358,38 +1358,57 @@ class AMP_Validation_Utils {
 	 */
 	public static function print_validation_errors_meta_box( $post ) {
 		$errors = json_decode( $post->post_content, true );
+		$urls   = get_post_meta( $post->ID, self::AMP_URL_META, false );
 		?>
 		<style>
 			.amp-validation-errors .detailed {
 				margin-left: 30px;
 			}
+			.amp-validation-errors .amp-recheck {
+				float: right;
+			}
+			.amp-validation-errors .amp-recheck a {
+				color: #a00;
+			}
 		</style>
-		<ul class="amp-validation-errors">
-			<?php foreach ( $errors as $error ) : ?>
-				<li>
-					<details open>
-						<summary><code><?php echo esc_html( $error['code'] ); ?></code></summary>
-						<?php unset( $error['code'] ); ?>
-						<ul class="detailed">
-							<?php foreach ( $error as $key => $value ) : ?>
-								<li>
-									<details open>
-										<summary><code><?php echo esc_html( $key ); ?></code></summary>
-										<div class="detailed">
-											<?php if ( is_string( $value ) ) : ?>
-												<?php echo esc_html( $value ); ?>
-											<?php else : ?>
-												<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></pre>
-											<?php endif; ?>
-										</div>
-									</details>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					</details>
-				</li>
-			<?php endforeach; ?>
-		</ul>
+		<div class="amp-validation-errors">
+			<ul>
+				<?php foreach ( $errors as $error ) : ?>
+					<li>
+						<details open>
+							<summary><code><?php echo esc_html( $error['code'] ); ?></code></summary>
+							<?php unset( $error['code'] ); ?>
+							<ul class="detailed">
+								<?php foreach ( $error as $key => $value ) : ?>
+									<li>
+										<details open>
+											<summary><code><?php echo esc_html( $key ); ?></code></summary>
+											<div class="detailed">
+												<?php if ( is_string( $value ) ) : ?>
+													<?php echo esc_html( $value ); ?>
+												<?php else : ?>
+													<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></code>
+												<?php endif; ?>
+											</div>
+										</details>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						</details>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<hr>
+			<h3><?php esc_html_e( 'URLs', 'amp' ); ?></h3>
+			<ul>
+				<?php foreach ( $urls as $url ) : ?>
+					<li>
+						<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_url( $url ); ?></a>
+						<span class="amp-recheck"><?php echo self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ) ); // WPCS: XSS ok. ?></span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
 		<?php
 	}
 
