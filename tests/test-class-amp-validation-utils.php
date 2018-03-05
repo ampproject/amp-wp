@@ -107,7 +107,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::schedule_cron' ) );
 		$this->assertEquals( 10, has_action( AMP_Validation_Utils::CRON_EVENT, self::TESTED_CLASS . '::cron_validate_urls' ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
-		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_side_meta_box' ) );
+		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_meta_boxes' ) );
 	}
 
 	/**
@@ -1112,23 +1112,33 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for add_side_meta_box()
+	 * Test for add_meta_boxes()
 	 *
-	 * @covers AMP_Validation_Utils::add_side_meta_box()
+	 * @covers AMP_Validation_Utils::add_meta_boxes()
 	 */
-	public function test_add_side_meta_box() {
+	public function test_add_meta_boxes() {
 		global $wp_meta_boxes;
-		AMP_Validation_Utils::add_side_meta_box();
-		$meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['side']['default'][ AMP_Validation_Utils::SIDE_META_BOX ];
-		$this->assertEquals( null, $meta_box['args'] );
-		$this->assertEquals( AMP_Validation_Utils::SIDE_META_BOX, $meta_box['id'] );
-		$this->assertEquals( 'Actions', $meta_box['title'] );
+		AMP_Validation_Utils::add_meta_boxes();
+		$side_meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['side']['default'][ AMP_Validation_Utils::SIDE_META_BOX ];
+		$this->assertEquals( AMP_Validation_Utils::SIDE_META_BOX, $side_meta_box['id'] );
+		$this->assertEquals( 'Actions', $side_meta_box['title'] );
 		$this->assertEquals(
 			array(
 				self::TESTED_CLASS,
 				'output_side_meta_box',
 			),
-			$meta_box['callback']
+			$side_meta_box['callback']
+		);
+
+		$full_meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['normal']['default'][ AMP_Validation_Utils::FULL_META_BOX ];
+		$this->assertEquals( AMP_Validation_Utils::FULL_META_BOX, $full_meta_box['id'] );
+		$this->assertEquals( 'Validation Errors', $full_meta_box['title'] );
+		$this->assertEquals(
+			array(
+				self::TESTED_CLASS,
+				'output_full_meta_box',
+			),
+			$full_meta_box['callback']
 		);
 	}
 
@@ -1162,6 +1172,23 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			),
 			$output
 		);
+	}
+
+	/**
+	 * Test for output_side_meta_box()
+	 *
+	 * @covers AMP_Validation_Utils::output_side_meta_box()
+	 */
+	public function test_output_full_meta_box() {
+		$this->set_capability();
+		$post_storing_error = get_post( $this->create_custom_post() );
+		ob_start();
+		AMP_Validation_Utils::output_full_meta_box( $post_storing_error );
+		$output = ob_get_clean();
+
+		$this->assertContains( '<details', $output );
+		$this->assertContains( $this->disallowed_tag_name, $output );
+		$this->assertContains( $this->disallowed_attribute_name, $output );
 	}
 
 	/**

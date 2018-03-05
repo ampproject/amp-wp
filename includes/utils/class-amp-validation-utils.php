@@ -146,6 +146,13 @@ class AMP_Validation_Utils {
 	const SIDE_META_BOX = 'amp_side_meta_box';
 
 	/**
+	 * The name of the side meta box on the CPT post.php page.
+	 *
+	 * @var string
+	 */
+	const FULL_META_BOX = 'amp_full_meta_box';
+
+	/**
 	 * The errors encountered when validating.
 	 *
 	 * @var array[][] {
@@ -176,7 +183,7 @@ class AMP_Validation_Utils {
 		add_action( 'init', array( __CLASS__, 'schedule_cron' ) );
 		add_action( self::CRON_EVENT, array( __CLASS__, 'cron_validate_urls' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'remove_publish_meta_box' ) );
-		add_action( 'add_meta_boxes', array( __CLASS__, 'add_side_meta_box' ) );
+		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
@@ -1242,11 +1249,12 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Adds the side meta box to the CPT post.php page.
+	 * Adds the meta boxes to the CPT post.php page.
 	 *
 	 * @return void
 	 */
-	public static function add_side_meta_box() {
+	public static function add_meta_boxes() {
+		add_meta_box( self::FULL_META_BOX, __( 'Validation Errors', 'amp' ), array( __CLASS__, 'output_full_meta_box' ), self::POST_TYPE_SLUG, 'normal' );
 		add_meta_box( self::SIDE_META_BOX, __( 'Actions', 'amp' ), array( __CLASS__, 'output_side_meta_box' ), self::POST_TYPE_SLUG, 'side' );
 	}
 
@@ -1276,8 +1284,32 @@ class AMP_Validation_Utils {
 		/* translators: %s: The date this was published */
 		printf( __( 'Published on: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post_with_error->post_date ) ) ) ); // WPCS: XSS ok.
 		echo '</span></div>';
-		printf( '<div class="misc-pub-section"></div><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
+		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
 		printf( '<div class="misc-pub-section">%s</div>', self::get_recheck_link( $post_with_error, $redirect_url ) ); // WPCS: XSS ok.
+	}
+
+	/**
+	 * Outputs the full meta box on the CPT post.php page.
+	 *
+	 * This displays the errors stored in the post content.
+	 * These are output as stored, but using <details> elements.
+	 *
+	 * @param WP_Post $post The post for which to output the box.
+	 * @return void
+	 */
+	public static function output_full_meta_box( $post ) {
+		$errors = json_decode( $post->post_content, true );
+		echo '<ul>';
+		foreach ( $errors as $error ) {
+			printf( '<li><details open><summary>%s</summary><div style="margin-left:30px;"><ul>', esc_html( $error['code'] ) );
+			unset( $error['code'] );
+			foreach ( $error as $key => $value ) {
+				$value = is_string( $value ) ? $value : sprintf( '<code>%s</code>', wp_json_encode( $value ) );
+				printf( '<li><details open><summary>%s</summary><div style="margin-left:30px;"><code>%s</code></div></li>', esc_html( $key ), esc_html( $value ) );
+			}
+			echo '</ul></div></details></li>';
+		}
+		echo '</ul>';
 	}
 
 	/**
