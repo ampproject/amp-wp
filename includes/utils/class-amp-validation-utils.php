@@ -1304,8 +1304,8 @@ class AMP_Validation_Utils {
 			printf( '<li><details open><summary>%s</summary><div style="margin-left:30px;"><ul>', esc_html( $error['code'] ) );
 			unset( $error['code'] );
 			foreach ( $error as $key => $value ) {
-				$value = is_string( $value ) ? $value : sprintf( '<code>%s</code>', wp_json_encode( $value ) );
-				printf( '<li><details open><summary>%s</summary><div style="margin-left:30px;"><code>%s</code></div></li>', esc_html( $key ), esc_html( $value ) );
+				$value = is_string( $value ) ? esc_html( $value ) : sprintf( '<code>%s</code>', wp_json_encode( $value ) );
+				printf( '<li><details open><summary>%s</summary><div style="margin-left:30px;"><code>%s</code></div></li>', esc_html( $key ), $value ); // WPCS: XSS ok.
 			}
 			echo '</ul></div></details></li>';
 		}
