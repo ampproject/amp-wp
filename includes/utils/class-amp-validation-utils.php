@@ -1374,14 +1374,75 @@ class AMP_Validation_Utils {
 		<div class="amp-validation-errors">
 			<ul>
 				<?php foreach ( $errors as $error ) : ?>
+					<?php
+					$collasped_details = array();
+					?>
 					<li>
 						<details open>
 							<summary><code><?php echo esc_html( $error['code'] ); ?></code></summary>
-							<?php unset( $error['code'] ); ?>
 							<ul class="detailed">
+							<?php if ( self::ELEMENT_REMOVED_CODE === $error['code'] ) : ?>
+								<li>
+									<details open>
+										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
+										<code class="detailed">
+											<?php
+											if ( isset( $error['parent_name'] ) ) {
+												echo esc_html( sprintf( '<%s …>', $error['parent_name'] ) );
+											}
+											?>
+											<mark>
+												<?php
+												echo esc_html( sprintf( '<%s', $error['node_name'] ) );
+												if ( isset( $error['node_attributes'] ) ) {
+													foreach ( $error['node_attributes'] as $key => $value ) {
+														printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+													}
+												}
+												echo esc_html( '>…' );
+												?>
+											</mark>
+										</code>
+									</details>
+									<?php
+									$collasped_details[] = 'node_attributes';
+									$collasped_details[] = 'node_name';
+									$collasped_details[] = 'parent_name';
+									?>
+								</li>
+							<?php elseif ( self::ATTRIBUTE_REMOVED_CODE === $error['code'] ) : ?>
+								<li>
+									<details open>
+										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
+										<code class="detailed">
+											<?php
+											if ( isset( $error['parent_name'] ) ) {
+												echo esc_html( sprintf( '<%s', $error['parent_name'] ) );
+											}
+											foreach ( $error['element_attributes'] as $key => $value ) {
+												if ( $key === $error['node_name'] ) {
+													echo '<mark>';
+												}
+												printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+												if ( $key === $error['node_name'] ) {
+													echo '</mark>';
+												}
+											}
+											echo esc_html( '>' );
+											?>
+										</code>
+									</details>
+									<?php
+									$collasped_details[] = 'parent_name';
+									$collasped_details[] = 'element_attributes';
+									$collasped_details[] = 'node_name';
+									?>
+								</li>
+							<?php endif; ?>
+								<?php unset( $error['code'] ); ?>
 								<?php foreach ( $error as $key => $value ) : ?>
 									<li>
-										<details open>
+										<details <?php echo ! in_array( $key, $collasped_details, true ) ? 'open' : ''; ?>>
 											<summary><code><?php echo esc_html( $key ); ?></code></summary>
 											<div class="detailed">
 												<?php if ( is_string( $value ) ) : ?>

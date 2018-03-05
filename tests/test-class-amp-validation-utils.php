@@ -1327,10 +1327,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function get_mock_errors() {
 		return array(
 			array(
-				'code'        => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
-				'node_name'   => $this->disallowed_tag_name,
-				'parent_name' => 'div',
-				'sources'     => array(
+				'code'            => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
+				'node_name'       => $this->disallowed_tag_name,
+				'parent_name'     => 'div',
+				'node_attributes' => array(),
+				'sources'         => array(
 					array(
 						'type' => 'plugin',
 						'name' => $this->plugin_name,
@@ -1338,10 +1339,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				),
 			),
 			array(
-				'code'        => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
-				'node_name'   => $this->disallowed_attribute_name,
-				'parent_name' => 'div',
-				'sources'     => array(
+				'code'               => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
+				'node_name'          => $this->disallowed_attribute_name,
+				'parent_name'        => 'div',
+				'element_attributes' => array(
+					$this->disallowed_attribute_name => '',
+				),
+				'sources'            => array(
 					array(
 						'type' => 'plugin',
 						'name' => $this->plugin_name,
