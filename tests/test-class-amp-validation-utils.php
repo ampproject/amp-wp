@@ -842,16 +842,37 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for validate_latest_published_post().
+	 * Test for validate_after_plugin_activation().
 	 *
-	 * @covers AMP_Validation_Utils::validate_latest_published_post()
+	 * @covers AMP_Validation_Utils::validate_after_plugin_activation()
 	 */
-	public function test_validate_latest_published_post() {
+	public function test_validate_after_plugin_activation() {
 		add_filter( 'amp_pre_get_permalink', '__return_empty_string' );
-		$r = AMP_Validation_Utils::validate_latest_published_post();
+		$r = AMP_Validation_Utils::validate_after_plugin_activation();
 		$this->assertInstanceOf( 'WP_Error', $r );
 		$this->assertEquals( 'no_published_post_url_available', $r->get_error_code() );
 		remove_filter( 'amp_pre_get_permalink', '__return_empty_string' );
+
+		$validation_errors = array(
+			array(
+				'code' => 'example',
+			),
+		);
+
+		$this->factory()->post->create();
+		$filter = function() use ( $validation_errors ) {
+			return array(
+				'body'    => '',
+				'headers' => array(
+					AMP_Validation_Utils::VALIDATION_ERRORS_RESPONSE_HEADER_NAME => wp_json_encode( $validation_errors ),
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+		$r = AMP_Validation_Utils::validate_after_plugin_activation();
+		remove_filter( 'pre_http_request', $filter );
+		$this->assertEquals( $validation_errors, $r );
+		$this->assertEquals( $validation_errors, get_transient( AMP_Validation_Utils::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY ) );
 	}
 
 	/**
@@ -884,6 +905,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$that          = $this;
 		$validated_url = home_url( '/foo/' );
 		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
+			unset( $pre, $r );
 			$that->assertEquals(
 				add_query_arg(
 					AMP_Validation_Utils::VALIDATE_QUERY_VAR,
@@ -903,7 +925,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$r = AMP_Validation_Utils::validate_url( $validated_url );
 		$this->assertEquals( $validation_errors, $r );
 		remove_filter( 'pre_http_request', $filter );
-		$this->assertEquals( $validation_errors, get_transient( AMP_Validation_Utils::LAST_VALIDATION_ERRORS_TRANSIENT_KEY ) );
 	}
 
 	/**
@@ -920,7 +941,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$pagenow          = 'plugins.php'; // WPCS: global override ok.
 		$_GET['activate'] = 'true';
 
-		set_transient( AMP_Validation_Utils::LAST_VALIDATION_ERRORS_TRANSIENT_KEY, array(
+		set_transient( AMP_Validation_Utils::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, array(
 			array(
 				'code'    => 'example',
 				'sources' => array(

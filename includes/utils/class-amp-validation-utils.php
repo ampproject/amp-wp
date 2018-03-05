@@ -150,7 +150,7 @@ class AMP_Validation_Utils {
 	 *
 	 * @var string
 	 */
-	const LAST_VALIDATION_ERRORS_TRANSIENT_KEY = 'amp_last_validation_errors';
+	const PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY = 'amp_plugin_activation_validation_errors';
 
 	/**
 	 * The name of the side meta box on the CPT post.php page.
@@ -205,8 +205,8 @@ class AMP_Validation_Utils {
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
 		add_action( 'activate_plugin', function() {
-			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_latest_published_post' ) ) ) {
-				add_action( 'shutdown', array( __CLASS__, 'validate_latest_published_post' ) ); // Shutdown so all plugins will have been activated.
+			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
+				add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
 			}
 		} );
 	}
@@ -915,14 +915,20 @@ class AMP_Validation_Utils {
 	/**
 	 * Validates the latest published post.
 	 *
-	 * @return array|WP_Error The response array, or WP_Error.
+	 * @return array|WP_Error The validation errors, or WP_Error.
 	 */
-	public static function validate_latest_published_post() {
+	public static function validate_after_plugin_activation() {
 		$url = amp_admin_get_preview_permalink();
 		if ( ! $url ) {
 			return new WP_Error( 'no_published_post_url_available' );
 		}
-		return self::validate_url( $url );
+		$validation_errors = self::validate_url( $url );
+		if ( is_array( $validation_errors ) && count( $validation_errors ) > 0 ) {
+			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
+		} else {
+			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
+		}
+		return $validation_errors;
 	}
 
 	/**
@@ -954,10 +960,9 @@ class AMP_Validation_Utils {
 			return new WP_Error( 'response_header_absent' );
 		}
 		$validation_errors = json_decode( $json, true );
-		if ( $validation_errors ) {
-			set_transient( self::LAST_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
+		if ( ! is_array( $validation_errors ) ) {
+			return new WP_Error( 'malformed_json_validation_errors' );
 		}
-
 		return $validation_errors;
 	}
 
@@ -969,11 +974,11 @@ class AMP_Validation_Utils {
 	public static function plugin_notice() {
 		global $pagenow;
 		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
-			$validation_errors = get_transient( self::LAST_VALIDATION_ERRORS_TRANSIENT_KEY );
+			$validation_errors = get_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
 			if ( empty( $validation_errors ) || ! is_array( $validation_errors ) ) {
 				return;
 			}
-			delete_transient( self::LAST_VALIDATION_ERRORS_TRANSIENT_KEY );
+			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
 			$errors          = self::summarize_validation_errors( $validation_errors );
 			$invalid_plugins = isset( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {
@@ -1188,7 +1193,7 @@ class AMP_Validation_Utils {
 			$class   = 'notice-warning';
 			$message = _n( 'The rechecked URL still has validation errors.', 'The rechecked URLs still have validation errors.', $count_urls_tested, 'amp' );
 		} else {
-			$message = _n( 'The rechecked URL has no validation error.', 'The rechecked URLs have no validation error.', $count_urls_tested, 'amp' );
+			$message = _n( 'The rechecked URL has no validation errors.', 'The rechecked URLs have no validation errors.', $count_urls_tested, 'amp' );
 			$class   = 'updated';
 		}
 
@@ -1203,19 +1208,18 @@ class AMP_Validation_Utils {
 	/**
 	 * Handles clicking 'recheck' on the inline post actions.
 	 *
-	 * @param integer $post_id The post ID of the recheck.
+	 * @param int $post_id The post ID of the recheck.
 	 * @return void
 	 */
 	public static function handle_inline_recheck( $post_id ) {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
 		$url = get_post_meta( $post_id, self::AMP_URL_META, true );
-		self::validate_url( $url );
-		$validation_post  = self::get_validation_status_post( $url );
-		$remaining_errors = $validation_post ? '1' : '0';
+		$validation_errors = self::validate_url( $url );
+		self::store_validation_errors( $validation_errors, $url );
+		$remaining_errors = ! empty( $validation_errors ) ? '1' : '0';
 
-		if ( $validation_post ) {
-			$redirect = wp_get_referer();
-		} else {
+		$redirect = wp_get_referer();
+		if ( ! $redirect || empty( $validation_errors ) ) {
 			// If there are no remaining errors and the post was deleted, redirect to edit.php instead of post.php.
 			$redirect = add_query_arg(
 				'post_type',
