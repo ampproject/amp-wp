@@ -183,9 +183,12 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function init() {
+		if ( current_theme_supports( 'amp' ) ) {
+			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+		}
+
 		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
-		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );

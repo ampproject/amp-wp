@@ -93,6 +93,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::init()
 	 */
 	public function test_init() {
+		add_theme_support( 'amp' );
 		AMP_Validation_Utils::init();
 		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::amp_rest_validation' ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::validate_content' ) );

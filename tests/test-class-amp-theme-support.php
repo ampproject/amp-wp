@@ -94,8 +94,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response() {
+		global $wp_widget_factory;
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
 		$wp_widget_factory = new WP_Widget_Factory();
 		wp_widgets_init();
 

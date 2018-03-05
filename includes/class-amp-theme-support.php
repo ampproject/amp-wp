@@ -77,13 +77,7 @@ class AMP_Theme_Support {
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
-
-		if ( ! is_amp_endpoint() ) {
-			amp_add_frontend_actions();
-		} else {
-			self::setup_commenting();
-			add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
-		}
+		self::add_temporary_discussion_restrictions();
 
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
@@ -98,20 +92,49 @@ class AMP_Theme_Support {
 			}
 		}
 
-		if ( amp_is_canonical() ) {
+		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+		add_action( 'wp', array( __CLASS__, 'finish_init' ) );
+	}
 
-			// Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
-			if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
-				wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because canonical may change in future.
-				exit;
-			}
+	/**
+	 * Finish initialization once query vars are set.
+	 *
+	 * @since 0.7
+	 */
+	public static function finish_init() {
+		if ( ! is_amp_endpoint() ) {
+			amp_add_frontend_actions();
+			return;
+		}
+
+		if ( amp_is_canonical() ) {
+			self::redirect_canonical_amp();
 		} else {
 			self::register_paired_hooks();
 		}
 
-		self::register_hooks();
-		self::$embed_handlers    = self::register_content_embed_handlers();
+		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
+		self::$embed_handlers    = self::register_content_embed_handlers();
+	}
+
+	/**
+	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+	 *
+	 * @since 0.7
+	 */
+	public static function redirect_canonical_amp() {
+		if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
+			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
+			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
+			}
+
+			$url = amp_remove_endpoint( $url );
+
+			wp_safe_redirect( $url, 302 ); // Temporary redirect because canonical may change in future.
+			exit;
+		}
 	}
 
 	/**
@@ -166,7 +189,7 @@ class AMP_Theme_Support {
 	/**
 	 * Register hooks.
 	 */
-	public static function register_hooks() {
+	public static function add_hooks() {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
@@ -374,9 +397,9 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Set up commenting.
+	 * Set up some restrictions for commenting based on amp-live-list limitations.
 	 */
-	public static function setup_commenting() {
+	protected static function add_temporary_discussion_restrictions() {
 		/*
 		 * Temporarily force comments to be listed in descending order.
 		 *
