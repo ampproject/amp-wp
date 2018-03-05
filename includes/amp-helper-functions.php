@@ -32,12 +32,16 @@ function amp_get_permalink( $post_id ) {
 		return $pre_url;
 	}
 
-	$parsed_url = wp_parse_url( get_permalink( $post_id ) );
-	$structure  = get_option( 'permalink_structure' );
-	if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
-		$amp_url = add_query_arg( AMP_QUERY_VAR, '', get_permalink( $post_id ) );
+	if ( amp_is_canonical() ) {
+		$amp_url = get_permalink( $post_id );
 	} else {
-		$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
+		$parsed_url = wp_parse_url( get_permalink( $post_id ) );
+		$structure  = get_option( 'permalink_structure' );
+		if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
+			$amp_url = add_query_arg( AMP_QUERY_VAR, '', get_permalink( $post_id ) );
+		} else {
+			$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( AMP_QUERY_VAR, 'single_amp' );
+		}
 	}
 
 	/**
@@ -49,6 +53,25 @@ function amp_get_permalink( $post_id ) {
 	 * @param int   $post_id Post ID.
 	 */
 	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
+}
+
+/**
+ * Remove the AMP endpoint (and query var) from a given URL.
+ *
+ * @since 0.7
+ *
+ * @param string $url URL.
+ * @return string URL with AMP stripped.
+ */
+function amp_remove_endpoint( $url ) {
+
+	// Strip endpoint.
+	$url = preg_replace( ':/' . preg_quote( AMP_QUERY_VAR, ':' ) . '(?=/?(\?|#|$)):', '', $url );
+
+	// Strip query var.
+	$url = remove_query_arg( AMP_QUERY_VAR, $url );
+
+	return $url;
 }
 
 /**

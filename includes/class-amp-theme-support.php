@@ -588,13 +588,7 @@ class AMP_Theme_Support {
 			$url = add_query_arg( $added_query_vars, $url );
 		}
 
-		// Strip endpoint.
-		$url = preg_replace( ':/' . preg_quote( AMP_QUERY_VAR, ':' ) . '(?=/?(\?|#|$)):', '', $url );
-
-		// Strip query var.
-		$url = remove_query_arg( AMP_QUERY_VAR, $url );
-
-		return $url;
+		return amp_remove_endpoint( $url );
 	}
 
 	/**
