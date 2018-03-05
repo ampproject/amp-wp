@@ -241,9 +241,19 @@ class AMP_Validation_Utils {
 			$error['parent_name'] = $node->parentNode->nodeName;
 		}
 		if ( $removed['node'] instanceof DOMElement ) {
-			$error['code'] = self::ELEMENT_REMOVED_CODE;
+			$error['code']            = self::ELEMENT_REMOVED_CODE;
+			$error['node_attributes'] = array();
+			foreach ( $removed['node']->attributes as $attribute ) {
+				$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			}
 		} elseif ( $removed['node'] instanceof DOMAttr ) {
-			$error['code'] = self::ATTRIBUTE_REMOVED_CODE;
+			$error['code']               = self::ATTRIBUTE_REMOVED_CODE;
+			$error['element_attributes'] = array();
+			if ( $removed['node']->parentNode && $removed['node']->parentNode->hasAttributes() ) {
+				foreach ( $removed['node']->parentNode->attributes as $attribute ) {
+					$error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+				}
+			}
 		}
 
 		self::add_validation_error( $error );
@@ -1213,7 +1223,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function handle_inline_recheck( $post_id ) {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
-		$url = get_post_meta( $post_id, self::AMP_URL_META, true );
+		$url               = get_post_meta( $post_id, self::AMP_URL_META, true );
 		$validation_errors = self::validate_url( $url );
 		self::store_validation_errors( $validation_errors, $url );
 		$remaining_errors = ! empty( $validation_errors ) ? '1' : '0';
@@ -1370,7 +1380,7 @@ class AMP_Validation_Utils {
 											<?php if ( is_string( $value ) ) : ?>
 												<?php echo esc_html( $value ); ?>
 											<?php else : ?>
-												<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></code>
+												<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></pre>
 											<?php endif; ?>
 										</div>
 									</details>

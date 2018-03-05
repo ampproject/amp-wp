@@ -336,10 +336,13 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
 		$this->assertEquals(
 			array(
-				'code'        => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
-				'node_name'   => $attr_node->nodeName,
-				'parent_name' => $video->nodeName,
-				'sources'     => array(),
+				'code'               => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
+				'node_name'          => $attr_node->nodeName,
+				'parent_name'        => $video->nodeName,
+				'sources'            => array(),
+				'element_attributes' => array(
+					'onload' => 'someFunction()',
+				),
 			),
 			AMP_Validation_Utils::$validation_errors[0]
 		);

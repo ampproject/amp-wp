@@ -137,9 +137,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals(
 			array(
 				array(
-					'node_name' => 'img',
-					'sources'   => array(),
-					'code'      => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
+					'node_name'       => 'img',
+					'sources'         => array(),
+					'code'            => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
+					'node_attributes' => array(),
 				),
 			),
 			AMP_Validation_Utils::$validation_errors
