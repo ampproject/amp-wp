@@ -1172,11 +1172,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $url_scheme && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_scheme ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
-
-					// Check if the url isn't just text by asserting it contains slashes.
-					if ( ! preg_match( '/\//', $url ) ) {
-						return AMP_Rule_Spec::FAIL;
-					}
 				}
 
 				return AMP_Rule_Spec::PASS;
