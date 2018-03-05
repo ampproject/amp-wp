@@ -1161,19 +1161,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$urls_to_test = explode( ',', $attr_value );
 
 				foreach ( $urls_to_test as $url ) {
-					// Check if the host contains invalid chars
+					// Check if the host contains invalid chars.
 					$url_host = wp_parse_url( urldecode( $url ), PHP_URL_HOST );
 					if ( $url_host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_host ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
 
-					// Check if the protocol contains invalid chars
+					// Check if the protocol contains invalid chars.
 					$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
 					if ( $url_scheme && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_scheme ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
 
-					// Check if the url isn't just text by asserting it contains slashes
+					// Check if the url isn't just text by asserting it contains slashes.
 					if ( ! preg_match( '/\//', $url ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
