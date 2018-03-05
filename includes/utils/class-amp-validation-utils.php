@@ -139,6 +139,20 @@ class AMP_Validation_Utils {
 	const NONCE_TRANSIENT_NAME = 'amp_validation_cron';
 
 	/**
+	 * HTTP response header name containing JSON-serialized validation errors.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERRORS_RESPONSE_HEADER_NAME = 'X-AMP-Validation-Errors';
+
+	/**
+	 * Transient key to store validation errors when activating a plugin.
+	 *
+	 * @var string
+	 */
+	const LAST_VALIDATION_ERRORS_TRANSIENT_KEY = 'amp_last_validation_errors';
+
+	/**
 	 * The name of the side meta box on the CPT post.php page.
 	 *
 	 * @var string
@@ -188,8 +202,8 @@ class AMP_Validation_Utils {
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
 		add_action( 'activate_plugin', function() {
-			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_home' ) ) ) {
-				add_action( 'shutdown', array( __CLASS__, 'validate_home' ) ); // Shutdown so all plugins will have been activated.
+			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_latest_published_post' ) ) ) {
+				add_action( 'shutdown', array( __CLASS__, 'validate_latest_published_post' ) ); // Shutdown so all plugins will have been activated.
 			}
 		} );
 	}
@@ -798,6 +812,13 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Send validation errors back in response header.
+	 */
+	public static function send_validation_errors_header() {
+		header( self::VALIDATION_ERRORS_RESPONSE_HEADER_NAME . ': ' . wp_json_encode( self::$validation_errors ) );
+	}
+
+	/**
 	 * Stores the validation errors.
 	 *
 	 * After the preprocessors run, this gets the validation response if the query var is present.
@@ -889,19 +910,27 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Validates the home page.
+	 * Validates the latest published post.
 	 *
 	 * @return array|WP_Error The response array, or WP_Error.
 	 */
-	public static function validate_home() {
-		return self::validate_url( home_url( '/' ) );
+	public static function validate_latest_published_post() {
+		$url = amp_admin_get_preview_permalink();
+		if ( ! $url ) {
+			return new WP_Error( 'no_published_post_url_available' );
+		}
+		return self::validate_url( $url );
 	}
 
 	/**
-	 * Validates a given URL, and stores its errors in a custom post.
+	 * Validates a given URL.
 	 *
+	 * The validation errors will be stored in the validation status custom post type,
+	 * as well as in a transient.
+	 *
+	 * @todo Instead of storing validation errors in process_response, it should be done here instead.
 	 * @param string $url The URL to validate.
-	 * @return array|WP_Error The response array, or WP_Error.
+	 * @return array|WP_Error The validation errors, or WP_Error on error.
 	 */
 	public static function validate_url( $url ) {
 		$validation_url = add_query_arg(
@@ -909,10 +938,24 @@ class AMP_Validation_Utils {
 			1,
 			$url
 		);
-		return wp_remote_get( $validation_url, array(
+
+		$r = wp_remote_get( $validation_url, array(
 			'cookies'   => wp_unslash( $_COOKIE ),
 			'sslverify' => false,
 		) );
+		if ( is_wp_error( $r ) ) {
+			return $r;
+		}
+		$json = wp_remote_retrieve_header( $r, self::VALIDATION_ERRORS_RESPONSE_HEADER_NAME );
+		if ( ! $json ) {
+			return new WP_Error( 'response_header_absent' );
+		}
+		$validation_errors = json_decode( $json, true );
+		if ( $validation_errors ) {
+			set_transient( self::LAST_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
+		}
+
+		return $validation_errors;
 	}
 
 	/**
@@ -923,14 +966,11 @@ class AMP_Validation_Utils {
 	public static function plugin_notice() {
 		global $pagenow;
 		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
-			$error_post = self::get_validation_status_post( home_url( '/' ) );
-			if ( ! $error_post ) {
+			$validation_errors = get_transient( self::LAST_VALIDATION_ERRORS_TRANSIENT_KEY );
+			if ( empty( $validation_errors ) || ! is_array( $validation_errors ) ) {
 				return;
 			}
-			$validation_errors = json_decode( $error_post->post_content, true );
-			if ( ! is_array( $validation_errors ) ) {
-				return;
-			}
+			delete_transient( self::LAST_VALIDATION_ERRORS_TRANSIENT_KEY );
 			$errors          = self::summarize_validation_errors( $validation_errors );
 			$invalid_plugins = isset( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ self::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {

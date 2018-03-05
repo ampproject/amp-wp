@@ -36,6 +36,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_without_pretty_permalinks() {
+		remove_theme_support( 'amp' );
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
 

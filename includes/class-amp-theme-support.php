@@ -283,7 +283,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Hook into a form submissions, such as comment the form or some other .
+	 * Hook into a form submissions, such as the comment form or some other form submission.
 	 *
 	 * @since 0.7.0
 	 * @global string $pagenow
@@ -997,6 +997,9 @@ class AMP_Theme_Support {
 
 		if ( AMP_Validation_Utils::should_validate_front_end() ) {
 
+			AMP_Validation_Utils::send_validation_errors_header();
+
+			// @todo Add this as a method in AMP_Validation_Utils.
 			// Add comment with validation errors.
 			$report  = "\n# Validation Status\n";
 			$report .= "\n## Summary\n";

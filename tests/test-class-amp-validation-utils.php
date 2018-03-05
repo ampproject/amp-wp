@@ -841,22 +841,68 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for validate_home()
+	 * Test for validate_latest_published_post().
 	 *
-	 * @covers AMP_Validation_Utils::validate_home()
+	 * @covers AMP_Validation_Utils::validate_latest_published_post()
 	 */
-	public function test_validate_home() {
-		$this->assertTrue( is_array( AMP_Validation_Utils::validate_home() ) );
+	public function test_validate_latest_published_post() {
+		add_filter( 'amp_pre_get_permalink', '__return_empty_string' );
+		$r = AMP_Validation_Utils::validate_latest_published_post();
+		$this->assertInstanceOf( 'WP_Error', $r );
+		$this->assertEquals( 'no_published_post_url_available', $r->get_error_code() );
+		remove_filter( 'amp_pre_get_permalink', '__return_empty_string' );
 	}
 
 	/**
-	 * Test for validate_url()
+	 * Test for validate_url().
 	 *
 	 * @covers AMP_Validation_Utils::validate_url()
 	 */
 	public function test_validate_url() {
-		$response = AMP_Validation_Utils::validate_url( get_permalink( $this->factory()->post->create() ) );
-		$this->assertTrue( is_array( $response ) );
+		$validation_errors = array(
+			array(
+				'code' => 'example',
+			),
+		);
+
+		// Test headers absent.
+		$this->factory()->post->create();
+		$filter = function() use ( $validation_errors ) {
+			return array(
+				'body'    => '',
+				'headers' => array(),
+			);
+		};
+		add_filter( 'pre_http_request', $filter );
+		$r = AMP_Validation_Utils::validate_url( home_url( '/' ) );
+		$this->assertInstanceOf( 'WP_Error', $r );
+		$this->assertEquals( 'response_header_absent', $r->get_error_code() );
+		remove_filter( 'pre_http_request', $filter );
+
+		// Test success.
+		$that          = $this;
+		$validated_url = home_url( '/foo/' );
+		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
+			$that->assertEquals(
+				add_query_arg(
+					AMP_Validation_Utils::VALIDATE_QUERY_VAR,
+					1,
+					$validated_url
+				),
+				$url
+			);
+			return array(
+				'body'    => '',
+				'headers' => array(
+					AMP_Validation_Utils::VALIDATION_ERRORS_RESPONSE_HEADER_NAME => wp_json_encode( $validation_errors ),
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+		$r = AMP_Validation_Utils::validate_url( $validated_url );
+		$this->assertEquals( $validation_errors, $r );
+		remove_filter( 'pre_http_request', $filter );
+		$this->assertEquals( $validation_errors, get_transient( AMP_Validation_Utils::LAST_VALIDATION_ERRORS_TRANSIENT_KEY ) );
 	}
 
 	/**
@@ -873,7 +919,17 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$pagenow          = 'plugins.php'; // WPCS: global override ok.
 		$_GET['activate'] = 'true';
 
-		$this->create_custom_post();
+		set_transient( AMP_Validation_Utils::LAST_VALIDATION_ERRORS_TRANSIENT_KEY, array(
+			array(
+				'code'    => 'example',
+				'sources' => array(
+					array(
+						'type' => 'plugin',
+						'name' => 'foo-bar',
+					),
+				),
+			),
+		) );
 		ob_start();
 		AMP_Validation_Utils::plugin_notice();
 		$output = ob_get_clean();
