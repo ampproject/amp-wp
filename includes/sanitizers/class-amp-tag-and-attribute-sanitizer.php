@@ -704,7 +704,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * be valid
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
-				$result = $this->check_attr_spec_rule_valid_host( $node, $attr_name, $attr_spec_rule );
+				$result = $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule );
 				if ( AMP_Rule_Spec::PASS === $result ) {
 					$score++;
 				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
@@ -891,7 +891,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
-				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_host( $node, $attr_name, $attr_spec_rule ) ) {
+				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
@@ -1153,7 +1153,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_valid_host( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value   = $node->getAttribute( $attr_name );
@@ -1161,8 +1161,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$urls_to_test = explode( ',', $attr_value );
 
 				foreach ( $urls_to_test as $url ) {
+					// Check if the host contains invalid chars
 					$url_host = wp_parse_url( urldecode( $url ), PHP_URL_HOST );
 					if ( $url_host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_host ) ) {
+						return AMP_Rule_Spec::FAIL;
+					}
+
+					// Check if the protocol contains invalid chars
+					$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
+					if ( $url_scheme && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_scheme ) ) {
+						return AMP_Rule_Spec::FAIL;
+					}
+
+					// Check if the url isn't just text by asserting it contains slashes
+					if ( ! preg_match( '/\//', $url ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
 				}
