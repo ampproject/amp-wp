@@ -1118,7 +1118,7 @@ class AMP_Validation_Utils {
 		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
 
 		if ( ! empty( $url ) ) {
-			$actions[ self::RECHECK_ACTION ]  = self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ) );
+			$actions[ self::RECHECK_ACTION ]  = self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url );
 			$actions[ self::DEBUG_QUERY_VAR ] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
 				esc_url(
@@ -1222,7 +1222,10 @@ class AMP_Validation_Utils {
 	 */
 	public static function handle_inline_recheck( $post_id ) {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
-		$url               = get_post_meta( $post_id, self::AMP_URL_META, true );
+		$url = get_post_meta( $post_id, self::AMP_URL_META, true );
+		if ( isset( $_GET['recheck_url'] ) ) {
+			$url = wp_validate_redirect( wp_unslash( $_GET['recheck_url'] ) );
+		}
 		$validation_errors = self::validate_url( $url );
 		self::store_validation_errors( $validation_errors, $url );
 		$remaining_errors = ! empty( $validation_errors ) ? '1' : '0';
@@ -1324,14 +1327,9 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function print_status_meta_box( $post ) {
-		$url             = get_post_meta( $post->ID, self::AMP_URL_META, true );
-		$post_with_error = self::get_validation_status_post( $url );
-		if ( ! isset( $post_with_error->post_date ) ) {
-			return;
-		}
 		$redirect_url = add_query_arg(
 			'post',
-			$post_with_error->ID,
+			$post->ID,
 			admin_url( 'post.php' )
 		);
 
@@ -1340,10 +1338,10 @@ class AMP_Validation_Utils {
 		$date_format = __( 'M j, Y @ H:i', 'default' );
 		echo '<div class="curtime misc-pub-section"><span id="timestamp">';
 		/* translators: %s: The date this was published */
-		printf( __( 'Published on: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post_with_error->post_date ) ) ) ); // WPCS: XSS ok.
+		printf( __( 'Published on: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post->post_date ) ) ) ); // WPCS: XSS ok.
 		echo '</span></div>';
 		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
-		printf( '<div class="misc-pub-section">%s</div>', self::get_recheck_link( $post_with_error, $redirect_url ) ); // WPCS: XSS ok.
+		printf( '<div class="misc-pub-section">%s</div>', self::get_recheck_link( $post, $redirect_url ) ); // WPCS: XSS ok.
 		echo '</div>';
 	}
 
@@ -1448,7 +1446,7 @@ class AMP_Validation_Utils {
 												<?php if ( is_string( $value ) ) : ?>
 													<?php echo esc_html( $value ); ?>
 												<?php else : ?>
-													<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></code>
+													<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></pre>
 												<?php endif; ?>
 											</div>
 										</details>
@@ -1465,7 +1463,7 @@ class AMP_Validation_Utils {
 				<?php foreach ( $urls as $url ) : ?>
 					<li>
 						<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_url( $url ); ?></a>
-						<span class="amp-recheck"><?php echo self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ) ); // WPCS: XSS ok. ?></span>
+						<span class="amp-recheck"><?php echo self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url ); // WPCS: XSS ok. ?></span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
@@ -1481,15 +1479,18 @@ class AMP_Validation_Utils {
 	 *
 	 * @param  WP_Post $post         The post storing the validation error.
 	 * @param  string  $redirect_url The URL of the redirect.
+	 * @param  string  $recheck_url  The URL to check. Optional.
 	 * @return string $link The link to recheck the post.
 	 */
-	public static function get_recheck_link( $post, $redirect_url ) {
+	public static function get_recheck_link( $post, $redirect_url, $recheck_url = null ) {
 		return sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
 			wp_nonce_url(
 				add_query_arg(
-					'action',
-					self::RECHECK_ACTION,
+					array(
+						'action'      => self::RECHECK_ACTION,
+						'recheck_url' => $recheck_url,
+					),
 					$redirect_url
 				),
 				self::NONCE_ACTION . $post->ID
