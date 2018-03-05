@@ -157,14 +157,14 @@ class AMP_Validation_Utils {
 	 *
 	 * @var string
 	 */
-	const SIDE_META_BOX = 'amp_side_meta_box';
+	const STATUS_META_BOX = 'amp_validation_status';
 
 	/**
 	 * The name of the side meta box on the CPT post.php page.
 	 *
 	 * @var string
 	 */
-	const FULL_META_BOX = 'amp_full_meta_box';
+	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
 	 * The errors encountered when validating.
@@ -1297,8 +1297,8 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function add_meta_boxes() {
-		add_meta_box( self::FULL_META_BOX, __( 'Validation Errors', 'amp' ), array( __CLASS__, 'output_full_meta_box' ), self::POST_TYPE_SLUG, 'normal' );
-		add_meta_box( self::SIDE_META_BOX, __( 'Actions', 'amp' ), array( __CLASS__, 'output_side_meta_box' ), self::POST_TYPE_SLUG, 'side' );
+		add_meta_box( self::VALIDATION_ERRORS_META_BOX, __( 'Validation Errors', 'amp' ), array( __CLASS__, 'print_validation_errors_meta_box' ), self::POST_TYPE_SLUG, 'normal' );
+		add_meta_box( self::STATUS_META_BOX, __( 'Status', 'amp' ), array( __CLASS__, 'print_status_meta_box' ), self::POST_TYPE_SLUG, 'side' );
 	}
 
 	/**
@@ -1310,7 +1310,7 @@ class AMP_Validation_Utils {
 	 * @param WP_Post $post The post for which to output the box.
 	 * @return void
 	 */
-	public static function output_side_meta_box( $post ) {
+	public static function print_status_meta_box( $post ) {
 		$url             = get_post_meta( $post->ID, self::AMP_URL_META, true );
 		$post_with_error = self::get_validation_status_post( $url );
 		if ( ! isset( $post_with_error->post_date ) ) {
@@ -1321,6 +1321,8 @@ class AMP_Validation_Utils {
 			$post_with_error->ID,
 			admin_url( 'post.php' )
 		);
+
+		echo '<div id="submitpost" class="submitbox">';
 		/* translators: Meta box date format */
 		$date_format = __( 'M j, Y @ H:i', 'default' );
 		echo '<div class="curtime misc-pub-section"><span id="timestamp">';
@@ -1329,6 +1331,7 @@ class AMP_Validation_Utils {
 		echo '</span></div>';
 		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
 		printf( '<div class="misc-pub-section">%s</div>', self::get_recheck_link( $post_with_error, $redirect_url ) ); // WPCS: XSS ok.
+		echo '</div>';
 	}
 
 	/**
@@ -1340,19 +1343,41 @@ class AMP_Validation_Utils {
 	 * @param WP_Post $post The post for which to output the box.
 	 * @return void
 	 */
-	public static function output_full_meta_box( $post ) {
+	public static function print_validation_errors_meta_box( $post ) {
 		$errors = json_decode( $post->post_content, true );
-		echo '<ul>';
-		foreach ( $errors as $error ) {
-			printf( '<li><details open><summary>%s</summary><div style="margin-left:30px;"><ul>', esc_html( $error['code'] ) );
-			unset( $error['code'] );
-			foreach ( $error as $key => $value ) {
-				$value = is_string( $value ) ? esc_html( $value ) : sprintf( '<code>%s</code>', wp_json_encode( $value ) );
-				printf( '<li><details open><summary>%s</summary><div style="margin-left:30px;"><code>%s</code></div></li>', esc_html( $key ), $value ); // WPCS: XSS ok.
+		?>
+		<style>
+			.amp-validation-errors .detailed {
+				margin-left: 30px;
 			}
-			echo '</ul></div></details></li>';
-		}
-		echo '</ul>';
+		</style>
+		<ul class="amp-validation-errors">
+			<?php foreach ( $errors as $error ) : ?>
+				<li>
+					<details open>
+						<summary><code><?php echo esc_html( $error['code'] ); ?></code></summary>
+						<?php unset( $error['code'] ); ?>
+						<ul class="detailed">
+							<?php foreach ( $error as $key => $value ) : ?>
+								<li>
+									<details open>
+										<summary><code><?php echo esc_html( $key ); ?></code></summary>
+										<div class="detailed">
+											<?php if ( is_string( $value ) ) : ?>
+												<?php echo esc_html( $value ); ?>
+											<?php else : ?>
+												<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></code>
+											<?php endif; ?>
+										</div>
+									</details>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</details>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+		<?php
 	}
 
 	/**

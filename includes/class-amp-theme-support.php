@@ -398,13 +398,13 @@ class AMP_Theme_Support {
 
 	/**
 	 * Set up some restrictions for commenting based on amp-live-list limitations.
+	 *
+	 * Temporarily force comments to be listed in descending order.
+	 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
+	 *
+	 * @link https://github.com/ampproject/amphtml/issues/5396
 	 */
 	protected static function add_temporary_discussion_restrictions() {
-		/*
-		 * Temporarily force comments to be listed in descending order.
-		 *
-		 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
-		 */
 		add_filter( 'option_comment_order', function() {
 			return 'desc';
 		}, PHP_INT_MAX );

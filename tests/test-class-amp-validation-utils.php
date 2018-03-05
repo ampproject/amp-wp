@@ -1176,41 +1176,41 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function test_add_meta_boxes() {
 		global $wp_meta_boxes;
 		AMP_Validation_Utils::add_meta_boxes();
-		$side_meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['side']['default'][ AMP_Validation_Utils::SIDE_META_BOX ];
-		$this->assertEquals( AMP_Validation_Utils::SIDE_META_BOX, $side_meta_box['id'] );
-		$this->assertEquals( 'Actions', $side_meta_box['title'] );
+		$side_meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['side']['default'][ AMP_Validation_Utils::STATUS_META_BOX ];
+		$this->assertEquals( AMP_Validation_Utils::STATUS_META_BOX, $side_meta_box['id'] );
+		$this->assertEquals( 'Status', $side_meta_box['title'] );
 		$this->assertEquals(
 			array(
 				self::TESTED_CLASS,
-				'output_side_meta_box',
+				'print_status_meta_box',
 			),
 			$side_meta_box['callback']
 		);
 
-		$full_meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['normal']['default'][ AMP_Validation_Utils::FULL_META_BOX ];
-		$this->assertEquals( AMP_Validation_Utils::FULL_META_BOX, $full_meta_box['id'] );
+		$full_meta_box = $wp_meta_boxes[ AMP_Validation_Utils::POST_TYPE_SLUG ]['normal']['default'][ AMP_Validation_Utils::VALIDATION_ERRORS_META_BOX ];
+		$this->assertEquals( AMP_Validation_Utils::VALIDATION_ERRORS_META_BOX, $full_meta_box['id'] );
 		$this->assertEquals( 'Validation Errors', $full_meta_box['title'] );
 		$this->assertEquals(
 			array(
 				self::TESTED_CLASS,
-				'output_full_meta_box',
+				'print_validation_errors_meta_box',
 			),
 			$full_meta_box['callback']
 		);
 	}
 
 	/**
-	 * Test for output_side_meta_box()
+	 * Test for print_status_meta_box()
 	 *
-	 * @covers AMP_Validation_Utils::output_side_meta_box()
+	 * @covers AMP_Validation_Utils::print_status_meta_box()
 	 */
-	public function test_output_side_meta_box() {
+	public function test_print_status_meta_box() {
 		$this->set_capability();
 		$post_storing_error = get_post( $this->create_custom_post() );
 		$url                = get_post_meta( $post_storing_error->ID, AMP_Validation_Utils::AMP_URL_META, true );
 		$post_with_error    = AMP_Validation_Utils::get_validation_status_post( $url );
 		ob_start();
-		AMP_Validation_Utils::output_side_meta_box( $post_storing_error );
+		AMP_Validation_Utils::print_status_meta_box( $post_storing_error );
 		$output = ob_get_clean();
 
 		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_with_error->post_date ) ), $output );
@@ -1232,15 +1232,15 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for output_side_meta_box()
+	 * Test for print_status_meta_box()
 	 *
-	 * @covers AMP_Validation_Utils::output_side_meta_box()
+	 * @covers AMP_Validation_Utils::print_status_meta_box()
 	 */
-	public function test_output_full_meta_box() {
+	public function test_print_validation_errors_meta_box() {
 		$this->set_capability();
 		$post_storing_error = get_post( $this->create_custom_post() );
 		ob_start();
-		AMP_Validation_Utils::output_full_meta_box( $post_storing_error );
+		AMP_Validation_Utils::print_validation_errors_meta_box( $post_storing_error );
 		$output = ob_get_clean();
 
 		$this->assertContains( '<details', $output );
