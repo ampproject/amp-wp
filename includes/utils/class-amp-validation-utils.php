@@ -868,15 +868,9 @@ class AMP_Validation_Utils {
 		$encoded_errors = wp_json_encode( $validation_errors );
 		$post_name      = md5( $encoded_errors );
 
-		if ( $post_for_this_url ) {
-			if ( $post_for_this_url->post_name === $post_name ) {
-				// If the post name is unchanged then the errors are the same and there is nothing to do.
-				return $post_for_this_url->ID;
-			} else {
-				// Otherwise, if the post name is changed, then the errors are now different for the URL (and any other associated URLs) so delete and create anew.
-				wp_delete_post( $post_for_this_url->ID, true );
-				$post_for_this_url = null;
-			}
+		// If the post name is unchanged then the errors are the same and there is nothing to do.
+		if ( $post_for_this_url && $post_for_this_url->post_name === $post_name ) {
+			return $post_for_this_url->ID;
 		}
 
 		// If there already exists a post for the given validation errors, just amend the $url to the existing post.
@@ -888,17 +882,22 @@ class AMP_Validation_Utils {
 			return $post_for_other_url->ID;
 		}
 
-		// Otherwise, create a new validation status post.
-		return wp_insert_post( wp_slash( array(
+		// Otherwise, create a new validation status post, or update the existing one.
+		$post_id = wp_insert_post( wp_slash( array(
+			'ID'           => $post_for_this_url ? $post_for_this_url->ID : null,
 			'post_type'    => self::POST_TYPE_SLUG,
 			'post_title'   => $url,
 			'post_name'    => $post_name,
 			'post_content' => $encoded_errors,
 			'post_status'  => 'publish',
-			'meta_input'   => array(
-				self::AMP_URL_META => $url,
-			),
 		) ) );
+		if ( ! $post_id ) {
+			return null;
+		}
+		if ( ! in_array( $url, get_post_meta( $post_id, self::AMP_URL_META, false ), true ) ) {
+			add_post_meta( $post_id, self::AMP_URL_META, wp_slash( $url ), false );
+		}
+		return $post_id;
 	}
 
 	/**

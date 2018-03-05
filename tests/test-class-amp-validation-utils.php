@@ -810,7 +810,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		// A post already exists for this URL, so it should be updated.
 		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Utils::REMOVED_ELEMENTS ] );
 		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Utils::SOURCES_INVALID_OUTPUT ]['plugin'] );
-		$this->assertEquals( $url, get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, true ) );
+		$this->assertContains( $url, get_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, false ) );
 
 		AMP_Validation_Utils::reset_validation_results();
 		AMP_Validation_Utils::process_markup( $this->valid_amp_img );
