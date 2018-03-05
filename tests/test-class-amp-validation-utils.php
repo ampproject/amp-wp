@@ -1278,6 +1278,17 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test for get_debug_url()
+	 *
+	 * @covers AMP_Validation_Utils::get_debug_url()
+	 */
+	public function test_get_debug_url() {
+		$this->assertContains( AMP_Validation_Utils::VALIDATE_QUERY_VAR . '=1', AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
+		$this->assertContains( AMP_Validation_Utils::DEBUG_QUERY_VAR . '=1', AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
+		$this->assertStringEndsWith( '#development=1', AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
+	}
+
+	/**
 	 * Test for get_recheck_link()
 	 *
 	 * @covers AMP_Validation_Utils::get_recheck_link()

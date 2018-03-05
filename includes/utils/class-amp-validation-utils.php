@@ -1108,7 +1108,6 @@ class AMP_Validation_Utils {
 			return $actions;
 		}
 
-		// @todo Add link to view frontend without sanitization applied to debug.
 		$actions['edit'] = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( get_edit_post_link( $post ) ),
@@ -1121,15 +1120,7 @@ class AMP_Validation_Utils {
 			$actions[ self::RECHECK_ACTION ]  = self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url );
 			$actions[ self::DEBUG_QUERY_VAR ] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
-				esc_url(
-					add_query_arg(
-						array(
-							self::VALIDATE_QUERY_VAR => 1,
-							self::DEBUG_QUERY_VAR    => 1,
-						),
-						$url
-					) . '#development=1'
-				),
+				esc_url( self::get_debug_url( $url ) ),
 				esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
 				esc_html__( 'Debug', 'amp' )
 			);
@@ -1341,8 +1332,21 @@ class AMP_Validation_Utils {
 		printf( __( 'Published on: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post->post_date ) ) ) ); // WPCS: XSS ok.
 		echo '</span></div>';
 		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
-		printf( '<div class="misc-pub-section">%s</div>', self::get_recheck_link( $post, $redirect_url ) ); // WPCS: XSS ok.
+
+		echo '<div class="misc-pub-section">';
+		echo self::get_recheck_link( $post, $redirect_url ); // WPCS: XSS ok.
+		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
+		if ( $url ) {
+			printf(
+				' | <a href="%s" aria-label="%s">%s</a>',
+				esc_url( self::get_debug_url( $url ) ),
+				esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
+				esc_html__( 'Debug', 'amp' )
+			); // WPCS: XSS ok.
+		}
 		echo '</div>';
+
+		echo '</div><!-- /submitpost -->';
 	}
 
 	/**
@@ -1364,9 +1368,6 @@ class AMP_Validation_Utils {
 			}
 			.amp-validation-errors .amp-recheck {
 				float: right;
-			}
-			.amp-validation-errors .amp-recheck a {
-				color: #a00;
 			}
 		</style>
 		<div class="amp-validation-errors">
@@ -1463,12 +1464,39 @@ class AMP_Validation_Utils {
 				<?php foreach ( $urls as $url ) : ?>
 					<li>
 						<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_url( $url ); ?></a>
-						<span class="amp-recheck"><?php echo self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url ); // WPCS: XSS ok. ?></span>
+						<span class="amp-recheck">
+							<?php echo self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url ); // WPCS: XSS ok. ?>
+							|
+							<?php
+							printf(
+								'<a href="%s" aria-label="%s">%s</a>',
+								esc_url( self::get_debug_url( $url ) ),
+								esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
+								esc_html__( 'Debug', 'amp' )
+							)
+							?>
+						</span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Get validation debug UR:.
+	 *
+	 * @param string $url URL to to validate and debug.
+	 * @return string Debug URL.
+	 */
+	public static function get_debug_url( $url ) {
+		return add_query_arg(
+			array(
+				self::VALIDATE_QUERY_VAR => 1,
+				self::DEBUG_QUERY_VAR    => 1,
+			),
+			$url
+		) . '#development=1';
 	}
 
 	/**
