@@ -1330,7 +1330,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				'code'        => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
 				'node_name'   => $this->disallowed_tag_name,
 				'parent_name' => 'div',
-				'sources'   => array(
+				'sources'     => array(
 					array(
 						'type' => 'plugin',
 						'name' => $this->plugin_name,
@@ -1338,10 +1338,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				),
 			),
 			array(
-				'code'      => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
-				'node_name' => $this->disallowed_attribute_name,
+				'code'        => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
+				'node_name'   => $this->disallowed_attribute_name,
 				'parent_name' => 'div',
-				'sources'   => array(
+				'sources'     => array(
 					array(
 						'type' => 'plugin',
 						'name' => $this->plugin_name,
