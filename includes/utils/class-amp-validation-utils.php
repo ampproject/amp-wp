@@ -200,6 +200,7 @@ class AMP_Validation_Utils {
 		add_action( 'init', array( __CLASS__, 'schedule_cron' ) );
 		add_action( self::CRON_EVENT, array( __CLASS__, 'cron_validate_urls' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'remove_publish_meta_box' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_status_count' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 
 		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
@@ -209,6 +210,26 @@ class AMP_Validation_Utils {
 				add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
 			}
 		} );
+	}
+
+	/**
+	 * Add count of how many validation error posts there are to the admin menu.
+	 */
+	public static function add_admin_menu_validation_status_count() {
+		global $submenu;
+		if ( ! isset( $submenu[ AMP_Options_Manager::OPTION_NAME ] ) ) {
+			return;
+		}
+		$count = wp_count_posts( self::POST_TYPE_SLUG );
+		if ( empty( $count->publish ) ) {
+			return;
+		}
+		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
+			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
+				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( $count->publish ) . '</span></span>';
+				break;
+			}
+		}
 	}
 
 	/**
