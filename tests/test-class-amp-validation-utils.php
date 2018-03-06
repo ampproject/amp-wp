@@ -139,7 +139,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				array(
 					'node_name'       => 'img',
 					'sources'         => array(),
-					'code'            => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
+					'code'            => AMP_Validation_Utils::INVALID_ELEMENT_CODE,
 					'node_attributes' => array(),
 				),
 			),
@@ -1010,7 +1010,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				'url_count',
 				'1',
 			),
-			'removed_element'       => array(
+			'invalid_element'       => array(
 				AMP_Validation_Utils::REMOVED_ELEMENTS,
 				$this->disallowed_tag_name,
 			),
@@ -1338,7 +1338,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function get_mock_errors() {
 		return array(
 			array(
-				'code'            => AMP_Validation_Utils::ELEMENT_REMOVED_CODE,
+				'code'            => AMP_Validation_Utils::INVALID_ELEMENT_CODE,
 				'node_name'       => $this->disallowed_tag_name,
 				'parent_name'     => 'div',
 				'node_attributes' => array(),
@@ -1350,7 +1350,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				),
 			),
 			array(
-				'code'               => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
+				'code'               => AMP_Validation_Utils::INVALID_ATTRIBUTE_CODE,
 				'node_name'          => $this->disallowed_attribute_name,
 				'parent_name'        => 'div',
 				'element_attributes' => array(

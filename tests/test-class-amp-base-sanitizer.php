@@ -336,7 +336,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( null, $video->getAttribute( $attribute ) );
 		$this->assertEquals(
 			array(
-				'code'               => AMP_Validation_Utils::ATTRIBUTE_REMOVED_CODE,
+				'code'               => AMP_Validation_Utils::INVALID_ATTRIBUTE_CODE,
 				'node_name'          => $attr_node->nodeName,
 				'parent_name'        => $video->nodeName,
 				'sources'            => array(),

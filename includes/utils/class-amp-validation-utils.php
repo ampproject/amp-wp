@@ -48,25 +48,25 @@ class AMP_Validation_Utils {
 	const SOURCES_INVALID_OUTPUT = 'sources_with_invalid_output';
 
 	/**
-	 * Validation code for when element is removed.
+	 * Validation code for an invalid element.
 	 *
 	 * @var string
 	 */
-	const ELEMENT_REMOVED_CODE = 'element_removed';
+	const INVALID_ELEMENT_CODE = 'invalid_element';
 
 	/**
-	 * Validation code for when attribute is removed.
+	 * Validation code for an invalid attribute.
 	 *
 	 * @var string
 	 */
-	const ATTRIBUTE_REMOVED_CODE = 'attribute_removed';
+	const INVALID_ATTRIBUTE_CODE = 'invalid_attribute';
 
 	/**
-	 * Validation code for when enqueued script is blocked.
+	 * Validation code for when script is enqueued (which is not allowed).
 	 *
 	 * @var string
 	 */
-	const ENQUEUED_SCRIPT_BLOCKED_CODE = 'enqueued_script_blocked';
+	const ENQUEUED_SCRIPT_CODE = 'enqueued_script';
 
 	/**
 	 * The meta key for the AMP URL where the error occurred.
@@ -290,6 +290,83 @@ class AMP_Validation_Utils {
 		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'validate_enqueued_scripts' ), PHP_INT_MAX );
+	}
+
+	/**
+	 * Validate enqueued scripts.
+	 *
+	 * Any enqueued script that is located within a theme or plugin directory will be dequeued with
+	 * a validation error added referencing that theme or plugin as the source. The two caveats for
+	 * this technique for validating enqueued scripts is that:
+	 *
+	 * 1) If a theme or plugin enqueues a script that is registered in core, then this valiation error
+	 *    cannot be attributed to the theme or plugin.
+	 * 2) If a theme or plugin enqueues an external script on another domain (e.g. a CDN) then this will
+	 *    not be attributed to the theme or plugin either. Only scripts local
+	 *
+	 * @todo A way around this is to wrap each of the wp_enqueue_scripts hooks and compare the queue before/after. The callback will indicate the theme or plugin.
+	 */
+	public static function validate_enqueued_scripts() {
+		$scripts = wp_scripts();
+		foreach ( $scripts->queue as $handle ) {
+			if ( ! isset( $scripts->registered[ $handle ] ) ) {
+				continue;
+			}
+			$dep = $scripts->registered[ $handle ];
+
+			$plugins_url    = plugins_url();
+			$mu_plugins_url = plugins_url( '', WPMU_PLUGIN_DIR . '/' );
+
+			$source = null;
+			if ( 0 === strpos( $dep->src, get_stylesheet_directory_uri() ) ) {
+				$source = array(
+					'type' => 'theme',
+					'name' => get_stylesheet(),
+				);
+			} elseif ( get_template() !== get_stylesheet() && 0 === strpos( $dep->src, get_template_directory_uri() ) ) {
+				$source = array(
+					'type' => 'theme',
+					'name' => get_template(),
+				);
+			} elseif ( 0 === strpos( $dep->src, $plugins_url ) ) {
+				$source = array(
+					'type' => 'plugin',
+					'name' => preg_replace(
+						':[/\?#].+:',
+						'',
+						ltrim( substr( $dep->src, strlen( $plugins_url ) ), '/' )
+					),
+				);
+			} elseif ( 0 === strpos( $dep->src, $mu_plugins_url ) ) {
+				$source = array(
+					'type' => 'mu-plugin',
+					'name' => preg_replace(
+						':[/\?#].+:',
+						'',
+						ltrim( substr( $dep->src, strlen( $mu_plugins_url ) ), '/' )
+					),
+				);
+			}
+
+			if ( ! $source ) {
+				return;
+			}
+
+			/*
+			 * Note that the script is only dequeued if we know the source.  Otherwise we let the script
+			 * remain enqueued so that the element's removal will be reported.
+			 */
+			wp_dequeue_script( $handle );
+			self::add_validation_error( array(
+				'code'       => self::ENQUEUED_SCRIPT_CODE,
+				'handle'     => $handle,
+				'dependency' => $dep,
+				'sources'    => array(
+					$source,
+				),
+			) );
+		}
 	}
 
 	/**
@@ -313,13 +390,13 @@ class AMP_Validation_Utils {
 			$error['parent_name'] = $node->parentNode->nodeName;
 		}
 		if ( $removed['node'] instanceof DOMElement ) {
-			$error['code']            = self::ELEMENT_REMOVED_CODE;
+			$error['code']            = self::INVALID_ELEMENT_CODE;
 			$error['node_attributes'] = array();
 			foreach ( $removed['node']->attributes as $attribute ) {
 				$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
 			}
 		} elseif ( $removed['node'] instanceof DOMAttr ) {
-			$error['code']               = self::ATTRIBUTE_REMOVED_CODE;
+			$error['code']               = self::INVALID_ATTRIBUTE_CODE;
 			$error['element_attributes'] = array();
 			if ( $removed['node']->parentNode && $removed['node']->parentNode->hasAttributes() ) {
 				foreach ( $removed['node']->parentNode->attributes as $attribute ) {
@@ -438,12 +515,12 @@ class AMP_Validation_Utils {
 		foreach ( $validation_errors as $validation_error ) {
 			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
 
-			if ( self::ELEMENT_REMOVED_CODE === $code ) {
+			if ( self::INVALID_ELEMENT_CODE === $code ) {
 				if ( ! isset( $removed_elements[ $validation_error['node_name'] ] ) ) {
 					$removed_elements[ $validation_error['node_name'] ] = 0;
 				}
 				$removed_elements[ $validation_error['node_name'] ] += 1;
-			} elseif ( self::ATTRIBUTE_REMOVED_CODE === $code ) {
+			} elseif ( self::INVALID_ATTRIBUTE_CODE === $code ) {
 				if ( ! isset( $removed_attributes[ $validation_error['node_name'] ] ) ) {
 					$removed_attributes[ $validation_error['node_name'] ] = 0;
 				}
@@ -1452,7 +1529,7 @@ class AMP_Validation_Utils {
 						<details open>
 							<summary><code><?php echo esc_html( $error['code'] ); ?></code></summary>
 							<ul class="detailed">
-							<?php if ( self::ELEMENT_REMOVED_CODE === $error['code'] ) : ?>
+							<?php if ( self::INVALID_ELEMENT_CODE === $error['code'] ) : ?>
 								<li>
 									<details open>
 										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
@@ -1481,7 +1558,7 @@ class AMP_Validation_Utils {
 									$collasped_details[] = 'parent_name';
 									?>
 								</li>
-							<?php elseif ( self::ATTRIBUTE_REMOVED_CODE === $error['code'] ) : ?>
+							<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $error['code'] ) : ?>
 								<li>
 									<details open>
 										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
