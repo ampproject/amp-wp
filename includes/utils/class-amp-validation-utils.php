@@ -62,6 +62,13 @@ class AMP_Validation_Utils {
 	const ATTRIBUTE_REMOVED_CODE = 'attribute_removed';
 
 	/**
+	 * Validation code for when enqueued script is blocked.
+	 *
+	 * @var string
+	 */
+	const ENQUEUED_SCRIPT_BLOCKED_CODE = 'enqueued_script_blocked';
+
+	/**
 	 * The meta key for the AMP URL where the error occurred.
 	 *
 	 * @var string
@@ -245,12 +252,12 @@ class AMP_Validation_Utils {
 		if ( ! empty( $counts->publish ) ) {
 			$items[] = sprintf(
 				'<a class="amp-validation-errors" href="%s">%s</a>',
-				admin_url( 'edit.php?post_type=' . self::POST_TYPE_SLUG ),
-				sprintf(
+				esc_url( admin_url( 'edit.php?post_type=' . self::POST_TYPE_SLUG ) ),
+				esc_html( sprintf(
 					/* translators: %s is the validation error count */
 					_n( '%s AMP Validation Error', '%s AMP Validation Errors', $counts->publish, 'amp' ),
 					$counts->publish
-				)
+				) )
 			);
 		}
 		return $items;
@@ -272,7 +279,7 @@ class AMP_Validation_Utils {
 				color: #dc3232;
 				border: none;
 			}
-			</style>
+		</style>
 		<?php
 	}
 
