@@ -185,6 +185,8 @@ class AMP_Validation_Utils {
 	public static function init() {
 		if ( current_theme_supports( 'amp' ) ) {
 			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
+			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 		}
 
 		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
@@ -230,6 +232,48 @@ class AMP_Validation_Utils {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Filter At a Glance items add AMP Validation Errors.
+	 *
+	 * @param array $items At a glance items.
+	 * @return array Items.
+	 */
+	public static function filter_dashboard_glance_items( $items ) {
+		$counts = wp_count_posts( self::POST_TYPE_SLUG );
+		if ( ! empty( $counts->publish ) ) {
+			$items[] = sprintf(
+				'<a class="amp-validation-errors" href="%s">%s</a>',
+				admin_url( 'edit.php?post_type=' . self::POST_TYPE_SLUG ),
+				sprintf(
+					/* translators: %s is the validation error count */
+					_n( '%s AMP Validation Error', '%s AMP Validation Errors', $counts->publish, 'amp' ),
+					$counts->publish
+				)
+			);
+		}
+		return $items;
+	}
+
+	/**
+	 * Print styles for the At a Glance widget.
+	 */
+	public static function print_dashboard_glance_styles() {
+		?>
+		<style>
+			#dashboard_right_now .amp-validation-errors {
+				color: #a00;
+			}
+			#dashboard_right_now .amp-validation-errors:before {
+				content: "\f534";
+			}
+			#dashboard_right_now .amp-validation-errors:hover {
+				color: #dc3232;
+				border: none;
+			}
+			</style>
+		<?php
 	}
 
 	/**
