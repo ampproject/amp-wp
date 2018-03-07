@@ -187,7 +187,6 @@ class AMP_Theme_Support {
 		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_amp_default_styles' ), 9 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
-		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
 		if ( is_customize_preview() ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
@@ -829,6 +828,13 @@ class AMP_Theme_Support {
 			) );
 			$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 		}
+		if ( ! self::schema_org_present( $dom ) ) {
+			$script = $dom->createElement( 'script', wp_json_encode( amp_get_schemaorg_metadata() ) );
+			AMP_DOM_Utils::add_attributes_to_node( $script, array(
+				'type' => 'application/ld+json',
+			) );
+			$head->appendChild( $script );
+		}
 
 		// Ensure rel=canonical link.
 		$rel_canonical = null;
@@ -1006,5 +1012,21 @@ class AMP_Theme_Support {
 		);
 
 		return $response;
+	}
+
+	/**
+	 * Checks if there is already a schema.org script in the head.
+	 *
+	 * @param DOMDocument $dom Representation of the document.
+	 * @return bool
+	 */
+	public static function schema_org_present( DOMDocument $dom ) {
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
+			if ( 1 === preg_match( '/{"@context":"https?:[\\\]\/[\\\]\/schema\.org/', $script->nodeValue ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
