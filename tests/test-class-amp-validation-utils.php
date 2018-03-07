@@ -88,7 +88,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function test_init() {
 		add_theme_support( 'amp' );
 		AMP_Validation_Utils::init();
-		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::validate_content' ) );
+		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::print_edit_form_validation_status' ) );
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::register_post_type' ) );
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::plugin_notice' ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Utils::POST_TYPE_SLUG . '_posts_columns', self::TESTED_CLASS . '::add_post_columns' ) );
@@ -242,15 +242,15 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test validate_content
+	 * Test print_edit_form_validation_status
 	 *
-	 * @covers AMP_Validation_Utils::validate_content()
+	 * @covers AMP_Validation_Utils::print_edit_form_validation_status()
 	 */
-	public function test_validate_content() {
+	public function test_print_edit_form_validation_status() {
 		$this->set_capability();
 		$post = $this->factory()->post->create_and_get();
 		ob_start();
-		AMP_Validation_Utils::validate_content( $post );
+		AMP_Validation_Utils::print_edit_form_validation_status( $post );
 		$output = ob_get_clean();
 
 		$this->assertNotContains( 'notice notice-warning', $output );
@@ -258,7 +258,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$post->post_content = $this->disallowed_tag;
 		ob_start();
-		AMP_Validation_Utils::validate_content( $post );
+		AMP_Validation_Utils::print_edit_form_validation_status( $post );
 		$output = ob_get_clean();
 
 		$this->assertContains( 'notice notice-warning', $output );
@@ -269,7 +269,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$youtube            = 'https://www.youtube.com/watch?v=GGS-tKTXw4Y';
 		$post->post_content = $youtube;
 		ob_start();
-		AMP_Validation_Utils::validate_content( $post );
+		AMP_Validation_Utils::print_edit_form_validation_status( $post );
 		$output = ob_get_clean();
 
 		// The YouTube embed handler should convert the URL into a valid AMP element.
@@ -449,9 +449,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test validate_content
+	 * Test get_source
 	 *
-	 * @covers AMP_Validation_Utils::validate_content()
+	 * @covers AMP_Validation_Utils::print_edit_form_validation_status()
 	 */
 	public function test_get_source() {
 		$plugin = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
@@ -508,31 +508,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( '', $output );
 		$this->assertEquals( call_user_func( array( $this, 'get_string' ) ), $result );
 		unset( $post );
-	}
-
-	/**
-	 * Test display_error().
-	 *
-	 * @covers AMP_Validation_Utils::display_error()
-	 */
-	public function test_display_error() {
-		$removed_element   = 'script';
-		$removed_attribute = 'onload';
-		$response          = array(
-			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
-				$removed_element => 1,
-			),
-			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(
-				$removed_attribute => 1,
-			),
-		);
-		ob_start();
-		AMP_Validation_Utils::display_error( $response );
-		$output = ob_get_clean();
-		$this->assertContains( 'notice notice-warning', $output );
-		$this->assertContains( 'Warning:', $output );
-		$this->assertContains( $removed_element, $output );
-		$this->assertContains( $removed_attribute, $output );
 	}
 
 	/**

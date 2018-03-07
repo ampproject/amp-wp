@@ -182,7 +182,7 @@ class AMP_Validation_Utils {
 			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 		}
 
-		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
+		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
@@ -436,23 +436,92 @@ class AMP_Validation_Utils {
 	/**
 	 * Checks the AMP validity of the post content.
 	 *
-	 * If it's not valid AMP,
-	 * it displays an error message above the 'Classic' editor.
+	 * If it's not valid AMP, it displays an error message above the 'Classic' editor.
 	 *
+	 * @todo There needs to be a save_post action (as there was previously) to do a loopback request for the $url to update the validation results.
 	 * @param WP_Post $post The updated post.
 	 * @return void
 	 */
-	public static function validate_content( $post ) {
+	public static function print_edit_form_validation_status( $post ) {
 		if ( ! post_supports_amp( $post ) ) {
 			return;
 		}
 
-		self::process_markup( $post->post_content );
-		$results = self::summarize_validation_errors( self::$validation_errors );
-		if ( ! empty( self::$validation_errors ) ) {
-			self::display_error( $results );
+		$url                    = null;
+		$validation_status_post = null;
+		$validation_errors      = array();
+
+		// Validate post content outside frontend context.
+		if ( post_type_supports( $post->post_type, 'editor' ) ) {
+			self::process_markup( $post->post_content );
+			$validation_errors = array_merge(
+				$validation_errors,
+				self::$validation_errors
+			);
+			self::reset_validation_results();
 		}
-		self::reset_validation_results();
+
+		// Incorporate frontend validation status if there is a known URL for the post.
+		if ( is_post_type_viewable( $post->post_type ) ) {
+			$url = amp_get_permalink( $post->ID );
+
+			$validation_status_post = self::get_validation_status_post( $url );
+			if ( $validation_status_post ) {
+				$data = json_decode( $validation_status_post->post_content, true );
+				if ( is_array( $data ) ) {
+					$validation_errors = array_merge( $validation_errors, $data );
+				}
+			}
+		}
+
+		if ( empty( $validation_errors ) ) {
+			return;
+		}
+
+		echo '<div class="notice notice-warning">';
+		echo '<p>';
+		esc_html_e( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' );
+		if ( $validation_status_post || $url ) {
+			if ( $validation_status_post ) {
+				echo sprintf(
+					' <a href="%s" target="_blank">%s</a>',
+					esc_url( get_edit_post_link( $validation_status_post ) ),
+					esc_html__( 'Details', 'amp' )
+				);
+			}
+			if ( $url ) {
+				echo sprintf(
+					' <a href="%s" aria-label="%s" target="_blank">%s</a>',
+					esc_url( self::get_debug_url( $url ) ),
+					esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
+					esc_html__( 'Debug', 'amp' )
+				);
+			}
+		}
+		echo '</p>';
+
+		$results      = self::summarize_validation_errors( array_unique( $validation_errors, SORT_REGULAR ) );
+		$removed_sets = array();
+		if ( ! empty( $results[ self::REMOVED_ELEMENTS ] ) && is_array( $results[ self::REMOVED_ELEMENTS ] ) ) {
+			$removed_sets[] = array(
+				'label' => __( 'Invalid elements:', 'amp' ),
+				'names' => array_map( 'sanitize_key', $results[ self::REMOVED_ELEMENTS ] ),
+			);
+		}
+		if ( ! empty( $results[ self::REMOVED_ATTRIBUTES ] ) && is_array( $results[ self::REMOVED_ATTRIBUTES ] ) ) {
+			$removed_sets[] = array(
+				'label' => __( 'Invalid attributes:', 'amp' ),
+				'names' => array_map( 'sanitize_key', $results[ self::REMOVED_ATTRIBUTES ] ),
+			);
+		}
+		// @todo There are other kinds of errors other than REMOVED_ELEMENTS and REMOVED_ATTRIBUTES.
+		foreach ( $removed_sets as $removed_set ) {
+			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
+			self::output_removed_set( $removed_set['names'] );
+			echo '</p>';
+		}
+
+		echo '</div>';
 	}
 
 	/**
@@ -764,39 +833,6 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Displays an error message on /wp-admin/post.php.
-	 *
-	 * Located at the top of the 'Classic' editor.
-	 * States that the content is not valid AMP.
-	 *
-	 * @param array $response The validation response, an associative array.
-	 * @return void
-	 */
-	public static function display_error( $response ) {
-		echo '<div class="notice notice-warning">';
-		printf( '<p>%s</p>', esc_html__( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' ) );
-		$removed_sets = array();
-		if ( ! empty( $response[ self::REMOVED_ELEMENTS ] ) && is_array( $response[ self::REMOVED_ELEMENTS ] ) ) {
-			$removed_sets[] = array(
-				'label' => __( 'Invalid elements:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $response[ self::REMOVED_ELEMENTS ] ),
-			);
-		}
-		if ( ! empty( $response[ self::REMOVED_ATTRIBUTES ] ) && is_array( $response[ self::REMOVED_ATTRIBUTES ] ) ) {
-			$removed_sets[] = array(
-				'label' => __( 'Invalid attributes:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $response[ self::REMOVED_ATTRIBUTES ] ),
-			);
-		}
-		foreach ( $removed_sets as $removed_set ) {
-			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
-			self::output_removed_set( $removed_set['names'] );
-			echo '</p>';
-		}
-		echo '</div>';
-	}
-
-	/**
 	 * Output a removed set, each wrapped in <code></code>.
 	 *
 	 * @param array[][] $set {
@@ -807,7 +843,7 @@ class AMP_Validation_Utils {
 	 * }
 	 * @return void
 	 */
-	public static function output_removed_set( $set ) {
+	protected static function output_removed_set( $set ) {
 		$items = array();
 		foreach ( $set as $name => $count ) {
 			if ( 1 === intval( $count ) ) {
