@@ -298,7 +298,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(
 			$dom_document, array(
-				'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
+				'validation_error_callback' => 'AMP_Validation_Utils::add_validation_error',
 			)
 		);
 		$sanitizer->remove_invalid_child( $child );
@@ -329,7 +329,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$video->setAttribute( $attribute, 'someFunction()' );
 		$attr_node = $video->getAttributeNode( $attribute );
 		$args      = array(
-			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
+			'validation_error_callback' => 'AMP_Validation_Utils::add_validation_error',
 		);
 		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
 		$sanitizer->remove_invalid_attribute( $video, $attribute );

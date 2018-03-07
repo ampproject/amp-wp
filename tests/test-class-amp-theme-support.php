@@ -129,7 +129,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$removed_nodes  = array();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
-			'remove_invalid_callback' => function( $removed ) use ( &$removed_nodes ) {
+			'validation_error_callback' => function( $removed ) use ( &$removed_nodes ) {
 				$removed_nodes[ $removed['node']->nodeName ] = $removed['node'];
 			},
 		) );

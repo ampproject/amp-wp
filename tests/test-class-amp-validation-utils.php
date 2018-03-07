@@ -123,13 +123,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test track_removed.
+	 * Test add_validation_error.
 	 *
-	 * @covers AMP_Validation_Utils::track_removed()
+	 * @covers AMP_Validation_Utils::add_validation_error()
 	 */
 	public function test_track_removed() {
 		$this->assertEmpty( AMP_Validation_Utils::$validation_errors );
-		AMP_Validation_Utils::track_removed( array(
+		AMP_Validation_Utils::add_validation_error( array(
 			'node' => $this->node,
 		) );
 
@@ -150,11 +150,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test was_node_removed.
 	 *
-	 * @covers AMP_Validation_Utils::track_removed()
+	 * @covers AMP_Validation_Utils::add_validation_error()
 	 */
 	public function test_was_node_removed() {
 		$this->assertEmpty( AMP_Validation_Utils::$validation_errors );
-		AMP_Validation_Utils::track_removed(
+		AMP_Validation_Utils::add_validation_error(
 			array(
 				'node' => $this->node,
 			)
@@ -710,10 +710,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'AMP_Comments_Sanitizer' => array(),
 		);
 
-		$expected_callback   = self::TESTED_CLASS . '::track_removed';
+		$expected_callback   = self::TESTED_CLASS . '::add_validation_error';
 		$filtered_sanitizers = AMP_Validation_Utils::add_validation_callback( $sanitizers );
 		foreach ( $filtered_sanitizers as $sanitizer => $args ) {
-			$this->assertEquals( $expected_callback, $args['remove_invalid_callback'] );
+			$this->assertEquals( $expected_callback, $args['validation_error_callback'] );
 		}
 		remove_theme_support( 'amp' );
 	}

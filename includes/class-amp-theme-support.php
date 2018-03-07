@@ -984,12 +984,12 @@ class AMP_Theme_Support {
 
 		$args = array_merge(
 			array(
-				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element'    => true,
-				'remove_invalid_callback' => null,
-				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
-				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
-				'disable_invalid_removal' => $is_validation_debug_mode,
+				'content_max_width'         => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element'      => true,
+				'validation_error_callback' => null,
+				'allow_dirty_styles'        => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'       => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'disable_invalid_removal'   => $is_validation_debug_mode,
 			),
 			$args
 		);

@@ -226,7 +226,6 @@ class AMP_Validation_Utils {
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_status_count' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 
-		// @todo There is more than just node removal that needs to be reported. There is also script enqueues, external stylesheets, cdata length, etc.
 		// Actions and filters involved in validation.
 		add_action( 'activate_plugin', function() {
 			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
@@ -307,49 +306,10 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Tracks when a sanitizer removes a node (element or attribute).
-	 *
-	 * @param array $removed {
-	 *     The data of the removed node.
-	 *
-	 *     @type DOMElement|DOMNode $node   The removed node.
-	 *     @type DOMElement|DOMNode $parent The parent of the removed node.
-	 * }
-	 * @return void
-	 */
-	public static function track_removed( $removed ) {
-		$node  = $removed['node'];
-		$error = array(
-			'node_name' => $node->nodeName,
-			'sources'   => self::locate_sources( $node ),
-		);
-		if ( $node->parentNode ) {
-			$error['parent_name'] = $node->parentNode->nodeName;
-		}
-		if ( $removed['node'] instanceof DOMElement ) {
-			$error['code']            = self::INVALID_ELEMENT_CODE;
-			$error['node_attributes'] = array();
-			foreach ( $removed['node']->attributes as $attribute ) {
-				$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
-			}
-		} elseif ( $removed['node'] instanceof DOMAttr ) {
-			$error['code']               = self::INVALID_ATTRIBUTE_CODE;
-			$error['element_attributes'] = array();
-			if ( $removed['node']->parentNode && $removed['node']->parentNode->hasAttributes() ) {
-				foreach ( $removed['node']->parentNode->attributes as $attribute ) {
-					$error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
-				}
-			}
-		}
-
-		self::add_validation_error( $error );
-	}
-
-	/**
 	 * Processes markup, to determine AMP validity.
 	 *
 	 * Passes $markup through the AMP sanitizers.
-	 * Also passes a 'remove_invalid_callback' to keep track of stripped attributes and nodes.
+	 * Also passes a 'validation_error_callback' to keep track of stripped attributes and nodes.
 	 *
 	 * @param string $markup The markup to process.
 	 * @return string Sanitized markup.
@@ -360,8 +320,8 @@ class AMP_Validation_Utils {
 		/** This filter is documented in wp-includes/post-template.php */
 		$markup = apply_filters( 'the_content', $markup );
 		$args   = array(
-			'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
-			'remove_invalid_callback' => 'AMP_Validation_Utils::track_removed',
+			'content_max_width'         => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			'validation_error_callback' => 'AMP_Validation_Utils::add_validation_error',
 		);
 
 		$results = AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
@@ -427,12 +387,57 @@ class AMP_Validation_Utils {
 	 *     Data.
 	 *
 	 *     @type string $code Error code.
+	 *     @type DOMElement|DOMNode $node The removed node.
 	 * }
 	 */
 	public static function add_validation_error( array $data ) {
+		$node = null;
+
+		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
+			$node = $data['node'];
+			unset( $data['node'] );
+			$data['node_name'] = $node->nodeName;
+			$data['sources']   = self::locate_sources( $node );
+			if ( $node->parentNode ) {
+				$data['parent_name'] = $node->parentNode->nodeName;
+			}
+		}
+
+		if ( $node instanceof DOMElement ) {
+			if ( ! isset( $data['code'] ) ) {
+				$data['code'] = self::INVALID_ELEMENT_CODE;
+			}
+			$data['node_attributes'] = array();
+			foreach ( $node->attributes as $attribute ) {
+				$data['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			}
+
+			$is_enqueued_link = (
+				'link' === $node->nodeName
+				&&
+				preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( 'id' ), $matches )
+				&&
+				isset( self::$enqueued_style_sources[ $matches['handle'] ] )
+			);
+			if ( $is_enqueued_link ) {
+				$data['sources'] = self::$enqueued_style_sources[ $matches['handle'] ];
+			}
+		} elseif ( $node instanceof DOMAttr ) {
+			if ( ! isset( $data['code'] ) ) {
+				$data['code'] = self::INVALID_ATTRIBUTE_CODE;
+			}
+			$data['element_attributes'] = array();
+			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
+				foreach ( $node->parentNode->attributes as $attribute ) {
+					$data['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+				}
+			}
+		}
+
 		if ( ! isset( $data['code'] ) ) {
 			$data['code'] = 'unknown';
 		}
+
 		self::$validation_errors[] = $data;
 	}
 
@@ -931,7 +936,7 @@ class AMP_Validation_Utils {
 			$sanitizers[ $sanitizer ] = array_merge(
 				$args,
 				array(
-					'remove_invalid_callback' => __CLASS__ . '::track_removed',
+					'validation_error_callback' => __CLASS__ . '::add_validation_error',
 				)
 			);
 		}
