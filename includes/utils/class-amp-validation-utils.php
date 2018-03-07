@@ -185,6 +185,20 @@ class AMP_Validation_Utils {
 	public static $validation_errors = array();
 
 	/**
+	 * Sources that enqueue each script.
+	 *
+	 * @var array
+	 */
+	public static $enqueued_script_sources = array();
+
+	/**
+	 * Sources that enqueue each style.
+	 *
+	 * @var array
+	 */
+	public static $enqueued_style_sources = array();
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
@@ -287,86 +301,9 @@ class AMP_Validation_Utils {
 	 * Add hooks for doing validation during preprocessing/sanitizing.
 	 */
 	public static function add_validation_hooks() {
-		add_action( 'wp', array( __CLASS__, 'callback_wrappers' ) );
+		self::callback_wrappers();
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'validate_enqueued_scripts' ), PHP_INT_MAX );
-	}
-
-	/**
-	 * Validate enqueued scripts.
-	 *
-	 * Any enqueued script that is located within a theme or plugin directory will be dequeued with
-	 * a validation error added referencing that theme or plugin as the source. The two caveats for
-	 * this technique for validating enqueued scripts is that:
-	 *
-	 * 1) If a theme or plugin enqueues a script that is registered in core, then this valiation error
-	 *    cannot be attributed to the theme or plugin.
-	 * 2) If a theme or plugin enqueues an external script on another domain (e.g. a CDN) then this will
-	 *    not be attributed to the theme or plugin either. Only scripts local
-	 *
-	 * @todo A way around this is to wrap each of the wp_enqueue_scripts hooks and compare the queue before/after. The callback will indicate the theme or plugin.
-	 */
-	public static function validate_enqueued_scripts() {
-		$scripts = wp_scripts();
-		foreach ( $scripts->queue as $handle ) {
-			if ( ! isset( $scripts->registered[ $handle ] ) ) {
-				continue;
-			}
-			$dep = $scripts->registered[ $handle ];
-
-			$plugins_url    = plugins_url();
-			$mu_plugins_url = plugins_url( '', WPMU_PLUGIN_DIR . '/' );
-
-			$source = null;
-			if ( 0 === strpos( $dep->src, get_stylesheet_directory_uri() ) ) {
-				$source = array(
-					'type' => 'theme',
-					'name' => get_stylesheet(),
-				);
-			} elseif ( get_template() !== get_stylesheet() && 0 === strpos( $dep->src, get_template_directory_uri() ) ) {
-				$source = array(
-					'type' => 'theme',
-					'name' => get_template(),
-				);
-			} elseif ( 0 === strpos( $dep->src, $plugins_url ) ) {
-				$source = array(
-					'type' => 'plugin',
-					'name' => preg_replace(
-						':[/\?#].+:',
-						'',
-						ltrim( substr( $dep->src, strlen( $plugins_url ) ), '/' )
-					),
-				);
-			} elseif ( 0 === strpos( $dep->src, $mu_plugins_url ) ) {
-				$source = array(
-					'type' => 'mu-plugin',
-					'name' => preg_replace(
-						':[/\?#].+:',
-						'',
-						ltrim( substr( $dep->src, strlen( $mu_plugins_url ) ), '/' )
-					),
-				);
-			}
-
-			if ( ! $source ) {
-				return;
-			}
-
-			/*
-			 * Note that the script is only dequeued if we know the source.  Otherwise we let the script
-			 * remain enqueued so that the element's removal will be reported.
-			 */
-			wp_dequeue_script( $handle );
-			self::add_validation_error( array(
-				'code'       => self::ENQUEUED_SCRIPT_CODE,
-				'handle'     => $handle,
-				'dependency' => $dep,
-				'sources'    => array(
-					$source,
-				),
-			) );
-		}
 	}
 
 	/**
@@ -558,7 +495,9 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function reset_validation_results() {
-		self::$validation_errors = array();
+		self::$validation_errors       = array();
+		self::$enqueued_style_sources  = array();
+		self::$enqueued_script_sources = array();
 	}
 
 	/**
@@ -832,13 +771,67 @@ class AMP_Validation_Utils {
 	 */
 	public static function wrapped_callback( $callback ) {
 		return function() use ( $callback ) {
+			global $wp_styles, $wp_scripts;
+
 			$function      = $callback['function'];
 			$accepted_args = $callback['accepted_args'];
 			$args          = func_get_args();
 
+			$before_styles_enqueued = array();
+			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
+				$before_styles_enqueued = $wp_styles->queue;
+			}
+			$before_scripts_enqueued = array();
+			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
+				$before_scripts_enqueued = $wp_scripts->queue;
+			}
+
 			ob_start();
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
 			$output = ob_get_clean();
+
+			// Keep track of which source enqueued the styles.
+			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
+				foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
+					$source = array_merge(
+						wp_array_slice_assoc( $callback, array( 'type', 'name' ) ),
+						array(
+							'args' => array(
+								'hook' => $callback['hook'],
+							),
+						)
+					);
+
+					AMP_Validation_Utils::$enqueued_style_sources[ $handle ][] = $source;
+				}
+			}
+
+			// Keep track of which source enqueued the scripts, and immediately report validity .
+			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
+				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $handle ) {
+					$source = array_merge(
+						wp_array_slice_assoc( $callback, array( 'type', 'name' ) ),
+						array(
+							'args' => array(
+								'hook' => $callback['hook'],
+							),
+						)
+					);
+
+					AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = $source;
+
+					if ( isset( $wp_scripts->registered[ $handle ] ) ) {
+						self::add_validation_error( array(
+							'code'       => self::ENQUEUED_SCRIPT_CODE,
+							'handle'     => $handle,
+							'dependency' => $wp_scripts->registered[ $handle ],
+							'sources'    => array(
+								$source,
+							),
+						) );
+					}
+				}
+			}
 
 			// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
 			if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
@@ -1596,7 +1589,7 @@ class AMP_Validation_Utils {
 												<?php if ( is_string( $value ) ) : ?>
 													<?php echo esc_html( $value ); ?>
 												<?php else : ?>
-													<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ ) ); ?></pre>
+													<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
 												<?php endif; ?>
 											</div>
 										</details>

@@ -118,7 +118,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_add_validation_hooks() {
 		AMP_Validation_Utils::add_validation_hooks();
-		$this->assertEquals( 10, has_action( 'wp', array( self::TESTED_CLASS, 'callback_wrappers' ) ) );
 		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', array( self::TESTED_CLASS, 'add_validation_callback' ) ) );
 		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
 	}
