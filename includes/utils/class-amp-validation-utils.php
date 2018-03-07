@@ -13,13 +13,6 @@
 class AMP_Validation_Utils {
 
 	/**
-	 * Key for the markup value in the REST API endpoint.
-	 *
-	 * @var string
-	 */
-	const MARKUP_KEY = 'markup';
-
-	/**
 	 * Query var that triggers validation.
 	 *
 	 * @var string
@@ -125,27 +118,6 @@ class AMP_Validation_Utils {
 	const NONCE_ACTION = 'amp_recheck_';
 
 	/**
-	 * The name of the cron event to validate URLs.
-	 *
-	 * @var string
-	 */
-	const CRON_EVENT = 'amp_validate_urls';
-
-	/**
-	 * The query var of the cron nonce.
-	 *
-	 * @var string
-	 */
-	const CUSTOM_CRON_NONCE = 'amp_validation_cron_nonce';
-
-	/**
-	 * The name of the transient to store the cron nonce.
-	 *
-	 * @var string
-	 */
-	const NONCE_TRANSIENT_NAME = 'amp_validation_cron';
-
-	/**
 	 * HTTP response header name containing JSON-serialized validation errors.
 	 *
 	 * @var string
@@ -210,7 +182,6 @@ class AMP_Validation_Utils {
 			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 		}
 
-		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'validate_content' ), 10, 2 );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
@@ -220,8 +191,6 @@ class AMP_Validation_Utils {
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'remaining_error_notice' ) );
 		add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
-		add_action( 'init', array( __CLASS__, 'schedule_cron' ) );
-		add_action( self::CRON_EVENT, array( __CLASS__, 'cron_validate_urls' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'remove_publish_meta_box' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_status_count' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
@@ -329,55 +298,14 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Registers the REST API endpoint for validation.
-	 *
-	 * @return void
-	 */
-	public static function amp_rest_validation() {
-		register_rest_route( 'amp-wp/v1', '/validate', array(
-			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'handle_validate_request' ),
-			'args'                => array(
-				self::MARKUP_KEY => array(
-					'validate_callback' => array( __CLASS__, 'validate_arg' ),
-				),
-			),
-			'permission_callback' => array( __CLASS__, 'has_cap' ),
-		) );
-	}
-
-	/**
 	 * Whether the user has the required capability.
 	 *
 	 * Checks for permissions before validating.
-	 * Also serves as the permission callback for REST requests.
 	 *
 	 * @return boolean $has_cap Whether the current user has the capability.
 	 */
 	public static function has_cap() {
 		return current_user_can( 'edit_posts' );
-	}
-
-	/**
-	 * Validate the markup passed to the REST API.
-	 *
-	 * @param WP_REST_Request $request The REST request.
-	 * @return array|WP_Error.
-	 */
-	public static function handle_validate_request( WP_REST_Request $request ) {
-		$json = $request->get_json_params();
-		if ( empty( $json[ self::MARKUP_KEY ] ) ) {
-			return new WP_Error( 'no_markup', 'No markup passed to validator', array(
-				'status' => 404,
-			) );
-		}
-
-		// @todo Add request param to indicate whether the supplied content is raw (and needs the_content filters applied).
-		$processed = self::process_markup( $json[ self::MARKUP_KEY ] );
-		$response  = self::summarize_validation_errors( self::$validation_errors );
-		self::reset_validation_results();
-		$response['processed_markup'] = $processed;
-		return $response;
 	}
 
 	/**
@@ -503,19 +431,6 @@ class AMP_Validation_Utils {
 		self::$validation_errors       = array();
 		self::$enqueued_style_sources  = array();
 		self::$enqueued_script_sources = array();
-	}
-
-	/**
-	 * Validate the argument in the REST API request.
-	 *
-	 * It would be ideal to simply pass 'is_string' in register_rest_route().
-	 * But it always returned false.
-	 *
-	 * @param mixed $arg      The argument to validate.
-	 * @return boolean $is_valid Whether the argument is valid.
-	 */
-	public static function validate_arg( $arg ) {
-		return is_string( $arg );
 	}
 
 	/**
@@ -907,22 +822,12 @@ class AMP_Validation_Utils {
 	/**
 	 * Whether to validate the front end response.
 	 *
-	 * Either the user has the capability and the query var is present,
-	 * or this is a cron job, and the nonce saved in the transient must match that passed in the request.
+	 * Either the user has the capability and the query var is present.
 	 *
 	 * @return boolean
 	 */
 	public static function should_validate_front_end() {
-		$should_validate = (
-			( self::has_cap() && ( isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) )
-			||
-			(
-				isset( $_GET[ self::CUSTOM_CRON_NONCE ] )
-				&&
-				( get_transient( self::NONCE_TRANSIENT_NAME ) === sanitize_key( wp_unslash( $_GET[ self::CUSTOM_CRON_NONCE ] ) ) )
-			)
-		); // WPCS: CSRF ok.
-		return $should_validate;
+		return self::has_cap() && isset( $_GET[ self::VALIDATE_QUERY_VAR ] ); // WPCS: CSRF ok.
 	}
 
 	/**
@@ -996,7 +901,6 @@ class AMP_Validation_Utils {
 		$url = remove_query_arg(
 			array(
 				self::VALIDATE_QUERY_VAR,
-				self::CUSTOM_CRON_NONCE,
 				self::DEBUG_QUERY_VAR,
 			),
 			$url
@@ -1383,57 +1287,6 @@ class AMP_Validation_Utils {
 		);
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();
-	}
-
-	/**
-	 * Schedules the cron job to validate URLs.
-	 *
-	 * @return void
-	 */
-	public static function schedule_cron() {
-		if ( ! wp_next_scheduled( self::CRON_EVENT ) ) {
-			wp_schedule_event( time(), 'twicedaily', self::CRON_EVENT );
-		}
-	}
-
-	/**
-	 * Validates URLs when the cron action occurs.
-	 *
-	 * Makes validation requests to the home URL and the most recent post.
-	 * Creates a custom nonce, saves it in a transient, and passes it in the request.
-	 * Then, should_validate_front_end() verifies whether the passed nonce matches the transient.
-	 *
-	 * @return void
-	 */
-	public static function cron_validate_urls() {
-		if ( ! isset( $_GET['doing_wp_cron'] ) ) { // WPCS: CSRF ok.
-			return;
-		}
-
-		$nonce             = md5( sanitize_key( wp_unslash( $_GET['doing_wp_cron'] ) ) ); // WPCS: CSRF ok.
-		$minute_in_seconds = 60;
-		set_transient( self::NONCE_TRANSIENT_NAME, $nonce, $minute_in_seconds );
-
-		$urls_to_validate           = array( home_url( '/' ) );
-		$recent_posts               = wp_get_recent_posts(
-			array(
-				'numberposts' => 1,
-				'post_status' => 'publish',
-			),
-			OBJECT
-		);
-		$most_recent_post_permalink = is_array( $recent_posts ) ? get_permalink( reset( $recent_posts ) ) : null;
-		if ( ! empty( $most_recent_post_permalink ) ) {
-			$urls_to_validate[] = $most_recent_post_permalink;
-		}
-
-		foreach ( $urls_to_validate as $url ) {
-			wp_remote_get( add_query_arg(
-				self::CUSTOM_CRON_NONCE,
-				$nonce,
-				$url
-			) );
-		};
 	}
 
 	/**

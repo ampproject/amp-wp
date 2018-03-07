@@ -27,13 +27,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public $node;
 
 	/**
-	 * The expected REST API route.
-	 *
-	 * @var string
-	 */
-	public $expected_route = '/amp-wp/v1/validate';
-
-	/**
 	 * A tag that the sanitizer should strip.
 	 *
 	 * @var string
@@ -95,7 +88,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function test_init() {
 		add_theme_support( 'amp' );
 		AMP_Validation_Utils::init();
-		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::amp_rest_validation' ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::validate_content' ) );
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::register_post_type' ) );
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::plugin_notice' ) );
@@ -105,8 +97,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
-		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::schedule_cron' ) );
-		$this->assertEquals( 10, has_action( AMP_Validation_Utils::CRON_EVENT, self::TESTED_CLASS . '::cron_validate_urls' ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_meta_boxes' ) );
 	}
@@ -203,29 +193,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_rest_validation.
-	 *
-	 * @covers AMP_Validation_Utils::amp_rest_validation()
-	 */
-	public function test_amp_rest_validation() {
-		$routes  = rest_get_server()->get_routes();
-		$route   = $routes[ $this->expected_route ][0];
-		$methods = array(
-			'POST' => true,
-		);
-		$args    = array(
-			'markup' => array(
-				'validate_callback' => array( self::TESTED_CLASS, 'validate_arg' ),
-			),
-		);
-
-		$this->assertEquals( $args, $route['args'] );
-		$this->assertEquals( array( self::TESTED_CLASS, 'handle_validate_request' ), $route['callback'] );
-		$this->assertEquals( $methods, $route['methods'] );
-		$this->assertEquals( array( self::TESTED_CLASS, 'has_cap' ), $route['permission_callback'] );
-	}
-
-	/**
 	 * Test has_cap.
 	 *
 	 * @covers AMP_Validation_Utils::has_cap()
@@ -238,45 +205,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$this->set_capability();
 		$this->assertTrue( AMP_Validation_Utils::has_cap() );
-	}
-
-	/**
-	 * Test handle_validate_request.
-	 *
-	 * @covers AMP_Validation_Utils::handle_validate_request()
-	 */
-	public function test_handle_validate_request() {
-		global $post;
-		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		$this->set_capability();
-		$request = new WP_REST_Request( 'POST', $this->expected_route );
-		$request->set_header( 'content-type', 'application/json' );
-		$markup = $this->disallowed_tag;
-		$request->set_body( wp_json_encode( array(
-			AMP_Validation_Utils::MARKUP_KEY => $markup,
-		) ) );
-		$response          = AMP_Validation_Utils::handle_validate_request( $request );
-		$expected_response = array(
-			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
-				'script' => 1,
-			),
-			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
-			'processed_markup'                       => '',
-			'sources_with_invalid_output'            => array(),
-		);
-		$this->assertEquals( $expected_response, $response );
-
-		$request->set_body( wp_json_encode( array(
-			AMP_Validation_Utils::MARKUP_KEY => $this->valid_amp_img,
-		) ) );
-		$response          = AMP_Validation_Utils::handle_validate_request( $request );
-		$expected_response = array(
-			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(),
-			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
-			'processed_markup'                       => '<p>' . $this->valid_amp_img . '</p>',
-			'sources_with_invalid_output'            => array(),
-		);
-		$this->assertEquals( $expected_response, $response );
 	}
 
 	/**
@@ -311,20 +239,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) );
 		AMP_Validation_Utils::reset_validation_results();
 		$this->assertEquals( array(), AMP_Validation_Utils::$validation_errors );
-	}
-
-	/**
-	 * Test validate_arg
-	 *
-	 * @covers AMP_Validation_Utils::validate_arg()
-	 */
-	public function test_validate_arg() {
-		$invalid_number = 54321;
-		$invalid_array  = array( 'foo', 'bar' );
-		$valid_string   = '<div class="baz"></div>';
-		$this->assertFalse( AMP_Validation_Utils::validate_arg( $invalid_number ) );
-		$this->assertFalse( AMP_Validation_Utils::validate_arg( $invalid_array ) );
-		$this->assertTrue( AMP_Validation_Utils::validate_arg( $valid_string ) );
 	}
 
 	/**
@@ -685,14 +599,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] = 1;
 		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$this->set_capability();
-		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
-
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'subscriber',
-		) ) );
-		$nonce = '123456789';
-		$_GET[ AMP_Validation_Utils::CUSTOM_CRON_NONCE ] = $nonce;
-		set_transient( AMP_Validation_Utils::NONCE_TRANSIENT_NAME, $nonce, 60 );
 		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
 	}
 
@@ -1144,35 +1050,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		// This calls wp_redirect(), which throws an exception.
 		$this->assertTrue( isset( $exception ) );
-	}
-
-	/**
-	 * Test for schedule_cron()
-	 *
-	 * @covers AMP_Validation_Utils::schedule_cron()
-	 */
-	public function test_schedule_cron() {
-		AMP_Validation_Utils::schedule_cron();
-		$scheduled     = wp_next_scheduled( AMP_Validation_Utils::CRON_EVENT );
-		$cron_array    = _get_cron_array();
-		$cron_events   = $cron_array[ $scheduled ][ AMP_Validation_Utils::CRON_EVENT ];
-		$cron_settings = array_shift( $cron_events );
-		$this->assertTrue( is_int( $scheduled ) );
-		$this->assertEquals( array(), $cron_settings['args'] );
-		$this->assertEquals( 'twicedaily', $cron_settings['schedule'] );
-	}
-
-	/**
-	 * Test for cron_validate_urls()
-	 *
-	 * @covers AMP_Validation_Utils::cron_validate_urls()
-	 */
-	public function test_cron_validate_urls() {
-		$doing_cron            = '123456789';
-		$_GET['doing_wp_cron'] = $doing_cron;
-		AMP_Validation_Utils::cron_validate_urls();
-		$transient = get_transient( AMP_Validation_Utils::NONCE_TRANSIENT_NAME );
-		$this->assertEquals( md5( $doing_cron ), $transient );
 	}
 
 	/**
