@@ -51,7 +51,7 @@ class AMP_Image_Dimension_Extractor {
 			return set_url_scheme( $url, 'http' );
 		}
 
-		$parsed = AMP_WP_Utils::parse_url( $url );
+		$parsed = wp_parse_url( $url );
 		if ( ! isset( $parsed['host'] ) ) {
 			$path = '';
 			if ( isset( $parsed['path'] ) ) {
