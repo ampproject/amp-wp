@@ -684,6 +684,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a class="foo" href="http://foo bar">value</a>',
 				'<a class="foo" href="">value</a>',
 			),
+			'a_with_encoded_host'                                       => array(
+				'<a class="foo" href="http://%65%78%61%6d%70%6c%65%2e%63%6f%6d/foo/">value</a>',
+				null,
+			),
 			'a_with_wrong_schemeless_host'                              => array(
 				'<a class="foo" href="//bad domain with a space.com/foo">value</a>',
 				'<a class="foo" href="">value</a>',
