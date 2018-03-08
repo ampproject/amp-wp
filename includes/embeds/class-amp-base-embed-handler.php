@@ -17,10 +17,10 @@ abstract class AMP_Base_Embed_Handler {
 	protected $args = array();
 	protected $did_convert_elements = false;
 
-	abstract function register_embed();
-	abstract function unregister_embed();
+	abstract public function register_embed();
+	abstract public function unregister_embed();
 
-	function __construct( $args = array() ) {
+	public function __construct( $args = array() ) {
 		$this->args = wp_parse_args( $args, array(
 			'width' => $this->DEFAULT_WIDTH,
 			'height' => $this->DEFAULT_HEIGHT,
