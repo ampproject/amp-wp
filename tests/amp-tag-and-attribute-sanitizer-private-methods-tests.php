@@ -996,7 +996,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				1,
+				2,
 			),
 			'attributes_allow_relative_false_fail' => array(
 				array(
@@ -1024,7 +1024,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				1,
+				2,
 			),
 			'attributes_allow_empty_false_fail' => array(
 				array(
