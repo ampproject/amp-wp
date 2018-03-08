@@ -1166,7 +1166,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 					// Check if the protocol contains invalid chars.
-					$dots_pos = preg_match( $url, ':' );
+					$dots_pos = strpos( $url, ':' );
 					if ( false !== $dots_pos && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', substr( $url, 0, $dots_pos ) ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
