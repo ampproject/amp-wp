@@ -930,9 +930,9 @@ class AMP_Validation_Utils {
 	 *
 	 * Either the user has the capability and the query var is present.
 	 *
-	 * @return boolean
+	 * @return boolean Whether to validate.
 	 */
-	public static function should_validate_front_end() {
+	public static function should_validate_response() {
 		return self::has_cap() && isset( $_GET[ self::VALIDATE_QUERY_VAR ] ); // WPCS: CSRF ok.
 	}
 

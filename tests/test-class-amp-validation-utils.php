@@ -563,18 +563,18 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test should_validate_front_end
+	 * Test should_validate_response.
 	 *
-	 * @covers AMP_Validation_Utils::should_validate_front_end()
+	 * @covers AMP_Validation_Utils::should_validate_response()
 	 */
-	public function test_should_validate_front_end() {
+	public function test_should_validate_response() {
 		global $post;
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
-		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
+		$this->assertFalse( AMP_Validation_Utils::should_validate_response() );
 		$_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] = 1;
-		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
+		$this->assertFalse( AMP_Validation_Utils::should_validate_response() );
 		$this->set_capability();
-		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
+		$this->assertTrue( AMP_Validation_Utils::should_validate_response() );
 	}
 
 	/**
