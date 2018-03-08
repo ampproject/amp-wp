@@ -1,7 +1,7 @@
 === AMP for WordPress ===
 Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp, westonruter
 Tags: amp, mobile
-Requires at least: 4.7
+Requires at least: 4.8
 Tested up to: 4.9
 Stable tag: 0.6.0
 License: GPLv2 or later
