@@ -1156,9 +1156,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$attr_value   = $node->getAttribute( $attr_name );
-				$urls_to_test = preg_split( '/\s*,\s*/', $attr_value );
-
+				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
 				foreach ( $urls_to_test as $url ) {
 					// Check if the host contains invalid chars.
 					$url_host = wp_parse_url( urldecode( $url ), PHP_URL_HOST );
@@ -1168,7 +1166,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 					// Check if the protocol contains invalid chars.
 					$dots_pos = strpos( $url, ':' );
-					if ( $dots_pos !== false && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', substr( $url, 0, $dots_pos ) ) ) {
+					if ( false !== $dots_pos && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', substr( $url, 0, $dots_pos ) ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
 				}
@@ -1196,9 +1194,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$attr_value   = $node->getAttribute( $attr_name );
-				$attr_value   = preg_replace( '/\s*,\s*/', ',', $attr_value );
-				$urls_to_test = explode( ',', $attr_value );
+				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
 				foreach ( $urls_to_test as $url ) {
 					/*
 					 * This seems to be an acceptable check since the AMP validator
@@ -1215,9 +1211,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
-						$attr_value   = $node->getAttribute( $alternative_name );
-						$attr_value   = preg_replace( '/\s*,\s*/', ',', $attr_value );
-						$urls_to_test = explode( ',', $attr_value );
+						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
 						foreach ( $urls_to_test as $url ) {
 							/*
 							 * This seems to be an acceptable check since the AMP validator
@@ -1254,9 +1248,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$attr_value   = $node->getAttribute( $attr_name );
-				$attr_value   = preg_replace( '/\s*,\s*/', ',', $attr_value );
-				$urls_to_test = explode( ',', $attr_value );
+				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
 				foreach ( $urls_to_test as $url ) {
 					$parsed_url = AMP_WP_Utils::parse_url( $url );
 
@@ -1275,9 +1267,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
-						$attr_value   = $node->getAttribute( $alternative_name );
-						$attr_value   = preg_replace( '/\s*,\s*/', ',', $attr_value );
-						$urls_to_test = explode( ',', $attr_value );
+						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
 						foreach ( $urls_to_test as $url ) {
 							$parsed_url = AMP_WP_Utils::parse_url( $url );
 							if ( empty( $parsed_url['scheme'] ) ) {
