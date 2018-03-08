@@ -152,7 +152,13 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * @return array An array of arrays holding an integer representation of iterations.
 	 */
 	public function get_table_row_iterations() {
-		return [ [ 1 ], [ 10 ], [ 100 ], [ 1000 ], [ 10000 ] ];
+		return array(
+			array( 1 ),
+			array( 10 ),
+			array( 100 ),
+			array( 1000 ),
+			array( 10000 )
+		);
 	}
 
 	/**
@@ -190,8 +196,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
 
 		if ( preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR ) {
-			// $this->fail( 'Failed when backtrack limit was exhausted.' );
+			$this->fail( 'Failed when backtrack limit was exhausted.' );
 		}
-		$this->assertNotNull( $converted );
 	}
 }
