@@ -624,7 +624,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::store_validation_errors()
 	 */
 	public function test_store_validation_errors() {
-		global $post, $wp;
+		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		add_theme_support( 'amp' );
 		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
@@ -701,6 +701,35 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$this->assertNull( $custom_post_id );
 		remove_theme_support( 'amp' );
+	}
+
+	/**
+	 * Test for store_validation_errors() when existing post is trashed.
+	 *
+	 * @covers AMP_Validation_Utils::store_validation_errors()
+	 */
+	public function test_store_validation_errors_untrashing() {
+		$validation_errors = $this->get_mock_errors();
+
+		$first_post_id = AMP_Validation_Utils::store_validation_errors( $validation_errors, home_url( '/foo/' ) );
+		$this->assertInternalType( 'int', $first_post_id );
+
+		$post_name = get_post( $first_post_id )->post_name;
+		wp_trash_post( $first_post_id );
+		$this->assertEquals( $post_name . '__trashed', get_post( $first_post_id )->post_name );
+
+		$next_post_id = AMP_Validation_Utils::store_validation_errors( $validation_errors, home_url( '/bar/' ) );
+		$this->assertInternalType( 'int', $next_post_id );
+		$this->assertEquals( $post_name, get_post( $next_post_id )->post_name );
+		$this->assertEquals( $next_post_id, $first_post_id );
+
+		$this->assertEqualSets(
+			array(
+				home_url( '/foo/' ),
+				home_url( '/bar/' ),
+			),
+			get_post_meta( $next_post_id, AMP_Validation_Utils::AMP_URL_META, false )
+		);
 	}
 
 	/**

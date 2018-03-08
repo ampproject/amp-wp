@@ -1066,7 +1066,13 @@ class AMP_Validation_Utils {
 
 		// If there already exists a post for the given validation errors, just amend the $url to the existing post.
 		$post_for_other_url = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
+		if ( ! $post_for_other_url ) {
+			$post_for_other_url = get_page_by_path( $post_name . '__trashed', OBJECT, self::POST_TYPE_SLUG );
+		}
 		if ( $post_for_other_url ) {
+			if ( 'trash' === $post_for_other_url->post_status ) {
+				wp_untrash_post( $post_for_other_url->ID );
+			}
 			if ( ! in_array( $url, get_post_meta( $post_for_other_url->ID, self::AMP_URL_META, false ), true ) ) {
 				add_post_meta( $post_for_other_url->ID, self::AMP_URL_META, wp_slash( $url ), false );
 			}
