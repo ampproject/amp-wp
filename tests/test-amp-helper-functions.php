@@ -36,6 +36,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_without_pretty_permalinks() {
+		remove_theme_support( 'amp' );
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
 
@@ -109,6 +110,40 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10 );
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+	}
+
+	/**
+	 * Test amp_get_permalink() with theme support paired mode.
+	 *
+	 * @covers \amp_get_permalink()
+	 */
+	public function test_amp_get_permalink_with_theme_support() {
+		global $wp_rewrite;
+		add_theme_support( 'amp' );
+
+		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+		$wp_rewrite->use_trailing_slashes = true;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules();
+
+		$post_id = $this->factory()->post->create();
+		$this->assertEquals( get_permalink( $post_id ), amp_get_permalink( $post_id ) );
+
+		add_theme_support( 'amp', array(
+			'template_dir' => 'amp',
+		) );
+	}
+
+	/**
+	 * Test amp_remove_endpoint.
+	 *
+	 * @covers \amp_remove_endpoint()
+	 */
+	public function test_amp_remove_endpoint() {
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/?amp' ) );
+		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
+		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
 	}
 
 	/**

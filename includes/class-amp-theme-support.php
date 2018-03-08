@@ -77,13 +77,7 @@ class AMP_Theme_Support {
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
-
-		if ( ! is_amp_endpoint() ) {
-			amp_add_frontend_actions();
-		} else {
-			self::setup_commenting();
-			add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
-		}
+		self::add_temporary_discussion_restrictions();
 
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
@@ -98,20 +92,55 @@ class AMP_Theme_Support {
 			}
 		}
 
-		if ( amp_is_canonical() ) {
+		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
-			// Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
-			if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
-				wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because canonical may change in future.
-				exit;
-			}
+		/*
+		 * Note that wp action is use instead of template_redirect because some themes/plugins output
+		 * the response at this action and then short-circuit with exit. So this is why the the preceding
+		 * action to template_redirect--the wp action--is used instead.
+		 */
+		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+	}
+
+	/**
+	 * Finish initialization once query vars are set.
+	 *
+	 * @since 0.7
+	 */
+	public static function finish_init() {
+		if ( ! is_amp_endpoint() ) {
+			amp_add_frontend_actions();
+			return;
+		}
+
+		if ( amp_is_canonical() ) {
+			self::redirect_canonical_amp();
 		} else {
 			self::register_paired_hooks();
 		}
 
-		self::register_hooks();
-		self::$embed_handlers    = self::register_content_embed_handlers();
+		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
+		self::$embed_handlers    = self::register_content_embed_handlers();
+	}
+
+	/**
+	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+	 *
+	 * @since 0.7
+	 */
+	public static function redirect_canonical_amp() {
+		if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
+			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
+			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
+			}
+
+			$url = amp_remove_endpoint( $url );
+
+			wp_safe_redirect( $url, 302 ); // Temporary redirect because canonical may change in future.
+			exit;
+		}
 	}
 
 	/**
@@ -166,7 +195,7 @@ class AMP_Theme_Support {
 	/**
 	 * Register hooks.
 	 */
-	public static function register_hooks() {
+	public static function add_hooks() {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
@@ -215,6 +244,10 @@ class AMP_Theme_Support {
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
+
+		if ( AMP_Validation_Utils::should_validate_response() ) {
+			AMP_Validation_Utils::add_validation_hooks();
+		}
 
 		// @todo Add character conversion.
 	}
@@ -279,7 +312,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Hook into a form submissions, such as comment the form or some other .
+	 * Hook into a form submissions, such as the comment form or some other form submission.
 	 *
 	 * @since 0.7.0
 	 * @global string $pagenow
@@ -370,14 +403,14 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Set up commenting.
+	 * Set up some restrictions for commenting based on amp-live-list limitations.
+	 *
+	 * Temporarily force comments to be listed in descending order.
+	 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
+	 *
+	 * @link https://github.com/ampproject/amphtml/issues/5396
 	 */
-	public static function setup_commenting() {
-		/*
-		 * Temporarily force comments to be listed in descending order.
-		 *
-		 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
-		 */
+	protected static function add_temporary_discussion_restrictions() {
 		add_filter( 'option_comment_order', function() {
 			return 'desc';
 		}, PHP_INT_MAX );
@@ -584,13 +617,7 @@ class AMP_Theme_Support {
 			$url = add_query_arg( $added_query_vars, $url );
 		}
 
-		// Strip endpoint.
-		$url = preg_replace( ':/' . preg_quote( AMP_QUERY_VAR, ':' ) . '(?=/?(\?|#|$)):', '', $url );
-
-		// Strip query var.
-		$url = remove_query_arg( AMP_QUERY_VAR, $url );
-
-		return $url;
+		return amp_remove_endpoint( $url );
 	}
 
 	/**
@@ -953,13 +980,15 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
+		$is_validation_debug_mode = ! empty( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
+
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element'    => true,
-				'remove_invalid_callback' => null,
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'disable_invalid_removal' => $is_validation_debug_mode,
 			),
 			$args
 		);
@@ -992,6 +1021,12 @@ class AMP_Theme_Support {
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
 			/* translators: %s is the charset of the current site */
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		}
+
+		if ( AMP_Validation_Utils::should_validate_response() ) {
+			AMP_Validation_Utils::finalize_validation( $dom, array(
+				'remove_source_comments' => ! $is_validation_debug_mode,
+			) );
 		}
 
 		$response  = "<!DOCTYPE html>\n";

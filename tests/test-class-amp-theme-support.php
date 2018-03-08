@@ -94,8 +94,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response() {
+		global $wp_widget_factory;
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
 		$wp_widget_factory = new WP_Widget_Factory();
 		wp_widgets_init();
 
@@ -127,7 +129,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$removed_nodes  = array();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
-			'remove_invalid_callback' => function( $removed ) use ( &$removed_nodes ) {
+			'validation_error_callback' => function( $removed ) use ( &$removed_nodes ) {
 				$removed_nodes[ $removed['node']->nodeName ] = $removed['node'];
 			},
 		) );
@@ -149,7 +151,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
 
 		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 2, $removed_nodes );
+		$this->assertCount( 3, $removed_nodes );
 		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 	}

@@ -1559,9 +1559,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$node   = $parent;
 			$parent = $parent->parentNode;
 			if ( $parent ) {
-				$this->remove_invalid_child( $node );
+				$parent->removeChild( $node );
 			}
 		}
 	}
 }
-

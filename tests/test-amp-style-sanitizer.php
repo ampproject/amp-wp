@@ -173,9 +173,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 			'style_with_no_head' => array(
-				'<html amp><body>Not good!<style>body{color:red}</style></body>',
+				'<html amp><body>Not good!<style>body{color:red;overflow:auto;overflow-x:scroll;overflow-y:scroll;}</style></body>',
 				array(
-					'body{color:red}',
+					'body{color:red;}',
 				),
 			),
 		);
