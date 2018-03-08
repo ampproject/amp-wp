@@ -137,7 +137,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
 		// Create a new DOM document
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		// Load the rendered page into it
 		$dom->loadHTML( $amp_rendered );
 
@@ -171,7 +171,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
@@ -202,7 +202,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 		// Two amp-analytics components should be in the page
