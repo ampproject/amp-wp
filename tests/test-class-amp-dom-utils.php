@@ -157,7 +157,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 			array( 10 ),
 			array( 100 ),
 			array( 1000 ),
-			array( 10000 )
+			array( 10000 ),
 		);
 	}
 
@@ -171,7 +171,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	public function test_attribute_conversion_on_long_iframe_srcdocs( $iterations ) {
 		$html = '<html amp><head><meta charset="utf-8"></head><body><table>';
 
-		for( $i = 0; $i < $iterations; $i++ ) {
+		for ( $i = 0; $i < $iterations; $i++ ) {
 			$html .= '
 				<tr>
 				<td class="rank" style="width:2%;">1453</td>
