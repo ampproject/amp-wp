@@ -394,10 +394,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'node' => $element,
 			) );
 		}
-		$stylesheet = preg_replace( '/overflow\s*:\s*(auto|scroll)\s*;?\s*/', '', $stylesheet, -1, $overlow_count );
+		$stylesheet = preg_replace( '/overflow(-[xy])?\s*:\s*(auto|scroll)\s*;?\s*/', '', $stylesheet, -1, $overlow_count );
 		if ( $overlow_count > 0 && ! empty( $this->args['validation_error_callback'] ) ) {
 			call_user_func( $this->args['validation_error_callback'], array(
-				'code' => 'css_overflow_removed',
+				'code' => 'css_overflow_property_removed',
 				'node' => $element,
 			) );
 		}
@@ -548,7 +548,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * @todo This removal needs to be reported.
 		 * @see https://www.ampproject.org/docs/reference/spec.html#properties
 		 */
-		if ( preg_match( '#^overflow#i', $property ) && preg_match( '#^(auto|scroll)$#i', $value ) ) {
+		if ( preg_match( '#^overflow(-[xy])?$#i', $property ) && preg_match( '#^(auto|scroll)$#i', $value ) ) {
 			return array( false, false );
 		}
 
