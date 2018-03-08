@@ -23,7 +23,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		wp_embed_unregister_handler( 'amp-twitter', -1 );
 	}
 
-	function shortcode( $attr ) {
+	public function shortcode( $attr ) {
 		$attr = wp_parse_args( $attr, array(
 			'tweet' => false,
 		) );
@@ -59,7 +59,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 	}
 
-	function oembed( $matches, $attr, $url, $rawattr ) {
+	public function oembed( $matches, $attr, $url, $rawattr ) {
 		$id = false;
 
 		if ( isset( $matches[5] ) && is_numeric( $matches[5] ) ) {
