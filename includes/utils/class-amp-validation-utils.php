@@ -27,6 +27,13 @@ class AMP_Validation_Utils {
 	const DEBUG_QUERY_VAR = 'amp_debug';
 
 	/**
+	 * Query var for cache-busting.
+	 *
+	 * @var string
+	 */
+	const CACHE_BUST_QUERY_VAR = 'amp_cache_bust';
+
+	/**
 	 * The slug of the post type to store AMP errors.
 	 *
 	 * @var string
@@ -171,6 +178,13 @@ class AMP_Validation_Utils {
 	public static $enqueued_style_sources = array();
 
 	/**
+	 * Post IDs for posts that have been updated which need to be re-validated.
+	 *
+	 * @var int[]
+	 */
+	public static $posts_pending_frontend_validation = array();
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
@@ -180,6 +194,7 @@ class AMP_Validation_Utils {
 			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
 			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+			add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
 		}
 
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
@@ -272,6 +287,60 @@ class AMP_Validation_Utils {
 		self::callback_wrappers();
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
+	}
+
+	/**
+	 * Handle save_post action to queue re-validation of the post on the frontend.
+	 *
+	 * @see AMP_Validation_Utils::validate_queued_posts_on_frontend()
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post.
+	 */
+	public static function handle_save_post_prompting_validation( $post_id, $post ) {
+		$should_validate_post = (
+			is_post_type_viewable( $post->post_type )
+			&&
+			! wp_is_post_autosave( $post )
+			&&
+			! wp_is_post_revision( $post )
+		);
+		if ( $should_validate_post ) {
+			self::$posts_pending_frontend_validation[] = $post_id;
+
+			// The reason for shutdown is to ensure that all postmeta changes have been saved, including whether AMP is enabled.
+			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_queued_posts_on_frontend' ) ) ) {
+				add_action( 'shutdown', array( __CLASS__, 'validate_queued_posts_on_frontend' ) );
+			}
+		}
+	}
+
+	/**
+	 * Validate the posts pending frontend validation.
+	 *
+	 * @see AMP_Validation_Utils::handle_save_post_prompting_validation()
+	 */
+	public static function validate_queued_posts_on_frontend() {
+		$posts = array_filter(
+			array_map( 'get_post', self::$posts_pending_frontend_validation ),
+			function( $post ) {
+				return $post && post_supports_amp( $post ) && 'trash' !== $post->post_status;
+			}
+		);
+
+		// @todo Only validate the first and then queue the rest in WP Cron?
+		foreach ( $posts as $post ) {
+			$url = amp_get_permalink( $post->ID );
+			if ( ! $url ) {
+				continue;
+			}
+
+			$validation_errors = self::validate_url( $url );
+			if ( is_wp_error( $validation_errors ) ) {
+				continue;
+			}
+
+			self::store_validation_errors( $validation_errors, $url );
+		}
 	}
 
 	/**
@@ -397,7 +466,6 @@ class AMP_Validation_Utils {
 				$removed_attributes[ $validation_error['node_name'] ] += 1;
 			}
 
-			// @todo It would be best if the invalid source was tied to the invalid elements and attributes.
 			if ( ! empty( $validation_error['sources'] ) ) {
 				$source = array_pop( $validation_error['sources'] );
 
@@ -438,12 +506,11 @@ class AMP_Validation_Utils {
 	 *
 	 * If it's not valid AMP, it displays an error message above the 'Classic' editor.
 	 *
-	 * @todo There needs to be a save_post action (as there was previously) to do a loopback request for the $url to update the validation results.
 	 * @param WP_Post $post The updated post.
 	 * @return void
 	 */
 	public static function print_edit_form_validation_status( $post ) {
-		if ( ! post_supports_amp( $post ) ) {
+		if ( ! post_supports_amp( $post ) || ! self::has_cap() ) {
 			return;
 		}
 
@@ -490,6 +557,9 @@ class AMP_Validation_Utils {
 				);
 			}
 			if ( $url ) {
+				if ( $validation_status_post ) {
+					echo ' | ';
+				}
 				echo sprintf(
 					' <a href="%s" aria-label="%s" target="_blank">%s</a>',
 					esc_url( self::get_debug_url( $url ) ),
@@ -867,6 +937,50 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Finalize validation.
+	 *
+	 * @param DOMDocument $dom Document.
+	 * @param array       $args {
+	 *     Args.
+	 *
+	 *     @type bool $remove_source_comments           Whether source comments should be removed. Defaults to true.
+	 *     @type bool $send_validation_errors_header    Whether the X-AMP-Validation-Errors header should be sent. Defaults to true.
+	 *     @type bool $append_validation_status_comment Whether the validation errors should be appended as an HTML comment. Defaults to true.
+	 * }
+	 */
+	public static function finalize_validation( DOMDocument $dom, $args = array() ) {
+		$args = array_merge(
+			array(
+				'send_validation_errors_header'    => true,
+				'remove_source_comments'           => true,
+				'append_validation_status_comment' => true,
+			),
+			$args
+		);
+
+		if ( $args['send_validation_errors_header'] && ! headers_sent() ) {
+			self::send_validation_errors_header();
+		}
+
+		if ( $args['remove_source_comments'] ) {
+			self::remove_source_comments( $dom );
+		}
+
+		if ( $args['append_validation_status_comment'] ) {
+			$report  = "\n# Validation Status\n";
+			$report .= "\n## Summary\n";
+			$report .= wp_json_encode( self::summarize_validation_errors( self::$validation_errors ), 128 /* JSON_PRETTY_PRINT */ ) . "\n";
+			$report .= "\n## Details\n";
+			$report .= wp_json_encode( self::$validation_errors, 128 /* JSON_PRETTY_PRINT */ ) . "\n";
+			$comment = $dom->createComment( $report );
+			$body    = $dom->getElementsByTagName( 'body' )->item( 0 );
+			if ( $body ) {
+				$body->appendChild( $comment );
+			}
+		}
+	}
+
+	/**
 	 * Adds the validation callback if front-end validation is needed.
 	 *
 	 * @param array $sanitizers The AMP sanitizers.
@@ -932,16 +1046,6 @@ class AMP_Validation_Utils {
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors( $validation_errors, $url ) {
-
-		// Remove query vars that are only used to initiate validation requests.
-		$url = remove_query_arg(
-			array(
-				self::VALIDATE_QUERY_VAR,
-				self::DEBUG_QUERY_VAR,
-			),
-			$url
-		);
-
 		$post_for_this_url = self::get_validation_status_post( $url );
 
 		// Since there are no validation errors and there is an existing $existing_post_id, just delete the post.
@@ -1020,6 +1124,7 @@ class AMP_Validation_Utils {
 		}
 		$validation_errors = self::validate_url( $url );
 		if ( is_array( $validation_errors ) && count( $validation_errors ) > 0 ) {
+			self::store_validation_errors( $validation_errors, $url );
 			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
 		} else {
 			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
@@ -1033,23 +1138,33 @@ class AMP_Validation_Utils {
 	 * The validation errors will be stored in the validation status custom post type,
 	 * as well as in a transient.
 	 *
-	 * @todo Instead of storing validation errors in process_response, it should be done here instead.
 	 * @param string $url The URL to validate.
 	 * @return array|WP_Error The validation errors, or WP_Error on error.
 	 */
 	public static function validate_url( $url ) {
 		$validation_url = add_query_arg(
-			self::VALIDATE_QUERY_VAR,
-			1,
+			array(
+				self::VALIDATE_QUERY_VAR   => 1,
+				self::CACHE_BUST_QUERY_VAR => wp_rand(),
+			),
 			$url
 		);
 
 		$r = wp_remote_get( $validation_url, array(
 			'cookies'   => wp_unslash( $_COOKIE ),
 			'sslverify' => false,
+			'headers'   => array(
+				'Cache-Control' => 'no-cache',
+			),
 		) );
 		if ( is_wp_error( $r ) ) {
 			return $r;
+		}
+		if ( wp_remote_retrieve_response_code( $r ) >= 400 ) {
+			return new WP_Error(
+				wp_remote_retrieve_response_code( $r ),
+				wp_remote_retrieve_response_message( $r )
+			);
 		}
 		$json = wp_remote_retrieve_header( $r, self::VALIDATION_ERRORS_RESPONSE_HEADER_NAME );
 		if ( ! $json ) {
@@ -1059,6 +1174,7 @@ class AMP_Validation_Utils {
 		if ( ! is_array( $validation_errors ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
+
 		return $validation_errors;
 	}
 
@@ -1240,26 +1356,29 @@ class AMP_Validation_Utils {
 		if ( self::RECHECK_ACTION !== $action ) {
 			return $redirect;
 		}
-		$urls = array();
+		$remaining_invalid_urls = array();
 		foreach ( $items as $item ) {
 			$url = get_post_meta( $item, self::AMP_URL_META, true );
-			if ( ! empty( $url ) ) {
-				$urls[] = $url;
-				self::validate_url( $url );
+			if ( empty( $url ) ) {
+				continue;
+			}
+
+			$validation_errors = self::validate_url( $url );
+			if ( ! is_array( $validation_errors ) ) {
+				continue;
+			}
+
+			self::store_validation_errors( $validation_errors, $url );
+			if ( ! empty( $validation_errors ) ) {
+				$remaining_invalid_urls[] = $url;
 			}
 		}
 
 		// Get the URLs that still have errors after rechecking.
 		$args = array(
 			self::URLS_TESTED      => count( $items ),
-			self::REMAINING_ERRORS => '0',
+			self::REMAINING_ERRORS => empty( $remaining_invalid_urls ) ? '0' : '1',
 		);
-		foreach ( $urls as $url ) {
-			if ( self::get_validation_status_post( $url ) ) {
-				$args[ self::REMAINING_ERRORS ] = '1';
-				break;
-			}
-		}
 
 		return add_query_arg( $args, $redirect );
 	}
@@ -1305,8 +1424,11 @@ class AMP_Validation_Utils {
 			$url = wp_validate_redirect( wp_unslash( $_GET['recheck_url'] ) );
 		}
 		$validation_errors = self::validate_url( $url );
-		self::store_validation_errors( $validation_errors, $url );
-		$remaining_errors = ! empty( $validation_errors ) ? '1' : '0';
+		$remaining_errors  = true;
+		if ( is_array( $validation_errors ) ) {
+			self::store_validation_errors( $validation_errors, $url );
+			$remaining_errors = ! empty( $validation_errors );
+		}
 
 		$redirect = wp_get_referer();
 		if ( ! $redirect || empty( $validation_errors ) ) {
@@ -1319,7 +1441,7 @@ class AMP_Validation_Utils {
 		}
 		$args = array(
 			self::URLS_TESTED      => '1',
-			self::REMAINING_ERRORS => $remaining_errors,
+			self::REMAINING_ERRORS => $remaining_errors ? '1' : '0',
 		);
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();

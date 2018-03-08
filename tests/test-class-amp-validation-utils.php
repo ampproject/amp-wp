@@ -787,7 +787,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$validated_url = home_url( '/foo/' );
 		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
 			unset( $pre, $r );
-			$that->assertEquals(
+			$that->assertStringStartsWith(
 				add_query_arg(
 					AMP_Validation_Utils::VALIDATE_QUERY_VAR,
 					1,
@@ -953,6 +953,17 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		// The action isn't correct, so the callback should return the URL unchanged.
 		$this->assertEquals( $initial_redirect, AMP_Validation_Utils::handle_bulk_action( $initial_redirect, 'trash', $items ) );
+
+		$that   = $this;
+		$filter = function() use ( $that ) {
+			return array(
+				'body'    => '',
+				'headers' => array(
+					AMP_Validation_Utils::VALIDATION_ERRORS_RESPONSE_HEADER_NAME => wp_json_encode( $that->get_mock_errors() ),
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
 		$this->assertEquals(
 			add_query_arg(
 				array(
@@ -963,6 +974,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			),
 			AMP_Validation_Utils::handle_bulk_action( $initial_redirect, AMP_Validation_Utils::RECHECK_ACTION, $items )
 		);
+		remove_filter( 'pre_http_request', $filter, 10, 3 );
 	}
 
 	/**
