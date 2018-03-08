@@ -684,7 +684,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a class="foo" href="http://foo bar">value</a>',
 				'<a class="foo" href="">value</a>',
 			),
-			'a_with_mail_host'                                         => array(
+			'a_with_wrong_schemeless_host'                              => array(
+				'<a class="foo" href="//bad domain with a space.com/foo">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+			'a_with_mail_host'                                          => array(
 				'<a class="foo" href="mail to:foo@bar.com">value</a>',
 				'<a class="foo" href="">value</a>',
 			),
