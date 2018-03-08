@@ -1,7 +1,7 @@
 <?php
 
 class AMP_WP_Utils__Parse_Url__Test extends WP_UnitTestCase {
-	function get_test_data() {
+	public function get_test_data() {
 		return array(
 			'valid__no_component' => array(
 				'https://example.com/path',
@@ -39,7 +39,7 @@ class AMP_WP_Utils__Parse_Url__Test extends WP_UnitTestCase {
 	/**
 	 * @dataProvider get_test_data
 	 */
-	function test__method( $url, $expected, $component ) {
+	public function test__method( $url, $expected, $component ) {
 		$actual = AMP_WP_Utils::parse_url( $url, $component );
 
 		$this->assertEquals( $expected, $actual );
