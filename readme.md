@@ -64,6 +64,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Creation of AMP-related notifications, on entering invalid content in the 'classic' editor. See [#912](https://github.com/Automattic/amp-wp/pull/912/). Props kienstra, westonruter, ThierryA.
 - Add output buffering, ensuring the entire page is valid AMP. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#857](https://github.com/Automattic/amp-wp/pull/857). Props westonruter, ThierryA.
 - Update the generated sanitizer file to the AMP spec, and simplify the file that generates it. See [#929](https://github.com/Automattic/amp-wp/pull/929). Props westonruter.
+- Add validation of host names in URLs. See [#983](https://github.com/Automattic/amp-wp/pull/983). Props rubengonzalezmrf.
 
 See [0.7 milestone](https://github.com/Automattic/amp-wp/milestone/6?closed=1).
 
