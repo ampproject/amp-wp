@@ -794,7 +794,7 @@ class AMP_Theme_Support {
 	 *
 	 * @param DOMDocument $dom Doc.
 	 */
-	protected static function ensure_required_markup( DOMDocument $dom ) {
+	public static function ensure_required_markup( DOMDocument $dom ) {
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
 			$head = $dom->createElement( 'head' );
@@ -828,14 +828,21 @@ class AMP_Theme_Support {
 			) );
 			$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 		}
-		if ( ! self::schema_org_present( $dom ) ) {
+		// Prevent schema.org duplicates.
+		$schema_org_script = null;
+		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
+			if ( 'application/ld+json' === $script->getAttribute( 'type' ) && preg_match( '/{"@context":"https?:[\\\]\/[\\\]\/schema\.org/', $script->nodeValue ) ) {
+				$schema_org_script = $script->nodeValue;
+				break;
+			}
+		}
+		if ( ! $schema_org_script ) {
 			$script = $dom->createElement( 'script', wp_json_encode( amp_get_schemaorg_metadata() ) );
 			AMP_DOM_Utils::add_attributes_to_node( $script, array(
 				'type' => 'application/ld+json',
 			) );
 			$head->appendChild( $script );
 		}
-
 		// Ensure rel=canonical link.
 		$rel_canonical = null;
 		foreach ( $head->getElementsByTagName( 'link' ) as $link ) {
@@ -1012,21 +1019,5 @@ class AMP_Theme_Support {
 		);
 
 		return $response;
-	}
-
-	/**
-	 * Checks if there is already a schema.org script in the head.
-	 *
-	 * @param DOMDocument $dom Representation of the document.
-	 * @return bool
-	 */
-	public static function schema_org_present( DOMDocument $dom ) {
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
-			if ( 1 === preg_match( '/{"@context":"https?:[\\\]\/[\\\]\/schema\.org/', $script->nodeValue ) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

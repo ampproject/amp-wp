@@ -332,47 +332,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test schema_org_present().
+	 * Test ensure_required_markup().
 	 *
-	 * @dataProvider get_script_data
-	 * @covers AMP_Theme_Support::schema_org_present()
-	 * @param string  $script The value of the script.
-	 * @param boolean $expected The expected result.
+	 * @covers AMP_Theme_Support::ensure_required_markup()
 	 */
-	public function test_schema_org_present( $script, $expected ) {
-		$page = '<html><head><script>%s</script></head><body>Test</body></html>';
-		$dom  = new DOMDocument();
-		$dom->loadHTML( sprintf( $page, $script ) );
-		$this->assertEquals( $expected, AMP_Theme_Support::schema_org_present( $dom ) );
-	}
+	public function test_ensure_required_markup() {
+		$schema_test_value = '<script type="application/ld+json">{"@context":"http:\/\/schema.org"';
 
-	/**
-	 * Data provider for test_schema_org_present().
-	 *
-	 * @return array
-	 */
-	public function get_script_data() {
-		return array(
-			'string_schema_value'       => array(
-				'schema.org',
-				false,
-			),
-			'string_not_schema'         => array(
-				'somethinghere.org',
-				false,
-			),
-			'json_schema_present_https' => array(
-				wp_json_encode( array( '@context' => 'https://schema.org' ) ),
-				true,
-			),
-			'json_schema_present_http'  => array(
-				wp_json_encode( array( '@context' => 'http://schema.org' ) ),
-				true,
-			),
-			'json_schema_not_present'   => array(
-				wp_json_encode( array( '@anothercontext' => 'https://schema.org' ) ),
-				false,
-			),
-		);
+		$page = '<html><head></head><body>Test</body></html>';
+		$dom  = new DOMDocument();
+		$dom->loadHTML( $page );
+		AMP_Theme_Support::ensure_required_markup( $dom );
+		$this->assertContains( $schema_test_value, $dom->saveHTML() );
+
+		$page = '<html><head<script type="application/ld+json">{"@context":"http:\/\/schema.org","publisher":{"@type":"Organization","name":"Test Blog"}}</script>></head><body>Test</body></html>';
+		$dom  = new DOMDocument();
+		$dom->loadHTML( $page );
+		AMP_Theme_Support::ensure_required_markup( $dom );
+		$this->assertEquals( substr_count( $dom->saveHTML(), $schema_test_value ), 1 );
 	}
 }
