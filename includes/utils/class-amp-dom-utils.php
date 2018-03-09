@@ -233,7 +233,7 @@ class AMP_DOM_Utils {
 
 		$html = preg_replace_callback(
 			// Match all start tags that probably contain a binding attribute.
-			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s+[^>]+\]=[^>]+)\s*>#',
+			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
 			$replace_callback,
 			$html
 		);
