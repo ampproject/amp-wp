@@ -283,19 +283,31 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 *
 	 * @covers AMP_Validation_Utils::locate_sources()
 	 * @covers AMP_Validation_Utils::parse_source_comment()
-	 * @covers AMP_Validation_Utils::get_source_comment_start()
-	 * @covers AMP_Validation_Utils::get_source_comment_end()
+	 * @covers AMP_Validation_Utils::get_source_comment()
 	 * @covers AMP_Validation_Utils::remove_source_comments()
 	 */
 	public function test_source_comments() {
+		$source1 = array(
+			'type'      => 'plugin',
+			'name'      => 'foo',
+			'shortcode' => 'test',
+			'function'  => __FUNCTION__,
+		);
+		$source2 = array(
+			'type'     => 'theme',
+			'name'     => 'bar',
+			'function' => __FUNCTION__,
+			'hook'     => 'something',
+		);
+
 		$dom = AMP_DOM_Utils::get_dom_from_content( implode(
 			'',
 			array(
-				AMP_Validation_Utils::get_source_comment_start( 'plugin', 'foo', array( 'shortcode' => 'test' ) ),
-				AMP_Validation_Utils::get_source_comment_start( 'theme', 'bar', array( 'hook' => 'something' ) ),
+				AMP_Validation_Utils::get_source_comment( $source1, true ),
+				AMP_Validation_Utils::get_source_comment( $source2, true ),
 				'<b id="test">Test</b>',
-				AMP_Validation_Utils::get_source_comment_end( 'theme', 'bar' ),
-				AMP_Validation_Utils::get_source_comment_end( 'plugin', 'foo' ),
+				AMP_Validation_Utils::get_source_comment( $source2, false ),
+				AMP_Validation_Utils::get_source_comment( $source1, false ),
 			)
 		) );
 
@@ -315,33 +327,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertInternalType( 'array', $sources );
 		$this->assertCount( 2, $sources );
 
-		$expected = array(
-			'type' => 'plugin',
-			'name' => 'foo',
-			'args' => array(
-				'shortcode' => 'test',
-			),
-		);
-		$this->assertEquals( $expected, $sources[0] );
-		$expected['closing'] = false;
-		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[0] ) );
-		$expected['closing'] = true;
-		unset( $expected['args'] );
-		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[3] ) );
+		$this->assertEquals( $source1, $sources[0] );
+		$parsed_comment = AMP_Validation_Utils::parse_source_comment( $comments[0] );
+		$this->assertEquals( $source1, $parsed_comment['source'] );
+		$this->assertFalse( $parsed_comment['closing'] );
+		$parsed_comment = AMP_Validation_Utils::parse_source_comment( $comments[3] );
+		$this->assertEquals( $source1, $parsed_comment['source'] );
+		$this->assertTrue( $parsed_comment['closing'] );
 
-		$expected = array(
-			'type' => 'theme',
-			'name' => 'bar',
-			'args' => array(
-				'hook' => 'something',
-			),
-		);
-		$this->assertEquals( $expected, $sources[1] );
-		$expected['closing'] = false;
-		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[1] ) );
-		$expected['closing'] = true;
-		unset( $expected['args'] );
-		$this->assertEquals( $expected, AMP_Validation_Utils::parse_source_comment( $comments[2] ) );
+		$this->assertEquals( $source2, $sources[1] );
+		$parsed_comment = AMP_Validation_Utils::parse_source_comment( $comments[1] );
+		$this->assertEquals( $source2, $parsed_comment['source'] );
+		$this->assertFalse( $parsed_comment['closing'] );
+		$parsed_comment = AMP_Validation_Utils::parse_source_comment( $comments[2] );
+		$this->assertEquals( $source2, $parsed_comment['source'] );
+		$this->assertTrue( $parsed_comment['closing'] );
 
 		AMP_Validation_Utils::remove_source_comments( $dom );
 		$this->assertEquals( 0, $xpath->query( '//comment()' )->length );
@@ -356,7 +356,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->set_capability();
-		$action_non_plugin        = 'foo_action';
+		$action_no_tag_output     = 'foo_action';
+		$action_core_output       = 'core_action';
 		$action_no_output         = 'bar_action_no_output';
 		$action_function_callback = 'baz_action_function';
 		$action_no_argument       = 'test_action_no_argument';
@@ -369,7 +370,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		add_action( $action_one_argument, array( $this, 'output_notice' ) );
 		add_action( $action_two_arguments, array( $this, 'output_message' ), 10, 2 );
 		add_action( $action_no_output, array( $this, 'get_string' ), 10, 2 );
-		add_action( $action_non_plugin, 'the_ID' );
+		add_action( $action_no_tag_output, 'the_ID' );
+		add_action( $action_core_output, 'edit_post_link' );
 		add_action( $action_no_output, '__return_false' );
 
 		$this->assertEquals( 10, has_action( $action_no_argument, array( $this, 'output_div' ) ) );
@@ -378,7 +380,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] = 1;
 		AMP_Validation_Utils::callback_wrappers();
-		$this->assertEquals( 10, has_action( $action_non_plugin, 'the_ID' ) );
+		$this->assertNotEquals( 10, has_action( $action_no_tag_output, 'the_ID' ) );
 		$this->assertNotEquals( 10, has_action( $action_no_output, array( $this, 'get_string' ) ) );
 		$this->assertNotEquals( 10, has_action( $action_no_argument, array( $this, 'output_div' ) ) );
 		$this->assertNotEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
@@ -388,23 +390,23 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
 		$this->assertContains( '<div class="notice notice-error">', $output );
-		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
-		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		ob_start();
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
 		$this->assertContains( '<div></div>', $output );
-		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
-		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		ob_start();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
 		$this->assertContains( $notice, $output );
 		$this->assertContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
-		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
-		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		ob_start();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
@@ -413,22 +415,29 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
 		$this->assertContains( $expected_output, $output );
-		$this->assertContains( '<!--amp-source-stack:plugin:amp', $output );
-		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
-		// This action's callback isn't from a plugin or theme, so it shouldn't be wrapped in comments.
+		// This action's callback doesn't output any HTML tags, so no HTML should be present.
 		ob_start();
-		do_action( $action_non_plugin );
+		do_action( $action_no_tag_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--amp-source-stack:plugin:', $output );
-		$this->assertNotContains( '<!--/amp-source-stack:plugin:', $output );
+		$this->assertNotContains( '<!--amp-source-stack ', $output );
+		$this->assertNotContains( '<!--/amp-source-stack ', $output );
+
+		// This action's callback comes from core.
+		ob_start();
+		do_action( $action_core_output );
+		$output = ob_get_clean();
+		$this->assertContains( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
+		$this->assertContains( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		ob_start();
 		do_action( $action_no_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--amp-source-stack:plugin:', $output );
-		$this->assertNotContains( '<!--/amp-source-stack:plugin:', $output );
+		$this->assertNotContains( '<!--amp-source-stack ', $output );
+		$this->assertNotContains( '<!--/amp-source-stack ', $output );
 	}
 
 	/**
@@ -443,7 +452,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		} );
 
 		$this->assertSame(
-			'before<!--amp-source-stack:plugin:amp {"shortcode":"test"}--><b>test</b><!--/amp-source-stack:plugin:amp-->after',
+			'before<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}-->after',
 			do_shortcode( 'before[test]after' )
 		);
 	}
@@ -451,16 +460,16 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test get_source
 	 *
-	 * @covers AMP_Validation_Utils::print_edit_form_validation_status()
+	 * @covers AMP_Validation_Utils::get_source()
 	 */
 	public function test_get_source() {
-		$plugin = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
-		$this->assertContains( 'amp', $plugin['name'] );
-		$this->assertEquals( 'plugin', $plugin['type'] );
-		$the_content = AMP_Validation_Utils::get_source( 'the_content' );
-		$this->assertEquals( null, $the_content );
-		$core_function = AMP_Validation_Utils::get_source( 'the_content' );
-		$this->assertEquals( null, $core_function );
+		$source = AMP_Validation_Utils::get_source( 'amp_after_setup_theme' );
+		$this->assertEquals( 'amp', $source['name'] );
+		$this->assertEquals( 'plugin', $source['type'] );
+
+		$source = AMP_Validation_Utils::get_source( 'the_content' );
+		$this->assertEquals( 'wp-includes', $source['name'] );
+		$this->assertEquals( 'core', $source['type'] );
 	}
 
 	/**
@@ -475,9 +484,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				echo $test_string; // WPCS: XSS OK.
 			},
 			'accepted_args' => 0,
-			'type'          => 'plugin',
-			'name'          => 'amp',
-			'hook'          => 'bar',
+			'source'        => array(
+				'type' => 'plugin',
+				'name' => 'amp',
+				'hook' => 'bar',
+			),
 		);
 
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
@@ -488,15 +499,17 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
 		$this->assertContains( $test_string, $output );
-		$this->assertContains( '<!--amp-source-stack:plugin:amp {"hook":"bar"}', $output );
-		$this->assertContains( '<!--/amp-source-stack:plugin:amp', $output );
+		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
+		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 
 		$callback = array(
 			'function'      => array( $this, 'get_string' ),
 			'accepted_args' => 0,
-			'type'          => 'plugin',
-			'name'          => 'amp',
-			'hook'          => 'bar',
+			'source'        => array(
+				'type' => 'plugin',
+				'name' => 'amp',
+				'hook' => 'bar',
+			),
 		);
 
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
@@ -627,7 +640,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		add_theme_support( 'amp' );
-		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 
 		$this->assertCount( 1, AMP_Validation_Utils::$validation_errors );
 		$this->assertEquals( 'script', AMP_Validation_Utils::$validation_errors[0]['node_name'] );
@@ -659,7 +672,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		AMP_Validation_Utils::reset_validation_results();
 		$url = home_url( '/?baz' );
-		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		AMP_Validation_Utils::reset_validation_results();
 		$meta = get_post_meta( $post_id, AMP_Validation_Utils::AMP_URL_META, false );
@@ -668,7 +681,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( $url, $meta );
 
 		$url = home_url( '/?foo-bar' );
-		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo-->' . $this->disallowed_tag . '<!--/amp-source-stack:plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		AMP_Validation_Utils::reset_validation_results();
 		$meta = get_post_meta( $post_id, AMP_Validation_Utils::AMP_URL_META, false );
@@ -678,7 +691,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( $url, $meta );
 
 		AMP_Validation_Utils::reset_validation_results();
-		AMP_Validation_Utils::process_markup( '<!--amp-source-stack:plugin:foo--><nonexistent></nonexistent><!--/amp-source-stack:plugin:foo-->' );
+		AMP_Validation_Utils::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}--><nonexistent></nonexistent><!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 		$custom_post_id = AMP_Validation_Utils::store_validation_errors( AMP_Validation_Utils::$validation_errors, $url );
 		AMP_Validation_Utils::reset_validation_results();
 		$error_post                = get_post( $custom_post_id );
