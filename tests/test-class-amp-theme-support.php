@@ -334,21 +334,41 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test ensure_required_markup().
 	 *
+	 * @dataProvider get_script_data
 	 * @covers AMP_Theme_Support::ensure_required_markup()
+	 * @param string  $script The value of the script.
+	 * @param boolean $expected The expected result.
 	 */
-	public function test_ensure_required_markup() {
-		$schema_test_value = '<script type="application/ld+json">{"@context":"http:\/\/schema.org"';
-
-		$page = '<html><head></head><body>Test</body></html>';
+	public function test_ensure_required_markup( $script, $expected ) {
+		$page = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
 		$dom  = new DOMDocument();
-		$dom->loadHTML( $page );
+		$dom->loadHTML( sprintf( $page, $script ) );
 		AMP_Theme_Support::ensure_required_markup( $dom );
-		$this->assertContains( $schema_test_value, $dom->saveHTML() );
-
-		$page = '<html><head<script type="application/ld+json">{"@context":"http:\/\/schema.org","publisher":{"@type":"Organization","name":"Test Blog"}}</script>></head><body>Test</body></html>';
-		$dom  = new DOMDocument();
-		$dom->loadHTML( $page );
-		AMP_Theme_Support::ensure_required_markup( $dom );
-		$this->assertEquals( substr_count( $dom->saveHTML(), $schema_test_value ), 1 );
+		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
+	}
+	/**
+	 * Data provider for test_ensure_required_markup.
+	 *
+	 * @return array
+	 */
+	public function get_script_data() {
+		return array(
+			'schema_org_not_present'        => array(
+				'',
+				1,
+			),
+			'schema_org_present'            => array(
+				wp_json_encode( array( '@context' => 'http://schema.org' ) ),
+				1,
+			),
+			'schema_org_output_not_escaped' => array(
+				'{"@context":"http://schema.org"',
+				1,
+			),
+			'schema_org_another_key'        => array(
+				wp_json_encode( array( '@anothercontext' => 'https://schema.org' ) ),
+				1,
+			),
+		);
 	}
 }

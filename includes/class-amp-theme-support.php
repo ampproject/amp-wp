@@ -829,18 +829,16 @@ class AMP_Theme_Support {
 			$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 		}
 		// Prevent schema.org duplicates.
-		$schema_org_script = null;
+		$has_schema_org_metadata = false;
 		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
-			if ( 'application/ld+json' === $script->getAttribute( 'type' ) && preg_match( '/{"@context":"https?:[\\\]\/[\\\]\/schema\.org/', $script->nodeValue ) ) {
-				$schema_org_script = $script->nodeValue;
+			if ( 'application/ld+json' === $script->getAttribute( 'type' ) && false !== strpos( $script->nodeValue, 'schema.org' ) ) {
+				$has_schema_org_metadata = true;
 				break;
 			}
 		}
-		if ( ! $schema_org_script ) {
+		if ( ! $has_schema_org_metadata ) {
 			$script = $dom->createElement( 'script', wp_json_encode( amp_get_schemaorg_metadata() ) );
-			AMP_DOM_Utils::add_attributes_to_node( $script, array(
-				'type' => 'application/ld+json',
-			) );
+			$script->setAttribute( 'type', 'application/ld+json' );
 			$head->appendChild( $script );
 		}
 		// Ensure rel=canonical link.
