@@ -284,7 +284,8 @@ class AMP_Validation_Utils {
 	 * Add hooks for doing validation during preprocessing/sanitizing.
 	 */
 	public static function add_validation_hooks() {
-		self::callback_wrappers();
+		self::wrap_widget_callbacks();
+		add_action( 'all', array( __CLASS__, 'wrap_hook_callbacks' ) );
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 	}
@@ -602,6 +603,7 @@ class AMP_Validation_Utils {
 	 * @return string HTML Comment.
 	 */
 	public static function get_source_comment( array $source, $is_start = true ) {
+		unset( $source['reflection'] );
 		return sprintf(
 			'<!--%samp-source-stack %s-->',
 			$is_start ? '' : '/',
@@ -674,48 +676,12 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Wraps callbacks in comments to indicate to the sanitizer which extension added them.
-	 *
-	 * Iterates through all of the registered callbacks for actions and filters.
-	 * If a callback is from a plugin and outputs markup, this wraps the markup in comments.
-	 * Later, the sanitizer can identify which theme or plugin the illegal markup is from.
+	 * Wrap callbacks for registered widgets to keep track of queued assets and the source for anything printed for validation.
 	 *
 	 * @global array $wp_filter
 	 * @return void
 	 */
-	public static function callback_wrappers() {
-		global $wp_filter;
-		$pending_wrap_callbacks = array();
-
-		// @todo Consider doing this at the 'all' action instead. This would be more reliable and we could reset $wp_filter at PHP_INT_MAX.
-		// Wrap all added filters and actions.
-		foreach ( $wp_filter as $hook => $wp_hook ) {
-			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $callback ) {
-					$source = self::get_source( $callback['function'] );
-					if ( ! $source ) {
-						continue;
-					}
-					$source['hook'] = $hook;
-
-					$pending_wrap_callbacks[ $hook ][] = array_merge(
-						$callback,
-						compact( 'priority', 'source', 'hook' )
-					);
-				}
-			}
-		}
-
-		// Iterate over hooks to replace after iterating over all to begin with to prevent infinite loop in PHP<=5.4.
-		foreach ( $pending_wrap_callbacks as $hook => $callbacks ) {
-			foreach ( $callbacks as $callback ) {
-				remove_action( $hook, $callback['function'], $callback['priority'] );
-				$wrapped_callback = self::wrapped_callback( $callback );
-				add_action( $hook, $wrapped_callback, $callback['priority'], $callback['accepted_args'] );
-			}
-		}
-
-		// Wrap widgets callbacks.
+	public static function wrap_widget_callbacks() {
 		global $wp_registered_widgets;
 		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
 			$source = self::get_source( $registered_widget['callback'] );
@@ -730,7 +696,72 @@ class AMP_Validation_Utils {
 
 			$registered_widget['callback'] = self::wrapped_callback( $callback );
 		}
+	}
 
+	/**
+	 * Wrap filter/action callback functions for a given hook.
+	 *
+	 * Wrapped callback functions are reset to their original functions after invocation.
+	 * This runs at the 'all' action. The shutdown hook is excluded.
+	 *
+	 * @global WP_Hook[] $wp_filter
+	 * @param string $hook Hook name for action or filter.
+	 * @return void
+	 */
+	public static function wrap_hook_callbacks( $hook ) {
+		global $wp_filter;
+
+		if ( ! isset( $wp_filter[ $hook ] ) || 'shutdown' === $hook ) {
+			return;
+		}
+
+		foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
+			foreach ( $callbacks as &$callback ) {
+				$source = self::get_source( $callback['function'] );
+				if ( ! $source ) {
+					continue;
+				}
+
+				/*
+				 * A current limitation with wrapping callbacks is that the wrapped function cannot have
+				 * any parameters passed by reference. Without this the result is:
+				 *
+				 * > PHP Warning:  Parameter 1 to wp_default_styles() expected to be a reference, value given.
+				 */
+				if ( self::has_parameters_passed_by_reference( $source['reflection'] ) ) {
+					continue;
+				}
+				unset( $source['reflection'] ); // No longer needed.
+
+				$source['hook']    = $hook;
+				$original_function = $callback['function'];
+				$wrapped_callback  = self::wrapped_callback( array_merge(
+					$callback,
+					compact( 'priority', 'source', 'hook' )
+				) );
+
+				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
+					$callback['function'] = $original_function; // Restore original.
+					return call_user_func_array( $wrapped_callback, func_get_args() );
+				};
+			}
+		}
+	}
+
+	/**
+	 * Determine whether the given reflection method/function has params passed by reference.
+	 *
+	 * @since 0.7
+	 * @param ReflectionFunction|ReflectionMethod $reflection Reflection.
+	 * @return bool Whether there are parameters passed by reference.
+	 */
+	protected static function has_parameters_passed_by_reference( $reflection ) {
+		foreach ( $reflection->getParameters() as $parameter ) {
+			if ( $parameter->isPassedByReference() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -769,8 +800,10 @@ class AMP_Validation_Utils {
 	 * @return array|null {
 	 *     The source data.
 	 *
-	 *     @type string $type Source type.
+	 *     @type string $type Source type (core, plugin, mu-plugin, or theme).
 	 *     @type string $name Source name.
+	 *     @type string $function Normalized function name.
+	 *     @type ReflectionMethod|ReflectionFunction $reflection
 	 * }
 	 */
 	public static function get_source( $callback ) {
@@ -805,7 +838,7 @@ class AMP_Validation_Utils {
 			return null;
 		}
 
-		$source = array();
+		$source = compact( 'reflection' );
 
 		$file = $reflection->getFileName();
 		if ( $file ) {

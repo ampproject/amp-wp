@@ -69,15 +69,32 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	const TAG_NAME = 'img';
 
 	/**
+	 * Backed up $wp_registered_widgets.
+	 *
+	 * @var array
+	 */
+	protected $original_wp_registered_widgets;
+
+	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
+	 * @global $wp_registered_widgets
 	 */
 	public function setUp() {
 		parent::setUp();
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
 		AMP_Validation_Utils::reset_validation_results();
+		$this->original_wp_registered_widgets = $GLOBALS['wp_registered_widgets'];
+	}
+
+	/**
+	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 */
+	public function tearDown() {
+		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets; // WPCS: override ok.
+		parent::tearDown();
 	}
 
 	/**
@@ -348,12 +365,52 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test callback_wrappers
+	 * Test wrap_widget_callbacks.
 	 *
-	 * @covers AMP_Validation_Utils::callback_wrappers()
+	 * @covers AMP_Validation_Utils::wrap_widget_callbacks()
+	 */
+	public function test_wrap_widget_callbacks() {
+		global $wp_registered_widgets;
+
+		$widget_id = 'search-2';
+		$this->assertArrayHasKey( $widget_id, $wp_registered_widgets );
+		$this->assertInternalType( 'array', $wp_registered_widgets[ $widget_id ]['callback'] );
+		$this->assertInstanceOf( 'WP_Widget_Search', $wp_registered_widgets[ $widget_id ]['callback'][0] );
+
+		AMP_Validation_Utils::wrap_widget_callbacks();
+		$this->assertInstanceOf( 'Closure', $wp_registered_widgets[ $widget_id ]['callback'] );
+
+		$sidebar_id = 'amp-sidebar';
+		register_sidebar( array(
+			'id'           => $sidebar_id,
+			'after_widget' => '</li>',
+		) );
+		update_option( 'sidebars_widgets', array(
+			$sidebar_id => array( $widget_id ),
+		) );
+
+		ob_start();
+		dynamic_sidebar( $sidebar_id );
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith(
+			'<!--amp-source-stack {"type":"core","name":"wp-includes","function":"WP_Widget_Search::display_callback","widget_id":"search-2"}--><li id="search-2"',
+			$output
+		);
+		$this->assertStringEndsWith(
+			'</li><!--/amp-source-stack {"type":"core","name":"wp-includes","function":"WP_Widget_Search::display_callback","widget_id":"search-2"}-->',
+			$output
+		);
+	}
+
+	/**
+	 * Test wrap_hook_callbacks.
+	 *
+	 * @covers AMP_Validation_Utils::wrap_hook_callbacks()
 	 */
 	public function test_callback_wrappers() {
 		global $post;
+		$that = $this;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->set_capability();
 		$action_no_tag_output     = 'foo_action';
@@ -365,6 +422,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$action_two_arguments     = 'example_action_two_arguments';
 		$notice                   = 'Example notice';
 
+		AMP_Validation_Utils::add_validation_hooks();
+
 		add_action( $action_function_callback, '_amp_print_php_version_admin_notice' );
 		add_action( $action_no_argument, array( $this, 'output_div' ) );
 		add_action( $action_one_argument, array( $this, 'output_notice' ) );
@@ -374,17 +433,12 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		add_action( $action_core_output, 'edit_post_link' );
 		add_action( $action_no_output, '__return_false' );
 
+		// All of the callback functions remain as-is. They will only change for a given hook at the 'all' action.
+		$this->assertEquals( 10, has_action( $action_no_tag_output, 'the_ID' ) );
+		$this->assertEquals( 10, has_action( $action_no_output, array( $this, 'get_string' ) ) );
 		$this->assertEquals( 10, has_action( $action_no_argument, array( $this, 'output_div' ) ) );
 		$this->assertEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
 		$this->assertEquals( 10, has_action( $action_two_arguments, array( $this, 'output_message' ) ) );
-
-		$_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] = 1;
-		AMP_Validation_Utils::callback_wrappers();
-		$this->assertNotEquals( 10, has_action( $action_no_tag_output, 'the_ID' ) );
-		$this->assertNotEquals( 10, has_action( $action_no_output, array( $this, 'get_string' ) ) );
-		$this->assertNotEquals( 10, has_action( $action_no_argument, array( $this, 'output_div' ) ) );
-		$this->assertNotEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
-		$this->assertNotEquals( 10, has_action( $action_two_arguments, array( $this, 'output_message' ) ) );
 
 		ob_start();
 		do_action( $action_function_callback );
@@ -438,6 +492,34 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertNotContains( '<!--amp-source-stack ', $output );
 		$this->assertNotContains( '<!--/amp-source-stack ', $output );
+
+		// Ensure that nested actions output the expected stack, and that has_action() works as expected in spite of the function wrapping.
+		$handle_outer_action = function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
+			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
+			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+			do_action( 'inner_action' );
+			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+		};
+		$handle_inner_action = function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
+			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
+			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+			echo '<b>Hello</b>';
+		};
+		add_action( 'outer_action', $handle_outer_action );
+		add_action( 'inner_action', $handle_inner_action );
+		ob_start();
+		do_action( 'outer_action' );
+		$output = ob_get_clean();
+		$this->assertEquals(
+			implode( '', array(
+				'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
+				'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
+				'<b>Hello</b>',
+				'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
+				'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
+			) ),
+			$output
+		);
 	}
 
 	/**
