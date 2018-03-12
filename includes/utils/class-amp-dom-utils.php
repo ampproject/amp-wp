@@ -64,6 +64,17 @@ class AMP_DOM_Utils {
 
 		$dom = new DOMDocument();
 
+		/**
+		 * Convert Bind Attributes.
+		 *
+		 * Use this filter to skip converting amp-bind style attributes. On large documents that
+		 * are known not to contain amp-bind style attributes, it's more performant to skip the
+		 * conversion.  Use of this filter is only recommended if documents are very large and
+		 * at risk of exceeding regex engine limits.
+		 *
+		 * @param bool   $convert  True if bind attributes should be converted, false otherwise. Default true.
+		 * @param string $document Valid HTML document possibly containing bind attributes to be converted.
+		 */
 		if ( apply_filters( 'amp_convert_bind_attributes', true, $document ) ) {
 			// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 			$document = self::convert_amp_bind_attributes( $document );
@@ -233,14 +244,15 @@ class AMP_DOM_Utils {
 			return '<' . $tag_matches['name'] . $new_attrs . '>';
 		};
 
-		$html = preg_replace_callback(
+		$converted = preg_replace_callback(
 			// Match all start tags that probably contain a binding attribute.
 			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
 			$replace_callback,
 			$html
 		);
 
-		return $html;
+		// If the conversion failed, pass the original HTML as DOMDocument may still be able to use it.
+		return ( ! is_null( $converted ) ) ? $converted : $html;
 	}
 
 	/**
