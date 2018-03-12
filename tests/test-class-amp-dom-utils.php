@@ -192,7 +192,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 			htmlentities( $html )
 		);
 
-		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
+		AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
 
 		if ( preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR ) {
 			$this->fail( 'Failed when backtrack limit was exhausted.' );
