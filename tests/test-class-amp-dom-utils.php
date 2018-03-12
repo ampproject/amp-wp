@@ -157,7 +157,6 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 			array( 10 ),
 			array( 100 ),
 			array( 1000 ),
-			array( 10000 ),
 		);
 	}
 
