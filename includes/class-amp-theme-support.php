@@ -123,7 +123,7 @@ class AMP_Theme_Support {
 		wp_enqueue_script( 'amp-runtime' );
 
 		// Enqueue default styles expected by sanitizer.
-		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ) );
+		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
