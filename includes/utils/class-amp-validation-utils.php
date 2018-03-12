@@ -1143,6 +1143,9 @@ class AMP_Validation_Utils {
 	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
 	public static function get_validation_status_post( $url ) {
+		if ( ! post_type_exists( self::POST_TYPE_SLUG ) ) {
+			return null;
+		}
 		$query = new WP_Query( array(
 			'post_type'      => self::POST_TYPE_SLUG,
 			'post_status'    => 'publish',
