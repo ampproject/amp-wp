@@ -193,21 +193,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Javascript URLs from https://cdn.ampproject.org
 	 *
 	 * @since 0.7
+	 * @see amp_register_default_scripts()
 	 *
-	 * @return string[] Returns component name as array key and JavaScript URL as array value,
-	 *                  respectively. Will return an empty array if sanitization has yet to be run
+	 * @return array() Returns component name as array key and true as value (or JavaScript URL string),
+	 *                  respectively. When true then the default component script URL will be used.
+	 *                  Will return an empty array if sanitization has yet to be run
 	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
-		$scripts = array();
-		foreach ( $this->script_components as $component ) {
-			$scripts[ $component ] = sprintf(
-				'https://cdn.ampproject.org/v0/%s-%s.js',
-				$component,
-				'latest'
-			);
-		}
-		return $scripts;
+		return array_fill_keys( $this->script_components, true );
 	}
 
 	/**
@@ -314,6 +308,27 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
 			if ( $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ) {
+
+				// Expand extension_spec into a set of attr_spec_list.
+				if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
+					$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
+					$custom_attr    = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
+
+					$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = array(
+						AMP_Rule_Spec::VALUE     => $extension_spec['name'],
+						AMP_Rule_Spec::MANDATORY => true,
+					);
+
+					$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
+						AMP_Rule_Spec::VALUE_REGEX => implode( '', array(
+							'^',
+							preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ),
+							'(' . implode( '|', $extension_spec['allowed_versions'] ) . ')',
+							'\.js$',
+						) ),
+					);
+				}
+
 				$rule_spec_list_to_validate[ $id ] = $rule_spec;
 			}
 		}
@@ -530,12 +545,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function validate_tag_spec_for_node( $node, $tag_spec ) {
 
-		// Always skip extension spec scripts since we manage the injection of these ourselves.
-		if ( isset( $tag_spec['extension_spec'] ) ) {
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return false;
 		}
 
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
+		// Extension scripts must be in the head.
+		if ( isset( $tag_spec['extension_spec'] ) && ! $this->has_parent( $node, 'head' ) ) {
 			return false;
 		}
 
@@ -580,6 +595,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return 0.5;
 		}
 
+		if ( ! $node instanceof DOMElement ) {
+			/*
+			 * A DOMNode is not valid for checks so might
+			 * as well bail here is not an DOMElement.
+			 */
+			return 0;
+		}
+
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
 			if ( ! isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				continue;
@@ -587,14 +610,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $attr_alt_name ) {
 				$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
 			}
-		}
-
-		if ( ! $node instanceof DOMElement ) {
-			/*
-			 * A DOMNode is not valid for checks so might
-			 * as well bail here is not an DOMElement.
-			 */
-			return 0;
 		}
 
 		$score = 0;

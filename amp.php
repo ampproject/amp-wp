@@ -64,6 +64,15 @@ function amp_deactivate() {
 	flush_rewrite_rules();
 }
 
+/*
+ * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
+ * for the sake of being able to use AMP components on non-AMP documents ("dirty AMP").
+ */
+add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
+
+// Ensure async and custom-element/custom-template attributes are present on script tags.
+add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
+
 /**
  * Set up AMP.
  *

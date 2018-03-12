@@ -119,6 +119,12 @@ class AMP_Theme_Support {
 			self::register_paired_hooks();
 		}
 
+		// Enqueue AMP runtime.
+		wp_enqueue_script( 'amp-runtime' );
+
+		// Enqueue default styles expected by sanitizer.
+		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ) );
+
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
 		self::$embed_handlers    = self::register_content_embed_handlers();
@@ -212,9 +218,7 @@ class AMP_Theme_Support {
 		 * in this case too we should defer to the theme as well to output the meta charset because it is possible the
 		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
 		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_amp_default_styles' ), 9 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
@@ -567,16 +571,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Print AMP script and placeholder for others.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
-	 */
-	public static function add_amp_component_scripts() {
-		// Replaced after output buffering with all AMP component scripts.
-		echo self::SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
-	}
-
-	/**
 	 * Get canonical URL for current request.
 	 *
 	 * @see rel_canonical()
@@ -746,69 +740,6 @@ class AMP_Theme_Support {
 	public static function print_amp_styles() {
 		echo amp_get_boilerplate_code() . "\n"; // WPCS: XSS OK.
 		echo "<style amp-custom></style>\n"; // This will by populated by AMP_Style_Sanitizer.
-	}
-
-	/**
-	 * Adds default styles expected by sanitizer.
-	 */
-	public static function enqueue_amp_default_styles() {
-		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ) );
-	}
-
-	/**
-	 * Determine required AMP scripts.
-	 *
-	 * @param array $amp_scripts Initial scripts.
-	 * @return string Scripts to inject into the HEAD.
-	 */
-	public static function get_amp_scripts( $amp_scripts ) {
-
-		foreach ( self::$embed_handlers as $embed_handler ) {
-			$amp_scripts = array_merge(
-				$amp_scripts,
-				$embed_handler->get_scripts()
-			);
-		}
-
-		/**
-		 * List of components that are custom elements.
-		 *
-		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template.
-		 *
-		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
-		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
-		 */
-		$custom_templates = array( 'amp-mustache' );
-
-		/**
-		 * Filters AMP component scripts before they are injected onto the output buffer for the response.
-		 *
-		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet
-		 * recognize.
-		 *
-		 * @since 0.7
-		 *
-		 * @param array $amp_scripts AMP Component scripts, mapping component names to component source URLs.
-		 */
-		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
-
-		$scripts = '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
-
-			$custom_type = 'custom-element';
-			if ( in_array( $amp_script_component, $custom_templates, true ) ) {
-				$custom_type = 'custom-template';
-			}
-
-			$scripts .= sprintf(
-				'<script async %s="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
-				$custom_type,
-				$amp_script_component,
-				$amp_script_source
-			);
-		}
-
-		return $scripts;
 	}
 
 	/**
@@ -1032,13 +963,33 @@ class AMP_Theme_Support {
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
-		// Inject required scripts.
-		$response = preg_replace(
-			'#' . preg_quote( self::SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_scripts( $assets['scripts'] ),
-			$response,
-			1
-		);
+		$amp_scripts = $assets['scripts'];
+		foreach ( self::$embed_handlers as $embed_handler ) {
+			$amp_scripts = array_merge(
+				$amp_scripts,
+				$embed_handler->get_scripts()
+			);
+		}
+
+		// Allow for embed handlers to override the default extension version by defining a different URL.
+		foreach ( $amp_scripts as $handle => $value ) {
+			if ( is_string( $value ) && wp_script_is( $handle, 'registered' ) ) {
+				wp_scripts()->registered[ $handle ]->src = $value;
+			}
+		}
+
+		// Print all scripts, some of which may have already been printed and inject into head.
+		ob_start();
+		wp_print_scripts( array_keys( $amp_scripts ) );
+		$script_tags = ob_get_clean();
+		if ( ! empty( $script_tags ) ) {
+			$response = preg_replace(
+				'#(?=</head>)#',
+				$script_tags,
+				$response,
+				1
+			);
+		}
 
 		return $response;
 	}

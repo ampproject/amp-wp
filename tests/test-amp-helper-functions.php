@@ -15,6 +15,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( 'amp' );
+		global $wp_scripts;
+		$wp_scripts = null;
 		parent::tearDown();
 	}
 
@@ -165,6 +167,41 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'args'           => func_get_args(),
 		);
 		return $value;
+	}
+
+	/**
+	 * Test script registering.
+	 *
+	 * @covers amp_register_default_scripts()
+	 * @covers amp_filter_script_loader_tag()
+	 * @global WP_Scripts $wp_scripts
+	 */
+	public function test_script_registering() {
+		global $wp_scripts;
+		$wp_scripts = null;
+		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
+
+		$this->assertTrue( wp_script_is( 'amp-runtime', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-mustache', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-list', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-bind', 'registered' ) );
+
+		wp_enqueue_script( 'amp-mathml' );
+		wp_enqueue_script( 'amp-mustache' );
+		$this->assertTrue( wp_script_is( 'amp-mathml', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'amp-mustache', 'enqueued' ) );
+
+		// Try overriding URL.
+		wp_scripts()->registered['amp-mustache']->src = 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js';
+
+		ob_start();
+		wp_print_scripts();
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-latest.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-0.1.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**

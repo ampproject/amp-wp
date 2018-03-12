@@ -162,7 +162,7 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted'     => array(
 				$this->oembed_url . PHP_EOL,
-				array( 'amp-soundcloud' => 'https://cdn.ampproject.org/v0/amp-soundcloud-latest.js' ),
+				array( 'amp-soundcloud' => true ),
 			),
 		);
 	}
