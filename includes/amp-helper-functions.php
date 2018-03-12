@@ -197,11 +197,133 @@ function amp_get_asset_url( $file ) {
  *
  * @since 0.7
  * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ *
  * @return string Boilerplate code.
  */
 function amp_get_boilerplate_code() {
 	return '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
 		. '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+}
+
+/**
+ * Register default scripts for AMP components.
+ *
+ * @param WP_Scripts $wp_scripts Scripts.
+ */
+function amp_register_default_scripts( $wp_scripts ) {
+
+	// AMP Runtime.
+	$handle = 'amp-runtime';
+	$wp_scripts->add(
+		$handle,
+		'https://cdn.ampproject.org/v0.js',
+		array(),
+		null
+	);
+	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
+		'async' => true,
+	) );
+
+	// Shadow AMP API.
+	$handle = 'amp-shadow';
+	$wp_scripts->add(
+		$handle,
+		'https://cdn.ampproject.org/shadow-v0.js',
+		array(),
+		null
+	);
+	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
+		'async' => true,
+	) );
+
+	// Get all AMP components as defined in the spec.
+	$extensions = array();
+	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tags() as $allowed_tag ) {
+		foreach ( $allowed_tag as $rule_spec ) {
+			if ( ! empty( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension'] ) ) {
+				$extensions = array_merge(
+					$extensions,
+					$rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension']
+				);
+			}
+		}
+	}
+	$extensions = array_unique( $extensions );
+
+	foreach ( $extensions as $extension ) {
+		$src = sprintf(
+			'https://cdn.ampproject.org/v0/%s-%s.js',
+			$extension,
+			'latest'
+		);
+
+		$wp_scripts->add(
+			$extension,
+			$src,
+			array( 'amp-runtime' ),
+			null
+		);
+	}
+}
+
+/**
+ * Add AMP script attributes to enqueued scripts.
+ *
+ * @link https://core.trac.wordpress.org/ticket/12009
+ * @since 0.7
+ *
+ * @param string $tag    The script tag.
+ * @param string $handle The script handle.
+ * @return string Script loader tag.
+ */
+function amp_filter_script_loader_tag( $tag, $handle ) {
+	$prefix = 'https://cdn.ampproject.org/';
+	$src    = wp_scripts()->registered[ $handle ]->src;
+	if ( 0 !== strpos( $src, $prefix ) ) {
+		return $tag;
+	}
+
+	/*
+	 * All scripts from AMP CDN should be loaded async.
+	 * See <https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa#include-"shadow-amp"-in-your-progressive-web-app>.
+	 */
+	$attributes = array(
+		'async' => true,
+	);
+
+	// Add custom-template and custom-element attributes. All component scripts look like https://cdn.ampproject.org/v0/:name-:version.js.
+	if ( 'v0' === strtok( substr( $src, strlen( $prefix ) ), '/' ) ) {
+		/*
+		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template. So we hard-code it here.
+		 *
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
+		 */
+		if ( 'amp-mustache' === $handle ) {
+			$attributes['custom-template'] = $handle;
+		} else {
+			$attributes['custom-element'] = $handle;
+		}
+	}
+
+	// Add each attribute (if it hasn't already been added).
+	foreach ( $attributes as $key => $value ) {
+		if ( ! preg_match( ":\s$key(=|>|\s):", $tag ) ) {
+			if ( true === $value ) {
+				$attribute_string = sprintf( ' %s', esc_attr( $key ) );
+			} else {
+				$attribute_string = sprintf( ' %s="%s"', esc_attr( $key ), esc_attr( $value ) );
+			}
+			$tag = preg_replace(
+				':(?=></script>):',
+				$attribute_string,
+				$tag,
+				1
+			);
+		}
+	}
+
+	return $tag;
 }
 
 /**

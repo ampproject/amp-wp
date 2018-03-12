@@ -917,7 +917,8 @@ class AMP_Validation_Utils {
 				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $handle ) {
 					AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = $callback['source'];
 
-					if ( isset( $wp_scripts->registered[ $handle ] ) ) {
+					// Flag all scripts not loaded from the AMP CDN as validation errors.
+					if ( isset( $wp_scripts->registered[ $handle ] ) && 0 !== strpos( $wp_scripts->registered[ $handle ]->src, 'https://cdn.ampproject.org/' ) ) {
 						self::add_validation_error( array(
 							'code'       => self::ENQUEUED_SCRIPT_CODE,
 							'handle'     => $handle,

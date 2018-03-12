@@ -46,23 +46,27 @@ function amp_post_template_add_canonical( $amp_template ) {
 /**
  * Print scripts.
  *
+ * @see amp_register_default_scripts()
+ * @see amp_filter_script_loader_tag()
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_scripts( $amp_template ) {
+
+	// Just in case the runtime has been overridden by amp_post_template_data filter.
+	wp_scripts()->registered['amp-runtime']->src = $amp_template->get( 'amp_runtime_script' );
+
+	// Make sure any filtered extension script URLs get updated in registered scripts before printing.
 	$scripts = $amp_template->get( 'amp_component_scripts', array() );
-	foreach ( $scripts as $element => $script ) {
-		$custom_type = ( 'amp-mustache' === $element ) ? 'template' : 'element';
-		printf(
-			'<script custom-%s="%s" src="%s" async></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-			esc_attr( $custom_type ),
-			esc_attr( $element ),
-			esc_url( $script )
-		);
+	foreach ( $scripts as $handle => $value ) {
+		if ( is_string( $value ) && wp_script_is( $handle, 'registered' ) ) {
+			wp_scripts()->registered[ $handle ]->src = $value;
+		}
 	}
-	printf(
-		'<script src="%s" async></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		esc_url( $amp_template->get( 'amp_runtime_script' ) )
-	);
+
+	wp_print_scripts( array_merge(
+		array( 'amp-runtime' ),
+		array_keys( $scripts )
+	) );
 }
 
 /**

@@ -15,8 +15,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 *
+	 * @global WP_Scripts $wp_scripts
 	 */
 	public function tearDown() {
+		global $wp_scripts;
+		$wp_scripts = null;
 		parent::tearDown();
 		remove_theme_support( 'amp' );
 		$_REQUEST                = array(); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
@@ -91,15 +95,28 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test prepare_response.
 	 *
 	 * @global WP_Widget_Factory $wp_widget_factory
+	 * @global WP_Scripts $wp_scripts
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response() {
-		global $wp_widget_factory;
+		global $wp_widget_factory, $wp_scripts;
+		$wp_scripts = null;
+
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 		$wp_widget_factory = new WP_Widget_Factory();
 		wp_widgets_init();
+
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_enqueue_script( 'amp-list' );
+		} );
+		add_action( 'wp_footer', function() {
+			wp_print_scripts( 'amp-mathml' );
+			?>
+			<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+			<?php
+		}, 1 );
 
 		ob_start();
 		?>
@@ -138,7 +155,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
 		$this->assertContains( '<style amp-custom>body { background: black; }', $sanitized_html );
-		$this->assertContains( '<script async src="https://cdn.ampproject.org/v0.js"', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-latest.js" async custom-element="amp-list"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
 
 		$this->assertNotContains( '<img', $sanitized_html );
@@ -146,9 +165,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->assertNotContains( '<audio', $sanitized_html );
 		$this->assertContains( '<amp-audio', $sanitized_html );
-		$this->assertContains( '<script async custom-element="amp-audio"', $sanitized_html );
 
-		$this->assertContains( '<script async custom-element="amp-ad"', $sanitized_html );
+		// Note these are single-quoted because they are injected after the DOM has been re-serialized, so the type and src attributes come from WP_Scripts::do_item().
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-audio-latest.js\' async custom-element="amp-audio"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-ad-latest.js\' async custom-element="amp-ad"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
 		$this->assertCount( 3, $removed_nodes );
@@ -244,28 +264,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
-	}
-
-	/**
-	 * Test get_amp_scripts().
-	 *
-	 * @covers AMP_Theme_Support::get_amp_scripts()
-	 */
-	public function test_get_amp_scripts() {
-		add_filter( 'amp_component_scripts', function( $scripts ) {
-			$scripts['amp-video'] = 'https://cdn.ampproject.org/v0/amp-video-0.1.js';
-			return $scripts;
-		} );
-
-		$scripts = AMP_Theme_Support::get_amp_scripts( array(
-			'amp-mustache' => 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
-			'amp-bind'     => 'https://cdn.ampproject.org/v0/amp-bind-0.1.js',
-		) );
-
-		$this->assertEquals(
-			'<script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script><script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script><script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>', // phpcs:ignore
-			$scripts
-		);
 	}
 
 	/**
