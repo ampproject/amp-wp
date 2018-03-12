@@ -187,10 +187,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 		$html .= '</table></body></html>';
 
-		$to_convert = '<amp-iframe
-		sandbox="allow-scripts"
-		srcdoc="' . htmlentities( $html ) . '">
-		</amp-iframe>';
+		$to_convert = sprintf(
+			'<amp-iframe sandbox="allow-scripts" srcdoc="%s"> </amp-iframe>',
+			htmlentities( $html )
+		);
 
 		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
 
