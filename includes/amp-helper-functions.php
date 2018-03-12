@@ -210,28 +210,15 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$extensions = array();
 	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tags() as $allowed_tag ) {
 		foreach ( $allowed_tag as $rule_spec ) {
-			if ( ! isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ) {
-				continue;
-			}
-			$tag_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ];
-			if ( ! empty( $tag_spec['also_requires_tag_warning'] ) ) {
-				$extensions[] = strtok( $tag_spec['also_requires_tag_warning'][0], ' ' );
-			}
-			if ( ! empty( $tag_spec['requires_extension'] ) ) {
-				$extensions = array_merge( $extensions, $tag_spec['requires_extension'] );
+			if ( ! empty( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension'] ) ) {
+				$extensions = array_merge(
+					$extensions,
+					$rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension']
+				);
 			}
 		}
 	}
-
-	/**
-	 * List of components that are custom elements.
-	 *
-	 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template.
-	 *
-	 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
-	 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
-	 */
-	$custom_templates = array( 'amp-mustache' );
+	$extensions = array_unique( $extensions );
 
 	foreach ( $extensions as $extension ) {
 		$src = sprintf(
@@ -246,15 +233,6 @@ function amp_register_default_scripts( $wp_scripts ) {
 			array( 'amp-runtime' ),
 			null
 		);
-		$attributes = array(
-			'async' => true,
-		);
-		if ( in_array( $extension, $custom_templates, true ) ) {
-			$attributes['custom-template'] = $extension;
-		} else {
-			$attributes['custom-element'] = $extension;
-		}
-		$wp_scripts->add_data( $extension, 'amp_script_attributes', $attributes );
 	}
 }
 
@@ -269,9 +247,33 @@ function amp_register_default_scripts( $wp_scripts ) {
  * @return string Script loader tag.
  */
 function amp_filter_script_loader_tag( $tag, $handle ) {
-	$attributes = wp_scripts()->get_data( $handle, 'amp_script_attributes' );
-	if ( ! is_array( $attributes ) ) {
+	$prefix = 'https://cdn.ampproject.org/';
+	$src    = wp_scripts()->registered[ $handle ]->src;
+	if ( 0 !== strpos( $src, $prefix ) ) {
 		return $tag;
+	}
+
+	/*
+	 * All scripts from AMP CDN should be loaded async.
+	 * See <https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa#include-"shadow-amp"-in-your-progressive-web-app>.
+	 */
+	$attributes = array(
+		'async' => true,
+	);
+
+	// Add custom-template and custom-element attributes. All component scripts look like https://cdn.ampproject.org/v0/:name-:version.js.
+	if ( 'v0' === strtok( substr( $src, strlen( $prefix ) ), '/' ) ) {
+		/*
+		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template. So we hard-code it here.
+		 *
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
+		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
+		 */
+		if ( 'amp-mustache' === $handle ) {
+			$attributes['custom-template'] = $handle;
+		} else {
+			$attributes['custom-element'] = $handle;
+		}
 	}
 
 	// Add each attribute (if it hasn't already been added).
