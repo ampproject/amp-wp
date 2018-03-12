@@ -64,8 +64,10 @@ class AMP_DOM_Utils {
 
 		$dom = new DOMDocument();
 
-		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
-		$document = self::convert_amp_bind_attributes( $document );
+		if ( apply_filters( 'amp_convert_bind_attributes', true, $document ) ) {
+			// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
+			$document = self::convert_amp_bind_attributes( $document );
+		}
 
 		/*
 		 * Prevent amp-mustache syntax from getting URL-encoded in attributes when saveHTML is done.
