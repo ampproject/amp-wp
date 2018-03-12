@@ -109,8 +109,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_widgets_init();
 
 		add_action( 'wp_enqueue_scripts', function() {
-			wp_enqueue_script( 'amp-mathml' );
+			wp_enqueue_script( 'amp-list' );
 		} );
+		add_action( 'wp_footer', function() {
+			wp_print_scripts( 'amp-mathml' );
+			?>
+			<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+			<?php
+		}, 1 );
 
 		ob_start();
 		?>
@@ -150,6 +156,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
 		$this->assertContains( '<style amp-custom>body { background: black; }', $sanitized_html );
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-latest.js" async custom-element="amp-list"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
 
