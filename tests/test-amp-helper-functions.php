@@ -31,6 +31,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_slug().
+	 *
+	 * @covers amp_get_slug()
+	 */
+	public function test_amp_get_slug() {
+		$this->assertSame( 'amp', amp_get_slug() );
+	}
+
+	/**
 	 * Test amp_get_permalink() without pretty permalinks.
 	 *
 	 * @covers \amp_get_permalink()
@@ -261,7 +270,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \post_supports_amp()
 	 */
 	public function test_post_supports_amp() {
-		add_post_type_support( 'page', AMP_QUERY_VAR );
+		add_post_type_support( 'page', amp_get_slug() );
 
 		// Test disabled by default for page for posts and show on front.
 		update_option( 'show_on_front', 'page' );
@@ -282,7 +291,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( post_supports_amp( $post ) );
 
 		// Reset.
-		remove_post_type_support( 'page', AMP_QUERY_VAR );
+		remove_post_type_support( 'page', amp_get_slug() );
 	}
 
 	/**

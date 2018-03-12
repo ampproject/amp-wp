@@ -134,7 +134,7 @@ class AMP_Template_Customizer {
 
 		wp_add_inline_script( 'amp-customize-controls', sprintf( 'ampCustomizeControls.boot( %s );',
 			wp_json_encode( array(
-				'queryVar' => AMP_QUERY_VAR,
+				'queryVar' => amp_get_slug(),
 				'panelId'  => self::PANEL_ID,
 				'ampUrl'   => amp_admin_get_preview_permalink(),
 				'l10n'     => array(
