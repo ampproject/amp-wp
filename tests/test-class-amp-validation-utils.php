@@ -125,6 +125,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_add_validation_hooks() {
 		AMP_Validation_Utils::add_validation_hooks();
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', array( self::TESTED_CLASS, 'add_validation_callback' ) ) );
 		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
 	}
@@ -526,17 +528,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * Test decorate_shortcode_source.
 	 *
 	 * @covers AMP_Validation_Utils::decorate_shortcode_source()
+	 * @covers AMP_Validation_Utils::decorate_filter_source()
 	 */
-	public function test_decorate_shortcode_source() {
+	public function test_decorate_shortcode_and_filter_source() {
 		AMP_Validation_Utils::add_validation_hooks();
 		add_shortcode( 'test', function() {
 			return '<b>test</b>';
 		} );
 
-		$this->assertSame(
-			'before<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}-->after',
-			do_shortcode( 'before[test]after' )
-		);
+		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
+		$source_json      = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
+		$expected_content = implode( '', array(
+			"<!--amp-source-stack $source_json>",
+			'<p>before<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}-->after</p>' . "\n",
+			"<!--/amp-source-stack $source_json>",
+		) );
 	}
 
 	/**
