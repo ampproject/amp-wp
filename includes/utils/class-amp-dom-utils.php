@@ -64,8 +64,8 @@ class AMP_DOM_Utils {
 
 		$dom = new DOMDocument();
 
-			// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
-			$document = self::convert_amp_bind_attributes( $document );
+		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
+		$document = self::convert_amp_bind_attributes( $document );
 
 		/*
 		 * Prevent amp-mustache syntax from getting URL-encoded in attributes when saveHTML is done.
@@ -238,7 +238,15 @@ class AMP_DOM_Utils {
 			$html
 		);
 
-		// If the conversion failed, pass the original HTML as DOMDocument may still be able to use it.
+		/**
+		 * If the regex engine incurred an error during processing, for example exceeding the backtrack
+		 * limit, $converted will be null. In this case we return the originally passed document to allow
+		 * DOMDocument to attempt to load it.  If the AMP HTML doesn't make use of amp-bind or similar
+		 * attributes, then everything should still work.
+		 *
+		 * See https://github.com/Automattic/amp-wp/issues/993 for additional context on this issue.
+		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
+		 */
 		return ( ! is_null( $converted ) ) ? $converted : $html;
 	}
 
