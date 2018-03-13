@@ -12,7 +12,6 @@ if [[ ! -e $GUTENBERG_PATH ]]; then
 	cd $PLUGINS_PATH
 	echo "This needs to clone the Gutenberg plugin into your plugins directory, as it looks like it's not there."
 	read -p "Is that alright? y/n " -r
-	printf "\n"
 	if [[ $REPLY =~ [Yy] ]]; then
 		git clone https://github.com/WordPress/gutenberg.git
 	else
@@ -26,5 +25,5 @@ else
 	fi
 fi
 
-cd $PROJECT_PATH/bin
-wp eval-file create-gutenberg-test-post.php
+cd $PROJECT_PATH
+wp eval-file bin/create-gutenberg-test-post.php

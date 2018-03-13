@@ -14,7 +14,7 @@
  */
 function amp_get_blocks() {
 	$fixtures_dir = dirname( dirname( __DIR__ ) ) . '/gutenberg/blocks/test/fixtures';
-	$content      = '';
+	$content      = amp_get_block_permutations();
 	if ( ! is_dir( $fixtures_dir ) ) {
 		$fixtures_dir = dirname( $fixtures_dir );
 		if ( ! is_dir( $fixtures_dir ) ) {
@@ -23,14 +23,75 @@ function amp_get_blocks() {
 	}
 
 	foreach ( glob( $fixtures_dir . '/*.html' ) as $file ) {
-		if ( ! preg_match( '/(serialized|embed|custom-text-teaser)/', $file ) ) {
+		if ( ! preg_match( '/(serialized|embed|shortcode|custom-text-teaser)/', $file ) ) {
 			// Add the block's title.
 			if ( preg_match( ':core__(?P<block>.+)\.html:s', basename( $file ), $matches ) ) {
 				$content .= sprintf( '<h1>%s</h1>', $matches['block'] );
 			}
-			$content .= file_get_contents( $file ); // @codingStandardsIgnoreLine: file_get_contents_file_get_contents and file_system_read_file_get_contents.
+			$content .= file_get_contents( $file ); // @codingStandardsIgnoreLine: file_get_contents_file_get_contents, file_system_read_file_get_contents.
 		}
 	}
+
+	// Replace broken URLs in fixture files.
+	$content = str_replace( 'http://google.com/hi.png', 'https://cldup.com/-3VMmmrPm9.jpg', $content );
+	$content = str_replace( 'https://awesome-fake.video/file.mp4', 'https://videos.files.wordpress.com/DK5mLrbr/video-ca6dc0ab4a_hd.mp4', $content );
+	return $content;
+}
+
+/**
+ * Gets the Gutenberg block permutations.
+ *
+ * These are mostly copied from gutenberg/blocks/test/fixtures, and slightly modified.
+ * Embeds and shortcodes are tested in a separate script, so this does not have have many.
+ *
+ * @return string $content The blocks as HTML.
+ */
+function amp_get_block_permutations() {
+	$blocks = array(
+		array(
+			'title'   => 'Categories With Dropdown',
+			'content' => '<!-- wp:core/categories {"showPostCounts":false,"displayAsDropdown":true,"showHierarchy":false} /-->',
+		),
+		array(
+			'title'   => 'Columns, With 2 Columns',
+			'content' => '<!-- wp:columns {"columns":2} --><div class="wp-block-columns has-2-columns"><!-- wp:paragraph {"layout":"column-1"} -->	<p class="layout-column-1">Column One, Paragraph One</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph Two</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-2"} --><p class="layout-column-2">Column Two, Paragraph One</p><!-- /wp:paragraph --></div><!-- /wp:columns -->',
+		),
+		array(
+			'title'   => 'Cover Image With Fixed Background',
+			'content' => '<!-- wp:core/cover-image {"url":"https://cldup.com/uuUqE_dXzy.jpg","dimRatio":40} --><section class="wp-block-cover-image has-background-dim-40 has-background-dim has-parallax" style="background-image:url(https://cldup.com/uuUqE_dXzy.jpg)"><h2>Guten Berg!</h2></section><!-- /wp:core/cover-image -->',
+		),
+		array(
+			'title'   => 'WordPress Embed',
+			'content' => '<!-- wp:core-embed/wordpress {"url":"https://make.wordpress.org/core/2017/12/11/whats-new-in-gutenberg-11th-december/"} --><figure class="wp-block-embed-wordpress wp-block-embed">https://make.wordpress.org/core/2017/12/11/whats-new-in-gutenberg-11th-december/<figcaption>Embedded content from WordPress</figcaption></figure><!-- /wp:core-embed/wordpress -->',
+		),
+		array(
+			'title'   => 'YouTube Embed',
+			'content' => '<!-- wp:core-embed/youtube {"url":"https://www.youtube.com/watch?v=GGS-tKTXw4Y"} --><figure class="wp-block-embed-youtube wp-block-embed">https://www.youtube.com/watch?v=GGS-tKTXw4Y<figcaption>Embedded content from youtube</figcaption></figure><!-- /wp:core-embed/youtube -->',
+		),
+		array(
+			'title'   => 'Twitter Embed',
+			'content' => '<!-- wp:core-embed/twitter {"url":"https://twitter.com/AMPhtml/status/963443140005957632"} --><figure class="wp-block-embed-twitter wp-block-embed">https://twitter.com/AMPhtml/status/963443140005957632<figcaption>We are Automattic</figcaption></figure><!-- /wp:core-embed/twitter -->',
+		),
+		array(
+			'title'   => 'Gallery With 3 Columns',
+			'content' => '<!-- wp:core/gallery --><ul class="wp-block-gallery alignnone columns-3 is-cropped"><li class="blocks-gallery-item"><figure><img src="https://cldup.com/uuUqE_dXzy.jpg" alt="title" /></figure></li><li class="blocks-gallery-item"><figure><img src="https://cldup.com/-3VMmmrPm9.jpg" alt="title" /></figure></li><li class="blocks-gallery-item"><figure><img src="https://cldup.com/aMbxBM0zAi.jpg" alt="title" /></figure></li></ul><!-- /wp:core/gallery -->',
+		),
+		array(
+			'title'   => 'Audio Shortcode',
+			'content' => '<!-- wp:core/shortcode -->[audio src=https://wptavern.com/wp-content/uploads/2017/11/EPISODE-296-Gutenberg-Telemetry-Calypso-and-More-With-Matt-Mullenweg.mp3]<!-- /wp:core/shortcode -->',
+		),
+		array(
+			'title'   => 'Caption Shortcode',
+			'content' => '<!-- wp:core/shortcode -->[caption width=150]This is a caption[/caption]<!-- /wp:core/shortcode -->',
+		),
+	);
+
+	$content = '';
+	foreach ( $blocks as $block ) {
+		$content .= sprintf( '<h1>%s</h1>', $block['title'] );
+		$content .= $block['content'];
+	}
+
 	return $content;
 }
 
