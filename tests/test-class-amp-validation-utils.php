@@ -119,7 +119,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test init.
+	 * Test add_validation_hooks.
 	 *
 	 * @covers AMP_Validation_Utils::add_validation_hooks()
 	 */
@@ -129,6 +129,65 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', array( self::TESTED_CLASS, 'add_validation_callback' ) ) );
 		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
+	}
+
+	/**
+	 * Test add_validation_hooks with Gutenberg active.
+	 *
+	 * @covers AMP_Validation_Utils::add_validation_hooks()
+	 */
+	public function test_add_validation_hooks_gutenberg() {
+		if ( ! function_exists( 'do_blocks' ) ) {
+			$this->markTestSkipped( 'Gutenberg not active.' );
+		}
+
+		$this->assertEquals( 9, has_filter( 'the_content', 'do_blocks' ) );
+		AMP_Validation_Utils::add_validation_hooks();
+		$this->assertFalse( has_filter( 'the_content', 'do_blocks' ) );
+	}
+
+	/**
+	 * Get block data.
+	 *
+	 * @ses Test_AMP_Validation_Utils::test_do_blocks()
+	 * @return array
+	 */
+	public function get_block_data() {
+		return array(
+			'paragraph'    => array(
+				"<!-- wp:paragraph -->\n<p>Latest posts:</p>\n<!-- /wp:paragraph -->",
+				"<!--amp-source-stack {\"block_name\":\"core\/paragraph\"}-->\n<p>Latest posts:</p>\n<!--/amp-source-stack {\"block_name\":\"core\/paragraph\"}-->",
+			),
+			'latest_posts' => array(
+				'<!-- wp:latest-posts /-->',
+				'<!--amp-source-stack {"block_name":"core\/latest-posts","type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts aligncenter"></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
+			),
+			'columns'      => array(
+				"<!-- wp:columns -->\n<div class=\"wp-block-columns has-2-columns\">\n    <!-- wp:quote {\"layout\":\"column-1\"} -->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!-- /wp:quote -->\n\n    <!-- wp:html {\"layout\":\"column-2\"} -->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!-- /wp:html -->\n</div>\n<!-- /wp:columns -->",
+				"<!--amp-source-stack {\"block_name\":\"core\/columns\"}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\"}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\"}}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\"}-->",
+			),
+		);
+	}
+
+	/**
+	 * Test do_blocks.
+	 *
+	 * @param string $content Content.
+	 * @param string $expected Expected content.
+	 * @dataProvider get_block_data
+	 * @covers AMP_Validation_Utils::do_blocks()
+	 * @covers AMP_Validation_Utils::render_blocks
+	 */
+	public function test_do_blocks( $content, $expected ) {
+		if ( ! function_exists( 'do_blocks' ) ) {
+			$this->markTestSkipped( 'Gutenberg not active.' );
+		}
+
+		$rendered_block = AMP_Validation_Utils::do_blocks( $content );
+		$this->assertEquals(
+			preg_replace( '/\s+/', ' ', $expected ),
+			preg_replace( '/\s+/', ' ', $rendered_block )
+		);
 	}
 
 	/**
