@@ -185,6 +185,15 @@ class AMP_Validation_Utils {
 	public static $posts_pending_frontend_validation = array();
 
 	/**
+	 * Current sources gathered for a given hook currently being run.
+	 *
+	 * @see AMP_Validation_Utils::wrap_hook_callbacks()
+	 * @see AMP_Validation_Utils::decorate_filter_source()
+	 * @var array[]
+	 */
+	protected static $current_hook_source_stack = array();
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
@@ -285,7 +294,13 @@ class AMP_Validation_Utils {
 	 */
 	public static function add_validation_hooks() {
 		self::wrap_widget_callbacks();
+
 		add_action( 'all', array( __CLASS__, 'wrap_hook_callbacks' ) );
+		$wrapped_filters = array( 'the_content', 'the_excerpt' );
+		foreach ( $wrapped_filters as $wrapped_filter ) {
+			add_filter( $wrapped_filter, array( __CLASS__, 'decorate_filter_source' ), PHP_INT_MAX );
+		}
+
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 	}
@@ -470,7 +485,9 @@ class AMP_Validation_Utils {
 			if ( ! empty( $validation_error['sources'] ) ) {
 				$source = array_pop( $validation_error['sources'] );
 
-				$invalid_sources[ $source['type'] ][] = $source['name'];
+				if ( isset( $source['type'], $source['name'] ) ) {
+					$invalid_sources[ $source['type'] ][] = $source['name'];
+				}
 			}
 		}
 
@@ -715,6 +732,7 @@ class AMP_Validation_Utils {
 			return;
 		}
 
+		self::$current_hook_source_stack[ $hook ] = array();
 		foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
 			foreach ( $callbacks as &$callback ) {
 				$source = self::get_source( $callback['function'] );
@@ -722,16 +740,21 @@ class AMP_Validation_Utils {
 					continue;
 				}
 
+				$reflection = $source['reflection'];
+				unset( $source['reflection'] ); // Omit from stored source.
+
+				// Add hook to stack for decorate_filter_source to read from.
+				self::$current_hook_source_stack[ $hook ][] = $source;
+
 				/*
 				 * A current limitation with wrapping callbacks is that the wrapped function cannot have
 				 * any parameters passed by reference. Without this the result is:
 				 *
 				 * > PHP Warning:  Parameter 1 to wp_default_styles() expected to be a reference, value given.
 				 */
-				if ( self::has_parameters_passed_by_reference( $source['reflection'] ) ) {
+				if ( self::has_parameters_passed_by_reference( $reflection ) ) {
 					continue;
 				}
-				unset( $source['reflection'] ); // No longer needed.
 
 				$source['hook']    = $hook;
 				$original_function = $callback['function'];
@@ -794,6 +817,40 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Wraps output of a filter to add source stack comments.
+	 *
+	 * @param string $value Value.
+	 * @return string Value wrapped in source comments.
+	 */
+	public static function decorate_filter_source( $value ) {
+
+		// Abort if the output is not a string and it doesn't contain any HTML tags.
+		if ( ! is_string( $value ) || ! preg_match( '/<.+?>/s', $value ) ) {
+			return $value;
+		}
+
+		$post   = get_post();
+		$source = array(
+			'hook'   => current_filter(),
+			'filter' => true,
+		);
+		if ( $post ) {
+			$source['post_id']   = $post->ID;
+			$source['post_type'] = $post->post_type;
+		}
+		if ( isset( self::$current_hook_source_stack[ current_filter() ] ) ) {
+			$sources = self::$current_hook_source_stack[ current_filter() ];
+			array_pop( $sources ); // Remove self.
+			$source['sources'] = $sources;
+		}
+		return implode( '', array(
+			self::get_source_comment( $source, true ),
+			$value,
+			self::get_source_comment( $source, false ),
+		) );
+	}
+
+	/**
 	 * Gets the plugin or theme of the callback, if one exists.
 	 *
 	 * @param string|array $callback The callback for which to get the plugin.
@@ -822,7 +879,7 @@ class AMP_Validation_Utils {
 			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
 				// The $callback is a method.
 				if ( is_string( $callback[0] ) ) {
-					$class_name = '\'' . $callback[0];
+					$class_name = $callback[0];
 				} elseif ( is_object( $callback[0] ) ) {
 					$class_name = get_class( $callback[0] );
 				}
