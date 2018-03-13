@@ -19,7 +19,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 600;
 	protected $DEFAULT_HEIGHT = 338;
 
-	function __construct( $args = array() ) {
+	public function __construct( $args = array() ) {
 		parent::__construct( $args );
 
 		if ( isset( $this->args['content_max_width'] ) ) {
@@ -29,7 +29,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 	}
 
-	function register_embed() {
+	public function register_embed() {
 		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 		add_shortcode( 'vimeo', array( $this, 'shortcode' ) );
 		add_filter( 'wp_video_shortcode_override', array( $this, 'video_override' ), 10, 2 );
