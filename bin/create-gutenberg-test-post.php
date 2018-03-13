@@ -1,13 +1,13 @@
 <?php
 /**
- * Create post to test all Gutenberg blocks.
+ * Creates a post to test all Gutenberg blocks.
  *
  * @codeCoverageIgnore
  * @package AMP
  */
 
 /**
- * Gets many of the Gutenberg fixture blocks in /blocks/tests/fixtures.
+ * Gets many of the Gutenberg fixture blocks in blocks/tests/fixtures/.
  *
  * @throws Exception If this is script is not run inside the plugin directory.
  * @return string $content Post content with all Gutenberg blocks.
@@ -25,7 +25,7 @@ function amp_get_blocks() {
 	foreach ( glob( $fixtures_dir . '/*.html' ) as $file ) {
 		if ( ! preg_match( '/(serialized|embed|custom-text-teaser)/', $file ) ) {
 			// Add the block's title.
-			if ( preg_match( ':core__(<block>.+)\.html:s', basename( $file ), $matches ) ) {
+			if ( preg_match( ':core__(?P<block>.+)\.html:s', basename( $file ), $matches ) ) {
 				$content .= sprintf( '<h1>%s</h1>', $matches['block'] );
 			}
 			$content .= file_get_contents( $file ); // @codingStandardsIgnoreLine: file_get_contents_file_get_contents and file_system_read_file_get_contents.
