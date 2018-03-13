@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+cd "$(dirname "$0")"
 
 BIN_PATH="$(pwd)"
 PROJECT_PATH=$(dirname $PWD)
