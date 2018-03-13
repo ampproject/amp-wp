@@ -50,7 +50,7 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://vimeo.com/172355597' . PHP_EOL,
-				array( 'amp-vimeo' => 'https://cdn.ampproject.org/v0/amp-vimeo-latest.js' ),
+				array( 'amp-vimeo' => true ),
 			),
 		);
 	}

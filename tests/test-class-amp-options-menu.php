@@ -43,7 +43,7 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 	 */
 	public function test_init() {
 		$this->instance->init();
-		$this->assertEquals( 10, has_action( 'admin_menu', array( $this->instance, 'add_menu_items' ) ) );
+		$this->assertEquals( 9, has_action( 'admin_menu', array( $this->instance, 'add_menu_items' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' ) );
 	}
 
