@@ -220,7 +220,6 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
-		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
 
 		if ( is_customize_preview() ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
@@ -754,7 +753,7 @@ class AMP_Theme_Support {
 	 *
 	 * @param DOMDocument $dom Doc.
 	 */
-	protected static function ensure_required_markup( DOMDocument $dom ) {
+	public static function ensure_required_markup( DOMDocument $dom ) {
 		$xpath = new DOMXPath( $dom );
 
 		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
@@ -795,7 +794,19 @@ class AMP_Theme_Support {
 			) );
 			$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 		}
-
+		// Prevent schema.org duplicates.
+		$has_schema_org_metadata = false;
+		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
+			if ( 'application/ld+json' === $script->getAttribute( 'type' ) && false !== strpos( $script->nodeValue, 'schema.org' ) ) {
+				$has_schema_org_metadata = true;
+				break;
+			}
+		}
+		if ( ! $has_schema_org_metadata ) {
+			$script = $dom->createElement( 'script', wp_json_encode( amp_get_schemaorg_metadata() ) );
+			$script->setAttribute( 'type', 'application/ld+json' );
+			$head->appendChild( $script );
+		}
 		// Ensure rel=canonical link.
 		$rel_canonical = null;
 		foreach ( $head->getElementsByTagName( 'link' ) as $link ) {
