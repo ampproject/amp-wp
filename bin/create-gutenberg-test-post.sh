@@ -14,6 +14,9 @@ if [[ ! -e $GUTENBERG_PATH ]]; then
 	read -p "Is that alright? y/n " -r
 	if [[ $REPLY =~ [Yy] ]]; then
 		git clone https://github.com/WordPress/gutenberg.git
+		wp plugin activate gutenberg
+		echo "The Gutenberg plugin is cloned. Please follow the build steps:"
+		echo "https://github.com/WordPress/gutenberg/blob/master/CONTRIBUTING.md"
 	else
 		echo "Exiting script."
 		exit 1

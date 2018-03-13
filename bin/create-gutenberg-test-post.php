@@ -104,14 +104,15 @@ function amp_get_block_permutations() {
  */
 function amp_create_gutenberg_test_post( $content ) {
 	$slug            = 'amp-test-gutenberg-blocks';
-	$page            = get_page_by_path( $slug );
+	$title           = 'AMP Test Gutenberg Blocks';
+	$page            = get_page_by_path( "/{$slug}/" );
 	$failure_message = 'The test page could not be added, please try again.';
 	if ( $page ) {
 		$page_id = $page->ID;
 	} else {
 		$page_id = wp_insert_post( array(
 			'post_name'  => $slug,
-			'post_title' => 'Test Gutenberg Blocks',
+			'post_title' => $title,
 			'post_type'  => 'page',
 		) );
 
