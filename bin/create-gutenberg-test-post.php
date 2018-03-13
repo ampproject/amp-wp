@@ -23,9 +23,10 @@ function amp_get_blocks() {
 	}
 
 	foreach ( glob( $fixtures_dir . '/*.html' ) as $file ) {
-		if ( ! preg_match( '/(serialized|embed|shortcode|custom-text-teaser)/', $file ) ) {
+		if ( ! preg_match( '/(serialized|embed|shortcode|custom-text-teaser|core__block)/', $file ) ) {
 			// Add the block's title.
-			if ( preg_match( ':core__(?P<block>.+)\.html:s', basename( $file ), $matches ) ) {
+			preg_match( ':core__(?P<block>.+)\.html:s', basename( $file ), $matches );
+			if ( isset( $matches['block'] ) ) {
 				$content .= sprintf( '<h1>%s</h1>', $matches['block'] );
 			}
 			$content .= file_get_contents( $file ); // @codingStandardsIgnoreLine: file_get_contents_file_get_contents, file_system_read_file_get_contents.
@@ -41,13 +42,17 @@ function amp_get_blocks() {
 /**
  * Gets the Gutenberg block permutations.
  *
- * These are mostly copied from gutenberg/blocks/test/fixtures, and slightly modified.
+ * These are mostly copied from gutenberg/blocks/test/fixtures/, and slightly modified.
  * Embeds and shortcodes are tested in a separate script, so this does not have have many.
  *
  * @return string $content The blocks as HTML.
  */
 function amp_get_block_permutations() {
 	$blocks = array(
+		array(
+			'title'   => '(Reusable) Block With Video',
+			'content' => sprintf( '<!-- wp:block {"ref":%d} /-->', amp_create_reusable_block() ),
+		),
 		array(
 			'title'   => 'Categories With Dropdown',
 			'content' => '<!-- wp:core/categories {"showPostCounts":false,"displayAsDropdown":true,"showHierarchy":false} /-->',
@@ -88,11 +93,28 @@ function amp_get_block_permutations() {
 
 	$content = '';
 	foreach ( $blocks as $block ) {
-		$content .= sprintf( '<h1>%s</h1>', $block['title'] );
+		$content .= sprintf( '<h2>%s</h2>', $block['title'] );
 		$content .= $block['content'];
 	}
 
 	return $content;
+}
+
+/**
+ * Creates a reusable block with a video.
+ *
+ * Reusable blocks are stored in custom post types.
+ * This creates one, and returns the ID on success.
+ *
+ * @return int|WP_Error $post_id The post ID where the reusable block is stored, and 0 or WP_Error in case of failure.
+ */
+function amp_create_reusable_block() {
+	return wp_insert_post( array(
+		'post_type'    => 'wp_block',
+		'post_title'   => 'Test Reusable Block',
+		'post_content' => '<!-- wp:core/video --><figure class="wp-block-video"><video src="https://videos.files.wordpress.com/DK5mLrbr/video-ca6dc0ab4a_hd.mp4" controls=""></video></figure><!-- /wp:core/video -->',
+		'post_status'  => 'publish',
+	) );
 }
 
 /**
