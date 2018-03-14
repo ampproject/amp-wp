@@ -9,17 +9,22 @@
 /**
  * Gets many of the Gutenberg fixture blocks in blocks/tests/fixtures/.
  *
- * @throws Exception If this is script is not run inside the plugin directory.
+ * @throws Exception If this is script is not run inside the plugin directory, or if it doesn't have .html fixtures.
  * @return string $content Post content with all Gutenberg blocks.
  */
 function amp_get_blocks() {
-	$fixtures_dir = dirname( dirname( __DIR__ ) ) . '/gutenberg/blocks/test/fixtures';
-	$content      = amp_get_block_permutations();
-	if ( ! is_dir( $fixtures_dir ) ) {
-		$fixtures_dir = dirname( $fixtures_dir );
-		if ( ! is_dir( $fixtures_dir ) ) {
+	$gutenberg_dir = dirname( dirname( __DIR__ ) ) . '/gutenberg';
+	$content       = amp_get_block_permutations();
+	if ( ! is_dir( $gutenberg_dir ) ) {
+		$gutenberg_dir = dirname( $gutenberg_dir );
+		if ( ! is_dir( $gutenberg_dir ) ) {
 			throw new Exception( 'Please run this script from the AMP plugin root.' );
 		}
+	}
+
+	$fixtures_dir = $gutenberg_dir . '/blocks/test/fixtures';
+	if ( ! is_dir( $fixtures_dir ) ) {
+		throw new Exception( "Test files not found in the Gutenberg plugin. You may need to clone the plugin repo: \nhttps://github.com/WordPress/gutenberg.git" );
 	}
 
 	foreach ( glob( $fixtures_dir . '/*.html' ) as $file ) {
@@ -59,7 +64,7 @@ function amp_get_block_permutations() {
 		),
 		array(
 			'title'   => 'Columns, With 2 Columns',
-			'content' => '<!-- wp:columns {"columns":2} --><div class="wp-block-columns has-2-columns"><!-- wp:paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph One</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph Two</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-2"} --><p class="layout-column-2">Column Two, Paragraph One</p><!-- /wp:paragraph --></div><!-- /wp:columns -->',
+			'content' => '<!-- wp:core/columns {"columns":2} --><div class="wp-block-columns has-2-columns"><!-- wp:core/paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph One</p><!-- /wp:core/paragraph --><!-- wp:core/paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph Two</p><!-- /wp:core/paragraph --><!-- wp:core/paragraph {"layout":"column-2"} --><p class="layout-column-2">Column Two, Paragraph One</p><!-- /wp:core/paragraph --></div><!-- /wp:core/columns -->',
 		),
 		array(
 			'title'   => 'Cover Image With Fixed Background',
