@@ -157,14 +157,29 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'paragraph'    => array(
 				"<!-- wp:paragraph -->\n<p>Latest posts:</p>\n<!-- /wp:paragraph -->",
 				"<!--amp-source-stack {\"block_name\":\"core\/paragraph\"}-->\n<p>Latest posts:</p>\n<!--/amp-source-stack {\"block_name\":\"core\/paragraph\"}-->",
+				array(
+					'element' => 'p',
+					'blocks'  => array( 'core/paragraph' ),
+				),
 			),
 			'latest_posts' => array(
 				'<!-- wp:latest-posts /-->',
 				'<!--amp-source-stack {"block_name":"core\/latest-posts","type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts aligncenter"></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
+				array(
+					'element' => 'ul',
+					'blocks'  => array( 'core/latest-posts' ),
+				),
 			),
 			'columns'      => array(
-				"<!-- wp:columns -->\n<div class=\"wp-block-columns has-2-columns\">\n    <!-- wp:quote {\"layout\":\"column-1\"} -->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!-- /wp:quote -->\n\n    <!-- wp:html {\"layout\":\"column-2\"} -->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!-- /wp:html -->\n</div>\n<!-- /wp:columns -->",
-				"<!--amp-source-stack {\"block_name\":\"core\/columns\"}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\"}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\"}}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\"}-->",
+				"<!-- wp:columns -->\n<div class=\"wp-block-columns has-2-columns\">\n    <!-- wp:quote {\"layout\":\"column-1\",\"foo\":{\"bar\":1}} -->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!-- /wp:quote -->\n\n    <!-- wp:html {\"layout\":\"column-2\"} -->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!-- /wp:html -->\n</div>\n<!-- /wp:columns -->",
+				"<!--amp-source-stack {\"block_name\":\"core\/columns\"}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\"}-->",
+				array(
+					'element' => 'blockquote',
+					'blocks'  => array(
+						'core/columns',
+						'core/quote',
+					),
+				),
 			),
 		);
 	}
@@ -172,13 +187,14 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test do_blocks.
 	 *
-	 * @param string $content Content.
+	 * @param string $content  Content.
 	 * @param string $expected Expected content.
+	 * @param array  $query    Query.
 	 * @dataProvider get_block_data
 	 * @covers AMP_Validation_Utils::do_blocks()
-	 * @covers AMP_Validation_Utils::render_blocks
+	 * @covers AMP_Validation_Utils::render_blocks()
 	 */
-	public function test_do_blocks( $content, $expected ) {
+	public function test_do_blocks( $content, $expected, $query ) {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
@@ -187,6 +203,14 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals(
 			preg_replace( '/\s+/', ' ', $expected ),
 			preg_replace( '/\s+/', ' ', $rendered_block )
+		);
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $rendered_block );
+		$el  = $dom->getElementsByTagName( $query['element'] )->item( 0 );
+
+		$this->assertEquals(
+			$query['blocks'],
+			wp_list_pluck( AMP_Validation_Utils::locate_sources( $el ), 'block_name' )
 		);
 	}
 
