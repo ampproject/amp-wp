@@ -47,7 +47,8 @@ class AMP_Options_Manager {
 		sort( $old_post_types );
 		sort( $new_post_types );
 		if ( $old_post_types !== $new_post_types ) {
-			flush_rewrite_rules();
+			flush_rewrite_rules( false );
+			do_action( 'rri_flush_rules' );
 		}
 	}
 

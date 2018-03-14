@@ -1323,6 +1323,25 @@ class AMP_Allowed_Tags_Generated {
 
 			),
 		),
+		'amp-mathml' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-formula' => array(
+						'mandatory' => true,
+					),
+					'inline' => array(),
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-mathml',
+					),
+				),
+			),
+		),
 		'amp-o2-player' => array(
 			array(
 				'attr_spec_list' => array(
