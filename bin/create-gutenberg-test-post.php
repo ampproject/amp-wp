@@ -6,25 +6,27 @@
  * @package AMP
  */
 
+namespace AMP;
+
 /**
  * Gets many of the Gutenberg fixture blocks in blocks/tests/fixtures/.
  *
- * @throws Exception If this is script is not run inside the plugin directory, or if it doesn't have .html fixtures.
+ * @throws \Exception If this is script is not run inside the plugin directory, or if it doesn't have .html fixtures.
  * @return string $content Post content with all Gutenberg blocks.
  */
-function amp_get_blocks() {
+function get_test_block_fixtures() {
 	$gutenberg_dir = dirname( dirname( __DIR__ ) ) . '/gutenberg';
-	$content       = amp_get_block_permutations();
+	$content       = get_test_block_permutations();
 	if ( ! is_dir( $gutenberg_dir ) ) {
 		$gutenberg_dir = dirname( $gutenberg_dir );
 		if ( ! is_dir( $gutenberg_dir ) ) {
-			throw new Exception( 'Please run this script from the AMP plugin root.' );
+			throw new \Exception( 'Please run this script from the AMP plugin root.' );
 		}
 	}
 
 	$fixtures_dir = $gutenberg_dir . '/blocks/test/fixtures';
 	if ( ! is_dir( $fixtures_dir ) ) {
-		throw new Exception( "Test files not found in the Gutenberg plugin. You may need to clone the plugin repo: \nhttps://github.com/WordPress/gutenberg.git" );
+		throw new \Exception( "Test files not found in the Gutenberg plugin. You may need to clone the plugin repo: \nhttps://github.com/WordPress/gutenberg.git" );
 	}
 
 	foreach ( glob( $fixtures_dir . '/*.html' ) as $file ) {
@@ -52,11 +54,11 @@ function amp_get_blocks() {
  *
  * @return string $content The blocks as HTML.
  */
-function amp_get_block_permutations() {
+function get_test_block_permutations() {
 	$blocks = array(
 		array(
 			'title'   => '(Reusable) Block With Video',
-			'content' => sprintf( '<!-- wp:block {"ref":%d} /-->', amp_create_reusable_block() ),
+			'content' => sprintf( '<!-- wp:block {"ref":%d} /-->', create_test_reusable_block() ),
 		),
 		array(
 			'title'   => 'Categories With Dropdown',
@@ -111,9 +113,9 @@ function amp_get_block_permutations() {
  * Reusable blocks are stored in custom post types.
  * This creates one, and returns the ID on success.
  *
- * @return int|WP_Error $post_id The post ID where the reusable block is stored, and 0 or WP_Error in case of failure.
+ * @return int|\WP_Error $post_id The post ID where the reusable block is stored, and 0 or WP_Error in case of failure.
  */
-function amp_create_reusable_block() {
+function create_test_reusable_block() {
 	return wp_insert_post( array(
 		'post_type'    => 'wp_block',
 		'post_title'   => 'Test Reusable Block',
@@ -125,11 +127,11 @@ function amp_create_reusable_block() {
 /**
  * Creates a Gutenberg test post (page).
  *
- * @throws Exception If there is an error in creating the test page.
+ * @throws \Exception If there is an error in creating the test page.
  * @param string $content The content to add to the post.
  * @return int Page ID.
  */
-function amp_create_gutenberg_test_post( $content ) {
+function create_gutenberg_test_post( $content ) {
 	$slug            = 'amp-test-gutenberg-blocks';
 	$title           = 'AMP Test Gutenberg Blocks';
 	$page            = get_page_by_path( "/{$slug}/" );
@@ -144,7 +146,7 @@ function amp_create_gutenberg_test_post( $content ) {
 		) );
 
 		if ( ! $page_id || is_wp_error( $page_id ) ) {
-			throw new Exception( $failure_message );
+			throw new \Exception( $failure_message );
 		}
 	}
 
@@ -154,7 +156,7 @@ function amp_create_gutenberg_test_post( $content ) {
 	) );
 
 	if ( ! $update ) {
-		throw new Exception( $failure_message );
+		throw new \Exception( $failure_message );
 	}
 	return $update;
 }
@@ -162,10 +164,10 @@ function amp_create_gutenberg_test_post( $content ) {
 // Bootstrap.
 if ( defined( 'WP_CLI' ) ) {
 	try {
-		$post_id = amp_create_gutenberg_test_post( amp_get_blocks() );
-		WP_CLI::success( sprintf( 'The test page is at: %s', amp_get_permalink( $post_id ) . '#development=1' ) );
-	} catch ( Exception $e ) {
-		WP_CLI::error( $e->getMessage() );
+		$post_id = create_gutenberg_test_post( get_test_block_fixtures() );
+		\WP_CLI::success( sprintf( 'The test page is at: %s', \amp_get_permalink( $post_id ) . '#development=1' ) );
+	} catch ( \Exception $e ) {
+		\WP_CLI::error( $e->getMessage() );
 	}
 } else {
 	echo "This script should be run WP-CLI via: wp eval-file bin/create-gutenberg-test-post.php\n";
