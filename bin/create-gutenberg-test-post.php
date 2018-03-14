@@ -59,7 +59,7 @@ function amp_get_block_permutations() {
 		),
 		array(
 			'title'   => 'Columns, With 2 Columns',
-			'content' => '<!-- wp:columns {"columns":2} --><div class="wp-block-columns has-2-columns"><!-- wp:paragraph {"layout":"column-1"} -->	<p class="layout-column-1">Column One, Paragraph One</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph Two</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-2"} --><p class="layout-column-2">Column Two, Paragraph One</p><!-- /wp:paragraph --></div><!-- /wp:columns -->',
+			'content' => '<!-- wp:columns {"columns":2} --><div class="wp-block-columns has-2-columns"><!-- wp:paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph One</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph Two</p><!-- /wp:paragraph --><!-- wp:paragraph {"layout":"column-2"} --><p class="layout-column-2">Column Two, Paragraph One</p><!-- /wp:paragraph --></div><!-- /wp:columns -->',
 		),
 		array(
 			'title'   => 'Cover Image With Fixed Background',
