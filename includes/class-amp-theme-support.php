@@ -92,6 +92,9 @@ class AMP_Theme_Support {
 			}
 		}
 
+		// Register the field to capture the "subject to moderation." message for amp comments.
+		add_action( 'admin_init', array( __CLASS__, 'register_discussion_setting' ) );
+
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
 		/*
@@ -520,7 +523,7 @@ class AMP_Theme_Support {
 		?>
 		<div submit-success>
 			<template type="amp-mustache">
-				<?php esc_html_e( 'Your comment has been posted, but may be subject to moderation.', 'amp' ); ?>
+				<?php echo esc_html( self::get_comment_moderation_notice() ); ?>
 			</template>
 		</div>
 		<div submit-error>
@@ -528,6 +531,44 @@ class AMP_Theme_Support {
 				<p class="amp-comment-submit-error">{{{error}}}</p>
 			</template>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Register the setting to capture the "subject to moderation." message for amp comments.
+	 *
+	 * @since 0.7
+	 */
+	public static function register_discussion_setting() {
+		register_setting( 'discussion', 'amp_comment_notice', 'sanitize_text_field' );
+		add_settings_field( 'amp_comment_notice', 'Comment Notice', array( __CLASS__, 'comment_moderation_field' ), 'discussion' );
+	}
+
+	/**
+	 * Get the moderation notice for AMP comment submission.
+	 *
+	 * @since 0.7
+	 */
+	public static function get_comment_moderation_notice() {
+		$default = __( 'Your comment has been posted, but may be subject to moderation.', 'amp' );
+		return get_option( 'amp_comment_notice', $default );
+	}
+
+	/**
+	 * Output the field to capture the comment moderation message for amp comments.
+	 *
+	 * @since 0.7
+	 */
+	public static function comment_moderation_field() {
+		?>
+		<p>
+			<label for="amp_comment_notice">
+				<?php echo esc_html__( 'When a comment is submitted in AMP, it is expected to be shown instantly. However, there is a delay while AMP polls for new comments. This message is to give the user an indication that there may be a delay.', 'amp' ); ?>
+			</label>
+		</p>
+		<p>
+			<textarea name="amp_comment_notice" id="amp_comment_notice" rows="3" cols="50" class="large-text code"><?php echo esc_html( self::get_comment_moderation_notice() ); ?></textarea>
+		</p>
 		<?php
 	}
 
