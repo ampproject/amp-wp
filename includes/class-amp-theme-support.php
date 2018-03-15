@@ -567,7 +567,7 @@ class AMP_Theme_Support {
 		?>
 		<p>
 			<label for="amp_comment_notice">
-				<?php echo esc_html__( 'When a comment is submitted in AMP, it is expected to be shown instantly. However, there is a delay while AMP polls for new comments. This message is to give the user an indication that there may be a delay.', 'amp' ); ?>
+				<?php echo esc_html__( 'This message is to give a user posting a comment that it was successful, but there will be a delay.', 'amp' ); ?>
 			</label>
 		</p>
 		<p>
