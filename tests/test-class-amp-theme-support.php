@@ -384,11 +384,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_dequeue_script( $script_slug );
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertFalse( in_array( $script_slug, wp_scripts()->queue, true ) );
-		$this->assertFalse( in_array( $style_slug, wp_styles()->queue, true ) );
-
-		add_theme_support( 'amp' );
-		AMP_Theme_Support::enqueue_assets();
 		$this->assertTrue( in_array( $script_slug, wp_scripts()->queue, true ) );
 		$this->assertTrue( in_array( $style_slug, wp_styles()->queue, true ) );
 	}

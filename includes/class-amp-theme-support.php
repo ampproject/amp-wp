@@ -1021,11 +1021,9 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_assets() {
-		if ( is_amp_endpoint() ) {
-			// Enqueue AMP runtime.
-			wp_enqueue_script( 'amp-runtime' );
-			// Enqueue default styles expected by sanitizer.
-			wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
-		}
+		// Enqueue AMP runtime.
+		wp_enqueue_script( 'amp-runtime' );
+		// Enqueue default styles expected by sanitizer.
+		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
 	}
 }
