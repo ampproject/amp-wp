@@ -36,7 +36,8 @@ class AMP_Gutenberg_Categories_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Render.
+	 * Render Gutenberg block. This is essentially the same method as the original.
+	 * Difference is excluding the disallowed JS script, adding <form> tags, and using on:change for <select>.
 	 *
 	 * @param array $attributes Attributes.
 	 * @return string Rendered.
@@ -62,7 +63,7 @@ class AMP_Gutenberg_Categories_Handler extends AMP_Base_Embed_Handler {
 			$id                       = 'wp-block-categories-dropdown-' . $block_id;
 			$form_id                  = $id . '-form';
 			$args['id']               = $id;
-			$args['show_option_none'] = __( 'Select Category', 'gutenberg' );
+			$args['show_option_none'] = __( 'Select Category', 'amp' );
 			$wrapper_markup           = '<div class="%1$s">%2$s</div>';
 			$items_markup             = wp_dropdown_categories( $args );
 			$type                     = 'dropdown';
@@ -88,7 +89,7 @@ class AMP_Gutenberg_Categories_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		if ( ! empty( $attributes['displayAsDropdown'] ) ) {
-			$block_content = sprintf('<form action="%s" method="get" target="_top" id="%s">%s</form>', esc_url( home_url() ), esc_attr( $form_id ), $block_content );
+			$block_content = sprintf( '<form action="%s" method="get" target="_top" id="%s">%s</form>', esc_url( home_url() ), esc_attr( $form_id ), $block_content );
 		}
 		return $block_content;
 	}
