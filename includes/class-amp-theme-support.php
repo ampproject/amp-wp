@@ -550,8 +550,12 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function get_comment_moderation_notice() {
-		$default = __( 'Your comment has been posted, but may be subject to moderation.', 'amp' );
-		return get_option( 'amp_comment_notice', $default );
+		$default = __( 'Your comment has been posted and will show shortly.', 'amp' );
+		$message = trim( get_option( 'amp_comment_notice' ) );
+		if ( empty( $message ) ) {
+			$message = $default;
+		}
+		return $message;
 	}
 
 	/**
