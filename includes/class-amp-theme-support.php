@@ -567,7 +567,7 @@ class AMP_Theme_Support {
 		?>
 		<p>
 			<label for="amp_comment_notice">
-				<?php echo esc_html__( 'This message is to give a user posting a comment that it was successful, but there will be a delay.', 'amp' ); ?>
+				<?php echo esc_html__( 'This message is to indicate to a user that the comment was posted, but there will be a delay in displaying it.', 'amp' ); ?>
 			</label>
 		</p>
 		<p>
