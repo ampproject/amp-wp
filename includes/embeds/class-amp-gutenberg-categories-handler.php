@@ -16,7 +16,9 @@ class AMP_Gutenberg_Categories_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_action( 'the_post', array( $this, 'override_category_block_render_callback' ) );
+		if ( function_exists( 'gutenberg_init' ) ) {
+			add_action( 'the_post', array( $this, 'override_category_block_render_callback' ) );
+		}
 	}
 
 	/**
