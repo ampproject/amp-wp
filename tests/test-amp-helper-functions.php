@@ -15,6 +15,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( 'amp' );
+		global $wp_scripts;
+		$wp_scripts = null;
 		parent::tearDown();
 	}
 
@@ -31,11 +33,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_slug().
+	 *
+	 * @covers amp_get_slug()
+	 */
+	public function test_amp_get_slug() {
+		$this->assertSame( 'amp', amp_get_slug() );
+	}
+
+	/**
 	 * Test amp_get_permalink() without pretty permalinks.
 	 *
 	 * @covers \amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_without_pretty_permalinks() {
+		remove_theme_support( 'amp' );
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
 
@@ -112,6 +124,40 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_permalink() with theme support paired mode.
+	 *
+	 * @covers \amp_get_permalink()
+	 */
+	public function test_amp_get_permalink_with_theme_support() {
+		global $wp_rewrite;
+		add_theme_support( 'amp' );
+
+		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+		$wp_rewrite->use_trailing_slashes = true;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules();
+
+		$post_id = $this->factory()->post->create();
+		$this->assertEquals( get_permalink( $post_id ), amp_get_permalink( $post_id ) );
+
+		add_theme_support( 'amp', array(
+			'template_dir' => 'amp',
+		) );
+	}
+
+	/**
+	 * Test amp_remove_endpoint.
+	 *
+	 * @covers \amp_remove_endpoint()
+	 */
+	public function test_amp_remove_endpoint() {
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/?amp' ) );
+		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
+		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
+	}
+
+	/**
 	 * Filter calls.
 	 *
 	 * @var array
@@ -130,6 +176,48 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'args'           => func_get_args(),
 		);
 		return $value;
+	}
+
+	/**
+	 * Test script registering.
+	 *
+	 * @covers amp_register_default_scripts()
+	 * @covers amp_filter_script_loader_tag()
+	 * @global WP_Scripts $wp_scripts
+	 */
+	public function test_script_registering() {
+		global $wp_scripts;
+		$wp_scripts = null;
+		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
+
+		$this->assertTrue( wp_script_is( 'amp-runtime', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-mustache', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-list', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-bind', 'registered' ) );
+
+		wp_enqueue_script( 'amp-mathml' );
+		wp_enqueue_script( 'amp-mustache' );
+		$this->assertTrue( wp_script_is( 'amp-mathml', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'amp-mustache', 'enqueued' ) );
+
+		// Try overriding URL.
+		wp_scripts()->registered['amp-mustache']->src = 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js';
+
+		ob_start();
+		wp_print_scripts();
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-latest.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-0.1.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
+		// Try some experimental component to ensure expected script attributes are added.
+		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', array( 'amp-runtime' ), null );
+		ob_start();
+		wp_print_scripts( 'amp-foo' );
+		$output = ob_get_clean();
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -226,7 +314,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \post_supports_amp()
 	 */
 	public function test_post_supports_amp() {
-		add_post_type_support( 'page', AMP_QUERY_VAR );
+		add_post_type_support( 'page', amp_get_slug() );
 
 		// Test disabled by default for page for posts and show on front.
 		update_option( 'show_on_front', 'page' );
@@ -247,7 +335,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( post_supports_amp( $post ) );
 
 		// Reset.
-		remove_post_type_support( 'page', AMP_QUERY_VAR );
+		remove_post_type_support( 'page', amp_get_slug() );
 	}
 
 	/**
@@ -371,70 +459,5 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
-	}
-
-	/**
-	 * Test amp_intercept_post_request_redirect().
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 * @covers amp_intercept_post_request_redirect()
-	 */
-	public function test_amp_intercept_post_request_redirect() {
-		if ( ! function_exists( 'xdebug_get_headers' ) ) {
-			$this->markTestSkipped( 'xdebug is required for this test' );
-		}
-
-		add_theme_support( 'amp' );
-		$url = get_home_url();
-
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', function () {
-			return '__return_false';
-		} );
-
-		ob_start();
-		amp_intercept_post_request_redirect( $url );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-
-		$this->assertContains( 'AMP-Redirect-To: ' . $url, xdebug_get_headers() );
-		$this->assertContains( 'Access-Control-Expose-Headers: AMP-Redirect-To', xdebug_get_headers() );
-
-		ob_start();
-		amp_intercept_post_request_redirect( '/new-location/' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$this->assertContains( 'AMP-Redirect-To: https://example.org/new-location/', xdebug_get_headers() );
-
-		ob_start();
-		amp_intercept_post_request_redirect( '//example.com/new-location/' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$headers = xdebug_get_headers();
-		$this->assertContains( 'AMP-Redirect-To: https://example.com/new-location/', $headers );
-
-		ob_start();
-		amp_intercept_post_request_redirect( '' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$this->assertContains( 'AMP-Redirect-To: https://example.org', xdebug_get_headers() );
-	}
-
-	/**
-	 * Test amp_handle_xhr_request().
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 * @covers amp_handle_xhr_headers_output()
-	 */
-	public function test_amp_handle_xhr_request() {
-		global $pagenow;
-		if ( ! function_exists( 'xdebug_get_headers' ) ) {
-			$this->markTestSkipped( 'xdebug is required for this test' );
-		}
-
-		$_GET['__amp_source_origin'] = 'https://example.org';
-		$pagenow                     = 'wp-comments-post.php';
-
-		amp_handle_xhr_request();
-		$this->assertContains( 'AMP-Access-Control-Allow-Source-Origin: https://example.org', xdebug_get_headers() );
-
 	}
 }

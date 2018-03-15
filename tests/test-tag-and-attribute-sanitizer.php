@@ -165,6 +165,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-izlesene' ),
 			),
 
+			'amp-mathml'                                                => array(
+				'<amp-mathml layout="container" inline data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>',
+				null, // No change.
+				array( 'amp-mathml' ),
+			),
+
+			'amp-riddle-quiz'                                           => array(
+				'<amp-riddle-quiz layout="responsive" width="600" height="400" data-riddle-id="25799"></amp-riddle-quiz>',
+				null, // No change.
+				array( 'amp-riddle-quiz' ),
+			),
+
+			'amp-wistia-player'                                         => array(
+				'<amp-wistia-player data-media-hashed-id="u8p9wq6mq8" width="512" height="360"></amp-wistia-player>',
+				null, // No change.
+				array( 'amp-wistia-player' ),
+			),
+
+			'amp-byside-content'                                        => array(
+				'<amp-byside-content data-webcare-id="D6604AE5D0" data-channel="" data-lang="pt" data-fid="" data-label="amp-number" layout="fixed" width="120" height="40"></amp-byside-content>',
+				null, // No change.
+				array( 'amp-byside-content' ),
+			),
+
+			'amp-bind-macro'                                            => array(
+				'<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>',
+				null, // No change.
+				array( 'amp-bind' ),
+			),
+
 			'amp-nexxtv-player'                                         => array(
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.
@@ -650,6 +680,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a class="foo" href="">value</a>',
 			),
 
+			'a_with_wrong_host'                                         => array(
+				'<a class="foo" href="http://foo bar">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+			'a_with_encoded_host'                                       => array(
+				'<a class="foo" href="http://%65%78%61%6d%70%6c%65%2e%63%6f%6d/foo/">value</a>',
+				null,
+			),
+			'a_with_wrong_schemeless_host'                              => array(
+				'<a class="foo" href="//bad domain with a space.com/foo">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+			'a_with_mail_host'                                          => array(
+				'<a class="foo" href="mail to:foo@bar.com">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+
 			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements'                              => array(
 				'<font size="1">Headline</font><span style="color: blue">Span</span>',
@@ -755,11 +802,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'bad_meta_ua_compatible' => array(
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1"></head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta content="IE=9,chrome=1"></head><body></body></html>', // Note the http-equiv is removed because the content violates its attribute spec.
 			),
 			'bad_meta_charset' => array(
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
-				'<html amp><head><title>Mojibake?</title></head><body></body></html>',
+				'<html amp><head><meta><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.
 			),
 			'bad_meta_viewport' => array(
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
@@ -771,6 +818,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'meta_viewport_extras' => array(
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,height=device-height,initial-scale=2,maximum-scale=3,minimum-scale=1.0,shrink-to-fit=yes,user-scalable=yes,viewport-fit=cover"></head><body></body></html>',
+				null, // No change.
+			),
+			'meta_og_property' => array(
+				'<html amp><head><meta charset="utf-8"><meta property="og:site_name" content="AMP Site"></head><body></body></html>',
 				null, // No change.
 			),
 		);

@@ -11,6 +11,9 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
 	</rule>
@@ -25,7 +28,7 @@
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
-			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS,documentElement" />
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS,documentElement,removeChild,ownerDocument" />
 		</properties>
 	</rule>
 

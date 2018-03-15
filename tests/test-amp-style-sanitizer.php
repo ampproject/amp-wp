@@ -57,10 +57,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 
-			'div_kses_banned_style' => array(
-				'<span style="overflow-x: hidden;">Specific overflow axis not allowed.</span>',
-				'<span>Specific overflow axis not allowed.</span>',
-				array(),
+			'span_display_none' => array(
+				'<span style="display: none;">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
+				'<span class="amp-wp-inline-0f1bf07c72fdf1784fff2e164d9dca98">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
+				array(
+					'.amp-wp-inline-0f1bf07c72fdf1784fff2e164d9dca98 { display:none; }',
+				),
 			),
 
 			'div_amp_banned_style' => array(
@@ -160,7 +162,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					's {color:yellow}',
 				),
 			),
-			'style_eleemnts_with_link_elements' => array(
+			'style_elements_with_link_elements' => array(
 				sprintf(
 					'<html amp><head><meta charset="utf-8"><style type="text/css">strong.before-dashicon {color:green}</style><link rel="stylesheet" href="%s"><style type="text/css">strong.after-dashicon {color:green}</style></head><body><style>s {color:yellow !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 					includes_url( 'css/dashicons.css' )
@@ -170,6 +172,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.dashicons-dashboard:before',
 					'strong.after-dashicon',
 					's {color:yellow}',
+				),
+			),
+			'style_with_no_head' => array(
+				'<html amp><body>Not good!<style>body{color:red;overflow:auto;overflow-x:scroll;overflow-y:scroll;}</style></body>',
+				array(
+					'body{color:red;}',
 				),
 			),
 		);

@@ -93,13 +93,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->instance->render_status( $post );
 		$this->assertContains( $amp_status_markup, ob_get_clean() );
 
-		remove_post_type_support( 'post', AMP_QUERY_VAR );
+		remove_post_type_support( 'post', amp_get_slug() );
 
 		ob_start();
 		$this->instance->render_status( $post );
 		$this->assertEmpty( ob_get_clean() );
 
-		add_post_type_support( 'post', AMP_QUERY_VAR );
+		add_post_type_support( 'post', amp_get_slug() );
 		wp_set_current_user( $this->factory->user->create( array(
 			'role' => 'subscriber',
 		) ) );
@@ -160,7 +160,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$link = 'https://foo.bar';
 		$this->assertEquals( 'https://foo.bar', $this->instance->preview_post_link( $link ) );
 		$_POST['amp-preview'] = 'do-preview';
-		$this->assertEquals( 'https://foo.bar?' . AMP_QUERY_VAR . '=1', $this->instance->preview_post_link( $link ) );
+		$this->assertEquals( 'https://foo.bar?' . amp_get_slug() . '=1', $this->instance->preview_post_link( $link ) );
 	}
 
 }

@@ -54,7 +54,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://www.facebook.com/zuck/posts/10102593740125791' . PHP_EOL,
-				array( 'amp-facebook' => 'https://cdn.ampproject.org/v0/amp-facebook-latest.js' ),
+				array( 'amp-facebook' => true ),
 			),
 		);
 	}

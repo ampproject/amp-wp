@@ -71,6 +71,14 @@ class AMP_Theme_Support {
 	 * Initialize.
 	 */
 	public static function init() {
+		if ( ! current_theme_supports( 'amp' ) ) {
+			return;
+		}
+
+		self::purge_amp_query_vars();
+		self::handle_xhr_request();
+		self::add_temporary_discussion_restrictions();
+
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
 		// Validate theme support usage.
@@ -84,21 +92,61 @@ class AMP_Theme_Support {
 			}
 		}
 
-		if ( amp_is_canonical() ) {
+		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
-			// Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
-			if ( false !== get_query_var( AMP_QUERY_VAR, false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
-				wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because canonical may change in future.
-				exit;
-			}
+		/*
+		 * Note that wp action is use instead of template_redirect because some themes/plugins output
+		 * the response at this action and then short-circuit with exit. So this is why the the preceding
+		 * action to template_redirect--the wp action--is used instead.
+		 */
+		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+	}
+
+	/**
+	 * Finish initialization once query vars are set.
+	 *
+	 * @since 0.7
+	 */
+	public static function finish_init() {
+		if ( ! is_amp_endpoint() ) {
+			amp_add_frontend_actions();
+			return;
+		}
+
+		if ( amp_is_canonical() ) {
+			self::redirect_canonical_amp();
 		} else {
 			self::register_paired_hooks();
 		}
 
-		self::purge_amp_query_vars(); // Note that amp_prepare_xhr_post() still looks at $_GET['__amp_source_origin'].
-		self::register_hooks();
-		self::$embed_handlers    = self::register_content_embed_handlers();
+		// Enqueue AMP runtime.
+		wp_enqueue_script( 'amp-runtime' );
+
+		// Enqueue default styles expected by sanitizer.
+		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
+
+		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
+		self::$embed_handlers    = self::register_content_embed_handlers();
+	}
+
+	/**
+	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+	 *
+	 * @since 0.7
+	 */
+	public static function redirect_canonical_amp() {
+		if ( false !== get_query_var( amp_get_slug(), false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
+			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
+			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
+			}
+
+			$url = amp_remove_endpoint( $url );
+
+			wp_safe_redirect( $url, 302 ); // Temporary redirect because canonical may change in future.
+			exit;
+		}
 	}
 
 	/**
@@ -129,6 +177,18 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Determine whether the user is in the Customizer preview iframe.
+	 *
+	 * @since 0.7
+	 *
+	 * @return bool Whether in Customizer preview iframe.
+	 */
+	public static function is_customize_preview_iframe() {
+		global $wp_customize;
+		return is_customize_preview() && $wp_customize->get_messenger_channel();
+	}
+
+	/**
 	 * Register hooks for paired mode.
 	 */
 	public static function register_paired_hooks() {
@@ -141,14 +201,13 @@ class AMP_Theme_Support {
 	/**
 	 * Register hooks.
 	 */
-	public static function register_hooks() {
+	public static function add_hooks() {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_head', 'wp_print_head_scripts', 9 );
-		remove_action( 'wp_footer', 'wp_print_footer_scripts', 20 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 
 		/*
 		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
@@ -159,10 +218,13 @@ class AMP_Theme_Support {
 		 * in this case too we should defer to the theme as well to output the meta charset because it is possible the
 		 * install is not on utf-8 and we may need to do a encoding conversion.
 		 */
-		add_action( 'wp_head', array( __CLASS__, 'add_amp_component_scripts' ), 10 );
-		add_action( 'wp_head', array( __CLASS__, 'print_amp_styles' ) );
+		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
-		add_action( 'wp_head', 'amp_print_schemaorg_metadata' );
+
+		if ( is_customize_preview() ) {
+			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
+		}
+		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
 
@@ -178,11 +240,17 @@ class AMP_Theme_Support {
 		 */
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
+		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
+
+		if ( AMP_Validation_Utils::should_validate_response() ) {
+			AMP_Validation_Utils::add_validation_hooks();
+		}
 
 		// @todo Add character conversion.
 	}
@@ -247,18 +315,105 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Set up commenting.
+	 * Hook into a form submissions, such as the comment form or some other form submission.
+	 *
+	 * @since 0.7.0
+	 * @global string $pagenow
 	 */
-	public static function setup_commenting() {
-		if ( ! current_theme_supports( AMP_QUERY_VAR ) ) {
+	public static function handle_xhr_request() {
+		global $pagenow;
+		if ( empty( self::$purged_amp_query_vars['__amp_source_origin'] ) ) {
 			return;
 		}
 
-		/*
-		 * Temporarily force comments to be listed in descending order.
-		 *
-		 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
-		 */
+		if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
+			// We don't need any data, so just send a success.
+			add_filter( 'comment_post_redirect', function() {
+				// We don't need any data, so just send a success.
+				wp_send_json_success();
+			}, PHP_INT_MAX );
+			self::handle_xhr_headers_output();
+		} elseif ( ! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] ) ) {
+			add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );
+			self::handle_xhr_headers_output();
+		}
+	}
+
+	/**
+	 * Handle the AMP XHR headers and output errors.
+	 *
+	 * @since 0.7.0
+	 */
+	public static function handle_xhr_headers_output() {
+		// Add die handler for AMP error display.
+		add_filter( 'wp_die_handler', function() {
+			/**
+			 * New error handler for AMP form submission.
+			 *
+			 * @param WP_Error|string $error The error to handle.
+			 */
+			return function( $error ) {
+				status_header( 400 );
+				if ( is_wp_error( $error ) ) {
+					$error = $error->get_error_message();
+				}
+				$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
+				wp_send_json( array(
+					'error' => wp_kses( $error, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) ),
+				) );
+			};
+		} );
+
+		// Send AMP header.
+		$origin = esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] );
+		header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
+	}
+
+	/**
+	 * Intercept the response to a non-comment POST request.
+	 *
+	 * @since 0.7.0
+	 * @param string $location The location to redirect to.
+	 */
+	public static function intercept_post_request_redirect( $location ) {
+
+		// Make sure relative redirects get made absolute.
+		$parsed_location = array_merge(
+			array(
+				'scheme' => 'https',
+				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'path'   => strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ),
+			),
+			wp_parse_url( $location )
+		);
+
+		$absolute_location = $parsed_location['scheme'] . '://' . $parsed_location['host'];
+		if ( isset( $parsed_location['port'] ) ) {
+			$absolute_location .= ':' . $parsed_location['port'];
+		}
+		$absolute_location .= $parsed_location['path'];
+		if ( isset( $parsed_location['query'] ) ) {
+			$absolute_location .= '?' . $parsed_location['query'];
+		}
+		if ( isset( $parsed_location['fragment'] ) ) {
+			$absolute_location .= '#' . $parsed_location['fragment'];
+		}
+
+		header( 'AMP-Redirect-To: ' . $absolute_location );
+		header( 'Access-Control-Expose-Headers: AMP-Redirect-To' );
+		// Send json success as no data is required.
+		wp_send_json_success();
+	}
+
+	/**
+	 * Set up some restrictions for commenting based on amp-live-list limitations.
+	 *
+	 * Temporarily force comments to be listed in descending order.
+	 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
+	 *
+	 * @link https://github.com/ampproject/amphtml/issues/5396
+	 */
+	protected static function add_temporary_discussion_restrictions() {
 		add_filter( 'option_comment_order', function() {
 			return 'desc';
 		}, PHP_INT_MAX );
@@ -415,16 +570,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Print AMP script and placeholder for others.
-	 *
-	 * @link https://www.ampproject.org/docs/reference/spec#scrpt
-	 */
-	public static function add_amp_component_scripts() {
-		// Replaced after output buffering with all AMP component scripts.
-		echo self::SCRIPTS_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput, WordPress.XSS.EscapeOutput
-	}
-
-	/**
 	 * Get canonical URL for current request.
 	 *
 	 * @see rel_canonical()
@@ -465,13 +610,7 @@ class AMP_Theme_Support {
 			$url = add_query_arg( $added_query_vars, $url );
 		}
 
-		// Strip endpoint.
-		$url = preg_replace( ':/' . preg_quote( AMP_QUERY_VAR, ':' ) . '(?=/?(\?|#|$)):', '', $url );
-
-		// Strip query var.
-		$url = remove_query_arg( AMP_QUERY_VAR, $url );
-
-		return $url;
+		return amp_remove_endpoint( $url );
 	}
 
 	/**
@@ -603,62 +742,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Determine required AMP scripts.
-	 *
-	 * @param array $amp_scripts Initial scripts.
-	 * @return string Scripts to inject into the HEAD.
-	 */
-	public static function get_amp_scripts( $amp_scripts ) {
-
-		foreach ( self::$embed_handlers as $embed_handler ) {
-			$amp_scripts = array_merge(
-				$amp_scripts,
-				$embed_handler->get_scripts()
-			);
-		}
-
-		/**
-		 * List of components that are custom elements.
-		 *
-		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template.
-		 *
-		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
-		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
-		 */
-		$custom_templates = array( 'amp-mustache' );
-
-		/**
-		 * Filters AMP component scripts before they are injected onto the output buffer for the response.
-		 *
-		 * Plugins may add their own component scripts which have been rendered but which the plugin doesn't yet
-		 * recognize.
-		 *
-		 * @since 0.7
-		 *
-		 * @param array $amp_scripts AMP Component scripts, mapping component names to component source URLs.
-		 */
-		$amp_scripts = apply_filters( 'amp_component_scripts', $amp_scripts );
-
-		$scripts = '<script async src="https://cdn.ampproject.org/v0.js"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		foreach ( $amp_scripts as $amp_script_component => $amp_script_source ) {
-
-			$custom_type = 'custom-element';
-			if ( in_array( $amp_script_component, $custom_templates, true ) ) {
-				$custom_type = 'custom-template';
-			}
-
-			$scripts .= sprintf(
-				'<script async %s="%s" src="%s"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources, WordPress.XSS.EscapeOutput.OutputNotEscaped
-				$custom_type,
-				$amp_script_component,
-				$amp_script_source
-			);
-		}
-
-		return $scripts;
-	}
-
-	/**
 	 * Ensure markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 	 *
 	 * Ensure meta[charset], meta[name=viewport], and link[rel=canonical]; a the whitelist sanitizer
@@ -666,10 +749,18 @@ class AMP_Theme_Support {
 	 * canonical URL by default if a singular post.
 	 *
 	 * @since 0.7
+	 * @todo All of this might be better placed inside of a sanitizer.
 	 *
 	 * @param DOMDocument $dom Doc.
 	 */
-	protected static function ensure_required_markup( DOMDocument $dom ) {
+	public static function ensure_required_markup( DOMDocument $dom ) {
+		$xpath = new DOMXPath( $dom );
+
+		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
+			$dom->documentElement->setAttribute( 'amp', '' );
+		}
+
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
 			$head = $dom->createElement( 'head' );
@@ -703,7 +794,19 @@ class AMP_Theme_Support {
 			) );
 			$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 		}
-
+		// Prevent schema.org duplicates.
+		$has_schema_org_metadata = false;
+		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
+			if ( 'application/ld+json' === $script->getAttribute( 'type' ) && false !== strpos( $script->nodeValue, 'schema.org' ) ) {
+				$has_schema_org_metadata = true;
+				break;
+			}
+		}
+		if ( ! $has_schema_org_metadata ) {
+			$script = $dom->createElement( 'script', wp_json_encode( amp_get_schemaorg_metadata() ) );
+			$script->setAttribute( 'type', 'application/ld+json' );
+			$head->appendChild( $script );
+		}
 		// Ensure rel=canonical link.
 		$rel_canonical = null;
 		foreach ( $head->getElementsByTagName( 'link' ) as $link ) {
@@ -718,6 +821,36 @@ class AMP_Theme_Support {
 				'href' => self::get_current_canonical_url(),
 			) );
 			$head->appendChild( $rel_canonical );
+		}
+
+		// Make sure scripts from the body get moved to the head.
+		$scripts = array();
+		foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
+			$scripts[] = $script;
+		}
+		foreach ( $scripts as $script ) {
+			$head->appendChild( $script );
+		}
+	}
+
+	/**
+	 * Dequeue Customizer assets which are not necessary outside the preview iframe.
+	 *
+	 * Prevent enqueueing customize-preview styles if not in customizer preview iframe.
+	 * These are only needed for when there is live editing of content, such as selective refresh.
+	 *
+	 * @since 0.7
+	 */
+	public static function dequeue_customize_preview_scripts() {
+
+		// Dequeue styles unnecessary unless in customizer preview iframe when editing (such as for edit shortcuts).
+		if ( ! self::is_customize_preview_iframe() ) {
+			wp_dequeue_style( 'customize-preview' );
+			foreach ( wp_styles()->registered as $handle => $dependency ) {
+				if ( in_array( 'customize-preview', $dependency->deps, true ) ) {
+					wp_dequeue_style( $handle );
+				}
+			}
 		}
 	}
 
@@ -756,16 +889,68 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Filter rendered partial to convert to AMP.
+	 *
+	 * @see WP_Customize_Partial::render()
+	 *
+	 * @param string|mixed $partial Rendered partial.
+	 * @return string|mixed Filtered partial.
+	 * @global int $content_width
+	 */
+	public static function filter_customize_partial_render( $partial ) {
+		global $content_width;
+		if ( is_string( $partial ) && preg_match( '/<\w/', $partial ) ) {
+			$dom  = AMP_DOM_Utils::get_dom_from_content( $partial );
+			$args = array(
+				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element' => false,
+				'allow_dirty_styles'   => true,
+				'allow_dirty_scripts'  => false,
+			);
+			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
+			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
+		}
+		return $partial;
+	}
+
+	/**
 	 * Process response to ensure AMP validity.
 	 *
 	 * @since 0.7
 	 *
-	 * @param string $response HTML document response.
+	 * @param string $response HTML document response. By default it expects a complete document.
+	 * @param array  $args {
+	 *     Args to send to the preprocessor/sanitizer.
+	 *
+	 *     @type callable $remove_invalid_callback Function to call whenever a node is removed due to being invalid.
+	 * }
 	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
-	public static function prepare_response( $response ) {
+	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
+
+		/*
+		 * Check if the response starts with HTML markup.
+		 * Without this check, JSON responses will be erroneously corrupted,
+		 * being wrapped in HTML documents.
+		 */
+		if ( '<' !== substr( ltrim( $response ), 0, 1 ) ) {
+			return $response;
+		}
+
+		$is_validation_debug_mode = ! empty( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
+
+		$args = array_merge(
+			array(
+				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element'    => true,
+				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'disable_invalid_removal' => $is_validation_debug_mode,
+			),
+			$args
+		);
 
 		/*
 		 * Make sure that <meta charset> is present in output prior to parsing.
@@ -780,37 +965,54 @@ class AMP_Theme_Support {
 				1
 			);
 		}
-		$dom  = AMP_DOM_Utils::get_dom( $response );
-		$args = array(
-			'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-			'use_document_element' => true,
-		);
-
-		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
-		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
-			$dom->documentElement->setAttribute( 'amp', '' );
-		}
-
-		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+		$dom = AMP_DOM_Utils::get_dom( $response );
 
 		self::ensure_required_markup( $dom );
+
+		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
 		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
 			/* translators: %s is the charset of the current site */
-			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ), E_USER_WARNING ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		}
+
+		if ( AMP_Validation_Utils::should_validate_response() ) {
+			AMP_Validation_Utils::finalize_validation( $dom, array(
+				'remove_source_comments' => ! $is_validation_debug_mode,
+			) );
 		}
 
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
-		// Inject required scripts.
-		$response = preg_replace(
-			'#' . preg_quote( self::SCRIPTS_PLACEHOLDER, '#' ) . '#',
-			self::get_amp_scripts( $assets['scripts'] ),
-			$response,
-			1
-		);
+		$amp_scripts = $assets['scripts'];
+		foreach ( self::$embed_handlers as $embed_handler ) {
+			$amp_scripts = array_merge(
+				$amp_scripts,
+				$embed_handler->get_scripts()
+			);
+		}
+
+		// Allow for embed handlers to override the default extension version by defining a different URL.
+		foreach ( $amp_scripts as $handle => $value ) {
+			if ( is_string( $value ) && wp_script_is( $handle, 'registered' ) ) {
+				wp_scripts()->registered[ $handle ]->src = $value;
+			}
+		}
+
+		// Print all scripts, some of which may have already been printed and inject into head.
+		ob_start();
+		wp_print_scripts( array_keys( $amp_scripts ) );
+		$script_tags = ob_get_clean();
+		if ( ! empty( $script_tags ) ) {
+			$response = preg_replace(
+				'#(?=</head>)#',
+				$script_tags,
+				$response,
+				1
+			);
+		}
 
 		return $response;
 	}

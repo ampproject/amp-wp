@@ -53,7 +53,7 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
-				array( 'amp-instagram' => 'https://cdn.ampproject.org/v0/amp-instagram-latest.js' ),
+				array( 'amp-instagram' => true ),
 			),
 		);
 	}
