@@ -304,96 +304,15 @@ class AMP_Validation_Utils {
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 
+		$do_blocks_priority  = has_filter( 'the_content', 'do_blocks' );
 		$is_gutenberg_active = (
-			function_exists( 'do_blocks' )
-			&&
-			function_exists( 'gutenberg_parse_blocks' )
-			&&
-			function_exists( 'gutenberg_render_block' )
+			false !== $do_blocks_priority
 			&&
 			class_exists( 'WP_Block_Type_Registry' )
 		);
 		if ( $is_gutenberg_active ) {
-			$do_blocks_priority = has_filter( 'the_content', 'do_blocks' );
-			if ( false !== $do_blocks_priority ) {
-				remove_filter( 'the_content', 'do_blocks', $do_blocks_priority );
-				add_filter( 'the_content', array( __CLASS__, 'do_blocks' ), $do_blocks_priority );
-			}
+			add_filter( 'the_content', array( __CLASS__, 'add_block_source_comments' ), $do_blocks_priority - 1 );
 		}
-	}
-
-	/**
-	 * Parse blocks out of content and render with AMP source stack comments added to demarcate blocks.
-	 *
-	 * @see do_blocks() prior to https://github.com/WordPress/gutenberg/commit/49f05e53a4e9ceff0c08fe646f3b0bb724f58b53
-	 *
-	 * @param string $content Content.
-	 * @return string Content with rendered blocks.
-	 */
-	public static function do_blocks( $content ) {
-		$blocks = gutenberg_parse_blocks( $content );
-		return self::render_blocks( $blocks );
-	}
-
-	/**
-	 * Render parsed blocks.
-	 *
-	 * @param array $blocks Blocks.
-	 * @return string Rendered blocks.
-	 */
-	protected static function render_blocks( $blocks ) {
-		$rendered_blocks = '';
-
-		foreach ( $blocks as $block ) {
-			$rendered_block = gutenberg_render_block( $block );
-
-			// Obtain source information for block.
-			$source = null;
-			if ( ! empty( $block['blockName'] ) ) {
-				$source = array(
-					'block_name' => $block['blockName'],
-				);
-				if ( ! empty( $block['attrs'] ) ) {
-					$source['block_attrs'] = $block['attrs'];
-				}
-				$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
-				if ( $block_type && $block_type->is_dynamic() ) {
-					$callback_source = self::get_source( $block_type->render_callback );
-					if ( $callback_source ) {
-						$source = array_merge(
-							$source,
-							$callback_source
-						);
-					}
-				}
-			}
-
-			// Prepend rendered block with start source comment.
-			if ( $source ) {
-				$rendered_block = self::get_source_comment( $source, true ) . $rendered_block;
-			}
-
-			// Render nested blocks.
-			if ( ! empty( $block['innerBlocks'] ) ) {
-				$rendered_inner_blocks = self::render_blocks( $block['innerBlocks'] );
-
-				// Inject rendered inner blocks before closing tag of outer block (or at end of string if no closing). @todo Confirm approach here.
-				$rendered_block = preg_replace(
-					'#(?=(</[a-zA-Z0-9_-]+>\s*)$)#s',
-					$rendered_inner_blocks,
-					$rendered_block,
-					1
-				);
-			}
-
-			// Append rendered block with end source comment.
-			if ( $source ) {
-				$rendered_block .= self::get_source_comment( $source, false );
-			}
-
-			$rendered_blocks .= $rendered_block;
-		}
-		return $rendered_blocks;
 	}
 
 	/**
@@ -781,6 +700,74 @@ class AMP_Validation_Utils {
 		foreach ( $comments as $comment ) {
 			$comment->parentNode->removeChild( $comment );
 		}
+	}
+
+	/**
+	 * Add block source comments.
+	 *
+	 * @param string $content Content prior to blocks being processed.
+	 * @return string Content with source comments added.
+	 */
+	public static function add_block_source_comments( $content ) {
+
+		$start_block_pattern = implode( '', array(
+			'#<!--\s+',
+			'(?P<closing>/)?',
+			'wp:(?P<name>\S+)',
+			'(?:\s+(?P<attributes>\{.*?\}))?',
+			'\s+(?P<self_closing>\/)?',
+			'-->#s',
+		) );
+
+		return preg_replace_callback(
+			$start_block_pattern,
+			array( __CLASS__, 'handle_block_source_comment_replacement' ),
+			$content
+		);
+	}
+
+	/**
+	 * Handle block source comment replacement.
+	 *
+	 * @see \AMP_Validation_Utils::add_block_source_comments()
+	 * @param array $matches Matches.
+	 * @return string Replaced.
+	 */
+	protected static function handle_block_source_comment_replacement( $matches ) {
+		$replaced = $matches[0];
+
+		// Obtain source information for block.
+		$source = array(
+			'block_name' => $matches['name'],
+		);
+
+		// Make implicit core namespace explicit.
+		$is_implicit_core_namespace = ( false === strpos( $source['block_name'], '/' ) );
+		$source['block_name']       = $is_implicit_core_namespace ? 'core/' . $source['block_name'] : $source['block_name'];
+
+		if ( ! empty( $matches['attributes'] ) ) {
+			$source['block_attrs'] = json_decode( $matches['attributes'] );
+		}
+		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $source['block_name'] );
+		if ( $block_type && $block_type->is_dynamic() ) {
+			$callback_source = self::get_source( $block_type->render_callback );
+			if ( $callback_source ) {
+				$source = array_merge(
+					$source,
+					$callback_source
+				);
+			}
+		}
+
+		if ( ! empty( $matches['closing'] ) ) {
+			$replaced .= self::get_source_comment( $source, false );
+		} else {
+			$replaced = self::get_source_comment( $source, true ) . $replaced;
+			if ( ! empty( $matches['self_closing'] ) ) {
+				$replaced .= self::get_source_comment( $source, false );
+			}
+		}
+		return $replaced;
 	}
 
 	/**

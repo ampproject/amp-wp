@@ -141,15 +141,16 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
 
-		$this->assertEquals( 9, has_filter( 'the_content', 'do_blocks' ) );
+		$priority = has_filter( 'the_content', 'do_blocks' );
+		$this->assertNotFalse( $priority );
 		AMP_Validation_Utils::add_validation_hooks();
-		$this->assertFalse( has_filter( 'the_content', 'do_blocks' ) );
+		$this->assertEquals( $priority - 1, has_filter( 'the_content', array( self::TESTED_CLASS, 'add_block_source_comments' ) ) );
 	}
 
 	/**
 	 * Get block data.
 	 *
-	 * @ses Test_AMP_Validation_Utils::test_do_blocks()
+	 * @see Test_AMP_Validation_Utils::test_add_block_source_comments()
 	 * @return array
 	 */
 	public function get_block_data() {
@@ -172,7 +173,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			),
 			'columns'      => array(
 				"<!-- wp:columns -->\n<div class=\"wp-block-columns has-2-columns\">\n    <!-- wp:quote {\"layout\":\"column-1\",\"foo\":{\"bar\":1}} -->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!-- /wp:quote -->\n\n    <!-- wp:html {\"layout\":\"column-2\"} -->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!-- /wp:html -->\n</div>\n<!-- /wp:columns -->",
-				"<!--amp-source-stack {\"block_name\":\"core\/columns\"}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\"}-->",
+				"<!--amp-source-stack {\"block_name\":\"core\/columns\"}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\"}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\"}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\"}-->",
 				array(
 					'element' => 'blockquote',
 					'blocks'  => array(
@@ -185,24 +186,23 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test do_blocks.
+	 * Test do_blockadd_block_source_comments.
 	 *
 	 * @param string $content  Content.
 	 * @param string $expected Expected content.
 	 * @param array  $query    Query.
 	 * @dataProvider get_block_data
-	 * @covers AMP_Validation_Utils::do_blocks()
-	 * @covers AMP_Validation_Utils::render_blocks()
+	 * @covers AMP_Validation_Utils::add_block_source_comments()
 	 */
-	public function test_do_blocks( $content, $expected, $query ) {
+	public function test_add_block_source_comments( $content, $expected, $query ) {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
 
-		$rendered_block = AMP_Validation_Utils::do_blocks( $content );
+		$rendered_block = do_blocks( AMP_Validation_Utils::add_block_source_comments( $content ) );
 		$this->assertEquals(
-			preg_replace( '/\s+/', ' ', $expected ),
-			preg_replace( '/\s+/', ' ', $rendered_block )
+			preg_replace( '/(?<=>)\s+(?=<)/', '', $expected ),
+			preg_replace( '/(?<=>)\s+(?=<)/', '', $rendered_block )
 		);
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $rendered_block );
