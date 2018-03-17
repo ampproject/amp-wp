@@ -372,7 +372,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::wrap_widget_callbacks()
 	 */
 	public function test_wrap_widget_callbacks() {
-		global $wp_registered_widgets;
+		global $wp_registered_widgets, $_wp_sidebars_widgets;
 
 		$widget_id = 'search-2';
 		$this->assertArrayHasKey( $widget_id, $wp_registered_widgets );
@@ -387,9 +387,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'id'           => $sidebar_id,
 			'after_widget' => '</li>',
 		) );
-		update_option( 'sidebars_widgets', array(
-			$sidebar_id => array( $widget_id ),
-		) );
+		$_wp_sidebars_widgets[ $sidebar_id ] = array( $widget_id ); // WPCS: global override ok.
 
 		ob_start();
 		dynamic_sidebar( $sidebar_id );
@@ -1145,6 +1143,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Validation_Utils::remaining_error_notice();
 		$this->assertContains( 'The rechecked URL has no validation error', ob_get_clean() );
+
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	/**

@@ -171,6 +171,10 @@ function post_supports_amp( $post ) {
  * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
+	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		return false;
+	}
+
 	if ( amp_is_canonical() ) {
 		return true;
 	}
