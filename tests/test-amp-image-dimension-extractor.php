@@ -56,14 +56,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $actual );
 	}
-}
 
-/**
- * Tests for AMP_Image_Dimension_Extractor_Normalize_URL.
- *
- * @covers AMP_Image_Dimension_Extractor_Normalize_URL
- */
-class AMP_Image_Dimension_Extractor_Normalize_URL_Test extends WP_UnitTestCase {
 	/**
 	 * Data strings for testing converter.
 	 *
@@ -117,20 +110,12 @@ class AMP_Image_Dimension_Extractor_Normalize_URL_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected_url, $result_url );
 	}
-}
-
-/**
- * Tests for AMP_Image_Dimension_Extractor_By_Downloading.
- *
- * @covers AMP_Image_Dimension_Extractor_By_Downloading
- *
- * TODO: tests for transients, errors, lock
- * TODO: mocked tests
- */
-class AMP_Image_Dimension_Extractor_By_Downloading_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test a valid image file.
+	 *
+	 * TODO: tests for transients, errors, lock
+	 * TODO: mocked tests
 	 */
 	public function test__valid_image_file() {
 		$sources  = array(

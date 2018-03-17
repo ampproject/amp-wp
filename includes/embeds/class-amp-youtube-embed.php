@@ -158,7 +158,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 				$video_id = $parts[1];
 			}
 		} else {
-			/* ?v={id} or ?list={id} */
+			/* The query looks like ?v={id} or ?list={id} */
 			parse_str( $parsed_url['query'], $query_args );
 
 			if ( isset( $query_args['v'] ) ) {
@@ -167,7 +167,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		if ( empty( $video_id ) ) {
-			/* /(v|e|embed)/{id} */
+			/* The path looks like /(v|e|embed)/{id} */
 			$parts = explode( '/', $parsed_url['path'] );
 
 			if ( in_array( $parts[1], array( 'v', 'e', 'embed' ), true ) ) {
