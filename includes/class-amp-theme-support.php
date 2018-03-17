@@ -229,7 +229,7 @@ class AMP_Theme_Support {
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
 		 * combine to surpass the 50K limit imposed for the amp-custom style.
 		 */
-		add_filter( 'show_admin_bar', '__return_false', 100 ); // phpcs:ignore
+		add_filter( 'show_admin_bar', '__return_false', 100 );
 
 		/*
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
