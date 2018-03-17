@@ -346,6 +346,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::ensure_required_markup( $dom );
 		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
 	}
+
 	/**
 	 * Data provider for test_ensure_required_markup.
 	 *
@@ -370,5 +371,20 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				1,
 			),
 		);
+	}
+
+	/**
+	 * Test enqueue_assets().
+	 *
+	 * @covers AMP_Theme_Support::enqueue_assets()
+	 */
+	public function test_enqueue_assets() {
+		$script_slug = 'amp-runtime';
+		$style_slug  = 'amp-default';
+		wp_dequeue_script( $script_slug );
+		wp_dequeue_style( $style_slug );
+		AMP_Theme_Support::enqueue_assets();
+		$this->assertTrue( in_array( $script_slug, wp_scripts()->queue, true ) );
+		$this->assertTrue( in_array( $style_slug, wp_styles()->queue, true ) );
 	}
 }
