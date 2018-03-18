@@ -27,6 +27,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public $node;
 
 	/**
+	 * The expected REST API route.
+	 *
+	 * @var string
+	 */
+	public $expected_route = '/amp-wp/v1/validate';
+
+	/**
 	 * A tag that the sanitizer should strip.
 	 *
 	 * @var string
@@ -106,6 +113,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		add_theme_support( 'amp' );
 		AMP_Validation_Utils::init();
 		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::print_edit_form_validation_status' ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::amp_rest_validation' ) );
 		$this->assertEquals( 10, has_action( 'init', self::TESTED_CLASS . '::register_post_type' ) );
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::plugin_notice' ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Utils::POST_TYPE_SLUG . '_posts_columns', self::TESTED_CLASS . '::add_post_columns' ) );
@@ -295,6 +303,29 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_rest_validation.
+	 *
+	 * @covers AMP_Validation_Utils::amp_rest_validation()
+	 */
+	public function test_amp_rest_validation() {
+		$routes  = rest_get_server()->get_routes();
+		$route   = $routes[ $this->expected_route ][0];
+		$methods = array(
+			'POST' => true,
+		);
+		$args    = array(
+			'markup' => array(
+				'validate_callback' => array( self::TESTED_CLASS, 'validate_arg' ),
+			),
+		);
+
+		$this->assertEquals( $args, $route['args'] );
+		$this->assertEquals( array( self::TESTED_CLASS, 'handle_validate_request' ), $route['callback'] );
+		$this->assertEquals( $methods, $route['methods'] );
+		$this->assertEquals( array( self::TESTED_CLASS, 'has_cap' ), $route['permission_callback'] );
+	}
+
+	/**
 	 * Test has_cap.
 	 *
 	 * @covers AMP_Validation_Utils::has_cap()
@@ -307,6 +338,45 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$this->set_capability();
 		$this->assertTrue( AMP_Validation_Utils::has_cap() );
+	}
+
+	/**
+	 * Test handle_validate_request.
+	 *
+	 * @covers AMP_Validation_Utils::handle_validate_request()
+	 */
+	public function test_handle_validate_request() {
+		global $post;
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$this->set_capability();
+		$request = new WP_REST_Request( 'POST', $this->expected_route );
+		$request->set_header( 'content-type', 'application/json' );
+		$markup = $this->disallowed_tag;
+		$request->set_body( wp_json_encode( array(
+			AMP_Validation_Utils::MARKUP_KEY => $markup,
+		) ) );
+		$response          = AMP_Validation_Utils::handle_validate_request( $request );
+		$expected_response = array(
+			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(
+				'script' => 1,
+			),
+			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
+			'processed_markup'                       => '',
+			'sources_with_invalid_output'            => array(),
+		);
+		$this->assertEquals( $expected_response, $response );
+
+		$request->set_body( wp_json_encode( array(
+			AMP_Validation_Utils::MARKUP_KEY => $this->valid_amp_img,
+		) ) );
+		$response          = AMP_Validation_Utils::handle_validate_request( $request );
+		$expected_response = array(
+			AMP_Validation_Utils::REMOVED_ELEMENTS   => array(),
+			AMP_Validation_Utils::REMOVED_ATTRIBUTES => array(),
+			'processed_markup'                       => '<p>' . $this->valid_amp_img . '</p>',
+			'sources_with_invalid_output'            => array(),
+		);
+		$this->assertEquals( $expected_response, $response );
 	}
 
 	/**
@@ -747,18 +817,18 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test should_validate_response.
+	 * Test should_validate_front_end.
 	 *
-	 * @covers AMP_Validation_Utils::should_validate_response()
+	 * @covers AMP_Validation_Utils::should_validate_front_end()
 	 */
-	public function test_should_validate_response() {
+	public function test_should_validate_front_end() {
 		global $post;
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
-		$this->assertFalse( AMP_Validation_Utils::should_validate_response() );
+		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] = 1;
-		$this->assertFalse( AMP_Validation_Utils::should_validate_response() );
+		$this->assertFalse( AMP_Validation_Utils::should_validate_front_end() );
 		$this->set_capability();
-		$this->assertTrue( AMP_Validation_Utils::should_validate_response() );
+		$this->assertTrue( AMP_Validation_Utils::should_validate_front_end() );
 	}
 
 	/**
