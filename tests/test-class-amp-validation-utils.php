@@ -1450,6 +1450,26 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test enqueue_block_validation.
+	 *
+	 * @covers AMP_Theme_Support::enqueue_block_validation()
+	 */
+	public function test_enqueue_block_validation() {
+		global $post;
+		$post = $this->factory()->post->create(); // WPCS: global override ok.
+		$slug = 'amp-block-validation';
+		AMP_Validation_Utils::enqueue_block_validation();
+
+		$script = wp_scripts()->registered[ $slug ];
+		$this->assertContains( 'js/amp-block-validation.js', $script->src );
+		$this->assertEquals( array( 'jquery' ), $script->deps );
+		$this->assertEquals( AMP__VERSION, $script->ver );
+		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
+		$this->assertContains( 'ampBlockValidation.boot', $script->extra['after'][1] );
+		$this->assertContains( 'The %s block above has invalid AMP', $script->extra['after'][1] );
+	}
+
+	/**
 	 * Creates and inserts a custom post.
 	 *
 	 * @return int|WP_Error $error_post The ID of new custom post, or an error.

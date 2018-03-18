@@ -160,6 +160,13 @@ class AMP_Validation_Utils {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
+	 * The namespace of the REST API request.
+	 *
+	 * @var string
+	 */
+	const REST_NAMESPACE ='amp-wp/v1';
+
+	/**
 	 * The errors encountered when validating.
 	 *
 	 * @var array[][] {
@@ -211,6 +218,7 @@ class AMP_Validation_Utils {
 			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 			add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
+			add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
 		}
 
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
@@ -406,7 +414,7 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function amp_rest_validation() {
-		register_rest_route( 'amp-wp/v1', '/validate', array(
+		register_rest_route( self::REST_NAMESPACE, '/validate', array(
 			'methods'             => 'POST',
 			'callback'            => array( __CLASS__, 'handle_validate_request' ),
 			'args'                => array(
@@ -437,15 +445,15 @@ class AMP_Validation_Utils {
 	 * @return array|WP_Error.
 	 */
 	public static function handle_validate_request( WP_REST_Request $request ) {
-		$json = $request->get_json_params();
-		if ( empty( $json[ self::MARKUP_KEY ] ) ) {
+		$markup = $request->get_param( self::MARKUP_KEY );
+		if ( empty( $markup ) ) {
 			return new WP_Error( 'no_markup', 'No markup passed to validator', array(
 				'status' => 404,
 			) );
 		}
 
 		// @todo Add request param to indicate whether the supplied content is raw (and needs the_content filters applied).
-		$processed = self::process_markup( $json[ self::MARKUP_KEY ] );
+		$processed = self::process_markup( $markup );
 		$response  = self::summarize_validation_errors( self::$validation_errors );
 		self::reset_validation_results();
 		$response['processed_markup'] = $processed;
@@ -1937,6 +1945,32 @@ class AMP_Validation_Utils {
 			esc_html__( 'Recheck the URL for AMP validity', 'amp' ),
 			esc_html__( 'Recheck', 'amp' )
 		);
+	}
+
+	/**
+	 * Enqueues the block validation script.
+	 *
+	 * @return void
+	 */
+	public static function enqueue_block_validation() {
+		$slug = 'amp-block-validation';
+
+		wp_enqueue_script(
+			$slug,
+			amp_get_asset_url( "js/{$slug}.js" ),
+			array( 'jquery' ),
+			AMP__VERSION,
+			true
+		);
+
+		$data = wp_json_encode( array(
+			'i18n'     => array(
+				/* translators: %s: the name of the block */
+				'notice' => __( 'The %s block above has invalid AMP', 'amp' ),
+			),
+			'endpoint' => get_rest_url( null, self::REST_NAMESPACE . '/validate' ),
+		) );
+		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
 	}
 
 }
