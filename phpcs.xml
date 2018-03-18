@@ -38,6 +38,8 @@
 		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>
 
+	<arg name="colors" />
+
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>
