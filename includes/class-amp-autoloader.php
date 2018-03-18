@@ -86,6 +86,7 @@ class AMP_Autoloader {
 		'AMP_Image_Dimension_Extractor'               => 'includes/utils/class-amp-image-dimension-extractor',
 		'AMP_Validation_Utils'                        => 'includes/utils/class-amp-validation-utils',
 		'AMP_String_Utils'                            => 'includes/utils/class-amp-string-utils',
+		'AMP_WP_Utils'                                => 'includes/utils/class-amp-wp-utils',
 		'AMP_Widget_Archives'                         => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'                       => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Media_Video'                      => 'includes/widgets/class-amp-widget-media-video',
