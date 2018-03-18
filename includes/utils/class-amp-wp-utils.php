@@ -1,15 +1,39 @@
 <?php
+/**
+ * Class AMP_WP_Utils
+ *
+ * @package AMP
+ */
 
+/**
+ * Class AMP_WP_Utils
+ *
+ * @since 0.5
+ *
+ * @deprecated 0.7 As WordPress 4.7 is our minimum supported version.
+ */
 class AMP_WP_Utils {
 	/**
-	 * wp_parse_url in < WordPress 4.7 does not respect the component arg, so we're adding this helper so we can use it.
+	 * The core function wp_parse_url in < WordPress 4.7 does not respect the component arg. This helper lets us use it.
 	 *
-	 * This can be removed once 4.8 is out and we bump up our min supported WP version.
+	 * Don't use.
+	 *
+	 * @deprecated 0.7 wp_parse_url() is now used instead.
+	 *
+	 * @param string $url       The raw URL. Can be false if the URL failed to parse.
+	 * @param int    $component The specific component to retrieve. Use one of the PHP
+	 *                          predefined constants to specify which one.
+	 *                          Defaults to -1 (= return all parts as an array).
+	 * @return mixed False on parse failure; Array of URL components on success;
+	 *               When a specific component has been requested: null if the component
+	 *               doesn't exist in the given URL; a string or - in the case of
+	 *               PHP_URL_PORT - integer when it does. See parse_url()'s return values.
 	 */
 	public static function parse_url( $url, $component = -1 ) {
+		_deprecated_function( __METHOD__, '0.7', 'wp_parse_url' );
 		$parsed = wp_parse_url( $url, $component );
 
-		// Because < 4.7 always returned a full array regardless of component
+		// Because < 4.7 always returned a full array regardless of component.
 		if ( -1 !== $component && is_array( $parsed ) ) {
 			return self::_get_component_from_parsed_url_array( $parsed, $component );
 		}
@@ -21,6 +45,17 @@ class AMP_WP_Utils {
 	 * Included for 4.6 back-compat
 	 *
 	 * Copied from https://developer.wordpress.org/reference/functions/_get_component_from_parsed_url_array/
+	 *
+	 * @deprecated 0.7
+	 *
+	 * @param array|false $url_parts The parsed URL. Can be false if the URL failed to parse.
+	 * @param int         $component The specific component to retrieve. Use one of the PHP
+	 *                               predefined constants to specify which one.
+	 *                               Defaults to -1 (= return all parts as an array).
+	 * @return mixed False on parse failure; Array of URL components on success;
+	 *               When a specific component has been requested: null if the component
+	 *               doesn't exist in the given URL; a string or - in the case of
+	 *               PHP_URL_PORT - integer when it does. See parse_url()'s return values.
 	 */
 	protected static function _get_component_from_parsed_url_array( $url_parts, $component = -1 ) {
 		if ( -1 === $component ) {
@@ -39,6 +74,12 @@ class AMP_WP_Utils {
 	 * Included for 4.6 back-compat
 	 *
 	 * Copied from https://developer.wordpress.org/reference/functions/_wp_translate_php_url_constant_to_key/
+	 *
+	 * @param int $constant The specific component to retrieve. Use one of the PHP
+	 *                      predefined constants to specify which one.
+	 * @return mixed False if component not found. string or integer if found.
+	 *
+	 * @deprecated 0.7
 	 */
 	protected static function _wp_translate_php_url_constant_to_key( $constant ) {
 		$translation = array(
