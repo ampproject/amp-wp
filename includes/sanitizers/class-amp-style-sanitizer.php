@@ -483,27 +483,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.4
 	 *
-	 * @param string $string Style string.
+	 * @param string $css Style string.
 	 * @return array Style properties.
 	 */
-	private function process_style( $string ) {
-		/*
-		 * Filter properties
-		 *
-		 * @todo Removed values are not reported.
-		 */
-		$string = safecss_filter_attr( esc_html( $string ) );
+	private function process_style( $css ) {
 
-		if ( ! $string ) {
-			return array();
-		}
+		// Normalize whitespace.
+		$css = str_replace( array( "\n", "\r", "\t" ), '', $css );
 
 		/*
-		 * safecss returns a string but we want individual rules.
 		 * Use preg_split to break up rules by `;` but only if the
 		 * semi-colon is not inside parens (like a data-encoded image).
 		 */
-		$styles = array_map( 'trim', preg_split( '/;(?![^(]*\))/', $string ) );
+		$styles = preg_split( '/\s*;\s*(?![^(]*\))/', trim( $css, '; ' ) );
+		$styles = array_filter( $styles );
 
 		// Normalize the order of the styles.
 		sort( $styles );
@@ -512,12 +505,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Normalize whitespace and filter rules.
 		foreach ( $styles as $index => $rule ) {
-			$arr2 = array_map( 'trim', explode( ':', $rule, 2 ) );
-			if ( 2 !== count( $arr2 ) ) {
+			$tuple = preg_split( '/\s*:\s*/', $rule, 2 );
+			if ( 2 !== count( $tuple ) ) {
 				continue;
 			}
 
-			list( $property, $value ) = $this->filter_style( $arr2[0], $arr2[1] );
+			list( $property, $value ) = $this->filter_style( $tuple[0], $tuple[1] );
 			if ( empty( $property ) || empty( $value ) ) {
 				continue;
 			}
