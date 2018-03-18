@@ -185,6 +185,15 @@ class AMP_Validation_Utils {
 	public static $posts_pending_frontend_validation = array();
 
 	/**
+	 * Current sources gathered for a given hook currently being run.
+	 *
+	 * @see AMP_Validation_Utils::wrap_hook_callbacks()
+	 * @see AMP_Validation_Utils::decorate_filter_source()
+	 * @var array[]
+	 */
+	protected static $current_hook_source_stack = array();
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
@@ -284,7 +293,14 @@ class AMP_Validation_Utils {
 	 * Add hooks for doing validation during preprocessing/sanitizing.
 	 */
 	public static function add_validation_hooks() {
-		self::callback_wrappers();
+		self::wrap_widget_callbacks();
+
+		add_action( 'all', array( __CLASS__, 'wrap_hook_callbacks' ) );
+		$wrapped_filters = array( 'the_content', 'the_excerpt' );
+		foreach ( $wrapped_filters as $wrapped_filter ) {
+			add_filter( $wrapped_filter, array( __CLASS__, 'decorate_filter_source' ), PHP_INT_MAX );
+		}
+
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
 		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 	}
@@ -469,7 +485,9 @@ class AMP_Validation_Utils {
 			if ( ! empty( $validation_error['sources'] ) ) {
 				$source = array_pop( $validation_error['sources'] );
 
-				$invalid_sources[ $source['type'] ][] = $source['name'];
+				if ( isset( $source['type'], $source['name'] ) ) {
+					$invalid_sources[ $source['type'] ][] = $source['name'];
+				}
 			}
 		}
 
@@ -597,47 +615,34 @@ class AMP_Validation_Utils {
 	/**
 	 * Get source start comment.
 	 *
-	 * @param string $type Extension type.
-	 * @param string $name Extension name.
-	 * @param array  $args Args.
+	 * @param array $source   Source data.
+	 * @param bool  $is_start Whether the comment is the start or end.
 	 * @return string HTML Comment.
 	 */
-	public static function get_source_comment_start( $type, $name, $args = array() ) {
-		$args_encoded = wp_json_encode( $args );
-		if ( '[]' === $args_encoded ) {
-			$args_encoded = '{}';
-		}
-		return sprintf( '<!--amp-source-stack:%s:%s %s-->', $type, $name, str_replace( '--', '', $args_encoded ) );
-	}
-
-	/**
-	 * Get source end comment.
-	 *
-	 * @param string $type Extension type.
-	 * @param string $name Extension name.
-	 * @return string HTML Comment.
-	 */
-	public static function get_source_comment_end( $type, $name ) {
-		return sprintf( '<!--/amp-source-stack:%s:%s-->', $type, $name );
+	public static function get_source_comment( array $source, $is_start = true ) {
+		unset( $source['reflection'] );
+		return sprintf(
+			'<!--%samp-source-stack %s-->',
+			$is_start ? '' : '/',
+			str_replace( '--', '', wp_json_encode( $source ) )
+		);
 	}
 
 	/**
 	 * Parse source comment.
 	 *
 	 * @param DOMComment $comment Comment.
-	 * @return array|null Source info or null if not a source comment.
+	 * @return array|null Parsed source or null if not a source comment.
 	 */
 	public static function parse_source_comment( DOMComment $comment ) {
-		if ( ! preg_match( '#^\s*(?P<closing>/)?amp-source-stack:(?P<type>theme|plugin|mu-plugin):(?P<name>\S+)(?: (?P<args>{.+}))?\s*$#s', $comment->nodeValue, $matches ) ) {
+		if ( ! preg_match( '#^\s*(?P<closing>/)?amp-source-stack\s+(?P<args>{.+})\s*$#s', $comment->nodeValue, $matches ) ) {
 			return null;
 		}
-		$source = wp_array_slice_assoc( $matches, array( 'type', 'name' ) );
 
-		$source['closing'] = ! empty( $matches['closing'] );
-		if ( isset( $matches['args'] ) ) {
-			$source['args'] = json_decode( $matches['args'], true );
-		}
-		return $source;
+		$source  = json_decode( $matches['args'], true );
+		$closing = ! empty( $matches['closing'] );
+
+		return compact( 'source', 'closing' );
 	}
 
 	/**
@@ -653,17 +658,17 @@ class AMP_Validation_Utils {
 	 */
 	public static function locate_sources( DOMNode $node ) {
 		$xpath    = new DOMXPath( $node->ownerDocument );
-		$comments = $xpath->query( 'preceding::comment()[ contains( ., "amp-source-stack:" ) ]', $node );
+		$comments = $xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = array();
 		foreach ( $comments as $comment ) {
-			$source = self::parse_source_comment( $comment );
-			if ( $source ) {
-				if ( $source['closing'] ) {
-					array_pop( $sources );
-				} else {
-					unset( $source['closing'] );
-					$sources[] = $source;
-				}
+			$parsed_comment = self::parse_source_comment( $comment );
+			if ( ! $parsed_comment ) {
+				continue;
+			}
+			if ( $parsed_comment['closing'] ) {
+				array_pop( $sources );
+			} else {
+				$sources[] = $parsed_comment['source'];
 			}
 		}
 		return $sources;
@@ -677,7 +682,7 @@ class AMP_Validation_Utils {
 	public static function remove_source_comments( $dom ) {
 		$xpath    = new DOMXPath( $dom );
 		$comments = array();
-		foreach ( $xpath->query( '//comment()[ contains( ., "amp-source-stack:" ) ]' ) as $comment ) {
+		foreach ( $xpath->query( '//comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]' ) as $comment ) {
 			if ( self::parse_source_comment( $comment ) ) {
 				$comments[] = $comment;
 			}
@@ -688,44 +693,98 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Wraps callbacks in comments to indicate to the sanitizer which extension added them.
-	 *
-	 * Iterates through all of the registered callbacks for actions and filters.
-	 * If a callback is from a plugin and outputs markup, this wraps the markup in comments.
-	 * Later, the sanitizer can identify which theme or plugin the illegal markup is from.
+	 * Wrap callbacks for registered widgets to keep track of queued assets and the source for anything printed for validation.
 	 *
 	 * @global array $wp_filter
 	 * @return void
 	 */
-	public static function callback_wrappers() {
-		global $wp_filter;
-		$pending_wrap_callbacks = array();
-		foreach ( $wp_filter as $filter_tag => $wp_hook ) {
-			foreach ( $wp_hook->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $callback ) {
-					$source_data = self::get_source( $callback['function'] );
-					if ( isset( $source_data ) ) {
-						$pending_wrap_callbacks[ $filter_tag ][] = array_merge(
-							$callback,
-							$source_data,
-							array(
-								'hook' => $filter_tag,
-							),
-							compact( 'priority' )
-						);
-					}
-				}
+	public static function wrap_widget_callbacks() {
+		global $wp_registered_widgets;
+		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
+			$source = self::get_source( $registered_widget['callback'] );
+			if ( ! $source ) {
+				continue;
 			}
+			$source['widget_id'] = $widget_id;
+
+			$function      = $registered_widget['callback'];
+			$accepted_args = 2; // For the $instance and $args arguments.
+			$callback      = compact( 'function', 'accepted_args', 'source' );
+
+			$registered_widget['callback'] = self::wrapped_callback( $callback );
+		}
+	}
+
+	/**
+	 * Wrap filter/action callback functions for a given hook.
+	 *
+	 * Wrapped callback functions are reset to their original functions after invocation.
+	 * This runs at the 'all' action. The shutdown hook is excluded.
+	 *
+	 * @global WP_Hook[] $wp_filter
+	 * @param string $hook Hook name for action or filter.
+	 * @return void
+	 */
+	public static function wrap_hook_callbacks( $hook ) {
+		global $wp_filter;
+
+		if ( ! isset( $wp_filter[ $hook ] ) || 'shutdown' === $hook ) {
+			return;
 		}
 
-		// Iterate over hooks to replace after iterating over all to begin with to prevent infinite loop in PHP<=5.4.
-		foreach ( $pending_wrap_callbacks as $hook => $callbacks ) {
-			foreach ( $callbacks as $callback ) {
-				remove_action( $hook, $callback['function'], $callback['priority'] );
-				$wrapped_callback = self::wrapped_callback( $callback );
-				add_action( $hook, $wrapped_callback, $callback['priority'], $callback['accepted_args'] );
+		self::$current_hook_source_stack[ $hook ] = array();
+		foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
+			foreach ( $callbacks as &$callback ) {
+				$source = self::get_source( $callback['function'] );
+				if ( ! $source ) {
+					continue;
+				}
+
+				$reflection = $source['reflection'];
+				unset( $source['reflection'] ); // Omit from stored source.
+
+				// Add hook to stack for decorate_filter_source to read from.
+				self::$current_hook_source_stack[ $hook ][] = $source;
+
+				/*
+				 * A current limitation with wrapping callbacks is that the wrapped function cannot have
+				 * any parameters passed by reference. Without this the result is:
+				 *
+				 * > PHP Warning:  Parameter 1 to wp_default_styles() expected to be a reference, value given.
+				 */
+				if ( self::has_parameters_passed_by_reference( $reflection ) ) {
+					continue;
+				}
+
+				$source['hook']    = $hook;
+				$original_function = $callback['function'];
+				$wrapped_callback  = self::wrapped_callback( array_merge(
+					$callback,
+					compact( 'priority', 'source', 'hook' )
+				) );
+
+				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
+					$callback['function'] = $original_function; // Restore original.
+					return call_user_func_array( $wrapped_callback, func_get_args() );
+				};
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the given reflection method/function has params passed by reference.
+	 *
+	 * @since 0.7
+	 * @param ReflectionFunction|ReflectionMethod $reflection Reflection.
+	 * @return bool Whether there are parameters passed by reference.
+	 */
+	protected static function has_parameters_passed_by_reference( $reflection ) {
+		foreach ( $reflection->getParameters() as $parameter ) {
+			if ( $parameter->isPassedByReference() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -747,12 +806,48 @@ class AMP_Validation_Utils {
 		if ( empty( $source ) ) {
 			return $output;
 		}
+		$source['shortcode'] = $tag;
+
 		$output = implode( '', array(
-			self::get_source_comment_start( $source['type'], $source['name'], array( 'shortcode' => $tag ) ),
+			self::get_source_comment( $source, true ),
 			$output,
-			self::get_source_comment_end( $source['type'], $source['name'] ),
+			self::get_source_comment( $source, false ),
 		) );
 		return $output;
+	}
+
+	/**
+	 * Wraps output of a filter to add source stack comments.
+	 *
+	 * @param string $value Value.
+	 * @return string Value wrapped in source comments.
+	 */
+	public static function decorate_filter_source( $value ) {
+
+		// Abort if the output is not a string and it doesn't contain any HTML tags.
+		if ( ! is_string( $value ) || ! preg_match( '/<.+?>/s', $value ) ) {
+			return $value;
+		}
+
+		$post   = get_post();
+		$source = array(
+			'hook'   => current_filter(),
+			'filter' => true,
+		);
+		if ( $post ) {
+			$source['post_id']   = $post->ID;
+			$source['post_type'] = $post->post_type;
+		}
+		if ( isset( self::$current_hook_source_stack[ current_filter() ] ) ) {
+			$sources = self::$current_hook_source_stack[ current_filter() ];
+			array_pop( $sources ); // Remove self.
+			$source['sources'] = $sources;
+		}
+		return implode( '', array(
+			self::get_source_comment( $source, true ),
+			$value,
+			self::get_source_comment( $source, false ),
+		) );
 	}
 
 	/**
@@ -762,23 +857,33 @@ class AMP_Validation_Utils {
 	 * @return array|null {
 	 *     The source data.
 	 *
-	 *     @type string $type Source type.
+	 *     @type string $type Source type (core, plugin, mu-plugin, or theme).
 	 *     @type string $name Source name.
+	 *     @type string $function Normalized function name.
+	 *     @type ReflectionMethod|ReflectionFunction $reflection
 	 * }
 	 */
 	public static function get_source( $callback ) {
+		$reflection = null;
+		$class_name = null; // Because ReflectionMethod::getDeclaringClass() can return a parent class.
 		try {
 			if ( is_string( $callback ) && is_callable( $callback ) ) {
 				// The $callback is a function or static method.
-				$exploded_callback = explode( '::', $callback );
-				if ( count( $exploded_callback ) > 1 ) {
-					$reflection = new ReflectionClass( $exploded_callback[0] );
+				$exploded_callback = explode( '::', $callback, 2 );
+				if ( 2 === count( $exploded_callback ) ) {
+					$class_name = $exploded_callback[0];
+					$reflection = new ReflectionMethod( $exploded_callback[0], $exploded_callback[1] );
 				} else {
 					$reflection = new ReflectionFunction( $callback );
 				}
 			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
 				// The $callback is a method.
-				$reflection = new ReflectionClass( $callback[0] );
+				if ( is_string( $callback[0] ) ) {
+					$class_name = $callback[0];
+				} elseif ( is_object( $callback[0] ) ) {
+					$class_name = get_class( $callback[0] );
+				}
+				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
 			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
 				$reflection = new ReflectionFunction( $callback );
 			}
@@ -786,28 +891,38 @@ class AMP_Validation_Utils {
 			return null;
 		}
 
-		$file = isset( $reflection ) ? $reflection->getFileName() : null;
-		if ( ! isset( $file ) ) {
+		if ( ! $reflection ) {
 			return null;
 		}
-		$file = wp_normalize_path( $file );
 
-		$slug_pattern = '([^/]+)';
-		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-			$type = 'plugin';
-			$name = $matches[1];
-		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-			$type = 'theme';
-			$name = $matches[1];
-		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-			$type = 'mu-plugin';
-			$name = $matches[1];
+		$source = compact( 'reflection' );
+
+		$file = $reflection->getFileName();
+		if ( $file ) {
+			$file         = wp_normalize_path( $file );
+			$slug_pattern = '([^/]+)';
+			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
+				$source['type'] = 'plugin';
+				$source['name'] = $matches[1];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
+				$source['type'] = 'theme';
+				$source['name'] = $matches[1];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
+				$source['type'] = 'mu-plugin';
+				$source['name'] = $matches[1];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(wp-admin|wp-includes)/:s', $file, $matches ) ) {
+				$source['type'] = 'core';
+				$source['name'] = $matches[1];
+			}
 		}
 
-		if ( isset( $type, $name ) ) {
-			return compact( 'type', 'name' );
+		if ( $class_name ) {
+			$source['function'] = $class_name . '::' . $reflection->getName();
+		} else {
+			$source['function'] = $reflection->getName();
 		}
-		return null;
+
+		return $source;
 	}
 
 	/**
@@ -822,9 +937,7 @@ class AMP_Validation_Utils {
 	 *
 	 *     @type callable $function
 	 *     @type int      $accepted_args
-	 *     @type string   $type
-	 *     @type string   $source
-	 *     @type string   $hook
+	 *     @type array    $source
 	 * }
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
 	 */
@@ -852,40 +965,23 @@ class AMP_Validation_Utils {
 			// Keep track of which source enqueued the styles.
 			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
 				foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
-					$source = array_merge(
-						wp_array_slice_assoc( $callback, array( 'type', 'name' ) ),
-						array(
-							'args' => array(
-								'hook' => $callback['hook'],
-							),
-						)
-					);
-
-					AMP_Validation_Utils::$enqueued_style_sources[ $handle ][] = $source;
+					AMP_Validation_Utils::$enqueued_style_sources[ $handle ][] = $callback['source'];
 				}
 			}
 
 			// Keep track of which source enqueued the scripts, and immediately report validity .
 			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
 				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $handle ) {
-					$source = array_merge(
-						wp_array_slice_assoc( $callback, array( 'type', 'name' ) ),
-						array(
-							'args' => array(
-								'hook' => $callback['hook'],
-							),
-						)
-					);
+					AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = $callback['source'];
 
-					AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = $source;
-
-					if ( isset( $wp_scripts->registered[ $handle ] ) ) {
+					// Flag all scripts not loaded from the AMP CDN as validation errors.
+					if ( isset( $wp_scripts->registered[ $handle ] ) && 0 !== strpos( $wp_scripts->registered[ $handle ]->src, 'https://cdn.ampproject.org/' ) ) {
 						self::add_validation_error( array(
 							'code'       => self::ENQUEUED_SCRIPT_CODE,
 							'handle'     => $handle,
 							'dependency' => $wp_scripts->registered[ $handle ],
 							'sources'    => array(
-								$source,
+								$callback['source'],
 							),
 						) );
 					}
@@ -894,9 +990,9 @@ class AMP_Validation_Utils {
 
 			// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
 			if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
-				echo AMP_Validation_Utils::get_source_comment_start( $callback['type'], $callback['name'], array( 'hook' => $callback['hook'] ) ); // WPCS: XSS ok.
+				echo AMP_Validation_Utils::get_source_comment( $callback['source'], true ); // WPCS: XSS ok.
 				echo $output; // WPCS: XSS ok.
-				echo AMP_Validation_Utils::get_source_comment_end( $callback['type'], $callback['name'] ); // WPCS: XSS ok.
+				echo AMP_Validation_Utils::get_source_comment( $callback['source'], false ); // WPCS: XSS ok.
 			}
 			return $result;
 		};
@@ -1104,6 +1200,9 @@ class AMP_Validation_Utils {
 	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
 	public static function get_validation_status_post( $url ) {
+		if ( ! post_type_exists( self::POST_TYPE_SLUG ) ) {
+			return null;
+		}
 		$query = new WP_Query( array(
 			'post_type'      => self::POST_TYPE_SLUG,
 			'post_status'    => 'publish',

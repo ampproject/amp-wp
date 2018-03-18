@@ -66,7 +66,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://twitter.com/altjoen/status/118252236836061184' . PHP_EOL,
-				array( 'amp-twitter' => 'https://cdn.ampproject.org/v0/amp-twitter-latest.js' ),
+				array( 'amp-twitter' => true ),
 			),
 		);
 	}

@@ -50,7 +50,7 @@ class AMP_DailyMotion_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://www.dailymotion.com/video/x5awwth' . PHP_EOL,
-				array( 'amp-dailymotion' => 'https://cdn.ampproject.org/v0/amp-dailymotion-latest.js' ),
+				array( 'amp-dailymotion' => true ),
 			),
 		);
 	}

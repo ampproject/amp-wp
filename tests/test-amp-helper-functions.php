@@ -15,6 +15,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( 'amp' );
+		global $wp_scripts;
+		$wp_scripts = null;
 		parent::tearDown();
 	}
 
@@ -28,6 +30,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function return_example_url( $url, $post_id ) {
 		$current_filter = current_filter();
 		return 'http://overridden.example.com/?' . build_query( compact( 'url', 'post_id', 'current_filter' ) );
+	}
+
+	/**
+	 * Test amp_get_slug().
+	 *
+	 * @covers amp_get_slug()
+	 */
+	public function test_amp_get_slug() {
+		$this->assertSame( 'amp', amp_get_slug() );
 	}
 
 	/**
@@ -168,6 +179,48 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test script registering.
+	 *
+	 * @covers amp_register_default_scripts()
+	 * @covers amp_filter_script_loader_tag()
+	 * @global WP_Scripts $wp_scripts
+	 */
+	public function test_script_registering() {
+		global $wp_scripts;
+		$wp_scripts = null;
+		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
+
+		$this->assertTrue( wp_script_is( 'amp-runtime', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-mustache', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-list', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'amp-bind', 'registered' ) );
+
+		wp_enqueue_script( 'amp-mathml' );
+		wp_enqueue_script( 'amp-mustache' );
+		$this->assertTrue( wp_script_is( 'amp-mathml', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'amp-mustache', 'enqueued' ) );
+
+		// Try overriding URL.
+		wp_scripts()->registered['amp-mustache']->src = 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js';
+
+		ob_start();
+		wp_print_scripts();
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-latest.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-0.1.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
+		// Try some experimental component to ensure expected script attributes are added.
+		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', array( 'amp-runtime' ), null );
+		ob_start();
+		wp_print_scripts( 'amp-foo' );
+		$output = ob_get_clean();
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+	}
+
+	/**
 	 * Test amp_get_content_embed_handlers().
 	 *
 	 * @covers amp_get_content_embed_handlers()
@@ -261,7 +314,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \post_supports_amp()
 	 */
 	public function test_post_supports_amp() {
-		add_post_type_support( 'page', AMP_QUERY_VAR );
+		add_post_type_support( 'page', amp_get_slug() );
 
 		// Test disabled by default for page for posts and show on front.
 		update_option( 'show_on_front', 'page' );
@@ -282,7 +335,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( post_supports_amp( $post ) );
 
 		// Reset.
-		remove_post_type_support( 'page', AMP_QUERY_VAR );
+		remove_post_type_support( 'page', amp_get_slug() );
 	}
 
 	/**

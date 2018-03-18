@@ -57,10 +57,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 
-			'div_kses_banned_style' => array(
-				'<span style="overflow-x: hidden;">Specific overflow axis not allowed.</span>',
-				'<span>Specific overflow axis not allowed.</span>',
-				array(),
+			'span_display_none' => array(
+				'<span style="display: none;">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
+				'<span class="amp-wp-inline-0f1bf07c72fdf1784fff2e164d9dca98">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
+				array(
+					'.amp-wp-inline-0f1bf07c72fdf1784fff2e164d9dca98 { display:none; }',
+				),
 			),
 
 			'div_amp_banned_style' => array(

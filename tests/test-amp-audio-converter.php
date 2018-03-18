@@ -134,7 +134,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 	public function test_get_scripts__did_convert() {
 		$source = '<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>';
-		$expected = array( 'amp-audio' => 'https://cdn.ampproject.org/v0/amp-audio-latest.js' );
+		$expected = array( 'amp-audio' => true );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );

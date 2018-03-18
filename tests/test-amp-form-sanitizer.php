@@ -99,7 +99,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_scripts() {
 		$source   = '<form method="post" action-xhr="//example.org/example-page/" target="_top"></form>';
-		$expected = array( 'amp-form' => 'https://cdn.ampproject.org/v0/amp-form-latest.js' );
+		$expected = array( 'amp-form' => true );
 
 		$dom                 = AMP_DOM_Utils::get_dom_from_content( $source );
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
