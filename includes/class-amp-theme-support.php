@@ -248,7 +248,7 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 
-		if ( AMP_Validation_Utils::should_validate_front_end() ) {
+		if ( AMP_Validation_Utils::should_validate_response() ) {
 			AMP_Validation_Utils::add_validation_hooks();
 		}
 
@@ -977,7 +977,7 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		if ( AMP_Validation_Utils::should_validate_front_end() ) {
+		if ( AMP_Validation_Utils::should_validate_response() ) {
 			AMP_Validation_Utils::finalize_validation( $dom, array(
 				'remove_source_comments' => ! $is_validation_debug_mode,
 			) );

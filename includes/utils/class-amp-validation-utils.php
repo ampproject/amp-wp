@@ -13,13 +13,6 @@
 class AMP_Validation_Utils {
 
 	/**
-	 * Key for the markup value in the REST API endpoint.
-	 *
-	 * @var string
-	 */
-	const MARKUP_KEY = 'markup';
-
-	/**
 	 * Query var that triggers validation.
 	 *
 	 * @var string
@@ -222,7 +215,6 @@ class AMP_Validation_Utils {
 		}
 
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
-		add_action( 'rest_api_init', array( __CLASS__, 'amp_rest_validation' ) );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
@@ -409,55 +401,14 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Registers the REST API endpoint for validation.
-	 *
-	 * @return void
-	 */
-	public static function amp_rest_validation() {
-		register_rest_route( self::REST_NAMESPACE, '/validate', array(
-			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'handle_validate_request' ),
-			'args'                => array(
-				self::MARKUP_KEY => array(
-					'validate_callback' => array( __CLASS__, 'validate_arg' ),
-				),
-			),
-			'permission_callback' => array( __CLASS__, 'has_cap' ),
-		) );
-	}
-
-	/**
 	 * Whether the user has the required capability.
 	 *
 	 * Checks for permissions before validating.
-	 * Also serves as the permission callback for REST requests.
 	 *
 	 * @return boolean $has_cap Whether the current user has the capability.
 	 */
 	public static function has_cap() {
 		return current_user_can( 'edit_posts' );
-	}
-
-	/**
-	 * Validate the markup passed to the REST API.
-	 *
-	 * @param WP_REST_Request $request The REST request.
-	 * @return array|WP_Error.
-	 */
-	public static function handle_validate_request( WP_REST_Request $request ) {
-		$markup = $request->get_param( self::MARKUP_KEY );
-		if ( empty( $markup ) ) {
-			return new WP_Error( 'no_markup', 'No markup passed to validator', array(
-				'status' => 404,
-			) );
-		}
-
-		// @todo Add request param to indicate whether the supplied content is raw (and needs the_content filters applied).
-		$processed = self::process_markup( $markup );
-		$response  = self::summarize_validation_errors( self::$validation_errors );
-		self::reset_validation_results();
-		$response['processed_markup'] = $processed;
-		return $response;
 	}
 
 	/**
@@ -584,19 +535,6 @@ class AMP_Validation_Utils {
 		self::$validation_errors       = array();
 		self::$enqueued_style_sources  = array();
 		self::$enqueued_script_sources = array();
-	}
-
-	/**
-	 * Validate the argument in the REST API request.
-	 *
-	 * It would be ideal to simply pass 'is_string' in register_rest_route().
-	 * But it always returned false.
-	 *
-	 * @param mixed $arg      The argument to validate.
-	 * @return boolean $is_valid Whether the argument is valid.
-	 */
-	public static function validate_arg( $arg ) {
-		return is_string( $arg );
 	}
 
 	/**
@@ -1170,12 +1108,14 @@ class AMP_Validation_Utils {
 	}
 
 	/**
-	 * Whether to validate the front end.
+	 * Whether to validate the front end response.
+	 *
+	 * Either the user has the capability and the query var is present.
 	 *
 	 * @return boolean Whether to validate.
 	 */
-	public static function should_validate_front_end() {
-		return ( self::has_cap() && ( isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) ); // WPCS: CSRF ok.
+	public static function should_validate_response() {
+		return self::has_cap() && isset( $_GET[ self::VALIDATE_QUERY_VAR ] ); // WPCS: CSRF ok.
 	}
 
 	/**
@@ -1288,16 +1228,6 @@ class AMP_Validation_Utils {
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors( $validation_errors, $url ) {
-
-		// Remove query vars that are only used to initiate validation requests.
-		$url = remove_query_arg(
-			array(
-				self::VALIDATE_QUERY_VAR,
-				self::DEBUG_QUERY_VAR,
-			),
-			$url
-		);
-
 		$post_for_this_url = self::get_validation_status_post( $url );
 
 		// Since there are no validation errors and there is an existing $existing_post_id, just delete the post.
