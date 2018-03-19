@@ -4,15 +4,15 @@
 ![Banner](wp-assets/banner-1544x500.png)
 Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
-**Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)  
-**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
-**Requires at least:** 4.7  
-**Tested up to:** 4.9  
-**Stable tag:** 0.6.0  
-**License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 5.3  
+**Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)
+**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)
+**Requires at least:** 4.7
+**Tested up to:** 4.9
+**Stable tag:** 0.6.0
+**License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)
+**Requires PHP:** 5.3
 
-[![Build Status](https://travis-ci.org/Automattic/amp-wp.svg?branch=master)](https://travis-ci.org/Automattic/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com) 
+[![Build Status](https://travis-ci.org/Automattic/amp-wp.svg?branch=master)](https://travis-ci.org/Automattic/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com)
 
 ## Description ##
 
@@ -53,6 +53,16 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 1. Upload the folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
+
+## Developing ##
+
+1. Install `grunt` using `npm install -g grunt-cli`
+1. Install `dev-lib` using `git submodule update --init`
+1. `grunt`
+
+You will now find the plugin in the project root with the name `amp.zip`.
+
+Once you have installed the dependencies, you can rebuild each time just by running `grunt`.
 
 ## Changelog ##
 
