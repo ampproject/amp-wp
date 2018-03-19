@@ -428,6 +428,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 	 */
 	return apply_filters( 'amp_content_embed_handlers',
 		array(
+			'AMP_Core_Block_Handler'        => array(),
 			'AMP_Twitter_Embed_Handler'     => array(),
 			'AMP_YouTube_Embed_Handler'     => array(),
 			'AMP_DailyMotion_Embed_Handler' => array(),
