@@ -1417,6 +1417,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
+		$this->assertEquals( $wp_rest_additional_fields['page'][ AMP_Validation_Utils::REST_FIELD_NAME ], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
 	}
 
 	/**
@@ -1426,7 +1427,13 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_rest_field_amp_validation() {
 		// @todo: implement the tested function.
-		$this->assertEquals( array(), AMP_Validation_Utils::rest_field_amp_validation( array(), '' ) );
+		$post_data = array(
+			'link' => home_url( '/' ),
+		);
+		$this->assertEquals( null, AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
+
+		$this->create_custom_post();
+		assertEquals( $this->get_mock_errors(), AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
 	}
 
 	/**

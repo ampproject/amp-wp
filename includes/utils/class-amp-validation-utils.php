@@ -157,7 +157,7 @@ class AMP_Validation_Utils {
 	 *
 	 * @var string
 	 */
-	const REST_FIELD_NAME = 'amp_validation';
+	const REST_FIELD_NAME = 'amp_validation_errors';
 
 	/**
 	 * The errors encountered when validating.
@@ -1910,7 +1910,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function add_rest_api_fields() {
 		register_rest_field(
-			'post',
+			array( 'post', 'page' ),
 			self::REST_FIELD_NAME,
 			array(
 				'get_callback' => array( __CLASS__, 'rest_field_amp_validation' ),
@@ -1927,11 +1927,11 @@ class AMP_Validation_Utils {
 	 *
 	 * @param array  $post_data  Data for the post.
 	 * @param string $field_name The name of the field to add.
-	 * @return array $validation_data
+	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
 	public static function rest_field_amp_validation( $post_data, $field_name ) {
-		// @todo: conditionally return validation.
-		return array();
+		$validation_post = self::get_validation_status_post( $post_data['link'] );
+		return isset( $validation_post ) ? json_decode( $validation_post->post_content, true ) : null;
 	}
 
 }
