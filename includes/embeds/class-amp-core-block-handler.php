@@ -1,39 +1,58 @@
 <?php
 /**
- * Class AMP_Gutenberg_Categories_Handler
+ * Class AMP_Core_Block_Handler
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Gutenberg_Categories_Handler
+ * Class AMP_Core_Block_Handler
  *
  * @since 1.0
  */
-class AMP_Gutenberg_Categories_Handler extends AMP_Base_Embed_Handler {
+class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
+
+	/**
+	 * Original block callback.
+	 *
+	 * @var array
+	 */
+	public $original_categories_callback;
+
+	/**
+	 * Block name.
+	 *
+	 * @var string
+	 */
+	public $block_name = 'core/categories';
 
 	/**
 	 * Register embed.
 	 */
 	public function register_embed() {
-		if ( function_exists( 'gutenberg_init' ) ) {
-			add_action( 'the_post', array( $this, 'override_category_block_render_callback' ) );
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			$registry = WP_Block_Type_Registry::get_instance();
+			$block    = $registry->get_registered( $this->block_name );
+
+			if ( $block ) {
+				$this->original_categories_callback = $block->render_callback;
+				$block->render_callback             = array( $this, 'render' );
+			}
 		}
 	}
 
 	/**
 	 * Unregister embed.
 	 */
-	public function unregister_embed() {}
+	public function unregister_embed() {
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			$registry = WP_Block_Type_Registry::get_instance();
+			$block    = $registry->get_registered( $this->block_name );
 
-	/**
-	 * Override the output of Gutenberg core/category block.
-	 */
-	public function override_category_block_render_callback() {
-		if ( is_amp_endpoint() ) {
-			$registry               = WP_Block_Type_Registry::get_instance();
-			$block                  = $registry->get_registered( 'core/categories' );
-			$block->render_callback = array( $this, 'render' );
+			if ( $block && ! empty( $this->original_categories_callback ) ) {
+				$block->render_callback             = $this->original_categories_callback;
+				$this->original_categories_callback = null;
+			}
 		}
 	}
 

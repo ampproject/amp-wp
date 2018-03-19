@@ -38,7 +38,7 @@ class AMP_Autoloader {
 		'AMP_DailyMotion_Embed_Handler'               => 'includes/embeds/class-amp-dailymotion-embed',
 		'AMP_Facebook_Embed_Handler'                  => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'                   => 'includes/embeds/class-amp-gallery-embed',
-		'AMP_Gutenberg_Categories_Handler'            => 'includes/embeds/class-amp-gutenberg-categories-handler',
+		'AMP_Core_Block_Handler'                      => 'includes/embeds/class-amp-core-block-handler',
 		'AMP_Instagram_Embed_Handler'                 => 'includes/embeds/class-amp-instagram-embed',
 		'AMP_Issuu_Embed_Handler'                     => 'includes/embeds/class-amp-issuu-embed-handler',
 		'AMP_Meetup_Embed_Handler'                    => 'includes/embeds/class-amp-meetup-embed-handler',
