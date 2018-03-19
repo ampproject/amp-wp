@@ -156,7 +156,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return integer Video ID.
 	 */
 	private function get_video_id_from_url( $url ) {
-		$parsed_url = parse_url( $url );
+		$parsed_url = wp_parse_url( $url );
 		parse_str( $parsed_url['path'], $path );
 
 		$video_id = '';
