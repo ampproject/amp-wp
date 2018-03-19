@@ -28,12 +28,21 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 */
 	public $test_block = 'core/test';
 
+	/**
+	 * Setup.
+	 */
 	public function setUp() {
 		parent::setUp();
 
 		// Require gutenberg file to be able to run the tests.
 		if ( file_exists( AMP__DIR__ . '/../gutenberg/gutenberg.php' ) ) {
 			require_once AMP__DIR__ . '/../gutenberg/gutenberg.php';
+
+			if ( ! function_exists( 'register_block_type' ) ) {
+				require_once AMP__DIR__ . '/../gutenberg/lib/class-wp-block-type.php';
+				require_once AMP__DIR__ . '/../gutenberg/lib/class-wp-block-type-registry.php';
+				require_once AMP__DIR__ . '/../gutenberg/lib/blocks.php';
+			}
 		}
 	}
 
@@ -41,7 +50,10 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Teardown.
 	 */
 	public function tearDown() {
-		$this->unregister_dummy_block();
+		if ( function_exists( 'register_block_type' ) ) {
+			$this->unregister_dummy_block();
+		}
+
 		parent::tearDown();
 	}
 
@@ -67,6 +79,10 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 */
 	public function test_register_embed() {
 
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestIncomplete( 'Files needed for testing missing.' );
+		}
+
 		$this->register_dummy_block();
 
 		$this->instance             = new AMP_Core_Block_Handler();
@@ -91,6 +107,10 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Test unregister_embed().
 	 */
 	public function test_unregister_embed() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestIncomplete( 'Files needed for testing missing.' );
+		}
+
 		$this->register_dummy_block();
 
 		$this->instance             = new AMP_Core_Block_Handler();
@@ -102,7 +122,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$registry = WP_Block_Type_Registry::get_instance();
 		$block    = $registry->get_registered( $this->test_block );
 
-		$this->assertEquals(  '__return_true', $block->render_callback );
+		$this->assertEquals( '__return_true', $block->render_callback );
 
 		$this->unregister_dummy_block();
 	}
