@@ -116,6 +116,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_meta_boxes' ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::add_rest_api_fields' ) );
 	}
 
 	/**
@@ -1382,7 +1383,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_validation.
 	 *
-	 * @covers AMP_Theme_Support::enqueue_block_validation()
+	 * @covers AMP_Validation_Utils::enqueue_block_validation()
 	 */
 	public function test_enqueue_block_validation() {
 		global $post;
@@ -1397,6 +1398,35 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $script->extra['after'][1] );
 		$this->assertContains( 'The %s block above has invalid AMP', $script->extra['after'][1] );
+	}
+
+	/**
+	 * Test add_rest_api_fields.
+	 *
+	 * @covers AMP_Validation_Utils::add_rest_api_fields()
+	 */
+	public function test_add_rest_api_fields() {
+		global $wp_rest_additional_fields;
+		AMP_Validation_Utils::add_rest_api_fields();
+		$field = $wp_rest_additional_fields['post'][ AMP_Validation_Utils::REST_FIELD_NAME ];
+		$this->assertEquals(
+			$field['schema'],
+			array(
+				'description' => 'AMP validation results',
+				'type'        => 'object',
+			)
+		);
+		$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
+	}
+
+	/**
+	 * Test rest_field_amp_validation.
+	 *
+	 * @covers AMP_Validation_Utils::rest_field_amp_validation()
+	 */
+	public function test_rest_field_amp_validation() {
+		// @todo: implement the tested function.
+		$this->assertEquals( array(), AMP_Validation_Utils::rest_field_amp_validation( array(), '' ) );
 	}
 
 	/**

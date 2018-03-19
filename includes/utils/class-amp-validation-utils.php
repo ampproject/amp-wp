@@ -153,11 +153,11 @@ class AMP_Validation_Utils {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
-	 * The namespace of the REST API request.
+	 * The name of the REST API field with the AMP validation results.
 	 *
 	 * @var string
 	 */
-	const REST_NAMESPACE ='amp-wp/v1';
+	const REST_FIELD_NAME = 'amp_validation';
 
 	/**
 	 * The errors encountered when validating.
@@ -212,6 +212,7 @@ class AMP_Validation_Utils {
 			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 			add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
 			add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
+			add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 		}
 
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
@@ -1898,9 +1899,39 @@ class AMP_Validation_Utils {
 				/* translators: %s: the name of the block */
 				'notice' => __( 'The %s block above has invalid AMP', 'amp' ),
 			),
-			'endpoint' => get_rest_url( null, self::REST_NAMESPACE . '/validate' ),
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
+	}
+
+	/**
+	 * Adds fields to the REST API responses, in order to display validation errors.
+	 *
+	 * @return void
+	 */
+	public static function add_rest_api_fields() {
+		register_rest_field(
+			'post',
+			self::REST_FIELD_NAME,
+			array(
+				'get_callback' => array( __CLASS__, 'rest_field_amp_validation' ),
+				'schema'       => array(
+					'description' => __( 'AMP validation results', 'amp' ),
+					'type'        => 'object',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Adds a field to the REST API responses to display the validation status.
+	 *
+	 * @param array  $post_data  Data for the post.
+	 * @param string $field_name The name of the field to add.
+	 * @return array $validation_data
+	 */
+	public static function rest_field_amp_validation( $post_data, $field_name ) {
+		// @todo: conditionally return validation.
+		return array();
 	}
 
 }
