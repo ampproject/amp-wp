@@ -324,10 +324,22 @@ class AMP_Theme_Support {
 
 		if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
 			// We don't need any data, so just send a success.
-			add_filter( 'comment_post_redirect', function() {
+			add_filter( 'comment_post_redirect', function( $url, $comment ) {
+				// Get theme support.
+				$theme_support = get_theme_support( 'amp' );
+
+				// Add the comment ID to the URL to force AMP to refresh the page.
+				$url = add_query_arg( 'comment', $comment->comment_ID, $url );
+
+				// Send redirect header if amp-live-list has been opted-out.
+				if ( empty( $theme_support['comments_live_list'] ) ) {
+					header( 'AMP-Redirect-To: ' . $url, true );
+				}
+
 				// We don't need any data, so just send a success.
 				wp_send_json_success();
-			}, PHP_INT_MAX );
+
+			}, PHP_INT_MAX, 2 );
 			self::handle_xhr_headers_output();
 		} elseif ( ! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] ) ) {
 			add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );
