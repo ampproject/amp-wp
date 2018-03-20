@@ -1889,7 +1889,7 @@ class AMP_Validation_Utils {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'jquery' ),
+			array(),
 			AMP__VERSION,
 			true
 		);

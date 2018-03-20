@@ -1393,7 +1393,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$script = wp_scripts()->registered[ $slug ];
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
-		$this->assertEquals( array( 'jquery' ), $script->deps );
+		$this->assertEquals( array(), $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $script->extra['after'][1] );
@@ -1417,7 +1417,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
-		$this->assertEquals( $wp_rest_additional_fields['page'][ AMP_Validation_Utils::REST_FIELD_NAME ], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
+		$this->assertEquals( $wp_rest_additional_fields['page'][ AMP_Validation_Utils::REST_FIELD_NAME ]['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
 	}
 
 	/**
@@ -1433,7 +1433,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( null, AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
 
 		$this->create_custom_post();
-		assertEquals( $this->get_mock_errors(), AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
+		$this->assertEquals( $this->get_mock_errors(), AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
 	}
 
 	/**
