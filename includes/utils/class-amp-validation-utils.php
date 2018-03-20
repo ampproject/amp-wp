@@ -1895,7 +1895,7 @@ class AMP_Validation_Utils {
 		);
 
 		$data = wp_json_encode( array(
-			'i18n'     => array(
+			'i18n' => array(
 				/* translators: %s: the name of the block */
 				'notice' => __( 'The %s block above has invalid AMP', 'amp' ),
 			),
@@ -1909,8 +1909,19 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function add_rest_api_fields() {
+		if ( amp_is_canonical() ) {
+			$object_types = get_post_types_by_support( 'editor' );
+		} else {
+			$object_types = array_intersect(
+				get_post_types_by_support( 'amp' ),
+				get_post_types( array(
+					'show_in_rest' => true,
+				) )
+			);
+		}
+
 		register_rest_field(
-			array( 'post', 'page' ),
+			$object_types,
 			self::REST_FIELD_NAME,
 			array(
 				'get_callback' => array( __CLASS__, 'rest_field_amp_validation' ),

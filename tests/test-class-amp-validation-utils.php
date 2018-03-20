@@ -94,6 +94,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets; // WPCS: override ok.
+		remove_theme_support( 'amp' );
 		parent::tearDown();
 	}
 
@@ -1406,18 +1407,42 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::add_rest_api_fields()
 	 */
 	public function test_add_rest_api_fields() {
-		global $wp_rest_additional_fields;
+		// Test in a non Native-AMP (canonical) context.
 		AMP_Validation_Utils::add_rest_api_fields();
-		$field = $wp_rest_additional_fields['post'][ AMP_Validation_Utils::REST_FIELD_NAME ];
-		$this->assertEquals(
-			$field['schema'],
-			array(
-				'description' => 'AMP validation results',
-				'type'        => 'object',
-			)
+		$post_types_non_canonical = array_intersect(
+			get_post_types_by_support( 'amp' ),
+			get_post_types( array(
+				'show_in_rest' => true,
+			) )
 		);
-		$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
-		$this->assertEquals( $wp_rest_additional_fields['page'][ AMP_Validation_Utils::REST_FIELD_NAME ]['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
+		$this->assert_rest_api_field_present( $post_types_non_canonical );
+
+		// Test in a Native AMP (canonical) context.
+		add_theme_support( 'amp' );
+		AMP_Validation_Utils::add_rest_api_fields();
+		$post_types_canonical = get_post_types_by_support( 'editor' );
+		$this->assert_rest_api_field_present( $post_types_canonical );
+	}
+
+	/**
+	 * Asserts that the post types have the additional REST field.
+	 *
+	 * @covers AMP_Validation_Utils::add_rest_api_fields()
+	 * @param array $post_types The post types that should have the REST field.
+	 * @return void
+	 */
+	public function assert_rest_api_field_present( $post_types ) {
+		foreach ( $post_types as $post_type ) {
+			$field = $GLOBALS['wp_rest_additional_fields'][ $post_type ][ AMP_Validation_Utils::REST_FIELD_NAME ];
+			$this->assertEquals(
+				$field['schema'],
+				array(
+					'description' => 'AMP validation results',
+					'type'        => 'object',
+				)
+			);
+			$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
+		}
 	}
 
 	/**
@@ -1426,12 +1451,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::rest_field_amp_validation()
 	 */
 	public function test_rest_field_amp_validation() {
-		// @todo: implement the tested function.
 		$post_data = array(
 			'link' => home_url( '/' ),
 		);
 		$this->assertEquals( null, AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
-
 		$this->create_custom_post();
 		$this->assertEquals( $this->get_mock_errors(), AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
 	}
