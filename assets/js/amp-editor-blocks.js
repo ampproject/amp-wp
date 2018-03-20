@@ -26,9 +26,27 @@ var ampEditorBlocks = ( function() {
 	component.boot = function boot( data ) {
 		_.extend( component.data, data );
 
-		wp.hooks.addFilter( 'blocks.registerBlockType', 'core/blocks/addAttributes', component.addAMPAttributes );
-		wp.hooks.addFilter( 'blocks.getSaveElement', 'core/blocks/filterSave', component.filterBlocksSave );
-		wp.hooks.addFilter( 'blocks.BlockEdit', 'core/blocks/filterEdit', component.filterBlocksEdit );
+		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
+		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
+		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
+
+		// In case of adding just layout attribute and not amp-layout wrapper.
+		// wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addLayoutAttribute', component.addAMPExtraProps );
+	};
+
+	/**
+	 * Add extra props to save.
+	 *
+	 * @param props
+	 * @param blockType
+	 * @param attributes
+	 * @returns {*}
+	 */
+	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
+		if ( _.isEmpty( attributes.ampLayout ) ) {
+			return props;
+		}
+		return _.assign( { layout: attributes.ampLayout }, props );
 	};
 
 	/**
@@ -82,15 +100,42 @@ var ampEditorBlocks = ( function() {
 						} )
 					)
 				);
+
+			/*
+			 This would be in case of adding just layout attribute.
+			 if ( ! _.isEmpty( attributes.ampLayout ) ) {
+				 return [
+					 inspectorControls,
+					 el( BlockEdit, _.assign( {
+					    key: 'original',
+					    layout: ampLayout,
+					 }, props ) ),
+				 ];
+			 }*/
+
+			if ( ! _.isEmpty( attributes.ampLayout ) && ! isSelected ) {
+				return [
+					inspectorControls,
+					el( 'amp-layout',
+						{ key: 'amp', layout: attributes.ampLayout, width: 1, height: 1, children: el( BlockEdit, _.assign( {
+							key: 'original',
+						}, props ) ) }
+					)
+				];
+			}
+
+
 			return [
 				inspectorControls,
-				el( BlockEdit, _.assign( { key: 'original' }, props ) ),
+				el( BlockEdit, _.assign( {
+					key: 'original',
+				}, props ) ),
 			];
 		};
 	};
 
 	/**
-	 * Filteres blocks save function for core blocks except for dynamic blocks.
+	 * Filters blocks save function for core blocks except for dynamic blocks.
 	 *
 	 * @param element
 	 * @param blockType
