@@ -335,9 +335,17 @@ class AMP_Theme_Support {
 				if ( empty( $theme_support['comments_live_list'] ) ) {
 					header( 'AMP-Redirect-To: ' . $url, true );
 				}
+				// Create a success message to display to the user.
+				if ( '1' === (string) $comment->comment_approved ) {
+					$message = __( 'Your comment has been posted and has been approved.', 'amp' );
+				} else {
+					$message = __( 'Your comment has been posted, and is awaiting moderation.', 'default' );
+				}
+
+				$message = apply_filters( 'amp_comment_submitted_message', $message, $comment );
 
 				// We don't need any data, so just send a success.
-				wp_send_json_success();
+				wp_send_json_success( $message );
 
 			}, PHP_INT_MAX, 2 );
 			self::handle_xhr_headers_output();
@@ -528,7 +536,7 @@ class AMP_Theme_Support {
 		?>
 		<div submit-success>
 			<template type="amp-mustache">
-				<?php esc_html_e( 'Your comment has been posted, but may be subject to moderation.', 'amp' ); ?>
+				{{{data}}}
 			</template>
 		</div>
 		<div submit-error>
