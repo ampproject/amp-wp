@@ -359,7 +359,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Hook into a form submissions, such as the comment form or some other form submission.
+	 * Hook into a POST form submissions, such as the comment form or some other form submission.
 	 *
 	 * @since 0.7.0
 	 */
@@ -371,7 +371,7 @@ class AMP_Theme_Support {
 		// Send AMP response header.
 		$origin = wp_validate_redirect( wp_sanitize_redirect( esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] ) ) );
 		if ( $origin ) {
-			self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) ); // @todo The $origin needs to be validated.
+			self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) );
 		}
 
 		// Intercept POST requests which redirect.
@@ -414,8 +414,10 @@ class AMP_Theme_Support {
 
 		// Cause a page refresh if amp-live-list is not implemented for comments via add_theme_support( 'amp', array( 'comments_live_list' => true ) ).
 		if ( empty( $theme_support[0]['comments_live_list'] ) ) {
-
-			// Add the comment ID to the URL to force AMP to refresh the page.
+			/*
+			 * Add the comment ID to the URL to force AMP to refresh the page.
+			 * This is ideally a temporary workaround to deal with https://github.com/ampproject/amphtml/issues/14170
+			 */
 			$url = add_query_arg( 'comment', $comment->comment_ID, $url );
 
 			// Pass URL along to wp_redirect().
@@ -461,13 +463,14 @@ class AMP_Theme_Support {
 	 * }
 	 */
 	public static function handle_wp_die( $error, $title = '', $args = array() ) {
-		$status_code = 500;
 		if ( is_int( $title ) ) {
 			$status_code = $title;
 		} elseif ( is_int( $args ) ) {
 			$status_code = $args;
 		} elseif ( is_array( $args ) && isset( $args['response'] ) ) {
 			$status_code = $args['response'];
+		} else {
+			$status_code = 500;
 		}
 		status_header( $status_code );
 
