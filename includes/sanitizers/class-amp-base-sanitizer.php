@@ -384,4 +384,25 @@ abstract class AMP_Base_Sanitizer {
 			}
 		}
 	}
+
+	/**
+	 * Get data-amp-layout value from the parent node 'figure' added by editor block.
+	 *
+	 * @param DOMNode $node Base node.
+	 * @return bool|string Layout value or false.
+	 */
+	public function get_data_amp_layout( $node ) {
+		$layout = false;
+
+		// Editor blocks add 'figure' as the parent node for images. If this node has data-amp-layout then we should add this as the layout attribute.
+		$parent_node = $node->parentNode;
+		if ( 'figure' === $parent_node->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+			if ( isset( $parent_attributes['data-amp-layout'] ) ) {
+				$layout = $parent_attributes['data-amp-layout'];
+			}
+		}
+
+		return $layout;
+	}
 }

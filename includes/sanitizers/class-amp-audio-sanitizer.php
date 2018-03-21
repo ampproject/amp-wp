@@ -83,6 +83,14 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
 				$this->remove_invalid_child( $node );
 			} else {
+
+				$layout = $this->get_data_amp_layout( $node );
+
+				// The width has to be unset / auto in case of fixed-height.
+				if ( 'fixed-height' === $layout ) {
+					$new_node->setAttribute( 'width', 'auto' );
+				}
+
 				$node->parentNode->replaceChild( $new_node, $node );
 			}
 
@@ -131,6 +139,9 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 					if ( 'false' !== $value ) {
 						$out[ $name ] = '';
 					}
+					break;
+				case 'data-amp-layout':
+					$out['layout'] = $value;
 					break;
 
 				default:

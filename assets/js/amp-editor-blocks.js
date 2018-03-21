@@ -11,9 +11,15 @@ var ampEditorBlocks = ( function() {
 		data: {
 			dynamicBlocks: [],
 			ampLayoutOptions: [
-				{ value: '', label: 'None' },
-				{ value: 'responsive', label: 'Responsive' },
+				{ value: 'nodisplay', label: 'No Display' },
+				{ value: 'fixed', label: 'Fixed' }, // Not supported by amp-audio and amp-pixel.
+				{ value: 'responsive', label: 'Responsive' }, // To ensure your AMP element displays, you must specify a width and height for the containing element.
+				{ value: 'fixed-height', label: 'Fixed height' },
 				{ value: 'fill', label: 'Fill' },
+				{ value: 'container', label: 'Container' }, // Not supported by img.
+				{ value: 'flex-item', label: 'Flex Item' },
+				{ value: 'intrinsic', label: 'Intrinsic' },
+
 			]
 		},
 	};
@@ -31,6 +37,37 @@ var ampEditorBlocks = ( function() {
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addLayoutAttribute', component.addAMPExtraProps );
 	};
+
+	/**
+	 * Get layout options depending on the block.
+	 *
+	 * @param blockName
+	 * @returns {[*]}
+	 */
+	component.getLayoutOptions = function getLayoutOptions( blockName ) {
+		let layoutOptions = [
+			{ value: '', label: 'None' }
+		];
+
+		_.each( component.data.ampLayoutOptions, function( option ) {
+
+			if ( 'core/image' === blockName ) {
+				if ( 'container' === option.value ) {
+					return true;
+				}
+			} else if ( 'core/audio' === blockName ) {
+				if ( -1 !== [ 'responsive', 'fill', 'container', 'flex-item', 'intrinsic' ].indexOf( option.value ) ) {
+					return true;
+				}
+			}
+
+			layoutOptions.push( { value: option.value, label: option.label } );
+		} );
+
+		return layoutOptions;
+	};
+
+
 	/**
 	 * Add extra data-amp-layout attribute to save to DB.
 	 *
@@ -81,7 +118,7 @@ var ampEditorBlocks = ( function() {
 			} = wp.components;
 
 		return function( props ) {
-			var { attributes, isSelected } = props,
+			var { attributes, isSelected, name } = props,
 				ampLayout,
 				inspectorControls;
 
@@ -91,7 +128,7 @@ var ampEditorBlocks = ( function() {
 					el ( SelectControl, {
 						label: 'AMP Layout',
 						value: ampLayout,
-						options: component.data.ampLayoutOptions,
+						options: component.getLayoutOptions( name ),
 						onChange: function( ampLayout ) {
 							props.setAttributes( { ampLayout: ampLayout } );
 						}

@@ -22,6 +22,11 @@ class AMP_Editor_Blocks {
 		}
 	}
 
+	/**
+	 * @param $context
+	 * @return mixed
+	 *
+	 */
 	public function whitelist_layout_in_wp_kses_allowed_html( $context ) {
 		foreach ( $context as $tag ) {
 			$tag['data-amp-layout'] = true;

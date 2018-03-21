@@ -130,6 +130,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
 					break;
 
+				case 'data-amp-layout':
+					$out['layout'] = $value;
+					break;
+
 				default:
 					break;
 			}
@@ -202,9 +206,33 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMNode $node The DOMNode to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
+
+		$layout = $this->get_data_amp_layout( $node );
+
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+
+		if ( ! empty( $layout ) ) {
+			$old_attributes['data-amp-layout'] = $layout;
+
+			// @todo If $layout is responsive, we might need to make sure to specify parent elements width and height.
+			// @todo In addition to Gutenberg blocks also look into existing data-amp-layout of the base node, perhaps that would need similar handling.
+		}
+
 		$new_attributes = $this->filter_attributes( $old_attributes );
 		$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+
+		// The width has to be unset / auto in case of fixed-height.
+		if ( 'fixed-height' === $layout ) {
+			$new_attributes['width'] = 'auto';
+
+			// The parent element should have width/height set and position set in case of 'fill'.
+			// @todo Look into object-fit for the image element.
+		} elseif ( 'fill' === $layout ) {
+			$node->parent_node->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
+			unset( $new_attributes['width'] );
+			unset( $new_attributes['height'] );
+		}
+
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 
