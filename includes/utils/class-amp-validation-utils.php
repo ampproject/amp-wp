@@ -1913,6 +1913,7 @@ class AMP_Validation_Utils {
 				/* translators: %s: the name of the block */
 				'notice' => __( 'The %s block above has invalid AMP', 'amp' ),
 			),
+			'errorKey' => self::REST_FIELD_NAME,
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
 	}
