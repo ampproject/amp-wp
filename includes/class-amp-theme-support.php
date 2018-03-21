@@ -501,7 +501,11 @@ class AMP_Theme_Support {
 			wp_parse_url( $location )
 		);
 
-		$absolute_location = $parsed_location['scheme'] . '://' . $parsed_location['host'];
+		$absolute_location = '';
+		if ( 'https' === $parsed_location['scheme'] ) {
+			$absolute_location .= $parsed_location['scheme'] . ':';
+		}
+		$absolute_location .= '//' . $parsed_location['host'];
 		if ( isset( $parsed_location['port'] ) ) {
 			$absolute_location .= ':' . $parsed_location['port'];
 		}

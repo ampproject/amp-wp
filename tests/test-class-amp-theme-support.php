@@ -394,14 +394,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_intercept_post_request_redirect() {
 
 		add_theme_support( 'amp' );
-		$url = home_url( '/' );
+		$url = home_url( '/', 'https' );
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter( 'wp_die_ajax_handler', function () {
 			return '__return_false';
 		} );
 
-		// Test redirecting to full URL.
+		// Test redirecting to full URL with HTTPS protocol.
 		AMP_Theme_Support::$headers_sent = array();
 		ob_start();
 		AMP_Theme_Support::intercept_post_request_redirect( $url );
@@ -410,6 +410,31 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			array(
 				'name'        => 'AMP-Redirect-To',
 				'value'       => $url,
+				'replace'     => true,
+				'status_code' => null,
+			),
+			AMP_Theme_Support::$headers_sent
+		);
+		$this->assertContains(
+			array(
+				'name'        => 'Access-Control-Expose-Headers',
+				'value'       => 'AMP-Redirect-To',
+				'replace'     => true,
+				'status_code' => null,
+			),
+			AMP_Theme_Support::$headers_sent
+		);
+
+		// Test redirecting to non-HTTPS URL.
+		AMP_Theme_Support::$headers_sent = array();
+		ob_start();
+		$url = home_url( '/', 'http' );
+		AMP_Theme_Support::intercept_post_request_redirect( $url );
+		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertContains(
+			array(
+				'name'        => 'AMP-Redirect-To',
+				'value'       => preg_replace( '#^\w+:#', '', $url ),
 				'replace'     => true,
 				'status_code' => null,
 			),
