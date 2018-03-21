@@ -369,8 +369,10 @@ class AMP_Theme_Support {
 		}
 
 		// Send AMP response header.
-		$origin = esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] );
-		self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) ); // @todo The $origin needs to be validated.
+		$origin = wp_validate_redirect( wp_sanitize_redirect( esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] ) ) );
+		if ( $origin ) {
+			self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) ); // @todo The $origin needs to be validated.
+		}
 
 		// Intercept POST requests which redirect.
 		add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );

@@ -275,27 +275,32 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::handle_xhr_request()
 	 */
 	public function test_handle_xhr_request() {
+		AMP_Theme_Support::purge_amp_query_vars();
 		AMP_Theme_Support::handle_xhr_request();
 		$this->assertEmpty( AMP_Theme_Support::$headers_sent );
 
-		$_GET['__amp_source_origin'] = home_url();
+		// Try bad source origin.
+		$_GET['__amp_source_origin'] = 'http://evil.example.com/';
 		$_SERVER['REQUEST_METHOD']   = 'POST';
-
 		AMP_Theme_Support::purge_amp_query_vars();
 		AMP_Theme_Support::handle_xhr_request();
+		$this->assertEmpty( AMP_Theme_Support::$headers_sent );
 
+		// Try home source origin.
+		$_GET['__amp_source_origin'] = home_url();
+		$_SERVER['REQUEST_METHOD']   = 'POST';
+		AMP_Theme_Support::purge_amp_query_vars();
+		AMP_Theme_Support::handle_xhr_request();
 		$this->assertCount( 1, AMP_Theme_Support::$headers_sent );
-
 		$this->assertEquals(
 			array(
 				'name'        => 'AMP-Access-Control-Allow-Source-Origin',
-				'value'       => 'http://example.org',
+				'value'       => home_url(),
 				'replace'     => true,
 				'status_code' => null,
 			),
 			AMP_Theme_Support::$headers_sent[0]
 		);
-
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', array( 'AMP_Theme_Support', 'intercept_post_request_redirect' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', array( 'AMP_Theme_Support', 'filter_comment_post_redirect' ) ) );
 		$this->assertEquals(
