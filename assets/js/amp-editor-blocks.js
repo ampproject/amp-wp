@@ -27,15 +27,12 @@ var ampEditorBlocks = ( function() {
 		_.extend( component.data, data );
 
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
-		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
+		// wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
-
-		// In case of adding just layout attribute and not amp-layout wrapper.
-		// wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addLayoutAttribute', component.addAMPExtraProps );
+		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addLayoutAttribute', component.addAMPExtraProps );
 	};
-
 	/**
-	 * Add extra props to save.
+	 * Add extra data-amp-layout attribute to save to DB.
 	 *
 	 * @param props
 	 * @param blockType
@@ -46,7 +43,8 @@ var ampEditorBlocks = ( function() {
 		if ( _.isEmpty( attributes.ampLayout ) ) {
 			return props;
 		}
-		return _.assign( { layout: attributes.ampLayout }, props );
+
+		return _.assign( { 'data-amp-layout': attributes.ampLayout }, props );
 	};
 
 	/**
@@ -89,46 +87,36 @@ var ampEditorBlocks = ( function() {
 
 			ampLayout = attributes.ampLayout;
 			inspectorControls = isSelected && (
-					el( InspectorControls, { key: 'inspector' },
-						el ( SelectControl, {
-							label: 'AMP Layout',
-							value: ampLayout,
-							options: component.data.ampLayoutOptions,
-							onChange: function( ampLayout ) {
-								props.setAttributes( { ampLayout: ampLayout } );
-							}
-						} )
-					)
-				);
+				el( InspectorControls, { key: 'inspector' },
+					el ( SelectControl, {
+						label: 'AMP Layout',
+						value: ampLayout,
+						options: component.data.ampLayoutOptions,
+						onChange: function( ampLayout ) {
+							props.setAttributes( { ampLayout: ampLayout } );
+						}
+					} )
+				)
+			);
 
-			/*
-			 This would be in case of adding just layout attribute.
-			 if ( ! _.isEmpty( attributes.ampLayout ) ) {
-				 return [
-					 inspectorControls,
-					 el( BlockEdit, _.assign( {
-					    key: 'original',
-					    layout: ampLayout,
-					 }, props ) ),
-				 ];
-			 }*/
-
+			// For editor view, add a wrapper to any tags.
 			if ( ! _.isEmpty( attributes.ampLayout ) && ! isSelected ) {
 				return [
 					inspectorControls,
 					el( 'amp-layout',
-						{ key: 'amp', layout: attributes.ampLayout, width: 1, height: 1, children: el( BlockEdit, _.assign( {
+						{ key: 'amp', 'data-amp-layout': attributes.ampLayout, width: 1, height: 1, children: el( BlockEdit, _.assign( {
 							key: 'original',
 						}, props ) ) }
 					)
 				];
 			}
 
-
+			// Return original.
 			return [
 				inspectorControls,
 				el( BlockEdit, _.assign( {
 					key: 'original',
+					'data-amp-layout': ampLayout,
 				}, props ) ),
 			];
 		};
@@ -148,9 +136,8 @@ var ampEditorBlocks = ( function() {
 		if ( -1 !== component.data.dynamicBlocks.indexOf( blockType ) || _.isEmpty( attributes.ampLayout ) ) {
 			return element;
 		}
-		return wp.element.createElement( 'amp-layout',
-			{ layout: attributes.ampLayout, width: 1, height: 1, children: element }
-		);
+
+		return element;
 	};
 
 	return component;

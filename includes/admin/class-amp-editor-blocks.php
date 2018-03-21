@@ -18,7 +18,15 @@ class AMP_Editor_Blocks {
 		if ( function_exists( 'gutenberg_init' ) ) {
 			$self = new self();
 			add_action( 'admin_enqueue_scripts', array( $self, 'add_editor_filters' ) );
+			add_filter( 'wp_kses_allowed_html', array( $self, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		}
+	}
+
+	public function whitelist_layout_in_wp_kses_allowed_html( $context ) {
+		foreach ( $context as $tag ) {
+			$tag['data-amp-layout'] = true;
+		}
+		return $context;
 	}
 
 	/**
