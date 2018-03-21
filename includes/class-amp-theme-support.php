@@ -109,8 +109,6 @@ class AMP_Theme_Support {
 		 * action to template_redirect--the wp action--is used instead.
 		 */
 		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
-
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -226,6 +224,7 @@ class AMP_Theme_Support {
 		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		if ( is_customize_preview() ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		}
@@ -1146,8 +1145,8 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_assets() {
-		// Enqueue AMP runtime.
 		wp_enqueue_script( 'amp-runtime' );
+
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
 	}
