@@ -363,7 +363,14 @@ class AMP_Theme_Support {
 	 * @since 0.7.0
 	 */
 	public static function handle_xhr_request() {
-		if ( empty( self::$purged_amp_query_vars['__amp_source_origin'] ) || empty( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+		$is_amp_xhr = (
+			! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] )
+			&&
+			! empty( self::$purged_amp_query_vars['__amp_source_origin'] )
+			&&
+			( ! empty( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
+		);
+		if ( ! $is_amp_xhr ) {
 			return;
 		}
 

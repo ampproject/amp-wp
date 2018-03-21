@@ -279,6 +279,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::handle_xhr_request();
 		$this->assertEmpty( AMP_Theme_Support::$headers_sent );
 
+		$_GET['_wp_amp_action_xhr_converted'] = '1';
+
 		// Try bad source origin.
 		$_GET['__amp_source_origin'] = 'http://evil.example.com/';
 		$_SERVER['REQUEST_METHOD']   = 'POST';
