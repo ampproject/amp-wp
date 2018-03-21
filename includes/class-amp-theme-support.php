@@ -68,6 +68,15 @@ class AMP_Theme_Support {
 	public static $purged_amp_query_vars = array();
 
 	/**
+	 * Headers sent (or attempted to be sent).
+	 *
+	 * @since 0.7
+	 * @see AMP_Theme_Support::send_header()
+	 * @var array[]
+	 */
+	public static $headers_sent = array();
+
+	/**
 	 * Initialize.
 	 */
 	public static function init() {
@@ -87,7 +96,7 @@ class AMP_Theme_Support {
 			$args = array_shift( $support );
 			if ( ! is_array( $args ) ) {
 				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback' ) ) ) !== 0 ) {
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list' ) ) ) !== 0 ) {
 				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
@@ -311,84 +320,171 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Send an HTTP response header.
+	 *
+	 * This largely exists to facilitate unit testing but it also provides a better interface for sending headers.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param string $name  Header name.
+	 * @param string $value Header value.
+	 * @param array  $args {
+	 *     Args to header().
+	 *
+	 *     @type bool $replace     Whether to replace a header previously sent. Default true.
+	 *     @type int  $status_code Status code to send with the sent header.
+	 * }
+	 * @return bool Whether the header was sent.
+	 */
+	public static function send_header( $name, $value, $args = array() ) {
+		$args = array_merge(
+			array(
+				'replace'     => true,
+				'status_code' => null,
+			),
+			$args
+		);
+
+		self::$headers_sent[] = array_merge( compact( 'name', 'value' ), $args );
+		if ( headers_sent() ) {
+			return false;
+		}
+
+		header(
+			sprintf( '%s: %s', $name, $value ),
+			$args['replace'],
+			$args['status_code']
+		);
+		return true;
+	}
+
+	/**
 	 * Hook into a form submissions, such as the comment form or some other form submission.
 	 *
 	 * @since 0.7.0
-	 * @global string $pagenow
 	 */
 	public static function handle_xhr_request() {
-		global $pagenow;
-		if ( empty( self::$purged_amp_query_vars['__amp_source_origin'] ) ) {
+		if ( empty( self::$purged_amp_query_vars['__amp_source_origin'] ) || empty( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
 			return;
 		}
 
-		if ( isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
-			// We don't need any data, so just send a success.
-			add_filter( 'comment_post_redirect', function( $url, $comment ) {
-				// Get theme support.
-				$theme_support = get_theme_support( 'amp' );
+		// Send AMP response header.
+		$origin = esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] );
+		self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) ); // @todo The $origin needs to be validated.
 
-				// Add the comment ID to the URL to force AMP to refresh the page.
-				$url = add_query_arg( 'comment', $comment->comment_ID, $url );
+		// Intercept POST requests which redirect.
+		add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );
 
-				// Send redirect header if amp-live-list has been opted-out.
-				if ( empty( $theme_support['comments_live_list'] ) ) {
-					header( 'AMP-Redirect-To: ' . $url, true );
-				}
-				// Create a success message to display to the user.
-				if ( '1' === (string) $comment->comment_approved ) {
-					$message = __( 'Your comment has been posted and has been approved.', 'amp' );
-				} else {
-					$message = __( 'Your comment has been posted, and is awaiting moderation.', 'default' );
-				}
+		// Add special handling for redirecting after comment submission.
+		add_filter( 'comment_post_redirect', array( __CLASS__, 'filter_comment_post_redirect' ), PHP_INT_MAX, 2 );
 
-				$message = apply_filters( 'amp_comment_submitted_message', $message, $comment );
-
-				// We don't need any data, so just send a success.
-				wp_send_json_success( $message );
-
-			}, PHP_INT_MAX, 2 );
-			self::handle_xhr_headers_output();
-		} elseif ( ! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] ) ) {
-			add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );
-			self::handle_xhr_headers_output();
-		}
-	}
-
-	/**
-	 * Handle the AMP XHR headers and output errors.
-	 *
-	 * @since 0.7.0
-	 */
-	public static function handle_xhr_headers_output() {
-		// Add die handler for AMP error display.
+		// Add die handler for AMP error display, most likely due to problem with comment.
 		add_filter( 'wp_die_handler', function() {
-			/**
-			 * New error handler for AMP form submission.
-			 *
-			 * @param WP_Error|string $error The error to handle.
-			 */
-			return function( $error ) {
-				status_header( 400 );
-				if ( is_wp_error( $error ) ) {
-					$error = $error->get_error_message();
-				}
-				$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
-				wp_send_json( array(
-					'error' => wp_kses( $error, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) ),
-				) );
-			};
+			return array( __CLASS__, 'handle_wp_die' );
 		} );
 
-		// Send AMP header.
-		$origin = esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] );
-		header( 'AMP-Access-Control-Allow-Source-Origin: ' . $origin, true );
 	}
 
 	/**
-	 * Intercept the response to a non-comment POST request.
+	 * Strip tags that are not allowed in amp-mustache.
 	 *
 	 * @since 0.7.0
+	 *
+	 * @param string $text Text to sanitize.
+	 * @return string Sanitized text.
+	 */
+	protected static function wp_kses_amp_mustache( $text ) {
+		$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
+		return wp_kses( $text, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
+	}
+
+	/**
+	 * Handle comment_post_redirect to ensure page reload is done when comments_live_list is not supported, while sending back a success message when it is.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param string     $url     Comment permalink to redirect to.
+	 * @param WP_Comment $comment Posted comment.
+	 * @return string URL.
+	 */
+	public static function filter_comment_post_redirect( $url, $comment ) {
+		$theme_support = get_theme_support( 'amp' );
+
+		// Cause a page refresh if amp-live-list is not implemented for comments via add_theme_support( 'amp', array( 'comments_live_list' => true ) ).
+		if ( empty( $theme_support[0]['comments_live_list'] ) ) {
+
+			// Add the comment ID to the URL to force AMP to refresh the page.
+			$url = add_query_arg( 'comment', $comment->comment_ID, $url );
+
+			// Pass URL along to wp_redirect().
+			return $url;
+		}
+
+		// Create a success message to display to the user.
+		if ( '1' === (string) $comment->comment_approved ) {
+			$message = __( 'Your comment has been posted.', 'amp' );
+		} else {
+			$message = __( 'Your comment is awaiting moderation.', 'default' ); // Note core string re-use.
+		}
+
+		/**
+		 * Filters the message when comment submitted success message when
+		 *
+		 * @since 0.7
+		 */
+		$message = apply_filters( 'amp_comment_posted_message', $message, $comment );
+
+		// Message will be shown in template defined by AMP_Theme_Support::add_amp_comment_form_templates().
+		wp_send_json( array(
+			'message' => self::wp_kses_amp_mustache( $message ),
+		) );
+	}
+
+	/**
+	 * New error handler for AMP form submission.
+	 *
+	 * @since 0.7.0
+	 * @see wp_die()
+	 *
+	 * @param WP_Error|string  $error The error to handle.
+	 * @param string|int       $title Optional. Error title. If `$message` is a `WP_Error` object,
+	 *                                error data with the key 'title' may be used to specify the title.
+	 *                                If `$title` is an integer, then it is treated as the response
+	 *                                code. Default empty.
+	 * @param string|array|int $args {
+	 *     Optional. Arguments to control behavior. If `$args` is an integer, then it is treated
+	 *     as the response code. Default empty array.
+	 *
+	 *     @type int $response The HTTP response code. Default 200 for Ajax requests, 500 otherwise.
+	 * }
+	 */
+	public static function handle_wp_die( $error, $title = '', $args = array() ) {
+		$status_code = 500;
+		if ( is_int( $title ) ) {
+			$status_code = $title;
+		} elseif ( is_int( $args ) ) {
+			$status_code = $args;
+		} elseif ( is_array( $args ) && isset( $args['response'] ) ) {
+			$status_code = $args['response'];
+		}
+		status_header( $status_code );
+
+		if ( is_wp_error( $error ) ) {
+			$error = $error->get_error_message();
+		}
+
+		// Message will be shown in template defined by AMP_Theme_Support::add_amp_comment_form_templates().
+		wp_send_json( array(
+			'error' => self::wp_kses_amp_mustache( $error ),
+		) );
+	}
+
+	/**
+	 * Intercept the response to a POST request.
+	 *
+	 * @since 0.7.0
+	 * @see wp_redirect()
+	 *
 	 * @param string $location The location to redirect to.
 	 */
 	public static function intercept_post_request_redirect( $location ) {
@@ -398,7 +494,7 @@ class AMP_Theme_Support {
 			array(
 				'scheme' => 'https',
 				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
-				'path'   => strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ),
+				'path'   => isset( $_SERVER['REQUEST_URI'] ) ? strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ) : '/',
 			),
 			wp_parse_url( $location )
 		);
@@ -415,9 +511,9 @@ class AMP_Theme_Support {
 			$absolute_location .= '#' . $parsed_location['fragment'];
 		}
 
-		header( 'AMP-Redirect-To: ' . $absolute_location );
-		header( 'Access-Control-Expose-Headers: AMP-Redirect-To' );
-		// Send json success as no data is required.
+		self::send_header( 'AMP-Redirect-To', $absolute_location );
+		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To' );
+
 		wp_send_json_success();
 	}
 
@@ -536,7 +632,7 @@ class AMP_Theme_Support {
 		?>
 		<div submit-success>
 			<template type="amp-mustache">
-				{{{data}}}
+				<p>{{{message}}}</p>
 			</template>
 		</div>
 		<div submit-error>
