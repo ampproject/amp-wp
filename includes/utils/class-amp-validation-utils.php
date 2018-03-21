@@ -1909,7 +1909,7 @@ class AMP_Validation_Utils {
 		);
 
 		$data = wp_json_encode( array(
-			'i18n' => array(
+			'i18n'     => array(
 				/* translators: %s: the name of the block */
 				'notice' => __( 'The %s block above has invalid AMP', 'amp' ),
 			),
