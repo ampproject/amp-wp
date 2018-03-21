@@ -383,6 +383,25 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_existing_validation_errors.
+	 *
+	 * @covers AMP_Validation_Utils::get_existing_validation_errors()
+	 */
+	public function test_get_existing_validation_errors() {
+		add_theme_support( 'amp' );
+		AMP_Validation_Utils::register_post_type();
+		$post = $this->factory()->post->create_and_get();
+		$this->assertEquals( null, AMP_Validation_Utils::get_existing_validation_errors( $post ) );
+
+		// Create an error custom post for the $post_id, so the function will return existing errors.
+		$this->create_custom_post( amp_get_permalink( $post->ID ) );
+		$this->assertEquals(
+			$this->get_mock_errors(),
+			AMP_Validation_Utils::get_existing_validation_errors( $post )
+		);
+	}
+
+	/**
 	 * Test source comments.
 	 *
 	 * @covers AMP_Validation_Utils::locate_sources()
@@ -1451,20 +1470,38 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::rest_field_amp_validation()
 	 */
 	public function test_rest_field_amp_validation() {
-		$post_data = array(
-			'link' => home_url( '/' ),
+		$post_id = $this->factory()->post->create();
+		$this->assertEquals(
+			null,
+			AMP_Validation_Utils::rest_field_amp_validation(
+				array(
+					'id' => $post_id,
+				),
+				''
+			)
 		);
-		$this->assertEquals( null, AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
-		$this->create_custom_post();
-		$this->assertEquals( $this->get_mock_errors(), AMP_Validation_Utils::rest_field_amp_validation( $post_data, '' ) );
+
+		// Create an error custom post for the ID, so this will return the errors in the field.
+		$this->create_custom_post( amp_get_permalink( $post_id ) );
+		$this->assertEquals(
+			$this->get_mock_errors(),
+			AMP_Validation_Utils::rest_field_amp_validation(
+				array(
+					'id' => $post_id,
+				),
+				''
+			)
+		);
 	}
 
 	/**
 	 * Creates and inserts a custom post.
 	 *
+	 * @param string|null $url The URL where there are errors, or null.
 	 * @return int|WP_Error $error_post The ID of new custom post, or an error.
 	 */
-	public function create_custom_post() {
+	public function create_custom_post( $url = null ) {
+		$url            = isset( $url ) ? $url : home_url( '/' );
 		$content        = wp_json_encode( $this->get_mock_errors() );
 		$encoded_errors = md5( $content );
 		$post_args      = array(
@@ -1474,7 +1511,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'post_status'  => 'publish',
 		);
 		$error_post     = wp_insert_post( wp_slash( $post_args ) );
-		$url            = home_url( '/' );
 		update_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
 		return $error_post;
 	}

@@ -566,16 +566,9 @@ class AMP_Validation_Utils {
 		}
 
 		// Incorporate frontend validation status if there is a known URL for the post.
-		if ( is_post_type_viewable( $post->post_type ) ) {
-			$url = amp_get_permalink( $post->ID );
-
-			$validation_status_post = self::get_validation_status_post( $url );
-			if ( $validation_status_post ) {
-				$data = json_decode( $validation_status_post->post_content, true );
-				if ( is_array( $data ) ) {
-					$validation_errors = array_merge( $validation_errors, $data );
-				}
-			}
+		$existing_validation_errors = self::get_existing_validation_errors( $post );
+		if ( isset( $existing_validation_errors ) ) {
+			$validation_errors = $existing_validation_errors;
 		}
 
 		if ( empty( $validation_errors ) ) {
@@ -629,6 +622,29 @@ class AMP_Validation_Utils {
 		}
 
 		echo '</div>';
+	}
+
+	/**
+	 * Gets the validation errors for a given post.
+	 *
+	 * These are stored in a custom post type.
+	 * If none exist, returns null.
+	 *
+	 * @param WP_Post $post The post for which to get the validation errors.
+	 * @return array|null $errors The validation errors, if they exist.
+	 */
+	public static function get_existing_validation_errors( $post ) {
+		if ( is_post_type_viewable( $post->post_type ) ) {
+			$url                    = amp_get_permalink( $post->ID );
+			$validation_status_post = self::get_validation_status_post( $url );
+			if ( $validation_status_post ) {
+				$data = json_decode( $validation_status_post->post_content, true );
+				if ( is_array( $data ) ) {
+					return $data;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -1110,8 +1126,6 @@ class AMP_Validation_Utils {
 
 	/**
 	 * Whether to validate the front end response.
-	 *
-	 * Either the user has the capability and the query var is present.
 	 *
 	 * @return boolean Whether to validate.
 	 */
@@ -1936,13 +1950,25 @@ class AMP_Validation_Utils {
 	/**
 	 * Adds a field to the REST API responses to display the validation status.
 	 *
+	 * First, get existing errors for the post.
+	 * If there are none, validate the post and return any errors.
+	 *
 	 * @param array  $post_data  Data for the post.
 	 * @param string $field_name The name of the field to add.
 	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
 	public static function rest_field_amp_validation( $post_data, $field_name ) {
-		$validation_post = self::get_validation_status_post( $post_data['link'] );
-		return isset( $validation_post ) ? json_decode( $validation_post->post_content, true ) : null;
+		$post_id           = $post_data['id'];
+		$post              = get_post( $post_id );
+		$validation_errors = self::get_existing_validation_errors( $post );
+
+		if ( ! empty( $validation_errors ) ) {
+			return $validation_errors;
+		} else {
+			self::$posts_pending_frontend_validation[] = $post_id;
+			self::validate_queued_posts_on_frontend();
+			return self::get_existing_validation_errors( $post );
+		}
 	}
 
 }
