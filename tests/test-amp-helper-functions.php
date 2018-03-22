@@ -35,7 +35,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_slug().
 	 *
-	 * @covers amp_get_slug()
+	 * @covers \amp_get_slug()
 	 */
 	public function test_amp_get_slug() {
 		$this->assertSame( 'amp', amp_get_slug() );
@@ -181,8 +181,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test script registering.
 	 *
-	 * @covers amp_register_default_scripts()
-	 * @covers amp_filter_script_loader_tag()
+	 * @covers \amp_register_default_scripts()
+	 * @covers \amp_filter_script_loader_tag()
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function test_script_registering() {
@@ -223,7 +223,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_content_embed_handlers().
 	 *
-	 * @covers amp_get_content_embed_handlers()
+	 * @covers \amp_get_content_embed_handlers()
 	 */
 	public function test_amp_get_content_embed_handlers() {
 		$post = $this->factory()->post->create_and_get();
@@ -249,7 +249,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test deprecated $post param for amp_get_content_embed_handlers().
 	 *
-	 * @covers amp_get_content_embed_handlers()
+	 * @covers \amp_get_content_embed_handlers()
 	 */
 	public function test_amp_get_content_embed_handlers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
@@ -261,7 +261,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_content_sanitizers().
 	 *
-	 * @covers amp_get_content_sanitizers()
+	 * @covers \amp_get_content_sanitizers()
 	 */
 	public function test_amp_get_content_sanitizers() {
 		$post = $this->factory()->post->create_and_get();
@@ -299,7 +299,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test deprecated $post param for amp_get_content_sanitizers().
 	 *
-	 * @covers amp_get_content_sanitizers()
+	 * @covers \amp_get_content_sanitizers()
 	 */
 	public function test_amp_get_content_sanitizers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
