@@ -83,8 +83,8 @@ var ampBlockValidation = ( function() {
 				if ( validationError.hasOwnProperty( 'sources' ) ) {
 					validationError.sources.forEach( function( source ) {
 						if ( source.hasOwnProperty( 'block_name' ) ) {
-							if ( blocksWithErrors.hasOwnProperty( 'block_attrs' ) ) {
-								validationError.blockAttrs = blocksWithErrors.block_attrs; // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+							if ( source.hasOwnProperty( 'block_attrs' ) ) {
+								validationError.blockAttrs = source.block_attrs; // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 							}
 							if ( blocksWithErrors.hasOwnProperty( source.block_name ) ) {
 								blocksWithErrors[ source.block_name ].push( validationError );
