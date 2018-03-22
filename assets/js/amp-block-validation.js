@@ -23,7 +23,7 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Boot module.
 		 *
-		 * @param {Object} data Object data.
+		 * @param {Object} data Module data.
 		 * @return {void}
 		 */
 		boot: function( data ) {
@@ -116,17 +116,16 @@ var ampBlockValidation = ( function() {
 			rawErrors = module.blocksWithErrors[ props.name ];
 
 			rawErrors.forEach( function( validationError ) {
+				var attribute;
 				if ( ! content.includes( validationError.node_name ) || ! validationError.hasOwnProperty( 'node_attributes' ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
 					return;
 				}
-				attributes = validationError.node_attributes;
-				for ( var attribute in attributes ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+				attributes = validationError.node_attributes; // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+				for ( attribute in attributes ) {
 
-					// Check that the content has both the attribute and the property.
-					if ( attributes.hasOwnProperty( attribute ) ) {
-						if ( content.includes( attribute ) && content.includes( attributes[ attribute ] ) ) {
-							validationErrors.push( validationError );
-						}
+					// Check that the content has the attribute and the property.
+					if ( attributes.hasOwnProperty( attribute ) && content.includes( attribute ) && content.includes( attributes[ attribute ] ) ) {
+						validationErrors.push( validationError );
 					}
 				}
 			} );
@@ -135,6 +134,6 @@ var ampBlockValidation = ( function() {
 		}
 
 	};
-	return module;
 
+	return module;
 } )();
