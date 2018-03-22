@@ -83,11 +83,14 @@ var ampBlockValidation = ( function() {
 				if ( validationError.hasOwnProperty( 'sources' ) ) {
 					validationError.sources.forEach( function( source ) {
 						if ( source.hasOwnProperty( 'block_name' ) ) {
-							if ( blocksWithErrors.hasOwnProperty( source.block_name ) ) {
-								blocksWithErrors[ source.block_name ].push( validationError ); // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
-							} else {
-								blocksWithErrors[ source.block_name ] = [ validationError ]; // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+							if ( blocksWithErrors.hasOwnProperty( 'block_attrs' ) ) {
+								validationError.blockAttrs = blocksWithErrors.block_attrs; // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 							}
+							if ( blocksWithErrors.hasOwnProperty( source.block_name ) ) {
+								blocksWithErrors[ source.block_name ].push( validationError );
+							} else {
+								blocksWithErrors[ source.block_name ] = [ validationError ];
+							} // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 						}
 					} );
 				}
