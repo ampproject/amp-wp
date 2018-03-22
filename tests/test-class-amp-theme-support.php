@@ -436,11 +436,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_set_comments_walker.
+	 * Test set_comments_walker.
 	 *
-	 * @covers AMP_Theme_Support::amp_set_comments_walker()
+	 * @covers AMP_Theme_Support::set_comments_walker()
 	 */
-	public function test_amp_set_comments_walker() {
+	public function test_set_comments_walker() {
 		$this->markTestIncomplete();
 	}
 
