@@ -1,8 +1,8 @@
 /**
- * AMP Gutenberg integration.
+ * Validates blocks for AMP compatibility.
  *
- * On editing a block, this checks that the content is AMP-compatible.
- * And it displays a notice if it's not.
+ * This uses the REST API response from saving a page to find validation errors.
+ * If one exists for a block, it display it inline with a Notice component.
  */
 
 /* exported ampBlockValidation */
@@ -46,10 +46,10 @@ var ampBlockValidation = ( function() {
 		 */
 		conditionallyAddNotice: function( OriginalBlockEdit ) {
 			return function( props ) {
-				var result = [ wp.element.createElement( OriginalBlockEdit, props ) ];
+				var errors = module.getBlockValidationErrors( props ),
+					result = [ wp.element.createElement( OriginalBlockEdit, props ) ];
 
-				// @todo: find if the errors apply to this specific block, not only the same type of block.
-				if ( module.blocksWithErrors.hasOwnProperty( props.name ) ) {
+				if ( errors.length > 0 ) {
 					result.push( wp.element.createElement(
 						wp.components.Notice,
 						{
@@ -68,9 +68,9 @@ var ampBlockValidation = ( function() {
 		 *
 		 * Iterates through the 'amp_validation_errors' from the REST API response.
 		 * This returns an object, with block types as the keys, and error arrays as the values.
-		 * The block's overriden edit() method can then get the errors for its block type.
+		 * The block's overridden edit() method can then get the errors for its block type.
 		 *
-		 * @returns {Object|null} The blocks with errors.
+		 * @returns {Object} The blocks with errors.
 		 */
 		getBlocksWithErrors: function() {
 			var currentPost      = wp.data.select( 'core/editor' ).getCurrentPost(),
@@ -93,6 +93,45 @@ var ampBlockValidation = ( function() {
 				}
 			} );
 			return blocksWithErrors;
+		},
+
+		/**
+		 * Gets the validation errors for a specific block if they exist.
+		 *
+		 * In module.blocksWithErrors, the errors are stored by block name.
+		 * This finds the validation errors for a specific block, based on its content.
+		 *
+		 * @todo: search more specifically, as this currently only checks for matching of the node_name and node_attributes.
+		 * @param {Object} props Properties for the block.
+		 * @return {Array} The validation error(s) for the block, or an empty array.
+		 */
+		getBlockValidationErrors: function( props ) {
+			var attributes, content, rawErrors,
+				validationErrors = [];
+
+			if ( ! props.attributes.hasOwnProperty( 'content' ) || ! module.blocksWithErrors.hasOwnProperty( props.name ) ) {
+				return validationErrors;
+			}
+			content   = props.attributes.content;
+			rawErrors = module.blocksWithErrors[ props.name ];
+
+			rawErrors.forEach( function( validationError ) {
+				if ( ! content.includes( validationError.node_name ) || ! validationError.hasOwnProperty( 'node_attributes' ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+					return;
+				}
+				attributes = validationError.node_attributes;
+				for ( var attribute in attributes ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+
+					// Check that the content has both the attribute and the property.
+					if ( attributes.hasOwnProperty( attribute ) ) {
+						if ( content.includes( attribute ) && content.includes( attributes[ attribute ] ) ) {
+							validationErrors.push( validationError );
+						}
+					}
+				}
+			} );
+
+			return validationErrors;
 		}
 
 	};
