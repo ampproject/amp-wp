@@ -109,8 +109,6 @@ class AMP_Theme_Support {
 		 * action to template_redirect--the wp action--is used instead.
 		 */
 		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
-
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -226,6 +224,7 @@ class AMP_Theme_Support {
 		add_action( 'wp_print_styles', array( __CLASS__, 'print_amp_styles' ), 0 ); // Print boilerplate before theme and plugin stylesheets.
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		if ( is_customize_preview() ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		}
@@ -250,7 +249,7 @@ class AMP_Theme_Support {
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
-		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 
 		if ( AMP_Validation_Utils::should_validate_response() ) {
@@ -364,7 +363,14 @@ class AMP_Theme_Support {
 	 * @since 0.7.0
 	 */
 	public static function handle_xhr_request() {
-		if ( empty( self::$purged_amp_query_vars['__amp_source_origin'] ) || empty( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+		$is_amp_xhr = (
+			! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] )
+			&&
+			! empty( self::$purged_amp_query_vars['__amp_source_origin'] )
+			&&
+			( ! empty( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
+		);
+		if ( ! $is_amp_xhr ) {
 			return;
 		}
 
@@ -438,7 +444,7 @@ class AMP_Theme_Support {
 		 */
 		$message = apply_filters( 'amp_comment_posted_message', $message, $comment );
 
-		// Message will be shown in template defined by AMP_Theme_Support::add_amp_comment_form_templates().
+		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
 		wp_send_json( array(
 			'message' => self::wp_kses_amp_mustache( $message ),
 		) );
@@ -478,7 +484,7 @@ class AMP_Theme_Support {
 			$error = $error->get_error_message();
 		}
 
-		// Message will be shown in template defined by AMP_Theme_Support::add_amp_comment_form_templates().
+		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
 		wp_send_json( array(
 			'error' => self::wp_kses_amp_mustache( $error ),
 		) );
@@ -637,8 +643,12 @@ class AMP_Theme_Support {
 	/**
 	 * Adds the form submit success and fail templates.
 	 */
-	public static function add_amp_comment_form_templates() {
+	public static function amend_comment_form() {
 		?>
+		<?php if ( is_singular() && ! amp_is_canonical() ) : ?>
+			<input type="hidden" name="redirect_to" value="<?php echo esc_url( amp_get_permalink( get_the_ID() ) ); ?>">
+		<?php endif; ?>
+
 		<div submit-success>
 			<template type="amp-mustache">
 				<p>{{{message}}}</p>
@@ -1146,8 +1156,8 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_assets() {
-		// Enqueue AMP runtime.
 		wp_enqueue_script( 'amp-runtime' );
+
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
 	}
