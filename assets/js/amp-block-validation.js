@@ -38,24 +38,56 @@ var ampBlockValidation = ( function() {
 		 */
 		conditionallyAddNotice: function( OriginalBlockEdit ) {
 			return function( props ) {
-				var currentPost = wp.data.select( 'core/editor' ).getCurrentPost(),
-					hasErrors   = currentPost.hasOwnProperty( module.data.errorKey ) && 0 < currentPost[ module.data.errorKey ].length,
-					result      = [ wp.element.createElement( OriginalBlockEdit, props ) ];
+				var currentPost      = wp.data.select( 'core/editor' ).getCurrentPost(),
+					blocksWithErrors = module.getBlocksWithErrors( currentPost ),
+					result           = [ wp.element.createElement( OriginalBlockEdit, props ) ];
 
-				// @todo: find if the errors apply to this block, as this simply finds if there are any errors at all.
-				// If the issue is caused by a block, the source looks to have a block_name.
-				if ( hasErrors ) {
+				// @todo: find if the errors apply to this specific block, not only the same type of block.
+				if ( blocksWithErrors.hasOwnProperty( props.name ) ) {
 					result.push( wp.element.createElement(
 						wp.components.Notice,
 						{
 							status: 'warning',
-							content: module.data.i18n.notice.replace( '%s', props.name ),
+							content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + blocksWithErrors[ props.name ][0].code,
 							isDismissible: false
 						}
 					) );
 				}
 				return result;
 			};
+		},
+
+		/**
+		 * Gets the block types with errors.
+		 *
+		 * Iterates through the 'amp_validation_errors' from the REST API response.
+		 * This returns an object, with block types as the keys, and error arrays as the values.
+		 * The block's overriden edit() method can then get the errors for its block type.
+		 *
+		 * @todo: possibly keep the result of this in a store, instead of calling it each time.
+		 * @param {Object} currentPost The current post returned from the REST API.
+		 * @returns {Object|null} The blocks with errors.
+		 */
+		getBlocksWithErrors: function( currentPost ) {
+			var blocksWithErrors = {};
+			if ( ! currentPost.hasOwnProperty( module.data.errorKey ) ) {
+				return null;
+			}
+
+			currentPost[ module.data.errorKey ].forEach( function( validationError ) {
+				if ( validationError.hasOwnProperty( 'sources' ) ) {
+					validationError.sources.forEach( function( source ) {
+						if ( source.hasOwnProperty( 'block_name' ) ) {
+							if ( blocksWithErrors.hasOwnProperty( source.block_name ) ) {
+								blocksWithErrors[ source.block_name ].push( validationError ); // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+							} else {
+								blocksWithErrors[ source.block_name ] = [ validationError ]; // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+							}
+						}
+					} );
+				}
+			} );
+			return blocksWithErrors;
 		}
 
 	};
