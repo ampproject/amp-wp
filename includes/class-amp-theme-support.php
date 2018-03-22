@@ -249,7 +249,7 @@ class AMP_Theme_Support {
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
-		add_action( 'comment_form', array( __CLASS__, 'add_amp_comment_form_templates' ), 100 );
+		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 
 		if ( AMP_Validation_Utils::should_validate_response() ) {
@@ -444,7 +444,7 @@ class AMP_Theme_Support {
 		 */
 		$message = apply_filters( 'amp_comment_posted_message', $message, $comment );
 
-		// Message will be shown in template defined by AMP_Theme_Support::add_amp_comment_form_templates().
+		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
 		wp_send_json( array(
 			'message' => self::wp_kses_amp_mustache( $message ),
 		) );
@@ -484,7 +484,7 @@ class AMP_Theme_Support {
 			$error = $error->get_error_message();
 		}
 
-		// Message will be shown in template defined by AMP_Theme_Support::add_amp_comment_form_templates().
+		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
 		wp_send_json( array(
 			'error' => self::wp_kses_amp_mustache( $error ),
 		) );
@@ -643,8 +643,12 @@ class AMP_Theme_Support {
 	/**
 	 * Adds the form submit success and fail templates.
 	 */
-	public static function add_amp_comment_form_templates() {
+	public static function amend_comment_form() {
 		?>
+		<?php if ( is_singular() && ! amp_is_canonical() ) : ?>
+			<input type="hidden" name="redirect_to" value="<?php echo esc_url( amp_get_permalink( get_the_ID() ) ); ?>">
+		<?php endif; ?>
+
 		<div submit-success>
 			<template type="amp-mustache">
 				<p>{{{message}}}</p>

@@ -95,6 +95,39 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amend_comment_form().
+	 *
+	 * @covers AMP_Theme_Support::amend_comment_form()
+	 */
+	public function test_amend_comment_form() {
+		$post_id = $this->factory()->post->create();
+		$this->go_to( get_permalink( $post_id ) );
+		$this->assertTrue( is_singular() );
+
+		// Test native AMP.
+		add_theme_support( 'amp' );
+		$this->assertTrue( amp_is_canonical() );
+		ob_start();
+		AMP_Theme_Support::amend_comment_form();
+		$output = ob_get_clean();
+		$this->assertNotContains( '<input type="hidden" name="redirect_to"', $output );
+		$this->assertContains( '<div submit-success>', $output );
+		$this->assertContains( '<div submit-error>', $output );
+
+		// Test paired AMP.
+		add_theme_support( 'amp', array(
+			'template_dir' => 'amp-templates',
+		) );
+		$this->assertFalse( amp_is_canonical() );
+		ob_start();
+		AMP_Theme_Support::amend_comment_form();
+		$output = ob_get_clean();
+		$this->assertContains( '<input type="hidden" name="redirect_to"', $output );
+		$this->assertContains( '<div submit-success>', $output );
+		$this->assertContains( '<div submit-error>', $output );
+	}
+
+	/**
 	 * Test prepare_response.
 	 *
 	 * @global WP_Widget_Factory $wp_widget_factory
