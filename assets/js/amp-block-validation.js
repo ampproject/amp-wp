@@ -16,6 +16,11 @@ var ampBlockValidation = ( function() {
 		data: {},
 
 		/**
+		 * The blocks with validation errors.
+		 */
+		blocksWithErrors: {},
+
+		/**
 		 * Boot module.
 		 *
 		 * @param {Object} data Object data.
@@ -23,6 +28,9 @@ var ampBlockValidation = ( function() {
 		 */
 		boot: function( data ) {
 			module.data = data;
+			wp.data.subscribe( function() {
+				module.blocksWithErrors = module.getBlocksWithErrors();
+			} );
 			wp.hooks.addFilter(
 				'blocks.BlockEdit',
 				'amp/add-notice',
@@ -38,17 +46,15 @@ var ampBlockValidation = ( function() {
 		 */
 		conditionallyAddNotice: function( OriginalBlockEdit ) {
 			return function( props ) {
-				var currentPost      = wp.data.select( 'core/editor' ).getCurrentPost(),
-					blocksWithErrors = module.getBlocksWithErrors( currentPost ),
-					result           = [ wp.element.createElement( OriginalBlockEdit, props ) ];
+				var result = [ wp.element.createElement( OriginalBlockEdit, props ) ];
 
 				// @todo: find if the errors apply to this specific block, not only the same type of block.
-				if ( blocksWithErrors.hasOwnProperty( props.name ) ) {
+				if ( module.blocksWithErrors.hasOwnProperty( props.name ) ) {
 					result.push( wp.element.createElement(
 						wp.components.Notice,
 						{
 							status: 'warning',
-							content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + blocksWithErrors[ props.name ][0].code,
+							content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + module.blocksWithErrors[ props.name ][0].code,
 							isDismissible: false
 						}
 					) );
@@ -64,14 +70,13 @@ var ampBlockValidation = ( function() {
 		 * This returns an object, with block types as the keys, and error arrays as the values.
 		 * The block's overriden edit() method can then get the errors for its block type.
 		 *
-		 * @todo: possibly keep the result of this in a store, instead of calling it each time.
-		 * @param {Object} currentPost The current post returned from the REST API.
 		 * @returns {Object|null} The blocks with errors.
 		 */
-		getBlocksWithErrors: function( currentPost ) {
-			var blocksWithErrors = {};
-			if ( ! currentPost.hasOwnProperty( module.data.errorKey ) ) {
-				return null;
+		getBlocksWithErrors: function() {
+			var currentPost      = wp.data.select( 'core/editor' ).getCurrentPost(),
+				blocksWithErrors = {};
+			if ( ! currentPost.hasOwnProperty( module.data.errorKey ) || ! Array.isArray( currentPost[ module.data.errorKey ] ) ) {
+				return blocksWithErrors;
 			}
 
 			currentPost[ module.data.errorKey ].forEach( function( validationError ) {
