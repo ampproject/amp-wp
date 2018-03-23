@@ -376,6 +376,9 @@ function amp_get_analytics( $analytics = array() ) {
  * @param array $analytics Analytics entries.
  */
 function amp_print_analytics( $analytics ) {
+	if ( empty( $analytics ) ) {
+		$analytics = array();
+	}
 	$analytics_entries = amp_get_analytics( $analytics );
 
 	if ( empty( $analytics_entries ) ) {
