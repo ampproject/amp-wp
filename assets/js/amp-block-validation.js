@@ -6,6 +6,7 @@
  */
 
 /* exported ampBlockValidation */
+/* global wp, _ */
 var ampBlockValidation = ( function() {
 	'use strict';
 
@@ -104,36 +105,52 @@ var ampBlockValidation = ( function() {
 		 * In module.blocksWithErrors, the errors are stored by block name.
 		 * This finds the validation errors for a specific block, based on its content.
 		 *
-		 * @todo: search more specifically, as this currently only checks for matching of the node_name and node_attributes.
+		 * @todo: keep refining how this finds if the errors match.
 		 * @param {Object} props Properties for the block.
 		 * @return {Array} The validation error(s) for the block, or an empty array.
 		 */
 		getBlockValidationErrors: function( props ) {
-			var attributes, content, rawErrors,
+			var rawErrors,
 				validationErrors = [];
 
-			if ( ! props.attributes.hasOwnProperty( 'content' ) || ! module.blocksWithErrors.hasOwnProperty( props.name ) ) {
+			if ( ! module.blocksWithErrors.hasOwnProperty( props.name ) ) {
 				return validationErrors;
 			}
-			content   = props.attributes.content;
 			rawErrors = module.blocksWithErrors[ props.name ];
 
 			rawErrors.forEach( function( validationError ) {
-				var attribute;
-				if ( ! content.includes( validationError.node_name ) || ! validationError.hasOwnProperty( 'node_attributes' ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
-					return;
-				}
-				attributes = validationError.node_attributes; // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
-				for ( attribute in attributes ) {
 
-					// Check that the content has the attribute and the property.
-					if ( attributes.hasOwnProperty( attribute ) && content.includes( attribute ) && content.includes( attributes[ attribute ] ) ) {
-						validationErrors.push( validationError );
-					}
+				// Uses _.isMatch because the props attributes can also have default attributes that blockAttrs doesn't have.
+				if ( validationError.hasOwnProperty( 'blockAttrs' ) && _.isMatch( props.attributes, validationError.blockAttrs ) ) {
+					validationErrors.push( validationError );
+				} else if ( module.doNameAndAttributesMatch( validationError, props.attributes ) ) {
+					validationErrors.push( validationError );
 				}
 			} );
 
 			return validationErrors;
+		},
+
+		/**
+		 * Whether the node_name and node_attributes in the validation error are present in the block.
+		 *
+		 * @param {Object} validationError The validation errors to check.
+		 * @param {Object} propAttributes  The block attributes, originally passed in the props object.
+		 * @returns {Boolean} Whether node_name and the node_attributes are in the block.
+		 */
+		doNameAndAttributesMatch: function( validationError, propAttributes ) {
+			var attribute, nodeAttributes;
+			if ( ! validationError.hasOwnProperty( 'node_attributes' ) || ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) { // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+				return false;
+			}
+
+			nodeAttributes = validationError.node_attributes;
+			for ( attribute in nodeAttributes ) {
+				if ( ! nodeAttributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( nodeAttributes[ attribute ] ) ) {
+					return false; // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+				}
+			}
+			return true;
 		}
 
 	};

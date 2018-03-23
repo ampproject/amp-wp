@@ -1903,7 +1903,7 @@ class AMP_Validation_Utils {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array(),
+			array( 'underscore' ),
 			AMP__VERSION,
 			true
 		);
