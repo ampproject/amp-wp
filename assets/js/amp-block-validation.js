@@ -48,25 +48,24 @@ var ampBlockValidation = ( function() {
 		conditionallyAddNotice: function( OriginalBlockEdit ) {
 			return function( props ) {
 				var errors = module.getBlockValidationErrors( props ),
-					errorCode = module.blocksWithErrors.hasOwnProperty( props.name ) ? module.blocksWithErrors[ props.name ][0].code : '',
 					result = [ wp.element.createElement( OriginalBlockEdit, props ) ];
 
 				if ( errors.length > 0 ) {
 					result.unshift(
+						wp.element.createElement(
+							wp.components.Notice,
+							{
+								status: 'warning',
+								content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + module.getErrorCodes( errors ),
+								isDismissible: false
+							}
+						),
 						wp.element.createElement(
 							wp.components.ExternalLink,
 							{
 								href: module.data.moreDetailsLink,
 								children: module.data.i18n.moreDetails,
 								className: 'notice notice-alt notice-warning'
-							}
-						),
-						wp.element.createElement(
-							wp.components.Notice,
-							{
-								status: 'warning',
-								content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + errorCode,
-								isDismissible: false
 							}
 						)
 					);
@@ -150,18 +149,43 @@ var ampBlockValidation = ( function() {
 		 * @returns {Boolean} Whether node_name and the node_attributes are in the block.
 		 */
 		doNameAndAttributesMatch: function( validationError, propAttributes ) {
-			var attribute, nodeAttributes;
-			if ( ! validationError.hasOwnProperty( 'node_attributes' ) || ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) { // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+			var attribute, attributes, attributesKey;
+			if ( ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
 				return false;
 			}
 
-			nodeAttributes = validationError.node_attributes;
-			for ( attribute in nodeAttributes ) {
-				if ( ! nodeAttributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( nodeAttributes[ attribute ] ) ) {
-					return false; // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+			if ( validationError.hasOwnProperty( 'node_attributes' ) ) {
+				attributesKey = 'node_attributes';
+			} else if ( validationError.hasOwnProperty( 'element_attributes' ) ) {
+				attributesKey = 'element_attributes';
+			} else {
+				return false;
+			}
+
+			// Ensure the content has all attributes and properties in the validationError.
+			attributes = validationError[ attributesKey ];
+			for ( attribute in attributes ) {
+				if ( ! attributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( attributes[ attribute ] ) ) {
+					return false;
 				}
 			}
 			return true;
+		},
+
+		/**
+		 * Gets the unique error codes from the block errors.
+		 *
+		 * @param {Array} errors The validation errors for a block.
+		 * @returns {String} errorCodes A comma-separated string of validation error codes.
+		 */
+		getErrorCodes: function( errors ) {
+			var allErrors = [];
+			errors.forEach( function( validationError ) {
+				if ( ! allErrors.includes( validationError.code ) ) {
+					allErrors.push( validationError.code  );
+				}
+			} );
+			return allErrors.join( ', ' );
 		}
 
 	};
