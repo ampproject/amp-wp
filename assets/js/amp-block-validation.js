@@ -51,7 +51,7 @@ var ampBlockValidation = ( function() {
 					result = [ wp.element.createElement( OriginalBlockEdit, props ) ];
 
 				if ( errors.length > 0 ) {
-					result.push( wp.element.createElement(
+					result.unshift( wp.element.createElement(
 						wp.components.Notice,
 						{
 							status: 'warning',
@@ -103,7 +103,7 @@ var ampBlockValidation = ( function() {
 		 * Gets the validation errors for a specific block if they exist.
 		 *
 		 * In module.blocksWithErrors, the errors are stored by block name.
-		 * This finds the validation errors for a specific block, based on its content.
+		 * This finds the validation errors for a specific block, based on its attributes or content.
 		 *
 		 * @todo: keep refining how this finds if the errors match.
 		 * @param {Object} props Properties for the block.
