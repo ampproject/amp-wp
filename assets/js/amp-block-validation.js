@@ -179,13 +179,25 @@ var ampBlockValidation = ( function() {
 		 * @returns {String} errorCodes A comma-separated string of validation error codes.
 		 */
 		getErrorCodes: function( errors ) {
-			var allErrors = [];
+			var errorName,
+				count,
+				allErrors = {},
+				errorsWithCounts = [],
+				minimumCount = 1;
+
 			errors.forEach( function( validationError ) {
-				if ( ! allErrors.includes( validationError.code ) ) {
-					allErrors.push( validationError.code  );
+				if ( ! allErrors.hasOwnProperty( validationError.code ) ) {
+					allErrors[ validationError.code ] = 1;
+				} else {
+					allErrors[ validationError.code ]++;
 				}
 			} );
-			return allErrors.join( ', ' );
+
+			for ( errorName in allErrors ) {
+				count = allErrors[ errorName ];
+				errorsWithCounts.push( count <= minimumCount ? errorName : errorName + ' (%s)'.replace( '%s', count ) );
+			}
+			return errorsWithCounts.join( ', ' );
 		}
 
 	};
