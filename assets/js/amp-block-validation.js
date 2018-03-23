@@ -48,17 +48,28 @@ var ampBlockValidation = ( function() {
 		conditionallyAddNotice: function( OriginalBlockEdit ) {
 			return function( props ) {
 				var errors = module.getBlockValidationErrors( props ),
+					errorCode = module.blocksWithErrors.hasOwnProperty( props.name ) ? module.blocksWithErrors[ props.name ][0].code : '',
 					result = [ wp.element.createElement( OriginalBlockEdit, props ) ];
 
 				if ( errors.length > 0 ) {
-					result.unshift( wp.element.createElement(
-						wp.components.Notice,
-						{
-							status: 'warning',
-							content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + module.blocksWithErrors[ props.name ][0].code,
-							isDismissible: false
-						}
-					) );
+					result.unshift(
+						wp.element.createElement(
+							wp.components.ExternalLink,
+							{
+								href: module.data.moreDetailsLink,
+								children: module.data.i18n.moreDetails,
+								className: 'notice notice-alt notice-warning'
+							}
+						),
+						wp.element.createElement(
+							wp.components.Notice,
+							{
+								status: 'warning',
+								content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + errorCode,
+								isDismissible: false
+							}
+						)
+					);
 				}
 				return result;
 			};

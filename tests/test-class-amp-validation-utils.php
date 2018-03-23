@@ -1413,18 +1413,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function test_enqueue_block_validation() {
 		global $post;
-		$post = $this->factory()->post->create(); // WPCS: global override ok.
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$slug = 'amp-block-validation';
+		$this->set_capability();
 		AMP_Validation_Utils::enqueue_block_validation();
 
-		$script = wp_scripts()->registered[ $slug ];
+		$script        = wp_scripts()->registered[ $slug ];
+		$inline_script = $script->extra['after'][1];
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
 		$this->assertEquals( array( 'underscore' ), $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
-		$this->assertContains( 'ampBlockValidation.boot', $script->extra['after'][1] );
-		$this->assertContains( AMP_Validation_Utils::REST_FIELD_NAME, $script->extra['after'][1] );
-		$this->assertContains( 'This %s block has invalid AMP:', $script->extra['after'][1] );
+		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
+		$this->assertContains( AMP_Validation_Utils::REST_FIELD_NAME, $inline_script );
+		$this->assertContains( 'This %s block has invalid AMP:', $inline_script );
+		$this->assertContains( 'More details', $inline_script );
 	}
 
 	/**
