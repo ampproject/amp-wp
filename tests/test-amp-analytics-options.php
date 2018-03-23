@@ -257,7 +257,34 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		amp_print_analytics( $analytics );
 		$output = ob_get_clean();
 
-		$this->assertEquals( 0, strpos( $output, '<amp-analytics' ) );
+		$this->assertStringStartsWith( '<amp-analytics', $output );
+		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+	}
+
+	/**
+	 * Test amp_print_analytics() when empty, called via wp_footer.
+	 *
+	 * Note that wp_footer action passes empty string to any handlers.
+	 * This test asserts that an issue discovered in PHP 7.1 is fixed.
+	 *
+	 * @see AMP_Theme_Support::add_hooks() Where add_action( 'wp_footer', 'amp_print_analytics' ) is done.
+	 * @covers \amp_print_analytics()
+	 */
+	public function test_amp_print_analytics_when_empty() {
+
+		ob_start();
+		amp_print_analytics( '' );
+		$this->assertEmpty( ob_get_clean() );
+
+		$this->insert_one_option(
+			$this->vendor,
+			$this->config_one
+		);
+		ob_start();
+		amp_print_analytics( '' );
+		$output = ob_get_clean();
+		$this->assertStringStartsWith( '<amp-analytics', $output );
+		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}
 
 }
