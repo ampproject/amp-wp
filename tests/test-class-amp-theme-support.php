@@ -213,6 +213,54 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test validate_non_amp_theme.
+	 *
+	 * @global WP_Widget_Factory $wp_widget_factory
+	 * @global WP_Scripts $wp_scripts
+	 * @covers AMP_Theme_Support::validate_non_amp_theme()
+	 */
+	public function test_validate_non_amp_theme() {
+		global $wp_widget_factory, $wp_scripts;
+		$wp_scripts = null;
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+		$wp_widget_factory = new WP_Widget_Factory();
+		wp_widgets_init();
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html lang="en-US" class="no-js">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width">
+				<?php wp_head(); ?>
+			</head>
+			<body>
+				<?php wp_print_scripts( 'amp-mathml' ); ?>
+			</body>
+		</html>
+		<?php
+		$original_html  = trim( ob_get_clean() );
+		$removed_nodes  = array();
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
+			'validation_error_callback' => function( $removed ) use ( &$removed_nodes ) {
+				$removed_nodes[ $removed['node']->nodeName ] = $removed['node'];
+			},
+		) );
+
+		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
+		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
+		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
+
+	}	
+
+	/**
 	 * Test prepare_response for bad/non-HTML.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
