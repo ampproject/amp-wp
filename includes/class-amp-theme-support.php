@@ -885,8 +885,6 @@ class AMP_Theme_Support {
 	 * @param DOMDocument $dom Doc.
 	 */
 	public static function ensure_required_markup( DOMDocument $dom ) {
-		$xpath = new DOMXPath( $dom );
-
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
 			$head = $dom->createElement( 'head' );
@@ -1086,16 +1084,20 @@ class AMP_Theme_Support {
 
 		$xpath = new DOMXPath( $dom );
 
-		// Make sure scripts from the body get moved to the head.
-		$scripts = array();
-		foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
-			$scripts[] = $script;
-		}
-		foreach ( $scripts as $script ) {
-			$head->appendChild( $script );
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+
+		if ( isset( $head ) ) {
+			// Make sure scripts from the body get moved to the head.
+			$scripts = array();
+			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
+				$scripts[] = $script;
+			}
+			foreach ( $scripts as $script ) {
+				$head->appendChild( $script );
+			}
 		}
 
-		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		// Ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
