@@ -48,7 +48,7 @@ var ampBlockValidation = ( function() {
 		conditionallyAddNotice: function( OriginalBlockEdit ) {
 			return function( props ) {
 				var errors = module.getBlockValidationErrors( props ),
-					result = [ wp.element.createElement( OriginalBlockEdit, props ) ];
+					result = [ wp.element.createElement( OriginalBlockEdit, _.extend( props, { key: 'amp-original-edit' } ) ) ];
 
 				if ( errors.length > 0 ) {
 					result.unshift(
@@ -57,7 +57,8 @@ var ampBlockValidation = ( function() {
 							{
 								status: 'warning',
 								content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + module.getErrorCodes( errors ),
-								isDismissible: false
+								isDismissible: false,
+								key: 'amp-validation-notice'
 							}
 						),
 						wp.element.createElement(
@@ -65,7 +66,8 @@ var ampBlockValidation = ( function() {
 							{
 								href: module.data.moreDetailsLink,
 								children: module.data.i18n.moreDetails,
-								className: 'notice notice-alt notice-warning'
+								className: 'notice notice-alt notice-warning',
+								key: 'amp-validation-details'
 							}
 						)
 					);
