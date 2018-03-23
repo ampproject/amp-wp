@@ -149,16 +149,9 @@ var ampBlockValidation = ( function() {
 		 * @returns {Boolean} Whether node_name and the node_attributes are in the block.
 		 */
 		doNameAndAttributesMatch: function( validationError, propAttributes ) {
-			var attribute, attributes, attributesKey;
-			if ( ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
-				return false;
-			}
-
-			if ( validationError.hasOwnProperty( 'node_attributes' ) ) {
-				attributesKey = 'node_attributes';
-			} else if ( validationError.hasOwnProperty( 'element_attributes' ) ) {
-				attributesKey = 'element_attributes';
-			} else {
+			var attribute, attributes,
+				attributesKey = module.getAttributesKey( validationError );
+			if ( ! attributesKey || ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
 				return false;
 			}
 
@@ -170,6 +163,22 @@ var ampBlockValidation = ( function() {
 				}
 			}
 			return true;
+		},
+
+		/**
+		 * Gets the key for the attributes in validationError.
+		 *
+		 * @param {Object} validationError The validation errors to check.
+		 * @returns {String|null} attributeKey The key used to get the attributes, or null.
+		 */
+		getAttributesKey: function( validationError ) {
+			if ( validationError.hasOwnProperty( 'node_attributes' ) ) {
+				return 'node_attributes';
+			} else if ( validationError.hasOwnProperty( 'element_attributes' ) ) {
+				return 'element_attributes';
+			} else {
+				return null;
+			}
 		},
 
 		/**
