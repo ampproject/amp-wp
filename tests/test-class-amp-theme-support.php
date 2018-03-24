@@ -441,7 +441,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::set_comments_walker()
 	 */
 	public function test_set_comments_walker() {
-		$this->markTestIncomplete();
+		$args = AMP_Theme_Support::set_comments_walker( array(
+			'walker' => null,
+		) );
+		$this->assertInstanceOf( 'AMP_Comment_Walker', $args['walker'] );
 	}
 
 	/**
