@@ -217,7 +217,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 *
 	 * @global WP_Widget_Factory $wp_widget_factory
 	 * @global WP_Scripts $wp_scripts
-	 * @covers AMP_Theme_Support::validate_non_amp_theme()
+	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
 		global $wp_widget_factory, $wp_scripts;
@@ -226,8 +226,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
-		$wp_widget_factory = new WP_Widget_Factory();
-		wp_widgets_init();
 
 		ob_start();
 		?>
@@ -245,19 +243,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<?php
 		$original_html  = trim( ob_get_clean() );
 		$removed_nodes  = array();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
-			'validation_error_callback' => function( $removed ) use ( &$removed_nodes ) {
-				$removed_nodes[ $removed['node']->nodeName ] = $removed['node'];
-			},
-		) );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
+		// Invalid viewport meta tag is not present.
+		$this->assertNotContains( '<meta name="viewport" content="width=device-width">', $sanitized_html );
+
+		// Correct viewport meta tag was added.
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
-		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
-		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<meta name="generator" content="AMP Plugin', $sanitized_html );
 
+		// MathML script was added.
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}	
 
 	/**
