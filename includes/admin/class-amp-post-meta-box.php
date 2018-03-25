@@ -167,7 +167,7 @@ class AMP_Post_Meta_Box {
 		$verify = (
 			isset( $post->ID )
 			&&
-			is_post_type_viewable( $post->post_type )
+			post_type_supports( $post->post_type, amp_get_slug() )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 			&&
