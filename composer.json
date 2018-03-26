@@ -5,6 +5,9 @@
     "type": "wordpress-plugin",
     "license": "GPL-2.0",
     "version": "1.0.0",
+    "require": {
+        "sabberworm/php-css-parser": "*"
+    },
     "require-dev": {
         "wp-coding-standards/wpcs": "^0.14.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
