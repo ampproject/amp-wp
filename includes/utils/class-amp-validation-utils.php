@@ -1912,8 +1912,9 @@ class AMP_Validation_Utils {
 		$data = wp_json_encode( array(
 			'i18n'            => array(
 				/* translators: %s: the name of the block */
-				'notice'      => __( 'This %s block has invalid AMP:', 'amp' ),
+				'notice'      => __( 'This %s block has invalid AMP', 'amp' ),
 				'moreDetails' => __( 'More details', 'amp' ),
+				'summary'     => __( 'Summary', 'amp' ),
 			),
 			'errorKey'        => self::REST_FIELD_NAME,
 			'moreDetailsLink' => $more_details_link,

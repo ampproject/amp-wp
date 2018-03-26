@@ -1428,6 +1428,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( AMP_Validation_Utils::REST_FIELD_NAME, $inline_script );
 		$this->assertContains( 'This %s block has invalid AMP:', $inline_script );
 		$this->assertContains( 'More details', $inline_script );
+		$this->assertContains( 'Summary', $inline_script );
 	}
 
 	/**

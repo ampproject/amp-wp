@@ -47,29 +47,30 @@ var ampBlockValidation = ( function() {
 		 */
 		conditionallyAddNotice: function( OriginalBlockEdit ) {
 			return function( props ) {
-				var errors = module.getBlockValidationErrors( props ),
+				var errorPanel,
+					errors = module.getBlockValidationErrors( props ),
 					result = [ wp.element.createElement( OriginalBlockEdit, _.extend( props, { key: 'amp-original-edit' } ) ) ];
 
 				if ( errors.length > 0 ) {
+					errorPanel = wp.element.createElement(
+						wp.components.PanelBody,
+						{
+							title: module.data.i18n.notice.replace( '%s', props.name ),
+							children:  module.getErrorSummary( errors ),
+							initialOpen: false
+						}
+					);
 					result.unshift(
 						wp.element.createElement(
 							wp.components.Notice,
 							{
 								status: 'warning',
-								content: module.data.i18n.notice.replace( '%s', props.name ) + ' ' + module.getErrorCodes( errors ),
+								content: errorPanel, //
 								isDismissible: false,
 								key: 'amp-validation-notice'
 							}
 						),
-						wp.element.createElement(
-							wp.components.ExternalLink,
-							{
-								href: module.data.moreDetailsLink,
-								children: module.data.i18n.moreDetails,
-								className: 'notice notice-alt notice-warning',
-								key: 'amp-validation-details'
-							}
-						)
+
 					);
 				}
 				return result;
@@ -189,7 +190,7 @@ var ampBlockValidation = ( function() {
 		 * @param {Array} errors The validation errors for a block.
 		 * @returns {String} errorCodes A comma-separated string of validation error codes.
 		 */
-		getErrorCodes: function( errors ) {
+		getErrorSummary: function( errors ) {
 			var allErrors = [];
 
 			errors.forEach( function( validationError ) {
@@ -197,7 +198,7 @@ var ampBlockValidation = ( function() {
 					allErrors.push( validationError.code );
 				}
 			} );
-			return allErrors.join( ', ' );
+			return module.data.i18n.summary + ': ' + allErrors.join( ', ' ) + '<pre>%s</pre>'.replace( '%s', JSON.stringify( errors ) );
 		}
 
 	};
