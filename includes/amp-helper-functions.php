@@ -373,9 +373,12 @@ function amp_get_analytics( $analytics = array() ) {
  *
  * @since 0.7
  *
- * @param array $analytics Analytics entries.
+ * @param array|string $analytics Analytics entries, or empty string when called via wp_footer action.
  */
 function amp_print_analytics( $analytics ) {
+	if ( '' === $analytics ) {
+		$analytics = array();
+	}
 	$analytics_entries = amp_get_analytics( $analytics );
 
 	if ( empty( $analytics_entries ) ) {

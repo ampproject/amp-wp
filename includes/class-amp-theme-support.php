@@ -1088,11 +1088,7 @@ class AMP_Theme_Support {
 
 		if ( isset( $head ) ) {
 			// Make sure scripts from the body get moved to the head.
-			$scripts = array();
 			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
-				$scripts[] = $script;
-			}
-			foreach ( $scripts as $script ) {
 				$head->appendChild( $script );
 			}
 		}

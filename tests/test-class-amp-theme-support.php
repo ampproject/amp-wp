@@ -220,7 +220,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
-		global $wp_widget_factory, $wp_scripts;
 		$wp_scripts = null;
 
 		add_theme_support( 'amp' );
@@ -242,7 +241,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		</html>
 		<?php
 		$original_html  = trim( ob_get_clean() );
-		$removed_nodes  = array();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
 		// Invalid viewport meta tag is not present.
