@@ -253,7 +253,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// MathML script was added.
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-	}	
+	}
 
 	/**
 	 * Test prepare_response for bad/non-HTML.
