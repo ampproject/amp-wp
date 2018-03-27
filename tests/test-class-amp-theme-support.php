@@ -187,7 +187,29 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::add_hooks()
 	 */
 	public function test_add_hooks() {
-		$this->markTestIncomplete();
+		AMP_Theme_Support::add_hooks();
+		$this->assertFalse( has_action( 'wp_head', 'wp_post_preview_js' ) );
+		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
+		$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
+		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+
+		$this->assertEquals( 0, has_action( 'wp_print_styles', array( self::TESTED_CLASS, 'print_amp_styles' ) ) );
+		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
+		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
+		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_assets' ) ) );
+
+		$this->assertFalse( has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'dequeue_customize_preview_scripts' ) ) );
+		$this->assertEquals( 10, has_filter( 'customize_partial_render', array( self::TESTED_CLASS, 'filter_customize_partial_render' ) ) );
+		$this->assertEquals( 10, has_action( 'wp_footer', 'amp_print_analytics' ) );
+		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
+		$this->assertEquals( 0, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
+
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_list_comments_args', array( self::TESTED_CLASS, 'amp_set_comments_walker' ) ) );
+		$this->assertEquals( 10, has_filter( 'comment_form_defaults', array( self::TESTED_CLASS, 'filter_comment_form_defaults' ) ) );
+		$this->assertEquals( 10, has_filter( 'comment_reply_link', array( self::TESTED_CLASS, 'filter_comment_reply_link' ) ) );
+		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', array( self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ) ) );
+		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
+		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 	}
 
 	/**
@@ -243,7 +265,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::send_header()
 	 */
 	public function test_send_header() {
-		$this->markTestIncomplete();
+		$name         = 'foo';
+		$value        = 'bar';
+		$args         = array(
+			'X-Example' => 'baz',
+		);
+		$default_args = array(
+			'replace'     => true,
+			'status_code' => null,
+		);
+		AMP_Theme_Support::send_header( $name, $value, $args );
+		$this->assertEquals( array_merge( compact( 'name', 'value' ), $args, $default_args ), reset( AMP_Theme_Support::$headers_sent ) );
 	}
 
 	/**
@@ -499,7 +531,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::register_content_embed_handlers()
 	 */
 	public function test_register_content_embed_handlers() {
-		$this->markTestIncomplete();
+		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
+		foreach ( $embed_handlers as $embed_handler ) {
+			$this->assertTrue( is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) );
+			$reflection = new ReflectionObject( $embed_handler );
+			$args       = $reflection->getProperty( 'args' );
+			$args->setAccessible( true );
+			$property = $args->getValue( $embed_handler );
+			$this->assertEquals( AMP_Post_Template::CONTENT_MAX_WIDTH, $property['content_max_width'] );
+		}
 	}
 
 	/**
