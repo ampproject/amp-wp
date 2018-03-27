@@ -63,6 +63,7 @@ class AMP_Content_Sanitizer {
 		$return_styles = ! empty( $args['return_styles'] );
 		unset( $args['return_styles'] );
 		foreach ( $sanitizer_classes as $sanitizer_class => $sanitizer_args ) {
+			$sanitize_class_start = microtime( true );
 			if ( ! class_exists( $sanitizer_class ) ) {
 				/* translators: %s is sanitizer class */
 				_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Sanitizer (%s) class does not exist', 'amp' ), esc_html( $sanitizer_class ) ), '0.4.1' );
@@ -90,6 +91,8 @@ class AMP_Content_Sanitizer {
 			} else {
 				$stylesheets = array_merge( $stylesheets, $sanitizer->get_stylesheets() );
 			}
+
+			AMP_Response_Headers::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
 		}
 
 		return compact( 'scripts', 'styles', 'stylesheets' );
