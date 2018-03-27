@@ -34,6 +34,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$_SERVER['QUERY_STRING'] = '';
 		unset( $_SERVER['REQUEST_URI'] );
 		unset( $_SERVER['REQUEST_METHOD'] );
+		if ( isset( $GLOBALS['wp_customize'] ) ) {
+			$GLOBALS['wp_customize']->stop_previewing_theme();
+		}
 		AMP_Theme_Support::$headers_sent = array();
 	}
 
@@ -146,7 +149,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::is_customize_preview_iframe()
 	 */
 	public function test_is_customize_preview_iframe() {
-		$this->markTestIncomplete();
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		$GLOBALS['wp_customize'] = new WP_Customize_Manager();
+		$this->assertFalse( AMP_Theme_Support::is_customize_preview_iframe() );
+		$GLOBALS['wp_customize'] = new WP_Customize_Manager( array(
+			'messenger_channel' => 'baz',
+		) );
+		$this->assertFalse( AMP_Theme_Support::is_customize_preview_iframe() );
+		$GLOBALS['wp_customize']->start_previewing_theme();
+		$this->assertTrue( AMP_Theme_Support::is_customize_preview_iframe() );
 	}
 
 	/**
@@ -155,7 +166,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::register_paired_hooks()
 	 */
 	public function test_register_paired_hooks() {
-		$this->markTestIncomplete();
+		$template_types = array(
+			'paged',
+			'index',
+			'404',
+			'archive',
+			'author',
+			'category',
+		);
+		AMP_Theme_Support::register_paired_hooks();
+		foreach ( $template_types as $template_type ) {
+			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_paired_template_hierarchy' ) ) );
+		}
+		$this->assertEquals( 100, has_filter( 'template_include', array( self::TESTED_CLASS, 'filter_paired_template_include' ) ) );
 	}
 
 	/**
