@@ -14,6 +14,13 @@
 class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 	/**
+	 * The name of the tested class.
+	 *
+	 * @var string
+	 */
+	const TESTED_CLASS = 'AMP_Theme_Support';
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 *
 	 * @global WP_Scripts $wp_scripts
@@ -37,7 +44,37 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
 	public function test_init() {
-		$this->markTestIncomplete();
+		$_REQUEST['__amp_source_origin'] = 'foo';
+		$_GET['__amp_source_origin']     = 'foo';
+		AMP_Theme_Support::init();
+		$this->assertNotEquals( 10, has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
+
+		// Ensure that purge_amp_query_vars() didn't execute.
+		$this->assertTrue( isset( $_REQUEST['__amp_source_origin'] ) ); // WPCS: CSRF ok.
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		$this->assertEquals( 10, has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', array( self::TESTED_CLASS, 'finish_init' ) ) );
+		$this->assertFalse( isset( $_REQUEST['__amp_source_origin'] ) ); // WPCS: CSRF ok.
+
+		add_theme_support( 'amp', 'invalid_argumnet_type' );
+		try {
+			AMP_Theme_Support::init();
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertEquals( 'Expected AMP theme support arg to be array.', $e->getMessage() );
+
+		add_theme_support( 'amp', array(
+			'invalid_param_key' => array(),
+		) );
+		try {
+			AMP_Theme_Support::init();
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertEquals( 'Expected AMP theme support to only have template_dir and/or available_callback.', $e->getMessage() );
 	}
 
 	/**
@@ -46,7 +83,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::redirect_canonical_amp()
 	 */
 	public function test_redirect_canonical_amp() {
-		$this->markTestIncomplete();
+		set_query_var( amp_get_slug(), 1 );
+		try {
+			AMP_Theme_Support::redirect_canonical_amp();
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		// wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertTrue( isset( $e ) );
 	}
 
 	/**
