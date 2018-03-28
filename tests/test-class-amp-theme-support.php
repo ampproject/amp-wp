@@ -666,7 +666,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_comment_form_state_id()
 	 */
 	public function test_get_comment_form_state_id() {
-		$this->markTestIncomplete();
+		$post_id = 54;
+		$this->assertEquals( 'commentform_post_' . $post_id, AMP_Theme_Support::get_comment_form_state_id( $post_id ) );
+		$post_id = 91542;
+		$this->assertEquals( 'commentform_post_' . $post_id, AMP_Theme_Support::get_comment_form_state_id( $post_id ) );
 	}
 
 	/**
@@ -675,7 +678,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_comment_form_defaults()
 	 */
 	public function test_filter_comment_form_defaults() {
-		$this->markTestIncomplete();
+		global $post;
+		$post           = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$title_reply_to = 'Reply To';
+		$title_reply    = 'Reply';
+		$defaults       = AMP_Theme_Support::filter_comment_form_defaults( array(
+			'title_reply_to'      => $title_reply_to,
+			'title_reply'         => $title_reply,
+			'cancel_reply_before' => '',
+			'title_reply_before'  => '',
+		) );
+		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $defaults['title_reply_before'] );
+		$this->assertContains( 'replyToName ?', $defaults['title_reply_before'] );
+		$this->assertContains( '</span>', $defaults['cancel_reply_before'] );
 	}
 
 	/**
