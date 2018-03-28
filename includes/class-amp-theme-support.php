@@ -997,7 +997,7 @@ class AMP_Theme_Support {
 		 * Sites with New Relic will need to specially configure New Relic for AMP:
 		 * https://docs.newrelic.com/docs/browser/new-relic-browser/installation/monitor-amp-pages-new-relic-browser
 		 */
-		if ( extension_loaded( 'newrelic' ) ) {
+		if ( function_exists( 'newrelic_disable_autorum' ) ) {
 			newrelic_disable_autorum();
 		}
 
