@@ -588,15 +588,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_amp_comment_form_templates.
-	 *
-	 * @covers AMP_Theme_Support::add_amp_comment_form_templates()
-	 */
-	public function test_add_amp_comment_form_templates() {
-		$this->markTestIncomplete();
-	}
-
-	/**
 	 * Test filter_paired_template_hierarchy.
 	 *
 	 * @covers AMP_Theme_Support::filter_paired_template_hierarchy()
