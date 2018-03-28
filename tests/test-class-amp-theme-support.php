@@ -602,7 +602,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_paired_template_hierarchy()
 	 */
 	public function test_filter_paired_template_hierarchy() {
-		$this->markTestIncomplete();
+		$template_dir = 'amp-templates';
+		add_theme_support( 'amp', array(
+			'template_dir' => $template_dir,
+		) );
+		$templates          = array(
+			'single-post-example.php',
+			'single-post.php',
+			'single.php',
+		);
+		$filtered_templates = AMP_Theme_Support::filter_paired_template_hierarchy( $templates );
+		foreach ( $filtered_templates as $key => $filtered_template ) {
+			$this->assertEquals( $template_dir . '/' . $templates[ $key ], $filtered_template );
+		}
 	}
 
 	/**
@@ -611,7 +623,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_paired_template_include()
 	 */
 	public function test_filter_paired_template_include() {
-		$this->markTestIncomplete();
+		$template_dir = 'amp-templates';
+		$template     = 'single.php';
+		add_theme_support( 'amp', array(
+			'template_dir' => $template_dir,
+		) );
+		$this->assertEquals( $template, AMP_Theme_Support::filter_paired_template_include( $template ) );
+		remove_theme_support( 'amp' );
+		try {
+			AMP_Theme_Support::filter_paired_template_include( $template );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertTrue( isset( $e ) );
 	}
 
 	/**
@@ -620,7 +644,20 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_current_canonical_url()
 	 */
 	public function test_get_current_canonical_url() {
-		$this->markTestIncomplete();
+		global $post, $wp;
+		$home_url = home_url( '/' );
+		$this->assertEquals( $home_url, AMP_Theme_Support::get_current_canonical_url() );
+
+		$added_query_vars = array(
+			'foo' => 'bar',
+		);
+		$wp->query_vars   = $added_query_vars;
+		$this->assertEquals( add_query_arg( $added_query_vars, $home_url ), AMP_Theme_Support::get_current_canonical_url() );
+
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$this->go_to( get_permalink( $post ) );
+		$this->assertEquals( wp_get_canonical_url(), AMP_Theme_Support::get_current_canonical_url() );
+
 	}
 
 	/**
