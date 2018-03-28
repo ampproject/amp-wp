@@ -802,7 +802,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::start_output_buffering()
 	 */
 	public function test_start_output_buffering() {
-		$this->markTestIncomplete();
+		$ob_level = ob_get_level();
+		AMP_Theme_Support::start_output_buffering();
+		$this->assertTrue( ob_get_level() > $ob_level );
+		// End output buffer.
+		if ( ob_get_level() > $ob_level ) {
+			ob_get_clean();
+		}
+		$this->assertNotEquals( 10, has_action( 'shutdown', array( self::TESTED_CLASS, 'finish_output_buffering' ) ) );
 	}
 
 	/**
@@ -811,7 +818,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
-		$this->markTestIncomplete();
+		// start first layer buffer.
+		ob_start();
+		AMP_Theme_Support::start_output_buffering();
+		echo '<test-text>';
+		AMP_Theme_Support::finish_output_buffering();
+		// get first layer buffer.
+		$output = ob_get_clean();
+
+		$this->assertContains( '<test-text></test-text>', $output );
 	}
 
 	/**
