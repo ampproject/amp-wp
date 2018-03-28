@@ -218,7 +218,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::purge_amp_query_vars()
 	 */
 	public function test_purge_amp_query_vars() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification
 		$bad_query_vars = array(
 			'amp_latest_update_time' => '1517199956',
 			'__amp_source_origin'    => home_url(),
@@ -232,10 +232,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		remove_action( 'wp', 'amp_maybe_add_actions' );
 		$this->go_to( add_query_arg( $all_query_vars, home_url( '/foo/' ) ) );
-		$_REQUEST = $_GET; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		$_REQUEST = $_GET;
 		foreach ( $all_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_GET );
+			$this->assertArrayHasKey( $key, $_REQUEST );
 			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
@@ -245,18 +245,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEqualSets( AMP_Theme_Support::$purged_amp_query_vars, $bad_query_vars );
 
 		foreach ( $bad_query_vars as $key => $value ) {
-			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertArrayNotHasKey( $key, $_GET );
+			$this->assertArrayNotHasKey( $key, $_REQUEST );
 			$this->assertNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		foreach ( $ok_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_GET );
+			$this->assertArrayHasKey( $key, $_REQUEST );
 			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:enable WordPress.CSRF.NonceVerification.NoNonceVerification
 	}
 
 	/**
