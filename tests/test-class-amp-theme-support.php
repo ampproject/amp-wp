@@ -670,12 +670,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_filter_comment_form_defaults() {
 		global $post;
-		$post           = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		$title_reply_to = 'Reply To';
-		$title_reply    = 'Reply';
-		$defaults       = AMP_Theme_Support::filter_comment_form_defaults( array(
-			'title_reply_to'      => $title_reply_to,
-			'title_reply'         => $title_reply,
+		$post     = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$defaults = AMP_Theme_Support::filter_comment_form_defaults( array(
+			'title_reply_to'      => 'Reply To',
+			'title_reply'         => 'Reply',
 			'cancel_reply_before' => '',
 			'title_reply_before'  => '',
 		) );
