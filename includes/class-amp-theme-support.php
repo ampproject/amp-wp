@@ -885,13 +885,6 @@ class AMP_Theme_Support {
 	 * @param DOMDocument $dom Doc.
 	 */
 	public static function ensure_required_markup( DOMDocument $dom ) {
-		$xpath = new DOMXPath( $dom );
-
-		// First ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
-		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
-			$dom->documentElement->setAttribute( 'amp', '' );
-		}
-
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
 			$head = $dom->createElement( 'head' );
@@ -952,15 +945,6 @@ class AMP_Theme_Support {
 				'href' => self::get_current_canonical_url(),
 			) );
 			$head->appendChild( $rel_canonical );
-		}
-
-		// Make sure scripts from the body get moved to the head.
-		$scripts = array();
-		foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
-			$scripts[] = $script;
-		}
-		foreach ( $scripts as $script ) {
-			$head->appendChild( $script );
 		}
 	}
 
@@ -1098,9 +1082,25 @@ class AMP_Theme_Support {
 		}
 		$dom = AMP_DOM_Utils::get_dom( $response );
 
-		self::ensure_required_markup( $dom );
+		$xpath = new DOMXPath( $dom );
+
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+
+		if ( isset( $head ) ) {
+			// Make sure scripts from the body get moved to the head.
+			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
+				$head->appendChild( $script );
+			}
+		}
+
+		// Ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
+			$dom->documentElement->setAttribute( 'amp', '' );
+		}
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		self::ensure_required_markup( $dom );
 
 		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
