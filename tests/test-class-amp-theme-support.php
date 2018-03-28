@@ -818,15 +818,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
 		// start first layer buffer.
 		ob_start();
 		AMP_Theme_Support::start_output_buffering();
-		echo '<test-text>';
+		echo '<img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
 		AMP_Theme_Support::finish_output_buffering();
 		// get first layer buffer.
 		$output = ob_get_clean();
 
-		$this->assertContains( '<test-text></test-text>', $output );
+		$this->assertContains( '<html amp', $output );
+		$this->assertContains( '<amp-img src="test.png"', $output );
+		$this->assertNotContains( '<script data-test', $output );
+
 	}
 
 	/**
@@ -835,7 +843,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_customize_partial_render()
 	 */
 	public function test_filter_customize_partial_render() {
-		$this->markTestIncomplete();
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
+		$partial = '<img src="test.png"><script data-head>document.write(\'Illegal\');</script>';
+		$output  = AMP_Theme_Support::filter_customize_partial_render( $partial );
+		$this->assertContains( '<amp-img src="test.png"', $output );
+		$this->assertNotContains( '<script', $output );
+		$this->assertNotContains( '<html', $output );
+
 	}
 
 	/**
