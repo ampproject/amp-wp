@@ -198,7 +198,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
 		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_assets' ) ) );
 
-		$this->assertFalse( has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'dequeue_customize_preview_scripts' ) ) );
+		$this->assertEquals( 1000, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'dequeue_customize_preview_scripts' ) ) );
 		$this->assertEquals( 10, has_filter( 'customize_partial_render', array( self::TESTED_CLASS, 'filter_customize_partial_render' ) ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', 'amp_print_analytics' ) );
 		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
@@ -699,7 +699,28 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_comment_reply_link()
 	 */
 	public function test_filter_comment_reply_link() {
-		$this->markTestIncomplete();
+		global $post;
+		$post          = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$comment       = $this->factory()->comment->create_and_get();
+		$link          = get_comment_link( $comment );
+		$respond_id    = '5234';
+		$reply_text    = 'Reply';
+		$reply_to_text = 'Reply to';
+		$args          = compact( 'respond_id', 'reply_text', 'reply_to_text' );
+		$comment       = $this->factory()->comment->create_and_get();
+		update_option( 'comment_registration', true );
+		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
+		$this->assertEquals( $link, $filtered_link );
+		update_option( 'comment_registration', false );
+
+		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
+		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $filtered_link );
+		$this->assertContains( $comment->comment_author, $filtered_link );
+		$this->assertContains( $comment->comment_ID, $filtered_link );
+		$this->assertContains( 'tap:AMP.setState', $filtered_link );
+		$this->assertContains( $reply_text, $filtered_link );
+		$this->assertContains( $reply_to_text, $filtered_link );
+		$this->assertContains( $respond_id, $filtered_link );
 	}
 
 	/**
@@ -708,7 +729,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_cancel_comment_reply_link()
 	 */
 	public function test_filter_cancel_comment_reply_link() {
-		$this->markTestIncomplete();
+		global $post;
+		$post                   = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$url                    = get_permalink( $post );
+		$_SERVER['REQUEST_URI'] = $url;
+		$this->factory()->comment->create_and_get();
+		$formatted_link = get_cancel_comment_reply_link();
+		$link           = remove_query_arg( 'replytocom' );
+		$text           = 'Cancel your reply';
+		$filtered_link  = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, $text );
+		$this->assertContains( $url, $filtered_link );
+		$this->assertContains( $text, $filtered_link );
+		$this->assertContains( '<a id="cancel-comment-reply-link"', $filtered_link );
+		$this->assertContains( '.values.comment_parent ==', $filtered_link );
+		$this->assertContains( 'tap:AMP.setState(', $filtered_link );
+
+		$filtered_link_no_text_passed = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, '' );
+		$this->assertContains( 'Click here to cancel reply.', $filtered_link_no_text_passed );
 	}
 
 	/**
@@ -717,7 +754,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::print_amp_styles()
 	 */
 	public function test_print_amp_styles() {
-		$this->markTestIncomplete();
+		ob_start();
+		AMP_Theme_Support::print_amp_styles();
+		$output = ob_get_clean();
+		$this->assertContains( amp_get_boilerplate_code(), $output );
+		$this->assertContains( '<style amp-custom></style>', $output );
 	}
 
 	/**
@@ -742,7 +783,26 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::dequeue_customize_preview_scripts()
 	 */
 	public function test_dequeue_customize_preview_scripts() {
-		$this->markTestIncomplete();
+		// Ensure AMP_Theme_Support::is_customize_preview_iframe() is true.
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		$GLOBALS['wp_customize'] = new WP_Customize_Manager( array(
+			'messenger_channel' => 'baz',
+		) );
+		$GLOBALS['wp_customize']->start_previewing_theme();
+		$customize_preview = 'customize-preview';
+		$preview_style     = 'example-preview-style';
+		wp_enqueue_style( $preview_style, home_url( '/' ), array( $customize_preview ) );
+		AMP_Theme_Support::dequeue_customize_preview_scripts();
+		$this->assertTrue( wp_style_is( $preview_style ) );
+		$this->assertTrue( wp_style_is( $customize_preview ) );
+
+		wp_enqueue_style( $preview_style, home_url( '/' ), array( $customize_preview ) );
+		wp_enqueue_style( $customize_preview );
+		// Ensure AMP_Theme_Support::is_customize_preview_iframe() is false.
+		$GLOBALS['wp_customize'] = new WP_Customize_Manager();
+		AMP_Theme_Support::dequeue_customize_preview_scripts();
+		$this->assertFalse( wp_style_is( $preview_style ) );
+		$this->assertFalse( wp_style_is( $customize_preview ) );
 	}
 
 	/**
