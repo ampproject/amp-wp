@@ -405,7 +405,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_intercept_post_request_redirect() {
 
 		add_theme_support( 'amp' );
-		$url = home_url( '/', 'https' );
+		$url = home_url( '', 'https' ) . ':443/?test=true#test';
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter( 'wp_die_ajax_handler', function () {
