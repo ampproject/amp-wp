@@ -220,8 +220,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
-		$wp_scripts = null;
-
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
