@@ -802,14 +802,20 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::start_output_buffering()
 	 */
 	public function test_start_output_buffering() {
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
 		$ob_level = ob_get_level();
 		AMP_Theme_Support::start_output_buffering();
+
+		$this->assertEquals( 0, has_action( 'shutdown', array( self::TESTED_CLASS, 'finish_output_buffering' ) ) );
 		$this->assertTrue( ob_get_level() > $ob_level );
 		// End output buffer.
 		if ( ob_get_level() > $ob_level ) {
 			ob_get_clean();
 		}
-		$this->assertNotEquals( 10, has_action( 'shutdown', array( self::TESTED_CLASS, 'finish_output_buffering' ) ) );
 	}
 
 	/**
