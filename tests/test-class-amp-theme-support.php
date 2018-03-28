@@ -803,6 +803,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_start_output_buffering() {
 
+		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
+			/**
+			 * Define newrelic_disable_autorum to allow passing line.
+			 */
+			function newrelic_disable_autorum() {
+				return true;
+			}
+		}
+
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
