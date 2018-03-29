@@ -48,7 +48,7 @@ function amp_admin_get_preview_permalink() {
 	 */
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
-	if ( ! post_type_supports( $post_type, AMP_QUERY_VAR ) ) {
+	if ( ! post_type_supports( $post_type, amp_get_slug() ) ) {
 		return null;
 	}
 
