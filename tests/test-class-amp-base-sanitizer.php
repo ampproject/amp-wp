@@ -28,7 +28,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'width'  => 100,
 					'height' => 100,
-					'layout' => 'responsive',
+					'layout' => 'intrinsic',
 				),
 			),
 
@@ -79,14 +79,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'width'  => 100,
 					'height' => 100,
-					'layout' => 'responsive',
+					'layout' => 'intrinsic',
 				),
 			),
 		);
 	}
 
 	/**
-	 * Test AMP_Base_Sanitizer::enforce_fixed_height().
+	 * Test AMP_Base_Sanitizer::set_layout().
 	 *
 	 * @dataProvider get_data
 	 * @param array $source_attributes   Source Attrs.
