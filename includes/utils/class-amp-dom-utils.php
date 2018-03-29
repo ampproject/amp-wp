@@ -231,14 +231,23 @@ class AMP_DOM_Utils {
 			return '<' . $tag_matches['name'] . $new_attrs . '>';
 		};
 
-		$html = preg_replace_callback(
+		$converted = preg_replace_callback(
 			// Match all start tags that probably contain a binding attribute.
-			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s+[^>]+\]=[^>]+)\s*>#',
+			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
 			$replace_callback,
 			$html
 		);
 
-		return $html;
+		/**
+		 * If the regex engine incurred an error during processing, for example exceeding the backtrack
+		 * limit, $converted will be null. In this case we return the originally passed document to allow
+		 * DOMDocument to attempt to load it.  If the AMP HTML doesn't make use of amp-bind or similar
+		 * attributes, then everything should still work.
+		 *
+		 * See https://github.com/Automattic/amp-wp/issues/993 for additional context on this issue.
+		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
+		 */
+		return ( ! is_null( $converted ) ) ? $converted : $html;
 	}
 
 	/**

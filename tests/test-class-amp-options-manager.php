@@ -171,7 +171,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_settings_errors() );
 
 		// Activation error.
-		remove_post_type_support( 'foo', AMP_QUERY_VAR );
+		remove_post_type_support( 'foo', amp_get_slug() );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$errors = get_settings_errors();
 		$this->assertCount( 1, $errors );
@@ -181,7 +181,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Deactivation error.
 		AMP_Options_Manager::update_option( 'supported_post_types', array() );
-		add_post_type_support( 'foo', AMP_QUERY_VAR );
+		add_post_type_support( 'foo', amp_get_slug() );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$errors = get_settings_errors();
 		$this->assertCount( 1, $errors );

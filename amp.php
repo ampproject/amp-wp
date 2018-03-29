@@ -55,7 +55,7 @@ function amp_deactivate() {
 	// We need to manually remove the amp endpoint
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
-		if ( AMP_QUERY_VAR === $endpoint[1] ) {
+		if ( amp_get_slug() === $endpoint[1] ) {
 			unset( $wp_rewrite->endpoints[ $index ] );
 			break;
 		}
@@ -63,6 +63,15 @@ function amp_deactivate() {
 
 	flush_rewrite_rules();
 }
+
+/*
+ * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
+ * for the sake of being able to use AMP components on non-AMP documents ("dirty AMP").
+ */
+add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
+
+// Ensure async and custom-element/custom-template attributes are present on script tags.
+add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
 
 /**
  * Set up AMP.
@@ -73,18 +82,10 @@ function amp_deactivate() {
  * @since 0.6
  */
 function amp_after_setup_theme() {
+	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
+
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
-	}
-
-	if ( ! defined( 'AMP_QUERY_VAR' ) ) {
-		/**
-		 * Filter the AMP query variable.
-		 *
-		 * @since 0.3.2
-		 * @param string $query_var The AMP query variable.
-		 */
-		define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
 	}
 
 	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
@@ -107,11 +108,11 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
-	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
+	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
+	AMP_Validation_Utils::init();
 	AMP_Theme_Support::init();
 	AMP_Post_Type_Support::add_post_type_support();
-	AMP_Validation_Utils::init();
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
@@ -132,8 +133,8 @@ function amp_init() {
 // Make sure the `amp` query var has an explicit value.
 // Avoids issues when filtering the deprecated `query_string` hook.
 function amp_force_query_var_value( $query_vars ) {
-	if ( isset( $query_vars[ AMP_QUERY_VAR ] ) && '' === $query_vars[ AMP_QUERY_VAR ] ) {
-		$query_vars[ AMP_QUERY_VAR ] = 1;
+	if ( isset( $query_vars[ amp_get_slug() ] ) && '' === $query_vars[ amp_get_slug() ] ) {
+		$query_vars[ amp_get_slug() ] = 1;
 	}
 	return $query_vars;
 }
@@ -202,7 +203,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 		$query->is_home()
 		&&
 		// Is AMP endpoint.
-		false !== $query->get( AMP_QUERY_VAR, false )
+		false !== $query->get( amp_get_slug(), false )
 		&&
 		// Is query not yet fixed uo up to be front page.
 		! $query->is_front_page()
@@ -214,7 +215,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 		get_option( 'page_on_front' )
 		&&
 		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
-		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), array( AMP_QUERY_VAR, 'preview', 'page', 'paged', 'cpage' ) ) )
+		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), array( amp_get_slug(), 'preview', 'page', 'paged', 'cpage' ) ) )
 	);
 	if ( $is_front_page_query ) {
 		$query->is_home     = false;
@@ -304,9 +305,9 @@ function amp_render_post( $post ) {
 	 * which is not ideal for any code that expects to run in an AMP context.
 	 * Let's force the value to be true while we render AMP.
 	 */
-	$was_set = isset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+	$was_set = isset( $wp_query->query_vars[ amp_get_slug() ] );
 	if ( ! $was_set ) {
-		$wp_query->query_vars[ AMP_QUERY_VAR ] = true;
+		$wp_query->query_vars[ amp_get_slug() ] = true;
 	}
 
 	// Prevent New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset.
@@ -328,7 +329,7 @@ function amp_render_post( $post ) {
 	$template->load();
 
 	if ( ! $was_set ) {
-		unset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+		unset( $wp_query->query_vars[ amp_get_slug() ] );
 	}
 }
 
@@ -359,7 +360,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() ) {
-		$link = trailingslashit( trailingslashit( $link ) . AMP_QUERY_VAR );
+		$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
 	}
 
 	return $link;

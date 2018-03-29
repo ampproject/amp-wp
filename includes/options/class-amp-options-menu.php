@@ -22,7 +22,7 @@ class AMP_Options_Menu {
 	 */
 	public function init() {
 		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
-		add_action( 'admin_menu', array( $this, 'add_menu_items' ) );
+		add_action( 'admin_menu', array( $this, 'add_menu_items' ), 9 );
 	}
 
 	/**
@@ -94,7 +94,7 @@ class AMP_Options_Menu {
 					id="<?php echo esc_attr( $element_id ); ?>"
 					name="<?php echo esc_attr( $element_name ); ?>"
 					value="<?php echo esc_attr( $post_type->name ); ?>"
-					<?php checked( true, amp_is_canonical() || post_type_supports( $post_type->name, AMP_QUERY_VAR ) ); ?>
+					<?php checked( true, amp_is_canonical() || post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
 					<?php disabled( $is_builtin ); ?>
 					>
 				<label for="<?php echo esc_attr( $element_id ); ?>">

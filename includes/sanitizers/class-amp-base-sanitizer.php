@@ -54,6 +54,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_bind_placeholder_prefix
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
+	 *      @type bool $disable_invalid_removal
 	 *      @type callable $remove_invalid_callback
 	 * }
 	 */
@@ -288,17 +289,19 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMNode|DOMElement $child The node to remove.
+	 * @param DOMNode|DOMElement $node The node to remove.
+	 * @param array              $args Additional args to pass to validation error callback.
+	 *
 	 * @return void
 	 */
-	public function remove_invalid_child( $child ) {
-		$parent = $child->parentNode;
-		$child->parentNode->removeChild( $child );
-		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], array(
-				'node'   => $child,
-				'parent' => $parent,
-			) );
+	public function remove_invalid_child( $node, $args = array() ) {
+		if ( isset( $this->args['validation_error_callback'] ) ) {
+			call_user_func( $this->args['validation_error_callback'],
+				array_merge( compact( 'node' ), $args )
+			);
+		}
+		if ( empty( $this->args['disable_invalid_removal'] ) ) {
+			$node->parentNode->removeChild( $node );
 		}
 	}
 
@@ -312,25 +315,33 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement     $element   The node for which to remove the attribute.
 	 * @param DOMAttr|string $attribute The attribute to remove from the element.
+	 * @param array          $args      Additional args to pass to validation error callback.
 	 * @return void
 	 */
-	public function remove_invalid_attribute( $element, $attribute ) {
-		if ( isset( $this->args['remove_invalid_callback'] ) ) {
+	public function remove_invalid_attribute( $element, $attribute, $args = array() ) {
+		if ( isset( $this->args['validation_error_callback'] ) ) {
 			if ( is_string( $attribute ) ) {
 				$attribute = $element->getAttributeNode( $attribute );
 			}
 			if ( $attribute ) {
-				$element->removeAttributeNode( $attribute );
-				call_user_func( $this->args['remove_invalid_callback'], array(
-					'node'   => $attribute,
-					'parent' => $element,
-				) );
+				call_user_func( $this->args['validation_error_callback'],
+					array_merge(
+						array(
+							'node' => $attribute,
+						),
+						$args
+					)
+				);
+				if ( empty( $this->args['disable_invalid_removal'] ) ) {
+					$element->removeAttributeNode( $attribute );
+				}
 			}
-		} elseif ( is_string( $attribute ) ) {
-			$element->removeAttribute( $attribute );
-		} else {
-			$element->removeAttributeNode( $attribute );
+		} elseif ( empty( $this->args['disable_invalid_removal'] ) ) {
+			if ( is_string( $attribute ) ) {
+				$element->removeAttribute( $attribute );
+			} else {
+				$element->removeAttributeNode( $attribute );
+			}
 		}
 	}
-
 }
