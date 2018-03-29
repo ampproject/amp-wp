@@ -42,6 +42,14 @@ To run it:
 3. run `wp eval-file bin/create-comments-on-test-post.php`
 4. go to the URL that is output in the command line
 
+## Testing Gutenberg Block Support
+
+The following script creates a post with all core Gutenberg blocks. To run it:
+1. `ssh` into an environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV)
+2. `cd` to the root of this plugin
+3. run `bash bin/create-gutenberge-test-post.sh`
+4. go to the URL that is output in the command line
+
 ## PHPUnit Testing
 
 Please run these tests in an environment with WordPress unit tests installed, like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
