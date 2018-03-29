@@ -243,7 +243,7 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		// Commenting hooks.
-		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );

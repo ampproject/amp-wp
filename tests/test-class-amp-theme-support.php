@@ -204,7 +204,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
 		$this->assertEquals( 0, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
 
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_list_comments_args', array( self::TESTED_CLASS, 'amp_set_comments_walker' ) ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_list_comments_args', array( self::TESTED_CLASS, 'set_comments_walker' ) ) );
 		$this->assertEquals( 10, has_filter( 'comment_form_defaults', array( self::TESTED_CLASS, 'filter_comment_form_defaults' ) ) );
 		$this->assertEquals( 10, has_filter( 'comment_reply_link', array( self::TESTED_CLASS, 'filter_comment_reply_link' ) ) );
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', array( self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ) ) );
@@ -800,7 +800,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::start_output_buffering()
 	 */
 	public function test_start_output_buffering() {
-
 		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
 			/**
 			 * Define newrelic_disable_autorum to allow passing line.
@@ -831,7 +830,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
-
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
@@ -856,7 +854,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_customize_partial_render()
 	 */
 	public function test_filter_customize_partial_render() {
-
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
