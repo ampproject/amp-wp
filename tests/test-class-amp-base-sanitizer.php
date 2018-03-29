@@ -95,7 +95,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::enforce_fixed_height()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument, $args );
+		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
 		$returned_attributes = $sanitizer->set_layout( $source_attributes );
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
