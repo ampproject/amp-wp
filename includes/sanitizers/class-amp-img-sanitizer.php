@@ -208,6 +208,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 		$new_attributes = $this->filter_attributes( $old_attributes );
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
+			$new_attributes['layout'] = 'intrinsic';
+		}
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 
