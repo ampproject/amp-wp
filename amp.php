@@ -21,12 +21,29 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-			<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
-		</div>
+		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+	</div>
 	<?php
 }
 if ( version_compare( phpversion(), '5.3', '<' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
+	return;
+}
+
+/**
+ * Print admin notice when composer install has not been performed.
+ *
+ * @since 1.0
+ */
+function _amp_print_composer_install_admin_notice() {
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install` to finish installation.', 'amp' ); ?></p>
+	</div>
+	<?php
+}
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) ) {
+	add_action( 'admin_notices', '_amp_print_composer_install_admin_notice' );
 	return;
 }
 
