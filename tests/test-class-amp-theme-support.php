@@ -182,6 +182,45 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test validate_non_amp_theme.
+	 *
+	 * @global WP_Widget_Factory $wp_widget_factory
+	 * @global WP_Scripts $wp_scripts
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_validate_non_amp_theme() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html lang="en-US" class="no-js">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width">
+				<?php wp_head(); ?>
+			</head>
+			<body>
+				<?php wp_print_scripts( 'amp-mathml' ); ?>
+			</body>
+		</html>
+		<?php
+		$original_html  = trim( ob_get_clean() );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+
+		// Invalid viewport meta tag is not present.
+		$this->assertNotContains( '<meta name="viewport" content="width=device-width">', $sanitized_html );
+
+		// Correct viewport meta tag was added.
+		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
+
+		// MathML script was added.
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+	}
+
+	/**
 	 * Test add_hooks.
 	 *
 	 * @covers AMP_Theme_Support::add_hooks()
