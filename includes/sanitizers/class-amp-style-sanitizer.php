@@ -65,6 +65,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $amp_custom_style_element;
 
 	/**
+	 * The found style[amp-keyframe] elements.
+	 *
+	 * @since 1.0
+	 * @var DOMElement[]
+	 */
+	private $amp_keyframes_style_elements = array();
+
+	/**
 	 * Regex for allowed font stylesheet URL.
 	 *
 	 * @var string
@@ -219,6 +227,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $elements as $element ) {
 			$this->collect_inline_styles( $element );
 		}
+
+		$this->finalize_amp_keyframes_styles();
+
 		$this->did_convert_elements = true;
 
 		// Now make sure the amp-custom style is in the DOM and populated, if we're working with the document element.
@@ -555,29 +566,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 * @link https://github.com/ampproject/amphtml/blob/b685a0780a7f59313666225478b2b79b463bcd0b/validator/validator-main.protoascii#L1002-L1043
+	 * @todo Limit @keyframes to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
+	 * @todo Use CSS parser to process.
 	 *
 	 * @param DOMElement $style Style element.
 	 * @return true|WP_Error Validity.
 	 */
 	private function validate_amp_keyframe( $style ) {
-		if ( 'body' !== $style->parentNode->nodeName ) {
-			return new WP_Error( 'mandatory_body_child', __( 'amp-keyframes is not child of body element.', 'amp' ) );
-		}
-
+		// @todo Check size of previous $this->amp_keyframes_style_elements to determine if this one is too big, since they get combined later..
 		if ( $this->keyframes_max_size && strlen( $style->textContent ) > $this->keyframes_max_size ) {
 			return new WP_Error( 'max_bytes', __( 'amp-keyframes is too large', 'amp' ) );
 		}
 
-		// This logic could be in AMP_Tag_And_Attribute_Sanitizer, but since it only applies to amp-keyframes it seems unnecessary.
-		$next_sibling = $style->nextSibling;
-		while ( $next_sibling ) {
-			if ( $next_sibling instanceof DOMElement ) {
-				return new WP_Error( 'mandatory_last_child', __( 'amp-keyframes is not last element in body.', 'amp' ) );
-			}
-			$next_sibling = $next_sibling->nextSibling;
-		}
-
 		// @todo Also add validation of the CSS spec itself.
+		// @todo Minification needed.
+		// @todo Just capture the keyframes stylesheet and then amend a new style[amp-keyframes] at the end of the doc.
+		$this->amp_keyframes_style_elements[] = $style;
+
 		return true;
 	}
 
@@ -630,6 +635,38 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$element->setAttribute( 'class', $element->getAttribute( 'class' ) . ' ' . $class );
 		} else {
 			$element->setAttribute( 'class', $class );
+		}
+	}
+
+	/**
+	 * Finalize style[amp-keyframes] elements.
+	 *
+	 * Combine all amp-keyframe elements and enforece that it is at the end of the body.
+	 *
+	 * @since 1.0
+	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
+	 */
+	private function finalize_amp_keyframes_styles() {
+		if ( empty( $this->amp_keyframes_style_elements ) ) {
+			return;
+		}
+		$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $body ) {
+			foreach ( $this->amp_keyframes_style_elements as $other_amp_keyframe_style ) {
+				$this->remove_invalid_child( $other_amp_keyframe_style, array(
+					'code'    => 'missing_body_element',
+					'message' => __( 'amp-keyframes must be last child of body element.', 'amp' ),
+				) );
+			}
+		} else {
+			$first_amp_keyframes_style = array_shift( $this->amp_keyframes_style_elements );
+			foreach ( $this->amp_keyframes_style_elements as $other_amp_keyframe_style ) {
+				foreach ( $other_amp_keyframe_style->childNodes as $text_node ) {
+					$first_amp_keyframes_style->appendChild( $text_node );
+				}
+				$other_amp_keyframe_style->parentNode->removeChild( $other_amp_keyframe_style );
+			}
+			$body->appendChild( $first_amp_keyframes_style );
 		}
 	}
 }

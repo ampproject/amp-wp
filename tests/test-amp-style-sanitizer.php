@@ -235,18 +235,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		return array(
 			'style_amp_keyframes'              => array(
-				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes foo {} }</style>',
+				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) {@keyframes foo {} }</style>',
 				null, // No Change.
 			),
 
 			'style_amp_keyframes_max_overflow' => array(
-				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes ' . str_repeat( 'a', $keyframes_max_size + 1 ) . ' {} }</style>',
+				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) {@keyframes ' . str_repeat( 'a', $keyframes_max_size + 1 ) . ' {} }</style>',
 				'',
 			),
 
 			'style_amp_keyframes_last_child'   => array(
-				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) { @keyframes foo {} }</style> as <b>after</b>',
-				' as <b>after</b>',
+				'<b>before</b> <style amp-keyframes>@keyframes anim1 {}</style> between <style amp-keyframes>@keyframes anim2 {}</style> as <b>after</b>',
+				'<b>before</b> between  as <b>after</b><style amp-keyframes>@keyframes anim1 {}@keyframes anim2 {}</style>',
 			),
 		);
 	}
@@ -264,6 +264,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = preg_replace( '#\s+(?=@keyframes)#', '', $content );
+		$content = preg_replace( '#\s+(?=</style>)#', '', $content );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 		$this->assertEquals( $expected, $content );
 	}
