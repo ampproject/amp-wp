@@ -42,20 +42,20 @@ class Test_AMP_Comment_Walker extends \WP_UnitTestCase {
 			'avatar_size' => 100,
 			'max_depth'   => 5,
 		);
-		$args = array_merge(
+		$args            = array_merge(
 			$base_args,
 			array(
 				'style' => 'baz',
 			)
 		);
-		$comment = $this->factory()->comment->create_and_get();
+		$comment         = $this->factory()->comment->create_and_get();
 		$this->walker->start_el( $output, $comment, 0, $args );
 		$this->assertContains( '<li data-sort-time=', $output );
 		$this->assertContains( $comment->comment_ID, $output );
 		$this->assertContains( strval( strtotime( $comment->comment_date ) ), $output );
 
-		$output = '<div></div>';
-		$args   = array_merge(
+		$output  = '<div></div>';
+		$args    = array_merge(
 			$base_args,
 			array(
 				'style' => 'div',
