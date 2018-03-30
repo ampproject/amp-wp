@@ -13,14 +13,14 @@
 class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 
 	/**
-	 * Instance of AMP_Comments_Sanitizer
+	 * The tested instance.
 	 *
 	 * @var AMP_Comments_Sanitizer
 	 */
 	public $instance;
 
 	/**
-	 * Instance of DOMDocument
+	 * Representation of the DOM.
 	 *
 	 * @var DOMDocument
 	 */
@@ -32,10 +32,10 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 * @inheritdoc
 	 */
 	public function setUp() {
+		parent::setUp();
 		$GLOBALS['post'] = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$this->dom       = new DOMDocument();
 		$this->instance  = new AMP_Comments_Sanitizer( $this->dom );
-		parent::setUp();
 	}
 
 	/**
@@ -116,7 +116,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Gets the elements names that are added to the form.
+	 * Gets the element names to add to the <form>.
 	 *
 	 * @return array An array of strings to add to the <form>.
 	 */
