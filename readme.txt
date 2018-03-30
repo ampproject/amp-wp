@@ -38,6 +38,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 == Changelog ==
 
+= 1.0 (unreleased) =
+- ...
+
 = 0.7 (unreleased) =
 
 - Add support for canonical AMP, if the theme registers support for it with `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#856](https://github.com/Automattic/amp-wp/pull/856). Props westonruter, kaitnyl, ThierryA.
