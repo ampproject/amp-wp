@@ -28,7 +28,7 @@
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
-			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS,documentElement,removeChild,ownerDocument" />
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS,documentElement,removeChild,ownerDocument,DEFAULT_WIDTH,DEFAULT_HEIGHT" />
 		</properties>
 	</rule>
 

@@ -129,12 +129,12 @@ function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions ) {
 			continue;
 		}
 
-		$host = parse_url( $url, PHP_URL_HOST );
+		$host = wp_parse_url( $url, PHP_URL_HOST );
 		if ( ! wp_endswith( $host, '.wp.com' ) || ! wp_endswith( $host, '.files.wordpress.com' ) ) {
 			continue;
 		}
 
-		parse_str( parse_url( $url, PHP_URL_QUERY ), $query );
+		parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $query );
 		$w = isset( $query['w'] ) ? absint( $query['w'] ) : false;
 		$h = isset( $query['h'] ) ? absint( $query['h'] ) : false;
 
