@@ -10,7 +10,7 @@
  *
  * @since 0.7
  */
-class Test_AMP_Comment_Walker extends \WP_UnitTestCase {
+class Test_AMP_Comment_Walker extends WP_UnitTestCase {
 
 	/**
 	 * The comment walker.
