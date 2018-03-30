@@ -493,6 +493,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			// Delete illegal properties. See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
+			$property_blacklist = array(
+				'behavior',
+				'-moz-binding',
+			);
+			foreach ( $property_blacklist as $illegal_property_name ) {
+				$properties = $ruleset->getRules( $illegal_property_name );
+				foreach ( $properties as $property ) {
+					$validation_errors[] = array(
+						'code'           => 'illegal_css_property',
+						'property_name'  => $property->getRule(),
+						'property_value' => $property->getValue(),
+					);
+					$ruleset->removeRule( $property->getRule() );
+				}
+			}
+
 			// Convert width to max-width when requested. See <https://github.com/Automattic/amp-wp/issues/494>.
 			if ( $args['convert_width_to_max_width'] ) {
 				$properties = $ruleset->getRules( 'width' );

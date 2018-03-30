@@ -110,7 +110,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'.amp-wp-2864855{background:#000;}',
 				),
-
 			),
 
 			'inline_style_element_with_multiple_rules_containing_selectors_is_removed' => array(
@@ -118,6 +117,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<div><span>bold!</span></div>',
 				array(
 					'div > span{font-weight:bold;font-style:italic;}',
+				),
+			),
+
+			'illegal_unsafe_properties' => array(
+				'<style>button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ }</style><button>Click</button>',
+				'<button>Click</button>',
+				array(
+					'button{font-weight:bold;}',
 				),
 			),
 		);
