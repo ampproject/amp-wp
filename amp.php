@@ -59,6 +59,12 @@ require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
 require_once AMP__DIR__ . '/includes/admin/functions.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
+
+/**
+ * Handle activation of plugin.
+ *
+ * @since 0.2
+ */
 function amp_activate() {
 	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
@@ -68,8 +74,14 @@ function amp_activate() {
 }
 
 register_deactivation_hook( __FILE__, 'amp_deactivate' );
+
+/**
+ * Handle deactivation of plugin.
+ *
+ * @since 0.2
+ */
 function amp_deactivate() {
-	// We need to manually remove the amp endpoint
+	// We need to manually remove the amp endpoint.
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
 		if ( amp_get_slug() === $endpoint[1] ) {
@@ -147,8 +159,16 @@ function amp_init() {
 	add_action( 'wp', 'amp_maybe_add_actions' );
 }
 
-// Make sure the `amp` query var has an explicit value.
-// Avoids issues when filtering the deprecated `query_string` hook.
+/**
+ * Make sure the `amp` query var has an explicit value.
+ *
+ * This avoids issues when filtering the deprecated `query_string` hook.
+ *
+ * @since 0.3.3
+ *
+ * @param array $query_vars Query vars.
+ * @return array Query vars.
+ */
 function amp_force_query_var_value( $query_vars ) {
 	if ( isset( $query_vars[ amp_get_slug() ] ) && '' === $query_vars[ amp_get_slug() ] ) {
 		$query_vars[ amp_get_slug() ] = 1;
@@ -267,20 +287,41 @@ function amp_is_canonical() {
 	return false;
 }
 
+/**
+ * Load classes.
+ *
+ * @since 0.2
+ * @deprecated As of 0.6 since autoloading is now employed.
+ */
 function amp_load_classes() {
 	_deprecated_function( __FUNCTION__, '0.6' );
 }
 
+/**
+ * Add frontend actions.
+ *
+ * @since 0.2
+ */
 function amp_add_frontend_actions() {
 	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
 }
 
+/**
+ * Add post template actions.
+ *
+ * @since 0.2
+ */
 function amp_add_post_template_actions() {
 	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }
 
+/**
+ * Add action to do post template rendering at template_redirect action.
+ *
+ * @since 0.2
+ */
 function amp_prepare_render() {
 	add_action( 'template_redirect', 'amp_render' );
 }
