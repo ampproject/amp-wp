@@ -88,6 +88,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $content_url;
 
 	/**
+	 * XPath.
+	 *
+	 * @var DOMXPath
+	 */
+	private $xpath;
+
+	/**
+	 * Amount of time that was spent parsing CSS.
+	 *
+	 * @var float
+	 */
+	private $parse_css_duration = 0.0;
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.7
@@ -128,6 +142,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$this->base_url    = $guessurl;
 		$this->content_url = WP_CONTENT_URL;
+		$this->xpath       = new DOMXPath( $dom );
 	}
 
 	/**
@@ -171,7 +186,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * Note that xpath is used to query the DOM so that the link and style elements will be
 		 * in document order. DOMNode::compareDocumentPosition() is not yet implemented.
 		 */
-		$xpath = new DOMXPath( $this->dom );
+		$xpath = $this->xpath;
 
 		$lower_case = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
 		$predicates = array(
@@ -231,6 +246,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
+		}
+
+		if ( $this->parse_css_duration > 0.0 ) {
+			AMP_Response_Headers::send_server_timing( 'amp_parse_css', $this->parse_css_duration, 'AMP Parse CSS' );
 		}
 	}
 
@@ -299,11 +318,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$rules = trim( $element->textContent );
-		$rules = $this->remove_illegal_css( $rules, $element );
+		$stylesheet = trim( $element->textContent );
+		if ( $stylesheet ) {
+			$stylesheet = $this->process_stylesheet( $stylesheet, $element );
+		}
 
 		// Remove if surpasses max size.
-		$length = strlen( $rules );
+		$length = strlen( $stylesheet );
 		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
 			$this->remove_invalid_child( $element, array(
 				'message' => __( 'Too much CSS enqueued.', 'amp' ),
@@ -311,8 +332,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$this->stylesheets[ md5( $rules ) ] = $rules;
-		$this->current_custom_size         += $length;
+		$hash = md5( $stylesheet );
+
+		$this->stylesheets[ $hash ] = $stylesheet;
+		$this->current_custom_size += $length;
 
 		if ( $element->hasAttribute( 'amp-custom' ) ) {
 			if ( ! $this->amp_custom_style_element ) {
@@ -349,58 +372,164 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Load the CSS from the filesystem.
-		$rules  = "\n/* $href */\n";
-		$rules .= file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
-
-		$rules = $this->remove_illegal_css( $rules, $element );
-
-		$media = $element->getAttribute( 'media' );
-		if ( $media && 'all' !== $media ) {
-			$rules = sprintf( '@media %s { %s }', $media, $rules );
+		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+		if ( false === $stylesheet ) {
+			$this->remove_invalid_child( $element, array(
+				'message' => __( 'Unable to load stylesheet from filesystem.', 'amp' ),
+			) );
+			return;
 		}
 
-		// Remove if surpasses max size.
-		$length = strlen( $rules );
+		// Honor the link's media attribute.
+		$media = $element->getAttribute( 'media' );
+		if ( $media && 'all' !== $media ) {
+			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
+		}
+
+		$stylesheet = $this->process_stylesheet( $stylesheet, $element );
+
+		// Skip if surpasses max size.
+		$length = strlen( $stylesheet );
 		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
 			$this->remove_invalid_child( $element, array(
 				'message' => __( 'Too much CSS enqueued.', 'amp' ),
 			) );
 			return;
 		}
+		$hash = md5( $stylesheet );
 
+		$this->stylesheets[ $hash ] = $stylesheet;
 		$this->current_custom_size += $length;
-		$this->stylesheets[ $href ] = $rules;
 
 		// Remove now that styles have been processed.
 		$element->parentNode->removeChild( $element );
 	}
 
 	/**
-	 * Remove illegal CSS from the stylesheet.
+	 * Process stylesheet.
 	 *
-	 * @since 0.7
+	 * Sanitized invalid CSS properties and rules, removes rules which do not
+	 * apply to the current document, and compresses the CSS to remove whitespace and comments.
 	 *
-	 * @todo This needs proper CSS parser and to take an alternative approach to removing !important by extracting
-	 * the rule into a separate style rule with a very specific selector.
-	 * @param string     $stylesheet Stylesheet.
-	 * @param DOMElement $element    Element where the stylesheet came from.
-	 * @return string Scrubbed stylesheet.
+	 * @since 1.0
+	 * @todo Add flag for whether to do tree shaking.
+	 *
+	 * @param string             $stylesheet Stylesheet.
+	 * @param DOMElement|DOMAttr $node       Element (link/style) or style attribute where the stylesheet came from.
+	 * @param array              $args       {
+	 *     Args.
+	 *
+	 *     @type bool $convert_width_to_max_width Convert width to max-width.
+	 * }
+	 * @return string Processed stylesheet.
 	 */
-	private function remove_illegal_css( $stylesheet, $element ) {
-		$stylesheet = preg_replace( '/\s*!important/', '', $stylesheet, -1, $important_count ); // Note this has to also replace inside comments to be valid.
-		if ( $important_count > 0 && ! empty( $this->args['validation_error_callback'] ) ) {
-			call_user_func( $this->args['validation_error_callback'], array(
-				'code' => 'css_important_removed',
-				'node' => $element,
-			) );
+	private function process_stylesheet( $stylesheet, $node, $args = array() ) {
+		$start_time = microtime( true );
+
+		$args = array_merge(
+			array(
+				'convert_width_to_max_width' => false,
+			),
+			$args
+		);
+
+		$cache_key        = md5( $stylesheet );
+		$cached_processed = wp_cache_get( $cache_key, 'amp-stylesheet' );
+		if ( $cached_processed ) {
+			if ( ! empty( $this->args['validation_error_callback'] ) ) {
+				foreach ( $cached_processed['validation_errors'] as $validation_error ) {
+					call_user_func( $this->args['validation_error_callback'], array_merge( $validation_error, compact( 'node' ) ) );
+				}
+			}
+			return $cached_processed['stylesheet'];
 		}
-		$stylesheet = preg_replace( '/overflow(-[xy])?\s*:\s*(auto|scroll)\s*;?\s*/', '', $stylesheet, -1, $overlow_count );
-		if ( $overlow_count > 0 && ! empty( $this->args['validation_error_callback'] ) ) {
-			call_user_func( $this->args['validation_error_callback'], array(
-				'code' => 'css_overflow_property_removed',
-				'node' => $element,
-			) );
+
+		$parser_settings = Sabberworm\CSS\Settings::create()->withMultibyteSupport( false );
+		$css_parser      = new Sabberworm\CSS\Parser( $stylesheet, $parser_settings );
+		$css_document    = $css_parser->parse();
+
+		// @todo Fetch an @import.
+		// @todo Disallow anything except @font-face, @keyframes, @media, @supports.
+		/**
+		 * Rulesets.
+		 *
+		 * @var Sabberworm\CSS\RuleSet\RuleSet[] $rulesets
+		 * @var Sabberworm\CSS\Rule\Rule $rule
+		 */
+		$rulesets          = $css_document->getAllRuleSets();
+		$validation_errors = array();
+		foreach ( $rulesets as $ruleset ) {
+			/**
+			 * Properties.
+			 *
+			 * @var Sabberworm\CSS\Rule\Rule[] $properties
+			 */
+
+			// Remove properties that have illegal values. See <https://www.ampproject.org/docs/fundamentals/spec#properties>.
+			// @todo Limit transition to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
+			$properties = $ruleset->getRules( 'overflow-' );
+			foreach ( $properties as $property ) {
+				if ( in_array( $property->getValue(), array( 'auto', 'scroll' ), true ) ) {
+					$validation_errors[] = array(
+						'code'           => 'illegal_css_property_value',
+						'property_name'  => $property->getRule(),
+						'property_value' => $property->getValue(),
+					);
+					$ruleset->removeRule( $property->getRule() );
+				}
+			}
+
+			// Remove important qualifiers. See <https://www.ampproject.org/docs/fundamentals/spec#important>.
+			// @todo Try to convert into something else, like https://www.npmjs.com/package/replace-important.
+			$properties = $ruleset->getRules();
+			foreach ( $properties as $property ) {
+				if ( $property->getIsImportant() ) {
+					$validation_errors[] = array(
+						'code'           => 'illegal_css_important_qualifier',
+						'property_name'  => $property->getRule(),
+						'property_value' => $property->getValue(),
+					);
+					$property->setIsImportant( false );
+				}
+			}
+
+			// Convert width to max-width when requested. See <https://github.com/Automattic/amp-wp/issues/494>.
+			if ( $args['convert_width_to_max_width'] ) {
+				$properties = $ruleset->getRules( 'width' );
+				foreach ( $properties as $property ) {
+					$width_property = new \Sabberworm\CSS\Rule\Rule( 'max-width' );
+					$width_property->setValue( $property->getValue() );
+					$ruleset->removeRule( $property );
+					$ruleset->addRule( $width_property, $property );
+				}
+			}
+
+			// Remove the ruleset if it is now empty.
+			if ( 0 === count( $ruleset->getRules() ) ) {
+				$css_document->remove( $ruleset );
+			}
+			// @todo Sort??
+			// @todo Delete rules with selectors for -amphtml- class and i-amphtml- tags.
 		}
+
+		$output_format = Sabberworm\CSS\OutputFormat::createCompact();
+		$stylesheet    = $css_document->render( $output_format );
+
+		if ( ! empty( $this->args['validation_error_callback'] ) ) {
+			foreach ( $validation_errors as $validation_error ) {
+				call_user_func( $this->args['validation_error_callback'], array_merge( $validation_error, compact( 'node' ) ) );
+			}
+		}
+
+		$this->parse_css_duration += ( microtime( true ) - $start_time );
+
+		// @todo We need to cache an object that allows us to identify the rules that can be deleted.
+		wp_cache_set(
+			$cache_key,
+			compact( 'stylesheet', 'validation_errors' ),
+			'amp-stylesheet'
+		);
+
 		return $stylesheet;
 	}
 
@@ -450,129 +579,40 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $element Node.
 	 */
 	private function collect_inline_styles( $element ) {
-		$value = $element->getAttribute( 'style' );
-		if ( ! $value ) {
+		$style_attribute = $element->getAttributeNode( 'style' );
+		if ( ! $style_attribute || ! trim( $style_attribute->nodeValue ) ) {
 			return;
 		}
-		$class = $element->getAttribute( 'class' );
 
-		$properties = $this->process_style( $value );
+		// @todo Use hash from resulting processed CSS so that we can potentially re-use? We need to use the hash of the original rules as the cache key.
+		$class  = 'amp-wp-' . substr( md5( $style_attribute->nodeValue ), 0, 7 );
+		$rule   = sprintf( '.%s { %s }', $class, $style_attribute->nodeValue );
+		$hash   = md5( $rule );
+		$rule   = $this->process_stylesheet( $rule, $style_attribute, array(
+			'convert_width_to_max_width' => true,
+		) );
+		$length = strlen( $rule );
 
-		if ( ! empty( $properties ) ) {
-			$class_name = $this->generate_class_name( $properties );
-			$new_class  = trim( $class . ' ' . $class_name );
-
-			$selector = '.' . $class_name;
-			$length   = strlen( sprintf( '%s { %s }', $selector, join( '; ', $properties ) . ';' ) );
-
-			if ( $this->current_custom_size + $length > $this->custom_max_size ) {
-				$this->remove_invalid_attribute( $element, 'style', array(
-					'message' => __( 'Too much CSS.', 'amp' ),
-				) );
-				return;
-			}
-
-			$element->setAttribute( 'class', $new_class );
-			$this->styles[ $selector ] = $properties;
-		}
 		$element->removeAttribute( 'style' );
-	}
 
-	/**
-	 * Sanitize and convert individual styles.
-	 *
-	 * @since 0.4
-	 *
-	 * @param string $css Style string.
-	 * @return array Style properties.
-	 */
-	private function process_style( $css ) {
-
-		// Normalize whitespace.
-		$css = str_replace( array( "\n", "\r", "\t" ), '', $css );
-
-		/*
-		 * Use preg_split to break up rules by `;` but only if the
-		 * semi-colon is not inside parens (like a data-encoded image).
-		 */
-		$styles = preg_split( '/\s*;\s*(?![^(]*\))/', trim( $css, '; ' ) );
-		$styles = array_filter( $styles );
-
-		// Normalize the order of the styles.
-		sort( $styles );
-
-		$processed_styles = array();
-
-		// Normalize whitespace and filter rules.
-		foreach ( $styles as $index => $rule ) {
-			$tuple = preg_split( '/\s*:\s*/', $rule, 2 );
-			if ( 2 !== count( $tuple ) ) {
-				continue;
-			}
-
-			list( $property, $value ) = $this->filter_style( $tuple[0], $tuple[1] );
-			if ( empty( $property ) || empty( $value ) ) {
-				continue;
-			}
-
-			$processed_styles[ $index ] = "{$property}:{$value}";
+		if ( 0 === $length ) {
+			return;
 		}
 
-		return $processed_styles;
-	}
-
-	/**
-	 * Filter individual CSS name/value pairs.
-	 *
-	 *   - Remove overflow if value is `auto` or `scroll`
-	 *   - Change `width` to `max-width`
-	 *   - Remove !important
-	 *
-	 * @since 0.4
-	 *
-	 * @param string $property Property.
-	 * @param string $value    Value.
-	 * @return array
-	 */
-	private function filter_style( $property, $value ) {
-		/*
-		 * Remove overflow if value is `auto` or `scroll`; not allowed in AMP
-		 *
-		 * @todo This removal needs to be reported.
-		 * @see https://www.ampproject.org/docs/reference/spec.html#properties
-		 */
-		if ( preg_match( '#^overflow(-[xy])?$#i', $property ) && preg_match( '#^(auto|scroll)$#i', $value ) ) {
-			return array( false, false );
+		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
+			$this->remove_invalid_attribute( $element, $style_attribute, array(
+				'message' => __( 'Too much CSS.', 'amp' ),
+			) );
+			return;
 		}
 
-		if ( 'width' === $property ) {
-			$property = 'max-width';
+		$this->current_custom_size += $length;
+		$this->stylesheets[ $hash ] = $rule;
+
+		if ( $element->hasAttribute( 'class' ) ) {
+			$element->setAttribute( 'class', $element->getAttribute( 'class' ) . ' ' . $class );
+		} else {
+			$element->setAttribute( 'class', $class );
 		}
-
-		/*
-		 * Remove `!important`; not allowed in AMP
-		 *
-		 * @todo This removal needs to be reported.
-		 */
-		if ( false !== strpos( $value, 'important' ) ) {
-			$value = preg_replace( '/\s*\!\s*important$/', '', $value );
-		}
-
-		return array( $property, $value );
-	}
-
-	/**
-	 * Generate a unique class name
-	 *
-	 * Use the md5() of the $data parameter
-	 *
-	 * @since 0.4
-	 *
-	 * @param string $data Data.
-	 * @return string Class name.
-	 */
-	private function generate_class_name( $data ) {
-		$string = maybe_serialize( $data );
-		return 'amp-wp-inline-' . md5( $string );
 	}
 }

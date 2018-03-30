@@ -131,6 +131,10 @@ class AMP_Autoloader {
 	 * Called at the end of this file; calling a second time has no effect.
 	 */
 	public static function register() {
+		if ( file_exists( AMP__DIR__ . '/vendor/autoload.php' ) ) {
+			require_once AMP__DIR__ . '/vendor/autoload.php';
+		}
+
 		if ( ! self::$is_registered ) {
 			spl_autoload_register( array( __CLASS__, 'autoload' ) );
 			self::$is_registered = true;
