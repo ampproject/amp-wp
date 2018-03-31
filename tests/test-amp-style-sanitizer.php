@@ -71,27 +71,27 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(),
 			),
 
-			'!important_not_allowed' => array(
-				'<span style="margin: 1px!important;">!important not allowed.</span>',
-				'<span class="amp-wp-416ccd3">!important not allowed.</span>',
+			'!important_is_ok' => array(
+				'<span style="padding:1px; margin: 2px !important; outline: 3px;">!important is converted.</span>',
+				'<span class="amp-wp-6a75598">!important is converted.</span>',
 				array(
-					'.amp-wp-416ccd3{margin:1px;}',
+					'.amp-wp-6a75598{padding:1px;outline:3px;}:root:not(#FK_ID) .amp-wp-6a75598{margin:2px;}',
 				),
 			),
 
-			'!important_with_spaces_not_allowed' => array(
-				'<span style="color: red  !  important;">!important not allowed.</span>',
-				'<span class="amp-wp-952600b">!important not allowed.</span>',
+			'!important_with_spaces_also_converted' => array(
+				'<span style="color: red  !  important;">!important is converted.</span>',
+				'<span class="amp-wp-952600b">!important is converted.</span>',
 				array(
-					'.amp-wp-952600b{color:red;}',
+					':root:not(#FK_ID) .amp-wp-952600b{color:red;}',
 				),
 			),
 
-			'!important_multiple_not_allowed' => array(
-				'<span style="color: red !important; background: blue!important;">!important not allowed.</span>',
-				'<span class="amp-wp-1e2bfaa">!important not allowed.</span>',
+			'!important_multiple_is_converted' => array(
+				'<span style="color: red !important; background: blue!important;">!important is converted.</span>',
+				'<span class="amp-wp-1e2bfaa">!important is converted.</span>',
 				array(
-					'.amp-wp-1e2bfaa{color:red;background:blue;}',
+					':root:not(#FK_ID) .amp-wp-1e2bfaa{color:red;background:blue;}',
 				),
 			),
 
@@ -116,7 +116,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>div > span { font-weight:bold !important; overflow: scroll; font-style: italic; }</style><div><span>bold!</span></div>',
 				'<div><span>bold!</span></div>',
 				array(
-					'div > span{font-weight:bold;font-style:italic;}',
+					'div > span{font-style:italic;}:root:not(#FK_ID) div > span{font-weight:bold;}',
 				),
 			),
 
@@ -161,11 +161,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_link_and_style_test_data() {
 		return array(
 			'multiple_amp_custom_and_other_styles' => array(
-				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green}</style></head><body><style>s {color:yellow} /* So !important! */</style></body></html>',
+				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green; text-decoration: underline !important;}</style></head><body><style>s {color:yellow} /* So !important! */</style></body></html>',
 				array(
-					'b{color:red;}',
+					':root:not(#FK_ID) b{color:red;}',
 					'i{color:blue;}',
-					'u{color:green;}',
+					'u{color:green;}:root:not(#FK_ID) u{text-decoration:underline;}',
 					's{color:yellow;}',
 				),
 			),
@@ -178,7 +178,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'strong.before-dashicon',
 					'.dashicons-dashboard:before',
 					'strong.after-dashicon',
-					's{color:yellow;}',
+					':root:not(#FK_ID) s{color:yellow;}',
 				),
 			),
 			'style_with_no_head' => array(
@@ -214,7 +214,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
-			$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
+			if ( false === strpos( $expected_stylesheet, '{' ) ) {
+				$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
+			} else {
+				$this->assertStringStartsWith( $expected_stylesheet, $actual_stylesheets[ $i ] );
+			}
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
 	}

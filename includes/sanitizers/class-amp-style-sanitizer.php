@@ -459,17 +459,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$css_parser      = new Sabberworm\CSS\Parser( $stylesheet, $parser_settings );
 		$css_document    = $css_parser->parse();
 
-		// @todo Fetch an @import.
-		// @todo Disallow anything except @font-face, @keyframes, @media, @supports.
 		/**
 		 * Rulesets.
 		 *
 		 * @var Sabberworm\CSS\RuleSet\RuleSet[] $rulesets
-		 * @var Sabberworm\CSS\Rule\Rule $rule
+		 * @var Sabberworm\CSS\Rule\Rule $ruleset
 		 */
 		$rulesets          = $css_document->getAllRuleSets();
 		$validation_errors = array();
 		foreach ( $rulesets as $ruleset ) {
+
+			// @todo Fetch an @import.
+			// @todo Disallow anything except @font-face, @keyframes, @media, @supports.
+			if ( ! ( $ruleset instanceof \Sabberworm\CSS\RuleSet\DeclarationBlock ) ) {
+				continue;
+			}
+
 			/**
 			 * Properties.
 			 *
@@ -490,19 +495,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// Remove important qualifiers. See <https://www.ampproject.org/docs/fundamentals/spec#important>.
-			// @todo Try to convert into something else, like https://www.npmjs.com/package/replace-important.
-			$properties = $ruleset->getRules();
-			foreach ( $properties as $property ) {
-				if ( $property->getIsImportant() ) {
-					$validation_errors[] = array(
-						'code'           => 'illegal_css_important_qualifier',
-						'property_name'  => $property->getRule(),
-						'property_value' => $property->getValue(),
-					);
-					$property->setIsImportant( false );
-				}
-			}
+			$this->transform_important_qualifiers( $ruleset, $css_document );
 
 			// Delete illegal properties. See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
 			$property_blacklist = array(
@@ -559,6 +552,46 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		return $stylesheet;
+	}
+
+	/**
+	 * Replace !important qualifiers with more specific rules.
+	 *
+	 * @since 1.0
+	 * @see https://www.npmjs.com/package/replace-important
+	 * @see https://www.ampproject.org/docs/fundamentals/spec#important
+	 *
+	 * @param \Sabberworm\CSS\RuleSet\DeclarationBlock $ruleset      Ruleset.
+	 * @param \Sabberworm\CSS\CSSList\Document         $css_document CSS Document.
+	 */
+	private function transform_important_qualifiers( \Sabberworm\CSS\RuleSet\DeclarationBlock $ruleset, \Sabberworm\CSS\CSSList\Document $css_document ) {
+		/**
+		 * Properties.
+		 *
+		 * @var Sabberworm\CSS\Rule\Rule[] $properties
+		 */
+		$properties = $ruleset->getRules();
+		$importants = array();
+		foreach ( $properties as $property ) {
+			if ( $property->getIsImportant() ) {
+				$ruleset->removeRule( $property->getRule() );
+				$property->setIsImportant( false );
+				$importants[] = $property;
+			}
+		}
+		if ( empty( $importants ) ) {
+			return;
+		}
+
+		$important_ruleset = new \Sabberworm\CSS\RuleSet\DeclarationBlock();
+		$important_ruleset->setSelectors( array_map(
+			function( \Sabberworm\CSS\Property\Selector $old_selector ) {
+				return new \Sabberworm\CSS\Property\Selector( ':root:not(#FK_ID) ' . $old_selector->getSelector() );
+			},
+			$ruleset->getSelectors()
+		) );
+		$important_ruleset->setRules( $importants );
+		$css_document->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
 	}
 
 	/**
