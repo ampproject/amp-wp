@@ -49,11 +49,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
-
 			$new_attributes = $this->set_layout( $new_attributes );
-			if ( isset( $new_attributes['width'] ) && isset( $new_attributes['height'] ) ) {
-				$new_attributes['layout'] = 'responsive';
-			}
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 
