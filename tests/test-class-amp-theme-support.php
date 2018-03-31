@@ -913,8 +913,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response() {
-		global $wp_widget_factory, $wp_scripts;
+		global $wp_widget_factory, $wp_scripts, $wp_styles;
 		$wp_scripts = null;
+		$wp_styles  = null;
 
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
