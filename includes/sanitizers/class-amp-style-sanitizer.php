@@ -592,18 +592,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove properties that have illegal values. See <https://www.ampproject.org/docs/fundamentals/spec#properties>.
 		// @todo Limit transition to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
-		$properties = $ruleset->getRules( 'overflow-' );
-		foreach ( $properties as $property ) {
-			if ( in_array( $property->getValue(), array( 'auto', 'scroll' ), true ) ) {
-				$validation_errors[] = array(
-					'code'           => 'illegal_css_property_value',
-					'property_name'  => $property->getRule(),
-					'property_value' => $property->getValue(),
-				);
-				$ruleset->removeRule( $property->getRule() );
-			}
-		}
-
 		$this->transform_important_qualifiers( $ruleset, $css_list );
 
 		// Delete illegal properties. See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.

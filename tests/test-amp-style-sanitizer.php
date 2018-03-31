@@ -65,12 +65,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 
-			'div_amp_banned_style' => array(
-				'<span style="overflow: scroll;">Scrollbars not allowed.</span>',
-				'<span>Scrollbars not allowed.</span>',
-				array(),
-			),
-
 			'!important_is_ok' => array(
 				'<span style="padding:1px; margin: 2px !important; outline: 3px;">!important is converted.</span>',
 				'<span class="amp-wp-6a75598">!important is converted.</span>',
@@ -113,7 +107,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'inline_style_element_with_multiple_rules_containing_selectors_is_removed' => array(
-				'<style>div > span { font-weight:bold !important; overflow: scroll; font-style: italic; } @media screen and ( max-width: 640px ) { div > span { font-weight:normal !important; overflow: auto; font-style: normal; } }</style><div><span>bold!</span></div>',
+				'<style>div > span { font-weight:bold !important; font-style: italic; } @media screen and ( max-width: 640px ) { div > span { font-weight:normal !important; font-style: normal; } }</style><div><span>bold!</span></div>',
 				'<div><span>bold!</span></div>',
 				array(
 					'div > span{font-style:italic;}@media screen and ( max-width: 640px ){div > span{font-style:normal;}:root:not(#FK_ID) div > span{font-weight:normal;}}:root:not(#FK_ID) div > span{font-weight:bold;}',
@@ -121,10 +115,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'illegal_unsafe_properties' => array(
-				'<style>button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ }</style><button>Click</button>',
+				'<style>button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } @media screen { button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } }</style><button>Click</button>',
 				'<button>Click</button>',
 				array(
-					'button{font-weight:bold;}',
+					'button{font-weight:bold;}@media screen{button{font-weight:bold;}}',
 				),
 			),
 
@@ -198,7 +192,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 			'style_with_no_head' => array(
-				'<html amp><body>Not good!<style>body{color:red;overflow:auto;overflow-x:scroll;overflow-y:scroll;}</style></body>',
+				'<html amp><body>Not good!<style>body{color:red;}</style></body>',
 				array(
 					'body{color:red;}',
 				),
