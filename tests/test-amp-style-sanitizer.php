@@ -122,6 +122,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 
+			'illegal_at_rule_in_style_attribute' => array(
+				'<span style="color:brown; @media screen { color:green }">Parse error.</span>',
+				'<span>Parse error.</span>',
+				array(),
+			),
+
 			'illegal_at_rules_removed' => array(
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
 				'',
@@ -249,8 +255,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		return array(
 			'style_amp_keyframes'              => array(
-				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) {@keyframes foo {} }</style>',
-				null, // No Change.
+				'<style amp-keyframes>@keyframes anim1 { from { opacity:0.0 } to { opacity:0.5 } } @media (min-width: 600px) {@keyframes anim1 { from { opacity:0.5 } to { opacity:1.0 } } }</style>',
+				'<style amp-keyframes="">@keyframes anim1{from{opacity:0;}to{opacity:.5;}}@media (min-width: 600px){@keyframes anim1{from{opacity:.5;}to{opacity:1;}}}</style>',
 			),
 
 			'style_amp_keyframes_max_overflow' => array(
@@ -260,7 +266,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'style_amp_keyframes_last_child'   => array(
 				'<b>before</b> <style amp-keyframes>@keyframes anim1 {}</style> between <style amp-keyframes>@keyframes anim2 {}</style> as <b>after</b>',
-				'<b>before</b> between  as <b>after</b><style amp-keyframes>@keyframes anim1 {}@keyframes anim2 {}</style>',
+				'<b>before</b> between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
+			),
+
+			'blacklisted_and_whitelisted_keyframe_properties' => array(
+				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
+				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn);}}</style>',
+			),
+
+			'style_amp_keyframes_with_disallowed_rules' => array(
+				'<style amp-keyframes>body { color:red; opacity:1; } @keyframes anim1 { 50% { opacity:0.5 !important; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); }</style>',
+				'<style amp-keyframes="">@keyframes anim1{50%{opacity:.5;}}</style>',
 			),
 		);
 	}

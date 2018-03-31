@@ -44,29 +44,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $stylesheets = array();
 
 	/**
-	 * Spec for style[amp-custom] cdata.
-	 *
-	 * @since 1.0
-	 * @var array
-	 */
-	private $style_custom_cdata_spec;
-
-	/**
-	 * Spec for style[amp-keyframes] cdata.
-	 *
-	 * @since 1.0
-	 * @var array
-	 */
-	private $style_keyframes_cdata_spec;
-
-	/**
-	 * Current CSS size.
+	 * Current amp-custom CSS size.
 	 *
 	 * Sum of CSS located in $styles and $stylesheets.
 	 *
 	 * @var int
 	 */
 	private $current_custom_size = 0;
+
+	/**
+	 * Spec for style[amp-custom] cdata.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	private $style_custom_cdata_spec;
 
 	/**
 	 * The style[amp-custom] element.
@@ -76,12 +68,28 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $amp_custom_style_element;
 
 	/**
-	 * The found style[amp-keyframe] elements.
+	 * The found style[amp-keyframe] stylesheets.
 	 *
 	 * @since 1.0
-	 * @var DOMElement[]
+	 * @var string[]
 	 */
-	private $amp_keyframes_style_elements = array();
+	private $keyframes_stylesheets = array();
+
+	/**
+	 * Current amp-keyframes CSS size.
+	 *
+	 * @since 1.0
+	 * @var int
+	 */
+	private $current_keyframes_size = 0;
+
+	/**
+	 * Spec for style[amp-keyframes] cdata.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	private $style_keyframes_cdata_spec;
 
 	/**
 	 * Regex for allowed font stylesheet URL.
@@ -109,6 +117,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * XPath.
 	 *
+	 * @since 1.0
 	 * @var DOMXPath
 	 */
 	private $xpath;
@@ -116,6 +125,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Amount of time that was spent parsing CSS.
 	 *
+	 * @since 1.0
 	 * @var float
 	 */
 	private $parse_css_duration = 0.0;
@@ -325,24 +335,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $element Style element.
 	 */
 	private function process_style_element( DOMElement $element ) {
-		if ( $element->hasAttribute( 'amp-keyframes' ) ) {
-			$validity = $this->validate_amp_keyframe( $element );
-			if ( is_wp_error( $validity ) ) {
-				$this->remove_invalid_child( $element, array(
-					'message' => $validity->get_error_message(),
-				) );
-			}
-			return;
-		}
 
-		$stylesheet = trim( $element->textContent );
+		// @todo Any @keyframes rules could be removed from amp-custom and instead added to amp-keyframes.
+		$is_keyframes = $element->hasAttribute( 'amp-keyframes' );
+		$stylesheet   = trim( $element->textContent );
+		$cdata_spec   = $is_keyframes ? $this->style_keyframes_cdata_spec : $this->style_custom_cdata_spec;
 		if ( $stylesheet ) {
-			$stylesheet = $this->process_stylesheet( $stylesheet, $element );
+			$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
+				'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
+				'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
+				'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
+			) );
 		}
 
 		// Remove if surpasses max size.
 		$length = strlen( $stylesheet );
-		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
+		if ( ( $is_keyframes ? $this->current_keyframes_size : $this->current_custom_size ) + $length > $cdata_spec['max_bytes'] ) {
 			$this->remove_invalid_child( $element, array(
 				'message' => __( 'Too much CSS enqueued.', 'amp' ),
 			) );
@@ -351,8 +359,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$hash = md5( $stylesheet );
 
-		$this->stylesheets[ $hash ] = $stylesheet;
-		$this->current_custom_size += $length;
+		if ( $is_keyframes ) {
+			$this->keyframes_stylesheets[ $hash ] = $stylesheet;
+			$this->current_keyframes_size        += $length;
+		} else {
+			$this->stylesheets[ $hash ] = $stylesheet;
+			$this->current_custom_size += $length;
+		}
 
 		if ( $element->hasAttribute( 'amp-custom' ) ) {
 			if ( ! $this->amp_custom_style_element ) {
@@ -403,7 +416,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
 		}
 
-		$stylesheet = $this->process_stylesheet( $stylesheet, $element );
+		$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
+			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
+			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+		) );
 
 		// Skip if surpasses max size.
 		$length = strlen( $stylesheet );
@@ -436,7 +452,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array              $options    {
 	 *     Options.
 	 *
-	 *     @type bool $convert_width_to_max_width Convert width to max-width.
+	 *     @type string[] $property_whitelist         Exclusively-allowed properties.
+	 *     @type string[] $property_blacklist         Disallowed properties.
+	 *     @type bool     $convert_width_to_max_width Convert width to max-width.
 	 * }
 	 * @return string Processed stylesheet.
 	 */
@@ -445,7 +463,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$options = array_merge(
 			array(
+				'allowed_at_rules'           => array(),
 				'convert_width_to_max_width' => false,
+				'property_blacklist'         => array(
+					// See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
+					'behavior',
+					'-moz-binding',
+				),
+				'property_whitelist'         => array(),
+				'validate_keyframes'         => false,
 			),
 			$options
 		);
@@ -461,20 +487,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return $cached_processed['stylesheet'];
 		}
 
-		$parser_settings = Sabberworm\CSS\Settings::create()->withMultibyteSupport( false );
-		$css_parser      = new Sabberworm\CSS\Parser( $stylesheet, $parser_settings );
-		$css_document    = $css_parser->parse();
+		try {
+			$parser_settings = Sabberworm\CSS\Settings::create()->withMultibyteSupport( false );
+			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet, $parser_settings );
+			$css_document    = $css_parser->parse();
 
-		/**
-		 * Rulesets.
-		 *
-		 * @var CSSList $css_list
-		 * @var Rule $ruleset
-		 */
-		$validation_errors = $this->process_css_list( $css_document, $options );
+			$validation_errors = $this->process_css_list( $css_document, $options );
 
-		$output_format = Sabberworm\CSS\OutputFormat::createCompact();
-		$stylesheet    = $css_document->render( $output_format );
+			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
+			$stylesheet    = $css_document->render( $output_format );
+		} catch ( Exception $exception ) {
+			$stylesheet        = '';
+			$validation_errors = array(
+				array(
+					'code'    => 'css_parse_error',
+					'message' => $exception->getMessage(),
+				),
+			);
+		}
 
 		if ( ! empty( $this->args['validation_error_callback'] ) ) {
 			foreach ( $validation_errors as $validation_error ) {
@@ -507,14 +537,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$validation_errors = array();
 
 		foreach ( $css_list->getContents() as $css_item ) {
-			if ( $css_item instanceof DeclarationBlock ) {
+			if ( $css_item instanceof DeclarationBlock && empty( $options['validate_keyframes'] ) ) {
 				$validation_errors = array_merge(
 					$validation_errors,
 					$this->process_css_declaration_block( $css_item, $css_list, $options )
 				);
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
-				// @todo Let the list be informed by the spec.
-				if ( in_array( $css_item->atRuleName(), array( 'media', 'supports' ), true ) ) {
+				if ( in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$validation_errors = array_merge(
 						$validation_errors,
 						$this->process_css_list( $css_item, $options )
@@ -534,7 +563,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				);
 				$css_list->remove( $css_item );
 			} elseif ( $css_item instanceof AtRuleSet ) {
-				if ( in_array( $css_item->atRuleName(), array( 'font-face' ), true ) ) {
+				if ( in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$validation_errors = array_merge(
 						$validation_errors,
 						$this->process_css_declaration_block( $css_item, $css_list, $options )
@@ -548,10 +577,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$css_list->remove( $css_item );
 				}
 			} elseif ( $css_item instanceof KeyFrame ) {
-				$validation_errors = array_merge(
-					$validation_errors,
-					$this->process_css_keyframes( $css_item, $options )
-				);
+				if ( in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
+					$validation_errors = array_merge(
+						$validation_errors,
+						$this->process_css_keyframes( $css_item, $options )
+					);
+				} else {
+					$validation_errors[] = array(
+						'code'    => 'illegal_css_at_rule',
+						/* translators: %s is the CSS at-rule name. */
+						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
+					);
+				}
 			} elseif ( $css_item instanceof AtRule ) {
 				$validation_errors[] = array(
 					'code'    => 'illegal_css_at_rule',
@@ -574,6 +611,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Process CSS rule set.
 	 *
 	 * @since 1.0
+	 * @link https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles
+	 * @link https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles
 	 *
 	 * @param RuleSet $ruleset  Ruleset.
 	 * @param CSSList $css_list CSS List.
@@ -590,26 +629,38 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * @var Rule[] $properties
 		 */
 
-		// Remove properties that have illegal values. See <https://www.ampproject.org/docs/fundamentals/spec#properties>.
-		// @todo Limit transition to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
-		$this->transform_important_qualifiers( $ruleset, $css_list );
-
-		// Delete illegal properties. See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
-		$property_blacklist = array(
-			'behavior',
-			'-moz-binding',
-		);
-		foreach ( $property_blacklist as $illegal_property_name ) {
-			$properties = $ruleset->getRules( $illegal_property_name );
+		// Remove disallowed properties.
+		if ( ! empty( $options['property_whitelist'] ) ) {
+			$properties = $ruleset->getRules();
 			foreach ( $properties as $property ) {
-				$validation_errors[] = array(
-					'code'           => 'illegal_css_property',
-					'property_name'  => $property->getRule(),
-					'property_value' => $property->getValue(),
-				);
-				$ruleset->removeRule( $property->getRule() );
+				$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
+				if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
+					$validation_errors[] = array(
+						'code'           => 'illegal_css_property',
+						'property_name'  => $property->getRule(),
+						'property_value' => $property->getValue(),
+					);
+					$ruleset->removeRule( $property->getRule() );
+				}
+			}
+		} else {
+			foreach ( $options['property_blacklist'] as $illegal_property_name ) {
+				$properties = $ruleset->getRules( $illegal_property_name );
+				foreach ( $properties as $property ) {
+					$validation_errors[] = array(
+						'code'           => 'illegal_css_property',
+						'property_name'  => $property->getRule(),
+						'property_value' => $property->getValue(),
+					);
+					$ruleset->removeRule( $property->getRule() );
+				}
 			}
 		}
+
+		$validation_errors = array_merge(
+			$validation_errors,
+			$this->transform_important_qualifiers( $ruleset, $css_list )
+		);
 
 		// Convert width to max-width when requested. See <https://github.com/Automattic/amp-wp/issues/494>.
 		if ( $options['convert_width_to_max_width'] ) {
@@ -626,7 +677,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === count( $ruleset->getRules() ) ) {
 			$css_list->remove( $ruleset );
 		}
-		// @todo Sort??
 		// @todo Delete rules with selectors for -amphtml- class and i-amphtml- tags.
 		return $validation_errors;
 	}
@@ -635,13 +685,52 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Process CSS keyframes.
 	 *
 	 * @since 1.0
+	 * @link https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
+	 * @link https://github.com/ampproject/amphtml/blob/b685a0780a7f59313666225478b2b79b463bcd0b/validator/validator-main.protoascii#L1002-L1043
+	 * @todo Tree shaking could be extended to keyframes, to omit a keyframe if it is not referenced by any rule.
 	 *
 	 * @param KeyFrame $css_list Ruleset.
 	 * @param array    $options  Options.
 	 * @return array Validation errors.
 	 */
 	private function process_css_keyframes( KeyFrame $css_list, $options ) {
-		return array(); // @todo Add validation.
+		$validation_errors = array();
+		if ( ! empty( $options['property_whitelist'] ) ) {
+			foreach ( $css_list->getContents() as $rules ) {
+				if ( ! ( $rules instanceof DeclarationBlock ) ) {
+					$validation_errors[] = array(
+						'code'    => 'unrecognized_css',
+						'message' => __( 'Unrecognized CSS removed.', 'amp' ),
+					);
+					$css_list->remove( $rules );
+					continue;
+				}
+
+				$validation_errors = array_merge(
+					$validation_errors,
+					$this->transform_important_qualifiers( $rules, $css_list )
+				);
+
+				/**
+				 * Properties.
+				 *
+				 * @var Rule[] $properties
+				 */
+				$properties = $rules->getRules();
+				foreach ( $properties as $property ) {
+					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
+					if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
+						$validation_errors[] = array(
+							'code'           => 'illegal_css_property',
+							'property_name'  => $property->getRule(),
+							'property_value' => $property->getValue(),
+						);
+						$rules->removeRule( $property->getRule() );
+					}
+				}
+			}
+		}
+		return $validation_errors;
 	}
 
 	/**
@@ -652,10 +741,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#important
 	 * @todo Further tailor for specificity. See https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L87-L126.
 	 *
-	 * @param RuleSet $ruleset  Rule set.
-	 * @param CSSList $css_list CSS List.
+	 * @param RuleSet|DeclarationBlock $ruleset  Rule set.
+	 * @param CSSList                  $css_list CSS List.
+	 * @return array Validation errors.
 	 */
 	private function transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list ) {
+		$validation_errors    = array();
+		$allow_transformation = (
+			$ruleset instanceof DeclarationBlock
+			&&
+			! ( $css_list instanceof KeyFrame )
+		);
+
 		/**
 		 * Properties.
 		 *
@@ -668,14 +765,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$property->setIsImportant( false );
 
 				// An !important doesn't make sense for rulesets that don't have selectors.
-				if ( $ruleset instanceof DeclarationBlock ) {
+				if ( $allow_transformation ) {
 					$importants[] = $property;
 					$ruleset->removeRule( $property->getRule() );
+				} else {
+					$validation_errors[] = array(
+						'code'    => 'illegal_css_important',
+						'message' => __( 'Illegal CSS !important qualifier.', 'amp' ),
+					);
 				}
 			}
 		}
-		if ( ! ( $ruleset instanceof DeclarationBlock ) || empty( $importants ) ) {
-			return;
+		if ( ! $allow_transformation || empty( $importants ) ) {
+			return $validation_errors;
 		}
 
 		$important_ruleset = clone $ruleset;
@@ -687,32 +789,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		) );
 		$important_ruleset->setRules( $importants );
 		$css_list->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
-	}
 
-	/**
-	 * Validate amp-keyframe style.
-	 *
-	 * @since 0.7
-	 * @link https://github.com/ampproject/amphtml/blob/b685a0780a7f59313666225478b2b79b463bcd0b/validator/validator-main.protoascii#L1002-L1043
-	 * @todo Limit @keyframes to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
-	 * @todo Use CSS parser to process.
-	 * @todo Eliminate in favor of \AMP_Style_Sanitizer::process_css_keyframes().
-	 *
-	 * @param DOMElement $style Style element.
-	 * @return true|WP_Error Validity.
-	 */
-	private function validate_amp_keyframe( $style ) {
-		// @todo Check size of previous $this->amp_keyframes_style_elements to determine if this one is too big, since they get combined later..
-		if ( $this->style_keyframes_cdata_spec && strlen( $style->textContent ) > $this->style_keyframes_cdata_spec['max_bytes'] ) {
-			return new WP_Error( 'max_bytes', __( 'amp-keyframes is too large', 'amp' ) );
-		}
-
-		// @todo Also add validation of the CSS spec itself.
-		// @todo Minification needed.
-		// @todo Just capture the keyframes stylesheet and then amend a new style[amp-keyframes] at the end of the doc.
-		$this->amp_keyframes_style_elements[] = $style;
-
-		return true;
+		return $validation_errors;
 	}
 
 	/**
@@ -741,6 +819,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$hash   = md5( $rule );
 		$rule   = $this->process_stylesheet( $rule, $style_attribute, array(
 			'convert_width_to_max_width' => true,
+			'allowed_at_rules'           => array(),
+			'property_whitelist'         => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
 		) );
 		$length = strlen( $rule );
 
@@ -770,32 +850,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Finalize style[amp-keyframes] elements.
 	 *
-	 * Combine all amp-keyframe elements and enforece that it is at the end of the body.
+	 * Combine all amp-keyframe elements and enforce that it is at the end of the body.
 	 *
 	 * @since 1.0
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
 	 */
 	private function finalize_amp_keyframes_styles() {
-		if ( empty( $this->amp_keyframes_style_elements ) ) {
+		if ( empty( $this->keyframes_stylesheets ) ) {
 			return;
 		}
+
 		$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( ! $body ) {
-			foreach ( $this->amp_keyframes_style_elements as $other_amp_keyframe_style ) {
-				$this->remove_invalid_child( $other_amp_keyframe_style, array(
+			if ( ! empty( $this->args['validation_error_callback'] ) ) {
+				call_user_func( $this->args['validation_error_callback'], array(
 					'code'    => 'missing_body_element',
 					'message' => __( 'amp-keyframes must be last child of body element.', 'amp' ),
 				) );
 			}
-		} else {
-			$first_amp_keyframes_style = array_shift( $this->amp_keyframes_style_elements );
-			foreach ( $this->amp_keyframes_style_elements as $other_amp_keyframe_style ) {
-				foreach ( $other_amp_keyframe_style->childNodes as $text_node ) {
-					$first_amp_keyframes_style->appendChild( $text_node );
-				}
-				$other_amp_keyframe_style->parentNode->removeChild( $other_amp_keyframe_style );
-			}
-			$body->appendChild( $first_amp_keyframes_style );
+			return;
 		}
+
+		$style_element = $this->dom->createElement( 'style' );
+		$style_element->setAttribute( 'amp-keyframes', '' );
+		$style_element->appendChild( $this->dom->createTextNode( implode( '', $this->keyframes_stylesheets ) ) );
+		$body->appendChild( $style_element );
 	}
 }

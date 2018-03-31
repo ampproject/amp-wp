@@ -364,11 +364,11 @@ def GetTagSpec(tag_spec, attr_lists):
 			elif 'css_spec' == field_descriptor.name:
 				css_spec = {}
 
-				css_spec['at_rules'] = []
+				css_spec['allowed_at_rules'] = []
 				for at_rule_spec in field_value.at_rule_spec:
 					if '$DEFAULT' == at_rule_spec.name:
 						continue
-					css_spec['at_rules'].append( at_rule_spec.name )
+					css_spec['allowed_at_rules'].append( at_rule_spec.name )
 
 				for css_spec_field_name in ( 'allowed_declarations', 'font_url_spec', 'image_url_spec', 'validate_keyframes' ):
 					if not hasattr( field_value, css_spec_field_name ):

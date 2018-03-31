@@ -8423,13 +8423,13 @@ class AMP_Allowed_Tags_Generated {
 						'regex' => '!important',
 					),
 					'css_spec' => array(
-						'allowed_declarations' => array(),
-						'at_rules' => array(
+						'allowed_at_rules' => array(
 							'font-face',
 							'keyframes',
 							'media',
 							'supports',
 						),
+						'allowed_declarations' => array(),
 						'font_url_spec' => array(
 							'allow_empty' => true,
 							'allow_relative' => true,
@@ -8512,17 +8512,17 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'css_spec' => array(
+						'allowed_at_rules' => array(
+							'keyframes',
+							'media',
+							'supports',
+						),
 						'allowed_declarations' => array(
 							'animation-timing-function',
 							'offset-distance',
 							'opacity',
 							'transform',
 							'visibility',
-						),
-						'at_rules' => array(
-							'keyframes',
-							'media',
-							'supports',
 						),
 						'font_url_spec' => array(),
 						'image_url_spec' => array(),
