@@ -28,7 +28,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'width'  => 100,
 					'height' => 100,
-					'layout' => 'intrinsic',
+					'layout' => 'responsive',
 				),
 			),
 
@@ -79,7 +79,6 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'width'  => 100,
 					'height' => 100,
-					'layout' => 'intrinsic',
 				),
 			),
 		);

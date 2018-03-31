@@ -80,7 +80,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			$this->did_convert_elements = true;
 			$new_attributes             = $this->set_layout( $new_attributes );
-			if ( isset( $new_attributes['width'] ) && isset( $new_attributes['height'] ) ) {
+			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
+				$new_attributes['layout'] = 'intrinsic';
 				$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 			}
 
