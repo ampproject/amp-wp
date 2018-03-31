@@ -44,20 +44,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $stylesheets = array();
 
 	/**
-	 * Maximum number of bytes allowed for a keyframes style.
+	 * Spec for style[amp-custom] cdata.
 	 *
-	 * @since 0.7
-	 * @var int
+	 * @since 1.0
+	 * @var array
 	 */
-	private $keyframes_max_size;
+	private $style_custom_cdata_spec;
 
 	/**
-	 * Maximum number of bytes allowed for a AMP Custom style.
+	 * Spec for style[amp-keyframes] cdata.
 	 *
-	 * @since 0.7
-	 * @var int
+	 * @since 1.0
+	 * @var array
 	 */
-	private $custom_max_size;
+	private $style_keyframes_cdata_spec;
 
 	/**
 	 * Current CSS size.
@@ -131,21 +131,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function __construct( DOMDocument $dom, array $args = array() ) {
 		parent::__construct( $dom, $args );
 
-		// @todo See https://github.com/ampproject/amphtml/blob/d39efc401241421fe0830e4a710b342c44b1f7b5/validator/validator-main.protoascii#L1335-L1361.
-		$spec_name = 'style[amp-keyframes]';
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
-			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-				$this->keyframes_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
-				break;
+			if ( ! isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) ) {
+				continue;
 			}
-		}
-
-		// @todo Make sure css_spec gets parsed and included in AMP_Allowed_Tags_Generated. See <https://github.com/Automattic/amp-wp/pull/610/files> and https://github.com/ampproject/amphtml/blob/d39efc401241421fe0830e4a710b342c44b1f7b5/validator/validator-main.protoascii#L838-L918
-		$spec_name = 'style amp-custom';
-		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
-			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-				$this->custom_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
-				break;
+			if ( 'style[amp-keyframes]' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$this->style_keyframes_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
+			} elseif ( 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$this->style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
 			}
 		}
 
@@ -349,7 +342,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove if surpasses max size.
 		$length = strlen( $stylesheet );
-		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
+		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
 			$this->remove_invalid_child( $element, array(
 				'message' => __( 'Too much CSS enqueued.', 'amp' ),
 			) );
@@ -414,7 +407,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Skip if surpasses max size.
 		$length = strlen( $stylesheet );
-		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
+		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
 			$this->remove_invalid_child( $element, array(
 				'message' => __( 'Too much CSS enqueued.', 'amp' ),
 			) );
@@ -722,7 +715,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function validate_amp_keyframe( $style ) {
 		// @todo Check size of previous $this->amp_keyframes_style_elements to determine if this one is too big, since they get combined later..
-		if ( $this->keyframes_max_size && strlen( $style->textContent ) > $this->keyframes_max_size ) {
+		if ( $this->style_keyframes_cdata_spec && strlen( $style->textContent ) > $this->style_keyframes_cdata_spec['max_bytes'] ) {
 			return new WP_Error( 'max_bytes', __( 'amp-keyframes is too large', 'amp' ) );
 		}
 
@@ -769,7 +762,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
+		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
 			$this->remove_invalid_attribute( $element, $style_attribute, array(
 				'message' => __( 'Too much CSS.', 'amp' ),
 			) );
