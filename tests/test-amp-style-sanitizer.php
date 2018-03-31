@@ -113,10 +113,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'inline_style_element_with_multiple_rules_containing_selectors_is_removed' => array(
-				'<style>div > span { font-weight:bold !important; overflow: scroll; font-style: italic; }</style><div><span>bold!</span></div>',
+				'<style>div > span { font-weight:bold !important; overflow: scroll; font-style: italic; } @media screen and ( max-width: 640px ) { div > span { font-weight:normal !important; overflow: auto; font-style: normal; } }</style><div><span>bold!</span></div>',
 				'<div><span>bold!</span></div>',
 				array(
-					'div > span{font-style:italic;}:root:not(#FK_ID) div > span{font-weight:bold;}',
+					'div > span{font-style:italic;}@media screen and ( max-width: 640px ){div > span{font-style:normal;}:root:not(#FK_ID) div > span{font-weight:normal;}}:root:not(#FK_ID) div > span{font-weight:bold;}',
 				),
 			),
 
@@ -125,6 +125,22 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<button>Click</button>',
 				array(
 					'button{font-weight:bold;}',
+				),
+			),
+
+			'illegal_at_rules_removed' => array(
+				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
+				'',
+				array(
+					'body{color:black;}',
+				),
+			),
+
+			'allowed_at_rules_retained' => array(
+				'<style>@media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style>',
+				'',
+				array(
+					'@media screen and ( max-width: 640px ){body{font-size:small;}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");}@supports (display: grid){div{display:grid;}}@-moz-keyframes appear{from{opacity:0;}to{opacity:1;}}@keyframes appear{from{opacity:0;}to{opacity:1;}}',
 				),
 			),
 		);

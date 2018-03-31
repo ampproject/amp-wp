@@ -5,6 +5,17 @@
  * @package AMP
  */
 
+use \Sabberworm\CSS\RuleSet\DeclarationBlock;
+use \Sabberworm\CSS\CSSList\CSSList;
+use \Sabberworm\CSS\Property\Selector;
+use \Sabberworm\CSS\RuleSet\RuleSet;
+use \Sabberworm\CSS\Rule\Rule;
+use \Sabberworm\CSS\Property\AtRule;
+use \Sabberworm\CSS\CSSList\KeyFrame;
+use \Sabberworm\CSS\RuleSet\AtRuleSet;
+use \Sabberworm\CSS\Property\Import;
+use \Sabberworm\CSS\CSSList\AtRuleBlockList;
+
 /**
  * Class AMP_Style_Sanitizer
  *
@@ -120,6 +131,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function __construct( DOMDocument $dom, array $args = array() ) {
 		parent::__construct( $dom, $args );
 
+		// @todo See https://github.com/ampproject/amphtml/blob/d39efc401241421fe0830e4a710b342c44b1f7b5/validator/validator-main.protoascii#L1335-L1361.
 		$spec_name = 'style[amp-keyframes]';
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
 			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
@@ -128,6 +140,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// @todo Make sure css_spec gets parsed and included in AMP_Allowed_Tags_Generated. See <https://github.com/Automattic/amp-wp/pull/610/files> and https://github.com/ampproject/amphtml/blob/d39efc401241421fe0830e4a710b342c44b1f7b5/validator/validator-main.protoascii#L838-L918
 		$spec_name = 'style amp-custom';
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
 			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
@@ -427,21 +440,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param string             $stylesheet Stylesheet.
 	 * @param DOMElement|DOMAttr $node       Element (link/style) or style attribute where the stylesheet came from.
-	 * @param array              $args       {
-	 *     Args.
+	 * @param array              $options    {
+	 *     Options.
 	 *
 	 *     @type bool $convert_width_to_max_width Convert width to max-width.
 	 * }
 	 * @return string Processed stylesheet.
 	 */
-	private function process_stylesheet( $stylesheet, $node, $args = array() ) {
+	private function process_stylesheet( $stylesheet, $node, $options = array() ) {
 		$start_time = microtime( true );
 
-		$args = array_merge(
+		$options = array_merge(
 			array(
 				'convert_width_to_max_width' => false,
 			),
-			$args
+			$options
 		);
 
 		$cache_key        = md5( $stylesheet );
@@ -462,76 +475,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Rulesets.
 		 *
-		 * @var Sabberworm\CSS\RuleSet\RuleSet[] $rulesets
-		 * @var Sabberworm\CSS\Rule\Rule $ruleset
+		 * @var CSSList $css_list
+		 * @var Rule $ruleset
 		 */
-		$rulesets          = $css_document->getAllRuleSets();
-		$validation_errors = array();
-		foreach ( $rulesets as $ruleset ) {
-
-			// @todo Fetch an @import.
-			// @todo Disallow anything except @font-face, @keyframes, @media, @supports.
-			if ( ! ( $ruleset instanceof \Sabberworm\CSS\RuleSet\DeclarationBlock ) ) {
-				continue;
-			}
-
-			/**
-			 * Properties.
-			 *
-			 * @var Sabberworm\CSS\Rule\Rule[] $properties
-			 */
-
-			// Remove properties that have illegal values. See <https://www.ampproject.org/docs/fundamentals/spec#properties>.
-			// @todo Limit transition to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
-			$properties = $ruleset->getRules( 'overflow-' );
-			foreach ( $properties as $property ) {
-				if ( in_array( $property->getValue(), array( 'auto', 'scroll' ), true ) ) {
-					$validation_errors[] = array(
-						'code'           => 'illegal_css_property_value',
-						'property_name'  => $property->getRule(),
-						'property_value' => $property->getValue(),
-					);
-					$ruleset->removeRule( $property->getRule() );
-				}
-			}
-
-			$this->transform_important_qualifiers( $ruleset, $css_document );
-
-			// Delete illegal properties. See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
-			$property_blacklist = array(
-				'behavior',
-				'-moz-binding',
-			);
-			foreach ( $property_blacklist as $illegal_property_name ) {
-				$properties = $ruleset->getRules( $illegal_property_name );
-				foreach ( $properties as $property ) {
-					$validation_errors[] = array(
-						'code'           => 'illegal_css_property',
-						'property_name'  => $property->getRule(),
-						'property_value' => $property->getValue(),
-					);
-					$ruleset->removeRule( $property->getRule() );
-				}
-			}
-
-			// Convert width to max-width when requested. See <https://github.com/Automattic/amp-wp/issues/494>.
-			if ( $args['convert_width_to_max_width'] ) {
-				$properties = $ruleset->getRules( 'width' );
-				foreach ( $properties as $property ) {
-					$width_property = new \Sabberworm\CSS\Rule\Rule( 'max-width' );
-					$width_property->setValue( $property->getValue() );
-					$ruleset->removeRule( $property );
-					$ruleset->addRule( $width_property, $property );
-				}
-			}
-
-			// Remove the ruleset if it is now empty.
-			if ( 0 === count( $ruleset->getRules() ) ) {
-				$css_document->remove( $ruleset );
-			}
-			// @todo Sort??
-			// @todo Delete rules with selectors for -amphtml- class and i-amphtml- tags.
-		}
+		$validation_errors = $this->process_css_list( $css_document, $options );
 
 		$output_format = Sabberworm\CSS\OutputFormat::createCompact();
 		$stylesheet    = $css_document->render( $output_format );
@@ -555,43 +502,210 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Process CSS list.
+	 *
+	 * @since 1.0
+	 *
+	 * @param CSSList $css_list CSS List.
+	 * @param array   $options Options.
+	 * @return array Validation errors.
+	 */
+	private function process_css_list( CSSList $css_list, $options ) {
+		$validation_errors = array();
+
+		foreach ( $css_list->getContents() as $css_item ) {
+			if ( $css_item instanceof DeclarationBlock ) {
+				$validation_errors = array_merge(
+					$validation_errors,
+					$this->process_css_declaration_block( $css_item, $css_list, $options )
+				);
+			} elseif ( $css_item instanceof AtRuleBlockList ) {
+				// @todo Let the list be informed by the spec.
+				if ( in_array( $css_item->atRuleName(), array( 'media', 'supports' ), true ) ) {
+					$validation_errors = array_merge(
+						$validation_errors,
+						$this->process_css_list( $css_item, $options )
+					);
+				} else {
+					$validation_errors[] = array(
+						'code'    => 'illegal_css_at_rule',
+						/* translators: %s is the CSS at-rule name. */
+						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
+					);
+					$css_list->remove( $css_item );
+				}
+			} elseif ( $css_item instanceof Import ) {
+				$validation_errors[] = array(
+					'code'    => 'illegal_css_import_rule',
+					'message' => __( 'CSS @import is currently disallowed.', 'amp' ),
+				);
+				$css_list->remove( $css_item );
+			} elseif ( $css_item instanceof AtRuleSet ) {
+				if ( in_array( $css_item->atRuleName(), array( 'font-face' ), true ) ) {
+					$validation_errors = array_merge(
+						$validation_errors,
+						$this->process_css_declaration_block( $css_item, $css_list, $options )
+					);
+				} else {
+					$validation_errors[] = array(
+						'code'    => 'illegal_css_at_rule',
+						/* translators: %s is the CSS at-rule name. */
+						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
+					);
+					$css_list->remove( $css_item );
+				}
+			} elseif ( $css_item instanceof KeyFrame ) {
+				$validation_errors = array_merge(
+					$validation_errors,
+					$this->process_css_keyframes( $css_item, $options )
+				);
+			} elseif ( $css_item instanceof AtRule ) {
+				$validation_errors[] = array(
+					'code'    => 'illegal_css_at_rule',
+					/* translators: %s is the CSS at-rule name. */
+					'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
+				);
+				$css_list->remove( $css_item );
+			} else {
+				$validation_errors[] = array(
+					'code'    => 'unrecognized_css',
+					'message' => __( 'Unrecognized CSS removed.', 'amp' ),
+				);
+				$css_list->remove( $css_item );
+			}
+		}
+		return $validation_errors;
+	}
+
+	/**
+	 * Process CSS rule set.
+	 *
+	 * @since 1.0
+	 *
+	 * @param RuleSet $ruleset  Ruleset.
+	 * @param CSSList $css_list CSS List.
+	 * @param array   $options  Options.
+	 *
+	 * @return array Validation errors.
+	 */
+	private function process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options ) {
+		$validation_errors = array();
+
+		/**
+		 * Properties.
+		 *
+		 * @var Rule[] $properties
+		 */
+
+		// Remove properties that have illegal values. See <https://www.ampproject.org/docs/fundamentals/spec#properties>.
+		// @todo Limit transition to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
+		$properties = $ruleset->getRules( 'overflow-' );
+		foreach ( $properties as $property ) {
+			if ( in_array( $property->getValue(), array( 'auto', 'scroll' ), true ) ) {
+				$validation_errors[] = array(
+					'code'           => 'illegal_css_property_value',
+					'property_name'  => $property->getRule(),
+					'property_value' => $property->getValue(),
+				);
+				$ruleset->removeRule( $property->getRule() );
+			}
+		}
+
+		$this->transform_important_qualifiers( $ruleset, $css_list );
+
+		// Delete illegal properties. See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
+		$property_blacklist = array(
+			'behavior',
+			'-moz-binding',
+		);
+		foreach ( $property_blacklist as $illegal_property_name ) {
+			$properties = $ruleset->getRules( $illegal_property_name );
+			foreach ( $properties as $property ) {
+				$validation_errors[] = array(
+					'code'           => 'illegal_css_property',
+					'property_name'  => $property->getRule(),
+					'property_value' => $property->getValue(),
+				);
+				$ruleset->removeRule( $property->getRule() );
+			}
+		}
+
+		// Convert width to max-width when requested. See <https://github.com/Automattic/amp-wp/issues/494>.
+		if ( $options['convert_width_to_max_width'] ) {
+			$properties = $ruleset->getRules( 'width' );
+			foreach ( $properties as $property ) {
+				$width_property = new Rule( 'max-width' );
+				$width_property->setValue( $property->getValue() );
+				$ruleset->removeRule( $property );
+				$ruleset->addRule( $width_property, $property );
+			}
+		}
+
+		// Remove the ruleset if it is now empty.
+		if ( 0 === count( $ruleset->getRules() ) ) {
+			$css_list->remove( $ruleset );
+		}
+		// @todo Sort??
+		// @todo Delete rules with selectors for -amphtml- class and i-amphtml- tags.
+		return $validation_errors;
+	}
+
+	/**
+	 * Process CSS keyframes.
+	 *
+	 * @since 1.0
+	 *
+	 * @param KeyFrame $css_list Ruleset.
+	 * @param array    $options  Options.
+	 * @return array Validation errors.
+	 */
+	private function process_css_keyframes( KeyFrame $css_list, $options ) {
+		return array(); // @todo Add validation.
+	}
+
+	/**
 	 * Replace !important qualifiers with more specific rules.
 	 *
 	 * @since 1.0
 	 * @see https://www.npmjs.com/package/replace-important
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#important
+	 * @todo Further tailor for specificity. See https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L87-L126.
 	 *
-	 * @param \Sabberworm\CSS\RuleSet\DeclarationBlock $ruleset      Ruleset.
-	 * @param \Sabberworm\CSS\CSSList\Document         $css_document CSS Document.
+	 * @param RuleSet $ruleset  Rule set.
+	 * @param CSSList $css_list CSS List.
 	 */
-	private function transform_important_qualifiers( \Sabberworm\CSS\RuleSet\DeclarationBlock $ruleset, \Sabberworm\CSS\CSSList\Document $css_document ) {
+	private function transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list ) {
 		/**
 		 * Properties.
 		 *
-		 * @var Sabberworm\CSS\Rule\Rule[] $properties
+		 * @var Rule[] $properties
 		 */
 		$properties = $ruleset->getRules();
 		$importants = array();
 		foreach ( $properties as $property ) {
 			if ( $property->getIsImportant() ) {
-				$ruleset->removeRule( $property->getRule() );
 				$property->setIsImportant( false );
-				$importants[] = $property;
+
+				// An !important doesn't make sense for rulesets that don't have selectors.
+				if ( $ruleset instanceof DeclarationBlock ) {
+					$importants[] = $property;
+					$ruleset->removeRule( $property->getRule() );
+				}
 			}
 		}
-		if ( empty( $importants ) ) {
+		if ( ! ( $ruleset instanceof DeclarationBlock ) || empty( $importants ) ) {
 			return;
 		}
 
-		$important_ruleset = new \Sabberworm\CSS\RuleSet\DeclarationBlock();
+		$important_ruleset = clone $ruleset;
 		$important_ruleset->setSelectors( array_map(
-			function( \Sabberworm\CSS\Property\Selector $old_selector ) {
-				return new \Sabberworm\CSS\Property\Selector( ':root:not(#FK_ID) ' . $old_selector->getSelector() );
+			function( Selector $old_selector ) {
+				return new Selector( ':root:not(#FK_ID) ' . $old_selector->getSelector() );
 			},
 			$ruleset->getSelectors()
 		) );
 		$important_ruleset->setRules( $importants );
-		$css_document->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
+		$css_list->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
 	}
 
 	/**
@@ -601,6 +715,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/ampproject/amphtml/blob/b685a0780a7f59313666225478b2b79b463bcd0b/validator/validator-main.protoascii#L1002-L1043
 	 * @todo Limit @keyframes to opacity, transform and -vendorPrefix-transform. See https://www.ampproject.org/docs/design/responsive/style_pages#restricted-styles.
 	 * @todo Use CSS parser to process.
+	 * @todo Eliminate in favor of \AMP_Style_Sanitizer::process_css_keyframes().
 	 *
 	 * @param DOMElement $style Style element.
 	 * @return true|WP_Error Validity.
