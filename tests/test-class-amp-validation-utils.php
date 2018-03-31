@@ -94,6 +94,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets; // WPCS: override ok.
+		unset( $GLOBALS['current_screen'] );
 		parent::tearDown();
 	}
 
@@ -114,7 +115,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
-		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::persistent_caching_object_notice' ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::persistent_object_caching_notice' ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_meta_boxes' ) );
 	}
@@ -1361,41 +1362,36 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for persistent_caching_object_notice()
+	 * Test for persistent_object_caching_notice()
 	 *
-	 * @covers AMP_Validation_Utils::persistent_caching_object_notice()
+	 * @covers AMP_Validation_Utils::persistent_object_caching_notice()
 	 */
-	public function test_persistent_caching_object_notice() {
+	public function test_persistent_object_caching_notice() {
 		set_current_screen( 'toplevel_page_amp-options' );
-		$needle = 'The AMP plugin performs at its best when persistent object cache is enabled.';
+		$text = 'The AMP plugin performs at its best when persistent object cache is enabled.';
 
-		$using = null;
-		wp_using_ext_object_cache( $using );
+		wp_using_ext_object_cache( null );
 		ob_start();
-		AMP_Validation_Utils::persistent_caching_object_notice();
-		$this->assertContains( $needle, ob_get_clean() );
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertContains( $text, ob_get_clean() );
 
-		$using = true;
-		wp_using_ext_object_cache( $using );
+		wp_using_ext_object_cache( true );
 		ob_start();
-		AMP_Validation_Utils::persistent_caching_object_notice();
-		$this->assertNotContains( $needle, ob_get_clean() );
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
 
 		set_current_screen( 'edit.php' );
 
-		$using = null;
-		wp_using_ext_object_cache( $using );
+		wp_using_ext_object_cache( null );
 		ob_start();
-		AMP_Validation_Utils::persistent_caching_object_notice();
-		$this->assertNotContains( $needle, ob_get_clean() );
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
 
-		$using = true;
-		wp_using_ext_object_cache( $using );
+		wp_using_ext_object_cache( true );
 		ob_start();
-		AMP_Validation_Utils::persistent_caching_object_notice();
-		$this->assertNotContains( $needle, ob_get_clean() );
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
 
-		unset( $GLOBALS['current_screen'] );
 	}
 
 }

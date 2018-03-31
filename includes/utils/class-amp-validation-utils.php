@@ -214,7 +214,7 @@ class AMP_Validation_Utils {
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'remaining_error_notice' ) );
-		add_action( 'admin_notices', array( __CLASS__, 'persistent_caching_object_notice' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
 		add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'remove_publish_meta_box' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_status_count' ) );
@@ -1797,18 +1797,17 @@ class AMP_Validation_Utils {
 	 *
 	 * @return void
 	 */
-	public static function persistent_caching_object_notice() {
-		$screen = get_current_screen();
-		if ( 'toplevel_page_amp-options' === $screen->id ) {
-			if ( ! wp_using_ext_object_cache() ) {
-				?>
-				<div class="notice notice-warning">
-					<p><?php esc_html_e( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ); ?></p>
-					<p><a href="<?php echo esc_url( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching' ); ?>">More details</a></p>
-				</div>
-				<?php
-			}
+	public static function persistent_object_caching_notice() {
+		if ( ! wp_using_ext_object_cache() && 'toplevel_page_amp-options' === get_current_screen()->id ) {
+			printf(
+				'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+				esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
+				esc_url( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching' ),
+				esc_html__( 'More details', 'amp' ),
+				esc_html__( 'Dismiss this notice.', 'amp' )
+			);
 		}
 	}
 
 }
+
