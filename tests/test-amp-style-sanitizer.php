@@ -203,6 +203,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'body{color:red;}',
 				),
 			),
+			'style_with_not_selectors' => array(
+				'<html amp><head><meta charset="utf-8"><style amp-custom>body.bar > p:not(.baz) { color:red; } body.foo:not(.bar) > p { color:blue; } body.foo:not(.bar) p:not(.baz) { color:green; } body.foo p { color:yellow; }</style></head><body class="foo"><p>Hello</p></body>',
+				array(
+					'body.foo:not(.bar) > p{color:blue;}body.foo:not(.bar) p:not(.baz){color:green;}body.foo p{color:yellow;}',
+				),
+			),
 		);
 	}
 
@@ -233,7 +239,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			if ( false === strpos( $expected_stylesheet, '{' ) ) {
 				$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			} else {
-				$this->assertStringStartsWith( $expected_stylesheet, $actual_stylesheets[ $i ] );
+				$this->assertEquals( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			}
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}

@@ -603,9 +603,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
-						$classes = array();
-						// @todo There could be a false negative here, such as when :not(body.home) is used. Nots should be first removed prior to matching.
-						if ( preg_match_all( '/(?<=\.)([a-zA-Z0-9_-]+)/', $selector, $matches ) ) {
+						$classes          = array();
+						$reduced_selector = preg_replace( '/:not\(.+?\)/', '', $selector ); // Remove :not() to eliminate false negatives.
+						if ( preg_match_all( '/(?<=\.)([a-zA-Z0-9_-]+)/', $reduced_selector, $matches ) ) {
 							$classes = $matches[0];
 						}
 						$selectors_parsed[ $selector ] = $classes;
