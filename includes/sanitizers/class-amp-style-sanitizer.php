@@ -508,9 +508,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet = '';
 		foreach ( $parsed['stylesheet'] as $stylesheet_part ) {
 			if ( is_array( $stylesheet_part ) ) {
-				list( $referenced_classes, $selectors, $declaration_block ) = $stylesheet_part;
-				if ( ! $should_tree_shake || ( empty( $referenced_classes ) || 0 !== count( array_intersect( $referenced_classes, $this->used_class_names ) ) ) ) {
-					$stylesheet .= $selectors . $declaration_block;
+				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
+
+				$selectors = array();
+				if ( $should_tree_shake ) {
+					foreach ( $selectors_parsed as $selector => $class_names ) {
+						if ( count( $class_names ) === count( array_intersect( $class_names, $this->used_class_names ) ) ) {
+							$selectors[] = $selector;
+						}
+					}
+				} else {
+					$selectors = array_keys( $selectors_parsed );
+				}
+				if ( ! empty( $selectors ) ) {
+					$stylesheet .= implode( ',', $selectors ) . $declaration_block;
 				}
 			} else {
 				$stylesheet .= $stylesheet_part;
@@ -569,9 +580,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$after_declaration_block           = '/*AMP_WP_AFTER_DECLARATION*/';
 
 			$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
+			$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
 			$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
 			$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
-			$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
 
 			$stylesheet_string = $css_document->render( $output_format );
 
@@ -587,26 +598,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$length           = count( $split_stylesheet );
 			for ( $i = 0; $i < $length; $i++ ) {
 				if ( $before_declaration_block === $split_stylesheet[ $i ] ) {
-					$selectors   = explode( $between_selectors, $split_stylesheet[ ++$i ] );
+					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
 					$declaration = $split_stylesheet[ ++$i ];
 
-					$classes = array();
+					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
+						$classes = array();
+						// @todo There could be a false negative here, such as when :not(body.home) is used. Nots should be first removed prior to matching.
 						if ( preg_match_all( '/(?<=\.)([a-zA-Z0-9_-]+)/', $selector, $matches ) ) {
-							$classes = array_merge( $classes, $matches[0] );
-						} else {
-							/*
-							 * If one of the selectors lacks class names, then consider the entire entire
-							 * declaration block to not reference class names so that it will never be tree-shaken.
-							 */
-							$classes = array();
-							break;
+							$classes = $matches[0];
 						}
+						$selectors_parsed[ $selector ] = $classes;
 					}
 
 					$stylesheet[] = array(
-						$classes,
-						implode( '', $selectors ),
+						$selectors_parsed,
 						$declaration,
 					);
 				} else {
