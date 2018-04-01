@@ -10,7 +10,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Tested up to:** 4.9  
 **Stable tag:** 0.6.0  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 5.3  
+**Requires PHP:** 5.3.2  
 
 [![Build Status](https://travis-ci.org/Automattic/amp-wp.svg?branch=master)](https://travis-ci.org/Automattic/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com) 
 
