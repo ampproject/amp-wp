@@ -129,7 +129,8 @@ class AMP_Post_Template {
 				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
 			),
 
-			'post_amp_styles'       => array(),
+			'post_amp_stylesheets'  => array(),
+			'post_amp_styles'       => array(), // Deprecated.
 
 			'amp_analytics'         => amp_add_custom_analytics(),
 		);
@@ -319,7 +320,7 @@ class AMP_Post_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
-		$this->merge_data_for_key( 'post_amp_styles', $amp_content->get_amp_styles() );
+		$this->add_data_by_key( 'post_amp_stylesheets', $amp_content->get_amp_stylesheets() );
 	}
 
 	/**
@@ -347,13 +348,16 @@ class AMP_Post_Template {
 
 		$featured_image = get_post( $featured_id );
 
-		list( $sanitized_html, $featured_scripts, $featured_styles ) = AMP_Content_Sanitizer::sanitize(
-			$featured_html,
+		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
+		$assets = AMP_Content_Sanitizer::sanitize_document(
+			$dom,
 			array( 'AMP_Img_Sanitizer' => array() ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
 		);
+
+		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->add_data_by_key(
 			'featured_image', array(
@@ -362,12 +366,12 @@ class AMP_Post_Template {
 			)
 		);
 
-		if ( $featured_scripts ) {
-			$this->merge_data_for_key( 'amp_component_scripts', $featured_scripts );
+		if ( $assets['scripts'] ) {
+			$this->merge_data_for_key( 'amp_component_scripts', $assets['scripts'] );
 		}
 
-		if ( $featured_styles ) {
-			$this->merge_data_for_key( 'post_amp_styles', $featured_styles );
+		if ( $assets['stylesheets'] ) {
+			$this->merge_data_for_key( 'post_amp_stylesheets', $assets['stylesheets'] );
 		}
 	}
 
