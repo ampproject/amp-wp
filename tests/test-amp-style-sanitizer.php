@@ -187,7 +187,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'style_elements_with_link_elements' => array(
 				sprintf(
-					'<html amp><head><meta charset="utf-8"><style type="text/css">strong.before-dashicon {color:green}</style><link rel="stylesheet" href="%s"><style type="text/css">strong.after-dashicon {color:green}</style></head><body><style>s {color:yellow !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+					'<html amp><head><meta charset="utf-8"><style type="text/css">strong.before-dashicon {color:green}</style><link rel="stylesheet" href="%s"><style type="text/css">strong.after-dashicon {color:green}</style></head><body><style>s {color:yellow !important}</style><s class="before-dashicon"></s><strong class="dashicons-dashboard"></strong><strong class="after-dashicon"></strong></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 					includes_url( 'css/dashicons.css' )
 				),
 				array(

@@ -115,6 +115,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $content_url;
 
 	/**
+	 * Class names used in document.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	private $used_class_names = array();
+
+	/**
 	 * XPath.
 	 *
 	 * @since 1.0
@@ -194,6 +202,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get list of all the class names used in the document.
+	 *
+	 * @since 1.0
+	 * @return array Used class names.
+	 */
+	private function get_used_class_names() {
+		$classes = ' ';
+		foreach ( $this->xpath->query( '//*/@class' ) as $class_attribute ) {
+			$classes .= ' ' . $class_attribute->nodeValue;
+		}
+		return array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) );
+	}
+
+	/**
 	 * Sanitize CSS styles within the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.4
@@ -205,6 +227,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 			return;
 		}
+
+		$this->used_class_names = $this->get_used_class_names();
 
 		/*
 		 * Note that xpath is used to query the DOM so that the link and style elements will be
@@ -342,17 +366,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$cdata_spec   = $is_keyframes ? $this->style_keyframes_cdata_spec : $this->style_custom_cdata_spec;
 		if ( $stylesheet ) {
 			$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
-				'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
-				'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
-				'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
+				'allowed_at_rules'            => $cdata_spec['css_spec']['allowed_at_rules'],
+				'property_whitelist'          => $cdata_spec['css_spec']['allowed_declarations'],
+				'validate_keyframes'          => $cdata_spec['css_spec']['validate_keyframes'],
+				'class_selector_tree_shaking' => ! $cdata_spec['css_spec']['validate_keyframes'],
 			) );
 		}
 
 		// Remove if surpasses max size.
-		$length = strlen( $stylesheet );
-		if ( ( $is_keyframes ? $this->current_keyframes_size : $this->current_custom_size ) + $length > $cdata_spec['max_bytes'] ) {
+		$length       = strlen( $stylesheet );
+		$current_size = $is_keyframes ? $this->current_keyframes_size : $this->current_custom_size;
+		if ( $current_size + $length > $cdata_spec['max_bytes'] ) {
 			$this->remove_invalid_child( $element, array(
-				'message' => __( 'Too much CSS enqueued.', 'amp' ),
+				/* translators: %d is the number of bytes over the limit */
+				'message' => sprintf( __( 'Too much CSS enqueued (by %d bytes).', 'amp' ), ( $current_size + $length ) - $cdata_spec['max_bytes'] ),
 			) );
 			return;
 		}
@@ -417,15 +444,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
-			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
-			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'allowed_at_rules'            => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
+			'property_whitelist'          => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'class_selector_tree_shaking' => true,
 		) );
 
 		// Skip if surpasses max size.
 		$length = strlen( $stylesheet );
 		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
 			$this->remove_invalid_child( $element, array(
-				'message' => __( 'Too much CSS enqueued.', 'amp' ),
+				/* translators: %d is the number of bytes over the limit */
+				'message' => sprintf( __( 'Too much CSS enqueued (by %d bytes).', 'amp' ), ( $this->current_custom_size + $length ) - $this->style_custom_cdata_spec['max_bytes'] ),
 			) );
 			return;
 		}
@@ -445,20 +474,67 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * apply to the current document, and compresses the CSS to remove whitespace and comments.
 	 *
 	 * @since 1.0
-	 * @todo Add flag for whether to do tree shaking.
 	 *
 	 * @param string             $stylesheet Stylesheet.
 	 * @param DOMElement|DOMAttr $node       Element (link/style) or style attribute where the stylesheet came from.
-	 * @param array              $options    {
+	 * @param array              $options {
 	 *     Options.
 	 *
-	 *     @type string[] $property_whitelist         Exclusively-allowed properties.
-	 *     @type string[] $property_blacklist         Disallowed properties.
-	 *     @type bool     $convert_width_to_max_width Convert width to max-width.
+	 *     @type bool     $class_selector_tree_shaking Whether to perform tree shaking to delete rules that reference class names not extant in the current document.
+	 *     @type string[] $property_whitelist          Exclusively-allowed properties.
+	 *     @type string[] $property_blacklist          Disallowed properties.
+	 *     @type bool     $convert_width_to_max_width  Convert width to max-width.
 	 * }
 	 * @return string Processed stylesheet.
 	 */
 	private function process_stylesheet( $stylesheet, $node, $options = array() ) {
+		$should_tree_shake = ! empty( $options['class_selector_tree_shaking'] );
+		unset( $options['class_selector_tree_shaking'] );
+		$cache_key = md5( $stylesheet . serialize( $options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+
+		$cache_group = 'amp-parsed-stylesheet-v1';
+		$parsed      = wp_cache_get( $cache_key, $cache_group );
+		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
+			$parsed = $this->parse_stylesheet( $stylesheet, $options );
+			wp_cache_set( $cache_key, $parsed, $cache_group );
+		}
+
+		if ( ! empty( $this->args['validation_error_callback'] ) && ! empty( $parsed['validation_errors'] ) ) {
+			foreach ( $parsed['validation_errors'] as $validation_error ) {
+				call_user_func( $this->args['validation_error_callback'], array_merge( $validation_error, compact( 'node' ) ) );
+			}
+		}
+
+		$stylesheet = '';
+		foreach ( $parsed['stylesheet'] as $stylesheet_part ) {
+			if ( is_array( $stylesheet_part ) ) {
+				list( $referenced_classes, $selectors, $declaration_block ) = $stylesheet_part;
+				if ( ! $should_tree_shake || ( empty( $referenced_classes ) || 0 !== count( array_intersect( $referenced_classes, $this->used_class_names ) ) ) ) {
+					$stylesheet .= $selectors . $declaration_block;
+				}
+			} else {
+				$stylesheet .= $stylesheet_part;
+			}
+		}
+
+		return $stylesheet;
+	}
+
+	/**
+	 * Parse stylesheet.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $stylesheet_string Stylesheet.
+	 * @param array  $options           Options. See definition in \AMP_Style_Sanitizer::process_stylesheet().
+	 * @return array {
+	 *    Parsed stylesheet.
+	 *
+	 *    @type array $stylesheet        Stylesheet parts, where arrays are tuples for declaration blocks.
+	 *    @type array $validation_errors Validation errors.
+	 * }
+	 */
+	private function parse_stylesheet( $stylesheet_string, $options = array() ) {
 		$start_time = microtime( true );
 
 		$options = array_merge(
@@ -476,52 +552,77 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$options
 		);
 
-		$cache_key        = md5( $stylesheet );
-		$cached_processed = wp_cache_get( $cache_key, 'amp-stylesheet' );
-		if ( $cached_processed ) {
-			if ( ! empty( $this->args['validation_error_callback'] ) ) {
-				foreach ( $cached_processed['validation_errors'] as $validation_error ) {
-					call_user_func( $this->args['validation_error_callback'], array_merge( $validation_error, compact( 'node' ) ) );
-				}
-			}
-			return $cached_processed['stylesheet'];
-		}
-
+		$stylesheet        = array();
+		$validation_errors = array();
 		try {
 			$parser_settings = Sabberworm\CSS\Settings::create()->withMultibyteSupport( false );
-			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet, $parser_settings );
+			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
 			$css_document    = $css_parser->parse();
 
 			$validation_errors = $this->process_css_list( $css_document, $options );
 
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
-			$stylesheet    = $css_document->render( $output_format );
-		} catch ( Exception $exception ) {
-			$stylesheet        = '';
-			$validation_errors = array(
-				array(
-					'code'    => 'css_parse_error',
-					'message' => $exception->getMessage(),
-				),
-			);
-		}
 
-		if ( ! empty( $this->args['validation_error_callback'] ) ) {
-			foreach ( $validation_errors as $validation_error ) {
-				call_user_func( $this->args['validation_error_callback'], array_merge( $validation_error, compact( 'node' ) ) );
+			$before_declaration_block          = '/*AMP_WP_BEFORE_DECLARATION_BLOCK*/';
+			$between_selectors                 = '/*AMP_WP_BETWEEN_SELECTORS*/';
+			$after_declaration_block_selectors = '/*AMP_WP_BEFORE_DECLARATION_SELECTORS*/';
+			$after_declaration_block           = '/*AMP_WP_AFTER_DECLARATION*/';
+
+			$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
+			$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
+			$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
+			$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
+
+			$stylesheet_string = $css_document->render( $output_format );
+
+			$pattern  = '#';
+			$pattern .= '(' . preg_quote( $before_declaration_block, '#' ) . ')';
+			$pattern .= '(.+?)';
+			$pattern .= preg_quote( $after_declaration_block_selectors, '#' );
+			$pattern .= '(.+?)';
+			$pattern .= preg_quote( $after_declaration_block, '#' );
+			$pattern .= '#s';
+
+			$split_stylesheet = preg_split( $pattern, $stylesheet_string, -1, PREG_SPLIT_DELIM_CAPTURE );
+			$length           = count( $split_stylesheet );
+			for ( $i = 0; $i < $length; $i++ ) {
+				if ( $before_declaration_block === $split_stylesheet[ $i ] ) {
+					$selectors   = explode( $between_selectors, $split_stylesheet[ ++$i ] );
+					$declaration = $split_stylesheet[ ++$i ];
+
+					$classes = array();
+					foreach ( $selectors as $selector ) {
+						if ( preg_match_all( '/(?<=\.)([a-zA-Z0-9_-]+)/', $selector, $matches ) ) {
+							$classes = array_merge( $classes, $matches[0] );
+						} else {
+							/*
+							 * If one of the selectors lacks class names, then consider the entire entire
+							 * declaration block to not reference class names so that it will never be tree-shaken.
+							 */
+							$classes = array();
+							break;
+						}
+					}
+
+					$stylesheet[] = array(
+						$classes,
+						implode( '', $selectors ),
+						$declaration,
+					);
+				} else {
+					$stylesheet[] = $split_stylesheet[ $i ];
+				}
 			}
+		} catch ( Exception $exception ) {
+			$validation_errors[] = array(
+				'code'    => 'css_parse_error',
+				'message' => $exception->getMessage(),
+			);
 		}
 
 		$this->parse_css_duration += ( microtime( true ) - $start_time );
 
-		// @todo We need to cache an object that allows us to identify the rules that can be deleted.
-		wp_cache_set(
-			$cache_key,
-			compact( 'stylesheet', 'validation_errors' ),
-			'amp-stylesheet'
-		);
-
-		return $stylesheet;
+		return compact( 'stylesheet', 'validation_errors' );
 	}
 
 	/**
@@ -623,12 +724,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options ) {
 		$validation_errors = array();
 
-		/**
-		 * Properties.
-		 *
-		 * @var Rule[] $properties
-		 */
-
 		// Remove disallowed properties.
 		if ( ! empty( $options['property_whitelist'] ) ) {
 			$properties = $ruleset->getRules();
@@ -711,11 +806,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$this->transform_important_qualifiers( $rules, $css_list )
 				);
 
-				/**
-				 * Properties.
-				 *
-				 * @var Rule[] $properties
-				 */
 				$properties = $rules->getRules();
 				foreach ( $properties as $property ) {
 					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
@@ -753,11 +843,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			! ( $css_list instanceof KeyFrame )
 		);
 
-		/**
-		 * Properties.
-		 *
-		 * @var Rule[] $properties
-		 */
 		$properties = $ruleset->getRules();
 		$importants = array();
 		foreach ( $properties as $property ) {
@@ -818,21 +903,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$rule   = sprintf( '.%s { %s }', $class, $style_attribute->nodeValue );
 		$hash   = md5( $rule );
 		$rule   = $this->process_stylesheet( $rule, $style_attribute, array(
-			'convert_width_to_max_width' => true,
-			'allowed_at_rules'           => array(),
-			'property_whitelist'         => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'convert_width_to_max_width'  => true,
+			'allowed_at_rules'            => array(),
+			'property_whitelist'          => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'class_selector_tree_shaking' => false,
 		) );
 		$length = strlen( $rule );
 
-		$element->removeAttribute( 'style' );
-
 		if ( 0 === $length ) {
+			$element->removeAttribute( 'style' );
 			return;
 		}
 
 		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
 			$this->remove_invalid_attribute( $element, $style_attribute, array(
-				'message' => __( 'Too much CSS.', 'amp' ),
+				/* translators: %d is the number of bytes over the limit */
+				'message' => sprintf( __( 'Too much CSS enqueued (by %d bytes).', 'amp' ), ( $this->current_custom_size + $length ) - $this->style_custom_cdata_spec['max_bytes'] ),
 			) );
 			return;
 		}
@@ -840,6 +926,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->current_custom_size += $length;
 		$this->stylesheets[ $hash ] = $rule;
 
+		$element->removeAttribute( 'style' );
 		if ( $element->hasAttribute( 'class' ) ) {
 			$element->setAttribute( 'class', $element->getAttribute( 'class' ) . ' ' . $class );
 		} else {
