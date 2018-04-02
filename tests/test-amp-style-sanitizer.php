@@ -198,19 +198,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 			'style_with_no_head' => array(
-				'<html amp><body>Not good!<style>body{color:red;}</style></body>',
+				'<html amp><body>Not good!<style>body{color:red;}</style></body></html>',
 				array(
 					'body{color:red;}',
 				),
 			),
 			'style_with_not_selectors' => array(
-				'<html amp><head><meta charset="utf-8"><style amp-custom>body.bar > p:not(.baz) { color:red; } body.foo:not(.bar) > p { color:blue; } body.foo:not(.bar) p:not(.baz) { color:green; } body.foo p { color:yellow; }</style></head><body class="foo"><p>Hello</p></body>',
+				'<html amp><head><meta charset="utf-8"><style amp-custom>body.bar > p:not(.baz) { color:red; } body.foo:not(.bar) > p { color:blue; } body.foo:not(.bar) p:not(.baz) { color:green; } body.foo p { color:yellow; }</style></head><body class="foo"><p>Hello</p></body></html>',
 				array(
 					'body.foo:not(.bar) > p{color:blue;}body.foo:not(.bar) p:not(.baz){color:green;}body.foo p{color:yellow;}',
 				),
 			),
 			'style_with_attribute_selectors' => array(
-				'<html amp><head><meta charset="utf-8"><style amp-custom>.social-navigation a[href*="example.com"] { color:red; } .social-navigation a.examplecom { color:blue; }</style></head><body class="foo"><nav class="social-navigation"><a href="https://example.com/">Example</a></nav></body>',
+				'<html amp><head><meta charset="utf-8"><style amp-custom>.social-navigation a[href*="example.com"] { color:red; } .social-navigation a.examplecom { color:blue; }</style></head><body class="foo"><nav class="social-navigation"><a href="https://example.com/">Example</a></nav></body></html>',
 				array(
 					'.social-navigation a[href*="example.com"]{color:red;}',
 				),
@@ -249,6 +249,32 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			}
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
+	}
+
+	/**
+	 * Test handling of stylesheets with @font-face that have data: url source.
+	 *
+	 * Also confirm that class-based tree-shaking is working.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_font_face_at_rule()
+	 */
+	public function test_font_data_url_handling() {
+		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( includes_url( 'css/dashicons.css' ) ) . '"></head><body><span class="dashicons dashicons-admin-appearance"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
+		$sanitizer->sanitize();
+		AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertCount( 1, $actual_stylesheets );
+		$stylesheet = $actual_stylesheets[0];
+		$this->assertContains( 'dashicons.woff") format("woff")', $stylesheet );
+		$this->assertNotContains( 'data:application/font-woff;', $stylesheet );
+		$this->assertContains( '.dashicons{', $stylesheet );
+		$this->assertContains( '.dashicons-admin-appearance:before{', $stylesheet );
+		$this->assertNotContains( '.dashicons-format-chat:before', $stylesheet );
 	}
 
 	/**
