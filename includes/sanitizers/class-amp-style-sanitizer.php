@@ -1025,8 +1025,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$important_ruleset = clone $ruleset;
 		$important_ruleset->setSelectors( array_map(
+			/**
+			 * Modify selectors to be more specific to roughly match the effect of !important.
+			 *
+			 * @link https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L88-L109
+			 *
+			 * @param Selector $old_selector Original selector.
+			 * @return Selector The new more-specific selector.
+			 */
 			function( Selector $old_selector ) {
-				return new Selector( ':root:not(#FK_ID) ' . $old_selector->getSelector() );
+				$specific = ':not(#_)'; // Here "_" is just a short single-char ID.
+
+				$selector_mod = str_repeat( $specific, floor( $old_selector->getSpecificity() / 100 ) );
+				if ( $old_selector->getSpecificity() % 100 > 0 ) {
+					$selector_mod .= $specific;
+				}
+				if ( $old_selector->getSpecificity() % 10 > 0 ) {
+					$selector_mod .= $specific;
+				}
+
+				$new_selector = $old_selector->getSelector();
+
+				// Amend the selector mod to the first element in selector if it is already the root; otherwise add new root ancestor.
+				if ( preg_match( '/^\s*(html|:root)\b/i', $new_selector, $matches ) ) {
+					$new_selector = substr( $new_selector, 0, strlen( $matches[0] ) ) . $selector_mod . substr( $new_selector, strlen( $matches[0] ) );
+				} else {
+					$new_selector = sprintf( ':root%s %s', $selector_mod, $new_selector );
+				}
+				return new Selector( $new_selector );
 			},
 			$ruleset->getSelectors()
 		) );
@@ -1056,9 +1082,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// @todo Use hash from resulting processed CSS so that we can potentially re-use? We need to use the hash of the original rules as the cache key.
 		$class  = 'amp-wp-' . substr( md5( $style_attribute->nodeValue ), 0, 7 );
-		$rule   = sprintf( '.%s { %s }', $class, $style_attribute->nodeValue );
+		$root   = ':root' . str_repeat( ':not(#_)', 5 ); // @todo The correctness of using "5" should be validated.
+		$rule   = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
 		$hash   = md5( $rule );
 		$rule   = $this->process_stylesheet( $rule, $style_attribute, array(
 			'convert_width_to_max_width'  => true,
