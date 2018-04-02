@@ -499,10 +499,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$cache_key = md5( $stylesheet . serialize( $options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 
 		$cache_group = 'amp-parsed-stylesheet-v1';
-		$parsed      = wp_cache_get( $cache_key, $cache_group );
+		if ( wp_using_ext_object_cache() ) {
+			$parsed = wp_cache_get( $cache_key, $cache_group );
+		} else {
+			$parsed = get_transient( $cache_key . $cache_group );
+		}
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
 			$parsed = $this->parse_stylesheet( $stylesheet, $options );
-			wp_cache_set( $cache_key, $parsed, $cache_group );
+			if ( wp_using_ext_object_cache() ) {
+				wp_cache_set( $cache_key, $parsed, $cache_group );
+			} else {
+				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
+				set_transient( $cache_key . $cache_group, $parsed, MONTH_IN_SECONDS );
+			}
 		}
 
 		if ( ! empty( $this->args['validation_error_callback'] ) && ! empty( $parsed['validation_errors'] ) ) {
