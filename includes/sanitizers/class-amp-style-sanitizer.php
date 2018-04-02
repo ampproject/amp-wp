@@ -509,11 +509,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $parsed['stylesheet'] as $stylesheet_part ) {
 			if ( is_array( $stylesheet_part ) ) {
 				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
-
-				$selectors = array();
 				if ( $should_tree_shake ) {
+					$selectors = array();
 					foreach ( $selectors_parsed as $selector => $class_names ) {
-						if ( count( $class_names ) === count( array_intersect( $class_names, $this->used_class_names ) ) ) {
+						if ( 0 === count( array_diff( $class_names, $this->used_class_names ) ) ) { // If all class names are used in the doc.
 							$selectors[] = $selector;
 						}
 					}
