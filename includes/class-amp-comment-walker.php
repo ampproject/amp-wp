@@ -21,7 +21,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	public $args;
 
 	/**
-	 * Holds the timestamp of the most reacent comment in a thread.
+	 * Holds the timestamp of the most recent comment in a thread.
 	 *
 	 * @since 0.7
 	 * @var array
@@ -54,14 +54,29 @@ class AMP_Comment_Walker extends Walker_Comment {
 		} else {
 			$tag = '<li';
 		}
-		$new_tag = $tag . ' data-sort-time="' . esc_attr( strtotime( $comment->comment_date ) ) . '"';
+		$comment_time_stamp = strtotime( $comment->comment_date );
+		$new_tag            = $tag . ' data-sort-time="' . esc_attr( $comment_time_stamp ) . '"';
 
 		if ( ! empty( $this->comment_thread_age[ $comment->comment_ID ] ) ) {
-			$new_tag .= ' data-update-time="' . esc_attr( $this->comment_thread_age[ $comment->comment_ID ] ) . '"';
+			if ( $this->comment_thread_age[ $comment->comment_ID ] !== $comment_time_stamp ) {
+				// Only add data-update-time the update time is not the same.
+				$update_time = $this->comment_thread_age[ $comment->comment_ID ];
+			} elseif ( count( $this->comment_thread_age ) === 1 ) {
+				// Add the current timestamp to the last item to defeat polling the same URL to defeat caching.
+				$update_time = current_time( 'timestamp' );
+			}
+
+			if ( isset( $update_time ) ) {
+				$new_tag .= ' data-update-time="' . esc_attr( $update_time ) . '"';
+			}
 		}
 
 		$output .= $new_tag . substr( ltrim( $new_out ), strlen( $tag ) );
 
+		// Remove comment age if exists.
+		if ( isset( $this->comment_thread_age[ $comment->comment_ID ] ) ) {
+			unset( $this->comment_thread_age[ $comment->comment_ID ] );
+		}
 	}
 
 	/**
