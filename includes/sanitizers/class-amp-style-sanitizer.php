@@ -603,8 +603,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
-						$classes          = array();
-						$reduced_selector = preg_replace( '/:not\(.+?\)/', '', $selector ); // Remove :not() to eliminate false negatives.
+						$classes = array();
+
+						// Remove :not() to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
+						$reduced_selector = preg_replace( '/:not\(.+?\)/', '', $selector );
+
+						// Remove attribute selectors to eliminate false negative, such as with `.social-navigation a[href*="example.com"]:before`.
+						$reduced_selector = preg_replace( '/\[\w.*?\]/', '', $reduced_selector );
+
 						if ( preg_match_all( '/(?<=\.)([a-zA-Z0-9_-]+)/', $reduced_selector, $matches ) ) {
 							$classes = $matches[0];
 						}

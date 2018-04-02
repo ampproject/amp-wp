@@ -209,6 +209,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'body.foo:not(.bar) > p{color:blue;}body.foo:not(.bar) p:not(.baz){color:green;}body.foo p{color:yellow;}',
 				),
 			),
+			'style_with_attribute_selectors' => array(
+				'<html amp><head><meta charset="utf-8"><style amp-custom>.social-navigation a[href*="example.com"] { color:red; } .social-navigation a.examplecom { color:blue; }</style></head><body class="foo"><nav class="social-navigation"><a href="https://example.com/">Example</a></nav></body>',
+				array(
+					'.social-navigation a[href*="example.com"]{color:red;}',
+				),
+			),
 		);
 	}
 
