@@ -86,7 +86,6 @@ class AMP_Theme_Support {
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
-		self::add_temporary_discussion_restrictions();
 
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
@@ -533,35 +532,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Set up some restrictions for commenting based on amp-live-list limitations.
-	 *
-	 * Temporarily force comments to be listed in descending order.
-	 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
-	 *
-	 * @link https://github.com/ampproject/amphtml/issues/5396
-	 */
-	protected static function add_temporary_discussion_restrictions() {
-		add_filter( 'option_comment_order', function() {
-			return 'desc';
-		}, PHP_INT_MAX );
-
-		add_action( 'admin_print_footer_scripts-options-discussion.php', function() {
-			?>
-			<div class="notice notice-info inline" id="amp-comment-notice"><p><?php echo wp_kses_post( __( 'Note: AMP does not yet <a href="https://github.com/ampproject/amphtml/issues/5396" target="_blank">support ascending</a> comments with newer entries appearing at the bottom.', 'amp' ) ); ?></p></div>
-			<script>
-			// Move the notice below the selector and disable selector.
-			jQuery( function( $ ) {
-				var orderSelect = $( '#comment_order' ),
-					notice = $( '#amp-comment-notice' );
-				orderSelect.prop( 'disabled', true );
-				orderSelect.closest( 'fieldset' ).append( notice );
-			} );
-			</script>
-			<?php
-		} );
-	}
-
-	/**
 	 * Register/override widgets.
 	 *
 	 * @global WP_Widget_Factory
@@ -634,9 +604,6 @@ class AMP_Theme_Support {
 	public static function amp_set_comments_walker( $args ) {
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
-		// Add reverse order here as well, in case theme overrides it.
-		$args['reverse_top_level'] = true;
-
 		return $args;
 	}
 
