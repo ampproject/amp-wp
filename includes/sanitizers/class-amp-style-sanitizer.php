@@ -586,6 +586,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
 			$css_document    = $css_parser->parse();
 
+			if ( ! empty( $options['stylesheet_url'] ) ) {
+				$this->real_path_urls(
+					array_filter(
+						$css_document->getAllValues(),
+						function ( $value ) {
+							return $value instanceof URL;
+						}
+					),
+					$options['stylesheet_url']
+				);
+			}
+
 			$validation_errors = $this->process_css_list( $css_document, $options );
 
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
@@ -737,6 +749,39 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Convert URLs in to non-relative real-paths.
+	 *
+	 * @param URL[]  $urls           URLs.
+	 * @param string $stylesheet_url Stylesheet URL.
+	 */
+	private function real_path_urls( $urls, $stylesheet_url ) {
+		$base_url = preg_replace( ':[^/]+(\?.*)?(#.*)?$:', '', $stylesheet_url );
+		if ( empty( $base_url ) ) {
+			return;
+		}
+		foreach ( $urls as $url ) {
+			$url_string = $url->getURL()->getString();
+			if ( 'data:' === substr( $url_string, 0, 5 ) ) {
+				continue;
+			}
+
+			$parsed_url = wp_parse_url( $url_string );
+			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || '/' === substr( $parsed_url['path'], 0, 1 ) ) {
+				continue;
+			}
+
+			$relative_url = preg_replace( '#^\./#', '', $url->getURL()->getString() );
+
+			$real_url = $base_url . $relative_url;
+			do {
+				$real_url = preg_replace( '#[^/]+/../#', '', $real_url, -1, $count );
+			} while ( 0 !== $count );
+
+			$url->getURL()->setString( $real_url );
+		}
+	}
+
+	/**
 	 * Process CSS rule set.
 	 *
 	 * @since 1.0
@@ -781,7 +826,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( $ruleset instanceof AtRuleSet && 'font-face' === $ruleset->atRuleName() ) {
-			$this->process_font_face_at_rule( $ruleset, $options );
+			$this->process_font_face_at_rule( $ruleset );
 		}
 
 		$validation_errors = array_merge(
@@ -814,121 +859,97 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 *
 	 * @param AtRuleSet $ruleset Ruleset for @font-face.
-	 * @param array     $options Options.
 	 */
-	private function process_font_face_at_rule( AtRuleSet $ruleset, $options ) {
+	private function process_font_face_at_rule( AtRuleSet $ruleset ) {
 		$src_properties = $ruleset->getRules( 'src' );
 		if ( empty( $src_properties ) ) {
 			return;
 		}
 
-		$base_url = null;
-		if ( ! empty( $options['stylesheet_url'] ) ) {
-			$base_url = preg_replace( ':[^/]+(\?.*)?(#.*)?$:', '', $options['stylesheet_url'] );
-		}
-
-		/**
-		 * Convert a relative path URL into a real/absolute path.
-		 *
-		 * @param URL $url Stylesheet URL.
-		 */
-		$real_path = function ( URL $url ) use ( $base_url ) {
-			if ( empty( $base_url ) ) {
-				return;
-			}
-			$parsed_url = wp_parse_url( $url->getURL()->getString() );
-			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || '/' === substr( $parsed_url['path'], 0, 1 ) ) {
-				return;
-			}
-			$relative_url = preg_replace( '#^\./#', '', $url->getURL()->getString() );
-			$url->getURL()->setString( $base_url . $relative_url );
-		};
-
 		foreach ( $src_properties as $src_property ) {
 			$value = $src_property->getValue();
-			if ( $value instanceof URL ) {
-				$real_path( $value );
-			} elseif ( $value instanceof RuleValueList ) {
-				/*
-				 * The CSS Parser parses a src such as:
-				 *
-				 *    url(data:application/font-woff;...) format('woff'),
-				 *    url('Genericons.ttf') format('truetype'),
-				 *    url('Genericons.svg#genericonsregular') format('svg')
-				 *
-				 * As a list of components consisting of:
-				 *
-				 *    URL,
-				 *    RuleValueList( CSSFunction, URL ),
-				 *    RuleValueList( CSSFunction, URL ),
-				 *    CSSFunction
-				 *
-				 * Clearly the components here are not logically grouped. So the first step is to fix the order.
-				 */
-				$sources = array();
-				foreach ( $value->getListComponents() as $component ) {
-					if ( $component instanceof RuleValueList ) {
-						$subcomponents = $component->getListComponents();
-						$subcomponent  = array_shift( $subcomponents );
-						if ( $subcomponent ) {
-							if ( empty( $sources ) ) {
-								$sources[] = array( $subcomponent );
-							} else {
-								$sources[ count( $sources ) - 1 ][] = $subcomponent;
-							}
-						}
-						foreach ( $subcomponents as $subcomponent ) {
-							$sources[] = array( $subcomponent );
-						}
-					} else {
+			if ( ! ( $value instanceof RuleValueList ) ) {
+				continue;
+			}
+
+			/*
+			 * The CSS Parser parses a src such as:
+			 *
+			 *    url(data:application/font-woff;...) format('woff'),
+			 *    url('Genericons.ttf') format('truetype'),
+			 *    url('Genericons.svg#genericonsregular') format('svg')
+			 *
+			 * As a list of components consisting of:
+			 *
+			 *    URL,
+			 *    RuleValueList( CSSFunction, URL ),
+			 *    RuleValueList( CSSFunction, URL ),
+			 *    CSSFunction
+			 *
+			 * Clearly the components here are not logically grouped. So the first step is to fix the order.
+			 */
+			$sources = array();
+			foreach ( $value->getListComponents() as $component ) {
+				if ( $component instanceof RuleValueList ) {
+					$subcomponents = $component->getListComponents();
+					$subcomponent  = array_shift( $subcomponents );
+					if ( $subcomponent ) {
 						if ( empty( $sources ) ) {
-							$sources[] = array( $component );
+							$sources[] = array( $subcomponent );
 						} else {
-							$sources[ count( $sources ) - 1 ][] = $component;
+							$sources[ count( $sources ) - 1 ][] = $subcomponent;
 						}
 					}
-				}
-
-				/**
-				 * Source URL lists.
-				 *
-				 * @var URL[] $source_file_urls
-				 * @var URL[] $source_data_urls
-				 */
-				$source_file_urls = array();
-				$source_data_urls = array();
-				foreach ( $sources as $i => $source ) {
-					if ( $source[0] instanceof URL ) {
-						if ( 'data:' === substr( $source[0]->getURL()->getString(), 0, 5 ) ) {
-							$source_data_urls[ $i ] = $source[0];
-						} else {
-							$real_path( $source[0] );
-							$source_file_urls[ $i ] = $source[0];
-						}
+					foreach ( $subcomponents as $subcomponent ) {
+						$sources[] = array( $subcomponent );
+					}
+				} else {
+					if ( empty( $sources ) ) {
+						$sources[] = array( $component );
+					} else {
+						$sources[ count( $sources ) - 1 ][] = $component;
 					}
 				}
+			}
 
-				// Convert data: URLs into regular URLs, assuming there will be a file present (e.g. woff fonts in core themes).
-				if ( empty( $source_file_urls ) ) {
+			/**
+			 * Source URL lists.
+			 *
+			 * @var URL[] $source_file_urls
+			 * @var URL[] $source_data_urls
+			 */
+			$source_file_urls = array();
+			$source_data_urls = array();
+			foreach ( $sources as $i => $source ) {
+				if ( $source[0] instanceof URL ) {
+					if ( 'data:' === substr( $source[0]->getURL()->getString(), 0, 5 ) ) {
+						$source_data_urls[ $i ] = $source[0];
+					} else {
+						$source_file_urls[ $i ] = $source[0];
+					}
+				}
+			}
+
+			// Convert data: URLs into regular URLs, assuming there will be a file present (e.g. woff fonts in core themes).
+			if ( empty( $source_file_urls ) ) {
+				continue;
+			}
+			$source_file_url = current( $source_file_urls );
+			foreach ( $source_data_urls as $i => $data_url ) {
+				$mime_type = strtok( substr( $data_url->getURL()->getString(), 5 ), ';' );
+				if ( ! $mime_type ) {
 					continue;
 				}
-				$source_file_url = current( $source_file_urls );
-				foreach ( $source_data_urls as $i => $data_url ) {
-					$mime_type = strtok( substr( $data_url->getURL()->getString(), 5 ), ';' );
-					if ( ! $mime_type ) {
-						continue;
-					}
-					$extension   = preg_replace( ':.+/(.+-)?:', '', $mime_type );
-					$guessed_url = preg_replace(
-						':(?<=\.)\w+(\?.*)?(#.*)?$:', // Match the file extension in the URL.
-						$extension,
-						$source_file_url->getURL()->getString(),
-						1,
-						$count
-					);
-					if ( $count ) {
-						$data_url->getURL()->setString( $guessed_url );
-					}
+				$extension   = preg_replace( ':.+/(.+-)?:', '', $mime_type );
+				$guessed_url = preg_replace(
+					':(?<=\.)\w+(\?.*)?(#.*)?$:', // Match the file extension in the URL.
+					$extension,
+					$source_file_url->getURL()->getString(),
+					1,
+					$count
+				);
+				if ( $count ) {
+					$data_url->getURL()->setString( $guessed_url );
 				}
 			}
 		}

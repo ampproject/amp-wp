@@ -295,6 +295,28 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test handling of stylesheets with relative background-image URLs.
+	 *
+	 * @covers AMP_Style_Sanitizer::real_path_urls()
+	 */
+	public function test_relative_background_url_handling() {
+		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( admin_url( 'css/common.css' ) ) . '"></head><body><span class="spinner"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
+		$sanitizer->sanitize();
+		AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertCount( 1, $actual_stylesheets );
+		$stylesheet = $actual_stylesheets[0];
+
+		$this->assertNotContains( '../images/spinner', $stylesheet );
+		$this->assertContains( sprintf( '.spinner{background-image:url("%s");', admin_url( 'images/spinner-2x.gif' ) ), $stylesheet );
+	}
+
+	/**
 	 * Get amp-keyframe styles.
 	 *
 	 * @return array
