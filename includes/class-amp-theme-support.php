@@ -224,9 +224,7 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
-		if ( is_customize_preview() ) {
-			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
-		}
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
@@ -244,7 +242,7 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		// Commenting hooks.
-		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
@@ -601,7 +599,7 @@ class AMP_Theme_Support {
 	 * @param array $args the args for the comments list..
 	 * @return array Args to return.
 	 */
-	public static function amp_set_comments_walker( $args ) {
+	public static function set_comments_walker( $args ) {
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
 		return $args;
@@ -950,7 +948,7 @@ class AMP_Theme_Support {
 		 * Sites with New Relic will need to specially configure New Relic for AMP:
 		 * https://docs.newrelic.com/docs/browser/new-relic-browser/installation/monitor-amp-pages-new-relic-browser
 		 */
-		if ( extension_loaded( 'newrelic' ) ) {
+		if ( function_exists( 'newrelic_disable_autorum' ) ) {
 			newrelic_disable_autorum();
 		}
 
