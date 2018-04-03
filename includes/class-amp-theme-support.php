@@ -943,7 +943,7 @@ class AMP_Theme_Support {
 	public static function start_output_buffering() {
 		/*
 		 * Disable the New Relic Browser agent on AMP responses.
-		 * This prevents th New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset:
+		 * This prevents the New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset:
 		 * https://docs.newrelic.com/docs/browser/new-relic-browser/troubleshooting/google-amp-validator-fails-due-3rd-party-script
 		 * Sites with New Relic will need to specially configure New Relic for AMP:
 		 * https://docs.newrelic.com/docs/browser/new-relic-browser/installation/monitor-amp-pages-new-relic-browser
