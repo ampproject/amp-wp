@@ -1800,11 +1800,10 @@ class AMP_Validation_Utils {
 	public static function persistent_object_caching_notice() {
 		if ( ! wp_using_ext_object_cache() && 'toplevel_page_amp-options' === get_current_screen()->id ) {
 			printf(
-				'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+				'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
 				esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
 				esc_url( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching' ),
-				esc_html__( 'More details', 'amp' ),
-				esc_html__( 'Dismiss this notice.', 'amp' )
+				esc_html__( 'More details', 'amp' )
 			);
 		}
 	}
