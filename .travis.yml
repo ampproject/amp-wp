@@ -23,18 +23,18 @@ matrix:
   include:
    - php: "5.3"
      env: WP_VERSION=latest DEV_LIB_SKIP=composer,phpcs
-   - php: "5.3"
-     env: WP_VERSION=4.7 DEV_LIB_SKIP=composer,phpcs
    - php: "5.4"
-     env: WP_VERSION=latest
-   - php: "5.4"
-     env: WP_VERSION=4.7
+     env: WP_VERSION=4.7    DEV_LIB_SKIP=composer,phpcs
+   - php: "5.5"
+     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
+   - php: "5.6"
+     env: WP_VERSION=4.8    DEV_LIB_SKIP=phpcs
+   - php: "5.6"
+     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
    - php: "7.0"
-     env: WP_VERSION=latest
-   - php: "7.0"
-     env: WP_VERSION=4.7
+     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
    - php: "7.1"
-     env: WP_VERSION=latest
+     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
    - php: "7.2"
      env: WP_VERSION=trunk
 
