@@ -86,7 +86,6 @@ class AMP_Theme_Support {
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
-		self::add_temporary_discussion_restrictions();
 
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
@@ -225,9 +224,7 @@ class AMP_Theme_Support {
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
-		if ( is_customize_preview() ) {
-			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
-		}
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
@@ -245,7 +242,7 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
 
 		// Commenting hooks.
-		add_filter( 'wp_list_comments_args', array( __CLASS__, 'amp_set_comments_walker' ), PHP_INT_MAX );
+		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
@@ -534,35 +531,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Set up some restrictions for commenting based on amp-live-list limitations.
-	 *
-	 * Temporarily force comments to be listed in descending order.
-	 * The following hooks are temporary while waiting for amphtml#5396 to be resolved.
-	 *
-	 * @link https://github.com/ampproject/amphtml/issues/5396
-	 */
-	protected static function add_temporary_discussion_restrictions() {
-		add_filter( 'option_comment_order', function() {
-			return 'desc';
-		}, PHP_INT_MAX );
-
-		add_action( 'admin_print_footer_scripts-options-discussion.php', function() {
-			?>
-			<div class="notice notice-info inline" id="amp-comment-notice"><p><?php echo wp_kses_post( __( 'Note: AMP does not yet <a href="https://github.com/ampproject/amphtml/issues/5396" target="_blank">support ascending</a> comments with newer entries appearing at the bottom.', 'amp' ) ); ?></p></div>
-			<script>
-			// Move the notice below the selector and disable selector.
-			jQuery( function( $ ) {
-				var orderSelect = $( '#comment_order' ),
-					notice = $( '#amp-comment-notice' );
-				orderSelect.prop( 'disabled', true );
-				orderSelect.closest( 'fieldset' ).append( notice );
-			} );
-			</script>
-			<?php
-		} );
-	}
-
-	/**
 	 * Register/override widgets.
 	 *
 	 * @global WP_Widget_Factory
@@ -632,12 +600,9 @@ class AMP_Theme_Support {
 	 * @param array $args the args for the comments list..
 	 * @return array Args to return.
 	 */
-	public static function amp_set_comments_walker( $args ) {
+	public static function set_comments_walker( $args ) {
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
-		// Add reverse order here as well, in case theme overrides it.
-		$args['reverse_top_level'] = true;
-
 		return $args;
 	}
 
@@ -984,7 +949,7 @@ class AMP_Theme_Support {
 		 * Sites with New Relic will need to specially configure New Relic for AMP:
 		 * https://docs.newrelic.com/docs/browser/new-relic-browser/installation/monitor-amp-pages-new-relic-browser
 		 */
-		if ( extension_loaded( 'newrelic' ) ) {
+		if ( function_exists( 'newrelic_disable_autorum' ) ) {
 			newrelic_disable_autorum();
 		}
 

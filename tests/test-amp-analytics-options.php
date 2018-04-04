@@ -216,7 +216,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_analytics()
 	 *
-	 * @covers amp_get_analytics()
+	 * @covers \amp_get_analytics()
 	 */
 	public function test_amp_get_analytics() {
 		$this->insert_one_option(
@@ -243,7 +243,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test amp_print_analytics()
 	 *
-	 * @covers amp_print_analytics()
+	 * @covers \amp_print_analytics()
 	 */
 	public function test_amp_print_analytics() {
 		$this->insert_one_option(
