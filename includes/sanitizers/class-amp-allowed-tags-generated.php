@@ -13,8 +13,8 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 586;
-	private static $minimum_validator_revision_required = 319;
+	private static $spec_file_revision = 595;
+	private static $minimum_validator_revision_required = 322;
 
 	private static $allowed_tags = array(
 		'a' => array(
@@ -528,6 +528,9 @@ class AMP_Allowed_Tags_Generated {
 					'loop' => array(
 						'value_regex_casei' => '(false|number|true)',
 					),
+					'noautoplay' => array(
+						'value' => '',
+					),
 					'src' => array(
 						'mandatory' => true,
 						'value_url' => array(
@@ -695,6 +698,22 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-consent' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-consent',
+					),
+					'unique' => true,
+				),
+			),
+		),
 		'amp-dailymotion' => array(
 			array(
 				'attr_spec_list' => array(
@@ -734,6 +753,244 @@ class AMP_Allowed_Tags_Generated {
 						'amp-dailymotion',
 					),
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-dailymotion',
+				),
+			),
+		),
+		'amp-date-picker' => array(
+			array(
+				'attr_spec_list' => array(
+					'allow-blocked-ranges' => array(
+						'value' => '',
+					),
+					'blocked' => array(),
+					'day-size' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'first-day-of-week' => array(
+						'value_regex' => '[0-6]',
+					),
+					'format' => array(),
+					'fullscreen' => array(
+						'value' => '',
+					),
+					'highlighted' => array(),
+					'input-selector' => array(),
+					'locale' => array(),
+					'max' => array(),
+					'media' => array(),
+					'min' => array(),
+					'mode' => array(
+						'value_casei' => 'static',
+					),
+					'month-format' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'number-of-months' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'open-after-clear' => array(
+						'value' => '',
+					),
+					'open-after-select' => array(
+						'value' => '',
+					),
+					'src' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'value_url' => array(
+							'allow_relative' => true,
+							'allowed_protocol' => array(
+								'https',
+							),
+						),
+					),
+					'type' => array(
+						'value_casei' => 'single',
+					),
+					'week-day-format' => array(),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-date-picker',
+					),
+					'spec_name' => 'amp-date-picker[type=single][mode=static]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'allow-blocked-ranges' => array(
+						'value' => '',
+					),
+					'blocked' => array(),
+					'day-size' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'first-day-of-week' => array(
+						'value_regex' => '[0-6]',
+					),
+					'format' => array(),
+					'highlighted' => array(),
+					'input-selector' => array(),
+					'locale' => array(),
+					'max' => array(),
+					'media' => array(),
+					'min' => array(),
+					'mode' => array(
+						'mandatory' => true,
+						'value_casei' => 'overlay',
+					),
+					'month-format' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'number-of-months' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'open-after-clear' => array(
+						'value' => '',
+					),
+					'open-after-select' => array(
+						'value' => '',
+					),
+					'src' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'value_url' => array(
+							'allow_relative' => true,
+							'allowed_protocol' => array(
+								'https',
+							),
+						),
+					),
+					'type' => array(
+						'value_casei' => 'single',
+					),
+					'week-day-format' => array(),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-date-picker',
+					),
+					'spec_name' => 'amp-date-picker[type=single][mode=overlay]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'allow-blocked-ranges' => array(
+						'value' => '',
+					),
+					'blocked' => array(),
+					'day-size' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'end-input-selector' => array(),
+					'first-day-of-week' => array(
+						'value_regex' => '[0-6]',
+					),
+					'format' => array(),
+					'fullscreen' => array(
+						'value' => '',
+					),
+					'highlighted' => array(),
+					'locale' => array(),
+					'max' => array(),
+					'media' => array(),
+					'min' => array(),
+					'mode' => array(
+						'value_casei' => 'static',
+					),
+					'month-format' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'number-of-months' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'open-after-clear' => array(
+						'value' => '',
+					),
+					'open-after-select' => array(
+						'value' => '',
+					),
+					'src' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'value_url' => array(
+							'allow_relative' => true,
+							'allowed_protocol' => array(
+								'https',
+							),
+						),
+					),
+					'start-input-selector' => array(),
+					'type' => array(
+						'mandatory' => true,
+						'value_casei' => 'range',
+					),
+					'week-day-format' => array(),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-date-picker',
+					),
+					'spec_name' => 'amp-date-picker[type=range][mode=static]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'allow-blocked-ranges' => array(
+						'value' => '',
+					),
+					'blocked' => array(),
+					'day-size' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'end-input-selector' => array(),
+					'first-day-of-week' => array(
+						'value_regex' => '[0-6]',
+					),
+					'format' => array(),
+					'highlighted' => array(),
+					'locale' => array(),
+					'max' => array(),
+					'media' => array(),
+					'min' => array(),
+					'mode' => array(
+						'mandatory' => true,
+						'value_casei' => 'overlay',
+					),
+					'month-format' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'number-of-months' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'open-after-clear' => array(
+						'value' => '',
+					),
+					'open-after-select' => array(
+						'value' => '',
+					),
+					'src' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'value_url' => array(
+							'allow_relative' => true,
+							'allowed_protocol' => array(
+								'https',
+							),
+						),
+					),
+					'start-input-selector' => array(),
+					'type' => array(
+						'mandatory' => true,
+						'value_casei' => 'range',
+					),
+					'week-day-format' => array(),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-date-picker',
+					),
+					'spec_name' => 'amp-date-picker[type=range][mode=overlay]',
 				),
 			),
 		),
@@ -1362,6 +1619,9 @@ class AMP_Allowed_Tags_Generated {
 					'max-items' => array(),
 					'media' => array(),
 					'noloading' => array(
+						'value' => '',
+					),
+					'reset-on-refresh' => array(
 						'value' => '',
 					),
 					'single-item' => array(),
@@ -5447,6 +5707,7 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '(^|\\s)(amp-.*|amp4ads-.*|apple-itunes-app|content-disposition|revisit-after|viewport)(\\s|$)',
 					),
 					'property' => array(),
+					'scheme' => array(),
 				),
 				'tag_spec' => array(
 					'spec_name' => 'meta name= and content=',
@@ -5588,6 +5849,24 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=resource-type',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+						'value_regex_casei' => '(off|on)',
+					),
+					'http-equiv' => array(
+						'dispatch_key' => 2,
+						'mandatory' => true,
+						'value_casei' => 'x-dns-prefetch-control',
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'head',
+					'spec_name' => 'meta http-equiv=x-dns-prefetch-control',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#html-tags',
 				),
 			),
@@ -7104,9 +7383,75 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 							'latest',
 						),
+						'name' => 'amp-consent',
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'nonce' => array(),
+					'type' => array(
+						'dispatch_key' => 3,
+						'mandatory' => true,
+						'value_casei' => 'application/json',
+					),
+				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-consent',
+					'requires_extension' => array(
+						'amp-consent',
+					),
+					'spec_name' => 'amp-consent extension .json script',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-dailymotion',
 						'requires_usage' => 2,
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
+						'name' => 'amp-date-picker',
 					),
 				),
 			),
