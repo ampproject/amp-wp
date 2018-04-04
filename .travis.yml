@@ -54,9 +54,10 @@ matrix:
      env: WP_VERSION=latest
    - php: "7.0"
      env: WP_VERSION=4.7
-     # 7.1 / latest already included above as first build.
    - php: "7.1"
-     env: WP_VERSION=4.7
+     env: WP_VERSION=latest
+   - php: "7.2"
+     env: WP_VERSION=trunk
 
 install:
   - nvm install 6 && nvm use 6
