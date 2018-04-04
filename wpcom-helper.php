@@ -45,14 +45,15 @@ add_filter( 'amp_post_template_metadata', 'jetpack_amp_post_template_metadata', 
 /**
  * Add publisher and image metadata.
  *
+ * @since 0.3
+ *
  * @param array   $metadata Metadata array.
  * @param WP_Post $post     Post.
- *
  * @return array Modified metadata array.
  */
 function jetpack_amp_post_template_metadata( $metadata, $post ) {
 	if ( isset( $metadata['publisher'] ) && ! isset( $metadata['publisher']['logo'] ) ) {
-		$metadata = wpcom_amp_add_blavatar_to_metadata( $metadata, $post );
+		$metadata = wpcom_amp_add_blavatar_to_metadata( $metadata );
 	}
 
 	if ( ! isset( $metadata['image'] ) ) {
