@@ -24,7 +24,7 @@ Your theme can also use [Paired Mode](https://github.com/Automattic/amp-wp/wiki/
 
 "Native AMP" and "Paired Mode" add full support for commenting and widgets.
 
-This plugin only creates AMP content but does not automatically display it to your users when they visit from a mobile device. That is handled by AMP consumers such as Google Search. For more details, see the [AMP Project FAQ](https://www.ampproject.org/docs/support/faqs.html).
+If your theme doesn't support `'amp'`, this will use basic legacy post templates for AMP consumers like Google Search and Twitter. And when visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
 
