@@ -64,6 +64,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Update the generated sanitizer file to the AMP spec, and simplify the file that generates it. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#926](https://github.com/Automattic/amp-wp/pull/926). Props westonruter.
 - Several sanitizer updates, including for styles, and preventing valid tags from being removed. See [#935](https://github.com/Automattic/amp-wp/pull/935), [#944](https://github.com/Automattic/amp-wp/pull/944), [#952](https://github.com/Automattic/amp-wp/pull/952). Props westonruter, davisshaver.
 - Improve sanitization of `<amp-img>`, `<amp-video>`, and `<amp-iframe>`. See [#937](https://github.com/Automattic/amp-wp/pull/937), [#1054](https://github.com/Automattic/amp-wp/pull/1054). Props kienstra, amedina.
+- Automatically output an AMP component script if the preprocessor finds a component. See [#985](https://github.com/Automattic/amp-wp/pull/885). Props westonruter.
 - Fix an issue where the JSON inside `<script type="application/json">` was wrapped with CDATA. See [#891](https://github.com/Automattic/amp-wp/pull/891). Props westonruter.
 - Allow use of AMP components outside of AMP documents, including in [PWA](https://developers.google.com/web/progressive-web-apps/). See [#1013](https://github.com/Automattic/amp-wp/pull/1013). Props westonruter.
 - Access the AMP query var with `amp_get_slug()`, instead of `AMP_QUERY_VAR`. See [#986](https://github.com/Automattic/amp-wp/pull/986). Props westonruter, mjangda.
