@@ -721,6 +721,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null, // No change.
 				array( 'amp-selector', 'amp-form', 'amp-carousel' ),
 			),
+
+			'amp_live_list_sort'                                        => array(
+				'<amp-live-list sort="ascending" data-poll-interval="15000" data-max-items-per-page="5" id="amp-live-list-insert-blog"><button update on="tap:amp-live-list-insert-blog.update" class="ampstart-btn ml1 caps">You have updates</button><div items><div id="A green landscape with trees." data-sort-time="20180317225019">Hello</div></div></amp-live-list>',
+				null, // No change.
+				array( 'amp-live-list' ),
+			),
+
+			'amp_consent'                                               => array(
+				'<amp-consent media="all" noloading></amp-consent>',
+				null, // No change.
+				array( 'amp-consent' ),
+			),
+
+			'amp_date_picker'                                           => array(
+				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
+				null, // No change.
+				array( 'amp-date-picker' ),
+			),
 		);
 	}
 
