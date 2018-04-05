@@ -12,7 +12,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
 == Description ==
 
-AMP, the WordPress way. Bring the speed and features of the open source [AMP project](https://www.ampproject.org/) to your site.
+Bring the speed and features of the open source [AMP project](https://www.ampproject.org/) to your site, the WordPress way.
 
 With the plugin active, all posts on your site will have AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
 
