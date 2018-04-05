@@ -62,11 +62,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( isset( $_REQUEST['__amp_source_origin'] ) ); // WPCS: CSRF ok.
 
 		add_theme_support( 'amp', 'invalid_argumnet_type' );
+		$e = null;
 		try {
 			AMP_Theme_Support::init();
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
+		$this->assertInstanceOf( 'PHPUnit_Framework_Error_Notice', $e );
 		$this->assertEquals( 'Expected AMP theme support arg to be array.', $e->getMessage() );
 
 		add_theme_support( 'amp', array(
@@ -78,6 +80,40 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertEquals( 'Expected AMP theme support to only have template_dir and/or available_callback.', $e->getMessage() );
+	}
+
+	/**
+	 * Test that amphtml link is added at the right time.
+	 *
+	 * @covers AMP_Theme_Support::finish_init()
+	 */
+	public function test_amphtml_link() {
+		$post_id = $this->factory()->post->create( array( 'post_title' => 'Test' ) );
+		add_theme_support( 'amp', array(
+			'template_dir'       => '...',
+			'available_callback' => function() {
+				return is_singular();
+			},
+		) );
+
+		// Test paired mode singular.
+		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		$this->go_to( get_permalink( $post_id ) );
+		AMP_Theme_Support::finish_init();
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+
+		// Test paired mode homepage.
+		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		$this->go_to( home_url() );
+		AMP_Theme_Support::finish_init();
+		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+
+		// Test canonical.
+		remove_theme_support( 'amp' );
+		add_theme_support( 'amp' );
+		$this->go_to( get_permalink( $post_id ) );
+		AMP_Theme_Support::finish_init();
+		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
 	}
 
 	/**

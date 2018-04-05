@@ -117,7 +117,13 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
-			amp_add_frontend_actions();
+			// Add amphtml link when paired mode is available.
+			if ( self::is_paired_available() ) {
+				amp_add_frontend_actions(); // @todo This function is poor in how it requires a file that then does add_action().
+				if ( ! has_action( 'wp_head', 'amp_frontend_add_canonical' ) ) {
+					add_action( 'wp_head', 'amp_frontend_add_canonical' );
+				}
+			}
 			return;
 		}
 
