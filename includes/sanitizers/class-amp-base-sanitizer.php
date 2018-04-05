@@ -55,7 +55,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
 	 *      @type bool $disable_invalid_removal
-	 *      @type callable $remove_invalid_callback
+	 *      @type callable $validation_error_callback
 	 * }
 	 */
 	protected $args;

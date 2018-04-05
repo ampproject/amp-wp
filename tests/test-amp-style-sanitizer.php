@@ -232,6 +232,24 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-10b06ba{color:red;}',
 				),
 			),
+			'styles_with_dynamic_elements' => array(
+				implode( '', array(
+					'<html amp><head><meta charset="utf-8">',
+					'<style amp-custom>b.foo, form [submit-success] b, div[submit-failure] b, form.unused b { color: green }</style>',
+					'<style amp-custom>.dead-list li .highlighted, amp-live-list li .highlighted { background: yellow }</style>',
+					'<style amp-custom>body amp-list .portland { color:blue; }</style>',
+					'</head><body>',
+					'<form method="post" action-xhr="https://example.com/subscribe" target="_top"><div submit-success><template type="amp-mustache"><b>Thanks</b>, {{name}}}</template></div></form>',
+					'<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20"><button update on="tap:my-live-list.update">You have updates!</button><ul items><li id="live-list-2-item-2" data-sort-time="1464281932879">Hello</li></ul></amp-live-list>',
+					'<amp-list width="auto" height="100" layout="fixed-height" src="https://ampproject-b5f4c.firebaseapp.com/examples/data/amp-list-urls.json"> <template type="amp-mustache"> <div class="url-entry"> <a href="{{url}}" class="{{class}}">{{title}}</a> </div> </template> </amp-list>',
+					'</body></html>',
+				) ),
+				array(
+					'form [submit-success] b,div[submit-failure] b{color:green;}',
+					'amp-live-list li .highlighted{background:yellow;}',
+					'body amp-list .portland{color:blue;}',
+				),
+			),
 		);
 	}
 

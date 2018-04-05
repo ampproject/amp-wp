@@ -26,6 +26,33 @@ use \Sabberworm\CSS\Value\URL;
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Array of flags used to control sanitization.
+	 *
+	 * @var array {
+	 *      @type string[] $dynamic_element_selectors  Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
+	 *      @type bool     $use_document_element       Whether the root of the document should be used rather than the body.
+	 *      @type bool     $require_https_src          Require HTTPS URLs.
+	 *      @type bool     $allow_dirty_styles         Allow dirty styles. This short-circuits the sanitize logic; it is used primarily in Customizer preview.
+	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
+	 * }
+	 */
+	protected $args;
+
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'dynamic_element_selectors' => array(
+			'amp-list',
+			'amp-live-list',
+			'[submit-error]',
+			'[submit-success]',
+		),
+	);
+
+	/**
 	 * Styles.
 	 *
 	 * List of CSS styles in HTML content of DOMDocument ($this->dom).
@@ -520,6 +547,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		$dynamic_selector_pattern = null;
+		if ( ! empty( $this->args['dynamic_element_selectors'] ) ) {
+			$dynamic_selector_pattern = '#' . implode( '|', array_map(
+				function( $selector ) {
+					return preg_quote( $selector, '#' );
+				},
+				$this->args['dynamic_element_selectors']
+			) ) . '#';
+		}
+
 		$stylesheet = '';
 		foreach ( $parsed['stylesheet'] as $stylesheet_part ) {
 			if ( is_array( $stylesheet_part ) ) {
@@ -527,7 +564,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $should_tree_shake ) {
 					$selectors = array();
 					foreach ( $selectors_parsed as $selector => $class_names ) {
-						if ( 0 === count( array_diff( $class_names, $this->used_class_names ) ) ) { // If all class names are used in the doc.
+						$should_include = (
+							( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
+							||
+							// If all class names are used in the doc.
+							0 === count( array_diff( $class_names, $this->used_class_names ) )
+						);
+						if ( $should_include ) {
 							$selectors[] = $selector;
 						}
 					}
