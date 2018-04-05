@@ -69,10 +69,11 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Add support for all default WordPress widgets. See [#921](https://github.com/Automattic/amp-wp/pull/921), [#917](https://github.com/Automattic/amp-wp/pull/917). Props kienstra, westonruter.
 - Add support for more default embeds: Issuu, Post, Meetup, Reddit, Screencast, Tumblr, and WordPress Plugin Directory. See [#889](https://github.com/Automattic/amp-wp/pull/889). Props kaitnyl.
 - Allow native WordPress commenting, in fully valid AMP. See [#871](https://github.com/Automattic/amp-wp/pull/871), [#909](https://github.com/Automattic/amp-wp/pull/909). Props DavidCramer, westonruter.
-- Optionally use `<amp-live-list>` to display comments, avoiding full-page refreshes on adding comments. See [#1029](https://github.com/Automattic/amp-wp/pull/1029). Props DavidCramer, westonruter.
 - Add a complete UI for validation errors, including invalid tags and attributes. See [#971](https://github.com/Automattic/amp-wp/pull/971), [#1016](https://github.com/Automattic/amp-wp/pull/1016). Props westonruter, kienstra.
 - On activating a plugin, validate a front-end page and display a notice if there were errors. See [#971](https://github.com/Automattic/amp-wp/pull/971). Props westonruter, kienstra.
 - Creation of AMP-related notifications, on entering invalid content in the 'classic' editor. See [#912](https://github.com/Automattic/amp-wp/pull/912/). Props kienstra, westonruter, ThierryA.
+- Optionally use `<amp-live-list>` to display comments, avoiding full-page refreshes on adding comments. And enable making requests for an `<amp-live-list>`, like for displaying posts. See [#1029](https://github.com/Automattic/amp-wp/pull/1029), [#915](https://github.com/Automattic/amp-wp/pull/915). Props DavidCramer, westonruter.
+- Support `<amp-bind>`, enabling more dynamic elements. See [#895](https://github.com/Automattic/amp-wp/pull/895). Props westonruter.
 - Add output buffering, ensuring the entire page is valid AMP. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#857](https://github.com/Automattic/amp-wp/pull/857). Props westonruter, ThierryA.
 - Add validation of host names in URLs. See [#983](https://github.com/Automattic/amp-wp/pull/983). Props rubengonzalezmrf.
 - Add wp-cli scripts to test AMP support of comments and widgets. See [#924](https://github.com/Automattic/amp-wp/pull/924), [#859](https://github.com/Automattic/amp-wp/pull/859). Props DavidCramer, kienstra.
@@ -80,6 +81,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Update the generated sanitizer file to the AMP spec, and simplify the file that generates it. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#926](https://github.com/Automattic/amp-wp/pull/926). Props westonruter.
 - Several sanitizer updates, including for styles, and preventing valid tags from being removed. See [#935](https://github.com/Automattic/amp-wp/pull/935), [#944](https://github.com/Automattic/amp-wp/pull/944), [#952](https://github.com/Automattic/amp-wp/pull/952). Props westonruter, davisshaver.
 - Improve sanitization of `<amp-img>`, `<amp-video>`, and `<amp-iframe>`. See [#937](https://github.com/Automattic/amp-wp/pull/937), [#1054](https://github.com/Automattic/amp-wp/pull/1054). Props kienstra, amedina.
+- Fix an issue where the JSON inside `<script type="application/json">` was wrapped with CDATA. See [#891](https://github.com/Automattic/amp-wp/pull/891). Props westonruter.
 - Allow use of AMP components outside of AMP documents, including in [PWA](https://developers.google.com/web/progressive-web-apps/). See [#1013](https://github.com/Automattic/amp-wp/pull/1013). Props westonruter.
 - Access the AMP query var with `amp_get_slug()`, instead of `AMP_QUERY_VAR`. See [#986](https://github.com/Automattic/amp-wp/pull/986). Props westonruter, mjangda.
 - Update build scripts, including PHP versions in `.travis.yml`. See [#1058](https://github.com/Automattic/amp-wp/pull/1058/), [#949](https://github.com/Automattic/amp-wp/pull/949). Props westonruter.
