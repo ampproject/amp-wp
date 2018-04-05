@@ -24,7 +24,7 @@ Also, your pages and custom post types can have AMP versions. Simply check their
 
 Your entire site can render as "Native AMP" if your theme calls `add_theme_support( 'amp' )`. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended. See this [wiki page](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#native-amp) for details and restrictions.
 
-Your theme can also [use "Paired Mode"](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#paired-mode), with your own custom templates for the AMP URLs.
+Your theme can also use [Paired Mode](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#paired-mode), with your own custom templates for the AMP URLs.
 
 "Native AMP" and "Paired Mode" add full support for commenting and widgets.
 
