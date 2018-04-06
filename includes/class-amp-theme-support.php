@@ -217,6 +217,14 @@ class AMP_Theme_Support {
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 
+		// Prevent MediaElement.js scripts/styles from being enqueued.
+		add_filter( 'wp_video_shortcode_library', function() {
+			return 'amp';
+		} );
+		add_filter( 'wp_audio_shortcode_library', function() {
+			return 'amp';
+		} );
+
 		/*
 		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		 * Note that the meta[name=viewport] is not added here because a theme may want to define one with additional
