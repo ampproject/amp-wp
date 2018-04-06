@@ -69,8 +69,7 @@ var ampBlockValidation = ( function() {
 								isDismissible: false,
 								key: 'amp-validation-notice'
 							}
-						),
-
+						)
 					);
 				}
 				return result;
