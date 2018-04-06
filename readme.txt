@@ -2,7 +2,7 @@
 Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp, westonruter
 Tags: amp, mobile
 Requires at least: 4.7
-Tested up to: 4.9.5
+Tested up to: 4.9
 Stable tag: 0.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -44,7 +44,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 == Changelog ==
 
-= 0.7 (unreleased) =
+= 0.7.0 (unreleased) =
 
 - Render an entire site as "Native AMP" if the theme calls `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857). Props westonruter, kaitnyl, ThierryA.
 - Use "Paired Mode" if the theme calls `add_theme_support( 'amp' )` and passes a `'template_dir'` value for the AMP templates. See [#856](https://github.com/Automattic/amp-wp/pull/856). Props westonruter, kaitnyl.

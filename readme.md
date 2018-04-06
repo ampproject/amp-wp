@@ -7,7 +7,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.7  
-**Tested up to:** 4.9.5  
+**Tested up to:** 4.9  
 **Stable tag:** 0.6.0  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.3  
@@ -62,7 +62,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ## Changelog ##
 
-### 0.7 (unreleased) ###
+### 0.7.0 (unreleased) ###
 - Render an entire site as "Native AMP" if the theme calls `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857). Props westonruter, kaitnyl, ThierryA.
 - Use "Paired Mode" if the theme calls `add_theme_support( 'amp' )` and passes a `'template_dir'` value for the AMP templates. See [#856](https://github.com/Automattic/amp-wp/pull/856). Props westonruter, kaitnyl.
 - Allow full Customization when the theme supports `'amp'`. See [#952](https://github.com/Automattic/amp-wp/pull/952). Props westonruter.
