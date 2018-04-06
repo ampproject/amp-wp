@@ -54,7 +54,6 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_bind_placeholder_prefix
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
-	 *      @type bool $disable_invalid_removal
 	 *      @type callable $validation_error_callback
 	 * }
 	 */
@@ -290,18 +289,22 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param DOMNode|DOMElement $node The node to remove.
 	 * @param array              $args Additional args to pass to validation error callback.
-	 *
-	 * @return void
+	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $args = array() ) {
+		$should_remove = true;
 		if ( isset( $this->args['validation_error_callback'] ) ) {
-			call_user_func( $this->args['validation_error_callback'],
+			$result = call_user_func( $this->args['validation_error_callback'],
 				array_merge( compact( 'node' ), $args )
 			);
+			if ( is_bool( $result ) ) {
+				$should_remove = $result;
+			}
 		}
-		if ( empty( $this->args['disable_invalid_removal'] ) ) {
+		if ( $should_remove ) {
 			$node->parentNode->removeChild( $node );
 		}
+		return $should_remove;
 	}
 
 	/**
@@ -315,15 +318,16 @@ abstract class AMP_Base_Sanitizer {
 	 * @param DOMElement     $element   The node for which to remove the attribute.
 	 * @param DOMAttr|string $attribute The attribute to remove from the element.
 	 * @param array          $args      Additional args to pass to validation error callback.
-	 * @return void
+	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_attribute( $element, $attribute, $args = array() ) {
+		$should_remove = true;
 		if ( isset( $this->args['validation_error_callback'] ) ) {
 			if ( is_string( $attribute ) ) {
 				$attribute = $element->getAttributeNode( $attribute );
 			}
 			if ( $attribute ) {
-				call_user_func( $this->args['validation_error_callback'],
+				$result = call_user_func( $this->args['validation_error_callback'],
 					array_merge(
 						array(
 							'node' => $attribute,
@@ -331,16 +335,20 @@ abstract class AMP_Base_Sanitizer {
 						$args
 					)
 				);
-				if ( empty( $this->args['disable_invalid_removal'] ) ) {
+				if ( is_bool( $result ) ) {
+					$should_remove = $result;
+				}
+				if ( $should_remove ) {
 					$element->removeAttributeNode( $attribute );
 				}
 			}
-		} elseif ( empty( $this->args['disable_invalid_removal'] ) ) {
+		} else {
 			if ( is_string( $attribute ) ) {
 				$element->removeAttribute( $attribute );
 			} else {
 				$element->removeAttributeNode( $attribute );
 			}
 		}
+		return $should_remove;
 	}
 }
