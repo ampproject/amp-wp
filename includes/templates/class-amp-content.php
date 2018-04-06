@@ -34,9 +34,18 @@ class AMP_Content {
 	/**
 	 * AMP styles.
 	 *
+	 * @deprecated
 	 * @var array
 	 */
 	private $amp_styles = array();
+
+	/**
+	 * AMP stylesheets.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	private $amp_stylesheets = array();
 
 	/**
 	 * Args.
@@ -97,10 +106,22 @@ class AMP_Content {
 	/**
 	 * Get AMP styles.
 	 *
-	 * @return array
+	 * @deprecated Since 1.0 in favor of the get_amp_stylesheets method.
+	 * @return array Empty list.
 	 */
 	public function get_amp_styles() {
-		return $this->amp_styles;
+		_deprecated_function( __METHOD__, '1.0', __CLASS__ . '::get_amp_stylesheets' );
+		return array();
+	}
+
+	/**
+	 * Get AMP styles.
+	 *
+	 * @since 1.0
+	 * @return array
+	 */
+	public function get_amp_stylesheets() {
+		return $this->amp_stylesheets;
 	}
 
 	/**
@@ -130,12 +151,13 @@ class AMP_Content {
 	}
 
 	/**
-	 * Add styles.
+	 * Add stylesheets.
 	 *
-	 * @param array $styles Styles.
+	 * @since 1.0
+	 * @param array $stylesheets Styles.
 	 */
-	private function add_styles( $styles ) {
-		$this->amp_styles = array_merge( $this->amp_styles, $styles );
+	private function add_stylesheets( $stylesheets ) {
+		$this->amp_stylesheets = array_merge( $this->amp_stylesheets, $stylesheets );
 	}
 
 	/**
@@ -179,14 +201,16 @@ class AMP_Content {
 	 *
 	 * @see AMP_Content_Sanitizer::sanitize()
 	 * @param string $content Content.
-	 * @return array Sanitized content.
+	 * @return string Sanitized content.
 	 */
 	private function sanitize( $content ) {
-		list( $sanitized_content, $scripts, $styles ) = AMP_Content_Sanitizer::sanitize( $content, $this->sanitizer_classes, $this->args );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
-		$this->add_scripts( $scripts );
-		$this->add_styles( $styles );
+		$results = AMP_Content_Sanitizer::sanitize_document( $dom, $this->sanitizer_classes, $this->args );
 
-		return $sanitized_content;
+		$this->add_scripts( $results['scripts'] );
+		$this->add_stylesheets( $results['stylesheets'] );
+
+		return AMP_DOM_Utils::get_content_from_dom( $dom );
 	}
 }

@@ -13,136 +13,22 @@
 class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
-	 * Get enforce sizes data.
+	 * Gets data for test_set_layout().
 	 *
-	 * @return array Data
+	 * @return array
 	 */
-	public function get_enforce_sizes_data() {
-		return array(
-			'already_has_sizes'                            => array(
-				array(
-					'sizes' => 'blah',
-				),
-				array(
-					'sizes' => 'blah',
-				),
-			),
-
-			'empty'                                        => array(
-				array(),
-				array(),
-			),
-
-			'no_width'                                     => array(
-				array(
-					'height' => 100,
-				),
-				array(
-					'height' => 100,
-				),
-			),
-
-			'no_height'                                    => array(
-				array(
-					'width' => 200,
-				),
-				array(
-					'width' => 200,
-				),
-			),
-
-			'enforce_sizes_no_class'                       => array(
-				array(
-					'width'  => 200,
-					'height' => 100,
-				),
-				array(
-					'width'  => 200,
-					'height' => 100,
-					'sizes'  => '(min-width: 200px) 200px, 100vw',
-					'class'  => 'amp-wp-enforced-sizes',
-				),
-			),
-
-			'enforce_sizes_has_class'                      => array(
-				array(
-					'width'  => 200,
-					'height' => 100,
-					'class'  => 'my-class',
-				),
-				array(
-					'width'  => 200,
-					'height' => 100,
-					'sizes'  => '(min-width: 200px) 200px, 100vw',
-					'class'  => 'my-class amp-wp-enforced-sizes',
-				),
-			),
-
-			'enforce_sizes_with_bigger_content_max_width'  => array(
-				array(
-					'width'  => 250,
-					'height' => 100,
-				),
-				array(
-					'width'  => 250,
-					'height' => 100,
-					'sizes'  => '(min-width: 250px) 250px, 100vw',
-					'class'  => 'amp-wp-enforced-sizes',
-				),
-				array(
-					'content_max_width' => 500,
-				),
-			),
-
-			'enforce_sizes_with_smaller_content_max_width' => array(
-				array(
-					'width'  => 800,
-					'height' => 350,
-				),
-				array(
-					'width'  => 800,
-					'height' => 350,
-					'sizes'  => '(min-width: 675px) 675px, 100vw',
-					'class'  => 'amp-wp-enforced-sizes',
-				),
-				array(
-					'content_max_width' => 675,
-				),
-			),
-		);
-	}
-
-	/**
-	 * Test AMP_Base_Sanitizer::enforce_sizes_attribute().
-	 *
-	 * @dataProvider get_enforce_sizes_data
-	 * @param array $source_attributes   Source Attrs.
-	 * @param array $expected_attributes Expected Attrs.
-	 * @param array $args                Args.
-	 * @covers AMP_Base_Sanitizer::enforce_sizes_attribute()
-	 */
-	public function test_enforce_sizes_attribute( $source_attributes, $expected_attributes, $args = array() ) {
-		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
-		$returned_attributes = $sanitizer->enforce_sizes_attribute( $source_attributes );
-
-		$this->assertEquals( $expected_attributes, $returned_attributes );
-	}
-
-	/**
-	 * Get enforce fixed data.
-	 *
-	 * @return array Data.
-	 */
-	public function get_enforce_fixed_data() {
+	public function get_data() {
 		return array(
 			'both_dimensions_included' => array(
 				array(
 					'width'  => 100,
 					'height' => 100,
+					'layout' => 'responsive',
 				),
 				array(
 					'width'  => 100,
 					'height' => 100,
+					'layout' => 'responsive',
 				),
 			),
 
@@ -184,22 +70,32 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 					'layout' => 'fixed-height',
 				),
 			),
+
+			'no_layout_specified'      => array(
+				array(
+					'width'  => 100,
+					'height' => 100,
+				),
+				array(
+					'width'  => 100,
+					'height' => 100,
+				),
+			),
 		);
 	}
 
 	/**
-	 * Test AMP_Base_Sanitizer::enforce_fixed_height().
+	 * Test AMP_Base_Sanitizer::set_layout().
 	 *
-	 * @dataProvider get_enforce_fixed_data
+	 * @dataProvider get_data
 	 * @param array $source_attributes   Source Attrs.
 	 * @param array $expected_attributes Expected Attrs.
 	 * @param array $args                Args.
 	 * @covers AMP_Base_Sanitizer::enforce_fixed_height()
 	 */
-	public function test_enforce_fixed_height( $source_attributes, $expected_attributes, $args = array() ) {
+	public function test_set_layout( $source_attributes, $expected_attributes, $args = array() ) {
 		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
-		$returned_attributes = $sanitizer->enforce_fixed_height( $source_attributes );
-
+		$returned_attributes = $sanitizer->set_layout( $source_attributes );
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
 

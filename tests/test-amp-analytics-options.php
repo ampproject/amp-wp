@@ -82,7 +82,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that nothing is added if no analytics option defined in the DB
 	 */
-	function test_no_options() {
+	public function test_no_options() {
 		$options = $this->get_options();
 		$this->assertEmpty( $options );
 	}
@@ -90,7 +90,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that exactly one analytics component is inserted into the DB
 	 */
-	function test_one_option_inserted() {
+	public function test_one_option_inserted() {
 		$this->insert_one_option(
 			$this->vendor,
 			$this->config_one
@@ -103,7 +103,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that two analytics components are inserted into the DB
 	 */
-	function test_two_options_inserted() {
+	public function test_two_options_inserted() {
 
 		/* Insert analytics option one */
 		$this->insert_one_option(
@@ -124,7 +124,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that the analytics JS is added to the page
 	 */
-	function test_analytics_js_added() {
+	public function test_analytics_js_added() {
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -137,7 +137,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
 		// Create a new DOM document
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		// Load the rendered page into it
 		$dom->loadHTML( $amp_rendered );
 
@@ -158,7 +158,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that exactly one analytics component are added to the page
 	 */
-	function test_one_analytics_component_added() {
+	public function test_one_analytics_component_added() {
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -171,7 +171,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
@@ -186,7 +186,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that two analytics components are added to the page
 	 */
-	function test_two_analytics_components_added() {
+	public function test_two_analytics_components_added() {
 
 		$this->insert_one_option(
 			$this->vendor,
@@ -202,7 +202,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 		// Two amp-analytics components should be in the page
@@ -216,7 +216,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_analytics()
 	 *
-	 * @covers amp_get_analytics()
+	 * @covers \amp_get_analytics()
 	 */
 	public function test_amp_get_analytics() {
 		$this->insert_one_option(
@@ -243,7 +243,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test amp_print_analytics()
 	 *
-	 * @covers amp_print_analytics()
+	 * @covers \amp_print_analytics()
 	 */
 	public function test_amp_print_analytics() {
 		$this->insert_one_option(
@@ -257,7 +257,34 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		amp_print_analytics( $analytics );
 		$output = ob_get_clean();
 
-		$this->assertEquals( 0, strpos( $output, '<amp-analytics' ) );
+		$this->assertStringStartsWith( '<amp-analytics', $output );
+		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+	}
+
+	/**
+	 * Test amp_print_analytics() when empty, called via wp_footer.
+	 *
+	 * Note that wp_footer action passes empty string to any handlers.
+	 * This test asserts that an issue discovered in PHP 7.1 is fixed.
+	 *
+	 * @see AMP_Theme_Support::add_hooks() Where add_action( 'wp_footer', 'amp_print_analytics' ) is done.
+	 * @covers \amp_print_analytics()
+	 */
+	public function test_amp_print_analytics_when_empty() {
+
+		ob_start();
+		amp_print_analytics( '' );
+		$this->assertEmpty( ob_get_clean() );
+
+		$this->insert_one_option(
+			$this->vendor,
+			$this->config_one
+		);
+		ob_start();
+		amp_print_analytics( '' );
+		$output = ob_get_clean();
+		$this->assertStringStartsWith( '<amp-analytics', $output );
+		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}
 
 }

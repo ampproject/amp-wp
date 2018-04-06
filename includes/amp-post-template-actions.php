@@ -107,6 +107,12 @@ function amp_post_template_add_schemaorg_metadata() {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_styles( $amp_template ) {
+	$stylesheets = $amp_template->get( 'post_amp_stylesheets' );
+	if ( ! empty( $stylesheets ) ) {
+		echo '/* Inline stylesheets */' . PHP_EOL; // WPCS: XSS OK.
+		echo implode( '', $stylesheets ); // WPCS: XSS OK.
+	}
+
 	$styles = $amp_template->get( 'post_amp_styles' );
 	if ( ! empty( $styles ) ) {
 		echo '/* Inline styles */' . PHP_EOL; // WPCS: XSS OK.

@@ -51,7 +51,7 @@ class AMP_Image_Dimension_Extractor {
 			return set_url_scheme( $url, 'http' );
 		}
 
-		$parsed = AMP_WP_Utils::parse_url( $url );
+		$parsed = wp_parse_url( $url );
 		if ( ! isset( $parsed['host'] ) ) {
 			$path = '';
 			if ( isset( $parsed['path'] ) ) {
@@ -198,7 +198,7 @@ class AMP_Image_Dimension_Extractor {
 		$urls = array_keys( $urls_to_fetch );
 
 		if ( ! function_exists( 'amp_get_fasterimage_client' ) ) {
-			require_once( AMP__DIR__ . '/includes/lib/fasterimage/amp-fasterimage.php' );
+			require_once AMP__DIR__ . '/includes/lib/fasterimage/amp-fasterimage.php';
 		}
 
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );

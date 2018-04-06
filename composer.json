@@ -4,7 +4,16 @@
     "homepage": "https://github.com/Automattic/amp-wp",
     "type": "wordpress-plugin",
     "license": "GPL-2.0",
-    "version": "0.7.0",
+    "version": "1.0.0",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/xwp/PHP-CSS-Parser"
+        }
+    ],
+    "require": {
+        "sabberworm/php-css-parser": "dev-master"
+    },
     "require-dev": {
         "wp-coding-standards/wpcs": "^0.14.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",

@@ -1216,7 +1216,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					 * This seems to be an acceptable check since the AMP validator
 					 * will allow a URL with no protocol to pass validation.
 					 */
-					$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
+					$url_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
 					if ( $url_scheme ) {
 						if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 							return AMP_Rule_Spec::FAIL;
@@ -1233,7 +1233,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 							 * This seems to be an acceptable check since the AMP validator
 							 *  will allow a URL with no protocol to pass validation.
 							 */
-							$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
+							$url_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
 							if ( $url_scheme ) {
 								if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 									return AMP_Rule_Spec::FAIL;
@@ -1266,7 +1266,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
 				foreach ( $urls_to_test as $url ) {
-					$parsed_url = AMP_WP_Utils::parse_url( $url );
+					$parsed_url = wp_parse_url( $url );
 
 					/*
 					 *  The JS AMP validator seems to consider 'relative' to mean
@@ -1285,7 +1285,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
 						foreach ( $urls_to_test as $url ) {
-							$parsed_url = AMP_WP_Utils::parse_url( $url );
+							$parsed_url = wp_parse_url( $url );
 							if ( empty( $parsed_url['scheme'] ) ) {
 								return AMP_Rule_Spec::FAIL;
 							}
@@ -1338,7 +1338,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
-			$url_domain = AMP_WP_Utils::parse_url( $attr_value, PHP_URL_HOST );
+			$url_domain = wp_parse_url( $attr_value, PHP_URL_HOST );
 			if ( ! empty( $url_domain ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] as $disallowed_domain ) {
 					if ( strtolower( $url_domain ) === strtolower( $disallowed_domain ) ) {

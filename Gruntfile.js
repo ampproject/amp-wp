@@ -84,15 +84,21 @@ module.exports = function( grunt ) {
 				args: [ 'ls-files' ]
 			},
 			function( err, res ) {
+				var paths;
 				if ( err ) {
 					throw new Error( err.message );
 				}
 
+				paths = res.stdout.trim().split( /\n/ ).filter( function( file ) {
+					return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
+				} );
+				paths.push( 'vendor/autoload.php' );
+				paths.push( 'vendor/composer/**' );
+				paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
+
 				grunt.config.set( 'copy', {
 					build: {
-						src: res.stdout.trim().split( /\n/ ).filter( function( file ) {
-							return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
-						} ),
+						src: paths,
 						dest: 'build',
 						expand: true
 					}
