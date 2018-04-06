@@ -120,12 +120,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'button{font-weight:bold;}@media screen{button{font-weight:bold;}}',
 				),
+				array( 'illegal_css_property', 'illegal_css_property', 'illegal_css_property', 'illegal_css_property' ),
 			),
 
 			'illegal_at_rule_in_style_attribute' => array(
 				'<span style="color:brown; @media screen { color:green }">Parse error.</span>',
 				'<span>Parse error.</span>',
 				array(),
+				array( 'css_parse_error' ),
 			),
 
 			'illegal_at_rules_removed' => array(
@@ -134,6 +136,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'body{color:black;}',
 				),
+				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
 			),
 
 			'allowed_at_rules_retained' => array(
@@ -163,11 +166,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string $source               Source.
 	 * @param string $expected_content     Expected content.
 	 * @param string $expected_stylesheets Expected stylesheets.
+	 * @param array  $expected_errors      Expected error codes.
 	 */
-	public function test_body_style_attribute_sanitizer( $source, $expected_content, $expected_stylesheets ) {
+	public function test_body_style_attribute_sanitizer( $source, $expected_content, $expected_stylesheets, $expected_errors = array() ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 
-		$sanitizer = new AMP_Style_Sanitizer( $dom );
+		$error_codes = array();
+		$args        = array(
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		);
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
 		// Test content.
@@ -177,6 +188,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Test stylesheet.
 		$this->assertEquals( $expected_stylesheets, array_values( $sanitizer->get_stylesheets() ) );
+
+		$this->assertEquals( $expected_errors, $error_codes );
 	}
 
 	/**
@@ -194,6 +207,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'u{color:green;}:root:not(#_):not(#_) u{text-decoration:underline;}',
 					's{color:yellow;}',
 				),
+				array(),
 			),
 			'style_elements_with_link_elements' => array(
 				sprintf(
@@ -206,24 +220,28 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'strong.after-dashicon',
 					':root:not(#_):not(#_) s{color:yellow;}',
 				),
+				array(),
 			),
 			'style_with_no_head' => array(
 				'<html amp><body>Not good!<style>body{color:red;}</style></body></html>',
 				array(
 					'body{color:red;}',
 				),
+				array(),
 			),
 			'style_with_not_selectors' => array(
 				'<html amp><head><meta charset="utf-8"><style amp-custom>body.bar > p:not(.baz) { color:red; } body.foo:not(.bar) > p { color:blue; } body.foo:not(.bar) p:not(.baz) { color:green; } body.foo p { color:yellow; }</style></head><body class="foo"><p>Hello</p></body></html>',
 				array(
 					'body.foo:not(.bar) > p{color:blue;}body.foo:not(.bar) p:not(.baz){color:green;}body.foo p{color:yellow;}',
 				),
+				array(),
 			),
 			'style_with_attribute_selectors' => array(
 				'<html amp><head><meta charset="utf-8"><style amp-custom>.social-navigation a[href*="example.com"] { color:red; } .social-navigation a.examplecom { color:blue; }</style></head><body class="foo"><nav class="social-navigation"><a href="https://example.com/">Example</a></nav></body></html>',
 				array(
 					'.social-navigation a[href*="example.com"]{color:red;}',
 				),
+				array(),
 			),
 			'style_on_root_element' => array(
 				'<html amp style="color:red;"><head><meta charset="utf-8"><style amp-custom>html { background-color: blue !important; }</style></head><body>Hi</body></html>',
@@ -231,6 +249,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'html:not(#_):not(#_){background-color:blue;}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-10b06ba{color:red;}',
 				),
+				array(),
 			),
 			'styles_with_dynamic_elements' => array(
 				implode( '', array(
@@ -249,6 +268,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'amp-live-list li .highlighted{background:yellow;}',
 					'body amp-list .portland{color:blue;}',
 				),
+				array(),
 			),
 		);
 	}
@@ -259,19 +279,24 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_link_and_style_test_data
 	 * @param string $source               Source.
 	 * @param array  $expected_stylesheets Expected stylesheets.
+	 * @param array  $expected_errors      Expected error codes.
 	 */
-	public function test_link_and_style_elements( $source, $expected_stylesheets ) {
+	public function test_link_and_style_elements( $source, $expected_stylesheets, $expected_errors = array() ) {
 		$dom = AMP_DOM_Utils::get_dom( $source );
 
-		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
-			'use_document_element' => true,
-			'remove_unused_rules'  => 'always',
-		) );
+		$error_codes = array();
+		$args        = array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'always',
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		);
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
-			'use_document_element' => true,
-		) );
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
 		$whitelist_sanitizer->sanitize();
 
 		$sanitized_html     = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
@@ -285,6 +310,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			}
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
+
+		$this->assertEquals( $expected_errors, $error_codes );
 	}
 
 	/**
@@ -354,26 +381,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'style_amp_keyframes'              => array(
 				'<style amp-keyframes>@keyframes anim1 { from { opacity:0.0 } to { opacity:0.5 } } @media (min-width: 600px) {@keyframes anim1 { from { opacity:0.5 } to { opacity:1.0 } } }</style>',
 				'<style amp-keyframes="">@keyframes anim1{from{opacity:0;}to{opacity:.5;}}@media (min-width: 600px){@keyframes anim1{from{opacity:.5;}to{opacity:1;}}}</style>',
+				array(),
 			),
 
 			'style_amp_keyframes_max_overflow' => array(
 				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) {@keyframes ' . str_repeat( 'a', $keyframes_max_size + 1 ) . ' {} }</style>',
 				'',
+				array( 'excessive_css' ),
 			),
 
 			'style_amp_keyframes_last_child'   => array(
 				'<b>before</b> <style amp-keyframes>@keyframes anim1 {}</style> between <style amp-keyframes>@keyframes anim2 {}</style> as <b>after</b>',
 				'<b>before</b> between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
+				array(),
 			),
 
 			'blacklisted_and_whitelisted_keyframe_properties' => array(
 				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn);}}</style>',
+				array( 'illegal_css_property', 'illegal_css_property', 'illegal_css_property' ),
 			),
 
 			'style_amp_keyframes_with_disallowed_rules' => array(
 				'<style amp-keyframes>body { color:red; opacity:1; } @keyframes anim1 { 50% { opacity:0.5 !important; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{opacity:.5;}}</style>',
+				array( 'unrecognized_css', 'illegal_css_important', 'illegal_css_at_rule' ),
 			),
 		);
 	}
@@ -384,12 +416,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_keyframe_data
 	 * @param string $source   Markup to process.
 	 * @param string $expected The markup to expect.
+	 * @param array  $expected_errors      Expected error codes.
 	 */
-	public function test_keyframe_sanitizer( $source, $expected = null ) {
-		$expected  = isset( $expected ) ? $expected : $source;
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+	public function test_keyframe_sanitizer( $source, $expected = null, $expected_errors = array() ) {
+		$expected    = isset( $expected ) ? $expected : $source;
+		$dom         = AMP_DOM_Utils::get_dom_from_content( $source );
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
 			'use_document_element' => true,
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
 		) );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -397,6 +434,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$content = preg_replace( '#\s+(?=</style>)#', '', $content );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 		$this->assertEquals( $expected, $content );
+
+		$this->assertEquals( $expected_errors, $error_codes );
 	}
 
 	/**

@@ -71,9 +71,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.0
 	 * @var array[] {
-	 * @type array              $stylesheet Array of stylesheet chunked, with declaration blocks being represented as arrays.
-	 * @type DOMElement|DOMAttr $node       Origin for styles.
-	 * @type array $sources
+	 *     @type array              $stylesheet Array of stylesheet chunked, with declaration blocks being represented as arrays.
+	 *     @type DOMElement|DOMAttr $node       Origin for styles.
+	 *     @type array              $sources    Sources for the node.
+	 *     @type bool               $keyframes  Whether an amp-keyframes.
 	 * }
 	 */
 	private $pending_stylesheets = array();
@@ -92,14 +93,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var DOMElement
 	 */
 	private $amp_custom_style_element;
-
-	/**
-	 * The found style[amp-keyframe] stylesheets.
-	 *
-	 * @since 1.0
-	 * @var string[]
-	 */
-	private $keyframes_stylesheets = array();
 
 	/**
 	 * Spec for style[amp-keyframes] cdata.
