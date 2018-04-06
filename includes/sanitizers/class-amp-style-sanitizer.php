@@ -1286,7 +1286,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'code'    => 'excessive_css',
 						'message' => sprintf(
 							/* translators: %d is the number of bytes over the limit */
-							__( 'Too much CSS enqueued (by %d bytes).', 'amp' ),
+							__( 'Too much CSS output (by %d bytes).', 'amp' ),
 							( $final_size + $sheet_size ) - $stylesheet_set['cdata_spec']['max_bytes']
 						),
 					);

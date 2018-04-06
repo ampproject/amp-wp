@@ -322,23 +322,89 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Style_Sanitizer::process_font_face_at_rule()
 	 */
 	public function test_font_data_url_handling() {
-		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( includes_url( 'css/dashicons.css' ) ) . '"></head><body><span class="dashicons dashicons-admin-appearance"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$html  = '<html amp><head><meta charset="utf-8">';
+		$html .= '<link rel="stylesheet" href="' . esc_url( includes_url( 'css/dashicons.css' ) ) . '">'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$html .= '</head><body><span class="b dashicons dashicons-admin-appearance"></span></body></html>';
 
-		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
-			'use_document_element' => true,
-			'remove_unused_rules'  => 'always',
+		// Test with tree-shaking.
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'always',
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
 		) );
 		$sanitizer->sanitize();
-		AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$this->assertEquals( array(), $error_codes );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
 		$this->assertCount( 1, $actual_stylesheets );
-		$stylesheet = $actual_stylesheets[0];
-		$this->assertContains( 'dashicons.woff") format("woff")', $stylesheet );
-		$this->assertNotContains( 'data:application/font-woff;', $stylesheet );
-		$this->assertContains( '.dashicons{', $stylesheet );
-		$this->assertContains( '.dashicons-admin-appearance:before{', $stylesheet );
-		$this->assertNotContains( '.dashicons-format-chat:before', $stylesheet );
+		$this->assertContains( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
+		$this->assertNotContains( 'data:application/font-woff;', $actual_stylesheets[0] );
+		$this->assertContains( '.dashicons{', $actual_stylesheets[0] );
+		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
+		$this->assertNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+
+		// Test with rule-removal not forced, since dashicons alone is not larger than 50KB.
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'sometimes',
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$this->assertEquals( array(), $error_codes );
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertContains( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
+		$this->assertNotContains( 'data:application/font-woff;', $actual_stylesheets[0] );
+		$this->assertContains( '.dashicons,.dashicons-before:before{', $actual_stylesheets[0] );
+		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
+		$this->assertContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+	}
+
+	/**
+	 * Test that auto-removal is performed when remove_unused_rules=sometimes (the default), and that excessive CSS will be removed entirely.
+	 *
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 */
+	public function test_large_custom_css_and_rule_removal() {
+		$custom_max_size = null;
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$custom_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+		$this->assertNotNull( $custom_max_size );
+
+		$html  = '<html amp><head><meta charset="utf-8">';
+		$html .= '<style>.' . str_repeat( 'a', $custom_max_size - 50 ) . '{ color:red } .b{ color:blue; }</style>';
+		$html .= '<style>.b ' . str_repeat( 'c', $custom_max_size ) . '{ color:green }</style>';
+		$html .= '</head><body><span class="b">...</span></body></html>';
+		$dom   = AMP_DOM_Utils::get_dom( $html );
+
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+
+		$this->assertEquals(
+			array( '.b{color:blue;}' ),
+			array_values( $sanitizer->get_stylesheets() )
+		);
+
+		$this->assertEquals(
+			array( 'removed_unused_css_rules', 'excessive_css' ),
+			$error_codes
+		);
 	}
 
 	/**
@@ -369,13 +435,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_keyframe_data() {
-		$keyframes_max_size = 10;
+		$keyframes_max_size = null;
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
 			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style[amp-keyframes]' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
 				$keyframes_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
 				break;
 			}
 		}
+		$this->assertNotNull( $keyframes_max_size );
 
 		return array(
 			'style_amp_keyframes'              => array(
