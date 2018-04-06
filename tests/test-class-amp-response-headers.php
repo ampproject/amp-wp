@@ -1,13 +1,13 @@
 <?php
 /**
- * Tests for Theme Support.
+ * Tests for AMP_Response_Headers.
  *
  * @package AMP
  * @since 1.0
  */
 
 /**
- * Tests for Theme Support.
+ * Tests for AMP_Response_Headers.
  *
  * @covers AMP_Response_Headers
  */

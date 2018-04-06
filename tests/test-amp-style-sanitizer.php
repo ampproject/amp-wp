@@ -430,33 +430,34 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				admin_url( 'css/common.css' ),
 				ABSPATH . 'wp-admin/css/common.css',
 			),
-			'amp_css_bad_file_extension' => array(
+			'amp_disallowed_file_extension' => array(
 				content_url( 'themes/twentyseventeen/index.php' ),
 				null,
-				'amp_css_bad_file_extension',
+				'amp_disallowed_file_extension',
 			),
-			'amp_css_path_not_found' => array(
+			'amp_file_path_not_found' => array(
 				content_url( 'themes/twentyseventeen/404.css' ),
 				null,
-				'amp_css_path_not_found',
+				'amp_file_path_not_found',
 			),
 		);
 	}
 
 	/**
-	 * Tests get_validated_css_file_path.
+	 * Tests get_validated_url_file_path.
 	 *
 	 * @dataProvider get_stylesheet_urls
-	 * @covers AMP_Style_Sanitizer::get_validated_css_file_path()
+	 * @covers AMP_Style_Sanitizer::get_validated_url_file_path()
+	 *
 	 * @param string      $source     Source URL.
 	 * @param string|null $expected   Expected path or null if error.
 	 * @param string      $error_code Error code. Optional.
 	 */
-	public function test_get_validated_css_file_path( $source, $expected, $error_code = null ) {
+	public function test_get_validated_url_file_path( $source, $expected, $error_code = null ) {
 		$dom = AMP_DOM_Utils::get_dom( '<html></html>' );
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom );
-		$actual    = $sanitizer->get_validated_css_file_path( $source );
+		$actual    = $sanitizer->get_validated_url_file_path( $source, array( 'css' ) );
 		if ( isset( $error_code ) ) {
 			$this->assertInstanceOf( 'WP_Error', $actual );
 			$this->assertEquals( $error_code, $actual->get_error_code() );

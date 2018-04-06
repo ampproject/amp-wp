@@ -297,52 +297,57 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Generates an enqueued style's fully-qualified file path.
+	 * Generate a URL's fully-qualified file path.
 	 *
 	 * @since 0.7
 	 * @see WP_Styles::_css_href()
 	 *
-	 * @param string $src The source URL of the enqueued style.
+	 * @param string   $url The file URL.
+	 * @param string[] $allowed_extensions Allowed file extensions.
 	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
 	 */
-	public function get_validated_css_file_path( $src ) {
+	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
 		$needs_base_url = (
-			! is_bool( $src )
+			! is_bool( $url )
 			&&
-			! preg_match( '|^(https?:)?//|', $src )
+			! preg_match( '|^(https?:)?//|', $url )
 			&&
-			! ( $this->content_url && 0 === strpos( $src, $this->content_url ) )
+			! ( $this->content_url && 0 === strpos( $url, $this->content_url ) )
 		);
 		if ( $needs_base_url ) {
-			$src = $this->base_url . $src;
+			$url = $this->base_url . $url;
 		}
 
 		// Strip query and fragment from URL.
-		$src = preg_replace( ':[\?#].*$:', '', $src );
+		$url = preg_replace( ':[\?#].*$:', '', $url );
 
-		if ( ! preg_match( '/\.(css|less|scss|sass)$/i', $src ) ) {
-			/* translators: %s is stylesheet URL */
-			return new WP_Error( 'amp_css_bad_file_extension', sprintf( __( 'Skipped stylesheet which does not have recognized CSS file extension (%s).', 'amp' ), $src ) );
+		// Validate file extensions.
+		if ( ! empty( $allowed_extensions ) ) {
+			$pattern = sprintf( '/\.(%s)$/i', implode( '|', $allowed_extensions ) );
+			if ( ! preg_match( $pattern, $url ) ) {
+				/* translators: %s is the file URL */
+				return new WP_Error( 'amp_disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
+			}
 		}
 
 		$includes_url = includes_url( '/' );
 		$content_url  = content_url( '/' );
 		$admin_url    = get_admin_url( null, '/' );
-		$css_path     = null;
-		if ( 0 === strpos( $src, $content_url ) ) {
-			$css_path = WP_CONTENT_DIR . substr( $src, strlen( $content_url ) - 1 );
-		} elseif ( 0 === strpos( $src, $includes_url ) ) {
-			$css_path = ABSPATH . WPINC . substr( $src, strlen( $includes_url ) - 1 );
-		} elseif ( 0 === strpos( $src, $admin_url ) ) {
-			$css_path = ABSPATH . 'wp-admin' . substr( $src, strlen( $admin_url ) - 1 );
+		$file_path    = null;
+		if ( 0 === strpos( $url, $content_url ) ) {
+			$file_path = WP_CONTENT_DIR . substr( $url, strlen( $content_url ) - 1 );
+		} elseif ( 0 === strpos( $url, $includes_url ) ) {
+			$file_path = ABSPATH . WPINC . substr( $url, strlen( $includes_url ) - 1 );
+		} elseif ( 0 === strpos( $url, $admin_url ) ) {
+			$file_path = ABSPATH . 'wp-admin' . substr( $url, strlen( $admin_url ) - 1 );
 		}
 
-		if ( ! $css_path || false !== strpos( '../', $css_path ) || 0 !== validate_file( $css_path ) || ! file_exists( $css_path ) ) {
-			/* translators: %s is stylesheet URL */
-			return new WP_Error( 'amp_css_path_not_found', sprintf( __( 'Unable to locate filesystem path for stylesheet %s.', 'amp' ), $src ) );
+		if ( ! $file_path || false !== strpos( '../', $file_path ) || 0 !== validate_file( $file_path ) || ! file_exists( $file_path ) ) {
+			/* translators: %s is file URL */
+			return new WP_Error( 'amp_file_path_not_found', sprintf( __( 'Unable to locate filesystem path for %s.', 'amp' ), $url ) );
 		}
 
-		return $css_path;
+		return $file_path;
 	}
 
 	/**
@@ -401,7 +406,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$css_file_path = $this->get_validated_css_file_path( $href );
+		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
 		if ( is_wp_error( $css_file_path ) ) {
 			$this->remove_invalid_child( $element, array(
 				'message' => $css_file_path->get_error_message(),
@@ -539,7 +544,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet        = array();
 		$validation_errors = array();
 		try {
-			$parser_settings = Sabberworm\CSS\Settings::create()->withMultibyteSupport( false );
+			$parser_settings = Sabberworm\CSS\Settings::create();
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
 			$css_document    = $css_parser->parse();
 
@@ -783,7 +788,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( $ruleset instanceof AtRuleSet && 'font-face' === $ruleset->atRuleName() ) {
-			$this->process_font_face_at_rule( $ruleset );
+			$this->process_font_face_at_rule( $ruleset, $options );
 		}
 
 		$validation_errors = array_merge(
@@ -816,8 +821,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 *
 	 * @param AtRuleSet $ruleset Ruleset for @font-face.
+	 * @param array     $options Options.
 	 */
-	private function process_font_face_at_rule( AtRuleSet $ruleset ) {
+	private function process_font_face_at_rule( AtRuleSet $ruleset, $options ) {
 		$src_properties = $ruleset->getRules( 'src' );
 		if ( empty( $src_properties ) ) {
 			return;
@@ -905,9 +911,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					1,
 					$count
 				);
-				if ( $count ) {
-					$data_url->getURL()->setString( $guessed_url );
+				if ( 1 !== $count ) {
+					continue;
 				}
+
+				// Ensure file exists.
+				$path = $this->get_validated_url_file_path( $guessed_url );
+				if ( is_wp_error( $path ) ) {
+					continue;
+				}
+
+				$data_url->getURL()->setString( $guessed_url );
+				break;
 			}
 		}
 	}
@@ -965,7 +980,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 * @see https://www.npmjs.com/package/replace-important
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#important
-	 * @todo Further tailor for specificity. See https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L87-L126.
 	 *
 	 * @param RuleSet|DeclarationBlock $ruleset  Rule set.
 	 * @param CSSList                  $css_list CSS List.
