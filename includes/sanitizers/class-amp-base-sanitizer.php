@@ -55,7 +55,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
 	 *      @type bool $disable_invalid_removal
-	 *      @type callable $remove_invalid_callback
+	 *      @type callable $validation_error_callback
 	 * }
 	 */
 	protected $args;
@@ -130,6 +130,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Return array of values that would be valid as an HTML `style` attribute.
 	 *
 	 * @since 0.4
+	 * @deprecated As of 1.0, use get_stylesheets().
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */

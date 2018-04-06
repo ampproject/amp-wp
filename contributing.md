@@ -2,10 +2,21 @@
 
 Thanks for taking the time to contribute!
 
-To clone this repository
-``` bash
-$ git clone --recursive git@github.com:Automattic/amp-wp.git
+To start, clone this repository into your WordPress install being used for development:
+
+```bash
+cd wp-content/plugins && git clone --recursive git@github.com:Automattic/amp-wp.git amp
 ```
+
+If you happened to have cloned without `--recursive` previously, please do `git submodule update --init` to ensure the [dev-lib](https://github.com/xwp/wp-dev-lib/) submodule is available for development.
+
+Lastly, to get the plugin running in your WordPress install, run `composer install` and then activate the plugin via the WordPress dashboard or `wp plugin activate amp`.
+
+To install the `pre-commit` hook, do `bash dev-lib/install-pre-commit-hook.sh`.
+
+Note that pull requests will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint and (for now) JSCS and JSHint.
+
+To run the Grunt commands, please first `npm install -g grunt-cli` and then `npm install`.
 
 ## Updating Allowed Tags And Attributes
 
@@ -72,6 +83,7 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
+0. Do `grunt build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 1. Bump plugin versions in `package.json` (×1), `package-lock.json` (×1, just do `npm install` first), `composer.json` (×1), and in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 2. Add changelog entry to readme.
 3. Merge release branch into `master`.
