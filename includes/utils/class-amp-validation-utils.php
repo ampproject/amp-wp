@@ -411,7 +411,9 @@ class AMP_Validation_Utils {
 			$node = $data['node'];
 			unset( $data['node'] );
 			$data['node_name'] = $node->nodeName;
-			$data['sources']   = self::locate_sources( $node );
+			if ( ! isset( $data['sources'] ) ) {
+				$data['sources'] = self::locate_sources( $node );
+			}
 			if ( $node->parentNode ) {
 				$data['parent_name'] = $node->parentNode->nodeName;
 			}

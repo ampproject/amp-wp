@@ -29,6 +29,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
+	 *      @type string   $remove_unused_rules        Enum 'never', 'sometimes' (default), 'always'. If total CSS is greater than max_bytes, whether to strip selectors (and then empty rules) when they are not found to be used in doc. A validation error will be emitted when stripping happens since it is not completely safe in the case of dynamic content.
 	 *      @type string[] $dynamic_element_selectors  Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
 	 *      @type bool     $use_document_element       Whether the root of the document should be used rather than the body.
 	 *      @type bool     $require_https_src          Require HTTPS URLs.
@@ -44,6 +45,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = array(
+		'remove_unused_rules'       => 'sometimes',
 		'dynamic_element_selectors' => array(
 			'amp-list',
 			'amp-live-list',
@@ -53,19 +55,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
-	 * Styles.
-	 *
-	 * List of CSS styles in HTML content of DOMDocument ($this->dom).
-	 *
-	 * @since 0.4
-	 * @var array[]
-	 */
-	private $styles = array();
-
-	/**
 	 * Stylesheets.
 	 *
-	 * Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets
+	 * Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets,
 	 *
 	 * @since 0.7
 	 * @var string[]
@@ -73,13 +65,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $stylesheets = array();
 
 	/**
-	 * Current amp-custom CSS size.
+	 * List of stylesheet parts prior to selector/rule removal (tree shaking).
 	 *
-	 * Sum of CSS located in $styles and $stylesheets.
+	 * Keys are MD5 hashes of stylesheets.
 	 *
-	 * @var int
+	 * @since 1.0
+	 * @var array[] {
+	 * @type array              $stylesheet Array of stylesheet chunked, with declaration blocks being represented as arrays.
+	 * @type DOMElement|DOMAttr $node       Origin for styles.
+	 * @type array $sources
+	 * }
 	 */
-	private $current_custom_size = 0;
+	private $pending_stylesheets = array();
 
 	/**
 	 * Spec for style[amp-custom] cdata.
@@ -103,14 +100,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var string[]
 	 */
 	private $keyframes_stylesheets = array();
-
-	/**
-	 * Current amp-keyframes CSS size.
-	 *
-	 * @since 1.0
-	 * @var int
-	 */
-	private $current_keyframes_size = 0;
 
 	/**
 	 * Spec for style[amp-keyframes] cdata.
@@ -210,14 +199,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get list of CSS styles in HTML content of DOMDocument ($this->dom).
 	 *
 	 * @since 0.4
+	 * @deprecated As of 1.0, use get_stylesheets().
 	 *
 	 * @return array[] Mapping CSS selectors to array of properties, or mapping of keys starting with 'stylesheet:' with value being the stylesheet.
 	 */
 	public function get_styles() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-		return $this->styles;
+		return array();
 	}
 
 	/**
@@ -227,7 +214,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
 	 */
 	public function get_stylesheets() {
-		return array_merge( $this->stylesheets, parent::get_stylesheets() );
+		return $this->stylesheets;
 	}
 
 	/**
@@ -237,11 +224,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Used class names.
 	 */
 	private function get_used_class_names() {
-		$classes = ' ';
-		foreach ( $this->xpath->query( '//*/@class' ) as $class_attribute ) {
-			$classes .= ' ' . $class_attribute->nodeValue;
+		if ( empty( $this->used_class_names ) ) {
+			$classes = ' ';
+			foreach ( $this->xpath->query( '//*/@class' ) as $class_attribute ) {
+				$classes .= ' ' . $class_attribute->nodeValue;
+			}
+			$this->used_class_names = array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) );
 		}
-		return array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) );
+		return $this->used_class_names;
 	}
 
 	/**
@@ -257,7 +247,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$this->used_class_names = $this->get_used_class_names();
+		$this->parse_css_duration = 0.0;
 
 		/*
 		 * Note that xpath is used to query the DOM so that the link and style elements will be
@@ -297,36 +287,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->collect_inline_styles( $element );
 		}
 
-		$this->finalize_amp_keyframes_styles();
+		$this->finalize_styles();
 
 		$this->did_convert_elements = true;
-
-		// Now make sure the amp-custom style is in the DOM and populated, if we're working with the document element.
-		if ( ! empty( $this->args['use_document_element'] ) ) {
-			if ( ! $this->amp_custom_style_element ) {
-				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
-				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
-				$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-				if ( ! $head ) {
-					$head = $this->dom->createElement( 'head' );
-					$this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
-				}
-				$head->appendChild( $this->amp_custom_style_element );
-			}
-
-			$css = implode( '', $this->get_stylesheets() );
-
-			/*
-			 * Let the style[amp-custom] be populated with the concatenated CSS.
-			 * !important: Updating the contents of this style element by setting textContent is not
-			 * reliable across PHP/libxml versions, so this is why the children are removed and the
-			 * text node is then explicitly added containing the CSS.
-			 */
-			while ( $this->amp_custom_style_element->firstChild ) {
-				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
-			}
-			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
-		}
 
 		if ( $this->parse_css_duration > 0.0 ) {
 			AMP_Response_Headers::send_server_timing( 'amp_parse_css', $this->parse_css_duration, 'AMP Parse CSS' );
@@ -394,33 +357,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet   = trim( $element->textContent );
 		$cdata_spec   = $is_keyframes ? $this->style_keyframes_cdata_spec : $this->style_custom_cdata_spec;
 		if ( $stylesheet ) {
+
 			$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
-				'allowed_at_rules'            => $cdata_spec['css_spec']['allowed_at_rules'],
-				'property_whitelist'          => $cdata_spec['css_spec']['allowed_declarations'],
-				'validate_keyframes'          => $cdata_spec['css_spec']['validate_keyframes'],
-				'class_selector_tree_shaking' => ! $cdata_spec['css_spec']['validate_keyframes'],
+				'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
+				'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
+				'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
 			) );
-		}
 
-		// Remove if surpasses max size.
-		$length       = strlen( $stylesheet );
-		$current_size = $is_keyframes ? $this->current_keyframes_size : $this->current_custom_size;
-		if ( $current_size + $length > $cdata_spec['max_bytes'] ) {
-			$this->remove_invalid_child( $element, array(
-				/* translators: %d is the number of bytes over the limit */
-				'message' => sprintf( __( 'Too much CSS enqueued (by %d bytes).', 'amp' ), ( $current_size + $length ) - $cdata_spec['max_bytes'] ),
-			) );
-			return;
-		}
-
-		$hash = md5( $stylesheet );
-
-		if ( $is_keyframes ) {
-			$this->keyframes_stylesheets[ $hash ] = $stylesheet;
-			$this->current_keyframes_size        += $length;
-		} else {
-			$this->stylesheets[ $hash ] = $stylesheet;
-			$this->current_custom_size += $length;
+			$pending_stylesheet = array(
+				'keyframes'  => $is_keyframes,
+				'stylesheet' => $stylesheet,
+				'node'       => $element,
+			);
+			if ( ! empty( $this->args['validation_error_callback'] ) ) {
+				$pending_stylesheet['sources'] = AMP_Validation_Utils::locate_sources( $element ); // Needed because node is removed below.
+			}
+			$this->pending_stylesheets[] = $pending_stylesheet;
 		}
 
 		if ( $element->hasAttribute( 'amp-custom' ) ) {
@@ -473,26 +425,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
-			'allowed_at_rules'            => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
-			'property_whitelist'          => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
-			'class_selector_tree_shaking' => true,
-			'stylesheet_url'              => $href,
-			'stylesheet_path'             => $css_file_path,
+			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
+			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'stylesheet_url'     => $href,
+			'stylesheet_path'    => $css_file_path,
 		) );
 
-		// Skip if surpasses max size.
-		$length = strlen( $stylesheet );
-		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
-			$this->remove_invalid_child( $element, array(
-				/* translators: %d is the number of bytes over the limit */
-				'message' => sprintf( __( 'Too much CSS enqueued (by %d bytes).', 'amp' ), ( $this->current_custom_size + $length ) - $this->style_custom_cdata_spec['max_bytes'] ),
-			) );
-			return;
+		$pending_stylesheet = array(
+			'keyframes'  => false,
+			'stylesheet' => $stylesheet,
+			'node'       => $element,
+		);
+		if ( ! empty( $this->args['validation_error_callback'] ) ) {
+			$pending_stylesheet['sources'] = AMP_Validation_Utils::locate_sources( $element ); // Needed because node is removed below.
 		}
-		$hash = md5( $stylesheet );
-
-		$this->stylesheets[ $hash ] = $stylesheet;
-		$this->current_custom_size += $length;
+		$this->pending_stylesheets[] = $pending_stylesheet;
 
 		// Remove now that styles have been processed.
 		$element->parentNode->removeChild( $element );
@@ -517,13 +464,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type bool     $convert_width_to_max_width  Convert width to max-width.
 	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link (or @import?).
 	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link (or @import?).
+	 *     @type array    $allowed_at_rules            Allowed @-rules.
+	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
 	 * }
-	 * @return string Processed stylesheet.
+	 * @return array Processed stylesheet parts.
 	 */
 	private function process_stylesheet( $stylesheet, $node, $options = array() ) {
-		$should_tree_shake = ! empty( $options['class_selector_tree_shaking'] );
-		unset( $options['class_selector_tree_shaking'] );
-		$cache_key = md5( $stylesheet . serialize( $options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$cache_impacting_options = wp_array_slice_assoc(
+			$options,
+			array( 'property_whitelist', 'property_blacklist', 'convert_width_to_max_width', 'stylesheet_url', 'allowed_at_rules' )
+		);
+
+		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 
 		$cache_group = 'amp-parsed-stylesheet-v1';
 		if ( wp_using_ext_object_cache() ) {
@@ -547,45 +499,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$dynamic_selector_pattern = null;
-		if ( ! empty( $this->args['dynamic_element_selectors'] ) ) {
-			$dynamic_selector_pattern = '#' . implode( '|', array_map(
-				function( $selector ) {
-					return preg_quote( $selector, '#' );
-				},
-				$this->args['dynamic_element_selectors']
-			) ) . '#';
-		}
-
-		$stylesheet = '';
-		foreach ( $parsed['stylesheet'] as $stylesheet_part ) {
-			if ( is_array( $stylesheet_part ) ) {
-				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
-				if ( $should_tree_shake ) {
-					$selectors = array();
-					foreach ( $selectors_parsed as $selector => $class_names ) {
-						$should_include = (
-							( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
-							||
-							// If all class names are used in the doc.
-							0 === count( array_diff( $class_names, $this->used_class_names ) )
-						);
-						if ( $should_include ) {
-							$selectors[] = $selector;
-						}
-					}
-				} else {
-					$selectors = array_keys( $selectors_parsed );
-				}
-				if ( ! empty( $selectors ) ) {
-					$stylesheet .= implode( ',', $selectors ) . $declaration_block;
-				}
-			} else {
-				$stylesheet .= $stylesheet_part;
-			}
-		}
-
-		return $stylesheet;
+		return $parsed['stylesheet'];
 	}
 
 	/**
@@ -1146,33 +1060,31 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$class  = 'amp-wp-' . substr( md5( $style_attribute->nodeValue ), 0, 7 );
-		$root   = ':root' . str_repeat( ':not(#_)', 5 ); // @todo The correctness of using "5" should be validated.
-		$rule   = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
-		$hash   = md5( $rule );
-		$rule   = $this->process_stylesheet( $rule, $style_attribute, array(
-			'convert_width_to_max_width'  => true,
-			'allowed_at_rules'            => array(),
-			'property_whitelist'          => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
-			'class_selector_tree_shaking' => false,
-		) );
-		$length = strlen( $rule );
+		$class = 'amp-wp-' . substr( md5( $style_attribute->nodeValue ), 0, 7 );
+		$root  = ':root' . str_repeat( ':not(#_)', 5 ); // @todo The correctness of using "5" should be validated.
+		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
 
-		if ( 0 === $length ) {
+		$stylesheet = $this->process_stylesheet( $rule, $style_attribute, array(
+			'convert_width_to_max_width' => true,
+			'allowed_at_rules'           => array(),
+			'property_whitelist'         => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+		) );
+
+		if ( empty( $stylesheet ) ) {
 			$element->removeAttribute( 'style' );
 			return;
 		}
 
-		if ( $this->current_custom_size + $length > $this->style_custom_cdata_spec['max_bytes'] ) {
-			$this->remove_invalid_attribute( $element, $style_attribute, array(
-				/* translators: %d is the number of bytes over the limit */
-				'message' => sprintf( __( 'Too much CSS enqueued (by %d bytes).', 'amp' ), ( $this->current_custom_size + $length ) - $this->style_custom_cdata_spec['max_bytes'] ),
-			) );
-			return;
+		$pending_stylesheet = array(
+			'stylesheet' => $stylesheet,
+			'node'       => $element,
+			'keyframes'  => false,
+		);
+		if ( ! empty( $this->args['validation_error_callback'] ) ) {
+			$pending_stylesheet['sources'] = AMP_Validation_Utils::locate_sources( $element ); // Needed because node is removed below.
 		}
 
-		$this->current_custom_size += $length;
-		$this->stylesheets[ $hash ] = $rule;
+		$this->pending_stylesheets[] = $pending_stylesheet;
 
 		$element->removeAttribute( 'style' );
 		if ( $element->hasAttribute( 'class' ) ) {
@@ -1183,32 +1095,206 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Finalize style[amp-keyframes] elements.
+	 * Finalize stylesheets for style[amp-custom] and style[amp-keyframes] elements.
 	 *
-	 * Combine all amp-keyframe elements and enforce that it is at the end of the body.
+	 * Concatenate all pending stylesheets, remove unused rules if necessary, and add to style elements in doc.
+	 * Combine all amp-keyframe styles and add them to the end of the body.
 	 *
 	 * @since 1.0
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
 	 */
-	private function finalize_amp_keyframes_styles() {
-		if ( empty( $this->keyframes_stylesheets ) ) {
-			return;
-		}
+	private function finalize_styles() {
 
-		$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( ! $body ) {
-			if ( ! empty( $this->args['validation_error_callback'] ) ) {
-				call_user_func( $this->args['validation_error_callback'], array(
-					'code'    => 'missing_body_element',
-					'message' => __( 'amp-keyframes must be last child of body element.', 'amp' ),
-				) );
+		$stylesheet_sets = array(
+			'custom'    => array(
+				'total_size'          => 0,
+				'cdata_spec'          => $this->style_custom_cdata_spec,
+				'pending_stylesheets' => array(),
+				'final_stylesheets'   => array(),
+				'remove_unused_rules' => $this->args['remove_unused_rules'],
+			),
+			'keyframes' => array(
+				'total_size'          => 0,
+				'cdata_spec'          => $this->style_keyframes_cdata_spec,
+				'pending_stylesheets' => array(),
+				'final_stylesheets'   => array(),
+				'remove_unused_rules' => 'never', // Not relevant.
+			),
+		);
+
+		// Divide pending stylesheet between custom and keyframes, and calculate size of each.
+		while ( ! empty( $this->pending_stylesheets ) ) {
+			$pending_stylesheet = array_shift( $this->pending_stylesheets );
+
+			$set_name = ! empty( $pending_stylesheet['keyframes'] ) ? 'keyframes' : 'custom';
+			$size     = 0;
+			foreach ( $pending_stylesheet['stylesheet'] as $part ) {
+				if ( is_string( $part ) ) {
+					$size += strlen( $part );
+				} elseif ( is_array( $part ) ) {
+					$size += strlen( implode( ',', array_keys( $part[0] ) ) ); // Selectors.
+					$size += strlen( $part[1] ); // Declaration block.
+				}
 			}
+			$stylesheet_sets[ $set_name ]['total_size']           += $size;
+			$stylesheet_sets[ $set_name ]['pending_stylesheets'][] = $pending_stylesheet;
+		}
+
+		// Process the pending stylesheets.
+		foreach ( array_keys( $stylesheet_sets ) as $set_name ) {
+			$stylesheet_sets[ $set_name ] = $this->finalize_stylesheet_set( $stylesheet_sets[ $set_name ] );
+		}
+
+		$this->stylesheets = $stylesheet_sets['custom']['final_stylesheets'];
+
+		// If we're not working with the document element (e.g. for legacy post templates) then there is nothing left to do.
+		if ( empty( $this->args['use_document_element'] ) ) {
 			return;
 		}
 
-		$style_element = $this->dom->createElement( 'style' );
-		$style_element->setAttribute( 'amp-keyframes', '' );
-		$style_element->appendChild( $this->dom->createTextNode( implode( '', $this->keyframes_stylesheets ) ) );
-		$body->appendChild( $style_element );
+		// Add style[amp-custom] to document.
+		if ( ! empty( $stylesheet_sets['custom']['final_stylesheets'] ) ) {
+
+			// Ensure style[amp-custom] is present in the document.
+			if ( ! $this->amp_custom_style_element ) {
+				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
+				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
+				$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+				if ( ! $head ) {
+					$head = $this->dom->createElement( 'head' );
+					$this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
+				}
+				$head->appendChild( $this->amp_custom_style_element );
+			}
+
+			$css = implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
+
+			/*
+			 * Let the style[amp-custom] be populated with the concatenated CSS.
+			 * !important: Updating the contents of this style element by setting textContent is not
+			 * reliable across PHP/libxml versions, so this is why the children are removed and the
+			 * text node is then explicitly added containing the CSS.
+			 */
+			while ( $this->amp_custom_style_element->firstChild ) {
+				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
+			}
+			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
+		}
+
+		// Add style[amp-keyframes] to document.
+		if ( ! empty( $stylesheet_sets['keyframes']['final_stylesheets'] ) ) {
+			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+			if ( ! $body ) {
+				if ( ! empty( $this->args['validation_error_callback'] ) ) {
+					call_user_func( $this->args['validation_error_callback'], array(
+						'code'    => 'missing_body_element',
+						'message' => __( 'amp-keyframes must be last child of body element.', 'amp' ),
+					) );
+				}
+			} else {
+				$style_element = $this->dom->createElement( 'style' );
+				$style_element->setAttribute( 'amp-keyframes', '' );
+				$style_element->appendChild( $this->dom->createTextNode( implode( '', $stylesheet_sets['keyframes']['final_stylesheets'] ) ) );
+				$body->appendChild( $style_element );
+			}
+		}
+	}
+
+	/**
+	 * Finalize a stylesheet set (amp-custom or amp-keyframes).
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $stylesheet_set Stylesheet set.
+	 * @return array Finalized stylesheet set.
+	 */
+	private function finalize_stylesheet_set( $stylesheet_set ) {
+		$is_too_much_css   = $stylesheet_set['total_size'] > $stylesheet_set['cdata_spec']['max_bytes'];
+		$should_tree_shake = (
+			'always' === $stylesheet_set['remove_unused_rules'] || (
+				$is_too_much_css
+				&&
+				'sometimes' === $stylesheet_set['remove_unused_rules']
+			)
+		);
+
+		if ( $is_too_much_css && $should_tree_shake && ! empty( $this->args['validation_error_callback'] ) ) {
+			call_user_func( $this->args['validation_error_callback'], array(
+				'code'    => 'removed_unused_css_rules',
+				'message' => __( 'Too much CSS is enqueued and so seemingly irrelevant rules have been removed.', 'amp' ),
+			) );
+		}
+
+		$dynamic_selector_pattern = null;
+		if ( $should_tree_shake && ! empty( $this->args['dynamic_element_selectors'] ) ) {
+			$dynamic_selector_pattern = '#' . implode( '|', array_map(
+				function( $selector ) {
+					return preg_quote( $selector, '#' );
+				},
+				$this->args['dynamic_element_selectors']
+			) ) . '#';
+		}
+
+		$final_size = 0;
+		foreach ( $stylesheet_set['pending_stylesheets'] as $pending_stylesheet ) {
+			$stylesheet = '';
+			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
+				if ( is_string( $stylesheet_part ) ) {
+					$stylesheet .= $stylesheet_part;
+				} else {
+					list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
+					if ( $should_tree_shake ) {
+						$selectors = array();
+						foreach ( $selectors_parsed as $selector => $class_names ) {
+							$should_include = (
+								( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
+								||
+								// If all class names are used in the doc.
+								0 === count( array_diff( $class_names, $this->get_used_class_names() ) )
+							);
+							if ( $should_include ) {
+								$selectors[] = $selector;
+							}
+						}
+					} else {
+						$selectors = array_keys( $selectors_parsed );
+					}
+					if ( ! empty( $selectors ) ) {
+						$stylesheet .= implode( ',', $selectors ) . $declaration_block;
+					}
+				}
+			}
+
+			// Skip considering stylesheet if an identical one has already been processed.
+			$hash = md5( $stylesheet );
+			if ( isset( $stylesheet_set['final_stylesheets'][ $hash ] ) ) {
+				continue;
+			}
+
+			// Report validation error if size is now too big.
+			$sheet_size = strlen( $stylesheet );
+			if ( $final_size + $sheet_size > $stylesheet_set['cdata_spec']['max_bytes'] ) {
+				if ( ! empty( $this->args['validation_error_callback'] ) ) {
+					$validation_error = array(
+						'code'    => 'excessive_css',
+						'message' => sprintf(
+							/* translators: %d is the number of bytes over the limit */
+							__( 'Too much CSS enqueued (by %d bytes).', 'amp' ),
+							( $final_size + $sheet_size ) - $stylesheet_set['cdata_spec']['max_bytes']
+						),
+					);
+					if ( isset( $pending_stylesheet['sources'] ) ) {
+						$validation_error['sources'] = $pending_stylesheet['sources'];
+					}
+					call_user_func( $this->args['validation_error_callback'], $validation_error );
+				}
+			} else {
+				$final_size += $sheet_size;
+
+				$stylesheet_set['final_stylesheets'][ $hash ] = $stylesheet;
+			}
+		}
+
+		return $stylesheet_set;
 	}
 }

@@ -265,6 +265,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
 			'use_document_element' => true,
+			'remove_unused_rules'  => 'always',
 		) );
 		$sanitizer->sanitize();
 
@@ -299,6 +300,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
 			'use_document_element' => true,
+			'remove_unused_rules'  => 'always',
 		) );
 		$sanitizer->sanitize();
 		AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
@@ -386,7 +388,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_keyframe_sanitizer( $source, $expected = null ) {
 		$expected  = isset( $expected ) ? $expected : $source;
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Style_Sanitizer( $dom );
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$content = preg_replace( '#\s+(?=@keyframes)#', '', $content );

@@ -130,6 +130,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Return array of values that would be valid as an HTML `style` attribute.
 	 *
 	 * @since 0.4
+	 * @deprecated As of 1.0, use get_stylesheets().
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */
