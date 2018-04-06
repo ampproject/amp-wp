@@ -265,11 +265,22 @@ class AMP_Validation_Utils {
 	protected static $should_filter_terms_clauses_for_error_validation_status;
 
 	/**
+	 * Whether in debug mode.
+	 *
+	 * This means that sanitization will not be applied for validation errors.
+	 *
+	 * @var bool
+	 */
+	public static $debug = false;
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
 	 */
 	public static function init() {
+		self::$debug = isset( $_REQUEST[ self::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
+
 		if ( current_theme_supports( 'amp' ) ) {
 			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
 			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
@@ -564,6 +575,7 @@ class AMP_Validation_Utils {
 	 *     @type string $code Error code.
 	 *     @type DOMElement|DOMNode $node The removed node.
 	 * }
+	 * @return bool Whether the validation error should result in sanitization.
 	 */
 	public static function add_validation_error( array $data ) {
 		$node = null;
@@ -616,6 +628,8 @@ class AMP_Validation_Utils {
 		}
 
 		self::$validation_errors[] = $data;
+
+		return ! self::$debug;
 	}
 
 	/**
@@ -1343,7 +1357,7 @@ class AMP_Validation_Utils {
 	public static function finalize_validation( DOMDocument $dom, $args = array() ) {
 		$args = array_merge(
 			array(
-				'remove_source_comments'           => true,
+				'remove_source_comments'           => ! self::$debug,
 				'append_validation_status_comment' => true,
 			),
 			$args

@@ -623,7 +623,7 @@ class AMP_Theme_Support {
 	 * @see get_query_template()
 	 *
 	 * @param array $templates Template hierarchy.
-	 * @returns array Templates.
+	 * @return array Templates.
 	 */
 	public static function filter_paired_template_hierarchy( $templates ) {
 		$support = get_theme_support( 'amp' );
@@ -1026,15 +1026,12 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		$is_validation_debug_mode = isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
-
 		$args = array_merge(
 			array(
-				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element'    => true,
-				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
-				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
-				'disable_invalid_removal' => $is_validation_debug_mode,
+				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element' => true,
+				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 			),
 			$args
 		);
@@ -1086,9 +1083,7 @@ class AMP_Theme_Support {
 		}
 
 		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::finalize_validation( $dom, array(
-				'remove_source_comments' => ! $is_validation_debug_mode,
-			) );
+			AMP_Validation_Utils::finalize_validation( $dom );
 		}
 
 		$response  = "<!DOCTYPE html>\n";
