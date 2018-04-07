@@ -258,6 +258,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$elements[] = $element;
 		}
 
+		// If 'width' attribute is present for 'col' tag, convert to proper CSS rule.
+		foreach ( $this->dom->getElementsByTagName( 'col' ) as $col ) {
+			$width_attr = $col->getAttribute( 'width' );
+			if ( ! empty( $width_attr ) && ( false === strpos( $width_attr, '*' ) ) ) {
+				$width_style = 'width: ' . $width_attr;
+				if ( is_numeric( $width_attr ) ) {
+					$width_style .= 'px';
+				}
+				$col->setAttribute( 'style', $width_style );
+				$col->removeAttribute( 'width' );
+			}
+		}
+
 		/**
 		 * Element.
 		 *

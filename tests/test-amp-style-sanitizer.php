@@ -156,6 +156,28 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-ab79d9e{color:purple;}',
 				),
 			),
+
+			'col_with_width_attribute' => array(
+				'<table><colgroup><col width="253"/></colgroup></table>',
+				'<table><colgroup><col class="amp-wp-cbcb5c2"></colgroup></table>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cbcb5c2{max-width:253px;}',
+				),
+			),
+
+			'col_with_percent_width_attribute' => array(
+				'<table><colgroup><col width="50%"/></colgroup></table>',
+				'<table><colgroup><col class="amp-wp-cd7753e"></colgroup></table>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cd7753e{max-width:50%;}',
+				),
+			),
+
+			'col_with_star_width_attribute' => array(
+				'<table><colgroup><col width="0*"/></colgroup></table>',
+				'<table><colgroup><col width="0*"></colgroup></table>',
+				array(),
+			),
 		);
 	}
 
