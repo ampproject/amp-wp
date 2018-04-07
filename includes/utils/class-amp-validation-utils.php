@@ -276,10 +276,22 @@ class AMP_Validation_Utils {
 	/**
 	 * Add the actions.
 	 *
+	 * @param array $args {
+	 *     Args.
+	 *
+	 *     @type bool $debug Whether validation should be done in debug mode, where validation errors are not sanitized and source comments are not removed.
+	 * }
 	 * @return void
 	 */
-	public static function init() {
-		self::$debug = isset( $_REQUEST[ self::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
+	public static function init( $args = array() ) {
+		$args = array_merge(
+			array(
+				'debug' => false,
+			),
+			$args
+		);
+
+		self::$debug = $args['debug'];
 
 		if ( current_theme_supports( 'amp' ) ) {
 			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
@@ -453,7 +465,6 @@ class AMP_Validation_Utils {
 		}
 
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
-		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ) );
 
 		$do_blocks_priority  = has_filter( 'the_content', 'do_blocks' );
 		$is_gutenberg_active = (
@@ -464,6 +475,8 @@ class AMP_Validation_Utils {
 		if ( $is_gutenberg_active ) {
 			add_filter( 'the_content', array( __CLASS__, 'add_block_source_comments' ), $do_blocks_priority - 1 );
 		}
+
+		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ), 1000 );
 	}
 
 	/**
@@ -1382,14 +1395,28 @@ class AMP_Validation_Utils {
 	 * @return array $sanitizers The filtered AMP sanitizers.
 	 */
 	public static function add_validation_callback( $sanitizers ) {
-		foreach ( $sanitizers as $sanitizer => $args ) {
-			$sanitizers[ $sanitizer ] = array_merge(
-				$args,
-				array(
-					'validation_error_callback' => __CLASS__ . '::add_validation_error',
-				)
-			);
+		foreach ( $sanitizers as $sanitizer => &$args ) {
+
+			if ( isset( $args['validation_error_callback'] ) ) {
+				$original_validation_error_callback = $args['validation_error_callback'];
+				$args['validation_error_callback']  = function( $validation_error ) use ( $original_validation_error_callback ) {
+					AMP_Validation_Utils::add_validation_error( $validation_error );
+					$result = call_user_func( $original_validation_error_callback, $validation_error );
+					if ( self::$debug ) {
+						return false;
+					}
+					return $result;
+				};
+			} else {
+				$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
+			}
 		}
+
+		// @todo Pass this into all sanitizers?
+		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
+			$sanitizers['AMP_Style_Sanitizer']['locate_sources'] = true;
+		}
+
 		return $sanitizers;
 	}
 
