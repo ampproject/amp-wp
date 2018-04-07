@@ -129,7 +129,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		AMP_Validation_Utils::add_validation_hooks();
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
-		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', array( self::TESTED_CLASS, 'add_validation_callback' ) ) );
+		$this->assertEquals( 1000, has_action( 'amp_content_sanitizers', array( self::TESTED_CLASS, 'add_validation_callback' ) ) );
 		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
 	}
 
