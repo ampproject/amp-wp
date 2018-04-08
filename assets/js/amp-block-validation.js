@@ -14,7 +14,11 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Holds data.
 		 */
-		data: {},
+		data: {
+			i18n: {
+				invalidAmpContentNotice: ''
+			}
+		},
 
 		/**
 		 * The blocks with validation errors.
@@ -30,7 +34,10 @@ var ampBlockValidation = ( function() {
 		boot: function boot( data ) {
 			module.data = data;
 			wp.data.subscribe( function() {
-				module.blocksWithErrors = module.getBlocksWithErrors();
+
+				// @todo Limit to subscribing to changes to validationErrors.
+				// @todo Changes to the block errors needs to set data?
+				module.blocksWithErrors = module.getBlocksWithErrors(); // @todo Why not call this in conditionallyAddNotice?
 			} );
 			wp.hooks.addFilter(
 				'blocks.BlockEdit',
@@ -47,28 +54,24 @@ var ampBlockValidation = ( function() {
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
 			return function( props ) {
-				var errorPanel,
-					errors = module.getBlockValidationErrors( props ),
-					result = [ wp.element.createElement( BlockEdit, _.extend( {}, props, { key: 'amp-original-edit' } ) ) ];
+				var errors, result;
+				errors = module.getBlockValidationErrors( props );
+				result = [
+					wp.element.createElement( BlockEdit, _.extend( {}, props, { key: 'amp-original-edit' } ) )
+				];
 
 				if ( errors.length > 0 ) {
-					errorPanel = wp.element.createElement(
-						wp.components.PanelBody,
-						{
-							title: module.data.i18n.notice.replace( '%s', props.name ),
-							children:  module.getErrorSummary( errors ),
-							initialOpen: false
-						}
-					);
 					result.unshift(
+
+						// @todo Add PanelBody with validation error details.
 						wp.element.createElement(
 							wp.components.Notice,
 							{
 								status: 'warning',
-								content: errorPanel, //
 								isDismissible: false,
 								key: 'amp-validation-notice'
-							}
+							},
+							module.data.i18n.invalidAmpContentNotice + ' ' + _.unique( _.pluck( errors, 'code' ) ).join( ', ' )
 						)
 					);
 				}
@@ -88,26 +91,35 @@ var ampBlockValidation = ( function() {
 		getBlocksWithErrors: function getBlocksWithErrors() {
 			var currentPost      = wp.data.select( 'core/editor' ).getCurrentPost(),
 				blocksWithErrors = {};
-			if ( ! currentPost.hasOwnProperty( module.data.errorKey ) || ! Array.isArray( currentPost[ module.data.errorKey ] ) ) {
+
+			if ( ! Array.isArray( currentPost[ module.data.restValidationErrorsField ] ) ) {
 				return blocksWithErrors;
 			}
 
-			currentPost[ module.data.errorKey ].forEach( function( validationError ) {
-				if ( validationError.hasOwnProperty( 'sources' ) ) {
-					validationError.sources.forEach( function( source ) {
-						if ( source.hasOwnProperty( 'block_name' ) ) {
-							if ( source.hasOwnProperty( 'block_attrs' ) ) {
-								validationError.blockAttrs = source.block_attrs; // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-							}
-							if ( blocksWithErrors.hasOwnProperty( source.block_name ) ) {
-								blocksWithErrors[ source.block_name ].push( validationError );
-							} else {
-								blocksWithErrors[ source.block_name ] = [ validationError ];
-							} // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
-						}
-					} );
+			// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+			currentPost[ module.data.restValidationErrorsField ].forEach( function( validationError ) {
+				if ( ! validationError.sources ) {
+					return;
 				}
+				validationError.sources.forEach( function( source ) { // @todo Only use the leaf block source. Ignore parent blocks for validation errors.
+					var blockValidationError;
+					if ( ! source.block_name ) {
+						return;
+					}
+					blockValidationError = _.extend( {}, validationError );
+					if ( source.block_attrs ) {
+						blockValidationError.blockAttrs = source.block_attrs;
+					}
+
+					if ( blocksWithErrors[ source.block_name ] ) {
+						blocksWithErrors[ source.block_name ].push( blockValidationError );
+					} else {
+						blocksWithErrors[ source.block_name ] = [ blockValidationError ];
+					}
+				} );
 			} );
+
+			// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 			return blocksWithErrors;
 		},
 
@@ -125,15 +137,15 @@ var ampBlockValidation = ( function() {
 			var rawErrors,
 				validationErrors = [];
 
-			if ( ! module.blocksWithErrors.hasOwnProperty( props.name ) ) {
+			if ( ! module.blocksWithErrors[ props.name ] ) {
 				return validationErrors;
 			}
-			rawErrors = module.blocksWithErrors[ props.name ];
 
-			rawErrors.forEach( function( validationError ) {
+			rawErrors = module.blocksWithErrors[ props.name ];
+			rawErrors.forEach( function( validationError ) { // @todo Switch to using _.filter().
 
 				// Uses _.isMatch because the props attributes can also have default attributes that blockAttrs doesn't have.
-				if ( validationError.hasOwnProperty( 'blockAttrs' ) && _.isMatch( props.attributes, validationError.blockAttrs ) ) {
+				if ( validationError.blockAttrs && _.isMatch( props.attributes, validationError.blockAttrs ) ) {
 					validationErrors.push( validationError );
 				} else if ( module.doNameAndAttributesMatch( validationError, props.attributes ) ) {
 					validationErrors.push( validationError );
@@ -146,6 +158,7 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Whether the node_name and node_attributes in the validation error are present in the block.
 		 *
+		 * @todo This doesn't seem to be working.
 		 * @param {Object} validationError - The validation errors to check.
 		 * @param {Object} propAttributes  - The block attributes, originally passed in the props object.
 		 * @returns {Boolean} Whether node_name and the node_attributes are in the block.
@@ -181,23 +194,6 @@ var ampBlockValidation = ( function() {
 			} else {
 				return null;
 			}
-		},
-
-		/**
-		 * Gets the unique error codes from the block errors.
-		 *
-		 * @param {Array} errors - The validation errors for a block.
-		 * @returns {String} errorCodes A comma-separated string of validation error codes.
-		 */
-		getErrorSummary: function getErrorSummary( errors ) {
-			var allErrors = [];
-
-			errors.forEach( function( validationError ) {
-				if ( ! allErrors.includes( validationError.code ) ) {
-					allErrors.push( validationError.code );
-				}
-			} );
-			return module.data.i18n.summary + ': ' + allErrors.join( ', ' ) + '<pre>%s</pre>'.replace( '%s', JSON.stringify( errors ) );
 		}
 
 	};

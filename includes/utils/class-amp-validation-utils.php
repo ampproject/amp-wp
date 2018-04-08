@@ -1908,8 +1908,7 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function enqueue_block_validation() {
-		$slug              = 'amp-block-validation';
-		$more_details_link = isset( $GLOBALS['post']->ID ) ? get_edit_post_link( self::get_validation_status_post( amp_get_permalink( $GLOBALS['post']->ID ) ), '' ) : '';
+		$slug = 'amp-block-validation';
 
 		wp_enqueue_script(
 			$slug,
@@ -1919,15 +1918,12 @@ class AMP_Validation_Utils {
 			true
 		);
 
+		// @todo Add moreDetails and summary.
 		$data = wp_json_encode( array(
-			'i18n'            => array(
-				/* translators: %s: the name of the block */
-				'notice'      => __( 'This %s block has invalid AMP', 'amp' ),
-				'moreDetails' => __( 'More details', 'amp' ),
-				'summary'     => __( 'Summary', 'amp' ),
+			'i18n'                      => array(
+				'invalidAmpContentNotice' => __( 'This block has invalid AMP content:', 'amp' ),
 			),
-			'errorKey'        => self::REST_FIELD_NAME,
-			'moreDetailsLink' => $more_details_link,
+			'restValidationErrorsField' => self::REST_FIELD_NAME,
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
 	}

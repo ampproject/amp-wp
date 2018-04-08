@@ -1428,9 +1428,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
 		$this->assertContains( AMP_Validation_Utils::REST_FIELD_NAME, $inline_script );
-		$this->assertContains( 'This %s block has invalid AMP', $inline_script );
-		$this->assertContains( 'More details', $inline_script );
-		$this->assertContains( 'Summary', $inline_script );
+		$this->assertContains( 'This block has invalid AMP content', $inline_script );
 	}
 
 	/**
