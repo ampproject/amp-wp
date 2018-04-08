@@ -42,14 +42,14 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Wraps the edit() method of a block, and conditionally adds a Notice.
 		 *
-		 * @param {Function} OriginalBlockEdit - The original edit() method of the block.
+		 * @param {Function} BlockEdit - The original edit() method of the block.
 		 * @returns {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
-		conditionallyAddNotice: function conditionallyAddNotice( OriginalBlockEdit ) {
+		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
 			return function( props ) {
 				var errorPanel,
 					errors = module.getBlockValidationErrors( props ),
-					result = [ wp.element.createElement( OriginalBlockEdit, _.extend( props, { key: 'amp-original-edit' } ) ) ];
+					result = [ wp.element.createElement( BlockEdit, _.extend( {}, props, { key: 'amp-original-edit' } ) ) ];
 
 				if ( errors.length > 0 ) {
 					errorPanel = wp.element.createElement(
