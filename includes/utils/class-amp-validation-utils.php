@@ -187,7 +187,9 @@ class AMP_Validation_Utils {
 	/**
 	 * Post IDs for posts that have been updated which need to be re-validated.
 	 *
-	 * @var int[]
+	 * Keys are post IDs and values are whether the post has been re-validated.
+	 *
+	 * @var bool[]
 	 */
 	public static $posts_pending_frontend_validation = array();
 
@@ -339,9 +341,11 @@ class AMP_Validation_Utils {
 			! wp_is_post_autosave( $post )
 			&&
 			! wp_is_post_revision( $post )
+			&&
+			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
 		);
 		if ( $should_validate_post ) {
-			self::$posts_pending_frontend_validation[] = $post_id;
+			self::$posts_pending_frontend_validation[ $post_id ] = true;
 
 			// The reason for shutdown is to ensure that all postmeta changes have been saved, including whether AMP is enabled.
 			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_queued_posts_on_frontend' ) ) ) {
@@ -357,7 +361,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function validate_queued_posts_on_frontend() {
 		$posts = array_filter(
-			array_map( 'get_post', self::$posts_pending_frontend_validation ),
+			array_map( 'get_post', array_keys( array_filter( self::$posts_pending_frontend_validation ) ) ),
 			function( $post ) {
 				return $post && post_supports_amp( $post ) && 'trash' !== $post->post_status;
 			}
@@ -369,6 +373,9 @@ class AMP_Validation_Utils {
 			if ( ! $url ) {
 				continue;
 			}
+
+			// Prevent re-validating.
+			self::$posts_pending_frontend_validation[ $post->ID ] = false;
 
 			$validation_errors = self::validate_url( $url );
 			if ( is_wp_error( $validation_errors ) ) {
@@ -1970,7 +1977,9 @@ class AMP_Validation_Utils {
 		$post_id = $post_data['id'];
 		$post    = get_post( $post_id );
 		if ( in_array( $request->get_method(), array( 'PUT', 'POST' ), true ) ) {
-			self::$posts_pending_frontend_validation[] = $post_id;
+			if ( ! isset( self::$posts_pending_frontend_validation[ $post_id ] ) ) {
+				self::$posts_pending_frontend_validation[ $post_id ] = true;
+			}
 			self::validate_queued_posts_on_frontend();
 		}
 		return self::get_existing_validation_errors( $post );
