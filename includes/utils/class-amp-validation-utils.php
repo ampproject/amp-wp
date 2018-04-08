@@ -1961,22 +1961,19 @@ class AMP_Validation_Utils {
 	 * First, get existing errors for the post.
 	 * If there are none, validate the post and return any errors.
 	 *
-	 * @param array  $post_data  Data for the post.
-	 * @param string $field_name The name of the field to add.
+	 * @param array           $post_data  Data for the post.
+	 * @param string          $field_name The name of the field to add.
+	 * @param WP_REST_Request $request    The name of the field to add.
 	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
-	public static function rest_field_amp_validation( $post_data, $field_name ) {
-		$post_id           = $post_data['id'];
-		$post              = get_post( $post_id );
-		$validation_errors = self::get_existing_validation_errors( $post );
-
-		if ( ! empty( $validation_errors ) ) {
-			return $validation_errors;
-		} else {
+	public static function rest_field_amp_validation( $post_data, $field_name, $request ) {
+		$post_id = $post_data['id'];
+		$post    = get_post( $post_id );
+		if ( in_array( $request->get_method(), array( 'PUT', 'POST' ), true ) ) {
 			self::$posts_pending_frontend_validation[] = $post_id;
 			self::validate_queued_posts_on_frontend();
-			return self::get_existing_validation_errors( $post );
 		}
+		return self::get_existing_validation_errors( $post );
 	}
 
 	/**

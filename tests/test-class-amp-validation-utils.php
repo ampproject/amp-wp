@@ -1490,7 +1490,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				array(
 					'id' => $post_id,
 				),
-				''
+				'',
+				new WP_REST_Request( 'PUT' )
 			)
 		);
 
@@ -1502,7 +1503,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				array(
 					'id' => $post_id,
 				),
-				''
+				'',
+				new WP_REST_Request( 'PUT' )
 			)
 		);
 	}

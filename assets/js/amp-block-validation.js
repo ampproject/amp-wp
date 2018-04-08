@@ -24,10 +24,10 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Boot module.
 		 *
-		 * @param {Object} data Module data.
+		 * @param {Object} data - Module data.
 		 * @return {void}
 		 */
-		boot: function( data ) {
+		boot: function boot( data ) {
 			module.data = data;
 			wp.data.subscribe( function() {
 				module.blocksWithErrors = module.getBlocksWithErrors();
@@ -42,10 +42,10 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Wraps the edit() method of a block, and conditionally adds a Notice.
 		 *
-		 * @param {Function} OriginalBlockEdit The original edit() method of the block.
+		 * @param {Function} OriginalBlockEdit - The original edit() method of the block.
 		 * @returns {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
-		conditionallyAddNotice: function( OriginalBlockEdit ) {
+		conditionallyAddNotice: function conditionallyAddNotice( OriginalBlockEdit ) {
 			return function( props ) {
 				var errorPanel,
 					errors = module.getBlockValidationErrors( props ),
@@ -85,7 +85,7 @@ var ampBlockValidation = ( function() {
 		 *
 		 * @returns {Object} The blocks with errors.
 		 */
-		getBlocksWithErrors: function() {
+		getBlocksWithErrors: function getBlocksWithErrors() {
 			var currentPost      = wp.data.select( 'core/editor' ).getCurrentPost(),
 				blocksWithErrors = {};
 			if ( ! currentPost.hasOwnProperty( module.data.errorKey ) || ! Array.isArray( currentPost[ module.data.errorKey ] ) ) {
@@ -118,10 +118,10 @@ var ampBlockValidation = ( function() {
 		 * This finds the validation errors for a specific block, based on its attributes or content.
 		 *
 		 * @todo: keep refining how this finds if the errors match.
-		 * @param {Object} props Properties for the block.
+		 * @param {Object} props - Properties for the block.
 		 * @return {Array} The validation error(s) for the block, or an empty array.
 		 */
-		getBlockValidationErrors: function( props ) {
+		getBlockValidationErrors: function getBlockValidationErrors( props ) {
 			var rawErrors,
 				validationErrors = [];
 
@@ -146,11 +146,11 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Whether the node_name and node_attributes in the validation error are present in the block.
 		 *
-		 * @param {Object} validationError The validation errors to check.
-		 * @param {Object} propAttributes  The block attributes, originally passed in the props object.
+		 * @param {Object} validationError - The validation errors to check.
+		 * @param {Object} propAttributes  - The block attributes, originally passed in the props object.
 		 * @returns {Boolean} Whether node_name and the node_attributes are in the block.
 		 */
-		doNameAndAttributesMatch: function( validationError, propAttributes ) {
+		doNameAndAttributesMatch: function doNameAndAttributesMatch( validationError, propAttributes ) {
 			var attribute, attributes,
 				attributesKey = module.getAttributesKey( validationError );
 			if ( ! attributesKey || ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
@@ -170,10 +170,10 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Gets the key for the attributes in validationError.
 		 *
-		 * @param {Object} validationError The validation errors to check.
+		 * @param {Object} validationError - The validation errors to check.
 		 * @returns {String|null} attributeKey The key used to get the attributes, or null.
 		 */
-		getAttributesKey: function( validationError ) {
+		getAttributesKey: function getAttributesKey( validationError ) {
 			if ( validationError.hasOwnProperty( 'node_attributes' ) ) {
 				return 'node_attributes';
 			} else if ( validationError.hasOwnProperty( 'element_attributes' ) ) {
@@ -186,10 +186,10 @@ var ampBlockValidation = ( function() {
 		/**
 		 * Gets the unique error codes from the block errors.
 		 *
-		 * @param {Array} errors The validation errors for a block.
+		 * @param {Array} errors - The validation errors for a block.
 		 * @returns {String} errorCodes A comma-separated string of validation error codes.
 		 */
-		getErrorSummary: function( errors ) {
+		getErrorSummary: function getErrorSummary( errors ) {
 			var allErrors = [];
 
 			errors.forEach( function( validationError ) {
