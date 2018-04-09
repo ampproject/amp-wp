@@ -1,1 +1,6 @@
-dev-lib/.eslintrc
+{
+	"extends": "wordpress",
+	"rules": {
+		"no-magic-numbers": [2, { "ignoreArrayIndexes": true, "ignore": [ -1, 0, 1 ] }]
+	}
+}

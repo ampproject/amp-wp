@@ -11,6 +11,7 @@ var ampBlockValidation = ( function() {
 	'use strict';
 
 	var module = {
+
 		/**
 		 * Holds data.
 		 */
@@ -45,12 +46,13 @@ var ampBlockValidation = ( function() {
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
 			return function( props ) {
 				var errors, result;
+
 				errors = module.getBlockValidationErrors( props );
 				result = [
-					wp.element.createElement( BlockEdit, _.extend( {}, props, { key: 'amp-original-edit' } ) )
+					wp.element.createElement( BlockEdit, _.extend({}, props, { key: 'amp-original-edit' }) )
 				];
 
-				if ( errors.length > 0 ) {
+				if ( 0 < errors.length ) {
 					result.unshift(
 
 						// @todo Add PanelBody with validation error details.
@@ -84,14 +86,14 @@ var ampBlockValidation = ( function() {
 		 * @return {Array} The validation error(s) for the block, or an empty array.
 		 */
 		getBlockValidationErrors: function getBlockValidationErrors( props ) {
-			var allValidationErrors, blockValidationErrors = [];
+			var allValidationErrors,
+				blockValidationErrors = [];
 
 			allValidationErrors = wp.data.select( 'core/editor' ).getCurrentPost()[ module.data.restValidationErrorsField ];
 			if ( ! Array.isArray( allValidationErrors ) ) {
 				return blockValidationErrors;
 			}
 
-			// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 			allValidationErrors.forEach( function( validationError ) {
 				var i, source;
 				if ( ! validationError.sources ) {
@@ -99,7 +101,7 @@ var ampBlockValidation = ( function() {
 				}
 
 				// Find the inner-most nested block source only; ignore any nested blocks.
-				for ( i = validationError.sources.length - 1; i >= 0; i-- ) {
+				for ( i = validationError.sources.length - 1; 0 <= i; i-- ) {
 					source = validationError.sources[ i ];
 
 					if ( ! source.block_name || source.block_name !== props.name ) {
@@ -112,9 +114,8 @@ var ampBlockValidation = ( function() {
 						break;
 					}
 				}
-			} );
+			});
 
-			// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 			return blockValidationErrors;
 		},
 
@@ -129,14 +130,14 @@ var ampBlockValidation = ( function() {
 		doNameAndAttributesMatch: function doNameAndAttributesMatch( validationError, propAttributes ) {
 			var attribute, attributes,
 				attributesKey = module.getAttributesKey( validationError );
-			if ( ! attributesKey || ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) { // jscs:ignore requireCamelCaseOrUpperCaseIdentifiers
+			if ( ! attributesKey || ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) {
 				return false;
 			}
 
 			// Ensure the content has all attributes and properties in the validationError.
 			attributes = validationError[ attributesKey ];
 			for ( attribute in attributes ) {
-				if ( ! attributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( attributes[ attribute ] ) ) {
+				if ( ! attributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( attributes[ attribute ]) ) {
 					return false;
 				}
 			}
@@ -162,4 +163,4 @@ var ampBlockValidation = ( function() {
 	};
 
 	return module;
-} )();
+}() );

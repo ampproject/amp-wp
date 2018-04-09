@@ -39,7 +39,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			api.bind( 'ready', function() {
 				component.addState(); // Needed for WP<4.9.
 				initPanel();
-			} );
+			});
 		}
 	};
 
@@ -64,7 +64,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
 
 		urlParser.href = url;
-		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ component.data.queryVar ] ) ) {
+		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ component.data.queryVar ]) ) {
 			return true;
 		}
 		return regexEndpoint.test( urlParser.pathname );
@@ -84,7 +84,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		urlParser.href = url;
 		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
 
-		if ( urlParser.search.length > 1 ) {
+		if ( 1 < urlParser.search.length ) {
 			params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
 			delete params[ component.data.queryVar ];
 			urlParser.search = $.param( params );
@@ -120,7 +120,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			if ( ! component.tooltipVisible.get() ) {
 				return;
 			}
-			if ( component.tooltipFocused.get() > 0 ) {
+			if ( 0 < component.tooltipFocused.get() ) {
 				component.tryToCloseTooltip();
 			} else {
 				component.tooltipVisible.set( false );
@@ -170,12 +170,13 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 * @returns {void}
 	 */
 	component.updatePanelNotifications = function updatePanelNotifications() {
-		var panel = api.panel( component.data.panelId ), containers;
-		containers = panel.sections().concat( [ panel ] );
+		var panel = api.panel( component.data.panelId ),
+			containers;
+		containers = panel.sections().concat([ panel ]);
 		if ( api.state( 'ampAvailable' ).get() ) {
 			_.each( containers, function( container ) {
 				container.notifications.remove( 'amp_unavailable' );
-			} );
+			});
 		} else {
 			_.each( containers, function( container ) {
 				container.notifications.add( new api.Notification( 'amp_unavailable', {
@@ -189,11 +190,11 @@ var ampCustomizeControls = ( function( api, $ ) {
 						li.find( 'a' ).on( 'click', function( event ) {
 							event.preventDefault();
 							component.enableAndNavigateToUrl( this.href );
-						} );
+						});
 						return li;
 					}
-				} ) );
-			} );
+				}) );
+			});
 		}
 	};
 
@@ -206,11 +207,11 @@ var ampCustomizeControls = ( function( api, $ ) {
 	component.panelReady = function panelReady( panel ) {
 		var ampToggleContainer, checkbox, tooltip, tooltipLink;
 
-		ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )( {
+		ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )({
 			message: component.data.l10n.unavailableMessage,
 			linkText: component.data.l10n.unavailableLinkText,
 			url: component.data.ampUrl
-		} ) );
+		}) );
 		checkbox = ampToggleContainer.find( 'input[type=checkbox]' );
 		tooltip = ampToggleContainer.find( '.tooltip' );
 		tooltipLink = tooltip.find( 'a' );
@@ -233,7 +234,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 					component.tooltipVisible.set( true );
 				}, 250 );
 			}
-		} );
+		});
 
 		if ( panel.notifications ) {
 			api.state( 'ampAvailable' ).bind( component.updatePanelNotifications );
@@ -246,12 +247,12 @@ var ampCustomizeControls = ( function( api, $ ) {
 			if ( api.state( 'ampAvailable' ).get() ) {
 				api.state( 'ampEnabled' ).set( 'mobile' === device );
 			}
-		} );
+		});
 
 		// Message coming from previewer.
 		api.previewer.bind( 'amp-status', function( data ) {
 			api.state( 'ampAvailable' ).set( data.available );
-		} );
+		});
 		function setInitialAmpEnabledState( data ) {
 			api.state( 'ampEnabled' ).set( data.enabled );
 			api.previewer.unbind( 'amp-status', setInitialAmpEnabledState );
@@ -270,13 +271,13 @@ var ampCustomizeControls = ( function( api, $ ) {
 				}
 				return val;
 			};
-		} )( api.previewer.previewUrl.validate );
+		})( api.previewer.previewUrl.validate );
 
 		// Listen for ampEnabled state changes.
 		api.state( 'ampEnabled' ).bind( function( enabled ) {
 			checkbox.prop( 'checked', enabled );
 			component.updatePreviewUrl();
-		} );
+		});
 
 		// Listen for ampAvailable state changes.
 		api.state( 'ampAvailable' ).bind( function( available ) {
@@ -286,7 +287,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			if ( api.state( 'ampEnabled' ).get() ) {
 				component.tooltipVisible.set( ! available );
 			}
-		} );
+		});
 
 		// Adding checkbox toggle before device selection.
 		$( '.devices-wrapper' ).before( ampToggleContainer );
@@ -295,7 +296,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		tooltipLink.on( 'click', function( event ) {
 			event.preventDefault();
 			component.enableAndNavigateToUrl( this.href );
-		} );
+		});
 
 		// Toggle visibility of tooltip based on tooltipVisible state.
 		component.tooltipVisible.bind( function( visible ) {
@@ -305,7 +306,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 					if ( ! $.contains( ampToggleContainer[0], event.target ) ) {
 						component.tooltipVisible.set( false );
 					}
-				} );
+				});
 				tooltip.fadeIn();
 				component.tryToCloseTooltip();
 			} else {
@@ -313,7 +314,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 				component.tooltipFocused.set( 0 );
 				$( document ).off( 'click.amp-toggle-outside' );
 			}
-		} );
+		});
 
 		// Handle click on checkbox to either enable the AMP preview or show the tooltip.
 		checkbox.on( 'click', function() {
@@ -323,7 +324,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			} else {
 				component.tooltipVisible.set( true );
 			}
-		} );
+		});
 
 		// Keep track of the user's state interacting with the tooltip.
 		tooltip.on( 'mouseenter', function() {
@@ -331,21 +332,21 @@ var ampCustomizeControls = ( function( api, $ ) {
 				component.tooltipVisible.set( true );
 			}
 			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
-		} );
+		});
 		tooltip.on( 'mouseleave', function() {
 			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
-		} );
+		});
 		tooltipLink.on( 'focus', function() {
 			if ( ! api.state( 'ampAvailable' ).get() ) {
 				component.tooltipVisible.set( true );
 			}
 			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
-		} );
+		});
 		tooltipLink.on( 'blur', function() {
 			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
-		} );
+		});
 	};
 
 	return component;
 
-} )( wp.customize, jQuery );
+})( wp.customize, jQuery );

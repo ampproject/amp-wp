@@ -17,10 +17,10 @@ var ampCustomizePreview = ( function( api ) {
 		api.bind( 'preview-ready', function() {
 			api.preview.bind( 'active', function() {
 				api.preview.send( 'amp-status', data );
-			} );
-		} );
+			});
+		});
 	};
 
 	return component;
 
-} )( wp.customize );
+})( wp.customize );

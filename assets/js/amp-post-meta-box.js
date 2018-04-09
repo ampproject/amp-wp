@@ -65,7 +65,7 @@ var ampPostMetaBox = ( function( $ ) {
 				component.addPreviewButton();
 			}
 			component.listen();
-		} );
+		});
 	};
 
 	/**
@@ -78,18 +78,18 @@ var ampPostMetaBox = ( function( $ ) {
 		$( component.ampPreviewBtnSelector ).on( 'click.amp-post-preview', function( e ) {
 			e.preventDefault();
 			component.onAmpPreviewButtonClick();
-		} );
+		});
 
 		component.statusRadioInputs.prop( 'disabled', true ); // Prevent cementing setting default status as overridden status.
 		$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
 			e.preventDefault();
 			component.statusRadioInputs.prop( 'disabled', false );
 			component.toggleAmpStatus( $( e.target ) );
-		} );
+		});
 
 		$( '#submitpost input[type="submit"]' ).on( 'click', function() {
 			$( component.ampPreviewBtnSelector ).addClass( 'disabled' );
-		} );
+		});
 	};
 
 	/**
@@ -103,10 +103,10 @@ var ampPostMetaBox = ( function( $ ) {
 		previewBtn
 			.clone()
 			.insertAfter( previewBtn )
-			.prop( {
+			.prop({
 				'href': component.data.previewLink,
 				'id': component.ampPreviewBtnSelector.replace( '#', '' )
-			} )
+			})
 			.text( component.data.l10n.ampPreviewBtnLabel )
 			.parent()
 			.addClass( 'has-amp-preview' );
@@ -125,11 +125,11 @@ var ampPostMetaBox = ( function( $ ) {
 
 		// Flag the AMP preview referer.
 		$input = $( '<input>' )
-			.prop( {
+			.prop({
 				'type': 'hidden',
 				'name': 'amp-preview',
 				'value': 'do-preview'
-			} )
+			})
 			.insertAfter( component.ampPreviewBtnSelector );
 
 		// Trigger Core preview button and remove AMP flag.
@@ -164,7 +164,7 @@ var ampPostMetaBox = ( function( $ ) {
 			} else {
 				$container.find( 'input[type="radio"]' ).first().focus();
 			}
-		} );
+		});
 		$container.slideToggle( component.toggleSpeed );
 
 		// Update status.

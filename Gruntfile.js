@@ -1,10 +1,11 @@
 /* eslint-env node */
 /* jshint node:true */
+/* eslint-disable camelcase */
 
 module.exports = function( grunt ) {
 	'use strict';
 
-	grunt.initConfig( {
+	grunt.initConfig({
 
 		pkg: grunt.file.readJSON( 'package.json' ),
 
@@ -57,7 +58,7 @@ module.exports = function( grunt ) {
 			}
 		}
 
-	} );
+	});
 
 	// Load tasks.
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
@@ -69,11 +70,11 @@ module.exports = function( grunt ) {
 	// Register tasks.
 	grunt.registerTask( 'default', [
 		'build'
-	] );
+	]);
 
 	grunt.registerTask( 'readme', [
 		'shell:readme'
-	] );
+	]);
 
 	grunt.registerTask( 'build', function() {
 		var done = this.async();
@@ -91,7 +92,7 @@ module.exports = function( grunt ) {
 
 				paths = res.stdout.trim().split( /\n/ ).filter( function( file ) {
 					return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
-				} );
+				});
 				paths.push( 'vendor/autoload.php' );
 				paths.push( 'vendor/composer/**' );
 				paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
@@ -102,19 +103,19 @@ module.exports = function( grunt ) {
 						dest: 'build',
 						expand: true
 					}
-				} );
+				});
 				grunt.task.run( 'readme' );
 				grunt.task.run( 'copy' );
 				grunt.task.run( 'shell:create_release_zip' );
 				done();
 			}
 		);
-	} );
+	});
 
 	grunt.registerTask( 'create-release-zip', [
 		'build',
 		'shell:create_release_zip'
-	] );
+	]);
 
 	grunt.registerTask( 'deploy', [
 		'build',
@@ -123,5 +124,5 @@ module.exports = function( grunt ) {
 		'shell:verify_matching_versions',
 		'wp_deploy',
 		'clean'
-	] );
+	]);
 };
