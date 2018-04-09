@@ -203,6 +203,13 @@ class AMP_Validation_Utils {
 	protected static $current_hook_source_stack = array();
 
 	/**
+	 * Index for where block appears in a post's content.
+	 *
+	 * @var int
+	 */
+	protected static $block_content_index = 0;
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
@@ -744,6 +751,7 @@ class AMP_Validation_Utils {
 	 * @return string Content with source comments added.
 	 */
 	public static function add_block_source_comments( $content ) {
+		self::$block_content_index = 0;
 
 		$start_block_pattern = implode( '', array(
 			'#<!--\s+',
@@ -774,7 +782,13 @@ class AMP_Validation_Utils {
 		// Obtain source information for block.
 		$source = array(
 			'block_name' => $matches['name'],
+			'post_id'    => get_the_ID(),
 		);
+
+		if ( empty( $matches['closing'] ) ) {
+			$source['block_content_index'] = self::$block_content_index;
+			self::$block_content_index++;
+		}
 
 		// Make implicit core namespace explicit.
 		$is_implicit_core_namespace = ( false === strpos( $source['block_name'], '/' ) );
@@ -799,6 +813,7 @@ class AMP_Validation_Utils {
 		} else {
 			$replaced = self::get_source_comment( $source, true ) . $replaced;
 			if ( ! empty( $matches['self_closing'] ) ) {
+				unset( $source['block_content_index'] );
 				$replaced .= self::get_source_comment( $source, false );
 			}
 		}

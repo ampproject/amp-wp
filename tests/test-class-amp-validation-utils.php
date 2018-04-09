@@ -164,7 +164,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		return array(
 			'paragraph'    => array(
 				"<!-- wp:paragraph -->\n<p>Latest posts:</p>\n<!-- /wp:paragraph -->",
-				"<!--amp-source-stack {\"block_name\":\"core\/paragraph\"}-->\n<p>Latest posts:</p>\n<!--/amp-source-stack {\"block_name\":\"core\/paragraph\"}-->",
+				"<!--amp-source-stack {\"block_name\":\"core\/paragraph\",\"post_id\":{{post_id}},\"block_content_index\":0}-->\n<p>Latest posts:</p>\n<!--/amp-source-stack {\"block_name\":\"core\/paragraph\",\"post_id\":{{post_id}}}-->",
 				array(
 					'element' => 'p',
 					'blocks'  => array( 'core/paragraph' ),
@@ -172,7 +172,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			),
 			'latest_posts' => array(
 				'<!-- wp:latest-posts /-->',
-				'<!--amp-source-stack {"block_name":"core\/latest-posts","type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts aligncenter"></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
+				'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts aligncenter"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
 				array(
 					'element' => 'ul',
 					'blocks'  => array( 'core/latest-posts' ),
@@ -180,7 +180,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			),
 			'columns'      => array(
 				"<!-- wp:columns -->\n<div class=\"wp-block-columns has-2-columns\">\n    <!-- wp:quote {\"layout\":\"column-1\",\"foo\":{\"bar\":1}} -->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!-- /wp:quote -->\n\n    <!-- wp:html {\"layout\":\"column-2\"} -->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!-- /wp:html -->\n</div>\n<!-- /wp:columns -->",
-				"<!--amp-source-stack {\"block_name\":\"core\/columns\"}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\"}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\"}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\"}-->",
+				"<!--amp-source-stack {\"block_name\":\"core\/columns\",\"post_id\":{{post_id}},\"block_content_index\":0}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"post_id\":{{post_id}},\"block_content_index\":1,\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\",\"post_id\":{{post_id}}}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"post_id\":{{post_id}},\"block_content_index\":2,\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\",\"post_id\":{{post_id}}}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\",\"post_id\":{{post_id}}}-->",
 				array(
 					'element' => 'blockquote',
 					'blocks'  => array(
@@ -193,7 +193,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test do_blockadd_block_source_comments.
+	 * Test add_block_source_comments.
 	 *
 	 * @param string $content  Content.
 	 * @param string $expected Expected content.
@@ -209,9 +209,27 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
 		}
 
+		global $post;
+		$post = $this->factory()->post->create_and_get(); // WPCS: Override ok.
+		$this->assertInstanceOf( 'WP_Post', get_post() );
+
 		$rendered_block = do_blocks( AMP_Validation_Utils::add_block_source_comments( $content ) );
+
+		$expected = str_replace(
+			array(
+				'{{post_id}}',
+				'{{title}}',
+				'{{url}}',
+			),
+			array(
+				$post->ID,
+				get_the_title( $post ),
+				get_permalink( $post ),
+			),
+			$expected
+		);
 		$this->assertEquals(
-			preg_replace( '/(?<=>)\s+(?=<)/', '', $expected ),
+			preg_replace( '/(?<=>)\s+(?=<)/', '', str_replace( '%d', $post->ID, $expected ) ),
 			preg_replace( '/(?<=>)\s+(?=<)/', '', $rendered_block )
 		);
 

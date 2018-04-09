@@ -87,9 +87,12 @@ var ampBlockValidation = ( function() {
 		 */
 		getBlockValidationErrors: function getBlockValidationErrors( props ) {
 			var allValidationErrors,
-				blockValidationErrors = [];
+				blockValidationErrors = [],
+				currentPost;
 
-			allValidationErrors = wp.data.select( 'core/editor' ).getCurrentPost()[ module.data.restValidationErrorsField ];
+			// @todo We need to grab the validation errors, group them by postId and blockIndex, then align with getBlockOrder upon update of the restValidationErrorsField.
+			currentPost         = wp.data.select( 'core/editor' ).getCurrentPost();
+			allValidationErrors = currentPost[ module.data.restValidationErrorsField ];
 			if ( ! Array.isArray( allValidationErrors ) ) {
 				return blockValidationErrors;
 			}
@@ -104,7 +107,7 @@ var ampBlockValidation = ( function() {
 				for ( i = validationError.sources.length - 1; 0 <= i; i-- ) {
 					source = validationError.sources[ i ];
 
-					if ( ! source.block_name || source.block_name !== props.name ) {
+					if ( ! source.block_name || source.block_name !== props.name || currentPost.id !== source.post_id ) {
 						continue;
 					}
 
