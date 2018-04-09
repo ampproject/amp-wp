@@ -21,11 +21,6 @@ var ampBlockValidation = ( function() {
 		},
 
 		/**
-		 * The blocks with validation errors.
-		 */
-		blocksWithErrors: {},
-
-		/**
 		 * Boot module.
 		 *
 		 * @param {Object} data - Module data.
@@ -33,12 +28,7 @@ var ampBlockValidation = ( function() {
 		 */
 		boot: function boot( data ) {
 			module.data = data;
-			wp.data.subscribe( function() {
 
-				// @todo Limit to subscribing to changes to validationErrors.
-				// @todo Changes to the block errors needs to set data?
-				module.blocksWithErrors = module.getBlocksWithErrors(); // @todo Why not call this in conditionallyAddNotice?
-			} );
 			wp.hooks.addFilter(
 				'blocks.BlockEdit',
 				'amp/add-notice',
@@ -85,74 +75,47 @@ var ampBlockValidation = ( function() {
 		 * Iterates through the 'amp_validation_errors' from the REST API response.
 		 * This returns an object, with block types as the keys, and error arrays as the values.
 		 * The block's overridden edit() method can then get the errors for its block type.
-		 *
-		 * @returns {Object} The blocks with errors.
-		 */
-		getBlocksWithErrors: function getBlocksWithErrors() {
-			var currentPost      = wp.data.select( 'core/editor' ).getCurrentPost(),
-				blocksWithErrors = {};
-
-			if ( ! Array.isArray( currentPost[ module.data.restValidationErrorsField ] ) ) {
-				return blocksWithErrors;
-			}
-
-			// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-			currentPost[ module.data.restValidationErrorsField ].forEach( function( validationError ) {
-				if ( ! validationError.sources ) {
-					return;
-				}
-				validationError.sources.forEach( function( source ) { // @todo Only use the leaf block source. Ignore parent blocks for validation errors.
-					var blockValidationError;
-					if ( ! source.block_name ) {
-						return;
-					}
-					blockValidationError = _.extend( {}, validationError );
-					if ( source.block_attrs ) {
-						blockValidationError.blockAttrs = source.block_attrs;
-					}
-
-					if ( blocksWithErrors[ source.block_name ] ) {
-						blocksWithErrors[ source.block_name ].push( blockValidationError );
-					} else {
-						blocksWithErrors[ source.block_name ] = [ blockValidationError ];
-					}
-				} );
-			} );
-
-			// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
-			return blocksWithErrors;
-		},
-
-		/**
-		 * Gets the validation errors for a specific block if they exist.
-		 *
-		 * In module.blocksWithErrors, the errors are stored by block name.
 		 * This finds the validation errors for a specific block, based on its attributes or content.
-		 *
 		 * @todo: keep refining how this finds if the errors match.
-		 * @param {Object} props - Properties for the block.
+		 *
+		 * @param {Object} props            - Properties for the block.
+		 * @param {string} props.name       - Block name.
+		 * @param {string} props.attributes - Block attributes.
 		 * @return {Array} The validation error(s) for the block, or an empty array.
 		 */
 		getBlockValidationErrors: function getBlockValidationErrors( props ) {
-			var rawErrors,
-				validationErrors = [];
+			var allValidationErrors, blockValidationErrors = [];
 
-			if ( ! module.blocksWithErrors[ props.name ] ) {
-				return validationErrors;
+			allValidationErrors = wp.data.select( 'core/editor' ).getCurrentPost()[ module.data.restValidationErrorsField ];
+			if ( ! Array.isArray( allValidationErrors ) ) {
+				return blockValidationErrors;
 			}
 
-			rawErrors = module.blocksWithErrors[ props.name ];
-			rawErrors.forEach( function( validationError ) { // @todo Switch to using _.filter().
+			// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+			allValidationErrors.forEach( function( validationError ) {
+				var i, source;
+				if ( ! validationError.sources ) {
+					return;
+				}
 
-				// Uses _.isMatch because the props attributes can also have default attributes that blockAttrs doesn't have.
-				if ( validationError.blockAttrs && _.isMatch( props.attributes, validationError.blockAttrs ) ) {
-					validationErrors.push( validationError );
-				} else if ( module.doNameAndAttributesMatch( validationError, props.attributes ) ) {
-					validationErrors.push( validationError );
+				// Find the inner-most nested block source only; ignore any nested blocks.
+				for ( i = validationError.sources.length - 1; i >= 0; i-- ) {
+					source = validationError.sources[ i ];
+
+					if ( ! source.block_name || source.block_name !== props.name ) {
+						continue;
+					}
+
+					// Uses _.isMatch because the props attributes can also have default attributes that blockAttrs doesn't have.
+					if ( source.block_attrs && _.isMatch( props.attributes, source.block_attrs ) || module.doNameAndAttributesMatch( validationError, props.attributes ) ) {
+						blockValidationErrors.push( validationError );
+						break;
+					}
 				}
 			} );
 
-			return validationErrors;
+			// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+			return blockValidationErrors;
 		},
 
 		/**
