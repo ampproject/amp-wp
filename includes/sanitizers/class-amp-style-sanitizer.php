@@ -266,7 +266,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( is_numeric( $width_attr ) ) {
 					$width_style .= 'px';
 				}
-				$col->setAttribute( 'style', $width_style );
+				if ( $col->hasAttribute( 'style' ) ) {
+					$col->setAttribute( 'style', $col->getAttribute( 'style' ) . ';' . $width_style );
+				} else {
+					$col->setAttribute( 'style', $width_style );
+				}
 				$col->removeAttribute( 'width' );
 			}
 		}
