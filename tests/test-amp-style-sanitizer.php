@@ -49,14 +49,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 
-			'width_to_max-width' => array(
-				'<figure style="width: 300px"></figure>',
-				'<figure class="amp-wp-343bce0"></figure>',
-				array(
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-343bce0{max-width:300px;}',
-				),
-			),
-
 			'span_display_none' => array(
 				'<span style="display: none;">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
 				'<span class="amp-wp-224b51a">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
@@ -161,7 +153,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<table><colgroup><col width="253"/></colgroup></table>',
 				'<table><colgroup><col class="amp-wp-cbcb5c2"></colgroup></table>',
 				array(
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cbcb5c2{max-width:253px;}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cbcb5c2{width:253px;}',
 				),
 			),
 
@@ -169,7 +161,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<table><colgroup><col width="50%"/></colgroup></table>',
 				'<table><colgroup><col class="amp-wp-cd7753e"></colgroup></table>',
 				array(
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cd7753e{max-width:50%;}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cd7753e{width:50%;}',
 				),
 			),
 

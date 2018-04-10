@@ -472,7 +472,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type bool     $class_selector_tree_shaking Whether to perform tree shaking to delete rules that reference class names not extant in the current document.
 	 *     @type string[] $property_whitelist          Exclusively-allowed properties.
 	 *     @type string[] $property_blacklist          Disallowed properties.
-	 *     @type bool     $convert_width_to_max_width  Convert width to max-width.
 	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link (or @import?).
 	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link (or @import?).
 	 *     @type array    $allowed_at_rules            Allowed @-rules.
@@ -483,7 +482,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $node, $options = array() ) {
 		$cache_impacting_options = wp_array_slice_assoc(
 			$options,
-			array( 'property_whitelist', 'property_blacklist', 'convert_width_to_max_width', 'stylesheet_url', 'allowed_at_rules' )
+			array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
 		);
 
 		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
@@ -532,17 +531,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$options = array_merge(
 			array(
-				'allowed_at_rules'           => array(),
-				'convert_width_to_max_width' => false,
-				'property_blacklist'         => array(
+				'allowed_at_rules'   => array(),
+				'property_blacklist' => array(
 					// See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
 					'behavior',
 					'-moz-binding',
 				),
-				'property_whitelist'         => array(),
-				'validate_keyframes'         => false,
-				'stylesheet_url'             => null,
-				'stylesheet_path'            => null,
+				'property_whitelist' => array(),
+				'validate_keyframes' => false,
+				'stylesheet_url'     => null,
+				'stylesheet_path'    => null,
 			),
 			$options
 		);
@@ -801,17 +799,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$validation_errors,
 			$this->transform_important_qualifiers( $ruleset, $css_list )
 		);
-
-		// Convert width to max-width when requested. See <https://github.com/Automattic/amp-wp/issues/494>.
-		if ( $options['convert_width_to_max_width'] ) {
-			$properties = $ruleset->getRules( 'width' );
-			foreach ( $properties as $property ) {
-				$width_property = new Rule( 'max-width' );
-				$width_property->setValue( $property->getValue() );
-				$ruleset->removeRule( $property );
-				$ruleset->addRule( $width_property, $property );
-			}
-		}
 
 		// Remove the ruleset if it is now empty.
 		if ( 0 === count( $ruleset->getRules() ) ) {
@@ -1085,9 +1072,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
 
 		$stylesheet = $this->process_stylesheet( $rule, $style_attribute, array(
-			'convert_width_to_max_width' => true,
-			'allowed_at_rules'           => array(),
-			'property_whitelist'         => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'allowed_at_rules'   => array(),
+			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
 		) );
 
 		if ( empty( $stylesheet ) ) {
