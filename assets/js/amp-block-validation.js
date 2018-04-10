@@ -28,6 +28,7 @@ var ampBlockValidation = ( function() {
 		 * @return {void}
 		 */
 		boot: function boot( data ) {
+			var lastValidationErrors;
 			module.data = data;
 
 			wp.hooks.addFilter(
@@ -35,70 +36,67 @@ var ampBlockValidation = ( function() {
 				'amp/add-notice',
 				module.conditionallyAddNotice
 			);
-		},
 
-		/**
-		 * Wraps the edit() method of a block, and conditionally adds a Notice.
-		 *
-		 * @param {Function} BlockEdit - The original edit() method of the block.
-		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
-		 */
-		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
-			return function( props ) {
-				var errors, result;
+			module.store = wp.data.registerStore( 'amp/blockValidation', {
+				reducer: function( _state, action ) {
+					var state = _state || {
+						blocksValidationErrors: {}
+					};
 
-				errors = module.getBlockValidationErrors( props );
-				result = [
-					wp.element.createElement( BlockEdit, _.extend( {}, props, { key: 'amp-original-edit' } ) )
-				];
-
-				if ( 0 < errors.length ) {
-					result.unshift(
-
-						// @todo Add PanelBody with validation error details.
-						wp.element.createElement(
-							wp.components.Notice,
-							{
-								status: 'warning',
-								isDismissible: false,
-								key: 'amp-validation-notice'
-							},
-							module.data.i18n.invalidAmpContentNotice + ' ' + _.unique( _.pluck( errors, 'code' ) ).join( ', ' )
-						)
-					);
+					switch ( action.type ) {
+						case 'UPDATE_BLOCKS_VALIDATION_ERRORS':
+							return _.extend( {}, state, {
+								blocksValidationErrors: action.blocksValidationErrors
+							} );
+						default:
+							return state;
+					}
+				},
+				actions: {
+					updateBlocksValidationErrors: function( blocksValidationErrors ) {
+						return {
+							type: 'UPDATE_BLOCKS_VALIDATION_ERRORS',
+							blocksValidationErrors: blocksValidationErrors
+						};
+					}
+				},
+				selectors: {
+					getBlockValidationErrors: function( state, uid ) {
+						return state.blocksValidationErrors[ uid ] || [];
+					}
 				}
-				return result;
-			};
+			} );
+
+			wp.data.subscribe( function() {
+				var thisValidationErrors = wp.data.select( 'core/editor' ).getCurrentPost()[ module.data.restValidationErrorsField ];
+				if ( thisValidationErrors && ! _.isEqual( lastValidationErrors, thisValidationErrors ) ) {
+					lastValidationErrors = thisValidationErrors;
+					module.updateBlocksValidationErrors( thisValidationErrors );
+				}
+
+				// @todo wp.data.dispatch( 'core/editor' ).createNotice()?
+			} );
 		},
 
 		/**
-		 * Gets the block types with errors.
+		 * Update blocks' validation errors in the store.
 		 *
-		 * Iterates through the 'amp_validation_errors' from the REST API response.
-		 * This returns an object, with block types as the keys, and error arrays as the values.
-		 * The block's overridden edit() method can then get the errors for its block type.
-		 * This finds the validation errors for a specific block, based on its attributes or content.
-		 * @todo: keep refining how this finds if the errors match.
-		 *
-		 * @param {Object} props            - Properties for the block.
-		 * @param {string} props.name       - Block name.
-		 * @param {string} props.attributes - Block attributes.
-		 * @return {Array} The validation error(s) for the block, or an empty array.
+		 * @param {Object[]} validationErrors - Validation errors.
+		 * @return {void}
 		 */
-		getBlockValidationErrors: function getBlockValidationErrors( props ) {
-			var allValidationErrors,
-				blockValidationErrors = [],
-				currentPost;
+		updateBlocksValidationErrors: function updateBlocksValidationErrors( validationErrors ) {
+			var blocksValidationErrors, blockOrder, currentPost, selectors;
+			selectors = wp.data.select( 'core/editor' );
+			blockOrder = selectors.getBlockOrder();
+			currentPost = selectors.getCurrentPost();
 
-			// @todo We need to grab the validation errors, group them by postId and blockIndex, then align with getBlockOrder upon update of the restValidationErrorsField.
-			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-			allValidationErrors = currentPost[ module.data.restValidationErrorsField ];
-			if ( ! Array.isArray( allValidationErrors ) ) {
-				return blockValidationErrors;
-			}
+			blocksValidationErrors = {};
+			_.each( blockOrder, function( uid ) {
+				blocksValidationErrors[ uid ] = [];
+			} );
 
-			allValidationErrors.forEach( function( validationError ) { // eslint-disable-line
-				var i, source;
+			_.each( validationErrors, function( validationError ) {
+				var i, source, matchedBlockUid;
 				if ( ! validationError.sources ) {
 					return;
 				}
@@ -107,61 +105,61 @@ var ampBlockValidation = ( function() {
 				for ( i = validationError.sources.length - 1; 0 <= i; i-- ) {
 					source = validationError.sources[ i ];
 
-					if ( ! source.block_name || source.block_name !== props.name || currentPost.id !== source.post_id ) {
+					if ( ! source.block_name || currentPost.id !== source.post_id ) {
 						continue;
 					}
 
-					// Uses _.isMatch because the props attributes can also have default attributes that blockAttrs doesn't have.
-					if ( source.block_attrs && _.isMatch( props.attributes, source.block_attrs ) || module.doNameAndAttributesMatch( validationError, props.attributes ) ) { // eslint-disable-line
-						blockValidationErrors.push( validationError );
+					// @todo Cross-check source.block_name with wp.data.select( 'core/editor' ).getBlock( matchedBlockUid ).name?
+					matchedBlockUid = blockOrder[ source.block_content_index ];
+					if ( ! _.isUndefined( matchedBlockUid ) ) {
+						blocksValidationErrors[ blockOrder[ source.block_content_index ] ].push( validationError );
 						break;
 					}
 				}
 			} );
 
-			return blockValidationErrors;
+			wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blocksValidationErrors );
 		},
 
 		/**
-		 * Whether the node_name and node_attributes in the validation error are present in the block.
+		 * Wraps the edit() method of a block, and conditionally adds a Notice.
 		 *
-		 * @todo This doesn't seem to be working.
-		 * @param {Object} validationError - The validation errors to check.
-		 * @param {Object} propAttributes  - The block attributes, originally passed in the props object.
-		 * @return {boolean} Whether node_name and the node_attributes are in the block.
+		 * @param {Function} BlockEdit - The original edit() method of the block.
+		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
-		doNameAndAttributesMatch: function doNameAndAttributesMatch( validationError, propAttributes ) {
-			var attribute, attributes,
-				attributesKey = module.getAttributesKey( validationError );
-			if ( ! attributesKey || ! propAttributes.hasOwnProperty( 'content' ) || ! propAttributes.content.includes( validationError.node_name ) ) {
-				return false;
-			}
+		conditionallyAddNotice: function( BlockEdit ) {
+			var AmpNoticeBlockEdit = function( props ) {
+				var edit = wp.element.createElement(
+					BlockEdit,
+					_.extend( {}, props, { key: 'amp-original-edit' } )
+				);
 
-			// Ensure the content has all attributes and properties in the validationError.
-			attributes = validationError[ attributesKey ];
-			for ( attribute in attributes ) {
-				if ( ! attributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( attributes[ attribute ] ) ) {
-					return false;
+				if ( 0 === props.ampBlockValidationErrors.length ) {
+					return edit;
 				}
-			}
-			return true;
-		},
 
-		/**
-		 * Gets the key for the attributes in validationError.
-		 *
-		 * @param {Object} validationError - The validation errors to check.
-		 * @return {string|null} attributeKey The key used to get the attributes, or null.
-		 */
-		getAttributesKey: function getAttributesKey( validationError ) {
-			if ( validationError.hasOwnProperty( 'node_attributes' ) ) {
-				return 'node_attributes';
-			} else if ( validationError.hasOwnProperty( 'element_attributes' ) ) {
-				return 'element_attributes';
-			}
-			return null;
+				return [
+
+					// @todo Add PanelBody with validation error details.
+					wp.element.createElement(
+						wp.components.Notice,
+						{
+							status: 'warning',
+							isDismissible: false,
+							key: 'amp-validation-notice'
+						},
+						module.data.i18n.invalidAmpContentNotice + ' ' + _.pluck( props.ampBlockValidationErrors, 'code' ).join( ', ' )
+					),
+					edit
+				];
+			};
+
+			return wp.data.withSelect( function( select, ownProps ) {
+				return _.extend( {}, ownProps, {
+					ampBlockValidationErrors: select( 'amp/blockValidation' ).getBlockValidationErrors( ownProps.id )
+				} );
+			} )( AmpNoticeBlockEdit );
 		}
-
 	};
 
 	return module;
