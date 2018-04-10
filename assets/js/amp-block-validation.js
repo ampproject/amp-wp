@@ -41,7 +41,7 @@ var ampBlockValidation = ( function() {
 		 * Wraps the edit() method of a block, and conditionally adds a Notice.
 		 *
 		 * @param {Function} BlockEdit - The original edit() method of the block.
-		 * @returns {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
+		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
 			return function( props ) {
@@ -49,7 +49,7 @@ var ampBlockValidation = ( function() {
 
 				errors = module.getBlockValidationErrors( props );
 				result = [
-					wp.element.createElement( BlockEdit, _.extend({}, props, { key: 'amp-original-edit' }) )
+					wp.element.createElement( BlockEdit, _.extend( {}, props, { key: 'amp-original-edit' } ) )
 				];
 
 				if ( 0 < errors.length ) {
@@ -91,13 +91,13 @@ var ampBlockValidation = ( function() {
 				currentPost;
 
 			// @todo We need to grab the validation errors, group them by postId and blockIndex, then align with getBlockOrder upon update of the restValidationErrorsField.
-			currentPost         = wp.data.select( 'core/editor' ).getCurrentPost();
+			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			allValidationErrors = currentPost[ module.data.restValidationErrorsField ];
 			if ( ! Array.isArray( allValidationErrors ) ) {
 				return blockValidationErrors;
 			}
 
-			allValidationErrors.forEach( function( validationError ) {
+			allValidationErrors.forEach( function( validationError ) { // eslint-disable-line
 				var i, source;
 				if ( ! validationError.sources ) {
 					return;
@@ -112,12 +112,12 @@ var ampBlockValidation = ( function() {
 					}
 
 					// Uses _.isMatch because the props attributes can also have default attributes that blockAttrs doesn't have.
-					if ( source.block_attrs && _.isMatch( props.attributes, source.block_attrs ) || module.doNameAndAttributesMatch( validationError, props.attributes ) ) {
+					if ( source.block_attrs && _.isMatch( props.attributes, source.block_attrs ) || module.doNameAndAttributesMatch( validationError, props.attributes ) ) { // eslint-disable-line
 						blockValidationErrors.push( validationError );
 						break;
 					}
 				}
-			});
+			} );
 
 			return blockValidationErrors;
 		},
@@ -128,7 +128,7 @@ var ampBlockValidation = ( function() {
 		 * @todo This doesn't seem to be working.
 		 * @param {Object} validationError - The validation errors to check.
 		 * @param {Object} propAttributes  - The block attributes, originally passed in the props object.
-		 * @returns {Boolean} Whether node_name and the node_attributes are in the block.
+		 * @return {boolean} Whether node_name and the node_attributes are in the block.
 		 */
 		doNameAndAttributesMatch: function doNameAndAttributesMatch( validationError, propAttributes ) {
 			var attribute, attributes,
@@ -140,7 +140,7 @@ var ampBlockValidation = ( function() {
 			// Ensure the content has all attributes and properties in the validationError.
 			attributes = validationError[ attributesKey ];
 			for ( attribute in attributes ) {
-				if ( ! attributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( attributes[ attribute ]) ) {
+				if ( ! attributes.hasOwnProperty( attribute ) || ! propAttributes.content.includes( attribute ) || ! propAttributes.content.includes( attributes[ attribute ] ) ) {
 					return false;
 				}
 			}
@@ -151,16 +151,15 @@ var ampBlockValidation = ( function() {
 		 * Gets the key for the attributes in validationError.
 		 *
 		 * @param {Object} validationError - The validation errors to check.
-		 * @returns {String|null} attributeKey The key used to get the attributes, or null.
+		 * @return {string|null} attributeKey The key used to get the attributes, or null.
 		 */
 		getAttributesKey: function getAttributesKey( validationError ) {
 			if ( validationError.hasOwnProperty( 'node_attributes' ) ) {
 				return 'node_attributes';
 			} else if ( validationError.hasOwnProperty( 'element_attributes' ) ) {
 				return 'element_attributes';
-			} else {
-				return null;
 			}
+			return null;
 		}
 
 	};

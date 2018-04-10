@@ -9,8 +9,8 @@
 			$( '.amp-wp-header a' ).css( 'color', to );
 			$( '.amp-wp-header div' ).css( 'color', to );
 			$( '.amp-wp-header .amp-wp-site-icon' ).css( 'border-color', to ).css( 'background-color', to );
-		});
-	});
+		} );
+	} );
 
 	// Nav bar background color.
 	wp.customize( 'amp_customizer[header_background_color]', function( value ) {
@@ -18,8 +18,8 @@
 			$( 'html, .amp-wp-header' ).css( 'background-color', to );
 			$( '.amp-wp-article a, .amp-wp-article a:visited, .amp-wp-footer a, .amp-wp-footer a:visited' ).css( 'color', to );
 			$( 'blockquote, .amp-wp-byline amp-img' ).css( 'border-color', to );
-		});
-	});
+		} );
+	} );
 
 	// AMP background color scheme.
 	wp.customize( 'amp_customizer[color_scheme]', function( value ) {
@@ -27,7 +27,7 @@
 			var colors = amp_customizer_design.color_schemes[ to ]; // eslint-disable-line
 
 			if ( ! colors ) {
-				console.error( 'Selected color scheme "%s" not registered.', to );
+				console.error( 'Selected color scheme "%s" not registered.', to ); // eslint-disable-line
 				return;
 			}
 
@@ -36,14 +36,13 @@
 			$( '.amp-wp-meta, .wp-caption .wp-caption-text, .amp-wp-tax-category, .amp-wp-tax-tag, .amp-wp-footer p' ).css( 'color', colors.muted_text_color );
 			$( '.wp-caption .wp-caption-text, .amp-wp-comments-link a, .amp-wp-footer' ).css( 'border-color', colors.border_color );
 			$( '.amp-wp-iframe-placeholder, amp-carousel, amp-iframe, amp-youtube, amp-instagram, amp-vine' ).css( 'background-color', colors.border_color );
-		});
-	});
+		} );
+	} );
 
 	// Site title.
 	wp.customize( 'blogname', function( setting ) {
 		setting.bind( function( title ) {
 			$( '.amp-wp-header .amp-site-title, .amp-wp-footer h2' ).text( title );
-		});
-	});
-
-})( jQuery );
+		} );
+	} );
+}( jQuery ) );
