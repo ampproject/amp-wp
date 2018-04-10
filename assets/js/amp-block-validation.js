@@ -40,59 +40,70 @@ var ampBlockValidation = ( function() {
 			module.store = wp.data.registerStore( 'amp/blockValidation', {
 				reducer: function( _state, action ) {
 					var state = _state || {
-						blocksValidationErrors: {}
+						blockValidationErrorsByUid: {}
 					};
 
 					switch ( action.type ) {
 						case 'UPDATE_BLOCKS_VALIDATION_ERRORS':
 							return _.extend( {}, state, {
-								blocksValidationErrors: action.blocksValidationErrors
+								blockValidationErrorsByUid: action.blockValidationErrorsByUid
 							} );
 						default:
 							return state;
 					}
 				},
 				actions: {
-					updateBlocksValidationErrors: function( blocksValidationErrors ) {
+					updateBlocksValidationErrors: function( blockValidationErrorsByUid ) {
 						return {
 							type: 'UPDATE_BLOCKS_VALIDATION_ERRORS',
-							blocksValidationErrors: blocksValidationErrors
+							blockValidationErrorsByUid: blockValidationErrorsByUid
 						};
 					}
 				},
 				selectors: {
 					getBlockValidationErrors: function( state, uid ) {
-						return state.blocksValidationErrors[ uid ] || [];
+						return state.blockValidationErrorsByUid[ uid ] || [];
 					}
 				}
 			} );
 
 			wp.data.subscribe( function() {
-				var thisValidationErrors = wp.data.select( 'core/editor' ).getCurrentPost()[ module.data.restValidationErrorsField ];
-				if ( thisValidationErrors && ! _.isEqual( lastValidationErrors, thisValidationErrors ) ) {
-					lastValidationErrors = thisValidationErrors;
-					module.updateBlocksValidationErrors( thisValidationErrors );
+				var currentPost, thisValidationErrors;
+
+				// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
+				// We can only align block validation errors with blocks in editor when in saved state.
+				if ( wp.data.select( 'core/editor' ).isEditedPostDirty() ) {
+					return;
 				}
 
-				// @todo wp.data.dispatch( 'core/editor' ).createNotice()?
+				currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+				thisValidationErrors = currentPost[ module.data.restValidationErrorsField ];
+				if ( thisValidationErrors && ! _.isEqual( lastValidationErrors, thisValidationErrors ) ) {
+					lastValidationErrors = thisValidationErrors;
+					module.updateBlocksValidationErrors(
+						currentPost.id,
+						wp.data.select( 'core/editor' ).getBlockOrder(),
+						thisValidationErrors
+					);
+
+					// @todo Create an notice in the editor when there are validation errors, beyond just for blocks.
+				}
 			} );
 		},
 
 		/**
 		 * Update blocks' validation errors in the store.
 		 *
+		 * @param {number}   postId           - Post ID.
+		 * @param {string[]} blockOrder       - Block order.
 		 * @param {Object[]} validationErrors - Validation errors.
 		 * @return {void}
 		 */
-		updateBlocksValidationErrors: function updateBlocksValidationErrors( validationErrors ) {
-			var blocksValidationErrors, blockOrder, currentPost, selectors;
-			selectors = wp.data.select( 'core/editor' );
-			blockOrder = selectors.getBlockOrder();
-			currentPost = selectors.getCurrentPost();
+		updateBlocksValidationErrors: function updateBlocksValidationErrors( postId, blockOrder, validationErrors ) {
+			var blockValidationErrorsByUid = {};
 
-			blocksValidationErrors = {};
 			_.each( blockOrder, function( uid ) {
-				blocksValidationErrors[ uid ] = [];
+				blockValidationErrorsByUid[ uid ] = [];
 			} );
 
 			_.each( validationErrors, function( validationError ) {
@@ -105,20 +116,20 @@ var ampBlockValidation = ( function() {
 				for ( i = validationError.sources.length - 1; 0 <= i; i-- ) {
 					source = validationError.sources[ i ];
 
-					if ( ! source.block_name || currentPost.id !== source.post_id ) {
+					if ( ! source.block_name || postId !== source.post_id ) {
 						continue;
 					}
 
 					// @todo Cross-check source.block_name with wp.data.select( 'core/editor' ).getBlock( matchedBlockUid ).name?
 					matchedBlockUid = blockOrder[ source.block_content_index ];
 					if ( ! _.isUndefined( matchedBlockUid ) ) {
-						blocksValidationErrors[ blockOrder[ source.block_content_index ] ].push( validationError );
+						blockValidationErrorsByUid[ blockOrder[ source.block_content_index ] ].push( validationError );
 						break;
 					}
 				}
 			} );
 
-			wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blocksValidationErrors );
+			wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blockValidationErrorsByUid );
 		},
 
 		/**
