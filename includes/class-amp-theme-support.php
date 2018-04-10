@@ -1034,6 +1034,15 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
+		// Account for case where ob_flush() was called prematurely.
+		if ( false === strpos( $response, '<html' ) ) {
+			$error = sprintf(
+				'<div style="color:red; background: white; padding: 0.5em; position: fixed; z-index: 100000; bottom: 0; border: dashed 1px red;">%s</div>',
+				wp_kses_post( __( '<strong>AMP Plugin Error</strong>: It appears that your WordPress install prematurely flushed the output buffer. You will need to disable AMP theme support until that is fixed.', 'amp' ) )
+			);
+			return $error . $response;
+		}
+
 		$is_validation_debug_mode = ! empty( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
 
 		$args = array_merge(
