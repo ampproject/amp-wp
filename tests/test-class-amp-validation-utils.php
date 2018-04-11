@@ -1432,6 +1432,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::enqueue_block_validation()
 	 */
 	public function test_enqueue_block_validation() {
+		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$this->markTestSkipped( 'Gutenberg not available.' );
+		}
+
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$slug = 'amp-block-validation';
@@ -1446,7 +1450,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
 		$this->assertContains( AMP_Validation_Utils::REST_FIELD_NAME, $inline_script );
-		$this->assertContains( 'This block has invalid AMP content', $inline_script );
+		$this->assertContains( '"domain":"amp"', $inline_script );
 	}
 
 	/**

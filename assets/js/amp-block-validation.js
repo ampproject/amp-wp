@@ -18,9 +18,8 @@ var ampBlockValidation = ( function() {
 		 * @param {Object}
 		 */
 		data: {
-			i18n: {
-				invalidAmpContentNotice: ''
-			}
+			i18n: {},
+			restValidationErrorsField: ''
 		},
 
 		/**
@@ -38,6 +37,8 @@ var ampBlockValidation = ( function() {
 		 */
 		boot: function boot( data ) {
 			module.data = data;
+
+			wp.i18n.setLocaleData( module.data.i18n, 'amp' );
 
 			wp.hooks.addFilter(
 				'blocks.BlockEdit',
@@ -126,8 +127,8 @@ var ampBlockValidation = ( function() {
 				wp.i18n._n(
 					'There is %s issue from AMP validation.',
 					'There are %s issues from AMP validation.',
-					validationErrors.length
-					// @todo Domain.
+					validationErrors.length,
+					'amp'
 				),
 				validationErrors.length
 			);
@@ -140,20 +141,20 @@ var ampBlockValidation = ( function() {
 				if ( blockErrorCount > 0 ) {
 					noticeMessage += ' ' + wp.i18n.sprintf(
 						wp.i18n._n(
-							'And %s is directly due to the content here.',
-							'And %s are directly due to the content here.',
-							blockErrorCount
-							// @todo Domain.
+							'And %s is directly due to content here.',
+							'And %s are directly due to content here.',
+							blockErrorCount,
+							'amp'
 						),
 						blockErrorCount
 					);
 				} else {
 					noticeMessage += ' ' + wp.i18n.sprintf(
 						wp.i18n._n(
-							'But it is not directly due to the content here.',
-							'But none are directly due to the content here.',
-							validationErrors.length
-							// @todo Domain.
+							'But it is not directly due to content here.',
+							'But none are directly due to content here.',
+							validationErrors.length,
+							'amp'
 						),
 						validationErrors.length
 					);
@@ -163,12 +164,14 @@ var ampBlockValidation = ( function() {
 				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
 
 				noticeMessage += ' ' + wp.i18n._n(
-					'It may not be due to the content here.',
-					'Some may be due to the content here.',
-					validationErrors.length
-					// @todo Domain.
+					'It may not be due to content here.',
+					'Some may be due to content here.',
+					validationErrors.length,
+					'amp'
 				);
 			}
+
+			noticeMessage += ' ' + wp.i18n.__( 'Invalid code is stripped when displaying AMP.', 'amp' );
 
 			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeMessage ).notice.id;
 		},
@@ -261,6 +264,36 @@ var ampBlockValidation = ( function() {
 		},
 
 		/**
+		 * Get message for validation error.
+		 *
+		 * @param {Object} validationError - Validation error.
+		 * @param {string} validationError.code - Validation error code.
+		 * @param {string} [validationError.node_name] - Node name.
+		 * @param {string} [validationError.message] - Validation error message.
+		 * @return {wp.element.Component[]|string[]} Validation error message.
+		 */
+		getValidationErrorMessage: function getValidationErrorMessage( validationError ) {
+			if ( validationError.message ) {
+				return validationError.message;
+			}
+			if ( 'invalid_element' === validationError.code && validationError.node_name ) {
+				return [
+					wp.i18n.__( 'Invalid element: ' ),
+					wp.element.createElement( 'code', { key: 'name' }, validationError.node_name )
+				];
+			} else if ( 'invalid_attribute' === validationError.code && validationError.node_name ) {
+				return [
+					wp.i18n.__( 'Invalid attribute: ' ),
+					wp.element.createElement( 'code', { key: 'name' }, validationError.parent_name ? wp.i18n.sprintf( '%s[%s]', validationError.parent_name, validationError.node_name ) : validationError.node_name )
+				];
+			}
+			return [
+				wp.i18n.__( 'Error code: ', 'amp' ),
+				wp.element.createElement( 'code', { key: 'name' }, validationError.code || wp.i18n.__( 'unknown' ) )
+			];
+		},
+
+		/**
 		 * Wraps the edit() method of a block, and conditionally adds a Notice.
 		 *
 		 * @param {Function} BlockEdit - The original edit() method of the block.
@@ -268,7 +301,8 @@ var ampBlockValidation = ( function() {
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
 			function AmpNoticeBlockEdit( props ) {
-				var edit = wp.element.createElement(
+				var edit, details;
+				edit = wp.element.createElement(
 					BlockEdit,
 					_.extend( {}, props, { key: 'amp-original-edit' } )
 				);
@@ -277,9 +311,26 @@ var ampBlockValidation = ( function() {
 					return edit;
 				}
 
-				return [
+				details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
+					wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
+						wp.i18n._n(
+							'There is %s issue from AMP validation.',
+							'There are %s issues from AMP validation.',
+							props.ampBlockValidationErrors.length,
+							'amp'
+						),
+						props.ampBlockValidationErrors.length
+					) ),
+					wp.element.createElement(
+						'ul',
+						{ key: 'list', className: 'amp-block-validation-errors__list' },
+						_.map( props.ampBlockValidationErrors, function( error, key ) {
+							return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
+						} )
+					)
+				] );
 
-					// @todo Add PanelBody with validation error details.
+				return [
 					wp.element.createElement(
 						wp.components.Notice,
 						{
@@ -287,7 +338,7 @@ var ampBlockValidation = ( function() {
 							isDismissible: false,
 							key: 'amp-validation-notice'
 						},
-						module.data.i18n.invalidAmpContentNotice + ' ' + _.pluck( props.ampBlockValidationErrors, 'code' ).join( ', ' )
+						details
 					),
 					edit
 				];

@@ -1933,11 +1933,8 @@ class AMP_Validation_Utils {
 			true
 		);
 
-		// @todo Add moreDetails and summary.
 		$data = wp_json_encode( array(
-			'i18n'                      => array(
-				'invalidAmpContentNotice' => __( 'This block has invalid AMP content:', 'amp' ),
-			),
+			'i18n'                      => gutenberg_get_jed_locale_data( 'amp' ), // @todo POT file.
 			'restValidationErrorsField' => self::REST_FIELD_NAME,
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
