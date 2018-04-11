@@ -68,7 +68,7 @@ var ampBlockValidation = ( function() {
 			} );
 
 			wp.data.subscribe( function() {
-				var currentPost, thisValidationErrors;
+				var currentPost, thisValidationErrors, blockValidationErrors;
 
 				// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
 				// We can only align block validation errors with blocks in editor when in saved state.
@@ -80,56 +80,105 @@ var ampBlockValidation = ( function() {
 				thisValidationErrors = currentPost[ module.data.restValidationErrorsField ];
 				if ( thisValidationErrors && ! _.isEqual( lastValidationErrors, thisValidationErrors ) ) {
 					lastValidationErrors = thisValidationErrors;
-					module.updateBlocksValidationErrors(
-						currentPost.id,
-						wp.data.select( 'core/editor' ).getBlockOrder(),
-						thisValidationErrors
-					);
+					try {
+						blockValidationErrors = module.getBlocksValidationErrors();
+						wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blockValidationErrors.byUid );
 
-					// @todo Create an notice in the editor when there are validation errors, beyond just for blocks.
+						// @todo Also show blockValidationErrors.other in notice, showing non-block errors and mentioning how many block errors there are.
+					} catch ( e ) {
+						wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( {} ); // Empty it out.
+
+						// @todo Also show thisValidationErrors in notice.
+					}
 				}
 			} );
 		},
 
 		/**
+		 * Get flattened block order.
+		 *
+		 * @param {Object[]} blocks - List of blocks which maty have nested blocks inside them.
+		 * @return {string[]} Block IDs in flattened order.
+		 */
+		getFlattenedBlockOrder: function getFlattenedBlockOrder( blocks ) {
+			var blockOrder = [];
+			_.each( blocks, function( block ) {
+				blockOrder.push( block.uid );
+				if ( block.innerBlocks.length > 0 ) {
+					Array.prototype.push.apply( blockOrder, module.getFlattenedBlockOrder( block.innerBlocks ) );
+				}
+			} );
+			return blockOrder;
+		},
+
+		/**
 		 * Update blocks' validation errors in the store.
 		 *
-		 * @param {number}   postId           - Post ID.
-		 * @param {string[]} blockOrder       - Block order.
-		 * @param {Object[]} validationErrors - Validation errors.
-		 * @return {void}
+		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
-		updateBlocksValidationErrors: function updateBlocksValidationErrors( postId, blockOrder, validationErrors ) {
-			var blockValidationErrorsByUid = {};
+		getBlocksValidationErrors: function getBlocksValidationErrors() {
+			var blockValidationErrorsByUid, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			editorSelect = wp.data.select( 'core/editor' );
+			currentPost = editorSelect.getCurrentPost();
+			validationErrors = currentPost[ module.data.restValidationErrorsField ];
+			blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
 
+			otherValidationErrors = [];
+			blockValidationErrorsByUid = {};
 			_.each( blockOrder, function( uid ) {
 				blockValidationErrorsByUid[ uid ] = [];
 			} );
 
 			_.each( validationErrors, function( validationError ) {
-				var i, source, matchedBlockUid;
+				var i, source, uid, block, matched;
 				if ( ! validationError.sources ) {
+					otherValidationErrors.push( validationError );
 					return;
 				}
 
 				// Find the inner-most nested block source only; ignore any nested blocks.
+				matched = false;
 				for ( i = validationError.sources.length - 1; 0 <= i; i-- ) {
 					source = validationError.sources[ i ];
 
-					if ( ! source.block_name || postId !== source.post_id ) {
+					// Skip sources that are not for blocks.
+					if ( ! source.block_name || _.isUndefined( source.block_content_index ) || currentPost.id !== source.post_id ) {
 						continue;
 					}
 
-					// @todo Cross-check source.block_name with wp.data.select( 'core/editor' ).getBlock( matchedBlockUid ).name?
-					matchedBlockUid = blockOrder[ source.block_content_index ];
-					if ( ! _.isUndefined( matchedBlockUid ) ) {
-						blockValidationErrorsByUid[ blockOrder[ source.block_content_index ] ].push( validationError );
-						break;
+					// Look up the block ID by index, assuming the blocks of content in the editor are the same as blocks rendered on frontend.
+					uid = blockOrder[ source.block_content_index ];
+					if ( _.isUndefined( uid ) ) {
+						throw new Error( 'undefined_block_index' );
 					}
+
+					// Sanity check that block exists for uid.
+					block = editorSelect.getBlock( uid );
+					if ( ! block ) {
+						throw new Error( 'block_lookup_failure' );
+					}
+
+					// Check the block type in case a block is dynamically added/removed via the_content filter to cause alignment error.
+					if ( block.name !== source.block_name ) {
+						throw new Error( 'ordered_block_alignment_mismatch' );
+					}
+
+					blockValidationErrorsByUid[ uid ].push( validationError );
+					matched = true;
+
+					// Stop looking for sources, since we aren't looking for parent blocks.
+					break;
+				}
+
+				if ( ! matched ) {
+					otherValidationErrors.push( validationError );
 				}
 			} );
 
-			wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blockValidationErrorsByUid );
+			return {
+				byUid: blockValidationErrorsByUid,
+				other: otherValidationErrors
+			};
 		},
 
 		/**
@@ -138,8 +187,8 @@ var ampBlockValidation = ( function() {
 		 * @param {Function} BlockEdit - The original edit() method of the block.
 		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
-		conditionallyAddNotice: function( BlockEdit ) {
-			var AmpNoticeBlockEdit = function( props ) {
+		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
+			function AmpNoticeBlockEdit( props ) {
 				var edit = wp.element.createElement(
 					BlockEdit,
 					_.extend( {}, props, { key: 'amp-original-edit' } )
@@ -163,7 +212,7 @@ var ampBlockValidation = ( function() {
 					),
 					edit
 				];
-			};
+			}
 
 			return wp.data.withSelect( function( select, ownProps ) {
 				return _.extend( {}, ownProps, {
