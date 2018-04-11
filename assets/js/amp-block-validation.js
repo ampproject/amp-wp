@@ -28,7 +28,7 @@ var ampBlockValidation = ( function() {
 		 * @return {void}
 		 */
 		boot: function boot( data ) {
-			var lastValidationErrors;
+			var lastValidationErrors, validationWarningNoticeId;
 			module.data = data;
 
 			wp.hooks.addFilter(
@@ -68,7 +68,7 @@ var ampBlockValidation = ( function() {
 			} );
 
 			wp.data.subscribe( function() {
-				var currentPost, thisValidationErrors, blockValidationErrors;
+				var currentPost, validationErrors, noticeAction, blockValidationErrors, noticeMessage;
 
 				// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
 				// We can only align block validation errors with blocks in editor when in saved state.
@@ -77,18 +77,53 @@ var ampBlockValidation = ( function() {
 				}
 
 				currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-				thisValidationErrors = currentPost[ module.data.restValidationErrorsField ];
-				if ( thisValidationErrors && ! _.isEqual( lastValidationErrors, thisValidationErrors ) ) {
-					lastValidationErrors = thisValidationErrors;
-					try {
-						blockValidationErrors = module.getBlocksValidationErrors();
-						wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blockValidationErrors.byUid );
+				validationErrors = currentPost[ module.data.restValidationErrorsField ];
+				if ( validationErrors && ! _.isEqual( lastValidationErrors, validationErrors ) ) {
+					lastValidationErrors = validationErrors;
 
-						// @todo Also show blockValidationErrors.other in notice, showing non-block errors and mentioning how many block errors there are.
-					} catch ( e ) {
-						wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( {} ); // Empty it out.
+					if ( validationWarningNoticeId ) {
+						wp.data.dispatch( 'core/editor' ).removeNotice( validationWarningNoticeId );
+						validationWarningNoticeId = null;
+					}
 
-						// @todo Also show thisValidationErrors in notice.
+					if ( ! validationErrors.length ) {
+						wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( {} );
+					} else {
+						noticeMessage = wp.i18n.sprintf(
+							wp.i18n._n(
+								'There is %s AMP validation issues.',
+								'There are %s AMP validation issues.',
+								validationErrors.length
+								// @todo Domain.
+							),
+							validationErrors.length
+						);
+
+						try {
+							blockValidationErrors = module.getBlocksValidationErrors();
+							wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blockValidationErrors.byUid );
+
+							if ( validationErrors.length - blockValidationErrors.other.length > 0 ) {
+								noticeMessage += ' ' + wp.i18n.sprintf(
+									wp.i18n._n(
+										'And %s of them is in your content blocks.',
+										'And %s of them are in your content blocks.',
+										validationErrors.length - blockValidationErrors.other.length
+										// @todo Domain.
+									),
+									validationErrors.length - blockValidationErrors.other.length
+								);
+							} else {
+								noticeMessage += ' ' + wp.i18n.__( 'But none of them are in your content.' ); // @todo Domain.
+							}
+						} catch ( e ) {
+							wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( {} ); // Empty it out.
+						}
+
+						noticeAction = wp.data.dispatch( 'core/editor' ).createWarningNotice(
+							noticeMessage
+						);
+						validationWarningNoticeId = noticeAction.notice.id;
 					}
 				}
 			} );
