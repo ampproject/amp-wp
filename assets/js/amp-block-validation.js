@@ -13,7 +13,9 @@ var ampBlockValidation = ( function() {
 	var module = {
 
 		/**
-		 * Holds data.
+		 * Data exported from server.
+		 *
+		 * @param {Object}
 		 */
 		data: {
 			i18n: {
@@ -22,13 +24,19 @@ var ampBlockValidation = ( function() {
 		},
 
 		/**
+		 * Name of the store.
+		 *
+		 * @param {string}
+		 */
+		storeName: 'amp/blockValidation',
+
+		/**
 		 * Boot module.
 		 *
 		 * @param {Object} data - Module data.
 		 * @return {void}
 		 */
 		boot: function boot( data ) {
-			var lastValidationErrors, validationWarningNoticeId;
 			module.data = data;
 
 			wp.hooks.addFilter(
@@ -37,7 +45,18 @@ var ampBlockValidation = ( function() {
 				module.conditionallyAddNotice
 			);
 
-			module.store = wp.data.registerStore( 'amp/blockValidation', {
+			module.store = module.registerStore();
+
+			wp.data.subscribe( module.handleValidationErrorsStateChange );
+		},
+
+		/**
+		 * Register store.
+		 *
+		 * @return {Object} Store.
+		 */
+		registerStore: function registerStore() {
+			return wp.data.registerStore( module.storeName, {
 				reducer: function( _state, action ) {
 					var state = _state || {
 						blockValidationErrorsByUid: {}
@@ -66,67 +85,92 @@ var ampBlockValidation = ( function() {
 					}
 				}
 			} );
+		},
 
-			wp.data.subscribe( function() {
-				var currentPost, validationErrors, noticeAction, blockValidationErrors, noticeMessage;
+		/**
+		 * Handle state change regarding validation errors.
+		 *
+		 * @return {void}
+		 */
+		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
+			var currentPost, validationErrors, blockValidationErrors, noticeMessage, blockErrorCount;
 
-				// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
-				// We can only align block validation errors with blocks in editor when in saved state.
-				if ( wp.data.select( 'core/editor' ).isEditedPostDirty() ) {
-					return;
-				}
+			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
+			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
+			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() ) {
+				return;
+			}
 
-				currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-				validationErrors = currentPost[ module.data.restValidationErrorsField ];
-				if ( validationErrors && ! _.isEqual( lastValidationErrors, validationErrors ) ) {
-					lastValidationErrors = validationErrors;
+			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			validationErrors = currentPost[ module.data.restValidationErrorsField ];
 
-					if ( validationWarningNoticeId ) {
-						wp.data.dispatch( 'core/editor' ).removeNotice( validationWarningNoticeId );
-						validationWarningNoticeId = null;
-					}
+			// Short-circuit if there was no change to the validation errors.
+			if ( ! validationErrors || _.isEqual( module.lastValidationErrors, validationErrors ) ) {
+				return;
+			}
+			module.lastValidationErrors = validationErrors;
 
-					if ( ! validationErrors.length ) {
-						wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( {} );
-					} else {
-						noticeMessage = wp.i18n.sprintf(
-							wp.i18n._n(
-								'There is %s AMP validation issues.',
-								'There are %s AMP validation issues.',
-								validationErrors.length
-								// @todo Domain.
-							),
+			// Remove any existing notice.
+			if ( module.validationWarningNoticeId ) {
+				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
+				module.validationWarningNoticeId = null;
+			}
+
+			// If there are no validation errors then just make sure the validation notices are cleared from the blocks.
+			if ( ! validationErrors.length ) {
+				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+				return;
+			}
+
+			noticeMessage = wp.i18n.sprintf(
+				wp.i18n._n(
+					'There is %s issue from AMP validation.',
+					'There are %s issues from AMP validation.',
+					validationErrors.length
+					// @todo Domain.
+				),
+				validationErrors.length
+			);
+
+			try {
+				blockValidationErrors = module.getBlocksValidationErrors();
+				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byUid );
+
+				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
+				if ( blockErrorCount > 0 ) {
+					noticeMessage += ' ' + wp.i18n.sprintf(
+						wp.i18n._n(
+							'And %s is directly due to the content here.',
+							'And %s are directly due to the content here.',
+							blockErrorCount
+							// @todo Domain.
+						),
+						blockErrorCount
+					);
+				} else {
+					noticeMessage += ' ' + wp.i18n.sprintf(
+						wp.i18n._n(
+							'But it is not directly due to the content here.',
+							'But none are directly due to the content here.',
 							validationErrors.length
-						);
-
-						try {
-							blockValidationErrors = module.getBlocksValidationErrors();
-							wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( blockValidationErrors.byUid );
-
-							if ( validationErrors.length - blockValidationErrors.other.length > 0 ) {
-								noticeMessage += ' ' + wp.i18n.sprintf(
-									wp.i18n._n(
-										'And %s of them is in your content blocks.',
-										'And %s of them are in your content blocks.',
-										validationErrors.length - blockValidationErrors.other.length
-										// @todo Domain.
-									),
-									validationErrors.length - blockValidationErrors.other.length
-								);
-							} else {
-								noticeMessage += ' ' + wp.i18n.__( 'But none of them are in your content.' ); // @todo Domain.
-							}
-						} catch ( e ) {
-							wp.data.dispatch( 'amp/blockValidation' ).updateBlocksValidationErrors( {} ); // Empty it out.
-						}
-
-						noticeAction = wp.data.dispatch( 'core/editor' ).createWarningNotice(
-							noticeMessage
-						);
-						validationWarningNoticeId = noticeAction.notice.id;
-					}
+							// @todo Domain.
+						),
+						validationErrors.length
+					);
 				}
-			} );
+			} catch ( e ) {
+				// Clear out block validation errors in case the block sand errors cannot be aligned.
+				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+
+				noticeMessage += ' ' + wp.i18n._n(
+					'It may not be due to the content here.',
+					'Some may be due to the content here.',
+					validationErrors.length
+					// @todo Domain.
+				);
+			}
+
+			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeMessage ).notice.id;
 		},
 
 		/**
@@ -251,7 +295,7 @@ var ampBlockValidation = ( function() {
 
 			return wp.data.withSelect( function( select, ownProps ) {
 				return _.extend( {}, ownProps, {
-					ampBlockValidationErrors: select( 'amp/blockValidation' ).getBlockValidationErrors( ownProps.id )
+					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.id )
 				} );
 			} )( AmpNoticeBlockEdit );
 		}
