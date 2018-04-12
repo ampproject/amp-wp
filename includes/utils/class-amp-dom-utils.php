@@ -138,9 +138,9 @@ class AMP_DOM_Utils {
 		/*
 		 * Remove pre-HTML5-style encoding declaration if added above.
 		 */
-		$metaHttpEquivElement = $dom->getElementById("meta-http-equiv");
-		if ( $metaHttpEquivElement ) {
-			$metaHttpEquivElement->parentNode->removeChild($metaHttpEquivElement);
+		$meta_http_equiv_element = $dom->getElementById( 'meta-http-equiv' );
+		if ( $meta_http_equiv_element ) {
+			$meta_http_equiv_element->parentNode->removeChild( $meta_http_equiv_element );
 		}
 
 		return $dom;
