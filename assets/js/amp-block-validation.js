@@ -309,12 +309,11 @@ var ampBlockValidation = ( function() {
 		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
-			function AmpNoticeBlockEdit( props, children ) {
+			function AmpNoticeBlockEdit( props ) {
 				var edit, details;
 				edit = wp.element.createElement(
 					BlockEdit,
-					_.extend( {}, props, { key: 'amp-original-edit' } ),
-					children
+					props
 				);
 
 				if ( 0 === props.ampBlockValidationErrors.length ) {
@@ -340,18 +339,18 @@ var ampBlockValidation = ( function() {
 					)
 				] );
 
-				return [
+				return wp.element.createElement(
+					wp.element.Fragment, {},
 					wp.element.createElement(
 						wp.components.Notice,
 						{
 							status: 'warning',
-							isDismissible: false,
-							key: 'amp-validation-notice'
+							isDismissible: false
 						},
 						details
 					),
 					edit
-				];
+				);
 			}
 
 			return wp.data.withSelect( function( select, ownProps ) {
