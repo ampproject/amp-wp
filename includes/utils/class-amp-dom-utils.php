@@ -109,6 +109,18 @@ class AMP_DOM_Utils {
 		}
 
 		/*
+		 * Add a pre-HTML5-style declaration of the encoding since libxml<2.8 doesn't recognize
+		 * HTML5's meta charset. See <https://bugzilla.gnome.org/show_bug.cgi?id=655218>.
+		 */
+		if ( version_compare( LIBXML_DOTTED_VERSION, '2.8', '<' ) ) {
+			$document = preg_replace(
+				'#<meta[^>]+charset="([^"]+)"#i',
+				'<meta http-equiv="Content-Type" content="text/html; charset=$1" id="meta-http-equiv">$0',
+				$document
+			);
+		}
+
+		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
 		 * We can later use this to extract our nodes.
@@ -121,6 +133,14 @@ class AMP_DOM_Utils {
 
 		if ( ! $result ) {
 			return false;
+		}
+
+		/*
+		 * Remove pre-HTML5-style encoding declaration if added above.
+		 */
+		$metaHttpEquivElement = $dom->getElementById("meta-http-equiv");
+		if ( $metaHttpEquivElement ) {
+			$metaHttpEquivElement->parentNode->removeChild($metaHttpEquivElement);
 		}
 
 		return $dom;
