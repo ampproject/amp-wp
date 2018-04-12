@@ -1449,7 +1449,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
-		$this->assertContains( AMP_Validation_Utils::REST_FIELD_NAME, $inline_script );
+		$this->assertContains( AMP_Validation_Utils::VALIDITY_REST_FIELD_NAME, $inline_script );
 		$this->assertContains( '"domain":"amp"', $inline_script );
 	}
 
@@ -1485,48 +1485,64 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function assert_rest_api_field_present( $post_types ) {
 		foreach ( $post_types as $post_type ) {
-			$field = $GLOBALS['wp_rest_additional_fields'][ $post_type ][ AMP_Validation_Utils::REST_FIELD_NAME ];
+			$field = $GLOBALS['wp_rest_additional_fields'][ $post_type ][ AMP_Validation_Utils::VALIDITY_REST_FIELD_NAME ];
 			$this->assertEquals(
 				$field['schema'],
 				array(
-					'description' => 'AMP validation results',
+					'description' => 'AMP validity status',
 					'type'        => 'object',
 				)
 			);
-			$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'rest_field_amp_validation' ) );
+			$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'get_amp_validity_rest_field' ) );
 		}
 	}
 
 	/**
-	 * Test rest_field_amp_validation.
+	 * Test get_amp_validity_rest_field.
 	 *
-	 * @covers AMP_Validation_Utils::rest_field_amp_validation()
+	 * @covers AMP_Validation_Utils::get_amp_validity_rest_field()
 	 */
 	public function test_rest_field_amp_validation() {
-		$post_id = $this->factory()->post->create();
-		$this->assertEquals(
-			null,
-			AMP_Validation_Utils::rest_field_amp_validation(
-				array(
-					'id' => $post_id,
-				),
-				'',
-				new WP_REST_Request( 'PUT' )
-			)
-		);
+		AMP_Validation_Utils::register_post_type();
+		$id = $this->factory()->post->create();
+		$this->assertNull( AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'GET' )
+		) );
 
 		// Create an error custom post for the ID, so this will return the errors in the field.
-		$this->create_custom_post( amp_get_permalink( $post_id ) );
-		$this->assertEquals(
-			$this->get_mock_errors(),
-			AMP_Validation_Utils::rest_field_amp_validation(
-				array(
-					'id' => $post_id,
-				),
-				'',
-				new WP_REST_Request( 'PUT' )
-			)
+		$this->create_custom_post( amp_get_permalink( $id ) );
+
+		// Make sure capability check is honored.
+		$this->assertNull( AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'GET' )
+		) );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		// GET request.
+		$field = AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'GET' )
 		);
+		$this->assertArrayHasKey( 'errors', $field );
+		$this->assertArrayHasKey( 'link', $field );
+		$this->assertEquals( $field['errors'], $this->get_mock_errors() );
+
+		// @todo Test successful loopback request to test.
+		// PUT request.
+		$field = AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'PUT' )
+		);
+		$this->assertArrayHasKey( 'errors', $field );
+		$this->assertArrayHasKey( 'link', $field );
+		$this->assertEquals( $field['errors'], $this->get_mock_errors() );
 	}
 
 	/**

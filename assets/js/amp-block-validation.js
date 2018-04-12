@@ -19,7 +19,7 @@ var ampBlockValidation = ( function() {
 		 */
 		data: {
 			i18n: {},
-			restValidationErrorsField: ''
+			ampValidityRestField: ''
 		},
 
 		/**
@@ -94,7 +94,7 @@ var ampBlockValidation = ( function() {
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeMessage, blockErrorCount;
+			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity;
 
 			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
 			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
@@ -103,7 +103,8 @@ var ampBlockValidation = ( function() {
 			}
 
 			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-			validationErrors = currentPost[ module.data.restValidationErrorsField ];
+			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
+			validationErrors = ampValidity.errors;
 
 			// Short-circuit if there was no change to the validation errors.
 			if ( ! validationErrors || _.isEqual( module.lastValidationErrors, validationErrors ) ) {
@@ -172,8 +173,16 @@ var ampBlockValidation = ( function() {
 			}
 
 			noticeMessage += ' ' + wp.i18n.__( 'Invalid code is stripped when displaying AMP.', 'amp' );
+			noticeElement = wp.element.createElement( 'p', {}, [
+				noticeMessage + ' ',
+				ampValidity.link && wp.element.createElement(
+					'a',
+					{ key: 'details', href: ampValidity.link, target: '_blank' },
+					wp.i18n.__( 'Details', 'amp' )
+				)
+			] );
 
-			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeMessage ).notice.id;
+			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeElement, { spokenMessage: noticeMessage } ).notice.id;
 		},
 
 		/**
@@ -202,7 +211,7 @@ var ampBlockValidation = ( function() {
 			var blockValidationErrorsByUid, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
-			validationErrors = currentPost[ module.data.restValidationErrorsField ];
+			validationErrors = currentPost[ module.data.ampValidityRestField ].errors;
 			blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
 
 			otherValidationErrors = [];
@@ -300,11 +309,12 @@ var ampBlockValidation = ( function() {
 		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
-			function AmpNoticeBlockEdit( props ) {
+			function AmpNoticeBlockEdit( props, children ) {
 				var edit, details;
 				edit = wp.element.createElement(
 					BlockEdit,
-					_.extend( {}, props, { key: 'amp-original-edit' } )
+					_.extend( {}, props, { key: 'amp-original-edit' } ),
+					children
 				);
 
 				if ( 0 === props.ampBlockValidationErrors.length ) {

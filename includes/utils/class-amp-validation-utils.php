@@ -157,7 +157,7 @@ class AMP_Validation_Utils {
 	 *
 	 * @var string
 	 */
-	const REST_FIELD_NAME = 'amp_validation_errors';
+	const VALIDITY_REST_FIELD_NAME = 'amp_validity';
 
 	/**
 	 * The errors encountered when validating.
@@ -365,6 +365,8 @@ class AMP_Validation_Utils {
 	 * Validate the posts pending frontend validation.
 	 *
 	 * @see AMP_Validation_Utils::handle_save_post_prompting_validation()
+	 *
+	 * @return array Mapping of post ID to the result of validating or storing the validation result.
 	 */
 	public static function validate_queued_posts_on_frontend() {
 		$posts = array_filter(
@@ -374,10 +376,13 @@ class AMP_Validation_Utils {
 			}
 		);
 
+		$validation_posts = array();
+
 		// @todo Only validate the first and then queue the rest in WP Cron?
 		foreach ( $posts as $post ) {
 			$url = amp_get_permalink( $post->ID );
 			if ( ! $url ) {
+				$validation_posts[ $post->ID ] = new WP_Error( 'no_amp_permalink' );
 				continue;
 			}
 
@@ -386,11 +391,13 @@ class AMP_Validation_Utils {
 
 			$validation_errors = self::validate_url( $url );
 			if ( is_wp_error( $validation_errors ) ) {
-				continue;
+				$validation_posts[ $post->ID ] = $validation_errors;
+			} else {
+				$validation_posts[ $post->ID ] = self::store_validation_errors( $validation_errors, $url );
 			}
-
-			self::store_validation_errors( $validation_errors, $url );
 		}
+
+		return $validation_posts;
 	}
 
 	/**
@@ -1264,7 +1271,7 @@ class AMP_Validation_Utils {
 	 *
 	 * @param array  $validation_errors Validation errors.
 	 * @param string $url               URL on which the validation errors occurred.
-	 * @return int|null $post_id The post ID of the custom post type used, or null.
+	 * @return int|WP_Error $post_id The post ID of the custom post type used, null if post was deleted due to no validation errors, or WP_Error on failure.
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors( $validation_errors, $url ) {
@@ -1309,9 +1316,9 @@ class AMP_Validation_Utils {
 			'post_name'    => $post_name,
 			'post_content' => $encoded_errors,
 			'post_status'  => 'publish',
-		) ) );
-		if ( ! $post_id ) {
-			return null;
+		) ), true );
+		if ( is_wp_error( $post_id ) ) {
+			return $post_id;
 		}
 		if ( ! in_array( $url, get_post_meta( $post_id, self::AMP_URL_META, false ), true ) ) {
 			add_post_meta( $post_id, self::AMP_URL_META, wp_slash( $url ), false );
@@ -1934,8 +1941,8 @@ class AMP_Validation_Utils {
 		);
 
 		$data = wp_json_encode( array(
-			'i18n'                      => gutenberg_get_jed_locale_data( 'amp' ), // @todo POT file.
-			'restValidationErrorsField' => self::REST_FIELD_NAME,
+			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ), // @todo POT file.
+			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
 	}
@@ -1959,11 +1966,11 @@ class AMP_Validation_Utils {
 
 		register_rest_field(
 			$object_types,
-			self::REST_FIELD_NAME,
+			self::VALIDITY_REST_FIELD_NAME,
 			array(
-				'get_callback' => array( __CLASS__, 'rest_field_amp_validation' ),
+				'get_callback' => array( __CLASS__, 'get_amp_validity_rest_field' ),
 				'schema'       => array(
-					'description' => __( 'AMP validation results', 'amp' ),
+					'description' => __( 'AMP validity status', 'amp' ),
 					'type'        => 'object',
 				),
 			)
@@ -1981,16 +1988,42 @@ class AMP_Validation_Utils {
 	 * @param WP_REST_Request $request    The name of the field to add.
 	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
-	public static function rest_field_amp_validation( $post_data, $field_name, $request ) {
-		$post_id = $post_data['id'];
-		$post    = get_post( $post_id );
-		if ( in_array( $request->get_method(), array( 'PUT', 'POST' ), true ) ) {
-			if ( ! isset( self::$posts_pending_frontend_validation[ $post_id ] ) ) {
-				self::$posts_pending_frontend_validation[ $post_id ] = true;
-			}
-			self::validate_queued_posts_on_frontend();
+	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
+		unset( $field_name );
+		if ( ! current_user_can( 'edit_post', $post_data['id'] ) ) {
+			return null;
 		}
-		return self::get_existing_validation_errors( $post );
+		$post = get_post( $post_data['id'] );
+
+		$validation_status_post = null;
+		if ( in_array( $request->get_method(), array( 'PUT', 'POST' ), true ) ) {
+			if ( ! isset( self::$posts_pending_frontend_validation[ $post->ID ] ) ) {
+				self::$posts_pending_frontend_validation[ $post->ID ] = true;
+			}
+			$results = self::validate_queued_posts_on_frontend();
+			if ( isset( $results[ $post->ID ] ) && is_int( $results[ $post->ID ] ) ) {
+				$validation_status_post = get_post( $results[ $post->ID ] );
+			}
+		}
+
+		if ( empty( $validation_status_post ) ) {
+			// @todo Consider process_markup() if not post type is not viewable and if post type supports editor.
+			$validation_status_post = self::get_validation_status_post( amp_get_permalink( $post->ID ) );
+		}
+
+		if ( ! $validation_status_post ) {
+			$field = array(
+				'errors' => array(),
+				'link'   => null,
+			);
+		} else {
+			$field = array(
+				'errors' => json_decode( $validation_status_post->post_content, true ),
+				'link'   => get_edit_post_link( $validation_status_post->ID, 'raw' ),
+			);
+		}
+
+		return $field;
 	}
 
 	/**
