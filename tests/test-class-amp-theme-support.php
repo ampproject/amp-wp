@@ -893,7 +893,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// start first layer buffer.
 		ob_start();
 		AMP_Theme_Support::start_output_buffering();
-		echo '<img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
+		echo '<html><img src="test.png"><script data-test>document.write(\'Illegal\');</script></html>';
 		AMP_Theme_Support::finish_output_buffering();
 		// get first layer buffer.
 		$output = ob_get_clean();
@@ -1048,6 +1048,25 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
 		$this->assertContains( '<html amp', $sanitized_html );
+	}
+
+	/**
+	 * Test preparing an incomplete response due to ob_flush().
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_premature_ob_flush() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		ob_start();
+		wp_footer();
+		echo '</body></html>';
+		$original_html  = trim( ob_get_clean() );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+
+		$this->assertContains( 'AMP Plugin Error', $sanitized_html );
+		$this->assertNotContains( '<!DOCTYPE html>', $sanitized_html );
+		$this->assertNotContains( '<html amp', $sanitized_html );
 	}
 
 	/**

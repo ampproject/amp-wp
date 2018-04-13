@@ -220,6 +220,14 @@ class AMP_Theme_Support {
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 
+		// Prevent MediaElement.js scripts/styles from being enqueued.
+		add_filter( 'wp_video_shortcode_library', function() {
+			return 'amp';
+		} );
+		add_filter( 'wp_audio_shortcode_library', function() {
+			return 'amp';
+		} );
+
 		/*
 		 * Add additional markup required by AMP <https://www.ampproject.org/docs/reference/spec#required-markup>.
 		 * Note that the meta[name=viewport] is not added here because a theme may want to define one with additional
@@ -989,6 +997,15 @@ class AMP_Theme_Support {
 		 */
 		if ( '<' !== substr( ltrim( $response ), 0, 1 ) ) {
 			return $response;
+		}
+
+		// Account for case where ob_flush() was called prematurely.
+		if ( false === strpos( $response, '<html' ) ) {
+			$error = sprintf(
+				'<div style="color:red; background: white; padding: 0.5em; position: fixed; z-index: 100000; bottom: 0; border: dashed 1px red;">%s</div>',
+				wp_kses_post( __( '<strong>AMP Plugin Error</strong>: It appears that your WordPress install prematurely flushed the output buffer. You will need to disable AMP theme support until that is fixed.', 'amp' ) )
+			);
+			return $error . $response;
 		}
 
 		$is_validation_debug_mode = isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.

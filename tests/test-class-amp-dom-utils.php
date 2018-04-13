@@ -212,6 +212,26 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test encoding.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 */
+	public function test_get_dom_encoding() {
+		$html  = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>';
+		$html .= '<p>Check out ‘this’ and “that” and—other things.</p>';
+		$html .= '<p>Check out &#8216;this&#8217; and &#8220;that&#8221; and&#8212;other things.</p>';
+		$html .= '<p>Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
+		$html .= '</body></html>';
+
+		$document = AMP_DOM_Utils::get_dom_from_content( $html );
+		$this->assertEquals( 'UTF-8', $document->encoding );
+		$paragraphs = $document->getElementsByTagName( 'p' );
+		$this->assertSame( 3, $paragraphs->length );
+		$this->assertSame( $paragraphs->item( 0 )->textContent, $paragraphs->item( 1 )->textContent );
+		$this->assertSame( $paragraphs->item( 1 )->textContent, $paragraphs->item( 2 )->textContent );
+	}
+
+	/**
 	 * Get Table Row Iterations
 	 *
 	 * @return array An array of arrays holding an integer representation of iterations.
