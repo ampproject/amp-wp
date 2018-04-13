@@ -214,6 +214,14 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
+		add_filter( 'amp_content_sanitizers', function( $sanitizers ) {
+			$sanitizers['AMP_Core_Theme_Sanitizer'] = array(
+				'template'   => get_template(),
+				'stylesheet' => get_stylesheet(),
+			);
+			return $sanitizers;
+		} );
+
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
