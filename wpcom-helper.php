@@ -188,7 +188,7 @@ function wpcom_amp_extract_image_dimensions_from_querystring( $dimensions ) {
 		}
 
 		$host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( ! wp_endswith( $host, '.wp.com' ) || ! wp_endswith( $host, '.files.wordpress.com' ) ) {
+		if ( ! wp_endswith( $host, '.wp.com' ) && ! wp_endswith( $host, '.files.wordpress.com' ) ) {
 			continue;
 		}
 
