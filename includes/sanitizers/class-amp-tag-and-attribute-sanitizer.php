@@ -433,6 +433,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$attr_spec_list
 		);
 
+		// Amend spec list with layout.
+		if ( isset( $tag_spec['amp_layout'] ) ) {
+			$merged_attr_spec_list = array_merge( $merged_attr_spec_list, $this->layout_allowed_attributes );
+
+			if ( isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
+				$layouts = wp_array_slice_assoc( AMP_Rule_Spec::$layout_enum, $tag_spec['amp_layout']['supported_layouts'] );
+
+				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
+			}
+		}
+
 		// Identify any remaining disallowed attributes.
 		$disallowed_attributes = $this->get_disallowed_attributes_in_node( $node, $merged_attr_spec_list );
 
@@ -1465,13 +1476,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Return true if attribute name is valid for this attr_spec_list, false otherwise.
 	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || isset( $this->layout_allowed_attributes[ $attr_name ] ) || isset( $attr_spec_list[ $attr_name ] ) ) {
+		if ( isset( $attr_spec_list[ $attr_name ] ) ) {
 			return true;
-		} else {
-			foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
-				if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
-					return true;
-				}
+		}
+		foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
+			if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
+				return true;
 			}
 		}
 
