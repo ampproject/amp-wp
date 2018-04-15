@@ -469,6 +469,15 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('unique_warning'):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
 
+	if tag_spec.HasField('amp_layout'):
+		amp_layout = {}
+		for field in tag_spec.amp_layout.ListFields():
+			if 'supported_layouts' == field[0].name:
+				amp_layout['supported_layouts'] = [ val for val in field[1] ]
+			else:
+				amp_layout[ field[0].name ] = field[1]
+		tag_rules['amp_layout'] = amp_layout
+
 	logging.info('... done')
 	return tag_rules
 

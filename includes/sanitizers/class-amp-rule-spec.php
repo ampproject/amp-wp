@@ -53,6 +53,24 @@ abstract class AMP_Rule_Spec {
 	const VALUE_URL               = 'value_url';
 
 	/**
+	 * Supported layout values.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	public static $layout_enum = array(
+		1 => 'nodisplay',
+		2 => 'fixed',
+		3 => 'fixed-height',
+		4 => 'responsive',
+		5 => 'container',
+		6 => 'fill',
+		7 => 'flex-item',
+		8 => 'fluid',
+		9 => 'intrinsic',
+	);
+
+	/**
 	 * If a node type listed here is invalid, it and it's subtree will be
 	 * removed if it is invalid. This is mainly  because any children will be
 	 * non-functional without this parent.

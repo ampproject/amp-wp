@@ -8,9 +8,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	protected $layout_allowed_attrs;
 
 	public function setUp() {
-		$this->allowed_tags = AMP_Allowed_Tags_Generated::get_allowed_tags();
-		$this->globally_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
-		$this->layout_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
+		$this->allowed_tags           = AMP_Allowed_Tags_Generated::get_allowed_tags();
+		$this->globally_allowed_attrs = AMP_Allowed_Tags_Generated::get_allowed_attributes();
+		$this->layout_allowed_attrs   = AMP_Allowed_Tags_Generated::get_layout_attributes();
 	}
 
 	public function get_attr_spec_rule_data() {
@@ -551,10 +551,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		}
 		$source = '<' . $data['tag_name'] . ' ' . $attribute . '>Some test content</' . $data['tag_name'] . '>';
 
-		$attr_spec_list = $this->allowed_tags[ $data['tag_name'] ][$data['rule_spec_index']]['attr_spec_list'];
-		foreach( $attr_spec_list as $attr_name => $attr_val ) {
-			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] ) ) {
-				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] as $attr_alt_name ) {
+		$attr_spec_list = $this->allowed_tags[ $data['tag_name'] ][ $data['rule_spec_index'] ]['attr_spec_list'];
+		if ( isset( $this->allowed_tags[ $data['tag_name'] ][ $data['rule_spec_index'] ]['tag_spec']['amp_layout'] ) ) {
+			$attr_spec_list = array_merge( $attr_spec_list, $this->layout_allowed_attrs );
+		}
+		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
+			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+				foreach ( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $attr_alt_name ) {
 					$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
 				}
 			}
