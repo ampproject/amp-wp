@@ -24,10 +24,10 @@
 	// AMP background color scheme.
 	wp.customize( 'amp_customizer[color_scheme]', function( value ) {
 		value.bind( function( to ) {
-			var colors = amp_customizer_design.color_schemes[ to ];
+			var colors = amp_customizer_design.color_schemes[ to ]; // eslint-disable-line
 
 			if ( ! colors ) {
-				console.error( 'Selected color scheme "%s" not registered.', to );
+				console.error( 'Selected color scheme "%s" not registered.', to ); // eslint-disable-line
 				return;
 			}
 
@@ -45,5 +45,4 @@
 			$( '.amp-wp-header .amp-site-title, .amp-wp-footer h2' ).text( title );
 		} );
 	} );
-
-} )( jQuery );
+}( jQuery ) );

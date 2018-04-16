@@ -22,5 +22,4 @@ var ampCustomizePreview = ( function( api ) {
 	};
 
 	return component;
-
-} )( wp.customize );
+}( wp.customize ) );

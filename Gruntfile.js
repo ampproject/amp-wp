@@ -1,5 +1,6 @@
 /* eslint-env node */
 /* jshint node:true */
+/* eslint-disable camelcase */
 
 module.exports = function( grunt ) {
 	'use strict';

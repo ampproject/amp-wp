@@ -1008,7 +1008,7 @@ class AMP_Theme_Support {
 			return $error . $response;
 		}
 
-		$is_validation_debug_mode = ! empty( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
+		$is_validation_debug_mode = isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
 
 		$args = array_merge(
 			array(
