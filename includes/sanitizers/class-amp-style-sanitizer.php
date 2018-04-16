@@ -394,8 +394,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_link_element( DOMElement $element ) {
 		$href = $element->getAttribute( 'href' );
 
-		// Allow font URLs.
-		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $href ) ) {
+		// Allow font URLs, including protocol-less URLs and recognized URLs that use HTTP instead of HTTPS.
+		$normalized_font_href = preg_replace( '#^(http:)?(?=//)#', 'https:', $href );
+		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $normalized_font_href ) ) {
+			if ( $href !== $normalized_font_href ) {
+				$element->setAttribute( 'href', $normalized_font_href );
+			}
 			return;
 		}
 

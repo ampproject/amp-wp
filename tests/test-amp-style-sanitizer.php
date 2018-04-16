@@ -583,6 +583,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'https://fonts.googleapis.com/css?family=Tangerine',
 				true,
 			),
+			'tangerine2'  => array(
+				'//fonts.googleapis.com/css?family=Tangerine',
+				true,
+			),
+			'tangerine3'  => array(
+				'http://fonts.googleapis.com/css?family=Tangerine',
+				true,
+			),
 			'typekit'     => array(
 				'https://use.typekit.net/abc.css',
 				true,
@@ -620,7 +628,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$link = $dom->getElementsByTagName( 'link' )->item( 0 );
 		if ( $pass ) {
 			$this->assertInstanceOf( 'DOMElement', $link );
-			$this->assertEquals( $url, $link->getAttribute( 'href' ) );
+			$this->assertEquals(
+				preg_replace( '#^(http:)?(?=//)#', 'https:', $url ),
+				$link->getAttribute( 'href' )
+			);
 		} else {
 			$this->assertEmpty( $link );
 		}
