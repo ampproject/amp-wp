@@ -739,6 +739,44 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null, // No change.
 				array( 'amp-date-picker' ),
 			),
+
+			'amp-img-layout-allowed'                                    => array(
+				implode( '', array(
+					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
+				) ),
+				null, // No change.
+				array(),
+			),
+
+			'amp-img-layout-illegal'                                    => array(
+				'<amp-img src="/img1.png" width="50" height="50" layout="container"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				array(),
+			),
+
+			'amp-img-layout-unknown'                                    => array(
+				'<amp-img src="/img1.png" width="50" height="50" layout="bogus-value"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				array(),
+			),
+
+			'non-layout-span-element-attrs'                             => array(
+				'<span id="test" width="1" height="1" heights="(min-width:500px) 200px, 80%" sizes="(min-width: 650px) 50vw, 100vw" layout="nodisplay" [height]="1" [width]="1">Test</span>',
+				'<span id="test">Test</span>',
+				array(),
+			),
+
+			'non-layout-col-element-attrs'                              => array(
+				'<table><col class="foo" width="123" style="background:red;"><col class="bar" style="background:green;" width="12%"><col class="baz" style="background:blue;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				array(),
+			),
 		);
 	}
 
