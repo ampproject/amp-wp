@@ -536,15 +536,27 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				admin_url( 'css/common.css' ),
 				ABSPATH . 'wp-admin/css/common.css',
 			),
+			'admin_with_host_https' => array(
+				set_url_scheme( admin_url( 'css/common.css' ), 'https' ),
+				ABSPATH . 'wp-admin/css/common.css',
+			),
+			'admin_with_host_http' => array(
+				set_url_scheme( admin_url( 'css/common.css' ), 'http' ),
+				ABSPATH . 'wp-admin/css/common.css',
+			),
+			'admin_with_no_host_scheme' => array(
+				preg_replace( '#^\w+:(?=//)#', '', admin_url( 'css/common.css' ) ),
+				ABSPATH . 'wp-admin/css/common.css',
+			),
 			'amp_disallowed_file_extension' => array(
 				content_url( 'themes/twentyseventeen/index.php' ),
 				null,
-				'amp_disallowed_file_extension',
+				'disallowed_file_extension',
 			),
 			'amp_file_path_not_found' => array(
 				content_url( 'themes/twentyseventeen/404.css' ),
 				null,
-				'amp_file_path_not_found',
+				'file_path_not_found',
 			),
 		);
 	}
@@ -581,23 +593,39 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return array(
 			'tangerine'   => array(
 				'https://fonts.googleapis.com/css?family=Tangerine',
-				true,
+				array(),
+			),
+			'tangerine2'  => array(
+				'//fonts.googleapis.com/css?family=Tangerine',
+				array(),
+			),
+			'tangerine3'  => array(
+				'http://fonts.googleapis.com/css?family=Tangerine',
+				array(),
 			),
 			'typekit'     => array(
 				'https://use.typekit.net/abc.css',
-				true,
+				array(),
 			),
 			'fontscom'    => array(
 				'https://fast.fonts.net/abc.css',
-				true,
+				array(),
 			),
 			'fontawesome' => array(
 				'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
-				true,
+				array(),
 			),
-			'fontbad' => array(
+			'bad_host'    => array(
 				'https://bad.example.com/font.css',
-				false,
+				array( 'disallowed_external_file_url' ),
+			),
+			'bad_ext'    => array(
+				home_url( '/bad.php' ),
+				array( 'disallowed_file_extension' ),
+			),
+			'bad_file'    => array(
+				home_url( '/bad.css' ),
+				array( 'file_path_not_found' ),
 			),
 		);
 	}
@@ -606,21 +634,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Tests that font URLs get validated.
 	 *
 	 * @dataProvider get_font_urls
-	 * @param string $url  Font URL.
-	 * @param bool   $pass Whether the font URL is ok.
+	 * @param string $url         Font URL.
+	 * @param array  $error_codes Error codes.
 	 */
-	public function test_font_urls( $url, $pass ) {
+	public function test_font_urls( $url, $error_codes ) {
 		$dom = AMP_DOM_Utils::get_dom( sprintf( '<html><head><link rel="stylesheet" href="%s"></head></html>', $url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 
+		$validation_errors = array();
+
 		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
-			'use_document_element' => true,
+			'use_document_element'      => true,
+			'validation_error_callback' => function( $error ) use ( &$validation_errors ) {
+				$validation_errors[] = $error;
+			},
 		) );
 		$sanitizer->sanitize();
 
+		$this->assertEqualSets( $error_codes, wp_list_pluck( $validation_errors, 'code' ) );
+
 		$link = $dom->getElementsByTagName( 'link' )->item( 0 );
-		if ( $pass ) {
+		if ( empty( $error_codes ) ) {
 			$this->assertInstanceOf( 'DOMElement', $link );
-			$this->assertEquals( $url, $link->getAttribute( 'href' ) );
+			$this->assertEquals(
+				preg_replace( '#^(http:)?(?=//)#', 'https:', $url ),
+				$link->getAttribute( 'href' )
+			);
 		} else {
 			$this->assertEmpty( $link );
 		}

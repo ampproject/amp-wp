@@ -311,22 +311,39 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$url = $this->base_url . $url;
 		}
 
-		// Strip query and fragment from URL.
-		$url = preg_replace( ':[\?#].*$:', '', $url );
+		$remove_url_scheme = function( $schemed_url ) {
+			return preg_replace( '#^\w+:(?=//)#', '', $schemed_url );
+		};
+
+		// Strip URL scheme, query, and fragment.
+		$url = $remove_url_scheme( preg_replace( ':[\?#].*$:', '', $url ) );
+
+		$includes_url = $remove_url_scheme( includes_url( '/' ) );
+		$content_url  = $remove_url_scheme( content_url( '/' ) );
+		$admin_url    = $remove_url_scheme( get_admin_url( null, '/' ) );
+
+		$allowed_hosts = array(
+			wp_parse_url( $includes_url, PHP_URL_HOST ),
+			wp_parse_url( $content_url, PHP_URL_HOST ),
+			wp_parse_url( $admin_url, PHP_URL_HOST ),
+		);
+
+		$url_host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
+			/* translators: %s is the file URL */
+			return new WP_Error( 'disallowed_external_file_url', sprintf( __( 'Skipped file which does not have a recognized local host (%s).', 'amp' ), $url_host ) );
+		}
 
 		// Validate file extensions.
 		if ( ! empty( $allowed_extensions ) ) {
 			$pattern = sprintf( '/\.(%s)$/i', implode( '|', $allowed_extensions ) );
 			if ( ! preg_match( $pattern, $url ) ) {
 				/* translators: %s is the file URL */
-				return new WP_Error( 'amp_disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
+				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
 			}
 		}
 
-		$includes_url = includes_url( '/' );
-		$content_url  = content_url( '/' );
-		$admin_url    = get_admin_url( null, '/' );
-		$file_path    = null;
+		$file_path = null;
 		if ( 0 === strpos( $url, $content_url ) ) {
 			$file_path = WP_CONTENT_DIR . substr( $url, strlen( $content_url ) - 1 );
 		} elseif ( 0 === strpos( $url, $includes_url ) ) {
@@ -337,7 +354,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! $file_path || false !== strpos( '../', $file_path ) || 0 !== validate_file( $file_path ) || ! file_exists( $file_path ) ) {
 			/* translators: %s is file URL */
-			return new WP_Error( 'amp_file_path_not_found', sprintf( __( 'Unable to locate filesystem path for %s.', 'amp' ), $url ) );
+			return new WP_Error( 'file_path_not_found', sprintf( __( 'Unable to locate filesystem path for %s.', 'amp' ), $url ) );
 		}
 
 		return $file_path;
@@ -394,14 +411,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_link_element( DOMElement $element ) {
 		$href = $element->getAttribute( 'href' );
 
-		// Allow font URLs.
-		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $href ) ) {
+		// Allow font URLs, including protocol-less URLs and recognized URLs that use HTTP instead of HTTPS.
+		$normalized_font_href = preg_replace( '#^(http:)?(?=//)#', 'https:', $href );
+		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $normalized_font_href ) ) {
+			if ( $href !== $normalized_font_href ) {
+				$element->setAttribute( 'href', $normalized_font_href );
+			}
 			return;
 		}
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
 		if ( is_wp_error( $css_file_path ) ) {
 			$this->remove_invalid_child( $element, array(
+				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
 			) );
 			return;
