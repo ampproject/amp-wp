@@ -288,6 +288,7 @@ class AMP_Theme_Support {
 			'__amp_source_origin',
 			'_wp_amp_action_xhr_converted',
 			'amp_latest_update_time',
+			'amp_last_check_time',
 		);
 
 		// Scrub input vars.
