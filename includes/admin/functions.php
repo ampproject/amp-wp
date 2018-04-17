@@ -73,6 +73,7 @@ function amp_admin_get_preview_permalink() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
+	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php **/
 	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( 'amp' ) ) {
 		return;
 	}
