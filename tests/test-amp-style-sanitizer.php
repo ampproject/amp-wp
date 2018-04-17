@@ -49,14 +49,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			),
 
-			'width_to_max-width' => array(
-				'<figure style="width: 300px"></figure>',
-				'<figure class="amp-wp-343bce0"></figure>',
-				array(
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-343bce0{max-width:300px;}',
-				),
-			),
-
 			'span_display_none' => array(
 				'<span style="display: none;">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
 				'<span class="amp-wp-224b51a">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
@@ -154,6 +146,36 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					':root:not(#_) #child{color:red;}:root:not(#_):not(#_) #parent #child{color:pink;}:root:not(#_) .foo{color:blue;}:root:not(#_):not(#_) #me .foo{color:green;}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-64b4fd4{color:yellow;}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-ab79d9e{color:purple;}',
+				),
+			),
+
+			'col_with_width_attribute' => array(
+				'<table><colgroup><col width="253"/></colgroup></table>',
+				'<table><colgroup><col class="amp-wp-cbcb5c2"></colgroup></table>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cbcb5c2{width:253px;}',
+				),
+			),
+
+			'col_with_percent_width_attribute' => array(
+				'<table><colgroup><col width="50%"/></colgroup></table>',
+				'<table><colgroup><col class="amp-wp-cd7753e"></colgroup></table>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cd7753e{width:50%;}',
+				),
+			),
+
+			'col_with_star_width_attribute' => array(
+				'<table><colgroup><col width="0*"/></colgroup></table>',
+				'<table><colgroup><col width="0*"></colgroup></table>',
+				array(),
+			),
+
+			'col_with_width_attribute_and_existing_style' => array(
+				'<table><colgroup><col width="50" style="background-color: red; width: 60px"/></colgroup></table>',
+				'<table><colgroup><col class="amp-wp-c8aa9e9"></colgroup></table>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c8aa9e9{width:50px;width:60px;background-color:red;}',
 				),
 			),
 		);
