@@ -170,6 +170,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<table><colgroup><col width="0*"></colgroup></table>',
 				array(),
 			),
+
+			'col_with_width_attribute_and_existing_style' => array(
+				'<table><colgroup><col width="50" style="background-color: red; width: 60px"/></colgroup></table>',
+				'<table><colgroup><col class="amp-wp-c8aa9e9"></colgroup></table>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c8aa9e9{width:50px;width:60px;background-color:red;}',
+				),
+			),
 		);
 	}
 
