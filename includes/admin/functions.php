@@ -73,6 +73,10 @@ function amp_admin_get_preview_permalink() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
+	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( 'amp' ) ) {
+		return;
+	}
+
 	$menu_slug = add_query_arg( array(
 		'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
 		'url'              => rawurlencode( amp_admin_get_preview_permalink() ),
