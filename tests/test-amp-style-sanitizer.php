@@ -536,6 +536,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				admin_url( 'css/common.css' ),
 				ABSPATH . 'wp-admin/css/common.css',
 			),
+			'admin_with_host_https' => array(
+				set_url_scheme( admin_url( 'css/common.css' ), 'https' ),
+				ABSPATH . 'wp-admin/css/common.css',
+			),
+			'admin_with_host_http' => array(
+				set_url_scheme( admin_url( 'css/common.css' ), 'http' ),
+				ABSPATH . 'wp-admin/css/common.css',
+			),
+			'admin_with_no_host_scheme' => array(
+				preg_replace( '#^\w+:(?=//)#', '', admin_url( 'css/common.css' ) ),
+				ABSPATH . 'wp-admin/css/common.css',
+			),
 			'amp_disallowed_file_extension' => array(
 				content_url( 'themes/twentyseventeen/index.php' ),
 				null,
@@ -602,6 +614,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'fontawesome' => array(
 				'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
 				array(),
+			),
+			'bad_host'    => array(
+				'https://bad.example.com/font.css',
+				array( 'disallowed_external_file_url' ),
 			),
 			'bad_ext'    => array(
 				home_url( '/bad.php' ),
