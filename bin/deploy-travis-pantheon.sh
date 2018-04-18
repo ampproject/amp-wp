@@ -86,11 +86,7 @@ if [ ! -e node_modules/.bin ]; then
 fi
 PATH="node_modules/.bin/:$PATH"
 grunt build
-version_append=$(git --no-pager log -1 --format="%h" --date=short)-$(date "+%Y%m%dT%H%M%S")
 rsync -avz --delete ./build/ "$repo_dir/wp-content/plugins/amp/"
-cat ./build/amp.php |
-    sed "/^ \* Version:/ s/$/-$version_append/" |
-    sed "/^define( 'AMP__VERSION/ s/' );/-$version_append' );/" > "$repo_dir/wp-content/plugins/amp/amp.php"
 git --no-pager log -1 --format="Build AMP plugin at %h: %s" > /tmp/commit-message.txt
 
 # Commit and deploy.
