@@ -296,6 +296,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification
 		$bad_query_vars = array(
 			'amp_latest_update_time' => '1517199956',
+			'amp_last_check_time'    => '1517599126',
 			'__amp_source_origin'    => home_url(),
 		);
 		$ok_query_vars  = array(

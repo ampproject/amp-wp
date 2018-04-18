@@ -1,6 +1,6 @@
 /* eslint-env node */
 /* jshint node:true */
-/* eslint-disable camelcase */
+/* eslint-disable camelcase, no-console, no-param-reassign */
 
 module.exports = function( grunt ) {
 	'use strict';
@@ -77,39 +77,89 @@ module.exports = function( grunt ) {
 	] );
 
 	grunt.registerTask( 'build', function() {
-		var done = this.async();
+		var done, spawnQueue, stdout;
+		done = this.async();
+		spawnQueue = [];
+		stdout = [];
 
-		grunt.util.spawn(
+		spawnQueue.push(
+			{
+				cmd: 'git',
+				args: [ '--no-pager', 'log', '-1', '--format=%h', '--date=short' ]
+			},
 			{
 				cmd: 'git',
 				args: [ 'ls-files' ]
-			},
-			function( err, res ) {
-				var paths;
-				if ( err ) {
-					throw new Error( err.message );
-				}
-
-				paths = res.stdout.trim().split( /\n/ ).filter( function( file ) {
-					return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
-				} );
-				paths.push( 'vendor/autoload.php' );
-				paths.push( 'vendor/composer/**' );
-				paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
-
-				grunt.config.set( 'copy', {
-					build: {
-						src: paths,
-						dest: 'build',
-						expand: true
-					}
-				} );
-				grunt.task.run( 'readme' );
-				grunt.task.run( 'copy' );
-				grunt.task.run( 'shell:create_release_zip' );
-				done();
 			}
 		);
+
+		function finalize() {
+			var commitHash, lsOutput, versionAppend, paths;
+			commitHash = stdout.shift();
+			lsOutput = stdout.shift();
+			versionAppend = commitHash + '-' + new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' );
+
+			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
+				return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
+			} );
+			paths.push( 'vendor/autoload.php' );
+			paths.push( 'vendor/composer/**' );
+			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
+
+			grunt.task.run( 'clean' );
+			grunt.config.set( 'copy', {
+				build: {
+					src: paths,
+					dest: 'build',
+					expand: true,
+					options: {
+						noProcess: [ '*/**', 'LICENSE', 'jetpack-helper.php', 'wpcom-helper.php' ], // That is, only process amp.php and readme.txt.
+						process: function( content, srcpath ) {
+							var matches, version, versionRegex;
+							if ( /amp\.php$/.test( srcpath ) ) {
+								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
+
+								// If not a stable build (e.g. 0.7.0-beta), amend the version with the git commit and current timestamp.
+								matches = content.match( versionRegex );
+								if ( matches ) {
+									version = matches[ 2 ] + '-' + versionAppend;
+									console.log( 'Updating version in amp.php to ' + version );
+									content = content.replace( versionRegex, '$1' + version );
+									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
+								}
+							}
+							return content;
+						}
+					}
+				}
+			} );
+			grunt.task.run( 'readme' );
+			grunt.task.run( 'copy' );
+
+			grunt.task.run( 'shell:create_release_zip' );
+
+			done();
+		}
+
+		function doNext() {
+			var nextSpawnArgs = spawnQueue.shift();
+			if ( ! nextSpawnArgs ) {
+				finalize();
+			} else {
+				grunt.util.spawn(
+					nextSpawnArgs,
+					function( err, res ) {
+						if ( err ) {
+							throw new Error( err.message );
+						}
+						stdout.push( res.stdout );
+						doNext();
+					}
+				);
+			}
+		}
+
+		doNext();
 	} );
 
 	grunt.registerTask( 'create-release-zip', [
@@ -122,7 +172,6 @@ module.exports = function( grunt ) {
 		'jshint',
 		'shell:phpunit',
 		'shell:verify_matching_versions',
-		'wp_deploy',
-		'clean'
+		'wp_deploy'
 	] );
 };
