@@ -88,6 +88,7 @@ module.exports = function( grunt ) {
 					throw new Error( err.message );
 				}
 
+				grunt.task.run( 'clean' );
 				grunt.config.set( 'copy', {
 					build: {
 						src: res.stdout.trim().split( /\n/ ).filter( function( file ) {
