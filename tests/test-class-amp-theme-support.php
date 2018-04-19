@@ -894,6 +894,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->assertEquals( 0, has_action( 'shutdown', array( self::TESTED_CLASS, 'finish_output_buffering' ) ) );
 		$this->assertTrue( ob_get_level() > $ob_level );
+
 		// End output buffer.
 		if ( ob_get_level() > $ob_level ) {
 			ob_get_clean();
@@ -913,12 +914,24 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// start first layer buffer.
 		ob_start();
 		AMP_Theme_Support::start_output_buffering();
-		echo '<html><img src="test.png"><script data-test>document.write(\'Illegal\');</script></html>';
+
+		echo '<img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
+
+		// Additional nested output bufferings which aren't getting closed.
+		ob_start();
+		echo 'foo';
+		ob_start( function( $response ) {
+			return strtoupper( $response );
+		} );
+		echo 'bar';
+
 		AMP_Theme_Support::finish_output_buffering();
 		// get first layer buffer.
 		$output = ob_get_clean();
 
 		$this->assertContains( '<html amp', $output );
+		$this->assertContains( 'foo', $output );
+		$this->assertContains( 'BAR', $output );
 		$this->assertContains( '<amp-img src="test.png"', $output );
 		$this->assertNotContains( '<script data-test', $output );
 
@@ -1069,25 +1082,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
 		$this->assertContains( '<html amp', $sanitized_html );
-	}
-
-	/**
-	 * Test preparing an incomplete response due to ob_flush().
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_premature_ob_flush() {
-		add_theme_support( 'amp' );
-		AMP_Theme_Support::init();
-		ob_start();
-		wp_footer();
-		echo '</body></html>';
-		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-
-		$this->assertContains( 'AMP Plugin Error', $sanitized_html );
-		$this->assertNotContains( '<!DOCTYPE html>', $sanitized_html );
-		$this->assertNotContains( '<html amp', $sanitized_html );
 	}
 
 	/**
