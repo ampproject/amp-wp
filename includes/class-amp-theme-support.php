@@ -77,6 +77,14 @@ class AMP_Theme_Support {
 	public static $headers_sent = array();
 
 	/**
+	 * Output buffering level when starting.
+	 *
+	 * @since 0.7
+	 * @var int
+	 */
+	protected static $initial_ob_level = 0;
+
+	/**
 	 * Initialize.
 	 */
 	public static function init() {
@@ -969,6 +977,7 @@ class AMP_Theme_Support {
 		}
 
 		ob_start();
+		self::$initial_ob_level = ob_get_level();
 
 		// Note that the following must be at 0 because wp_ob_end_flush_all() runs at shutdown:1.
 		add_action( 'shutdown', array( __CLASS__, 'finish_output_buffering' ), 0 );
@@ -981,6 +990,12 @@ class AMP_Theme_Support {
 	 * @see AMP_Theme_Support::start_output_buffering()
 	 */
 	public static function finish_output_buffering() {
+
+		// Flush output buffer stack until we get to the output buffer we started.
+		while ( ob_get_level() > self::$initial_ob_level ) {
+			ob_end_flush();
+		}
+
 		echo self::prepare_response( ob_get_clean() ); // WPCS: xss ok.
 	}
 
