@@ -349,7 +349,7 @@ class AMP_Post_Template {
 
 		list( $sanitized_html, $featured_scripts, $featured_styles ) = AMP_Content_Sanitizer::sanitize(
 			$featured_html,
-			array( 'AMP_Img_Sanitizer' => array() ),
+			amp_get_content_sanitizers( $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
