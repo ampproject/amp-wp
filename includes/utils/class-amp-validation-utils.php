@@ -48,6 +48,41 @@ class AMP_Validation_Utils {
 	const TAXONOMY_SLUG = 'amp_validation_error';
 
 	/**
+	 * Term group for validation_error terms have not yet been acknowledged.
+	 *
+	 * @var int
+	 */
+	const VALIDATION_ERROR_NEW_STATUS = 0;
+
+	/**
+	 * Term group for validation_error terms that the user acknowledges as being ignored (and thus not disabling AMP).
+	 *
+	 * @var int
+	 */
+	const VALIDATION_ERROR_IGNORED_STATUS = 1;
+
+	/**
+	 * Action name for ignoring a validation error.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_IGNORE_ACTION = 'amp_validation_error_ignore';
+
+	/**
+	 * Action name for acknowledging a validation error.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_ACKNOWLEDGE_ACTION = 'amp_validation_error_acknowledge';
+
+	/**
+	 * Term group for validation_error terms that the user acknowledges (as being blockers to enabling AMP).
+	 *
+	 * @var int
+	 */
+	const VALIDATION_ERROR_ACKNOWLEDGED_STATUS = 2;
+
+	/**
 	 * The key in the response for the sources that have invalid output.
 	 *
 	 * @var string
@@ -1344,7 +1379,7 @@ class AMP_Validation_Utils {
 			'capabilities'       => array(
 				'assign_terms' => 'do_not_allow',
 				'edit_terms'   => 'do_not_allow',
-				'delete_terms' => 'do_not_allow',
+				// Note that delete_terms is needed so the checkbox (cb) table column will work.
 			),
 		) );
 
@@ -1398,14 +1433,13 @@ class AMP_Validation_Utils {
 
 		// Override the columns displayed for the validation error terms.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
-			return array_merge(
-				wp_array_slice_assoc( $old_columns, array( 'cb' ) ),
-				array(
-					'error'   => __( 'Error', 'amp' ),
-					'details' => __( 'Details', 'amp' ),
-					'sources' => __( 'Sources', 'amp' ),
-					'posts'   => __( 'URLs', 'amp' ),
-				)
+			return array(
+				'cb'      => $old_columns['cb'],
+				'error'   => __( 'Error', 'amp' ),
+				'status'  => __( 'Status', 'amp' ),
+				'details' => __( 'Details', 'amp' ),
+				'sources' => __( 'Sources', 'amp' ),
+				'posts'   => __( 'URLs', 'amp' ),
 			);
 		} );
 
@@ -1431,6 +1465,15 @@ class AMP_Validation_Utils {
 						$content .= sprintf( '<p>%s</p>', esc_html( $validation_error['message'] ) );
 					}
 					break;
+				case 'status':
+					if ( self::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) {
+						$content = esc_html__( 'Ignored', 'amp' );
+					} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $term->term_group ) {
+						$content = esc_html__( 'Acknowledged', 'amp' );
+					} else {
+						$content = esc_html__( 'New', 'amp' );
+					}
+					break;
 				case 'details':
 					unset( $validation_error['code'] );
 					unset( $validation_error['message'] );
@@ -1452,7 +1495,142 @@ class AMP_Validation_Utils {
 			return $content;
 		}, 10, 3 );
 
+		// Add row actions.
+		add_filter( 'tag_row_actions', function( $actions, WP_Term $tag ) {
+			if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
+				unset( $actions['delete'] );
+				$term_id = $tag->term_id;
+				if ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $tag->term_group ) {
+					$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
+						'<a href="%s" aria-label="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ), compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+						),
+						esc_attr__( 'Acknowledging an error marks it as read. AMP validation errors prevent a URL from being served as AMP.', 'amp' ),
+						esc_html__( 'Acknowledge', 'amp' )
+					);
+				}
+				if ( self::VALIDATION_ERROR_IGNORED_STATUS !== $tag->term_group ) {
+					$actions[ self::VALIDATION_ERROR_IGNORE_ACTION ] = sprintf(
+						'<a href="%s" aria-label="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_IGNORE_ACTION ), compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_IGNORE_ACTION
+						),
+						esc_attr__( 'Ignoring an error prevents it from blocking a URL from being served as AMP.', 'amp' ),
+						esc_html__( 'Ignore', 'amp' )
+					);
+				}
+			}
+			return $actions;
+		}, 10, 2 );
+
+		// Handle inline edit links.
+		add_action( 'load-edit-tags.php', function() {
+			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
+				return;
+			}
+			$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
+			check_admin_referer( $action );
+			$tax = get_taxonomy( self::TAXONOMY_SLUG );
+			if ( ! current_user_can( $tax->cap->manage_terms ) ) { // Yes it is an object.
+				return;
+			}
+
+			$referer  = wp_get_referer();
+			$term_id  = intval( $_GET['term_id'] ); // WPCS: CSRF ok.
+			$redirect = self::handle_validation_error_update( $referer, $action, array( $term_id ) );
+			if ( $redirect !== $referer ) {
+				$redirect = remove_query_arg( array( 'action', '_wpnonce', 'term_id' ), $redirect );
+				wp_safe_redirect( $redirect );
+				exit;
+			}
+		} );
+
+		// Add bulk actions.
+		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
+			unset( $bulk_actions['delete'] );
+			$bulk_actions[ self::VALIDATION_ERROR_IGNORE_ACTION ]      = __( 'Ignore', 'amp' );
+			$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Acknowledge', 'amp' );
+			return $bulk_actions;
+		} );
+
+		// Handle bulk actions.
+		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
+
+		// Show notices for bulk actions.
+		add_action( 'admin_notices', function() {
+			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || empty( $_GET['amp_actioned'] ) || empty( $_GET['actioned_count'] ) ) { // WPCS: CSRF ok.
+				return;
+			}
+			$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
+			$count    = intval( $_GET['actioned_count'] ); // WPCS: CSRF ok.
+			$message  = null;
+			if ( self::VALIDATION_ERROR_IGNORE_ACTION === $actioned ) {
+				$message = sprintf(
+					/* translators: %s is number of errors ignored */
+					_n(
+						'Ignored %s error. It will no longer block related URLs from being served as AMP.',
+						'Ignored %s errors. They will no longer block related URLs from being served as AMP.',
+						number_format_i18n( $count ),
+						'amp'
+					),
+					$count
+				);
+			} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $actioned ) {
+				$message = sprintf(
+					/* translators: %s is number of errors acknowledged */
+					_n(
+						'Acknowledged %s error. It will continue to block related URLs from being served as AMP.',
+						'Acknowledged %s errors. They will continue to block related URLs from being served as AMP.',
+						number_format_i18n( $count ),
+						'amp'
+					),
+					$count
+				);
+			}
+
+			if ( $message ) {
+				printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $message ) );
+			}
+		} );
+
+		// @todo Be able to filter validation errors by new, acknowledged, or ignored.
 		// @todo Default to hide_empty terms since we don't want to show errors which don't have any instances on the site.
+	}
+
+	/**
+	 * Handle bulk and inline edits to amp_validation_error terms.
+	 *
+	 * @param string $redirect_to Redirect to.
+	 * @param string $action      Action.
+	 * @param int[]  $term_ids    Term IDs.
+	 *
+	 * @return string Redirect.
+	 */
+	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
+		$term_group = null;
+		if ( self::VALIDATION_ERROR_IGNORE_ACTION === $action ) {
+			$term_group = self::VALIDATION_ERROR_IGNORED_STATUS;
+		} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $action ) {
+			$term_group = self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS;
+		}
+
+		if ( $term_group ) {
+			foreach ( $term_ids as $term_id ) {
+				wp_update_term( $term_id, self::TAXONOMY_SLUG, compact( 'term_group' ) );
+			}
+			$redirect_to = add_query_arg(
+				array(
+					'amp_actioned'   => $action,
+					'actioned_count' => count( $term_ids ),
+				),
+				$redirect_to
+			);
+		}
+
+		return $redirect_to;
 	}
 
 	/**
