@@ -34,11 +34,18 @@ class AMP_Validation_Utils {
 	const CACHE_BUST_QUERY_VAR = 'amp_cache_bust';
 
 	/**
-	 * The slug of the post type to store AMP errors.
+	 * The slug of the post type to store URLs that have AMP errors.
 	 *
 	 * @var string
 	 */
-	const POST_TYPE_SLUG = 'amp_validation_error';
+	const POST_TYPE_SLUG = 'amp_invalid_url';
+
+	/**
+	 * The slug of the taxonomy to store AMP errors.
+	 *
+	 * @var string
+	 */
+	const TAXONOMY_SLUG = 'amp_validation_error';
 
 	/**
 	 * The key in the response for the sources that have invalid output.
@@ -67,13 +74,6 @@ class AMP_Validation_Utils {
 	 * @var string
 	 */
 	const ENQUEUED_SCRIPT_CODE = 'enqueued_script';
-
-	/**
-	 * The meta key for the AMP URL where the error occurred.
-	 *
-	 * @var string
-	 */
-	const AMP_URL_META = 'amp_url';
 
 	/**
 	 * The key for removed elements.
@@ -792,11 +792,11 @@ class AMP_Validation_Utils {
 		// Obtain source information for block.
 		$source = array(
 			'block_name' => $matches['name'],
-			'post_id'    => get_the_ID(),
+			'post_id'    => get_the_ID(), // @todo This is causing duplicate validation errors to occur when only variance is post_id.
 		);
 
 		if ( empty( $matches['closing'] ) ) {
-			$source['block_content_index'] = self::$block_content_index;
+			$source['block_content_index'] = self::$block_content_index; // @todo This is causing duplicate validation errors to occur when only variance is post_id.
 			self::$block_content_index++;
 		}
 
@@ -974,7 +974,7 @@ class AMP_Validation_Utils {
 			'filter' => true,
 		);
 		if ( $post ) {
-			$source['post_id']   = $post->ID;
+			$source['post_id']   = $post->ID; // @todo This is causing duplicate validation errors to occur when only variance is post_id.
 			$source['post_type'] = $post->post_type;
 		}
 		if ( isset( self::$current_hook_source_stack[ current_filter() ] ) ) {
@@ -1287,37 +1287,178 @@ class AMP_Validation_Utils {
 	/**
 	 * Registers the post type to store the validation errors.
 	 *
-	 * @return void.
+	 * @return void
 	 */
 	public static function register_post_type() {
 		$post_type = register_post_type(
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'Validation Status', 'post type general name', 'amp' ),
-					'singular_name'      => __( 'validation error', 'amp' ),
-					'not_found'          => __( 'No validation errors found', 'amp' ),
-					'not_found_in_trash' => __( 'No validation errors found in trash', 'amp' ),
-					'search_items'       => __( 'Search statuses', 'amp' ),
-					'edit_item'          => __( 'Validation Status', 'amp' ),
+					'name'               => _x( 'Invalid AMP Pages (URLs)', 'post type general name', 'amp' ),
+					'menu_name'          => __( 'Invalid Pages', 'amp' ),
+					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
+					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
+					'not_found_in_trash' => __( 'No invalid AMP pages in trash', 'amp' ),
+					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
+					'edit_item'          => __( 'Invalid AMP Page', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
 				'show_in_menu' => AMP_Options_Manager::OPTION_NAME,
+				// @todo Show in rest.
 			)
 		);
 
 		// Hide the add new post link.
 		$post_type->cap->create_posts = 'do_not_allow';
+
+		register_taxonomy( self::TAXONOMY_SLUG, self::POST_TYPE_SLUG, array(
+			'labels'             => array(
+				'name'                  => _x( 'AMP Validation Errors', 'taxonomy general name', 'amp' ),
+				'singular_name'         => _x( 'AMP Validation Error', 'taxonomy singular name', 'amp' ),
+				'search_items'          => __( 'Search AMP Validation Errors', 'amp' ),
+				'all_items'             => __( 'All AMP Validation Errors', 'amp' ),
+				'edit_item'             => __( 'Edit AMP Validation Error', 'amp' ),
+				'update_item'           => __( 'Update AMP Validation Error', 'amp' ),
+				'menu_name'             => __( 'Validation Errors', 'amp' ),
+				'back_to_items'         => __( 'Back to AMP Validation Errors', 'amp' ),
+				'popular_items'         => __( 'Frequent Validation Errors', 'amp' ),
+				'view_item'             => __( 'View Validation Error', 'amp' ),
+				'add_new_item'          => __( 'Add New Validation Error', 'amp' ), // Makes no sense.
+				'new_item_name'         => __( 'New Validation Error Hash', 'amp' ), // Makes no sense.
+				'not_found'             => __( 'No validation errors found.', 'amp' ),
+				'no_terms'              => __( 'Validation Error', 'amp' ),
+				'items_list_navigation' => __( 'Validation errors navigation', 'amp' ),
+				'items_list'            => __( 'Validation errors list', 'amp' ),
+				/* translators: Tab heading when selecting from the most used terms */
+				'most_used'             => __( 'Most Used Validation Errors', 'amp' ),
+			),
+			'public'             => false,
+			'show_ui'            => true, // @todo False because we need a custom UI.
+			'show_tagcloud'      => false,
+			'show_in_quick_edit' => false,
+			'hierarchical'       => false, // Or true? Code could be the parent term?
+			'show_in_menu'       => true,
+			'meta_box_cb'        => false, // See print_validation_errors_meta_box().
+			'capabilities'       => array(
+				'assign_terms' => 'do_not_allow',
+				'edit_terms'   => 'do_not_allow',
+				'delete_terms' => 'do_not_allow',
+			),
+		) );
+
+		// Include searching taxonomy term descriptions.
+		add_filter( 'terms_clauses', function( $clauses, $taxonomies, $args ) {
+			global $wpdb;
+			if ( ! empty( $args['search'] ) && in_array( self::TAXONOMY_SLUG, $taxonomies, true ) ) {
+				$clauses['where'] = preg_replace(
+					'#(?<=\()(?=\(t\.name LIKE \')#',
+					$wpdb->prepare( '(tt.description LIKE %s) OR ', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
+					$clauses['where']
+				);
+			}
+			return $clauses;
+		}, 10, 3 );
+
+		// Hide empty term addition form.
+		add_action( 'admin_enqueue_scripts', function() {
+			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+				wp_add_inline_style( 'common', '#col-left { display: none; }  #col-right { float:none; width: auto; }' );
+			}
+		} );
+
+		// Show AMP validation errors under AMP admin menu.
+		add_action( 'admin_menu', function() {
+			add_submenu_page(
+				AMP_Options_Manager::OPTION_NAME,
+				esc_html__( 'Validation Errors', 'amp' ),
+				esc_html__( 'Validation Errors', 'amp' ),
+				get_taxonomy( self::TAXONOMY_SLUG )->cap->manage_terms, // Yes, cap is an object not an array.
+				// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
+				esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . self::POST_TYPE_SLUG )
+			);
+		} );
+
+		// Make sure parent menu item is expanded when visiting the taxonomy term page.
+		add_filter( 'parent_file', function( $parent_file ) {
+			if ( get_current_screen()->taxonomy === self::TAXONOMY_SLUG ) {
+				$parent_file = AMP_Options_Manager::OPTION_NAME;
+			}
+			return $parent_file;
+		}, 10, 2 );
+
+		// Replace the primary column to be error instead of the removed name column..
+		add_filter( 'list_table_primary_column', function( $primary_column ) {
+			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+				$primary_column = 'error';
+			}
+			return $primary_column;
+		} );
+
+		// Override the columns displayed for the validation error terms.
+		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
+			return array_merge(
+				wp_array_slice_assoc( $old_columns, array( 'cb' ) ),
+				array(
+					'error'   => __( 'Error', 'amp' ),
+					'details' => __( 'Details', 'amp' ),
+					'sources' => __( 'Sources', 'amp' ),
+					'posts'   => __( 'URLs', 'amp' ),
+				)
+			);
+		} );
+
+		// Supply the content for the custom columns.
+		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', function( $content, $column_name, $term_id ) {
+			$term = get_term( $term_id );
+
+			$validation_error = json_decode( $term->description, true );
+			if ( ! isset( $validation_error['code'] ) ) {
+				$validation_error['code'] = 'unknown';
+			}
+
+			switch ( $column_name ) {
+				case 'error':
+					$content .= '<p>';
+					$content .= sprintf( '<code>%s</code>', esc_html( $validation_error['code'] ) );
+					if ( 'invalid_element' === $validation_error['code'] || 'invalid_attribute' === $validation_error['code'] ) {
+						$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
+					}
+					$content .= '</p>';
+
+					if ( isset( $validation_error['message'] ) ) {
+						$content .= sprintf( '<p>%s</p>', esc_html( $validation_error['message'] ) );
+					}
+					break;
+				case 'details':
+					unset( $validation_error['code'] );
+					unset( $validation_error['message'] );
+					unset( $validation_error['sources'] );
+					$content = sprintf( '<pre>%s</pre>', esc_html( wp_json_encode( $validation_error, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ) );
+					break;
+				case 'sources':
+					if ( empty( $validation_error['sources'] ) ) {
+						$content .= sprintf( '<em>%s</em>', __( 'n/a', 'amp' ) );
+					} else {
+						$content = sprintf(
+							'<details><summary>%s</summary><pre>%s</pre></details>',
+							number_format_i18n( count( $validation_error['sources'] ) ),
+							esc_html( wp_json_encode( $validation_error['sources'], 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) )
+						);
+					}
+					break;
+			}
+			return $content;
+		}, 10, 3 );
+
+		// @todo Default to hide_empty terms since we don't want to show errors which don't have any instances on the site.
 	}
 
 	/**
 	 * Stores the validation errors.
 	 *
-	 * After the preprocessors run, this gets the validation response if the query var is present.
-	 * It then stores the response in a custom post type.
-	 * If there's already an error post for the URL, but there's no error anymore, it deletes it.
+	 * If there are no validation errors provided, then any existing amp_invalid_url post is deleted.
 	 *
 	 * @param array  $validation_errors Validation errors.
 	 * @param string $url               URL on which the validation errors occurred.
@@ -1325,79 +1466,74 @@ class AMP_Validation_Utils {
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors( $validation_errors, $url ) {
-		$post_for_this_url = self::get_validation_status_post( $url );
+		$post_slug = md5( $url );
+		$post      = get_page_by_path( $post_slug, OBJECT, self::POST_TYPE_SLUG );
+		if ( ! $post ) {
+			$post = get_page_by_path( $post_slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
+		}
 
 		// Since there are no validation errors and there is an existing $existing_post_id, just delete the post.
 		if ( empty( $validation_errors ) ) {
-			if ( $post_for_this_url ) {
-				wp_delete_post( $post_for_this_url->ID, true );
+			if ( $post ) {
+				wp_delete_post( $post->ID, true );
 			}
 			return null;
 		}
 
-		$encoded_errors = wp_json_encode( $validation_errors );
-		$post_name      = md5( $encoded_errors );
+		// Keep track of the original order of the validation errors, and when there are duplicates of a given error.
+		$ordered_validation_error_hashes = array();
 
-		// If the post name is unchanged then the errors are the same and there is nothing to do.
-		if ( $post_for_this_url && $post_for_this_url->post_name === $post_name ) {
-			return $post_for_this_url->ID;
-		}
+		$terms = array();
+		foreach ( $validation_errors as $data ) {
+			$description = wp_json_encode( $data );
+			$term_slug   = md5( $description );
 
-		// If there already exists a post for the given validation errors, just amend the $url to the existing post.
-		$post_for_other_url = get_page_by_path( $post_name, OBJECT, self::POST_TYPE_SLUG );
-		if ( ! $post_for_other_url ) {
-			$post_for_other_url = get_page_by_path( $post_name . '__trashed', OBJECT, self::POST_TYPE_SLUG );
-		}
-		if ( $post_for_other_url ) {
-			if ( 'trash' === $post_for_other_url->post_status ) {
-				wp_untrash_post( $post_for_other_url->ID );
+			if ( ! isset( $terms[ $term_slug ] ) ) {
+
+				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
+				$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
+				if ( ! ( $term instanceof WP_Term ) ) {
+					$r = wp_insert_term( $term_slug, self::TAXONOMY_SLUG, wp_slash( compact( 'description' ) ) );
+					if ( is_wp_error( $r ) ) {
+						continue;
+					}
+					$term = get_term( $r['term_id'] );
+				}
+				$terms[ $term_slug ] = $term;
 			}
-			if ( ! in_array( $url, get_post_meta( $post_for_other_url->ID, self::AMP_URL_META, false ), true ) ) {
-				add_post_meta( $post_for_other_url->ID, self::AMP_URL_META, wp_slash( $url ), false );
-			}
-			return $post_for_other_url->ID;
+
+			$ordered_validation_error_hashes[] = $term_slug;
 		}
 
-		// Otherwise, create a new validation status post, or update the existing one.
-		$post_id = wp_insert_post( wp_slash( array(
-			'ID'           => $post_for_this_url ? $post_for_this_url->ID : null,
-			'post_type'    => self::POST_TYPE_SLUG,
-			'post_title'   => $url,
-			'post_name'    => $post_name,
-			'post_content' => $encoded_errors,
-			'post_status'  => 'publish',
-		) ), true );
-		if ( is_wp_error( $post_id ) ) {
-			return $post_id;
+		// Create a new invalid AMP URL post, or update the existing one.
+		$r = wp_insert_post(
+			wp_slash( array(
+				'ID'           => $post ? $post->ID : null,
+				'post_type'    => self::POST_TYPE_SLUG,
+				'post_title'   => $url,
+				'post_name'    => $post_slug,
+				'post_content' => implode( "\n", $ordered_validation_error_hashes ),
+				'post_status'  => 'publish', // @todo Use draft when doing a post preview?
+			) ),
+			true
+		);
+		if ( is_wp_error( $r ) ) {
+			return $r;
 		}
-		if ( ! in_array( $url, get_post_meta( $post_id, self::AMP_URL_META, false ), true ) ) {
-			add_post_meta( $post_id, self::AMP_URL_META, wp_slash( $url ), false );
-		}
+		$post_id = $r;
+		wp_set_object_terms( $post_id, wp_list_pluck( $terms, 'term_id' ), self::TAXONOMY_SLUG );
 		return $post_id;
 	}
 
 	/**
 	 * Gets the existing custom post that stores errors for the $url, if it exists.
 	 *
+	 * @todo Rename to get_invalid_url_post().
 	 * @param string $url The URL of the post.
 	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
 	public static function get_validation_status_post( $url ) {
-		if ( ! post_type_exists( self::POST_TYPE_SLUG ) ) {
-			return null;
-		}
-		$query = new WP_Query( array(
-			'post_type'      => self::POST_TYPE_SLUG,
-			'post_status'    => 'publish',
-			'posts_per_page' => 1,
-			'meta_query'     => array(
-				array(
-					'key'   => self::AMP_URL_META,
-					'value' => $url,
-				),
-			),
-		) );
-		return array_shift( $query->posts );
+		return get_page_by_path( md5( $url ), OBJECT, self::POST_TYPE_SLUG );
 	}
 
 	/**
@@ -1439,7 +1575,7 @@ class AMP_Validation_Utils {
 		);
 
 		$r = wp_remote_get( $validation_url, array(
-			'cookies'   => wp_unslash( $_COOKIE ),
+			'cookies'   => wp_unslash( $_COOKIE ), // @todo Passing-along the credentials of the currently-authenticated user prevents this from working in cron.
 			'sslverify' => false,
 			'headers'   => array(
 				'Cache-Control' => 'no-cache',
@@ -1517,7 +1653,6 @@ class AMP_Validation_Utils {
 		$columns = array_merge(
 			$columns,
 			array(
-				'url_count'                  => esc_html__( 'Count', 'amp' ),
 				self::REMOVED_ELEMENTS       => esc_html__( 'Removed Elements', 'amp' ),
 				self::REMOVED_ATTRIBUTES     => esc_html__( 'Removed Attributes', 'amp' ),
 				self::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Sources', 'amp' ),
@@ -1546,17 +1681,18 @@ class AMP_Validation_Utils {
 		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
-		$validation_errors = json_decode( $post->post_content, true );
-		if ( ! is_array( $validation_errors ) ) {
-			return;
+
+		$validation_errors = array();
+		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
+			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
+			if ( $term ) {
+				$validation_errors[] = json_decode( $term->description, true );
+			}
 		}
+
 		$errors = self::summarize_validation_errors( $validation_errors );
-		$urls   = get_post_meta( $post_id, self::AMP_URL_META, false );
 
 		switch ( $column_name ) {
-			case 'url_count':
-				echo count( $urls );
-				break;
 			case self::REMOVED_ELEMENTS:
 				if ( ! empty( $errors[ self::REMOVED_ELEMENTS ] ) ) {
 					self::output_removed_set( $errors[ self::REMOVED_ELEMENTS ] );
@@ -1605,7 +1741,7 @@ class AMP_Validation_Utils {
 			esc_html__( 'Details', 'amp' )
 		);
 		unset( $actions['inline hide-if-no-js'] );
-		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
+		$url = $post->post_title;
 
 		if ( ! empty( $url ) ) {
 			$actions[ self::RECHECK_ACTION ]  = self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url );
@@ -1646,7 +1782,11 @@ class AMP_Validation_Utils {
 		}
 		$remaining_invalid_urls = array();
 		foreach ( $items as $item ) {
-			$url = get_post_meta( $item, self::AMP_URL_META, true );
+			$post = get_post( $item );
+			if ( empty( $post ) ) {
+				continue;
+			}
+			$url = $post->post_title;
 			if ( empty( $url ) ) {
 				continue;
 			}
@@ -1707,7 +1847,8 @@ class AMP_Validation_Utils {
 	 */
 	public static function handle_inline_recheck( $post_id ) {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
-		$url = get_post_meta( $post_id, self::AMP_URL_META, true );
+		$post = get_post( $post_id );
+		$url  = $post->post_title;
 		if ( isset( $_GET['recheck_url'] ) ) {
 			$url = wp_validate_redirect( wp_unslash( $_GET['recheck_url'] ) );
 		}
@@ -1781,7 +1922,7 @@ class AMP_Validation_Utils {
 
 		echo '<div class="misc-pub-section">';
 		echo self::get_recheck_link( $post, $redirect_url ); // WPCS: XSS ok.
-		$url = get_post_meta( $post->ID, self::AMP_URL_META, true );
+		$url = $post->post_title;
 		if ( $url ) {
 			printf(
 				' | <a href="%s" aria-label="%s">%s</a>',
@@ -1805,15 +1946,18 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function print_validation_errors_meta_box( $post ) {
-		$errors = json_decode( $post->post_content, true );
-		$urls   = get_post_meta( $post->ID, self::AMP_URL_META, false );
+		$errors = array();
+		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
+			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
+			if ( $term ) {
+				$errors[] = json_decode( $term->description, true );
+			}
+		}
+
 		?>
 		<style>
 			.amp-validation-errors .detailed {
 				margin-left: 30px;
-			}
-			.amp-validation-errors .amp-recheck {
-				float: right;
 			}
 		</style>
 		<div class="amp-validation-errors">
@@ -1901,27 +2045,6 @@ class AMP_Validation_Utils {
 								<?php endforeach; ?>
 							</ul>
 						</details>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-			<hr>
-			<h3><?php esc_html_e( 'URLs', 'amp' ); ?></h3>
-			<ul>
-				<?php foreach ( $urls as $url ) : ?>
-					<li>
-						<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_url( $url ); ?></a>
-						<span class="amp-recheck">
-							<?php echo self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url ); // WPCS: XSS ok. ?>
-							|
-							<?php
-							printf(
-								'<a href="%s" aria-label="%s">%s</a>',
-								esc_url( self::get_debug_url( $url ) ),
-								esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
-								esc_html__( 'Debug', 'amp' )
-							)
-							?>
-						</span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
