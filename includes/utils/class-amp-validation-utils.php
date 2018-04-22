@@ -48,6 +48,13 @@ class AMP_Validation_Utils {
 	const TAXONOMY_SLUG = 'amp_validation_error';
 
 	/**
+	 * Query var used when filtering by validation error status.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_STATUS_QUERY_VAR = 'amp_validation_error_status';
+
+	/**
 	 * Term group for validation_error terms have not yet been acknowledged.
 	 *
 	 * @var int
@@ -248,6 +255,16 @@ class AMP_Validation_Utils {
 	public static $hook_source_stack = array();
 
 	/**
+	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
+	 *
+	 * This is set to false when calling wp_count_terms() for the admin menu and for the views.
+	 *
+	 * @see AMP_Validation_Utils::get_validation_error_count()
+	 * @var bool
+	 */
+	protected static $should_filter_terms_clauses_for_error_validation_status;
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
@@ -286,6 +303,8 @@ class AMP_Validation_Utils {
 
 	/**
 	 * Add count of how many validation error posts there are to the admin menu.
+	 *
+	 * @todo This probably needs to be updated to show the number of amp_invalid_url posts which have validation errors in the new group.
 	 */
 	public static function add_admin_menu_validation_status_count() {
 		global $submenu;
@@ -1405,10 +1424,16 @@ class AMP_Validation_Utils {
 
 		// Show AMP validation errors under AMP admin menu.
 		add_action( 'admin_menu', function() {
+			$menu_item_label = esc_html__( 'Validation Errors', 'amp' );
+			$new_error_count = self::get_validation_error_count( self::VALIDATION_ERROR_NEW_STATUS );
+			if ( $new_error_count ) {
+				$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
+			}
+
 			add_submenu_page(
 				AMP_Options_Manager::OPTION_NAME,
 				esc_html__( 'Validation Errors', 'amp' ),
-				esc_html__( 'Validation Errors', 'amp' ),
+				$menu_item_label,
 				get_taxonomy( self::TAXONOMY_SLUG )->cap->manage_terms, // Yes, cap is an object not an array.
 				// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
 				esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . self::POST_TYPE_SLUG )
@@ -1429,6 +1454,117 @@ class AMP_Validation_Utils {
 				$primary_column = 'error';
 			}
 			return $primary_column;
+		} );
+
+		// Add views for filtering validation errors by status.
+		add_filter( 'views_edit-' . self::TAXONOMY_SLUG, function( $views ) {
+			$total_term_count        = self::get_validation_error_count();
+			$acknowledged_term_count = self::get_validation_error_count( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS );
+			$ignored_term_count      = self::get_validation_error_count( self::VALIDATION_ERROR_IGNORED_STATUS );
+			$new_term_count          = $total_term_count - $acknowledged_term_count - $ignored_term_count;
+
+			$current_url = remove_query_arg(
+				array_merge(
+					wp_removable_query_args(),
+					array( 's' ) // For some reason behavior of posts list table is to not persist the search query.
+				),
+				wp_unslash( $_SERVER['REQUEST_URI'] )
+			);
+
+			$current_status = null;
+			if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+				$value = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
+				if ( in_array( $value, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+					$current_status = $value;
+				}
+			}
+
+			$views['all'] = sprintf(
+				'<a href="%s" class="%s">%s</a>',
+				esc_url( remove_query_arg( self::VALIDATION_ERROR_STATUS_QUERY_VAR, $current_url ) ),
+				null === $current_status ? 'current' : '',
+				sprintf(
+					/* translators: %s is the term count */
+					_nx(
+						'All <span class="count">(%s)</span>',
+						'All <span class="count">(%s)</span>',
+						$total_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $total_term_count )
+				)
+			);
+
+			$views['new'] = sprintf(
+				'<a href="%s" class="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+						self::VALIDATION_ERROR_NEW_STATUS,
+						$current_url
+					)
+				),
+				self::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
+				sprintf(
+					/* translators: %s is the term count */
+					_nx(
+						'New <span class="count">(%s)</span>',
+						'New <span class="count">(%s)</span>',
+						$new_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $new_term_count )
+				)
+			);
+
+			$views['acknowledged'] = sprintf(
+				'<a href="%s" class="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+						self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+						$current_url
+					)
+				),
+				self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $current_status ? 'current' : '',
+				sprintf(
+					/* translators: %s is the term count */
+					_nx(
+						'Acknowledged <span class="count">(%s)</span>',
+						'Acknowledged <span class="count">(%s)</span>',
+						$acknowledged_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $acknowledged_term_count )
+				)
+			);
+
+			$views['ignored'] = sprintf(
+				'<a href="%s" class="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+						self::VALIDATION_ERROR_IGNORED_STATUS,
+						$current_url
+					)
+				),
+				self::VALIDATION_ERROR_IGNORED_STATUS === $current_status ? 'current' : '',
+				sprintf(
+					/* translators: %s is the term count */
+					_nx(
+						'Ignored <span class="count">(%s)</span>',
+						'Ignored <span class="count">(%s)</span>',
+						$ignored_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $ignored_term_count )
+				)
+			);
+			return $views;
 		} );
 
 		// Override the columns displayed for the validation error terms.
@@ -1526,6 +1662,25 @@ class AMP_Validation_Utils {
 			return $actions;
 		}, 10, 2 );
 
+		// Filter amp_validation_error term query by term group when requested.
+		add_action( 'load-edit-tags.php', function() {
+			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+				return;
+			}
+			self::$should_filter_terms_clauses_for_error_validation_status = true;
+			$group = intval( $_GET[ AMP_Validation_Utils::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
+			if ( ! in_array( $group, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+				return;
+			}
+			add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $group ) {
+				global $wpdb;
+				if ( self::TAXONOMY_SLUG === $taxonomies[0] && self::$should_filter_terms_clauses_for_error_validation_status ) {
+					$clauses['where'] .= $wpdb->prepare( ' AND t.term_group = %d', $group );
+				}
+				return $clauses;
+			}, 10, 2 );
+		} );
+
 		// Handle inline edit links.
 		add_action( 'load-edit-tags.php', function() {
 			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
@@ -1558,6 +1713,13 @@ class AMP_Validation_Utils {
 
 		// Handle bulk actions.
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
+
+		// Prevent query vars from persisting after redirect.
+		add_filter( 'removable_query_args', function( $query_vars ) {
+			$query_vars[] = 'amp_actioned';
+			$query_vars[] = 'actioned_count';
+			return $query_vars;
+		} );
 
 		// Show notices for bulk actions.
 		add_action( 'admin_notices', function() {
@@ -1596,8 +1758,31 @@ class AMP_Validation_Utils {
 			}
 		} );
 
-		// @todo Be able to filter validation errors by new, acknowledged, or ignored.
 		// @todo Default to hide_empty terms since we don't want to show errors which don't have any instances on the site.
+	}
+
+	/**
+	 * Get the count of validation error terms, optionally restricted by term group (e.g. ignored or acknowledged).
+	 *
+	 * @param int|null $group Term group.
+	 * @return int|WP_Error Number of terms in that taxonomy or WP_Error if the taxonomy does not exist.
+	 */
+	public static function get_validation_error_count( $group = null ) {
+		$filter = function( $clauses ) use ( $group ) {
+			global $wpdb;
+			$clauses['where'] .= $wpdb->prepare( ' AND t.term_group = %d', $group );
+			return $clauses;
+		};
+		if ( isset( $group ) ) {
+			add_filter( 'terms_clauses', $filter );
+		}
+		self::$should_filter_terms_clauses_for_error_validation_status = false;
+		$term_count = wp_count_terms( self::TAXONOMY_SLUG );
+		self::$should_filter_terms_clauses_for_error_validation_status = true;
+		if ( isset( $group ) ) {
+			remove_filter( 'terms_clauses', $filter );
+		}
+		return $term_count;
 	}
 
 	/**
