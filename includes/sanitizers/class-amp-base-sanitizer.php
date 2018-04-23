@@ -216,6 +216,9 @@ abstract class AMP_Base_Sanitizer {
 	 * @return string[]
 	 */
 	public function set_layout( $attributes ) {
+		if ( isset( $attributes['layout'] ) && 'fill' === $attributes['layout'] && 'flex-item' !== $attributes['layout'] ) {
+			return $attributes;
+		}
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
@@ -363,5 +366,42 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		return $layout;
+	}
+
+	/**
+	 * Set attributes to node's parent element according to layout.
+	 *
+	 * @param DOMNode $node Node.
+	 * @param array   $new_attributes Attributes array.
+	 * @param string  $layout Layout.
+	 * @return array New attributes.
+	 */
+	public function set_element_layout_attributes( $node, $new_attributes, $layout ) {
+
+		// The width has to be unset / auto in case of fixed-height.
+		if ( 'fixed-height' === $layout ) {
+			if ( ! isset( $new_attributes['height'] ) ) {
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+			$new_attributes['width'] = 'auto';
+			$node->parentNode->setAttribute( 'style', 'height: ' . $new_attributes['height'] . 'px; width: auto;' );
+
+			// The parent element should have width/height set and position set in case of 'fill'.
+		} elseif ( 'fill' === $layout ) {
+			if ( ! isset( $new_attributes['height'] ) ) {
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
+			unset( $new_attributes['width'] );
+			unset( $new_attributes['height'] );
+		} elseif ( 'responsive' === $layout ) {
+			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
+		} elseif ( 'fixed' === $layout ) {
+			if ( ! isset( $new_attributes['height'] ) ) {
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+		}
+
+		return $new_attributes;
 	}
 }

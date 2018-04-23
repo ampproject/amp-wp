@@ -16,10 +16,9 @@ var ampEditorBlocks = ( function() {
 				{ value: 'responsive', label: 'Responsive' }, // To ensure your AMP element displays, you must specify a width and height for the containing element.
 				{ value: 'fixed-height', label: 'Fixed height' },
 				{ value: 'fill', label: 'Fill' },
-				{ value: 'container', label: 'Container' }, // Not supported by img.
+				{ value: 'container', label: 'Container' }, // Not supported by img and video.
 				{ value: 'flex-item', label: 'Flex Item' },
-				{ value: 'intrinsic', label: 'Intrinsic' }
-
+				{ value: 'intrinsic', label: 'Intrinsic' } // Not supported by video.
 			]
 		}
 	};
@@ -51,12 +50,19 @@ var ampEditorBlocks = ( function() {
 
 		_.each( component.data.ampLayoutOptions, function( option ) {
 
+			// Exclude options from layout that are not supported.
 			if ( 'core/image' === blockName ) {
 				if ( 'container' === option.value ) {
 					return true;
 				}
 			} else if ( 'core/audio' === blockName ) {
 				if ( -1 !== [ 'responsive', 'fill', 'container', 'flex-item', 'intrinsic' ].indexOf( option.value ) ) {
+					return true;
+				}
+			} else if ( 'core/video' === blockName ) {
+
+				// Don't allow intrinsic / responsive since the core video block doesn't have height/width anyway.
+				if ( -1 !== [ 'container', 'intrinsic', 'responsive' ].indexOf( option.value ) ) {
 					return true;
 				}
 			}
@@ -179,4 +185,4 @@ var ampEditorBlocks = ( function() {
 	};
 
 	return component;
-} )();
+}() );
