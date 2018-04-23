@@ -1277,7 +1277,7 @@ class AMP_Validation_Utils {
 						self::add_validation_error( array(
 							'code'       => self::ENQUEUED_SCRIPT_CODE,
 							'handle'     => $handle,
-							'dependency' => $wp_scripts->registered[ $handle ],
+							'dependency' => $wp_scripts->registered[ $handle ], // @todo Remove extra data since too variable.
 							'sources'    => array(
 								$callback['source'],
 							),
@@ -1815,9 +1815,78 @@ class AMP_Validation_Utils {
 			return $content;
 		}, 10, 3 );
 
+		// Hacikly remove amp_validation_error terms before they get bulk deleted (as workaround for WP_Terms_List_Table::column_cb()).
+		add_action( 'load-edit-tags.php', function() {
+			$is_delete_tags_request = isset( $_REQUEST['action'] ) && 'delete' === $_REQUEST['action'] && ! empty( $_REQUEST['delete_tags'] ); // WPCS: CSRF ok.
+			if ( ! $is_delete_tags_request ) {
+				return;
+			}
+			$requested_delete_tags = array_map( 'intval', (array) $_REQUEST['delete_tags'] ); // WPCS: CSRF ok.
+			$actual_delete_tags    = array();
+			$blocked_delete_tags   = array();
+			foreach ( $requested_delete_tags as $requested_delete_tag ) {
+				$term = get_term( $requested_delete_tag );
+				if ( $term && self::TAXONOMY_SLUG === $term->taxonomy && 0 !== $term->count ) {
+					$blocked_delete_tags[] = $requested_delete_tag;
+				} else {
+					$actual_delete_tags[] = $requested_delete_tag;
+				}
+			}
+
+			// Prevent deleting terms that shouldn't be deleted.
+			$_POST['delete_tags']    = $actual_delete_tags;
+			$_REQUEST['delete_tags'] = $actual_delete_tags;
+
+			// Show admin notice when terms were blocked from being deleted.
+			if ( ! empty( $blocked_delete_tags ) ) {
+				add_filter( 'redirect_term_location', function( $url ) use ( $blocked_delete_tags ) {
+					return add_query_arg( 'amp_validation_errors_not_deleted', count( $blocked_delete_tags ), $url );
+				} );
+			}
+
+			// Remove success message if no terms were actually deleted.
+			if ( empty( $actual_delete_tags ) ) {
+				add_filter( 'redirect_term_location', function( $url ) {
+					return remove_query_arg( 'message', $url );
+				} );
+			}
+		} );
+
+		// Show admin notice when validation error terms were skipped from being deleted due to still having associated URLs (workaround for WP_Terms_List_Table::column_cb()).
+		add_action( 'admin_notices', function() {
+			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || empty( $_REQUEST['amp_validation_errors_not_deleted'] ) ) {
+				return;
+			}
+			$count = intval( $_REQUEST['amp_validation_errors_not_deleted'] ); // WPCS: CSRF ok.
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				esc_html(
+					sprintf(
+						/* translators: %s is number of validation errors */
+						_n(
+							'%s validation error was not deleted because it still has occurrence on the site.',
+							'%s validation errors were not deleted because they still have occurrences on the site.',
+							$count,
+							'amp'
+						),
+						number_format_i18n( $count )
+					)
+				)
+			);
+		} );
+
 		// Prevent user from being able to delete validation errors when they still have associated invalid URLs.
 		add_filter( 'user_has_cap', function( $allcaps, $caps, $args ) {
 			if ( isset( $args[0] ) && 'delete_term' === $args[0] && 0 !== get_term( $args[2] )->count ) {
+				/*
+				 * However, only apply this if not on the edit terms screen for validation errors, since
+				 * WP_Terms_List_Table::column_cb() unfortunately has a hard-coded delete_term capability check, so
+				 * without that check passing then the checkbox is not shown.
+				 */
+				if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy && empty( $_REQUEST['action'] ) ) {
+					return $allcaps;
+				}
+
 				$allcaps = array_merge(
 					$allcaps,
 					array_fill_keys( $caps, false )
@@ -1830,6 +1899,17 @@ class AMP_Validation_Utils {
 		add_filter( 'tag_row_actions', function( $actions, WP_Term $tag ) {
 			if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
 				$term_id = $tag->term_id;
+
+				/*
+				 * Hide deletion link when there are remaining invalid URLs associated with them.
+				 * Note that this would normally be handled via the user_has_cap filter above,
+				 * but this has to be here due to a problem with WP_Terms_List_Table::column_cb()
+				 * which requires a workaround.
+				 */
+				if ( 0 !== $tag->count ) {
+					unset( $actions['delete'] );
+				}
+
 				if ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $tag->term_group ) {
 					$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
 						'<a href="%s" aria-label="%s">%s</a>',
@@ -1910,17 +1990,18 @@ class AMP_Validation_Utils {
 		// Prevent query vars from persisting after redirect.
 		add_filter( 'removable_query_args', function( $query_vars ) {
 			$query_vars[] = 'amp_actioned';
-			$query_vars[] = 'actioned_count';
+			$query_vars[] = 'amp_actioned_count';
+			$query_vars[] = 'amp_validation_errors_not_deleted';
 			return $query_vars;
 		} );
 
 		// Show notices for bulk actions.
 		add_action( 'admin_notices', function() {
-			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || empty( $_GET['amp_actioned'] ) || empty( $_GET['actioned_count'] ) ) { // WPCS: CSRF ok.
+			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || empty( $_GET['amp_actioned'] ) || empty( $_GET['amp_actioned_count'] ) ) { // WPCS: CSRF ok.
 				return;
 			}
 			$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
-			$count    = intval( $_GET['actioned_count'] ); // WPCS: CSRF ok.
+			$count    = intval( $_GET['amp_actioned_count'] ); // WPCS: CSRF ok.
 			$message  = null;
 			if ( self::VALIDATION_ERROR_IGNORE_ACTION === $actioned ) {
 				$message = sprintf(
@@ -2001,8 +2082,8 @@ class AMP_Validation_Utils {
 			}
 			$redirect_to = add_query_arg(
 				array(
-					'amp_actioned'   => $action,
-					'actioned_count' => count( $term_ids ),
+					'amp_actioned'       => $action,
+					'amp_actioned_count' => count( $term_ids ),
 				),
 				$redirect_to
 			);
