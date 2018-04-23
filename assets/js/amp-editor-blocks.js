@@ -1,8 +1,7 @@
 /* exported ampEditorBlocks */
-/* eslint no-magic-numbers: [ "error", { "ignore": [ 1 ] } ] */
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1 ] } ] */
 
 var ampEditorBlocks = ( function() {
-
 	var component = {
 
 		/**
@@ -26,7 +25,7 @@ var ampEditorBlocks = ( function() {
 	/**
 	 * Set data, add filters.
 	 *
-	 * @param data
+	 * @param {array} data Data.
 	 */
 	component.boot = function boot( data ) {
 		_.extend( component.data, data );
@@ -40,8 +39,8 @@ var ampEditorBlocks = ( function() {
 	/**
 	 * Get layout options depending on the block.
 	 *
-	 * @param blockName
-	 * @returns {[*]}
+	 * @param {string} blockName Block name.
+	 * @return {[*]} Options.
 	 */
 	component.getLayoutOptions = function getLayoutOptions( blockName ) {
 		var layoutOptions = [
@@ -49,7 +48,6 @@ var ampEditorBlocks = ( function() {
 		];
 
 		_.each( component.data.ampLayoutOptions, function( option ) {
-
 			// Exclude options from layout that are not supported.
 			if ( 'core/image' === blockName ) {
 				if ( 'container' === option.value ) {
@@ -60,7 +58,6 @@ var ampEditorBlocks = ( function() {
 					return true;
 				}
 			} else if ( 'core/video' === blockName ) {
-
 				// Don't allow intrinsic / responsive since the core video block doesn't have height/width anyway.
 				if ( -1 !== [ 'container', 'intrinsic', 'responsive' ].indexOf( option.value ) ) {
 					return true;
@@ -73,14 +70,13 @@ var ampEditorBlocks = ( function() {
 		return layoutOptions;
 	};
 
-
 	/**
 	 * Add extra data-amp-layout attribute to save to DB.
 	 *
-	 * @param props
-	 * @param blockType
-	 * @param attributes
-	 * @returns {*}
+	 * @param {object} props Properties.
+	 * @param {string} blockType Block type.
+	 * @param {object} attributes Attributes.
+	 * @return {*}
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
 		if ( _.isEmpty( attributes.ampLayout ) ) {
@@ -93,9 +89,9 @@ var ampEditorBlocks = ( function() {
 	/**
 	 * Add AMP attributes (in this test case just ampLayout) to every core block.
 	 *
-	 * @param settings
-	 * @param name
-	 * @returns {*}
+	 * @param {object} settings Settings.
+	 * @param {string} name Block name.
+	 * @return {*} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
 
