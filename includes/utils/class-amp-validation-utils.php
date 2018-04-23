@@ -311,13 +311,20 @@ class AMP_Validation_Utils {
 		if ( ! isset( $submenu[ AMP_Options_Manager::OPTION_NAME ] ) ) {
 			return;
 		}
-		$count = wp_count_posts( self::POST_TYPE_SLUG );
-		if ( empty( $count->publish ) ) {
+
+		$query = new WP_Query( array(
+			'post_type'                             => self::POST_TYPE_SLUG,
+			self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS,
+			'update_post_meta_cache'                => false,
+			'update_post_term_cache'                => false,
+		) );
+
+		if ( 0 === $query->found_posts ) {
 			return;
 		}
 		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
 			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
-				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( $count->publish ) . '</span></span>';
+				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $query->found_posts ) ) . '</span></span>';
 				break;
 			}
 		}
