@@ -2517,7 +2517,7 @@ class AMP_Validation_Utils {
 					$collasped_details = array();
 					?>
 					<li>
-						<details open>
+						<details <?php echo ( self::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) ? 'open' : ''; ?>>
 							<summary>
 								<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
 									<?php esc_html_e( '[New]', 'amp' ); ?>
