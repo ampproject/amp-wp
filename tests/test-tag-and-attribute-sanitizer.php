@@ -721,6 +721,62 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null, // No change.
 				array( 'amp-selector', 'amp-form', 'amp-carousel' ),
 			),
+
+			'amp_live_list_sort'                                        => array(
+				'<amp-live-list sort="ascending" data-poll-interval="15000" data-max-items-per-page="5" id="amp-live-list-insert-blog"><button update on="tap:amp-live-list-insert-blog.update" class="ampstart-btn ml1 caps">You have updates</button><div items><div id="A green landscape with trees." data-sort-time="20180317225019">Hello</div></div></amp-live-list>',
+				null, // No change.
+				array( 'amp-live-list' ),
+			),
+
+			'amp_consent'                                               => array(
+				'<amp-consent media="all" noloading></amp-consent>',
+				null, // No change.
+				array( 'amp-consent' ),
+			),
+
+			'amp_date_picker'                                           => array(
+				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
+				null, // No change.
+				array( 'amp-date-picker' ),
+			),
+
+			'amp-img-layout-allowed'                                    => array(
+				implode( '', array(
+					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
+				) ),
+				null, // No change.
+				array(),
+			),
+
+			'amp-img-layout-illegal'                                    => array(
+				'<amp-img src="/img1.png" width="50" height="50" layout="container"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				array(),
+			),
+
+			'amp-img-layout-unknown'                                    => array(
+				'<amp-img src="/img1.png" width="50" height="50" layout="bogus-value"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				array(),
+			),
+
+			'non-layout-span-element-attrs'                             => array(
+				'<span id="test" width="1" height="1" heights="(min-width:500px) 200px, 80%" sizes="(min-width: 650px) 50vw, 100vw" layout="nodisplay" [height]="1" [width]="1">Test</span>',
+				'<span id="test">Test</span>',
+				array(),
+			),
+
+			'non-layout-col-element-attrs'                              => array(
+				'<table><col class="foo" width="123" style="background:red;"><col class="bar" style="background:green;" width="12%"><col class="baz" style="background:blue;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				array(),
+			),
 		);
 	}
 

@@ -10,7 +10,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Tested up to:** 4.9  
 **Stable tag:** 0.6.0  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 5.3  
+**Requires PHP:** 5.3.2  
 
 [![Build Status](https://travis-ci.org/Automattic/amp-wp.svg?branch=master)](https://travis-ci.org/Automattic/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com) 
 
@@ -55,6 +55,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
 
 ## Changelog ##
+
+### 1.0 (unreleased) ###
+- ...
 
 ### 0.7 (unreleased) ###
 - Add support for canonical AMP, if the theme registers support for it with `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#856](https://github.com/Automattic/amp-wp/pull/856). Props westonruter, kaitnyl, ThierryA.

@@ -94,6 +94,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets; // WPCS: override ok.
+		remove_theme_support( 'amp' );
+		unset( $GLOBALS['current_screen'] );
 		parent::tearDown();
 	}
 
@@ -114,12 +116,14 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Utils::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::persistent_object_caching_notice' ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_meta_boxes' ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::add_rest_api_fields' ) );
 	}
 
 	/**
-	 * Test init.
+	 * Test add_validation_hooks.
 	 *
 	 * @covers AMP_Validation_Utils::add_validation_hooks()
 	 */
@@ -129,6 +133,113 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( 10, has_action( 'amp_content_sanitizers', array( self::TESTED_CLASS, 'add_validation_callback' ) ) );
 		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
+	}
+
+	/**
+	 * Test add_validation_hooks with Gutenberg active.
+	 *
+	 * @covers AMP_Validation_Utils::add_validation_hooks()
+	 */
+	public function test_add_validation_hooks_gutenberg() {
+		if ( ! function_exists( 'do_blocks' ) ) {
+			$this->markTestSkipped( 'Gutenberg not active.' );
+		}
+		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
+			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
+		}
+
+		$priority = has_filter( 'the_content', 'do_blocks' );
+		$this->assertNotFalse( $priority );
+		AMP_Validation_Utils::add_validation_hooks();
+		$this->assertEquals( $priority - 1, has_filter( 'the_content', array( self::TESTED_CLASS, 'add_block_source_comments' ) ) );
+	}
+
+	/**
+	 * Get block data.
+	 *
+	 * @see Test_AMP_Validation_Utils::test_add_block_source_comments()
+	 * @return array
+	 */
+	public function get_block_data() {
+		return array(
+			'paragraph'    => array(
+				"<!-- wp:paragraph -->\n<p>Latest posts:</p>\n<!-- /wp:paragraph -->",
+				"<!--amp-source-stack {\"block_name\":\"core\/paragraph\",\"post_id\":{{post_id}},\"block_content_index\":0}-->\n<p>Latest posts:</p>\n<!--/amp-source-stack {\"block_name\":\"core\/paragraph\",\"post_id\":{{post_id}}}-->",
+				array(
+					'element' => 'p',
+					'blocks'  => array( 'core/paragraph' ),
+				),
+			),
+			'latest_posts' => array(
+				'<!-- wp:latest-posts /-->',
+				'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts aligncenter"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
+				array(
+					'element' => 'ul',
+					'blocks'  => array( 'core/latest-posts' ),
+				),
+			),
+			'columns'      => array(
+				"<!-- wp:columns -->\n<div class=\"wp-block-columns has-2-columns\">\n    <!-- wp:quote {\"layout\":\"column-1\",\"foo\":{\"bar\":1}} -->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!-- /wp:quote -->\n\n    <!-- wp:html {\"layout\":\"column-2\"} -->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!-- /wp:html -->\n</div>\n<!-- /wp:columns -->",
+				"<!--amp-source-stack {\"block_name\":\"core\/columns\",\"post_id\":{{post_id}},\"block_content_index\":0}-->\n<div class=\"wp-block-columns has-2-columns\">\n\n\n\n<!--amp-source-stack {\"block_name\":\"core\/quote\",\"post_id\":{{post_id}},\"block_content_index\":1,\"block_attrs\":{\"layout\":\"column-1\",\"foo\":{\"bar\":1}}}-->\n    <blockquote class=\"wp-block-quote layout-column-1\">\n        <p>A quotation!</p><cite>Famous</cite></blockquote>\n    <!--/amp-source-stack {\"block_name\":\"core\/quote\",\"post_id\":{{post_id}}}--><!--amp-source-stack {\"block_name\":\"core\/html\",\"post_id\":{{post_id}},\"block_content_index\":2,\"block_attrs\":{\"layout\":\"column-2\"}}-->\n    <div class=\"layout-column-2\">\n        <script>\n            document.write('Not allowed!');\n        </script>\n    </div>\n    <!--/amp-source-stack {\"block_name\":\"core\/html\",\"post_id\":{{post_id}}}--></div>\n<!--/amp-source-stack {\"block_name\":\"core\/columns\",\"post_id\":{{post_id}}}-->",
+				array(
+					'element' => 'blockquote',
+					'blocks'  => array(
+						'core/columns',
+						'core/quote',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test add_block_source_comments.
+	 *
+	 * @param string $content  Content.
+	 * @param string $expected Expected content.
+	 * @param array  $query    Query.
+	 * @dataProvider get_block_data
+	 * @covers AMP_Validation_Utils::add_block_source_comments()
+	 */
+	public function test_add_block_source_comments( $content, $expected, $query ) {
+		if ( ! function_exists( 'do_blocks' ) ) {
+			$this->markTestSkipped( 'Gutenberg not active.' );
+		}
+		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
+			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
+		}
+
+		global $post;
+		$post = $this->factory()->post->create_and_get(); // WPCS: Override ok.
+		$this->assertInstanceOf( 'WP_Post', get_post() );
+
+		$rendered_block = do_blocks( AMP_Validation_Utils::add_block_source_comments( $content ) );
+
+		$expected = str_replace(
+			array(
+				'{{post_id}}',
+				'{{title}}',
+				'{{url}}',
+			),
+			array(
+				$post->ID,
+				get_the_title( $post ),
+				get_permalink( $post ),
+			),
+			$expected
+		);
+		$this->assertEquals(
+			preg_replace( '/(?<=>)\s+(?=<)/', '', str_replace( '%d', $post->ID, $expected ) ),
+			preg_replace( '/(?<=>)\s+(?=<)/', '', $rendered_block )
+		);
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $rendered_block );
+		$el  = $dom->getElementsByTagName( $query['element'] )->item( 0 );
+
+		$this->assertEquals(
+			$query['blocks'],
+			wp_list_pluck( AMP_Validation_Utils::locate_sources( $el ), 'block_name' )
+		);
 	}
 
 	/**
@@ -298,6 +409,25 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_existing_validation_errors.
+	 *
+	 * @covers AMP_Validation_Utils::get_existing_validation_errors()
+	 */
+	public function test_get_existing_validation_errors() {
+		add_theme_support( 'amp' );
+		AMP_Validation_Utils::register_post_type();
+		$post = $this->factory()->post->create_and_get();
+		$this->assertEquals( null, AMP_Validation_Utils::get_existing_validation_errors( $post ) );
+
+		// Create an error custom post for the $post_id, so the function will return existing errors.
+		$this->create_custom_post( amp_get_permalink( $post->ID ) );
+		$this->assertEquals(
+			$this->get_mock_errors(),
+			AMP_Validation_Utils::get_existing_validation_errors( $post )
+		);
+	}
+
+	/**
 	 * Test source comments.
 	 *
 	 * @covers AMP_Validation_Utils::locate_sources()
@@ -372,7 +502,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::wrap_widget_callbacks()
 	 */
 	public function test_wrap_widget_callbacks() {
-		global $wp_registered_widgets;
+		global $wp_registered_widgets, $_wp_sidebars_widgets;
 
 		$widget_id = 'search-2';
 		$this->assertArrayHasKey( $widget_id, $wp_registered_widgets );
@@ -387,9 +517,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'id'           => $sidebar_id,
 			'after_widget' => '</li>',
 		) );
-		update_option( 'sidebars_widgets', array(
-			$sidebar_id => array( $widget_id ),
-		) );
+		$_wp_sidebars_widgets[ $sidebar_id ] = array( $widget_id ); // WPCS: global override ok.
 
 		ob_start();
 		dynamic_sidebar( $sidebar_id );
@@ -1145,6 +1273,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Validation_Utils::remaining_error_notice();
 		$this->assertContains( 'The rechecked URL has no validation error', ob_get_clean() );
+
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	/**
@@ -1297,11 +1427,132 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test enqueue_block_validation.
+	 *
+	 * @covers AMP_Validation_Utils::enqueue_block_validation()
+	 */
+	public function test_enqueue_block_validation() {
+		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$this->markTestSkipped( 'Gutenberg not available.' );
+		}
+
+		global $post;
+		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$slug = 'amp-block-validation';
+		$this->set_capability();
+		AMP_Validation_Utils::enqueue_block_validation();
+
+		$script        = wp_scripts()->registered[ $slug ];
+		$inline_script = $script->extra['after'][1];
+		$this->assertContains( 'js/amp-block-validation.js', $script->src );
+		$this->assertEquals( array( 'underscore' ), $script->deps );
+		$this->assertEquals( AMP__VERSION, $script->ver );
+		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
+		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
+		$this->assertContains( AMP_Validation_Utils::VALIDITY_REST_FIELD_NAME, $inline_script );
+		$this->assertContains( '"domain":"amp"', $inline_script );
+	}
+
+	/**
+	 * Test add_rest_api_fields.
+	 *
+	 * @covers AMP_Validation_Utils::add_rest_api_fields()
+	 */
+	public function test_add_rest_api_fields() {
+		// Test in a non Native-AMP (canonical) context.
+		AMP_Validation_Utils::add_rest_api_fields();
+		$post_types_non_canonical = array_intersect(
+			get_post_types_by_support( 'amp' ),
+			get_post_types( array(
+				'show_in_rest' => true,
+			) )
+		);
+		$this->assert_rest_api_field_present( $post_types_non_canonical );
+
+		// Test in a Native AMP (canonical) context.
+		add_theme_support( 'amp' );
+		AMP_Validation_Utils::add_rest_api_fields();
+		$post_types_canonical = get_post_types_by_support( 'editor' );
+		$this->assert_rest_api_field_present( $post_types_canonical );
+	}
+
+	/**
+	 * Asserts that the post types have the additional REST field.
+	 *
+	 * @covers AMP_Validation_Utils::add_rest_api_fields()
+	 * @param array $post_types The post types that should have the REST field.
+	 * @return void
+	 */
+	public function assert_rest_api_field_present( $post_types ) {
+		foreach ( $post_types as $post_type ) {
+			$field = $GLOBALS['wp_rest_additional_fields'][ $post_type ][ AMP_Validation_Utils::VALIDITY_REST_FIELD_NAME ];
+			$this->assertEquals(
+				$field['schema'],
+				array(
+					'description' => 'AMP validity status',
+					'type'        => 'object',
+				)
+			);
+			$this->assertEquals( $field['get_callback'], array( self::TESTED_CLASS, 'get_amp_validity_rest_field' ) );
+		}
+	}
+
+	/**
+	 * Test get_amp_validity_rest_field.
+	 *
+	 * @covers AMP_Validation_Utils::get_amp_validity_rest_field()
+	 */
+	public function test_rest_field_amp_validation() {
+		AMP_Validation_Utils::register_post_type();
+		$id = $this->factory()->post->create();
+		$this->assertNull( AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'GET' )
+		) );
+
+		// Create an error custom post for the ID, so this will return the errors in the field.
+		$this->create_custom_post( amp_get_permalink( $id ) );
+
+		// Make sure capability check is honored.
+		$this->assertNull( AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'GET' )
+		) );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		// GET request.
+		$field = AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'GET' )
+		);
+		$this->assertArrayHasKey( 'errors', $field );
+		$this->assertArrayHasKey( 'link', $field );
+		$this->assertEquals( $field['errors'], $this->get_mock_errors() );
+
+		// @todo Test successful loopback request to test.
+		// PUT request.
+		$field = AMP_Validation_Utils::get_amp_validity_rest_field(
+			compact( 'id' ),
+			'',
+			new WP_REST_Request( 'PUT' )
+		);
+		$this->assertArrayHasKey( 'errors', $field );
+		$this->assertArrayHasKey( 'link', $field );
+		$this->assertEquals( $field['errors'], $this->get_mock_errors() );
+	}
+
+	/**
 	 * Creates and inserts a custom post.
 	 *
+	 * @param string|null $url The URL where there are errors, or null.
 	 * @return int|WP_Error $error_post The ID of new custom post, or an error.
 	 */
-	public function create_custom_post() {
+	public function create_custom_post( $url = null ) {
+		$url            = isset( $url ) ? $url : home_url( '/' );
 		$content        = wp_json_encode( $this->get_mock_errors() );
 		$encoded_errors = md5( $content );
 		$post_args      = array(
@@ -1311,7 +1562,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			'post_status'  => 'publish',
 		);
 		$error_post     = wp_insert_post( wp_slash( $post_args ) );
-		$url            = home_url( '/' );
 		update_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
 		return $error_post;
 	}
@@ -1357,6 +1607,39 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Test for persistent_object_caching_notice()
+	 *
+	 * @covers AMP_Validation_Utils::persistent_object_caching_notice()
+	 */
+	public function test_persistent_object_caching_notice() {
+		set_current_screen( 'toplevel_page_amp-options' );
+		$text = 'The AMP plugin performs at its best when persistent object cache is enabled.';
+
+		wp_using_ext_object_cache( null );
+		ob_start();
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertContains( $text, ob_get_clean() );
+
+		wp_using_ext_object_cache( true );
+		ob_start();
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
+
+		set_current_screen( 'edit.php' );
+
+		wp_using_ext_object_cache( null );
+		ob_start();
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
+
+		wp_using_ext_object_cache( true );
+		ob_start();
+		AMP_Validation_Utils::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
+
 	}
 
 }

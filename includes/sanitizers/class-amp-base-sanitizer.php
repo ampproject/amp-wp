@@ -55,7 +55,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
 	 *      @type bool $disable_invalid_removal
-	 *      @type callable $remove_invalid_callback
+	 *      @type callable $validation_error_callback
 	 * }
 	 */
 	protected $args;
@@ -130,6 +130,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Return array of values that would be valid as an HTML `style` attribute.
 	 *
 	 * @since 0.4
+	 * @deprecated As of 1.0, use get_stylesheets().
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */
@@ -201,7 +202,7 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Enforce fixed height.
+	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -214,56 +215,14 @@ abstract class AMP_Base_Sanitizer {
 	 * }
 	 * @return string[]
 	 */
-	public function enforce_fixed_height( $attributes ) {
+	public function set_layout( $attributes ) {
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
 		}
-
 		if ( empty( $attributes['width'] ) ) {
 			$attributes['layout'] = 'fixed-height';
 		}
-
-		return $attributes;
-	}
-
-	/**
-	 * This is our workaround to enforce max sizing with layout=responsive.
-	 *
-	 * We want elements to not grow beyond their width and shrink to fill the screen on viewports smaller than their width.
-	 *
-	 * See https://github.com/ampproject/amphtml/issues/1280#issuecomment-171533526
-	 * See https://github.com/Automattic/amp-wp/issues/101
-	 *
-	 * @param string[] $attributes {
-	 *      Attributes.
-	 *
-	 *      @type int $height
-	 *      @type int $width
-	 *      @type string $sizes
-	 *      @type string $class
-	 *      @type string $layout
-	 * }
-	 * @return string[]
-	 */
-	public function enforce_sizes_attribute( $attributes ) {
-		if ( ! isset( $attributes['width'], $attributes['height'] ) ) {
-			return $attributes;
-		}
-
-		$max_width = $attributes['width'];
-		if ( isset( $this->args['content_max_width'] ) && $max_width >= $this->args['content_max_width'] ) {
-			$max_width = $this->args['content_max_width'];
-		}
-
-		// Allows floats and integers but prevents negative values.
-		// Uses string format to prevent additional modification.
-		$attributes['sizes'] = sprintf(
-			'(min-width: %1$spx) %1$spx, 100vw',
-			max( 0, floatval( $max_width ) )
-		);
-
-		$this->add_or_append_attribute( $attributes, 'class', 'amp-wp-enforced-sizes' );
 
 		return $attributes;
 	}

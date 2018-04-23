@@ -73,7 +73,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			if ( ! $node->hasAttribute( 'src' ) || '' === $node->getAttribute( 'src' ) ) {
+			if ( ! $node->hasAttribute( 'src' ) || '' === trim( $node->getAttribute( 'src' ) ) ) {
 				$this->remove_invalid_child( $node );
 				continue;
 			}
@@ -119,7 +119,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'alt':
 				case 'class':
 				case 'srcset':
-				case 'sizes':
 				case 'on':
 				case 'attribution':
 					$out[ $name ] = $value;
@@ -219,7 +218,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$new_attributes = $this->filter_attributes( $old_attributes );
-		$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
 
 		// The width has to be unset / auto in case of fixed-height.
 		if ( 'fixed-height' === $layout ) {
@@ -231,6 +229,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$node->parent_node->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
 			unset( $new_attributes['width'] );
 			unset( $new_attributes['height'] );
+		}
+
+		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
+			$new_attributes['layout'] = 'intrinsic';
 		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
@@ -255,7 +258,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function is_gif_url( $url ) {
 		$ext  = self::$anim_extension;
-		$path = AMP_WP_Utils::parse_url( $url, PHP_URL_PATH );
+		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
 	}
 }

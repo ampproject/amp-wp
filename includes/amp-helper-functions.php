@@ -171,6 +171,10 @@ function post_supports_amp( $post ) {
  * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
+	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		return false;
+	}
+
 	if ( amp_is_canonical() ) {
 		return true;
 	}
@@ -369,9 +373,12 @@ function amp_get_analytics( $analytics = array() ) {
  *
  * @since 0.7
  *
- * @param array $analytics Analytics entries.
+ * @param array|string $analytics Analytics entries, or empty string when called via wp_footer action.
  */
 function amp_print_analytics( $analytics ) {
+	if ( '' === $analytics ) {
+		$analytics = array();
+	}
 	$analytics_entries = amp_get_analytics( $analytics );
 
 	if ( empty( $analytics_entries ) ) {
@@ -424,6 +431,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 	 */
 	return apply_filters( 'amp_content_embed_handlers',
 		array(
+			'AMP_Core_Block_Handler'        => array(),
 			'AMP_Twitter_Embed_Handler'     => array(),
 			'AMP_YouTube_Embed_Handler'     => array(),
 			'AMP_DailyMotion_Embed_Handler' => array(),

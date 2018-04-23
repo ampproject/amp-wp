@@ -67,6 +67,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// Test inline script boot.
 		$this->assertTrue( false !== stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
 		unset( $GLOBALS['post'] );
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	/**

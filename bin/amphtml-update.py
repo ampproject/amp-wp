@@ -356,12 +356,37 @@ def GetTagSpec(tag_spec, attr_lists):
 		for (field_descriptor, field_value) in tag_spec.cdata.ListFields():
 			if isinstance(field_value, (unicode, str, bool, int)):
 				cdata_dict[ field_descriptor.name ] = field_value
-			else:
-				if hasattr( field_value, '_values' ):
-					cdata_dict[ field_descriptor.name ] = {}
-					for _value in field_value._values:
-						for (key,val) in _value.ListFields():
-							cdata_dict[ field_descriptor.name ][ key.name ] = val
+			elif hasattr( field_value, '_values' ):
+				cdata_dict[ field_descriptor.name ] = {}
+				for _value in field_value._values:
+					for (key,val) in _value.ListFields():
+						cdata_dict[ field_descriptor.name ][ key.name ] = val
+			elif 'css_spec' == field_descriptor.name:
+				css_spec = {}
+
+				css_spec['allowed_at_rules'] = []
+				for at_rule_spec in field_value.at_rule_spec:
+					if '$DEFAULT' == at_rule_spec.name:
+						continue
+					css_spec['allowed_at_rules'].append( at_rule_spec.name )
+
+				for css_spec_field_name in ( 'allowed_declarations', 'font_url_spec', 'image_url_spec', 'validate_keyframes' ):
+					if not hasattr( field_value, css_spec_field_name ):
+						continue
+					css_spec_field_value = getattr( field_value, css_spec_field_name )
+					if isinstance(css_spec_field_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer)):
+						css_spec[ css_spec_field_name ] = [ val for val in css_spec_field_value ]
+					elif hasattr( css_spec_field_value, 'ListFields' ):
+						css_spec[ css_spec_field_name ] = {}
+						for (css_spec_field_item_descriptor, css_spec_field_item_value) in getattr( field_value, css_spec_field_name ).ListFields():
+							if isinstance(css_spec_field_item_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer)):
+								css_spec[ css_spec_field_name ][ css_spec_field_item_descriptor.name ] = [ val for val in css_spec_field_item_value ]
+							else:
+								css_spec[ css_spec_field_name ][ css_spec_field_item_descriptor.name ] = css_spec_field_item_value
+					else:
+						css_spec[ css_spec_field_name ] = css_spec_field_value
+
+				cdata_dict['css_spec'] = css_spec
 		if len( cdata_dict ) > 0:
 			tag_spec_dict['cdata'] = cdata_dict
 
@@ -443,6 +468,15 @@ def GetTagRules(tag_spec):
 
 	if tag_spec.HasField('unique_warning'):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
+
+	if tag_spec.HasField('amp_layout'):
+		amp_layout = {}
+		for field in tag_spec.amp_layout.ListFields():
+			if 'supported_layouts' == field[0].name:
+				amp_layout['supported_layouts'] = [ val for val in field[1] ]
+			else:
+				amp_layout[ field[0].name ] = field[1]
+		tag_rules['amp_layout'] = amp_layout
 
 	logging.info('... done')
 	return tag_rules
