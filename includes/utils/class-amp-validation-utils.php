@@ -1815,10 +1815,20 @@ class AMP_Validation_Utils {
 			return $content;
 		}, 10, 3 );
 
+		// Prevent user from being able to delete validation errors when they still have associated invalid URLs.
+		add_filter( 'user_has_cap', function( $allcaps, $caps, $args ) {
+			if ( isset( $args[0] ) && 'delete_term' === $args[0] && 0 !== get_term( $args[2] )->count ) {
+				$allcaps = array_merge(
+					$allcaps,
+					array_fill_keys( $caps, false )
+				);
+			}
+			return $allcaps;
+		}, 10, 3 );
+
 		// Add row actions.
 		add_filter( 'tag_row_actions', function( $actions, WP_Term $tag ) {
 			if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
-				unset( $actions['delete'] );
 				$term_id = $tag->term_id;
 				if ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $tag->term_group ) {
 					$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
@@ -1889,7 +1899,6 @@ class AMP_Validation_Utils {
 
 		// Add bulk actions.
 		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
-			unset( $bulk_actions['delete'] );
 			$bulk_actions[ self::VALIDATION_ERROR_IGNORE_ACTION ]      = __( 'Ignore', 'amp' );
 			$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Acknowledge', 'amp' );
 			return $bulk_actions;
