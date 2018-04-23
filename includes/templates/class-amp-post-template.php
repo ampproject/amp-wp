@@ -351,7 +351,7 @@ class AMP_Post_Template {
 		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
 		$assets = AMP_Content_Sanitizer::sanitize_document(
 			$dom,
-			array( 'AMP_Img_Sanitizer' => array() ),
+			amp_get_content_sanitizers( $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)

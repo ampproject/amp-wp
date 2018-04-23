@@ -12,13 +12,19 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
 == Description ==
 
-This plugin adds support for the [Accelerated Mobile Pages](https://www.ampproject.org) (AMP) Project, which is an open source initiative that aims to provide mobile optimized content that can load instantly everywhere.
+Bring the speed and features of the open source [AMP project](https://www.ampproject.org/) to your site, the WordPress way.
 
-With the plugin active, all posts on your site will have dynamically generated AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
+With the plugin active, all posts on your site will have AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
 
-Note #1: homepage, the blog index, and archives are not currently supported.
+Also, your pages and custom post types can have AMP versions. Simply check their boxes on the 'AMP Settings' page in `/wp-admin`.
 
-Note #2: this plugin only creates AMP content but does not automatically display it to your users when they visit from a mobile device. That is handled by AMP consumers such as Google Search. For more details, see the [AMP Project FAQ](https://www.ampproject.org/docs/support/faqs.html).
+Your entire site can render as "Native AMP" if your theme calls `add_theme_support( 'amp' )`. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended. See this [wiki page](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#native-amp) for details and restrictions.
+
+Your theme can also use [Paired Mode](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#paired-mode), with your own custom templates for the AMP URLs.
+
+"Native AMP" and "Paired Mode" add full support for commenting and widgets.
+
+If your theme doesn't support `'amp'`, this will use basic legacy post templates for AMP consumers like Google Search and Twitter. And when visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
 
@@ -41,18 +47,51 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 = 1.0 (unreleased) =
 - ...
 
-= 0.7 (unreleased) =
+= 0.7.0 (unreleased) =
 
-- Add support for canonical AMP, if the theme registers support for it with `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#856](https://github.com/Automattic/amp-wp/pull/856). Props westonruter, kaitnyl, ThierryA.
+- Render an entire site as "Native AMP" if the theme calls `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#852](https://github.com/Automattic/amp-wp/pull/852), [#865](https://github.com/Automattic/amp-wp/pull/865), [#888](https://github.com/Automattic/amp-wp/pull/888). Props westonruter, kaitnyl, ThierryA.
+- Use the AMP spec to automatically discover the required AMP component scripts to include on the page while post-processing. See [#882](https://github.com/Automattic/amp-wp/pull/882), [#885](https://github.com/Automattic/amp-wp/pull/885). Props westonruter.
+- Automatically concatenate stylesheets from `style` tags with loaded stylesheets from `link` tags combined in one `style[amp-custom]`. See [#887](https://github.com/Automattic/amp-wp/pull/887), [#890](https://github.com/Automattic/amp-wp/pull/890), [#935](https://github.com/Automattic/amp-wp/pull/935). Props westonruter.
+- Update serialization to use HTML instead of XML; update minimum version of PHP fro, 5.2 to 5.3. See [#891](https://github.com/Automattic/amp-wp/pull/891).
+- Add support for widgets. See [#870](https://github.com/Automattic/amp-wp/pull/870). Props kienstra.
+- Add support for forms. See [#907](https://github.com/Automattic/amp-wp/pull/907), [#923](https://github.com/Automattic/amp-wp/pull/923). Props DavidCramer.
+- Use "Paired Mode" if the theme calls `add_theme_support( 'amp' )` and passes a `'template_dir'` value for the AMP templates. See [#856](https://github.com/Automattic/amp-wp/pull/856), [#877](https://github.com/Automattic/amp-wp/pull/877). Props westonruter, kaitnyl.
+- Add AMP implementations of audio/video playlists. See [#954](https://github.com/Automattic/amp-wp/pull/954). Props kienstra.
+- Allow full Customization when the theme supports `'amp'`. See [#952](https://github.com/Automattic/amp-wp/pull/952). Props westonruter.
 - Add support for all default WordPress widgets. See [#921](https://github.com/Automattic/amp-wp/pull/921), [#917](https://github.com/Automattic/amp-wp/pull/917). Props kienstra, westonruter.
 - Add support for more default embeds: Issuu, Post, Meetup, Reddit, Screencast, Tumblr, and WordPress Plugin Directory. See [#889](https://github.com/Automattic/amp-wp/pull/889). Props kaitnyl.
-- Allow native WordPress commenting, in fully valid AMP. See [#871](https://github.com/Automattic/amp-wp/pull/871), [#909](https://github.com/Automattic/amp-wp/pull/909). Props DavidCramer, westonruter.
+- Allow native WordPress commenting, in fully valid AMP. See [#1024](https://github.com/Automattic/amp-wp/pull/1024), [#1029](https://github.com/Automattic/amp-wp/pull/1029), [#871](https://github.com/Automattic/amp-wp/pull/871), [#909](https://github.com/Automattic/amp-wp/pull/909). Props DavidCramer, westonruter.
+- Add a UI for displaying validation errors, including invalid tags and attributes, with tracing for the source for each error according to which theme/plugin's shortcode, widget, or other hook is responsible. Includes debug mode to suspend sanitizer. See [#971](https://github.com/Automattic/amp-wp/pull/971), [#1012](https://github.com/Automattic/amp-wp/pull/1012), [#1016](https://github.com/Automattic/amp-wp/pull/1016). Props westonruter, kienstra.
+- On activating a plugin, validate a front-end page and display a notice if there were errors. See [#971](https://github.com/Automattic/amp-wp/pull/971). Props westonruter, kienstra.
 - Creation of AMP-related notifications, on entering invalid content in the 'classic' editor. See [#912](https://github.com/Automattic/amp-wp/pull/912/). Props kienstra, westonruter, ThierryA.
-- Add output buffering, ensuring the entire page is valid AMP. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#857](https://github.com/Automattic/amp-wp/pull/857). Props westonruter, ThierryA.
-- Update the generated sanitizer file to the AMP spec, and simplify the file that generates it. See [#929](https://github.com/Automattic/amp-wp/pull/929). Props westonruter.
+- Optionally use `<amp-live-list>` to display comments, avoiding full-page refreshes on adding comments. And enable making requests for an `<amp-live-list>`, like for displaying posts. See [#1029](https://github.com/Automattic/amp-wp/pull/1029), [#915](https://github.com/Automattic/amp-wp/pull/915). Props DavidCramer, westonruter.
+- Support `<amp-bind>`, enabling more dynamic elements. See [#895](https://github.com/Automattic/amp-wp/pull/895). Props westonruter.
+- Add output buffering, ensuring the entire page is valid AMP. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#857](https://github.com/Automattic/amp-wp/pull/857), [#931](https://github.com/Automattic/amp-wp/pull/931). Props westonruter, ThierryA.
 - Add validation of host names in URLs. See [#983](https://github.com/Automattic/amp-wp/pull/983). Props rubengonzalezmrf.
+- Add WP-CLI scripts to test AMP support of comments and widgets. See [#924](https://github.com/Automattic/amp-wp/pull/924), [#859](https://github.com/Automattic/amp-wp/pull/859). Props DavidCramer, kienstra.
+- Improve test coverage, including for `AMP_Theme_Support`. See [#1034](https://github.com/Automattic/amp-wp/pull/1034). Props DavidCramer, kienstra.
+- Update the generated sanitizer file to the AMP spec, and simplify the file that generates it. See [#929](https://github.com/Automattic/amp-wp/pull/929), [#926](https://github.com/Automattic/amp-wp/pull/926). Props westonruter.
+- Several sanitizer updates, including for styles, and preventing valid tags from being removed. See [#935](https://github.com/Automattic/amp-wp/pull/935), [#944](https://github.com/Automattic/amp-wp/pull/944), [#952](https://github.com/Automattic/amp-wp/pull/952). Props westonruter, davisshaver.
+- Improve sanitization of `<amp-img>`, `<amp-video>`, and `<amp-iframe>`. See [#937](https://github.com/Automattic/amp-wp/pull/937), [#1054](https://github.com/Automattic/amp-wp/pull/1054). Props kienstra, amedina.
+- Fix an issue where the JSON inside `<script type="application/json">` was wrapped with CDATA. See [#891](https://github.com/Automattic/amp-wp/pull/891). Props westonruter.
+- Allow use of AMP components outside of AMP documents, including in [PWA](https://developers.google.com/web/progressive-web-apps/). See [#1013](https://github.com/Automattic/amp-wp/pull/1013). Props westonruter.
+- Access the AMP query var with `amp_get_slug()`, instead of `AMP_QUERY_VAR`. See [#986](https://github.com/Automattic/amp-wp/pull/986). Props westonruter, mjangda.
+- Update build scripts, including PHP versions in `.travis.yml`. See [#1058](https://github.com/Automattic/amp-wp/pull/1058/), [#949](https://github.com/Automattic/amp-wp/pull/949). Props westonruter.
+- Prevent New Relic script from being injected in AMP responses. See [#932](https://github.com/Automattic/amp-wp/pull/932). Props westonruter.
+- Fix handling of 0 and empty height/width attributes. See [#979](https://github.com/Automattic/amp-wp/pull/979). Props davisshaver.
 
-See [0.7 milestone](https://github.com/Automattic/amp-wp/milestone/6?closed=1).
+For a full list of the closed issues and merged pull requests in this release, see the [0.7 milestone](https://github.com/Automattic/amp-wp/milestone/6?closed=1).
+
+Contributors in this release, including design, development, testing, and project management: Adam Silverstein (adamsilverstein), Alberto Medina (amedina), Christian Chung (christianc1), Claudio Sossi, David Cramer (DavidCramer), Davis Shaver (davisshaver), Douglas Paul (douglyuckling), Jason Johnston (jhnstn), Joshua Wold (jwold), Kaitlyn (kaitnyl), Leo Postovoit (postphotos), Mackenzie Hartung (MackenzieHartung), Maxim Siebert (MaximSiebert), Mike Crantea (mehigh), Mohammad Jangda (mjangda), Oscar Sanchez (oscarssanchez), Philip John (philipjohn), Renato Alves (renatonascalves), Rubén (rubengonzalezmrf), Ryan Kienstra (kienstra), Thierry Muller (ThierryA), vortfu, Weston Ruter (westonruter), Ziga Sancin (zigasancin).
+
+= 0.6.2 (2018-02-28) =
+
+* Improve logic and use of escaping; limit flushing rewrite rules to only when supported_post_types change. See [#953](https://github.com/Automattic/amp-wp/pull/953). Props philipjohn, westonruter.
+* Fix AMP preview icon in Firefox. See [#920](https://github.com/Automattic/amp-wp/pull/920). Props zigasancin.
+
+= 0.6.1 (2018-02-09) =
+
+Version bump to re-release plugin in order to deal with missing file in 0.6.0 release package that caused fatal error.
 
 = 0.6.0 (2018-01-23) =
 
@@ -63,7 +102,7 @@ See [0.7 milestone](https://github.com/Automattic/amp-wp/milestone/6?closed=1).
 - Add generator meta tag for AMP. See [#810](https://github.com/Automattic/amp-wp/pull/810). Props vaporwavre.
 - Add code quality checking via phpcs, eslint, jscs, and jshint. See [#795](https://github.com/Automattic/amp-wp/pull/795). Props westonruter.
 - Add autoloader to reduce complexity. See [#828](https://github.com/Automattic/amp-wp/pull/828). Props mikeschinkel, westonruter, ThierryA.
-- Fix Polldaddy amd SoundCloud embeds. Add vanilla WordPress "embed" test page. A new `bin/create-embed-test-post.php` wp-cli script is introduced. See [#829](https://github.com/Automattic/amp-wp/pull/829). Props kienstra, westonruter, ThierryA.
+- Fix Polldaddy amd SoundCloud embeds. Add vanilla WordPress "embed" test page. A new `bin/create-embed-test-post.php` WP-CLI script is introduced. See [#829](https://github.com/Automattic/amp-wp/pull/829). Props kienstra, westonruter, ThierryA.
 - Merge AMP Customizer into main Customizer. See [#819](https://github.com/Automattic/amp-wp/pull/819). Props kaitnyl, westonruter.
 - Update AMP HTML tags and attributes. A new `bin/amphtml-update.sh` bash script is introduced. Fixes Playbuzz. See [#823](https://github.com/Automattic/amp-wp/pull/823). Props kienstra, ThierryA, westonruter.
 - Remove erroneous hash from id on amp-wp-header. See [#853](https://github.com/Automattic/amp-wp/pull/853). Props eshannon3.
