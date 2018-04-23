@@ -95,6 +95,9 @@ var ampEditorBlocks = ( function() {
 
 		// Currently adds ampLayout to all core blocks. Not sure if it should.
 		if ( -1 !== name.indexOf( 'core/' ) ) {
+			if ( ! settings.attributes ) {
+				settings.attributes = {};
+			}
 			settings.attributes.ampLayout = {
 				type: 'string',
 			};

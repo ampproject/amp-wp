@@ -212,9 +212,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $layout ) ) {
 			$old_attributes['data-amp-layout'] = $layout;
-
-			// @todo If $layout is responsive, we might need to make sure to specify parent elements width and height.
-			// @todo In addition to Gutenberg blocks also look into existing data-amp-layout of the base node, perhaps that would need similar handling.
 		}
 
 		$new_attributes = $this->filter_attributes( $old_attributes );
@@ -222,13 +219,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		// The width has to be unset / auto in case of fixed-height.
 		if ( 'fixed-height' === $layout ) {
 			$new_attributes['width'] = 'auto';
+			$node->parentNode->setAttribute( 'style', 'height: ' . $new_attributes['height'] . 'px; width: auto;' );
 
 			// The parent element should have width/height set and position set in case of 'fill'.
-			// @todo Look into object-fit for the image element.
 		} elseif ( 'fill' === $layout ) {
-			$node->parent_node->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
+			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
 			unset( $new_attributes['width'] );
 			unset( $new_attributes['height'] );
+		} elseif ( 'responsive' === $layout ) {
+			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
 		}
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );

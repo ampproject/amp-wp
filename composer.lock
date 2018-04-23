@@ -11,13 +11,13 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "e3204589287c28396b3db16b92ec30dab19ac2e9"
+                "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+                "reference": "c3b01ef0a85824e86fd86a74a8154d8d5c34b0ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/e3204589287c28396b3db16b92ec30dab19ac2e9",
-                "reference": "e3204589287c28396b3db16b92ec30dab19ac2e9",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/c3b01ef0a85824e86fd86a74a8154d8d5c34b0ff",
+                "reference": "c3b01ef0a85824e86fd86a74a8154d8d5c34b0ff",
                 "shasum": ""
             },
             "require": {
@@ -32,6 +32,7 @@
                     "Sabberworm\\CSS": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -47,10 +48,7 @@
                 "parser",
                 "stylesheet"
             ],
-            "support": {
-                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/master"
-            },
-            "time": "2018-04-01 07:35:36"
+            "time": "2017-05-31 21:19:41"
         }
     ],
     "packages-dev": [
