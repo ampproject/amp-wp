@@ -18,10 +18,10 @@ var ampEditorBlocks = ( function() {
 				{ value: 'fill', label: 'Fill' },
 				{ value: 'container', label: 'Container' }, // Not supported by img.
 				{ value: 'flex-item', label: 'Flex Item' },
-				{ value: 'intrinsic', label: 'Intrinsic' },
+				{ value: 'intrinsic', label: 'Intrinsic' }
 
 			]
-		},
+		}
 	};
 
 	/**
@@ -45,7 +45,7 @@ var ampEditorBlocks = ( function() {
 	 * @returns {[*]}
 	 */
 	component.getLayoutOptions = function getLayoutOptions( blockName ) {
-		let layoutOptions = [
+		var layoutOptions = [
 			{ value: '', label: 'None' }
 		];
 
@@ -99,7 +99,7 @@ var ampEditorBlocks = ( function() {
 				settings.attributes = {};
 			}
 			settings.attributes.ampLayout = {
-				type: 'string',
+				type: 'string'
 			};
 		}
 		return settings;
@@ -113,15 +113,13 @@ var ampEditorBlocks = ( function() {
 	 */
 	component.filterBlocksEdit = function filterBlocksEdit( BlockEdit ) {
 		var el = wp.element.createElement,
-			{
-				InspectorControls,
-			} = wp.blocks,
-			{
-				SelectControl,
-			} = wp.components;
+			InspectorControls = wp.blocks.InspectorControls,
+			SelectControl = wp.components.SelectControl;
 
 		return function( props ) {
-			var { attributes, isSelected, name } = props,
+			var attributes = props.attributes,
+				isSelected = props.isSelected,
+				name = props.name,
 				ampLayout,
 				inspectorControls;
 
@@ -145,7 +143,7 @@ var ampEditorBlocks = ( function() {
 					inspectorControls,
 					el( 'amp-layout',
 						{ key: 'amp', 'data-amp-layout': attributes.ampLayout, width: 1, height: 1, children: el( BlockEdit, _.assign( {
-							key: 'original',
+							key: 'original'
 						}, props ) ) }
 					)
 				];
@@ -156,8 +154,8 @@ var ampEditorBlocks = ( function() {
 				inspectorControls,
 				el( BlockEdit, _.assign( {
 					key: 'original',
-					'data-amp-layout': ampLayout,
-				}, props ) ),
+					'data-amp-layout': ampLayout
+				}, props ) )
 			];
 		};
 	};

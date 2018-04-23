@@ -23,9 +23,10 @@ class AMP_Editor_Blocks {
 	}
 
 	/**
-	 * @param $context
-	 * @return mixed
+	 * Whitelist data-amp-layout.
 	 *
+	 * @param array $context Array of contexts.
+	 * @return mixed Modified array.
 	 */
 	public function whitelist_layout_in_wp_kses_allowed_html( $context ) {
 		foreach ( $context as $tag ) {
