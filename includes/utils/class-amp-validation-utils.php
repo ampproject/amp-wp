@@ -324,21 +324,78 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Add recognition of amp_validation_error_status query var for amp_invalid_url post queries.
+	 *
+	 * @see WP_Tax_Query::get_sql_for_clause()
+	 *
+	 * @param string   $where SQL WHERE clause.
+	 * @param WP_Query $query Query.
+	 * @return string Modified WHERE clause.
+	 */
+	public static function filter_posts_where_for_validation_error_status( $where, WP_Query $query ) {
+		global $wpdb;
+		if (
+			in_array( self::POST_TYPE_SLUG, (array) $query->get( 'post_type' ), true )
+			&&
+			is_numeric( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) )
+		) {
+			$where .= $wpdb->prepare(
+				" AND (
+					SELECT 1
+					FROM $wpdb->term_relationships
+					INNER JOIN $wpdb->term_taxonomy ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
+					INNER JOIN $wpdb->terms ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id
+					WHERE
+						$wpdb->term_taxonomy.taxonomy = %s
+						AND
+						$wpdb->term_relationships.object_id = $wpdb->posts.ID
+						AND
+						$wpdb->terms.term_group = %d
+					LIMIT 1
+				)",
+				self::TAXONOMY_SLUG,
+				$query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR )
+			);
+		}
+		return $where;
+	}
+
+	/**
 	 * Filter At a Glance items add AMP Validation Errors.
 	 *
 	 * @param array $items At a glance items.
 	 * @return array Items.
 	 */
 	public static function filter_dashboard_glance_items( $items ) {
-		$counts = wp_count_posts( self::POST_TYPE_SLUG );
-		if ( ! empty( $counts->publish ) ) {
+
+		$query = new WP_Query( array(
+			'post_type'                             => self::POST_TYPE_SLUG,
+			self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS,
+			'update_post_meta_cache'                => false,
+			'update_post_term_cache'                => false,
+		) );
+
+		if ( 0 !== $query->found_posts ) {
 			$items[] = sprintf(
 				'<a class="amp-validation-errors" href="%s">%s</a>',
-				esc_url( admin_url( 'edit.php?post_type=' . self::POST_TYPE_SLUG ) ),
+				esc_url( admin_url(
+					add_query_arg(
+						array(
+							'post_type' => self::POST_TYPE_SLUG,
+							self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS,
+						),
+						'edit.php'
+					)
+				) ),
 				esc_html( sprintf(
 					/* translators: %s is the validation error count */
-					_n( '%s AMP Validation Error', '%s AMP Validation Errors', $counts->publish, 'amp' ),
-					$counts->publish
+					_n(
+						'%s URL w/ new AMP errors',
+						'%s URLs w/ new AMP errors',
+						$query->found_posts,
+						'amp'
+					),
+					$query->found_posts
 				) )
 			);
 		}
@@ -1402,6 +1459,15 @@ class AMP_Validation_Utils {
 			),
 		) );
 
+		// Add support for querying posts by amp_validation_error_status.
+		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
+
+		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
+		add_filter( 'query_vars', function( $query_vars ) {
+			$query_vars[] = self::VALIDATION_ERROR_STATUS_QUERY_VAR;
+			return $query_vars;
+		} );
+
 		// Include searching taxonomy term descriptions.
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies, $args ) {
 			global $wpdb;
@@ -1454,6 +1520,117 @@ class AMP_Validation_Utils {
 				$primary_column = 'error';
 			}
 			return $primary_column;
+		} );
+
+		// Add views for filtering validation errors by status.
+		add_filter( 'views_edit-' . self::POST_TYPE_SLUG, function( $views ) {
+			unset( $views['publish'] );
+
+			$args = array(
+				'post_type'              => self::POST_TYPE_SLUG,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			);
+
+			$with_new_query          = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS )
+			) );
+			$with_acknowledged_query = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS )
+			) );
+			$with_ignored_query      = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_IGNORED_STATUS )
+			) );
+
+			$current_url = remove_query_arg(
+				array_merge(
+					wp_removable_query_args(),
+					array( 's' ) // For some reason behavior of posts list table is to not persist the search query.
+				),
+				wp_unslash( $_SERVER['REQUEST_URI'] )
+			);
+
+			$current_status = null;
+			if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+				$value = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
+				if ( in_array( $value, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+					$current_status = $value;
+				}
+			}
+
+			$views['new'] = sprintf(
+				'<a href="%s" class="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+						self::VALIDATION_ERROR_NEW_STATUS,
+						$current_url
+					)
+				),
+				self::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
+				sprintf(
+					/* translators: %s is the post count */
+					_nx(
+						'With New Errors <span class="count">(%s)</span>',
+						'With New Errors <span class="count">(%s)</span>',
+						$with_new_query->found_posts,
+						'posts',
+						'amp'
+					),
+					number_format_i18n( $with_new_query->found_posts )
+				)
+			);
+
+			$views['acknowledged'] = sprintf(
+				'<a href="%s" class="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+						self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+						$current_url
+					)
+				),
+				self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $current_status ? 'current' : '',
+				sprintf(
+					/* translators: %s is the post count */
+					_nx(
+						'With Acknowledged Errors <span class="count">(%s)</span>',
+						'With Acknowledged Errors <span class="count">(%s)</span>',
+						$with_acknowledged_query->found_posts,
+						'posts',
+						'amp'
+					),
+					number_format_i18n( $with_acknowledged_query->found_posts )
+				)
+			);
+
+			$views['ignored'] = sprintf(
+				'<a href="%s" class="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+						self::VALIDATION_ERROR_IGNORED_STATUS,
+						$current_url
+					)
+				),
+				self::VALIDATION_ERROR_IGNORED_STATUS === $current_status ? 'current' : '',
+				sprintf(
+					/* translators: %s is the post count */
+					_nx(
+						'With Ignored Errors <span class="count">(%s)</span>',
+						'With Ignored Errors <span class="count">(%s)</span>',
+						$with_ignored_query->found_posts,
+						'posts',
+						'amp'
+					),
+					number_format_i18n( $with_ignored_query->found_posts )
+				)
+			);
+
+			return $views;
 		} );
 
 		// Add views for filtering validation errors by status.
@@ -2309,11 +2486,14 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function print_validation_errors_meta_box( $post ) {
-		$errors = array();
+		$validation_errors = array();
 		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
 			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
 			if ( $term ) {
-				$errors[] = json_decode( $term->description, true );
+				$validation_errors[] = array(
+					'term' => $term,
+					'data' => json_decode( $term->description, true ),
+				);
 			}
 		}
 
@@ -2325,29 +2505,38 @@ class AMP_Validation_Utils {
 		</style>
 		<div class="amp-validation-errors">
 			<ul>
-				<?php foreach ( $errors as $error ) : ?>
+				<?php foreach ( $validation_errors as $error ) : ?>
 					<?php
 					$collasped_details = array();
 					?>
 					<li>
 						<details open>
-							<summary><code><?php echo esc_html( $error['code'] ); ?></code></summary>
+							<summary>
+								<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
+									<?php esc_html_e( '[New]', 'amp' ); ?>
+								<?php elseif ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $error['term']->term_group ) : ?>
+									<?php esc_html_e( '[Acknowledged]', 'amp' ); ?>
+								<?php elseif ( self::VALIDATION_ERROR_IGNORED_STATUS === $error['term']->term_group ) : ?>
+									<?php esc_html_e( '[Ignored]', 'amp' ); ?>
+								<?php endif; ?>
+								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
+							</summary>
 							<ul class="detailed">
-							<?php if ( self::INVALID_ELEMENT_CODE === $error['code'] ) : ?>
+							<?php if ( self::INVALID_ELEMENT_CODE === $error['data']['code'] ) : ?>
 								<li>
 									<details open>
 										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
 										<code class="detailed">
 											<?php
-											if ( isset( $error['parent_name'] ) ) {
-												echo esc_html( sprintf( '<%s …>', $error['parent_name'] ) );
+											if ( isset( $error['data']['parent_name'] ) ) {
+												echo esc_html( sprintf( '<%s …>', $error['data']['parent_name'] ) );
 											}
 											?>
 											<mark>
 												<?php
-												echo esc_html( sprintf( '<%s', $error['node_name'] ) );
-												if ( isset( $error['node_attributes'] ) ) {
-													foreach ( $error['node_attributes'] as $key => $value ) {
+												echo esc_html( sprintf( '<%s', $error['data']['node_name'] ) );
+												if ( isset( $error['data']['node_attributes'] ) ) {
+													foreach ( $error['data']['node_attributes'] as $key => $value ) {
 														printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
 													}
 												}
@@ -2362,21 +2551,21 @@ class AMP_Validation_Utils {
 									$collasped_details[] = 'parent_name';
 									?>
 								</li>
-							<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $error['code'] ) : ?>
+							<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $error['data']['code'] ) : ?>
 								<li>
 									<details open>
 										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
 										<code class="detailed">
 											<?php
-											if ( isset( $error['parent_name'] ) ) {
-												echo esc_html( sprintf( '<%s', $error['parent_name'] ) );
+											if ( isset( $error['data']['parent_name'] ) ) {
+												echo esc_html( sprintf( '<%s', $error['data']['parent_name'] ) );
 											}
-											foreach ( $error['element_attributes'] as $key => $value ) {
-												if ( $key === $error['node_name'] ) {
+											foreach ( $error['data']['element_attributes'] as $key => $value ) {
+												if ( $key === $error['data']['node_name'] ) {
 													echo '<mark>';
 												}
 												printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
-												if ( $key === $error['node_name'] ) {
+												if ( $key === $error['data']['node_name'] ) {
 													echo '</mark>';
 												}
 											}
@@ -2391,8 +2580,8 @@ class AMP_Validation_Utils {
 									?>
 								</li>
 							<?php endif; ?>
-								<?php unset( $error['code'] ); ?>
-								<?php foreach ( $error as $key => $value ) : ?>
+								<?php unset( $error['data']['code'] ); ?>
+								<?php foreach ( $error['data'] as $key => $value ) : ?>
 									<li>
 										<details <?php echo ! in_array( $key, $collasped_details, true ) ? 'open' : ''; ?>>
 											<summary><code><?php echo esc_html( $key ); ?></code></summary>
