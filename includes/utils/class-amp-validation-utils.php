@@ -1431,6 +1431,28 @@ class AMP_Validation_Utils {
 		// Hide the add new post link.
 		$post_type->cap->create_posts = 'do_not_allow';
 
+		// Show URL at the top of the edit form in place of the title (since title support is not present).
+		add_action( 'edit_form_top', function( $post ) {
+			if ( self::POST_TYPE_SLUG !== $post->post_type ) {
+				return;
+			}
+			?>
+			<h2 class="amp-invalid-url">
+				<a href="<?php echo esc_url( $post->post_title ); ?>"><?php echo esc_html( get_the_title( $post ) ); ?></a>
+			</h2>
+			<?php
+		} );
+
+		// Strip host name from AMP invalid URL being printed.
+		add_action( 'load-edit.php', function() {
+			add_filter( 'the_title', function( $title, $post ) {
+				if ( self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+					$title = preg_replace( '#^(\w+:)?//[^/]+#', '', $title );
+				}
+				return $title;
+			}, 10, 2 );
+		} );
+
 		register_taxonomy( self::TAXONOMY_SLUG, self::POST_TYPE_SLUG, array(
 			'labels'             => array(
 				'name'                  => _x( 'AMP Validation Errors', 'taxonomy general name', 'amp' ),
