@@ -2411,6 +2411,7 @@ class AMP_Validation_Utils {
 			return;
 		}
 
+		// @todo Move into helper function.
 		$counts = array_fill_keys(
 			array(
 				self::VALIDATION_ERROR_NEW_STATUS,
@@ -2420,6 +2421,7 @@ class AMP_Validation_Utils {
 			0
 		);
 
+		// @todo Move into helper function.
 		$validation_errors = array();
 		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
 			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
@@ -2682,21 +2684,67 @@ class AMP_Validation_Utils {
 		$date_format = __( 'M j, Y @ H:i', 'default' );
 		echo '<div class="curtime misc-pub-section"><span id="timestamp">';
 		/* translators: %s: The date this was published */
-		printf( __( 'Published on: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post->post_date ) ) ) ); // WPCS: XSS ok.
+		printf( __( 'Last checked: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post->post_date ) ) ) ); // WPCS: XSS ok.
 		echo '</span></div>';
-		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
+
+		// @todo Move into helper function.
+		$counts = array_fill_keys(
+			array(
+				self::VALIDATION_ERROR_NEW_STATUS,
+				self::VALIDATION_ERROR_IGNORED_STATUS,
+				self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+			),
+			0
+		);
+
+		// @todo Move into helper function.
+		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
+			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
+			if ( $term && isset( $counts[ $term->term_group ] ) ) {
+				$counts[ $term->term_group ]++;
+			}
+		}
+
+		// @todo De-duplicate with other place where logic is run.
+		$displayed_counts = array();
+		if ( $counts[ self::VALIDATION_ERROR_NEW_STATUS ] ) {
+			$displayed_counts[] = esc_html( sprintf(
+				/* translators: %s is count */
+				__( 'New: %s', 'amp' ),
+				number_format_i18n( $counts[ self::VALIDATION_ERROR_NEW_STATUS ] )
+			) );
+		}
+		if ( $counts[ self::VALIDATION_ERROR_IGNORED_STATUS ] ) {
+			$displayed_counts[] = esc_html( sprintf(
+				/* translators: %s is count */
+				__( 'Ignored: %s', 'amp' ),
+				number_format_i18n( $counts[ self::VALIDATION_ERROR_IGNORED_STATUS ] )
+			) );
+		}
+		if ( $counts[ self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] ) {
+			$displayed_counts[] = esc_html( sprintf(
+				/* translators: %s is count */
+				__( 'Acknowledged: %s', 'amp' ),
+				number_format_i18n( $counts[ self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] )
+			) );
+		}
 
 		echo '<div class="misc-pub-section">';
-		echo self::get_recheck_link( $post, $redirect_url ); // WPCS: XSS ok.
+		echo implode( '<br>', $displayed_counts ); // WPCS: xss ok.
+		echo '</div>';
+
+		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
 		$url = $post->post_title;
-		if ( $url ) {
-			printf(
-				' | <a href="%s" aria-label="%s">%s</a>',
-				esc_url( self::get_debug_url( $url ) ),
-				esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
-				esc_html__( 'Debug', 'amp' )
-			); // WPCS: XSS ok.
-		}
+
+		echo '<div class="misc-pub-section">';
+		printf( '<a href="%s">%s</a> | ', esc_url( $url ), esc_html__( 'View', 'amp' ) );
+		echo self::get_recheck_link( $post, $redirect_url ); // WPCS: XSS ok.
+		printf(
+			' | <a href="%s" aria-label="%s">%s</a>',
+			esc_url( self::get_debug_url( $url ) ),
+			esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
+			esc_html__( 'Debug', 'amp' )
+		); // WPCS: XSS ok.
 		echo '</div>';
 
 		echo '</div><!-- /submitpost -->';
