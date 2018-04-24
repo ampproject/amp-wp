@@ -2035,8 +2035,8 @@ class AMP_Validation_Utils {
 			$referer  = wp_get_referer();
 			$term_id  = intval( $_GET['term_id'] ); // WPCS: CSRF ok.
 			$redirect = self::handle_validation_error_update( $referer, $action, array( $term_id ) );
+
 			if ( $redirect !== $referer ) {
-				$redirect = remove_query_arg( array( 'action', '_wpnonce', 'term_id' ), $redirect );
 				wp_safe_redirect( $redirect );
 				exit;
 			}
@@ -2062,9 +2062,9 @@ class AMP_Validation_Utils {
 			return $query_vars;
 		} );
 
-		// Show notices for bulk actions.
+		// Show notices for changes to amp_validation_error terms.
 		add_action( 'admin_notices', function() {
-			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || empty( $_GET['amp_actioned'] ) || empty( $_GET['amp_actioned_count'] ) ) { // WPCS: CSRF ok.
+			if ( ! ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy || self::POST_TYPE_SLUG === get_current_screen()->post_type ) || empty( $_GET['amp_actioned'] ) || empty( $_GET['amp_actioned_count'] ) ) { // WPCS: CSRF ok.
 				return;
 			}
 			$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
@@ -2703,8 +2703,12 @@ class AMP_Validation_Utils {
 
 		?>
 		<style>
-			.amp-validation-errors .detailed {
+			.amp-validation-errors .detailed,
+			.amp-validation-errors .actions {
 				margin-left: 30px;
+			}
+			.amp-validation-errors pre {
+				overflow: auto;
 			}
 		</style>
 		<div class="amp-validation-errors">
@@ -2712,19 +2716,56 @@ class AMP_Validation_Utils {
 				<?php foreach ( $validation_errors as $error ) : ?>
 					<?php
 					$collasped_details = array();
+					$term              = $error['term'];
+					$term_id           = $term->term_id;
+					$edit_terms_url    = admin_url( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG );
 					?>
 					<li>
-						<details <?php echo ( self::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) ? 'open' : ''; ?>>
+						<details <?php echo ( self::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) ? 'open' : ''; ?>>
 							<summary>
-								<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
+								<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
 									<?php esc_html_e( '[New]', 'amp' ); ?>
-								<?php elseif ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $error['term']->term_group ) : ?>
+								<?php elseif ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $term->term_group ) : ?>
 									<?php esc_html_e( '[Acknowledged]', 'amp' ); ?>
-								<?php elseif ( self::VALIDATION_ERROR_IGNORED_STATUS === $error['term']->term_group ) : ?>
+								<?php elseif ( self::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) : ?>
 									<?php esc_html_e( '[Ignored]', 'amp' ); ?>
 								<?php endif; ?>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
 							</summary>
+							<p class="actions">
+								<?php
+								$actions = array();
+								if ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $term->term_group ) {
+									$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
+										'<a href="%s" aria-label="%s">%s</a>',
+										wp_nonce_url(
+											add_query_arg(
+												array_merge( array( 'action' => self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ), compact( 'term_id' ) ),
+												$edit_terms_url
+											),
+											self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+										),
+										esc_attr__( 'Acknowledging an error marks it as read. AMP validation errors prevent a URL from being served as AMP.', 'amp' ),
+										esc_html__( 'Acknowledge', 'amp' )
+									);
+								}
+								if ( self::VALIDATION_ERROR_IGNORED_STATUS !== $term->term_group ) {
+									$actions[ self::VALIDATION_ERROR_IGNORE_ACTION ] = sprintf(
+										'<a href="%s" aria-label="%s">%s</a>',
+										wp_nonce_url(
+											add_query_arg(
+												array_merge( array( 'action' => self::VALIDATION_ERROR_IGNORE_ACTION ), compact( 'term_id' ) ),
+												$edit_terms_url
+											),
+											self::VALIDATION_ERROR_IGNORE_ACTION
+										),
+										esc_attr__( 'Ignoring an error prevents it from blocking a URL from being served as AMP.', 'amp' ),
+										esc_html__( 'Ignore', 'amp' )
+									);
+								}
+								echo implode( ' | ', $actions ); // WPCS: xss ok.
+								?>
+							</p>
 							<ul class="detailed">
 							<?php if ( self::INVALID_ELEMENT_CODE === $error['data']['code'] ) : ?>
 								<li>
