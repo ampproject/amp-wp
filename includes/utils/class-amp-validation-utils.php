@@ -1754,13 +1754,20 @@ class AMP_Validation_Utils {
 		// Override the columns displayed for the validation error terms.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
 			return array(
-				'cb'      => $old_columns['cb'],
-				'error'   => __( 'Error', 'amp' ),
-				'status'  => __( 'Status', 'amp' ),
-				'details' => __( 'Details', 'amp' ),
-				'sources' => __( 'Sources', 'amp' ),
-				'posts'   => __( 'URLs', 'amp' ),
+				'cb'               => $old_columns['cb'],
+				'error'            => __( 'Error', 'amp' ),
+				'created_date_gmt' => __( 'Created Date', 'amp' ),
+				'status'           => __( 'Status', 'amp' ),
+				'details'          => __( 'Details', 'amp' ),
+				'sources'          => __( 'Sources', 'amp' ),
+				'posts'            => __( 'URLs', 'amp' ),
 			);
+		} );
+
+		// Let the created date column sort by term ID.
+		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
+			$sortable_columns['created_date_gmt'] = 'term_id';
+			return $sortable_columns;
 		} );
 
 		// Supply the content for the custom columns.
@@ -1793,6 +1800,47 @@ class AMP_Validation_Utils {
 					} else {
 						$content = esc_html__( 'New', 'amp' );
 					}
+					break;
+				case 'created_date_gmt':
+					$created_datetime = null;
+					$created_date_gmt = get_term_meta( $term_id, 'created_date_gmt', true );
+					if ( $created_date_gmt ) {
+						try {
+							$created_datetime = new DateTime( $created_date_gmt, new DateTimeZone( 'UTC' ) );
+							$timezone_string  = get_option( 'timezone_string' );
+							if ( ! $timezone_string && get_option( 'gmt_offset' ) ) {
+								$timezone_string = timezone_name_from_abbr( '', get_option( 'gmt_offset' ) * HOUR_IN_SECONDS, false );
+							}
+							if ( $timezone_string ) {
+								$created_datetime->setTimezone( new DateTimeZone( get_option( 'timezone_string' ) ) );
+							}
+						} catch ( Exception $e ) {
+							unset( $e );
+						}
+					}
+					if ( ! $created_datetime ) {
+						$time_ago = __( 'n/a', 'amp' );
+					} elseif ( time() - $created_datetime->getTimestamp() < DAY_IN_SECONDS ) {
+						/* translators: %s is the relative time */
+						$time_ago = sprintf(
+							'<abbr title="%s">%s</abbr>',
+							esc_attr( $created_datetime->format( __( 'Y/m/d g:i:s a', 'default' ) ) ),
+							/* translators: %s is relative time */
+							esc_html( sprintf( __( '%s ago', 'default' ), human_time_diff( $created_datetime->getTimestamp() ) ) )
+						);
+					} else {
+						$time_ago = mysql2date( __( 'Y/m/d g:i:s a', 'default' ), $created_date_gmt );
+					}
+
+					if ( $created_datetime ) {
+						$time_ago = sprintf(
+							'<time datetime="%s">%s</time>',
+							$created_datetime->format( 'c' ),
+							$time_ago
+						);
+					}
+					$content .= $time_ago;
+
 					break;
 				case 'details':
 					unset( $validation_error['code'] );
@@ -1934,6 +1982,15 @@ class AMP_Validation_Utils {
 				}
 			}
 			return $actions;
+		}, 10, 2 );
+
+		// Filter amp_validation_error term query by term group when requested.
+		add_filter( 'get_terms_defaults', function( $args, $taxonomies ) {
+			if ( array( self::TAXONOMY_SLUG ) === $taxonomies ) {
+				$args['orderby'] = 'term_id';
+				$args['order']   = 'DESC';
+			}
+			return $args;
 		}, 10, 2 );
 
 		// Filter amp_validation_error term query by term group when requested.
@@ -2134,7 +2191,9 @@ class AMP_Validation_Utils {
 					if ( is_wp_error( $r ) ) {
 						continue;
 					}
-					$term = get_term( $r['term_id'] );
+					$term_id = $r['term_id'];
+					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
+					$term = get_term( $term_id );
 				}
 				$terms[ $term_slug ] = $term;
 			}
