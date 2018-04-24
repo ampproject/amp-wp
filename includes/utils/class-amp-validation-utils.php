@@ -2359,6 +2359,7 @@ class AMP_Validation_Utils {
 		$columns = array_merge(
 			$columns,
 			array(
+				'error_status'               => esc_html__( 'Error Status', 'amp' ),
 				self::REMOVED_ELEMENTS       => esc_html__( 'Removed Elements', 'amp' ),
 				self::REMOVED_ATTRIBUTES     => esc_html__( 'Removed Attributes', 'amp' ),
 				self::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Sources', 'amp' ),
@@ -2388,17 +2389,54 @@ class AMP_Validation_Utils {
 			return;
 		}
 
+		$counts = array_fill_keys(
+			array(
+				self::VALIDATION_ERROR_NEW_STATUS,
+				self::VALIDATION_ERROR_IGNORED_STATUS,
+				self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+			),
+			0
+		);
+
 		$validation_errors = array();
 		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
 			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
 			if ( $term ) {
 				$validation_errors[] = json_decode( $term->description, true );
+				if ( isset( $counts[ $term->term_group ] ) ) {
+					$counts[ $term->term_group ]++;
+				}
 			}
 		}
 
 		$errors = self::summarize_validation_errors( $validation_errors );
 
 		switch ( $column_name ) {
+			case 'error_status':
+				$displayed_counts = array();
+				if ( $counts[ self::VALIDATION_ERROR_NEW_STATUS ] ) {
+					$displayed_counts[] = esc_html( sprintf(
+						/* translators: %s is count */
+						__( 'New: %s', 'amp' ),
+						number_format_i18n( $counts[ self::VALIDATION_ERROR_NEW_STATUS ] )
+					) );
+				}
+				if ( $counts[ self::VALIDATION_ERROR_IGNORED_STATUS ] ) {
+					$displayed_counts[] = esc_html( sprintf(
+						/* translators: %s is count */
+						__( 'Ignored: %s', 'amp' ),
+						number_format_i18n( $counts[ self::VALIDATION_ERROR_IGNORED_STATUS ] )
+					) );
+				}
+				if ( $counts[ self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] ) {
+					$displayed_counts[] = esc_html( sprintf(
+						/* translators: %s is count */
+						__( 'Acknowledged: %s', 'amp' ),
+						number_format_i18n( $counts[ self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] )
+					) );
+				}
+				echo implode( '<br>', $displayed_counts ); // WPCS: xss ok.
+				break;
 			case self::REMOVED_ELEMENTS:
 				if ( ! empty( $errors[ self::REMOVED_ELEMENTS ] ) ) {
 					self::output_removed_set( $errors[ self::REMOVED_ELEMENTS ] );
