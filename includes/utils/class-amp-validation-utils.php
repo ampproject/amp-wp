@@ -1275,10 +1275,9 @@ class AMP_Validation_Utils {
 					// Flag all scripts not loaded from the AMP CDN as validation errors.
 					if ( isset( $wp_scripts->registered[ $handle ] ) && 0 !== strpos( $wp_scripts->registered[ $handle ]->src, 'https://cdn.ampproject.org/' ) ) {
 						self::add_validation_error( array(
-							'code'       => self::ENQUEUED_SCRIPT_CODE,
-							'handle'     => $handle,
-							'dependency' => $wp_scripts->registered[ $handle ], // @todo Remove extra data since too variable.
-							'sources'    => array(
+							'code'    => self::ENQUEUED_SCRIPT_CODE,
+							'handle'  => $handle,
+							'sources' => array(
 								$callback['source'],
 							),
 						) );
