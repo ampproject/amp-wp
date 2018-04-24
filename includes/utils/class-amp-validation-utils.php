@@ -1469,6 +1469,14 @@ class AMP_Validation_Utils {
 		// Add support for querying posts by amp_validation_error_status.
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 
+		// Hide irrelevant "published" label in the invalid URL post list.
+		add_filter( 'post_date_column_status', function( $status, $post ) {
+			if ( self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+				$status = '';
+			}
+			return $status;
+		}, 10, 2 );
+
 		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
 		add_filter( 'query_vars', function( $query_vars ) {
 			$query_vars[] = self::VALIDATION_ERROR_STATUS_QUERY_VAR;
@@ -2049,6 +2057,8 @@ class AMP_Validation_Utils {
 			$query_vars[] = 'amp_actioned';
 			$query_vars[] = 'amp_actioned_count';
 			$query_vars[] = 'amp_validation_errors_not_deleted';
+			$query_vars[] = 'amp_remaining_errors';
+			$query_vars[] = 'amp_urls_tested';
 			return $query_vars;
 		} );
 
