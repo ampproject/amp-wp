@@ -53,7 +53,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
-			$new_attributes = $this->set_element_layout_attributes( $node, $new_attributes, $layout );
+			$new_attributes = $this->set_attachment_layout_attributes( $node, $new_attributes, $layout );
 			$new_attributes = $this->set_layout( $new_attributes );
 			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
 				$new_attributes['layout'] = 'responsive';

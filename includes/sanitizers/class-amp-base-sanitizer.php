@@ -376,7 +376,33 @@ abstract class AMP_Base_Sanitizer {
 	 * @param string  $layout Layout.
 	 * @return array New attributes.
 	 */
-	public function set_element_layout_attributes( $node, $new_attributes, $layout ) {
+	public function set_attachment_layout_attributes( $node, $new_attributes, $layout ) {
+
+		// If either height or width is missing, try to get these from original file.
+		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
+
+			// Get the width and height from the file.
+			$ext  = pathinfo( $new_attributes['src'], PATHINFO_EXTENSION );
+			$name = wp_basename( $new_attributes['src'], ".$ext" );
+			$args = array(
+				'name'        => $name,
+				'post_type'   => 'attachment',
+				'post_status' => 'inherit',
+				'numberposts' => 1,
+			);
+
+			$attachment = get_posts( $args );
+
+			if ( ! empty( $attachment ) ) {
+				$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
+				if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) ) {
+					$new_attributes['width'] = $meta_data['width'];
+				}
+				if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
+					$new_attributes['height'] = $meta_data['height'];
+				}
+			}
+		}
 
 		// The width has to be unset / auto in case of fixed-height.
 		if ( 'fixed-height' === $layout ) {

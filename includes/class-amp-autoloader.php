@@ -71,6 +71,7 @@ class AMP_Autoloader {
 		'AMP_Audio_Sanitizer'                         => 'includes/sanitizers/class-amp-audio-sanitizer',
 		'AMP_Base_Sanitizer'                          => 'includes/sanitizers/class-amp-base-sanitizer',
 		'AMP_Blacklist_Sanitizer'                     => 'includes/sanitizers/class-amp-blacklist-sanitizer',
+		'AMP_Block_Sanitizer'                         => 'includes/sanitizers/class-amp-block-sanitizer',
 		'AMP_Iframe_Sanitizer'                        => 'includes/sanitizers/class-amp-iframe-sanitizer',
 		'AMP_Img_Sanitizer'                           => 'includes/sanitizers/class-amp-img-sanitizer',
 		'AMP_Comments_Sanitizer'                      => 'includes/sanitizers/class-amp-comments-sanitizer',

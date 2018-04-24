@@ -25,7 +25,7 @@ var ampEditorBlocks = ( function() {
 	/**
 	 * Set data, add filters.
 	 *
-	 * @param {array} data Data.
+	 * @param {Array} data Data.
 	 */
 	component.boot = function boot( data ) {
 		_.extend( component.data, data );
@@ -49,17 +49,12 @@ var ampEditorBlocks = ( function() {
 
 		_.each( component.data.ampLayoutOptions, function( option ) {
 			// Exclude options from layout that are not supported.
-			if ( 'core/image' === blockName ) {
+			if ( 'core/image' === blockName || 'core/video' === blockName ) {
 				if ( 'container' === option.value ) {
 					return true;
 				}
 			} else if ( 'core/audio' === blockName ) {
 				if ( -1 !== [ 'responsive', 'fill', 'container', 'flex-item', 'intrinsic' ].indexOf( option.value ) ) {
-					return true;
-				}
-			} else if ( 'core/video' === blockName ) {
-				// Don't allow intrinsic / responsive since the core video block doesn't have height/width anyway.
-				if ( -1 !== [ 'container', 'intrinsic', 'responsive' ].indexOf( option.value ) ) {
 					return true;
 				}
 			}
