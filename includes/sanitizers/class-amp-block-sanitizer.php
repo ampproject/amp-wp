@@ -26,7 +26,17 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @todo Add all elements.
 	 * @var array AMP elements to add layout to.
 	 */
-	public static $amp_embeds = array( 'amp-youtube', 'amp-twitter', 'amp-vimeo', 'amp-tumblr', 'amp-soundcloud' );
+	public static $amp_embeds = array(
+		'amp-youtube',
+		'amp-facebook',
+		'amp-twitter',
+		'amp-vimeo',
+		'amp-instagram',
+		'amp-dailymotion',
+		'amp-hulu',
+		'amp-reddit',
+		'amp-soundcloud',
+	);
 
 	/**
 	 * Sanitize the AMP elements contained by <figure> element where necessary.

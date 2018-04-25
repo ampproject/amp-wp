@@ -45,16 +45,38 @@ var ampEditorBlocks = ( function() {
 	component.getLayoutOptions = function getLayoutOptions( blockName ) {
 		var layoutOptions = [
 			{ value: '', label: 'None' }
+		],
+		embedBlocks = [
+			'core-embed/youtube',
+			'core-embed/facebook',
+			'core-embed/instagram'
 		];
 
 		_.each( component.data.ampLayoutOptions, function( option ) {
 			// Exclude options from layout that are not supported.
-			if ( 'core/image' === blockName || 'core/video' === blockName ) {
+			if ( 'core/image' === blockName || 'core/video' === blockName || 'core-embed/twitter' === blockName ) {
 				if ( 'container' === option.value ) {
 					return true;
 				}
 			} else if ( 'core/audio' === blockName ) {
 				if ( -1 !== [ 'responsive', 'fill', 'container', 'flex-item', 'intrinsic' ].indexOf( option.value ) ) {
+					return true;
+				}
+			} else if ( -1 !== embedBlocks.indexOf( blockName ) ) {
+				if ( 'container' === option.value || 'intrinsic' === option.value ) {
+					return true;
+				}
+			} else if (
+				'core-embed/vimeo' === blockName ||
+				'core-embed/dailymotion' === blockName ||
+				'core-embed/hulu' === blockName ||
+				'core-embed/reddit' === blockName
+			) {
+				if ( 'container' === option.value || 'intrinsic' === option.value || 'nodisplay' === option.value ) {
+					return true;
+				}
+			} else if ( 'core-embed/soundcloud' === blockName ) {
+				if ( 'fixed-height' !== option.value ) {
 					return true;
 				}
 			}
@@ -91,7 +113,7 @@ var ampEditorBlocks = ( function() {
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
 
 		// Currently adds ampLayout to all core blocks. Not sure if it should.
-		if ( -1 !== name.indexOf( 'core/' ) ) {
+		if ( 0 === name.indexOf( 'core' ) ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
@@ -118,7 +140,8 @@ var ampEditorBlocks = ( function() {
 				isSelected = props.isSelected,
 				name = props.name,
 				ampLayout,
-				inspectorControls;
+				inspectorControls,
+				width;
 
 			ampLayout = attributes.ampLayout;
 			inspectorControls = isSelected && (
@@ -134,12 +157,20 @@ var ampEditorBlocks = ( function() {
 				)
 			);
 
-			// For editor view, add a wrapper to any tags.
-			if ( ! _.isEmpty( attributes.ampLayout ) && ! isSelected ) {
+			// For editor view, add a wrapper to any tags except for embeds, these will break due to embedding logic.
+			if ( ! _.isEmpty( attributes.ampLayout ) && ! isSelected && -1 === name.indexOf( 'core-embed/') ) {
+
+				if ( 'fixed-height' === attributes.ampLayout ) {
+					width = 'auto';
+				} else {
+					width = 600;
+				}
+				// @todo Should we try to add width and height according to the layout?
+
 				return [
 					inspectorControls,
 					el( 'amp-layout',
-						{ key: 'amp', 'data-amp-layout': attributes.ampLayout, width: 1, height: 1, children: el( BlockEdit, _.assign( {
+						{ key: 'amp', 'data-amp-layout': attributes.ampLayout, width: width, height: 400, children: el( BlockEdit, _.assign( {
 							key: 'original'
 						}, props ) ) }
 					)
