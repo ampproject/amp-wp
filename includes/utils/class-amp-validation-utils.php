@@ -1523,13 +1523,20 @@ class AMP_Validation_Utils {
 			return $query_vars;
 		} );
 
-		// Include searching taxonomy term descriptions.
+		// Include searching taxonomy term descriptions and sources term meta.
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies, $args ) {
 			global $wpdb;
 			if ( ! empty( $args['search'] ) && in_array( self::TAXONOMY_SLUG, $taxonomies, true ) ) {
+				$clauses['join'] .= " LEFT JOIN $wpdb->termmeta AS termmeta_sources ON termmeta_sources.term_id = t.term_id AND termmeta_sources.meta_key = 'sources'";
+
+				$conditions = array(
+					$wpdb->prepare( '(tt.description LIKE %s)', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
+					$wpdb->prepare( '(termmeta_sources.meta_value LIKE %s)', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
+				);
+
 				$clauses['where'] = preg_replace(
 					'#(?<=\()(?=\(t\.name LIKE \')#',
-					$wpdb->prepare( '(tt.description LIKE %s) OR ', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
+					implode( 'OR', $conditions ) . ' OR ',
 					$clauses['where']
 				);
 			}
@@ -1904,17 +1911,20 @@ class AMP_Validation_Utils {
 				case 'details':
 					unset( $validation_error['code'] );
 					unset( $validation_error['message'] );
-					unset( $validation_error['sources'] );
 					$content = sprintf( '<pre>%s</pre>', esc_html( wp_json_encode( $validation_error, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ) );
 					break;
 				case 'sources':
-					if ( empty( $validation_error['sources'] ) ) {
+					$sources = get_term_meta( $term_id, 'sources', true );
+					if ( $sources ) {
+						$sources = json_decode( $sources, true );
+					}
+					if ( ! is_array( $sources ) ) {
 						$content .= sprintf( '<em>%s</em>', __( 'n/a', 'amp' ) );
 					} else {
 						$content = sprintf(
 							'<details><summary>%s</summary><pre>%s</pre></details>',
-							number_format_i18n( count( $validation_error['sources'] ) ),
-							esc_html( wp_json_encode( $validation_error['sources'], 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) )
+							number_format_i18n( count( $sources ) ),
+							esc_html( wp_json_encode( $sources, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) )
 						);
 					}
 					break;
@@ -2251,6 +2261,16 @@ class AMP_Validation_Utils {
 
 		$terms = array();
 		foreach ( $validation_errors as $data ) {
+			/*
+			 * Exclude sources from data since not available unless sources are being obtained,
+			 * and thus not able to be matched when hashed.
+			 */
+			$sources = null;
+			if ( isset( $data['sources'] ) ) {
+				$sources = $data['sources'];
+				unset( $data['sources'] );
+			}
+			ksort( $data );
 			$description = wp_json_encode( $data );
 			$term_slug   = md5( $description );
 
@@ -2265,6 +2285,7 @@ class AMP_Validation_Utils {
 					}
 					$term_id = $r['term_id'];
 					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
+					update_term_meta( $term_id, 'sources', wp_slash( wp_json_encode( $sources ) ) );
 					$term = get_term( $term_id );
 				}
 				$terms[ $term_slug ] = $term;
