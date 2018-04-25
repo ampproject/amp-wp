@@ -915,11 +915,11 @@ class AMP_Validation_Utils {
 		// Obtain source information for block.
 		$source = array(
 			'block_name' => $matches['name'],
-			'post_id'    => get_the_ID(), // @todo This is causing duplicate validation errors to occur when only variance is post_id.
+			'post_id'    => get_the_ID(),
 		);
 
 		if ( empty( $matches['closing'] ) ) {
-			$source['block_content_index'] = self::$block_content_index; // @todo This is causing duplicate validation errors to occur when only variance is post_id.
+			$source['block_content_index'] = self::$block_content_index;
 			self::$block_content_index++;
 		}
 
@@ -1527,16 +1527,9 @@ class AMP_Validation_Utils {
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies, $args ) {
 			global $wpdb;
 			if ( ! empty( $args['search'] ) && in_array( self::TAXONOMY_SLUG, $taxonomies, true ) ) {
-				$clauses['join'] .= " LEFT JOIN $wpdb->termmeta AS termmeta_sources ON termmeta_sources.term_id = t.term_id AND termmeta_sources.meta_key = 'sources'";
-
-				$conditions = array(
-					$wpdb->prepare( '(tt.description LIKE %s)', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
-					$wpdb->prepare( '(termmeta_sources.meta_value LIKE %s)', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
-				);
-
 				$clauses['where'] = preg_replace(
 					'#(?<=\()(?=\(t\.name LIKE \')#',
-					implode( 'OR', $conditions ) . ' OR ',
+					$wpdb->prepare( '(tt.description LIKE %s) OR ', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
 					$clauses['where']
 				);
 			}
@@ -1825,7 +1818,6 @@ class AMP_Validation_Utils {
 				'created_date_gmt' => __( 'Created Date', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
 				'details'          => __( 'Details', 'amp' ),
-				'sources'          => __( 'Sources', 'amp' ),
 				'posts'            => __( 'URLs', 'amp' ),
 			);
 		} );
@@ -1912,21 +1904,6 @@ class AMP_Validation_Utils {
 					unset( $validation_error['code'] );
 					unset( $validation_error['message'] );
 					$content = sprintf( '<pre>%s</pre>', esc_html( wp_json_encode( $validation_error, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ) );
-					break;
-				case 'sources':
-					$sources = get_term_meta( $term_id, 'sources', true );
-					if ( $sources ) {
-						$sources = json_decode( $sources, true );
-					}
-					if ( ! is_array( $sources ) ) {
-						$content .= sprintf( '<em>%s</em>', __( 'n/a', 'amp' ) );
-					} else {
-						$content = sprintf(
-							'<details><summary>%s</summary><pre>%s</pre></details>',
-							number_format_i18n( count( $sources ) ),
-							esc_html( wp_json_encode( $sources, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) )
-						);
-					}
 					break;
 			}
 			return $content;
@@ -2256,8 +2233,12 @@ class AMP_Validation_Utils {
 			return null;
 		}
 
-		// Keep track of the original order of the validation errors, and when there are duplicates of a given error.
-		$ordered_validation_error_hashes = array();
+		/*
+		 * The details for individual validation errors is stored in the amp_validation_error taxonomy terms.
+		 * The post content just contains the slugs for these terms and the sources for the given instance of
+		 * the validation error.
+		 */
+		$stored_validation_errors = array();
 
 		$terms = array();
 		foreach ( $validation_errors as $data ) {
@@ -2285,14 +2266,34 @@ class AMP_Validation_Utils {
 					}
 					$term_id = $r['term_id'];
 					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
-					update_term_meta( $term_id, 'sources', wp_slash( wp_json_encode( $sources ) ) );
 					$term = get_term( $term_id );
 				}
 				$terms[ $term_slug ] = $term;
 			}
 
-			$ordered_validation_error_hashes[] = $term_slug;
+			$stored_validation_errors[] = compact( 'term_slug', 'sources' );
 		}
+
+		$post_content = wp_json_encode( $stored_validation_errors );
+		$placeholder  = 'amp_invalid_url_content_placeholder' . wp_rand();
+
+		// Guard against Kses from corrupting content by adding post_content after content_save_pre filter applies.
+		$insert_post_content = function( $post_data ) use ( $placeholder, $post_content ) {
+			$should_supply_post_content = (
+				isset( $post_data['post_content'] )
+				&&
+				$placeholder === $post_data['post_content']
+				&&
+				isset( $post_data['post_type'] )
+				&&
+				self::POST_TYPE_SLUG === $post_data['post_type']
+			);
+			if ( $should_supply_post_content ) {
+				$post_data['post_content'] = wp_slash( $post_content );
+			}
+			return $post_data;
+		};
+		add_filter( 'wp_insert_post_data', $insert_post_content );
 
 		// Create a new invalid AMP URL post, or update the existing one.
 		$r = wp_insert_post(
@@ -2301,11 +2302,12 @@ class AMP_Validation_Utils {
 				'post_type'    => self::POST_TYPE_SLUG,
 				'post_title'   => $url,
 				'post_name'    => $post_slug,
-				'post_content' => implode( "\n", $ordered_validation_error_hashes ),
+				'post_content' => $placeholder, // Content is provided via wp_insert_post_data filter above to guard against Kses-corruption.
 				'post_status'  => 'publish', // @todo Use draft when doing a post preview?
 			) ),
 			true
 		);
+		remove_filter( 'wp_insert_post_data', $insert_post_content );
 		if ( is_wp_error( $r ) ) {
 			return $r;
 		}
@@ -2344,11 +2346,16 @@ class AMP_Validation_Utils {
 		);
 		$post   = get_post( $post );
 		$errors = array();
-		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
-			if ( ! preg_match( '/^[0-9a-f]{32}$/', $term_slug ) ) {
+
+		$stored_validation_errors = json_decode( $post->post_content, true );
+		if ( ! is_array( $stored_validation_errors ) ) {
+			return array();
+		}
+		foreach ( $stored_validation_errors as $stored_validation_error ) {
+			if ( ! isset( $stored_validation_error['term_slug'], $stored_validation_error['sources'] ) ) {
 				continue;
 			}
-			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
+			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], self::TAXONOMY_SLUG );
 			if ( ! $term ) {
 				continue;
 			}
@@ -2357,7 +2364,12 @@ class AMP_Validation_Utils {
 			}
 			$errors[] = array(
 				'term' => $term,
-				'data' => json_decode( $term->description, true ),
+				'data' => array_merge(
+					json_decode( $term->description, true ),
+					array(
+						'sources' => $stored_validation_error['sources'],
+					)
+				),
 			);
 		}
 		return $errors;
