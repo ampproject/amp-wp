@@ -384,7 +384,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertNotContains( 'notice notice-warning', $output );
-		$this->assertNotContains( 'Warning:', $output );
 
 		$post->post_content = $this->disallowed_tag;
 		ob_start();
@@ -392,7 +391,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertContains( 'notice notice-warning', $output );
-		$this->assertContains( 'Warning:', $output );
 		$this->assertContains( '<code>script</code>', $output );
 		AMP_Validation_Utils::reset_validation_results();
 
@@ -404,29 +402,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		// The YouTube embed handler should convert the URL into a valid AMP element.
 		$this->assertNotContains( 'notice notice-warning', $output );
-		$this->assertNotContains( 'Warning:', $output );
 		AMP_Validation_Utils::reset_validation_results();
-	}
-
-	/**
-	 * Test get_existing_validation_errors.
-	 *
-	 * @covers AMP_Validation_Utils::get_existing_validation_errors()
-	 */
-	public function test_get_existing_validation_errors() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
-
-		add_theme_support( 'amp' );
-		AMP_Validation_Utils::register_post_type();
-		$post = $this->factory()->post->create_and_get();
-		$this->assertEquals( null, AMP_Validation_Utils::get_existing_validation_errors( $post ) );
-
-		// Create an error custom post for the $post_id, so the function will return existing errors.
-		$this->create_custom_post( amp_get_permalink( $post->ID ) );
-		$this->assertEquals(
-			$this->get_mock_errors(),
-			AMP_Validation_Utils::get_existing_validation_errors( $post )
-		);
 	}
 
 	/**
@@ -972,7 +948,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test for get_validation_status_post().
 	 *
-	 * @covers AMP_Validation_Utils::get_validation_status_post()
+	 * @covers AMP_Validation_Utils::get_invalid_url_post()
 	 */
 	public function test_get_validation_status_post() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -984,10 +960,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) );
 
 		$url = get_permalink( $custom_post_id );
-		$this->assertEquals( null, AMP_Validation_Utils::get_validation_status_post( $url ) );
+		$this->assertEquals( null, AMP_Validation_Utils::get_invalid_url_post( $url ) );
 
 		update_post_meta( $custom_post_id, AMP_Validation_Utils::AMP_URL_META, $url );
-		$this->assertEquals( $custom_post_id, AMP_Validation_Utils::get_validation_status_post( $url )->ID );
+		$this->assertEquals( $custom_post_id, AMP_Validation_Utils::get_invalid_url_post( $url )->ID );
 	}
 
 	/**
@@ -1375,7 +1351,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->set_capability();
 		$post_storing_error = get_post( $this->create_custom_post() );
 		$url                = get_post_meta( $post_storing_error->ID, AMP_Validation_Utils::AMP_URL_META, true );
-		$post_with_error    = AMP_Validation_Utils::get_validation_status_post( $url );
+		$post_with_error    = AMP_Validation_Utils::get_invalid_url_post( $url );
 		ob_start();
 		AMP_Validation_Utils::print_status_meta_box( $post_storing_error );
 		$output = ob_get_clean();
@@ -1429,8 +1405,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::get_debug_url()
 	 */
 	public function test_get_debug_url() {
-		$this->assertContains( AMP_Validation_Utils::VALIDATE_QUERY_VAR . '=1', AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
-		$this->assertContains( AMP_Validation_Utils::DEBUG_QUERY_VAR . '=1', AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
+		$this->assertContains( AMP_Validation_Utils::VALIDATE_QUERY_VAR, AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
+		$this->assertContains( AMP_Validation_Utils::DEBUG_QUERY_VAR, AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
 		$this->assertStringEndsWith( '#development=1', AMP_Validation_Utils::get_debug_url( 'https://example.com/foo/' ) );
 	}
 

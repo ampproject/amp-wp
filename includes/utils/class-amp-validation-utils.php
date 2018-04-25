@@ -696,48 +696,49 @@ class AMP_Validation_Utils {
 			return;
 		}
 
-		$url                    = null;
-		$validation_status_post = null;
-		$validation_errors      = array();
-
-		// Validate post content outside frontend context.
-		if ( post_type_supports( $post->post_type, 'editor' ) ) {
-			self::process_markup( $post->post_content );
-			$validation_errors = array_merge(
-				$validation_errors,
-				self::$validation_errors
-			);
-			self::reset_validation_results();
+		$amp_url           = null;
+		$invalid_url_post  = null;
+		$validation_errors = array();
+		if ( is_post_type_viewable( $post->post_type ) ) {
+			$amp_url = amp_get_permalink( $post->ID );
 		}
 
 		// Incorporate frontend validation status if there is a known URL for the post.
-		$existing_validation_errors = self::get_existing_validation_errors( $post );
-		if ( isset( $existing_validation_errors ) ) {
-			$validation_errors = $existing_validation_errors;
-		}
+		$invalid_url_post = self::get_invalid_url_post( $amp_url );
+		if ( $invalid_url_post ) {
+			$validation_errors = wp_list_pluck(
+				self::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_ignored' => true ) ),
+				'data'
+			);
+		} elseif ( post_type_supports( $post->post_type, 'editor' ) ) {
 
+			// Validate post content outside frontend context.
+			self::process_markup( $post->post_content );
+			$validation_errors = self::$validation_errors;
+			self::reset_validation_results();
+		}
 		if ( empty( $validation_errors ) ) {
 			return;
 		}
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
-		esc_html_e( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' );
-		if ( $validation_status_post || $url ) {
-			if ( $validation_status_post ) {
+		esc_html_e( 'There is content which fails AMP validation. Non-ignored validation errors prevent AMP from being served.', 'amp' );
+		if ( $invalid_url_post || $amp_url ) {
+			if ( $invalid_url_post ) {
 				echo sprintf(
 					' <a href="%s" target="_blank">%s</a>',
-					esc_url( get_edit_post_link( $validation_status_post ) ),
-					esc_html__( 'Details', 'amp' )
+					esc_url( get_edit_post_link( $invalid_url_post ) ),
+					esc_html__( 'Review issues', 'amp' )
 				);
 			}
-			if ( $url ) {
-				if ( $validation_status_post ) {
+			if ( $amp_url ) {
+				if ( $invalid_url_post ) {
 					echo ' | ';
 				}
 				echo sprintf(
 					' <a href="%s" aria-label="%s" target="_blank">%s</a>',
-					esc_url( self::get_debug_url( $url ) ),
+					esc_url( self::get_debug_url( $amp_url ) ),
 					esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
 					esc_html__( 'Debug', 'amp' )
 				);
@@ -767,29 +768,6 @@ class AMP_Validation_Utils {
 		}
 
 		echo '</div>';
-	}
-
-	/**
-	 * Gets the validation errors for a given post.
-	 *
-	 * These are stored in a custom post type.
-	 * If none exist, returns null.
-	 *
-	 * @param WP_Post $post The post for which to get the validation errors.
-	 * @return array|null $errors The validation errors, if they exist.
-	 */
-	public static function get_existing_validation_errors( $post ) {
-		if ( is_post_type_viewable( $post->post_type ) ) {
-			$url                    = amp_get_permalink( $post->ID );
-			$validation_status_post = self::get_validation_status_post( $url );
-			if ( $validation_status_post ) {
-				$data = json_decode( $validation_status_post->post_content, true );
-				if ( is_array( $data ) ) {
-					return $data;
-				}
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -2277,12 +2255,50 @@ class AMP_Validation_Utils {
 	/**
 	 * Gets the existing custom post that stores errors for the $url, if it exists.
 	 *
-	 * @todo Rename to get_invalid_url_post().
 	 * @param string $url The URL of the post.
 	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
-	public static function get_validation_status_post( $url ) {
+	public static function get_invalid_url_post( $url ) {
 		return get_page_by_path( md5( $url ), OBJECT, self::POST_TYPE_SLUG );
+	}
+
+	/**
+	 * Gets validation errors for a given invalid URL post.
+	 *
+	 * @param int|WP_Post $post Post of amp_invalid_url type.
+	 * @param array       $args {
+	 *     Args.
+	 *
+	 *     @type bool $ignore_ignored Exclude validation errors that are ignored. Default false.
+	 * }
+	 * @return array List of errors.
+	 */
+	public static function get_invalid_url_validation_errors( $post, $args = array() ) {
+		$args   = array_merge(
+			array(
+				'ignore_ignored' => false,
+			),
+			$args
+		);
+		$post   = get_post( $post );
+		$errors = array();
+		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
+			if ( ! preg_match( '/^[0-9a-f]{32}$/', $term_slug ) ) {
+				continue;
+			}
+			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
+			if ( ! $term ) {
+				continue;
+			}
+			if ( $args['ignore_ignored'] && self::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) {
+				continue;
+			}
+			$errors[] = array(
+				'term' => $term,
+				'data' => json_decode( $term->description, true ),
+			);
+		}
+		return $errors;
 	}
 
 	/**
@@ -2443,18 +2459,14 @@ class AMP_Validation_Utils {
 		);
 
 		// @todo Move into helper function.
-		$validation_errors = array();
-		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
-			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
-			if ( $term ) {
-				$validation_errors[] = json_decode( $term->description, true );
-				if ( isset( $counts[ $term->term_group ] ) ) {
-					$counts[ $term->term_group ]++;
-				}
+		$validation_errors = self::get_invalid_url_validation_errors( $post_id );
+		foreach ( wp_list_pluck( $validation_errors, 'term' ) as $term ) {
+			if ( isset( $counts[ $term->term_group ] ) ) {
+				$counts[ $term->term_group ]++;
 			}
 		}
 
-		$errors = self::summarize_validation_errors( $validation_errors );
+		$error_summary = self::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
 
 		switch ( $column_name ) {
 			case 'error_status':
@@ -2483,23 +2495,23 @@ class AMP_Validation_Utils {
 				echo implode( '<br>', $displayed_counts ); // WPCS: xss ok.
 				break;
 			case self::REMOVED_ELEMENTS:
-				if ( ! empty( $errors[ self::REMOVED_ELEMENTS ] ) ) {
-					self::output_removed_set( $errors[ self::REMOVED_ELEMENTS ] );
+				if ( ! empty( $error_summary[ self::REMOVED_ELEMENTS ] ) ) {
+					self::output_removed_set( $error_summary[ self::REMOVED_ELEMENTS ] );
 				} else {
 					esc_html_e( '--', 'amp' );
 				}
 				break;
 			case self::REMOVED_ATTRIBUTES:
-				if ( ! empty( $errors[ self::REMOVED_ATTRIBUTES ] ) ) {
-					self::output_removed_set( $errors[ self::REMOVED_ATTRIBUTES ] );
+				if ( ! empty( $error_summary[ self::REMOVED_ATTRIBUTES ] ) ) {
+					self::output_removed_set( $error_summary[ self::REMOVED_ATTRIBUTES ] );
 				} else {
 					esc_html_e( '--', 'amp' );
 				}
 				break;
 			case self::SOURCES_INVALID_OUTPUT:
-				if ( isset( $errors[ self::SOURCES_INVALID_OUTPUT ] ) ) {
+				if ( isset( $error_summary[ self::SOURCES_INVALID_OUTPUT ] ) ) {
 					$sources = array();
-					foreach ( $errors[ self::SOURCES_INVALID_OUTPUT ] as $type => $names ) {
+					foreach ( $error_summary[ self::SOURCES_INVALID_OUTPUT ] as $type => $names ) {
 						foreach ( array_unique( $names ) as $name ) {
 							$sources[] = sprintf( '%s: <code>%s</code>', esc_html( $type ), esc_html( $name ) );
 						}
@@ -2719,9 +2731,9 @@ class AMP_Validation_Utils {
 		);
 
 		// @todo Move into helper function.
-		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
-			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
-			if ( $term && isset( $counts[ $term->term_group ] ) ) {
+		$validation_errors = self::get_invalid_url_validation_errors( $post );
+		foreach ( wp_list_pluck( $validation_errors, 'term' ) as $term ) {
+			if ( isset( $counts[ $term->term_group ] ) ) {
 				$counts[ $term->term_group ]++;
 			}
 		}
@@ -2781,17 +2793,7 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function print_validation_errors_meta_box( $post ) {
-		$validation_errors = array();
-		foreach ( array_filter( explode( "\n", $post->post_content ) ) as $term_slug ) {
-			$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
-			if ( $term ) {
-				$validation_errors[] = array(
-					'term' => $term,
-					'data' => json_decode( $term->description, true ),
-				);
-			}
-		}
-
+		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		?>
 		<style>
 			.amp-validation-errors .detailed,
@@ -2949,8 +2951,8 @@ class AMP_Validation_Utils {
 	public static function get_debug_url( $url ) {
 		return add_query_arg(
 			array(
-				self::VALIDATE_QUERY_VAR => 1,
-				self::DEBUG_QUERY_VAR    => 1,
+				self::VALIDATE_QUERY_VAR => '',
+				self::DEBUG_QUERY_VAR    => '',
 			),
 			$url
 		) . '#development=1';
@@ -3069,18 +3071,25 @@ class AMP_Validation_Utils {
 
 		if ( empty( $validation_status_post ) ) {
 			// @todo Consider process_markup() if not post type is not viewable and if post type supports editor.
-			$validation_status_post = self::get_validation_status_post( amp_get_permalink( $post->ID ) );
+			$validation_status_post = self::get_invalid_url_post( amp_get_permalink( $post->ID ) );
 		}
 
-		if ( ! $validation_status_post ) {
-			$field = array(
-				'errors' => array(),
-				'link'   => null,
-			);
-		} else {
-			$field = array(
-				'errors' => json_decode( $validation_status_post->post_content, true ),
-				'link'   => get_edit_post_link( $validation_status_post->ID, 'raw' ),
+		$field = array(
+			'errors'      => array(),
+			'review_link' => null,
+			'debug_link'  => self::get_debug_url( amp_get_permalink( $post_data['id'] ) ),
+		);
+
+		if ( $validation_status_post ) {
+			$field = array_merge(
+				$field,
+				array(
+					'review_link' => get_edit_post_link( $validation_status_post->ID, 'raw' ),
+					'errors'      => wp_list_pluck(
+						self::get_invalid_url_validation_errors( $validation_status_post, array( 'ignore_ignored' => true ) ),
+						'data'
+					),
+				)
 			);
 		}
 

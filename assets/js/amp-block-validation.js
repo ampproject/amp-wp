@@ -172,13 +172,19 @@ var ampBlockValidation = ( function() {
 				);
 			}
 
-			noticeMessage += ' ' + wp.i18n.__( 'Invalid code is stripped when displaying AMP.', 'amp' );
+			noticeMessage += ' ' + wp.i18n.__( 'Non-ignored validation errors prevent AMP from being served.', 'amp' );
 			noticeElement = wp.element.createElement( 'p', {}, [
 				noticeMessage + ' ',
-				ampValidity.link && wp.element.createElement(
+				ampValidity.review_link && wp.element.createElement(
 					'a',
-					{ key: 'details', href: ampValidity.link, target: '_blank' },
-					wp.i18n.__( 'Details', 'amp' )
+					{ key: 'details', href: ampValidity.review_link, target: '_blank' },
+					wp.i18n.__( 'Review issues', 'amp' )
+				),
+				ampValidity.review_link && ' | ',
+				ampValidity.debug_link && wp.element.createElement(
+					'a',
+					{ key: 'details', href: ampValidity.debug_link, target: '_blank' },
+					wp.i18n.__( 'Debug', 'amp' )
 				)
 			] );
 
