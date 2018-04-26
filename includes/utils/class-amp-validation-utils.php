@@ -2193,8 +2193,15 @@ class AMP_Validation_Utils {
 		}
 
 		if ( $term_group ) {
+			$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
+			if ( false !== $has_pre_term_description_filter ) {
+				remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+			}
 			foreach ( $term_ids as $term_id ) {
 				wp_update_term( $term_id, self::TAXONOMY_SLUG, compact( 'term_group' ) );
+			}
+			if ( false !== $has_pre_term_description_filter ) {
+				add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 			}
 			$redirect_to = add_query_arg(
 				array(
@@ -2260,7 +2267,14 @@ class AMP_Validation_Utils {
 				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
 				$term = get_term_by( 'slug', $term_slug, self::TAXONOMY_SLUG );
 				if ( ! ( $term instanceof WP_Term ) ) {
+					$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
+					if ( false !== $has_pre_term_description_filter ) {
+						remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+					}
 					$r = wp_insert_term( $term_slug, self::TAXONOMY_SLUG, wp_slash( compact( 'description' ) ) );
+					if ( false !== $has_pre_term_description_filter ) {
+						add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+					}
 					if ( is_wp_error( $r ) ) {
 						continue;
 					}
