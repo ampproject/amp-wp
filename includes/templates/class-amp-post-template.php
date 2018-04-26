@@ -94,7 +94,13 @@ class AMP_Post_Template {
 		} else {
 			$this->post = get_post( $post );
 		}
-		$this->ID = $this->post->ID;
+
+		// Make sure we have a post, or bail if not.
+		if ( is_a( $this->post, 'WP_Post' ) ) {
+			$this->ID = $this->post->ID;
+		} else {
+			return;
+		}
 
 		$content_max_width = self::CONTENT_MAX_WIDTH;
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
