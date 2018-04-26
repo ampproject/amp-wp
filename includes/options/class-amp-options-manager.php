@@ -33,7 +33,7 @@ class AMP_Options_Manager {
 		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
 	}
 
-    /**
+	/**
 	 * Flush rewrite rules if the supported_post_types have changed.
 	 *
 	 * @since 0.6.2
