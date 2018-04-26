@@ -23,14 +23,15 @@ class AMP_Editor_Blocks {
 	}
 
 	/**
-	 * Whitelist data-amp-layout.
+	 * Whitelist used data-amp-* attributes.
 	 *
 	 * @param array $context Array of contexts.
 	 * @return mixed Modified array.
 	 */
 	public function whitelist_layout_in_wp_kses_allowed_html( $context ) {
 		foreach ( $context as $tag ) {
-			$tag['data-amp-layout'] = true;
+			$tag['data-amp-layout']    = true;
+			$tag['data-amp-noloading'] = true;
 		}
 		return $context;
 	}

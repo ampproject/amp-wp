@@ -348,24 +348,44 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get data-amp-layout value from the parent node 'figure' added by editor block.
+	 * Get data-amp-* values from the parent node 'figure' added by editor block.
 	 *
 	 * @param DOMNode $node Base node.
-	 * @return bool|string Layout value or false.
+	 * @return array AMP data array.
 	 */
-	public function get_data_amp_layout( $node ) {
-		$layout = false;
+	public function get_data_amp_attributes( $node ) {
+		$attributes = array();
 
 		// Editor blocks add 'figure' as the parent node for images. If this node has data-amp-layout then we should add this as the layout attribute.
 		$parent_node = $node->parentNode;
 		if ( 'figure' === $parent_node->tagName ) {
 			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
 			if ( isset( $parent_attributes['data-amp-layout'] ) ) {
-				$layout = $parent_attributes['data-amp-layout'];
+				$attributes['layout'] = $parent_attributes['data-amp-layout'];
+			}
+			if ( isset( $parent_attributes['data-amp-noloading'] ) && true === filter_var( $parent_attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
+				$attributes['noloading'] = $parent_attributes['data-amp-noloading'];
 			}
 		}
 
-		return $layout;
+		return $attributes;
+	}
+
+	/**
+	 * Set AMP attributes.
+	 *
+	 * @param array $attributes Array of attributes.
+	 * @param array $amp_data Array of AMP attributes.
+	 * @return array
+	 */
+	public function set_data_amp_attributes( $attributes, $amp_data ) {
+		if ( isset( $amp_data['layout'] ) ) {
+			$attributes['data-amp-layout'] = $amp_data['layout'];
+		}
+		if ( isset( $amp_data['noloading'] ) ) {
+			$attributes['data-amp-noloading'] = '';
+		}
+		return $attributes;
 	}
 
 	/**

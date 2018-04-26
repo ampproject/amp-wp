@@ -46,13 +46,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node           = $nodes->item( $i );
+			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-			$layout         = $this->get_data_amp_layout( $node );
-			if ( ! empty( $layout ) ) {
-				$old_attributes['data-amp-layout'] = $layout;
-			}
+			$old_attributes = $this->set_data_amp_attributes( $old_attributes, $amp_data );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
+			$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
 			$new_attributes = $this->set_attachment_layout_attributes( $node, $new_attributes, $layout );
 			$new_attributes = $this->set_layout( $new_attributes );
 			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
@@ -160,6 +159,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'data-amp-layout':
 					$out['layout'] = $value;
+					break;
+
+				case 'data-amp-noloading':
+					$out['noloading'] = $value;
 					break;
 
 				default:

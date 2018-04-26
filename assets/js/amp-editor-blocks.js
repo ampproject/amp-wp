@@ -97,11 +97,19 @@ var ampEditorBlocks = ( function() {
 	 * @return {*} Props.
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
-		if ( _.isEmpty( attributes.ampLayout ) ) {
+		var ampAttributes = {};
+		if ( ! attributes.ampLayout && ! attributes.ampNoLoading ) {
 			return props;
 		}
 
-		return _.assign( { 'data-amp-layout': attributes.ampLayout }, props );
+		if ( attributes.ampLayout ) {
+			ampAttributes[ 'data-amp-layout' ] = attributes.ampLayout;
+		}
+		if ( attributes.ampNoLoading ) {
+			ampAttributes[ 'data-amp-noloading' ] = attributes.ampNoLoading;
+		}
+
+		return _.assign( ampAttributes, props );
 	};
 
 	/**
@@ -135,6 +143,9 @@ var ampEditorBlocks = ( function() {
 			}
 			settings.attributes.ampLayout = {
 				type: 'string'
+			};
+			settings.attributes.ampNoLoading = {
+				type: 'boolean'
 			};
 		}
 		return settings;
@@ -216,22 +227,34 @@ var ampEditorBlocks = ( function() {
 	 */
 	component.setUpInspectorControls = function setUpInspectorControls( props ) {
 		var ampLayout = props.attributes.ampLayout,
+			ampNoLoading = props.attributes.ampNoLoading,
 			isSelected = props.isSelected,
 			name = props.name,
 			el = wp.element.createElement,
 			InspectorControls = wp.blocks.InspectorControls,
-			SelectControl = wp.components.SelectControl;
+			SelectControl = wp.components.SelectControl,
+			ToggleControl = wp.components.ToggleControl,
+			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
-				el( SelectControl, {
-					label: 'AMP Layout',
-					value: ampLayout,
-					options: component.getLayoutOptions( name ),
-					onChange: function( value ) {
-						props.setAttributes( { ampLayout: value } );
-					}
-				} )
+				el( PanelBody, { title: 'AMP Settings' },
+					el( SelectControl, {
+						label: 'AMP Layout',
+						value: ampLayout,
+						options: component.getLayoutOptions( name ),
+						onChange: function( value ) {
+							props.setAttributes( { ampLayout: value } );
+						}
+					} ),
+					el( ToggleControl, {
+						label: 'AMP Noloading',
+						checked: ampNoLoading,
+						onChange: function() {
+							props.setAttributes( { ampNoLoading: ! ampNoLoading } );
+						}
+					} )
+				)
 			)
 		);
 	};

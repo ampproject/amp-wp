@@ -61,11 +61,10 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			// We are looking for <figure> elements with layout attribute only.
-			if ( ! isset( $attributes['data-amp-layout'] ) ) {
+			if ( ! isset( $attributes['data-amp-layout'] ) && ! isset( $attributes['data-amp-noloading'] ) ) {
 				continue;
 			}
 
-			$layout       = $attributes['data-amp-layout'];
 			$amp_el_found = false;
 
 			foreach ( $node->childNodes as $child_node ) {
@@ -73,9 +72,15 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 				$amp_el_found = true;
-				$child_node->setAttribute( 'layout', $layout );
 
-				$this->set_attributes( $child_node, $node, $layout, $attributes );
+				if ( isset( $attributes['data-amp-layout'] ) ) {
+					$child_node->setAttribute( 'layout', $attributes['data-amp-layout'] );
+				}
+				if ( isset( $attributes['data-amp-noloading'] ) && true === filter_var( $attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
+					$child_node->setAttribute( 'noloading', '' );
+				}
+
+				$this->set_layout_attributes( $child_node, $node, $child_node->getAttribute( 'layout' ), $attributes );
 			}
 
 			if ( false === $amp_el_found ) {
@@ -93,7 +98,7 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string  $layout Layout.
 	 * @param array   $attributes Current attributes of the AMP element.
 	 */
-	protected function set_attributes( $node, $parent_node, $layout, $attributes ) {
+	protected function set_layout_attributes( $node, $parent_node, $layout, $attributes ) {
 
 		// The width has to be unset / auto in case of fixed-height.
 		if ( 'fixed-height' === $layout ) {
