@@ -1128,9 +1128,18 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Print all scripts, some of which may have already been printed and inject into head.
+		/*
+		 * Print additional AMP component scripts which have been discovered by the sanitizers, and inject into the head.
+		 * Before printing the AMP scripts, make sure that no plugins will be manipulating the output to be invalid AMP
+		 * since at this point the sanitizers have completed and won't check what is output here.
+		 */
 		ob_start();
-		wp_print_scripts( array_keys( $amp_scripts ) );
+		$possible_hooks = array( 'wp_print_scripts', 'print_scripts_array', 'script_loader_src', 'clean_url', 'script_loader_tag', 'attribute_escape' );
+		foreach ( $possible_hooks as $possible_hook ) {
+			remove_all_filters( $possible_hook ); // An action and a filter are the same thing.
+		}
+		add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 ); // Make sure this one required filter is present.
+		wp_scripts()->do_items( array_keys( $amp_scripts ) );
 		$script_tags = ob_get_clean();
 		if ( ! empty( $script_tags ) ) {
 			$response = preg_replace(

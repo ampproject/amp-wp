@@ -976,6 +976,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_action( 'wp_enqueue_scripts', function() {
 			wp_enqueue_script( 'amp-list' );
 		} );
+		add_action( 'wp_print_scripts', function() {
+			echo '<!-- wp_print_scripts -->';
+		} );
+		add_filter( 'script_loader_tag', function( $tag, $handle ) {
+			return preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
+		}, 10, 2 );
 		add_action( 'wp_footer', function() {
 			wp_print_scripts( 'amp-mathml' );
 			?>
@@ -1016,6 +1022,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			},
 		) );
 
+		$this->assertNotContains( 'handle=', $sanitized_html );
+		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
@@ -1036,7 +1044,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-ad-latest.js\' async custom-element="amp-ad"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 3, $removed_nodes );
+		$this->assertCount( 4, $removed_nodes );
 		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 	}
