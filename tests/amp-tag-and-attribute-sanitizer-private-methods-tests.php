@@ -411,7 +411,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $source );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
@@ -568,7 +567,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $source );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
@@ -664,7 +662,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 			printf( 'got = %s' .PHP_EOL, $got );
 		}
 
@@ -805,7 +802,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 			printf( 'got = %s' .PHP_EOL, $got );
 		}
 
@@ -867,7 +863,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $ancestor_node != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $ancestor_node, $got );
@@ -1073,7 +1068,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
@@ -1200,7 +1194,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
@@ -1352,7 +1345,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
@@ -1446,7 +1438,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
@@ -1581,7 +1572,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
@@ -1730,7 +1720,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		if ( $expected != $got ) {
 			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
 		}
 
 		$this->assertEquals( $expected, $got );
