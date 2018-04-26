@@ -111,13 +111,6 @@ class AMP_Validation_Utils {
 	const INVALID_ATTRIBUTE_CODE = 'invalid_attribute';
 
 	/**
-	 * Validation code for when script is enqueued (which is not allowed).
-	 *
-	 * @var string
-	 */
-	const ENQUEUED_SCRIPT_CODE = 'enqueued_script';
-
-	/**
 	 * The key for removed elements.
 	 *
 	 * @var string
@@ -591,7 +584,8 @@ class AMP_Validation_Utils {
 	 * @return bool Whether the validation error should result in sanitization.
 	 */
 	public static function add_validation_error( array $data ) {
-		$node = null;
+		$node    = null;
+		$matches = null;
 
 		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
 			$node = $data['node'];
@@ -622,7 +616,69 @@ class AMP_Validation_Utils {
 				isset( self::$enqueued_style_sources[ $matches['handle'] ] )
 			);
 			if ( $is_enqueued_link ) {
-				$data['sources'] = self::$enqueued_style_sources[ $matches['handle'] ];
+				$data['sources'] = array_merge(
+					$data['sources'],
+					self::$enqueued_style_sources[ $matches['handle'] ]
+				);
+			}
+
+			/**
+			 * Script dependency.
+			 *
+			 * @var _WP_Dependency $script_dependency
+			 */
+			if ( 'script' === $node->nodeName ) {
+				$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
+
+				if ( $node->hasAttribute( 'src' ) ) {
+
+					// External script.
+					$src = $node->getAttribute( 'src' );
+					foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
+						$script_dependency  = wp_scripts()->registered[ $enqueued_script_handle ];
+						$is_matching_script = (
+							$script_dependency
+							&&
+							$script_dependency->src
+							&&
+							// Script attribute is haystack because includes protocol and may include query args (like ver).
+							false !== strpos( $src, preg_replace( '#^https?:(?=//)#', '', $script_dependency->src ) )
+						);
+						if ( $is_matching_script ) {
+							$data['sources'] = array_merge(
+								$data['sources'],
+								self::$enqueued_script_sources[ $enqueued_script_handle ]
+							);
+							break;
+						}
+					}
+				} elseif ( $node->firstChild ) {
+
+					// Inline script.
+					$text = $node->textContent;
+					foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
+						$inline_scripts = array_filter( array_merge(
+							(array) wp_scripts()->get_data( $enqueued_script_handle, 'data' ),
+							(array) wp_scripts()->get_data( $enqueued_script_handle, 'before' ),
+							(array) wp_scripts()->get_data( $enqueued_script_handle, 'after' )
+						) );
+						foreach ( $inline_scripts as $inline_script ) {
+							/*
+							 * Check to see if the inline script is inside (or the same) as the script in the document.
+							 * Note that WordPress takes the registered inline script and will output it with newlines
+							 * padding it, and sometimes with the script wrapped by CDATA blocks.
+							 */
+							if ( false !== strpos( $text, trim( $inline_script ) ) ) {
+								$data['sources'] = array_merge(
+									$data['sources'],
+									self::$enqueued_script_sources[ $enqueued_script_handle ]
+								);
+								break;
+							}
+						}
+					}
+					$data['text'] = $text;
+				}
 			}
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $data['code'] ) ) {
@@ -1272,20 +1328,18 @@ class AMP_Validation_Utils {
 				}
 			}
 
-			// Keep track of which source enqueued the scripts, and immediately report validity .
+			// Keep track of which source enqueued the scripts, and immediately report validity.
 			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
-				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $handle ) {
-					AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = $callback['source'];
+				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $queued_handle ) {
+					$handles = array( $queued_handle );
 
-					// Flag all scripts not loaded from the AMP CDN as validation errors.
-					if ( isset( $wp_scripts->registered[ $handle ] ) && 0 !== strpos( $wp_scripts->registered[ $handle ]->src, 'https://cdn.ampproject.org/' ) ) {
-						self::add_validation_error( array(
-							'code'    => self::ENQUEUED_SCRIPT_CODE,
-							'handle'  => $handle,
-							'sources' => array(
-								$callback['source'],
-							),
-						) );
+					// Account for case where registered script is a placeholder for a set of scripts (e.g. jquery).
+					if ( isset( $wp_scripts->registered[ $queued_handle ] ) && false === $wp_scripts->registered[ $queued_handle ]->src ) {
+						$handles = array_merge( $handles, $wp_scripts->registered[ $queued_handle ]->deps );
+					}
+
+					foreach ( $handles as $handle ) {
+						AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = $callback['source'];
 					}
 				}
 			}
@@ -2300,7 +2354,7 @@ class AMP_Validation_Utils {
 				&&
 				isset( $post_data['post_type'] )
 				&&
-				self::POST_TYPE_SLUG === $post_data['post_type']
+				AMP_Validation_Utils::POST_TYPE_SLUG === $post_data['post_type']
 			);
 			if ( $should_supply_post_content ) {
 				$post_data['post_content'] = wp_slash( $post_content );
