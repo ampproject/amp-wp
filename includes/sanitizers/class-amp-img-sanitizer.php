@@ -73,13 +73,13 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			if ( ! $node->hasAttribute( 'src' ) || '' === $node->getAttribute( 'src' ) ) {
+			if ( ! $node->hasAttribute( 'src' ) || '' === trim( $node->getAttribute( 'src' ) ) ) {
 				$this->remove_invalid_child( $node );
 				continue;
 			}
 
 			// Determine which images need their dimensions determined/extracted.
-			if ( '' === $node->getAttribute( 'width' ) || '' === $node->getAttribute( 'height' ) ) {
+			if ( ! is_numeric( $node->getAttribute( 'width' ) ) || ! is_numeric( $node->getAttribute( 'height' ) ) ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
@@ -119,7 +119,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'alt':
 				case 'class':
 				case 'srcset':
-				case 'sizes':
 				case 'on':
 				case 'attribution':
 					$out[ $name ] = $value;
@@ -128,6 +127,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'width':
 				case 'height':
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
+					break;
+
+				case 'data-amp-layout':
+					$out['layout'] = $value;
 					break;
 
 				default:
@@ -154,17 +157,29 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $node instanceof DOMElement ) {
 					continue;
 				}
-
-				// Provide default dimensions for images whose dimensions we couldn't fetch.
-				if ( false !== $dimensions ) {
-					$node->setAttribute( 'width', $dimensions['width'] );
-					$node->setAttribute( 'height', $dimensions['height'] );
-				} else {
-					$width  = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
+				if (
+					! is_numeric( $node->getAttribute( 'width' ) ) &&
+					! is_numeric( $node->getAttribute( 'height' ) )
+				) {
 					$height = self::FALLBACK_HEIGHT;
+					$width  = self::FALLBACK_WIDTH;
 					$node->setAttribute( 'width', $width );
 					$node->setAttribute( 'height', $height );
 					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size' : 'amp-wp-unknown-size';
+					$node->setAttribute( 'class', $class );
+				} elseif (
+					! is_numeric( $node->getAttribute( 'height' ) )
+				) {
+					$height = self::FALLBACK_HEIGHT;
+					$node->setAttribute( 'height', $height );
+					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-height' : 'amp-wp-unknown-size amp-wp-unknown-height';
+					$node->setAttribute( 'class', $class );
+				} elseif (
+					! is_numeric( $node->getAttribute( 'width' ) )
+				) {
+					$width = self::FALLBACK_WIDTH;
+					$node->setAttribute( 'width', $width );
+					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-width' : 'amp-wp-unknown-size amp-wp-unknown-width';
 					$node->setAttribute( 'class', $class );
 				}
 			}
@@ -192,7 +207,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private function adjust_and_replace_node( $node ) {
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 		$new_attributes = $this->filter_attributes( $old_attributes );
-		$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
+			$new_attributes['layout'] = 'intrinsic';
+		}
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 

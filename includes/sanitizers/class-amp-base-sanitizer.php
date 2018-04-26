@@ -48,6 +48,14 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string[] $amp_allowed_tags
 	 *      @type string[] $amp_globally_allowed_attributes
 	 *      @type string[] $amp_layout_allowed_attributes
+	 *      @type array $amp_allowed_tags
+	 *      @type array $amp_globally_allowed_attributes
+	 *      @type array $amp_layout_allowed_attributes
+	 *      @type array $amp_bind_placeholder_prefix
+	 *      @type bool $allow_dirty_styles
+	 *      @type bool $allow_dirty_scripts
+	 *      @type bool $disable_invalid_removal
+	 *      @type callable $remove_invalid_callback
 	 * }
 	 */
 	protected $args;
@@ -167,12 +175,15 @@ abstract class AMP_Base_Sanitizer {
 	 * @return float|int|string Returns a numeric dimension value, or an empty string.
 	 */
 	public function sanitize_dimension( $value, $dimension ) {
-		if ( empty( $value ) ) {
+
+		// Allows 0 to be used as valid dimension.
+		if ( null === $value ) {
 			return '';
 		}
 
-		if ( false !== filter_var( $value, FILTER_VALIDATE_INT ) ) {
-			return absint( $value );
+		// Accepts both integers and floats & prevents negative values.
+		if ( is_numeric( $value ) ) {
+			return max( 0, floatval( $value ) );
 		}
 
 		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
@@ -190,7 +201,7 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Enforce fixed height.
+	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -203,51 +214,14 @@ abstract class AMP_Base_Sanitizer {
 	 * }
 	 * @return string[]
 	 */
-	public function enforce_fixed_height( $attributes ) {
+	public function set_layout( $attributes ) {
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
 		}
-
 		if ( empty( $attributes['width'] ) ) {
 			$attributes['layout'] = 'fixed-height';
 		}
-
-		return $attributes;
-	}
-
-	/**
-	 * This is our workaround to enforce max sizing with layout=responsive.
-	 *
-	 * We want elements to not grow beyond their width and shrink to fill the screen on viewports smaller than their width.
-	 *
-	 * See https://github.com/ampproject/amphtml/issues/1280#issuecomment-171533526
-	 * See https://github.com/Automattic/amp-wp/issues/101
-	 *
-	 * @param string[] $attributes {
-	 *      Attributes.
-	 *
-	 *      @type int $height
-	 *      @type int $width
-	 *      @type string $sizes
-	 *      @type string $class
-	 *      @type string $layout
-	 * }
-	 * @return string[]
-	 */
-	public function enforce_sizes_attribute( $attributes ) {
-		if ( ! isset( $attributes['width'], $attributes['height'] ) ) {
-			return $attributes;
-		}
-
-		$max_width = $attributes['width'];
-		if ( isset( $this->args['content_max_width'] ) && $max_width >= $this->args['content_max_width'] ) {
-			$max_width = $this->args['content_max_width'];
-		}
-
-		$attributes['sizes'] = sprintf( '(min-width: %1$dpx) %1$dpx, 100vw', absint( $max_width ) );
-
-		$this->add_or_append_attribute( $attributes, 'class', 'amp-wp-enforced-sizes' );
 
 		return $attributes;
 	}
@@ -313,13 +287,19 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMElement $child The node to remove.
-	 * @return void.
+	 * @param DOMNode|DOMElement $node The node to remove.
+	 * @param array              $args Additional args to pass to validation error callback.
+	 *
+	 * @return void
 	 */
-	public function remove_invalid_child( $child ) {
-		$child->parentNode->removeChild( $child );
-		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], $child, AMP_Validation_Utils::NODE_REMOVED );
+	public function remove_invalid_child( $node, $args = array() ) {
+		if ( isset( $this->args['validation_error_callback'] ) ) {
+			call_user_func( $this->args['validation_error_callback'],
+				array_merge( compact( 'node' ), $args )
+			);
+		}
+		if ( empty( $this->args['disable_invalid_removal'] ) ) {
+			$node->parentNode->removeChild( $node );
 		}
 	}
 
@@ -331,15 +311,35 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMElement $element   The node for which to remove the attribute.
-	 * @param string     $attribute The attribute to remove from the node.
-	 * @return void.
+	 * @param DOMElement     $element   The node for which to remove the attribute.
+	 * @param DOMAttr|string $attribute The attribute to remove from the element.
+	 * @param array          $args      Additional args to pass to validation error callback.
+	 * @return void
 	 */
-	public function remove_invalid_attribute( $element, $attribute ) {
-		$element->removeAttribute( $attribute );
-		if ( isset( $this->args['remove_invalid_callback'] ) ) {
-			call_user_func( $this->args['remove_invalid_callback'], $element, AMP_Validation_Utils::ATTRIBUTE_REMOVED, $attribute );
+	public function remove_invalid_attribute( $element, $attribute, $args = array() ) {
+		if ( isset( $this->args['validation_error_callback'] ) ) {
+			if ( is_string( $attribute ) ) {
+				$attribute = $element->getAttributeNode( $attribute );
+			}
+			if ( $attribute ) {
+				call_user_func( $this->args['validation_error_callback'],
+					array_merge(
+						array(
+							'node' => $attribute,
+						),
+						$args
+					)
+				);
+				if ( empty( $this->args['disable_invalid_removal'] ) ) {
+					$element->removeAttributeNode( $attribute );
+				}
+			}
+		} elseif ( empty( $this->args['disable_invalid_removal'] ) ) {
+			if ( is_string( $attribute ) ) {
+				$element->removeAttribute( $attribute );
+			} else {
+				$element->removeAttributeNode( $attribute );
+			}
 		}
 	}
-
 }

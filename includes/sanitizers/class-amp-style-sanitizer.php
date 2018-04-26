@@ -15,9 +15,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Styles.
 	 *
-	 * @var string[] List of CSS styles in HTML content of DOMDocument ($this->dom).
+	 * List of CSS styles in HTML content of DOMDocument ($this->dom).
 	 *
 	 * @since 0.4
+	 * @var array[]
 	 */
 	private $styles = array();
 
@@ -46,6 +47,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var int
 	 */
 	private $custom_max_size;
+
+	/**
+	 * Current CSS size.
+	 *
+	 * Sum of CSS located in $styles and $stylesheets.
+	 *
+	 * @var int
+	 */
+	private $current_custom_size = 0;
 
 	/**
 	 * The style[amp-custom] element.
@@ -125,7 +135,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.4
 	 *
-	 * @return string[] Mapping CSS selectors to array of properties, or mapping of keys starting with 'stylesheet:' with value being the stylesheet.
+	 * @return array[] Mapping CSS selectors to array of properties, or mapping of keys starting with 'stylesheet:' with value being the stylesheet.
 	 */
 	public function get_styles() {
 		if ( ! $this->did_convert_elements ) {
@@ -151,6 +161,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		$elements = array();
+
+		// Do nothing if inline styles are allowed.
+		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
+			return;
+		}
 
 		/*
 		 * Note that xpath is used to query the DOM so that the link and style elements will be
@@ -204,22 +219,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$head->appendChild( $this->amp_custom_style_element );
 			}
 
-			// Gather stylesheets to print as long as they don't surpass the limit.
-			$skipped    = array();
-			$css        = '';
-			$total_size = 0;
-			foreach ( $this->get_stylesheets() as $key => $stylesheet ) {
-				$sheet_size = strlen( $stylesheet );
-				if ( $total_size + $sheet_size > $this->custom_max_size ) {
-					$skipped[] = $key;
-				} else {
-					if ( $total_size ) {
-						$css .= ' ';
-					}
-					$css        .= $stylesheet;
-					$total_size += $sheet_size;
-				}
-			}
+			$css = implode( '', $this->get_stylesheets() );
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -231,15 +231,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
-
-			// @todo This would be a candidate for sanitization reporting.
-			// Add comments to indicate which sheets were not included.
-			foreach ( array_reverse( $skipped ) as $skip ) {
-				$this->amp_custom_style_element->parentNode->insertBefore(
-					$this->dom->createComment( sprintf( 'Skipped including %s stylesheet since too large.', $skip ) ),
-					$this->amp_custom_style_element->nextSibling
-				);
-			}
 		}
 	}
 
@@ -298,18 +289,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $element Style element.
 	 */
 	private function process_style_element( DOMElement $element ) {
-		if ( 'body' === $element->parentNode->nodeName && $element->hasAttribute( 'amp-keyframes' ) ) {
+		if ( $element->hasAttribute( 'amp-keyframes' ) ) {
 			$validity = $this->validate_amp_keyframe( $element );
-			if ( true !== $validity ) {
-				$element->parentNode->removeChild( $element ); // @todo Add reporting.
+			if ( is_wp_error( $validity ) ) {
+				$this->remove_invalid_child( $element, array(
+					'message' => $validity->get_error_message(),
+				) );
 			}
 			return;
 		}
 
 		$rules = trim( $element->textContent );
-		$rules = $this->remove_illegal_css( $rules );
+		$rules = $this->remove_illegal_css( $rules, $element );
+
+		// Remove if surpasses max size.
+		$length = strlen( $rules );
+		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
+			$this->remove_invalid_child( $element, array(
+				'message' => __( 'Too much CSS enqueued.', 'amp' ),
+			) );
+			return;
+		}
 
 		$this->stylesheets[ md5( $rules ) ] = $rules;
+		$this->current_custom_size         += $length;
 
 		if ( $element->hasAttribute( 'amp-custom' ) ) {
 			if ( ! $this->amp_custom_style_element ) {
@@ -339,22 +342,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_css_file_path( $href );
 		if ( is_wp_error( $css_file_path ) ) {
-			$element->parentNode->removeChild( $element ); // @todo Report removal. Show HTML comment?
+			$this->remove_invalid_child( $element, array(
+				'message' => $css_file_path->get_error_message(),
+			) );
 			return;
 		}
 
 		// Load the CSS from the filesystem.
-		$css  = "\n/* $href */\n";
-		$css .= file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+		$rules  = "\n/* $href */\n";
+		$rules .= file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 
-		$css = $this->remove_illegal_css( $css );
+		$rules = $this->remove_illegal_css( $rules, $element );
 
 		$media = $element->getAttribute( 'media' );
 		if ( $media && 'all' !== $media ) {
-			$css = sprintf( '@media %s { %s }', $media, $css );
+			$rules = sprintf( '@media %s { %s }', $media, $rules );
 		}
 
-		$this->stylesheets[ $href ] = $css;
+		// Remove if surpasses max size.
+		$length = strlen( $rules );
+		if ( $this->current_custom_size + $length > $this->custom_max_size ) {
+			$this->remove_invalid_child( $element, array(
+				'message' => __( 'Too much CSS enqueued.', 'amp' ),
+			) );
+			return;
+		}
+
+		$this->current_custom_size += $length;
+		$this->stylesheets[ $href ] = $rules;
 
 		// Remove now that styles have been processed.
 		$element->parentNode->removeChild( $element );
@@ -367,12 +382,25 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @todo This needs proper CSS parser and to take an alternative approach to removing !important by extracting
 	 * the rule into a separate style rule with a very specific selector.
-	 * @param string $stylesheet Stylesheet.
+	 * @param string     $stylesheet Stylesheet.
+	 * @param DOMElement $element    Element where the stylesheet came from.
 	 * @return string Scrubbed stylesheet.
 	 */
-	private function remove_illegal_css( $stylesheet ) {
-		$stylesheet = preg_replace( '/\s*!important/', '', $stylesheet ); // Note this has to also replace inside comments to be valid.
-		$stylesheet = preg_replace( '/overflow\s*:\s*(auto|scroll)\s*;?\s*/', '', $stylesheet );
+	private function remove_illegal_css( $stylesheet, $element ) {
+		$stylesheet = preg_replace( '/\s*!important/', '', $stylesheet, -1, $important_count ); // Note this has to also replace inside comments to be valid.
+		if ( $important_count > 0 && ! empty( $this->args['validation_error_callback'] ) ) {
+			call_user_func( $this->args['validation_error_callback'], array(
+				'code' => 'css_important_removed',
+				'node' => $element,
+			) );
+		}
+		$stylesheet = preg_replace( '/overflow(-[xy])?\s*:\s*(auto|scroll)\s*;?\s*/', '', $stylesheet, -1, $overlow_count );
+		if ( $overlow_count > 0 && ! empty( $this->args['validation_error_callback'] ) ) {
+			call_user_func( $this->args['validation_error_callback'], array(
+				'code' => 'css_overflow_property_removed',
+				'node' => $element,
+			) );
+		}
 		return $stylesheet;
 	}
 
@@ -386,15 +414,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return true|WP_Error Validity.
 	 */
 	private function validate_amp_keyframe( $style ) {
+		if ( 'body' !== $style->parentNode->nodeName ) {
+			return new WP_Error( 'mandatory_body_child', __( 'amp-keyframes is not child of body element.', 'amp' ) );
+		}
+
 		if ( $this->keyframes_max_size && strlen( $style->textContent ) > $this->keyframes_max_size ) {
-			return new WP_Error( 'max_bytes' );
+			return new WP_Error( 'max_bytes', __( 'amp-keyframes is too large', 'amp' ) );
 		}
 
 		// This logic could be in AMP_Tag_And_Attribute_Sanitizer, but since it only applies to amp-keyframes it seems unnecessary.
 		$next_sibling = $style->nextSibling;
 		while ( $next_sibling ) {
 			if ( $next_sibling instanceof DOMElement ) {
-				return new WP_Error( 'mandatory_last_child' );
+				return new WP_Error( 'mandatory_last_child', __( 'amp-keyframes is not last element in body.', 'amp' ) );
 			}
 			$next_sibling = $next_sibling->nextSibling;
 		}
@@ -418,19 +450,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $element Node.
 	 */
 	private function collect_inline_styles( $element ) {
-		$style = $element->getAttribute( 'style' );
-		if ( ! $style ) {
+		$value = $element->getAttribute( 'style' );
+		if ( ! $value ) {
 			return;
 		}
 		$class = $element->getAttribute( 'class' );
 
-		$style = $this->process_style( $style );
-		if ( ! empty( $style ) ) {
-			$class_name = $this->generate_class_name( $style );
+		$properties = $this->process_style( $value );
+
+		if ( ! empty( $properties ) ) {
+			$class_name = $this->generate_class_name( $properties );
 			$new_class  = trim( $class . ' ' . $class_name );
 
+			$selector = '.' . $class_name;
+			$length   = strlen( sprintf( '%s { %s }', $selector, join( '; ', $properties ) . ';' ) );
+
+			if ( $this->current_custom_size + $length > $this->custom_max_size ) {
+				$this->remove_invalid_attribute( $element, 'style', array(
+					'message' => __( 'Too much CSS.', 'amp' ),
+				) );
+				return;
+			}
+
 			$element->setAttribute( 'class', $new_class );
-			$this->styles[ '.' . $class_name ] = $style;
+			$this->styles[ $selector ] = $properties;
 		}
 		$element->removeAttribute( 'style' );
 	}
@@ -440,26 +483,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.4
 	 *
-	 * @param string $string Style string.
-	 * @return array
+	 * @param string $css Style string.
+	 * @return array Style properties.
 	 */
-	private function process_style( $string ) {
+	private function process_style( $css ) {
 
-		/**
-		 * Filter properties
-		 */
-		$string = safecss_filter_attr( esc_html( $string ) );
-
-		if ( ! $string ) {
-			return array();
-		}
+		// Normalize whitespace.
+		$css = str_replace( array( "\n", "\r", "\t" ), '', $css );
 
 		/*
-		 * safecss returns a string but we want individual rules.
 		 * Use preg_split to break up rules by `;` but only if the
 		 * semi-colon is not inside parens (like a data-encoded image).
 		 */
-		$styles = array_map( 'trim', preg_split( '/;(?![^(]*\))/', $string ) );
+		$styles = preg_split( '/\s*;\s*(?![^(]*\))/', trim( $css, '; ' ) );
+		$styles = array_filter( $styles );
 
 		// Normalize the order of the styles.
 		sort( $styles );
@@ -468,12 +505,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Normalize whitespace and filter rules.
 		foreach ( $styles as $index => $rule ) {
-			$arr2 = array_map( 'trim', explode( ':', $rule, 2 ) );
-			if ( 2 !== count( $arr2 ) ) {
+			$tuple = preg_split( '/\s*:\s*/', $rule, 2 );
+			if ( 2 !== count( $tuple ) ) {
 				continue;
 			}
 
-			list( $property, $value ) = $this->filter_style( $arr2[0], $arr2[1] );
+			list( $property, $value ) = $this->filter_style( $tuple[0], $tuple[1] );
 			if ( empty( $property ) || empty( $value ) ) {
 				continue;
 			}
@@ -498,14 +535,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array
 	 */
 	private function filter_style( $property, $value ) {
-
-		/**
+		/*
 		 * Remove overflow if value is `auto` or `scroll`; not allowed in AMP
 		 *
 		 * @todo This removal needs to be reported.
 		 * @see https://www.ampproject.org/docs/reference/spec.html#properties
 		 */
-		if ( preg_match( '#^overflow#i', $property ) && preg_match( '#^(auto|scroll)$#i', $value ) ) {
+		if ( preg_match( '#^overflow(-[xy])?$#i', $property ) && preg_match( '#^(auto|scroll)$#i', $value ) ) {
 			return array( false, false );
 		}
 
@@ -513,7 +549,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$property = 'max-width';
 		}
 
-		/**
+		/*
 		 * Remove `!important`; not allowed in AMP
 		 *
 		 * @todo This removal needs to be reported.

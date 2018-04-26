@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env php
 <?php
 /**
  * Verify versions referenced in plugin match.
@@ -39,7 +39,7 @@ if ( ! preg_match( '/## Changelog ##\s+###\s+(?P<version>\d+\.\d+(?:.\d+)?)/', $
 $versions['readme.md#changelog'] = $matches['version'];
 
 $plugin_file = file_get_contents( dirname( __FILE__ ) . '/../amp.php' );
-if ( ! preg_match( '/\*\s*Version:\s*(?P<version>\d+\.\d+(?:.\d+)?)/', $plugin_file, $matches ) ) {
+if ( ! preg_match( '/\*\s*Version:\s*(?P<version>\d+\.\d+(?:.\d+)?(-\w+)?)/', $plugin_file, $matches ) ) {
 	echo "Could not find version in readme metadata\n";
 	exit( 1 );
 }
@@ -57,5 +57,10 @@ echo json_encode( $versions, JSON_PRETTY_PRINT ) . "\n";
 
 if ( 1 !== count( array_unique( $versions ) ) ) {
 	fwrite( STDERR, "Error: Not all version references have been updated.\n" );
+	exit( 1 );
+}
+
+if ( false === strpos( $versions['amp.php#metadata'], '-' ) && ! preg_match( '/^\d+\.\d+\.\d+$/', $versions['amp.php#metadata'] ) ) {
+	fwrite( STDERR, sprintf( "Error: Release version (%s) lacks patch number. For new point releases, supply patch number of 0, such as 0.9.0 instead of 0.9.\n", $versions['amp.php#metadata'] ) );
 	exit( 1 );
 }

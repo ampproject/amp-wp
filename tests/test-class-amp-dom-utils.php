@@ -145,4 +145,75 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'div', $video->childNodes->item( 4 )->nodeName );
 		$this->assertEquals( 'span', $video->childNodes->item( 5 )->nodeName );
 	}
+
+	/**
+	 * Test encoding.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 */
+	public function test_get_dom_encoding() {
+		$html  = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>';
+		$html .= '<p>Check out ‘this’ and “that” and—other things.</p>';
+		$html .= '<p>Check out &#8216;this&#8217; and &#8220;that&#8221; and&#8212;other things.</p>';
+		$html .= '<p>Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
+		$html .= '</body></html>';
+
+		$document = AMP_DOM_Utils::get_dom_from_content( $html );
+		$this->assertEquals( 'UTF-8', $document->encoding );
+		$paragraphs = $document->getElementsByTagName( 'p' );
+		$this->assertSame( 3, $paragraphs->length );
+		$this->assertSame( $paragraphs->item( 0 )->textContent, $paragraphs->item( 1 )->textContent );
+		$this->assertSame( $paragraphs->item( 1 )->textContent, $paragraphs->item( 2 )->textContent );
+	}
+
+	/**
+	 * Get Table Row Iterations
+	 *
+	 * @return array An array of arrays holding an integer representation of iterations.
+	 */
+	public function get_table_row_iterations() {
+		return array(
+			array( 1 ),
+			array( 10 ),
+			array( 100 ),
+			array( 1000 ),
+		);
+	}
+
+	/**
+	 * Tests attribute conversions on content with iframe srcdocs of variable lengths.
+	 *
+	 * @dataProvider get_table_row_iterations
+	 *
+	 * @param int $iterations The number of table rows to append to iframe srcdoc.
+	 */
+	public function test_attribute_conversion_on_long_iframe_srcdocs( $iterations ) {
+		$html = '<html amp><head><meta charset="utf-8"></head><body><table>';
+
+		for ( $i = 0; $i < $iterations; $i++ ) {
+			$html .= '
+				<tr>
+				<td class="rank" style="width:2%;">1453</td>
+				<td class="text" style="width:10%;">1947</td>
+				<td class="text">Pittsburgh Ironmen</td>
+				<td class="boolean" style="width:10%;text-align:center;"></td>
+				<td class="number" style="width:10%;">1242</td>
+				<td class="number">1192</td>
+				<td class="number">1111</td>
+				<td class="number highlight">1182</td>
+				</tr>
+			';
+		}
+
+		$html .= '</table></body></html>';
+
+		$to_convert = sprintf(
+			'<amp-iframe sandbox="allow-scripts" srcdoc="%s"> </amp-iframe>',
+			htmlentities( $html )
+		);
+
+		AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
+
+		$this->assertSame( PREG_NO_ERROR, preg_last_error(), 'Probably failed when backtrack limit was exhausted.' );
+	}
 }

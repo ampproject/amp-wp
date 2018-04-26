@@ -172,7 +172,7 @@ class AMP_Options_Manager {
 				continue;
 			}
 
-			$post_type_supported = post_type_supports( $post_type->name, AMP_QUERY_VAR );
+			$post_type_supported = post_type_supports( $post_type->name, amp_get_slug() );
 			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
 
 			$error = null;

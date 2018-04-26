@@ -90,13 +90,15 @@ class AMP_DOM_Utils {
 			$document
 		);
 
-		/*
-		 * Replace noscript elements with placeholders since libxml<2.8 can parse them incorrectly.
-		 * When appearing in the head element, a noscript can cause the head to close prematurely
-		 * and the noscript gets moved to the body and anything after it which was in the head.
-		 * See <https://stackoverflow.com/questions/39013102/why-does-noscript-move-into-body-tag-instead-of-head-tag>.
-		 */
+		// Deal with bugs in older versions of libxml.
+		$added_back_compat_meta_content_type = false;
 		if ( version_compare( LIBXML_DOTTED_VERSION, '2.8', '<' ) ) {
+			/*
+			 * Replace noscript elements with placeholders since libxml<2.8 can parse them incorrectly.
+			 * When appearing in the head element, a noscript can cause the head to close prematurely
+			 * and the noscript gets moved to the body and anything after it which was in the head.
+			 * See <https://stackoverflow.com/questions/39013102/why-does-noscript-move-into-body-tag-instead-of-head-tag>.
+			 */
 			$document = preg_replace_callback(
 				'#<noscript[^>]*>.*?</noscript>#si',
 				function( $matches ) {
@@ -106,6 +108,21 @@ class AMP_DOM_Utils {
 				},
 				$document
 			);
+
+			/*
+			 * Add a pre-HTML5-style declaration of the encoding since libxml<2.8 doesn't recognize
+			 * HTML5's meta charset. See <https://bugzilla.gnome.org/show_bug.cgi?id=655218>.
+			 */
+			$document = preg_replace(
+				'#(?=<meta\s+charset=["\']?([a-z0-9_-]+))#i',
+				'<meta http-equiv="Content-Type" content="text/html; charset=$1" id="meta-http-equiv-content-type">',
+				$document,
+				1,
+				$count
+			);
+			if ( 1 === $count ) {
+				$added_back_compat_meta_content_type = true;
+			}
 		}
 
 		/*
@@ -121,6 +138,14 @@ class AMP_DOM_Utils {
 
 		if ( ! $result ) {
 			return false;
+		}
+
+		// Remove pre-HTML5-style encoding declaration if added above.
+		if ( $added_back_compat_meta_content_type ) {
+			$meta_http_equiv_element = $dom->getElementById( 'meta-http-equiv-content-type' );
+			if ( $meta_http_equiv_element ) {
+				$meta_http_equiv_element->parentNode->removeChild( $meta_http_equiv_element );
+			}
 		}
 
 		return $dom;
@@ -231,14 +256,23 @@ class AMP_DOM_Utils {
 			return '<' . $tag_matches['name'] . $new_attrs . '>';
 		};
 
-		$html = preg_replace_callback(
+		$converted = preg_replace_callback(
 			// Match all start tags that probably contain a binding attribute.
-			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s+[^>]+\]=[^>]+)\s*>#',
+			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
 			$replace_callback,
 			$html
 		);
 
-		return $html;
+		/**
+		 * If the regex engine incurred an error during processing, for example exceeding the backtrack
+		 * limit, $converted will be null. In this case we return the originally passed document to allow
+		 * DOMDocument to attempt to load it.  If the AMP HTML doesn't make use of amp-bind or similar
+		 * attributes, then everything should still work.
+		 *
+		 * See https://github.com/Automattic/amp-wp/issues/993 for additional context on this issue.
+		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
+		 */
+		return ( ! is_null( $converted ) ) ? $converted : $html;
 	}
 
 	/**

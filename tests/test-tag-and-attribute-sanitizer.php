@@ -165,6 +165,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-izlesene' ),
 			),
 
+			'amp-mathml'                                                => array(
+				'<amp-mathml layout="container" inline data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>',
+				null, // No change.
+				array( 'amp-mathml' ),
+			),
+
+			'amp-riddle-quiz'                                           => array(
+				'<amp-riddle-quiz layout="responsive" width="600" height="400" data-riddle-id="25799"></amp-riddle-quiz>',
+				null, // No change.
+				array( 'amp-riddle-quiz' ),
+			),
+
+			'amp-wistia-player'                                         => array(
+				'<amp-wistia-player data-media-hashed-id="u8p9wq6mq8" width="512" height="360"></amp-wistia-player>',
+				null, // No change.
+				array( 'amp-wistia-player' ),
+			),
+
+			'amp-byside-content'                                        => array(
+				'<amp-byside-content data-webcare-id="D6604AE5D0" data-channel="" data-lang="pt" data-fid="" data-label="amp-number" layout="fixed" width="120" height="40"></amp-byside-content>',
+				null, // No change.
+				array( 'amp-byside-content' ),
+			),
+
+			'amp-bind-macro'                                            => array(
+				'<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>',
+				null, // No change.
+				array( 'amp-bind' ),
+			),
+
 			'amp-nexxtv-player'                                         => array(
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.
@@ -650,6 +680,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a class="foo" href="">value</a>',
 			),
 
+			'a_with_wrong_host'                                         => array(
+				'<a class="foo" href="http://foo bar">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+			'a_with_encoded_host'                                       => array(
+				'<a class="foo" href="http://%65%78%61%6d%70%6c%65%2e%63%6f%6d/foo/">value</a>',
+				null,
+			),
+			'a_with_wrong_schemeless_host'                              => array(
+				'<a class="foo" href="//bad domain with a space.com/foo">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+			'a_with_mail_host'                                          => array(
+				'<a class="foo" href="mail to:foo@bar.com">value</a>',
+				'<a class="foo" href="">value</a>',
+			),
+
 			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements'                              => array(
 				'<font size="1">Headline</font><span style="color: blue">Span</span>',
@@ -673,6 +720,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<form action="/" method="get" target="_blank" id="form1"><amp-selector layout="container" name="single_image_select"><ul><li><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img></li><li><amp-img src="/img2.png" width="50" height="50" option="2"></amp-img></li><li option="na" selected>None of the Above</li></ul></amp-selector><amp-selector layout="container" name="multi_image_select" multiple><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img><amp-img src="/img2.png" width="50" height="50" option="2"></amp-img><amp-img src="/img3.png" width="50" height="50" option="3"></amp-img></amp-selector><amp-selector layout="container" name="multi_image_select_1" multiple><amp-carousel id="carousel-1" width="200" height="60" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d" disabled></amp-img></amp-carousel></amp-selector></form><amp-selector layout="container" name="multi_image_select_2" multiple form="form1"><amp-carousel id="carousel-1" width="400" height="300" type="slides" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d"></amp-img></amp-carousel></amp-selector>',
 				null, // No change.
 				array( 'amp-selector', 'amp-form', 'amp-carousel' ),
+			),
+
+			'amp_live_list_sort'                                        => array(
+				'<amp-live-list sort="ascending" data-poll-interval="15000" data-max-items-per-page="5" id="amp-live-list-insert-blog"><button update on="tap:amp-live-list-insert-blog.update" class="ampstart-btn ml1 caps">You have updates</button><div items><div id="A green landscape with trees." data-sort-time="20180317225019">Hello</div></div></amp-live-list>',
+				null, // No change.
+				array( 'amp-live-list' ),
+			),
+
+			'amp_consent'                                               => array(
+				'<amp-consent media="all" noloading></amp-consent>',
+				null, // No change.
+				array( 'amp-consent' ),
+			),
+
+			'amp_date_picker'                                           => array(
+				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
+				null, // No change.
+				array( 'amp-date-picker' ),
 			),
 		);
 	}

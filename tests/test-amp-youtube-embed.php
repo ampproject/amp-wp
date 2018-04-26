@@ -55,7 +55,7 @@ class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
-				array( 'amp-youtube' => 'https://cdn.ampproject.org/v0/amp-youtube-latest.js' ),
+				array( 'amp-youtube' => true ),
 			),
 		);
 	}

@@ -161,6 +161,8 @@ var ampPostMetaBox = ( function( $ ) {
 		editAmpStatus.fadeToggle( component.toggleSpeed, function() {
 			if ( editAmpStatus.is( ':visible' ) ) {
 				editAmpStatus.focus();
+			} else {
+				$container.find( 'input[type="radio"]' ).first().focus();
 			}
 		} );
 		$container.slideToggle( component.toggleSpeed );
