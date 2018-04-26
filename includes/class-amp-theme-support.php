@@ -1130,7 +1130,8 @@ class AMP_Theme_Support {
 
 		// Print all scripts, some of which may have already been printed and inject into head.
 		ob_start();
-		wp_print_scripts( array_keys( $amp_scripts ) );
+		remove_all_filters( 'print_scripts_array' ); // Make sure only the script handles we pass in will in fact get printed.
+		wp_scripts()->do_items( array_keys( $amp_scripts ) );
 		$script_tags = ob_get_clean();
 		if ( ! empty( $script_tags ) ) {
 			$response = preg_replace(
