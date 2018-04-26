@@ -16,7 +16,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'post_gallery', array( $this, 'override_gallery' ), 10, 2 );
+		add_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10, 2 );
 	}
 
 	/**
@@ -119,7 +119,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Override the output of gallery_shortcode().
+	 * Override the output of gallery_shortcode() if amp-carousel is not false.
 	 *
 	 * The 'Gallery' widget also uses this function.
 	 * This ensures that it outputs an <amp-carousel>.
@@ -128,7 +128,10 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $attributes Shortcode attributes.
 	 * @return string $html Markup for the gallery.
 	 */
-	public function override_gallery( $html, $attributes ) {
+	public function maybe_override_gallery( $html, $attributes ) {
+		if ( isset( $attributes['amp-carousel'] ) && false === filter_var( $attributes['amp-carousel'], FILTER_VALIDATE_BOOLEAN ) ) {
+			return $html;
+		}
 		return $this->shortcode( $attributes );
 	}
 
