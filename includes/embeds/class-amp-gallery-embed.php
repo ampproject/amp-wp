@@ -62,7 +62,6 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'order'          => $atts['order'],
 				'orderby'        => $atts['orderby'],
 				'fields'         => 'ids',
-				'posts_per_page' => 100,
 			) );
 		} elseif ( ! empty( $atts['exclude'] ) ) {
 			$attachments = get_children( array(
@@ -74,7 +73,6 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'order'          => $atts['order'],
 				'orderby'        => $atts['orderby'],
 				'fields'         => 'ids',
-				'posts_per_page' => 100,
 			) );
 		} else {
 			$attachments = get_children( array(
