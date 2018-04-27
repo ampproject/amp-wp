@@ -21,24 +21,6 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'figure';
 
 	/**
-	 * AMP elements.
-	 *
-	 * @todo Add all elements.
-	 * @var array AMP elements to add layout to.
-	 */
-	public static $amp_embeds = array(
-		'amp-youtube',
-		'amp-facebook',
-		'amp-twitter',
-		'amp-vimeo',
-		'amp-instagram',
-		'amp-dailymotion',
-		'amp-hulu',
-		'amp-reddit',
-		'amp-soundcloud',
-	);
-
-	/**
 	 * Sanitize the AMP elements contained by <figure> element where necessary.
 	 *
 	 * @since 0.2
@@ -60,6 +42,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 			$attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
+			// We are only looking for <figure> elements which have wp-block-embed as class.
+			if ( ! isset( $attributes['class'] ) || false === strpos( $attributes['class'], 'wp-block-embed' ) ) {
+				continue;
+			}
+
 			// We are looking for <figure> elements with layout attribute only.
 			if ( ! isset( $attributes['data-amp-layout'] ) && ! isset( $attributes['data-amp-noloading'] ) ) {
 				continue;
@@ -68,19 +55,14 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$amp_el_found = false;
 
 			foreach ( $node->childNodes as $child_node ) {
-				if ( ! in_array( $child_node->tagName, self::$amp_embeds, true ) ) {
+
+				// We are looking for child elements which start with 'amp-'.
+				if ( 0 !== strpos( $child_node->tagName, 'amp-' ) ) {
 					continue;
 				}
 				$amp_el_found = true;
 
-				if ( isset( $attributes['data-amp-layout'] ) ) {
-					$child_node->setAttribute( 'layout', $attributes['data-amp-layout'] );
-				}
-				if ( isset( $attributes['data-amp-noloading'] ) && true === filter_var( $attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
-					$child_node->setAttribute( 'noloading', '' );
-				}
-
-				$this->set_layout_attributes( $child_node, $node, $child_node->getAttribute( 'layout' ), $attributes );
+				$this->set_attributes( $child_node, $node, $attributes );
 			}
 
 			if ( false === $amp_el_found ) {
@@ -95,10 +77,18 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMNode $node AMP element node.
 	 * @param DOMNode $parent_node <figure> node.
-	 * @param string  $layout Layout.
 	 * @param array   $attributes Current attributes of the AMP element.
 	 */
-	protected function set_layout_attributes( $node, $parent_node, $layout, $attributes ) {
+	protected function set_attributes( $node, $parent_node, $attributes ) {
+
+		if ( isset( $attributes['data-amp-layout'] ) ) {
+			$node->setAttribute( 'layout', $attributes['data-amp-layout'] );
+		}
+		if ( isset( $attributes['data-amp-noloading'] ) && true === filter_var( $attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
+			$node->setAttribute( 'noloading', '' );
+		}
+
+		$layout = $node->getAttribute( 'layout' );
 
 		// The width has to be unset / auto in case of fixed-height.
 		if ( 'fixed-height' === $layout ) {
@@ -107,8 +97,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$node->setAttribute( 'width', 'auto' );
 
-			// @todo Perhaps the height is not in px, is it possible?
-			$parent_node->setAttribute( 'style', 'height: ' . $node->getAttribute( 'height' ) . 'px; width: auto;' );
+			$height = $node->getAttribute( 'height' );
+			if ( is_numeric( $height ) ) {
+				$height .= 'px';
+			}
+			$parent_node->setAttribute( 'style', "height: $height; width: auto;" );
 
 			// The parent element should have width/height set and position set in case of 'fill'.
 		} elseif ( 'fill' === $layout ) {

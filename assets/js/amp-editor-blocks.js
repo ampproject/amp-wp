@@ -172,7 +172,7 @@ var ampEditorBlocks = ( function() {
 
 			if ( 'core/shortcode' === name ) {
 				// Lets remove amp-carousel from from edit view.
-				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text ) ) {
+				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
 					props.setAttributes( { text: component.removeAmpCarouselFromShortcodeAtts( attributes.text ) } );
 				}
 

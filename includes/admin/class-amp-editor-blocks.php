@@ -14,11 +14,10 @@ class AMP_Editor_Blocks {
 	/**
 	 * Init.
 	 */
-	public static function init() {
+	public function init() {
 		if ( function_exists( 'gutenberg_init' ) ) {
-			$self = new self();
-			add_action( 'admin_enqueue_scripts', array( $self, 'add_editor_filters' ) );
-			add_filter( 'wp_kses_allowed_html', array( $self, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
+			add_action( 'admin_enqueue_scripts', array( $this, 'add_editor_filters' ) );
+			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		}
 	}
 
