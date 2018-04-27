@@ -958,9 +958,20 @@ class AMP_Validation_Utils {
 				$before_scripts_enqueued = $wp_scripts->queue;
 			}
 
-			ob_start();
+			/*
+			 * Verifying that the current output buffer type is not PHP_OUTPUT_HANDLER_USER is required to prevent a fatal error:
+			 * "ob_start(): Cannot use output buffering in output buffering display handlers"
+			 */
+			$ob_status  = ob_get_status();
+			$can_buffer = ! ( isset( $ob_status['type'] ) && 1 /* PHP_OUTPUT_HANDLER_USER */ === $ob_status['type'] );
+			$output     = null;
+			if ( $can_buffer ) {
+				ob_start();
+			}
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
-			$output = ob_get_clean();
+			if ( $can_buffer ) {
+				$output = ob_get_clean();
+			}
 
 			// Keep track of which source enqueued the styles.
 			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
