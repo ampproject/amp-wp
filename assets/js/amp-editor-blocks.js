@@ -19,7 +19,8 @@ var ampEditorBlocks = ( function() {
 				{ value: 'flex-item', label: 'Flex Item' },
 				{ value: 'intrinsic', label: 'Intrinsic' } // Not supported by video.
 			],
-			defaultWidth: 600
+			defaultWidth: 608, // Max-width in the editor.
+			defaultHeight: 400
 		}
 	};
 
@@ -162,11 +163,9 @@ var ampEditorBlocks = ( function() {
 
 		return function( props ) {
 			var attributes = props.attributes,
-				isSelected = props.isSelected,
 				name = props.name,
 				ampLayout,
-				inspectorControls,
-				width;
+				inspectorControls;
 
 			ampLayout = attributes.ampLayout;
 
@@ -190,22 +189,14 @@ var ampEditorBlocks = ( function() {
 			}
 
 			// For editor view, add a wrapper to any tags except for embeds, these will break due to embedding logic.
-			if ( ! _.isEmpty( attributes.ampLayout ) && ! isSelected && -1 === name.indexOf( 'core-embed/' ) ) {
-				if ( 'fixed-height' === attributes.ampLayout ) {
-					width = 'auto';
-				} else {
-					width = component.data.defaultWidth;
+			if ( attributes.ampLayout && -1 === name.indexOf( 'core-embed/' ) ) {
+				if ( 'core/image' === name ) {
+					component.setImageBlockLayoutAttributes( props, attributes.ampLayout, inspectorControls );
+				} else if ( 'nodisplay' === attributes.ampLayout ) {
+					return [
+						inspectorControls
+					];
 				}
-				// @todo Should we try to add width and height according to the layout?
-
-				return [
-					inspectorControls,
-					el( 'amp-layout',
-						{ key: 'amp', 'data-amp-layout': attributes.ampLayout, width: width, height: 400, children: el( BlockEdit, _.assign( {
-							key: 'original'
-						}, props ) ) }
-					)
-				];
 			}
 
 			// Return original.
@@ -213,10 +204,51 @@ var ampEditorBlocks = ( function() {
 				inspectorControls,
 				el( BlockEdit, _.assign( {
 					key: 'original',
-					'data-amp-layout': ampLayout
+					'data-amp-layout': ampLayout,
+					style: 'height:100px;'
 				}, props ) )
 			];
 		};
+	};
+
+	/**
+	 * Set width and height in case of image block.
+	 *
+	 * @param {Object} props Props.
+	 * @param {string} layout Layout.
+	 * @param {Object} inspectorControls Inspector controls.
+	 * @return {[*]} Void or block edit element.
+	 */
+	component.setImageBlockLayoutAttributes = function setImageBlockLayoutAttributes( props, layout, inspectorControls ) {
+		var attributes = props.attributes;
+		switch ( layout ) {
+			case 'fixed-height':
+			case 'responsive':
+				props.setAttributes( { width: '' } );
+				if ( ! attributes.height ) {
+					props.setAttributes( { height: component.data.defaultHeight } );
+				}
+				break;
+
+			case 'fixed':
+				if ( ! attributes.height ) {
+					props.setAttributes( { height: component.data.defaultHeight } );
+				}
+				if ( ! attributes.width ) {
+					props.setAttributes( { width: component.data.defaultWidth } );
+				}
+				break;
+
+			case 'fill':
+				props.setAttributes( { height: component.data.defaultHeight } );
+				props.setAttributes( { width: component.data.defaultWidth } );
+				break;
+
+			case 'nodisplay':
+				return [
+					inspectorControls
+				];
+		}
 	};
 
 	/**
@@ -234,13 +266,18 @@ var ampEditorBlocks = ( function() {
 			InspectorControls = wp.blocks.InspectorControls,
 			SelectControl = wp.components.SelectControl,
 			ToggleControl = wp.components.ToggleControl,
-			PanelBody = wp.components.PanelBody;
+			PanelBody = wp.components.PanelBody,
+			label = 'AMP Layout';
+
+		if ( 'core/image' === name ) {
+			label = 'AMP Layout (modifies width/height)';
+		}
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
 				el( PanelBody, { title: 'AMP Settings' },
 					el( SelectControl, {
-						label: 'AMP Layout',
+						label: label,
 						value: ampLayout,
 						options: component.getLayoutOptions( name ),
 						onChange: function( value ) {
@@ -296,7 +333,7 @@ var ampEditorBlocks = ( function() {
 	};
 
 	/**
-	 * Filters blocks save function for core blocks except for dynamic blocks.
+	 * Filters blocks' save function.
 	 *
 	 * @param {Object} element Element.
 	 * @param {string} blockType Block type.
@@ -308,7 +345,7 @@ var ampEditorBlocks = ( function() {
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
 			if ( attributes.ampCarousel ) {
 				// If the text contains amp-carousel, lets remove it.
-				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text ) ) {
+				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
 					text = component.removeAmpCarouselFromShortcodeAtts( attributes.text );
 
 					return wp.element.createElement(
@@ -323,7 +360,7 @@ var ampEditorBlocks = ( function() {
 			}
 
 			// If the text already contains amp-carousel, return original.
-			if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text ) ) {
+			if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
 				return element;
 			}
 
