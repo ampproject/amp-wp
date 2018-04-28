@@ -1000,6 +1000,12 @@ class AMP_Theme_Support {
 			$erase_flags = ! $args['cancelable'];
 		}
 		ob_start( array( __CLASS__, 'finish_output_buffering' ), $chunk_size, $erase_flags );
+
+		/*
+		 * Remove shutdown flushing which will cause PHP notice since buffer is not flushable.
+		 * This was only needed in PHP 5.2 anyway, which this plugin does not support.
+		 */
+		remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 	}
 
 	/**
