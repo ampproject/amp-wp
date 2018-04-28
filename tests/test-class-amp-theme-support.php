@@ -34,6 +34,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$_SERVER['QUERY_STRING'] = '';
 		unset( $_SERVER['REQUEST_URI'] );
 		unset( $_SERVER['REQUEST_METHOD'] );
+		unset( $GLOBALS['content_width'] );
 		if ( isset( $GLOBALS['wp_customize'] ) ) {
 			$GLOBALS['wp_customize']->stop_previewing_theme();
 		}
@@ -605,8 +606,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test register_content_embed_handlers.
 	 *
 	 * @covers AMP_Theme_Support::register_content_embed_handlers()
+	 * @global int $content_width
 	 */
 	public function test_register_content_embed_handlers() {
+		global $content_width;
+		$content_width  = 1234;
 		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
 		foreach ( $embed_handlers as $embed_handler ) {
 			$this->assertTrue( is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) );
@@ -614,7 +618,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$args       = $reflection->getProperty( 'args' );
 			$args->setAccessible( true );
 			$property = $args->getValue( $embed_handler );
-			$this->assertEquals( AMP_Post_Template::CONTENT_MAX_WIDTH, $property['content_max_width'] );
+			$this->assertEquals( $content_width, $property['content_max_width'] );
 		}
 	}
 
@@ -892,7 +896,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$ob_level = ob_get_level();
 		AMP_Theme_Support::start_output_buffering();
 
-		$this->assertEquals( 0, has_action( 'shutdown', array( self::TESTED_CLASS, 'finish_output_buffering' ) ) );
 		$this->assertTrue( ob_get_level() > $ob_level );
 
 		// End output buffer.
@@ -987,7 +990,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			echo '<!-- wp_print_scripts -->';
 		} );
 		add_filter( 'script_loader_tag', function( $tag, $handle ) {
-			return preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
+			if ( ! wp_scripts()->get_data( $handle, 'conditional' ) ) {
+				$tag = preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
+			}
+			return $tag;
 		}, 10, 2 );
 		add_action( 'wp_footer', function() {
 			wp_print_scripts( 'amp-mathml' );
