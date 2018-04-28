@@ -261,7 +261,11 @@ class AMP_Theme_Support {
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
 		 * instead of template_include.
 		 */
-		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
+		add_action( 'template_redirect', function() {
+			AMP_Theme_Support::start_output_buffering( array(
+				'cancelable' => class_exists( 'WP_UnitTestCase' ),
+			) );
+		} );
 
 		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
