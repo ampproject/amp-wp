@@ -963,8 +963,21 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @see AMP_Theme_Support::finish_output_buffering()
+	 *
+	 * @param array $args {
+	 *     Args.
+	 *
+	 *     @type bool $cancelable Whether the output buffer can be flushed/removed/cleaned.
+	 * }
 	 */
-	public static function start_output_buffering() {
+	public static function start_output_buffering( $args = array() ) {
+		$args = array_merge(
+			array(
+				'cancelable' => true, // Must be cancelable during unit tests.
+			),
+			$args
+		);
+
 		/*
 		 * Disable the New Relic Browser agent on AMP responses.
 		 * This prevents th New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset:
@@ -976,11 +989,19 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
-		ob_start();
-		self::$initial_ob_level = ob_get_level();
+		$chunk_size = 0; // Default value.
+		if ( defined( 'PHP_OUTPUT_HANDLER_STDFLAGS' ) ) {
+			$erase_flags = $args['cancelable'] ? PHP_OUTPUT_HANDLER_STDFLAGS : 0; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_output_handler_stdflagsFound
+		} else {
+			$erase_flags = ! $args['cancelable'];
+		}
+		ob_start( array( __CLASS__, 'finish_output_buffering' ), $chunk_size, $erase_flags );
 
-		// Note that the following must be at 0 because wp_ob_end_flush_all() runs at shutdown:1.
-		add_action( 'shutdown', array( __CLASS__, 'finish_output_buffering' ), 0 );
+		/*
+		 * Remove shutdown flushing which will cause PHP notice since buffer is not flushable.
+		 * This was only needed in PHP 5.2 anyway, which this plugin does not support.
+		 */
+		remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 	}
 
 	/**
@@ -988,15 +1009,12 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @see AMP_Theme_Support::start_output_buffering()
+	 *
+	 * @param string $response Buffered Response.
+	 * @return string Processed Response.
 	 */
-	public static function finish_output_buffering() {
-
-		// Flush output buffer stack until we get to the output buffer we started.
-		while ( ob_get_level() > self::$initial_ob_level ) {
-			ob_end_flush();
-		}
-
-		echo self::prepare_response( ob_get_clean() ); // WPCS: xss ok.
+	public static function finish_output_buffering( $response ) {
+		return self::prepare_response( $response );
 	}
 
 	/**
@@ -1129,18 +1147,24 @@ class AMP_Theme_Support {
 		}
 
 		/*
-		 * Print additional AMP component scripts which have been discovered by the sanitizers, and inject into the head.
-		 * Before printing the AMP scripts, make sure that no plugins will be manipulating the output to be invalid AMP
-		 * since at this point the sanitizers have completed and won't check what is output here.
+		 * Inject additional AMP component scripts which have been discovered by the sanitizers into the head.
+		 * This is adapted from wp_scripts()->do_items(), but it runs only the bare minimum required to output
+		 * the missing scripts, without allowing other filters to apply which may cause an invalid AMP response.
 		 */
-		ob_start();
-		$possible_hooks = array( 'wp_print_scripts', 'print_scripts_array', 'script_loader_src', 'clean_url', 'script_loader_tag', 'attribute_escape' );
-		foreach ( $possible_hooks as $possible_hook ) {
-			remove_all_filters( $possible_hook ); // An action and a filter are the same thing.
+		$script_tags = '';
+		foreach ( array_diff( array_keys( $amp_scripts ), wp_scripts()->done ) as $handle ) {
+			if ( ! wp_script_is( $handle, 'registered' ) ) {
+				continue;
+			}
+			$script_dep   = wp_scripts()->registered[ $handle ];
+			$script_tags .= amp_filter_script_loader_tag(
+				sprintf(
+					"<script type='text/javascript' src='%s'></script>\n", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+					esc_url( $script_dep->src )
+				),
+				$handle
+			);
 		}
-		add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 ); // Make sure this one required filter is present.
-		wp_scripts()->do_items( array_keys( $amp_scripts ) );
-		$script_tags = ob_get_clean();
 		if ( ! empty( $script_tags ) ) {
 			$response = preg_replace(
 				'#(?=</head>)#',

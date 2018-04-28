@@ -911,9 +911,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
+		$status = ob_get_status();
+		$this->assertSame( 1, ob_get_level() );
+		$this->assertEquals( 'default output handler', $status['name'] );
+
 		// start first layer buffer.
 		ob_start();
 		AMP_Theme_Support::start_output_buffering();
+		$this->assertSame( 3, ob_get_level() );
 
 		echo '<img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
 
@@ -925,9 +930,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} );
 		echo 'bar';
 
-		AMP_Theme_Support::finish_output_buffering();
-		// get first layer buffer.
+		while ( ob_get_level() > 2 ) {
+			ob_end_flush();
+		}
 		$output = ob_get_clean();
+		$this->assertEquals( 1, ob_get_level() );
 
 		$this->assertContains( '<html amp', $output );
 		$this->assertContains( 'foo', $output );

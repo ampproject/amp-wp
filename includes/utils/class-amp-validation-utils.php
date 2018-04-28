@@ -194,6 +194,14 @@ class AMP_Validation_Utils {
 	protected static $current_hook_source_stack = array();
 
 	/**
+	 * Hook source stack.
+	 *
+	 * @since 0.7
+	 * @var array[]
+	 */
+	protected static $hook_source_stack = array();
+
+	/**
 	 * Add the actions.
 	 *
 	 * @return void
@@ -819,6 +827,7 @@ class AMP_Validation_Utils {
 	/**
 	 * Wraps output of a filter to add source stack comments.
 	 *
+	 * @todo Duplicate with AMP_Validation_Utils::wrap_buffer_with_source_comments()?
 	 * @param string $value Value.
 	 * @return string Value wrapped in source comments.
 	 */
@@ -926,6 +935,34 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Check whether or not output buffering is currently possible.
+	 *
+	 * This is to guard against a fatal error: "ob_start(): Cannot use output buffering in output buffering display handlers".
+	 *
+	 * @return bool Whether output buffering is allowed.
+	 */
+	public static function can_output_buffer() {
+
+		// Abort when in shutdown since printing we know to be in buffering display handler, and no output allowed anyway.
+		if ( did_action( 'shutdown' ) ) {
+			return false;
+		}
+
+		// Check if any functions in call stack are output buffering display handlers.
+		$called_functions = array();
+		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
+			$arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.PHP.NewConstants.debug_backtrace_ignore_argsFound
+		} else {
+			$arg = false;
+		}
+		$backtrace = debug_backtrace( $arg ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
+		foreach ( $backtrace as $call_stack ) {
+			$called_functions[] = '{closure}' === $call_stack['function'] ? 'Closure::__invoke' : $call_stack['function'];
+		}
+		return 0 === count( array_intersect( ob_list_handlers(), $called_functions ) );
+	}
+
+	/**
 	 * Wraps a callback in comments if it outputs markup.
 	 *
 	 * If the sanitizer removes markup,
@@ -958,20 +995,17 @@ class AMP_Validation_Utils {
 				$before_scripts_enqueued = $wp_scripts->queue;
 			}
 
-			/*
-			 * Verifying that the current output buffer type is not PHP_OUTPUT_HANDLER_USER is required to prevent a fatal error:
-			 * "ob_start(): Cannot use output buffering in output buffering display handlers"
-			 */
-			$ob_status  = ob_get_status();
-			$can_buffer = ! ( isset( $ob_status['type'] ) && 1 /* PHP_OUTPUT_HANDLER_USER */ === $ob_status['type'] );
-			$output     = null;
-			if ( $can_buffer ) {
-				ob_start();
+			// Wrap the markup output of (action) hooks in source comments.
+			$has_buffer_started        = false;
+			self::$hook_source_stack[] = $callback['source'];
+			if ( self::can_output_buffer() ) {
+				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
 			}
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
-			if ( $can_buffer ) {
-				$output = ob_get_clean();
+			if ( $has_buffer_started ) {
+				@ob_end_flush(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 			}
+			array_pop( self::$hook_source_stack );
 
 			// Keep track of which source enqueued the styles.
 			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
@@ -999,14 +1033,38 @@ class AMP_Validation_Utils {
 				}
 			}
 
-			// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
-			if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
-				echo AMP_Validation_Utils::get_source_comment( $callback['source'], true ); // WPCS: XSS ok.
-				echo $output; // WPCS: XSS ok.
-				echo AMP_Validation_Utils::get_source_comment( $callback['source'], false ); // WPCS: XSS ok.
-			}
 			return $result;
 		};
+	}
+
+	/**
+	 * Wrap output buffer with source comments.
+	 *
+	 * A key reason for why this is a method and not a closure is so that
+	 * the can_output_buffer method will be able to identify it by name.
+	 *
+	 * @since 0.7
+	 * @todo Is duplicate of \AMP_Validation_Utils::decorate_filter_source()?
+	 *
+	 * @param string $output Output buffer.
+	 * @return string Output buffer conditionally wrapped with source comments.
+	 */
+	public static function wrap_buffer_with_source_comments( $output ) {
+		if ( empty( self::$hook_source_stack ) ) {
+			return $output;
+		}
+
+		$source = self::$hook_source_stack[ count( self::$hook_source_stack ) - 1 ];
+
+		// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
+		if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
+			$output = implode( '', array(
+				self::get_source_comment( $source, true ),
+				$output,
+				self::get_source_comment( $source, false ),
+			) );
+		}
+		return $output;
 	}
 
 	/**
