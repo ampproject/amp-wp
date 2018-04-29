@@ -196,10 +196,12 @@ class AMP_Validation_Utils {
 	/**
 	 * Hook source stack.
 	 *
+	 * This has to be public for the sake of PHP 5.3.
+	 *
 	 * @since 0.7
 	 * @var array[]
 	 */
-	protected static $hook_source_stack = array();
+	public static $hook_source_stack = array();
 
 	/**
 	 * Add the actions.
@@ -1001,16 +1003,16 @@ class AMP_Validation_Utils {
 			}
 
 			// Wrap the markup output of (action) hooks in source comments.
-			$has_buffer_started        = false;
-			self::$hook_source_stack[] = $callback['source'];
-			if ( self::can_output_buffer() ) {
+			AMP_Validation_Utils::$hook_source_stack[] = $callback['source'];
+			$has_buffer_started                        = false;
+			if ( AMP_Validation_Utils::can_output_buffer() ) {
 				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
 			}
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
 			if ( $has_buffer_started ) {
 				ob_end_flush();
 			}
-			array_pop( self::$hook_source_stack );
+			array_pop( AMP_Validation_Utils::$hook_source_stack );
 
 			// Keep track of which source enqueued the styles.
 			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
