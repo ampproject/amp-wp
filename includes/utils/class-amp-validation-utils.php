@@ -943,7 +943,7 @@ class AMP_Validation_Utils {
 			return false;
 		}
 
-		// Abort when in shutdown since printing we know to be in buffering display handler, and no output allowed anyway.
+		// Abort when in shutdown since output has finished, when we're likely in the overall output buffering display handler.
 		if ( did_action( 'shutdown' ) ) {
 			return false;
 		}

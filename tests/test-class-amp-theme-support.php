@@ -879,6 +879,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test start_output_buffering.
 	 *
 	 * @covers AMP_Theme_Support::start_output_buffering()
+	 * @covers AMP_Theme_Support::is_output_buffering()
+	 * @covers AMP_Theme_Support::finish_output_buffering()
 	 */
 	public function test_start_output_buffering() {
 		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
@@ -894,21 +896,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		$ob_level = ob_get_level();
+		$initial_ob_level = ob_get_level();
 		AMP_Theme_Support::start_output_buffering();
-
-		$this->assertTrue( ob_get_level() > $ob_level );
-
-		// End output buffer.
-		if ( ob_get_level() > $ob_level ) {
-			ob_get_clean();
-		}
+		$this->assertEquals( $initial_ob_level + 1, ob_get_level() );
+		ob_end_flush();
+		$this->assertEquals( $initial_ob_level, ob_get_level() );
 	}
 
 	/**
 	 * Test finish_output_buffering.
 	 *
 	 * @covers AMP_Theme_Support::finish_output_buffering()
+	 * @covers AMP_Theme_Support::is_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
 		add_theme_support( 'amp' );
@@ -918,10 +917,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$status = ob_get_status();
 		$this->assertSame( 1, ob_get_level() );
 		$this->assertEquals( 'default output handler', $status['name'] );
+		$this->assertFalse( AMP_Theme_Support::is_output_buffering() );
 
 		// start first layer buffer.
 		ob_start();
 		AMP_Theme_Support::start_output_buffering();
+		$this->assertTrue( AMP_Theme_Support::is_output_buffering() );
 		$this->assertSame( 3, ob_get_level() );
 
 		echo '<img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
@@ -934,9 +935,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} );
 		echo 'bar';
 
+		$this->assertTrue( AMP_Theme_Support::is_output_buffering() );
 		while ( ob_get_level() > 2 ) {
 			ob_end_flush();
 		}
+		$this->assertFalse( AMP_Theme_Support::is_output_buffering() );
 		$output = ob_get_clean();
 		$this->assertEquals( 1, ob_get_level() );
 
