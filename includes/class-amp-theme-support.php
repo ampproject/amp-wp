@@ -1188,6 +1188,9 @@ class AMP_Theme_Support {
 			);
 		}
 
+		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
+		$response = preg_replace( '#(</body>.*</html>)(.+)#s', '$2$1', $response );
+
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
