@@ -125,13 +125,6 @@ class AMP_Validation_Utils {
 	const NONCE_ACTION = 'amp_recheck_';
 
 	/**
-	 * HTTP response header name containing JSON-serialized validation errors.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_ERRORS_RESPONSE_HEADER_NAME = 'X-AMP-Validation-Errors';
-
-	/**
 	 * Transient key to store validation errors when activating a plugin.
 	 *
 	 * @var string
@@ -1116,39 +1109,27 @@ class AMP_Validation_Utils {
 	 *     Args.
 	 *
 	 *     @type bool $remove_source_comments           Whether source comments should be removed. Defaults to true.
-	 *     @type bool $send_validation_errors_header    Whether the X-AMP-Validation-Errors header should be sent. Defaults to true.
 	 *     @type bool $append_validation_status_comment Whether the validation errors should be appended as an HTML comment. Defaults to true.
 	 * }
 	 */
 	public static function finalize_validation( DOMDocument $dom, $args = array() ) {
 		$args = array_merge(
 			array(
-				'send_validation_errors_header'    => true,
 				'remove_source_comments'           => true,
 				'append_validation_status_comment' => true,
 			),
 			$args
 		);
 
-		if ( $args['send_validation_errors_header'] && ! headers_sent() ) {
-			self::send_validation_errors_header();
-		}
-
 		if ( $args['remove_source_comments'] ) {
 			self::remove_source_comments( $dom );
 		}
 
 		if ( $args['append_validation_status_comment'] ) {
-			$report  = "\n# Validation Status\n";
-			$report .= "\n## Summary\n";
-			$report .= wp_json_encode( self::summarize_validation_errors( self::$validation_errors ), 128 /* JSON_PRETTY_PRINT */ ) . "\n";
-			$report .= "\n## Details\n";
-			$report .= wp_json_encode( self::$validation_errors, 128 /* JSON_PRETTY_PRINT */ ) . "\n";
-			$comment = $dom->createComment( $report );
-			$body    = $dom->getElementsByTagName( 'body' )->item( 0 );
-			if ( $body ) {
-				$body->appendChild( $comment );
-			}
+			$encoded = wp_json_encode( self::$validation_errors, 128 /* JSON_PRETTY_PRINT */ );
+			$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
+			$comment = $dom->createComment( 'AMP_VALIDATION_ERRORS:' . $encoded . "\n" );
+			$dom->documentElement->appendChild( $comment );
 		}
 	}
 
@@ -1196,13 +1177,6 @@ class AMP_Validation_Utils {
 
 		// Hide the add new post link.
 		$post_type->cap->create_posts = 'do_not_allow';
-	}
-
-	/**
-	 * Send validation errors back in response header.
-	 */
-	public static function send_validation_errors_header() {
-		header( self::VALIDATION_ERRORS_RESPONSE_HEADER_NAME . ': ' . wp_json_encode( self::$validation_errors ) );
 	}
 
 	/**
@@ -1347,11 +1321,11 @@ class AMP_Validation_Utils {
 				wp_remote_retrieve_response_message( $r )
 			);
 		}
-		$json = wp_remote_retrieve_header( $r, self::VALIDATION_ERRORS_RESPONSE_HEADER_NAME );
-		if ( ! $json ) {
-			return new WP_Error( 'response_header_absent' );
+		$response = wp_remote_retrieve_body( $r );
+		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION_ERRORS\s*:\s*(\[.*?\])\s*-->#s', $response, $matches ) ) {
+			return new WP_Error( 'response_comment_absent' );
 		}
-		$validation_errors = json_decode( $json, true );
+		$validation_errors = json_decode( $matches[1], true );
 		if ( ! is_array( $validation_errors ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}

@@ -871,9 +871,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->factory()->post->create();
 		$filter = function() use ( $validation_errors ) {
 			return array(
-				'body'    => '',
-				'headers' => array(
-					AMP_Validation_Utils::VALIDATION_ERRORS_RESPONSE_HEADER_NAME => wp_json_encode( $validation_errors ),
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION_ERRORS:' . wp_json_encode( $validation_errors )
 				),
 			);
 		};
@@ -907,7 +907,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		add_filter( 'pre_http_request', $filter );
 		$r = AMP_Validation_Utils::validate_url( home_url( '/' ) );
 		$this->assertInstanceOf( 'WP_Error', $r );
-		$this->assertEquals( 'response_header_absent', $r->get_error_code() );
+		$this->assertEquals( 'response_comment_absent', $r->get_error_code() );
 		remove_filter( 'pre_http_request', $filter );
 
 		// Test success.
@@ -924,9 +924,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				$url
 			);
 			return array(
-				'body'    => '',
-				'headers' => array(
-					AMP_Validation_Utils::VALIDATION_ERRORS_RESPONSE_HEADER_NAME => wp_json_encode( $validation_errors ),
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION_ERRORS:' . wp_json_encode( $validation_errors )
 				),
 			);
 		};
@@ -1085,9 +1085,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$that   = $this;
 		$filter = function() use ( $that ) {
 			return array(
-				'body'    => '',
-				'headers' => array(
-					AMP_Validation_Utils::VALIDATION_ERRORS_RESPONSE_HEADER_NAME => wp_json_encode( $that->get_mock_errors() ),
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION_ERRORS:' . wp_json_encode( $that->get_mock_errors() )
 				),
 			);
 		};
