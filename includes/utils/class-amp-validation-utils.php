@@ -943,6 +943,11 @@ class AMP_Validation_Utils {
 	 */
 	public static function can_output_buffer() {
 
+		// Output buffering for validation can only be done while overall output buffering is being done for the response.
+		if ( ! AMP_Theme_Support::is_output_buffering() ) {
+			return false;
+		}
+
 		// Abort when in shutdown since printing we know to be in buffering display handler, and no output allowed anyway.
 		if ( did_action( 'shutdown' ) ) {
 			return false;
@@ -1003,7 +1008,7 @@ class AMP_Validation_Utils {
 			}
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
 			if ( $has_buffer_started ) {
-				@ob_end_flush(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+				ob_end_flush();
 			}
 			array_pop( self::$hook_source_stack );
 

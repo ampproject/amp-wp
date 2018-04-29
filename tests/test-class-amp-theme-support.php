@@ -278,7 +278,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'customize_partial_render', array( self::TESTED_CLASS, 'filter_customize_partial_render' ) ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', 'amp_print_analytics' ) );
 		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
-		$this->assertEquals( 0, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
+		$this->assertEquals( $priority, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_list_comments_args', array( self::TESTED_CLASS, 'set_comments_walker' ) ) );
 		$this->assertEquals( 10, has_filter( 'comment_form_defaults', array( self::TESTED_CLASS, 'filter_comment_form_defaults' ) ) );

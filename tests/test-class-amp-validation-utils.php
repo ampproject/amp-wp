@@ -389,7 +389,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) );
 		$_wp_sidebars_widgets[ $sidebar_id ] = array( $widget_id ); // WPCS: global override ok.
 
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		dynamic_sidebar( $sidebar_id );
 		$output = ob_get_clean();
 
@@ -440,21 +440,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( $action_one_argument, array( $this, 'output_notice' ) ) );
 		$this->assertEquals( 10, has_action( $action_two_arguments, array( $this, 'output_message' ) ) );
 
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
 		$this->assertContains( '<div class="notice notice-error">', $output );
 		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
 		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
 		$this->assertContains( '<div></div>', $output );
 		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
 		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
 		$this->assertContains( $notice, $output );
@@ -462,10 +462,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
 		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
 		$output = ob_get_clean();
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
 		$this->assertContains( $expected_output, $output );
@@ -473,21 +473,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		// This action's callback doesn't output any HTML tags, so no HTML should be present.
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_tag_output );
 		$output = ob_get_clean();
 		$this->assertNotContains( '<!--amp-source-stack ', $output );
 		$this->assertNotContains( '<!--/amp-source-stack ', $output );
 
 		// This action's callback comes from core.
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_core_output );
 		$output = ob_get_clean();
 		$this->assertContains( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
 		$this->assertContains( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_output );
 		$output = ob_get_clean();
 		$this->assertNotContains( '<!--amp-source-stack ', $output );
@@ -507,7 +507,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		};
 		add_action( 'outer_action', $handle_outer_action );
 		add_action( 'inner_action', $handle_inner_action );
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		do_action( 'outer_action' );
 		$output = ob_get_clean();
 		$this->assertEquals(
@@ -579,7 +579,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		call_user_func( $wrapped_callback );
 		$output = ob_get_clean();
 
@@ -600,7 +600,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$wrapped_callback = AMP_Validation_Utils::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
-		ob_start();
+		AMP_Theme_Support::start_output_buffering();
 		$result = call_user_func( $wrapped_callback );
 		$output = ob_get_clean();
 		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );

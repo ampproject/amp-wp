@@ -77,12 +77,12 @@ class AMP_Theme_Support {
 	public static $headers_sent = array();
 
 	/**
-	 * Output buffering level when starting.
+	 * Whether output buffering has started.
 	 *
 	 * @since 0.7
-	 * @var int
+	 * @var bool
 	 */
-	protected static $initial_ob_level = 0;
+	protected static $is_output_buffering = false;
 
 	/**
 	 * Initialize.
@@ -261,11 +261,12 @@ class AMP_Theme_Support {
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
 		 * instead of template_include.
 		 */
-		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
+		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
 
 		// Add validation hooks *after* output buffering has started for the response.
 		if ( AMP_Validation_Utils::should_validate_response() ) {
-			add_action( 'template_redirect', array( 'AMP_Validation_Utils', 'add_validation_hooks' ), 1 );
+			AMP_Validation_Utils::add_validation_hooks();
 		}
 
 		// Commenting hooks.
@@ -978,6 +979,20 @@ class AMP_Theme_Support {
 		}
 
 		ob_start( array( __CLASS__, 'finish_output_buffering' ) );
+		self::$is_output_buffering = true;
+	}
+
+	/**
+	 * Determine whether output buffering has started.
+	 *
+	 * @since 0.7
+	 * @see AMP_Theme_Support::start_output_buffering()
+	 * @see AMP_Theme_Support::finish_output_buffering()
+	 *
+	 * @return bool Whether output buffering has started.
+	 */
+	public static function is_output_buffering() {
+		return self::$is_output_buffering;
 	}
 
 	/**
@@ -990,6 +1005,7 @@ class AMP_Theme_Support {
 	 * @return string Processed Response.
 	 */
 	public static function finish_output_buffering( $response ) {
+		self::$is_output_buffering = false;
 		return self::prepare_response( $response );
 	}
 
