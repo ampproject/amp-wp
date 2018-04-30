@@ -77,12 +77,12 @@ class AMP_Theme_Support {
 	public static $headers_sent = array();
 
 	/**
-	 * Output buffering level when starting.
+	 * Whether output buffering has started.
 	 *
 	 * @since 0.7
-	 * @var int
+	 * @var bool
 	 */
-	protected static $initial_ob_level = 0;
+	protected static $is_output_buffering = false;
 
 	/**
 	 * Initialize.
@@ -261,7 +261,13 @@ class AMP_Theme_Support {
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
 		 * instead of template_include.
 		 */
-		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
+		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
+
+		// Add validation hooks *after* output buffering has started for the response.
+		if ( AMP_Validation_Utils::should_validate_response() ) {
+			AMP_Validation_Utils::add_validation_hooks();
+		}
 
 		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
@@ -271,10 +277,6 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
-
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::add_validation_hooks();
-		}
 
 		// @todo Add character conversion.
 	}
@@ -976,11 +978,21 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
-		ob_start();
-		self::$initial_ob_level = ob_get_level();
+		ob_start( array( __CLASS__, 'finish_output_buffering' ) );
+		self::$is_output_buffering = true;
+	}
 
-		// Note that the following must be at 0 because wp_ob_end_flush_all() runs at shutdown:1.
-		add_action( 'shutdown', array( __CLASS__, 'finish_output_buffering' ), 0 );
+	/**
+	 * Determine whether output buffering has started.
+	 *
+	 * @since 0.7
+	 * @see AMP_Theme_Support::start_output_buffering()
+	 * @see AMP_Theme_Support::finish_output_buffering()
+	 *
+	 * @return bool Whether output buffering has started.
+	 */
+	public static function is_output_buffering() {
+		return self::$is_output_buffering;
 	}
 
 	/**
@@ -988,15 +1000,13 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @see AMP_Theme_Support::start_output_buffering()
+	 *
+	 * @param string $response Buffered Response.
+	 * @return string Processed Response.
 	 */
-	public static function finish_output_buffering() {
-
-		// Flush output buffer stack until we get to the output buffer we started.
-		while ( ob_get_level() > self::$initial_ob_level ) {
-			ob_end_flush();
-		}
-
-		echo self::prepare_response( ob_get_clean() ); // WPCS: xss ok.
+	public static function finish_output_buffering( $response ) {
+		self::$is_output_buffering = false;
+		return self::prepare_response( $response );
 	}
 
 	/**
@@ -1129,18 +1139,24 @@ class AMP_Theme_Support {
 		}
 
 		/*
-		 * Print additional AMP component scripts which have been discovered by the sanitizers, and inject into the head.
-		 * Before printing the AMP scripts, make sure that no plugins will be manipulating the output to be invalid AMP
-		 * since at this point the sanitizers have completed and won't check what is output here.
+		 * Inject additional AMP component scripts which have been discovered by the sanitizers into the head.
+		 * This is adapted from wp_scripts()->do_items(), but it runs only the bare minimum required to output
+		 * the missing scripts, without allowing other filters to apply which may cause an invalid AMP response.
 		 */
-		ob_start();
-		$possible_hooks = array( 'wp_print_scripts', 'print_scripts_array', 'script_loader_src', 'clean_url', 'script_loader_tag', 'attribute_escape' );
-		foreach ( $possible_hooks as $possible_hook ) {
-			remove_all_filters( $possible_hook ); // An action and a filter are the same thing.
+		$script_tags = '';
+		foreach ( array_diff( array_keys( $amp_scripts ), wp_scripts()->done ) as $handle ) {
+			if ( ! wp_script_is( $handle, 'registered' ) ) {
+				continue;
+			}
+			$script_dep   = wp_scripts()->registered[ $handle ];
+			$script_tags .= amp_filter_script_loader_tag(
+				sprintf(
+					"<script type='text/javascript' src='%s'></script>\n", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+					esc_url( $script_dep->src )
+				),
+				$handle
+			);
 		}
-		add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 ); // Make sure this one required filter is present.
-		wp_scripts()->do_items( array_keys( $amp_scripts ) );
-		$script_tags = ob_get_clean();
 		if ( ! empty( $script_tags ) ) {
 			$response = preg_replace(
 				'#(?=</head>)#',

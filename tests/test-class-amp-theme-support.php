@@ -34,6 +34,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$_SERVER['QUERY_STRING'] = '';
 		unset( $_SERVER['REQUEST_URI'] );
 		unset( $_SERVER['REQUEST_METHOD'] );
+		unset( $GLOBALS['content_width'] );
 		if ( isset( $GLOBALS['wp_customize'] ) ) {
 			$GLOBALS['wp_customize']->stop_previewing_theme();
 		}
@@ -277,7 +278,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'customize_partial_render', array( self::TESTED_CLASS, 'filter_customize_partial_render' ) ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', 'amp_print_analytics' ) );
 		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
-		$this->assertEquals( 0, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
+		$this->assertEquals( $priority, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_list_comments_args', array( self::TESTED_CLASS, 'set_comments_walker' ) ) );
 		$this->assertEquals( 10, has_filter( 'comment_form_defaults', array( self::TESTED_CLASS, 'filter_comment_form_defaults' ) ) );
@@ -605,8 +607,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test register_content_embed_handlers.
 	 *
 	 * @covers AMP_Theme_Support::register_content_embed_handlers()
+	 * @global int $content_width
 	 */
 	public function test_register_content_embed_handlers() {
+		global $content_width;
+		$content_width  = 1234;
 		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
 		foreach ( $embed_handlers as $embed_handler ) {
 			$this->assertTrue( is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) );
@@ -614,7 +619,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$args       = $reflection->getProperty( 'args' );
 			$args->setAccessible( true );
 			$property = $args->getValue( $embed_handler );
-			$this->assertEquals( AMP_Post_Template::CONTENT_MAX_WIDTH, $property['content_max_width'] );
+			$this->assertEquals( $content_width, $property['content_max_width'] );
 		}
 	}
 
@@ -874,6 +879,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test start_output_buffering.
 	 *
 	 * @covers AMP_Theme_Support::start_output_buffering()
+	 * @covers AMP_Theme_Support::is_output_buffering()
+	 * @covers AMP_Theme_Support::finish_output_buffering()
 	 */
 	public function test_start_output_buffering() {
 		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
@@ -889,31 +896,34 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		$ob_level = ob_get_level();
+		$initial_ob_level = ob_get_level();
 		AMP_Theme_Support::start_output_buffering();
-
-		$this->assertEquals( 0, has_action( 'shutdown', array( self::TESTED_CLASS, 'finish_output_buffering' ) ) );
-		$this->assertTrue( ob_get_level() > $ob_level );
-
-		// End output buffer.
-		if ( ob_get_level() > $ob_level ) {
-			ob_get_clean();
-		}
+		$this->assertEquals( $initial_ob_level + 1, ob_get_level() );
+		ob_end_flush();
+		$this->assertEquals( $initial_ob_level, ob_get_level() );
 	}
 
 	/**
 	 * Test finish_output_buffering.
 	 *
 	 * @covers AMP_Theme_Support::finish_output_buffering()
+	 * @covers AMP_Theme_Support::is_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
+		$status = ob_get_status();
+		$this->assertSame( 1, ob_get_level() );
+		$this->assertEquals( 'default output handler', $status['name'] );
+		$this->assertFalse( AMP_Theme_Support::is_output_buffering() );
+
 		// start first layer buffer.
 		ob_start();
 		AMP_Theme_Support::start_output_buffering();
+		$this->assertTrue( AMP_Theme_Support::is_output_buffering() );
+		$this->assertSame( 3, ob_get_level() );
 
 		echo '<img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
 
@@ -925,9 +935,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} );
 		echo 'bar';
 
-		AMP_Theme_Support::finish_output_buffering();
-		// get first layer buffer.
+		$this->assertTrue( AMP_Theme_Support::is_output_buffering() );
+		while ( ob_get_level() > 2 ) {
+			ob_end_flush();
+		}
+		$this->assertFalse( AMP_Theme_Support::is_output_buffering() );
 		$output = ob_get_clean();
+		$this->assertEquals( 1, ob_get_level() );
 
 		$this->assertContains( '<html amp', $output );
 		$this->assertContains( 'foo', $output );
@@ -980,7 +994,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			echo '<!-- wp_print_scripts -->';
 		} );
 		add_filter( 'script_loader_tag', function( $tag, $handle ) {
-			return preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
+			if ( ! wp_scripts()->get_data( $handle, 'conditional' ) ) {
+				$tag = preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
+			}
+			return $tag;
 		}, 10, 2 );
 		add_action( 'wp_footer', function() {
 			wp_print_scripts( 'amp-mathml' );
