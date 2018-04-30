@@ -8,7 +8,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.7  
 **Tested up to:** 4.9  
-**Stable tag:** 0.6.0  
+**Stable tag:** 0.6.2  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.3.2  
 

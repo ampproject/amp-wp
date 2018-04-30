@@ -125,13 +125,6 @@ class AMP_Validation_Utils {
 	const NONCE_ACTION = 'amp_recheck_';
 
 	/**
-	 * HTTP response header name containing JSON-serialized validation errors.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_ERRORS_RESPONSE_HEADER_NAME = 'X-AMP-Validation-Errors';
-
-	/**
 	 * Transient key to store validation errors when activating a plugin.
 	 *
 	 * @var string
@@ -208,6 +201,16 @@ class AMP_Validation_Utils {
 	 * @var int
 	 */
 	protected static $block_content_index = 0;
+
+	/**
+	 * Hook source stack.
+	 *
+	 * This has to be public for the sake of PHP 5.3.
+	 *
+	 * @since 0.7
+	 * @var array[]
+	 */
+	public static $hook_source_stack = array();
 
 	/**
 	 * Add the actions.
@@ -954,6 +957,7 @@ class AMP_Validation_Utils {
 	/**
 	 * Wraps output of a filter to add source stack comments.
 	 *
+	 * @todo Duplicate with AMP_Validation_Utils::wrap_buffer_with_source_comments()?
 	 * @param string $value Value.
 	 * @return string Value wrapped in source comments.
 	 */
@@ -1061,6 +1065,39 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Check whether or not output buffering is currently possible.
+	 *
+	 * This is to guard against a fatal error: "ob_start(): Cannot use output buffering in output buffering display handlers".
+	 *
+	 * @return bool Whether output buffering is allowed.
+	 */
+	public static function can_output_buffer() {
+
+		// Output buffering for validation can only be done while overall output buffering is being done for the response.
+		if ( ! AMP_Theme_Support::is_output_buffering() ) {
+			return false;
+		}
+
+		// Abort when in shutdown since output has finished, when we're likely in the overall output buffering display handler.
+		if ( did_action( 'shutdown' ) ) {
+			return false;
+		}
+
+		// Check if any functions in call stack are output buffering display handlers.
+		$called_functions = array();
+		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
+			$arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.PHP.NewConstants.debug_backtrace_ignore_argsFound
+		} else {
+			$arg = false;
+		}
+		$backtrace = debug_backtrace( $arg ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
+		foreach ( $backtrace as $call_stack ) {
+			$called_functions[] = '{closure}' === $call_stack['function'] ? 'Closure::__invoke' : $call_stack['function'];
+		}
+		return 0 === count( array_intersect( ob_list_handlers(), $called_functions ) );
+	}
+
+	/**
 	 * Wraps a callback in comments if it outputs markup.
 	 *
 	 * If the sanitizer removes markup,
@@ -1093,9 +1130,17 @@ class AMP_Validation_Utils {
 				$before_scripts_enqueued = $wp_scripts->queue;
 			}
 
-			ob_start();
+			// Wrap the markup output of (action) hooks in source comments.
+			AMP_Validation_Utils::$hook_source_stack[] = $callback['source'];
+			$has_buffer_started                        = false;
+			if ( AMP_Validation_Utils::can_output_buffer() ) {
+				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
+			}
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
-			$output = ob_get_clean();
+			if ( $has_buffer_started ) {
+				ob_end_flush();
+			}
+			array_pop( AMP_Validation_Utils::$hook_source_stack );
 
 			// Keep track of which source enqueued the styles.
 			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
@@ -1123,14 +1168,38 @@ class AMP_Validation_Utils {
 				}
 			}
 
-			// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
-			if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
-				echo AMP_Validation_Utils::get_source_comment( $callback['source'], true ); // WPCS: XSS ok.
-				echo $output; // WPCS: XSS ok.
-				echo AMP_Validation_Utils::get_source_comment( $callback['source'], false ); // WPCS: XSS ok.
-			}
 			return $result;
 		};
+	}
+
+	/**
+	 * Wrap output buffer with source comments.
+	 *
+	 * A key reason for why this is a method and not a closure is so that
+	 * the can_output_buffer method will be able to identify it by name.
+	 *
+	 * @since 0.7
+	 * @todo Is duplicate of \AMP_Validation_Utils::decorate_filter_source()?
+	 *
+	 * @param string $output Output buffer.
+	 * @return string Output buffer conditionally wrapped with source comments.
+	 */
+	public static function wrap_buffer_with_source_comments( $output ) {
+		if ( empty( self::$hook_source_stack ) ) {
+			return $output;
+		}
+
+		$source = self::$hook_source_stack[ count( self::$hook_source_stack ) - 1 ];
+
+		// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
+		if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
+			$output = implode( '', array(
+				self::get_source_comment( $source, true ),
+				$output,
+				self::get_source_comment( $source, false ),
+			) );
+		}
+		return $output;
 	}
 
 	/**
@@ -1173,39 +1242,27 @@ class AMP_Validation_Utils {
 	 *     Args.
 	 *
 	 *     @type bool $remove_source_comments           Whether source comments should be removed. Defaults to true.
-	 *     @type bool $send_validation_errors_header    Whether the X-AMP-Validation-Errors header should be sent. Defaults to true.
 	 *     @type bool $append_validation_status_comment Whether the validation errors should be appended as an HTML comment. Defaults to true.
 	 * }
 	 */
 	public static function finalize_validation( DOMDocument $dom, $args = array() ) {
 		$args = array_merge(
 			array(
-				'send_validation_errors_header'    => true,
 				'remove_source_comments'           => true,
 				'append_validation_status_comment' => true,
 			),
 			$args
 		);
 
-		if ( $args['send_validation_errors_header'] && ! headers_sent() ) {
-			self::send_validation_errors_header();
-		}
-
 		if ( $args['remove_source_comments'] ) {
 			self::remove_source_comments( $dom );
 		}
 
 		if ( $args['append_validation_status_comment'] ) {
-			$report  = "\n# Validation Status\n";
-			$report .= "\n## Summary\n";
-			$report .= wp_json_encode( self::summarize_validation_errors( self::$validation_errors ), 128 /* JSON_PRETTY_PRINT */ ) . "\n";
-			$report .= "\n## Details\n";
-			$report .= wp_json_encode( self::$validation_errors, 128 /* JSON_PRETTY_PRINT */ ) . "\n";
-			$comment = $dom->createComment( $report );
-			$body    = $dom->getElementsByTagName( 'body' )->item( 0 );
-			if ( $body ) {
-				$body->appendChild( $comment );
-			}
+			$encoded = wp_json_encode( self::$validation_errors, 128 /* JSON_PRETTY_PRINT */ );
+			$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
+			$comment = $dom->createComment( 'AMP_VALIDATION_ERRORS:' . $encoded . "\n" );
+			$dom->documentElement->appendChild( $comment );
 		}
 	}
 
@@ -1253,13 +1310,6 @@ class AMP_Validation_Utils {
 
 		// Hide the add new post link.
 		$post_type->cap->create_posts = 'do_not_allow';
-	}
-
-	/**
-	 * Send validation errors back in response header.
-	 */
-	public static function send_validation_errors_header() {
-		header( self::VALIDATION_ERRORS_RESPONSE_HEADER_NAME . ': ' . wp_json_encode( self::$validation_errors ) );
 	}
 
 	/**
@@ -1404,11 +1454,11 @@ class AMP_Validation_Utils {
 				wp_remote_retrieve_response_message( $r )
 			);
 		}
-		$json = wp_remote_retrieve_header( $r, self::VALIDATION_ERRORS_RESPONSE_HEADER_NAME );
-		if ( ! $json ) {
-			return new WP_Error( 'response_header_absent' );
+		$response = wp_remote_retrieve_body( $r );
+		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION_ERRORS\s*:\s*(\[.*?\])\s*-->#s', $response, $matches ) ) {
+			return new WP_Error( 'response_comment_absent' );
 		}
-		$validation_errors = json_decode( $json, true );
+		$validation_errors = json_decode( $matches[1], true );
 		if ( ! is_array( $validation_errors ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
