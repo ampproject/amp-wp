@@ -411,12 +411,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $node, $data['attribute_name'], $attr_spec_rule ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $source );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $source, wp_json_encode( $data ) ) );
 	}
 
 	public function get_is_allowed_attribute_data() {
@@ -571,12 +566,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $data['attribute_name'], $attr_spec_list ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $source );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $source, wp_json_encode( $data ) ) );
 	}
 
 	public function get_remove_node_data() {
@@ -667,13 +657,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-			printf( 'got = %s' . PHP_EOL, $got );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 
@@ -808,13 +792,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$got = preg_replace( '/(?<=>)\s+(?=<)/', '', $got );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-			printf( 'got = %s' . PHP_EOL, $got );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_ancestor_with_tag_name_data() {
@@ -870,12 +848,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_tag_name', array( $node, $data['ancestor_tag_name'] ) );
 
-		if ( $ancestor_node !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $ancestor_node, $got );
+		$this->assertEquals( $ancestor_node, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_validate_attr_spec_list_for_node_data() {
@@ -1076,12 +1049,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'validate_attr_spec_list_for_node', array( $node, $data['attr_spec_list'] ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_value_data() {
@@ -1203,12 +1171,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_value_casei_data() {
@@ -1355,12 +1318,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value_casei', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_blacklisted_value_regex() {
@@ -1449,12 +1407,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_blacklisted_value_regex', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_allowed_protocol() {
@@ -1584,12 +1537,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_disallowed_relative() {
@@ -1733,12 +1681,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_disallowed_relative', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected !== $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	/**
