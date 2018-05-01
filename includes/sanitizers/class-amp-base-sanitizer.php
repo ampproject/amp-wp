@@ -216,7 +216,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return string[]
 	 */
 	public function set_layout( $attributes ) {
-		if ( isset( $attributes['layout'] ) && 'fill' === $attributes['layout'] && 'flex-item' !== $attributes['layout'] ) {
+		if ( isset( $attributes['layout'] ) && ( 'fill' === $attributes['layout'] || 'flex-item' !== $attributes['layout'] ) ) {
 			return $attributes;
 		}
 		if ( empty( $attributes['height'] ) ) {

@@ -32,6 +32,16 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/100x100" layout="fill" width="100" height="100" class="amp-wp-enforced-sizes"></amp-img>',
 			),
 
+			'image_with_layout_from_editor'            => array(
+				'<figure data-amp-layout="fill"><img src="http://placehold.it/300x300" height="300" width="300" /></figure>',
+				'<figure data-amp-layout="fill" style="position:relative; width: 100%; height: 300px;"><amp-img src="http://placehold.it/300x300" layout="fill" class="amp-wp-enforced-sizes"></amp-img></figure>',
+			),
+
+			'image_with_noloading_from_editor'         => array(
+				'<figure data-amp-noloading="true"><img src="http://placehold.it/300x300" height="300" width="300" /></figure>',
+				'<figure data-amp-noloading="true"><amp-img src="http://placehold.it/300x300" height="300" width="300" noloading="" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></figure>',
+			),
+
 			'image_with_spaces_only_src'               => array(
 				'<p><img src="    " width="300" height="300" /></p>',
 				'<p></p>',
