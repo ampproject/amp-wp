@@ -3,8 +3,8 @@
  * Plugin Name: AMP
  * Description: Add AMP support to your WordPress site.
  * Plugin URI: https://github.com/automattic/amp-wp
- * Author: Automattic
- * Author URI: https://automattic.com
+ * Author: WordPress.com VIP, XWP, and contributors
+ * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
  * Version: 0.7-RC1
  * Text Domain: amp
  * Domain Path: /languages/
