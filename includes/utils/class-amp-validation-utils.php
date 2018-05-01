@@ -547,6 +547,10 @@ class AMP_Validation_Utils {
 				self::$validation_errors
 			);
 			self::reset_validation_results();
+
+			// Make sure original post is restored after applying shortcodes which could change it.
+			$GLOBALS['post'] = $post; // WPCS: override ok.
+			setup_postdata( $post );
 		}
 
 		// Incorporate frontend validation status if there is a known URL for the post.
