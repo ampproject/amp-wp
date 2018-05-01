@@ -539,16 +539,6 @@ class AMP_Validation_Utils {
 		$validation_status_post = null;
 		$validation_errors      = array();
 
-		// Validate post content outside frontend context.
-		if ( post_type_supports( $post->post_type, 'editor' ) ) {
-			self::process_markup( $post->post_content );
-			$validation_errors = array_merge(
-				$validation_errors,
-				self::$validation_errors
-			);
-			self::reset_validation_results();
-		}
-
 		// Incorporate frontend validation status if there is a known URL for the post.
 		if ( is_post_type_viewable( $post->post_type ) ) {
 			$url = amp_get_permalink( $post->ID );
@@ -560,6 +550,20 @@ class AMP_Validation_Utils {
 					$validation_errors = array_merge( $validation_errors, $data );
 				}
 			}
+		}
+
+		// If no results from URL are available, validate post content outside frontend context.
+		if ( empty( $validation_errors ) && post_type_supports( $post->post_type, 'editor' ) ) {
+			self::process_markup( $post->post_content );
+			$validation_errors = array_merge(
+				$validation_errors,
+				self::$validation_errors
+			);
+			self::reset_validation_results();
+
+			// Make sure original post is restored after applying shortcodes which could change it.
+			$GLOBALS['post'] = $post; // WPCS: override ok.
+			setup_postdata( $post );
 		}
 
 		if ( empty( $validation_errors ) ) {
