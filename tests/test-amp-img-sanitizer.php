@@ -138,6 +138,11 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<img class="alignleft" src="http://placehold.it/350x150" width="350" height="150" />',
 				'<amp-img class="alignleft amp-wp-enforced-sizes" src="http://placehold.it/350x150" width="350" height="150" layout="intrinsic"></amp-img>',
 			),
+
+			'image_with_caption'                       => array(
+				'<figure class="wp-caption aligncenter"><img src="http://placehold.it/350x150" alt="" width="350" height="150" class="size-medium wp-image-312"><figcaption class="wp-caption-text">This is an example caption.</figcaption></figure>',
+				'<figure class="wp-caption aligncenter"><amp-img src="http://placehold.it/350x150" alt="" width="350" height="150" class="size-medium wp-image-312 amp-wp-enforced-sizes" layout="intrinsic"></amp-img><figcaption class="wp-caption-text">This is an example caption.</figcaption></figure>',
+			),
 		);
 	}
 
