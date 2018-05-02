@@ -248,8 +248,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 * @see https://github.com/Automattic/amp-wp/issues/1104
 	 *
-	 * @param DOMNode|DOMElement $node The <amp-img> node.
-	 * @return DOMNode|DOMElement $node The <amp-img> node, possibly wrapped in a <figure>.
+	 * @param DOMElement $node The <amp-img> node.
+	 * @return DOMElement $node The <amp-img> node, possibly wrapped in a <figure>.
 	 */
 	public function handle_centering( $node ) {
 		$align_class = 'aligncenter';
@@ -257,7 +257,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$width       = $node->getAttribute( 'width' );
 
 		// If this doesn't have a width attribute, centering it in the <figure> wrapper won't work.
-		if ( ( false === strpos( $classes, $align_class ) ) || empty( $width ) ) {
+		if ( empty( $width ) || ! in_array( $align_class, preg_split( '/\s+/', trim( $classes ) ), true ) ) {
 			return $node;
 		}
 
