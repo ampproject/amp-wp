@@ -177,13 +177,13 @@ var ampBlockValidation = ( function() {
 				noticeMessage + ' ',
 				ampValidity.review_link && wp.element.createElement(
 					'a',
-					{ key: 'details', href: ampValidity.review_link, target: '_blank' },
+					{ key: 'review_link', href: ampValidity.review_link, target: '_blank' },
 					wp.i18n.__( 'Review issues', 'amp' )
 				),
 				ampValidity.review_link && ' | ',
 				ampValidity.debug_link && wp.element.createElement(
 					'a',
-					{ key: 'details', href: ampValidity.debug_link, target: '_blank' },
+					{ key: 'debug_link', href: ampValidity.debug_link, target: '_blank' },
 					wp.i18n.__( 'Debug', 'amp' )
 				)
 			] );
