@@ -13,6 +13,23 @@
 class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		AMP_Validation_Utils::reset_validation_results();
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		AMP_Validation_Utils::reset_validation_results();
+		AMP_Validation_Utils::$locate_sources = false;
+	}
+
+	/**
 	 * Gets data for test_set_layout().
 	 *
 	 * @return array
@@ -184,12 +201,13 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_child() {
-		AMP_Validation_Utils::reset_validation_results();
 		$parent_tag_name = 'div';
 		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
 		$child           = $dom_document->createElement( 'h1' );
 		$parent->appendChild( $child );
+
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(
@@ -199,8 +217,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$sanitizer->remove_invalid_child( $child );
 		$this->assertEquals( null, $parent->firstChild );
-		$this->assertCount( 1, AMP_Validation_Utils::$validation_errors );
-		$this->assertEquals( $child->nodeName, AMP_Validation_Utils::$validation_errors[0]['node_name'] );
+		$this->assertCount( 1, AMP_Validation_Utils::$validation_results );
+		$this->assertEquals( $child->nodeName, AMP_Validation_Utils::$validation_results[0]['error']['node_name'] );
 
 		$parent->appendChild( $child );
 		$this->assertEquals( $child, $parent->firstChild );
@@ -208,7 +226,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertEquals( null, $child->parentNode );
-		AMP_Validation_Utils::$validation_errors = null;
+		AMP_Validation_Utils::$validation_results = null;
 	}
 
 	/**
@@ -217,7 +235,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
 	 */
 	public function test_remove_attribute() {
-		AMP_Validation_Utils::reset_validation_results();
+		AMP_Validation_Utils::$locate_sources = true;
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$video_name   = 'amp-video';
 		$attribute    = 'onload';
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
@@ -240,8 +259,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 					'onload' => 'someFunction()',
 				),
 			),
-			AMP_Validation_Utils::$validation_errors[0]
+			AMP_Validation_Utils::$validation_results[0]['error']
 		);
-		AMP_Validation_Utils::reset_validation_results();
 	}
 }

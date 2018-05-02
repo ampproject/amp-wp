@@ -539,13 +539,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Processed stylesheet parts.
 	 */
 	private function process_stylesheet( $stylesheet, $options = array() ) {
-		$cache_impacting_options = wp_array_slice_assoc(
-			$options,
-			// @todo Needs to be a debug flag here because stored validation_errors will vary based on whether sources are being captured?
-			array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
+		$cache_impacting_options = array_merge(
+			wp_array_slice_assoc(
+				$options,
+				array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
+			),
+			array(
+				'locate_sources' => ! empty( $this->args['locate_sources'] ),
+			)
 		);
-
-		$cache_impacting_options['locate_sources'] = ! empty( $this->args['locate_sources'] );
 
 		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 
@@ -567,7 +569,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Report cached validation errors.
 			foreach ( $parsed['validation_errors'] as $validation_error ) {
-				$this->handle_validation_error( $validation_error );
+				$this->should_sanitize_validation_error( $validation_error ); // @todo Cannot affect result.
 			}
 		}
 
@@ -686,7 +688,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'code'    => 'css_parse_error',
 				'message' => $exception->getMessage(),
 			);
-			$this->handle_validation_error( $validation_error );
+			$this->should_sanitize_validation_error( $validation_error );
 			$validation_error[] = $validation_error;
 		}
 
@@ -696,26 +698,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Call the validation_error_callback.
+	 * Prepare validation error.
 	 *
-	 * Check whether or not sanitization should occur in response to validation error.
-	 *
-	 * @since 1.0
-	 *
-	 * @param array $validation_error Validation error.
-	 * @return bool Whether to sanitize.
+	 * @param array $error Error.
+	 * @param array $data Data.
+	 * @return array Error.
 	 */
-	private function handle_validation_error( $validation_error ) {
-		if ( empty( $this->args['validation_error_callback'] ) || ! is_callable( $this->args['validation_error_callback'] ) ) {
-			return true;
+	public function prepare_validation_error( array $error = array(), array $data = array() ) {
+		if ( ! isset( $data['node'] ) ) {
+			$data['node'] = $this->current_node;
 		}
-		if ( ! isset( $validation_error['node'] ) ) {
-			$validation_error['node'] = $this->current_node;
+		if ( ! isset( $error['sources'] ) ) {
+			$error['sources'] = $this->current_sources;
 		}
-		if ( ! isset( $validation_error['sources'] ) ) {
-			$validation_error['sources'] = $this->current_sources;
-		}
-		return false !== call_user_func( $this->args['validation_error_callback'], $validation_error );
+		return parent::prepare_validation_error( $error, $data );
 	}
 
 	/**
@@ -745,7 +741,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
 					);
 					$validation_errors[] = $validation_error;
-					$should_remove_item  = $this->handle_validation_error( $validation_error );
+					$should_remove_item  = $this->should_sanitize_validation_error( $validation_error );
 				}
 				if ( ! $should_remove_item ) {
 					$validation_errors = array_merge(
@@ -759,7 +755,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'message' => __( 'CSS @import is currently disallowed.', 'amp' ),
 				);
 				$validation_errors[] = $validation_error;
-				$should_remove_item  = $this->handle_validation_error( $validation_error );
+				$should_remove_item  = $this->should_sanitize_validation_error( $validation_error );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$validation_error    = array(
@@ -768,7 +764,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
 					);
 					$validation_errors[] = $validation_errors;
-					$should_remove_item  = $this->handle_validation_error( $validation_error );
+					$should_remove_item  = $this->should_sanitize_validation_error( $validation_error );
 				}
 
 				if ( ! $should_remove_item ) {
@@ -785,7 +781,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
 					);
 					$validation_errors[] = $validation_errors;
-					$should_remove_item  = $this->handle_validation_error( $validation_error );
+					$should_remove_item  = $this->should_sanitize_validation_error( $validation_error );
 				}
 
 				if ( ! $should_remove_item ) {
@@ -801,14 +797,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
 				);
 				$validation_errors[] = $validation_errors;
-				$should_remove_item  = $this->handle_validation_error( $validation_error );
+				$should_remove_item  = $this->should_sanitize_validation_error( $validation_error );
 			} else {
 				$validation_error    = array(
 					'code'    => 'unrecognized_css',
 					'message' => __( 'Unrecognized CSS removed.', 'amp' ),
 				);
 				$validation_errors[] = $validation_errors;
-				$should_remove_item  = $this->handle_validation_error( $validation_error );
+				$should_remove_item  = $this->should_sanitize_validation_error( $validation_error );
 			}
 
 			if ( $should_remove_item ) {
@@ -878,7 +874,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'property_name'  => $property->getRule(),
 						'property_value' => $property->getValue(),
 					);
-					if ( $this->handle_validation_error( $validation_error ) ) {
+					if ( $this->should_sanitize_validation_error( $validation_error ) ) {
 						$ruleset->removeRule( $property->getRule() );
 					}
 					$validation_errors[] = $validation_error;
@@ -893,7 +889,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'property_name'  => $property->getRule(),
 						'property_value' => (string) $property->getValue(),
 					);
-					if ( $this->handle_validation_error( $validation_error ) ) {
+					if ( $this->should_sanitize_validation_error( $validation_error ) ) {
 						$ruleset->removeRule( $property->getRule() );
 					}
 					$validation_errors[] = $validation_error;
@@ -1051,7 +1047,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'code'    => 'unrecognized_css',
 						'message' => __( 'Unrecognized CSS removed.', 'amp' ),
 					);
-					if ( $this->handle_validation_error( $validation_error ) ) {
+					if ( $this->should_sanitize_validation_error( $validation_error ) ) {
 						$css_list->remove( $rules );
 					}
 					$validation_errors[] = $validation_error;
@@ -1072,7 +1068,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							'property_name'  => $property->getRule(),
 							'property_value' => (string) $property->getValue(),
 						);
-						if ( $this->handle_validation_error( $validation_error ) ) {
+						if ( $this->should_sanitize_validation_error( $validation_error ) ) {
 							$rules->removeRule( $property->getRule() );
 						}
 						$validation_errors[] = $validation_error;
@@ -1117,7 +1113,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'code'    => 'illegal_css_important',
 						'message' => __( 'Illegal CSS !important qualifier.', 'amp' ),
 					);
-					if ( $this->handle_validation_error( $validation_error ) ) {
+					if ( $this->should_sanitize_validation_error( $validation_error ) ) {
 						$property->setIsImportant( false );
 					}
 					$validation_errors[] = $validation_error;
@@ -1308,9 +1304,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $stylesheet_sets['keyframes']['final_stylesheets'] ) ) {
 			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( ! $body ) {
-				$this->handle_validation_error( array(
+				$this->should_sanitize_validation_error( array(
 					'code'    => 'missing_body_element',
 					'message' => __( 'amp-keyframes must be last child of body element.', 'amp' ),
+					// @todo Note that this is not a fixable error.
 				) );
 			} else {
 				$style_element = $this->dom->createElement( 'style' );
@@ -1340,7 +1337,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		if ( $is_too_much_css && $should_tree_shake ) {
-			$this->handle_validation_error( array(
+			$should_tree_shake = $this->should_sanitize_validation_error( array(
 				'code'    => 'removed_unused_css_rules',
 				'message' => __( 'Too much CSS is enqueued and so seemingly irrelevant rules have been removed.', 'amp' ),
 			) );
@@ -1407,7 +1404,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( isset( $pending_stylesheet['sources'] ) ) {
 					$validation_error['sources'] = $pending_stylesheet['sources'];
 				}
-				if ( $this->handle_validation_error( $validation_error ) ) {
+				if ( $this->should_sanitize_validation_error( $validation_error ) ) {
 					continue;
 				}
 			}

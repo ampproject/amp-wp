@@ -13,13 +13,6 @@
 class AMP_Theme_Support {
 
 	/**
-	 * Replaced with the necessary scripts depending on components used in output.
-	 *
-	 * @var string
-	 */
-	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
-
-	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -93,6 +86,12 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		// @todo Rename to query var to indicate whether sources should be obtained. It's sources that are needing to be to be conditional.
+		AMP_Validation_Utils::init( array(
+			'locate_sources' => AMP_Validation_Utils::should_validate_response(),
+			'debug'          => isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ), // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		) );
+
 		self::$init_start_time = microtime( true );
 
 		self::purge_amp_query_vars();
@@ -146,6 +145,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
+		self::$sanitizer_classes = AMP_Validation_Utils::add_validation_callback( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
 	}
 
@@ -153,8 +153,12 @@ class AMP_Theme_Support {
 	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
 	 *
 	 * @since 0.7
+	 * @since 1.0 Added $exit param.
+	 * @todo Rename to redirect_non_amp().
+	 *
+	 * @param bool $exit Whether to exit after redirecting.
 	 */
-	public static function redirect_canonical_amp() {
+	public static function redirect_canonical_amp( $exit = true ) {
 		if ( false !== get_query_var( amp_get_slug(), false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
 			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
 			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
@@ -163,8 +167,14 @@ class AMP_Theme_Support {
 
 			$url = amp_remove_endpoint( $url );
 
-			wp_safe_redirect( $url, 302 ); // Temporary redirect because canonical may change in future.
-			exit;
+			/*
+			 * Temporary redirect because AMP URL may return when blocking validation errors
+			 * occur or when a non-canonical AMP theme is used.
+			 */
+			wp_safe_redirect( $url, 302 );
+			if ( $exit ) {
+				exit;
+			}
 		}
 	}
 
@@ -266,11 +276,6 @@ class AMP_Theme_Support {
 		 */
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
-
-		// Add validation hooks *after* output buffering has started for the response.
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::add_validation_hooks();
-		}
 
 		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
@@ -1006,16 +1011,17 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 *
 	 * @param string $response HTML document response. By default it expects a complete document.
-	 * @param array  $args {
-	 *     Args to send to the preprocessor/sanitizer.
-	 *
-	 *     @type callable $remove_invalid_callback Function to call whenever a node is removed due to being invalid.
-	 * }
+	 * @param array  $args     Args to send to the preprocessor/sanitizer.
 	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
 	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
+
+		if ( isset( $args['validation_error_callback'] ) ) {
+			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
+			unset( $args['validation_error_callback'] );
+		}
 
 		/*
 		 * Check if the response starts with HTML markup.
@@ -1075,6 +1081,15 @@ class AMP_Theme_Support {
 
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
+
+		if ( AMP_Validation_Utils::has_blocking_validation_errors() ) {
+			if ( amp_is_canonical() ) {
+				$dom->documentElement->removeAttribute( 'amp' );
+			} else {
+				self::redirect_canonical_amp( false );
+				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
+			}
+		}
 
 		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {

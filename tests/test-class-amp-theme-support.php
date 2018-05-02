@@ -21,6 +21,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	const TESTED_CLASS = 'AMP_Theme_Support';
 
 	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		AMP_Validation_Utils::reset_validation_results();
+	}
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 *
 	 * @global WP_Scripts $wp_scripts
@@ -29,6 +37,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		global $wp_scripts;
 		$wp_scripts = null;
 		parent::tearDown();
+		AMP_Validation_Utils::reset_validation_results();
 		remove_theme_support( 'amp' );
 		$_REQUEST                = array(); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
@@ -226,6 +235,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
@@ -891,6 +901,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::is_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
@@ -938,6 +949,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_customize_partial_render()
 	 */
 	public function test_filter_customize_partial_render() {
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
@@ -957,6 +969,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response() {
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
@@ -1012,19 +1025,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		</html>
 		<?php
 		$original_html  = trim( ob_get_clean() );
-		$removed_nodes  = array();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array(
-			'validation_error_callback' => function( $removed ) use ( &$removed_nodes ) {
-				$removed_nodes[ $removed['node']->nodeName ] = $removed['node'];
-			},
-		) );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
 		$this->assertNotContains( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
-		$this->assertContains( '<style amp-custom>body{background:black;}', $sanitized_html );
+		$this->assertRegExp( '#<style amp-custom>.*?body{background:black;}.*?</style>#s', $sanitized_html );
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-latest.js" async custom-element="amp-list"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
@@ -1040,10 +1048,27 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-audio-latest.js\' async custom-element="amp-audio"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-ad-latest.js\' async custom-element="amp-ad"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
+		$removed_nodes = array();
+		foreach ( AMP_Validation_Utils::$validation_results as $result ) {
+			if ( $result['sanitized'] && isset( $result['error']['node_name'] ) ) {
+				$node_name = $result['error']['node_name'];
+				if ( ! isset( $removed_nodes[ $node_name ] ) ) {
+					$removed_nodes[ $node_name ] = 0;
+				}
+				$removed_nodes[ $node_name ]++;
+			}
+		}
+
 		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 4, $removed_nodes );
-		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
-		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
+		$this->assertCount( 5, AMP_Validation_Utils::$validation_results );
+		$this->assertEquals(
+			array(
+				'onclick' => 1,
+				'handle'  => 3,
+				'script'  => 1,
+			),
+			$removed_nodes
+		);
 	}
 
 	/**
@@ -1052,6 +1077,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_bad_html() {
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 
@@ -1075,6 +1101,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		ob_start();

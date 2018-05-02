@@ -191,12 +191,12 @@ class AMP_Validation_Utils {
 	 * The errors encountered when validating.
 	 *
 	 * @var array[][] {
-	 *     @type string  $code        Error code.
-	 *     @type string  $node_name   Name of removed node.
-	 *     @type string  $parent_name Name of parent node.
+	 *     @type array  $error     Error code.
+	 *     @type bool   $sanitized Whether sanitized.
+	 *     @type string $slug      Hash of the error.
 	 * }
 	 */
-	public static $validation_errors = array();
+	public static $validation_results = array();
 
 	/**
 	 * Sources that enqueue each script.
@@ -258,9 +258,17 @@ class AMP_Validation_Utils {
 	protected static $should_filter_terms_clauses_for_error_validation_status;
 
 	/**
+	 * Whether validation error sources should be located.
+	 *
+	 * @todo Rename to should_locate_sources
+	 * @var bool
+	 */
+	public static $locate_sources = false;
+
+	/**
 	 * Whether in debug mode.
 	 *
-	 * This means that sanitization will not be applied for validation errors.
+	 * This means that sanitization will not be applied for validation errors, and any source comments will not be removed.
 	 *
 	 * @var bool
 	 */
@@ -279,12 +287,14 @@ class AMP_Validation_Utils {
 	public static function init( $args = array() ) {
 		$args = array_merge(
 			array(
-				'debug' => false,
+				'debug'          => false,
+				'locate_sources' => false,
 			),
 			$args
 		);
 
-		self::$debug = $args['debug'];
+		self::$debug          = $args['debug'];
+		self::$locate_sources = $args['locate_sources'];
 
 		if ( current_theme_supports( 'amp' ) ) {
 			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
@@ -315,6 +325,10 @@ class AMP_Validation_Utils {
 				add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
 			}
 		} );
+
+		if ( self::$locate_sources ) {
+			self::add_validation_hooks();
+		}
 	}
 
 	/**
@@ -447,6 +461,8 @@ class AMP_Validation_Utils {
 
 	/**
 	 * Add hooks for doing validation during preprocessing/sanitizing.
+	 *
+	 * @todo Rename to add_validation_error_source_tracing().
 	 */
 	public static function add_validation_hooks() {
 		self::wrap_widget_callbacks();
@@ -468,8 +484,6 @@ class AMP_Validation_Utils {
 		if ( $is_gutenberg_active ) {
 			add_filter( 'the_content', array( __CLASS__, 'add_block_source_comments' ), $do_blocks_priority - 1 );
 		}
-
-		add_filter( 'amp_content_sanitizers', array( __CLASS__, 'add_validation_callback' ), 1000 );
 	}
 
 	/**
@@ -575,130 +589,98 @@ class AMP_Validation_Utils {
 	/**
 	 * Add validation error.
 	 *
-	 * @param array $data {
+	 * @param array $error {
 	 *     Data.
 	 *
 	 *     @type string $code Error code.
 	 *     @type DOMElement|DOMNode $node The removed node.
 	 * }
+	 * @param array $data Additional data, including the node.
+	 *
 	 * @return bool Whether the validation error should result in sanitization.
 	 */
-	public static function add_validation_error( array $data ) {
+	public static function add_validation_error( array $error, array $data = array() ) {
 		$node    = null;
 		$matches = null;
+		$sources = null;
 
 		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
 			$node = $data['node'];
-			unset( $data['node'] );
-			$data['node_name'] = $node->nodeName;
-			if ( ! isset( $data['sources'] ) ) {
-				$data['sources'] = self::locate_sources( $node );
-			}
-			if ( $node->parentNode ) {
-				$data['parent_name'] = $node->parentNode->nodeName;
-			}
 		}
 
-		if ( $node instanceof DOMElement ) {
-			if ( ! isset( $data['code'] ) ) {
-				$data['code'] = self::INVALID_ELEMENT_CODE;
-			}
-			$data['node_attributes'] = array();
-			foreach ( $node->attributes as $attribute ) {
-				$data['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
-			}
-
-			$is_enqueued_link = (
-				'link' === $node->nodeName
-				&&
-				preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( 'id' ), $matches )
-				&&
-				isset( self::$enqueued_style_sources[ $matches['handle'] ] )
-			);
-			if ( $is_enqueued_link ) {
-				$data['sources'] = array_merge(
-					$data['sources'],
-					self::$enqueued_style_sources[ $matches['handle'] ]
-				);
-			}
-
-			/**
-			 * Script dependency.
-			 *
-			 * @var _WP_Dependency $script_dependency
-			 */
-			if ( 'script' === $node->nodeName ) {
-				$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
-
-				if ( $node->hasAttribute( 'src' ) ) {
-
-					// External script.
-					$src = $node->getAttribute( 'src' );
-					foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
-						$script_dependency  = wp_scripts()->registered[ $enqueued_script_handle ];
-						$is_matching_script = (
-							$script_dependency
-							&&
-							$script_dependency->src
-							&&
-							// Script attribute is haystack because includes protocol and may include query args (like ver).
-							false !== strpos( $src, preg_replace( '#^https?:(?=//)#', '', $script_dependency->src ) )
-						);
-						if ( $is_matching_script ) {
-							$data['sources'] = array_merge(
-								$data['sources'],
-								self::$enqueued_script_sources[ $enqueued_script_handle ]
-							);
-							break;
-						}
-					}
-				} elseif ( $node->firstChild ) {
-
-					// Inline script.
-					$text = $node->textContent;
-					foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
-						$inline_scripts = array_filter( array_merge(
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'data' ),
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'before' ),
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'after' )
-						) );
-						foreach ( $inline_scripts as $inline_script ) {
-							/*
-							 * Check to see if the inline script is inside (or the same) as the script in the document.
-							 * Note that WordPress takes the registered inline script and will output it with newlines
-							 * padding it, and sometimes with the script wrapped by CDATA blocks.
-							 */
-							if ( false !== strpos( $text, trim( $inline_script ) ) ) {
-								$data['sources'] = array_merge(
-									$data['sources'],
-									self::$enqueued_script_sources[ $enqueued_script_handle ]
-								);
-								break;
-							}
-						}
-					}
-					$data['text'] = $text;
-				}
-			}
-		} elseif ( $node instanceof DOMAttr ) {
-			if ( ! isset( $data['code'] ) ) {
-				$data['code'] = self::INVALID_ATTRIBUTE_CODE;
-			}
-			$data['element_attributes'] = array();
-			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
-				foreach ( $node->parentNode->attributes as $attribute ) {
-					$data['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
-				}
+		if ( self::$locate_sources ) {
+			if ( ! empty( $error['sources'] ) ) {
+				$sources = $error['sources'];
+			} elseif ( $node ) {
+				$sources = self::locate_sources( $node );
 			}
 		}
+		unset( $error['sources'] );
 
-		if ( ! isset( $data['code'] ) ) {
-			$data['code'] = 'unknown';
+		if ( ! isset( $error['code'] ) ) {
+			$error['code'] = 'unknown';
 		}
 
-		self::$validation_errors[] = $data;
+		/**
+		 * Filters the validation error array.
+		 *
+		 * This allows plugins to add amend additional properties which can help with
+		 * more accurately identifying a validation error beyond the name of the parent
+		 * node and the element's attributes. The $sources are also omitted because
+		 * these are only available during an explicit validation request and so they
+		 * are not suitable for plugins to vary sanitization by. If looking to force a
+		 * validation error to be ignored, use the 'amp_validation_error_sanitized'
+		 * filter instead of attempting to return an empty value with this filter (as
+		 * that is not supported).
+		 *
+		 * @since 1.0
+		 *
+		 * @param array $error Validation error to be printed.
+		 * @param array $context   {
+		 *     Context data for validation error sanitization.
+		 *
+		 *     @type DOMNode $node Node for which the validation error is being reported. May be null.
+		 * }
+		 */
+		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
-		return ! self::$debug;
+		// @todo Move this into a helper function.
+		ksort( $error );
+		$slug = md5( wp_json_encode( $error ) );
+		$term = get_term_by( 'slug', $slug, self::TAXONOMY_SLUG );
+
+		if ( ! self::$debug && ! empty( $term ) && self::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) {
+			$sanitized = true;
+		} else {
+			$sanitized = false;
+		}
+
+		/**
+		 * Filters whether the validation error should be sanitized.
+		 *
+		 * Note that the $node is not passed here to ensure that the filter can be
+		 * applied on validation errors that have been stored. Likewise, the $sources
+		 * are also omitted because these are only available during an explicit
+		 * validation request and so they are not suitable for plugins to vary
+		 * sanitization by. Note that returning false this indicates that the
+		 * validation error should not be considered a blocker to render AMP.
+		 *
+		 * @since 1.0
+		 *
+		 * @param bool  $sanitized Whether sanitized.
+		 * @param array $context   {
+		 *     Context data for validation error sanitization.
+		 *
+		 *     @type array $error Validation error being sanitized.
+		 * }
+		 */
+		$sanitized = apply_filters( 'amp_validation_error_sanitized', $sanitized, compact( 'error' ) );
+
+		// Add sources back into the $error for referencing later. @todo It may be cleaner to store sources separately to avoid having to re-remove later during storage.
+		$error = array_merge( $error, compact( 'sources' ) );
+
+		self::$validation_results[] = compact( 'error', 'sanitized' );
+		return $sanitized;
 	}
 
 	/**
@@ -761,7 +743,7 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function reset_validation_results() {
-		self::$validation_errors       = array();
+		self::$validation_results      = array();
 		self::$enqueued_style_sources  = array();
 		self::$enqueued_script_sources = array();
 	}
@@ -797,7 +779,7 @@ class AMP_Validation_Utils {
 
 			// Validate post content outside frontend context.
 			self::process_markup( $post->post_content );
-			$validation_errors = self::$validation_errors;
+			$validation_errors = wp_list_pluck( self::$validation_results, 'error' );
 			self::reset_validation_results();
 		}
 		if ( empty( $validation_errors ) ) {
@@ -901,6 +883,8 @@ class AMP_Validation_Utils {
 		$xpath    = new DOMXPath( $node->ownerDocument );
 		$comments = $xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = array();
+		$matches  = array();
+
 		foreach ( $comments as $comment ) {
 			$parsed_comment = self::parse_source_comment( $comment );
 			if ( ! $parsed_comment ) {
@@ -912,6 +896,81 @@ class AMP_Validation_Utils {
 				$sources[] = $parsed_comment['source'];
 			}
 		}
+
+		$is_enqueued_link = (
+			$node instanceof DOMElement
+			&&
+			'link' === $node->nodeName
+			&&
+			preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( 'id' ), $matches )
+			&&
+			isset( self::$enqueued_style_sources[ $matches['handle'] ] )
+		);
+		if ( $is_enqueued_link ) {
+			$sources = array_merge(
+				self::$enqueued_style_sources[ $matches['handle'] ],
+				$sources
+			);
+		}
+
+		/**
+		 * Script dependency.
+		 *
+		 * @var _WP_Dependency $script_dependency
+		 */
+		if ( $node instanceof DOMElement && 'script' === $node->nodeName ) {
+			$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
+
+			if ( $node->hasAttribute( 'src' ) ) {
+
+				// External script.
+				$src = $node->getAttribute( 'src' );
+				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
+					$script_dependency  = wp_scripts()->registered[ $enqueued_script_handle ];
+					$is_matching_script = (
+						$script_dependency
+						&&
+						$script_dependency->src
+						&&
+						// Script attribute is haystack because includes protocol and may include query args (like ver).
+						false !== strpos( $src, preg_replace( '#^https?:(?=//)#', '', $script_dependency->src ) )
+					);
+					if ( $is_matching_script ) {
+						$sources = array_merge(
+							self::$enqueued_script_sources[ $enqueued_script_handle ],
+							$sources
+						);
+						break;
+					}
+				}
+			} elseif ( $node->firstChild ) {
+
+				// Inline script.
+				$text = $node->textContent;
+				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
+					$inline_scripts = array_filter( array_merge(
+						(array) wp_scripts()->get_data( $enqueued_script_handle, 'data' ),
+						(array) wp_scripts()->get_data( $enqueued_script_handle, 'before' ),
+						(array) wp_scripts()->get_data( $enqueued_script_handle, 'after' )
+					) );
+					foreach ( $inline_scripts as $inline_script ) {
+						/*
+						 * Check to see if the inline script is inside (or the same) as the script in the document.
+						 * Note that WordPress takes the registered inline script and will output it with newlines
+						 * padding it, and sometimes with the script wrapped by CDATA blocks.
+						 */
+						if ( false !== strpos( $text, trim( $inline_script ) ) ) {
+							$sources = array_merge(
+								self::$enqueued_script_sources[ $enqueued_script_handle ],
+								$sources
+							);
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		return $sources;
 	}
 
@@ -1411,6 +1470,20 @@ class AMP_Validation_Utils {
 	}
 
 	/**
+	 * Determine if there are any validation errors which have not been ignored.
+	 *
+	 * @return bool Whether AMP is blocked.
+	 */
+	public static function has_blocking_validation_errors() {
+		foreach ( self::$validation_results as $result ) {
+			if ( false === $result['sanitized'] ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Finalize validation.
 	 *
 	 * @param DOMDocument $dom Document.
@@ -1435,7 +1508,8 @@ class AMP_Validation_Utils {
 		}
 
 		if ( $args['append_validation_status_comment'] ) {
-			$encoded = wp_json_encode( self::$validation_errors, 128 /* JSON_PRETTY_PRINT */ );
+			$errors  = wp_list_pluck( self::$validation_results, 'error' );
+			$encoded = wp_json_encode( $errors, 128 /* JSON_PRETTY_PRINT */ );
 			$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
 			$comment = $dom->createComment( 'AMP_VALIDATION_ERRORS:' . $encoded . "\n" );
 			$dom->documentElement->appendChild( $comment );
@@ -1450,20 +1524,7 @@ class AMP_Validation_Utils {
 	 */
 	public static function add_validation_callback( $sanitizers ) {
 		foreach ( $sanitizers as $sanitizer => &$args ) {
-
-			if ( isset( $args['validation_error_callback'] ) ) {
-				$original_validation_error_callback = $args['validation_error_callback'];
-				$args['validation_error_callback']  = function( $validation_error ) use ( $original_validation_error_callback ) {
-					AMP_Validation_Utils::add_validation_error( $validation_error );
-					$result = call_user_func( $original_validation_error_callback, $validation_error );
-					if ( self::$debug ) {
-						return false;
-					}
-					return $result;
-				};
-			} else {
-				$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
-			}
+			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 
 		// @todo Pass this into all sanitizers?
@@ -2274,6 +2335,7 @@ class AMP_Validation_Utils {
 	 *
 	 * If there are no validation errors provided, then any existing amp_invalid_url post is deleted.
 	 *
+	 * @todo Rename to validation results?
 	 * @param array  $validation_errors Validation errors.
 	 * @param string $url               URL on which the validation errors occurred.
 	 * @return int|WP_Error $post_id The post ID of the custom post type used, null if post was deleted due to no validation errors, or WP_Error on failure.
