@@ -54,7 +54,7 @@ class AMP_Post_Type_Support {
 			AMP_Options_Manager::get_option( 'supported_post_types', array() )
 		);
 		foreach ( $post_types as $post_type ) {
-			add_post_type_support( $post_type, AMP_QUERY_VAR );
+			add_post_type_support( $post_type, amp_get_slug() );
 		}
 	}
 
@@ -73,7 +73,7 @@ class AMP_Post_Type_Support {
 		$errors = array();
 
 		// Because `add_rewrite_endpoint` doesn't let us target specific post_types.
-		if ( ! post_type_supports( $post->post_type, AMP_QUERY_VAR ) ) {
+		if ( isset( $post->post_type ) && ! post_type_supports( $post->post_type, amp_get_slug() ) ) {
 			$errors[] = 'post-type-support';
 		}
 
@@ -90,7 +90,7 @@ class AMP_Post_Type_Support {
 		 * @param int     $post_id Post ID.
 		 * @param WP_Post $post    Post.
 		 */
-		if ( true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
+		if ( isset( $post->ID ) && true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
 			$errors[] = 'skip-post';
 		}
 

@@ -33,7 +33,7 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				array( 'amp-vine' => 'https://cdn.ampproject.org/v0/amp-vine-0.1.js' ),
+				array( 'amp-vine' => true ),
 			),
 		);
 	}
@@ -44,8 +44,15 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Vine_Embed_Handler();
 		$embed->register_embed();
-		apply_filters( 'the_content', $source );
-		$scripts = $embed->get_scripts();
+		$source = apply_filters( 'the_content', $source );
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$whitelist_sanitizer->sanitize();
+
+		$scripts = array_merge(
+			$embed->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
 
 		$this->assertEquals( $expected, $scripts );
 	}

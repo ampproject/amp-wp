@@ -7,10 +7,13 @@
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" value="amp" />
+			<property name="text_domain" value="amp,default" />
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
 	</rule>
@@ -25,8 +28,14 @@
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
-			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS" />
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS,documentElement,removeChild,ownerDocument" />
 		</properties>
+	</rule>
+
+	<!-- Include sniffs for PHP cross-version compatibility. -->
+	<config name="testVersion" value="5.3-99.0"/>
+	<rule ref="PHPCompatibility">
+		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>
 
 	<arg value="s"/>

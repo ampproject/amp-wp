@@ -56,6 +56,18 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 		$this->assertFalse( $before_is_amp_endpoint, 'is_amp_endpoint was not defaulting to false before amp_render_post' );
 		$this->assertTrue( $this->was_amp_endpoint, 'is_amp_endpoint was not forced to true during amp_render_post' );
 		$this->assertFalse( $after_is_amp_endpoint, 'is_amp_endpoint was not reset after amp_render_post' );
+
+		add_theme_support( 'amp' );
+		$this->assertTrue( is_amp_endpoint() );
+
+		// Make is_admin() true, as requests for an admin page aren't for AMP endpoints.
+		set_current_screen( 'edit.php' );
+		$this->assertFalse( is_amp_endpoint() );
+		unset( $GLOBALS['current_screen'] );
+
+		$GLOBALS['wp_query']->is_feed = true;
+		$this->assertFalse( is_amp_endpoint() );
+		$GLOBALS['wp_query']->is_feed = false;
 	}
 
 	/**

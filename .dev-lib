@@ -1,6 +1,8 @@
 PATH_EXCLUDES_PATTERN=includes/lib/
 DEFAULT_BASE_BRANCH=develop
 ASSETS_DIR=wp-assets
+PROJECT_SLUG=amp
+SKIP_ECHO_PATHS_SCOPE=1
 
 function after_wp_install {
     echo "Installing REST API..."

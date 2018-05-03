@@ -14,23 +14,12 @@ class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 400;
 	protected $DEFAULT_HEIGHT = 400;
 
-	private static $script_slug = 'amp-vine';
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-vine-0.1.js';
-
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-vine', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 	}
 
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-vine', -1 );
-	}
-
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-
-		return array( self::$script_slug => self::$script_src );
 	}
 
 	public function oembed( $matches, $attr, $url, $rawattr ) {

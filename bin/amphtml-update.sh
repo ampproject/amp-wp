@@ -38,4 +38,5 @@ cd $VENDOR_PATH/amphtml/validator
 
 # Run script.
 python amphtml-update.py
-cp amp_wp/class-amp-allowed-tags-generated.php ../../../includes/sanitizers/
+mv amp_wp/class-amp-allowed-tags-generated.php ../../../includes/sanitizers/
+rm -r amp_wp
