@@ -128,6 +128,21 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 <img src="http://placehold.it/380x180" width="380" height="180" />',
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img><amp-img src="http://placehold.it/360x160" width="360" height="160" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img><amp-img src="http://placehold.it/370x170" width="370" height="170" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img><amp-img src="http://placehold.it/380x180" width="380" height="180" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
 			),
+
+			'image_center_aligned'                     => array(
+				'<img class="aligncenter" src="http://placehold.it/350x150" width="350" height="150" />',
+				'<figure class="aligncenter" style="max-width: 350px;"><amp-img class="amp-wp-enforced-sizes" src="http://placehold.it/350x150" width="350" height="150" layout="intrinsic"></amp-img></figure>',
+			),
+
+			'image_left_aligned'                       => array(
+				'<img class="alignleft" src="http://placehold.it/350x150" width="350" height="150" />',
+				'<amp-img class="alignleft amp-wp-enforced-sizes" src="http://placehold.it/350x150" width="350" height="150" layout="intrinsic"></amp-img>',
+			),
+
+			'image_with_caption'                       => array(
+				'<figure class="wp-caption aligncenter"><img src="http://placehold.it/350x150" alt="" width="350" height="150" class="size-medium wp-image-312"><figcaption class="wp-caption-text">This is an example caption.</figcaption></figure>',
+				'<figure class="wp-caption aligncenter"><amp-img src="http://placehold.it/350x150" alt="" width="350" height="150" class="size-medium wp-image-312 amp-wp-enforced-sizes" layout="intrinsic"></amp-img><figcaption class="wp-caption-text">This is an example caption.</figcaption></figure>',
+			),
 		);
 	}
 
@@ -176,5 +191,58 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			$whitelist_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
+	}
+
+	/**
+	 * Test handle_centering
+	 *
+	 * @covers AMP_Img_Sanitizer::handle_centering()
+	 */
+	public function test_handle_centering() {
+		$dom                = new DOMDocument();
+		$align_center_class = 'aligncenter';
+		$align_left_class   = 'alignleft';
+		$sanitizer          = new AMP_Img_Sanitizer( $dom );
+		$width              = 300;
+
+		$amp_img = AMP_DOM_Utils::create_node(
+			$dom,
+			'amp-img',
+			array(
+				'class' => $align_left_class,
+				'width' => $width,
+			)
+		);
+
+		// There's no aligncenter class, so the node shouldn't change.
+		$this->assertEquals( $amp_img, $sanitizer->handle_centering( $amp_img ) );
+
+		$amp_img = AMP_DOM_Utils::create_node(
+			$dom,
+			'amp-img',
+			array(
+				'class' => $align_left_class,
+			)
+		);
+
+		// There's no width attribute, so the node shouldn't change.
+		$this->assertEquals( $amp_img, $sanitizer->handle_centering( $amp_img ) );
+
+		$centered_amp_img = AMP_DOM_Utils::create_node(
+			$dom,
+			'amp-img',
+			array(
+				'class' => $align_center_class,
+				'width' => $width,
+			)
+		);
+		$processed_tag    = $sanitizer->handle_centering( $centered_amp_img );
+		$child            = $processed_tag->firstChild;
+
+		$this->assertEquals( 'figure', $processed_tag->nodeName );
+		$this->assertEquals( $align_center_class, $processed_tag->getAttribute( 'class' ) );
+		$this->assertEquals( "max-width: {$width}px;", $processed_tag->getAttribute( 'style' ) );
+		$this->assertEquals( 'amp-img', $child->nodeName );
+		$this->assertFalse( strpos( $child->getAttribute( 'class' ), $align_center_class ) );
 	}
 }

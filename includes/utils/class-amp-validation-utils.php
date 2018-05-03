@@ -582,20 +582,24 @@ class AMP_Validation_Utils {
 		$validation_status_post = null;
 		$validation_errors      = array();
 
-		// Validate post content outside frontend context.
-		if ( post_type_supports( $post->post_type, 'editor' ) ) {
+		// Incorporate frontend validation status if there is a known URL for the post.
+		$existing_validation_errors = self::get_existing_validation_errors( $post );
+		if ( isset( $existing_validation_errors ) ) {
+			$validation_errors = $existing_validation_errors;
+		}
+
+		// If no results from URL are available, validate post content outside frontend context.
+		if ( empty( $validation_errors ) && post_type_supports( $post->post_type, 'editor' ) ) {
 			self::process_markup( $post->post_content );
 			$validation_errors = array_merge(
 				$validation_errors,
 				self::$validation_errors
 			);
 			self::reset_validation_results();
-		}
 
-		// Incorporate frontend validation status if there is a known URL for the post.
-		$existing_validation_errors = self::get_existing_validation_errors( $post );
-		if ( isset( $existing_validation_errors ) ) {
-			$validation_errors = $existing_validation_errors;
+			// Make sure original post is restored after applying shortcodes which could change it.
+			$GLOBALS['post'] = $post; // WPCS: override ok.
+			setup_postdata( $post );
 		}
 
 		if ( empty( $validation_errors ) ) {
