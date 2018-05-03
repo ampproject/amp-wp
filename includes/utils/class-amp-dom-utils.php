@@ -240,8 +240,13 @@ class AMP_DOM_Utils {
 			return '<' . $tag_matches['name'] . $new_attrs . '>';
 		};
 
+		/*
+		 * Match all start tags that probably contain a binding attribute.
+		 * @todo Warning: The following pattern is brittle since it truncates HTML tags that have attributes that contain ">" or "=>".
+		 * For example, if there exists: `<body class="foo" [class]="bodyClasses.concat( isBar ? 'bar' : '' ).filter( className => '' != className )">`
+		 * Then this results in the following being output as the first child fo the body: `'' != className )">`
+		 */
 		$converted = preg_replace_callback(
-			// Match all start tags that probably contain a binding attribute.
 			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
 			$replace_callback,
 			$html
