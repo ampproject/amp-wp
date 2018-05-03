@@ -415,7 +415,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						}
 					</script>
 				</amp-state>
-				<aside class="sidebar1" [class]="mySidebar.expanded ? 'expanded' : ''">...</aside>
+				<aside class="sidebar1" [class]="! mySidebar.expanded ? '' : 'expanded'">...</aside>
 				<aside class="sidebar2" [class]='mySidebar.expanded ? "visible" : ""'>...</aside>
 			</body>
 		</html>
