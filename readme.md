@@ -8,7 +8,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.7  
 **Tested up to:** 4.9  
-**Stable tag:** 0.6.2  
+**Stable tag:** 0.7.0  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.3  
 
@@ -62,7 +62,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ## Changelog ##
 
-### 0.7.0 (unreleased) ###
+### 0.7.0 (2018-05-03) ###
 - Render an entire site as "Native AMP" if the theme calls `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#852](https://github.com/Automattic/amp-wp/pull/852), [#865](https://github.com/Automattic/amp-wp/pull/865), [#888](https://github.com/Automattic/amp-wp/pull/888). Props westonruter, kaitnyl, ThierryA.
 - Use the AMP spec to automatically discover the required AMP component scripts to include on the page while post-processing. See [#882](https://github.com/Automattic/amp-wp/pull/882), [#885](https://github.com/Automattic/amp-wp/pull/885). Props westonruter.
 - Automatically concatenate stylesheets from `style` tags with loaded stylesheets from `link` tags combined in one `style[amp-custom]`. See [#887](https://github.com/Automattic/amp-wp/pull/887), [#890](https://github.com/Automattic/amp-wp/pull/890), [#935](https://github.com/Automattic/amp-wp/pull/935). Props westonruter.
