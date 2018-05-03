@@ -211,7 +211,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get list of all the class names used in the document.
+	 * Get list of all the class names used in the document, including those used in [class] attributes.
 	 *
 	 * @since 1.0
 	 * @return array Used class names.
@@ -222,6 +222,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->xpath->query( '//*/@class' ) as $class_attribute ) {
 				$classes .= ' ' . $class_attribute->nodeValue;
 			}
+
+			// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
+			foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class' ) as $bound_class_attribute ) {
+				if ( preg_match_all( '/([\'"])([^\1]+?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
+					$classes .= ' ' . implode( ' ', $matches[2] );
+				}
+			}
+
 			$this->used_class_names = array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) );
 		}
 		return $this->used_class_names;
