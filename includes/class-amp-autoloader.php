@@ -76,6 +76,7 @@ class AMP_Autoloader {
 		'AMP_Form_Sanitizer'                          => 'includes/sanitizers/class-amp-form-sanitizer',
 		'AMP_Playbuzz_Sanitizer'                      => 'includes/sanitizers/class-amp-playbuzz-sanitizer',
 		'AMP_Style_Sanitizer'                         => 'includes/sanitizers/class-amp-style-sanitizer',
+		'AMP_Instagram_Sanitizer'                     => 'includes/sanitizers/class-amp-instagram-sanitizer',
 		'AMP_Tag_And_Attribute_Sanitizer'             => 'includes/sanitizers/class-amp-tag-and-attribute-sanitizer',
 		'AMP_Video_Sanitizer'                         => 'includes/sanitizers/class-amp-video-sanitizer',
 		'AMP_Customizer_Design_Settings'              => 'includes/settings/class-amp-customizer-design-settings',
