@@ -20,7 +20,12 @@ var ampEditorBlocks = ( function() {
 				{ value: 'intrinsic', label: 'Intrinsic' } // Not supported by video.
 			],
 			defaultWidth: 608, // Max-width in the editor.
-			defaultHeight: 400
+			defaultHeight: 400,
+			mediaBlocks: [
+				'core/image',
+				'core/video',
+				'core/audio'
+			]
 		}
 	};
 
@@ -96,12 +101,6 @@ var ampEditorBlocks = ( function() {
 	 * @return {*} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
-		var mediaBlocks = [
-			'core/image',
-			'core/video',
-			'core/audio'
-		];
-
 		// Gallery settings for shortcode.
 		if ( 'core/shortcode' === name ) {
 			if ( ! settings.attributes ) {
@@ -113,7 +112,7 @@ var ampEditorBlocks = ( function() {
 		}
 
 		// Layout settings for embeds and media blocks.
-		if ( 0 === name.indexOf( 'core-embed' ) || -1 !== mediaBlocks.indexOf( name ) ) {
+		if ( 0 === name.indexOf( 'core-embed' ) || -1 !== component.data.mediaBlocks.indexOf( name ) ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
@@ -164,12 +163,11 @@ var ampEditorBlocks = ( function() {
 						}, props ) )
 					];
 				}
-			} else {
+			} else if ( -1 !== component.data.mediaBlocks.indexOf( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 				inspectorControls = component.setUpInspectorControls( props );
 			}
 
-			// For editor view, add a wrapper to any tags except for embeds, these will break due to embedding logic.
-			if ( attributes.ampLayout && -1 === name.indexOf( 'core-embed/' ) ) {
+			if ( attributes.ampLayout ) {
 				if ( 'core/image' === name ) {
 					component.setImageBlockLayoutAttributes( props, attributes.ampLayout, inspectorControls );
 				} else if ( 'nodisplay' === attributes.ampLayout ) {

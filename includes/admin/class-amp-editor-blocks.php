@@ -17,6 +17,7 @@ class AMP_Editor_Blocks {
 	public function init() {
 		if ( function_exists( 'gutenberg_init' ) ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'add_editor_filters' ) );
+			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		}
 	}
 
@@ -53,10 +54,13 @@ class AMP_Editor_Blocks {
 				}
 				$class_names = explode( ' ', $match[1] );
 				$class_attr  = array();
+				if ( isset( $block['attrs']['className'] ) ) {
+					$class_attr[] = $block['attrs']['className'];
+				}
 
 				// Take everything except for the wp-block-{block_type} class.
 				foreach ( $class_names as $class_name ) {
-					if ( false === strpos( $class_name, 'wp-block-' ) ) {
+					if ( false !== strpos( $class_name, 'amp-' ) ) {
 						$class_attr[] = $class_name;
 					}
 				}
@@ -69,8 +73,8 @@ class AMP_Editor_Blocks {
 					array(
 						'className' => implode( ' ', $class_attr ),
 					)
-				) );
-				$to_replace     = wp_json_encode( $block['attrs'] );
+				), 64 /* JSON_UNESCAPED_SLASHES */ );
+				$to_replace     = wp_json_encode( $block['attrs'], 64 /* JSON_UNESCAPED_SLASHES */ );
 
 				// Replace the classname attribute with the modified one.
 				$content                     = str_replace( $to_replace, $new_attributes, $prepared_post->post_content );
@@ -78,6 +82,20 @@ class AMP_Editor_Blocks {
 			}
 		}
 		return $prepared_post;
+	}
+
+	/**
+	 * Whitelist used data-amp-* attributes.
+	 *
+	 * @param array $context Array of contexts.
+	 * @return mixed Modified array.
+	 */
+	public function whitelist_layout_in_wp_kses_allowed_html( $context ) {
+		foreach ( $context as $tag ) {
+			$tag['data-amp-layout']    = true;
+			$tag['data-amp-noloading'] = true;
+		}
+		return $context;
 	}
 
 	/**
