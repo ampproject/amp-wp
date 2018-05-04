@@ -157,30 +157,29 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $node instanceof DOMElement ) {
 					continue;
 				}
+				$height = $dimensions && isset( $dimensions['height'] ) ? $dimensions['height'] : self::FALLBACK_HEIGHT;
+				$width  = $dimensions && isset( $dimensions['width'] ) ? $dimensions['width'] : self::FALLBACK_WIDTH;
+				$class  = $node->getAttribute( 'class' );
+				if ( ! $class ) {
+					$class = '';
+				}
 				if (
 					! is_numeric( $node->getAttribute( 'width' ) ) &&
 					! is_numeric( $node->getAttribute( 'height' ) )
 				) {
-					$height = self::FALLBACK_HEIGHT;
-					$width  = self::FALLBACK_WIDTH;
 					$node->setAttribute( 'width', $width );
 					$node->setAttribute( 'height', $height );
-					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size' : 'amp-wp-unknown-size';
-					$node->setAttribute( 'class', $class );
+					$node->setAttribute( 'class', trim( $class . ' amp-wp-unknown-size' ) );
 				} elseif (
 					! is_numeric( $node->getAttribute( 'height' ) )
 				) {
-					$height = self::FALLBACK_HEIGHT;
 					$node->setAttribute( 'height', $height );
-					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-height' : 'amp-wp-unknown-size amp-wp-unknown-height';
-					$node->setAttribute( 'class', $class );
+					$node->setAttribute( 'class', trim( $class . ' amp-wp-unknown-size amp-wp-unknown-height' ) );
 				} elseif (
 					! is_numeric( $node->getAttribute( 'width' ) )
 				) {
-					$width = self::FALLBACK_WIDTH;
 					$node->setAttribute( 'width', $width );
-					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-width' : 'amp-wp-unknown-size amp-wp-unknown-width';
-					$node->setAttribute( 'class', $class );
+					$node->setAttribute( 'class', trim( $class . ' amp-wp-unknown-size amp-wp-unknown-width' ) );
 				}
 			}
 		}
