@@ -582,20 +582,24 @@ class AMP_Validation_Utils {
 		$validation_status_post = null;
 		$validation_errors      = array();
 
-		// Validate post content outside frontend context.
-		if ( post_type_supports( $post->post_type, 'editor' ) ) {
+		// Incorporate frontend validation status if there is a known URL for the post.
+		$existing_validation_errors = self::get_existing_validation_errors( $post );
+		if ( isset( $existing_validation_errors ) ) {
+			$validation_errors = $existing_validation_errors;
+		}
+
+		// If no results from URL are available, validate post content outside frontend context.
+		if ( empty( $validation_errors ) && post_type_supports( $post->post_type, 'editor' ) ) {
 			self::process_markup( $post->post_content );
 			$validation_errors = array_merge(
 				$validation_errors,
 				self::$validation_errors
 			);
 			self::reset_validation_results();
-		}
 
-		// Incorporate frontend validation status if there is a known URL for the post.
-		$existing_validation_errors = self::get_existing_validation_errors( $post );
-		if ( isset( $existing_validation_errors ) ) {
-			$validation_errors = $existing_validation_errors;
+			// Make sure original post is restored after applying shortcodes which could change it.
+			$GLOBALS['post'] = $post; // WPCS: override ok.
+			setup_postdata( $post );
 		}
 
 		if ( empty( $validation_errors ) ) {
@@ -1498,7 +1502,7 @@ class AMP_Validation_Utils {
 				);
 				printf(
 					'<div class="notice notice-warning is-dismissible"><p>%s %s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html( _n( 'Warning: The following plugin may be incompatible with AMP:', 'Warning: The following plugins may be incompatible with AMP: ', count( $invalid_plugins ), 'amp' ) ),
+					esc_html( _n( 'Warning: The following plugin may be incompatible with AMP:', 'Warning: The following plugins may be incompatible with AMP:', count( $invalid_plugins ), 'amp' ) ),
 					implode( ', ', $reported_plugins ),
 					$more_details_link,
 					esc_html__( 'Dismiss this notice.', 'amp' )
