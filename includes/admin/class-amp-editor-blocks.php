@@ -17,7 +17,6 @@ class AMP_Editor_Blocks {
 	public function init() {
 		if ( function_exists( 'gutenberg_init' ) ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'add_editor_filters' ) );
-			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		}
 	}
 
@@ -79,20 +78,6 @@ class AMP_Editor_Blocks {
 			}
 		}
 		return $prepared_post;
-	}
-
-	/**
-	 * Whitelist used data-amp-* attributes.
-	 *
-	 * @param array $context Array of contexts.
-	 * @return mixed Modified array.
-	 */
-	public function whitelist_layout_in_wp_kses_allowed_html( $context ) {
-		foreach ( $context as $tag ) {
-			$tag['data-amp-layout']    = true;
-			$tag['data-amp-noloading'] = true;
-		}
-		return $context;
 	}
 
 	/**
