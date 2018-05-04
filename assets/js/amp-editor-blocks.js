@@ -127,8 +127,8 @@ var ampEditorBlocks = ( function() {
 			'core/audio'
 		];
 
-		// Gallery settings for shortcode.
-		if ( 'core/shortcode' === name ) {
+		// AMP Carousel settings.
+		if ( 'core/shortcode' === name || 'core/gallery' ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
@@ -184,6 +184,8 @@ var ampEditorBlocks = ( function() {
 						}, props ) )
 					];
 				}
+			} else if ( 'core/gallery' === name ) {
+				inspectorControls = component.setUpGalleryInpsectorControls( props );
 			} else {
 				inspectorControls = component.setUpInspectorControls( props );
 			}
@@ -285,6 +287,38 @@ var ampEditorBlocks = ( function() {
 							props.setAttributes( { ampNoLoading: ! ampNoLoading } );
 						}
 					} )
+				)
+			)
+		);
+	};
+
+	/**
+	 * Set up inspector controls for Gallery block.
+	 * Adds ampCarousel attribute for displaying the output as amp-carousel.
+	 *
+	 * @param {Object} props Props.
+	 * @return {*} Inspector controls.
+	 */
+	component.setUpGalleryInpsectorControls = function setUpGalleryInpsectorControls( props ) {
+		var ampCarousel = props.attributes.ampCarousel,
+			isSelected = props.isSelected,
+			el = wp.element.createElement,
+			InspectorControls = wp.blocks.InspectorControls,
+			ToggleControl = wp.components.ToggleControl,
+			PanelBody = wp.components.PanelBody,
+			toggleControl;
+
+		toggleControl = el( ToggleControl, {
+			label: 'Display as AMP carousel',
+			checked: ampCarousel,
+			onChange: function() {
+				props.setAttributes( { ampCarousel: ! ampCarousel } );
+			}
+		} );
+		return isSelected && (
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: 'AMP Settings' },
+					toggleControl
 				)
 			)
 		);
