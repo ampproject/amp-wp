@@ -59,18 +59,18 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'video_with_layout_from_editor_fill' => array(
-				'<figure data-amp-layout="fill"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
-				'<figure data-amp-layout="fill" style="position:relative; width: 100%; height: 100px;"><amp-video src="https://example.com/file.mp4" layout="fill"></amp-video></figure>',
+				'<figure class="amp-layout-fill"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
+				'<figure class="amp-layout-fill" style="position:relative; width: 100%; height: 100px;"><amp-video src="https://example.com/file.mp4" layout="fill"></amp-video></figure>',
 			),
 
 			'video_with_layout_from_editor_fixed' => array(
-				'<figure data-amp-layout="fixed"><video src="https://example.com/file.mp4" width="100"></video></figure>',
-				'<figure data-amp-layout="fixed"><amp-video src="https://example.com/file.mp4" width="100" layout="fixed" height="400"></amp-video></figure>',
+				'<figure class="amp-layout-fixed"><video src="https://example.com/file.mp4" width="100"></video></figure>',
+				'<figure class="amp-layout-fixed"><amp-video src="https://example.com/file.mp4" width="100" layout="fixed" height="400"></amp-video></figure>',
 			),
 
 			'video_with_noloading_from_editor' => array(
-				'<figure data-amp-noloading="true"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
-				'<figure data-amp-noloading="true"><amp-video src="https://example.com/file.mp4" height="100" width="100" noloading="" layout="responsive"></amp-video></figure>',
+				'<figure class="amp-noloading"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
+				'<figure class="amp-noloading"><amp-video src="https://example.com/file.mp4" height="100" width="100" noloading="" layout="responsive"></amp-video></figure>',
 			),
 
 			'multiple_same_video' => array(

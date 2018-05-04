@@ -60,8 +60,8 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'audio_with_layout_from_editor_fixed_height' => array(
-				'<figure data-amp-layout="fixed-height"><audio src="https://example.com/audio/file.ogg" width="100" height="100"></audio></figure>',
-				'<figure data-amp-layout="fixed-height"><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100" layout="fixed-height"></amp-audio></figure>',
+				'<figure class="amp-layout-fixed-height"><audio src="https://example.com/audio/file.ogg" width="100" height="100"></audio></figure>',
+				'<figure class="amp-layout-fixed-height"><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100" layout="fixed-height"></amp-audio></figure>',
 			),
 
 			'multiple_same_audio' => array(
