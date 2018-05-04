@@ -16,7 +16,18 @@ To install the `pre-commit` hook, do `bash dev-lib/install-pre-commit-hook.sh`.
 
 Note that pull requests will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint and (for now) JSCS and JSHint.
 
-To run the Grunt commands, please first `npm install -g grunt-cli` and then `npm install`.
+## Creating a Plugin Build
+
+To create a build of the plugin for installing in WordPress as a ZIP package, do:
+
+```bash
+git submodule update --init # (if you haven't done so yet)
+composer install # (if you haven't done so yet)
+npm install # (if you haven't done so yet)
+npm run build
+```
+
+This will create an `amp.zip` in the plugin directory which you can install. The contents of this ZIP are also located in the `build` directory which you can `rsync` somewhere as well. 
 
 ## Updating Allowed Tags And Attributes
 
@@ -83,9 +94,16 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
-0. Do `grunt build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
-1. Bump plugin versions in `package.json` (×1), `package-lock.json` (×1, just do `npm install` first), `composer.json` (×1), and in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
-2. Add changelog entry to readme.
-3. Merge release branch into `master`.
-4. Run `grunt deploy` to to commit the plugin to WordPress.org.
-5. [Create new release](https://github.com/Automattic/amp-wp/releases/new) on GitHub targeting `master`, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Publish.
+1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
+2. Bump plugin versions in `package.json` (×1), `package-lock.json` (×1, just do `npm install` first), `composer.json` (×1), and in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
+3. Add changelog entry to readme.
+4. Draft blog post about the new release.
+5. [Draft new release](https://github.com/Automattic/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Include link to changelog in release tag.
+6. Run `npm run deploy` to to commit the plugin to WordPress.org.
+7. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
+8. Publish GitHub release.
+9. Merge release branch into `develop`.
+10. Merge release tag into `master`.
+11. Publish release blog post, including link to GitHub release.
+12. Close the GitHub milestone and project.
+13. Make announcements.

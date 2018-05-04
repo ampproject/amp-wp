@@ -20,6 +20,7 @@
   "grunt-wp-deploy": "^1.2.1"
  },
  "scripts": {
-  "build": "grunt build"
+  "build": "grunt build",
+  "deploy": "grunt deploy"
  }
 }
