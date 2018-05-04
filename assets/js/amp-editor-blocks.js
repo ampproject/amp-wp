@@ -223,7 +223,9 @@ var ampEditorBlocks = ( function() {
 		var attributes = props.attributes;
 		switch ( layout ) {
 			case 'fixed-height':
-				props.setAttributes( { width: '' } );
+				if ( '' !== attributes.height ) {
+					props.setAttributes( { width: '' } );
+				}
 				if ( ! attributes.height ) {
 					props.setAttributes( { height: component.data.defaultHeight } );
 				}
