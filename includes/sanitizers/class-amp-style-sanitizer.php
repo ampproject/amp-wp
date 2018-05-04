@@ -713,6 +713,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$open_parens++;
 				} elseif ( ')' === $css[ $final_offset ] ) {
 					$open_parens--;
+				} elseif ( ';' === $css[ $final_offset ] || '}' === $css[ $final_offset ] ) {
+					break; // Stop looking since clearly came to the end of the property. Unbalanced parentheses.
 				}
 
 				// Found the end of the calc() function, so replace it with a placeholder function.
