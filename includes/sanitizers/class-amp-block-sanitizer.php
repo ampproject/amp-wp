@@ -47,7 +47,7 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// We are looking for <figure> elements with layout attribute only.
+			// We are looking for <figure> elements with AMP classes only.
 			if ( false === strpos( $attributes['class'], 'amp-layout-' ) && false === strpos( $attributes['class'], 'amp-noloading' ) ) {
 				continue;
 			}

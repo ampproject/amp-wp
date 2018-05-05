@@ -49,7 +49,13 @@ class AMP_Editor_Blocks {
 
 				// Get the class of the figure.
 				preg_match( "'<figure class=\"(.*?)\"'si", $block['innerHTML'], $match );
-				if ( ! $match ) {
+
+				// Lets check for gallery block class.
+				if ( empty( $match ) ) {
+					preg_match( "'<ul class=\"(.*?)\"'si", $block['innerHTML'], $match );
+				}
+
+				if ( ! empty( $match ) ) {
 					continue;
 				}
 				$class_names = explode( ' ', $match[1] );
@@ -58,7 +64,7 @@ class AMP_Editor_Blocks {
 					$class_attr[] = $block['attrs']['className'];
 				}
 
-				// Take everything except for the wp-block-{block_type} class.
+				// Take everything with amp-*.
 				foreach ( $class_names as $class_name ) {
 					if ( false !== strpos( $class_name, 'amp-' ) ) {
 						$class_attr[] = $class_name;

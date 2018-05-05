@@ -406,7 +406,7 @@ var ampEditorBlocks = ( function() {
 	 * Check if AMP Carousel is set.
 	 *
 	 * @param {Object} attributes Attributes.
-	 * @returns {boolean} If is set.
+	 * @return {boolean} If is set.
 	 */
 	component.hasAmpCarouselSet = function hasAmpCarouselSet( attributes ) {
 		return attributes.ampCarousel && false !== attributes.ampCarousel;
