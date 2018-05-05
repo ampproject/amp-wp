@@ -381,12 +381,15 @@ var ampEditorBlocks = ( function() {
 			);
 		}
 
-		// In case AMP Layout, add layout to classname.
+		// In case AMP attributes, add info to classname.
 		if ( component.hasAmpLayoutSet( attributes || '' ) ) {
 			ampClassName += ' amp-layout-' + attributes.ampLayout;
 		}
 		if ( component.hasAmpNoLoadingSet( attributes || '' ) ) {
 			ampClassName += ' amp-noloading';
+		}
+		if ( component.hasAmpCarouselSet( attributes || '' ) ) {
+			ampClassName += ' amp-carousel';
 		}
 
 		if ( '' !== ampClassName && attributes.className !== ampClassName ) {
@@ -397,6 +400,16 @@ var ampEditorBlocks = ( function() {
 			);
 		}
 		return element;
+	};
+
+	/**
+	 * Check if AMP Carousel is set.
+	 *
+	 * @param {Object} attributes Attributes.
+	 * @returns {boolean} If is set.
+	 */
+	component.hasAmpCarouselSet = function hasAmpCarouselSet( attributes ) {
+		return attributes.ampCarousel && false !== attributes.ampCarousel;
 	};
 
 	/**
