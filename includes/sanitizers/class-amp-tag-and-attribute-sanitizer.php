@@ -1428,7 +1428,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 2 !== count( $pair_parts ) ) {
 					return 0;
 				}
-				$properties[ strtolower( $pair_parts[0] ) ] = $pair_parts[1];
+				$properties[ trim( strtolower( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
 			}
 
 			// Fail if there are unrecognized properties.

@@ -161,3 +161,6 @@ function amp_editor_core_blocks() {
 	$editor_blocks = new AMP_Editor_Blocks();
 	$editor_blocks->init();
 }
+
+// Add filter for registering posts.
+add_filter( 'registered_post_type', 'AMP_Editor_Blocks::register_post_pre_insert_functions', 11 );

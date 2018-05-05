@@ -33,13 +33,13 @@ class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'data_amp_noloading'   => array(
-				'<figure class="wp-block-embed" data-amp-noloading="true"><amp-facebook></amp-facebook></figure>',
-				'<figure class="wp-block-embed" data-amp-noloading="true"><amp-facebook noloading="" layout="fixed-height"></amp-facebook></figure>',
+				'<figure class="wp-block-embed amp-noloading"><amp-facebook></amp-facebook></figure>',
+				'<figure class="wp-block-embed amp-noloading"><amp-facebook noloading="" layout="fixed-height"></amp-facebook></figure>',
 			),
 
 			'data_amp_layout_fill' => array(
-				'<figure class="wp-block-embed" data-amp-layout="fill"><amp-facebook width="100"></amp-facebook></figure>',
-				'<figure class="wp-block-embed" data-amp-layout="fill" style="position:relative; width: 100%; height: 400px;"><amp-facebook layout="fill"></amp-facebook></figure>',
+				'<figure class="wp-block-embed amp-layout-fill"><amp-facebook width="100"></amp-facebook></figure>',
+				'<figure class="wp-block-embed amp-layout-fill" style="position:relative; width: 100%; height: 400px;"><amp-facebook layout="fill"></amp-facebook></figure>',
 			),
 		);
 	}

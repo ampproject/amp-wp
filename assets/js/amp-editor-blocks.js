@@ -20,7 +20,12 @@ var ampEditorBlocks = ( function() {
 				{ value: 'intrinsic', label: 'Intrinsic' } // Not supported by video.
 			],
 			defaultWidth: 608, // Max-width in the editor.
-			defaultHeight: 400
+			defaultHeight: 400,
+			mediaBlocks: [
+				'core/image',
+				'core/video',
+				'core/audio'
+			]
 		}
 	};
 
@@ -35,7 +40,6 @@ var ampEditorBlocks = ( function() {
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
-		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addLayoutAttribute', component.addAMPExtraProps );
 	};
 
 	/**
@@ -90,30 +94,6 @@ var ampEditorBlocks = ( function() {
 	};
 
 	/**
-	 * Add extra data-amp-layout attribute to save to DB.
-	 *
-	 * @param {Object} props Properties.
-	 * @param {string} blockType Block type.
-	 * @param {Object} attributes Attributes.
-	 * @return {*} Props.
-	 */
-	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
-		var ampAttributes = {};
-		if ( ! attributes.ampLayout && ! attributes.ampNoLoading ) {
-			return props;
-		}
-
-		if ( attributes.ampLayout ) {
-			ampAttributes[ 'data-amp-layout' ] = attributes.ampLayout;
-		}
-		if ( attributes.ampNoLoading ) {
-			ampAttributes[ 'data-amp-noloading' ] = attributes.ampNoLoading;
-		}
-
-		return _.assign( ampAttributes, props );
-	};
-
-	/**
 	 * Add AMP attributes (in this test case just ampLayout) to every core block.
 	 *
 	 * @param {Object} settings Settings.
@@ -121,14 +101,8 @@ var ampEditorBlocks = ( function() {
 	 * @return {*} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
-		var mediaBlocks = [
-			'core/image',
-			'core/video',
-			'core/audio'
-		];
-
 		// AMP Carousel settings.
-		if ( 'core/shortcode' === name || 'core/gallery' ) {
+		if ( 'core/shortcode' === name || 'core/gallery' === name ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
@@ -138,7 +112,7 @@ var ampEditorBlocks = ( function() {
 		}
 
 		// Layout settings for embeds and media blocks.
-		if ( 0 === name.indexOf( 'core-embed' ) || -1 !== mediaBlocks.indexOf( name ) ) {
+		if ( 0 === name.indexOf( 'core-embed' ) || -1 !== component.data.mediaBlocks.indexOf( name ) ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
@@ -169,6 +143,11 @@ var ampEditorBlocks = ( function() {
 
 			ampLayout = attributes.ampLayout;
 
+			// Lets remove amp-related classes from edit view.
+			if ( component.hasClassAmpAttributes( attributes.className || '' ) ) {
+				props.setAttributes( { className: component.removeAmpAttributesFromClassName( attributes.className ) } );
+			}
+
 			if ( 'core/shortcode' === name ) {
 				// Lets remove amp-carousel from from edit view.
 				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
@@ -186,12 +165,11 @@ var ampEditorBlocks = ( function() {
 				}
 			} else if ( 'core/gallery' === name ) {
 				inspectorControls = component.setUpGalleryInpsectorControls( props );
-			} else {
+			} else if ( -1 !== component.data.mediaBlocks.indexOf( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 				inspectorControls = component.setUpInspectorControls( props );
 			}
 
-			// For editor view, add a wrapper to any tags except for embeds, these will break due to embedding logic.
-			if ( attributes.ampLayout && -1 === name.indexOf( 'core-embed/' ) ) {
+			if ( attributes.ampLayout ) {
 				if ( 'core/image' === name ) {
 					component.setImageBlockLayoutAttributes( props, attributes.ampLayout, inspectorControls );
 				} else if ( 'nodisplay' === attributes.ampLayout ) {
@@ -225,7 +203,6 @@ var ampEditorBlocks = ( function() {
 		var attributes = props.attributes;
 		switch ( layout ) {
 			case 'fixed-height':
-				props.setAttributes( { width: '' } );
 				if ( ! attributes.height ) {
 					props.setAttributes( { height: component.data.defaultHeight } );
 				}
@@ -369,7 +346,9 @@ var ampEditorBlocks = ( function() {
 	 * @return {*} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
-		var text;
+		var text,
+			ampClassName = element.props.className || '',
+			props = element.props;
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
 			if ( attributes.ampCarousel ) {
 				// If the text contains amp-carousel, lets remove it.
@@ -402,7 +381,42 @@ var ampEditorBlocks = ( function() {
 			);
 		}
 
+		// In case AMP Layout, add layout to classname.
+		if ( component.hasAmpLayoutSet( attributes || '' ) ) {
+			ampClassName += ' amp-layout-' + attributes.ampLayout;
+		}
+		if ( component.hasAmpNoLoadingSet( attributes || '' ) ) {
+			ampClassName += ' amp-noloading';
+		}
+
+		if ( '' !== ampClassName && attributes.className !== ampClassName ) {
+			props.className = ampClassName.trim();
+			return wp.element.createElement(
+				element.type,
+				props
+			);
+		}
 		return element;
+	};
+
+	/**
+	 * Check if AMP NoLoading is set.
+	 *
+	 * @param {Object} attributes Attributes.
+	 * @return {boolean} If is set.
+	 */
+	component.hasAmpNoLoadingSet = function hasAmpNoLoadingSet( attributes ) {
+		return attributes.ampNoLoading && false !== attributes.ampNoLoading;
+	};
+
+	/**
+	 * Check if AMP Layout is set.
+	 *
+	 * @param {Object} attributes Attributes.
+	 * @return {boolean} If AMP Layout is set.
+	 */
+	component.hasAmpLayoutSet = function hasAmpLayoutSet( attributes ) {
+		return attributes.ampLayout && attributes.ampLayout.length;
 	};
 
 	/**
@@ -423,6 +437,33 @@ var ampEditorBlocks = ( function() {
 	 */
 	component.hasGalleryShortcodeCarouselAttribute = function galleryShortcodeHasCarouselAttribute( text ) {
 		return -1 !== text.indexOf( 'amp-carousel=false' );
+	};
+
+	/**
+	 * Check if className has AMP attributes in it.
+	 *
+	 * @param {string} className Classname.
+	 * @return {boolean} If has attributes.
+	 */
+	component.hasClassAmpAttributes = function hasClassAmpAttributes( className ) {
+		return -1 !== className.indexOf( 'amp-' );
+	};
+
+	/**
+	 * Remove AMP related attributes from classname.
+	 *
+	 * @param {string} className Original className.
+	 * @return {string} Modified className.
+	 */
+	component.removeAmpAttributesFromClassName = function removeAmpAttributesFromClassName( className ) {
+		var splits = className.split( ' ' );
+		var modifiedClass = '';
+		_.each( splits, function( split ) {
+			if ( -1 === split.indexOf( 'amp-' ) ) {
+				modifiedClass += ' ' + split;
+			}
+		} );
+		return modifiedClass;
 	};
 
 	/**
