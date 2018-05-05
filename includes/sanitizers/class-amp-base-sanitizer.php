@@ -247,7 +247,7 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function add_or_append_attribute( &$attributes, $key, $value, $separator = ' ' ) {
 		if ( isset( $attributes[ $key ] ) ) {
-			$attributes[ $key ] .= $separator . $value;
+			$attributes[ $key ] = trim( $attributes[ $key ] . $separator . $value );
 		} else {
 			$attributes[ $key ] = $value;
 		}
