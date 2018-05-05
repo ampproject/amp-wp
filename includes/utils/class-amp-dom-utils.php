@@ -240,14 +240,18 @@ class AMP_DOM_Utils {
 			return '<' . $tag_matches['name'] . $new_attrs . '>';
 		};
 
-		/*
-		 * Match all start tags that probably contain a binding attribute.
-		 * @todo Warning: The following pattern is brittle since it truncates HTML tags that have attributes that contain ">" or "=>".
-		 * For example, if there exists: `<body class="foo" [class]="bodyClasses.concat( isBar ? 'bar' : '' ).filter( className => '' != className )">`
-		 * Then this results in the following being output as the first child fo the body: `'' != className )">`
-		 */
+		// Match all start tags that contain a binding attribute.
+		$pattern   = join( '', array(
+			'#<',
+			'(?P<name>[a-zA-Z0-9_\-]+)',          // Tag name.
+			'(?P<attrs>\s',
+			'(?:[^>"\'\[\]]+|"[^"]*"|\'[^\']*\')*', // Non-binding attributes tokens.
+			'\[[a-zA-Z0-9_\-]+\]\s*=',              // One binding attribute key.
+			'(?:[^>"\']+|"[^"]*"|\'[^\']*\')*',     // Any attribute tokens, including binding ones.
+			')>#s',
+		) );
 		$converted = preg_replace_callback(
-			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
+			$pattern, // @todo This pattern easily results in a PREG_BACKTRACK_LIMIT_ERROR.
 			$replace_callback,
 			$html
 		);
