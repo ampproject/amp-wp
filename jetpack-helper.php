@@ -14,6 +14,7 @@ function amp_jetpack_mods() {
 	}
 	amp_jetpack_disable_sharing();
 	amp_jetpack_disable_related_posts();
+	add_filter( 'videopress_shortcode_options', 'amp_videopress_enable_freedom_mode' );
 }
 
 function amp_jetpack_disable_sharing() {
@@ -68,4 +69,20 @@ function jetpack_amp_build_stats_pixel_url() {
 	$data['ref'] = 'DOCUMENT_REFERRER'; // amp placeholder
 	$data = array_map( 'rawurlencode' , $data );
 	return add_query_arg( $data, 'https://pixel.wp.com/g.gif' );
+}
+
+/**
+ * Force videopress to use html5 player that would generate <video /> tag
+ * that will be later converted to <amp-video />
+ *
+ * @param array $options videopress shortcode options.
+ * @return array videopress shortcode options with `freedom` set to true
+ */
+function amp_videopress_enable_freedom_mode( $options ) {
+	$options['freedom'] = true;
+	return $options;
+}
+
+if ( isset( $_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] ) ) {
+	add_filter( 'videopress_shortcode_options', 'amp_videopress_enable_freedom_mode' );
 }
