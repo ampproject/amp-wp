@@ -235,3 +235,16 @@ function wpcom_amp_extract_image_dimensions_from_getimagesize( $dimensions ) {
 
 	return $dimensions;
 }
+
+/**
+ * Force videopress to use html5 player that would generate <video /> tag
+ * that will be later converted to <amp-video />
+ *
+ * @param array $options videopress shortcode options.
+ * @return array videopress shortcode options with `freedom` set to true
+ */
+function amp_videopress_enable_freedom_mode( $options ) {
+	$options['freedom'] = true;
+	return $options;
+}
+add_filter( 'videopress_shortcode_options', 'amp_videopress_enable_freedom_mode' );
