@@ -368,6 +368,8 @@ abstract class AMP_Base_Sanitizer {
 						$attributes['layout'] = str_replace( 'amp-layout-', '', $class_name );
 					} elseif ( 'amp-noloading' === $class_name ) {
 						$attributes['noloading'] = true;
+					} elseif ( 'amp-lightbox' === $class_name ) {
+						$attributes['lightbox'] = true;
 					}
 				}
 			}
@@ -389,6 +391,11 @@ abstract class AMP_Base_Sanitizer {
 		}
 		if ( isset( $amp_data['noloading'] ) ) {
 			$attributes['data-amp-noloading'] = '';
+		}
+		if ( isset( $amp_data['lightbox'] ) ) {
+			$attributes['data-amp-lightbox'] = '';
+			$attributes['on']                = 'tap:amp-image-lightbox-1';
+			$attributes['role']              = 'button';
 		}
 		return $attributes;
 	}
@@ -454,5 +461,32 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		return $new_attributes;
+	}
+
+	/**
+	 * Add <amp-image-lightbox> element to body tag if it doesn't exist yet.
+	 *
+	 * @param array $attributes Attributes.
+	 */
+	public function maybe_add_amp_image_lightbox_node( $attributes ) {
+		if ( ! isset( $attributes['lightbox'] ) ) {
+			return;
+		}
+
+		$nodes = $this->dom->getElementById( 'amp-image-lightbox-1' );
+		if ( null !== $nodes ) {
+			return;
+		}
+
+		$nodes = $this->dom->getElementsByTagName( 'body' );
+		if ( ! $nodes->length ) {
+			return;
+		}
+		$body_node = $nodes->item( 0 );
+		$amp_image_lightbox = AMP_DOM_Utils::create_node( $this->dom, 'amp-image-lightbox', array(
+			'id'     => 'amp-image-lightbox-1',
+			'layout' => 'nodisplay',
+		) );
+		$body_node->appendChild( $amp_image_lightbox );
 	}
 }

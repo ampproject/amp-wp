@@ -120,6 +120,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'class':
 				case 'srcset':
 				case 'on':
+				case 'role':
 				case 'attribution':
 					$out[ $name ] = $value;
 					break;
@@ -135,6 +136,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'data-amp-noloading':
 					$out['noloading'] = $value;
+					break;
+
+				case 'data-amp-lightbox':
+					$out['lightbox'] = $value;
 					break;
 
 				default:
@@ -222,6 +227,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
 			$new_attributes['layout'] = 'intrinsic';
 		}
+
+		$this->maybe_add_amp_image_lightbox_node( $new_attributes );
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;

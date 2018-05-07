@@ -78,7 +78,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				'type'   => 'slides',
 				'layout' => 'responsive',
 			);
-			$amp_carousel = AMP_DOM_Utils::create_node( $this->dom, 'amp-carousel', $attributes );
+			$amp_carousel = AMP_DOM_Utils::create_node( $this->dom, 'amp-lightbox-gallery', $attributes );
 
 			for ( $j = $num_images - 1; $j >= 0; $j-- ) {
 				$amp_carousel->appendChild( $images->item( $j ) );
