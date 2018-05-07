@@ -83,6 +83,6 @@ function amp_videopress_enable_freedom_mode( $options ) {
 	return $options;
 }
 
-if ( isset( $_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] ) ) {
+if ( isset( $_GET[ AMP_Validation_Utils::VALIDATE_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
 	add_filter( 'videopress_shortcode_options', 'amp_videopress_enable_freedom_mode' );
 }
