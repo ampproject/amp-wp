@@ -19,6 +19,7 @@ add_filter( 'amp_options_menu_is_enabled', '__return_false', 9999 );
 function jetpack_amp_disable_the_content_filters() {
 	add_filter( 'post_flair_disable', '__return_true', 99 );
 	add_filter( 'videopress_show_2015_player', '__return_true' );
+	add_filter( 'videopress_shortcode_options', 'amp_videopress_enable_freedom_mode' );
 	add_filter( 'protected_embeds_use_form_post', '__return_false' );
 
 	remove_filter( 'the_title', 'widont' );
@@ -247,4 +248,3 @@ function amp_videopress_enable_freedom_mode( $options ) {
 	$options['freedom'] = true;
 	return $options;
 }
-add_filter( 'videopress_shortcode_options', 'amp_videopress_enable_freedom_mode' );
