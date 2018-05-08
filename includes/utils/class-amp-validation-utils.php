@@ -554,7 +554,6 @@ class AMP_Validation_Utils {
 
 		// If no results from URL are available, validate post content outside frontend context.
 		if ( empty( $validation_errors ) && post_type_supports( $post->post_type, 'editor' ) ) {
-			do_action( 'pre_amp_render_post', $post->ID );
 			self::process_markup( $post->post_content );
 			$validation_errors = array_merge(
 				$validation_errors,
