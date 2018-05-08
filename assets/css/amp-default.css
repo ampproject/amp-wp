@@ -9,3 +9,7 @@
 	/** Force the image into a box of fixed dimensions and use object-fit to scale. **/
 	object-fit: contain;
 }
+
+#amp-image-lightbox-1 img {
+	object-fit: contain;
+}
