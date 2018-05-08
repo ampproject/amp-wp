@@ -22,9 +22,9 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 			),
 
-			'no_a'                  => array(
-				'<ul class="amp-carousel"><amp-img></amp-img></ul>',
-				'<ul class="amp-carousel"><amp-img></amp-img></ul>',
+			'no_a_no_amp_img'       => array(
+				'<ul class="amp-carousel"><div></div></ul>',
+				'<ul class="amp-carousel"><div></div></ul>',
 			),
 
 			'no_amp_carousel'       => array(
@@ -34,7 +34,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 
 			'data_amp_with_gallery' => array(
 				'<ul class="amp-carousel"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
-				'<amp-carousel width="600" height="480" type="slides" layout="responsive"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></amp-carousel>',
+				'<amp-carousel height="400" type="slides" layout="fixed-height"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></amp-carousel>',
 			),
 		);
 	}

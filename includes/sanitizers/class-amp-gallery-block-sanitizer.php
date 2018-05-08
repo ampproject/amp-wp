@@ -59,33 +59,115 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			if ( ! isset( $attributes['class'] ) ) {
+				continue;
+			}
+			$is_amp_lightbox = false !== strpos( $attributes['class'], 'amp-lightbox' );
+			$is_amp_carousel = false !== strpos( $attributes['class'], 'amp-carousel' );
 
 			// We are only looking for <ul> elements which have amp-carousel as class.
-			if ( ! isset( $attributes['class'] ) || false === strpos( $attributes['class'], 'amp-carousel' ) ) {
+			if ( ! isset( $attributes['class'] ) || ( ! $is_amp_carousel && ! $is_amp_lightbox ) ) {
 				continue;
 			}
 
-			$images     = $node->getElementsByTagName( 'a' );
-			$num_images = $images->length;
+			// If lightbox is set, we should add lightbox feature to the gallery images.
+			if ( $is_amp_lightbox ) {
+				$this->add_lightbox_attributes_to_image_nodes( $node );
+				$this->maybe_add_amp_image_lightbox_node();
+			}
+
+			// If amp-carousel is not set, nothing else to do here.
+			if ( ! $is_amp_carousel ) {
+				continue;
+			}
+
+			$num_images = 0;
+
+			// If it's not AMP lightbox, look for links first.
+			if ( ! $is_amp_lightbox ) {
+				$images     = $node->getElementsByTagName( 'a' );
+				$num_images = $images->length;
+			}
+
+			if ( 0 === $num_images ) {
+
+				// If not linking to anything then look for <amp-img>.
+				$images     = $node->getElementsByTagName( 'amp-img' );
+				$num_images = $images->length;
+			}
 
 			if ( 0 === $num_images ) {
 				continue;
 			}
 
-			$attributes   = array(
-				'width'  => self::FALLBACK_WIDTH,
-				'height' => self::FALLBACK_HEIGHT,
+			$carousel_height     = $this->get_carousel_height( $node );
+			$carousel_attributes = array(
+				'height' => $carousel_height,
 				'type'   => 'slides',
-				'layout' => 'responsive',
+				'layout' => 'fixed-height',
 			);
-			$amp_carousel = AMP_DOM_Utils::create_node( $this->dom, 'amp-lightbox-gallery', $attributes );
+			$amp_carousel        = AMP_DOM_Utils::create_node( $this->dom, 'amp-carousel', $carousel_attributes );
 
 			for ( $j = $num_images - 1; $j >= 0; $j-- ) {
 				$amp_carousel->appendChild( $images->item( $j ) );
 			}
 
 			$node->parentNode->replaceChild( $amp_carousel, $node );
-			$this->did_convert_elements = true;
+		}
+		$this->did_convert_elements = true;
+	}
+
+	/**
+	 * Get carousel height by containing images.
+	 *
+	 * @param DOMNode $node Node <ul>.
+	 * @return int
+	 */
+	protected function get_carousel_height( $node ) {
+		$images     = $node->getElementsByTagName( 'amp-img' );
+		$num_images = $images->length;
+		$height     = false;
+		if ( 0 === $num_images ) {
+			return self::FALLBACK_HEIGHT;
+		}
+		for ( $i = $num_images - 1; $i >= 0; $i-- ) {
+			$image        = $images->item( $i );
+			$image_height = $image->getAttribute( 'height' );
+			if ( ! $image_height || ! is_numeric( $image_height ) ) {
+				continue;
+			}
+			if ( ! $height ) {
+				$height = $image_height;
+			} elseif ( $height > $image_height ) {
+				$height = $image_height;
+			}
+		}
+
+		return false === $height ? self::FALLBACK_HEIGHT : $height;
+	}
+
+	/**
+	 * Set lightbox related attributes to <amp-img> within gallery.
+	 *
+	 * @param DOMNode $node <ul> node.
+	 */
+	protected function add_lightbox_attributes_to_image_nodes( $node ) {
+		$images     = $node->getElementsByTagName( 'amp-img' );
+		$num_images = $images->length;
+		if ( 0 === $num_images ) {
+			return;
+		}
+		$attributes = array(
+			'data-amp-lightbox' => '',
+			'on'                => 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID,
+			'role'              => 'button',
+		);
+
+		for ( $j = $num_images - 1; $j >= 0; $j-- ) {
+			$image_node = $images->item( $j );
+			foreach ( $attributes as $att => $value ) {
+				$image_node->setAttribute( $att, $value );
+			}
 		}
 	}
 }

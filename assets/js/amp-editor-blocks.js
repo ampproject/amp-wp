@@ -1,6 +1,8 @@
 /* exported ampEditorBlocks */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0 ] } ] */
 
+var __ = wp.i18n.__;
+
 var ampEditorBlocks = ( function() {
 	var component = {
 
@@ -10,14 +12,14 @@ var ampEditorBlocks = ( function() {
 		data: {
 			dynamicBlocks: [],
 			ampLayoutOptions: [
-				{ value: 'nodisplay', label: 'No Display' },
-				{ value: 'fixed', label: 'Fixed' }, // Not supported by amp-audio and amp-pixel.
-				{ value: 'responsive', label: 'Responsive' }, // To ensure your AMP element displays, you must specify a width and height for the containing element.
-				{ value: 'fixed-height', label: 'Fixed height' },
-				{ value: 'fill', label: 'Fill' },
-				{ value: 'container', label: 'Container' }, // Not supported by img and video.
-				{ value: 'flex-item', label: 'Flex Item' },
-				{ value: 'intrinsic', label: 'Intrinsic' } // Not supported by video.
+				{ value: 'nodisplay', label: __( 'No Display' ) },
+				{ value: 'fixed', label: __( 'Fixed' ) }, // Not supported by amp-audio and amp-pixel.
+				{ value: 'responsive', label: __( 'Responsive' ) }, // To ensure your AMP element displays, you must specify a width and height for the containing element.
+				{ value: 'fixed-height', label: __( 'Fixed height' ) },
+				{ value: 'fill', label: __( 'Fill' ) },
+				{ value: 'container', label: __( 'Container' ) }, // Not supported by img and video.
+				{ value: 'flex-item', label: __( 'Flex Item' ) },
+				{ value: 'intrinsic', label: __( 'Intrinsic' ) } // Not supported by video.
 			],
 			defaultWidth: 608, // Max-width in the editor.
 			defaultHeight: 400,
@@ -25,7 +27,8 @@ var ampEditorBlocks = ( function() {
 				'core/image',
 				'core/video',
 				'core/audio'
-			]
+			],
+			ampPanelLabel: __( 'AMP Settings' )
 		}
 	};
 
@@ -240,17 +243,17 @@ var ampEditorBlocks = ( function() {
 	 * Get AMP Layout select control.
 	 *
 	 * @param {Object} props Props.
-	 * @returns {Object} Element.
+	 * @return {Object} Element.
 	 */
 	component.getAmpLayoutControl = function getAmpLayoutControl( props ) {
 		var ampLayout = props.attributes.ampLayout,
 			el = wp.element.createElement,
 			SelectControl = wp.components.SelectControl,
 			name = props.name,
-			label = 'AMP Layout';
+			label = __( 'AMP Layout' );
 
 		if ( 'core/image' === name ) {
-			label = 'AMP Layout (modifies width/height)';
+			label = __( 'AMP Layout (modifies width/height)' );
 		}
 
 		return el( SelectControl, {
@@ -267,13 +270,13 @@ var ampEditorBlocks = ( function() {
 	 * Get AMP Noloading toggle control.
 	 *
 	 * @param {Object} props Props.
-	 * @returns {Object} Element.
+	 * @return {Object} Element.
 	 */
 	component.getAmpNoloadingToggle = function getAmpNoloadingToggle( props ) {
 		var ampNoLoading = props.attributes.ampNoLoading,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = 'AMP Noloading';
+			label = __( 'AMP Noloading' );
 
 		return el( ToggleControl, {
 			label: label,
@@ -288,19 +291,23 @@ var ampEditorBlocks = ( function() {
 	 * Get AMP Lightbox toggle control.
 	 *
 	 * @param {Object} props Props.
-	 * @returns {Object} Element.
+	 * @return {Object} Element.
 	 */
 	component.getAmpLightboxToggle = function getAmpLightboxToggle( props ) {
 		var ampLightbox = props.attributes.ampLightbox,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = 'Add lightbox effect';
+			label = __( 'Add lightbox effect' );
 
 		return el( ToggleControl, {
 			label: label,
 			checked: ampLightbox,
-			onChange: function() {
+			onChange: function( nextValue ) {
 				props.setAttributes( { ampLightbox: ! ampLightbox } );
+				// In case of lightbox set linking images to 'none'.
+				if ( nextValue && props.attributes.linkTo && 'none' !== props.attributes.linkTo ) {
+					props.setAttributes( { linkTo: 'none' } );
+				}
 			}
 		} );
 	};
@@ -309,13 +316,13 @@ var ampEditorBlocks = ( function() {
 	 * Get AMP Carousel toggle control.
 	 *
 	 * @param {Object} props Props.
-	 * @returns {Object} Element.
+	 * @return {Object} Element.
 	 */
 	component.getAmpCarouselToggle = function getAmpCarouselToggle( props ) {
 		var ampCarousel = props.attributes.ampCarousel,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = 'Display as AMP carousel';
+			label = __( 'Display as AMP carousel' );
 
 		return el( ToggleControl, {
 			label: label,
@@ -340,7 +347,7 @@ var ampEditorBlocks = ( function() {
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: 'AMP Settings' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
 					component.getAmpLayoutControl( props ),
 					component.getAmpNoloadingToggle( props )
 				)
@@ -351,8 +358,8 @@ var ampEditorBlocks = ( function() {
 	/**
 	 * Set up inspector controls for Image block.
 	 *
-	 * @param props
-	 * @returns {Object|Element|*|{$$typeof, type, key, ref, props, _owner}}
+	 * @param {Object} props Props.
+	 * @return {Object} Inspector Controls.
 	 */
 	component.setUpImageInpsectorControls = function setUpImageInpsectorControls( props ) {
 		var isSelected = props.isSelected,
@@ -361,14 +368,14 @@ var ampEditorBlocks = ( function() {
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
-				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: 'AMP Settings' },
-						component.getAmpLayoutControl( props ),
-						component.getAmpNoloadingToggle( props ),
-						component.getAmpLightboxToggle( props )
-					)
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
+					component.getAmpLayoutControl( props ),
+					component.getAmpNoloadingToggle( props ),
+					component.getAmpLightboxToggle( props )
 				)
-			);
+			)
+		);
 	};
 
 	/**
@@ -386,7 +393,7 @@ var ampEditorBlocks = ( function() {
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: 'AMP Settings' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
 					component.getAmpCarouselToggle( props ),
 					component.getAmpLightboxToggle( props )
 				)
@@ -410,7 +417,7 @@ var ampEditorBlocks = ( function() {
 		if ( component.isGalleryShortcode( props.attributes ) ) {
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: 'AMP Settings' },
+					el( PanelBody, { title: component.data.ampPanelLabel },
 						component.getAmpCarouselToggle( props )
 					)
 				)

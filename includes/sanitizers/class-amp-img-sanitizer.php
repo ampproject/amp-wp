@@ -121,6 +121,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				case 'srcset':
 				case 'on':
 				case 'role':
+				case 'tabindex':
 				case 'attribution':
 					$out[ $name ] = $value;
 					break;
@@ -166,6 +167,21 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $node instanceof DOMElement ) {
 					continue;
 				}
+
+				if (
+					! is_numeric( $node->getAttribute( 'width' ) ) ||
+					! is_numeric( $node->getAttribute( 'height' ) )
+				) {
+					$attributes = array(
+						'width'  => $node->getAttribute( 'width' ),
+						'height' => $node->getAttribute( 'height' ),
+					);
+					$this->set_attachment_width_and_height_by_src( $node->getAttribute( 'src' ), $attributes );
+					$node->setAttribute( 'width', $attributes['width'] );
+					$node->setAttribute( 'height', $attributes['height'] );
+				}
+
+				// Set fallback dimensions if needed.
 				if (
 					! is_numeric( $node->getAttribute( 'width' ) ) &&
 					! is_numeric( $node->getAttribute( 'height' ) )
@@ -228,7 +244,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$new_attributes['layout'] = 'intrinsic';
 		}
 
-		$this->maybe_add_amp_image_lightbox_node( $new_attributes );
+		if ( isset( $new_attributes['lightbox'] ) ) {
+			$this->maybe_add_amp_image_lightbox_node();
+		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;

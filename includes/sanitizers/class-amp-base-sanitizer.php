@@ -20,6 +20,15 @@ abstract class AMP_Base_Sanitizer {
 	const FALLBACK_HEIGHT = 400;
 
 	/**
+	 * Value for <amp-image-lightbox> ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @const string
+	 */
+	const AMP_IMAGE_LIGHTBOX_ID = 'amp-image-lightbox-1';
+
+	/**
 	 * Placeholder for default args, to be set in child classes.
 	 *
 	 * @since 0.2
@@ -394,10 +403,42 @@ abstract class AMP_Base_Sanitizer {
 		}
 		if ( isset( $amp_data['lightbox'] ) ) {
 			$attributes['data-amp-lightbox'] = '';
-			$attributes['on']                = 'tap:amp-image-lightbox-1';
+			$attributes['on']                = 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID;
 			$attributes['role']              = 'button';
+			$attributes['tabindex']          = 0;
 		}
 		return $attributes;
+	}
+
+	/**
+	 * Sets width and height by src for attributes.
+	 *
+	 * @param string $src Src.
+	 * @param array  $attributes Array of attributes.
+	 */
+	public function set_attachment_width_and_height_by_src( $src, &$attributes ) {
+
+		// Get the width and height from the file.
+		$ext  = pathinfo( $src, PATHINFO_EXTENSION );
+		$name = wp_basename( $src, ".$ext" );
+		$args = array(
+			'name'        => $name,
+			'post_type'   => 'attachment',
+			'post_status' => 'inherit',
+			'numberposts' => 1,
+		);
+
+		$attachment = get_posts( $args );
+
+		if ( ! empty( $attachment ) ) {
+			$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
+			if ( ! is_numeric( $attributes['width'] ) && is_numeric( $meta_data['width'] ) ) {
+				$attributes['width'] = $meta_data['width'];
+			}
+			if ( ! is_numeric( $attributes['height'] ) && is_numeric( $meta_data['height'] ) ) {
+				$attributes['height'] = $meta_data['height'];
+			}
+		}
 	}
 
 	/**
@@ -412,28 +453,7 @@ abstract class AMP_Base_Sanitizer {
 
 		// If either height or width is missing, try to get these from original file.
 		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
-
-			// Get the width and height from the file.
-			$ext  = pathinfo( $new_attributes['src'], PATHINFO_EXTENSION );
-			$name = wp_basename( $new_attributes['src'], ".$ext" );
-			$args = array(
-				'name'        => $name,
-				'post_type'   => 'attachment',
-				'post_status' => 'inherit',
-				'numberposts' => 1,
-			);
-
-			$attachment = get_posts( $args );
-
-			if ( ! empty( $attachment ) ) {
-				$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
-				if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) ) {
-					$new_attributes['width'] = $meta_data['width'];
-				}
-				if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
-					$new_attributes['height'] = $meta_data['height'];
-				}
-			}
+			$this->set_attachment_width_and_height_by_src( $new_attributes['src'], $new_attributes );
 		}
 
 		// The width has to be unset / auto in case of fixed-height.
@@ -465,15 +485,10 @@ abstract class AMP_Base_Sanitizer {
 
 	/**
 	 * Add <amp-image-lightbox> element to body tag if it doesn't exist yet.
-	 *
-	 * @param array $attributes Attributes.
 	 */
-	public function maybe_add_amp_image_lightbox_node( $attributes ) {
-		if ( ! isset( $attributes['lightbox'] ) ) {
-			return;
-		}
+	public function maybe_add_amp_image_lightbox_node() {
 
-		$nodes = $this->dom->getElementById( 'amp-image-lightbox-1' );
+		$nodes = $this->dom->getElementById( self::AMP_IMAGE_LIGHTBOX_ID );
 		if ( null !== $nodes ) {
 			return;
 		}
@@ -482,9 +497,9 @@ abstract class AMP_Base_Sanitizer {
 		if ( ! $nodes->length ) {
 			return;
 		}
-		$body_node = $nodes->item( 0 );
+		$body_node          = $nodes->item( 0 );
 		$amp_image_lightbox = AMP_DOM_Utils::create_node( $this->dom, 'amp-image-lightbox', array(
-			'id'     => 'amp-image-lightbox-1',
+			'id'     => self::AMP_IMAGE_LIGHTBOX_ID,
 			'layout' => 'nodisplay',
 		) );
 		$body_node->appendChild( $amp_image_lightbox );
