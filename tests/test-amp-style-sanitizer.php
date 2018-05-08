@@ -292,6 +292,21 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'styles_with_calc_functions' => array(
+				implode( '', array(
+					'<html amp><head>',
+					'<style amp-custom>body { color: red; width: -webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) ); outline: solid 1px blue; }</style>',
+					'<style amp-custom>.alignwide{ max-width: calc(50% + 22.5rem); border: solid 1px red; }</style>',
+					'<style amp-custom>.alignwide{ height: calc(10% + ( 1px ); color: red; content: ")";}</style>', // Test unbalanced parentheses.
+					'</head><body><div class="alignwide"></div></body></html>',
+				) ),
+				array(
+					'body{color:red;width:-webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) );outline:solid 1px blue;}',
+					'.alignwide{max-width:calc(50% + 22.5rem);border:solid 1px red;}',
+					'.alignwide{color:red;content:")";}',
+				),
+				array(),
+			),
 		);
 	}
 
