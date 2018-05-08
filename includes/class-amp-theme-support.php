@@ -92,6 +92,8 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		AMP_Validation_Utils::init();
+
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
 

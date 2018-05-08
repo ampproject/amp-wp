@@ -110,7 +110,6 @@ function amp_init() {
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
-	AMP_Validation_Utils::init();
 	AMP_Theme_Support::init();
 	AMP_Post_Type_Support::add_post_type_support();
 	add_filter( 'request', 'amp_force_query_var_value' );
