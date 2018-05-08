@@ -16,7 +16,7 @@ class AMP_Editor_Blocks {
 	 */
 	public function init() {
 		if ( function_exists( 'gutenberg_init' ) ) {
-			add_action( 'admin_enqueue_scripts', array( $this, 'add_editor_filters' ) );
+			add_action( 'enqueue_block_editor_assets', array( $this, 'add_editor_filters' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10 );
 		}
 	}
@@ -113,7 +113,7 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'amp-runtime', 'underscore', 'wp-hooks' ),
+			array( 'amp-runtime', 'underscore', 'wp-hooks', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
