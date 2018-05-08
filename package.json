@@ -17,10 +17,20 @@
   "grunt-contrib-copy": "^1.0.0",
   "grunt-contrib-jshint": "^1.1.0",
   "grunt-shell": "^2.1.0",
-  "grunt-wp-deploy": "^1.2.1"
+  "grunt-wp-deploy": "^1.2.1",
+  "babel-core": "^6.25.0",
+  "babel-loader": "^7.1.1",
+  "babel-plugin-transform-object-rest-spread": "^6.26.0",
+  "babel-plugin-transform-react-jsx": "^6.24.1",
+  "babel-plugin-transform-runtime": "^6.23.0",
+  "babel-preset-env": "^1.6.1",
+  "webpack": "^3.10.0",
+  "cross-env": "^5.1.1"
  },
+ "main": "blocks/index.js",
  "scripts": {
   "build": "grunt build",
-  "deploy": "grunt deploy"
+  "deploy": "grunt deploy",
+  "dev": "cross-env BABEL_ENV=default webpack --watch"
  }
 }
