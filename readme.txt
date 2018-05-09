@@ -44,6 +44,13 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 == Changelog ==
 
+= 0.7.1 (Unreleased) =
+- Limit showing AMP validation warnings to when `amp` theme support is present. See [#1132](https://github.com/Automattic/amp-wp/pull/1132).
+- Supply the extracted dimensions to images determined to need them; fixes regression from 0.6 this is key for Gutenberg compat. See [#1117](https://github.com/Automattic/amp-wp/pull/1117).
+- Ensure before/after is amended to filtered comment_reply_link. See [#1118](https://github.com/Automattic/amp-wp/pull/1118).
+
+See [0.7.1 milestone](https://github.com/Automattic/amp-wp/milestone/8?closed=1).
+
 = 0.7.0 (2018-05-03) =
 
 - Render an entire site as "Native AMP" if the theme calls `add_theme_support( 'amp' )`. See [#857](https://github.com/Automattic/amp-wp/pull/857), [#852](https://github.com/Automattic/amp-wp/pull/852), [#865](https://github.com/Automattic/amp-wp/pull/865), [#888](https://github.com/Automattic/amp-wp/pull/888). Props westonruter, kaitnyl, ThierryA.
