@@ -17,24 +17,34 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_data() {
 		return array(
-			'no_ul'                 => array(
+			'no_ul'                               => array(
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 			),
 
-			'no_a_no_amp_img'       => array(
+			'no_a_no_amp_img'                     => array(
 				'<ul class="amp-carousel"><div></div></ul>',
 				'<ul class="amp-carousel"><div></div></ul>',
 			),
 
-			'no_amp_carousel'       => array(
+			'no_amp_carousel'                     => array(
 				'<ul><a><amp-img></amp-img></a></ul>',
 				'<ul><a><amp-img></amp-img></a></ul>',
 			),
 
-			'data_amp_with_gallery' => array(
+			'data_amp_with_carousel'              => array(
 				'<ul class="amp-carousel"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<amp-carousel height="400" type="slides" layout="fixed-height"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></amp-carousel>',
+			),
+
+			'data_amp_with_lightbox'              => array(
+				'<ul class="amp-lightbox"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
+				'<ul class="amp-lightbox"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox-1" role="button"></amp-img></a></figure></li></ul><amp-image-lightbox id="amp-image-lightbox-1" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+			),
+
+			'data_amp_with_lightbox_and_carousel' => array(
+				'<ul class="amp-carousel amp-lightbox"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
+				'<amp-carousel height="400" type="slides" layout="fixed-height"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox-1" role="button"></amp-img></amp-carousel><amp-image-lightbox id="amp-image-lightbox-1" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
 			),
 		);
 	}

@@ -112,10 +112,13 @@ var ampEditorBlocks = ( function() {
 			settings.attributes.ampCarousel = {
 				type: 'boolean'
 			};
+			settings.attributes.ampLightbox = {
+				type: 'boolean'
+			};
 		}
 
 		// Add AMP Lightbox settings.
-		if ( 'core/gallery' === name || 'core/image' === name ) {
+		if ( 'core/image' === name ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
@@ -162,9 +165,13 @@ var ampEditorBlocks = ( function() {
 			}
 
 			if ( 'core/shortcode' === name ) {
-				// Lets remove amp-carousel from from edit view.
+				// Lets remove amp-carousel from edit view.
 				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
 					props.setAttributes( { text: component.removeAmpCarouselFromShortcodeAtts( attributes.text ) } );
+				}
+				// Lets remove amp-lightbox from edit view.
+				if ( component.hasGalleryShortcodeLightboxAttribute( attributes.text || '' ) ) {
+					props.setAttributes( { text: component.removeAmpLightboxFromShortcodeAtts( attributes.text ) } );
 				}
 
 				inspectorControls = component.setUpShortcodeInspectorControls( props );
@@ -418,7 +425,8 @@ var ampEditorBlocks = ( function() {
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: component.data.ampPanelLabel },
-						component.getAmpCarouselToggle( props )
+						component.getAmpCarouselToggle( props ),
+						component.getAmpLightboxToggle( props )
 					)
 				)
 			);
@@ -439,36 +447,54 @@ var ampEditorBlocks = ( function() {
 		var text,
 			ampClassName = element.props.className || '',
 			props = element.props;
-		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
-			if ( attributes.ampCarousel ) {
-				// If the text contains amp-carousel, lets remove it.
-				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-					text = component.removeAmpCarouselFromShortcodeAtts( attributes.text );
 
-					return wp.element.createElement(
-						wp.element.RawHTML,
-						{},
-						text
-					);
+		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
+			if ( ! attributes.ampLightbox ) {
+				if ( component.hasGalleryShortcodeLightboxAttribute( attributes.text || '' ) ) {
+					text = component.removeAmpLightboxFromShortcodeAtts( attributes.text );
+				}
+			} else {
+				text = attributes.text || '';
+			}
+			if ( attributes.ampCarousel ) {
+				// If the text contains amp-carousel or amp-lightbox, lets remove it.
+				if ( component.hasGalleryShortcodeCarouselAttribute( text ) ) {
+					text = component.removeAmpCarouselFromShortcodeAtts( text );
 				}
 
-				// Else lets return original.
-				return element;
+				// If lightbox is not set, we can return here.
+				if ( ! attributes.ampLightbox ) {
+					if ( attributes.text !== text ) {
+						return wp.element.createElement(
+							wp.element.RawHTML,
+							{},
+							text
+						);
+					}
+
+					// Else lets return original.
+					return element;
+				}
+			} else if ( ! component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
+				// Add amp-carousel=false attribut to the shortcode.
+				text = attributes.text.replace( '[gallery', '[gallery amp-carousel=false' );
+			} else {
+				text = attributes.text;
 			}
 
-			// If the text already contains amp-carousel, return original.
-			if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-				return element;
+			if ( attributes.ampLightbox && ! component.hasGalleryShortcodeLightboxAttribute( text ) ) {
+				text = text.replace( '[gallery', '[gallery amp-lightbox=true' );
 			}
 
-			// Add amp-carousel=false attribut to the shortcode.
-			text = attributes.text.replace( '[gallery', '[gallery amp-carousel=false' );
+			if ( attributes.text !== text ) {
+				return wp.element.createElement(
+					wp.element.RawHTML,
+					{},
+					text
+				);
+			}
 
-			return wp.element.createElement(
-				wp.element.RawHTML,
-				{},
-				text
-			);
+			return element;
 		}
 
 		// In case AMP attributes, add info to classname.
@@ -546,6 +572,16 @@ var ampEditorBlocks = ( function() {
 	};
 
 	/**
+	 * Removes amp-lightbox=true from attributes.
+	 *
+	 * @param {string} shortcode Shortcode text.
+	 * @return {string} Modified shortcode.
+	 */
+	component.removeAmpLightboxFromShortcodeAtts = function removeAmpLightboxFromShortcodeAtts( shortcode ) {
+		return shortcode.replace( ' amp-lightbox=true', '' );
+	};
+
+	/**
 	 * Check if shortcode includes amp-carousel attribute.
 	 *
 	 * @param {string} text Shortcode.
@@ -553,6 +589,16 @@ var ampEditorBlocks = ( function() {
 	 */
 	component.hasGalleryShortcodeCarouselAttribute = function galleryShortcodeHasCarouselAttribute( text ) {
 		return -1 !== text.indexOf( 'amp-carousel=false' );
+	};
+
+	/**
+	 * Check if shortcode includes amp-lightbox attribute.
+	 *
+	 * @param {string} text Shortcode.
+	 * @return {boolean} If has amp-lightbox.
+	 */
+	component.hasGalleryShortcodeLightboxAttribute = function hasGalleryShortcodeLightboxAttribute( text ) {
+		return -1 !== text.indexOf( 'amp-lightbox=true' );
 	};
 
 	/**

@@ -55,7 +55,7 @@ class AMP_Editor_Blocks {
 					preg_match( "'<ul class=\"(.*?)\"'si", $block['innerHTML'], $match );
 				}
 
-				if ( ! empty( $match ) ) {
+				if ( empty( $match ) ) {
 					continue;
 				}
 				$class_names = explode( ' ', $match[1] );
