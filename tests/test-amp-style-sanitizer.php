@@ -292,6 +292,21 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'styles_with_calc_functions' => array(
+				implode( '', array(
+					'<html amp><head>',
+					'<style amp-custom>body { color: red; width: -webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) ); outline: solid 1px blue; }</style>',
+					'<style amp-custom>.alignwide{ max-width: calc(50% + 22.5rem); border: solid 1px red; }</style>',
+					'<style amp-custom>.alignwide{ height: calc(10% + ( 1px ); color: red; content: ")";}</style>', // Test unbalanced parentheses.
+					'</head><body><div class="alignwide"></div></body></html>',
+				) ),
+				array(
+					'body{color:red;width:-webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) );outline:solid 1px blue;}',
+					'.alignwide{max-width:calc(50% + 22.5rem);border:solid 1px red;}',
+					'.alignwide{color:red;content:")";}',
+				),
+				array(),
+			),
 		);
 	}
 
@@ -386,6 +401,58 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( '.dashicons,.dashicons-before:before{', $actual_stylesheets[0] );
 		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
 		$this->assertContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+	}
+
+	/**
+	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes.
+	 *
+	 * @covers AMP_Style_Sanitizer::get_used_class_names()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 */
+	public function test_class_amp_bind_preservation() {
+		ob_start();
+		?>
+		<html amp>
+			<head>
+				<meta charset="utf-8">
+				<style>.sidebar1 { display:none }</style>
+				<style>.sidebar1.expanded { display:block }</style>
+				<style>.sidebar2{ visibility:hidden }</style>
+				<style>.sidebar2.visible { display:block }</style>
+				<style>.nothing { visibility:hidden; }</style>
+				</style>
+			</head>
+			<body>
+				<amp-state id="mySidebar">
+					<script type="application/json">
+						{
+							"expanded": false
+						}
+					</script>
+				</amp-state>
+				<aside class="sidebar1" [class]="! mySidebar.expanded ? '' : 'expanded'">...</aside>
+				<aside class="sidebar2" [class]='mySidebar.expanded ? "visible" : ""'>...</aside>
+			</body>
+		</html>
+		<?php
+		$dom = AMP_DOM_Utils::get_dom( ob_get_clean() );
+
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'always',
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$this->assertEquals( array(), $error_codes );
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertEquals( '.sidebar1{display:none;}', $actual_stylesheets[0] );
+		$this->assertEquals( '.sidebar1.expanded{display:block;}', $actual_stylesheets[1] );
+		$this->assertEquals( '.sidebar2{visibility:hidden;}', $actual_stylesheets[2] );
+		$this->assertEquals( '.sidebar2.visible{display:block;}', $actual_stylesheets[3] );
+		$this->assertEmpty( $actual_stylesheets[4] );
 	}
 
 	/**

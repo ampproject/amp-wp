@@ -110,12 +110,12 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		// Test malformed.
 		$malformed_html = array(
 			'<amp-img width="123" [text]="..."</amp-img>',
-			'<amp-img width="123" [text] data-test="asd"></amp-img>',
+			'<amp-img width="123" [text="..."]></amp-img>',
 			'<amp-img width="123" [text]="..." *bad*></amp-img>',
 		);
 		foreach ( $malformed_html as $html ) {
 			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
-			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted );
+			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted, "Source: $html" );
 		}
 	}
 
@@ -242,6 +242,8 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 			array( 10 ),
 			array( 100 ),
 			array( 1000 ),
+			array( 10000 ),
+			array( 100000 ),
 		);
 	}
 
