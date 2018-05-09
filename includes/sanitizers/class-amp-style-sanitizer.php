@@ -1397,6 +1397,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							__( 'Too much CSS output (by %d bytes).', 'amp' ),
 							( $final_size + $sheet_size ) - $stylesheet_set['cdata_spec']['max_bytes']
 						),
+						'node'    => $pending_stylesheet['node'],
 					);
 					if ( isset( $pending_stylesheet['sources'] ) ) {
 						$validation_error['sources'] = $pending_stylesheet['sources'];
