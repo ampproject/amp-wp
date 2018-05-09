@@ -486,7 +486,7 @@ var ampEditorBlocks = ( function() {
 		}
 
 		if ( '' !== ampClassName && attributes.className !== ampClassName ) {
-			props.className = ampClassName.trim();
+			props = _.extend( {}, props, { className: ampClassName.trim() } );
 			return wp.element.createElement(
 				element.type,
 				props
