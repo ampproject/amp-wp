@@ -44,7 +44,7 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 
 			'url_simple' => array(
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="750" data-gfyid="tautwhoppingcougar" layout="responsive"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="500" height="750" data-gfyid="tautwhoppingcougar" layout="intrinsic"></amp-gfycat></p>' . PHP_EOL,
 			),
 
 		);
