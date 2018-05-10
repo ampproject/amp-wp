@@ -11,6 +11,21 @@
 class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 
 	/**
+	 * Set up.
+	 *
+	 * @global WP_Post $post
+	 */
+	public function setUp() {
+		global $post;
+		parent::setUp();
+
+		// This workaround is copied from and documented in tests/test-amp-soundcloud-embed.php.
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
+			$post = $this->factory()->post->create_and_get(); // WPCS: global override OK.
+		}
+	}
+
+	/**
 	 * Get conversion data.
 	 *
 	 * @return array
@@ -38,9 +53,6 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_conversion_data
 	 */
 	public function test__conversion( $source, $expected ) {
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
-			$this->markTestSkipped( 'Gfycat is not supported in this WP version.' );
-		}
 		$embed = new AMP_Gfycat_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
@@ -74,9 +86,6 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_scripts_data
 	 */
 	public function test__get_scripts( $source, $expected ) {
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
-			$this->markTestSkipped( 'Gfycat is not supported in this WP version.' );
-		}
 		$embed = new AMP_Gfycat_Embed_Handler();
 		$embed->register_embed();
 		$source = apply_filters( 'the_content', $source );
