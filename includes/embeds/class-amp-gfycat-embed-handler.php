@@ -13,7 +13,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Regex matched to produce output amp-gfycat.
 	 *
-	 * @const string
+	 * @var string
 	 */
 	const URL_PATTERN = '#https?://(www\.)?gfycat\.com/gifs/detail/.*#i';
 
@@ -32,7 +32,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Filter oEmbed HTML for Meetup to prepare it for AMP.
+	 * Filter oEmbed HTML for Gfycat to prepare it for AMP.
 	 *
 	 * @param mixed  $return The shortcode callback function to call.
 	 * @param string $url    The attempted embed URL.
@@ -62,7 +62,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 					'width'      => $attr['width'],
 					'height'     => $attr['height'],
 					'data-gfyid' => $data_gfyid,
-					'layout'     => 'responsive',
+					'layout'     => 'intrinsic',
 				)
 			);
 		}

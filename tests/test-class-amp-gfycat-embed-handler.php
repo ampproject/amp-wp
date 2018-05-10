@@ -11,6 +11,26 @@
 class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 
 	/**
+	 * Set up.
+	 *
+	 * @global WP_Post $post
+	 */
+	public function setUp() {
+		global $post;
+		parent::setUp();
+
+		/*
+		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()
+		 * method would short-circuit when this is the case:
+		 * https://github.com/WordPress/wordpress-develop/blob/4.8.4/src/wp-includes/class-wp-embed.php#L192-L193
+		 * So on WP<4.9 we set a post global to ensure oEmbeds get processed.
+		 */
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
+			$post = $this->factory()->post->create_and_get();
+		}
+	}
+
+	/**
 	 * Get conversion data.
 	 *
 	 * @return array
@@ -38,9 +58,6 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_conversion_data
 	 */
 	public function test__conversion( $source, $expected ) {
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
-			$this->markTestSkipped( 'Gfycat is not supported in this WP version.' );
-		}
 		$embed = new AMP_Gfycat_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
@@ -74,9 +91,6 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_scripts_data
 	 */
 	public function test__get_scripts( $source, $expected ) {
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
-			$this->markTestSkipped( 'Gfycat is not supported in this WP version.' );
-		}
 		$embed = new AMP_Gfycat_Embed_Handler();
 		$embed->register_embed();
 		$source = apply_filters( 'the_content', $source );
