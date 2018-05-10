@@ -147,6 +147,7 @@ class AMP_Theme_Support {
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
 		self::$embed_handlers    = self::register_content_embed_handlers();
+		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
 	}
 
 	/**

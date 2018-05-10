@@ -17,6 +17,13 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 600;
 	protected $DEFAULT_HEIGHT = 600;
 
+	/**
+	 * Tag.
+	 *
+	 * @var string embed HTML blockquote tag to identify and replace with AMP version.
+	 */
+	protected $sanitize_tag = 'blockquote';
+
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-instagram', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 		add_shortcode( 'instagram', array( $this, 'shortcode' ) );
@@ -82,5 +89,73 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return end( $matches );
+	}
+
+	/**
+	 * Sanitized <blockquote class="instagram-media"> tags to <amp-instagram>
+	 *
+	 * @param DOMDocument $dom DOM.
+	 */
+	public function sanitize_raw_embeds( $dom ) {
+		/**
+		 * Node list.
+		 *
+		 * @var DOMNodeList $node
+		 */
+		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
+		$num_nodes = $nodes->length;
+
+		if ( 0 === $num_nodes ) {
+			return;
+		}
+
+		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			$node = $nodes->item( $i );
+			if ( ! $node instanceof DOMElement ) {
+				continue;
+			}
+
+			if ( $node->hasAttribute( 'data-instgrm-permalink' ) ) {
+				$this->create_amp_instragram_and_replace_node( $dom, $node );
+			}
+		}
+	}
+
+	/**
+	 * Make final modifications to DOMNode
+	 *
+	 * @param DOMDocument $dom The HTML Document.
+	 * @param DOMNode     $node The DOMNode to adjust and replace.
+	 */
+	private function create_amp_instragram_and_replace_node( $dom, $node ) {
+		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
+
+		$new_node = AMP_DOM_Utils::create_node( $dom, 'amp-instagram', array(
+			'data-shortcode' => $instagram_id,
+			'layout'         => 'responsive',
+			'width'          => $this->DEFAULT_WIDTH,
+			'height'         => $this->DEFAULT_HEIGHT,
+		) );
+
+		$this->sanitize_embed_script( $node );
+
+		$node->parentNode->replaceChild( $new_node, $node );
+
+		$this->did_convert_elements = true;
+	}
+
+
+	/**
+	 * Removes instagram's embed <script> tag
+	 *
+	 * @param DOMNode $node The DOMNode to whose sibling is the instagram script.
+	 */
+	private function sanitize_embed_script( $node ) {
+		$next_sibling = $node->nextSibling;
+
+		if ( null !== $next_sibling && 'script' === strtolower( $next_sibling->nodeName )
+			&& false !== strpos( $next_sibling->getAttribute( 'src' ), 'instagram.com/embed.js' ) ) {
+			$next_sibling->parentNode->removeChild( $next_sibling );
+		}
 	}
 }
