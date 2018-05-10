@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 /**
  * Internal block libraries.
  */
@@ -8,7 +10,11 @@ const {
 	BlockAlignmentToolbar,
 	BlockControls
 } = wp.blocks;
-const { DateTimePicker, PanelBody } = wp.components;
+const {
+	DateTimePicker,
+	PanelBody,
+	TextControl
+} = wp.components;
 import timeago from 'timeago.js';
 
 /**
@@ -30,6 +36,9 @@ export default registerBlockType(
 			align: {
 				type: 'string',
 			},
+			cutoff: {
+				type: 'number',
+			},
 			dateTime: {
 				source: 'children',
 				type: 'string',
@@ -45,8 +54,8 @@ export default registerBlockType(
 		},
 
 		edit( { attributes, isSelected, setAttributes } ) {
-			var timeAgo,
-				align = attributes.align;
+			const { align, cutoff } = attributes;
+			var timeAgo;
 			if ( attributes.dateTime ) {
 				timeAgo = timeago().format( attributes.dateTime );
 			} else {
@@ -61,6 +70,13 @@ export default registerBlockType(
 								locale='en'
 								currentDate={ attributes.dateTime || moment() }
 								onChange={ value => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) } // eslint-disable-line
+							/>
+							<TextControl
+								type="number"
+								className="blocks-amp-timeout__cutoff"
+								label={ __( 'Cutoff (seconds)' ) }
+								value={ cutoff !== undefined ? cutoff : '' }
+								onChange={ value => ( setAttributes( { cutoff: value } ) ) }
 							/>
 						</PanelBody>
 					</InspectorControls>
@@ -79,8 +95,17 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
+			let timeagoProps = {
+				layout: 'responsive',
+				className: 'align' + ( attributes.align || 'none' ),
+				datetime: attributes.dateTime,
+				locale: 'en'
+			};
+			if ( attributes.cutoff ) {
+				timeagoProps.cutoff = attributes.cutoff;
+			}
 			return (
-				<amp-timeago layout='responsive' className={ 'align' + ( attributes.align || 'none' ) } datetime={ attributes.dateTime } locale="en">{ attributes.dateTime }</amp-timeago>
+				<amp-timeago { ...timeagoProps }>{ moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm') }</amp-timeago>
 			);
 		}
 	}
