@@ -39,6 +39,7 @@ class AMP_Autoloader {
 		'AMP_DailyMotion_Embed_Handler'               => 'includes/embeds/class-amp-dailymotion-embed',
 		'AMP_Facebook_Embed_Handler'                  => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'                   => 'includes/embeds/class-amp-gallery-embed',
+		'AMP_Gfycat_Embed_Handler'                    => 'includes/embeds/class-amp-gfycat-embed-handler',
 		'AMP_Core_Block_Handler'                      => 'includes/embeds/class-amp-core-block-handler',
 		'AMP_Instagram_Embed_Handler'                 => 'includes/embeds/class-amp-instagram-embed',
 		'AMP_Issuu_Embed_Handler'                     => 'includes/embeds/class-amp-issuu-embed-handler',
