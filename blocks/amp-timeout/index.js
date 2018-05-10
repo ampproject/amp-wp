@@ -52,13 +52,10 @@ export default registerBlockType(
 			];
 		},
 		save( { attributes } ) {
-			const ampDateTime = {
-				'datetime': attributes.dateTime
-			};
 			return (
 				<amp-timeago layout="fixed" width="160"
 					height="20"
-					{ ...ampDateTime }
+					dateTime={ attributes.dateTime }
 					locale="en">{ attributes.dateTime }</amp-timeago>
 			);
 		}
