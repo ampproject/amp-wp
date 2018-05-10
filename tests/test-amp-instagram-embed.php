@@ -76,4 +76,46 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $scripts );
 	}
+
+	/**
+	 * Data for test__raw_embed_sanitizer.
+	 *
+	 * @return array
+	 */
+	public function get_raw_embed_dataset() {
+		return array(
+			'no_embed'                           => array(
+				'<p>Hello world.</p>',
+				'<p>Hello world.</p>',
+			),
+			'embed_blockquote_without_instagram' => array(
+				'<blockquote>lorem ipsum</blockquote>',
+				'<blockquote>lorem ipsum</blockquote>',
+			),
+
+			'blockquote_embed'                   => array(
+				'<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote>',
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>',
+			),
+		);
+	}
+
+	/**
+	 * Test raw_embed_sanitizer.
+	 *
+	 * @param string $source  Content.
+	 * @param string $expected Expected content.
+	 * @dataProvider get_raw_embed_dataset
+	 * @covers AMP_Instagram_Embed_Handler::sanitize_raw_embeds()
+	 */
+	public function test__raw_embed_sanitizer( $source, $expected ) {
+		$dom   = AMP_DOM_Utils::get_dom_from_content( $source );
+		$embed = new AMP_Instagram_Embed_Handler();
+
+		$embed->sanitize_raw_embeds( $dom );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEquals( $expected, $content );
+	}
 }

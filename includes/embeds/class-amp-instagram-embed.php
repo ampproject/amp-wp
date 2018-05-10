@@ -24,13 +24,20 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	protected $sanitize_tag = 'blockquote';
 
+	/**
+	 * Tag.
+	 *
+	 * @var string AMP amp-facebook tag
+	 */
+	private $amp_tag = 'amp-instagram';
+
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-instagram', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, array( $this, 'oembed' ), -1 );
 		add_shortcode( 'instagram', array( $this, 'shortcode' ) );
 	}
 
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'amp-instagram', -1 );
+		wp_embed_unregister_handler( $this->amp_tag, -1 );
 		remove_shortcode( 'instagram' );
 	}
 
@@ -71,7 +78,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 		$this->did_convert_elements = true;
 
 		return AMP_HTML_Utils::build_tag(
-			'amp-instagram',
+			$this->amp_tag,
 			array(
 				'data-shortcode' => $args['instagram_id'],
 				'layout' => 'responsive',
@@ -130,7 +137,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function create_amp_instragram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
 
-		$new_node = AMP_DOM_Utils::create_node( $dom, 'amp-instagram', array(
+		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
 			'data-shortcode' => $instagram_id,
 			'layout'         => 'responsive',
 			'width'          => $this->DEFAULT_WIDTH,
