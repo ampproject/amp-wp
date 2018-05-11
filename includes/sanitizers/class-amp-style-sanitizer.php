@@ -639,8 +639,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$validation_errors = $this->process_css_list( $css_document, $options );
 
-			// @todo Remove trailing semicolons.
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
+			$output_format->setSemicolonAfterLastRule( false );
 
 			$before_declaration_block          = '/*AMP_WP_BEFORE_DECLARATION_BLOCK*/';
 			$between_selectors                 = '/*AMP_WP_BETWEEN_SELECTORS*/';
