@@ -24,3 +24,4 @@
 </head>
 
 <body class="<?php echo esc_attr( $this->get( 'body_class' ) ); ?>">
+<?php do_action( 'amp_post_template_body', $this ); ?>
