@@ -222,7 +222,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_link_and_style_test_data() {
 		return array(
 			'multiple_amp_custom_and_other_styles' => array(
-				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green; text-decoration: underline !important;}</style></head><body><style>s {color:yellow} /* So !important! */</style></body></html>',
+				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green; text-decoration: underline !important;}</style></head><body><style>s {color:yellow} /* So !important! */</style><b>1</b><i>i</i><u>u</u><s>s</s></body></html>',
 				array(
 					':root:not(#_):not(#_) b{color:red;}',
 					'i{color:blue;}',
@@ -472,8 +472,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$html  = '<html amp><head><meta charset="utf-8">';
 		$html .= '<style>.' . str_repeat( 'a', $custom_max_size - 50 ) . '{ color:red } .b{ color:blue; }</style>';
-		$html .= '<style>.b ' . str_repeat( 'c', $custom_max_size ) . '{ color:green }</style>';
-		$html .= '</head><body><span class="b">...</span></body></html>';
+		$html .= '<style>.b[data-value="' . str_repeat( 'c', $custom_max_size ) . '"] { color:green }</style>';
+		$html .= '<style>#nonexists { color:black; } #exists { color:white; }</style>';
+		$html .= '<style>div { color:black; } span { color:white; } </style>';
+		$html .= '</head><body><span class="b">...</span><span id="exists"></span></body></html>';
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 
 		$error_codes = array();
@@ -486,7 +488,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 
 		$this->assertEquals(
-			array( '.b{color:blue;}' ),
+			array(
+				'.b{color:blue;}',
+				'#exists{color:white;}',
+				'span{color:white;}',
+			),
 			array_values( $sanitizer->get_stylesheets() )
 		);
 

@@ -134,6 +134,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $used_class_names = array();
 
 	/**
+	 * Tag names used in document.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	private $used_tag_names = array();
+
+	/**
 	 * XPath.
 	 *
 	 * @since 1.0
@@ -243,6 +251,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->used_class_names = array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) );
 		}
 		return $this->used_class_names;
+	}
+
+
+	/**
+	 * Get list of all the tag names used in the document.
+	 *
+	 * @since 1.0
+	 * @return array Used tag names.
+	 */
+	private function get_used_tag_names() {
+		if ( empty( $this->used_tag_names ) ) {
+			$used_tag_names = array();
+			foreach ( $this->dom->getElementsByTagName( '*' ) as $el ) {
+				$used_tag_names[ $el->tagName ] = true;
+			}
+			$this->used_tag_names = array_keys( $used_tag_names );
+		}
+		return $this->used_tag_names;
 	}
 
 	/**
@@ -531,7 +557,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 
-		$cache_group = 'amp-parsed-stylesheet-v2';
+		$cache_group = 'amp-parsed-stylesheet-v4';
 		if ( wp_using_ext_object_cache() ) {
 			$parsed = wp_cache_get( $cache_key, $cache_group );
 		} else {
@@ -613,6 +639,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$validation_errors = $this->process_css_list( $css_document, $options );
 
+			// @todo Remove trailing semicolons.
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
 
 			$before_declaration_block          = '/*AMP_WP_BEFORE_DECLARATION_BLOCK*/';
@@ -644,18 +671,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
-						$classes = array();
+						$selectors_parsed[ $selector ] = array();
 
-						// Remove :not() to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
-						$reduced_selector = preg_replace( '/:not\(.+?\)/', '', $selector );
+						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
+						$reduced_selector = preg_replace( '/:[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
 
 						// Remove attribute selectors to eliminate false negative, such as with `.social-navigation a[href*="example.com"]:before`.
 						$reduced_selector = preg_replace( '/\[\w.*?\]/', '', $reduced_selector );
 
-						if ( preg_match_all( '/(?<=\.)([a-zA-Z0-9_-]+)/', $reduced_selector, $matches ) ) {
-							$classes = $matches[0];
+						$reduced_selector = preg_replace_callback(
+							'/\.([a-zA-Z0-9_-]+)/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ]['classes'][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
+						$reduced_selector = preg_replace_callback(
+							'/#([a-zA-Z0-9_-]+)/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ]['ids'][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
+
+						if ( preg_match_all( '/[a-zA-Z0-9_-]+/', $reduced_selector, $matches ) ) {
+							$selectors_parsed[ $selector ]['tags'] = $matches[0];
 						}
-						$selectors_parsed[ $selector ] = $classes;
 					}
 
 					// Restore calc() functions that were replaced with placeholders.
@@ -1403,6 +1446,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet_set['processed_nodes'] = array();
 
 		$final_size = 0;
+		$dom        = $this->dom;
 		foreach ( $stylesheet_set['pending_stylesheets'] as &$pending_stylesheet ) {
 			$stylesheet = '';
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
@@ -1412,12 +1456,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
 					if ( $should_tree_shake ) {
 						$selectors = array();
-						foreach ( $selectors_parsed as $selector => $class_names ) {
+						foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 							$should_include = (
 								( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
 								||
-								// If all class names are used in the doc.
-								0 === count( array_diff( $class_names, $this->get_used_class_names() ) )
+								(
+									// If all class names are used in the doc.
+									(
+										empty( $parsed_selector['classes'] )
+										||
+										0 === count( array_diff( $parsed_selector['classes'], $this->get_used_class_names() ) )
+									)
+									&&
+									// If all IDs are used in the doc.
+									(
+										empty( $parsed_selector['ids'] )
+										||
+										0 === count( array_filter( $parsed_selector['ids'], function( $id ) use ( $dom ) {
+											return ! $dom->getElementById( $id );
+										} ) )
+									)
+									&&
+									// If tag names are present in the doc.
+									(
+										empty( $parsed_selector['tags'] )
+										||
+										0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
+									)
+								)
 							);
 							if ( $should_include ) {
 								$selectors[] = $selector;
