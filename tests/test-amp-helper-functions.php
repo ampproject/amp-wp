@@ -457,16 +457,31 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$expected_site_icon_img = wp_get_attachment_image_src( $site_icon_id, 'full', false );
 
 		update_option( 'site_icon', $site_icon_id );
-		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals(
-			array(
-				'@type'  => $logo_type,
-				'height' => 32,
-				'url'    => $expected_site_icon_img[0],
-				'width'  => 32,
-			),
-			$metadata['publisher']['logo']
+		$expected_schema_site_icon = array(
+			'@type'  => $logo_type,
+			'height' => 32,
+			'url'    => $expected_site_icon_img[0],
+			'width'  => 32,
 		);
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
+		update_option( 'site_icon', null );
+
+		// Test the custom logo icon with too much height, expecting the publisher logo to fall back to the site icon.
+		$custom_logo_excessive_height = 150;
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_excessive_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		update_option( 'site_icon', $site_icon_id );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
+		set_theme_mod( 'custom_logo', null );
 		update_option( 'site_icon', null );
 
 		// Test page.

@@ -579,10 +579,20 @@ function amp_get_schemaorg_metadata() {
 		),
 	);
 
-	$custom_logo_id = get_theme_mod( 'custom_logo' );
+	$custom_logo_id  = get_theme_mod( 'custom_logo' );
+	$max_logo_width  = 600;
+	$max_logo_height = 60;
 	if ( $custom_logo_id && 'attachment' === get_post_type( $custom_logo_id ) ) {
 		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
-		if ( isset( $custom_logo_img[0], $custom_logo_img[1], $custom_logo_img[2] ) ) {
+		$is_proper_size  = (
+			isset( $custom_logo_img[0], $custom_logo_img[1], $custom_logo_img[2] )
+			&&
+			$custom_logo_img[1] <= $max_logo_width
+			&&
+			$custom_logo_img[2] <= $max_logo_height
+		);
+
+		if ( $is_proper_size ) {
 			$schema_img = array(
 				'url'    => $custom_logo_img[0],
 				'width'  => $custom_logo_img[1],
