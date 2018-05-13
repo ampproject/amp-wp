@@ -579,23 +579,46 @@ function amp_get_schemaorg_metadata() {
 		),
 	);
 
-	/**
-	 * Filters the site icon used in AMP responses.
-	 *
-	 * In general the `get_site_icon_url` filter should be used instead.
-	 *
-	 * @since 0.3
-	 * @todo Why is the size set to 32px?
-	 *
-	 * @param string $site_icon_url
-	 */
-	$site_icon_url = apply_filters( 'amp_site_icon_url', get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ) );
-	if ( $site_icon_url ) {
-		$metadata['publisher']['logo'] = array(
-			'@type'  => 'ImageObject',
-			'url'    => $site_icon_url,
-			'height' => AMP_Post_Template::SITE_ICON_SIZE,
-			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
+	$custom_logo_id = get_theme_mod( 'custom_logo' );
+	if ( $custom_logo_id && 'attachment' === get_post_type( $custom_logo_id ) ) {
+		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
+		if ( isset( $custom_logo_img[0], $custom_logo_img[1], $custom_logo_img[2] ) ) {
+			$schema_img = array(
+				'url'    => $custom_logo_img[0],
+				'width'  => $custom_logo_img[1],
+				'height' => $custom_logo_img[2],
+			);
+		}
+	}
+
+	if ( ! isset( $schema_img ) ) {
+
+		/**
+		 * Filters the site icon used in AMP responses.
+		 *
+		 * In general the `get_site_icon_url` filter should be used instead.
+		 *
+		 * @since 0.3
+		 * @todo Why is the size set to 32px?
+		 *
+		 * @param string $site_icon_url
+		 */
+		$site_icon_img_url = apply_filters( 'amp_site_icon_url', get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ) );
+		if ( $site_icon_img_url ) {
+			$schema_img = array(
+				'url'    => $site_icon_img_url,
+				'width'  => AMP_Post_Template::SITE_ICON_SIZE,
+				'height' => AMP_Post_Template::SITE_ICON_SIZE,
+			);
+		}
+	}
+
+	if ( isset( $schema_img ) ) {
+		$metadata['publisher']['logo'] = array_merge(
+			array(
+				'@type' => 'ImageObject',
+			),
+			$schema_img
 		);
 	}
 

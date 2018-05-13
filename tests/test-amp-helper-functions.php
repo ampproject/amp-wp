@@ -381,8 +381,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_schemaorg_metadata() {
 		update_option( 'blogname', 'Foo' );
+		$publisher_type     = 'Organization';
+		$logo_type          = 'ImageObject';
 		$expected_publisher = array(
-			'@type' => 'Organization',
+			'@type' => $publisher_type,
 			'name'  => 'Foo',
 		);
 
@@ -401,13 +403,71 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_author' => $user_id,
 		) );
 
-		// Test non-singular.
+		// Test non-singular, with no publisher logo.
 		$this->go_to( home_url() );
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
 		$this->assertArrayNotHasKey( '@type', $metadata );
 		$this->assertArrayHasKey( 'publisher', $metadata );
 		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+
+		// Test the custom_logo as the publisher logo.
+		$custom_logo_src    = 'example/custom-logo.jpeg';
+		$custom_logo_height = 45;
+		$custom_logo_width  = 600;
+		$custom_logo_id     = $this->factory()->attachment->create_object(
+			$custom_logo_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_logo_img  = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
+
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $custom_logo_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width,
+			),
+			$metadata['publisher']['logo']
+		);
+		set_theme_mod( 'custom_logo', null );
+
+		// Test the site icon as the publisher logo.
+		$site_icon_src          = 'foo/site-icon.jpeg';
+		$site_icon_id           = $this->factory()->attachment->create_object(
+			$site_icon_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_site_icon_img = wp_get_attachment_image_src( $site_icon_id, 'full', false );
+
+		update_option( 'site_icon', $site_icon_id );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => 32,
+				'url'    => $expected_site_icon_img[0],
+				'width'  => 32,
+			),
+			$metadata['publisher']['logo']
+		);
+		update_option( 'site_icon', null );
 
 		// Test page.
 		$this->go_to( get_permalink( $page_id ) );
