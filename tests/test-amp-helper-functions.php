@@ -463,7 +463,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'url'    => $expected_site_icon_img[0],
 			'width'  => 32,
 		);
-		$metadata = amp_get_schemaorg_metadata();
+		$metadata                  = amp_get_schemaorg_metadata();
 		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
 		update_option( 'site_icon', null );
 
