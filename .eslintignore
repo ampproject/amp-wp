@@ -1,1 +1,4 @@
-dev-lib/.eslintignore
+**/*.min.js
+**/node_modules/**
+**/vendor/**
+**/assets/js/amp-blocks-compiled.js
