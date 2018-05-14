@@ -28,19 +28,19 @@ export default registerBlockType(
 		icon: 'wordpress-alt', // @todo Needs an icon.
 		keywords: [
 			__( 'Time difference' ),
-			__( 'Time ago'),
+			__( 'Time ago' ),
 			__( 'Date' )
 		],
 
 		attributes: {
 			align: {
-				type: 'string',
+				type: 'string'
 			},
 			cutoff: {
-				type: 'number',
+				type: 'number'
 			},
 			dateTime: {
-				type: 'string',
+				type: 'string'
 			}
 		},
 
@@ -55,8 +55,8 @@ export default registerBlockType(
 			const { align, cutoff } = attributes;
 			var timeAgo;
 			if ( attributes.dateTime ) {
-				if ( attributes.cutoff && attributes.cutoff < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds') ) ) {
-					timeAgo = moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm');
+				if ( attributes.cutoff && attributes.cutoff < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds' ) ) ) {
+					timeAgo = moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' );
 				} else {
 					timeAgo = timeago().format( attributes.dateTime );
 				}
@@ -83,7 +83,7 @@ export default registerBlockType(
 						</PanelBody>
 					</InspectorControls>
 				),
-				<BlockControls>
+				<BlockControls key='controls'>
 					<BlockAlignmentToolbar
 						value={ align }
 						onChange={ ( nextAlign ) => {
@@ -92,7 +92,7 @@ export default registerBlockType(
 						controls={ [ 'left', 'center', 'right' ] }
 					/>
 				</BlockControls>,
-				<time dateTime={ attributes.dateTime }>{ timeAgo }</time>
+				<time key='timeago' dateTime={ attributes.dateTime }>{ timeAgo }</time>
 			];
 		},
 
@@ -107,7 +107,7 @@ export default registerBlockType(
 				timeagoProps.cutoff = attributes.cutoff;
 			}
 			return (
-				<amp-timeago { ...timeagoProps }>{ moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm') }</amp-timeago>
+				<amp-timeago { ...timeagoProps }>{ moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' ) }</amp-timeago>
 			);
 		}
 	}

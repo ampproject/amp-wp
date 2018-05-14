@@ -4,7 +4,7 @@ const path = require( 'path' );
 
 module.exports = {
 	entry: {
-		'./assets/js/editor-blocks': './blocks/index.js'
+		'./assets/js/amp-blocks-compiled': './blocks/index.js'
 	},
 	output: {
 		path: path.resolve( __dirname ),

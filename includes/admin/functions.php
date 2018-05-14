@@ -35,17 +35,6 @@ function amp_init_customizer() {
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
 }
 
-add_action( 'enqueue_block_editor_assets', 'amp_enqueue_admin_assets' );
-function amp_enqueue_admin_assets() {
-	// Scripts.
-	wp_enqueue_script(
-		'amp-editor-blocks',
-		amp_get_asset_url( 'js/editor-blocks.js' ),
-		array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-		AMP__VERSION
-	);
-}
-
 /**
  * Get permalink for the first AMP-eligible post.
  *
@@ -163,4 +152,12 @@ function amp_add_custom_analytics( $analytics = array() ) {
 function amp_post_meta_box() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
+}
+
+/**
+ * Bootstrap AMP Editor core blocks.
+ */
+function amp_editor_core_blocks() {
+	$editor_blocks = new AMP_Editor_Blocks();
+	$editor_blocks->init();
 }
