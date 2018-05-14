@@ -25,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Timeago' ),
 		category: 'common',
-		icon: 'wordpress-alt',
+		icon: 'wordpress-alt', // @todo Needs an icon.
 		keywords: [
 			__( 'Time difference' ),
 			__( 'Time ago'),
@@ -40,9 +40,7 @@ export default registerBlockType(
 				type: 'number',
 			},
 			dateTime: {
-				source: 'children',
 				type: 'string',
-				selector: 'amp-timeago'
 			}
 		},
 
@@ -57,7 +55,11 @@ export default registerBlockType(
 			const { align, cutoff } = attributes;
 			var timeAgo;
 			if ( attributes.dateTime ) {
-				timeAgo = timeago().format( attributes.dateTime );
+				if ( attributes.cutoff && attributes.cutoff < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds') ) ) {
+					timeAgo = moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm');
+				} else {
+					timeAgo = timeago().format( attributes.dateTime );
+				}
 			} else {
 				timeAgo = timeago().format( new Date() );
 				setAttributes( { dateTime: moment( moment(), moment.ISO_8601, true ).format() } );
