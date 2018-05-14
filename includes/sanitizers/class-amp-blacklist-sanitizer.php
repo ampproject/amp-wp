@@ -32,11 +32,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize.
 	 */
 	public function sanitize() {
+		_deprecated_function( __METHOD__, '0.7', 'AMP_Tag_And_Attribute_Sanitizer::sanitize' );
+
 		$blacklisted_tags       = $this->get_blacklisted_tags();
 		$blacklisted_attributes = $this->get_blacklisted_attributes();
 		$blacklisted_protocols  = $this->get_blacklisted_protocols();
 
-		$body = $this->get_body_node();
+		$body = $this->root_element;
 		$this->strip_tags( $body, $blacklisted_tags );
 		$this->strip_attributes_recursive( $body, $blacklisted_attributes, $blacklisted_protocols );
 	}
@@ -71,13 +73,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$attribute      = $node->attributes->item( $i );
 				$attribute_name = strtolower( $attribute->name );
 				if ( in_array( $attribute_name, $bad_attributes, true ) ) {
-					$node->removeAttribute( $attribute_name );
+					$this->remove_invalid_attribute( $node, $attribute_name );
 					continue;
 				}
 
 				// The on* attributes (like onclick) are a special case.
 				if ( 0 === stripos( $attribute_name, 'on' ) && 'on' !== $attribute_name ) {
-					$node->removeAttribute( $attribute_name );
+					$this->remove_invalid_attribute( $node, $attribute_name );
 					continue;
 				} elseif ( 'a' === $node_name ) {
 					$this->sanitize_a_attribute( $node, $attribute );
@@ -110,10 +112,10 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
 				$element     = $elements->item( $i );
 				$parent_node = $element->parentNode;
-				$parent_node->removeChild( $element );
+				$this->remove_invalid_child( $element );
 
 				if ( 'body' !== $parent_node->nodeName && AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$parent_node->parentNode->removeChild( $parent_node );
+					$this->remove_invalid_child( $parent_node );
 				}
 			}
 		}
@@ -132,13 +134,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			$old_value = $attribute->value;
 			$new_value = trim( preg_replace( self::PATTERN_REL_WP_ATTACHMENT, '', $old_value ) );
 			if ( empty( $new_value ) ) {
-				$node->removeAttribute( $attribute_name );
+				$this->remove_invalid_attribute( $node, $attribute_name );
 			} elseif ( $old_value !== $new_value ) {
 				$node->setAttribute( $attribute_name, $new_value );
 			}
 		} elseif ( 'rev' === $attribute_name ) {
 			// rev removed from HTML5 spec, which was used by Jetpack Markdown.
-			$node->removeAttribute( $attribute_name );
+			$this->remove_invalid_attribute( $node, $attribute_name );
 		} elseif ( 'target' === $attribute_name ) {
 			// _blank is the only allowed value and it must be lowercase.
 			// replace _new with _blank and others should simply be removed.
@@ -148,7 +150,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				$node->setAttribute( $attribute_name, '_blank' );
 			} else {
 				// Only _blank is allowed.
-				$node->removeAttribute( $attribute_name );
+				$this->remove_invalid_attribute( $node, $attribute_name );
 			}
 		}
 	}
@@ -217,7 +219,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove the node from the parent, if defined.
 		if ( $node->parentNode ) {
-			$node->parentNode->removeChild( $node );
+			$this->remove_invalid_child( $node );
 		}
 	}
 

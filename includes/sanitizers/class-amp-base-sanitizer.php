@@ -43,17 +43,26 @@ abstract class AMP_Base_Sanitizer {
 	 * @var array {
 	 *      @type int $content_max_width
 	 *      @type bool $add_placeholder
+	 *      @type bool $use_document_element
 	 *      @type bool $require_https_src
 	 *      @type string[] $amp_allowed_tags
 	 *      @type string[] $amp_globally_allowed_attributes
 	 *      @type string[] $amp_layout_allowed_attributes
+	 *      @type array $amp_allowed_tags
+	 *      @type array $amp_globally_allowed_attributes
+	 *      @type array $amp_layout_allowed_attributes
+	 *      @type array $amp_bind_placeholder_prefix
+	 *      @type bool $allow_dirty_styles
+	 *      @type bool $allow_dirty_scripts
+	 *      @type bool $disable_invalid_removal
+	 *      @type callable $remove_invalid_callback
 	 * }
 	 */
 	protected $args;
 
 	/**
 	 * Flag to be set in child class' sanitize() method indicating if the
-	 * HTML contained in the DOMDocument has been santized yet or not.
+	 * HTML contained in the DOMDocument has been sanitized yet or not.
 	 *
 	 * @since 0.2
 	 *
@@ -62,12 +71,19 @@ abstract class AMP_Base_Sanitizer {
 	protected $did_convert_elements = false;
 
 	/**
+	 * The root element used for sanitization. Either html or body.
+	 *
+	 * @var DOMElement
+	 */
+	protected $root_element;
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
 	 *
 	 * @param DOMDocument $dom Represents the HTML document to sanitize.
-	 * @param array       $args array {
+	 * @param array       $args {
 	 *      Args.
 	 *
 	 *      @type int $content_max_width
@@ -81,6 +97,12 @@ abstract class AMP_Base_Sanitizer {
 	public function __construct( $dom, $args = array() ) {
 		$this->dom  = $dom;
 		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
+
+		if ( ! empty( $this->args['use_document_element'] ) ) {
+			$this->root_element = $this->dom->documentElement;
+		} else {
+			$this->root_element = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		}
 	}
 
 	/**
@@ -96,7 +118,9 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @return string[] This are empty in this the base class.
+	 * @return string[] Returns component name as array key and JavaScript URL as array value,
+	 *                  respectively. Will return an empty array if sanitization has yet to be run
+	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
 		return array();
@@ -107,19 +131,39 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.4
 	 *
-	 * @return string[] This are empty in this the base class.
+	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */
 	public function get_styles() {
 		return array();
 	}
 
 	/**
+	 * Get stylesheets.
+	 *
+	 * @since 0.7
+	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
+	 */
+	public function get_stylesheets() {
+		$stylesheets = array();
+
+		foreach ( $this->get_styles() as $selector => $properties ) {
+			$stylesheet = sprintf( '%s { %s }', $selector, join( '; ', $properties ) . ';' );
+
+			$stylesheets[ md5( $stylesheet ) ] = $stylesheet;
+		}
+
+		return $stylesheets;
+	}
+
+	/**
 	 * Get HTML body as DOMElement from DOMDocument received by the constructor.
 	 *
-	 * @return DOMElement
+	 * @deprecated Just reference $root_element instead.
+	 * @return DOMElement The body or html element.
 	 */
 	protected function get_body_node() {
-		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		_deprecated_function( __METHOD__, 'AMP_Base_Sanitizer::$root_element', '0.7' );
+		return $this->root_element;
 	}
 
 	/**
@@ -131,12 +175,15 @@ abstract class AMP_Base_Sanitizer {
 	 * @return float|int|string Returns a numeric dimension value, or an empty string.
 	 */
 	public function sanitize_dimension( $value, $dimension ) {
-		if ( empty( $value ) ) {
+
+		// Allows 0 to be used as valid dimension.
+		if ( null === $value ) {
 			return '';
 		}
 
-		if ( false !== filter_var( $value, FILTER_VALIDATE_INT ) ) {
-			return absint( $value );
+		// Accepts both integers and floats & prevents negative values.
+		if ( is_numeric( $value ) ) {
+			return max( 0, floatval( $value ) );
 		}
 
 		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
@@ -154,7 +201,7 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Enforce fixed height.
+	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -167,51 +214,14 @@ abstract class AMP_Base_Sanitizer {
 	 * }
 	 * @return string[]
 	 */
-	public function enforce_fixed_height( $attributes ) {
+	public function set_layout( $attributes ) {
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
 		}
-
 		if ( empty( $attributes['width'] ) ) {
 			$attributes['layout'] = 'fixed-height';
 		}
-
-		return $attributes;
-	}
-
-	/**
-	 * This is our workaround to enforce max sizing with layout=responsive.
-	 *
-	 * We want elements to not grow beyond their width and shrink to fill the screen on viewports smaller than their width.
-	 *
-	 * See https://github.com/ampproject/amphtml/issues/1280#issuecomment-171533526
-	 * See https://github.com/Automattic/amp-wp/issues/101
-	 *
-	 * @param string[] $attributes {
-	 *      Attributes.
-	 *
-	 *      @type int $height
-	 *      @type int $width
-	 *      @type string $sizes
-	 *      @type string $class
-	 *      @type string $layout
-	 * }
-	 * @return string[]
-	 */
-	public function enforce_sizes_attribute( $attributes ) {
-		if ( ! isset( $attributes['width'], $attributes['height'] ) ) {
-			return $attributes;
-		}
-
-		$max_width = $attributes['width'];
-		if ( isset( $this->args['content_max_width'] ) && $max_width >= $this->args['content_max_width'] ) {
-			$max_width = $this->args['content_max_width'];
-		}
-
-		$attributes['sizes'] = sprintf( '(min-width: %1$dpx) %1$dpx, 100vw', absint( $max_width ) );
-
-		$this->add_or_append_attribute( $attributes, 'class', 'amp-wp-enforced-sizes' );
 
 		return $attributes;
 	}
@@ -267,5 +277,69 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		return $src;
+	}
+
+	/**
+	 * Removes an invalid child of a node.
+	 *
+	 * Also, calls the mutation callback for it.
+	 * This tracks all the nodes that were removed.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMNode|DOMElement $node The node to remove.
+	 * @param array              $args Additional args to pass to validation error callback.
+	 *
+	 * @return void
+	 */
+	public function remove_invalid_child( $node, $args = array() ) {
+		if ( isset( $this->args['validation_error_callback'] ) ) {
+			call_user_func( $this->args['validation_error_callback'],
+				array_merge( compact( 'node' ), $args )
+			);
+		}
+		if ( empty( $this->args['disable_invalid_removal'] ) ) {
+			$node->parentNode->removeChild( $node );
+		}
+	}
+
+	/**
+	 * Removes an invalid attribute of a node.
+	 *
+	 * Also, calls the mutation callback for it.
+	 * This tracks all the attributes that were removed.
+	 *
+	 * @since 0.7
+	 *
+	 * @param DOMElement     $element   The node for which to remove the attribute.
+	 * @param DOMAttr|string $attribute The attribute to remove from the element.
+	 * @param array          $args      Additional args to pass to validation error callback.
+	 * @return void
+	 */
+	public function remove_invalid_attribute( $element, $attribute, $args = array() ) {
+		if ( isset( $this->args['validation_error_callback'] ) ) {
+			if ( is_string( $attribute ) ) {
+				$attribute = $element->getAttributeNode( $attribute );
+			}
+			if ( $attribute ) {
+				call_user_func( $this->args['validation_error_callback'],
+					array_merge(
+						array(
+							'node' => $attribute,
+						),
+						$args
+					)
+				);
+				if ( empty( $this->args['disable_invalid_removal'] ) ) {
+					$element->removeAttributeNode( $attribute );
+				}
+			}
+		} elseif ( empty( $this->args['disable_invalid_removal'] ) ) {
+			if ( is_string( $attribute ) ) {
+				$element->removeAttribute( $attribute );
+			} else {
+				$element->removeAttributeNode( $attribute );
+			}
+		}
 	}
 }

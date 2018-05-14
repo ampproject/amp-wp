@@ -14,7 +14,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_post_template_add_scripts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
-	add_action( 'amp_post_template_head', 'amp_post_template_add_schemaorg_metadata' );
+	add_action( 'amp_post_template_head', 'amp_print_schemaorg_metadata' );
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
@@ -46,23 +46,27 @@ function amp_post_template_add_canonical( $amp_template ) {
 /**
  * Print scripts.
  *
+ * @see amp_register_default_scripts()
+ * @see amp_filter_script_loader_tag()
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_scripts( $amp_template ) {
+
+	// Just in case the runtime has been overridden by amp_post_template_data filter.
+	wp_scripts()->registered['amp-runtime']->src = $amp_template->get( 'amp_runtime_script' );
+
+	// Make sure any filtered extension script URLs get updated in registered scripts before printing.
 	$scripts = $amp_template->get( 'amp_component_scripts', array() );
-	foreach ( $scripts as $element => $script ) {
-		$custom_type = ( 'amp-mustache' === $element ) ? 'template' : 'element';
-		printf(
-			'<script custom-%s="%s" src="%s" async></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-			esc_attr( $custom_type ),
-			esc_attr( $element ),
-			esc_url( $script )
-		);
+	foreach ( $scripts as $handle => $value ) {
+		if ( is_string( $value ) && wp_script_is( $handle, 'registered' ) ) {
+			wp_scripts()->registered[ $handle ]->src = $value;
+		}
 	}
-	printf(
-		'<script src="%s" async></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		esc_url( $amp_template->get( 'amp_runtime_script' ) )
-	);
+
+	wp_print_scripts( array_merge(
+		array( 'amp-runtime' ),
+		array_keys( $scripts )
+	) );
 }
 
 /**
@@ -79,26 +83,22 @@ function amp_post_template_add_fonts( $amp_template ) {
 
 /**
  * Print boilerplate CSS.
+ *
+ * @since 0.3
+ * @see amp_get_boilerplate_code()
  */
 function amp_post_template_add_boilerplate_css() {
-	?>
-	<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-	<?php
+	echo amp_get_boilerplate_code(); // WPCS: xss ok.
 }
 
 /**
  * Print Schema.org metadata.
  *
- * @param AMP_Post_Template $amp_template Template.
+ * @deprecated Since 0.7
  */
-function amp_post_template_add_schemaorg_metadata( $amp_template ) {
-	$metadata = $amp_template->get( 'metadata' );
-	if ( empty( $metadata ) ) {
-		return;
-	}
-	?>
-	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
-	<?php
+function amp_post_template_add_schemaorg_metadata() {
+	_deprecated_function( __FUNCTION__, '0.7', 'amp_print_schemaorg_metadata' );
+	amp_print_schemaorg_metadata();
 }
 
 /**
@@ -133,31 +133,11 @@ function amp_post_template_add_analytics_script( $data ) {
 /**
  * Print analytics data.
  *
- * @param AMP_Post_Template $amp_template Template.
+ * @since 0.3.2
  */
-function amp_post_template_add_analytics_data( $amp_template ) {
-	$analytics_entries = $amp_template->get( 'amp_analytics' );
-	if ( empty( $analytics_entries ) ) {
-		return;
-	}
-
-	foreach ( $analytics_entries as $id => $analytics_entry ) {
-		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
-			/* translators: %1$s is analytics entry ID, %2$s is actual entry keys. */
-			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
-			continue;
-		}
-		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
-			'type' => 'application/json',
-		), wp_json_encode( $analytics_entry['config_data'] ) );
-
-		$amp_analytics_attr = array_merge( array(
-			'id'   => $id,
-			'type' => $analytics_entry['type'],
-		), $analytics_entry['attributes'] );
-
-		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
-	}
+function amp_post_template_add_analytics_data() {
+	$analytics = amp_add_custom_analytics();
+	amp_print_analytics( $analytics );
 }
 
 /**

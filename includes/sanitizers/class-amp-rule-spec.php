@@ -17,13 +17,16 @@ abstract class AMP_Rule_Spec {
 	 */
 	const ATTR_SPEC_LIST = 'attr_spec_list';
 	const TAG_SPEC       = 'tag_spec';
+	const CDATA          = 'cdata';
 
 	/**
-	 * AMP attr_spec value check results
+	 * AMP attr_spec value check results.
+	 *
+	 * In 0.7 these changed from strings to integers to speed up comparisons.
 	 */
-	const PASS           = 'pass';
-	const FAIL           = 'fail';
-	const NOT_APPLICABLE = 'not_applicable';
+	const PASS           = 1;
+	const FAIL           = 0;
+	const NOT_APPLICABLE = -1;
 
 	/**
 	 * HTML Element Tag rule names
@@ -46,6 +49,8 @@ abstract class AMP_Rule_Spec {
 	const VALUE_CASEI             = 'value_casei';
 	const VALUE_REGEX             = 'value_regex';
 	const VALUE_REGEX_CASEI       = 'value_regex_casei';
+	const VALUE_PROPERTIES        = 'value_properties';
+	const VALUE_URL               = 'value_url';
 
 	/**
 	 * If a node type listed here is invalid, it and it's subtree will be
@@ -77,7 +82,60 @@ abstract class AMP_Rule_Spec {
 	 */
 	public static $whitelisted_attr_regex = array(
 		'@^data-[a-zA-Z][\\w:.-]*$@uis',
-		'(update|item|pagination)', // Allowed for live reference points.
+		'(update|item|pagination|option|selected|disabled)', // Allowed for live reference points.
+	);
+
+	/**
+	 * List of boolean attributes.
+	 *
+	 * @since 0.7
+	 * @var array
+	 */
+	public static $boolean_attributes = array(
+		'allowfullscreen',
+		'async',
+		'autofocus',
+		'autoplay',
+		'checked',
+		'compact',
+		'controls',
+		'declare',
+		'default',
+		'defaultchecked',
+		'defaultmuted',
+		'defaultselected',
+		'defer',
+		'disabled',
+		'draggable',
+		'enabled',
+		'formnovalidate',
+		'hidden',
+		'indeterminate',
+		'inert',
+		'ismap',
+		'itemscope',
+		'loop',
+		'multiple',
+		'muted',
+		'nohref',
+		'noresize',
+		'noshade',
+		'novalidate',
+		'nowrap',
+		'open',
+		'pauseonexit',
+		'readonly',
+		'required',
+		'reversed',
+		'scoped',
+		'seamless',
+		'selected',
+		'sortable',
+		'spellcheck',
+		'translate',
+		'truespeed',
+		'typemustmatch',
+		'visible',
 	);
 
 	/**
@@ -90,17 +148,6 @@ abstract class AMP_Rule_Spec {
 		// An experimental tag with no protoascii.
 		'amp-share-tracking' => array(
 			'attr_spec_list' => array(),
-			'tag_spec'       => array(),
-		),
-
-		// Needed for some tags such as analytics.
-		'script'             => array(
-			'attr_spec_list' => array(
-				'type' => array(
-					'mandatory'   => true,
-					'value_casei' => 'application/json',
-				),
-			),
 			'tag_spec'       => array(),
 		),
 	);

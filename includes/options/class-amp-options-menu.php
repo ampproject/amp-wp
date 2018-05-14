@@ -22,7 +22,7 @@ class AMP_Options_Menu {
 	 */
 	public function init() {
 		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
-		add_action( 'admin_menu', array( $this, 'add_menu_items' ) );
+		add_action( 'admin_menu', array( $this, 'add_menu_items' ), 9 );
 	}
 
 	/**
@@ -84,7 +84,7 @@ class AMP_Options_Menu {
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<?php
 				$element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}";
-				$is_builtin = in_array( $post_type->name, $builtin_support, true );
+				$is_builtin = amp_is_canonical() || in_array( $post_type->name, $builtin_support, true );
 				?>
 				<?php if ( $is_builtin ) : ?>
 					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $post_type->name ); ?>">
@@ -94,7 +94,7 @@ class AMP_Options_Menu {
 					id="<?php echo esc_attr( $element_id ); ?>"
 					name="<?php echo esc_attr( $element_name ); ?>"
 					value="<?php echo esc_attr( $post_type->name ); ?>"
-					<?php checked( true, post_type_supports( $post_type->name, AMP_QUERY_VAR ) ); ?>
+					<?php checked( true, amp_is_canonical() || post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
 					<?php disabled( $is_builtin ); ?>
 					>
 				<label for="<?php echo esc_attr( $element_id ); ?>">
@@ -102,7 +102,15 @@ class AMP_Options_Menu {
 				</label>
 				<br>
 			<?php endforeach; ?>
-			<p class="description"><?php esc_html_e( 'Enable/disable AMP post type(s) support', 'amp' ); ?></p>
+			<p class="description">
+				<?php
+				if ( ! amp_is_canonical() ) :
+					esc_html_e( 'Enable/disable AMP post type(s) support', 'amp' );
+				else :
+					esc_html_e( 'Canonical AMP is enabled in your theme, so all post types will render.', 'amp' );
+				endif;
+			?>
+			</p>
 		</fieldset>
 		<?php
 	}
@@ -124,7 +132,9 @@ class AMP_Options_Menu {
 				<?php
 				settings_fields( AMP_Options_Manager::OPTION_NAME );
 				do_settings_sections( AMP_Options_Manager::OPTION_NAME );
-				submit_button();
+				if ( ! amp_is_canonical() ) {
+					submit_button();
+				}
 				?>
 			</form>
 		</div>

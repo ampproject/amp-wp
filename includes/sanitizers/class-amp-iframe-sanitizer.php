@@ -40,24 +40,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'iframe';
 
 	/**
-	 * Script slug.
-	 *
-	 * @var string AMP HTML tag to use in place of HTML's <iframe> tag.
-	 *
-	 * @since 0.2
-	 */
-	private static $script_slug = 'amp-iframe';
-
-	/**
-	 * Script src.
-	 *
-	 * @var string URL to AMP Project's IFrame element's JavaScript file found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 */
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-iframe-0.1.js';
-
-	/**
 	 * Default args.
 	 *
 	 * @var array
@@ -65,24 +47,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = array(
 		'add_placeholder' => false,
 	);
-
-	/**
-	 * Return one element array containing AMP HTML iframe tag and respective Javascript URL
-	 *
-	 * HTML tags and Javascript URLs found at cdn.ampproject.org
-	 *
-	 * @since 0.2
-	 *
-	 * @return string[] Returns AMP HTML iframe tag as array key and Javascript URL as array value,
-	 *                  respectively. Will return an empty array if sanitization has yet to be run
-	 *                  or if it did not find any HTML iframe elements to convert to AMP equivalents.
-	 */
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-		return array( self::$script_slug => self::$script_src );
-	}
 
 	/**
 	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
@@ -110,14 +74,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $new_attributes['src'] ) ) {
-				$node->parentNode->removeChild( $node );
+				$this->remove_invalid_child( $node );
 				continue;
 			}
 
 			$this->did_convert_elements = true;
-
-			$new_attributes = $this->enforce_fixed_height( $new_attributes );
-			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+			$new_attributes             = $this->set_layout( $new_attributes );
+			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
+				$new_attributes['layout'] = 'intrinsic';
+				$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+			}
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
 
@@ -228,4 +194,5 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 		return $placeholder_node;
 	}
+
 }

@@ -13,6 +13,21 @@
 class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 
 	/**
+	 * The oEmbed URL.
+	 *
+	 * @var string
+	 */
+	protected $oembed_url = 'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor';
+
+	/**
+	 * Response for oEmbed request.
+	 *
+	 * @see AMP_SoundCloud_Embed_Test::$oembed_url
+	 * @var string
+	 */
+	protected $oembed_response = '{"version":1.0,"type":"rich","provider_name":"SoundCloud","provider_url":"http://soundcloud.com","height":400,"width":500,"title":"Mozart - Requiem in D minor Complete Full by Jack Villano Villano","description":"mass in D Minor ","thumbnail_url":"http://i1.sndcdn.com/artworks-000046826426-o7i9ki-t500x500.jpg","html":"\u003Ciframe width=\"500\" height=\"400\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true\u0026url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F90097394\u0026show_artwork=true\u0026maxwidth=500\u0026maxheight=750\u0026dnt=1\"\u003E\u003C/iframe\u003E","author_name":"Jack Villano Villano","author_url":"https://soundcloud.com/jack-villano-villano"}';
+
+	/**
 	 * Set up.
 	 *
 	 * @global WP_Post $post
@@ -34,6 +49,41 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
 			add_shortcode( 'soundcloud', 'soundcloud_shortcode' );
 		}
+
+		add_filter( 'pre_http_request', array( $this, 'mock_http_request' ), 10, 3 );
+	}
+
+	/**
+	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 */
+	public function tearDown() {
+		remove_filter( 'pre_http_request', array( $this, 'mock_http_request' ) );
+		parent::tearDown();
+	}
+
+	/**
+	 * Mock HTTP request.
+	 *
+	 * @param mixed  $preempt Whether to preempt an HTTP request's return value. Default false.
+	 * @param mixed  $r       HTTP request arguments.
+	 * @param string $url     The request URL.
+	 * @return array Response data.
+	 */
+	public function mock_http_request( $preempt, $r, $url ) {
+		unset( $r );
+		if ( false !== strpos( $url, 'soundcloud.com' ) ) {
+			return array(
+				'body'          => $this->oembed_response,
+				'headers'       => array(),
+				'response'      => array(
+					'code'    => 200,
+					'message' => 'ok',
+				),
+				'cookies'       => array(),
+				'http_response' => null,
+			);
+		}
+		return $preempt;
 	}
 
 	/**
@@ -49,7 +99,7 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 			),
 
 			'url_simple' => array(
-				'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor' . PHP_EOL,
+				$this->oembed_url . PHP_EOL,
 				'<p><amp-soundcloud data-trackid="90097394" layout="fixed-height" height="200"></amp-soundcloud></p>' . PHP_EOL,
 			),
 		);
@@ -111,8 +161,8 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 				array(),
 			),
 			'converted'     => array(
-				'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor' . PHP_EOL,
-				array( 'amp-soundcloud' => 'https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js' ),
+				$this->oembed_url . PHP_EOL,
+				array( 'amp-soundcloud' => true ),
 			),
 		);
 	}
@@ -129,8 +179,15 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_SoundCloud_Embed_Handler();
 		$embed->register_embed();
-		apply_filters( 'the_content', $source );
-		$scripts = $embed->get_scripts();
+		$source = apply_filters( 'the_content', $source );
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$whitelist_sanitizer->sanitize();
+
+		$scripts = array_merge(
+			$embed->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
 
 		$this->assertEquals( $expected, $scripts );
 	}

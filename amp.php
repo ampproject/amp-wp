@@ -3,9 +3,9 @@
  * Plugin Name: AMP
  * Description: Add AMP support to your WordPress site.
  * Plugin URI: https://github.com/automattic/amp-wp
- * Author: Automattic
- * Author URI: https://automattic.com
- * Version: 0.6.0
+ * Author: WordPress.com VIP, XWP, Google, and contributors
+ * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
+ * Version: 0.7.0
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -13,9 +13,26 @@
  * @package AMP
  */
 
+/**
+ * Print admin notice regarding having an old version of PHP.
+ *
+ * @since 0.7
+ */
+function _amp_print_php_version_admin_notice() {
+	?>
+	<div class="notice notice-error">
+			<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		</div>
+	<?php
+}
+if ( version_compare( phpversion(), '5.3', '<' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
+	return;
+}
+
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.6.0' );
+define( 'AMP__VERSION', '0.7.0' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -38,7 +55,7 @@ function amp_deactivate() {
 	// We need to manually remove the amp endpoint
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
-		if ( AMP_QUERY_VAR === $endpoint[1] ) {
+		if ( amp_get_slug() === $endpoint[1] ) {
 			unset( $wp_rewrite->endpoints[ $index ] );
 			break;
 		}
@@ -46,6 +63,15 @@ function amp_deactivate() {
 
 	flush_rewrite_rules();
 }
+
+/*
+ * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
+ * for the sake of being able to use AMP components on non-AMP documents ("dirty AMP").
+ */
+add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
+
+// Ensure async and custom-element/custom-template attributes are present on script tags.
+add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
 
 /**
  * Set up AMP.
@@ -56,27 +82,13 @@ function amp_deactivate() {
  * @since 0.6
  */
 function amp_after_setup_theme() {
+	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
+
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
 
-	if ( ! defined( 'AMP_QUERY_VAR' ) ) {
-		/**
-		 * Filter the AMP query variable.
-		 *
-		 * @since 0.3.2
-		 * @param string $query_var The AMP query variable.
-		 */
-		define( 'AMP_QUERY_VAR', apply_filters( 'amp_query_var', 'amp' ) );
-	}
-
-	add_action( 'init', 'amp_init' );
-	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
-	add_filter( 'amp_post_template_analytics', 'amp_add_custom_analytics' );
-	add_action( 'wp_loaded', 'amp_post_meta_box' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
-	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
-	AMP_Post_Type_Support::add_post_type_support();
+	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
 }
 add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 
@@ -96,22 +108,32 @@ function amp_init() {
 
 	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
 
-	add_rewrite_endpoint( AMP_QUERY_VAR, EP_PERMALINK );
+	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
+	AMP_Validation_Utils::init();
+	AMP_Theme_Support::init();
+	AMP_Post_Type_Support::add_post_type_support();
 	add_filter( 'request', 'amp_force_query_var_value' );
-	add_action( 'wp', 'amp_maybe_add_actions' );
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_post_meta_box' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
 	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
-		require_once( AMP__DIR__ . '/jetpack-helper.php' );
+		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
+
+	// Add actions for legacy post templates.
+	add_action( 'wp', 'amp_maybe_add_actions' );
 }
 
 // Make sure the `amp` query var has an explicit value.
 // Avoids issues when filtering the deprecated `query_string` hook.
 function amp_force_query_var_value( $query_vars ) {
+
 	if ( isset( $query_vars[ AMP_QUERY_VAR ] ) ) {
 		if ( '' === $query_vars[ AMP_QUERY_VAR ] ) {
 			$query_vars[ AMP_QUERY_VAR ] = 1;
@@ -126,7 +148,7 @@ function amp_force_query_var_value( $query_vars ) {
 				// Check for extra-long slugs, which will truncate and remove the /amp/* part.
 				if ( strlen( $query_vars['name'] ) > 190 ) {
 					// Give WP_Query an improbable string to get a 404.
-					$query_vars['name'] = substr( $query_vars['name'], 0, -20 ) . substr( md5( $query_vars['name'] ), 0, 20 );
+					$query_vars['name'] = substr( $query_vars['name'], 0, - 20 ) . substr( md5( $query_vars['name'] ), 0, 20 );
 				} else {
 					$query_vars['name'] = $query_vars['name'] . "/amp/" . $query_vars[ AMP_QUERY_VAR ];
 				}
@@ -134,62 +156,32 @@ function amp_force_query_var_value( $query_vars ) {
 			}
 		}
 	}
-
 	return $query_vars;
 }
 
 /**
- * Fix up WP_Query for front page when amp query var is present.
+ * Conditionally add AMP actions or render the 'paired mode' template(s).
  *
- * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
+ * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
+ * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
  *
- * @since 0.6
- * @see WP_Query::parse_query()
- * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
- *
- * @param WP_Query $query Query.
- */
-function amp_correct_query_when_is_front_page( WP_Query $query ) {
-	$is_front_page_query = (
-		$query->is_main_query()
-		&&
-		$query->is_home()
-		&&
-		// Is AMP endpoint.
-		false !== $query->get( AMP_QUERY_VAR, false )
-		&&
-		// Is query not yet fixed uo up to be front page.
-		! $query->is_front_page()
-		&&
-		// Is showing pages on front.
-		'page' === get_option( 'show_on_front' )
-		&&
-		// Has page on front set.
-		get_option( 'page_on_front' )
-		&&
-		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
-		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), array( AMP_QUERY_VAR, 'preview', 'page', 'paged', 'cpage' ) ) )
-	);
-	if ( $is_front_page_query ) {
-		$query->is_home     = false;
-		$query->is_page     = true;
-		$query->is_singular = true;
-		$query->set( 'page_id', get_option( 'page_on_front' ) );
-	}
-}
-
-/**
- * Add AMP actions when the request can be served as AMP.
- *
- * Actions will only be added if the request is for a singular post (including front page and page for posts), excluding feeds.
- *
+ * @global WP_Query $wp_query
  * @since 0.2
+ * @return void
  */
 function amp_maybe_add_actions() {
+
+	// Short-circuit when theme supports AMP, as everything is handled by AMP_Theme_Support.
+	if ( current_theme_supports( 'amp' ) ) {
+		return;
+	}
+
+	// The remaining logic here is for paired mode running in themes that don't support AMP, the template system in AMP<=0.6.
 	global $wp_query;
 	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
 		return;
 	}
+
 	$is_amp_endpoint = is_amp_endpoint();
 
 	/**
@@ -211,6 +203,71 @@ function amp_maybe_add_actions() {
 	} else {
 		amp_add_frontend_actions();
 	}
+}
+
+/**
+ * Fix up WP_Query for front page when amp query var is present.
+ *
+ * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
+ *
+ * @since 0.6
+ * @see WP_Query::parse_query()
+ * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
+ *
+ * @param WP_Query $query Query.
+ */
+function amp_correct_query_when_is_front_page( WP_Query $query ) {
+	$is_front_page_query = (
+		$query->is_main_query()
+		&&
+		$query->is_home()
+		&&
+		// Is AMP endpoint.
+		false !== $query->get( amp_get_slug(), false )
+		&&
+		// Is query not yet fixed uo up to be front page.
+		! $query->is_front_page()
+		&&
+		// Is showing pages on front.
+		'page' === get_option( 'show_on_front' )
+		&&
+		// Has page on front set.
+		get_option( 'page_on_front' )
+		&&
+		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
+		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), array( amp_get_slug(), 'preview', 'page', 'paged', 'cpage' ) ) )
+	);
+	if ( $is_front_page_query ) {
+		$query->is_home     = false;
+		$query->is_page     = true;
+		$query->is_singular = true;
+		$query->set( 'page_id', get_option( 'page_on_front' ) );
+	}
+}
+
+/**
+ * Whether this is in 'canonical mode.'
+ *
+ * Themes can register support for this with `add_theme_support( 'amp' )`.
+ * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
+ * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
+ * `add_theme_support( 'amp', array( 'template_dir' => 'my-amp-templates' ) )`
+ * it will retain 'paired mode.
+ *
+ * @return boolean Whether this is in AMP 'canonical mode'.
+ */
+function amp_is_canonical() {
+	$support = get_theme_support( 'amp' );
+	if ( true === $support ) {
+		return true;
+	}
+	if ( is_array( $support ) ) {
+		$args = array_shift( $support );
+		if ( empty( $args['template_dir'] ) ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function amp_load_classes() {
@@ -268,9 +325,14 @@ function amp_render_post( $post ) {
 	 * which is not ideal for any code that expects to run in an AMP context.
 	 * Let's force the value to be true while we render AMP.
 	 */
-	$was_set = isset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+	$was_set = isset( $wp_query->query_vars[ amp_get_slug() ] );
 	if ( ! $was_set ) {
-		$wp_query->query_vars[ AMP_QUERY_VAR ] = true;
+		$wp_query->query_vars[ amp_get_slug() ] = true;
+	}
+
+	// Prevent New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset.
+	if ( extension_loaded( 'newrelic' ) ) {
+		newrelic_disable_autorum();
 	}
 
 	/**
@@ -287,17 +349,23 @@ function amp_render_post( $post ) {
 	$template->load();
 
 	if ( ! $was_set ) {
-		unset( $wp_query->query_vars[ AMP_QUERY_VAR ] );
+		unset( $wp_query->query_vars[ amp_get_slug() ] );
 	}
 }
 
 /**
  * Bootstraps the AMP customizer.
  *
+ * Uses the priority of 12 for the 'after_setup_theme' action.
+ * Many themes run `add_theme_support()` on the 'after_setup_theme' hook, at the default priority of 10.
+ * And that function's documentation suggests adding it to that action.
+ * So this enables themes to `add_theme_support( 'amp' )`.
+ * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
+ *
  * @since 0.4
  */
 function _amp_bootstrap_customizer() {
-	add_action( 'after_setup_theme', 'amp_init_customizer' );
+	add_action( 'after_setup_theme', 'amp_init_customizer', 12 );
 }
 add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
 
@@ -312,7 +380,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() ) {
-		$link = trailingslashit( trailingslashit( $link ) . AMP_QUERY_VAR );
+		$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
 	}
 
 	return $link;

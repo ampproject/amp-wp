@@ -67,6 +67,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// Test inline script boot.
 		$this->assertTrue( false !== stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
 		unset( $GLOBALS['post'] );
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	/**
@@ -79,18 +80,27 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory->user->create( array(
 			'role' => 'administrator',
 		) ) );
+		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 
+		// This is in AMP 'canonical mode,' so it shouldn't have the AMP status.
+		add_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
-		$this->assertContains( '<div class="misc-pub-section misc-amp-status"', ob_get_clean() );
+		$this->assertNotContains( $amp_status_markup, ob_get_clean() );
 
-		remove_post_type_support( 'post', AMP_QUERY_VAR );
+		// This is not in AMP 'canonical mode'.
+		remove_theme_support( 'amp' );
+		ob_start();
+		$this->instance->render_status( $post );
+		$this->assertContains( $amp_status_markup, ob_get_clean() );
+
+		remove_post_type_support( 'post', amp_get_slug() );
 
 		ob_start();
 		$this->instance->render_status( $post );
 		$this->assertEmpty( ob_get_clean() );
 
-		add_post_type_support( 'post', AMP_QUERY_VAR );
+		add_post_type_support( 'post', amp_get_slug() );
 		wp_set_current_user( $this->factory->user->create( array(
 			'role' => 'subscriber',
 		) ) );
@@ -151,7 +161,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$link = 'https://foo.bar';
 		$this->assertEquals( 'https://foo.bar', $this->instance->preview_post_link( $link ) );
 		$_POST['amp-preview'] = 'do-preview';
-		$this->assertEquals( 'https://foo.bar?' . AMP_QUERY_VAR . '=1', $this->instance->preview_post_link( $link ) );
+		$this->assertEquals( 'https://foo.bar?' . amp_get_slug() . '=1', $this->instance->preview_post_link( $link ) );
 	}
 
 }
