@@ -2,6 +2,7 @@
 	"root": true,
 	"extends": [
 		"wordpress",
+		"eslint:recommended",
 		"plugin:react/recommended"
 	],
 	"parserOptions": {
