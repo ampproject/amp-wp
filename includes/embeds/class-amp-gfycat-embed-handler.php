@@ -15,7 +15,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var string
 	 */
-	const URL_PATTERN = '#https?://(www\.)?gfycat\.com/gifs/detail/.*#i';
+	const URL_PATTERN = '#https?://(www\.)?gfycat\.com/.*#i';
 
 	/**
 	 * Register embed.
@@ -42,19 +42,33 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function filter_embed_oembed_html( $return, $url, $attr ) {
 		$parsed_url = wp_parse_url( $url );
 		if ( false !== strpos( $parsed_url['host'], 'gfycat.com' ) ) {
-			if ( preg_match( '/width=(?:"|\')(\d+)(?:"|\')/', $return, $matches ) ) {
+			if ( preg_match( '/width=["\']?(\d+)/', $return, $matches ) ) {
 				$attr['width'] = $matches[1];
 			}
-			if ( preg_match( '/height=(?:"|\')(\d+)(?:"|\')/', $return, $matches ) ) {
+			if ( preg_match( '/height=["\']?(\d+)/', $return, $matches ) ) {
 				$attr['height'] = $matches[1];
+			}
+
+			if ( empty( $attr['height'] ) ) {
+				return $return;
+			}
+
+			$layout = 'intrinsic';
+
+			if ( empty( $attr['width'] ) ) {
+				$layout        = 'fixed-height';
+				$attr['width'] = 'auto';
 			}
 
 			$pieces = explode( '/detail/', $parsed_url['path'] );
 			if ( ! isset( $pieces[1] ) ) {
-				return $return;
+				if ( ! preg_match( '/\/([A-Za-z0-9]+)/', $parsed_url['path'], $matches ) ) {
+					return $return;
+				}
+				$data_gfyid = $matches[1];
+			} else {
+				$data_gfyid = $pieces[1];
 			}
-
-			$data_gfyid = $pieces[1];
 
 			$return = AMP_HTML_Utils::build_tag(
 				'amp-gfycat',
@@ -62,7 +76,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 					'width'      => $attr['width'],
 					'height'     => $attr['height'],
 					'data-gfyid' => $data_gfyid,
-					'layout'     => 'intrinsic',
+					'layout'     => $layout,
 				)
 			);
 		}
