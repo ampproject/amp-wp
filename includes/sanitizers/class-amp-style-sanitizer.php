@@ -134,6 +134,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $used_class_names = array();
 
 	/**
+	 * Tag names used in document.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	private $used_tag_names = array();
+
+	/**
 	 * XPath.
 	 *
 	 * @since 1.0
@@ -243,6 +251,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->used_class_names = array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) );
 		}
 		return $this->used_class_names;
+	}
+
+
+	/**
+	 * Get list of all the tag names used in the document.
+	 *
+	 * @since 1.0
+	 * @return array Used tag names.
+	 */
+	private function get_used_tag_names() {
+		if ( empty( $this->used_tag_names ) ) {
+			$used_tag_names = array();
+			foreach ( $this->dom->getElementsByTagName( '*' ) as $el ) {
+				$used_tag_names[ $el->tagName ] = true;
+			}
+			$this->used_tag_names = array_keys( $used_tag_names );
+		}
+		return $this->used_tag_names;
 	}
 
 	/**
@@ -531,7 +557,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 
-		$cache_group = 'amp-parsed-stylesheet-v2';
+		$cache_group = 'amp-parsed-stylesheet-v4';
 		if ( wp_using_ext_object_cache() ) {
 			$parsed = wp_cache_get( $cache_key, $cache_group );
 		} else {
@@ -614,6 +640,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$validation_errors = $this->process_css_list( $css_document, $options );
 
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
+			$output_format->setSemicolonAfterLastRule( false );
 
 			$before_declaration_block          = '/*AMP_WP_BEFORE_DECLARATION_BLOCK*/';
 			$between_selectors                 = '/*AMP_WP_BETWEEN_SELECTORS*/';
@@ -644,18 +671,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
-						$classes = array();
+						$selectors_parsed[ $selector ] = array();
 
-						// Remove :not() to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
-						$reduced_selector = preg_replace( '/:not\(.+?\)/', '', $selector );
+						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
+						$reduced_selector = preg_replace( '/:[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
 
 						// Remove attribute selectors to eliminate false negative, such as with `.social-navigation a[href*="example.com"]:before`.
 						$reduced_selector = preg_replace( '/\[\w.*?\]/', '', $reduced_selector );
 
-						if ( preg_match_all( '/(?<=\.)([a-zA-Z0-9_-]+)/', $reduced_selector, $matches ) ) {
-							$classes = $matches[0];
+						$reduced_selector = preg_replace_callback(
+							'/\.([a-zA-Z0-9_-]+)/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ]['classes'][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
+						$reduced_selector = preg_replace_callback(
+							'/#([a-zA-Z0-9_-]+)/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ]['ids'][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
+
+						if ( preg_match_all( '/[a-zA-Z0-9_-]+/', $reduced_selector, $matches ) ) {
+							$selectors_parsed[ $selector ]['tags'] = $matches[0];
 						}
-						$selectors_parsed[ $selector ] = $classes;
 					}
 
 					// Restore calc() functions that were replaced with placeholders.
@@ -1294,6 +1337,56 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
+
+			$included_size    = 0;
+			$included_sources = array();
+			foreach ( $stylesheet_sets['custom']['pending_stylesheets'] as $i => $pending_stylesheet ) {
+				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) ) {
+					continue;
+				}
+				$message = $pending_stylesheet['node']->nodeName;
+				if ( $pending_stylesheet['node']->getAttribute( 'id' ) ) {
+					$message .= '#' . $pending_stylesheet['node']->getAttribute( 'id' );
+				}
+				if ( $pending_stylesheet['node']->getAttribute( 'class' ) ) {
+					$message .= '.' . $pending_stylesheet['node']->getAttribute( 'class' );
+				}
+				foreach ( $pending_stylesheet['node']->attributes as $attribute ) {
+					if ( 'id' !== $attribute->nodeName || 'class' !== $attribute->nodeName ) {
+						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
+					}
+				}
+				$message .= sprintf(
+					/* translators: %d is number of bytes */
+					_n( ' (%d byte)', ' (%d bytes)', $pending_stylesheet['size'], 'amp' ),
+					$pending_stylesheet['size']
+				);
+
+				if ( ! empty( $pending_stylesheet['included'] ) ) {
+					$included_sources[] = $message;
+					$included_size     += $pending_stylesheet['size'];
+				} else {
+					$excluded_sources[] = $message;
+				}
+			}
+			$comment = '';
+			if ( ! empty( $included_sources ) ) {
+				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n- " . implode( "\n- ", $included_sources ) . "\n";
+				/* translators: %d is number of bytes */
+				$comment .= sprintf( esc_html__( 'Total size: %d bytes', 'amp' ), $included_size ) . "\n";
+			}
+			if ( ! empty( $excluded_sources ) ) {
+				if ( $comment ) {
+					$comment .= "\n";
+				}
+				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n- " . implode( "\n- ", $excluded_sources ) . "\n";
+			}
+			if ( $comment ) {
+				$this->amp_custom_style_element->parentNode->insertBefore(
+					$this->dom->createComment( "\n$comment" ),
+					$this->amp_custom_style_element
+				);
+			}
 		}
 
 		// Add style[amp-keyframes] to document.
@@ -1350,8 +1443,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			) ) . '#';
 		}
 
+		$stylesheet_set['processed_nodes'] = array();
+
 		$final_size = 0;
-		foreach ( $stylesheet_set['pending_stylesheets'] as $pending_stylesheet ) {
+		$dom        = $this->dom;
+		foreach ( $stylesheet_set['pending_stylesheets'] as &$pending_stylesheet ) {
 			$stylesheet = '';
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
@@ -1360,12 +1456,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
 					if ( $should_tree_shake ) {
 						$selectors = array();
-						foreach ( $selectors_parsed as $selector => $class_names ) {
+						foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 							$should_include = (
 								( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
 								||
-								// If all class names are used in the doc.
-								0 === count( array_diff( $class_names, $this->get_used_class_names() ) )
+								(
+									// If all class names are used in the doc.
+									(
+										empty( $parsed_selector['classes'] )
+										||
+										0 === count( array_diff( $parsed_selector['classes'], $this->get_used_class_names() ) )
+									)
+									&&
+									// If all IDs are used in the doc.
+									(
+										empty( $parsed_selector['ids'] )
+										||
+										0 === count( array_filter( $parsed_selector['ids'], function( $id ) use ( $dom ) {
+											return ! $dom->getElementById( $id );
+										} ) )
+									)
+									&&
+									// If tag names are present in the doc.
+									(
+										empty( $parsed_selector['tags'] )
+										||
+										0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
+									)
+								)
 							);
 							if ( $should_include ) {
 								$selectors[] = $selector;
@@ -1379,15 +1497,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 			}
+			$sheet_size                 = strlen( $stylesheet );
+			$pending_stylesheet['size'] = $sheet_size;
 
 			// Skip considering stylesheet if an identical one has already been processed.
 			$hash = md5( $stylesheet );
 			if ( isset( $stylesheet_set['final_stylesheets'][ $hash ] ) ) {
+				$pending_stylesheet['included'] = true;
 				continue;
 			}
 
 			// Report validation error if size is now too big.
-			$sheet_size = strlen( $stylesheet );
 			if ( $final_size + $sheet_size > $stylesheet_set['cdata_spec']['max_bytes'] ) {
 				if ( ! empty( $this->args['validation_error_callback'] ) ) {
 					$validation_error = array(
@@ -1397,16 +1517,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							__( 'Too much CSS output (by %d bytes).', 'amp' ),
 							( $final_size + $sheet_size ) - $stylesheet_set['cdata_spec']['max_bytes']
 						),
+						'node'    => $pending_stylesheet['node'],
 					);
 					if ( isset( $pending_stylesheet['sources'] ) ) {
 						$validation_error['sources'] = $pending_stylesheet['sources'];
 					}
 					call_user_func( $this->args['validation_error_callback'], $validation_error );
 				}
+				$pending_stylesheet['included'] = false;
 			} else {
 				$final_size += $sheet_size;
 
 				$stylesheet_set['final_stylesheets'][ $hash ] = $stylesheet;
+				$pending_stylesheet['included']               = true;
 			}
 		}
 
