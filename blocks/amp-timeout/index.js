@@ -1,4 +1,4 @@
-/*jshint esversion: 6 */
+/* global moment */
 
 /**
  * Internal block libraries.

@@ -1,7 +1,18 @@
 {
 	"root": true,
 	"extends": [
-		"wordpress"
+		"wordpress",
+		"plugin:react/recommended"
+	],
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true
+		}
+	},
+	"plugins": [
+		"react"
 	],
 	"env": {
 		"browser": true
@@ -121,6 +132,7 @@
 		"react/display-name": "off",
 		"react/no-children-prop": "off",
 		"react/prop-types": "off",
+		"react/react-in-jsx-scope": "off",
 		"semi": "error",
 		"semi-spacing": "error",
 		"space-before-blocks": [
