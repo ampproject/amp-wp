@@ -1,0 +1,4 @@
+**/*.min.js
+**/node_modules/**
+**/vendor/**
+**/assets/js/editor-blocks.js
