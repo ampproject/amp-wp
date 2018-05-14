@@ -121,6 +121,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string $sandbox <iframe> `sandbox` attribute - Pass along if found; default to value of self::SANDBOX_DEFAULTS
 	 *      @type string $class <iframe> `class` attribute - Pass along if found
 	 *      @type string $sizes <iframe> `sizes` attribute - Pass along if found
+	 *      @type string $id <iframe> `id` attribute - Pass along if found
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
@@ -135,6 +136,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				case 'sandbox':
 				case 'class':
 				case 'sizes':
+				case 'id':
 					$out[ $name ] = $value;
 					break;
 

@@ -58,6 +58,11 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<amp-iframe src="https://example.com/iframe" width="500" height="281" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
 			),
 
+			'iframe_with_id_attribute'                  => array(
+				'<iframe src="https://example.com/iframe" id="myIframe"></iframe>',
+				'<amp-iframe src="https://example.com/iframe" id="myIframe" sandbox="allow-scripts allow-same-origin" height="400" layout="fixed-height"></amp-iframe>',
+			),
+
 			'iframe_with_protocol_relative_url' => array(
 				'<iframe src="//example.com/video/132886713"></iframe>',
 				'<amp-iframe src="https://example.com/video/132886713" sandbox="allow-scripts allow-same-origin" height="400" layout="fixed-height"></amp-iframe>',
