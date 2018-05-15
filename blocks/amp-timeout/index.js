@@ -13,7 +13,8 @@ const {
 const {
 	DateTimePicker,
 	PanelBody,
-	TextControl
+	TextControl,
+	SelectControl
 } = wp.components;
 import timeago from 'timeago.js';
 
@@ -41,6 +42,15 @@ export default registerBlockType(
 			},
 			dateTime: {
 				type: 'string'
+			},
+			ampLayout: {
+				type: 'string'
+			},
+			width: {
+				type: 'number'
+			},
+			height: {
+				type: 'number'
 			}
 		},
 
@@ -52,8 +62,8 @@ export default registerBlockType(
 		},
 
 		edit( { attributes, isSelected, setAttributes } ) {
-			const { align, cutoff } = attributes;
-			var timeAgo;
+			const { align, ampLayout, cutoff, height, width } = attributes;
+			let timeAgo;
 			if ( attributes.dateTime ) {
 				if ( attributes.cutoff && attributes.cutoff < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds' ) ) ) {
 					timeAgo = moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' );
@@ -64,6 +74,13 @@ export default registerBlockType(
 				timeAgo = timeago().format( new Date() );
 				setAttributes( { dateTime: moment( moment(), moment.ISO_8601, true ).format() } );
 			}
+
+			const ampLayoutOptions = [
+				{ value: '', label: 'Responsive' }, // Default for amp-timeago.
+				{ value: 'fixed', label: 'Fixed' },
+				{ value: 'fixed-height', label: 'Fixed height' }
+			];
+
 			return [
 				isSelected && (
 					<InspectorControls key='inspector'>
@@ -72,6 +89,26 @@ export default registerBlockType(
 								locale='en'
 								currentDate={ attributes.dateTime || moment() }
 								onChange={ value => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) } // eslint-disable-line
+							/>
+							<SelectControl
+								label={ __( 'Layout' ) }
+								value={ ampLayout }
+								options={ ampLayoutOptions }
+								onChange={ value => ( setAttributes( { ampLayout: value } ) ) }
+							/>
+							<TextControl
+								type="number"
+								className="blocks-amp-timeout__width"
+								label={ __( 'Width (px)' ) }
+								value={ width !== undefined ? width : '' }
+								onChange={ value => ( setAttributes( { width: value } ) ) }
+							/>
+							<TextControl
+								type="number"
+								className="blocks-amp-timeout__height"
+								label={ __( 'Height (px)' ) }
+								value={ width !== undefined ? height : '' }
+								onChange={ value => ( setAttributes( { height: value } ) ) }
 							/>
 							<TextControl
 								type="number"
@@ -105,6 +142,23 @@ export default registerBlockType(
 			};
 			if ( attributes.cutoff ) {
 				timeagoProps.cutoff = attributes.cutoff;
+			}
+			if ( attributes.ampLayout ) {
+				switch ( attributes.ampLayout ) {
+					case 'fixed-height':
+						if ( attributes.height ) {
+							timeagoProps.height = attributes.height;
+							timeagoProps.layout = attributes.ampLayout;
+						}
+						break;
+					case 'fixed':
+						if ( attributes.height && attributes.width ) {
+							timeagoProps.height = attributes.height;
+							timeagoProps.width = attributes.width;
+							timeagoProps.layout = attributes.ampLayout;
+						}
+						break;
+				}
 			}
 			return (
 				<amp-timeago { ...timeagoProps }>{ moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' ) }</amp-timeago>
