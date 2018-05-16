@@ -136,7 +136,11 @@ class ImageParser
                     return $this->type = 'tiff';
                 default:
                     $this->stream->resetPointer();
-                    if ( false !== strpos( $this->stream->read( 1024 ), '<svg' ) ) {
+                    $markup = $this->stream->read( 1024 );
+	                echo( __METHOD__ . ':' . $markup . "\n" );
+	                echo( ( false !== strpos( $markup, '<svg' ) ? 'YES SVG' : 'NOPE' ) . "\n" );
+
+                    if ( false !== strpos( $markup, '<svg' ) ) {
                         $this->type = 'svg';
                     } else {
                         return false;
@@ -359,7 +363,9 @@ class ImageParser
      */
     protected function parseSizeForSvg()
     {
+        $this->stream->resetPointer();
         $markup = $this->stream->read( 1024 );
+	    echo( __METHOD__ . ':' . $markup . "\n" );
         if ( ! preg_match( '#<svg.*?>#s', $markup, $matches ) ) {
             return null;
         }
@@ -374,6 +380,12 @@ class ImageParser
         }
         if ( $width && $height ) {
             return [ $width, $height ];
+        }
+        if ( preg_match( '/\sviewBox=([\'"])[^\1]*(?:,|\s)+(?P<width>\d+(?:\.\d+)?)(?:px)?(?:,|\s)+(?P<height>\d+(?:\.\d+)?)(?:px)?\s*\1/', $svg_start_tag, $matches ) ) {
+            return [
+                floatval( $matches['width'] ),
+                floatval( $matches['height'] )
+            ];
         }
         return null;
     }

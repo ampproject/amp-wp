@@ -35,6 +35,8 @@ class FasterImage
      */
     public function batch(array $urls)
     {
+    	echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
+    	print_r($urls);
 
         $multi   = curl_multi_init();
         $results = array();
@@ -72,9 +74,12 @@ class FasterImage
             $error = curl_error($$count);
 
             if ( $error ) {
-                $results[$uri]['failure_reason'] = $error;
+                $results[$uri]['failure_reason'] = sprintf( '%s (error code: %s)', $error, curl_errno( $$count ) );
             }
         }
+
+	    echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
+	    print_r($results);
 
         return $results;
     }
@@ -97,6 +102,7 @@ class FasterImage
      */
     protected function handle($url, & $result)
     {
+	    echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
         $stream           = new Stream();
         $parser           = new ImageParser($stream);
         $result['rounds'] = 0;
@@ -128,6 +134,7 @@ class FasterImage
         curl_setopt($ch, CURLOPT_ENCODING, "");
 
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $str) use (& $result, & $parser, & $stream, $url) {
+	        echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
 
             $result['rounds']++;
             $result['bytes'] += strlen($str);
@@ -135,6 +142,7 @@ class FasterImage
             $stream->write($str);
 
             try {
+            	echo "TRY: " . __METHOD__ . ':' . __LINE__ . PHP_EOL;
                 // store the type in the result array by looking at the bits
                 $result['type'] = $parser->parseType();
 
@@ -143,8 +151,10 @@ class FasterImage
                  * for the size.
                  */
                 $result['size'] = $parser->parseSize() ?: 'failed';
+                print_r($result);
             }
             catch (StreamBufferTooSmallException $e) {
+            	echo "StreamBufferTooSmallException\n";
                 /*
                  * If this exception is thrown, we don't have enough of the stream buffered
                  * so in order to tell curl to keep streaming we need to return the number
@@ -159,6 +169,7 @@ class FasterImage
                 return strlen($str);
             }
             catch (InvalidImageException $e) {
+	            echo "InvalidImageException\n";
 
                 /*
                  * This means we've determined that we're lost and don't know
