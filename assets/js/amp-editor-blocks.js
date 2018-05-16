@@ -40,6 +40,7 @@ var ampEditorBlocks = ( function() {
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
+		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
 	};
 
 	/**
@@ -94,6 +95,30 @@ var ampEditorBlocks = ( function() {
 	};
 
 	/**
+	 * Add extra data-amp-layout attribute to save to DB.
+	 *
+	 * @param {Object} props Properties.
+	 * @param {string} blockType Block type.
+	 * @param {Object} attributes Attributes.
+	 * @return {*} Props.
+	 */
+	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
+		var ampAttributes = {};
+		if ( ! attributes.ampLayout && ! attributes.ampNoLoading ) {
+			return props;
+		}
+
+		if ( attributes.ampLayout ) {
+			ampAttributes[ 'data-amp-layout' ] = attributes.ampLayout;
+		}
+		if ( attributes.ampNoLoading ) {
+			ampAttributes[ 'data-amp-noloading' ] = attributes.ampNoLoading;
+		}
+
+		return _.assign( ampAttributes, props );
+	};
+
+	/**
 	 * Add AMP attributes (in this test case just ampLayout) to every core block.
 	 *
 	 * @param {Object} settings Settings.
@@ -143,17 +168,7 @@ var ampEditorBlocks = ( function() {
 
 			ampLayout = attributes.ampLayout;
 
-			// Lets remove amp-related classes from edit view.
-			if ( component.hasClassAmpAttributes( attributes.className || '' ) ) {
-				props.setAttributes( { className: component.removeAmpAttributesFromClassName( attributes.className ) } );
-			}
-
 			if ( 'core/shortcode' === name ) {
-				// Lets remove amp-carousel from from edit view.
-				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-					props.setAttributes( { text: component.removeAmpCarouselFromShortcodeAtts( attributes.text ) } );
-				}
-
 				inspectorControls = component.setUpShortcodeInspectorControls( props );
 				if ( '' === inspectorControls ) {
 					// Return original.
@@ -312,9 +327,7 @@ var ampEditorBlocks = ( function() {
 	 * @return {*} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
-		var text,
-			ampClassName = element.props.className || '',
-			props = element.props;
+		var text;
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
 			if ( attributes.ampCarousel ) {
 				// If the text contains amp-carousel, lets remove it.
@@ -344,22 +357,6 @@ var ampEditorBlocks = ( function() {
 				wp.element.RawHTML,
 				{},
 				text
-			);
-		}
-
-		// In case AMP Layout, add layout to classname.
-		if ( component.hasAmpLayoutSet( attributes || '' ) ) {
-			ampClassName += ' amp-layout-' + attributes.ampLayout;
-		}
-		if ( component.hasAmpNoLoadingSet( attributes || '' ) ) {
-			ampClassName += ' amp-noloading';
-		}
-
-		if ( '' !== ampClassName && attributes.className !== ampClassName ) {
-			props.className = ampClassName.trim();
-			return wp.element.createElement(
-				element.type,
-				props
 			);
 		}
 		return element;
@@ -403,33 +400,6 @@ var ampEditorBlocks = ( function() {
 	 */
 	component.hasGalleryShortcodeCarouselAttribute = function galleryShortcodeHasCarouselAttribute( text ) {
 		return -1 !== text.indexOf( 'amp-carousel=false' );
-	};
-
-	/**
-	 * Check if className has AMP attributes in it.
-	 *
-	 * @param {string} className Classname.
-	 * @return {boolean} If has attributes.
-	 */
-	component.hasClassAmpAttributes = function hasClassAmpAttributes( className ) {
-		return -1 !== className.indexOf( 'amp-' );
-	};
-
-	/**
-	 * Remove AMP related attributes from classname.
-	 *
-	 * @param {string} className Original className.
-	 * @return {string} Modified className.
-	 */
-	component.removeAmpAttributesFromClassName = function removeAmpAttributesFromClassName( className ) {
-		var splits = className.split( ' ' );
-		var modifiedClass = '';
-		_.each( splits, function( split ) {
-			if ( -1 === split.indexOf( 'amp-' ) ) {
-				modifiedClass += ' ' + split;
-			}
-		} );
-		return modifiedClass;
 	};
 
 	/**

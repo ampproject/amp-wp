@@ -256,7 +256,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$figure       = $dom_document->createElement( $tag );
 		$amp_img      = $dom_document->createElement( 'amp-img' );
 		$figure->appendChild( $amp_img );
-		$figure->setAttribute( 'class', 'amp-noloading amp-layout-fixed' );
+		$figure->setAttribute( 'data-amp-noloading', 'true' );
+		$figure->setAttribute( 'data-amp-layout', 'fixed' );
 
 		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument(), array() );
 		$amp_args  = $sanitizer->get_data_amp_attributes( $amp_img );

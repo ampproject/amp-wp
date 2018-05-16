@@ -22,69 +22,6 @@ class AMP_Editor_Blocks {
 	}
 
 	/**
-	 * Whenever a post type is registered, hook into saving the post.
-	 *
-	 * @param string $post_type The newly registered post type.
-	 * @return string That same post type.
-	 */
-	public static function register_post_pre_insert_functions( $post_type ) {
-		add_filter( "rest_pre_insert_{$post_type}", 'AMP_Editor_Blocks::filter_rest_pre_insert_post', 11, 1 );
-		return $post_type;
-	}
-
-	/**
-	 * Filter pre_insert_post to ensure className is saved to post_content, too.
-	 *
-	 * @param WP_Post $prepared_post Prepared post.
-	 * @return mixed Prepared post.
-	 */
-	public static function filter_rest_pre_insert_post( $prepared_post ) {
-		if ( ! class_exists( 'Gutenberg_PEG_Parser' ) ) {
-			return $prepared_post;
-		}
-		$parser = new Gutenberg_PEG_Parser();
-		$blocks = $parser->parse( _gutenberg_utf8_split( $prepared_post->post_content ) );
-		foreach ( $blocks as $block ) {
-			if ( isset( $block['innerHTML'] ) ) {
-
-				// Get the class of the figure.
-				preg_match( "'<figure class=\"(.*?)\"'si", $block['innerHTML'], $match );
-				if ( ! $match ) {
-					continue;
-				}
-				$class_names = explode( ' ', $match[1] );
-				$class_attr  = array();
-				if ( isset( $block['attrs']['className'] ) ) {
-					$class_attr[] = $block['attrs']['className'];
-				}
-
-				// Take everything except for the wp-block-{block_type} class.
-				foreach ( $class_names as $class_name ) {
-					if ( false !== strpos( $class_name, 'amp-' ) ) {
-						$class_attr[] = $class_name;
-					}
-				}
-
-				if ( empty( $class_attr ) ) {
-					continue;
-				}
-				$new_attributes = wp_json_encode( array_merge(
-					$block['attrs'],
-					array(
-						'className' => implode( ' ', $class_attr ),
-					)
-				), 64 /* JSON_UNESCAPED_SLASHES */ );
-				$to_replace     = wp_json_encode( $block['attrs'], 64 /* JSON_UNESCAPED_SLASHES */ );
-
-				// Replace the classname attribute with the modified one.
-				$content                     = str_replace( $to_replace, $new_attributes, $prepared_post->post_content );
-				$prepared_post->post_content = $content;
-			}
-		}
-		return $prepared_post;
-	}
-
-	/**
 	 * Whitelist used data-amp-* attributes.
 	 *
 	 * @param array $context Array of contexts.
