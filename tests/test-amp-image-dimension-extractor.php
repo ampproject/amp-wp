@@ -5,12 +5,12 @@
  * @package AMP
  */
 
-define( 'AMP_IMG_DIMENSION_TEST_VALID_FILE', dirname( __FILE__ ) . '/assets/wordpress-logo.png' );
 define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/not-exists.png' );
 
 // Not ideal to use remote URLs (since the remote service can change); mocking would be better.
 define( 'IMG_350', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/350x150.png' );
 define( 'IMG_1024', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/1024x768.png' );
+define( 'IMG_SVG', 'https://www.ampproject.org/static/img/logo-blue.svg' );
 
 /**
  * Tests for AMP_Image_Dimension_Extractor.
@@ -159,6 +159,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$sources  = array(
 			IMG_350  => false,
 			IMG_1024 => false,
+			IMG_SVG  => false,
 		);
 		$expected = array(
 			IMG_350  => array(
@@ -168,6 +169,10 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			IMG_1024 => array(
 				'width'  => 1024,
 				'height' => 768,
+			),
+			IMG_SVG  => array(
+				'width'  => 175,
+				'height' => 60,
 			),
 		);
 
@@ -183,6 +188,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$sources  = array(
 			IMG_350  => false,
 			IMG_1024 => false,
+			IMG_SVG  => false,
 		);
 		$expected = array(
 			IMG_350  => array(
@@ -192,6 +198,10 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			IMG_1024 => array(
 				'width'  => 1024,
 				'height' => 768,
+			),
+			IMG_SVG  => array(
+				'width'  => 175,
+				'height' => 60,
 			),
 		);
 
@@ -240,6 +250,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			IMG_350                             => false,
 			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 			IMG_1024                            => false,
+			IMG_SVG                             => false,
 		);
 		$expected = array(
 			IMG_350                             => array(
@@ -250,6 +261,10 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			IMG_1024                            => array(
 				'width'  => 1024,
 				'height' => 768,
+			),
+			IMG_SVG                             => array(
+				'width'  => 175,
+				'height' => 60,
 			),
 		);
 
@@ -266,6 +281,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			IMG_350                             => false,
 			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 			IMG_1024                            => false,
+			IMG_SVG                             => false,
 		);
 		$expected = array(
 			IMG_350                             => array(
@@ -277,6 +293,10 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 				'width'  => 1024,
 				'height' => 768,
 			),
+			IMG_SVG                             => array(
+				'width'  => 175,
+				'height' => 60,
+			),
 		);
 
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
@@ -287,11 +307,11 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	/**
 	 * Test get_default_user_agent()
 	 *
-	 * @covers get_default_user_agent()
+	 * @covers \AMP_Image_Dimension_Extractor::get_default_user_agent()
 	 */
 	public function test__amp_wp_user_agent() {
 		$expected   = 'amp-wp, v' . AMP__VERSION . ', ';
-		$user_agent = AMP_Image_Dimension_Extractor::get_default_user_agent( '' );
+		$user_agent = AMP_Image_Dimension_Extractor::get_default_user_agent();
 		$user_agent = substr( $user_agent, 0, strlen( $expected ) );
 
 		$this->assertEquals( $expected, $user_agent );

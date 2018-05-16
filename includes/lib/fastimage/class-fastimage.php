@@ -70,7 +70,12 @@ class FastImage
                 case chr(0x89).'P':
                     return $this->type = 'png';
                 default:
-                    return false;
+                    $this->strpos = 0;
+                    if ( false !== strpos( $this->getChars( 1024 ), '<svg' ) ) {
+                        $this->type = 'svg';
+                    } else {
+                        return false;
+                    }
             }
         }
         return $this->type;
@@ -88,6 +93,8 @@ class FastImage
                 return $this->parseSizeForBMP();
             case 'jpeg':
                 return $this->parseSizeForJPEG();
+            case 'svg':
+                return $this->parseSizeForSVG();
         }
         return null;
     }
@@ -158,6 +165,29 @@ class FastImage
             }
         }
     }
+
+    private function parseSizeForSVG()
+    {
+        $this->strpos = 0;
+        $markup = $this->getChars( 1024 );
+        if ( ! preg_match( '#<svg.*?>#s', $markup, $matches ) ) {
+            return null;
+        }
+        $svg_start_tag = $matches[0];
+        $width = null;
+        $height = null;
+        if ( preg_match( '/\swidth=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
+            $width = floatval( $matches[2] );
+        }
+        if ( preg_match( '/\sheight=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
+            $height = floatval( $matches[2] );
+        }
+        if ( $width && $height ) {
+            return array( $width, $height );
+        }
+        return null;
+    }
+
     private function getChars($n)
     {
         $response = null;
