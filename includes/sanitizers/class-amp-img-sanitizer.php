@@ -139,10 +139,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out['noloading'] = $value;
 					break;
 
-				case 'data-amp-lightbox':
-					$out['lightbox'] = $value;
-					break;
-
 				default:
 					break;
 			}
@@ -254,13 +250,13 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
 		$new_attributes = $this->set_attachment_layout_attributes( $node, $new_attributes, $layout );
 
+		if ( isset( $old_attributes['data-amp-lightbox'] ) ) {
+			$this->maybe_add_amp_image_lightbox_node();
+		}
+
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
 			$new_attributes['layout'] = 'intrinsic';
-		}
-
-		if ( isset( $new_attributes['lightbox'] ) ) {
-			$this->maybe_add_amp_image_lightbox_node();
 		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {

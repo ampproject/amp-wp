@@ -13,3 +13,7 @@
 #amp-image-lightbox-1 img {
 	object-fit: contain;
 }
+
+.entry__content .wp-block-gallery[class*="columns-"] figure {
+	width: 100%;
+}

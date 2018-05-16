@@ -91,9 +91,6 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $attributes['data-amp-noloading'] ) && true === filter_var( $attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
 			$node->setAttribute( 'noloading', '' );
 		}
-		if ( isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
-			$node->setAttribute( 'lightbox', '' );
-		}
 
 		$layout = $node->getAttribute( 'layout' );
 

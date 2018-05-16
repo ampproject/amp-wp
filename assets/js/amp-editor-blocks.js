@@ -107,7 +107,18 @@ var ampEditorBlocks = ( function() {
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
 		var ampAttributes = {};
-		if ( ! attributes.ampLayout && ! attributes.ampNoLoading ) {
+
+		// Shortcode props are handled differently.
+		if ( 'core/shortcode' === blockType ) {
+			return props;
+		}
+
+		if (
+			! attributes.ampLayout &&
+			! attributes.ampNoLoading &&
+			! attributes.ampLightbox &&
+			! attributes.ampCarousel
+		) {
 			return props;
 		}
 
@@ -116,6 +127,12 @@ var ampEditorBlocks = ( function() {
 		}
 		if ( attributes.ampNoLoading ) {
 			ampAttributes[ 'data-amp-noloading' ] = attributes.ampNoLoading;
+		}
+		if ( attributes.ampLightbox ) {
+			ampAttributes[ 'data-amp-lightbox' ] = attributes.ampLightbox;
+		}
+		if ( attributes.ampCarousel ) {
+			ampAttributes[ 'data-amp-carousel' ] = attributes.ampLightbox;
 		}
 
 		return _.assign( ampAttributes, props );
@@ -248,6 +265,10 @@ var ampEditorBlocks = ( function() {
 				if ( ! attributes.height ) {
 					props.setAttributes( { height: component.data.defaultHeight } );
 				}
+				// Lightbox doesn't work with fixed height, so unset it.
+				if ( attributes.ampLightbox ) {
+					props.setAttributes( { ampLightbox: false } );
+				}
 				break;
 
 			case 'fixed':
@@ -331,9 +352,15 @@ var ampEditorBlocks = ( function() {
 			checked: ampLightbox,
 			onChange: function( nextValue ) {
 				props.setAttributes( { ampLightbox: ! ampLightbox } );
-				// In case of lightbox set linking images to 'none'.
-				if ( nextValue && props.attributes.linkTo && 'none' !== props.attributes.linkTo ) {
-					props.setAttributes( { linkTo: 'none' } );
+				if ( nextValue ) {
+					// Lightbox doesn't work with fixed height, so change.
+					if ( 'fixed-height' === props.attributes.ampLayout ) {
+						props.setAttributes( { ampLayout: 'fixed' } );
+					}
+					// In case of lightbox set linking images to 'none'.
+					if ( props.attributes.linkTo && 'none' !== props.attributes.linkTo ) {
+						props.setAttributes( { linkTo: 'none' } );
+					}
 				}
 			}
 		} );
@@ -510,8 +537,6 @@ var ampEditorBlocks = ( function() {
 					text
 				);
 			}
-
-
 		}
 		return element;
 	};
