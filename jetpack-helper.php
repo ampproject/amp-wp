@@ -58,7 +58,7 @@ function jetpack_amp_add_stats_pixel() {
 		return;
 	}
 	?>
-    <amp-pixel src="<?php echo esc_url( jetpack_amp_build_stats_pixel_url() ); ?>"></amp-pixel>
+	<amp-pixel src="<?php echo esc_url( jetpack_amp_build_stats_pixel_url() ); ?>"></amp-pixel>
 	<?php
 }
 
