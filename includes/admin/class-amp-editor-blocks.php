@@ -29,7 +29,7 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks-build',
 			amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-			array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+			array( 'amp-runtime', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 			AMP__VERSION
 		);
 	}

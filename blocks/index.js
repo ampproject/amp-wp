@@ -1,4 +1,4 @@
 /**
  * Import blocks.
  */
-import './amp-timeout';
+import './amp-timeago';
