@@ -6,62 +6,8 @@
  * @package AMP
  */
 
-add_action( 'pre_amp_render_post', 'jetpack_amp_disable_the_content_filters' );
-
 // Disable admin menu.
 add_filter( 'amp_options_menu_is_enabled', '__return_false', 9999 );
-
-/**
- * Disable the_content filters for Jetpack.
- *
- * @since 0.3
- */
-function jetpack_amp_disable_the_content_filters() {
-	add_filter( 'post_flair_disable', '__return_true', 99 );
-	add_filter( 'videopress_show_2015_player', '__return_true' );
-	add_filter( 'protected_embeds_use_form_post', '__return_false' );
-
-	remove_filter( 'the_title', 'widont' );
-
-	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'filter' ), 11 );
-	remove_filter( 'pre_kses', array( 'Filter_Embedded_HTML_Objects', 'maybe_create_links' ), 100 );
-}
-
-add_action( 'amp_post_template_head', 'jetpack_amp_add_og_tags' );
-
-/**
- * Add Open Graph tags.
- *
- * @since 0.3
- */
-function jetpack_amp_add_og_tags() {
-	if ( function_exists( 'jetpack_og_tags' ) ) {
-		jetpack_og_tags();
-	}
-}
-
-add_filter( 'amp_post_template_metadata', 'jetpack_amp_post_template_metadata', 10, 2 );
-
-/**
- * Add publisher and image metadata.
- *
- * @since 0.3
- *
- * @param array   $metadata Metadata array.
- * @param WP_Post $post     Post.
- * @return array Modified metadata array.
- */
-function jetpack_amp_post_template_metadata( $metadata, $post ) {
-	if ( isset( $metadata['publisher'] ) && ! isset( $metadata['publisher']['logo'] ) ) {
-		$metadata = wpcom_amp_add_blavatar_to_metadata( $metadata );
-	}
-
-	if ( ! isset( $metadata['image'] ) ) {
-		$metadata = wpcom_amp_add_image_to_metadata( $metadata, $post );
-	}
-
-	return $metadata;
-}
 
 add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', 'wpcom_amp_extract_image_dimensions_batch_add_custom_callbacks' );
 
