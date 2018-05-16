@@ -709,9 +709,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-bind' ),
 			),
 
+			'amp_bind_with_greater_than_symbol'                         => array(
+				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" [class]="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className => \'\' != className )">hello</div>',
+				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" [class]="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className =&gt; \'\' != className )">hello</div>',
+				array( 'amp-bind' ),
+			),
+
 			'amp_bad_bind_attr'                                         => array(
-				'<a [unrecognized] [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
-				'<a [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
+				'<a [href]=\'/\' [hidden]>test</a><p [text]="\'Hello \' + name" [unrecognized] title="Foo"><button [disabled]="" [type]=\'\'>Hello World</button></p>',
+				'<a [href]="/" [hidden]>test</a><p [text]="\'Hello \' + name" title="Foo"><button [disabled]="" [type]="">Hello World</button></p>',
 				array( 'amp-bind' ),
 			),
 

@@ -264,7 +264,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 		$expected_args = array(
 			'layout'    => 'fixed',
-			'noloading' => true,
+			'noloading' => 'true',
 		);
 
 		$this->assertEquals( $expected_args, $amp_args );

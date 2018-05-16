@@ -7,17 +7,34 @@
 
 /**
  * Class AMP_Img_Sanitizer_Test
+ *
+ * @covers AMP_Img_Sanitizer
  */
 class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
-	public static function force_remove_extraction_callbacks() {
-		remove_all_filters( 'amp_extract_image_dimensions_batch' );
-	}
 
+	/**
+	 * Set up.
+	 */
 	public function setUp() {
 		parent::setUp();
-		add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', array( __CLASS__, 'force_remove_extraction_callbacks' ) );
+		add_filter( 'amp_extract_image_dimensions_batch', function( $urls ) {
+			$dimensions = array();
+			foreach ( array_keys( $urls ) as $url ) {
+				if ( preg_match( '#/(?P<width>\d+)x(?P<height>\d+)$#', $url, $matches ) ) {
+					$dimensions[ $url ] = array_map( 'intval', wp_array_slice_assoc( $matches, array( 'width', 'height' ) ) );
+				} else {
+					$dimensions[ $url ] = false;
+				}
+			}
+			return $dimensions;
+		} );
 	}
 
+	/**
+	 * Data for test_converter.
+	 *
+	 * @return array
+	 */
 	public function get_data() {
 		return array(
 			'no_images'                                => array(
@@ -56,18 +73,23 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'image_with_empty_width_and_height'        => array(
-				'<p><img src="http://placehold.it/300x300" width="" height="" /></p>',
-				'<p><amp-img src="http://placehold.it/300x300" width="600" height="400" class="amp-wp-unknown-size amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
+				'<p><img src="http://placehold.it/200x300" width="" height="" /></p>',
+				'<p><amp-img src="http://placehold.it/200x300" width="200" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
+			),
+
+			'image_with_undefined_width_and_height'    => array(
+				'<p><img src="http://placehold.it/200x300" /></p>',
+				'<p><amp-img src="http://placehold.it/200x300" width="200" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
 			),
 
 			'image_with_empty_width'                   => array(
-				'<p><img src="http://placehold.it/300x300" width="" height="300" /></p>',
-				'<p><amp-img src="http://placehold.it/300x300" width="600" height="300" class="amp-wp-unknown-size amp-wp-unknown-width amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
+				'<p><img src="http://placehold.it/500x1000" width="" height="300" /></p>',
+				'<p><amp-img src="http://placehold.it/500x1000" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
 			),
 
 			'image_with_empty_height'                  => array(
-				'<p><img src="http://placehold.it/300x300" width="300" height="" /></p>',
-				'<p><amp-img src="http://placehold.it/300x300" width="300" height="400" class="amp-wp-unknown-size amp-wp-unknown-height amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
+				'<p><img src="http://placehold.it/500x1000" width="300" height="" /></p>',
+				'<p><amp-img src="http://placehold.it/500x1000" width="300" height="600" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
 			),
 
 			'image_with_zero_width'                    => array(
@@ -110,14 +132,14 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
 			),
 
-			'image_with_no_dimensions_is_forced_dimensions' => array(
+			'image_with_no_dimensions_is_forced'       => array(
 				'<img src="http://placehold.it/350x150" />',
-				'<amp-img src="http://placehold.it/350x150" width="600" height="400" class="amp-wp-unknown-size amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
+				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
 			),
 
-			'image_with_sizes_attribute_is_overridden' => array(
-				'<img src="http://placehold.it/350x150" width="350" height="150"  />',
-				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
+			'image_with_bad_src_url_get_fallback_dims' => array(
+				'<img src="http://example.com/404.png" />',
+				'<amp-img src="http://example.com/404.png" width="' . AMP_Img_Sanitizer::FALLBACK_WIDTH . '" height="' . AMP_Img_Sanitizer::FALLBACK_HEIGHT . '" class="amp-wp-unknown-size amp-wp-unknown-width amp-wp-unknown-height amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
 			),
 
 			'gif_image_conversion'                     => array(
@@ -167,7 +189,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test converter.
 	 *
-	 * @param string $source Source.
+	 * @param string $source   Source.
 	 * @param string $expected Expected.
 	 * @dataProvider get_data
 	 */
@@ -179,6 +201,9 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	/**
+	 * Test that amp-anim does not get included for a PNG.
+	 */
 	public function test_no_gif_no_image_scripts() {
 		$source   = '<img src="http://placehold.it/350x150.png" width="350" height="150" alt="Placeholder!" />';
 		$expected = array();
@@ -197,6 +222,9 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $scripts );
 	}
 
+	/**
+	 * Test that amp-anim does get included for a GIF.
+	 */
 	public function test_no_gif_image_scripts() {
 		$source   = '<img src="http://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />';
 		$expected = array( 'amp-anim' => true );
