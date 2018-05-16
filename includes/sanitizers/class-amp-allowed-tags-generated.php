@@ -3163,34 +3163,6 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
-		'amp-viz-vega' => array(
-			array(
-				'attr_spec_list' => array(
-					'src' => array(
-						'mandatory' => false,
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => '',
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							1,
-							2,
-							3,
-							4,
-							6,
-							7
-						),
-					),
-					'requires_extension' => array(
-						'amp-viz-vega',
-					),
-				),
-			),
-		),
 		'amp-vk' => array(
 			array(
 				'attr_spec_list' => array(
