@@ -368,18 +368,14 @@ abstract class AMP_Base_Sanitizer {
 		$parent_node = $node->parentNode;
 		if ( 'figure' === $parent_node->tagName ) {
 			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
-			if ( isset( $parent_attributes['class'] ) ) {
-				$classes = explode( ' ', $parent_attributes['class'] );
-
-				foreach ( $classes as $class_name ) {
-					if ( 0 === strpos( $class_name, 'amp-layout-' ) ) {
-						$attributes['layout'] = str_replace( 'amp-layout-', '', $class_name );
-					} elseif ( 'amp-noloading' === $class_name ) {
-						$attributes['noloading'] = true;
-					} elseif ( 'amp-lightbox' === $class_name ) {
-						$attributes['lightbox'] = true;
-					}
-				}
+			if ( isset( $parent_attributes['data-amp-layout'] ) ) {
+				$attributes['layout'] = $parent_attributes['data-amp-layout'];
+			}
+			if ( isset( $parent_attributes['data-amp-noloading'] ) && true === filter_var( $parent_attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
+				$attributes['noloading'] = $parent_attributes['data-amp-noloading'];
+			}
+			if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
+				$attributes['lightbox'] = true;
 			}
 		}
 

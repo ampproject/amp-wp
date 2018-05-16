@@ -47,8 +47,12 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// We are looking for <figure> elements with AMP classes only.
-			if ( false === strpos( $attributes['class'], 'amp-layout-' ) && false === strpos( $attributes['class'], 'amp-noloading' ) ) {
+			// We are looking for <figure> elements with layout attribute only.
+			if (
+				! isset( $attributes['data-amp-layout'] ) &&
+				! isset( $attributes['data-amp-noloading'] ) &&
+				! isset( $attributes['data-amp-lightbox'] )
+			) {
 				continue;
 			}
 
@@ -81,14 +85,14 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function set_attributes( $node, $parent_node, $attributes ) {
 
-		$classes = explode( ' ', $attributes['class'] );
-
-		foreach ( $classes as $class_name ) {
-			if ( 0 === strpos( $class_name, 'amp-layout-' ) ) {
-				$node->setAttribute( 'layout', str_replace( 'amp-layout-', '', $class_name ) );
-			} elseif ( 'amp-noloading' === $class_name ) {
-				$node->setAttribute( 'noloading', '' );
-			}
+		if ( isset( $attributes['data-amp-layout'] ) ) {
+			$node->setAttribute( 'layout', $attributes['data-amp-layout'] );
+		}
+		if ( isset( $attributes['data-amp-noloading'] ) && true === filter_var( $attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
+			$node->setAttribute( 'noloading', '' );
+		}
+		if ( isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
+			$node->setAttribute( 'lightbox', '' );
 		}
 
 		$layout = $node->getAttribute( 'layout' );
