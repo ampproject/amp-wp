@@ -1,4 +1,4 @@
 /**
  * Import blocks.
  */
-import './amp-timeago';
+import './amp-o2-player';
