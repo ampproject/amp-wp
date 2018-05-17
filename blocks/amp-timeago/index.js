@@ -107,7 +107,7 @@ export default registerBlockType(
 								type="number"
 								className="blocks-amp-timeout__height"
 								label={ __( 'Height (px)' ) }
-								value={ width !== undefined ? height : '' }
+								value={ height !== undefined ? height : '' }
 								onChange={ value => ( setAttributes( { height: value } ) ) }
 							/>
 							<TextControl
