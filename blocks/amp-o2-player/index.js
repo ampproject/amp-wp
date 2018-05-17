@@ -34,7 +34,7 @@ export default registerBlockType(
 				type: 'string'
 			},
 			dataVid: {
-				type: 'number'
+				type: 'string'
 			},
 			dataBcid: {
 				type: 'string'
@@ -144,7 +144,7 @@ export default registerBlockType(
 				height: attributes.height,
 				'data-pid': attributes.dataPid
 			};
-			if ( attributes.width ) {
+			if ( 'fixed-height' !== attributes.layout && attributes.width ) {
 				o2Props.width = attributes.width;
 			}
 			if ( ! attributes.autoPlay ) {
