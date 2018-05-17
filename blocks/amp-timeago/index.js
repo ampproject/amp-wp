@@ -26,7 +26,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Timeago' ),
 		category: 'common',
-		icon: 'wordpress-alt', // @todo Needs an icon.
+		icon: 'backup',
 		keywords: [
 			__( 'Time difference' ),
 			__( 'Time ago' ),
