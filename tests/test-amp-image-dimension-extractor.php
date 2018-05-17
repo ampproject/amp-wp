@@ -10,8 +10,8 @@ define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/no
 // Not ideal to use remote URLs (since the remote service can change); mocking would be better.
 define( 'IMG_350', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/350x150.png' );
 define( 'IMG_1024', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/1024x768.png' );
-define( 'IMG_SVG', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/316f589ce7f0c809a8ff101745f7ba5ea94505fb/amp.svg' );
-define( 'IMG_SVG_VIEWPORT', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/316f589ce7f0c809a8ff101745f7ba5ea94505fb/google.svg' );
+define( 'IMG_SVG', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/fd58ec3fc426645885f6a3afa58ad64fbc70ea89/amp.svg' );
+define( 'IMG_SVG_VIEWPORT', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/fd58ec3fc426645885f6a3afa58ad64fbc70ea89/google.svg' );
 
 /**
  * Tests for AMP_Image_Dimension_Extractor.
@@ -184,11 +184,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			),
 		);
 
-		// Temp start.
-		$sources  = wp_array_slice_assoc( $sources, array( IMG_SVG ) );
-		$expected = wp_array_slice_assoc( $expected, array( IMG_SVG ) );
-
-		// Temp end.
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
 
 		echo "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n";
