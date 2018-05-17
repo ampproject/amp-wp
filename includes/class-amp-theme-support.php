@@ -20,6 +20,13 @@ class AMP_Theme_Support {
 	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
 
 	/**
+	 * Response cache group name.
+	 *
+	 * @var string
+	 */
+	const RESPONSE_CACHE_GROUP = 'amp-reponse';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -1028,6 +1035,13 @@ class AMP_Theme_Support {
 		}
 
 		$is_validation_debug_mode = isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
+		$is_cache_enabled         = (
+			! defined( 'WP_DEBUG' )
+			||
+			true !== WP_DEBUG
+			||
+			$is_validation_debug_mode
+		);
 
 		$args = array_merge(
 			array(
@@ -1039,6 +1053,24 @@ class AMP_Theme_Support {
 			),
 			$args
 		);
+
+		// Return cache if enabled and found.
+		if ( $is_cache_enabled ) {
+			// Set response cache hash.
+			$response_cache_key = md5( maybe_serialize( array(
+				'sanitizer_classes' => self::$sanitizer_classes,
+				'embed_handlers'    => self::$embed_handlers,
+				'args'              => $args,
+				'response'          => $response,
+				'plugin_version'    => AMP__VERSION,
+			) ) );
+
+			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
+
+			if ( ! empty( $response_cache ) ) {
+				return $response_cache;
+			}
+		}
 
 		$dom_parse_start = microtime( true );
 
@@ -1139,6 +1171,11 @@ class AMP_Theme_Support {
 		}
 
 		AMP_Response_Headers::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
+
+		// Cache the response if enabled.
+		if ( $is_cache_enabled ) {
+			wp_cache_set( $response_cache_key, $response, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
+		}
 
 		return $response;
 	}
