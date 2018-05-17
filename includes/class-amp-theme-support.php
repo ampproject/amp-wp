@@ -281,6 +281,7 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
+		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header_video' ) );
 
 		// @todo Add character conversion.
 	}
@@ -1172,4 +1173,61 @@ class AMP_Theme_Support {
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
 	}
+
+	/**
+	 * Conditionally replace the header image markup with a header video.
+	 *
+	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
+	 * So in order for the header video to display,
+	 * this replaces the markup of the header image.
+	 *
+	 * @param string $html The image markup to filter.
+	 * @return string $html Filtered markup.
+	 */
+	public static function conditionally_output_header_video( $html ) {
+		if ( ! is_header_video_active() || ! ( has_header_video() || is_customize_preview() ) ) {
+			return $html;
+		}
+
+		$video_settings = get_header_video_settings();
+		if ( ! isset( $video_settings['videoUrl'], $video_settings['width'], $video_settings['height'] ) ) {
+			return $html;
+		}
+
+		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
+		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : null;
+		$video_attributes = array(
+			'width'    => $video_settings['width'],
+			'height'   => $video_settings['height'],
+			'layout'   => 'responsive',
+			'autoplay' => '',
+			'id'       => 'wp-custom-header-video',
+		);
+
+		// If the video URL is for YouTube, return an <amp-youtube> element.
+		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
+			return AMP_HTML_Utils::build_tag(
+				'amp-youtube',
+				array_merge(
+					$video_attributes,
+					array(
+						'data-videoid'        => $query['v'],
+						'data-param-rel'      => '0', // Don't show related videos.
+						'data-param-showinfo' => '0', // Don't show video title at the top.
+					)
+				)
+			);
+		} else {
+			return AMP_HTML_Utils::build_tag(
+				'amp-video',
+				array_merge(
+					$video_attributes,
+					array(
+						'src' => $video_settings['videoUrl'],
+					)
+				)
+			);
+		}
+	}
+
 }
