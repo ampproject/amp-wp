@@ -69,7 +69,6 @@ export default registerBlockType(
 				} else {
 					url = 'https://content.jwplatform.com/players/' + dataMediaId + '-' + dataPlayerId;
 				}
-
 			}
 			return [
 				isSelected && (
