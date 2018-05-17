@@ -17,39 +17,27 @@ const {
  * Register block.
  */
 export default registerBlockType(
-	'amp/amp-ooyala-player',
+	'amp/amp-reach-player',
 	{
-		title: __( 'AMP Ooyala Player' ),
-		description: __( 'Displays an Ooyala video.' ),
+		title: __( 'AMP Reach Player' ),
+		description: __( 'Displays the Reach Player configured in the Beachfront Reach platform.' ),
 		category: 'common',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed' ),
-			__( 'Ooyala video' )
+			__( 'Beachfront Reach video' )
 		],
 
-		// @todo Add data-config attribute?
 		attributes: {
-			dataEmbedCode: {
+			dataEmbedId: {
 				type: 'string'
-			},
-			dataPlayerId: {
-				type: 'string'
-			},
-			dataPcode: {
-				type: 'string'
-			},
-			dataPlayerVersion: {
-				type: 'string',
-				default: 'v3'
 			},
 			layout: {
 				type: 'string',
-				default: 'fixed'
+				default: 'fixed-height'
 			},
 			width: {
-				type: 'number',
-				default: 600
+				type: 'number'
 			},
 			height: {
 				type: 'number',
@@ -58,46 +46,28 @@ export default registerBlockType(
 		},
 
 		edit( { attributes, isSelected, setAttributes } ) {
-			const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, layout, height, width } = attributes;
+			const { dataEmbedId, layout, height, width } = attributes;
 			const ampLayoutOptions = [
 				{ value: '', label: __( 'None' ) },
 				{ value: 'responsive', label: __( 'Responsive' ) },
+				{ value: 'fixed-height', label: __( 'Fixed Height' ) },
 				{ value: 'fixed', label: __( 'Fixed' ) },
 				{ value: 'fill', label: __( 'Fill' ) },
 				{ value: 'flex-item', label: __( 'Flex-item' ) }
 
 			];
 			let url = false;
-			if ( dataEmbedCode && dataPlayerId && dataPcode ) {
-				url = 'http://cf.c.ooyala.com/' + dataEmbedCode;
+			if ( dataEmbedId ) {
+				url = 'https://media-cdn.beachfrontreach.com/acct_1/video/';
 			}
 			return [
 				isSelected && (
 					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'Ooyala settings' ) }>
+						<PanelBody title={ __( 'Reach settings' ) }>
 							<TextControl
-								label={ __( 'Video embed code (required)' ) }
-								value={ dataEmbedCode }
-								onChange={ value => ( setAttributes( { dataEmbedCode: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Player ID (required)' ) }
-								value={ dataPlayerId }
-								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Provider code for the account (required)' ) }
-								value={ dataPcode }
-								onChange={ value => ( setAttributes( { dataPcode: value } ) ) }
-							/>
-							<SelectControl
-								label={ __( 'Player version' ) }
-								value={ dataPlayerVersion }
-								options={ [
-									{ value: 'v3', label: __( 'V3' ) },
-									{ value: 'v4', label: __( 'V4' ) }
-								] }
-								onChange={ value => ( setAttributes( { dataPlayerVersion: value } ) ) }
+								label={ __( 'The Reach player embed id (required)' ) }
+								value={ dataEmbedId }
+								onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
 							/>
 							<SelectControl
 								label={ __( 'Layout' ) }
@@ -121,35 +91,32 @@ export default registerBlockType(
 					</InspectorControls>
 				),
 				url && (
-					<Placeholder label={ __( 'Ooyala Player' ) }>
+					<Placeholder label={ __( 'Reach Player' ) }>
 						<p className="components-placeholder__error"><a href={ url }>{ url }</a></p>
 						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
 					</Placeholder>
 				),
 				! url && (
-					<Placeholder label={ __( 'Ooyala Player' ) }>
-						<p>{ __( 'Add required data to use the block.' ) }</p>
+					<Placeholder label={ __( 'Reach Player' ) }>
+						<p>{ __( 'Add Reach player embed ID to use the block.' ) }</p>
 					</Placeholder>
 				)
 			];
 		},
 
 		save( { attributes } ) {
-			const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, layout, height, width } = attributes;
+			const { dataEmbedId, layout, height, width } = attributes;
 
-			let ooyalaProps = {
+			let reachProps = {
 				layout: layout,
 				height: height,
-				'data-embedcode': dataEmbedCode,
-				'data-playerid': dataPlayerId,
-				'data-pcode': dataPcode,
-				'data-playerversion': dataPlayerVersion
+				'data-embed-id': dataEmbedId
 			};
 			if ( 'fixed-height' !== layout && width ) {
-				ooyalaProps.width = width;
+				reachProps.width = width;
 			}
 			return (
-				<amp-ooyala-player { ...ooyalaProps }></amp-ooyala-player>
+				<amp-reach-player { ...reachProps }></amp-reach-player>
 			);
 		}
 	}

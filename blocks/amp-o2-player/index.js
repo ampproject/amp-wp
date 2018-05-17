@@ -22,7 +22,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP O2 Player' ),
 		category: 'common',
-		icon: 'backup',
+		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed' ),
 			__( 'AOL O2Player' )
