@@ -71,10 +71,8 @@ class FastImage
                     return $this->type = 'png';
                 default:
                     $this->strpos = 0;
-	                $markup = $this->getChars( 1024 );
-	                $this->strpos = 0;
-	                echo( __METHOD__ . ':' . $markup . "\n" );
-	                echo( ( false !== strpos( $markup, '<svg' ) ? 'YES SVG' : 'NOPE' ) . "\n" );
+                    $markup = $this->getChars( 1024 );
+                    $this->strpos = 0;
                     if ( false !== strpos( $markup, '<svg' ) ) {
                         $this->type = 'svg';
                     } else {
@@ -174,36 +172,27 @@ class FastImage
     {
         $this->strpos = 0;
         $markup = $this->getChars( 1024 );
-        echo( __METHOD__ . ':' . $markup . "\n" );
         if ( ! preg_match( '#<svg.*?>#s', $markup, $matches ) ) {
             return null;
         }
-        echo( __METHOD__ . ':' . __LINE__ );
         $svg_start_tag = $matches[0];
         $width = null;
         $height = null;
-	    echo( __METHOD__ . ':' . __LINE__ );
         if ( preg_match( '/\swidth=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
             $width = floatval( $matches[2] );
         }
-	    echo( __METHOD__ . ':' . __LINE__ );
         if ( preg_match( '/\sheight=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
             $height = floatval( $matches[2] );
         }
-	    echo( __METHOD__ . ':' . __LINE__ );
         if ( $width && $height ) {
-	        echo( __METHOD__ . ':' . __LINE__ );
             return array( $width, $height );
         }
-	    echo( __METHOD__ . ':' . __LINE__ );
         if ( preg_match( '/\sviewBox=([\'"])[^\1]*(?:,|\s)+(?P<width>\d+(?:\.\d+)?)(?:px)?(?:,|\s)+(?P<height>\d+(?:\.\d+)?)(?:px)?\s*\1/', $svg_start_tag, $matches ) ) {
-	        echo( __METHOD__ . ':' . __LINE__ );
             return array(
                 floatval( $matches['width'] ),
                 floatval( $matches['height'] )
             );
         }
-	    echo( __METHOD__ . ':' . __LINE__ );
         return null;
     }
 

@@ -172,7 +172,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
-		echo __METHOD__ . PHP_EOL; // WPCS: XSS OK.
 
 		$image = new FastImage();
 		$urls  = array_keys( $urls_to_fetch );
@@ -196,7 +195,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
-		echo __METHOD__ . PHP_EOL; // WPCS: XSS OK.
 		$urls = array_keys( $urls_to_fetch );
 
 		if ( ! function_exists( 'amp_get_fasterimage_client' ) ) {

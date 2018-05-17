@@ -35,21 +35,18 @@ class FasterImage
      */
     public function batch(array $urls)
     {
-    	echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
-    	print_r($urls);
 
         $multi   = curl_multi_init();
         $results = array();
-        $conn    = array();
 
         // Create the curl handles and add them to the multi_request
-        foreach ( array_values( $urls ) as $count => $uri ) {
+        foreach ( array_values($urls) as $count => $uri ) {
 
             $results[$uri] = [];
 
-	        $conn[ $count ] = $this->handle($uri, $results[$uri]);
+            $$count = $this->handle($uri, $results[$uri]);
 
-            $code = curl_multi_add_handle($multi, $conn[ $count ] );
+            $code = curl_multi_add_handle($multi, $$count);
 
             if ( $code != CURLM_OK ) {
                 throw new \Exception("Curl handle for $uri could not be added");
@@ -57,17 +54,6 @@ class FasterImage
         }
 
         // Perform the requests
-	    $multi_info = array();
-	    do {
-		    $status = curl_multi_exec( $multi, $active );
-
-		    if ( ( $info = curl_multi_info_read( $multi ) ) !== false ) {
-			    $multi_info[ array_search( $info['handle'], $conn ) ] = $info;
-		    }
-
-	    } while ( $status === CURLM_CALL_MULTI_PERFORM || $active );
-
-        /*
         do {
             while ( ($mrc = curl_multi_exec($multi, $active)) == CURLM_CALL_MULTI_PERFORM ) ;
             if ( $mrc != CURLM_OK && $mrc != CURLM_CALL_MULTI_PERFORM ) {
@@ -80,24 +66,15 @@ class FasterImage
                 usleep(250);
             }
         } while ( $active );
-        */
 
         // Figure out why individual requests may have failed
-        foreach ( array_values( $urls ) as $count => $url ) {
-        	if ( isset( $multi_info[ $count ] ) ) {
-	            $info = $multi_info[ $count ];
-	            if ( ! empty( $info['result'] ) ) {
-		            $results[ $url ]['failure_reason'] = sprintf( 'Error code: %d.', $info['result'] );
-		            if ( function_exists( 'curl_strerror' ) ) {
-			            $results[ $url ]['failure_reason'] .= ' ' . curl_strerror( $info['result'] );
-		            }
-	            }
-	        }
-	        curl_close( $conn[ $count ] );
-        }
+        foreach ( array_values($urls) as $count => $uri ) {
+            $error = curl_error($$count);
 
-	    echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
-	    print_r($results);
+            if ( $error ) {
+                $results[$uri]['failure_reason'] = $error;
+            }
+        }
 
         return $results;
     }
@@ -120,7 +97,6 @@ class FasterImage
      */
     protected function handle($url, & $result)
     {
-	    echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
         $stream           = new Stream();
         $parser           = new ImageParser($stream);
         $result['rounds'] = 0;
@@ -152,7 +128,6 @@ class FasterImage
         curl_setopt($ch, CURLOPT_ENCODING, "");
 
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $str) use (& $result, & $parser, & $stream, $url) {
-	        echo __METHOD__ . ':' . __LINE__ . PHP_EOL;
 
             $result['rounds']++;
             $result['bytes'] += strlen($str);
@@ -160,7 +135,6 @@ class FasterImage
             $stream->write($str);
 
             try {
-            	echo "TRY: " . __METHOD__ . ':' . __LINE__ . PHP_EOL;
                 // store the type in the result array by looking at the bits
                 $result['type'] = $parser->parseType();
 
@@ -169,10 +143,8 @@ class FasterImage
                  * for the size.
                  */
                 $result['size'] = $parser->parseSize() ?: 'failed';
-                print_r($result);
             }
             catch (StreamBufferTooSmallException $e) {
-            	echo "StreamBufferTooSmallException\n";
                 /*
                  * If this exception is thrown, we don't have enough of the stream buffered
                  * so in order to tell curl to keep streaming we need to return the number
@@ -187,7 +159,6 @@ class FasterImage
                 return strlen($str);
             }
             catch (InvalidImageException $e) {
-	            echo "InvalidImageException\n";
 
                 /*
                  * This means we've determined that we're lost and don't know

@@ -137,9 +137,6 @@ class ImageParser
                 default:
                     $this->stream->resetPointer();
                     $markup = $this->stream->read( 1024 );
-	                echo( __METHOD__ . ':' . $markup . "\n" );
-	                echo( ( false !== strpos( $markup, '<svg' ) ? 'YES SVG' : 'NOPE' ) . "\n" );
-
                     if ( false !== strpos( $markup, '<svg' ) ) {
                         $this->type = 'svg';
                     } else {
@@ -365,7 +362,6 @@ class ImageParser
     {
         $this->stream->resetPointer();
         $markup = $this->stream->read( 1024 );
-	    echo( __METHOD__ . ':' . $markup . "\n" );
         if ( ! preg_match( '#<svg.*?>#s', $markup, $matches ) ) {
             return null;
         }
