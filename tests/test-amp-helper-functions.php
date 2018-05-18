@@ -11,6 +11,13 @@
 class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 	/**
+	 * The mock Site Icon value to use in a filter.
+	 *
+	 * @var string
+	 */
+	const MOCK_SITE_ICON = 'https://example.com/new-site-icon.jpg';
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
@@ -467,7 +474,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
 		update_option( 'site_icon', null );
 
-		// Test the custom logo icon with too much height, expecting the publisher logo to fall back to the site icon.
+		// Test the custom logo with too much height, expecting the publisher logo to fall back to the site icon.
 		$custom_logo_excessive_height = 150;
 		update_post_meta(
 			$custom_logo_id,
@@ -483,6 +490,27 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
 		set_theme_mod( 'custom_logo', null );
 		update_option( 'site_icon', null );
+
+		/**
+		 * Test that the 'amp_site_icon_url' filter also applies to the Custom Logo.
+		 *
+		 * Before, this only applied to the Site Icon, as that was the only possible schema.org publisher logo.
+		 * But now that the Custom Logo is preferred, this filter should also apply to that.
+		 */
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		add_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo']['url'] );
+		remove_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		set_theme_mod( 'custom_logo', null );
 
 		// Test page.
 		$this->go_to( get_permalink( $page_id ) );
@@ -534,5 +562,17 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
+	}
+
+
+	/**
+	 * Get a mock publisher logo URL, to test that the filter works as expected.
+	 *
+	 * @param string $site_icon The publisher logo in the schema.org data.
+	 * @return string $site_icon The filtered publisher logo in the schema.org data.
+	 */
+	public static function mock_site_icon( $site_icon ) {
+		unset( $site_icon );
+		return self::MOCK_SITE_ICON;
 	}
 }
