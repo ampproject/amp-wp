@@ -584,16 +584,8 @@ function amp_get_schemaorg_metadata() {
 	$custom_logo_id  = get_theme_mod( 'custom_logo' );
 
 	if ( has_custom_logo() && $custom_logo_id ) {
-		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
-		$is_proper_size  = (
-			isset( $custom_logo_img[0], $custom_logo_img[1], $custom_logo_img[2] )
-			&&
-			$custom_logo_img[1] <= $max_logo_width
-			&&
-			$custom_logo_img[2] <= $max_logo_height
-		);
-
-		if ( $is_proper_size ) {
+		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, array( $max_logo_width, $max_logo_height ), false );
+		if ( $custom_logo_img ) {
 			$schema_img_url = $custom_logo_img[0];
 			$schema_img     = array(
 				'width'  => $custom_logo_img[1],
@@ -604,12 +596,10 @@ function amp_get_schemaorg_metadata() {
 
 	if ( ! isset( $schema_img_url ) ) {
 		$schema_img_url = get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE );
-		if ( $schema_img_url ) {
-			$schema_img = array(
-				'width'  => AMP_Post_Template::SITE_ICON_SIZE,
-				'height' => AMP_Post_Template::SITE_ICON_SIZE,
-			);
-		}
+		$schema_img     = array(
+			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
+			'height' => AMP_Post_Template::SITE_ICON_SIZE,
+		);
 	}
 
 	/**
@@ -625,7 +615,7 @@ function amp_get_schemaorg_metadata() {
 	 */
 	$schema_img_url = apply_filters( 'amp_site_icon_url', $schema_img_url );
 
-	if ( isset( $schema_img_url, $schema_img ) ) {
+	if ( $schema_img_url ) {
 		$metadata['publisher']['logo'] = array_merge(
 			array(
 				'@type' => 'ImageObject',

@@ -474,8 +474,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
 		update_option( 'site_icon', null );
 
-		// Test the custom logo with too much height, expecting the publisher logo to fall back to the site icon.
-		$custom_logo_excessive_height = 150;
+		/**
+		 * Test the publisher logo when the Custom Logo naturally has too much height, a common scenario.
+		 *
+		 * It's expected that the URL is the same,
+		 * but the height should be 60, the maximum height for the schema.org publisher logo.
+		 * And the width should be proportional to the new height.
+		 */
+		$custom_logo_excessive_height = 250;
 		update_post_meta(
 			$custom_logo_id,
 			'_wp_attachment_metadata',
@@ -486,8 +492,17 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		);
 		set_theme_mod( 'custom_logo', $custom_logo_id );
 		update_option( 'site_icon', $site_icon_id );
-		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
+		$metadata   = amp_get_schemaorg_metadata();
+		$max_height = 60;
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $max_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width * $max_height / $custom_logo_excessive_height, // Proportional to downsized height.
+			),
+			$metadata['publisher']['logo']
+		);
 		set_theme_mod( 'custom_logo', null );
 		update_option( 'site_icon', null );
 
