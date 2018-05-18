@@ -595,7 +595,7 @@ function amp_get_schemaorg_metadata() {
 
 		if ( $is_proper_size ) {
 			$schema_img_url = $custom_logo_img[0];
-			$schema_img = array(
+			$schema_img     = array(
 				'width'  => $custom_logo_img[1],
 				'height' => $custom_logo_img[2],
 			);
