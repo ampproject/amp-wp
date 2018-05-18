@@ -68,6 +68,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Ensure before/after is amended to filtered comment_reply_link. See [#1118](https://github.com/Automattic/amp-wp/pull/1118). Props westonruter.
 - Force VideoPress to use html5 player for AMP. See [#1125](https://github.com/Automattic/amp-wp/pull/1125). Props yurynix.
 - Soft-deprecate `AMP_Base_Sanitizer::get_body_node()` instead of hard-deprecating it (with triggered notice). See [#1141](https://github.com/Automattic/amp-wp/pull/1141). Props westonruter.
+- Pass '/' as an argument to home_url(), preventing possible 404. See [#1158](https://github.com/Automattic/amp-wp/issues/1158), [#1161](https://github.com/Automattic/amp-wp/pull/1161). Props kienstra.
 
 See [0.7.1 milestone](https://github.com/Automattic/amp-wp/milestone/8?closed=1).
 
