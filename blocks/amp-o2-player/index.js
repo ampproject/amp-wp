@@ -48,10 +48,11 @@ export default registerBlockType(
 			},
 			layout: {
 				type: 'string',
-				default: 'fixed-height'
+				default: 'responsive'
 			},
 			width: {
-				type: 'number'
+				type: 'number',
+				default: 600
 			},
 			height: {
 				type: 'number',
@@ -62,12 +63,12 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { autoPlay, dataPid, dataVid, dataBcid, dataBid, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: 'Responsive' },
-				{ value: 'fixed-height', label: 'Fixed height' },
-				{ value: 'fixed', label: 'Fixed' },
-				{ value: 'fill', label: 'Fill' },
-				{ value: 'flex-item', label: 'Flex-item' },
-				{ value: 'nodisplay', label: 'No Display' }
+				{ value: 'responsive', label: __( 'Responsive' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height' ) },
+				{ value: 'fixed', label: __( 'Fixed' ) },
+				{ value: 'fill', label: __( 'Fill' ) },
+				{ value: 'flex-item', label: __( 'Flex-item' ) },
+				{ value: 'nodisplay', label: __( 'No Display' ) }
 
 			];
 			let url = false;
@@ -84,19 +85,19 @@ export default registerBlockType(
 								onChange={ value => ( setAttributes( { dataPid: value } ) ) }
 							/>
 							<TextControl
-								label={ __( 'Buyer Company ID (bcid, required)' ) }
+								label={ __( 'Buyer Company ID (either buyer or video ID is required)' ) }
 								value={ dataBcid }
 								onChange={ value => ( setAttributes( { dataBcid: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Video ID (either buyer or video ID is required)' ) }
+								value={ dataVid }
+								onChange={ value => ( setAttributes( { dataVid: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Playlist ID' ) }
 								value={ dataBid }
 								onChange={ value => ( setAttributes( { dataBid: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Video ID' ) }
-								value={ dataVid }
-								onChange={ value => ( setAttributes( { dataVid: value } ) ) }
 							/>
 							<ToggleControl
 								label={ __( 'Autoplay' ) }
@@ -132,7 +133,7 @@ export default registerBlockType(
 				),
 				! url && (
 					<Placeholder label={ __( 'O2 Player' ) }>
-						<p>{ __( 'Add data to use the block.' ) }</p>
+						<p>{ __( 'Add required data to use the block.' ) }</p>
 					</Placeholder>
 				)
 			];

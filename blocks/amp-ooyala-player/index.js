@@ -60,7 +60,6 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: '', label: __( 'None' ) },
 				{ value: 'responsive', label: __( 'Responsive' ) },
 				{ value: 'fixed', label: __( 'Fixed' ) },
 				{ value: 'fill', label: __( 'Fill' ) },

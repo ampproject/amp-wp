@@ -65,10 +65,10 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: 'Responsive' },
-				{ value: 'fixed', label: 'Fixed' },
-				{ value: 'fill', label: 'Fill' },
-				{ value: 'flex-item', label: 'Flex-item' }
+				{ value: 'responsive', label: __( 'Responsive' ) },
+				{ value: 'fixed', label: __( 'Fixed' ) },
+				{ value: 'fill', label: __( 'Fill' ) },
+				{ value: 'flex-item', label: __( 'Flex-item' ) }
 
 			];
 			let url = false;

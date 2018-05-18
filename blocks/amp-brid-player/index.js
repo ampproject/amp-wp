@@ -64,12 +64,12 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { autoPlay, dataPartner, dataPlayer, dataVideo, dataPlaylist, dataOutstream, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: 'Responsive' },
-				{ value: 'fixed-height', label: 'Fixed height' },
-				{ value: 'fixed', label: 'Fixed' },
-				{ value: 'fill', label: 'Fill' },
-				{ value: 'flex-item', label: 'Flex-item' },
-				{ value: 'nodisplay', label: 'No Display' }
+				{ value: 'responsive', label: __( 'Responsive' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height' ) },
+				{ value: 'fixed', label: __( 'Fixed' ) },
+				{ value: 'fill', label: __( 'Fill' ) },
+				{ value: 'flex-item', label: __( 'Flex-item' ) },
+				{ value: 'nodisplay', label: __( 'No Display' ) }
 
 			];
 			let url = false;

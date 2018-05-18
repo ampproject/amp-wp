@@ -54,12 +54,12 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataPlayerId, dataMediaId, dataPlaylistId, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: 'Responsive' },
-				{ value: 'fixed-height', label: 'Fixed height' },
-				{ value: 'fixed', label: 'Fixed' },
-				{ value: 'fill', label: 'Fill' },
-				{ value: 'flex-item', label: 'Flex-item' },
-				{ value: 'nodisplay', label: 'No Display' }
+				{ value: 'responsive', label: __( 'Responsive' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height' ) },
+				{ value: 'fixed', label: __( 'Fixed' ) },
+				{ value: 'fill', label: __( 'Fill' ) },
+				{ value: 'flex-item', label: __( 'Flex-item' ) },
+				{ value: 'nodisplay', label: __( 'No Display' ) }
 
 			];
 			let url = false;
@@ -75,17 +75,17 @@ export default registerBlockType(
 					<InspectorControls key='inspector'>
 						<PanelBody title={ __( 'JW Player Settings' ) }>
 							<TextControl
-								label={ __( 'JW Platform player ID (required)' ) }
+								label={ __( 'Player ID (required)' ) }
 								value={ dataPlayerId }
 								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
 							/>
 							<TextControl
-								label={ __( 'JW Platform media ID (required if playlist ID not set)' ) }
+								label={ __( 'Media ID (required if playlist ID not set)' ) }
 								value={ dataMediaId }
 								onChange={ value => ( setAttributes( { dataMediaId: value } ) ) }
 							/>
 							<TextControl
-								label={ __( 'JW Platform playlist ID (required if media ID not set)' ) }
+								label={ __( 'Playlist ID (required if media ID not set)' ) }
 								value={ dataPlaylistId }
 								onChange={ value => ( setAttributes( { dataPlaylistId: value } ) ) }
 							/>

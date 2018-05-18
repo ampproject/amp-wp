@@ -37,7 +37,8 @@ export default registerBlockType(
 				default: 'fixed-height'
 			},
 			width: {
-				type: 'number'
+				type: 'number',
+				default: 600
 			},
 			height: {
 				type: 'number',
@@ -48,7 +49,6 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataEmbedId, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: '', label: __( 'None' ) },
 				{ value: 'responsive', label: __( 'Responsive' ) },
 				{ value: 'fixed-height', label: __( 'Fixed Height' ) },
 				{ value: 'fixed', label: __( 'Fixed' ) },

@@ -59,8 +59,8 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataDelayAdRequest, dataTag, dataSrc, dataPoster, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: 'Responsive' },
-				{ value: 'fixed', label: 'Fixed' }
+				{ value: 'responsive', label: __( 'Responsive' ) },
+				{ value: 'fixed', label: __( 'Fixed' ) }
 
 			];
 			let dataSet = false;
