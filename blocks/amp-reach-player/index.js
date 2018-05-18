@@ -92,7 +92,7 @@ export default registerBlockType(
 				),
 				url && (
 					<Placeholder label={ __( 'Reach Player' ) }>
-						<p className="components-placeholder__error"><a href={ url }>{ url }</a></p>
+						<p className="components-placeholder__error">{ url }</p>
 						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
 					</Placeholder>
 				),

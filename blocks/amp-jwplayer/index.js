@@ -54,8 +54,8 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataPlayerId, dataMediaId, dataPlaylistId, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'fixed-height', label: 'Fixed height' },
 				{ value: 'responsive', label: 'Responsive' },
+				{ value: 'fixed-height', label: 'Fixed height' },
 				{ value: 'fixed', label: 'Fixed' },
 				{ value: 'fill', label: 'Fill' },
 				{ value: 'flex-item', label: 'Flex-item' },
@@ -112,7 +112,7 @@ export default registerBlockType(
 				),
 				url && (
 					<Placeholder label={ __( 'JW Player' ) }>
-						<p className="components-placeholder__error"><a href={ url }>{ url }</a></p>
+						<p className="components-placeholder__error">{ url }</p>
 						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
 					</Placeholder>
 				),

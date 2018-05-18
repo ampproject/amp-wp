@@ -6,3 +6,4 @@ import './amp-ooyala-player';
 import './amp-reach-player';
 import './amp-springboard-player';
 import './amp-jwplayer';
+import './amp-brid-player';
