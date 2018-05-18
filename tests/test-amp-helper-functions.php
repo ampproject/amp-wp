@@ -579,7 +579,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'George', $metadata['author']['name'] );
 	}
 
-
 	/**
 	 * Get a mock publisher logo URL, to test that the filter works as expected.
 	 *
