@@ -53,11 +53,11 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 				return $return;
 			}
 
-			$layout = 'intrinsic';
+			$attributes = wp_array_slice_assoc( $attr, array( 'width', 'height' ) );
 
 			if ( empty( $attr['width'] ) ) {
-				$layout        = 'fixed-height';
-				$attr['width'] = 'auto';
+				$attributes['layout'] = 'fixed-height';
+				$attributes['width']  = 'auto';
 			}
 
 			$pieces = explode( '/detail/', $parsed_url['path'] );
@@ -65,19 +65,14 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 				if ( ! preg_match( '/\/([A-Za-z0-9]+)/', $parsed_url['path'], $matches ) ) {
 					return $return;
 				}
-				$data_gfyid = $matches[1];
+				$attributes['data-gfyid'] = $matches[1];
 			} else {
-				$data_gfyid = $pieces[1];
+				$attributes['data-gfyid'] = $pieces[1];
 			}
 
 			$return = AMP_HTML_Utils::build_tag(
 				'amp-gfycat',
-				array(
-					'width'      => $attr['width'],
-					'height'     => $attr['height'],
-					'data-gfyid' => $data_gfyid,
-					'layout'     => $layout,
-				)
+				$attributes
 			);
 		}
 		return $return;

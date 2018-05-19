@@ -44,17 +44,17 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 
 			'url_simple'      => array(
 				'https://gfycat.com/tautwhoppingcougar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar" layout="intrinsic"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			),
 
 			'url_with_detail' => array(
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar" layout="intrinsic"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			),
 
 			'url_with_params' => array(
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar?foo=bar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar" layout="intrinsic"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			),
 
 		);
