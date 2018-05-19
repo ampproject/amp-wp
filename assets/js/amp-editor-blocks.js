@@ -2,7 +2,11 @@
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0 ] } ] */
 
 var ampEditorBlocks = ( function() {
-	var component = {
+	var component, __;
+
+	__ = wp.i18n.__;
+
+	component = {
 
 		/**
 		 * Holds data.
@@ -10,14 +14,42 @@ var ampEditorBlocks = ( function() {
 		data: {
 			dynamicBlocks: [],
 			ampLayoutOptions: [
-				{ value: 'nodisplay', label: 'No Display' },
-				{ value: 'fixed', label: 'Fixed' }, // Not supported by amp-audio and amp-pixel.
-				{ value: 'responsive', label: 'Responsive' }, // To ensure your AMP element displays, you must specify a width and height for the containing element.
-				{ value: 'fixed-height', label: 'Fixed height' },
-				{ value: 'fill', label: 'Fill' },
-				{ value: 'container', label: 'Container' }, // Not supported by img and video.
-				{ value: 'flex-item', label: 'Flex Item' },
-				{ value: 'intrinsic', label: 'Intrinsic' } // Not supported by video.
+				{
+					value: 'nodisplay',
+					label: __( 'No Display' )
+				},
+				{
+					// Not supported by amp-audio and amp-pixel.
+					value: 'fixed',
+					label: __( 'Fixed' )
+				},
+				{
+					// To ensure your AMP element displays, you must specify a width and height for the containing element.
+					value: 'responsive',
+					label: __( 'Responsive' )
+				},
+				{
+					value: 'fixed-height',
+					label: __( 'Fixed height' )
+				},
+				{
+					value: 'fill',
+					label: __( 'Fill' )
+				},
+				{
+					// Not supported by img and video.
+					value: 'container',
+					label: __( 'Container' )
+				},
+				{
+					value: 'flex-item',
+					label: __( 'Flex Item' )
+				},
+				{
+					// Not supported by video.
+					value: 'intrinsic',
+					label: __( 'Intrinsic' )
+				}
 			],
 			defaultWidth: 608, // Max-width in the editor.
 			defaultHeight: 400,
@@ -50,28 +82,32 @@ var ampEditorBlocks = ( function() {
 	 * @return {[*]} Options.
 	 */
 	component.getLayoutOptions = function getLayoutOptions( blockName ) {
-		var layoutOptions = [
-				{ value: '', label: 'None' }
-			],
-			embedBlocks = [
-				'core-embed/youtube',
-				'core-embed/facebook',
-				'core-embed/instagram'
-			];
+		var layoutOptions, embedBlocks;
+		layoutOptions = [
+			{
+				value: '',
+				label: __( 'Default' )
+			}
+		];
+		embedBlocks = [
+			'core-embed/youtube',
+			'core-embed/facebook',
+			'core-embed/instagram'
+		];
 
 		_.each( component.data.ampLayoutOptions, function( option ) {
 			// Exclude options from layout that are not supported.
 			if ( 'core/image' === blockName || 'core/video' === blockName || 'core-embed/twitter' === blockName ) {
 				if ( 'container' === option.value ) {
-					return true;
+					return;
 				}
 			} else if ( 'core/audio' === blockName ) {
 				if ( -1 !== [ 'responsive', 'fill', 'container', 'flex-item', 'intrinsic' ].indexOf( option.value ) ) {
-					return true;
+					return;
 				}
 			} else if ( -1 !== embedBlocks.indexOf( blockName ) ) {
 				if ( 'container' === option.value || 'intrinsic' === option.value ) {
-					return true;
+					return;
 				}
 			} else if (
 				'core-embed/vimeo' === blockName ||
@@ -80,15 +116,18 @@ var ampEditorBlocks = ( function() {
 				'core-embed/reddit' === blockName
 			) {
 				if ( 'container' === option.value || 'intrinsic' === option.value || 'nodisplay' === option.value ) {
-					return true;
+					return;
 				}
 			} else if ( 'core-embed/soundcloud' === blockName ) {
 				if ( 'fixed-height' !== option.value ) {
-					return true;
+					return;
 				}
 			}
 
-			layoutOptions.push( { value: option.value, label: option.label } );
+			layoutOptions.push( {
+				value: option.value,
+				label: option.label
+			} );
 		} );
 
 		return layoutOptions;
@@ -100,7 +139,7 @@ var ampEditorBlocks = ( function() {
 	 * @param {Object} props Properties.
 	 * @param {string} blockType Block type.
 	 * @param {Object} attributes Attributes.
-	 * @return {*} Props.
+	 * @return {Object} Props.
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
 		var ampAttributes = {};
@@ -115,7 +154,7 @@ var ampEditorBlocks = ( function() {
 			ampAttributes[ 'data-amp-noloading' ] = attributes.ampNoLoading;
 		}
 
-		return _.assign( ampAttributes, props );
+		return _.extend( ampAttributes, props );
 	};
 
 	/**
@@ -123,7 +162,7 @@ var ampEditorBlocks = ( function() {
 	 *
 	 * @param {Object} settings Settings.
 	 * @param {string} name Block name.
-	 * @return {*} Settings.
+	 * @return {Object} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
 		// Gallery settings for shortcode.
@@ -173,7 +212,7 @@ var ampEditorBlocks = ( function() {
 				if ( '' === inspectorControls ) {
 					// Return original.
 					return [
-						el( BlockEdit, _.assign( {
+						el( BlockEdit, _.extend( {
 							key: 'original'
 						}, props ) )
 					];
@@ -195,7 +234,7 @@ var ampEditorBlocks = ( function() {
 			// Return original.
 			return [
 				inspectorControls,
-				el( BlockEdit, _.assign( {
+				el( BlockEdit, _.extend( {
 					key: 'original',
 					'data-amp-layout': ampLayout,
 					style: 'height:100px;'
@@ -249,19 +288,19 @@ var ampEditorBlocks = ( function() {
 			isSelected = props.isSelected,
 			name = props.name,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			SelectControl = wp.components.SelectControl,
 			ToggleControl = wp.components.ToggleControl,
 			PanelBody = wp.components.PanelBody,
-			label = 'AMP Layout';
+			label = __( 'AMP Layout' );
 
 		if ( 'core/image' === name ) {
-			label = 'AMP Layout (modifies width/height)';
+			label = __( 'AMP Layout (modifies width/height)' );
 		}
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: 'AMP Settings' },
+				el( PanelBody, { title: __( 'AMP Settings' ) },
 					el( SelectControl, {
 						label: label,
 						value: ampLayout,
@@ -271,7 +310,7 @@ var ampEditorBlocks = ( function() {
 						}
 					} ),
 					el( ToggleControl, {
-						label: 'AMP Noloading',
+						label: __( 'AMP loading indicator disabled' ),
 						checked: ampNoLoading,
 						onChange: function() {
 							props.setAttributes( { ampNoLoading: ! ampNoLoading } );
@@ -300,7 +339,7 @@ var ampEditorBlocks = ( function() {
 
 		if ( component.isGalleryShortcode( props.attributes ) ) {
 			toggleControl = el( ToggleControl, {
-				label: 'Display as AMP carousel',
+				label: __( 'Display as AMP carousel' ),
 				checked: ampCarousel,
 				onChange: function() {
 					props.setAttributes( { ampCarousel: ! ampCarousel } );
@@ -308,7 +347,7 @@ var ampEditorBlocks = ( function() {
 			} );
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: 'AMP Settings' },
+					el( PanelBody, { title: __( 'AMP Settings' ) },
 						toggleControl
 					)
 				)

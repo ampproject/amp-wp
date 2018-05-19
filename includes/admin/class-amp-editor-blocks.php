@@ -43,7 +43,7 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'amp-runtime', 'underscore', 'wp-hooks' ),
+			array( 'amp-runtime', 'underscore', 'wp-hooks', 'wp-i18n' ),
 			AMP__VERSION,
 			true
 		);

@@ -212,7 +212,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string $class
 	 *      @type string $layout
 	 * }
-	 * @return string[]
+	 * @return array Attributes.
 	 */
 	public function set_layout( $attributes ) {
 		if ( isset( $attributes['layout'] ) && ( 'fill' === $attributes['layout'] || 'flex-item' !== $attributes['layout'] ) ) {
@@ -375,7 +375,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param array $attributes Array of attributes.
 	 * @param array $amp_data Array of AMP attributes.
-	 * @return array
+	 * @return array Updated attributes.
 	 */
 	public function set_data_amp_attributes( $attributes, $amp_data ) {
 		if ( isset( $amp_data['layout'] ) ) {
