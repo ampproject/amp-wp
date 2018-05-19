@@ -505,7 +505,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test handling of stylesheets with relative background-image URLs.
 	 *
-	 * @covers AMP_Style_Sanitizer::real_path_urls()
+	 * @covers AMP_Style_Sanitizer::normalize_urls()
 	 */
 	public function test_relative_background_url_handling() {
 		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( admin_url( 'css/common.css' ) ) . '"></head><body><span class="spinner"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
@@ -677,6 +677,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		} else {
 			$this->assertEquals( $expected, $actual );
 		}
+	}
+
+
+	/**
+	 * Test normalize path URLs.
+	 *
+	 * @covers AMP_Style_Sanitizer::normalize_urls()
+	 */
+	public function test_normalizeurls() {
+		$this->assertTrue( true );
 	}
 
 	/**

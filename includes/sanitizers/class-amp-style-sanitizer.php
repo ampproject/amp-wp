@@ -625,17 +625,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
 			$css_document    = $css_parser->parse();
 
-			if ( ! empty( $options['stylesheet_url'] ) ) {
-				$this->real_path_urls(
-					array_filter(
-						$css_document->getAllValues(),
-						function ( $value ) {
-							return $value instanceof URL;
-						}
-					),
-					$options['stylesheet_url']
-				);
-			}
+			$this->normalize_urls(
+				array_filter(
+					$css_document->getAllValues(),
+					function ( $value ) {
+						return $value instanceof URL;
+					}
+				),
+				$options['stylesheet_url']
+			);
 
 			$validation_errors = $this->process_css_list( $css_document, $options );
 
@@ -872,17 +870,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param URL[]  $urls           URLs.
 	 * @param string $stylesheet_url Stylesheet URL.
 	 */
-	private function real_path_urls( $urls, $stylesheet_url ) {
+	private function normalize_urls( $urls, $stylesheet_url ) {
 		$base_url = preg_replace( ':[^/]+(\?.*)?(#.*)?$:', '', $stylesheet_url );
-		if ( empty( $base_url ) ) {
-			return;
-		}
+
 		foreach ( $urls as $url ) {
-			$url_string = $url->getURL()->getString();
+			$url_string = preg_replace( '/\s+/', '', $url->getURL()->getString() );
 			if ( 'data:' === substr( $url_string, 0, 5 ) ) {
 				continue;
 			}
-
 			$parsed_url = wp_parse_url( $url_string );
 			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || '/' === substr( $parsed_url['path'], 0, 1 ) ) {
 				continue;
