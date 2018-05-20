@@ -100,9 +100,10 @@ module.exports = function( grunt ) {
 			versionAppend = commitHash + '-' + new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' );
 
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
 			} );
 			paths.push( 'vendor/autoload.php' );
+			paths.push( 'assets/js/*-compiled.js' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
 
