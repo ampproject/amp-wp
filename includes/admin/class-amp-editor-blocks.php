@@ -24,14 +24,14 @@ class AMP_Editor_Blocks {
 	/**
 	 * Whitelist used data-amp-* attributes.
 	 *
-	 * @param array $context Array of contexts.
+	 * @param array $tags Array of contexts.
 	 * @return mixed Modified array.
 	 */
-	public function whitelist_layout_in_wp_kses_allowed_html( $context ) {
-		foreach ( $context as $tag ) {
+	public function whitelist_layout_in_wp_kses_allowed_html( $tags ) {
+		foreach ( $tags as &$tag ) {
 			$tag['data-amp-fit-text'] = true;
 		}
-		return $context;
+		return $tags;
 	}
 
 	/**
@@ -42,25 +42,11 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'amp-runtime', 'underscore', 'wp-hooks' ),
+			array( 'amp-runtime', 'underscore', 'wp-hooks', 'wp-i18n' ),
 			AMP__VERSION,
 			true
 		);
 
-		$dynamic_blocks      = array();
-		$block_type_registry = WP_Block_Type_Registry::get_instance();
-		$block_types         = $block_type_registry->get_all_registered();
-
-		foreach ( $block_types as $block_type ) {
-			if ( $block_type->is_dynamic() ) {
-				$dynamic_blocks[] = $block_type->name;
-			}
-		}
-
-		wp_add_inline_script( 'amp-editor-blocks', sprintf( 'ampEditorBlocks.boot( %s );',
-			wp_json_encode( array(
-				'dynamicBlocks' => $dynamic_blocks,
-			) )
-		) );
+		wp_add_inline_script( 'amp-editor-blocks', sprintf( 'ampEditorBlocks.boot();' ) );
 	}
 }

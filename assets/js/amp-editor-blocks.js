@@ -2,7 +2,11 @@
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0 ] } ] */
 
 var ampEditorBlocks = ( function() {
-	var component = {
+	var component, __;
+
+	__ = wp.i18n.__;
+
+	component = {
 
 		/**
 		 * Holds data.
@@ -14,7 +18,8 @@ var ampEditorBlocks = ( function() {
 				'core/code',
 				'core/quote',
 				'core/subhead'
-			]
+			],
+			ampSettingsLabel: __( 'AMP Settings' )
 		}
 	};
 
@@ -23,9 +28,7 @@ var ampEditorBlocks = ( function() {
 	 *
 	 * @param {Array} data Data.
 	 */
-	component.boot = function boot( data ) {
-		_.extend( component.data, data );
-
+	component.boot = function boot() {
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
@@ -111,7 +114,7 @@ var ampEditorBlocks = ( function() {
 		if ( ampFitText ) {
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: 'AMP Settings' },
+					el( PanelBody, { title: component.data.ampSettingsLabel },
 						el( ToggleControl, {
 							label: label,
 							checked: ampFitText,
@@ -120,21 +123,21 @@ var ampEditorBlocks = ( function() {
 							}
 						} ),
 						el( TextControl, {
-							label: 'Height (px)',
+							label: __( 'Height (px)' ),
 							value: height,
 							onChange: function( nextHeight ) {
 								props.setAttributes( { height: nextHeight } );
 							}
 						} ),
 						el( TextControl, {
-							label: 'Min font (px)',
+							label: __( 'Min font (px)' ),
 							value: minFont,
 							onChange: function( nextMinFont ) {
 								props.setAttributes( { minFont: nextMinFont } );
 							}
 						} ),
 						el( TextControl, {
-							label: 'Max font (px)',
+							label: __( 'Max font (px)' ),
 							value: maxFont,
 							onChange: function( nextMaxFont ) {
 								props.setAttributes( { maxFont: nextMaxFont } );
@@ -147,7 +150,7 @@ var ampEditorBlocks = ( function() {
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: 'AMP Settings' },
+				el( PanelBody, { title: component.data.ampSettingsLabel },
 					el( ToggleControl, {
 						label: label,
 						checked: ampFitText,
