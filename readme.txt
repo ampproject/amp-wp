@@ -45,7 +45,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 == Changelog ==
 
 = 1.0 (unreleased) =
-- ...
+- Prefer the Custom Logo as the schema.org publisher icon, over the Site Icon. See [#1144](https://github.com/Automattic/amp-wp/pull/1144). Props kienstra, westonruter.
 
 = 0.7.1 (Unreleased) =
 - Limit showing AMP validation warnings to when `amp` theme support is present. See [#1132](https://github.com/Automattic/amp-wp/pull/1132). Props westonruter.
