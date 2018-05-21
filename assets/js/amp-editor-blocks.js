@@ -366,42 +366,6 @@ var ampEditorBlocks = ( function() {
 
 		if ( ampFitText ) {
 			return isSelected && (
-					el( InspectorControls, { key: 'inspector' },
-						el( PanelBody, { title: component.data.ampSettingsLabel },
-							el( ToggleControl, {
-								label: label,
-								checked: ampFitText,
-								onChange: function() {
-									props.setAttributes( { ampFitText: ! ampFitText } );
-								}
-							} ),
-							el( TextControl, {
-								label: __( 'Height (px)' ),
-								value: height,
-								onChange: function( nextHeight ) {
-									props.setAttributes( { height: nextHeight } );
-								}
-							} ),
-							el( TextControl, {
-								label: __( 'Min font (px)' ),
-								value: minFont,
-								onChange: function( nextMinFont ) {
-									props.setAttributes( { minFont: nextMinFont } );
-								}
-							} ),
-							el( TextControl, {
-								label: __( 'Max font (px)' ),
-								value: maxFont,
-								onChange: function( nextMaxFont ) {
-									props.setAttributes( { maxFont: nextMaxFont } );
-								}
-							} )
-						)
-					)
-				);
-		}
-
-		return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: component.data.ampSettingsLabel },
 						el( ToggleControl, {
@@ -410,10 +374,46 @@ var ampEditorBlocks = ( function() {
 							onChange: function() {
 								props.setAttributes( { ampFitText: ! ampFitText } );
 							}
+						} ),
+						el( TextControl, {
+							label: __( 'Height (px)' ),
+							value: height,
+							onChange: function( nextHeight ) {
+								props.setAttributes( { height: nextHeight } );
+							}
+						} ),
+						el( TextControl, {
+							label: __( 'Min font (px)' ),
+							value: minFont,
+							onChange: function( nextMinFont ) {
+								props.setAttributes( { minFont: nextMinFont } );
+							}
+						} ),
+						el( TextControl, {
+							label: __( 'Max font (px)' ),
+							value: maxFont,
+							onChange: function( nextMaxFont ) {
+								props.setAttributes( { maxFont: nextMaxFont } );
+							}
 						} )
 					)
 				)
 			);
+		}
+
+		return isSelected && (
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: component.data.ampSettingsLabel },
+					el( ToggleControl, {
+						label: label,
+						checked: ampFitText,
+						onChange: function() {
+							props.setAttributes( { ampFitText: ! ampFitText } );
+						}
+					} )
+				)
+			)
+		);
 	};
 
 	/**
@@ -463,9 +463,9 @@ var ampEditorBlocks = ( function() {
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
 		var text,
 			fitTextProps = {
-			layout: 'fixed-height',
-			children: element
-		};
+				layout: 'fixed-height',
+				children: element
+			};
 
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
 			if ( attributes.ampCarousel ) {
