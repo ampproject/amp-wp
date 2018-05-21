@@ -48,11 +48,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$node           = $nodes->item( $i );
 			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-			$old_attributes = $this->set_data_amp_attributes( $old_attributes, $amp_data );
+			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
-			$new_attributes = $this->set_attachment_layout_attributes( $node, $new_attributes, $layout );
+			$new_attributes = $this->filter_video_dimensions( $new_attributes );
+			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
 			$new_attributes = $this->set_layout( $new_attributes );
 			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
 				$new_attributes['layout'] = 'responsive';
@@ -106,6 +107,40 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$this->did_convert_elements = true;
 
 		}
+	}
+
+	/**
+	 * Filter video dimensions, try to get width and height from original file if missing.
+	 *
+	 * @param array $new_attributes Attributes.
+	 * @return array Modified attributes.
+	 */
+	protected function filter_video_dimensions( $new_attributes ) {
+		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
+
+			// Get the width and height from the file.
+			$ext  = pathinfo( $new_attributes['src'], PATHINFO_EXTENSION );
+			$name = wp_basename( $new_attributes['src'], ".$ext" );
+			$args = array(
+				'name'        => $name,
+				'post_type'   => 'attachment',
+				'post_status' => 'inherit',
+				'numberposts' => 1,
+			);
+
+			$attachment = get_posts( $args );
+
+			if ( ! empty( $attachment ) ) {
+				$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
+				if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) ) {
+					$new_attributes['width'] = $meta_data['width'];
+				}
+				if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
+					$new_attributes['height'] = $meta_data['height'];
+				}
+			}
+		}
+		return $new_attributes;
 	}
 
 	/**

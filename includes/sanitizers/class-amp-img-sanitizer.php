@@ -229,11 +229,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$amp_data       = $this->get_data_amp_attributes( $node );
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-		$old_attributes = $this->set_data_amp_attributes( $old_attributes, $amp_data );
+		$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
 		$new_attributes = $this->filter_attributes( $old_attributes );
 		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
-		$new_attributes = $this->set_attachment_layout_attributes( $node, $new_attributes, $layout );
+		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
