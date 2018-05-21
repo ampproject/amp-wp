@@ -685,7 +685,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Style_Sanitizer::normalize_urls()
 	 */
-	public function test_normalizeurls() {
+	public function test_normalize_urls() {
 		$this->assertTrue( true );
 	}
 

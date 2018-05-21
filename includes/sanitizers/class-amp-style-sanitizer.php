@@ -875,9 +875,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $urls as $url ) {
 			$url_string = preg_replace( '/\s+/', '', $url->getURL()->getString() );
-			if ( 'data:' === substr( $url_string, 0, 5 ) ) {
-				continue;
-			}
+
 			$parsed_url = wp_parse_url( $url_string );
 			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || '/' === substr( $parsed_url['path'], 0, 1 ) ) {
 				continue;
