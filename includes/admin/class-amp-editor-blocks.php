@@ -50,20 +50,6 @@ class AMP_Editor_Blocks {
 			true
 		);
 
-		$dynamic_blocks      = array();
-		$block_type_registry = WP_Block_Type_Registry::get_instance();
-		$block_types         = $block_type_registry->get_all_registered();
-
-		foreach ( $block_types as $block_type ) {
-			if ( $block_type->is_dynamic() ) {
-				$dynamic_blocks[] = $block_type->name;
-			}
-		}
-
-		wp_add_inline_script( 'amp-editor-blocks', sprintf( 'ampEditorBlocks.boot( %s );',
-			wp_json_encode( array(
-				'dynamicBlocks' => $dynamic_blocks,
-			) )
-		) );
+		wp_add_inline_script( 'amp-editor-blocks', sprintf( 'ampEditorBlocks.boot();' ) );
 	}
 }

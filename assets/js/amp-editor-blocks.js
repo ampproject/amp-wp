@@ -12,7 +12,6 @@ var ampEditorBlocks = ( function() {
 		 * Holds data.
 		 */
 		data: {
-			dynamicBlocks: [],
 			ampLayoutOptions: [
 				{
 					value: 'nodisplay',
@@ -92,13 +91,9 @@ var ampEditorBlocks = ( function() {
 	};
 
 	/**
-	 * Set data, add filters.
-	 *
-	 * @param {Array} data Data.
+	 * Add filters.
 	 */
-	component.boot = function boot( data ) {
-		_.extend( component.data, data );
-
+	component.boot = function boot() {
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
@@ -472,7 +467,7 @@ var ampEditorBlocks = ( function() {
 	 * Adds ampCarousel attribute for displaying the output as amp-carousel.
 	 *
 	 * @param {Object} props Props.
-	 * @return {*} Inspector controls.
+	 * @return {Object} Inspector controls.
 	 */
 	component.setUpGalleryInpsectorControls = function setUpGalleryInpsectorControls( props ) {
 		var isSelected = props.isSelected,
@@ -495,7 +490,7 @@ var ampEditorBlocks = ( function() {
 	 * Adds ampCarousel attribute in case of gallery shortcode.
 	 *
 	 * @param {Object} props Props.
-	 * @return {*} Inspector controls.
+	 * @return {Object} Inspector controls.
 	 */
 	component.setUpShortcodeInspectorControls = function setUpShortcodeInspectorControls( props ) {
 		var isSelected = props.isSelected,
@@ -523,7 +518,7 @@ var ampEditorBlocks = ( function() {
 	 * @param {Object} element Element.
 	 * @param {string} blockType Block type.
 	 * @param {Object} attributes Attributes.
-	 * @return {*} Output element.
+	 * @return {Object} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
 		var text;
