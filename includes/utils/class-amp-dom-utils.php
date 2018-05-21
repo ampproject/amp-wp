@@ -207,7 +207,7 @@ class AMP_DOM_Utils {
 		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_prefix();
 
 		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
-		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*"|\'[^\']*\'|[^\'"\s]+))?#';
+		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
 
 		/**
 		 * Replace callback.
@@ -240,9 +240,18 @@ class AMP_DOM_Utils {
 			return '<' . $tag_matches['name'] . $new_attrs . '>';
 		};
 
+		// Match all start tags that contain a binding attribute.
+		$pattern   = join( '', array(
+			'#<',
+			'(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
+			'(?P<attrs>\s',                            // Attributes.
+			'(?:[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+', // Non-binding attributes tokens.
+			'\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
+			'(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
+			')>#s',
+		) );
 		$converted = preg_replace_callback(
-			// Match all start tags that probably contain a binding attribute.
-			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
+			$pattern,
 			$replace_callback,
 			$html
 		);

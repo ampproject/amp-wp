@@ -296,15 +296,12 @@ class AMP_Validation_Utils {
 		self::$debug          = $args['debug'];
 		self::$locate_sources = $args['locate_sources'];
 
-		if ( current_theme_supports( 'amp' ) ) {
-			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
-			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
-			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
-			add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
-			add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
-			add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
-		}
-
+		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
+		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
+		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
@@ -761,27 +758,23 @@ class AMP_Validation_Utils {
 			return;
 		}
 
-		$amp_url           = null;
-		$invalid_url_post  = null;
-		$validation_errors = array();
-		if ( is_post_type_viewable( $post->post_type ) ) {
-			$amp_url = amp_get_permalink( $post->ID );
+		// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
+		if ( ! is_post_type_viewable( $post->post_type ) ) {
+			return;
 		}
 
-		// Incorporate frontend validation status if there is a known URL for the post.
+		$amp_url          = amp_get_permalink( $post->ID );
 		$invalid_url_post = self::get_invalid_url_post( $amp_url );
-		if ( $invalid_url_post ) {
-			$validation_errors = wp_list_pluck(
-				self::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_ignored' => true ) ),
-				'data'
-			);
-		} elseif ( post_type_supports( $post->post_type, 'editor' ) ) {
-
-			// Validate post content outside frontend context.
-			self::process_markup( $post->post_content );
-			$validation_errors = wp_list_pluck( self::$validation_results, 'error' );
-			self::reset_validation_results();
+		if ( ! $invalid_url_post ) {
+			return;
 		}
+
+		$validation_errors = wp_list_pluck(
+			self::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_ignored' => true ) ),
+			'data'
+		);
+
+		// No validation errors so abort.
 		if ( empty( $validation_errors ) ) {
 			return;
 		}
@@ -789,26 +782,18 @@ class AMP_Validation_Utils {
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
 		esc_html_e( 'There is content which fails AMP validation. Non-ignored validation errors prevent AMP from being served.', 'amp' );
-		if ( $invalid_url_post || $amp_url ) {
-			if ( $invalid_url_post ) {
-				echo sprintf(
-					' <a href="%s" target="_blank">%s</a>',
-					esc_url( get_edit_post_link( $invalid_url_post ) ),
-					esc_html__( 'Review issues', 'amp' )
-				);
-			}
-			if ( $amp_url ) {
-				if ( $invalid_url_post ) {
-					echo ' | ';
-				}
-				echo sprintf(
-					' <a href="%s" aria-label="%s" target="_blank">%s</a>',
-					esc_url( self::get_debug_url( $amp_url ) ),
-					esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
-					esc_html__( 'Debug', 'amp' )
-				);
-			}
-		}
+		echo sprintf(
+			' <a href="%s" target="_blank">%s</a>',
+			esc_url( get_edit_post_link( $invalid_url_post ) ),
+			esc_html__( 'Review issues', 'amp' )
+		);
+		echo ' | ';
+		echo sprintf(
+			' <a href="%s" aria-label="%s" target="_blank">%s</a>',
+			esc_url( self::get_debug_url( $amp_url ) ),
+			esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
+			esc_html__( 'Debug', 'amp' )
+		);
 		echo '</p>';
 
 		$results      = self::summarize_validation_errors( array_unique( $validation_errors, SORT_REGULAR ) );
@@ -2147,7 +2132,7 @@ class AMP_Validation_Utils {
 
 		// Filter amp_validation_error term query by term group when requested.
 		add_filter( 'get_terms_defaults', function( $args, $taxonomies ) {
-			if ( array( self::TAXONOMY_SLUG ) === $taxonomies ) {
+			if ( array( AMP_Validation_Utils::TAXONOMY_SLUG ) === $taxonomies ) {
 				$args['orderby'] = 'term_id';
 				$args['order']   = 'DESC';
 			}
@@ -2603,7 +2588,7 @@ class AMP_Validation_Utils {
 				);
 				printf(
 					'<div class="notice notice-warning is-dismissible"><p>%s %s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html( _n( 'Warning: The following plugin may be incompatible with AMP:', 'Warning: The following plugins may be incompatible with AMP: ', count( $invalid_plugins ), 'amp' ) ),
+					esc_html( _n( 'Warning: The following plugin may be incompatible with AMP:', 'Warning: The following plugins may be incompatible with AMP:', count( $invalid_plugins ), 'amp' ) ),
 					implode( ', ', $reported_plugins ),
 					$more_details_link,
 					esc_html__( 'Dismiss this notice.', 'amp' )

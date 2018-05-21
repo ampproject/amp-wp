@@ -763,18 +763,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		global $post;
 		$post          = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$comment       = $this->factory()->comment->create_and_get();
-		$link          = get_comment_link( $comment );
+		$link          = sprintf( '<a href="%s">', get_comment_link( $comment ) );
 		$respond_id    = '5234';
 		$reply_text    = 'Reply';
 		$reply_to_text = 'Reply to';
-		$args          = compact( 'respond_id', 'reply_text', 'reply_to_text' );
+		$before        = '<div class="reply">';
+		$after         = '</div>';
+		$args          = compact( 'respond_id', 'reply_text', 'reply_to_text', 'before', 'after' );
 		$comment       = $this->factory()->comment->create_and_get();
+
 		update_option( 'comment_registration', true );
 		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
-		$this->assertEquals( $link, $filtered_link );
+		$this->assertEquals( $before . $link . $after, $filtered_link );
 		update_option( 'comment_registration', false );
 
 		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
+		$this->assertStringStartsWith( $before, $filtered_link );
+		$this->assertStringEndsWith( $after, $filtered_link );
 		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $filtered_link );
 		$this->assertContains( $comment->comment_author, $filtered_link );
 		$this->assertContains( $comment->comment_ID, $filtered_link );
@@ -1032,7 +1037,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<meta charset="' . get_bloginfo( 'charset' ) . '">', $sanitized_html );
 		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
 		$this->assertContains( '<style amp-boilerplate>', $sanitized_html );
-		$this->assertRegExp( '#<style amp-custom>.*?body{background:black;}.*?</style>#s', $sanitized_html );
+		$this->assertRegExp( '#<style amp-custom>.*?body{background:black}.*?</style>#s', $sanitized_html );
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-latest.js" async custom-element="amp-list"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript

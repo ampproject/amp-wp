@@ -160,11 +160,10 @@ abstract class AMP_Base_Sanitizer {
 	 * Get HTML body as DOMElement from DOMDocument received by the constructor.
 	 *
 	 * @deprecated Just reference $root_element instead.
-	 * @return DOMElement The body or html element.
+	 * @return DOMElement The body element.
 	 */
 	protected function get_body_node() {
-		_deprecated_function( __METHOD__, 'AMP_Base_Sanitizer::$root_element', '0.7' );
-		return $this->root_element;
+		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
 	}
 
 	/**
@@ -248,7 +247,7 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function add_or_append_attribute( &$attributes, $key, $value, $separator = ' ' ) {
 		if ( isset( $attributes[ $key ] ) ) {
-			$attributes[ $key ] .= $separator . $value;
+			$attributes[ $key ] = trim( $attributes[ $key ] . $separator . $value );
 		} else {
 			$attributes[ $key ] = $value;
 		}

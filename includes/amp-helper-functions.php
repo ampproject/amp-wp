@@ -447,6 +447,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Reddit_Embed_Handler'      => array(),
 			'AMP_Tumblr_Embed_Handler'      => array(),
 			'AMP_Gallery_Embed_Handler'     => array(),
+			'AMP_Gfycat_Embed_Handler'      => array(),
 			'WPCOM_AMP_Polldaddy_Embed'     => array(),
 		),
 		$post
@@ -579,23 +580,66 @@ function amp_get_schemaorg_metadata() {
 		),
 	);
 
+	/*
+	 * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
+	 * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
+	 * would not be acceptable, even though it fits in the 600x60px rectangle."
+	 * See <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
+	 */
+	$max_logo_width  = 600;
+	$max_logo_height = 60;
+	$custom_logo_id  = get_theme_mod( 'custom_logo' );
+	$schema_img      = array();
+
+	if ( has_custom_logo() && $custom_logo_id ) {
+		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, array( $max_logo_width, $max_logo_height ), false );
+		if ( $custom_logo_img ) {
+			// @todo Warning: The width/height returned may not actually be physically the $max_logo_width and $max_logo_height for the image returned.
+			$schema_img = array(
+				'url'    => $custom_logo_img[0],
+				'width'  => $custom_logo_img[1],
+				'height' => $custom_logo_img[2],
+			);
+		}
+	}
+
+	// Try Site Icon, though it is not ideal because "The logo should be a rectangle, not a square." per <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
+	if ( empty( $schema_img['url'] ) ) {
+		/*
+		 * Note that AMP_Post_Template::SITE_ICON_SIZE is used and not $max_logo_height because 32px is the largest
+		 * size that is defined in \WP_Site_Icon::$site_icon_sizes which is less than 60px. It may be a good idea
+		 * to add a site_icon_image_sizes filter which appends 60 to the list of sizes, but this will only help
+		 * when adding a new site icon and it would be irrelevant when a custom logo is present, per above.
+		 */
+		$schema_img = array(
+			'url'    => get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ),
+			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
+			'height' => AMP_Post_Template::SITE_ICON_SIZE,
+		);
+	}
+
 	/**
-	 * Filters the site icon used in AMP responses.
+	 * Filters the publisher logo URL in the schema.org data.
 	 *
-	 * In general the `get_site_icon_url` filter should be used instead.
+	 * Previously, this only filtered the Site Icon, as that was the only possible schema.org publisher logo.
+	 * But the Custom Logo is now the preferred publisher logo, if it exists and its dimensions aren't too big.
 	 *
 	 * @since 0.3
-	 * @todo Why is the size set to 32px?
 	 *
-	 * @param string $site_icon_url
+	 * @param string $schema_img_url URL of the publisher logo, either the Custom Logo or the Site Icon.
 	 */
-	$site_icon_url = apply_filters( 'amp_site_icon_url', get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ) );
-	if ( $site_icon_url ) {
-		$metadata['publisher']['logo'] = array(
-			'@type'  => 'ImageObject',
-			'url'    => $site_icon_url,
-			'height' => AMP_Post_Template::SITE_ICON_SIZE,
-			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
+	$filtered_schema_img_url = apply_filters( 'amp_site_icon_url', $schema_img['url'] );
+	if ( $filtered_schema_img_url !== $schema_img['url'] ) {
+		$schema_img['url'] = $filtered_schema_img_url;
+		unset( $schema_img['width'], $schema_img['height'] ); // Clear width/height since now unknown, and not required.
+	}
+
+	if ( ! empty( $schema_img['url'] ) ) {
+		$metadata['publisher']['logo'] = array_merge(
+			array(
+				'@type' => 'ImageObject',
+			),
+			$schema_img
 		);
 	}
 

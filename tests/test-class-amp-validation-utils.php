@@ -386,6 +386,9 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Utils::print_edit_form_validation_status()
 	 */
 	public function test_print_edit_form_validation_status() {
+		add_theme_support( 'amp' );
+
+		AMP_Validation_Utils::register_post_type();
 		$this->set_capability();
 		$post = $this->factory()->post->create_and_get();
 		ob_start();
@@ -394,24 +397,29 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
-		$post->post_content = $this->disallowed_tag;
+		$this->create_custom_post(
+			array(
+				array(
+					'code'            => AMP_Validation_Utils::INVALID_ELEMENT_CODE,
+					'node_name'       => $this->disallowed_tag_name,
+					'parent_name'     => 'div',
+					'node_attributes' => array(),
+					'sources'         => array(
+						array(
+							'type' => 'plugin',
+							'name' => $this->plugin_name,
+						),
+					),
+				),
+			),
+			amp_get_permalink( $post->ID )
+		);
 		ob_start();
 		AMP_Validation_Utils::print_edit_form_validation_status( $post );
 		$output = ob_get_clean();
 
 		$this->assertContains( 'notice notice-warning', $output );
 		$this->assertContains( '<code>script</code>', $output );
-		AMP_Validation_Utils::reset_validation_results();
-
-		$youtube            = 'https://www.youtube.com/watch?v=GGS-tKTXw4Y';
-		$post->post_content = $youtube;
-		ob_start();
-		AMP_Validation_Utils::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
-
-		// The YouTube embed handler should convert the URL into a valid AMP element.
-		$this->assertNotContains( 'notice notice-warning', $output );
-		AMP_Validation_Utils::reset_validation_results();
 	}
 
 	/**
@@ -1524,7 +1532,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		) );
 
 		// Create an error custom post for the ID, so this will return the errors in the field.
-		$this->create_custom_post( amp_get_permalink( $id ) );
+		$this->create_custom_post( array(), amp_get_permalink( $id ) );
 
 		// Make sure capability check is honored.
 		$this->assertNull( AMP_Validation_Utils::get_amp_validity_rest_field(
@@ -1560,22 +1568,18 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Creates and inserts a custom post.
 	 *
-	 * @param string|null $url The URL where there are errors, or null.
+	 * @param array  $errors Validation errors to populate.
+	 * @param string $url    URL that the errors occur on. Defaults to the home page.
 	 * @return int|WP_Error $error_post The ID of new custom post, or an error.
 	 */
-	public function create_custom_post( $url = null ) {
-		$url            = isset( $url ) ? $url : home_url( '/' );
-		$content        = wp_json_encode( $this->get_mock_errors() );
-		$encoded_errors = md5( $content );
-		$post_args      = array(
-			'post_type'    => AMP_Validation_Utils::POST_TYPE_SLUG,
-			'post_name'    => $encoded_errors,
-			'post_content' => $content,
-			'post_status'  => 'publish',
-		);
-		$error_post     = wp_insert_post( wp_slash( $post_args ) );
-		update_post_meta( $error_post, AMP_Validation_Utils::AMP_URL_META, $url );
-		return $error_post;
+	public function create_custom_post( $errors = null, $url = null ) {
+		if ( ! $errors ) {
+			$errors = $this->get_mock_errors();
+		}
+		if ( ! $url ) {
+			$url = home_url( '/' );
+		}
+		return AMP_Validation_Utils::store_validation_errors( $errors, $url );
 	}
 
 	/**
