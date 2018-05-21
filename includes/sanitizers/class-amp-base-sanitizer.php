@@ -221,7 +221,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string $class
 	 *      @type string $layout
 	 * }
-	 * @return string[]
+	 * @return array Attributes.
 	 */
 	public function set_layout( $attributes ) {
 		if ( isset( $attributes['layout'] ) && ( 'fill' === $attributes['layout'] || 'flex-item' !== $attributes['layout'] ) ) {
@@ -387,9 +387,9 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param array $attributes Array of attributes.
 	 * @param array $amp_data Array of AMP attributes.
-	 * @return array
+	 * @return array Updated attributes.
 	 */
-	public function set_data_amp_attributes( $attributes, $amp_data ) {
+	public function filter_data_amp_attributes( $attributes, $amp_data ) {
 		if ( isset( $amp_data['layout'] ) ) {
 			$attributes['data-amp-layout'] = $amp_data['layout'];
 		}
@@ -406,37 +406,6 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sets width and height by src for attributes.
-	 *
-	 * @param string $src Src.
-	 * @param array  $attributes Array of attributes.
-	 */
-	public function set_attachment_width_and_height_by_src( $src, &$attributes ) {
-
-		// Get the width and height from the file.
-		$ext  = pathinfo( $src, PATHINFO_EXTENSION );
-		$name = wp_basename( $src, ".$ext" );
-		$args = array(
-			'name'        => $name,
-			'post_type'   => 'attachment',
-			'post_status' => 'inherit',
-			'numberposts' => 1,
-		);
-
-		$attachment = get_posts( $args );
-
-		if ( ! empty( $attachment ) ) {
-			$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
-			if ( ! is_numeric( $attributes['width'] ) && is_numeric( $meta_data['width'] ) ) {
-				$attributes['width'] = $meta_data['width'];
-			}
-			if ( ! is_numeric( $attributes['height'] ) && is_numeric( $meta_data['height'] ) ) {
-				$attributes['height'] = $meta_data['height'];
-			}
-		}
-	}
-
-	/**
 	 * Set attributes to node's parent element according to layout.
 	 *
 	 * @param DOMNode $node Node.
@@ -444,12 +413,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @param string  $layout Layout.
 	 * @return array New attributes.
 	 */
-	public function set_attachment_layout_attributes( $node, $new_attributes, $layout ) {
-
-		// If either height or width is missing, try to get these from original file.
-		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
-			$this->set_attachment_width_and_height_by_src( $new_attributes['src'], $new_attributes );
-		}
+	public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {
 
 		// The width has to be unset / auto in case of fixed-height.
 		if ( 'fixed-height' === $layout ) {

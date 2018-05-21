@@ -36,7 +36,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			$node           = $nodes->item( $i );
 			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-			$old_attributes = $this->set_data_amp_attributes( $old_attributes, $amp_data );
+			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
 

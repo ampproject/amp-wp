@@ -24,17 +24,17 @@ class AMP_Editor_Blocks {
 	/**
 	 * Whitelist used data-amp-* attributes.
 	 *
-	 * @param array $context Array of contexts.
+	 * @param array $tags Array of allowed post tags.
 	 * @return mixed Modified array.
 	 */
-	public function whitelist_block_atts_in_wp_kses_allowed_html( $context ) {
-		foreach ( $context as $tag ) {
+	public function whitelist_block_atts_in_wp_kses_allowed_html( $tags ) {
+		foreach ( $tags as &$tag ) {
 			$tag['data-amp-layout']              = true;
 			$tag['data-amp-noloading']           = true;
 			$tag['data-amp-lightbox']            = true;
 			$tag['data-close-button-aria-label'] = true;
 		}
-		return $context;
+		return $tags;
 	}
 
 	/**
@@ -45,7 +45,7 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'amp-runtime', 'underscore', 'wp-hooks', 'wp-components' ),
+			array( 'amp-runtime', 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);

@@ -171,19 +171,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$class .= ' amp-wp-unknown-size';
 				}
 
-				if (
-					! is_numeric( $node->getAttribute( 'width' ) ) ||
-					! is_numeric( $node->getAttribute( 'height' ) )
-				) {
-					$attributes = array(
-						'width'  => $node->getAttribute( 'width' ),
-						'height' => $node->getAttribute( 'height' ),
-					);
-					$this->set_attachment_width_and_height_by_src( $node->getAttribute( 'src' ), $attributes );
-					$node->setAttribute( 'width', $attributes['width'] );
-					$node->setAttribute( 'height', $attributes['height'] );
-				}
-
 				$width  = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
 				$height = self::FALLBACK_HEIGHT;
 				if ( isset( $dimensions['width'] ) ) {
@@ -244,11 +231,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$amp_data       = $this->get_data_amp_attributes( $node );
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-		$old_attributes = $this->set_data_amp_attributes( $old_attributes, $amp_data );
+		$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
 		$new_attributes = $this->filter_attributes( $old_attributes );
 		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
-		$new_attributes = $this->set_attachment_layout_attributes( $node, $new_attributes, $layout );
+		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
 
 		if ( isset( $old_attributes['data-amp-lightbox'] ) ) {
 			$this->maybe_add_amp_image_lightbox_node();

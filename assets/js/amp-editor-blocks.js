@@ -1,10 +1,12 @@
 /* exported ampEditorBlocks */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0 ] } ] */
 
-var __ = wp.i18n.__;
-
 var ampEditorBlocks = ( function() {
-	var component = {
+	var component, __;
+
+	__ = wp.i18n.__;
+
+	component = {
 
 		/**
 		 * Holds data.
@@ -12,14 +14,71 @@ var ampEditorBlocks = ( function() {
 		data: {
 			dynamicBlocks: [],
 			ampLayoutOptions: [
-				{ value: 'nodisplay', label: __( 'No Display' ) },
-				{ value: 'fixed', label: __( 'Fixed' ) }, // Not supported by amp-audio and amp-pixel.
-				{ value: 'responsive', label: __( 'Responsive' ) }, // To ensure your AMP element displays, you must specify a width and height for the containing element.
-				{ value: 'fixed-height', label: __( 'Fixed height' ) },
-				{ value: 'fill', label: __( 'Fill' ) },
-				{ value: 'container', label: __( 'Container' ) }, // Not supported by img and video.
-				{ value: 'flex-item', label: __( 'Flex Item' ) },
-				{ value: 'intrinsic', label: __( 'Intrinsic' ) } // Not supported by video.
+				{
+					value: 'nodisplay',
+					label: __( 'No Display' ),
+					notAvailable: [
+						'core-embed/vimeo',
+						'core-embed/dailymotion',
+						'core-embed/hulu',
+						'core-embed/reddit',
+						'core-embed/soundcloud'
+					]
+				},
+				{
+					// Not supported by amp-audio and amp-pixel.
+					value: 'fixed',
+					label: __( 'Fixed' ),
+					notAvailable: [
+						'core-embed/soundcloud'
+					]
+				},
+				{
+					// To ensure your AMP element displays, you must specify a width and height for the containing element.
+					value: 'responsive',
+					label: __( 'Responsive' ),
+					notAvailable: [
+						'core/audio',
+						'core-embed/soundcloud'
+					]
+				},
+				{
+					value: 'fixed-height',
+					label: __( 'Fixed height' ),
+					notAvailable: []
+				},
+				{
+					value: 'fill',
+					label: __( 'Fill' ),
+					notAvailable: [
+						'core/audio',
+						'core-embed/soundcloud'
+					]
+				},
+				{
+					value: 'flex-item',
+					label: __( 'Flex Item' ),
+					notAvailable: [
+						'core/audio',
+						'core-embed/soundcloud'
+					]
+				},
+				{
+					// Not supported by video.
+					value: 'intrinsic',
+					label: __( 'Intrinsic' ),
+					notAvailable: [
+						'core/audio',
+						'core-embed/youtube',
+						'core-embed/facebook',
+						'core-embed/instagram',
+						'core-embed/vimeo',
+						'core-embed/dailymotion',
+						'core-embed/hulu',
+						'core-embed/reddit',
+						'core-embed/soundcloud'
+					]
+				}
 			],
 			defaultWidth: 608, // Max-width in the editor.
 			defaultHeight: 400,
@@ -47,6 +106,17 @@ var ampEditorBlocks = ( function() {
 	};
 
 	/**
+	 * Check if layout is available for the block.
+	 *
+	 * @param {string} blockName Block name.
+	 * @param {Object} option Layout option object.
+	 * @return {boolean} If is available.
+	 */
+	component.isLayoutAvailable = function isLayoutAvailable( blockName, option ) {
+		return -1 === option.notAvailable.indexOf( blockName );
+	};
+
+	/**
 	 * Get layout options depending on the block.
 	 *
 	 * @param {string} blockName Block name.
@@ -54,44 +124,19 @@ var ampEditorBlocks = ( function() {
 	 */
 	component.getLayoutOptions = function getLayoutOptions( blockName ) {
 		var layoutOptions = [
-				{ value: '', label: 'None' }
-			],
-			embedBlocks = [
-				'core-embed/youtube',
-				'core-embed/facebook',
-				'core-embed/instagram'
-			];
+			{
+				value: '',
+				label: __( 'Default' )
+			}
+		];
 
 		_.each( component.data.ampLayoutOptions, function( option ) {
-			// Exclude options from layout that are not supported.
-			if ( 'core/image' === blockName || 'core/video' === blockName || 'core-embed/twitter' === blockName ) {
-				if ( 'container' === option.value ) {
-					return true;
-				}
-			} else if ( 'core/audio' === blockName ) {
-				if ( -1 !== [ 'responsive', 'fill', 'container', 'flex-item', 'intrinsic' ].indexOf( option.value ) ) {
-					return true;
-				}
-			} else if ( -1 !== embedBlocks.indexOf( blockName ) ) {
-				if ( 'container' === option.value || 'intrinsic' === option.value ) {
-					return true;
-				}
-			} else if (
-				'core-embed/vimeo' === blockName ||
-				'core-embed/dailymotion' === blockName ||
-				'core-embed/hulu' === blockName ||
-				'core-embed/reddit' === blockName
-			) {
-				if ( 'container' === option.value || 'intrinsic' === option.value || 'nodisplay' === option.value ) {
-					return true;
-				}
-			} else if ( 'core-embed/soundcloud' === blockName ) {
-				if ( 'fixed-height' !== option.value ) {
-					return true;
-				}
+			if ( component.isLayoutAvailable( blockName, option ) ) {
+				layoutOptions.push( {
+					value: option.value,
+					label: option.label
+				} );
 			}
-
-			layoutOptions.push( { value: option.value, label: option.label } );
 		} );
 
 		return layoutOptions;
@@ -103,7 +148,7 @@ var ampEditorBlocks = ( function() {
 	 * @param {Object} props Properties.
 	 * @param {string} blockType Block type.
 	 * @param {Object} attributes Attributes.
-	 * @return {*} Props.
+	 * @return {Object} Props.
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
 		var ampAttributes = {};
@@ -135,7 +180,7 @@ var ampEditorBlocks = ( function() {
 			ampAttributes[ 'data-amp-carousel' ] = attributes.ampLightbox;
 		}
 
-		return _.assign( ampAttributes, props );
+		return _.extend( ampAttributes, props );
 	};
 
 	/**
@@ -143,7 +188,7 @@ var ampEditorBlocks = ( function() {
 	 *
 	 * @param {Object} settings Settings.
 	 * @param {string} name Block name.
-	 * @return {*} Settings.
+	 * @return {Object} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
 		// AMP Carousel settings.
@@ -215,7 +260,7 @@ var ampEditorBlocks = ( function() {
 				if ( '' === inspectorControls ) {
 					// Return original.
 					return [
-						el( BlockEdit, _.assign( {
+						el( BlockEdit, _.extend( {
 							key: 'original'
 						}, props ) )
 					];
@@ -228,23 +273,17 @@ var ampEditorBlocks = ( function() {
 				inspectorControls = component.setUpInspectorControls( props );
 			}
 
-			if ( attributes.ampLayout ) {
-				if ( 'core/image' === name ) {
-					component.setImageBlockLayoutAttributes( props, attributes.ampLayout, inspectorControls );
-				} else if ( 'nodisplay' === attributes.ampLayout ) {
-					return [
-						inspectorControls
-					];
-				}
+			// Return just inspector controls in case of 'nodisplay'.
+			if ( ampLayout && 'nodisplay' === ampLayout ) {
+				return [
+					inspectorControls
+				];
 			}
 
-			// Return original.
 			return [
 				inspectorControls,
-				el( BlockEdit, _.assign( {
-					key: 'original',
-					'data-amp-layout': ampLayout,
-					style: 'height:100px;'
+				el( BlockEdit, _.extend( {
+					key: 'original'
 				}, props ) )
 			];
 		};
@@ -255,10 +294,8 @@ var ampEditorBlocks = ( function() {
 	 *
 	 * @param {Object} props Props.
 	 * @param {string} layout Layout.
-	 * @param {Object} inspectorControls Inspector controls.
-	 * @return {[*]} Void or block edit element.
 	 */
-	component.setImageBlockLayoutAttributes = function setImageBlockLayoutAttributes( props, layout, inspectorControls ) {
+	component.setImageBlockLayoutAttributes = function setImageBlockLayoutAttributes( props, layout ) {
 		var attributes = props.attributes;
 		switch ( layout ) {
 			case 'fixed-height':
@@ -279,11 +316,6 @@ var ampEditorBlocks = ( function() {
 					props.setAttributes( { width: component.data.defaultWidth } );
 				}
 				break;
-
-			case 'nodisplay':
-				return [
-					inspectorControls
-				];
 		}
 	};
 
@@ -310,6 +342,9 @@ var ampEditorBlocks = ( function() {
 			options: component.getLayoutOptions( name ),
 			onChange: function( value ) {
 				props.setAttributes( { ampLayout: value } );
+				if ( 'core/image' === props.name ) {
+					component.setImageBlockLayoutAttributes( props, value );
+				}
 			}
 		} );
 	};
@@ -396,7 +431,7 @@ var ampEditorBlocks = ( function() {
 	component.setUpInspectorControls = function setUpInspectorControls( props ) {
 		var isSelected = props.isSelected,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
@@ -418,7 +453,7 @@ var ampEditorBlocks = ( function() {
 	component.setUpImageInpsectorControls = function setUpImageInpsectorControls( props ) {
 		var isSelected = props.isSelected,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
@@ -442,7 +477,7 @@ var ampEditorBlocks = ( function() {
 	component.setUpGalleryInpsectorControls = function setUpGalleryInpsectorControls( props ) {
 		var isSelected = props.isSelected,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
@@ -465,7 +500,7 @@ var ampEditorBlocks = ( function() {
 	component.setUpShortcodeInspectorControls = function setUpShortcodeInspectorControls( props ) {
 		var isSelected = props.isSelected,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
 
 		if ( component.isGalleryShortcode( props.attributes ) ) {

@@ -273,9 +273,9 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests set_data_amp_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::set_data_amp_attributes()
+	 * @covers AMP_Base_Sanitizer::filter_data_amp_attributes()
 	 */
-	public function test_set_data_amp_attributes() {
+	public function test_filter_data_amp_attributes() {
 		$amp_data   = array(
 			'noloading' => true,
 			'invalid'   => 123,
@@ -284,7 +284,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'width' => 100,
 		);
 		$sanitizer  = new AMP_Test_Stub_Sanitizer( new DOMDocument(), array() );
-		$attributes = $sanitizer->set_data_amp_attributes( $attributes, $amp_data );
+		$attributes = $sanitizer->filter_data_amp_attributes( $attributes, $amp_data );
 
 		$expected = array(
 			'width'              => 100,
@@ -298,7 +298,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Base_Sanitizer::set_attachment_layout_attributes()
 	 */
-	public function test_set_attachment_layout_attributes() {
+	public function test_filter_attachment_layout_attributes() {
 		$sanitizer    = new AMP_Test_Stub_Sanitizer( new DOMDocument(), array() );
 		$tag          = 'figure';
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
@@ -310,7 +310,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'src' => '',
 		);
 
-		$attributes    = $sanitizer->set_attachment_layout_attributes( $amp_img, $attributes, $layout );
+		$attributes    = $sanitizer->filter_attachment_layout_attributes( $amp_img, $attributes, $layout );
 		$expected_atts = array(
 			'src'    => '',
 			'height' => 400,
