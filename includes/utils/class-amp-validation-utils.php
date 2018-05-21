@@ -1368,7 +1368,7 @@ class AMP_Validation_Utils {
 			// Keep track of which source enqueued the styles.
 			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
 				foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
-					AMP_Validation_Utils::$enqueued_style_sources[ $handle ][] = $callback['source'];
+					AMP_Validation_Utils::$enqueued_style_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
 				}
 			}
 
@@ -1383,7 +1383,7 @@ class AMP_Validation_Utils {
 					}
 
 					foreach ( $handles as $handle ) {
-						AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = $callback['source'];
+						AMP_Validation_Utils::$enqueued_script_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
 					}
 				}
 			}
