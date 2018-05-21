@@ -29,6 +29,7 @@ class AMP_Autoloader {
 	 * @var string[]
 	 */
 	private static $_classmap = array(
+		'AMP_Editor_Blocks'                           => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                           => 'includes/class-amp-theme-support',
 		'AMP_Response_Headers'                        => 'includes/class-amp-response-headers',
 		'AMP_Comment_Walker'                          => 'includes/class-amp-comment-walker',
@@ -71,6 +72,7 @@ class AMP_Autoloader {
 		'AMP_Audio_Sanitizer'                         => 'includes/sanitizers/class-amp-audio-sanitizer',
 		'AMP_Base_Sanitizer'                          => 'includes/sanitizers/class-amp-base-sanitizer',
 		'AMP_Blacklist_Sanitizer'                     => 'includes/sanitizers/class-amp-blacklist-sanitizer',
+		'AMP_Block_Sanitizer'                         => 'includes/sanitizers/class-amp-block-sanitizer',
 		'AMP_Iframe_Sanitizer'                        => 'includes/sanitizers/class-amp-iframe-sanitizer',
 		'AMP_Img_Sanitizer'                           => 'includes/sanitizers/class-amp-img-sanitizer',
 		'AMP_Comments_Sanitizer'                      => 'includes/sanitizers/class-amp-comments-sanitizer',
