@@ -12,7 +12,6 @@ var ampEditorBlocks = ( function() {
 		 * Holds data.
 		 */
 		data: {
-			dynamicBlocks: [],
 			ampLayoutOptions: [
 				{
 					value: 'nodisplay',
@@ -92,12 +91,8 @@ var ampEditorBlocks = ( function() {
 
 	/**
 	 * Set data, add filters.
-	 *
-	 * @param {Array} data Data.
 	 */
-	component.boot = function boot( data ) {
-		_.extend( component.data, data );
-
+	component.boot = function boot() {
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
