@@ -94,6 +94,7 @@ class AMP_Theme_Support {
 		}
 
 		self::$init_start_time = microtime( true );
+		AMP_Validation_Utils::init();
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();

@@ -218,15 +218,12 @@ class AMP_Validation_Utils {
 	 * @return void
 	 */
 	public static function init() {
-		if ( current_theme_supports( 'amp' ) ) {
-			add_action( 'init', array( __CLASS__, 'register_post_type' ) );
-			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
-			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
-			add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
-			add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
-			add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
-		}
-
+		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
+		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
+		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
 		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
@@ -578,57 +575,41 @@ class AMP_Validation_Utils {
 			return;
 		}
 
-		$url                    = null;
-		$validation_status_post = null;
-		$validation_errors      = array();
-
-		// Incorporate frontend validation status if there is a known URL for the post.
-		$existing_validation_errors = self::get_existing_validation_errors( $post );
-		if ( isset( $existing_validation_errors ) ) {
-			$validation_errors = $existing_validation_errors;
+		// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
+		if ( ! is_post_type_viewable( $post->post_type ) ) {
+			return;
 		}
 
-		// If no results from URL are available, validate post content outside frontend context.
-		if ( empty( $validation_errors ) && post_type_supports( $post->post_type, 'editor' ) ) {
-			self::process_markup( $post->post_content );
-			$validation_errors = array_merge(
-				$validation_errors,
-				self::$validation_errors
-			);
-			self::reset_validation_results();
+		$url                    = amp_get_permalink( $post->ID );
+		$validation_status_post = self::get_validation_status_post( $url );
 
-			// Make sure original post is restored after applying shortcodes which could change it.
-			$GLOBALS['post'] = $post; // WPCS: override ok.
-			setup_postdata( $post );
+		// No validation status exists yet, so there is nothing to show.
+		if ( ! $validation_status_post ) {
+			return;
 		}
 
-		if ( empty( $validation_errors ) ) {
+		$validation_errors = json_decode( $validation_status_post->post_content, true );
+
+		// No validation errors so abort.
+		if ( empty( $validation_errors ) || ! is_array( $validation_errors ) ) {
 			return;
 		}
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
 		esc_html_e( 'Warning: There is content which fails AMP validation; it will be stripped when served as AMP.', 'amp' );
-		if ( $validation_status_post || $url ) {
-			if ( $validation_status_post ) {
-				echo sprintf(
-					' <a href="%s" target="_blank">%s</a>',
-					esc_url( get_edit_post_link( $validation_status_post ) ),
-					esc_html__( 'Details', 'amp' )
-				);
-			}
-			if ( $url ) {
-				if ( $validation_status_post ) {
-					echo ' | ';
-				}
-				echo sprintf(
-					' <a href="%s" aria-label="%s" target="_blank">%s</a>',
-					esc_url( self::get_debug_url( $url ) ),
-					esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
-					esc_html__( 'Debug', 'amp' )
-				);
-			}
-		}
+		echo sprintf(
+			' <a href="%s" target="_blank">%s</a>',
+			esc_url( get_edit_post_link( $validation_status_post ) ),
+			esc_html__( 'Details', 'amp' )
+		);
+		echo ' | ';
+		echo sprintf(
+			' <a href="%s" aria-label="%s" target="_blank">%s</a>',
+			esc_url( self::get_debug_url( $url ) ),
+			esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
+			esc_html__( 'Debug', 'amp' )
+		);
 		echo '</p>';
 
 		$results      = self::summarize_validation_errors( array_unique( $validation_errors, SORT_REGULAR ) );

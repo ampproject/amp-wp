@@ -160,11 +160,10 @@ abstract class AMP_Base_Sanitizer {
 	 * Get HTML body as DOMElement from DOMDocument received by the constructor.
 	 *
 	 * @deprecated Just reference $root_element instead.
-	 * @return DOMElement The body or html element.
+	 * @return DOMElement The body element.
 	 */
 	protected function get_body_node() {
-		_deprecated_function( __METHOD__, 'AMP_Base_Sanitizer::$root_element', '0.7' );
-		return $this->root_element;
+		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
 	}
 
 	/**
@@ -213,9 +212,12 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type string $class
 	 *      @type string $layout
 	 * }
-	 * @return string[]
+	 * @return array Attributes.
 	 */
 	public function set_layout( $attributes ) {
+		if ( isset( $attributes['layout'] ) && ( 'fill' === $attributes['layout'] || 'flex-item' !== $attributes['layout'] ) ) {
+			return $attributes;
+		}
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
@@ -342,5 +344,83 @@ abstract class AMP_Base_Sanitizer {
 				$element->removeAttributeNode( $attribute );
 			}
 		}
+	}
+
+	/**
+	 * Get data-amp-* values from the parent node 'figure' added by editor block.
+	 *
+	 * @param DOMNode $node Base node.
+	 * @return array AMP data array.
+	 */
+	public function get_data_amp_attributes( $node ) {
+		$attributes = array();
+
+		// Editor blocks add 'figure' as the parent node for images. If this node has data-amp-layout then we should add this as the layout attribute.
+		$parent_node = $node->parentNode;
+		if ( 'figure' === $parent_node->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+			if ( isset( $parent_attributes['data-amp-layout'] ) ) {
+				$attributes['layout'] = $parent_attributes['data-amp-layout'];
+			}
+			if ( isset( $parent_attributes['data-amp-noloading'] ) && true === filter_var( $parent_attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
+				$attributes['noloading'] = $parent_attributes['data-amp-noloading'];
+			}
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Set AMP attributes.
+	 *
+	 * @param array $attributes Array of attributes.
+	 * @param array $amp_data Array of AMP attributes.
+	 * @return array Updated attributes.
+	 */
+	public function filter_data_amp_attributes( $attributes, $amp_data ) {
+		if ( isset( $amp_data['layout'] ) ) {
+			$attributes['data-amp-layout'] = $amp_data['layout'];
+		}
+		if ( isset( $amp_data['noloading'] ) ) {
+			$attributes['data-amp-noloading'] = '';
+		}
+		return $attributes;
+	}
+
+	/**
+	 * Set attributes to node's parent element according to layout.
+	 *
+	 * @param DOMNode $node Node.
+	 * @param array   $new_attributes Attributes array.
+	 * @param string  $layout Layout.
+	 * @return array New attributes.
+	 */
+	public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {
+
+		// The width has to be unset / auto in case of fixed-height.
+		if ( 'fixed-height' === $layout ) {
+			if ( ! isset( $new_attributes['height'] ) ) {
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+			$new_attributes['width'] = 'auto';
+			$node->parentNode->setAttribute( 'style', 'height: ' . $new_attributes['height'] . 'px; width: auto;' );
+
+			// The parent element should have width/height set and position set in case of 'fill'.
+		} elseif ( 'fill' === $layout ) {
+			if ( ! isset( $new_attributes['height'] ) ) {
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
+			unset( $new_attributes['width'] );
+			unset( $new_attributes['height'] );
+		} elseif ( 'responsive' === $layout ) {
+			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
+		} elseif ( 'fixed' === $layout ) {
+			if ( ! isset( $new_attributes['height'] ) ) {
+				$new_attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+		}
+
+		return $new_attributes;
 	}
 }

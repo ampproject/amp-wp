@@ -16,8 +16,8 @@ class AMP_Analytics_Options_Submenu {
 
 	public function __construct( $parent_menu_slug ) {
 		$this->parent_menu_slug = $parent_menu_slug;
-		$this->menu_slug = 'amp-analytics-options';
-		$this->menu_page = new AMP_Analytics_Options_Submenu_Page();
+		$this->menu_slug        = 'amp-analytics-options';
+		$this->menu_page        = new AMP_Analytics_Options_Submenu_Page();
 	}
 
 	public function init() {
