@@ -960,6 +960,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @global WP_Widget_Factory $wp_widget_factory
 	 * @global WP_Scripts $wp_scripts
 	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Theme_Support::set_response_cache_key()
 	 */
 	public function test_prepare_response() {
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
@@ -1050,6 +1051,45 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['handle'] );
+
+		// Test that response cache is set correctly.
+		$this->assertEmpty( wp_cache_get(
+			AMP_Theme_Support::$response_cache_key,
+			AMP_Theme_Support::RESPONSE_CACHE_GROUP
+		) );
+		$response = AMP_Theme_Support::prepare_response( $original_html, array(
+			'enable_response_caching' => true,
+			'test_closure_argument'   => function() {},
+		) );
+		$this->assertEquals(
+			$response,
+			wp_cache_get(
+				AMP_Theme_Support::$response_cache_key,
+				AMP_Theme_Support::RESPONSE_CACHE_GROUP
+			)
+		);
+		$this->assertContains( 'amp_output_buffer', maybe_serialize( AMP_Response_Headers::$headers_sent ) );
+
+		// Test that response cache is return upon second call.
+		AMP_Response_Headers::$headers_sent = array();
+		$cache_key       = AMP_Theme_Support::$response_cache_key;
+		$cached_response = AMP_Theme_Support::prepare_response( $original_html, array(
+			'enable_response_caching' => true,
+			'test_closure_argument'   => function() {},
+		) );
+		$this->assertEquals( wp_cache_get( $cache_key, AMP_Theme_Support::RESPONSE_CACHE_GROUP ), $cached_response );
+		$this->assertEquals( $cache_key, AMP_Theme_Support::$response_cache_key );
+		$this->assertNotContains( 'amp_output_buffer', maybe_serialize( AMP_Response_Headers::$headers_sent ) );
+
+		// Test cache reset.
+		AMP_Response_Headers::$headers_sent = array();
+		AMP_Theme_Support::prepare_response( $original_html, array(
+			'enable_response_caching' => true,
+			'test_reset_by_arg'       => true,
+			'test_closure_argument'   => function() {},
+		) );
+		$this->assertNotEquals( $cache_key, AMP_Theme_Support::$response_cache_key );
+		$this->assertContains( 'amp_output_buffer', maybe_serialize( AMP_Response_Headers::$headers_sent ) );
 	}
 
 	/**
