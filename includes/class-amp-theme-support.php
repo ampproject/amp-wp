@@ -27,6 +27,13 @@ class AMP_Theme_Support {
 	const RESPONSE_CACHE_GROUP = 'amp-reponse';
 
 	/**
+	 * Query var that triggers response cache removal for the given page.
+	 *
+	 * @var string
+	 */
+	const FLUSH_RESPONSE_CACHE_VAR = 'amp_flush_response_cache';
+
+	/**
 	 * Response cache hash key.
 	 *
 	 * @var string
@@ -1062,13 +1069,20 @@ class AMP_Theme_Support {
 				self::$embed_handlers,
 				AMP__VERSION,
 			) );
-			$response_cache = wp_cache_get( self::$response_cache_key, self::RESPONSE_CACHE_GROUP );
 
-			if ( ! empty( $response_cache ) ) {
-				return $response_cache;
+			if ( isset( $_REQUEST[ self::FLUSH_RESPONSE_CACHE_VAR ] ) ) { // WPCS: csrf ok.
+				wp_cache_delete( self::$response_cache_key, self::RESPONSE_CACHE_GROUP );
+			} else {
+				$response_cache = wp_cache_get( self::$response_cache_key, self::RESPONSE_CACHE_GROUP );
+
+				if ( ! empty( $response_cache ) ) {
+					AMP_Response_Headers::send_header( 'AMP-Response-Cache', true );
+					return $response_cache;
+				}
 			}
 		}
 
+		AMP_Response_Headers::send_header( 'AMP-Response-Cache', false );
 		AMP_Response_Headers::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
 		$dom_parse_start = microtime( true );

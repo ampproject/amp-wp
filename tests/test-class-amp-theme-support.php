@@ -1053,35 +1053,49 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['handle'] );
 
 		// Test that response cache is set correctly.
+		$call_response = function() use ( $original_html ) {
+			return AMP_Theme_Support::prepare_response( $original_html, array(
+				'enable_response_caching' => true,
+				'test_closure_argument'   => function() {},
+			) );
+		};
 		$this->assertEmpty( wp_cache_get(
 			AMP_Theme_Support::$response_cache_key,
 			AMP_Theme_Support::RESPONSE_CACHE_GROUP
 		) );
-		$response = AMP_Theme_Support::prepare_response( $original_html, array(
-			'enable_response_caching' => true,
-			'test_closure_argument'   => function() {},
-		) );
 		$this->assertEquals(
-			$response,
+			$call_response(),
 			wp_cache_get(
 				AMP_Theme_Support::$response_cache_key,
 				AMP_Theme_Support::RESPONSE_CACHE_GROUP
 			)
 		);
-		$this->assertContains( 'amp_output_buffer', maybe_serialize( AMP_Response_Headers::$headers_sent ) );
+		$this->assertContains(
+			array(
+				'name'        => 'AMP-Response-Cache',
+				'value'       => false,
+				'replace'     => true,
+				'status_code' => null,
+			),
+			AMP_Response_Headers::$headers_sent
+		);
 
 		// Test that response cache is return upon second call.
 		AMP_Response_Headers::$headers_sent = array();
 		$cache_key                          = AMP_Theme_Support::$response_cache_key;
-		$cached_response                    = AMP_Theme_Support::prepare_response( $original_html, array(
-			'enable_response_caching' => true,
-			'test_closure_argument'   => function() {},
-		) );
-		$this->assertEquals( wp_cache_get( $cache_key, AMP_Theme_Support::RESPONSE_CACHE_GROUP ), $cached_response );
+		$this->assertEquals( wp_cache_get( $cache_key, AMP_Theme_Support::RESPONSE_CACHE_GROUP ), $call_response() );
 		$this->assertEquals( $cache_key, AMP_Theme_Support::$response_cache_key );
-		$this->assertNotContains( 'amp_output_buffer', maybe_serialize( AMP_Response_Headers::$headers_sent ) );
+		$this->assertContains(
+			array(
+				'name'        => 'AMP-Response-Cache',
+				'value'       => true,
+				'replace'     => true,
+				'status_code' => null,
+			),
+			AMP_Response_Headers::$headers_sent
+		);
 
-		// Test cache reset.
+		// Test new cache upon argument change.
 		AMP_Response_Headers::$headers_sent = array();
 		AMP_Theme_Support::prepare_response( $original_html, array(
 			'enable_response_caching' => true,
@@ -1089,7 +1103,28 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'test_closure_argument'   => function() {},
 		) );
 		$this->assertNotEquals( $cache_key, AMP_Theme_Support::$response_cache_key );
-		$this->assertContains( 'amp_output_buffer', maybe_serialize( AMP_Response_Headers::$headers_sent ) );
+		$this->assertContains(
+			array(
+				'name'        => 'AMP-Response-Cache',
+				'value'       => false,
+				'replace'     => true,
+				'status_code' => null,
+			),
+			AMP_Response_Headers::$headers_sent
+		);
+
+		// Test cache flush.
+		$_REQUEST[ AMP_Theme_Support::FLUSH_RESPONSE_CACHE_VAR ] = true;
+		$call_response();
+		$this->assertContains(
+			array(
+				'name'        => 'AMP-Response-Cache',
+				'value'       => false,
+				'replace'     => true,
+				'status_code' => null,
+			),
+			AMP_Response_Headers::$headers_sent
+		);
 	}
 
 	/**
