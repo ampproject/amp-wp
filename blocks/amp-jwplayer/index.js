@@ -65,9 +65,9 @@ export default registerBlockType(
 			let url = false;
 			if ( dataPlayerId && ( dataMediaId || dataPlaylistId ) ) {
 				if ( dataPlaylistId ) {
-					url = 'https://content.jwplatform.com/players/' + dataPlaylistId + '-' + dataPlayerId;
+					url = `https://content.jwplatform.com/players/${dataPlaylistId}-${dataPlayerId}`;
 				} else {
-					url = 'https://content.jwplatform.com/players/' + dataMediaId + '-' + dataPlayerId;
+					url = `https://content.jwplatform.com/players/${dataMediaId}-${dataPlayerId}`;
 				}
 			}
 			return [

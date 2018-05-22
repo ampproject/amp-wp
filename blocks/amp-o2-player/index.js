@@ -73,7 +73,7 @@ export default registerBlockType(
 			];
 			let url = false;
 			if ( dataPid && ( dataBcid || dataVid ) ) {
-				url = 'https://delivery.vidible.tv/htmlembed/pid=' + dataPid + '/';
+				url = `https://delivery.vidible.tv/htmlembed/pid=${dataPid}/`;
 			}
 			return [
 				isSelected && (

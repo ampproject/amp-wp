@@ -74,7 +74,7 @@ export default registerBlockType(
 			];
 			let url = false;
 			if ( dataPartner && dataPlayer && ( dataVideo || dataPlaylist || dataOutstream ) ) {
-				url = 'http://cdn.brid.tv/live/partners/' + dataPartner;
+				url = `http://cdn.brid.tv/live/partners/${dataPartner}`;
 			}
 			return [
 				isSelected && (

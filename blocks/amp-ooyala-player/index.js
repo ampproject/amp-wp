@@ -68,7 +68,7 @@ export default registerBlockType(
 			];
 			let url = false;
 			if ( dataEmbedCode && dataPlayerId && dataPcode ) {
-				url = 'http://cf.c.ooyala.com/' + dataEmbedCode;
+				url = `http://cf.c.ooyala.com/${dataEmbedCode}`;
 			}
 			return [
 				isSelected && (
