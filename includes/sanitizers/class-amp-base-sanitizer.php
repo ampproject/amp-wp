@@ -376,7 +376,7 @@ abstract class AMP_Base_Sanitizer {
 
 		if ( $node instanceof DOMElement ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Utils::INVALID_ELEMENT_CODE;
+				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
 			}
 			$error['node_attributes'] = array();
 			foreach ( $node->attributes as $attribute ) {
@@ -389,7 +389,7 @@ abstract class AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Utils::INVALID_ATTRIBUTE_CODE;
+				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
 			}
 			$error['element_attributes'] = array();
 			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {

@@ -25,7 +25,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		AMP_Validation_Utils::reset_validation_results();
+		AMP_Validation_Manager::reset_validation_results();
+		AMP_Validation_Manager::$debug = false;
+		unset( $GLOBALS['current_screen'] );
+		remove_theme_support( 'amp' );
 	}
 
 	/**
@@ -37,7 +40,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		global $wp_scripts;
 		$wp_scripts = null;
 		parent::tearDown();
-		AMP_Validation_Utils::reset_validation_results();
+		AMP_Validation_Manager::reset_validation_results();
 		remove_theme_support( 'amp' );
 		$_REQUEST                = array(); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
@@ -1054,7 +1057,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-ad-latest.js\' async custom-element="amp-ad"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		$removed_nodes = array();
-		foreach ( AMP_Validation_Utils::$validation_results as $result ) {
+		foreach ( AMP_Validation_Manager::$validation_results as $result ) {
 			if ( $result['sanitized'] && isset( $result['error']['node_name'] ) ) {
 				$node_name = $result['error']['node_name'];
 				if ( ! isset( $removed_nodes[ $node_name ] ) ) {
@@ -1065,7 +1068,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		}
 
 		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 5, AMP_Validation_Utils::$validation_results );
+		$this->assertCount( 5, AMP_Validation_Manager::$validation_results );
 		$this->assertEquals(
 			array(
 				'onclick' => 1,

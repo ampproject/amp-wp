@@ -87,9 +87,9 @@ class AMP_Theme_Support {
 		}
 
 		// @todo Rename to query var to indicate whether sources should be obtained. It's sources that are needing to be to be conditional.
-		AMP_Validation_Utils::init( array(
-			'locate_sources' => AMP_Validation_Utils::should_validate_response(),
-			'debug'          => isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ), // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		AMP_Validation_Manager::init( array(
+			'locate_sources' => AMP_Validation_Manager::should_validate_response(),
+			'debug'          => isset( $_REQUEST[ AMP_Validation_Manager::DEBUG_QUERY_VAR ] ), // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		) );
 
 		self::$init_start_time = microtime( true );
@@ -145,7 +145,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		self::$sanitizer_classes = AMP_Validation_Utils::add_validation_callback( self::$sanitizer_classes );
+		self::$sanitizer_classes = AMP_Validation_Manager::add_validation_callback( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
 	}
 
@@ -1082,7 +1082,7 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
 
-		if ( AMP_Validation_Utils::has_blocking_validation_errors() ) {
+		if ( AMP_Validation_Manager::has_blocking_validation_errors() ) {
 			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 			} else {
@@ -1097,8 +1097,8 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::finalize_validation( $dom );
+		if ( AMP_Validation_Manager::should_validate_response() ) {
+			AMP_Validation_Manager::finalize_validation( $dom );
 		}
 
 		$response  = "<!DOCTYPE html>\n";

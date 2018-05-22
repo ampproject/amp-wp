@@ -452,7 +452,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( empty( $node ) ) {
 			$this->current_sources = null;
 		} elseif ( ! empty( $this->args['locate_sources'] ) ) {
-			$this->current_sources = AMP_Validation_Utils::locate_sources( $node );
+			$this->current_sources = AMP_Validation_Manager::locate_sources( $node );
 		}
 	}
 
