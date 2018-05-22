@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+
 class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
@@ -54,6 +56,21 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	<source src="https://example.com/video.ogv" type="video/ogg">
 </video>',
 				'<amp-video width="480" height="300" poster="https://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
+			),
+
+			'video_with_layout_from_editor_fill' => array(
+				'<figure data-amp-layout="fill"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
+				'<figure data-amp-layout="fill" style="position:relative; width: 100%; height: 100px;"><amp-video src="https://example.com/file.mp4" layout="fill"></amp-video></figure>',
+			),
+
+			'video_with_layout_from_editor_fixed' => array(
+				'<figure data-amp-layout="fixed"><video src="https://example.com/file.mp4" width="100"></video></figure>',
+				'<figure data-amp-layout="fixed"><amp-video src="https://example.com/file.mp4" width="100" layout="fixed" height="400"></amp-video></figure>',
+			),
+
+			'video_with_noloading_from_editor' => array(
+				'<figure data-amp-noloading="true"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
+				'<figure data-amp-noloading="true"><amp-video src="https://example.com/file.mp4" height="100" width="100" noloading="" layout="responsive"></amp-video></figure>',
 			),
 
 			'multiple_same_video' => array(

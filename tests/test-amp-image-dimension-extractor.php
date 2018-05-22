@@ -5,12 +5,13 @@
  * @package AMP
  */
 
-define( 'AMP_IMG_DIMENSION_TEST_VALID_FILE', dirname( __FILE__ ) . '/assets/wordpress-logo.png' );
 define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/not-exists.png' );
 
 // Not ideal to use remote URLs (since the remote service can change); mocking would be better.
 define( 'IMG_350', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/350x150.png' );
 define( 'IMG_1024', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/1024x768.png' );
+define( 'IMG_SVG', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/fd58ec3fc426645885f6a3afa58ad64fbc70ea89/amp.svg' ); // @todo For some reason, FasterImage times out on this if the XML PI is absent.
+define( 'IMG_SVG_VIEWPORT', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/fd58ec3fc426645885f6a3afa58ad64fbc70ea89/google.svg' );
 
 /**
  * Tests for AMP_Image_Dimension_Extractor.
@@ -157,17 +158,27 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 */
 	public function test__multiple_valid_image_files() {
 		$sources  = array(
-			IMG_350  => false,
-			IMG_1024 => false,
+			IMG_350          => false,
+			IMG_1024         => false,
+			IMG_SVG          => false,
+			IMG_SVG_VIEWPORT => false,
 		);
 		$expected = array(
-			IMG_350  => array(
+			IMG_350          => array(
 				'width'  => 350,
 				'height' => 150,
 			),
-			IMG_1024 => array(
+			IMG_1024         => array(
 				'width'  => 1024,
 				'height' => 768,
+			),
+			IMG_SVG          => array(
+				'width'  => 175,
+				'height' => 60,
+			),
+			IMG_SVG_VIEWPORT => array(
+				'width'  => 251,
+				'height' => 80,
 			),
 		);
 
@@ -181,17 +192,27 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 */
 	public function test__multiple_valid_image_files_synchronous() {
 		$sources  = array(
-			IMG_350  => false,
-			IMG_1024 => false,
+			IMG_350          => false,
+			IMG_1024         => false,
+			IMG_SVG          => false,
+			IMG_SVG_VIEWPORT => false,
 		);
 		$expected = array(
-			IMG_350  => array(
+			IMG_350          => array(
 				'width'  => 350,
 				'height' => 150,
 			),
-			IMG_1024 => array(
+			IMG_1024         => array(
 				'width'  => 1024,
 				'height' => 768,
+			),
+			IMG_SVG          => array(
+				'width'  => 175,
+				'height' => 60,
+			),
+			IMG_SVG_VIEWPORT => array(
+				'width'  => 251,
+				'height' => 80,
 			),
 		);
 
@@ -287,11 +308,11 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	/**
 	 * Test get_default_user_agent()
 	 *
-	 * @covers get_default_user_agent()
+	 * @covers \AMP_Image_Dimension_Extractor::get_default_user_agent()
 	 */
 	public function test__amp_wp_user_agent() {
 		$expected   = 'amp-wp, v' . AMP__VERSION . ', ';
-		$user_agent = AMP_Image_Dimension_Extractor::get_default_user_agent( '' );
+		$user_agent = AMP_Image_Dimension_Extractor::get_default_user_agent();
 		$user_agent = substr( $user_agent, 0, strlen( $expected ) );
 
 		$this->assertEquals( $expected, $user_agent );
