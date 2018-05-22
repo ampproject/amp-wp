@@ -1072,8 +1072,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that response cache is return upon second call.
 		AMP_Response_Headers::$headers_sent = array();
-		$cache_key       = AMP_Theme_Support::$response_cache_key;
-		$cached_response = AMP_Theme_Support::prepare_response( $original_html, array(
+		$cache_key                          = AMP_Theme_Support::$response_cache_key;
+		$cached_response                    = AMP_Theme_Support::prepare_response( $original_html, array(
 			'enable_response_caching' => true,
 			'test_closure_argument'   => function() {},
 		) );
