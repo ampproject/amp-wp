@@ -1,5 +1,7 @@
 <?php
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_var_dump
+// phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
 
