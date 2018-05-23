@@ -1059,28 +1059,22 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that first response isn't cached.
 		$first_response = $call_response();
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Response-Cache',
-				'value'       => false,
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
+		$this->assertGreaterThan( 0, count( array_filter(
+			AMP_Response_Headers::$headers_sent,
+			function( $header ) {
+				return 'Server-Timing' === $header['name'];
+			}
+		) ) );
 
 		// Test that response cache is return upon second call.
 		AMP_Response_Headers::$headers_sent = array();
 		$this->assertEquals( $first_response, $call_response() );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Response-Cache',
-				'value'       => true,
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
+		$this->assertSame( 0, count( array_filter(
+			AMP_Response_Headers::$headers_sent,
+			function( $header ) {
+				return 'Server-Timing' === $header['name'];
+			}
+		) ) );
 
 		// Test new cache upon argument change.
 		AMP_Response_Headers::$headers_sent = array();
@@ -1088,15 +1082,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'enable_response_caching' => true,
 			'test_reset_by_arg'       => true,
 		) );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Response-Cache',
-				'value'       => false,
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
+		$this->assertGreaterThan( 0, count( array_filter(
+			AMP_Response_Headers::$headers_sent,
+			function( $header ) {
+				return 'Server-Timing' === $header['name'];
+			}
+		) ) );
 	}
 
 	/**

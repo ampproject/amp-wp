@@ -1064,12 +1064,10 @@ class AMP_Theme_Support {
 			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
 
 			if ( ! empty( $response_cache ) ) {
-				AMP_Response_Headers::send_header( 'AMP-Response-Cache', true );
 				return $response_cache;
 			}
 		}
 
-		AMP_Response_Headers::send_header( 'AMP-Response-Cache', false );
 		AMP_Response_Headers::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
 		$dom_parse_start = microtime( true );
