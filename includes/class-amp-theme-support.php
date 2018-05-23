@@ -92,6 +92,8 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		AMP_Validation_Utils::init();
+
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
 
@@ -793,7 +795,7 @@ class AMP_Theme_Support {
 
 		// Continue to show default link to wp-login when user is not logged-in.
 		if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
-			return $link;
+			return $args['before'] . $link . $args['after'];
 		}
 
 		$state_id  = self::get_comment_form_state_id( get_the_ID() );
@@ -814,7 +816,7 @@ class AMP_Theme_Support {
 			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
 			$args['reply_text']
 		);
-		return $link;
+		return $args['before'] . $link . $args['after'];
 	}
 
 	/**

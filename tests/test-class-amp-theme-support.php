@@ -772,18 +772,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		global $post;
 		$post          = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$comment       = $this->factory()->comment->create_and_get();
-		$link          = get_comment_link( $comment );
+		$link          = sprintf( '<a href="%s">', get_comment_link( $comment ) );
 		$respond_id    = '5234';
 		$reply_text    = 'Reply';
 		$reply_to_text = 'Reply to';
-		$args          = compact( 'respond_id', 'reply_text', 'reply_to_text' );
+		$before        = '<div class="reply">';
+		$after         = '</div>';
+		$args          = compact( 'respond_id', 'reply_text', 'reply_to_text', 'before', 'after' );
 		$comment       = $this->factory()->comment->create_and_get();
+
 		update_option( 'comment_registration', true );
 		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
-		$this->assertEquals( $link, $filtered_link );
+		$this->assertEquals( $before . $link . $after, $filtered_link );
 		update_option( 'comment_registration', false );
 
 		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
+		$this->assertStringStartsWith( $before, $filtered_link );
+		$this->assertStringEndsWith( $after, $filtered_link );
 		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $filtered_link );
 		$this->assertContains( $comment->comment_author, $filtered_link );
 		$this->assertContains( $comment->comment_ID, $filtered_link );
@@ -1097,6 +1102,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		AMP_Theme_Support::add_hooks();
 		ob_start();
 		?>
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
