@@ -57,12 +57,14 @@ class AMP_Editor_Blocks {
 				$tags[ $amp_block ] = array();
 			}
 
+			// @todo The global attributes included here should be matched up with what is actually used by each block.
 			$tags[ $amp_block ] = array_merge(
 				array_fill_keys(
 					array(
 						'layout',
 						'width',
 						'height',
+						'class',
 					),
 					true
 				),
