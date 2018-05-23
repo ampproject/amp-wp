@@ -16,8 +16,8 @@ class AMP_Editor_Blocks {
 	 */
 	public function init() {
 		if ( function_exists( 'gutenberg_init' ) ) {
-			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10 );
 		}
 	}
 
@@ -27,7 +27,7 @@ class AMP_Editor_Blocks {
 	 * @param array $tags Array of allowed post tags.
 	 * @return mixed Modified array.
 	 */
-	public function whitelist_layout_in_wp_kses_allowed_html( $tags ) {
+	public function whitelist_block_atts_in_wp_kses_allowed_html( $tags ) {
 		foreach ( $tags as &$tag ) {
 			$tag['data-amp-layout']    = true;
 			$tag['data-amp-noloading'] = true;
@@ -41,6 +41,14 @@ class AMP_Editor_Blocks {
 	 */
 	public function enqueue_block_editor_assets() {
 
+		// Scripts.
+		wp_enqueue_script(
+			'amp-editor-blocks-build',
+			amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
+			array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+			AMP__VERSION
+		);
+
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
@@ -50,13 +58,5 @@ class AMP_Editor_Blocks {
 		);
 
 		wp_add_inline_script( 'amp-editor-blocks', sprintf( 'ampEditorBlocks.boot();' ) );
-
-		// Scripts.
-		wp_enqueue_script(
-			'amp-editor-blocks-build',
-			amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-			array( 'amp-runtime', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-			AMP__VERSION
-		);
 	}
 }
