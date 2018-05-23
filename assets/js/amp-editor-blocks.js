@@ -196,10 +196,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				default: false
 			};
 			settings.attributes.minFont = {
-				type: 'number'
+				type: 'number',
+				default: 14
 			};
 			settings.attributes.maxFont = {
-				type: 'number'
+				type: 'number',
+				default: 48
 			};
 			settings.attributes.height = {
 				type: 'number',
@@ -399,38 +401,61 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							}
 						} ),
 						el( TextControl, {
-							label: __( 'Height (px, has to be larger than max font)' ),
+							label: __( 'Height' ),
 							value: height,
+							type: 'number',
+							min: 1,
 							onChange: function( nextHeight ) {
 								props.setAttributes( { height: nextHeight } );
 							}
 						} ),
-						el( PanelBody, { title: __( 'Min font (px, has to be smaller/same as max font)' ) },
+						maxFont > height && el(
+							wp.components.Notice,
+							{
+								status: 'error',
+								isDismissible: false
+							},
+							__( 'The height must be greater than the max font size.' )
+						),
+						el( PanelBody, { title: __( 'Minimum font size' ) },
 							el( FontSizePicker, {
-								label: __( 'Min font (px, has to be smaller/same as max font)' ),
 								fallbackFontSize: 14,
 								value: minFont,
 								fontSizes: FONT_SIZES,
 								onChange: function( nextMinFont ) {
+									if ( ! nextMinFont ) {
+										nextMinFont = 14; // @todo Supplying fallbackFontSize should be done automatically by the component?
+									}
 									if ( nextMinFont <= maxFont ) {
 										props.setAttributes( { minFont: nextMinFont } );
 									}
 								}
 							} )
 						),
-						el( PanelBody, { title: __( 'Max font (px)' ) },
+						minFont > maxFont && el(
+							wp.components.Notice,
+							{
+								status: 'error',
+								isDismissible: false
+							},
+							__( 'The min font size must less than the max font size.' )
+						),
+						el( PanelBody, { title: __( 'Maximum font size' ) },
 							el( FontSizePicker, {
 								value: maxFont,
 								fallbackFontSize: 48,
 								fontSizes: FONT_SIZES,
 								onChange: function( nextMaxFont ) {
+									if ( ! nextMaxFont ) {
+										nextMaxFont = 48; // @todo Supplying fallbackFontSize should be done automatically by the component?
+									}
 									props.setAttributes( {
 										maxFont: nextMaxFont,
 										height: Math.max( nextMaxFont, height )
 									} );
 								}
 							} )
-						)
+						),
 					)
 				)
 			);
