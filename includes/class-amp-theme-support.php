@@ -1082,7 +1082,7 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
 
-		if ( AMP_Validation_Manager::has_blocking_validation_errors() ) {
+		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
 			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 			} else {

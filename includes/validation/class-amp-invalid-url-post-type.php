@@ -201,7 +201,7 @@ class AMP_Invalid_URL_Post_Type {
 			return array();
 		}
 		foreach ( $stored_validation_errors as $stored_validation_error ) {
-			if ( ! isset( $stored_validation_error['term_slug'], $stored_validation_error['sources'] ) ) {
+			if ( ! isset( $stored_validation_error['term_slug'] ) ) {
 				continue;
 			}
 			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
@@ -276,8 +276,10 @@ class AMP_Invalid_URL_Post_Type {
 			$sources = null;
 			if ( isset( $data['sources'] ) ) {
 				$sources = $data['sources'];
-				unset( $data['sources'] );
 			}
+
+			// @todo The next few lines should be moved to a mthod in AMP_Validation_Error_Taxonomy.
+			unset( $data['sources'] );
 			ksort( $data );
 			$description = wp_json_encode( $data );
 			$term_slug   = md5( $description );

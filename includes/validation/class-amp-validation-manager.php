@@ -175,7 +175,7 @@ class AMP_Validation_Manager {
 	 * @todo Rename to add_validation_error_source_tracing().
 	 */
 	public static function add_validation_hooks() {
-		self::wrap_widget_callbacks();
+		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
 		add_action( 'all', array( __CLASS__, 'wrap_hook_callbacks' ) );
 		$wrapped_filters = array( 'the_content', 'the_excerpt' );
