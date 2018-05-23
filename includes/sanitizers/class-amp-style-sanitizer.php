@@ -865,17 +865,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Convert URLs in to non-relative real-paths.
+	 * Convert URLs in to non-relative real-paths and prevent there being any spaces.
 	 *
 	 * @param URL[]  $urls           URLs.
-	 * @param string $stylesheet_url Stylesheet URL.
+	 * @param string $stylesheet_url Stylesheet URL. Base URL is obtained from this. Optional.
 	 */
-	private function normalize_urls( $urls, $stylesheet_url ) {
-		$base_url = preg_replace( ':[^/]+(\?.*)?(#.*)?$:', '', $stylesheet_url );
+	private function normalize_urls( $urls, $stylesheet_url = '' ) {
+		$base_url = $stylesheet_url ? preg_replace( ':[^/]+(\?.*)?(#.*)?$:', '', $stylesheet_url ) : '';
 
 		foreach ( $urls as $url ) {
+			// URLs cannot have spaces in them, so strip them (especially when spaces get erroneously injected in data: URLs).
 			$url_string = preg_replace( '/\s+/', '', $url->getURL()->getString() );
 
+			// For data: URLs, all that is needed is to remove spaces so set and continue.
+			if ( 'data:' === substr( $url_string, 0, 5 ) ) {
+				$url->getURL()->setString( $url_string );
+				continue;
+			}
+
+			// If the base URL is empty, there is nothing more to do.
+			if ( empty( $base_url ) ) {
+				continue;
+			}
+
+			// If the URL is already absolute, continue since there there is nothing left to do.
 			$parsed_url = wp_parse_url( $url_string );
 			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || '/' === substr( $parsed_url['path'], 0, 1 ) ) {
 				continue;
@@ -883,6 +896,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$relative_url = preg_replace( '#^\./#', '', $url->getURL()->getString() );
 
+			// Resolve any relative parent directory paths.
 			$real_url = $base_url . $relative_url;
 			do {
 				$real_url = preg_replace( '#[^/]+/../#', '', $real_url, -1, $count );
