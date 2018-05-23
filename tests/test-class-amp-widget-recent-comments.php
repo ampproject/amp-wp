@@ -44,6 +44,8 @@ class Test_AMP_Widget_Recent_Comments extends WP_UnitTestCase {
 	 * @covers AMP_Widget_Recent_Comments::remove_head_style_in_amp()
 	 */
 	public function test_remove_head_style_in_amp() {
+		remove_action( 'wp_head', 'print_emoji_detection_script', 7 ); // Workaround for WordPress 5.0-alpha (#43055).
+
 		new AMP_Widget_Recent_Comments();
 		$this->assertTrue( apply_filters( 'show_recent_comments_widget_style', true ) );
 		ob_start();
@@ -58,6 +60,8 @@ class Test_AMP_Widget_Recent_Comments extends WP_UnitTestCase {
 	 * @covers AMP_Widget_Recent_Comments::remove_head_style_in_amp()
 	 */
 	public function test_remove_head_style_in_amp_not() {
+		remove_action( 'wp_head', 'print_emoji_detection_script', 7 ); // Workaround for WordPress 5.0-alpha (#43055).
+
 		remove_theme_support( 'amp' );
 		new AMP_Widget_Recent_Comments();
 		$this->assertTrue( apply_filters( 'show_recent_comments_widget_style', true ) );
