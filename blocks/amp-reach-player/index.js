@@ -4,6 +4,7 @@
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls } = wp.editor;
+const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
@@ -58,48 +59,56 @@ export default registerBlockType(
 			if ( dataEmbedId ) {
 				url = 'https://media-cdn.beachfrontreach.com/acct_1/video/';
 			}
-			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'Reach settings' ) }>
-							<TextControl
-								label={ __( 'The Reach player embed id (required)' ) }
-								value={ dataEmbedId }
-								onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
-							/>
-							<SelectControl
-								label={ __( 'Layout' ) }
-								value={ layout }
-								options={ ampLayoutOptions }
-								onChange={ value => ( setAttributes( { layout: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Width (px)' ) }
-								value={ width !== undefined ? width : '' }
-								onChange={ value => ( setAttributes( { width: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Height (px)' ) }
-								value={ height }
-								onChange={ value => ( setAttributes( { height: value } ) ) }
-							/>
-						</PanelBody>
-					</InspectorControls>
-				),
-				url && (
-					<Placeholder label={ __( 'Reach Player' ) }>
-						<p className="components-placeholder__error">{ url }</p>
-						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
-					</Placeholder>
-				),
-				! url && (
-					<Placeholder label={ __( 'Reach Player' ) }>
-						<p>{ __( 'Add Reach player embed ID to use the block.' ) }</p>
-					</Placeholder>
-				)
-			];
+			return (
+				<Fragment>
+					{
+						isSelected && (
+							<InspectorControls key='inspector'>
+								<PanelBody title={ __( 'Reach settings' ) }>
+									<TextControl
+										label={ __( 'The Reach player embed id (required)' ) }
+										value={ dataEmbedId }
+										onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
+									/>
+									<SelectControl
+										label={ __( 'Layout' ) }
+										value={ layout }
+										options={ ampLayoutOptions }
+										onChange={ value => ( setAttributes( { layout: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Width (px)' ) }
+										value={ width !== undefined ? width : '' }
+										onChange={ value => ( setAttributes( { width: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Height (px)' ) }
+										value={ height }
+										onChange={ value => ( setAttributes( { height: value } ) ) }
+									/>
+								</PanelBody>
+							</InspectorControls>
+						)
+					}
+					{
+						url && (
+							<Placeholder label={ __( 'Reach Player' ) }>
+								<p className="components-placeholder__error">{ url }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+							</Placeholder>
+						)
+					}
+					{
+						! url && (
+							<Placeholder label={ __( 'Reach Player' ) }>
+								<p>{ __( 'Add Reach player embed ID to use the block.' ) }</p>
+							</Placeholder>
+						)
+					}
+				</Fragment>
+			);
 		},
 
 		save( { attributes } ) {

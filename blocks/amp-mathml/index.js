@@ -33,14 +33,14 @@ export default registerBlockType(
 		edit( { attributes, setAttributes } ) {
 			const { dataFormula } = attributes;
 
-			return [
+			return (
 				<PlainText
 					key='formula'
 					value={ dataFormula }
 					placeholder={ __( 'Insert formula' ) }
 					onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
 				/>
-			];
+			);
 		},
 
 		save( { attributes } ) {

@@ -4,6 +4,7 @@
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls } = wp.editor;
+const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
@@ -73,78 +74,86 @@ export default registerBlockType(
 			if ( dataSiteId && dataContentId && dataDomain && dataMode && dataItems ) {
 				url = 'https://cms.springboardplatform.com/embed_iframe/';
 			}
-			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'Springboard Player Settings' ) }>
-							<TextControl
-								label={ __( 'SprintBoard site ID (required)' ) }
-								value={ dataSiteId }
-								onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Player content ID (required)' ) }
-								value={ dataContentId }
-								onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Player ID' ) }
-								value={ dataPlayerId }
-								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Springboard partner domain' ) }
-								value={ dataDomain }
-								onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
-							/>
-							<SelectControl
-								label={ __( 'Mode (required)' ) }
-								value={ dataMode }
-								options={ [
-									{ value: 'video', label: __( 'Video' ) },
-									{ value: 'playlist', label: __( 'Playlist' ) }
-								] }
-								onChange={ value => ( setAttributes( { dataMode: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Number of video is playlist (required)' ) }
-								value={ dataItems }
-								onChange={ value => ( setAttributes( { dataItems: value } ) ) }
-							/>
-							<SelectControl
-								label={ __( 'Layout' ) }
-								value={ layout }
-								options={ ampLayoutOptions }
-								onChange={ value => ( setAttributes( { layout: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Width (px)' ) }
-								value={ width !== undefined ? width : '' }
-								onChange={ value => ( setAttributes( { width: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Height (px)' ) }
-								value={ height }
-								onChange={ value => ( setAttributes( { height: value } ) ) }
-							/>
-						</PanelBody>
-					</InspectorControls>
-				),
-				url && (
-					<Placeholder label={ __( 'Springboard Player' ) }>
-						<p className="components-placeholder__error">{ url }</p>
-						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
-					</Placeholder>
-				),
-				! url && (
-					<Placeholder label={ __( 'Springboard Player' ) }>
-						<p>{ __( 'Add required data to use the block.' ) }</p>
-					</Placeholder>
-				)
-			];
+			return (
+				<Fragment>
+					{
+						isSelected && (
+							<InspectorControls key='inspector'>
+								<PanelBody title={ __( 'Springboard Player Settings' ) }>
+									<TextControl
+										label={ __( 'SprintBoard site ID (required)' ) }
+										value={ dataSiteId }
+										onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Player content ID (required)' ) }
+										value={ dataContentId }
+										onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Player ID' ) }
+										value={ dataPlayerId }
+										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Springboard partner domain' ) }
+										value={ dataDomain }
+										onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
+									/>
+									<SelectControl
+										label={ __( 'Mode (required)' ) }
+										value={ dataMode }
+										options={ [
+											{ value: 'video', label: __( 'Video' ) },
+											{ value: 'playlist', label: __( 'Playlist' ) }
+										] }
+										onChange={ value => ( setAttributes( { dataMode: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Number of video is playlist (required)' ) }
+										value={ dataItems }
+										onChange={ value => ( setAttributes( { dataItems: value } ) ) }
+									/>
+									<SelectControl
+										label={ __( 'Layout' ) }
+										value={ layout }
+										options={ ampLayoutOptions }
+										onChange={ value => ( setAttributes( { layout: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Width (px)' ) }
+										value={ width !== undefined ? width : '' }
+										onChange={ value => ( setAttributes( { width: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Height (px)' ) }
+										value={ height }
+										onChange={ value => ( setAttributes( { height: value } ) ) }
+									/>
+								</PanelBody>
+							</InspectorControls>
+						)
+					}
+					{
+						url && (
+							<Placeholder label={ __( 'Springboard Player' ) }>
+								<p className="components-placeholder__error">{ url }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+							</Placeholder>
+						)
+					}
+					{
+						! url && (
+							<Placeholder label={ __( 'Springboard Player' ) }>
+								<p>{ __( 'Add required data to use the block.' ) }</p>
+							</Placeholder>
+						)
+					}
+				</Fragment>
+			);
 		},
 
 		save( { attributes } ) {

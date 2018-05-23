@@ -4,6 +4,7 @@
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls } = wp.editor;
+const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
@@ -74,73 +75,82 @@ export default registerBlockType(
 			if ( dataPartner && dataPlayer && ( dataVideo || dataPlaylist || dataOutstream ) ) {
 				url = `http://cdn.brid.tv/live/partners/${dataPartner}`;
 			}
-			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'Brid Player Settings' ) }>
-							<TextControl
-								label={ __( 'Brid.tv partner ID (required)' ) }
-								value={ dataPartner }
-								onChange={ value => ( setAttributes( { dataPartner: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Brid.tv player ID (required)' ) }
-								value={ dataPlayer }
-								onChange={ value => ( setAttributes( { dataPlayer: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Video ID (one of video / playlist / outstream ID is required)' ) }
-								value={ dataVideo }
-								onChange={ value => ( setAttributes( { dataVideo: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Outstream unit ID (one of video / playlist / outstream ID is required)' ) }
-								value={ dataOutstream }
-								onChange={ value => ( setAttributes( { dataOutstream: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Playlist ID (one of video / playlist / outstream ID is required)' ) }
-								value={ dataPlaylist }
-								onChange={ value => ( setAttributes( { dataPlaylist: value } ) ) }
-							/>
-							<ToggleControl
-								label={ __( 'Autoplay' ) }
-								checked={ autoPlay }
-								onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
-							/>
-							<SelectControl
-								label={ __( 'Layout' ) }
-								value={ layout }
-								options={ ampLayoutOptions }
-								onChange={ value => ( setAttributes( { layout: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Width (px)' ) }
-								value={ width !== undefined ? width : '' }
-								onChange={ value => ( setAttributes( { width: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Height (px)' ) }
-								value={ height }
-								onChange={ value => ( setAttributes( { height: value } ) ) }
-							/>
-						</PanelBody>
-					</InspectorControls>
-				),
-				url && (
-					<Placeholder label={ __( 'Brid Player' ) }>
-						<p className="components-placeholder__error">{ url }</p>
-						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
-					</Placeholder>
-				),
-				! url && (
-					<Placeholder label={ __( 'Brid Player' ) }>
-						<p>{ __( 'Add required data to use the block.' ) }</p>
-					</Placeholder>
-				)
-			];
+			return (
+				<Fragment>
+					{
+						isSelected && (
+							<InspectorControls key='inspector'>
+								<PanelBody title={ __( 'Brid Player Settings' ) }>
+									<TextControl
+										label={ __( 'Brid.tv partner ID (required)' ) }
+										value={ dataPartner }
+										onChange={ value => ( setAttributes( { dataPartner: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Brid.tv player ID (required)' ) }
+										value={ dataPlayer }
+										onChange={ value => ( setAttributes( { dataPlayer: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Video ID (one of video / playlist / outstream ID is required)' ) }
+										value={ dataVideo }
+										onChange={ value => ( setAttributes( { dataVideo: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Outstream unit ID (one of video / playlist / outstream ID is required)' ) }
+										value={ dataOutstream }
+										onChange={ value => ( setAttributes( { dataOutstream: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Playlist ID (one of video / playlist / outstream ID is required)' ) }
+										value={ dataPlaylist }
+										onChange={ value => ( setAttributes( { dataPlaylist: value } ) ) }
+									/>
+									<ToggleControl
+										label={ __( 'Autoplay' ) }
+										checked={ autoPlay }
+										onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
+									/>
+									<SelectControl
+										label={ __( 'Layout' ) }
+										value={ layout }
+										options={ ampLayoutOptions }
+										onChange={ value => ( setAttributes( { layout: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Width (px)' ) }
+										value={ width !== undefined ? width : '' }
+										onChange={ value => ( setAttributes( { width: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Height (px)' ) }
+										value={ height }
+										onChange={ value => ( setAttributes( { height: value } ) ) }
+									/>
+								</PanelBody>
+							</InspectorControls>
+						)
+					}
+					{
+						url && (
+							<Placeholder label={ __( 'Brid Player' ) }>
+								<p className="components-placeholder__error">{ url }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+							</Placeholder>
+						)
+
+					}
+					{
+						! url && (
+							<Placeholder label={ __( 'Brid Player' ) }>
+								<p>{ __( 'Add required data to use the block.' ) }</p>
+							</Placeholder>
+						)
+					}
+				</Fragment>
+			);
 		},
 
 		save( { attributes } ) {

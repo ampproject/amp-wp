@@ -4,6 +4,7 @@
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls } = wp.editor;
+const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
@@ -65,63 +66,71 @@ export default registerBlockType(
 			if ( dataTag && dataSrc ) {
 				dataSet = true;
 			}
-			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'IMA Video Settings' ) }>
-							<TextControl
-								label={ __( 'Https URL for your VAST ad document (required)' ) }
-								value={ dataTag }
-								onChange={ value => ( setAttributes( { dataTag: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Https URL of your video content (required)' ) }
-								value={ dataSrc }
-								onChange={ value => ( setAttributes( { dataSrc: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Https URL to preview image' ) }
-								value={ dataPoster }
-								onChange={ value => ( setAttributes( { dataPoster: value } ) ) }
-							/>
-							<ToggleControl
-								label={ __( 'Delay Ad Request' ) }
-								checked={ dataDelayAdRequest }
-								onChange={ () => ( setAttributes( { dataDelayAdRequest: ! dataDelayAdRequest } ) ) }
-							/>
-							<SelectControl
-								label={ __( 'Layout' ) }
-								value={ layout }
-								options={ ampLayoutOptions }
-								onChange={ value => ( setAttributes( { layout: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Width (px)' ) }
-								value={ width !== undefined ? width : '' }
-								onChange={ value => ( setAttributes( { width: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Height (px)' ) }
-								value={ height }
-								onChange={ value => ( setAttributes( { height: value } ) ) }
-							/>
-						</PanelBody>
-					</InspectorControls>
-				),
-				dataSet && (
-					<Placeholder label={ __( 'IMA Video' ) }>
-						<p className="components-placeholder__error">{ dataSrc }</p>
-						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
-					</Placeholder>
-				),
-				! dataSet && (
-					<Placeholder label={ __( 'IMA Video' ) }>
-						<p>{ __( 'Add required data to use the block.' ) }</p>
-					</Placeholder>
-				)
-			];
+			return (
+				<Fragment>
+					{
+						isSelected && (
+							<InspectorControls key='inspector'>
+								<PanelBody title={ __( 'IMA Video Settings' ) }>
+									<TextControl
+										label={ __( 'Https URL for your VAST ad document (required)' ) }
+										value={ dataTag }
+										onChange={ value => ( setAttributes( { dataTag: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Https URL of your video content (required)' ) }
+										value={ dataSrc }
+										onChange={ value => ( setAttributes( { dataSrc: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Https URL to preview image' ) }
+										value={ dataPoster }
+										onChange={ value => ( setAttributes( { dataPoster: value } ) ) }
+									/>
+									<ToggleControl
+										label={ __( 'Delay Ad Request' ) }
+										checked={ dataDelayAdRequest }
+										onChange={ () => ( setAttributes( { dataDelayAdRequest: ! dataDelayAdRequest } ) ) }
+									/>
+									<SelectControl
+										label={ __( 'Layout' ) }
+										value={ layout }
+										options={ ampLayoutOptions }
+										onChange={ value => ( setAttributes( { layout: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Width (px)' ) }
+										value={ width !== undefined ? width : '' }
+										onChange={ value => ( setAttributes( { width: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Height (px)' ) }
+										value={ height }
+										onChange={ value => ( setAttributes( { height: value } ) ) }
+									/>
+								</PanelBody>
+							</InspectorControls>
+						)
+					}
+					{
+						dataSet && (
+							<Placeholder label={ __( 'IMA Video' ) }>
+								<p className="components-placeholder__error">{ dataSrc }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+							</Placeholder>
+						)
+					}
+					{
+						! dataSet && (
+							<Placeholder label={ __( 'IMA Video' ) }>
+								<p>{ __( 'Add required data to use the block.' ) }</p>
+							</Placeholder>
+						)
+					}
+				</Fragment>
+			);
 		},
 
 		save( { attributes } ) {

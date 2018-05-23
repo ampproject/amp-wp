@@ -4,6 +4,7 @@
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls } = wp.editor;
+const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
@@ -73,68 +74,76 @@ export default registerBlockType(
 			if ( dataPid && ( dataBcid || dataVid ) ) {
 				url = `https://delivery.vidible.tv/htmlembed/pid=${dataPid}/`;
 			}
-			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'O2 Player Settings' ) }>
-							<TextControl
-								label={ __( 'Player ID (required)' ) }
-								value={ dataPid }
-								onChange={ value => ( setAttributes( { dataPid: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Buyer Company ID (either buyer or video ID is required)' ) }
-								value={ dataBcid }
-								onChange={ value => ( setAttributes( { dataBcid: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Video ID (either buyer or video ID is required)' ) }
-								value={ dataVid }
-								onChange={ value => ( setAttributes( { dataVid: value } ) ) }
-							/>
-							<TextControl
-								label={ __( 'Playlist ID' ) }
-								value={ dataBid }
-								onChange={ value => ( setAttributes( { dataBid: value } ) ) }
-							/>
-							<ToggleControl
-								label={ __( 'Autoplay' ) }
-								checked={ autoPlay }
-								onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
-							/>
-							<SelectControl
-								label={ __( 'Layout' ) }
-								value={ layout }
-								options={ ampLayoutOptions }
-								onChange={ value => ( setAttributes( { layout: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Width (px)' ) }
-								value={ width !== undefined ? width : '' }
-								onChange={ value => ( setAttributes( { width: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								label={ __( 'Height (px)' ) }
-								value={ height }
-								onChange={ value => ( setAttributes( { height: value } ) ) }
-							/>
-						</PanelBody>
-					</InspectorControls>
-				),
-				url && (
-					<Placeholder label={ __( 'O2 Player' ) }>
-						<p className="components-placeholder__error">{ url }</p>
-						<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
-					</Placeholder>
-				),
-				! url && (
-					<Placeholder label={ __( 'O2 Player' ) }>
-						<p>{ __( 'Add required data to use the block.' ) }</p>
-					</Placeholder>
-				)
-			];
+			return (
+				<Fragment>
+					{
+						isSelected && (
+							<InspectorControls key='inspector'>
+								<PanelBody title={ __( 'O2 Player Settings' ) }>
+									<TextControl
+										label={ __( 'Player ID (required)' ) }
+										value={ dataPid }
+										onChange={ value => ( setAttributes( { dataPid: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Buyer Company ID (either buyer or video ID is required)' ) }
+										value={ dataBcid }
+										onChange={ value => ( setAttributes( { dataBcid: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Video ID (either buyer or video ID is required)' ) }
+										value={ dataVid }
+										onChange={ value => ( setAttributes( { dataVid: value } ) ) }
+									/>
+									<TextControl
+										label={ __( 'Playlist ID' ) }
+										value={ dataBid }
+										onChange={ value => ( setAttributes( { dataBid: value } ) ) }
+									/>
+									<ToggleControl
+										label={ __( 'Autoplay' ) }
+										checked={ autoPlay }
+										onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
+									/>
+									<SelectControl
+										label={ __( 'Layout' ) }
+										value={ layout }
+										options={ ampLayoutOptions }
+										onChange={ value => ( setAttributes( { layout: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Width (px)' ) }
+										value={ width !== undefined ? width : '' }
+										onChange={ value => ( setAttributes( { width: value } ) ) }
+									/>
+									<TextControl
+										type="number"
+										label={ __( 'Height (px)' ) }
+										value={ height }
+										onChange={ value => ( setAttributes( { height: value } ) ) }
+									/>
+								</PanelBody>
+							</InspectorControls>
+						)
+					}
+					{
+						url && (
+							<Placeholder label={ __( 'O2 Player' ) }>
+								<p className="components-placeholder__error">{ url }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+							</Placeholder>
+						)
+					}
+					{
+						! url && (
+							<Placeholder label={ __( 'O2 Player' ) }>
+								<p>{ __( 'Add required data to use the block.' ) }</p>
+							</Placeholder>
+						)
+					}
+				</Fragment>
+			);
 		},
 
 		save( { attributes } ) {
