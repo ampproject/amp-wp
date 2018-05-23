@@ -49,7 +49,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0-alpha' );
+define( 'AMP__VERSION', '0.7.1' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -143,6 +143,7 @@ function amp_init() {
 	AMP_Post_Type_Support::add_post_type_support();
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
@@ -150,7 +151,7 @@ function amp_init() {
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
-	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
+	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) && version_compare( JETPACK__VERSION, '6.2-alpha', '<' ) ) {
 		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
 

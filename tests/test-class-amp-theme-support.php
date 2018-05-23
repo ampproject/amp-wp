@@ -1130,6 +1130,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		AMP_Theme_Support::add_hooks();
 		ob_start();
 		?>
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
