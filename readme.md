@@ -8,7 +8,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.7  
 **Tested up to:** 4.9  
-**Stable tag:** 0.7.0  
+**Stable tag:** 0.7.1  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.3  
 
@@ -62,13 +62,14 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ## Changelog ##
 
-### 0.7.1 (Unreleased) ###
+### 0.7.1 (2018-05-23) ###
 - Limit showing AMP validation warnings to when `amp` theme support is present. See [#1132](https://github.com/Automattic/amp-wp/pull/1132). Props westonruter.
 - Supply the extracted dimensions to images determined to need them; fixes regression from 0.6 this is key for Gutenberg compat. See [#1117](https://github.com/Automattic/amp-wp/pull/1117). Props westonruter.
 - Ensure before/after is amended to filtered comment_reply_link. See [#1118](https://github.com/Automattic/amp-wp/pull/1118). Props westonruter.
 - Force VideoPress to use html5 player for AMP. See [#1125](https://github.com/Automattic/amp-wp/pull/1125). Props yurynix.
 - Soft-deprecate `AMP_Base_Sanitizer::get_body_node()` instead of hard-deprecating it (with triggered notice). See [#1141](https://github.com/Automattic/amp-wp/pull/1141). Props westonruter.
 - Pass '/' as an argument to home_url(), preventing possible 404. See [#1158](https://github.com/Automattic/amp-wp/issues/1158), [#1161](https://github.com/Automattic/amp-wp/pull/1161). Props kienstra.
+- Deprecate Jetpack helper and some parts of WPCOM helper for Jetpack 6.2. See [#1149](https://github.com/Automattic/amp-wp/pull/1149). Props gravityrail.
 
 See [0.7.1 milestone](https://github.com/Automattic/amp-wp/milestone/8?closed=1).
 
