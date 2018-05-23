@@ -1,7 +1,7 @@
 /* exported ampEditorBlocks */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0 ] } ] */
 
-var ampEditorBlocks = ( function() {
+var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	var component, __;
 
 	__ = wp.i18n.__;
