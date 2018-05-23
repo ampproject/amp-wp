@@ -41,6 +41,14 @@ class AMP_Editor_Blocks {
 	 */
 	public function enqueue_block_editor_assets() {
 
+		// Styles.
+		wp_enqueue_style(
+			'amp-editor-blocks-style',
+			amp_get_asset_url( 'css/amp-editor-blocks.css' ),
+			array(),
+			AMP__VERSION
+		);
+
 		// Scripts.
 		wp_enqueue_script(
 			'amp-editor-blocks-build',

@@ -1,7 +1,7 @@
 /* exported ampEditorBlocks */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0 ] } ] */
 
-var ampEditorBlocks = ( function() {
+var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	var component, __;
 
 	__ = wp.i18n.__;
@@ -358,16 +358,39 @@ var ampEditorBlocks = ( function() {
 			height = props.attributes.height,
 			isSelected = props.isSelected,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			TextControl = wp.components.TextControl,
+			FontSizePicker = wp.components.FontSizePicker,
 			ToggleControl = wp.components.ToggleControl,
 			PanelBody = wp.components.PanelBody,
-			label = 'Use AMP Fit Text';
+			label = __( 'Use AMP Fit Text' ),
+			FONT_SIZES = [
+				{
+					name: 'small',
+					shortName: __( 'S' ),
+					size: 14
+				},
+				{
+					name: 'regular',
+					shortName: __( 'M' ),
+					size: 16
+				},
+				{
+					name: 'large',
+					shortName: __( 'L' ),
+					size: 36
+				},
+				{
+					name: 'larger',
+					shortName: __( 'XL' ),
+					size: 48
+				}
+			];
 
 		if ( ampFitText ) {
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: component.data.ampSettingsLabel },
+					el( PanelBody, { title: component.data.ampSettingsLabel, className: 'is-amp-fit-text' },
 						el( ToggleControl, {
 							label: label,
 							checked: ampFitText,
@@ -376,26 +399,38 @@ var ampEditorBlocks = ( function() {
 							}
 						} ),
 						el( TextControl, {
-							label: __( 'Height (px)' ),
+							label: __( 'Height (px, has to be larger than max font)' ),
 							value: height,
 							onChange: function( nextHeight ) {
 								props.setAttributes( { height: nextHeight } );
 							}
 						} ),
-						el( TextControl, {
-							label: __( 'Min font (px)' ),
-							value: minFont,
-							onChange: function( nextMinFont ) {
-								props.setAttributes( { minFont: nextMinFont } );
-							}
-						} ),
-						el( TextControl, {
-							label: __( 'Max font (px)' ),
-							value: maxFont,
-							onChange: function( nextMaxFont ) {
-								props.setAttributes( { maxFont: nextMaxFont } );
-							}
-						} )
+						el( PanelBody, { title: __( 'Min font (px, has to be smaller/same as max font)' ) },
+							el( FontSizePicker, {
+								label: __( 'Min font (px, has to be smaller/same as max font)' ),
+								fallbackFontSize: 14,
+								value: minFont,
+								fontSizes: FONT_SIZES,
+								onChange: function( nextMinFont ) {
+									if ( nextMinFont <= maxFont ) {
+										props.setAttributes( { minFont: nextMinFont } );
+									}
+								}
+							} )
+						),
+						el( PanelBody, { title: __( 'Max font (px)' ) },
+							el( FontSizePicker, {
+								value: maxFont,
+								fallbackFontSize: 48,
+								fontSizes: FONT_SIZES,
+								onChange: function( nextMaxFont ) {
+									props.setAttributes( {
+										maxFont: nextMaxFont,
+										height: Math.max( nextMaxFont, height )
+									} );
+								}
+							} )
+						)
 					)
 				)
 			);
@@ -427,7 +462,7 @@ var ampEditorBlocks = ( function() {
 		var ampCarousel = props.attributes.ampCarousel,
 			isSelected = props.isSelected,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			ToggleControl = wp.components.ToggleControl,
 			PanelBody = wp.components.PanelBody,
 			toggleControl;
