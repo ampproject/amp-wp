@@ -27,20 +27,6 @@ class AMP_Theme_Support {
 	const RESPONSE_CACHE_GROUP = 'amp-reponse';
 
 	/**
-	 * Query var that triggers response cache removal for the given page.
-	 *
-	 * @var string
-	 */
-	const FLUSH_RESPONSE_CACHE_VAR = 'amp_flush_response_cache';
-
-	/**
-	 * Response cache hash key.
-	 *
-	 * @var string
-	 */
-	public static $response_cache_key;
-
-	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -1055,30 +1041,31 @@ class AMP_Theme_Support {
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'disable_invalid_removal' => $is_validation_debug_mode,
-				'enable_response_caching' => ! defined( 'WP_DEBUG' ) || true !== WP_DEBUG || $is_validation_debug_mode,
+				'enable_response_caching' => (
+					( ! defined( 'WP_DEBUG' ) || true !== WP_DEBUG )
+					&&
+					! AMP_Validation_Utils::should_validate_response()
+				),
 			),
 			$args
 		);
 
 		// Return cache if enabled and found.
 		if ( true === $args['enable_response_caching'] ) {
-			self::set_response_cache_key( array(
+			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
+			$response_cache_key = md5( wp_json_encode( array(
 				$args,
 				$response,
 				self::$sanitizer_classes,
 				self::$embed_handlers,
 				AMP__VERSION,
-			) );
+			) ) );
 
-			if ( isset( $_REQUEST[ self::FLUSH_RESPONSE_CACHE_VAR ] ) ) { // WPCS: csrf ok.
-				wp_cache_delete( self::$response_cache_key, self::RESPONSE_CACHE_GROUP );
-			} else {
-				$response_cache = wp_cache_get( self::$response_cache_key, self::RESPONSE_CACHE_GROUP );
+			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
 
-				if ( ! empty( $response_cache ) ) {
-					AMP_Response_Headers::send_header( 'AMP-Response-Cache', true );
-					return $response_cache;
-				}
+			if ( ! empty( $response_cache ) ) {
+				AMP_Response_Headers::send_header( 'AMP-Response-Cache', true );
+				return $response_cache;
 			}
 		}
 
@@ -1187,35 +1174,10 @@ class AMP_Theme_Support {
 
 		// Cache response if enabled.
 		if ( true === $args['enable_response_caching'] ) {
-			wp_cache_set( self::$response_cache_key, $response, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
+			wp_cache_set( $response_cache_key, $response, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
-	 *
-	 * @since 1.0
-	 *
-	 * @param array $data Data used to build hash key. A new hash key will be generated upon data value changes
-	 *                    which will eventually trigger a new cached reponse.
-	 */
-	protected static function set_response_cache_key( $data ) {
-		// Loop through the data and make sure all functions and closure are called to prevent serializing issues.
-		$maybe_call_user_function = function ( $data ) use ( &$maybe_call_user_function ) {
-			if ( is_array( $data ) ) {
-				foreach ( $data as $index => $item ) {
-					$data[ $index ] = $maybe_call_user_function( $item );
-				}
-			} elseif ( is_callable( $data ) ) {
-				return call_user_func( $data );
-			}
-
-			return $data;
-		};
-
-		self::$response_cache_key = md5( maybe_serialize( $maybe_call_user_function( $data ) ) );
 	}
 
 	/**

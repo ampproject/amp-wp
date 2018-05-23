@@ -960,7 +960,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @global WP_Widget_Factory $wp_widget_factory
 	 * @global WP_Scripts $wp_scripts
 	 * @covers AMP_Theme_Support::prepare_response()
-	 * @covers AMP_Theme_Support::set_response_cache_key()
 	 */
 	public function test_prepare_response() {
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
@@ -1052,24 +1051,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['handle'] );
 
-		// Test that response cache is set correctly.
 		$call_response = function() use ( $original_html ) {
 			return AMP_Theme_Support::prepare_response( $original_html, array(
 				'enable_response_caching' => true,
-				'test_closure_argument'   => function() {},
 			) );
 		};
-		$this->assertEmpty( wp_cache_get(
-			AMP_Theme_Support::$response_cache_key,
-			AMP_Theme_Support::RESPONSE_CACHE_GROUP
-		) );
-		$this->assertEquals(
-			$call_response(),
-			wp_cache_get(
-				AMP_Theme_Support::$response_cache_key,
-				AMP_Theme_Support::RESPONSE_CACHE_GROUP
-			)
-		);
+
+		// Test that first response isn't cached.
+		$first_response = $call_response();
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Response-Cache',
@@ -1082,9 +1071,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that response cache is return upon second call.
 		AMP_Response_Headers::$headers_sent = array();
-		$cache_key                          = AMP_Theme_Support::$response_cache_key;
-		$this->assertEquals( wp_cache_get( $cache_key, AMP_Theme_Support::RESPONSE_CACHE_GROUP ), $call_response() );
-		$this->assertEquals( $cache_key, AMP_Theme_Support::$response_cache_key );
+		$this->assertEquals( $first_response, $call_response() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Response-Cache',
@@ -1100,22 +1087,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::prepare_response( $original_html, array(
 			'enable_response_caching' => true,
 			'test_reset_by_arg'       => true,
-			'test_closure_argument'   => function() {},
 		) );
-		$this->assertNotEquals( $cache_key, AMP_Theme_Support::$response_cache_key );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Response-Cache',
-				'value'       => false,
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-
-		// Test cache flush.
-		$_REQUEST[ AMP_Theme_Support::FLUSH_RESPONSE_CACHE_VAR ] = true;
-		$call_response();
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Response-Cache',
