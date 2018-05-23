@@ -7,13 +7,8 @@ const {
 	registerBlockType
 } = wp.blocks;
 const {
-	InspectorControls,
 	PlainText
 } = wp.editor;
-const {
-	PanelBody,
-	ToggleControl
-} = wp.components;
 
 /**
  * Register block.
@@ -32,30 +27,15 @@ export default registerBlockType(
 		attributes: {
 			dataFormula: {
 				type: 'string'
-			},
-			displayInline: {
-				type: 'boolean'
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { dataFormula, displayInline } = attributes;
+		edit( { attributes, setAttributes } ) {
+			const { dataFormula } = attributes;
 
 			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'AMP MathML Settings' ) }>
-							<ToggleControl
-								label={ __( 'Display inline' ) }
-								checked={ displayInline }
-								onChange={ () => ( setAttributes( { displayInline: ! displayInline } ) ) }
-							/>
-						</PanelBody>
-					</InspectorControls>
-				),
 				<PlainText
 					key='formula'
-					tagName='div'
 					value={ dataFormula }
 					placeholder={ __( 'Insert formula' ) }
 					onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
@@ -68,9 +48,6 @@ export default registerBlockType(
 				'data-formula': attributes.dataFormula,
 				layout: 'container'
 			};
-			if ( attributes.displayInline ) {
-				mathmlProps.inline = '';
-			}
 			return (
 				<amp-mathml { ...mathmlProps }></amp-mathml>
 			);
