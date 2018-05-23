@@ -7,7 +7,7 @@
  *
  * @since 0.6
  */
-var ampPostMetaBox = ( function( $ ) {
+var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	var component = {
