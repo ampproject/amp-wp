@@ -16,7 +16,7 @@ class AMP_Editor_Blocks {
 	 */
 	public function init() {
 		if ( function_exists( 'gutenberg_init' ) ) {
-			add_action( 'admin_enqueue_scripts', array( $this, 'add_editor_filters' ) );
+			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		}
 	}
@@ -39,7 +39,16 @@ class AMP_Editor_Blocks {
 	 * Enqueue filters for extending core blocks attributes.
 	 * Has to be loaded before registering the blocks in registerCoreBlocks.
 	 */
-	public function add_editor_filters() {
+	public function enqueue_block_editor_assets() {
+
+		// Scripts.
+		wp_enqueue_script(
+			'amp-editor-blocks-build',
+			amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
+			array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+			AMP__VERSION
+		);
+
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
