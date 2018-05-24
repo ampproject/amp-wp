@@ -93,7 +93,11 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/quote',
 				'core/subhead'
 			],
-			ampSettingsLabel: __( 'AMP Settings' )
+			ampSettingsLabel: __( 'AMP Settings' ),
+			fontSizes: {
+				small: 14,
+				larger: 48
+			}
 		}
 	};
 
@@ -197,11 +201,11 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			};
 			settings.attributes.minFont = {
 				type: 'number',
-				default: 14
+				default: component.data.fontSizes.small
 			};
 			settings.attributes.maxFont = {
 				type: 'number',
-				default: 48
+				default: component.data.fontSizes.larger
 			};
 			settings.attributes.height = {
 				type: 'number',
@@ -424,7 +428,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 								fontSizes: FONT_SIZES,
 								onChange: function( nextMinFont ) {
 									if ( ! nextMinFont ) {
-										nextMinFont = 14; // @todo Supplying fallbackFontSize should be done automatically by the component?
+										nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
 									}
 									if ( nextMinFont <= maxFont ) {
 										props.setAttributes( { minFont: nextMinFont } );
@@ -447,7 +451,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 								fontSizes: FONT_SIZES,
 								onChange: function( nextMaxFont ) {
 									if ( ! nextMaxFont ) {
-										nextMaxFont = 48; // @todo Supplying fallbackFontSize should be done automatically by the component?
+										nextMaxFont = component.data.fontSizes.larger; // @todo Supplying fallbackFontSize should be done automatically by the component?
 									}
 									props.setAttributes( {
 										maxFont: nextMaxFont,
