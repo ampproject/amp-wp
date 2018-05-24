@@ -390,9 +390,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		$url_host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
-			return false;
-		}
 
 		// Validate file extensions.
 		if ( ! empty( $allowed_extensions ) ) {
@@ -401,6 +398,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				/* translators: %s is the file URL */
 				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
 			}
+		}
+
+		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
+			return false;
 		}
 
 		$file_path = null;
