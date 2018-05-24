@@ -1118,6 +1118,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check 'value_regex' - case sensitive regex match.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ];
+			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			/*
 			 * The regex pattern has '^' and '$' though they are not in the AMP spec.
@@ -1125,7 +1126,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * matched by a regex rule of '(_blank|_self|_top)'. As the AMP JS validator
 			 * only accepts '_blank' we leave it this way for now.
 			 */
-			if ( preg_match( '@^(' . $rule_value . ')$@u', $node->getAttribute( $attr_name ) ) ) {
+			if ( preg_match( '/^(' . $rule_value . ')$/u', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
 			} else {
 				return AMP_Rule_Spec::FAIL;
@@ -1153,9 +1154,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ];
+			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			// See note above regarding the '^' and '$' that are added here.
-			if ( preg_match( '/^' . $rule_value . '$/ui', $node->getAttribute( $attr_name ) ) ) {
+			if ( preg_match( '/^(' . $rule_value . ')$/ui', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
 			} else {
 				return AMP_Rule_Spec::FAIL;
