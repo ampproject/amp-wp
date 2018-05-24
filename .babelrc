@@ -18,7 +18,7 @@
     [
       "@wordpress/babel-plugin-makepot",
       {
-        "output": "languages/amp-editor-blocks-js.pot"
+        "output": "languages/amp.pot"
       }
     ]
   ],
