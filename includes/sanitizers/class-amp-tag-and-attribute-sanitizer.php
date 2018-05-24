@@ -1125,7 +1125,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * matched by a regex rule of '(_blank|_self|_top)'. As the AMP JS validator
 			 * only accepts '_blank' we leave it this way for now.
 			 */
-			if ( preg_match( '@^' . $rule_value . '$@u', $node->getAttribute( $attr_name ) ) ) {
+			if ( preg_match( '@^(' . $rule_value . ')$@u', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
 			} else {
 				return AMP_Rule_Spec::FAIL;
