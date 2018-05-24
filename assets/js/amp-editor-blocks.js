@@ -15,7 +15,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			ampLayoutOptions: [
 				{
 					value: 'nodisplay',
-					label: __( 'No Display' ),
+					label: __( 'No Display', 'amp' ),
 					notAvailable: [
 						'core-embed/vimeo',
 						'core-embed/dailymotion',
@@ -27,7 +27,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{
 					// Not supported by amp-audio and amp-pixel.
 					value: 'fixed',
-					label: __( 'Fixed' ),
+					label: __( 'Fixed', 'amp' ),
 					notAvailable: [
 						'core-embed/soundcloud'
 					]
@@ -35,7 +35,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{
 					// To ensure your AMP element displays, you must specify a width and height for the containing element.
 					value: 'responsive',
-					label: __( 'Responsive' ),
+					label: __( 'Responsive', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/soundcloud'
@@ -43,12 +43,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				},
 				{
 					value: 'fixed-height',
-					label: __( 'Fixed height' ),
+					label: __( 'Fixed height', 'amp' ),
 					notAvailable: []
 				},
 				{
 					value: 'fill',
-					label: __( 'Fill' ),
+					label: __( 'Fill', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/soundcloud'
@@ -56,7 +56,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				},
 				{
 					value: 'flex-item',
-					label: __( 'Flex Item' ),
+					label: __( 'Flex Item', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/soundcloud'
@@ -65,7 +65,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{
 					// Not supported by video.
 					value: 'intrinsic',
-					label: __( 'Intrinsic' ),
+					label: __( 'Intrinsic', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/youtube',
@@ -120,7 +120,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		var layoutOptions = [
 			{
 				value: '',
-				label: __( 'Default' )
+				label: __( 'Default', 'amp' )
 			}
 		];
 
@@ -282,15 +282,15 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			SelectControl = wp.components.SelectControl,
 			ToggleControl = wp.components.ToggleControl,
 			PanelBody = wp.components.PanelBody,
-			label = __( 'AMP Layout' );
+			label = __( 'AMP Layout', 'amp' );
 
 		if ( 'core/image' === name ) {
-			label = __( 'AMP Layout (modifies width/height)' );
+			label = __( 'AMP Layout (modifies width/height)', 'amp' );
 		}
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: __( 'AMP Settings' ) },
+				el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
 					el( SelectControl, {
 						label: label,
 						value: ampLayout,
@@ -303,7 +303,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						}
 					} ),
 					el( ToggleControl, {
-						label: __( 'AMP loading indicator disabled' ),
+						label: __( 'AMP loading indicator disabled', 'amp' ),
 						checked: ampNoLoading,
 						onChange: function() {
 							props.setAttributes( { ampNoLoading: ! ampNoLoading } );
@@ -332,7 +332,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 		if ( component.isGalleryShortcode( props.attributes ) ) {
 			toggleControl = el( ToggleControl, {
-				label: __( 'Display as AMP carousel' ),
+				label: __( 'Display as AMP carousel', 'amp' ),
 				checked: ampCarousel,
 				onChange: function() {
 					props.setAttributes( { ampCarousel: ! ampCarousel } );
@@ -340,7 +340,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			} );
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: __( 'AMP Settings' ) },
+					el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
 						toggleControl
 					)
 				)
