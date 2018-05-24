@@ -525,6 +525,32 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test handling external stylesheet.
+	 */
+	public function test_external_stylesheet_handling() {
+		$href = 'https://www.w3schools.com/css/mystyle.css';
+		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . $href . '"></head><body></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
+		$sanitizer->sanitize();
+		AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertCount( 1, $actual_stylesheets );
+		$stylesheet = $actual_stylesheets[0];
+
+		$this->assertContains( 'background-color:lightblue', $stylesheet );
+
+		// Make sure the stylesheet got saved to cache.
+		$cache_key = md5( $href );
+		$contents  = get_transient( $cache_key );
+		$this->assertNotFalse( $contents );
+		$this->assertContains( 'lightblue', $contents );
+	}
+
+	/**
 	 * Get amp-keyframe styles.
 	 *
 	 * @return array
@@ -653,6 +679,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				'file_path_not_found',
 			),
+			'amp_external_file' => array(
+				'//s.w.org/wp-includes/css/dashicons.css',
+				false,
+			),
 		);
 	}
 
@@ -709,10 +739,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'fontawesome' => array(
 				'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
 				array(),
-			),
-			'bad_host'    => array(
-				'https://bad.example.com/font.css',
-				array( 'disallowed_external_file_url' ),
 			),
 			'bad_ext'    => array(
 				home_url( '/bad.php' ),

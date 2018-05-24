@@ -358,7 +358,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param string   $url The file URL.
 	 * @param string[] $allowed_extensions Allowed file extensions.
-	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
+	 * @return string|WP_Error|boolean Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
 		$needs_base_url = (
@@ -391,8 +391,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$url_host = wp_parse_url( $url, PHP_URL_HOST );
 		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
-			/* translators: %s is the file URL */
-			return new WP_Error( 'disallowed_external_file_url', sprintf( __( 'Skipped file which does not have a recognized local host (%s).', 'amp' ), $url_host ) );
+			return false;
 		}
 
 		// Validate file extensions.
@@ -482,16 +481,37 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
+
+		$stylesheet = false;
 		if ( is_wp_error( $css_file_path ) ) {
 			$this->remove_invalid_child( $element, array(
 				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
 			) );
 			return;
+		} elseif ( false === $css_file_path ) {
+
+			// If CSS local path was not received, this must be external URL.
+			$cache_key = md5( $normalized_font_href );
+			$contents  = get_transient( $cache_key );
+			if ( false === $contents ) {
+				$r = wp_remote_get( $normalized_font_href );
+				if ( 200 !== wp_remote_retrieve_response_code( $r ) ) {
+					$contents = new WP_Error( wp_remote_retrieve_response_code( $r ) );
+				} else {
+					$contents = wp_remote_retrieve_body( $r );
+				}
+				set_transient( $cache_key, $contents, MONTH_IN_SECONDS );
+			}
+			if ( ! is_wp_error( $contents ) ) {
+				$stylesheet = $contents;
+			}
+		} else {
+
+			// Load the CSS from the filesystem.
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		}
 
-		// Load the CSS from the filesystem.
-		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		if ( false === $stylesheet ) {
 			$this->remove_invalid_child( $element, array(
 				'message' => __( 'Unable to load stylesheet from filesystem.', 'amp' ),
