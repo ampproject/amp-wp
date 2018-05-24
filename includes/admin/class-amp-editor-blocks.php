@@ -49,6 +49,7 @@ class AMP_Editor_Blocks {
 			'amp-jwplayer',
 			'amp-brid-player',
 			'amp-ima-video',
+			'amp-fit-text',
 		);
 
 		foreach ( $amp_blocks as $amp_block ) {
@@ -62,6 +63,7 @@ class AMP_Editor_Blocks {
 						'layout',
 						'width',
 						'height',
+						'class',
 					),
 					true
 				),

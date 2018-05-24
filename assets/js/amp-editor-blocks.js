@@ -201,15 +201,24 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			};
 			settings.attributes.minFont = {
 				type: 'number',
-				default: component.data.fontSizes.small
+				default: component.data.fontSizes.small,
+				source: 'attribute',
+				selector: 'amp-fit-text',
+				attribute: 'min-font-size'
 			};
 			settings.attributes.maxFont = {
 				type: 'number',
-				default: component.data.fontSizes.larger
+				default: component.data.fontSizes.larger,
+				source: 'attribute',
+				selector: 'amp-fit-text',
+				attribute: 'max-font-size'
 			};
 			settings.attributes.height = {
 				type: 'number',
-				default: 50
+				default: 50,
+				source: 'attribute',
+				selector: 'amp-fit-text',
+				attribute: 'height'
 			};
 		}
 
