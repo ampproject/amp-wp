@@ -172,7 +172,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
-			noticeMessage += ' ' + wp.i18n.__( 'Non-ignored validation errors prevent AMP from being served.', 'amp' );
+			noticeMessage += ' ' + wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
 			noticeElement = wp.element.createElement( 'p', {}, [
 				noticeMessage + ' ',
 				ampValidity.review_link && wp.element.createElement(

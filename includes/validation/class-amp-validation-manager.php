@@ -339,7 +339,7 @@ class AMP_Validation_Manager {
 				array(
 					'review_link' => get_edit_post_link( $validation_status_post->ID, 'raw' ),
 					'errors'      => wp_list_pluck(
-						AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post, array( 'ignore_ignored' => true ) ),
+						AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post, array( 'ignore_accepted' => true ) ),
 						'data'
 					),
 				)
@@ -522,7 +522,7 @@ class AMP_Validation_Manager {
 		}
 
 		$validation_errors = wp_list_pluck(
-			AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_ignored' => true ) ),
+			AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_accepted' => true ) ),
 			'data'
 		);
 
@@ -533,7 +533,7 @@ class AMP_Validation_Manager {
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
-		esc_html_e( 'There is content which fails AMP validation. Non-ignored validation errors prevent AMP from being served.', 'amp' );
+		esc_html_e( 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served.', 'amp' );
 		echo sprintf(
 			' <a href="%s" target="_blank">%s</a>',
 			esc_url( get_edit_post_link( $invalid_url_post ) ),
