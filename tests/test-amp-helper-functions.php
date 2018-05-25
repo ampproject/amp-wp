@@ -372,6 +372,51 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		) );
 		$metadata = amp_get_post_image_metadata( $post_id );
 		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
+
+		// Test an 'attachment' post type.
+		$attachment_src    = 'example/attachment.jpeg';
+		$attachment_height = 45;
+		$attachment_width  = 600;
+		$attachment_id     = $this->factory()->attachment->create_object(
+			$attachment_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_attachment_img = wp_get_attachment_image_src( $attachment_id, 'full', false );
+
+		update_post_meta(
+			$attachment_id,
+			'_wp_attachment_metadata',
+			array(
+				'height' => $attachment_height,
+				'width'  => $attachment_width,
+			)
+		);
+		$this->go_to( get_permalink( $attachment_id ) );
+
+		$this->assertEquals(
+			array(
+				'@type'  => 'ImageObject',
+				'height' => $attachment_height,
+				'url'    => $expected_attachment_img[0],
+				'width'  => $attachment_width,
+			),
+			amp_get_post_image_metadata( $attachment_id )
+		);
+
+		// Test a video as an 'attachment' post type, which shouldn't have a schema.org image.
+		$attachment_src = 'example/test-video.mpeg';
+		$attachment_id  = $this->factory()->attachment->create_object(
+			$attachment_src,
+			0,
+			array(
+				'post_mime_type' => 'video/mpeg',
+			)
+		);
+		$this->go_to( get_permalink( $attachment_id ) );
+		$this->assertNull( amp_get_post_image_metadata( $attachment_id ) );
 	}
 
 	/**
