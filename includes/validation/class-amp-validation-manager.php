@@ -448,7 +448,7 @@ class AMP_Validation_Manager {
 		$slug = md5( wp_json_encode( $error ) );
 		$term = get_term_by( 'slug', $slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
-		if ( ! self::$debug && ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) {
+		if ( ! self::$debug && ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
 			$sanitized = true;
 		} else {
 			$sanitized = false;

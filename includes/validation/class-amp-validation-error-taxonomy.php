@@ -27,32 +27,32 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_NEW_STATUS = 0;
 
 	/**
-	 * Term group for validation_error terms that the user acknowledges as being ignored (and thus not disabling AMP).
+	 * Term group for validation_error terms that the accepts and thus can be sanitized and does not disable AMP.
 	 *
 	 * @var int
 	 */
-	const VALIDATION_ERROR_IGNORED_STATUS = 1;
+	const VALIDATION_ERROR_ACCEPTED_STATUS = 1;
 
 	/**
-	 * Term group for validation_error terms that the user acknowledges (as being blockers to enabling AMP).
+	 * Term group for validation_error terms that the user flags as being blockers to enabling AMP.
 	 *
 	 * @var int
 	 */
-	const VALIDATION_ERROR_ACKNOWLEDGED_STATUS = 2;
+	const VALIDATION_ERROR_REJECTED_STATUS = 2;
 
 	/**
 	 * Action name for ignoring a validation error.
 	 *
 	 * @var string
 	 */
-	const VALIDATION_ERROR_IGNORE_ACTION = 'amp_validation_error_ignore';
+	const VALIDATION_ERROR_ACCEPT_ACTION = 'amp_validation_error_accept';
 
 	/**
-	 * Action name for acknowledging a validation error.
+	 * Action name for rejecting a validation error.
 	 *
 	 * @var string
 	 */
-	const VALIDATION_ERROR_ACKNOWLEDGE_ACTION = 'amp_validation_error_acknowledge';
+	const VALIDATION_ERROR_REJECT_ACTION = 'amp_validation_error_reject';
 
 	/**
 	 * Query var used when filtering by validation error status.
@@ -163,13 +163,13 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Get the count of validation error terms, optionally restricted by term group (e.g. ignored or acknowledged).
+	 * Get the count of validation error terms, optionally restricted by term group (e.g. accepted or rejected).
 	 *
 	 * @param array $args  {
 	 *    Args passed into wp_count_terms().
 	 *
 	 *     @type int|null $group        Term group.
-	 *     @type bool     $ignore_empty Ignore terms that are no longer associated with any URLs. Default false.
+	 *     @type bool     $ignore_empty Accept terms that are no longer associated with any URLs. Default false.
 	 * }
 	 * @return int Term count.
 	 */
@@ -358,8 +358,8 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Add bulk actions.
 		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
-			$bulk_actions[ self::VALIDATION_ERROR_IGNORE_ACTION ]      = __( 'Ignore', 'amp' );
-			$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Acknowledge', 'amp' );
+			$bulk_actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
+			$bulk_actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
 			return $bulk_actions;
 		} );
 
@@ -422,7 +422,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 		self::$should_filter_terms_clauses_for_error_validation_status = true;
 		$group = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-		if ( ! in_array( $group, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+		if ( ! in_array( $group, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS ), true ) ) {
 			return;
 		}
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $group ) {
@@ -464,23 +464,23 @@ class AMP_Validation_Error_Taxonomy {
 		$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
 		$count    = intval( $_GET['amp_actioned_count'] ); // WPCS: CSRF ok.
 		$message  = null;
-		if ( self::VALIDATION_ERROR_IGNORE_ACTION === $actioned ) {
+		if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $actioned ) {
 			$message = sprintf(
-				/* translators: %s is number of errors ignored */
+				/* translators: %s is number of errors accepted */
 				_n(
-					'Ignored %s error. It will no longer block related URLs from being served as AMP.',
-					'Ignored %s errors. They will no longer block related URLs from being served as AMP.',
+					'Accepted %s error. It will no longer block related URLs from being served as AMP.',
+					'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
 					number_format_i18n( $count ),
 					'amp'
 				),
 				$count
 			);
-		} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $actioned ) {
+		} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $actioned ) {
 			$message = sprintf(
-				/* translators: %s is number of errors acknowledged */
+				/* translators: %s is number of errors rejected */
 				_n(
-					'Acknowledged %s error. It will continue to block related URLs from being served as AMP.',
-					'Acknowledged %s errors. They will continue to block related URLs from being served as AMP.',
+					'Rejected %s error. It will continue to block related URLs from being served as AMP.',
+					'Rejected %s errors. They will continue to block related URLs from being served as AMP.',
 					number_format_i18n( $count ),
 					'amp'
 				),
@@ -514,26 +514,26 @@ class AMP_Validation_Error_Taxonomy {
 				unset( $actions['delete'] );
 			}
 
-			if ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $tag->term_group ) {
-				$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
+			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $tag->term_group ) {
+				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 					'<a href="%s" aria-label="%s">%s</a>',
 					wp_nonce_url(
-						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ), compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_REJECT_ACTION
 					),
-					esc_attr__( 'Acknowledging an error marks it as read. AMP validation errors prevent a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Acknowledge', 'amp' )
+					esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
+					esc_html__( 'Reject', 'amp' )
 				);
 			}
-			if ( self::VALIDATION_ERROR_IGNORED_STATUS !== $tag->term_group ) {
-				$actions[ self::VALIDATION_ERROR_IGNORE_ACTION ] = sprintf(
+			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $tag->term_group ) {
+				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s" aria-label="%s">%s</a>',
 					wp_nonce_url(
-						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_IGNORE_ACTION ), compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_IGNORE_ACTION
+						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
-					esc_attr__( 'Ignoring an error prevents it from blocking a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Ignore', 'amp' )
+					esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
+					esc_html__( 'Accept', 'amp' )
 				);
 			}
 		}
@@ -570,10 +570,10 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array Views.
 	 */
 	public static function filter_views_edit( $views ) {
-		$total_term_count        = self::get_validation_error_count();
-		$acknowledged_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ) );
-		$ignored_term_count      = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_IGNORED_STATUS ) );
-		$new_term_count          = $total_term_count - $acknowledged_term_count - $ignored_term_count;
+		$total_term_count    = self::get_validation_error_count();
+		$rejected_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
+		$accepted_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
+		$new_term_count      = $total_term_count - $rejected_term_count - $accepted_term_count;
 
 		$current_url = remove_query_arg(
 			array_merge(
@@ -586,7 +586,7 @@ class AMP_Validation_Error_Taxonomy {
 		$current_status = null;
 		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
 			$value = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-			if ( in_array( $value, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+			if ( in_array( $value, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS ), true ) ) {
 				$current_status = $value;
 			}
 		}
@@ -631,49 +631,49 @@ class AMP_Validation_Error_Taxonomy {
 			)
 		);
 
-		$views['acknowledged'] = sprintf(
+		$views['rejected'] = sprintf(
 			'<a href="%s" class="%s">%s</a>',
 			esc_url(
 				add_query_arg(
 					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+					self::VALIDATION_ERROR_REJECTED_STATUS,
 					$current_url
 				)
 			),
-			self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $current_status ? 'current' : '',
+			self::VALIDATION_ERROR_REJECTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
 				/* translators: %s is the term count */
 				_nx(
-					'Acknowledged <span class="count">(%s)</span>',
-					'Acknowledged <span class="count">(%s)</span>',
-					$acknowledged_term_count,
+					'Rejected <span class="count">(%s)</span>',
+					'Rejected <span class="count">(%s)</span>',
+					$rejected_term_count,
 					'terms',
 					'amp'
 				),
-				number_format_i18n( $acknowledged_term_count )
+				number_format_i18n( $rejected_term_count )
 			)
 		);
 
-		$views['ignored'] = sprintf(
+		$views['accepted'] = sprintf(
 			'<a href="%s" class="%s">%s</a>',
 			esc_url(
 				add_query_arg(
 					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_IGNORED_STATUS,
+					self::VALIDATION_ERROR_ACCEPTED_STATUS,
 					$current_url
 				)
 			),
-			self::VALIDATION_ERROR_IGNORED_STATUS === $current_status ? 'current' : '',
+			self::VALIDATION_ERROR_ACCEPTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
 				/* translators: %s is the term count */
 				_nx(
-					'Ignored <span class="count">(%s)</span>',
-					'Ignored <span class="count">(%s)</span>',
-					$ignored_term_count,
+					'Accepted <span class="count">(%s)</span>',
+					'Accepted <span class="count">(%s)</span>',
+					$accepted_term_count,
 					'terms',
 					'amp'
 				),
-				number_format_i18n( $ignored_term_count )
+				number_format_i18n( $accepted_term_count )
 			)
 		);
 		return $views;
@@ -709,10 +709,10 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'status':
-				if ( self::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) {
-					$content = esc_html__( 'Ignored', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $term->term_group ) {
-					$content = esc_html__( 'Acknowledged', 'amp' );
+				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
+					$content = esc_html__( 'Accepted', 'amp' );
+				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ) {
+					$content = esc_html__( 'Rejected', 'amp' );
 				} else {
 					$content = esc_html__( 'New', 'amp' );
 				}
@@ -866,10 +866,10 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
 		$term_group = null;
-		if ( self::VALIDATION_ERROR_IGNORE_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_IGNORED_STATUS;
-		} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS;
+		if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
+			$term_group = self::VALIDATION_ERROR_ACCEPTED_STATUS;
+		} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
+			$term_group = self::VALIDATION_ERROR_REJECTED_STATUS;
 		}
 
 		if ( $term_group ) {

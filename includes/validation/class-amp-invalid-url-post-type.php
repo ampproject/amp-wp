@@ -166,14 +166,14 @@ class AMP_Invalid_URL_Post_Type {
 	 * @param array       $args {
 	 *     Args.
 	 *
-	 *     @type bool $ignore_ignored Exclude validation errors that are ignored. Default false.
+	 *     @type bool $ignore_accepted Exclude validation errors that are accepted. Default false.
 	 * }
 	 * @return array List of errors.
 	 */
 	public static function get_invalid_url_validation_errors( $post, $args = array() ) {
 		$args   = array_merge(
 			array(
-				'ignore_ignored' => false,
+				'ignore_accepted' => false,
 			),
 			$args
 		);
@@ -192,7 +192,7 @@ class AMP_Invalid_URL_Post_Type {
 			if ( ! $term ) {
 				continue;
 			}
-			if ( $args['ignore_ignored'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) {
+			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
 				continue;
 			}
 			$errors[] = array(
@@ -351,17 +351,17 @@ class AMP_Invalid_URL_Post_Type {
 			'update_post_term_cache' => false,
 		);
 
-		$with_new_query          = new WP_Query( array_merge(
+		$with_new_query      = new WP_Query( array_merge(
 			$args,
 			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS )
 		) );
-		$with_acknowledged_query = new WP_Query( array_merge(
+		$with_rejected_query = new WP_Query( array_merge(
 			$args,
-			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS )
+			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS )
 		) );
-		$with_ignored_query      = new WP_Query( array_merge(
+		$with_accepted_query = new WP_Query( array_merge(
 			$args,
-			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS )
+			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS )
 		) );
 
 		$current_url = remove_query_arg(
@@ -375,7 +375,7 @@ class AMP_Invalid_URL_Post_Type {
 		$current_status = null;
 		if ( isset( $_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
 			$value = intval( $_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-			if ( in_array( $value, array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+			if ( in_array( $value, array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ), true ) ) {
 				$current_status = $value;
 			}
 		}
@@ -403,49 +403,49 @@ class AMP_Invalid_URL_Post_Type {
 			)
 		);
 
-		$views['acknowledged'] = sprintf(
+		$views['rejected'] = sprintf(
 			'<a href="%s" class="%s">%s</a>',
 			esc_url(
 				add_query_arg(
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
 					$current_url
 				)
 			),
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $current_status ? 'current' : '',
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
 				/* translators: %s is the post count */
 				_nx(
-					'With Acknowledged Errors <span class="count">(%s)</span>',
-					'With Acknowledged Errors <span class="count">(%s)</span>',
-					$with_acknowledged_query->found_posts,
+					'With Rejected Errors <span class="count">(%s)</span>',
+					'With Rejected Errors <span class="count">(%s)</span>',
+					$with_rejected_query->found_posts,
 					'posts',
 					'amp'
 				),
-				number_format_i18n( $with_acknowledged_query->found_posts )
+				number_format_i18n( $with_rejected_query->found_posts )
 			)
 		);
 
-		$views['ignored'] = sprintf(
+		$views['accepted'] = sprintf(
 			'<a href="%s" class="%s">%s</a>',
 			esc_url(
 				add_query_arg(
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
 					$current_url
 				)
 			),
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS === $current_status ? 'current' : '',
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
 				/* translators: %s is the post count */
 				_nx(
-					'With Ignored Errors <span class="count">(%s)</span>',
-					'With Ignored Errors <span class="count">(%s)</span>',
-					$with_ignored_query->found_posts,
+					'With Accepted Errors <span class="count">(%s)</span>',
+					'With Accepted Errors <span class="count">(%s)</span>',
+					$with_accepted_query->found_posts,
 					'posts',
 					'amp'
 				),
-				number_format_i18n( $with_ignored_query->found_posts )
+				number_format_i18n( $with_accepted_query->found_posts )
 			)
 		);
 
@@ -496,8 +496,8 @@ class AMP_Invalid_URL_Post_Type {
 		$counts = array_fill_keys(
 			array(
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
 			),
 			0
 		);
@@ -522,18 +522,18 @@ class AMP_Invalid_URL_Post_Type {
 						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] )
 					) );
 				}
-				if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS ] ) {
+				if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] ) {
 					$displayed_counts[] = esc_html( sprintf(
 						/* translators: %s is count */
-						__( 'Ignored: %s', 'amp' ),
-						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS ] )
+						__( 'Accepted: %s', 'amp' ),
+						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] )
 					) );
 				}
-				if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] ) {
+				if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] ) {
 					$displayed_counts[] = esc_html( sprintf(
 						/* translators: %s is count */
-						__( 'Acknowledged: %s', 'amp' ),
-						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] )
+						__( 'Rejected: %s', 'amp' ),
+						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] )
 					) );
 				}
 				echo implode( '<br>', $displayed_counts ); // WPCS: xss ok.
@@ -777,8 +777,8 @@ class AMP_Invalid_URL_Post_Type {
 		$counts = array_fill_keys(
 			array(
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
 			),
 			0
 		);
@@ -800,18 +800,18 @@ class AMP_Invalid_URL_Post_Type {
 				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] )
 			) );
 		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS ] ) {
+		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] ) {
 			$displayed_counts[] = esc_html( sprintf(
 				/* translators: %s is count */
-				__( 'Ignored: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS ] )
+				__( 'Accepted: %s', 'amp' ),
+				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] )
 			) );
 		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] ) {
+		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] ) {
 			$displayed_counts[] = esc_html( sprintf(
 				/* translators: %s is count */
-				__( 'Acknowledged: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ] )
+				__( 'Rejected: %s', 'amp' ),
+				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] )
 			) );
 		}
 
@@ -871,42 +871,42 @@ class AMP_Invalid_URL_Post_Type {
 							<summary>
 								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
 									<?php esc_html_e( '[New]', 'amp' ); ?>
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $term->term_group ) : ?>
-									<?php esc_html_e( '[Acknowledged]', 'amp' ); ?>
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS === $term->term_group ) : ?>
-									<?php esc_html_e( '[Ignored]', 'amp' ); ?>
+								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ) : ?>
+									<?php esc_html_e( '[Rejected]', 'amp' ); ?>
+								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) : ?>
+									<?php esc_html_e( '[Accepted]', 'amp' ); ?>
 								<?php endif; ?>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
 							</summary>
 							<p class="actions">
 								<?php
 								$actions = array();
-								if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $term->term_group ) {
-									$actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
+								if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS !== $term->term_group ) {
+									$actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 										'<a href="%s" aria-label="%s">%s</a>',
 										wp_nonce_url(
 											add_query_arg(
-												array_merge( array( 'action' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ), compact( 'term_id' ) ),
+												array_merge( array( 'action' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ),
 												$edit_terms_url
 											),
-											AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+											AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION
 										),
-										esc_attr__( 'Acknowledging an error marks it as read. AMP validation errors prevent a URL from being served as AMP.', 'amp' ),
-										esc_html__( 'Acknowledge', 'amp' )
+										esc_attr__( 'Rejecting an error marks it as read. AMP validation errors prevent a URL from being served as AMP.', 'amp' ),
+										esc_html__( 'Reject', 'amp' )
 									);
 								}
-								if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS !== $term->term_group ) {
-									$actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORE_ACTION ] = sprintf(
+								if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $term->term_group ) {
+									$actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 										'<a href="%s" aria-label="%s">%s</a>',
 										wp_nonce_url(
 											add_query_arg(
-												array_merge( array( 'action' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORE_ACTION ), compact( 'term_id' ) ),
+												array_merge( array( 'action' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ),
 												$edit_terms_url
 											),
-											AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORE_ACTION
+											AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
 										),
-										esc_attr__( 'Ignoring an error prevents it from blocking a URL from being served as AMP.', 'amp' ),
-										esc_html__( 'Ignore', 'amp' )
+										esc_attr__( 'Accepting an error prevents it from blocking a URL from being served as AMP.', 'amp' ),
+										esc_html__( 'Accept', 'amp' )
 									);
 								}
 								echo implode( ' | ', $actions ); // WPCS: xss ok.
