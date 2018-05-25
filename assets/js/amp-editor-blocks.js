@@ -363,11 +363,14 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	/**
 	 * Setup inspector controls for text blocks.
 	 *
+	 * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
+	 *
 	 * @param {Object} props Props.
 	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
 	 */
 	component.setUpTextBlocksInspectorControls = function setUpInspectorControls( props ) {
-		var ampFitText = props.attributes.ampFitText,
+		var inspectorPanelBodyArgs,
+			ampFitText = props.attributes.ampFitText,
 			minFont = props.attributes.minFont,
 			maxFont = props.attributes.maxFont,
 			height = props.attributes.height,
@@ -402,89 +405,86 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}
 			];
 
-		if ( ampFitText ) {
-			return isSelected && (
-				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: component.data.ampSettingsLabel, className: 'is-amp-fit-text' },
-						el( ToggleControl, {
-							label: label,
-							checked: ampFitText,
-							onChange: function() {
-								props.setAttributes( { ampFitText: ! ampFitText } );
-							}
-						} ),
-						el( TextControl, {
-							label: __( 'Height' ),
-							value: height,
-							type: 'number',
-							min: 1,
-							onChange: function( nextHeight ) {
-								props.setAttributes( { height: nextHeight } );
-							}
-						} ),
-						maxFont > height && el(
-							wp.components.Notice,
-							{
-								status: 'error',
-								isDismissible: false
-							},
-							__( 'The height must be greater than the max font size.' )
-						),
-						el( PanelBody, { title: __( 'Minimum font size' ) },
-							el( FontSizePicker, {
-								fallbackFontSize: 14,
-								value: minFont,
-								fontSizes: FONT_SIZES,
-								onChange: function( nextMinFont ) {
-									if ( ! nextMinFont ) {
-										nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
-									}
-									if ( nextMinFont <= maxFont ) {
-										props.setAttributes( { minFont: nextMinFont } );
-									}
-								}
-							} )
-						),
-						minFont > maxFont && el(
-							wp.components.Notice,
-							{
-								status: 'error',
-								isDismissible: false
-							},
-							__( 'The min font size must less than the max font size.' )
-						),
-						el( PanelBody, { title: __( 'Maximum font size' ) },
-							el( FontSizePicker, {
-								value: maxFont,
-								fallbackFontSize: 48,
-								fontSizes: FONT_SIZES,
-								onChange: function( nextMaxFont ) {
-									if ( ! nextMaxFont ) {
-										nextMaxFont = component.data.fontSizes.larger; // @todo Supplying fallbackFontSize should be done automatically by the component?
-									}
-									props.setAttributes( {
-										maxFont: nextMaxFont,
-										height: Math.max( nextMaxFont, height )
-									} );
-								}
-							} )
-						)
-					)
-				)
-			);
+		if ( ! isSelected ) {
+			return null;
 		}
 
-		return isSelected && (
-			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: component.data.ampSettingsLabel },
-					el( ToggleControl, {
-						label: label,
-						checked: ampFitText,
-						onChange: function() {
-							props.setAttributes( { ampFitText: ! ampFitText } );
+		inspectorPanelBodyArgs = [
+			PanelBody,
+			{ title: component.data.ampSettingsLabel, className: ampFitText ? 'is-amp-fit-text' : '' },
+			el( ToggleControl, {
+				label: label,
+				checked: ampFitText,
+				onChange: function() {
+					props.setAttributes( { ampFitText: ! ampFitText } );
+				}
+			} )
+		];
+
+		if ( ampFitText ) {
+			inspectorPanelBodyArgs.push.apply( inspectorPanelBodyArgs, [
+				el( TextControl, {
+					label: __( 'Height' ),
+					value: height,
+					type: 'number',
+					min: 1,
+					onChange: function( nextHeight ) {
+						props.setAttributes( { height: nextHeight } );
+					}
+				} ),
+				maxFont > height && el(
+					wp.components.Notice,
+					{
+						status: 'error',
+						isDismissible: false
+					},
+					__( 'The height must be greater than the max font size.' )
+				),
+				el( PanelBody, { title: __( 'Minimum font size' ) },
+					el( FontSizePicker, {
+						fallbackFontSize: 14,
+						value: minFont,
+						fontSizes: FONT_SIZES,
+						onChange: function( nextMinFont ) {
+							if ( ! nextMinFont ) {
+								nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
+							}
+							if ( nextMinFont <= maxFont ) {
+								props.setAttributes( { minFont: nextMinFont } );
+							}
+						}
+					} )
+				),
+				minFont > maxFont && el(
+					wp.components.Notice,
+					{
+						status: 'error',
+						isDismissible: false
+					},
+					__( 'The min font size must less than the max font size.' )
+				),
+				el( PanelBody, { title: __( 'Maximum font size' ) },
+					el( FontSizePicker, {
+						value: maxFont,
+						fallbackFontSize: 48,
+						fontSizes: FONT_SIZES,
+						onChange: function( nextMaxFont ) {
+							if ( ! nextMaxFont ) {
+								nextMaxFont = component.data.fontSizes.larger; // @todo Supplying fallbackFontSize should be done automatically by the component?
+							}
+							props.setAttributes( {
+								maxFont: nextMaxFont,
+								height: Math.max( nextMaxFont, height )
+							} );
 						}
 					} )
 				)
+			] );
+		}
+
+		return (
+			el( InspectorControls, { key: 'inspector' },
+				el.apply( null, inspectorPanelBodyArgs )
 			)
 		);
 	};
