@@ -13,6 +13,20 @@
 class AMP_Theme_Support {
 
 	/**
+	 * Replaced with the necessary scripts depending on components used in output.
+	 *
+	 * @var string
+	 */
+	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
+
+	/**
+	 * Response cache group name.
+	 *
+	 * @var string
+	 */
+	const RESPONSE_CACHE_GROUP = 'amp-reponse';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -974,8 +988,6 @@ class AMP_Theme_Support {
 	 * @return string Processed Response.
 	 */
 	public static function finish_output_buffering( $response ) {
-		AMP_Response_Headers::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
-
 		self::$is_output_buffering = false;
 		return self::prepare_response( $response );
 	}
@@ -1034,13 +1046,38 @@ class AMP_Theme_Support {
 
 		$args = array_merge(
 			array(
-				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element' => true,
-				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
-				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element'    => true,
+				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'enable_response_caching' => (
+					( ! defined( 'WP_DEBUG' ) || true !== WP_DEBUG )
+					&&
+					! AMP_Validation_Manager::should_validate_response()
+				),
 			),
 			$args
 		);
+
+		// Return cache if enabled and found.
+		if ( true === $args['enable_response_caching'] ) {
+			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
+			$response_cache_key = md5( wp_json_encode( array(
+				$args,
+				$response,
+				self::$sanitizer_classes,
+				self::$embed_handlers,
+				AMP__VERSION,
+			) ) );
+
+			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
+
+			if ( ! empty( $response_cache ) ) {
+				return $response_cache;
+			}
+		}
+
+		AMP_Response_Headers::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
 		$dom_parse_start = microtime( true );
 
@@ -1148,6 +1185,11 @@ class AMP_Theme_Support {
 		}
 
 		AMP_Response_Headers::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
+
+		// Cache response if enabled.
+		if ( true === $args['enable_response_caching'] ) {
+			wp_cache_set( $response_cache_key, $response, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
+		}
 
 		return $response;
 	}
