@@ -7,7 +7,7 @@
 
 /* exported ampBlockValidation */
 /* global wp, _ */
-var ampBlockValidation = ( function() {
+var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	var module = {
