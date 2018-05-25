@@ -85,7 +85,19 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/image',
 				'core/video',
 				'core/audio'
-			]
+			],
+			textBlocks: [
+				'core/paragraph',
+				'core/heading',
+				'core/code',
+				'core/quote',
+				'core/subhead'
+			],
+			ampSettingsLabel: __( 'AMP Settings' ),
+			fontSizes: {
+				small: 14,
+				larger: 48
+			}
 		}
 	};
 
@@ -178,6 +190,38 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			};
 		}
 
+		// Fit-text for text blocks.
+		if ( -1 !== component.data.textBlocks.indexOf( name ) ) {
+			if ( ! settings.attributes ) {
+				settings.attributes = {};
+			}
+			settings.attributes.ampFitText = {
+				type: 'boolean',
+				default: false
+			};
+			settings.attributes.minFont = {
+				type: 'number',
+				default: component.data.fontSizes.small,
+				source: 'attribute',
+				selector: 'amp-fit-text',
+				attribute: 'min-font-size'
+			};
+			settings.attributes.maxFont = {
+				type: 'number',
+				default: component.data.fontSizes.larger,
+				source: 'attribute',
+				selector: 'amp-fit-text',
+				attribute: 'max-font-size'
+			};
+			settings.attributes.height = {
+				type: 'number',
+				default: 50,
+				source: 'attribute',
+				selector: 'amp-fit-text',
+				attribute: 'height'
+			};
+		}
+
 		// Layout settings for embeds and media blocks.
 		if ( 0 === name.indexOf( 'core-embed' ) || -1 !== component.data.mediaBlocks.indexOf( name ) ) {
 			if ( ! settings.attributes ) {
@@ -222,6 +266,8 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} else if ( -1 !== component.data.mediaBlocks.indexOf( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 				inspectorControls = component.setUpInspectorControls( props );
+			} else if ( -1 !== component.data.textBlocks.indexOf( name ) ) {
+				inspectorControls = component.setUpTextBlocksInspectorControls( props );
 			}
 
 			// Return just inspector controls in case of 'nodisplay'.
@@ -315,6 +361,135 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	};
 
 	/**
+	 * Setup inspector controls for text blocks.
+	 *
+	 * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
+	 */
+	component.setUpTextBlocksInspectorControls = function setUpInspectorControls( props ) {
+		var inspectorPanelBodyArgs,
+			ampFitText = props.attributes.ampFitText,
+			minFont = props.attributes.minFont,
+			maxFont = props.attributes.maxFont,
+			height = props.attributes.height,
+			isSelected = props.isSelected,
+			el = wp.element.createElement,
+			InspectorControls = wp.editor.InspectorControls,
+			TextControl = wp.components.TextControl,
+			FontSizePicker = wp.components.FontSizePicker,
+			ToggleControl = wp.components.ToggleControl,
+			PanelBody = wp.components.PanelBody,
+			label = __( 'Use AMP Fit Text' ),
+			FONT_SIZES = [
+				{
+					name: 'small',
+					shortName: __( 'S' ),
+					size: 14
+				},
+				{
+					name: 'regular',
+					shortName: __( 'M' ),
+					size: 16
+				},
+				{
+					name: 'large',
+					shortName: __( 'L' ),
+					size: 36
+				},
+				{
+					name: 'larger',
+					shortName: __( 'XL' ),
+					size: 48
+				}
+			];
+
+		if ( ! isSelected ) {
+			return null;
+		}
+
+		inspectorPanelBodyArgs = [
+			PanelBody,
+			{ title: component.data.ampSettingsLabel, className: ampFitText ? 'is-amp-fit-text' : '' },
+			el( ToggleControl, {
+				label: label,
+				checked: ampFitText,
+				onChange: function() {
+					props.setAttributes( { ampFitText: ! ampFitText } );
+				}
+			} )
+		];
+
+		if ( ampFitText ) {
+			inspectorPanelBodyArgs.push.apply( inspectorPanelBodyArgs, [
+				el( TextControl, {
+					label: __( 'Height' ),
+					value: height,
+					type: 'number',
+					min: 1,
+					onChange: function( nextHeight ) {
+						props.setAttributes( { height: nextHeight } );
+					}
+				} ),
+				maxFont > height && el(
+					wp.components.Notice,
+					{
+						status: 'error',
+						isDismissible: false
+					},
+					__( 'The height must be greater than the max font size.' )
+				),
+				el( PanelBody, { title: __( 'Minimum font size' ) },
+					el( FontSizePicker, {
+						fallbackFontSize: 14,
+						value: minFont,
+						fontSizes: FONT_SIZES,
+						onChange: function( nextMinFont ) {
+							if ( ! nextMinFont ) {
+								nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
+							}
+							if ( nextMinFont <= maxFont ) {
+								props.setAttributes( { minFont: nextMinFont } );
+							}
+						}
+					} )
+				),
+				minFont > maxFont && el(
+					wp.components.Notice,
+					{
+						status: 'error',
+						isDismissible: false
+					},
+					__( 'The min font size must less than the max font size.' )
+				),
+				el( PanelBody, { title: __( 'Maximum font size' ) },
+					el( FontSizePicker, {
+						value: maxFont,
+						fallbackFontSize: 48,
+						fontSizes: FONT_SIZES,
+						onChange: function( nextMaxFont ) {
+							if ( ! nextMaxFont ) {
+								nextMaxFont = component.data.fontSizes.larger; // @todo Supplying fallbackFontSize should be done automatically by the component?
+							}
+							props.setAttributes( {
+								maxFont: nextMaxFont,
+								height: Math.max( nextMaxFont, height )
+							} );
+						}
+					} )
+				)
+			] );
+		}
+
+		return (
+			el( InspectorControls, { key: 'inspector' },
+				el.apply( null, inspectorPanelBodyArgs )
+			)
+		);
+	};
+
+	/**
 	 * Set up inspector controls for shortcode block.
 	 * Adds ampCarousel attribute in case of gallery shortcode.
 	 *
@@ -325,7 +500,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		var ampCarousel = props.attributes.ampCarousel,
 			isSelected = props.isSelected,
 			el = wp.element.createElement,
-			InspectorControls = wp.blocks.InspectorControls,
+			InspectorControls = wp.editor.InspectorControls,
 			ToggleControl = wp.components.ToggleControl,
 			PanelBody = wp.components.PanelBody,
 			toggleControl;
@@ -359,7 +534,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {*} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
-		var text;
+		var text,
+			fitTextProps = {
+				layout: 'fixed-height',
+				children: element
+			};
+
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
 			if ( attributes.ampCarousel ) {
 				// If the text contains amp-carousel, lets remove it.
@@ -390,6 +570,17 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{},
 				text
 			);
+		} else if ( -1 !== component.data.textBlocks.indexOf( blockType.name ) && attributes.ampFitText ) {
+			if ( attributes.minFont ) {
+				fitTextProps[ 'min-font-size' ] = attributes.minFont;
+			}
+			if ( attributes.maxFont ) {
+				fitTextProps[ 'max-font-size' ] = attributes.maxFont;
+			}
+			if ( attributes.height ) {
+				fitTextProps.height = attributes.height;
+			}
+			return wp.element.createElement( 'amp-fit-text', fitTextProps );
 		}
 		return element;
 	};
