@@ -374,10 +374,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
 
 		// Test an 'attachment' post type.
-		$attachment_src    = 'example/attachment.jpeg';
-		$attachment_height = 45;
-		$attachment_width  = 600;
-		$attachment_id     = $this->factory()->attachment->create_object(
+		$attachment_src          = 'example/attachment.jpeg';
+		$attachment_height       = 45;
+		$attachment_width        = 600;
+		$attachment_id           = $this->factory()->attachment->create_object(
 			$attachment_src,
 			0,
 			array(
