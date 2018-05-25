@@ -1545,6 +1545,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 							// Lets map the amp elements and replace the correct one and then check if we should include the replacement.
 							$amp_selectors_parsed = $this->get_ampified_selectors_parsed( $parsed_selector, $selector );
+
+							// @todo Maybe we should also make sure here that the original selector is not needed?
 							if ( is_array( $amp_selectors_parsed ) && $this->should_include_selector( $dynamic_selector_pattern, $amp_selectors_parsed['parsed_selector'], $amp_selectors_parsed['selector'] ) ) {
 
 								// @todo Check if there could be selector's array?
