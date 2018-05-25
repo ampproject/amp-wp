@@ -615,6 +615,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$options
 		);
 
+		// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
+		$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
+
 		// Find calc() functions and replace with placeholders since PHP-CSS-Parser can't handle them.
 		$stylesheet_string = $this->add_calc_placeholders( $stylesheet_string );
 
@@ -782,6 +785,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Remove spaces from data URLs which PHP-CSS-Parser doesn't handle.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $css CSS.
+	 * @return string CSS with spaces removed from data URLs.
+	 */
+	private function remove_spaces_from_data_urls( $css ) {
+		$css = preg_replace_callback(
+			'|(url)(\(.*?\))|',
+			function( $matches ) {
+				$replacement = preg_replace( '/\s+/', '', $matches[2] );
+				return $matches[1] . $replacement;
+			},
+			$css
+		);
+
+		return $css;
+	}
+
+	/**
 	 * Process CSS list.
 	 *
 	 * @since 1.0
@@ -865,7 +889,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Convert URLs in to non-relative real-paths and prevent there being any spaces.
+	 * Convert URLs in to non-relative normalized paths and prevent there being any spaces.
 	 *
 	 * @param URL[]  $urls           URLs.
 	 * @param string $stylesheet_url Stylesheet URL. Base URL is obtained from this. Optional.
@@ -885,6 +909,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If the base URL is empty, there is nothing more to do.
 			if ( empty( $base_url ) ) {
+				$url->getURL()->setString( $url_string );
 				continue;
 			}
 
