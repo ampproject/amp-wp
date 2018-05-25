@@ -539,13 +539,6 @@ class AMP_Validation_Manager {
 			esc_url( get_edit_post_link( $invalid_url_post ) ),
 			esc_html__( 'Review issues', 'amp' )
 		);
-		echo ' | ';
-		echo sprintf(
-			' <a href="%s" aria-label="%s" target="_blank">%s</a>',
-			esc_url( self::get_debug_url( $amp_url ) ),
-			esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
-			esc_html__( 'Debug', 'amp' )
-		);
 		echo '</p>';
 
 		$results      = AMP_Validation_Error_Taxonomy::summarize_validation_errors( array_unique( $validation_errors, SORT_REGULAR ) );

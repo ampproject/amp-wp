@@ -604,15 +604,11 @@ class AMP_Invalid_URL_Post_Type {
 		unset( $actions['inline hide-if-no-js'] );
 		$url = $post->post_title;
 
+		$view_url        = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ); // Prevent redirection to non-AMP page.
+		$actions['view'] = sprintf( '<a href="%s">%s</a>', esc_url( $view_url ), esc_html__( 'View', 'amp' ) );
+
 		if ( ! empty( $url ) ) {
 			$actions[ self::RECHECK_ACTION ] = self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url );
-
-			$actions[ AMP_Validation_Manager::DEBUG_QUERY_VAR ] = sprintf(
-				'<a href="%s" aria-label="%s">%s</a>',
-				esc_url( AMP_Validation_Manager::get_debug_url( $url ) ),
-				esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
-				esc_html__( 'Debug', 'amp' )
-			);
 		}
 
 		return $actions;
@@ -823,14 +819,9 @@ class AMP_Invalid_URL_Post_Type {
 		$url = $post->post_title;
 
 		echo '<div class="misc-pub-section">';
-		printf( '<a href="%s">%s</a> | ', esc_url( $url ), esc_html__( 'View', 'amp' ) );
+		$view_url = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ); // Prevent redirection to non-AMP page.
+		printf( '<a href="%s">%s</a> | ', esc_url( $view_url ), esc_html__( 'View', 'amp' ) );
 		echo self::get_recheck_link( $post, $redirect_url ); // WPCS: XSS ok.
-		printf(
-			' | <a href="%s" aria-label="%s">%s</a>',
-			esc_url( AMP_Validation_Manager::get_debug_url( $url ) ),
-			esc_attr__( 'Validate URL on frontend but without invalid elements/attributes removed', 'amp' ),
-			esc_html__( 'Debug', 'amp' )
-		); // WPCS: XSS ok.
 		echo '</div>';
 
 		echo '</div><!-- /submitpost -->';
