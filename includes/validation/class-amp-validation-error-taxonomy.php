@@ -155,358 +155,11 @@ class AMP_Validation_Error_Taxonomy {
 			),
 		) );
 
-		// Include searching taxonomy term descriptions and sources term meta.
-		add_filter( 'terms_clauses', function( $clauses, $taxonomies, $args ) {
-			global $wpdb;
-			if ( ! empty( $args['search'] ) && in_array( self::TAXONOMY_SLUG, $taxonomies, true ) ) {
-				$clauses['where'] = preg_replace(
-					'#(?<=\()(?=\(t\.name LIKE \')#',
-					$wpdb->prepare( '(tt.description LIKE %s) OR ', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
-					$clauses['where']
-				);
-			}
-			return $clauses;
-		}, 10, 3 );
+		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_deletion' ), 10, 3 );
 
-		// Hide empty term addition form.
-		add_action( 'admin_enqueue_scripts', function() {
-			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
-				wp_add_inline_style( 'common', '
-					#col-left { display: none; }
-					#col-right { float:none; width: auto; }
-
-					/* Improve column widths */
-					td.column-details pre, td.column-sources pre { overflow:auto; }
-					th.column-created_date_gmt { width:15%; }
-					th.column-status { width:10%; }
-				' );
-			}
-		} );
-
-		// Make sure parent menu item is expanded when visiting the taxonomy term page.
-		add_filter( 'parent_file', function( $parent_file ) {
-			if ( get_current_screen()->taxonomy === self::TAXONOMY_SLUG ) {
-				$parent_file = AMP_Options_Manager::OPTION_NAME;
-			}
-			return $parent_file;
-		}, 10, 2 );
-
-		// Replace the primary column to be error instead of the removed name column..
-		add_filter( 'list_table_primary_column', function( $primary_column ) {
-			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
-				$primary_column = 'error';
-			}
-			return $primary_column;
-		} );
-
-		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
-
-		add_filter( 'views_edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'filter_views_edit' ) );
-
-		// Override the columns displayed for the validation error terms.
-		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
-			return array(
-				'cb'               => $old_columns['cb'],
-				'error'            => __( 'Error', 'amp' ),
-				'created_date_gmt' => __( 'Created Date', 'amp' ),
-				'status'           => __( 'Status', 'amp' ),
-				'details'          => __( 'Details', 'amp' ),
-				'posts'            => __( 'URLs', 'amp' ),
-			);
-		} );
-
-		// Let the created date column sort by term ID.
-		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
-			$sortable_columns['created_date_gmt'] = 'term_id';
-			return $sortable_columns;
-		} );
-
-		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'prevent_bulk_deleting_non_empty_terms' ) );
-		add_action( 'admin_notices', array( __CLASS__, 'show_bulk_delete_blocked_error_notice' ) );
-
-		// Prevent user from being able to delete validation errors when they still have associated invalid URLs.
-		add_filter( 'user_has_cap', function( $allcaps, $caps, $args ) {
-			if ( isset( $args[0] ) && 'delete_term' === $args[0] && 0 !== get_term( $args[2] )->count ) {
-				/*
-				 * However, only apply this if not on the edit terms screen for validation errors, since
-				 * WP_Terms_List_Table::column_cb() unfortunately has a hard-coded delete_term capability check, so
-				 * without that check passing then the checkbox is not shown.
-				 */
-				if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy && empty( $_REQUEST['action'] ) ) {
-					return $allcaps;
-				}
-
-				$allcaps = array_merge(
-					$allcaps,
-					array_fill_keys( $caps, false )
-				);
-			}
-			return $allcaps;
-		}, 10, 3 );
-
-		// Add row actions.
-		add_filter( 'tag_row_actions', function( $actions, WP_Term $tag ) {
-			if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
-				$term_id = $tag->term_id;
-
-				/*
-				 * Hide deletion link when there are remaining invalid URLs associated with them.
-				 * Note that this would normally be handled via the user_has_cap filter above,
-				 * but this has to be here due to a problem with WP_Terms_List_Table::column_cb()
-				 * which requires a workaround.
-				 */
-				if ( 0 !== $tag->count ) {
-					unset( $actions['delete'] );
-				}
-
-				if ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $tag->term_group ) {
-					$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
-						'<a href="%s" aria-label="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ), compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
-						),
-						esc_attr__( 'Acknowledging an error marks it as read. AMP validation errors prevent a URL from being served as AMP.', 'amp' ),
-						esc_html__( 'Acknowledge', 'amp' )
-					);
-				}
-				if ( self::VALIDATION_ERROR_IGNORED_STATUS !== $tag->term_group ) {
-					$actions[ self::VALIDATION_ERROR_IGNORE_ACTION ] = sprintf(
-						'<a href="%s" aria-label="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_IGNORE_ACTION ), compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_IGNORE_ACTION
-						),
-						esc_attr__( 'Ignoring an error prevents it from blocking a URL from being served as AMP.', 'amp' ),
-						esc_html__( 'Ignore', 'amp' )
-					);
-				}
-			}
-			return $actions;
-		}, 10, 2 );
-
-		// Filter amp_validation_error term query by term group when requested.
-		add_filter( 'get_terms_defaults', function( $args, $taxonomies ) {
-			if ( array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) === $taxonomies ) {
-				$args['orderby'] = 'term_id';
-				$args['order']   = 'DESC';
-			}
-			return $args;
-		}, 10, 2 );
-
-		// Filter amp_validation_error term query by term group when requested.
-		add_action( 'load-edit-tags.php', function() {
-			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
-				return;
-			}
-			self::$should_filter_terms_clauses_for_error_validation_status = true;
-			$group = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-			if ( ! in_array( $group, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
-				return;
-			}
-			add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $group ) {
-				global $wpdb;
-				if ( self::TAXONOMY_SLUG === $taxonomies[0] && self::$should_filter_terms_clauses_for_error_validation_status ) {
-					$clauses['where'] .= $wpdb->prepare( ' AND t.term_group = %d', $group );
-				}
-				return $clauses;
-			}, 10, 2 );
-		} );
-
-		// Handle inline edit links.
-		add_action( 'load-edit-tags.php', function() {
-			if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
-				return;
-			}
-			$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
-			check_admin_referer( $action );
-			$tax = get_taxonomy( self::TAXONOMY_SLUG );
-			if ( ! current_user_can( $tax->cap->manage_terms ) ) { // Yes it is an object.
-				return;
-			}
-
-			$referer  = wp_get_referer();
-			$term_id  = intval( $_GET['term_id'] ); // WPCS: CSRF ok.
-			$redirect = self::handle_validation_error_update( $referer, $action, array( $term_id ) );
-
-			if ( $redirect !== $referer ) {
-				wp_safe_redirect( $redirect );
-				exit;
-			}
-		} );
-
-		// Add bulk actions.
-		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
-			$bulk_actions[ self::VALIDATION_ERROR_IGNORE_ACTION ]      = __( 'Ignore', 'amp' );
-			$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Acknowledge', 'amp' );
-			return $bulk_actions;
-		} );
-
-		// Handle bulk actions.
-		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
-
-		// Prevent query vars from persisting after redirect.
-		add_filter( 'removable_query_args', function( $query_vars ) {
-			$query_vars[] = 'amp_actioned';
-			$query_vars[] = 'amp_actioned_count';
-			$query_vars[] = 'amp_validation_errors_not_deleted';
-			return $query_vars;
-		} );
-
-		// Show notices for changes to amp_validation_error terms.
-		add_action( 'admin_notices', function() {
-			if ( ! ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_current_screen()->post_type ) || empty( $_GET['amp_actioned'] ) || empty( $_GET['amp_actioned_count'] ) ) { // WPCS: CSRF ok.
-				return;
-			}
-			$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
-			$count    = intval( $_GET['amp_actioned_count'] ); // WPCS: CSRF ok.
-			$message  = null;
-			if ( self::VALIDATION_ERROR_IGNORE_ACTION === $actioned ) {
-				$message = sprintf(
-					/* translators: %s is number of errors ignored */
-					_n(
-						'Ignored %s error. It will no longer block related URLs from being served as AMP.',
-						'Ignored %s errors. They will no longer block related URLs from being served as AMP.',
-						number_format_i18n( $count ),
-						'amp'
-					),
-					$count
-				);
-			} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $actioned ) {
-				$message = sprintf(
-					/* translators: %s is number of errors acknowledged */
-					_n(
-						'Acknowledged %s error. It will continue to block related URLs from being served as AMP.',
-						'Acknowledged %s errors. They will continue to block related URLs from being served as AMP.',
-						number_format_i18n( $count ),
-						'amp'
-					),
-					$count
-				);
-			}
-
-			if ( $message ) {
-				printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $message ) );
-			}
-		} );
-
-		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
-		add_filter( 'query_vars', function( $query_vars ) {
-			$query_vars[] = self::VALIDATION_ERROR_STATUS_QUERY_VAR;
-			return $query_vars;
-		} );
-
-		// Add views for filtering validation errors by status.
-		add_filter( 'views_edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, function( $views ) {
-			unset( $views['publish'] );
-
-			$args = array(
-				'post_type'              => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			);
-
-			$with_new_query          = new WP_Query( array_merge(
-				$args,
-				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS )
-			) );
-			$with_acknowledged_query = new WP_Query( array_merge(
-				$args,
-				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS )
-			) );
-			$with_ignored_query      = new WP_Query( array_merge(
-				$args,
-				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_IGNORED_STATUS )
-			) );
-
-			$current_url = remove_query_arg(
-				array_merge(
-					wp_removable_query_args(),
-					array( 's' ) // For some reason behavior of posts list table is to not persist the search query.
-				),
-				wp_unslash( $_SERVER['REQUEST_URI'] )
-			);
-
-			$current_status = null;
-			if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
-				$value = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-				if ( in_array( $value, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
-					$current_status = $value;
-				}
-			}
-
-			$views['new'] = sprintf(
-				'<a href="%s" class="%s">%s</a>',
-				esc_url(
-					add_query_arg(
-						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-						self::VALIDATION_ERROR_NEW_STATUS,
-						$current_url
-					)
-				),
-				self::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
-				sprintf(
-					/* translators: %s is the post count */
-					_nx(
-						'With New Errors <span class="count">(%s)</span>',
-						'With New Errors <span class="count">(%s)</span>',
-						$with_new_query->found_posts,
-						'posts',
-						'amp'
-					),
-					number_format_i18n( $with_new_query->found_posts )
-				)
-			);
-
-			$views['acknowledged'] = sprintf(
-				'<a href="%s" class="%s">%s</a>',
-				esc_url(
-					add_query_arg(
-						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-						self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
-						$current_url
-					)
-				),
-				self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $current_status ? 'current' : '',
-				sprintf(
-					/* translators: %s is the post count */
-					_nx(
-						'With Acknowledged Errors <span class="count">(%s)</span>',
-						'With Acknowledged Errors <span class="count">(%s)</span>',
-						$with_acknowledged_query->found_posts,
-						'posts',
-						'amp'
-					),
-					number_format_i18n( $with_acknowledged_query->found_posts )
-				)
-			);
-
-			$views['ignored'] = sprintf(
-				'<a href="%s" class="%s">%s</a>',
-				esc_url(
-					add_query_arg(
-						self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-						self::VALIDATION_ERROR_IGNORED_STATUS,
-						$current_url
-					)
-				),
-				self::VALIDATION_ERROR_IGNORED_STATUS === $current_status ? 'current' : '',
-				sprintf(
-					/* translators: %s is the post count */
-					_nx(
-						'With Ignored Errors <span class="count">(%s)</span>',
-						'With Ignored Errors <span class="count">(%s)</span>',
-						$with_ignored_query->found_posts,
-						'posts',
-						'amp'
-					),
-					number_format_i18n( $with_ignored_query->found_posts )
-				)
-			);
-
-			return $views;
-		} );
+		if ( is_admin() ) {
+			self::add_admin_hooks();
+		}
 	}
 
 	/**
@@ -634,6 +287,280 @@ class AMP_Validation_Error_Taxonomy {
 		);
 
 		return $results;
+	}
+
+	/**
+	 * Prevent user from being able to delete validation errors when they still have associated invalid URLs.
+	 *
+	 * @param array $allcaps All caps.
+	 * @param array $caps    Requested caps.
+	 * @param array $args    Cap args.
+	 * @return array All caps.
+	 */
+	public static function filter_user_has_cap_for_deletion( $allcaps, $caps, $args ) {
+		if ( isset( $args[0] ) && 'delete_term' === $args[0] && 0 !== get_term( $args[2] )->count ) {
+			/*
+			 * However, only apply this if not on the edit terms screen for validation errors, since
+			 * WP_Terms_List_Table::column_cb() unfortunately has a hard-coded delete_term capability check, so
+			 * without that check passing then the checkbox is not shown.
+			 */
+			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy && empty( $_REQUEST['action'] ) ) { // WPCS: CSRF OK.
+				return $allcaps;
+			}
+
+			$allcaps = array_merge(
+				$allcaps,
+				array_fill_keys( $caps, false )
+			);
+		}
+		return $allcaps;
+	}
+
+	/**
+	 * Add admin hooks.
+	 */
+	public static function add_admin_hooks() {
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
+		add_filter( 'terms_clauses', array( __CLASS__, 'filter_terms_clauses_for_description_search' ), 10, 3 );
+		add_action( 'admin_notices', array( __CLASS__, 'add_admin_notices' ) );
+		add_filter( 'tag_row_actions', array( __CLASS__, 'filter_tag_row_actions' ), 10, 2 );
+		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
+		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'prevent_bulk_deleting_non_empty_terms' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'show_bulk_delete_blocked_error_notice' ) );
+		add_filter( 'views_edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'filter_views_edit' ) );
+		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
+		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
+
+		// Prevent query vars from persisting after redirect.
+		add_filter( 'removable_query_args', function( $query_vars ) {
+			$query_vars[] = 'amp_actioned';
+			$query_vars[] = 'amp_actioned_count';
+			$query_vars[] = 'amp_validation_errors_not_deleted';
+			return $query_vars;
+		} );
+
+		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
+		add_filter( 'query_vars', function( $query_vars ) {
+			$query_vars[] = self::VALIDATION_ERROR_STATUS_QUERY_VAR;
+			return $query_vars;
+		} );
+
+		// Filter amp_validation_error term query by term group when requested.
+		add_filter( 'get_terms_defaults', function( $args, $taxonomies ) {
+			if ( array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) === $taxonomies ) {
+				$args['orderby'] = 'term_id';
+				$args['order']   = 'DESC';
+			}
+			return $args;
+		}, 10, 2 );
+
+		// Add bulk actions.
+		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
+			$bulk_actions[ self::VALIDATION_ERROR_IGNORE_ACTION ]      = __( 'Ignore', 'amp' );
+			$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Acknowledge', 'amp' );
+			return $bulk_actions;
+		} );
+
+		// Override the columns displayed for the validation error terms.
+		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
+			return array(
+				'cb'               => $old_columns['cb'],
+				'error'            => __( 'Error', 'amp' ),
+				'created_date_gmt' => __( 'Created Date', 'amp' ),
+				'status'           => __( 'Status', 'amp' ),
+				'details'          => __( 'Details', 'amp' ),
+				'posts'            => __( 'URLs', 'amp' ),
+			);
+		} );
+
+		// Let the created date column sort by term ID.
+		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
+			$sortable_columns['created_date_gmt'] = 'term_id';
+			return $sortable_columns;
+		} );
+
+		// Hide empty term addition form.
+		add_action( 'admin_enqueue_scripts', function() {
+			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+				wp_add_inline_style( 'common', '
+					#col-left { display: none; }
+					#col-right { float:none; width: auto; }
+
+					/* Improve column widths */
+					td.column-details pre, td.column-sources pre { overflow:auto; }
+					th.column-created_date_gmt { width:15%; }
+					th.column-status { width:10%; }
+				' );
+			}
+		} );
+
+		// Make sure parent menu item is expanded when visiting the taxonomy term page.
+		add_filter( 'parent_file', function( $parent_file ) {
+			if ( get_current_screen()->taxonomy === self::TAXONOMY_SLUG ) {
+				$parent_file = AMP_Options_Manager::OPTION_NAME;
+			}
+			return $parent_file;
+		}, 10, 2 );
+
+		// Replace the primary column to be error instead of the removed name column..
+		add_filter( 'list_table_primary_column', function( $primary_column ) {
+			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+				$primary_column = 'error';
+			}
+			return $primary_column;
+		} );
+	}
+
+	/**
+	 * Filter amp_validation_error term query by term group when requested.
+	 */
+	public static function add_group_terms_clauses_filter() {
+		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+			return;
+		}
+		self::$should_filter_terms_clauses_for_error_validation_status = true;
+		$group = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
+		if ( ! in_array( $group, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_IGNORED_STATUS, self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+			return;
+		}
+		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $group ) {
+			global $wpdb;
+			if ( self::TAXONOMY_SLUG === $taxonomies[0] && self::$should_filter_terms_clauses_for_error_validation_status ) {
+				$clauses['where'] .= $wpdb->prepare( ' AND t.term_group = %d', $group );
+			}
+			return $clauses;
+		}, 10, 2 );
+	}
+
+	/**
+	 * Include searching taxonomy term descriptions and sources term meta.
+	 *
+	 * @param array $clauses    Clauses.
+	 * @param array $taxonomies Taxonomies.
+	 * @param array $args       Args.
+	 * @return array Clauses.
+	 */
+	public static function filter_terms_clauses_for_description_search( $clauses, $taxonomies, $args ) {
+		global $wpdb;
+		if ( ! empty( $args['search'] ) && in_array( self::TAXONOMY_SLUG, $taxonomies, true ) ) {
+			$clauses['where'] = preg_replace(
+				'#(?<=\()(?=\(t\.name LIKE \')#',
+				$wpdb->prepare( '(tt.description LIKE %s) OR ', '%' . $wpdb->esc_like( $args['search'] ) . '%' ),
+				$clauses['where']
+			);
+		}
+		return $clauses;
+	}
+
+	/**
+	 * Show notices for changes to amp_validation_error terms.
+	 */
+	public static function add_admin_notices() {
+		if ( ! ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_current_screen()->post_type ) || empty( $_GET['amp_actioned'] ) || empty( $_GET['amp_actioned_count'] ) ) { // WPCS: CSRF ok.
+			return;
+		}
+		$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
+		$count    = intval( $_GET['amp_actioned_count'] ); // WPCS: CSRF ok.
+		$message  = null;
+		if ( self::VALIDATION_ERROR_IGNORE_ACTION === $actioned ) {
+			$message = sprintf(
+				/* translators: %s is number of errors ignored */
+				_n(
+					'Ignored %s error. It will no longer block related URLs from being served as AMP.',
+					'Ignored %s errors. They will no longer block related URLs from being served as AMP.',
+					number_format_i18n( $count ),
+					'amp'
+				),
+				$count
+			);
+		} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $actioned ) {
+			$message = sprintf(
+				/* translators: %s is number of errors acknowledged */
+				_n(
+					'Acknowledged %s error. It will continue to block related URLs from being served as AMP.',
+					'Acknowledged %s errors. They will continue to block related URLs from being served as AMP.',
+					number_format_i18n( $count ),
+					'amp'
+				),
+				$count
+			);
+		}
+
+		if ( $message ) {
+			printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $message ) );
+		}
+	}
+
+	/**
+	 * Add row actions.
+	 *
+	 * @param array   $actions Actions.
+	 * @param WP_Term $tag     Tag.
+	 * @return array Actions.
+	 */
+	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
+		if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
+			$term_id = $tag->term_id;
+
+			/*
+			 * Hide deletion link when there are remaining invalid URLs associated with them.
+			 * Note that this would normally be handled via the user_has_cap filter above,
+			 * but this has to be here due to a problem with WP_Terms_List_Table::column_cb()
+			 * which requires a workaround.
+			 */
+			if ( 0 !== $tag->count ) {
+				unset( $actions['delete'] );
+			}
+
+			if ( self::VALIDATION_ERROR_ACKNOWLEDGED_STATUS !== $tag->term_group ) {
+				$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
+					'<a href="%s" aria-label="%s">%s</a>',
+					wp_nonce_url(
+						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ), compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+					),
+					esc_attr__( 'Acknowledging an error marks it as read. AMP validation errors prevent a URL from being served as AMP.', 'amp' ),
+					esc_html__( 'Acknowledge', 'amp' )
+				);
+			}
+			if ( self::VALIDATION_ERROR_IGNORED_STATUS !== $tag->term_group ) {
+				$actions[ self::VALIDATION_ERROR_IGNORE_ACTION ] = sprintf(
+					'<a href="%s" aria-label="%s">%s</a>',
+					wp_nonce_url(
+						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_IGNORE_ACTION ), compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_IGNORE_ACTION
+					),
+					esc_attr__( 'Ignoring an error prevents it from blocking a URL from being served as AMP.', 'amp' ),
+					esc_html__( 'Ignore', 'amp' )
+				);
+			}
+		}
+		return $actions;
+	}
+
+	/**
+	 * Show AMP validation errors under AMP admin menu.
+	 */
+	public static function add_admin_menu_validation_error_item() {
+		$menu_item_label = esc_html__( 'Validation Errors', 'amp' );
+		$new_error_count = self::get_validation_error_count( array(
+			'group'        => self::VALIDATION_ERROR_NEW_STATUS,
+			'ignore_empty' => true,
+		) );
+		if ( $new_error_count ) {
+			$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
+		}
+
+		add_submenu_page(
+			AMP_Options_Manager::OPTION_NAME,
+			esc_html__( 'Validation Errors', 'amp' ),
+			$menu_item_label,
+			get_taxonomy( self::TAXONOMY_SLUG )->cap->manage_terms, // Yes, cap is an object not an array.
+			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
+			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )
+		);
 	}
 
 	/**
@@ -905,6 +832,30 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Handle inline edit links.
+	 */
+	public static function handle_inline_edit_request() {
+		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
+			return;
+		}
+		$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
+		check_admin_referer( $action );
+		$tax = get_taxonomy( self::TAXONOMY_SLUG );
+		if ( ! current_user_can( $tax->cap->manage_terms ) ) { // Yes it is an object.
+			return;
+		}
+
+		$referer  = wp_get_referer();
+		$term_id  = intval( $_GET['term_id'] ); // WPCS: CSRF ok.
+		$redirect = self::handle_validation_error_update( $referer, $action, array( $term_id ) );
+
+		if ( $redirect !== $referer ) {
+			wp_safe_redirect( $redirect );
+			exit;
+		}
+	}
+
+	/**
 	 * Handle bulk and inline edits to amp_validation_error terms.
 	 *
 	 * @param string $redirect_to Redirect to.
@@ -943,5 +894,4 @@ class AMP_Validation_Error_Taxonomy {
 
 		return $redirect_to;
 	}
-
 }

@@ -91,22 +91,29 @@ class AMP_Invalid_URL_Post_Type {
 		$post_type->cap->create_posts = 'do_not_allow';
 
 		if ( is_admin() ) {
-			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
-			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
-			add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
-			add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
-			add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
-
-			add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
-			add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
-			add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
-			add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
-			add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
-			add_action( 'admin_notices', array( __CLASS__, 'remaining_error_notice' ) );
-			add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
-			add_action( 'admin_menu', array( __CLASS__, 'remove_publish_meta_box' ) );
-			add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_status_count' ) );
+			self::add_admin_hooks();
 		}
+	}
+
+	/**
+	 * Add admin hooks.
+	 */
+	public static function add_admin_hooks() {
+		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
+		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
+		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
+		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
+
+		add_filter( 'views_edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_views_edit' ) );
+		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
+		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
+		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
+		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
+		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
+		add_action( 'admin_notices', array( __CLASS__, 'remaining_error_notice' ) );
+		add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
 
 		// Hide irrelevant "published" label in the invalid URL post list.
 		add_filter( 'post_date_column_status', function( $status, $post ) {
@@ -115,27 +122,6 @@ class AMP_Invalid_URL_Post_Type {
 			}
 			return $status;
 		}, 10, 2 );
-
-		// Show AMP validation errors under AMP admin menu.
-		add_action( 'admin_menu', function() {
-			$menu_item_label = esc_html__( 'Validation Errors', 'amp' );
-			$new_error_count = AMP_Validation_Error_Taxonomy::get_validation_error_count( array(
-				'group'        => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-				'ignore_empty' => true,
-			) );
-			if ( $new_error_count ) {
-				$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
-			}
-
-			add_submenu_page(
-				AMP_Options_Manager::OPTION_NAME,
-				esc_html__( 'Validation Errors', 'amp' ),
-				$menu_item_label,
-				get_taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG )->cap->manage_terms, // Yes, cap is an object not an array.
-				// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
-				esc_attr( 'edit-tags.php?taxonomy=' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '&post_type=' . self::POST_TYPE_SLUG )
-			);
-		} );
 
 		// Prevent query vars from persisting after redirect.
 		add_filter( 'removable_query_args', function( $query_vars ) {
@@ -148,10 +134,8 @@ class AMP_Invalid_URL_Post_Type {
 
 	/**
 	 * Add count of how many validation error posts there are to the admin menu.
-	 *
-	 * @todo This probably needs to be updated to show the number of amp_invalid_url posts which have validation errors in the new group.
 	 */
-	public static function add_admin_menu_validation_status_count() {
+	public static function add_admin_menu_new_invalid_url_count() {
 		global $submenu;
 		if ( ! isset( $submenu[ AMP_Options_Manager::OPTION_NAME ] ) ) {
 			return;
@@ -350,6 +334,122 @@ class AMP_Invalid_URL_Post_Type {
 		$post_id = $r;
 		wp_set_object_terms( $post_id, wp_list_pluck( $terms, 'term_id' ), AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		return $post_id;
+	}
+
+	/**
+	 * Add views for filtering validation errors by status.
+	 *
+	 * @param array $views Views.
+	 * @return array Views
+	 */
+	public static function filter_views_edit( $views ) {
+		unset( $views['publish'] );
+
+		$args = array(
+			'post_type'              => self::POST_TYPE_SLUG,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		);
+
+		$with_new_query          = new WP_Query( array_merge(
+			$args,
+			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS )
+		) );
+		$with_acknowledged_query = new WP_Query( array_merge(
+			$args,
+			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS )
+		) );
+		$with_ignored_query      = new WP_Query( array_merge(
+			$args,
+			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS )
+		) );
+
+		$current_url = remove_query_arg(
+			array_merge(
+				wp_removable_query_args(),
+				array( 's' ) // For some reason behavior of posts list table is to not persist the search query.
+			),
+			wp_unslash( $_SERVER['REQUEST_URI'] )
+		);
+
+		$current_status = null;
+		if ( isset( $_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+			$value = intval( $_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
+			if ( in_array( $value, array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS ), true ) ) {
+				$current_status = $value;
+			}
+		}
+
+		$views['new'] = sprintf(
+			'<a href="%s" class="%s">%s</a>',
+			esc_url(
+				add_query_arg(
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+					$current_url
+				)
+			),
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
+			sprintf(
+				/* translators: %s is the post count */
+				_nx(
+					'With New Errors <span class="count">(%s)</span>',
+					'With New Errors <span class="count">(%s)</span>',
+					$with_new_query->found_posts,
+					'posts',
+					'amp'
+				),
+				number_format_i18n( $with_new_query->found_posts )
+			)
+		);
+
+		$views['acknowledged'] = sprintf(
+			'<a href="%s" class="%s">%s</a>',
+			esc_url(
+				add_query_arg(
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS,
+					$current_url
+				)
+			),
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGED_STATUS === $current_status ? 'current' : '',
+			sprintf(
+				/* translators: %s is the post count */
+				_nx(
+					'With Acknowledged Errors <span class="count">(%s)</span>',
+					'With Acknowledged Errors <span class="count">(%s)</span>',
+					$with_acknowledged_query->found_posts,
+					'posts',
+					'amp'
+				),
+				number_format_i18n( $with_acknowledged_query->found_posts )
+			)
+		);
+
+		$views['ignored'] = sprintf(
+			'<a href="%s" class="%s">%s</a>',
+			esc_url(
+				add_query_arg(
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS,
+					$current_url
+				)
+			),
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_IGNORED_STATUS === $current_status ? 'current' : '',
+			sprintf(
+				/* translators: %s is the post count */
+				_nx(
+					'With Ignored Errors <span class="count">(%s)</span>',
+					'With Ignored Errors <span class="count">(%s)</span>',
+					$with_ignored_query->found_posts,
+					'posts',
+					'amp'
+				),
+				number_format_i18n( $with_ignored_query->found_posts )
+			)
+		);
+
+		return $views;
 	}
 
 	/**
@@ -639,20 +739,12 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Removes the 'Publish' meta box from the CPT post.php page.
-	 *
-	 * @return void
-	 */
-	public static function remove_publish_meta_box() {
-		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
-	}
-
-	/**
 	 * Adds the meta boxes to the CPT post.php page.
 	 *
 	 * @return void
 	 */
 	public static function add_meta_boxes() {
+		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
 		add_meta_box( self::VALIDATION_ERRORS_META_BOX, __( 'Validation Errors', 'amp' ), array( __CLASS__, 'print_validation_errors_meta_box' ), self::POST_TYPE_SLUG, 'normal' );
 		add_meta_box( self::STATUS_META_BOX, __( 'Status', 'amp' ), array( __CLASS__, 'print_status_meta_box' ), self::POST_TYPE_SLUG, 'side' );
 	}
@@ -769,7 +861,7 @@ class AMP_Invalid_URL_Post_Type {
 			<ul>
 				<?php foreach ( $validation_errors as $error ) : ?>
 					<?php
-					$collasped_details = array();
+					$collapsed_details = array();
 					$term              = $error['term'];
 					$term_id           = $term->term_id;
 					$edit_terms_url    = admin_url( 'edit-tags.php?taxonomy=' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
@@ -845,9 +937,9 @@ class AMP_Invalid_URL_Post_Type {
 										</code>
 									</details>
 									<?php
-									$collasped_details[] = 'node_attributes';
-									$collasped_details[] = 'node_name';
-									$collasped_details[] = 'parent_name';
+									$collapsed_details[] = 'node_attributes';
+									$collapsed_details[] = 'node_name';
+									$collapsed_details[] = 'parent_name';
 									?>
 								</li>
 							<?php elseif ( AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE === $error['data']['code'] ) : ?>
@@ -873,16 +965,16 @@ class AMP_Invalid_URL_Post_Type {
 										</code>
 									</details>
 									<?php
-									$collasped_details[] = 'parent_name';
-									$collasped_details[] = 'element_attributes';
-									$collasped_details[] = 'node_name';
+									$collapsed_details[] = 'parent_name';
+									$collapsed_details[] = 'element_attributes';
+									$collapsed_details[] = 'node_name';
 									?>
 								</li>
 							<?php endif; ?>
 								<?php unset( $error['data']['code'] ); ?>
 								<?php foreach ( $error['data'] as $key => $value ) : ?>
 									<li>
-										<details <?php echo ! in_array( $key, $collasped_details, true ) ? 'open' : ''; ?>>
+										<details <?php echo ! in_array( $key, $collapsed_details, true ) ? 'open' : ''; ?>>
 											<summary><code><?php echo esc_html( $key ); ?></code></summary>
 											<div class="detailed">
 												<?php if ( is_string( $value ) ) : ?>
@@ -973,7 +1065,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		$query = new WP_Query( array(
 			'post_type'              => self::POST_TYPE_SLUG,
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		) );
@@ -985,7 +1077,7 @@ class AMP_Invalid_URL_Post_Type {
 					add_query_arg(
 						array(
 							'post_type' => self::POST_TYPE_SLUG,
-							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS,
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
 						),
 						'edit.php'
 					)
