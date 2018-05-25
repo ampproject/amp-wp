@@ -1537,6 +1537,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
 					$selectors                                    = array();
 					foreach ( $selectors_parsed as $selector => $parsed_selector ) {
+
+						// @todo Replacing with AMP component selectors should happen if $should_tree_shake as well.
 						if ( $should_tree_shake ) {
 							if ( $this->should_include_selector( $dynamic_selector_pattern, $parsed_selector, $selector ) ) {
 								$selectors[] = $selector;
