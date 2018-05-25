@@ -847,6 +847,10 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function print_validation_errors_meta_box( $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
+
+		$can_serve_amp = 0 === count( array_filter( $validation_errors, function( $validation_error ) {
+			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['term']->term_group;
+		} ) );
 		?>
 		<style>
 			.amp-validation-errors .detailed,
@@ -857,6 +861,17 @@ class AMP_Invalid_URL_Post_Type {
 				overflow: auto;
 			}
 		</style>
+
+		<?php if ( $can_serve_amp ) : ?>
+			<div class="notice notice-success notice-alt inline">
+				<p><?php esc_html_e( 'This URL can be served as AMP because all validation errors have been accepted as not being blockers.', 'amp' ); ?></p>
+			</div>
+		<?php else : ?>
+			<div class="notice notice-warning notice-alt inline">
+				<p><?php esc_html_e( 'This URL cannot be served as AMP because it has validation errors which are either new or rejected as being blockers.', 'amp' ); ?></p>
+			</div>
+		<?php endif; ?>
+
 		<div class="amp-validation-errors">
 			<ul>
 				<?php foreach ( $validation_errors as $error ) : ?>
@@ -870,11 +885,11 @@ class AMP_Invalid_URL_Post_Type {
 						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) ? 'open' : ''; ?>>
 							<summary>
 								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
-									<?php esc_html_e( '[New]', 'amp' ); ?>
+									&#x2753; <?php esc_html_e( '[New]', 'amp' ); ?>
 								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ) : ?>
-									<?php esc_html_e( '[Rejected]', 'amp' ); ?>
+									&#x274C; <?php esc_html_e( '[Rejected]', 'amp' ); ?>
 								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) : ?>
-									<?php esc_html_e( '[Accepted]', 'amp' ); ?>
+									&#x2705; <?php esc_html_e( '[Accepted]', 'amp' ); ?>
 								<?php endif; ?>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
 							</summary>

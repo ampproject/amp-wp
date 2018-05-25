@@ -710,11 +710,11 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'status':
 				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
-					$content = esc_html__( 'Accepted', 'amp' );
+					$content = '&#x2705; ' . esc_html__( 'Accepted', 'amp' );
 				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ) {
-					$content = esc_html__( 'Rejected', 'amp' );
+					$content = '&#x274C; ' . esc_html__( 'Rejected', 'amp' );
 				} else {
-					$content = esc_html__( 'New', 'amp' );
+					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
 				}
 				break;
 			case 'created_date_gmt':
