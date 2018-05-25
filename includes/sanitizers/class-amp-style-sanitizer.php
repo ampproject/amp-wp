@@ -1409,6 +1409,88 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Check if CSS selector should be included to style.
+	 *
+	 * @param string $dynamic_selector_pattern Selector pattern.
+	 * @param array  $parsed_selector Array of tag and classes.
+	 * @param string $selector CSS selector.
+	 * @return bool If should include CSS selector.
+	 */
+	private function should_include_selector( $dynamic_selector_pattern, $parsed_selector, $selector ) {
+		$dom = $this->dom;
+		return (
+			( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
+			||
+			(
+				// If all class names are used in the doc.
+				(
+					empty( $parsed_selector['classes'] )
+					||
+					0 === count( array_diff( $parsed_selector['classes'], $this->get_used_class_names() ) )
+				)
+				&&
+				// If all IDs are used in the doc.
+				(
+					empty( $parsed_selector['ids'] )
+					||
+					0 === count( array_filter( $parsed_selector['ids'], function( $id ) use ( $dom ) {
+						return ! $dom->getElementById( $id );
+					} ) )
+				)
+				&&
+				// If tag names are present in the doc.
+				(
+					empty( $parsed_selector['tags'] )
+					||
+					0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
+				)
+			)
+		);
+	}
+
+	/**
+	 * Ampify CSS selectors.
+	 *
+	 * @param array  $parsed_selector Array of tag and classes.
+	 * @param string $selector CSS selector.
+	 * @return array|bool False if not ampification needed, ampified selector otherwise.
+	 */
+	private function get_ampified_selectors_parsed( $parsed_selector, $selector ) {
+
+		// @todo Add mappings.
+		$mappings          = array(
+			'img' => 'amp-img',
+		);
+		$ampified_selector = $selector;
+		$tags              = array();
+		if ( ! empty( $parsed_selector['tags'] ) ) {
+			foreach ( $parsed_selector['tags'] as $tag ) {
+				if ( ! array_key_exists( $tag, $mappings ) ) {
+					$tags[] = $tag;
+					continue;
+				} else {
+					$tags[]            = $mappings[ $tag ];
+					$replace_from      = '/(^|>|~|\s)' . $tag . '\b/';
+					$replace_to        = '\1' . $mappings[ $tag ];
+					$ampified_selector = preg_replace( $replace_from, $replace_to, $ampified_selector );
+				}
+			}
+		}
+		if ( $selector === $ampified_selector ) {
+			return false;
+		}
+
+		return array(
+			'selector'        => $ampified_selector,
+			'parsed_selector' => array(
+				'classes' => isset( $parsed_selector['classes'] ) ? $parsed_selector['classes'] : array(),
+				'tags'    => $tags,
+				'ids'     => isset( $parsed_selector['ids'] ) ? $parsed_selector['ids'] : array(),
+			),
+		);
+	}
+
+	/**
 	 * Finalize a stylesheet set (amp-custom or amp-keyframes).
 	 *
 	 * @since 1.0
@@ -1446,7 +1528,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet_set['processed_nodes'] = array();
 
 		$final_size = 0;
-		$dom        = $this->dom;
 		foreach ( $stylesheet_set['pending_stylesheets'] as &$pending_stylesheet ) {
 			$stylesheet = '';
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
@@ -1454,43 +1535,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$stylesheet .= $stylesheet_part;
 				} else {
 					list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
-					if ( $should_tree_shake ) {
-						$selectors = array();
-						foreach ( $selectors_parsed as $selector => $parsed_selector ) {
-							$should_include = (
-								( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
-								||
-								(
-									// If all class names are used in the doc.
-									(
-										empty( $parsed_selector['classes'] )
-										||
-										0 === count( array_diff( $parsed_selector['classes'], $this->get_used_class_names() ) )
-									)
-									&&
-									// If all IDs are used in the doc.
-									(
-										empty( $parsed_selector['ids'] )
-										||
-										0 === count( array_filter( $parsed_selector['ids'], function( $id ) use ( $dom ) {
-											return ! $dom->getElementById( $id );
-										} ) )
-									)
-									&&
-									// If tag names are present in the doc.
-									(
-										empty( $parsed_selector['tags'] )
-										||
-										0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
-									)
-								)
-							);
-							if ( $should_include ) {
+					$selectors                                    = array();
+					foreach ( $selectors_parsed as $selector => $parsed_selector ) {
+						if ( $should_tree_shake ) {
+							if ( $this->should_include_selector( $dynamic_selector_pattern, $parsed_selector, $selector ) ) {
 								$selectors[] = $selector;
 							}
+						} else {
+
+							// Lets map the amp elements and replace the correct one and then check if we should include the replacement.
+							$amp_selectors_parsed = $this->get_ampified_selectors_parsed( $parsed_selector, $selector );
+							if ( is_array( $amp_selectors_parsed ) && $this->should_include_selector( $dynamic_selector_pattern, $amp_selectors_parsed['parsed_selector'], $amp_selectors_parsed['selector'] ) ) {
+
+								// @todo Check if there could be selector's array?
+								$selectors[] = $amp_selectors_parsed['selector'];
+							} else {
+								$selectors = array_keys( $selectors_parsed );
+							}
 						}
-					} else {
-						$selectors = array_keys( $selectors_parsed );
 					}
 					if ( ! empty( $selectors ) ) {
 						$stylesheet .= implode( ',', $selectors ) . $declaration_block;
