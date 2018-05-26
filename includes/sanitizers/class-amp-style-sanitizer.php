@@ -789,20 +789,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Prepare validation error.
+	 * Check whether or not sanitization should occur in response to validation error.
 	 *
-	 * @param array $error Error.
-	 * @param array $data Data.
-	 * @return array Error.
+	 * Supply sources to the error and the current node to data.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $validation_error Validation error.
+	 * @param array $data Data including the node.
+	 * @return bool Whether to sanitize.
 	 */
-	public function prepare_validation_error( array $error = array(), array $data = array() ) {
+	public function should_sanitize_validation_error( $validation_error, $data = array() ) {
 		if ( ! isset( $data['node'] ) ) {
 			$data['node'] = $this->current_node;
 		}
 		if ( ! isset( $error['sources'] ) ) {
 			$error['sources'] = $this->current_sources;
 		}
-		return parent::prepare_validation_error( $error, $data );
+		return parent::should_sanitize_validation_error( $validation_error, $data );
 	}
 
 	/**

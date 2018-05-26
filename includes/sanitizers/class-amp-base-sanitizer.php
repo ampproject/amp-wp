@@ -329,13 +329,9 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Call the validation_error_callback.
-	 *
 	 * Check whether or not sanitization should occur in response to validation error.
 	 *
 	 * @since 1.0
-	 *
-	 * @todo Each sanitizer needs a $locate_sources arg.
 	 *
 	 * @param array $validation_error Validation error.
 	 * @param array $data             Data including the node.
