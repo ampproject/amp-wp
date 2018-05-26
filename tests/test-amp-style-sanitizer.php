@@ -505,7 +505,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test handling of stylesheets with relative background-image URLs.
 	 *
-	 * @covers AMP_Style_Sanitizer::normalize_urls()
+	 * @covers AMP_Style_Sanitizer::real_path_urls()
 	 */
 	public function test_relative_background_url_handling() {
 		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( admin_url( 'css/common.css' ) ) . '"></head><body><span class="spinner"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
@@ -686,9 +686,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_data_urls() {
 		return array(
-			'url_with_spaces' => array(
+			'url_with_spaces'      => array(
 				'html { background-image:url(url with spaces.png); }',
 				'html{background-image:url("urlwithspaces.png")}',
+			),
+			'data_url_with_spaces' => array(
+				'html { background: url(data:image/png; base64, ivborw0kggoaaaansuheugaaacwaaaascamaaaapwqozaaaabgdbtueaalgpc/xhbqaaaafzukdcak7ohokaaaamuexurczmzpf399fx1+bm5mzy9amaaadisurbvdjlvzxbesmgces5/p8/t9furvcrmu73jwlzosgsiizurcjo/ad+eqjjb4hv8bft+idpqocx1wjosbfhh2xssxeiyn3uli/6mnree07uiwjev8ueowds88ly97kqytlijkktuybbruayvh5wohixmpi5we58ek028czwyuqdlkpg1bkb4nnm+veanfhqn1k4+gpt6ugqcvu2h2ovuif/gwufyy8owepdyzsa3avcqpvovvzzz2vtnn2wu8qzvjddeto90gsy9mvlqtgysy231mxry6i2ggqjrty0l8fxcxfcbbhwrsyyaaaaaelftksuqmcc); }',
+				'html{background:url("data:image/png;base64,ivborw0kggoaaaansuheugaaacwaaaascamaaaapwqozaaaabgdbtueaalgpc/xhbqaaaafzukdcak7ohokaaaamuexurczmzpf399fx1+bm5mzy9amaaadisurbvdjlvzxbesmgces5/p8/t9furvcrmu73jwlzosgsiizurcjo/ad+eqjjb4hv8bft+idpqocx1wjosbfhh2xssxeiyn3uli/6mnree07uiwjev8ueowds88ly97kqytlijkktuybbruayvh5wohixmpi5we58ek028czwyuqdlkpg1bkb4nnm+veanfhqn1k4+gpt6ugqcvu2h2ovuif/gwufyy8owepdyzsa3avcqpvovvzzz2vtnn2wu8qzvjddeto90gsy9mvlqtgysy231mxry6i2ggqjrty0l8fxcxfcbbhwrsyyaaaaaelftksuqmcc")}',
 			),
 		);
 	}
@@ -697,12 +701,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test handling of stylesheets with spaces in the background-image URLs.
 	 *
 	 * @dataProvider get_data_urls
-	 * @covers AMP_Style_Sanitizer::normalize_urls()
+	 * @covers AMP_Style_Sanitizer::remove_spaces_from_data_urls()
 	 *
 	 * @param string      $source     Source URL string.
 	 * @param string|null $expected   Expected normalized URL string.
 	 */
-	public function test_normalize_urls( $source, $expected ) {
+	public function test_remove_spaces_from_data_urls( $source, $expected ) {
 		$html  = '<html><head><style>';
 		$html .= $source;
 		$html .= '</style></head</html>';

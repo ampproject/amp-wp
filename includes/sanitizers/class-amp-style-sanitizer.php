@@ -628,15 +628,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
 			$css_document    = $css_parser->parse();
 
-			$this->normalize_urls(
-				array_filter(
-					$css_document->getAllValues(),
-					function ( $value ) {
-						return $value instanceof URL;
-					}
-				),
-				$options['stylesheet_url']
-			);
+			if ( ! empty( $options['stylesheet_url'] ) ) {
+				$this->real_path_urls(
+					array_filter(
+						$css_document->getAllValues(),
+						function ( $value ) {
+							return $value instanceof URL;
+						}
+					),
+					$options['stylesheet_url']
+				);
+			}
 
 			$validation_errors = $this->process_css_list( $css_document, $options );
 
@@ -794,7 +796,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function remove_spaces_from_data_urls( $css ) {
 		return preg_replace_callback(
-			'/\burl\([^;}]*?\)/',
+			'/\burl\([^}]*?\)/',
 			function( $matches ) {
 				return preg_replace( '/\s+/', '', $matches[0] );
 			},
@@ -886,27 +888,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Convert URLs in to non-relative normalized paths and prevent there being any spaces.
+	 * Convert URLs in to non-relative real-paths.
 	 *
 	 * @param URL[]  $urls           URLs.
-	 * @param string $stylesheet_url Stylesheet URL. Base URL is obtained from this. Optional.
+	 * @param string $stylesheet_url Stylesheet URL.
 	 */
-	private function normalize_urls( $urls, $stylesheet_url = '' ) {
-		$base_url = $stylesheet_url ? preg_replace( ':[^/]+(\?.*)?(#.*)?$:', '', $stylesheet_url ) : '';
+	private function real_path_urls( $urls, $stylesheet_url ) {
+		$base_url = preg_replace( ':[^/]+(\?.*)?(#.*)?$:', '', $stylesheet_url );
+		if ( empty( $base_url ) ) {
+			return;
+		}
 
 		foreach ( $urls as $url ) {
 			// URLs cannot have spaces in them, so strip them (especially when spaces get erroneously injected in data: URLs).
-			$url_string = preg_replace( '/\s+/', '', $url->getURL()->getString() );
+			$url_string = $url->getURL()->getString();
 
 			// For data: URLs, all that is needed is to remove spaces so set and continue.
 			if ( 'data:' === substr( $url_string, 0, 5 ) ) {
-				$url->getURL()->setString( $url_string );
-				continue;
-			}
-
-			// If the base URL is empty, there is nothing more to do.
-			if ( empty( $base_url ) ) {
-				$url->getURL()->setString( $url_string );
 				continue;
 			}
 
