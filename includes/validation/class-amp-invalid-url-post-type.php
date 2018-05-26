@@ -223,7 +223,6 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * If there are no validation errors provided, then any existing amp_invalid_url post is deleted.
 	 *
-	 * @todo Rename to validation results?
 	 * @param array  $validation_errors Validation errors.
 	 * @param string $url               URL on which the validation errors occurred.
 	 * @return int|WP_Error $post_id The post ID of the custom post type used, null if post was deleted due to no validation errors, or WP_Error on failure.
@@ -262,12 +261,8 @@ class AMP_Invalid_URL_Post_Type {
 				$sources = $data['sources'];
 			}
 
-			// @todo The next few lines should be moved to a mthod in AMP_Validation_Error_Taxonomy.
-			unset( $data['sources'] );
-			ksort( $data );
-			$description = wp_json_encode( $data );
-			$term_slug   = md5( $description );
-
+			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
+			$term_slug = $term_data['slug'];
 			if ( ! isset( $terms[ $term_slug ] ) ) {
 
 				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
@@ -277,7 +272,7 @@ class AMP_Invalid_URL_Post_Type {
 					if ( false !== $has_pre_term_description_filter ) {
 						remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 					}
-					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( compact( 'description' ) ) );
+					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
 					if ( false !== $has_pre_term_description_filter ) {
 						add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 					}

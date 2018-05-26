@@ -417,11 +417,9 @@ class AMP_Validation_Manager {
 		 */
 		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
-		// @todo Move this into a helper function.
-		ksort( $error );
-		$slug = md5( wp_json_encode( $error ) );
-		$term = get_term_by( 'slug', $slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error );
 
+		$term = get_term_by( 'slug', $term_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		if ( ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
 			$sanitized = true;
 		} else {

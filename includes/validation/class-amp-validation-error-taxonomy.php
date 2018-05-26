@@ -163,6 +163,24 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Prepare a validation error for lookup or insertion as taxonomy term.
+	 *
+	 * @param array $error Validation error.
+	 * @return array Term fields.
+	 */
+	public static function prepare_validation_error_taxonomy_term( $error ) {
+		unset( $error['sources'] );
+		ksort( $error );
+		$description = wp_json_encode( $error );
+		$term_slug   = md5( $description );
+		return array(
+			'slug'        => $term_slug,
+			'name'        => $term_slug,
+			'description' => $description,
+		);
+	}
+
+	/**
 	 * Get the count of validation error terms, optionally restricted by term group (e.g. accepted or rejected).
 	 *
 	 * @param array $args  {
