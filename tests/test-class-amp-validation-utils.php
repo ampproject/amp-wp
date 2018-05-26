@@ -811,11 +811,11 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_validation_callback
+	 * Test filter_sanitizer_args
 	 *
-	 * @covers AMP_Validation_Manager::add_validation_callback()
+	 * @covers AMP_Validation_Manager::filter_sanitizer_args()
 	 */
-	public function test_add_validation_callback() {
+	public function test_filter_sanitizer_args() {
 		global $post;
 		$post       = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		$sanitizers = array(
@@ -825,7 +825,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		);
 
 		$expected_callback   = self::TESTED_CLASS . '::add_validation_error';
-		$filtered_sanitizers = AMP_Validation_Manager::add_validation_callback( $sanitizers );
+		$filtered_sanitizers = AMP_Validation_Manager::filter_sanitizer_args( $sanitizers );
 		foreach ( $filtered_sanitizers as $sanitizer => $args ) {
 			$this->assertEquals( $expected_callback, $args['validation_error_callback'] );
 		}

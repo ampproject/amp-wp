@@ -1243,7 +1243,7 @@ class AMP_Validation_Manager {
 			$errors  = wp_list_pluck( self::$validation_results, 'error' );
 			$encoded = wp_json_encode( $errors, 128 /* JSON_PRETTY_PRINT */ );
 			$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
-			$comment = $dom->createComment( 'AMP_VALIDATION_ERRORS:' . $encoded . "\n" );
+			$comment = $dom->createComment( 'AMP_VALIDATION_ERRORS:' . $encoded . "\n" ); // @todo Rename to AMP_VALIDATION_RESULTS and then include sanitized.
 			$dom->documentElement->appendChild( $comment );
 		}
 	}
@@ -1254,14 +1254,14 @@ class AMP_Validation_Manager {
 	 * @param array $sanitizers The AMP sanitizers.
 	 * @return array $sanitizers The filtered AMP sanitizers.
 	 */
-	public static function add_validation_callback( $sanitizers ) {
+	public static function filter_sanitizer_args( $sanitizers ) {
 		foreach ( $sanitizers as $sanitizer => &$args ) {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 
 		// @todo Pass this into all sanitizers?
 		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
-			$sanitizers['AMP_Style_Sanitizer']['locate_sources'] = true;
+			$sanitizers['AMP_Style_Sanitizer']['locate_sources'] = self::$locate_sources;
 		}
 
 		return $sanitizers;
@@ -1279,7 +1279,7 @@ class AMP_Validation_Manager {
 		}
 		$validation_errors = self::validate_url( $url );
 		if ( is_array( $validation_errors ) && count( $validation_errors ) > 0 ) {
-			self::store_validation_errors( $validation_errors, $url );
+			AMP_Invalid_URL_Post_Type::store_validation_errors( $validation_errors, $url );
 			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
 		} else {
 			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
@@ -1358,7 +1358,7 @@ class AMP_Validation_Manager {
 					'<a href="%s">%s</a>',
 					esc_url( add_query_arg(
 						'post_type',
-						self::POST_TYPE_SLUG,
+						AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 						admin_url( 'edit.php' )
 					) ),
 					__( 'More details', 'amp' )

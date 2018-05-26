@@ -159,7 +159,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		self::$sanitizer_classes = AMP_Validation_Manager::add_validation_callback( self::$sanitizer_classes );
+		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
 	}
 
