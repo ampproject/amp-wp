@@ -100,10 +100,8 @@ class AMP_Theme_Support {
 			return;
 		}
 
-		// @todo Rename to query var to indicate whether sources should be obtained. It's sources that are needing to be to be conditional.
 		AMP_Validation_Manager::init( array(
-			'locate_sources' => AMP_Validation_Manager::should_validate_response(),
-			'debug'          => isset( $_REQUEST[ AMP_Validation_Manager::DEBUG_QUERY_VAR ] ), // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			'should_locate_sources' => AMP_Validation_Manager::should_validate_response(),
 		) );
 
 		self::$init_start_time = microtime( true );
@@ -1135,7 +1133,9 @@ class AMP_Theme_Support {
 		}
 
 		if ( AMP_Validation_Manager::should_validate_response() ) {
-			AMP_Validation_Manager::finalize_validation( $dom );
+			AMP_Validation_Manager::finalize_validation( $dom, array(
+				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
+			) );
 		}
 
 		$response  = "<!DOCTYPE html>\n";

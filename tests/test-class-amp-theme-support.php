@@ -26,7 +26,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::$debug = false;
 		unset( $GLOBALS['current_screen'] );
 		remove_theme_support( 'amp' );
 	}

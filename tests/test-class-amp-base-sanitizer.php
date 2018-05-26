@@ -26,7 +26,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::$locate_sources = false;
+		AMP_Validation_Manager::$should_locate_sources = false;
 	}
 
 	/**
@@ -237,7 +237,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_remove_attribute() {
 		$this->markTestSkipped( 'Needs refactoring.' );
 
-		AMP_Validation_Manager::$locate_sources = true;
+		AMP_Validation_Manager::$should_locate_sources = true;
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$video_name   = 'amp-video';
 		$attribute    = 'onload';

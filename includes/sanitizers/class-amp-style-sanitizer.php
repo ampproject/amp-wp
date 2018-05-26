@@ -35,7 +35,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $require_https_src          Require HTTPS URLs.
 	 *      @type bool     $allow_dirty_styles         Allow dirty styles. This short-circuits the sanitize logic; it is used primarily in Customizer preview.
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
-	 *      @type bool     $locate_sources             Whether to locate the sources when reporting validation errors.
+	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 * }
 	 */
 	protected $args;
@@ -53,7 +53,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'[submit-error]',
 			'[submit-success]',
 		),
-		'locate_sources'            => false,
+		'should_locate_sources'     => false,
 	);
 
 	/**
@@ -451,7 +451,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->current_node = $node;
 		if ( empty( $node ) ) {
 			$this->current_sources = null;
-		} elseif ( ! empty( $this->args['locate_sources'] ) ) {
+		} elseif ( ! empty( $this->args['should_locate_sources'] ) ) {
 			$this->current_sources = AMP_Validation_Manager::locate_sources( $node );
 		}
 	}
@@ -592,8 +592,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
 			),
 			array(
-				'locate_sources' => ! empty( $this->args['locate_sources'] ),
-				// @todo There will need to be a variant for preview, probably is_customize_preview() or $wp_customize->changeset_uuid().
+				'should_locate_sources' => ! empty( $this->args['should_locate_sources'] ),
+				// @todo There will need to be a variant for preview, probably is_customize_preview() or $wp_customize->changeset_uuid(), or rather the list of sanitization overrides from query?
 			)
 		);
 

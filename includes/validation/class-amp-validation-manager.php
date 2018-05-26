@@ -20,13 +20,6 @@ class AMP_Validation_Manager {
 	const VALIDATE_QUERY_VAR = 'amp_validate';
 
 	/**
-	 * Query var that enables validation debug mode, to disable removal of invalid elements/attributes.
-	 *
-	 * @var string
-	 */
-	const DEBUG_QUERY_VAR = 'amp_debug';
-
-	/**
 	 * Query var for cache-busting.
 	 *
 	 * @var string
@@ -110,19 +103,9 @@ class AMP_Validation_Manager {
 	/**
 	 * Whether validation error sources should be located.
 	 *
-	 * @todo Rename to should_locate_sources
 	 * @var bool
 	 */
-	public static $locate_sources = false;
-
-	/**
-	 * Whether in debug mode.
-	 *
-	 * This means that sanitization will not be applied for validation errors, and any source comments will not be removed.
-	 *
-	 * @var bool
-	 */
-	public static $debug = false;
+	public static $should_locate_sources = false;
 
 	/**
 	 * Add the actions.
@@ -130,21 +113,19 @@ class AMP_Validation_Manager {
 	 * @param array $args {
 	 *     Args.
 	 *
-	 *     @type bool $debug Whether validation should be done in debug mode, where validation errors are not sanitized and source comments are not removed.
+	 *     @type bool $should_locate_sources Whether to locate sources.
 	 * }
 	 * @return void
 	 */
 	public static function init( $args = array() ) {
 		$args = array_merge(
 			array(
-				'debug'          => false,
-				'locate_sources' => false,
+				'should_locate_sources' => false,
 			),
 			$args
 		);
 
-		self::$debug          = $args['debug'];
-		self::$locate_sources = $args['locate_sources'];
+		self::$should_locate_sources = $args['should_locate_sources'];
 
 		add_action( 'init', array( 'AMP_Invalid_URL_Post_Type', 'register' ) );
 		add_action( 'init', array( 'AMP_Validation_Error_Taxonomy', 'register' ) );
@@ -164,17 +145,15 @@ class AMP_Validation_Manager {
 			}
 		} );
 
-		if ( self::$locate_sources ) {
-			self::add_validation_hooks();
+		if ( self::$should_locate_sources ) {
+			self::add_validation_error_sourcing();
 		}
 	}
 
 	/**
-	 * Add hooks for doing validation during preprocessing/sanitizing.
-	 *
-	 * @todo Rename to add_validation_error_source_tracing().
+	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
 	 */
-	public static function add_validation_hooks() {
+	public static function add_validation_error_sourcing() {
 		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
 		add_action( 'all', array( __CLASS__, 'wrap_hook_callbacks' ) );
@@ -330,7 +309,6 @@ class AMP_Validation_Manager {
 		$field = array(
 			'errors'      => array(),
 			'review_link' => null,
-			'debug_link'  => self::get_debug_url( amp_get_permalink( $post_data['id'] ) ),
 		);
 
 		if ( $validation_status_post ) {
@@ -407,7 +385,7 @@ class AMP_Validation_Manager {
 			$node = $data['node'];
 		}
 
-		if ( self::$locate_sources ) {
+		if ( self::$should_locate_sources ) {
 			if ( ! empty( $error['sources'] ) ) {
 				$sources = $error['sources'];
 			} elseif ( $node ) {
@@ -448,7 +426,7 @@ class AMP_Validation_Manager {
 		$slug = md5( wp_json_encode( $error ) );
 		$term = get_term_by( 'slug', $slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
-		if ( ! self::$debug && ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
+		if ( ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
 			$sanitized = true;
 		} else {
 			$sanitized = false;
@@ -600,6 +578,8 @@ class AMP_Validation_Manager {
 
 	/**
 	 * Walk back tree to find the open sources.
+	 *
+	 * @todo This method and others for sourcing could be moved to a separate class.
 	 *
 	 * @param DOMNode $node Node to look for.
 	 * @return array[][] {
@@ -1229,7 +1209,7 @@ class AMP_Validation_Manager {
 	public static function finalize_validation( DOMDocument $dom, $args = array() ) {
 		$args = array_merge(
 			array(
-				'remove_source_comments'           => ! self::$debug,
+				'remove_source_comments'           => true,
 				'append_validation_status_comment' => true,
 			),
 			$args
@@ -1261,7 +1241,7 @@ class AMP_Validation_Manager {
 
 		// @todo Pass this into all sanitizers?
 		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
-			$sanitizers['AMP_Style_Sanitizer']['locate_sources'] = self::$locate_sources;
+			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$should_locate_sources;
 		}
 
 		return $sanitizers;
@@ -1372,22 +1352,6 @@ class AMP_Validation_Manager {
 				); // WPCS: XSS ok.
 			}
 		}
-	}
-
-	/**
-	 * Get validation debug UR:.
-	 *
-	 * @param string $url URL to to validate and debug.
-	 * @return string Debug URL.
-	 */
-	public static function get_debug_url( $url ) {
-		return add_query_arg(
-			array(
-				self::VALIDATE_QUERY_VAR => '',
-				self::DEBUG_QUERY_VAR    => '',
-			),
-			$url
-		) . '#development=1';
 	}
 
 	/**

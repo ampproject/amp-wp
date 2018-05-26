@@ -96,7 +96,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets; // WPCS: override ok.
 		remove_theme_support( 'amp' );
 		unset( $GLOBALS['current_screen'] );
-		AMP_Validation_Manager::$locate_sources = false;
+		AMP_Validation_Manager::$should_locate_sources = false;
 		parent::tearDown();
 	}
 
@@ -128,10 +128,10 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test add_validation_hooks.
 	 *
-	 * @covers AMP_Validation_Manager::add_validation_hooks()
+	 * @covers AMP_Validation_Manager::add_validation_error_sourcing()
 	 */
 	public function test_add_validation_hooks() {
-		AMP_Validation_Manager::add_validation_hooks();
+		AMP_Validation_Manager::add_validation_error_sourcing();
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
@@ -140,7 +140,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	/**
 	 * Test add_validation_hooks with Gutenberg active.
 	 *
-	 * @covers AMP_Validation_Manager::add_validation_hooks()
+	 * @covers AMP_Validation_Manager::add_validation_error_sourcing()
 	 */
 	public function test_add_validation_hooks_gutenberg() {
 		if ( ! function_exists( 'do_blocks' ) ) {
@@ -152,7 +152,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		$priority = has_filter( 'the_content', 'do_blocks' );
 		$this->assertNotFalse( $priority );
-		AMP_Validation_Manager::add_validation_hooks();
+		AMP_Validation_Manager::add_validation_error_sourcing();
 		$this->assertEquals( $priority - 1, has_filter( 'the_content', array( self::TESTED_CLASS, 'add_block_source_comments' ) ) );
 	}
 
@@ -253,7 +253,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	public function test_track_removed() {
 		$this->markTestSkipped( 'Needs refactoring' );
 
-		AMP_Validation_Manager::$locate_sources = true;
+		AMP_Validation_Manager::$should_locate_sources = true;
 		$this->assertEmpty( AMP_Validation_Manager::$validation_results );
 		AMP_Validation_Manager::add_validation_error(
 			array(
@@ -556,7 +556,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$action_two_arguments     = 'example_action_two_arguments';
 		$notice                   = 'Example notice';
 
-		AMP_Validation_Manager::add_validation_hooks();
+		AMP_Validation_Manager::add_validation_error_sourcing();
 
 		add_action( $action_function_callback, '_amp_print_php_version_admin_notice' );
 		add_action( $action_no_argument, array( $this, 'output_div' ) );
@@ -663,7 +663,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::decorate_filter_source()
 	 */
 	public function test_decorate_shortcode_and_filter_source() {
-		AMP_Validation_Manager::add_validation_hooks();
+		AMP_Validation_Manager::add_validation_error_sourcing();
 		add_shortcode( 'test', function() {
 			return '<b>test</b>';
 		} );
@@ -1436,17 +1436,6 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( $first_url, $output );
 		$this->assertContains( $second_url_same_errors, $output );
 		AMP_Validation_Manager::reset_validation_results();
-	}
-
-	/**
-	 * Test for get_debug_url()
-	 *
-	 * @covers AMP_Validation_Manager::get_debug_url()
-	 */
-	public function test_get_debug_url() {
-		$this->assertContains( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_debug_url( 'https://example.com/foo/' ) );
-		$this->assertContains( AMP_Validation_Manager::DEBUG_QUERY_VAR, AMP_Validation_Manager::get_debug_url( 'https://example.com/foo/' ) );
-		$this->assertStringEndsWith( '#development=1', AMP_Validation_Manager::get_debug_url( 'https://example.com/foo/' ) );
 	}
 
 	/**
