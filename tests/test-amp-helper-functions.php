@@ -416,7 +416,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			)
 		);
 		$this->go_to( get_permalink( $attachment_id ) );
-		$this->assertNull( amp_get_post_image_metadata( $attachment_id ) );
+		$this->assertFalse( amp_get_post_image_metadata( $attachment_id ) );
 	}
 
 	/**
