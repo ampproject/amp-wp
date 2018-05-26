@@ -302,26 +302,22 @@ class AMP_Validation_Manager {
 		}
 
 		if ( empty( $validation_status_post ) ) {
-			// @todo Consider process_markup() if not post type is not viewable and if post type supports editor.
 			$validation_status_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( amp_get_permalink( $post->ID ) );
 		}
 
 		$field = array(
-			'errors'      => array(),
+			'results'     => array(),
 			'review_link' => null,
 		);
 
 		if ( $validation_status_post ) {
-			$field = array_merge(
-				$field,
-				array(
-					'review_link' => get_edit_post_link( $validation_status_post->ID, 'raw' ),
-					'errors'      => wp_list_pluck(
-						AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post, array( 'ignore_accepted' => true ) ),
-						'data'
-					),
-				)
-			);
+			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
+			foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
+				$field['results'][] = array(
+					'sanitized' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['term']->term_group,
+					'error'     => $result['data'],
+				);
+			}
 		}
 
 		return $field;
@@ -1220,10 +1216,9 @@ class AMP_Validation_Manager {
 		}
 
 		if ( $args['append_validation_status_comment'] ) {
-			$errors  = wp_list_pluck( self::$validation_results, 'error' );
-			$encoded = wp_json_encode( $errors, 128 /* JSON_PRETTY_PRINT */ );
+			$encoded = wp_json_encode( self::$validation_results, 128 /* JSON_PRETTY_PRINT */ );
 			$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
-			$comment = $dom->createComment( 'AMP_VALIDATION_ERRORS:' . $encoded . "\n" ); // @todo Rename to AMP_VALIDATION_RESULTS and then include sanitized.
+			$comment = $dom->createComment( 'AMP_VALIDATION_RESULTS:' . $encoded . "\n" );
 			$dom->documentElement->appendChild( $comment );
 		}
 	}
@@ -1302,14 +1297,15 @@ class AMP_Validation_Manager {
 			);
 		}
 		$response = wp_remote_retrieve_body( $r );
-		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION_ERRORS\s*:\s*(\[.*?\])\s*-->#s', $response, $matches ) ) {
+		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION_RESULTS\s*:\s*(\[.*?\])\s*-->#s', $response, $matches ) ) {
 			return new WP_Error( 'response_comment_absent' );
 		}
-		$validation_errors = json_decode( $matches[1], true );
-		if ( ! is_array( $validation_errors ) ) {
+		$validation_results = json_decode( $matches[1], true );
+		if ( ! is_array( $validation_results ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
 
+		$validation_errors = wp_list_pluck( $validation_results, 'error' );
 		return $validation_errors;
 	}
 

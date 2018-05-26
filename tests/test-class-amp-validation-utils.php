@@ -1067,10 +1067,16 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 				),
 				$url
 			);
+			$validation_results = array();
+			foreach ( $validation_errors as $error ) {
+				$sanitized            = false;
+				$validation_results[] = compact( 'error', 'sanitized' );
+			}
+
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_ERRORS:' . wp_json_encode( $validation_errors )
+					'AMP_VALIDATION_RESULTS:' . wp_json_encode( $validation_results )
 				),
 			);
 		};

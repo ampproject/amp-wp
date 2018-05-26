@@ -104,7 +104,14 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
-			validationErrors = ampValidity.errors;
+			validationErrors = _.map(
+				_.filter( ampValidity.results, function( result ) {
+					return ! result.sanitized;
+				} ),
+				function( result ) {
+					return result.error;
+				}
+			);
 
 			// Short-circuit if there was no change to the validation errors.
 			if ( ! validationErrors || _.isEqual( module.lastValidationErrors, validationErrors ) ) {
@@ -211,7 +218,14 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			var blockValidationErrorsByUid, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
-			validationErrors = currentPost[ module.data.ampValidityRestField ].errors;
+			validationErrors = _.map(
+				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
+					return ! result.sanitized;
+				} ),
+				function( result ) {
+					return result.error;
+				}
+			);
 			blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
 
 			otherValidationErrors = [];
