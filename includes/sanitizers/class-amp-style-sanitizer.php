@@ -585,21 +585,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed      = null;
 		$cache_key   = null;
 		$cache_group = 'amp-parsed-stylesheet-v5';
-		$can_cache   = ! $this->args['locate_sources'];
 
-		if ( $can_cache ) {
-			$cache_impacting_options = wp_array_slice_assoc(
+		$cache_impacting_options = array_merge(
+			wp_array_slice_assoc(
 				$options,
 				array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
-			);
+			),
+			array(
+				'locate_sources' => ! empty( $this->args['locate_sources'] ),
+				// @todo There will need to be a variant for preview, probably is_customize_preview() or $wp_customize->changeset_uuid().
+			)
+		);
 
-			$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 
-			if ( wp_using_ext_object_cache() ) {
-				$parsed = wp_cache_get( $cache_key, $cache_group );
-			} else {
-				$parsed = get_transient( $cache_key . $cache_group );
-			}
+		if ( wp_using_ext_object_cache() ) {
+			$parsed = wp_cache_get( $cache_key, $cache_group );
+		} else {
+			$parsed = get_transient( $cache_key . $cache_group );
 		}
 
 		// Make sure that the parsed stylesheet was cached with current sanitizations.
@@ -616,13 +619,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
 			$parsed = $this->parse_stylesheet( $stylesheet, $options );
 
-			if ( $can_cache ) {
-				if ( wp_using_ext_object_cache() ) {
-					wp_cache_set( $cache_key, $parsed, $cache_group );
-				} else {
-					// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
-					set_transient( $cache_key . $cache_group, $parsed, MONTH_IN_SECONDS );
-				}
+			if ( wp_using_ext_object_cache() ) {
+				wp_cache_set( $cache_key, $parsed, $cache_group );
+			} else {
+				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
+				set_transient( $cache_key . $cache_group, $parsed, MONTH_IN_SECONDS );
 			}
 		}
 
