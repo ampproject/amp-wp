@@ -11,6 +11,13 @@
 class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 	/**
+	 * The mock Site Icon value to use in a filter.
+	 *
+	 * @var string
+	 */
+	const MOCK_SITE_ICON = 'https://example.com/new-site-icon.jpg';
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
@@ -381,8 +388,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_schemaorg_metadata() {
 		update_option( 'blogname', 'Foo' );
+		$publisher_type     = 'Organization';
+		$logo_type          = 'ImageObject';
 		$expected_publisher = array(
-			'@type' => 'Organization',
+			'@type' => $publisher_type,
 			'name'  => 'Foo',
 		);
 
@@ -401,13 +410,122 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_author' => $user_id,
 		) );
 
-		// Test non-singular.
+		// Test non-singular, with no publisher logo.
 		$this->go_to( home_url() );
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
 		$this->assertArrayNotHasKey( '@type', $metadata );
 		$this->assertArrayHasKey( 'publisher', $metadata );
 		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+
+		// Test the custom_logo as the publisher logo.
+		$custom_logo_src    = 'example/custom-logo.jpeg';
+		$custom_logo_height = 45;
+		$custom_logo_width  = 600;
+		$custom_logo_id     = $this->factory()->attachment->create_object(
+			$custom_logo_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_logo_img  = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
+
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $custom_logo_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width,
+			),
+			$metadata['publisher']['logo']
+		);
+		set_theme_mod( 'custom_logo', null );
+
+		// Test the site icon as the publisher logo.
+		$site_icon_src          = 'foo/site-icon.jpeg';
+		$site_icon_id           = $this->factory()->attachment->create_object(
+			$site_icon_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_site_icon_img = wp_get_attachment_image_src( $site_icon_id, 'full', false );
+
+		update_option( 'site_icon', $site_icon_id );
+		$expected_schema_site_icon = array(
+			'@type'  => $logo_type,
+			'height' => 32,
+			'url'    => $expected_site_icon_img[0],
+			'width'  => 32,
+		);
+		$metadata                  = amp_get_schemaorg_metadata();
+		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
+		update_option( 'site_icon', null );
+
+		/**
+		 * Test the publisher logo when the Custom Logo naturally has too much height, a common scenario.
+		 *
+		 * It's expected that the URL is the same,
+		 * but the height should be 60, the maximum height for the schema.org publisher logo.
+		 * And the width should be proportional to the new height.
+		 */
+		$custom_logo_excessive_height = 250;
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_excessive_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		update_option( 'site_icon', $site_icon_id );
+		$metadata   = amp_get_schemaorg_metadata();
+		$max_height = 60;
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $max_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width * $max_height / $custom_logo_excessive_height, // Proportional to downsized height.
+			),
+			$metadata['publisher']['logo']
+		);
+		set_theme_mod( 'custom_logo', null );
+		update_option( 'site_icon', null );
+
+		/**
+		 * Test that the 'amp_site_icon_url' filter also applies to the Custom Logo.
+		 *
+		 * Before, this only applied to the Site Icon, as that was the only possible schema.org publisher logo.
+		 * But now that the Custom Logo is preferred, this filter should also apply to that.
+		 */
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		add_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo']['url'] );
+		remove_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		set_theme_mod( 'custom_logo', null );
 
 		// Test page.
 		$this->go_to( get_permalink( $page_id ) );
@@ -459,5 +577,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
+	}
+
+	/**
+	 * Get a mock publisher logo URL, to test that the filter works as expected.
+	 *
+	 * @param string $site_icon The publisher logo in the schema.org data.
+	 * @return string $site_icon The filtered publisher logo in the schema.org data.
+	 */
+	public static function mock_site_icon( $site_icon ) {
+		unset( $site_icon );
+		return self::MOCK_SITE_ICON;
 	}
 }

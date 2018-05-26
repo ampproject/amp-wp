@@ -793,16 +793,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string CSS with spaces removed from data URLs.
 	 */
 	private function remove_spaces_from_data_urls( $css ) {
-		$css = preg_replace_callback(
-			'|(url)(\(.*?\))|',
+		return preg_replace_callback(
+			'/\burl\([^;}]*?\)/',
 			function( $matches ) {
-				$replacement = preg_replace( '/\s+/', '', $matches[2] );
-				return $matches[1] . $replacement;
+				return preg_replace( '/\s+/', '', $matches[0] );
 			},
 			$css
 		);
-
-		return $css;
 	}
 
 	/**
