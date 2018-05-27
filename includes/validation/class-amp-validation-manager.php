@@ -324,31 +324,6 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Processes markup, to determine AMP validity.
-	 *
-	 * Passes $markup through the AMP sanitizers.
-	 * Also passes a 'validation_error_callback' to keep track of stripped attributes and nodes.
-	 *
-	 * @todo Eliminate since unused.
-	 *
-	 * @param string $markup The markup to process.
-	 * @return string Sanitized markup.
-	 */
-	public static function process_markup( $markup ) {
-		AMP_Theme_Support::register_content_embed_handlers();
-
-		/** This filter is documented in wp-includes/post-template.php */
-		$markup = apply_filters( 'the_content', $markup );
-		$args   = array(
-			'content_max_width'         => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
-			'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error',
-		);
-
-		$results = AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
-		return $results[0];
-	}
-
-	/**
 	 * Whether the user has the required capability.
 	 *
 	 * Checks for permissions before validating.
@@ -362,12 +337,7 @@ class AMP_Validation_Manager {
 	/**
 	 * Add validation error.
 	 *
-	 * @param array $error {
-	 *     Data.
-	 *
-	 *     @type string $code Error code.
-	 *     @type DOMElement|DOMNode $node The removed node.
-	 * }
+	 * @param array $error Error info, especially code.
 	 * @param array $data Additional data, including the node.
 	 *
 	 * @return bool Whether the validation error should result in sanitization.

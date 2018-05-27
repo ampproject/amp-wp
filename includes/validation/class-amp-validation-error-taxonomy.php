@@ -571,11 +571,12 @@ class AMP_Validation_Error_Taxonomy {
 			$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
 		}
 
+		$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
 			esc_html__( 'Validation Errors', 'amp' ),
 			$menu_item_label,
-			get_taxonomy( self::TAXONOMY_SLUG )->cap->manage_terms, // Yes, cap is an object not an array.
+			$taxonomy_caps->manage_terms,
 			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
 			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )
 		);
@@ -858,8 +859,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 		$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
 		check_admin_referer( $action );
-		$tax = get_taxonomy( self::TAXONOMY_SLUG );
-		if ( ! current_user_can( $tax->cap->manage_terms ) ) { // Yes it is an object.
+		$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
+		if ( ! current_user_can( $taxonomy_caps->manage_terms ) ) {
 			return;
 		}
 

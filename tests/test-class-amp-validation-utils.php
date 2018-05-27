@@ -295,42 +295,63 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test process_markup.
+	 * Processes markup, to determine AMP validity.
 	 *
-	 * @covers AMP_Validation_Manager::process_markup()
+	 * Passes $markup through the AMP sanitizers.
+	 * Also passes a 'validation_error_callback' to keep track of stripped attributes and nodes.
+	 *
+	 * @param string $markup The markup to process.
+	 * @return string Sanitized markup.
+	 */
+	public function process_markup( $markup ) {
+		AMP_Theme_Support::register_content_embed_handlers();
+
+		/** This filter is documented in wp-includes/post-template.php */
+		$markup = apply_filters( 'the_content', $markup );
+		$args   = array(
+			'content_max_width'         => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH,
+			'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error',
+		);
+
+		$results = AMP_Content_Sanitizer::sanitize( $markup, amp_get_content_sanitizers(), $args );
+		return $results[0];
+	}
+
+	/**
+	 * Test process_markup.
 	 */
 	public function test_process_markup() {
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 
 		$this->set_capability();
-		AMP_Validation_Manager::process_markup( $this->valid_amp_img );
+		$this->process_markup( $this->valid_amp_img );
 		$this->assertEquals( array(), AMP_Validation_Manager::$validation_results );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$video = '<video src="https://example.com/video">';
-		AMP_Validation_Manager::process_markup( $video );
+		$this->process_markup( $video );
 		// This isn't valid AMP, but the sanitizer should convert it to an <amp-video>, without stripping anything.
 		$this->assertEquals( array(), AMP_Validation_Manager::$validation_results );
 
 		AMP_Validation_Manager::reset_validation_results();
 
-		AMP_Validation_Manager::process_markup( $this->disallowed_tag );
+		$this->process_markup( $this->disallowed_tag );
 		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
 		$this->assertEquals( 'script', AMP_Validation_Manager::$validation_results[0]['error']['node_name'] );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$disallowed_style = '<div style="display:none"></div>';
-		AMP_Validation_Manager::process_markup( $disallowed_style );
+		$this->process_markup( $disallowed_style );
 		$this->assertEquals( array(), AMP_Validation_Manager::$validation_results );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$invalid_video = '<video width="200" height="100"></video>';
-		AMP_Validation_Manager::process_markup( $invalid_video );
+		$this->process_markup( $invalid_video );
 		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
 		$this->assertEquals( 'video', AMP_Validation_Manager::$validation_results[0]['error']['node_name'] );
 		AMP_Validation_Manager::reset_validation_results();
 
-		AMP_Validation_Manager::process_markup( '<button onclick="evil()">Do it</button>' );
+		$this->process_markup( '<button onclick="evil()">Do it</button>' );
 		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
 		$this->assertEquals( 'onclick', AMP_Validation_Manager::$validation_results[0]['error']['node_name'] );
 		AMP_Validation_Manager::reset_validation_results();
@@ -361,7 +382,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		AMP_Validation_Manager::process_markup( $this->disallowed_tag );
+		$this->process_markup( $this->disallowed_tag );
 		$response = AMP_Validation_Manager::summarize_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ) );
 		AMP_Validation_Manager::reset_validation_results();
 		$expected_response = array(
@@ -864,7 +885,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		global $post;
 		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
 		add_theme_support( 'amp' );
-		AMP_Validation_Manager::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
+		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 
 		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
 		$this->assertEquals( 'script', AMP_Validation_Manager::$validation_results[0]['error']['node_name'] );
@@ -896,7 +917,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 
 		AMP_Validation_Manager::reset_validation_results();
 		$url = home_url( '/?baz' );
-		AMP_Validation_Manager::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
+		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
 		AMP_Validation_Manager::reset_validation_results();
 		$meta = get_post_meta( $post_id, AMP_Validation_Manager::AMP_URL_META, false );
@@ -905,7 +926,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( $url, $meta );
 
 		$url = home_url( '/?foo-bar' );
-		AMP_Validation_Manager::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
+		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
 		AMP_Validation_Manager::reset_validation_results();
 		$meta = get_post_meta( $post_id, AMP_Validation_Manager::AMP_URL_META, false );
@@ -915,7 +936,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( $url, $meta );
 
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}--><nonexistent></nonexistent><!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
+		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}--><nonexistent></nonexistent><!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
 		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
 		AMP_Validation_Manager::reset_validation_results();
 		$error_post                = get_post( $custom_post_id );
@@ -930,7 +951,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertContains( $url, get_post_meta( $custom_post_id, AMP_Validation_Manager::AMP_URL_META, false ) );
 
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::process_markup( $this->valid_amp_img );
+		$this->process_markup( $this->valid_amp_img );
 
 		// There are no errors, so the existing error post should be deleted.
 		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );

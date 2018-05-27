@@ -205,7 +205,13 @@ class AMP_Theme_Support {
 			return false;
 		}
 
-		if ( is_singular() && ! post_supports_amp( get_queried_object() ) ) {
+		/**
+		 * Queried object.
+		 *
+		 * @var WP_Post $queried_object
+		 */
+		$queried_object = get_queried_object();
+		if ( is_singular() && ! post_supports_amp( $queried_object ) ) {
 			return false;
 		}
 
@@ -417,7 +423,7 @@ class AMP_Theme_Support {
 	 *
 	 * @param string     $url     Comment permalink to redirect to.
 	 * @param WP_Comment $comment Posted comment.
-	 * @return string URL.
+	 * @return string|null URL if redirect to be done; otherwise function will exist.
 	 */
 	public static function filter_comment_post_redirect( $url, $comment ) {
 		$theme_support = get_theme_support( 'amp' );
@@ -452,6 +458,7 @@ class AMP_Theme_Support {
 		wp_send_json( array(
 			'message' => self::wp_kses_amp_mustache( $message ),
 		) );
+		return null;
 	}
 
 	/**
@@ -857,6 +864,13 @@ class AMP_Theme_Support {
 	 * @param DOMDocument $dom Doc.
 	 */
 	public static function ensure_required_markup( DOMDocument $dom ) {
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $meta
+		 * @var DOMElement $script
+		 * @var DOMElement $link
+		 */
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
 			$head = $dom->createElement( 'head' );
@@ -865,11 +879,6 @@ class AMP_Theme_Support {
 		$meta_charset  = null;
 		$meta_viewport = null;
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			/**
-			 * Meta.
-			 *
-			 * @var DOMElement $meta
-			 */
 			if ( $meta->hasAttribute( 'charset' ) && 'utf-8' === strtolower( $meta->getAttribute( 'charset' ) ) ) { // @todo Also look for meta[http-equiv="Content-Type"]?
 				$meta_charset = $meta;
 			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
@@ -1058,6 +1067,7 @@ class AMP_Theme_Support {
 		);
 
 		// Return cache if enabled and found.
+		$response_cache_key = null;
 		if ( true === $args['enable_response_caching'] ) {
 			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
 			$response_cache_key = md5( wp_json_encode( array(
