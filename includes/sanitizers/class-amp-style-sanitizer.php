@@ -9,7 +9,6 @@ use \Sabberworm\CSS\RuleSet\DeclarationBlock;
 use \Sabberworm\CSS\CSSList\CSSList;
 use \Sabberworm\CSS\Property\Selector;
 use \Sabberworm\CSS\RuleSet\RuleSet;
-use \Sabberworm\CSS\Rule\Rule;
 use \Sabberworm\CSS\Property\AtRule;
 use \Sabberworm\CSS\CSSList\KeyFrame;
 use \Sabberworm\CSS\RuleSet\AtRuleSet;
@@ -320,6 +319,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// If 'width' attribute is present for 'col' tag, convert to proper CSS rule.
 		foreach ( $this->dom->getElementsByTagName( 'col' ) as $col ) {
+			/**
+			 * Col element.
+			 *
+			 * @var DOMElement $col
+			 */
 			$width_attr = $col->getAttribute( 'width' );
 			if ( ! empty( $width_attr ) && ( false === strpos( $width_attr, '*' ) ) ) {
 				$width_style = 'width: ' . $width_attr;
@@ -1071,7 +1075,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( $ruleset instanceof AtRuleSet && 'font-face' === $ruleset->atRuleName() ) {
-			$this->process_font_face_at_rule( $ruleset, $options );
+			$this->process_font_face_at_rule( $ruleset );
 		}
 
 		$results = array_merge(
@@ -1093,9 +1097,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 *
 	 * @param AtRuleSet $ruleset Ruleset for @font-face.
-	 * @param array     $options Options.
 	 */
-	private function process_font_face_at_rule( AtRuleSet $ruleset, $options ) {
+	private function process_font_face_at_rule( AtRuleSet $ruleset ) {
 		$src_properties = $ruleset->getRules( 'src' );
 		if ( empty( $src_properties ) ) {
 			return;
