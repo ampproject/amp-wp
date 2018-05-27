@@ -1120,6 +1120,16 @@ class AMP_Theme_Support {
 		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
 			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
+
+				/*
+				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
+				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
+				 */
+				if ( $head ) {
+					$script = $dom->createElement( 'script' );
+					$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+					$head->appendChild( $script );
+				}
 			} else {
 				self::redirect_canonical_amp( false );
 				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
