@@ -524,6 +524,8 @@ function amp_get_post_image_metadata( $post = null ) {
 
 	if ( has_post_thumbnail( $post->ID ) ) {
 		$post_image_id = get_post_thumbnail_id( $post->ID );
+	} elseif ( ( 'attachment' === $post->post_type ) && wp_attachment_is( 'image', $post ) ) {
+		$post_image_id = $post->ID;
 	} else {
 		$attached_image_ids = get_posts(
 			array(
