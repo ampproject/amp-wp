@@ -45,19 +45,6 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			),
 		);
-
-		/*
-		 *
-		 * <script>
-            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-            ga('create', "UA-52634867-3", 'auto');
-            ga('send', 'pageview');
-            </script>
-		 */
 	}
 
 	/**
@@ -72,12 +59,8 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 			$scripts[] = $script;
-//
-//			// If known, track it
-//			if ( $this->is_known_valid_script( $script ) ) {
-//				array_push( $scripts, $script );
-//			}
 		}
+
 		foreach ( $scripts as $script ) {
 			foreach ($this->known_scripts as $known_script) {
 				$text = $script->textContent;
@@ -91,25 +74,6 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				$script->parentNode->replaceChild($replacement, $script);
 			}
 		}
-//		$this->known_scripts = $this->get_known_scripts_from_page();
-	}
-
-	/**
-	 * Check if script is a known, AMP valid script.
-	 */
-	private function is_known_valid_script( $script ) {
-		return true;
-	}
-
-	/**
-	 * Gather known scripts in page
-	 */
-	private function get_known_scripts_from_page() {
-
-		$scripts = array();
-
-
-		return $scripts;
 	}
 }
 
