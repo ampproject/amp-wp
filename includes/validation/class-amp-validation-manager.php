@@ -1137,12 +1137,30 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Get nonce for performing amp_validate request.
+	 *
+	 * The returned nonce is irrespective of the authenticated user.
+	 *
+	 * @return string Nonce.
+	 */
+	public static function get_amp_validate_nonce() {
+		return wp_hash( self::VALIDATE_QUERY_VAR . (string) wp_nonce_tick(), 'nonce' );
+	}
+
+	/**
 	 * Whether to validate the front end response.
 	 *
 	 * @return boolean Whether to validate.
 	 */
 	public static function should_validate_response() {
-		return self::has_cap() && isset( $_GET[ self::VALIDATE_QUERY_VAR ] ); // WPCS: CSRF ok.
+		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+			return false;
+		}
+		if ( self::has_cap() ) {
+			return true;
+		}
+		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // WPCS: CSRF ok.
+		return self::get_amp_validate_nonce() === $validate_key;
 	}
 
 	/**
@@ -1242,14 +1260,13 @@ class AMP_Validation_Manager {
 	public static function validate_url( $url ) {
 		$validation_url = add_query_arg(
 			array(
-				self::VALIDATE_QUERY_VAR   => 1,
+				self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
 				self::CACHE_BUST_QUERY_VAR => wp_rand(),
 			),
 			$url
 		);
 
 		$r = wp_remote_get( $validation_url, array(
-			'cookies'   => wp_unslash( $_COOKIE ), // @todo Passing-along the credentials of the currently-authenticated user prevents this from working in cron.
 			'sslverify' => false,
 			'headers'   => array(
 				'Cache-Control' => 'no-cache',

@@ -1083,7 +1083,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 			$that->assertStringStartsWith(
 				add_query_arg(
 					AMP_Validation_Manager::VALIDATE_QUERY_VAR,
-					1,
+					'',
 					$validated_url
 				),
 				$url
