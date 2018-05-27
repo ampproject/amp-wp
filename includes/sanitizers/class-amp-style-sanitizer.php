@@ -605,7 +605,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$parsed = get_transient( $cache_key . $cache_group );
 		}
 
-		// Make sure that the parsed stylesheet was cached with current sanitizations.
+		/*
+		 * Make sure that the parsed stylesheet was cached with current sanitizations.
+		 * The should_sanitize_validation_error method prevents duplicates from being reported.
+		 */
 		if ( ! empty( $parsed['validation_results'] ) ) {
 			foreach ( $parsed['validation_results'] as $validation_result ) {
 				$sanitized = $this->should_sanitize_validation_error( $validation_result['error'] );
@@ -790,6 +793,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Previous return values from calls to should_sanitize_validation_error().
+	 *
+	 * This is used to prevent duplicates from being reported when the sanitization status
+	 * changes for a validation error in a previously-cached stylesheet.
+	 *
+	 * @see AMP_Style_Sanitizer::should_sanitize_validation_error()
+	 * @var array
+	 */
+	protected $previous_should_sanitize_validation_error_results = array();
+
+	/**
 	 * Check whether or not sanitization should occur in response to validation error.
 	 *
 	 * Supply sources to the error and the current node to data.
@@ -804,10 +818,25 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! isset( $data['node'] ) ) {
 			$data['node'] = $this->current_node;
 		}
-		if ( ! isset( $error['sources'] ) ) {
-			$error['sources'] = $this->current_sources;
+		if ( ! isset( $validation_error['sources'] ) ) {
+			$validation_error['sources'] = $this->current_sources;
 		}
-		return parent::should_sanitize_validation_error( $validation_error, $data );
+
+		/*
+		 * This is used to prevent duplicates from being reported when the sanitization status
+		 * changes for a validation error in a previously-cached stylesheet.
+		 */
+		$args = compact( 'validation_error', 'data' );
+		foreach ( $this->previous_should_sanitize_validation_error_results as $result ) {
+			if ( $result['args'] === $args ) {
+				return $result['sanitized'];
+			}
+		}
+
+		$sanitized = parent::should_sanitize_validation_error( $validation_error, $data );
+
+		$this->previous_should_sanitize_validation_error_results[] = compact( 'args', 'sanitized' );
+		return $sanitized;
 	}
 
 	/**
