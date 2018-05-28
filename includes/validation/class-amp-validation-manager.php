@@ -108,6 +108,13 @@ class AMP_Validation_Manager {
 	public static $should_locate_sources = false;
 
 	/**
+	 * Overrides for validation errors.
+	 *
+	 * @var array
+	 */
+	public static $validation_error_status_overrides = array();
+
+	/**
 	 * Add the actions.
 	 *
 	 * @param array $args {
@@ -154,6 +161,25 @@ class AMP_Validation_Manager {
 	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
 	 */
 	public static function add_validation_error_sourcing() {
+
+		// Capture overrides validation error status overrides from query var.
+		$can_override_validation_error_statuses = (
+			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF ok.
+			&&
+			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // WPCS: CSRF ok.
+			&&
+			isset( $_REQUEST['amp_validation_error_status'] ) // WPCS: CSRF ok.
+			&&
+			is_array( $_REQUEST['amp_validation_error_status'] ) // WPCS: CSRF ok.
+		);
+		if ( $can_override_validation_error_statuses ) {
+			foreach ( $_REQUEST['amp_validation_error_status'] as $slug => $status ) { // WPCS: CSRF ok.
+				$slug   = sanitize_key( $slug );
+				$status = intval( $status );
+				self::$validation_error_status_overrides[ $slug ] = $status;
+			}
+		}
+
 		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
 		add_action( 'all', array( __CLASS__, 'wrap_hook_callbacks' ) );
@@ -390,7 +416,9 @@ class AMP_Validation_Manager {
 		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error );
 
 		$term = get_term_by( 'slug', $term_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		if ( ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
+		if ( isset( self::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
+			$sanitized = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === self::$validation_error_status_overrides[ $term_data['slug'] ];
+		} elseif ( ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
 			$sanitized = true;
 		} else {
 			$sanitized = false;
@@ -1144,7 +1172,7 @@ class AMP_Validation_Manager {
 	 * @return string Nonce.
 	 */
 	public static function get_amp_validate_nonce() {
-		return wp_hash( self::VALIDATE_QUERY_VAR . (string) wp_nonce_tick(), 'nonce' );
+		return substr( wp_hash( self::VALIDATE_QUERY_VAR . (string) wp_nonce_tick(), 'nonce' ), -12, 10 );
 	}
 
 	/**
