@@ -840,7 +840,8 @@ class AMP_Invalid_URL_Post_Type {
 		?>
 		<style>
 			.amp-validation-errors .detailed,
-			.amp-validation-errors .actions {
+			.amp-validation-errors .actions,
+			.amp-validation-errors .validation-error-other-urls {
 				margin-left: 30px;
 			}
 			.amp-validation-errors pre {
@@ -859,6 +860,9 @@ class AMP_Invalid_URL_Post_Type {
 		<?php endif; ?>
 
 		<div class="amp-validation-errors">
+			<p>
+				<?php esc_html_e( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity. A validation error that is accepted here will also be accepted for any other URL it occurs on.', 'amp' ); ?>
+			</p>
 			<ul>
 				<?php foreach ( $validation_errors as $error ) : ?>
 					<?php
@@ -913,6 +917,32 @@ class AMP_Invalid_URL_Post_Type {
 								echo implode( ' | ', $actions ); // WPCS: xss ok.
 								?>
 							</p>
+							<?php if ( $term->count > 1 ) : ?>
+								<p class="validation-error-other-urls">
+									<?php
+									$url = admin_url(
+										add_query_arg(
+											array(
+												AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->slug,
+												'post_type' => self::POST_TYPE_SLUG,
+											),
+											'edit.php'
+										)
+									);
+									printf(
+										/* translators: %1$s is URL to invalid URL page, and %2$s is the count */
+										wp_kses_post( _n(
+											'There is at least <a href="%1$s">%2$s other URL</a> which has this validation error. Accepting or rejecting the error here will also apply to the other URL.',
+											'There are at least <a href="%1$s">%2$s other URLs</a> which have this validation error. Accepting or rejecting the error here will also apply to the other URLs.',
+											$term->count - 1,
+											'amp'
+										) ),
+										esc_url( $url ),
+										esc_html( number_format_i18n( $term->count - 1 ) )
+									);
+									?>
+								</p>
+							<?php endif; ?>
 							<ul class="detailed">
 							<?php if ( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE === $error['data']['code'] ) : ?>
 								<li>
