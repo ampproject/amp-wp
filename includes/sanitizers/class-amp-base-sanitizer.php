@@ -26,7 +26,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @const string
 	 */
-	const AMP_IMAGE_LIGHTBOX_ID = 'amp-image-lightbox-1';
+	const AMP_IMAGE_LIGHTBOX_ID = 'amp-image-lightbox';
 
 	/**
 	 * Placeholder for default args, to be set in child classes.
