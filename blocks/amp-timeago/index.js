@@ -40,19 +40,34 @@ export default registerBlockType(
 				type: 'string'
 			},
 			cutoff: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-timeago',
+				attribute: 'cutoff'
 			},
 			dateTime: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-timeago',
+				attribute: 'datetime'
 			},
 			ampLayout: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-timeago',
+				attribute: 'layout'
 			},
 			width: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-timeago',
+				attribute: 'width'
 			},
 			height: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-timeago',
+				attribute: 'height'
 			}
 		},
 

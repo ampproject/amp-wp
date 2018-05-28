@@ -28,25 +28,43 @@ export default registerBlockType(
 
 		attributes: {
 			dataPlayerId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'data-player-id'
 			},
 			dataMediaId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'data-media-id'
 			},
 			dataPlaylistId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'data-playlist-id'
 			},
 			layout: {
 				type: 'string',
-				default: 'responsive'
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'height'
 			}
 		},
 
@@ -142,7 +160,8 @@ export default registerBlockType(
 			}
 			if ( attributes.dataPlaylistId ) {
 				jwProps[ 'data-playlist-id' ] = attributes.dataPlaylistId;
-			} else if ( attributes.dataMediaId ) {
+			}
+			if ( attributes.dataMediaId ) {
 				jwProps[ 'data-media-id' ] = attributes.dataMediaId;
 			}
 			return (

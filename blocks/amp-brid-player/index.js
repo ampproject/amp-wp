@@ -29,26 +29,47 @@ export default registerBlockType(
 
 		attributes: {
 			autoPlay: {
-				default: false
+				default: false,
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'autoplay'
 			},
 			dataPartner: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-partner'
 			},
 			dataPlayer: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-player'
 			},
 			dataVideo: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-video'
 			},
 			dataPlaylist: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-playlist'
 			},
 			dataOutstream: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-outstream'
 			},
 			layout: {
 				type: 'string',
-				default: 'responsive'
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
@@ -56,7 +77,10 @@ export default registerBlockType(
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'height'
 			}
 		},
 

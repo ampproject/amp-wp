@@ -30,28 +30,49 @@ export default registerBlockType(
 		// @todo Perhaps later add subtitles option and additional source options?
 		attributes: {
 			dataDelayAdRequest: {
-				default: false
+				default: false,
+				source: 'attribute',
+				selector: 'amp-ima-video',
+				attribute: 'data-delay-ad-request'
 			},
 			dataTag: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-ima-video',
+				attribute: 'data-tag'
 			},
 			dataSrc: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-ima-video',
+				attribute: 'data-src'
 			},
 			dataPoster: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-ima-video',
+				attribute: 'data-poster'
 			},
 			layout: {
 				type: 'string',
-				default: 'responsive'
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-ima-video',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-ima-video',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-ima-video',
+				attribute: 'height'
 			}
 		},
 

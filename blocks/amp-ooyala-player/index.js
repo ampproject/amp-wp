@@ -30,29 +30,50 @@ export default registerBlockType(
 		// @todo Add data-config attribute?
 		attributes: {
 			dataEmbedCode: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-ooyala-player',
+				attribute: 'data-embedcode'
 			},
 			dataPlayerId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-ooyala-player',
+				attribute: 'data-playerid'
 			},
 			dataPcode: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-ooyala-player',
+				attribute: 'data-pcode'
 			},
 			dataPlayerVersion: {
 				type: 'string',
-				default: 'v3'
+				default: 'v3',
+				source: 'attribute',
+				selector: 'amp-ooyala-player',
+				attribute: 'data-playerversion'
 			},
 			layout: {
 				type: 'string',
-				default: 'fixed'
+				default: 'fixed',
+				source: 'attribute',
+				selector: 'amp-ooyala-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-ooyala-player',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-ooyala-player',
+				attribute: 'height'
 			}
 		},
 

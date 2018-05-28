@@ -28,36 +28,63 @@ export default registerBlockType(
 
 		attributes: {
 			dataSiteId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-side-id'
 			},
 			dataContentId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-content-id'
 			},
 			dataPlayerId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-player-id'
 			},
 			dataDomain: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-domain'
 			},
 			dataMode: {
 				type: 'string',
-				default: 'video'
+				default: 'video',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-mode'
 			},
 			dataItems: {
 				type: 'number',
-				default: 1
+				default: 1,
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-items'
 			},
 			layout: {
 				type: 'string',
-				default: 'responsive'
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'height'
 			}
 		},
 

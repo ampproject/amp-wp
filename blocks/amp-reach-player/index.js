@@ -29,19 +29,31 @@ export default registerBlockType(
 
 		attributes: {
 			dataEmbedId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'data-embed-id'
 			},
 			layout: {
 				type: 'string',
-				default: 'fixed-height'
+				default: 'fixed-height',
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'height'
 			}
 		},
 
