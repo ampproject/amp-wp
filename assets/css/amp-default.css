@@ -1,4 +1,4 @@
-.amp-wp-unknown-size img {
+.amp-wp-unknown-size .i-amphtml-replaced-content {
 	/** Worst case scenario when we can't figure out dimensions for an image. **/
 	/** Force the image into a box of fixed dimensions and use object-fit to scale. **/
 	object-fit: contain;
