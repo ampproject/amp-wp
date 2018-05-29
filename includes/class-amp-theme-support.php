@@ -1216,13 +1216,15 @@ class AMP_Theme_Support {
 	 * So in order for the header video to display,
 	 * this replaces the markup of the header image.
 	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
 	 * @param string $html The image markup to filter.
 	 * @return string $html Filtered markup.
 	 */
 	public static function conditionally_output_header_video( $html ) {
-		if ( ! is_header_video_active() || ! ( has_header_video() || is_customize_preview() ) ) {
+		if ( ! is_header_video_active() ) {
 			return $html;
-		}
+		};
 
 		$video_settings = get_header_video_settings();
 		if ( ! isset( $video_settings['videoUrl'], $video_settings['width'], $video_settings['height'] ) ) {

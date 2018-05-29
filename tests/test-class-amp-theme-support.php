@@ -30,6 +30,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$wp_scripts = null;
 		parent::tearDown();
 		remove_theme_support( 'amp' );
+		remove_theme_support( 'custom-header' );
 		$_REQUEST                = array(); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
 		unset( $_SERVER['REQUEST_URI'] );
@@ -287,6 +288,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', array( self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ) ) );
 		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
+		$this->assertEquals( 10, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'conditionally_output_header_video' ) ) );
 	}
 
 	/**
@@ -1207,5 +1209,32 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html', 10, 2 );
 		$image = '<img data-amp-layout="fill">';
 		$this->assertEquals( $image, wp_kses_post( $image ) );
+	}
+
+	/**
+	 * Test AMP_Theme_Support::conditionally_output_header_video().
+	 *
+	 * @see AMP_Theme_Support::conditionally_output_header_video()
+	 */
+	public function test_conditionally_output_header_video() {
+		$mock_image = '<img src="https://example.com/flower.jpeg">';
+
+		// If there's no theme support for 'custom-header', the callback should simply return the image.
+		$this->assertEquals(
+			$mock_image,
+			AMP_Theme_Support::conditionally_output_header_video( $mock_image )
+		);
+
+		// If theme support is present, but there isn't a header video selected, the callback should again return the image.
+		add_theme_support( 'custom-header', array(
+			'video' => true,
+		) );
+
+		// There's a YouTube URL as the header video.
+		set_theme_mod( 'external_header_video', 'https://www.youtube.com/watch?v=a8NScvBhVnc' );
+		$this->assertEquals(
+			'<amp-youtube width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0"></amp-youtube>',
+			AMP_Theme_Support::conditionally_output_header_video( $mock_image )
+		);
 	}
 }
