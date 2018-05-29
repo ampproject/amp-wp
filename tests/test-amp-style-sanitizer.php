@@ -681,6 +681,48 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get data URLs.
+	 *
+	 * @returns array data: URL data.
+	 */
+	public function get_data_urls() {
+		return array(
+			'url_with_spaces'      => array(
+				'html { background-image:url(url with spaces.png); }',
+				'html{background-image:url("urlwithspaces.png")}',
+			),
+			'data_url_with_spaces' => array(
+				'html { background: url(data:image/png; base64, ivborw0kggoaaaansuheugaaacwaaaascamaaaapwqozaaaabgdbtueaalgpc/xhbqaaaafzukdcak7ohokaaaamuexurczmzpf399fx1+bm5mzy9amaaadisurbvdjlvzxbesmgces5/p8/t9furvcrmu73jwlzosgsiizurcjo/ad+eqjjb4hv8bft+idpqocx1wjosbfhh2xssxeiyn3uli/6mnree07uiwjev8ueowds88ly97kqytlijkktuybbruayvh5wohixmpi5we58ek028czwyuqdlkpg1bkb4nnm+veanfhqn1k4+gpt6ugqcvu2h2ovuif/gwufyy8owepdyzsa3avcqpvovvzzz2vtnn2wu8qzvjddeto90gsy9mvlqtgysy231mxry6i2ggqjrty0l8fxcxfcbbhwrsyyaaaaaelftksuqmcc); }',
+				'html{background:url("data:image/png;base64,ivborw0kggoaaaansuheugaaacwaaaascamaaaapwqozaaaabgdbtueaalgpc/xhbqaaaafzukdcak7ohokaaaamuexurczmzpf399fx1+bm5mzy9amaaadisurbvdjlvzxbesmgces5/p8/t9furvcrmu73jwlzosgsiizurcjo/ad+eqjjb4hv8bft+idpqocx1wjosbfhh2xssxeiyn3uli/6mnree07uiwjev8ueowds88ly97kqytlijkktuybbruayvh5wohixmpi5we58ek028czwyuqdlkpg1bkb4nnm+veanfhqn1k4+gpt6ugqcvu2h2ovuif/gwufyy8owepdyzsa3avcqpvovvzzz2vtnn2wu8qzvjddeto90gsy9mvlqtgysy231mxry6i2ggqjrty0l8fxcxfcbbhwrsyyaaaaaelftksuqmcc")}',
+			),
+		);
+	}
+
+	/**
+	 * Test handling of stylesheets with spaces in the background-image URLs.
+	 *
+	 * @dataProvider get_data_urls
+	 * @covers AMP_Style_Sanitizer::remove_spaces_from_data_urls()
+	 *
+	 * @param string      $source     Source URL string.
+	 * @param string|null $expected   Expected normalized URL string.
+	 */
+	public function test_remove_spaces_from_data_urls( $source, $expected ) {
+		$html  = '<html><head><style>';
+		$html .= $source;
+		$html .= '</style></head</html>';
+
+		$dom = AMP_DOM_Utils::get_dom( $html );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$stylesheets = array_values( $sanitizer->get_stylesheets() );
+
+		$this->assertContains( $expected, $stylesheets[0] );
+	}
+
+	/**
 	 * Get font url test data.
 	 *
 	 * @return array Data.

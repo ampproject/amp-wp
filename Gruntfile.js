@@ -42,7 +42,16 @@ module.exports = function( grunt ) {
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php'
 			},
-			create_release_zip: {
+			webpack_production: {
+				command: 'cross-env BABEL_ENV=production webpack'
+			},
+			pot_to_php: {
+				command: 'npm run pot-to-php'
+			},
+			makepot: {
+				command: 'wp i18n make-pot .'
+			},
+			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
 			}
 		},
@@ -82,6 +91,8 @@ module.exports = function( grunt ) {
 		spawnQueue = [];
 		stdout = [];
 
+		grunt.task.run( 'shell:webpack_production' );
+
 		spawnQueue.push(
 			{
 				cmd: 'git',
@@ -100,12 +111,14 @@ module.exports = function( grunt ) {
 			versionAppend = commitHash + '-' + new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' );
 
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|webpack.*)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|webpack.*|languages\/README.*)/.test( file );
 			} );
 			paths.push( 'vendor/autoload.php' );
 			paths.push( 'assets/js/*-compiled.js' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
+			paths.push( 'languages/amp-translations.php' );
+			paths.push( 'languages/amp.pot' );
 
 			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {
@@ -137,8 +150,6 @@ module.exports = function( grunt ) {
 			grunt.task.run( 'readme' );
 			grunt.task.run( 'copy' );
 
-			grunt.task.run( 'shell:create_release_zip' );
-
 			done();
 		}
 
@@ -163,16 +174,21 @@ module.exports = function( grunt ) {
 		doNext();
 	} );
 
-	grunt.registerTask( 'create-release-zip', [
-		'build',
-		'shell:create_release_zip'
+	grunt.registerTask( 'create-build-zip', [
+		'shell:create_build_zip'
+	] );
+
+	grunt.registerTask( 'build-release', [
+		'shell:makepot',
+		'shell:pot_to_php',
+		'build'
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'build',
 		'jshint',
 		'shell:phpunit',
 		'shell:verify_matching_versions',
+		'build-release',
 		'wp_deploy'
 	] );
 };

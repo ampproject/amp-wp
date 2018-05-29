@@ -692,6 +692,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$options
 		);
 
+		// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
+		$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
+
 		// Find calc() functions and replace with placeholders since PHP-CSS-Parser can't handle them.
 		$stylesheet_string = $this->add_calc_placeholders( $stylesheet_string );
 
@@ -916,6 +919,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Remove spaces from data URLs which PHP-CSS-Parser doesn't handle.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $css CSS.
+	 * @return string CSS with spaces removed from data URLs.
+	 */
+	private function remove_spaces_from_data_urls( $css ) {
+		return preg_replace_callback(
+			'/\burl\([^}]*?\)/',
+			function( $matches ) {
+				return preg_replace( '/\s+/', '', $matches[0] );
+			},
+			$css
+		);
+	}
+
+	/**
 	 * Process CSS list.
 	 *
 	 * @since 1.0
@@ -1022,12 +1043,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( empty( $base_url ) ) {
 			return;
 		}
+
 		foreach ( $urls as $url ) {
+			// URLs cannot have spaces in them, so strip them (especially when spaces get erroneously injected in data: URLs).
 			$url_string = $url->getURL()->getString();
+
+			// For data: URLs, all that is needed is to remove spaces so set and continue.
 			if ( 'data:' === substr( $url_string, 0, 5 ) ) {
 				continue;
 			}
 
+			// If the URL is already absolute, continue since there there is nothing left to do.
 			$parsed_url = wp_parse_url( $url_string );
 			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || '/' === substr( $parsed_url['path'], 0, 1 ) ) {
 				continue;
@@ -1035,6 +1061,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$relative_url = preg_replace( '#^\./#', '', $url->getURL()->getString() );
 
+			// Resolve any relative parent directory paths.
 			$real_url = $base_url . $relative_url;
 			do {
 				$real_url = preg_replace( '#[^/]+/../#', '', $real_url, -1, $count );
