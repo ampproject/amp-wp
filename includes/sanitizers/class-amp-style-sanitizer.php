@@ -185,6 +185,26 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $calc_placeholders = array();
 
 	/**
+	 * Get error codes that can be raised during parsing of CSS.
+	 *
+	 * This is used to determine which validation errors should be taken into account
+	 * when determining which validation errors should vary the parse cache.
+	 *
+	 * @return array
+	 */
+	public static function get_css_parser_validation_error_codes() {
+		return array(
+			'css_parse_error',
+			'excessive_css',
+			'illegal_css_at_rule',
+			'illegal_css_important',
+			'illegal_css_property',
+			'removed_unused_css_rules',
+			'unrecognized_css',
+		);
+	}
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.7

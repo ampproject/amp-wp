@@ -1258,8 +1258,28 @@ class AMP_Validation_Manager {
 
 		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
 			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$should_locate_sources;
-			if ( ! empty( self::$validation_error_status_overrides ) ) {
-				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( self::$validation_error_status_overrides ) );
+
+			$css_validation_errors = array();
+			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
+				$term = get_term_by( 'slug', $slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+				if ( ! $term ) {
+					continue;
+				}
+				$validation_error = json_decode( $term->description, true );
+
+				$is_css_validation_error = (
+					is_array( $validation_error )
+					&&
+					isset( $validation_error['code'] )
+					&&
+					in_array( $validation_error['code'], AMP_Style_Sanitizer::get_css_parser_validation_error_codes(), true )
+				);
+				if ( $is_css_validation_error ) {
+					$css_validation_errors[ $slug ] = $status;
+				}
+			}
+			if ( ! empty( $css_validation_errors ) ) {
+				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
 		}
 
