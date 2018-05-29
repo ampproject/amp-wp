@@ -793,6 +793,12 @@ class AMP_Invalid_URL_Post_Type {
 			return;
 		}
 		$updated_count = 0;
+
+		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
+		if ( false !== $has_pre_term_description_filter ) {
+			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
 		foreach ( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $term_slug => $status ) {
 			$term_slug = sanitize_key( $term_slug );
 			$term      = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
@@ -805,6 +811,11 @@ class AMP_Invalid_URL_Post_Type {
 				wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, compact( 'term_group' ) );
 			}
 		}
+
+		if ( false !== $has_pre_term_description_filter ) {
+			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
 		$args = array(
 			'amp_taxonomy_terms_updated' => $updated_count,
 		);
@@ -943,14 +954,14 @@ class AMP_Invalid_URL_Post_Type {
 			validateUrl = <?php echo wp_json_encode( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_amp_validate_nonce(), $post->post_title ) ); ?>;
 			postId = <?php echo wp_json_encode( $post->ID ); ?>;
 			$( '#preview_validation_errors' ).on( 'click', function() {
-				var params = {};
+				var params = {}, validatePreviewUrl = validateUrl;
 				$( '.amp-validation-error-status' ).each( function() {
 					if ( this.value && ! this.options[ this.selectedIndex ].defaultSelected ) {
 						params[ this.name ] = this.value;
 					}
 				} );
-				validateUrl += '&' + $.param( params );
-				window.open( validateUrl, 'amp-validation-error-term-status-preview-' + String( postId ) );
+				validatePreviewUrl += '&' + $.param( params );
+				window.open( validatePreviewUrl, 'amp-validation-error-term-status-preview-' + String( postId ) );
 			} );
 		} );
 		</script>

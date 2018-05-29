@@ -208,6 +208,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'illegal_css_property',
 			'removed_unused_css_rules',
 			'unrecognized_css',
+			'disallowed_external_file_url',
+			'disallowed_file_extension',
+			'file_path_not_found',
 		);
 	}
 
@@ -617,7 +620,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v5';
+		$cache_group = 'amp-parsed-stylesheet-v6';
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -709,7 +712,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $sanitized ) {
 				$css_list->remove( $item );
 			}
-			$results[] = compact( 'error', 'message' );
+			$results[] = compact( 'error', 'sanitized' );
 			return $results;
 		}
 

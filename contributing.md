@@ -39,7 +39,7 @@ TO create a build of the plugin as it will be deployed to WordPress.org, run:
 npm run build-release
 ```
 
-Note that this will currently take much longer than a regular build because it generates the files required for translation. You also must have WP-CLI installed with the `i18n` package.
+Note that this will currently take much longer than a regular build because it generates the files required for translation. You also must have WP-CLI installed with the [`i18n-command` package](https://github.com/wp-cli/i18n-command).
 
 ## Updating Allowed Tags And Attributes
 
