@@ -630,7 +630,11 @@ class AMP_Invalid_URL_Post_Type {
 		$actions['view'] = sprintf( '<a href="%s">%s</a>', esc_url( $view_url ), esc_html__( 'View', 'amp' ) );
 
 		if ( ! empty( $url ) ) {
-			$actions[ self::RECHECK_ACTION ] = self::get_recheck_link( $post, get_edit_post_link( $post->ID, 'raw' ), $url );
+			$actions[ self::RECHECK_ACTION ] = sprintf(
+				'<a href="%s">%s</a>',
+				self::get_recheck_url( $post, get_edit_post_link( $post->ID, 'raw' ), $url ),
+				esc_html__( 'Re-check', 'amp' )
+			);
 		}
 
 		return $actions;
@@ -837,28 +841,62 @@ class AMP_Invalid_URL_Post_Type {
 			admin_url( 'post.php' )
 		);
 
-		echo '<div id="submitpost" class="submitbox">';
-		/* translators: Meta box date format */
-		$date_format = __( 'M j, Y @ H:i', 'default' );
-		echo '<div class="curtime misc-pub-section"><span id="timestamp">';
-		/* translators: %s: The date this was published */
-		printf( __( 'Last checked: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post->post_date ) ) ) ); // WPCS: XSS ok.
-		echo '</span></div>';
+		?>
+		<style>
+			#amp_validation_status .inside {
+				margin: 0;
+				padding: 0;
+			}
+			#re-check-action {
+				float: left;
+			}
+		</style>
+		<div id="submitpost" class="submitbox">
+			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
+			<div id="minor-publishing">
+				<div id="minor-publishing-actions">
+					<div id="re-check-action">
+						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post, $redirect_url ) ); ?>">
+							<?php esc_html_e( 'Re-check', 'amp' ); ?>
+						</a>
+					</div>
+					<div id="preview-action">
+						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+					</div>
+					<div class="clear"></div>
+				</div>
+				<div id="misc-publishing-actions">
+					<div class="curtime misc-pub-section">
+						<span id="timestamp">
+						<?php
+						printf(
+							/* translators: %s: The date this was published */
+							wp_kses_post( __( 'Last checked: <b>%s</b>', 'amp' ) ),
+							/* translators: Meta box date format */
+							esc_html( date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) ) )
+						);
+						?>
+						</span>
+					</div>
 
-		echo '<div class="misc-pub-section">';
-		self::display_invalid_url_validation_error_counts_summary( $post );
-		echo '</div>';
-
-		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
-		$url = $post->post_title;
-
-		echo '<div class="misc-pub-section">';
-		$view_url = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ); // Prevent redirection to non-AMP page.
-		printf( '<a href="%s">%s</a> | ', esc_url( $view_url ), esc_html__( 'View', 'amp' ) );
-		echo self::get_recheck_link( $post, $redirect_url ); // WPCS: XSS ok.
-		echo '</div>';
-
-		echo '</div><!-- /submitpost -->';
+					<div class="misc-pub-section">
+						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
+					</div>
+				</div>
+			</div>
+			<div id="major-publishing-actions">
+				<div id="delete-action">
+					<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>">
+						<?php esc_html_e( 'Move to Trash', 'default' ); ?>
+					</a>
+				</div>
+				<div id="publishing-action">
+					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
+				</div>
+				<div class="clear"></div>
+			</div>
+		</div><!-- /submitpost -->
+		<?php
 	}
 
 	/**
@@ -899,12 +937,6 @@ class AMP_Invalid_URL_Post_Type {
 
 		<p>
 			<?php esc_html_e( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity. A validation error that is accepted here will also be accepted for any other URL it occurs on.', 'amp' ); ?>
-		</p>
-
-		<p>
-			<button type="submit" name="action" class="button button-secondary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'amp' ); ?></button>
-			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
-			<button type="button" name="action" class="button button-secondary" id="preview_validation_errors"><?php esc_html_e( 'Preview', 'amp' ); ?></button>
 		</p>
 
 		<script>
@@ -1073,9 +1105,12 @@ class AMP_Invalid_URL_Post_Type {
 		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
+
+		// Remember URL is stored in post_title. Adding query var prevents redirection to non-AMP page.
+		$view_url = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $post->post_title );
 		?>
 		<h2 class="amp-invalid-url">
-			<a href="<?php echo esc_url( $post->post_title ); ?>"><?php echo esc_html( get_the_title( $post ) ); ?></a>
+			<a href="<?php echo esc_url( $view_url ); ?>"><?php echo esc_html( get_the_title( $post ) ); ?></a>
 		</h2>
 		<?php
 	}
@@ -1096,7 +1131,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Gets the link to recheck the post for AMP validity.
+	 * Gets the URL to recheck the post for AMP validity.
 	 *
 	 * Appends a query var to $redirect_url.
 	 * On clicking the link, it checks if errors still exist for $post.
@@ -1104,23 +1139,18 @@ class AMP_Invalid_URL_Post_Type {
 	 * @param  WP_Post $post         The post storing the validation error.
 	 * @param  string  $redirect_url The URL of the redirect.
 	 * @param  string  $recheck_url  The URL to check. Optional.
-	 * @return string $link The link to recheck the post.
+	 * @return string The URL to recheck the post.
 	 */
-	public static function get_recheck_link( $post, $redirect_url, $recheck_url = null ) {
-		return sprintf(
-			'<a href="%s" aria-label="%s">%s</a>',
-			wp_nonce_url(
-				add_query_arg(
-					array(
-						'action'      => self::RECHECK_ACTION,
-						'recheck_url' => $recheck_url,
-					),
-					$redirect_url
+	public static function get_recheck_url( $post, $redirect_url, $recheck_url = null ) {
+		return wp_nonce_url(
+			add_query_arg(
+				array(
+					'action'      => self::RECHECK_ACTION,
+					'recheck_url' => $recheck_url,
 				),
-				self::NONCE_ACTION . $post->ID
+				$redirect_url
 			),
-			esc_html__( 'Recheck the URL for AMP validity', 'amp' ),
-			esc_html__( 'Recheck', 'amp' )
+			self::NONCE_ACTION . $post->ID
 		);
 	}
 
