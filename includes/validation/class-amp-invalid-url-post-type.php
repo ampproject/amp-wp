@@ -218,6 +218,63 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
+	 * Get counts for the validation errors associated with a given invalid URL.
+	 *
+	 * @param int|WP_Post $post Post of amp_invalid_url type.
+	 * @return array Term counts.
+	 */
+	public static function get_invalid_url_validation_error_counts( $post ) {
+		$counts = array_fill_keys(
+			array(
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
+			),
+			0
+		);
+
+		$validation_errors = self::get_invalid_url_validation_errors( $post );
+		foreach ( wp_list_pluck( $validation_errors, 'term' ) as $term ) {
+			if ( isset( $counts[ $term->term_group ] ) ) {
+				$counts[ $term->term_group ]++;
+			}
+		}
+		return $counts;
+	}
+
+	/**
+	 * Display summary of the validation error counts for a given post.
+	 *
+	 * @param int|WP_Post $post Post of amp_invalid_url type.
+	 */
+	public static function display_invalid_url_validation_error_counts_summary( $post ) {
+		$result = array();
+		$counts = self::get_invalid_url_validation_error_counts( $post );
+		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] ) {
+			$result[] = esc_html( sprintf(
+				/* translators: %s is count */
+				__( '&#x2753; New: %s', 'amp' ),
+				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] )
+			) );
+		}
+		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] ) {
+			$result[] = esc_html( sprintf(
+				/* translators: %s is count */
+				__( '&#x2705; Accepted: %s', 'amp' ),
+				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] )
+			) );
+		}
+		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] ) {
+			$result[] = esc_html( sprintf(
+				/* translators: %s is count */
+				__( '&#x274C; Rejected: %s', 'amp' ),
+				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] )
+			) );
+		}
+		echo implode( '<br>', $result ); // WPCS: xss ok.
+	}
+
+	/**
 	 * Gets the existing custom post that stores errors for the $url, if it exists.
 	 *
 	 * @param string $url The URL of the post.
@@ -496,51 +553,12 @@ class AMP_Invalid_URL_Post_Type {
 			return;
 		}
 
-		// @todo Move into helper function.
-		$counts = array_fill_keys(
-			array(
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
-			),
-			0
-		);
-
-		// @todo Move into helper function.
 		$validation_errors = self::get_invalid_url_validation_errors( $post_id );
-		foreach ( wp_list_pluck( $validation_errors, 'term' ) as $term ) {
-			if ( isset( $counts[ $term->term_group ] ) ) {
-				$counts[ $term->term_group ]++;
-			}
-		}
-
-		$error_summary = AMP_Validation_Error_Taxonomy::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
+		$error_summary     = AMP_Validation_Error_Taxonomy::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
 
 		switch ( $column_name ) {
 			case 'error_status':
-				$displayed_counts = array();
-				if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] ) {
-					$displayed_counts[] = esc_html( sprintf(
-						/* translators: %s is count */
-						__( 'New: %s', 'amp' ),
-						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] )
-					) );
-				}
-				if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] ) {
-					$displayed_counts[] = esc_html( sprintf(
-						/* translators: %s is count */
-						__( 'Accepted: %s', 'amp' ),
-						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] )
-					) );
-				}
-				if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] ) {
-					$displayed_counts[] = esc_html( sprintf(
-						/* translators: %s is count */
-						__( 'Rejected: %s', 'amp' ),
-						number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] )
-					) );
-				}
-				echo implode( '<br>', $displayed_counts ); // WPCS: xss ok.
+				self::display_invalid_url_validation_error_counts_summary( $post_id );
 				break;
 			case AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS:
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
@@ -827,50 +845,8 @@ class AMP_Invalid_URL_Post_Type {
 		printf( __( 'Last checked: <b>%s</b>', 'amp' ), esc_html( date_i18n( $date_format, strtotime( $post->post_date ) ) ) ); // WPCS: XSS ok.
 		echo '</span></div>';
 
-		// @todo Move into helper function.
-		$counts = array_fill_keys(
-			array(
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
-			),
-			0
-		);
-
-		// @todo Move into helper function.
-		$validation_errors = self::get_invalid_url_validation_errors( $post );
-		foreach ( wp_list_pluck( $validation_errors, 'term' ) as $term ) {
-			if ( isset( $counts[ $term->term_group ] ) ) {
-				$counts[ $term->term_group ]++;
-			}
-		}
-
-		// @todo De-duplicate with other place where logic is run.
-		$displayed_counts = array();
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] ) {
-			$displayed_counts[] = esc_html( sprintf(
-				/* translators: %s is count */
-				__( 'New: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] )
-			) );
-		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] ) {
-			$displayed_counts[] = esc_html( sprintf(
-				/* translators: %s is count */
-				__( 'Accepted: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] )
-			) );
-		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] ) {
-			$displayed_counts[] = esc_html( sprintf(
-				/* translators: %s is count */
-				__( 'Rejected: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] )
-			) );
-		}
-
 		echo '<div class="misc-pub-section">';
-		echo implode( '<br>', $displayed_counts ); // WPCS: xss ok.
+		self::display_invalid_url_validation_error_counts_summary( $post );
 		echo '</div>';
 
 		printf( '<div class="misc-pub-section"><a class="submitdelete deletion" href="%s">%s</a></div>', esc_url( get_delete_post_link( $post->ID ) ), esc_html__( 'Move to Trash', 'default' ) );
@@ -955,11 +931,15 @@ class AMP_Invalid_URL_Post_Type {
 					<?php
 					$collapsed_details = array();
 					$term              = $error['term'];
+					$select_name       = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 					?>
 					<li>
 						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) ? 'open' : ''; ?>>
 							<summary>
-								<select class="amp-validation-error-status" name="<?php echo esc_attr( sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug ) ); ?>">
+								<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
+									<?php esc_html_e( 'Status:', 'amp' ); ?>
+								</label>
+								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
 										<option value=""><?php esc_html_e( 'New', 'amp' ); ?></option>
 									<?php endif; ?>
