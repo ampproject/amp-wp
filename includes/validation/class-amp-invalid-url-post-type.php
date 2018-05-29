@@ -327,7 +327,7 @@ class AMP_Invalid_URL_Post_Type {
 				'post_title'   => $url,
 				'post_name'    => $post_slug,
 				'post_content' => $placeholder, // Content is provided via wp_insert_post_data filter above to guard against Kses-corruption.
-				'post_status'  => 'publish', // @todo Use draft when doing a post preview?
+				'post_status'  => 'publish',
 			) ),
 			true
 		);
@@ -763,16 +763,17 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Handle validation error status update.
 	 *
+	 * @see AMP_Validation_Error_Taxonomy::handle_validation_error_update()
 	 * @todo This is duplicated with logic in AMP_Validation_Error_Taxonomy. All of the term updating needs to be refactored to make use of the REST API.
 	 */
 	public static function handle_validation_error_status_update() {
 		check_admin_referer( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' );
 
-		if ( empty( $_POST['amp_validation_error_status'] ) || ! is_array( $_POST['amp_validation_error_status'] ) ) {
+		if ( empty( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) || ! is_array( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
 			return;
 		}
 		$updated_count = 0;
-		foreach ( $_POST['amp_validation_error_status'] as $term_slug => $status ) {
+		foreach ( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $term_slug => $status ) {
 			$term_slug = sanitize_key( $term_slug );
 			$term      = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 			if ( ! $term ) {
@@ -932,7 +933,9 @@ class AMP_Invalid_URL_Post_Type {
 
 		<script>
 		jQuery( function( $ ) {
-			var validateUrl = <?php echo wp_json_encode( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_amp_validate_nonce(), $post->post_title ) ); ?>;
+			var validateUrl, postId;
+			validateUrl = <?php echo wp_json_encode( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_amp_validate_nonce(), $post->post_title ) ); ?>;
+			postId = <?php echo wp_json_encode( $post->ID ); ?>;
 			$( '#preview_validation_errors' ).on( 'click', function() {
 				var params = {};
 				$( '.amp-validation-error-status' ).each( function() {
@@ -941,7 +944,7 @@ class AMP_Invalid_URL_Post_Type {
 					}
 				} );
 				validateUrl += '&' + $.param( params );
-				window.open( validateUrl );
+				window.open( validateUrl, 'amp-validation-error-term-status-preview-' + String( postId ) );
 			} );
 		} );
 		</script>
@@ -956,7 +959,7 @@ class AMP_Invalid_URL_Post_Type {
 					<li>
 						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) ? 'open' : ''; ?>>
 							<summary>
-								<select class="amp-validation-error-status" name="<?php echo esc_attr( sprintf( 'amp_validation_error_status[%s]', $term->slug ) ); ?>">
+								<select class="amp-validation-error-status" name="<?php echo esc_attr( sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug ) ); ?>">
 									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
 										<option value=""><?php esc_html_e( 'New', 'amp' ); ?></option>
 									<?php endif; ?>

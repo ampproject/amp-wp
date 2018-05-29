@@ -55,7 +55,7 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_REJECT_ACTION = 'amp_validation_error_reject';
 
 	/**
-	 * Query var used when filtering by validation error status.
+	 * Query var used when filtering by validation error status or passing updates.
 	 *
 	 * @var string
 	 */

@@ -20,6 +20,13 @@ class AMP_Validation_Manager {
 	const VALIDATE_QUERY_VAR = 'amp_validate';
 
 	/**
+	 * Query var for passing status preview/update for validation error.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_TERM_STATUS_QUERY_VAR = 'amp_validation_error_term_status';
+
+	/**
 	 * Query var for cache-busting.
 	 *
 	 * @var string
@@ -168,15 +175,16 @@ class AMP_Validation_Manager {
 			&&
 			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // WPCS: CSRF ok.
 			&&
-			isset( $_REQUEST['amp_validation_error_status'] ) // WPCS: CSRF ok.
+			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // WPCS: CSRF ok.
 			&&
-			is_array( $_REQUEST['amp_validation_error_status'] ) // WPCS: CSRF ok.
+			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // WPCS: CSRF ok.
 		);
 		if ( $can_override_validation_error_statuses ) {
-			foreach ( $_REQUEST['amp_validation_error_status'] as $slug => $status ) { // WPCS: CSRF ok.
+			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // WPCS: CSRF ok.
 				$slug   = sanitize_key( $slug );
 				$status = intval( $status );
 				self::$validation_error_status_overrides[ $slug ] = $status;
+				ksort( self::$validation_error_status_overrides );
 			}
 		}
 
@@ -916,7 +924,7 @@ class AMP_Validation_Manager {
 			'filter' => true,
 		);
 		if ( $post ) {
-			$source['post_id']   = $post->ID; // @todo This is causing duplicate validation errors to occur when only variance is post_id.
+			$source['post_id']   = $post->ID;
 			$source['post_type'] = $post->post_type;
 		}
 		if ( isset( self::$current_hook_source_stack[ current_filter() ] ) ) {
@@ -1248,9 +1256,11 @@ class AMP_Validation_Manager {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 
-		// @todo Pass this into all sanitizers?
 		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
 			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$should_locate_sources;
+			if ( ! empty( self::$validation_error_status_overrides ) ) {
+				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( self::$validation_error_status_overrides ) );
+			}
 		}
 
 		return $sanitizers;

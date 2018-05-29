@@ -35,6 +35,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $allow_dirty_styles         Allow dirty styles. This short-circuits the sanitize logic; it is used primarily in Customizer preview.
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
+	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 * }
 	 */
 	protected $args;
@@ -53,6 +54,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'[submit-success]',
 		),
 		'should_locate_sources'     => false,
+		'parsed_cache_variant'      => null,
 	);
 
 	/**
@@ -595,13 +597,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$options,
 				array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
 			),
-			array(
-				'should_locate_sources' => ! empty( $this->args['should_locate_sources'] ),
-				// @todo There will need to be a variant for preview, probably is_customize_preview() or $wp_customize->changeset_uuid(), or rather the list of sanitization overrides from query?
+			wp_array_slice_assoc(
+				$this->args,
+				array( 'should_locate_sources', 'parsed_cache_variant' )
 			)
 		);
 
-		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$cache_key = md5( $stylesheet . wp_json_encode( $cache_impacting_options ) );
 
 		if ( wp_using_ext_object_cache() ) {
 			$parsed = wp_cache_get( $cache_key, $cache_group );
