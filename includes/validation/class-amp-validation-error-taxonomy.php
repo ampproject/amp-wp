@@ -155,8 +155,6 @@ class AMP_Validation_Error_Taxonomy {
 			),
 		) );
 
-		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_deletion' ), 10, 3 );
-
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
@@ -187,15 +185,13 @@ class AMP_Validation_Error_Taxonomy {
 	 *    Args passed into wp_count_terms().
 	 *
 	 *     @type int|null $group        Term group.
-	 *     @type bool     $ignore_empty Accept terms that are no longer associated with any URLs. Default false.
 	 * }
 	 * @return int Term count.
 	 */
 	public static function get_validation_error_count( $args = array() ) {
 		$args = array_merge(
 			array(
-				'group'        => null,
-				'ignore_empty' => false,
+				'group' => null,
 			),
 			$args
 		);
@@ -308,33 +304,6 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Prevent user from being able to delete validation errors when they still have associated invalid URLs.
-	 *
-	 * @param array $allcaps All caps.
-	 * @param array $caps    Requested caps.
-	 * @param array $args    Cap args.
-	 * @return array All caps.
-	 */
-	public static function filter_user_has_cap_for_deletion( $allcaps, $caps, $args ) {
-		if ( isset( $args[0] ) && 'delete_term' === $args[0] && 0 !== get_term( $args[2] )->count ) {
-			/*
-			 * However, only apply this if not on the edit terms screen for validation errors, since
-			 * WP_Terms_List_Table::column_cb() unfortunately has a hard-coded delete_term capability check, so
-			 * without that check passing then the checkbox is not shown.
-			 */
-			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy && empty( $_REQUEST['action'] ) ) { // WPCS: CSRF OK.
-				return $allcaps;
-			}
-
-			$allcaps = array_merge(
-				$allcaps,
-				array_fill_keys( $caps, false )
-			);
-		}
-		return $allcaps;
-	}
-
-	/**
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
@@ -344,8 +313,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'tag_row_actions', array( __CLASS__, 'filter_tag_row_actions' ), 10, 2 );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'prevent_bulk_deleting_non_empty_terms' ) );
-		add_action( 'admin_notices', array( __CLASS__, 'show_bulk_delete_blocked_error_notice' ) );
 		add_filter( 'views_edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'filter_views_edit' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
@@ -365,7 +332,15 @@ class AMP_Validation_Error_Taxonomy {
 			return $query_vars;
 		} );
 
-		// Filter amp_validation_error term query by term group when requested.
+		// Always exclude taxonomy terms when they have empty counts.
+		add_filter( 'get_terms_args', function( $args, $taxonomies ) {
+			if ( array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) === $taxonomies ) {
+				$args['hide_empty'] = true;
+			}
+			return $args;
+		}, 10, 2 );
+
+		// Default ordering terms by ID descending so that new terms appear at the top.
 		add_filter( 'get_terms_defaults', function( $args, $taxonomies ) {
 			if ( array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) === $taxonomies ) {
 				$args['orderby'] = 'term_id';
@@ -376,6 +351,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Add bulk actions.
 		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
+			unset( $bulk_actions['delete'] );
 			$bulk_actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
 			$bulk_actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
 			return $bulk_actions;
@@ -523,14 +499,13 @@ class AMP_Validation_Error_Taxonomy {
 			$term_id = $tag->term_id;
 
 			/*
-			 * Hide deletion link when there are remaining invalid URLs associated with them.
-			 * Note that this would normally be handled via the user_has_cap filter above,
-			 * but this has to be here due to a problem with WP_Terms_List_Table::column_cb()
-			 * which requires a workaround.
+			 * Hide deletion link since a validation error should only be removed once
+			 * it no longer has an occurence on the site. When an invalid URL is re-checked
+			 * and it no longer has this validation error, then the count will be decremented.
+			 * When a validation error term no longer has a count, then it is hidden from the
+			 * list table. A cron job could periodically delete terms that have no counts.
 			 */
-			if ( 0 !== $tag->count ) {
-				unset( $actions['delete'] );
-			}
+			unset( $actions['delete'] );
 
 			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $tag->term_group ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
@@ -564,8 +539,7 @@ class AMP_Validation_Error_Taxonomy {
 	public static function add_admin_menu_validation_error_item() {
 		$menu_item_label = esc_html__( 'Validation Errors', 'amp' );
 		$new_error_count = self::get_validation_error_count( array(
-			'group'        => self::VALIDATION_ERROR_NEW_STATUS,
-			'ignore_empty' => true,
+			'group' => self::VALIDATION_ERROR_NEW_STATUS,
 		) );
 		if ( $new_error_count ) {
 			$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
@@ -784,70 +758,6 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 		}
 		return $content;
-	}
-
-	/**
-	 * Hacikly remove amp_validation_error terms before they get bulk deleted (as workaround for WP_Terms_List_Table::column_cb()).
-	 */
-	public static function prevent_bulk_deleting_non_empty_terms() {
-		$is_delete_tags_request = isset( $_REQUEST['action'] ) && 'delete' === $_REQUEST['action'] && ! empty( $_REQUEST['delete_tags'] ); // WPCS: CSRF ok.
-		if ( ! $is_delete_tags_request ) {
-			return;
-		}
-		$requested_delete_tags = array_map( 'intval', (array) $_REQUEST['delete_tags'] ); // WPCS: CSRF ok.
-		$actual_delete_tags    = array();
-		$blocked_delete_tags   = array();
-		foreach ( $requested_delete_tags as $requested_delete_tag ) {
-			$term = get_term( $requested_delete_tag );
-			if ( $term && self::TAXONOMY_SLUG === $term->taxonomy && 0 !== $term->count ) {
-				$blocked_delete_tags[] = $requested_delete_tag;
-			} else {
-				$actual_delete_tags[] = $requested_delete_tag;
-			}
-		}
-
-		// Prevent deleting terms that shouldn't be deleted.
-		$_POST['delete_tags']    = $actual_delete_tags;
-		$_REQUEST['delete_tags'] = $actual_delete_tags;
-
-		// Show admin notice when terms were blocked from being deleted.
-		if ( ! empty( $blocked_delete_tags ) ) {
-			add_filter( 'redirect_term_location', function( $url ) use ( $blocked_delete_tags ) {
-				return add_query_arg( 'amp_validation_errors_not_deleted', count( $blocked_delete_tags ), $url );
-			} );
-		}
-
-		// Remove success message if no terms were actually deleted.
-		if ( empty( $actual_delete_tags ) ) {
-			add_filter( 'redirect_term_location', function( $url ) {
-				return remove_query_arg( 'message', $url );
-			} );
-		}
-	}
-
-	/**
-	 * Show admin notice when validation error terms were skipped from being deleted due to still having associated URLs (workaround for WP_Terms_List_Table::column_cb()).
-	 */
-	public static function show_bulk_delete_blocked_error_notice() {
-		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || empty( $_REQUEST['amp_validation_errors_not_deleted'] ) ) { // WPCS: CSRF OK.
-			return;
-		}
-		$count = intval( $_REQUEST['amp_validation_errors_not_deleted'] ); // WPCS: CSRF ok.
-		printf(
-			'<div class="notice notice-error"><p>%s</p></div>',
-			esc_html(
-				sprintf(
-					/* translators: %s is number of validation errors */
-					_n(
-						'%s validation error was not deleted because it still has occurrence on the site.',
-						'%s validation errors were not deleted because they still have occurrences on the site.',
-						$count,
-						'amp'
-					),
-					number_format_i18n( $count )
-				)
-			)
-		);
 	}
 
 	/**
