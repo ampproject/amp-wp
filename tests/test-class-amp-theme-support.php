@@ -1050,6 +1050,44 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['handle'] );
+
+		$call_response = function() use ( $original_html ) {
+			return AMP_Theme_Support::prepare_response( $original_html, array(
+				'enable_response_caching' => true,
+			) );
+		};
+
+		// Test that first response isn't cached.
+		$first_response = $call_response();
+		$this->assertGreaterThan( 0, count( array_filter(
+			AMP_Response_Headers::$headers_sent,
+			function( $header ) {
+				return 'Server-Timing' === $header['name'];
+			}
+		) ) );
+
+		// Test that response cache is return upon second call.
+		AMP_Response_Headers::$headers_sent = array();
+		$this->assertEquals( $first_response, $call_response() );
+		$this->assertSame( 0, count( array_filter(
+			AMP_Response_Headers::$headers_sent,
+			function( $header ) {
+				return 'Server-Timing' === $header['name'];
+			}
+		) ) );
+
+		// Test new cache upon argument change.
+		AMP_Response_Headers::$headers_sent = array();
+		AMP_Theme_Support::prepare_response( $original_html, array(
+			'enable_response_caching' => true,
+			'test_reset_by_arg'       => true,
+		) );
+		$this->assertGreaterThan( 0, count( array_filter(
+			AMP_Response_Headers::$headers_sent,
+			function( $header ) {
+				return 'Server-Timing' === $header['name'];
+			}
+		) ) );
 	}
 
 	/**
@@ -1083,6 +1121,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		AMP_Theme_Support::add_hooks();
 		ob_start();
 		?>
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">

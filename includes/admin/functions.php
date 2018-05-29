@@ -153,3 +153,11 @@ function amp_post_meta_box() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
 }
+
+/**
+ * Bootstrap AMP Editor core blocks.
+ */
+function amp_editor_core_blocks() {
+	$editor_blocks = new AMP_Editor_Blocks();
+	$editor_blocks->init();
+}
