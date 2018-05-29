@@ -361,11 +361,9 @@ class AMP_Invalid_URL_Post_Type {
 		// Guard against Kses from corrupting content by adding post_content after content_save_pre filter applies.
 		$insert_post_content = function( $post_data ) use ( $placeholder, $post_content ) {
 			$should_supply_post_content = (
-				isset( $post_data['post_content'] )
+				isset( $post_data['post_content'], $post_data['post_type'] )
 				&&
 				$placeholder === $post_data['post_content']
-				&&
-				isset( $post_data['post_type'] )
 				&&
 				self::POST_TYPE_SLUG === $post_data['post_type']
 			);
