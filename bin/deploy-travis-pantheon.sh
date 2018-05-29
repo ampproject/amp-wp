@@ -85,7 +85,7 @@ if [ ! -e node_modules/.bin ]; then
     npm install
 fi
 PATH="node_modules/.bin/:$PATH"
-grunt build
+npm run build
 rsync -avz --delete ./build/ "$repo_dir/wp-content/plugins/amp/"
 git --no-pager log -1 --format="Build AMP plugin at %h: %s" > /tmp/commit-message.txt
 

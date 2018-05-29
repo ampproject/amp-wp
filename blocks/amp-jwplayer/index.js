@@ -18,12 +18,12 @@ const {
 export default registerBlockType(
 	'amp/amp-jwplayer',
 	{
-		title: __( 'AMP JW Player' ),
-		description: __( 'Displays a cloud-hosted JW Player.' ),
+		title: __( 'AMP JW Player', 'amp' ),
+		description: __( 'Displays a cloud-hosted JW Player.', 'amp' ),
 		category: 'common',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed' )
+			__( 'Embed', 'amp' )
 		],
 
 		attributes: {
@@ -53,12 +53,12 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataPlayerId, dataMediaId, dataPlaylistId, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: __( 'Responsive' ) },
-				{ value: 'fixed-height', label: __( 'Fixed height' ) },
-				{ value: 'fixed', label: __( 'Fixed' ) },
-				{ value: 'fill', label: __( 'Fill' ) },
-				{ value: 'flex-item', label: __( 'Flex-item' ) },
-				{ value: 'nodisplay', label: __( 'No Display' ) }
+				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
+				{ value: 'fill', label: __( 'Fill', 'amp' ) },
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
+				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) }
 
 			];
 			let url = false;
@@ -74,37 +74,37 @@ export default registerBlockType(
 					{
 						isSelected && (
 							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'JW Player Settings' ) }>
+								<PanelBody title={ __( 'JW Player Settings', 'amp' ) }>
 									<TextControl
-										label={ __( 'Player ID (required)' ) }
+										label={ __( 'Player ID (required)', 'amp' ) }
 										value={ dataPlayerId }
 										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Media ID (required if playlist ID not set)' ) }
+										label={ __( 'Media ID (required if playlist ID not set)', 'amp' ) }
 										value={ dataMediaId }
 										onChange={ value => ( setAttributes( { dataMediaId: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Playlist ID (required if media ID not set)' ) }
+										label={ __( 'Playlist ID (required if media ID not set)', 'amp' ) }
 										value={ dataPlaylistId }
 										onChange={ value => ( setAttributes( { dataPlaylistId: value } ) ) }
 									/>
 									<SelectControl
-										label={ __( 'Layout' ) }
+										label={ __( 'Layout', 'amp' ) }
 										value={ layout }
 										options={ ampLayoutOptions }
 										onChange={ value => ( setAttributes( { layout: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Width (px)' ) }
+										label={ __( 'Width (px)', 'amp' ) }
 										value={ width !== undefined ? width : '' }
 										onChange={ value => ( setAttributes( { width: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Height (px)' ) }
+										label={ __( 'Height (px)', 'amp' ) }
 										value={ height }
 										onChange={ value => ( setAttributes( { height: value } ) ) }
 									/>
@@ -114,16 +114,16 @@ export default registerBlockType(
 					}
 					{
 						url && (
-							<Placeholder label={ __( 'JW Player' ) }>
+							<Placeholder label={ __( 'JW Player', 'amp' ) }>
 								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
 					{
 						! url && (
-							<Placeholder label={ __( 'JW Player' ) }>
-								<p>{ __( 'Add required data to use the block.' ) }</p>
+							<Placeholder label={ __( 'JW Player', 'amp' ) }>
+								<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
