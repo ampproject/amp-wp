@@ -563,6 +563,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		} else {
 			$parsed = get_transient( $cache_key . $cache_group );
 		}
+
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
 			$parsed = $this->parse_stylesheet( $stylesheet, $options );
 			if ( wp_using_ext_object_cache() ) {
@@ -573,13 +574,54 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! empty( $this->args['validation_error_callback'] ) && ! empty( $parsed['validation_errors'] ) ) {
+		if ( $node && ! empty( $this->args['validation_error_callback'] ) && ! empty( $parsed['validation_errors'] ) ) {
 			foreach ( $parsed['validation_errors'] as $validation_error ) {
 				call_user_func( $this->args['validation_error_callback'], array_merge( $validation_error, compact( 'node' ) ) );
 			}
 		}
 
 		return $parsed['stylesheet'];
+	}
+
+	/**
+	 * Parse imported stylesheet.
+	 *
+	 * @param Import $item Import object.
+	 */
+	private function parse_import_stylesheet( Import $item ) {
+		$import_url = $item->getLocation()->getURL()->getString();
+
+		// If it's local.
+		if ( false === filter_var( $import_url, FILTER_VALIDATE_URL ) && ! file_exists( $import_url ) ) {
+			if ( 0 === strpos( $import_url, '.' ) ) {
+				$import_url = str_replace( '.', '', 0 );
+			}
+			if ( 0 === strpos( $import_url, '/' ) ) {
+				$import_url = substr_replace( $import_url, '', 0, 1 );
+			}
+			$import_url = get_stylesheet_directory_uri() . '/' . $import_url;
+		}
+
+		// @todo else for external.
+		$css_file_path = $this->get_validated_url_file_path( $import_url, array( 'css', 'less', 'scss', 'sass' ) );
+
+		// Load the CSS from the filesystem.
+		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+
+		$stylesheet = $this->process_stylesheet( $stylesheet, null, array(
+			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
+			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'stylesheet_url'     => $import_url,
+			'stylesheet_path'    => $css_file_path,
+		) );
+
+		$pending_stylesheet = array(
+			'keyframes'  => false,
+			'stylesheet' => $stylesheet,
+			'node'       => null,
+		);
+
+		$this->pending_stylesheets[] = $pending_stylesheet;
 	}
 
 	/**
@@ -837,10 +879,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$css_list->remove( $css_item );
 				}
 			} elseif ( $css_item instanceof Import ) {
-				$validation_errors[] = array(
-					'code'    => 'illegal_css_import_rule',
-					'message' => __( 'CSS @import is currently disallowed.', 'amp' ),
-				);
+				$this->parse_import_stylesheet( $css_item );
 				$css_list->remove( $css_item );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
