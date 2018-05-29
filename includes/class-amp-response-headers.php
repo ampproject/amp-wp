@@ -63,9 +63,6 @@ class AMP_Response_Headers {
 	 * Send Server-Timing header.
 	 *
 	 * @since 1.0
-	 * @todo What is the ordering in Chrome dev tools? What are the colors about?
-	 * @todo Is there a better name standardization?
-	 * @todo Is there a way to indicate nested server timings, so an outer method's own time can be seen separately from the inner method's time?
 	 *
 	 * @param string $name        Name.
 	 * @param float  $duration    Duration. If negative, will be added to microtime( true ). Optional.
@@ -75,7 +72,7 @@ class AMP_Response_Headers {
 	public static function send_server_timing( $name, $duration = null, $description = null ) {
 		$value = $name;
 		if ( isset( $description ) ) {
-			$value .= sprintf( ';desc=%s', wp_json_encode( $description ) );
+			$value .= sprintf( ';desc="%s"', str_replace( array( '\\', '"' ), '', substr( $description, 0, 100 ) ) );
 		}
 		if ( isset( $duration ) ) {
 			if ( $duration < 0 ) {
