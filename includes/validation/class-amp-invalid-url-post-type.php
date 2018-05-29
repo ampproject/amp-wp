@@ -84,7 +84,7 @@ class AMP_Invalid_URL_Post_Type {
 					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
 					'not_found_in_trash' => __( 'No invalid AMP pages in trash', 'amp' ),
 					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
-					'edit_item'          => __( 'Invalid AMP Page', 'amp' ),
+					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -1124,7 +1124,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return string Title.
 	 */
 	public static function filter_the_title_in_post_list_table( $title, $post ) {
-		if ( get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+		if ( get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
 			$title = preg_replace( '#^(\w+:)?//[^/]+#', '', $title );
 		}
 		return $title;
