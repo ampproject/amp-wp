@@ -602,11 +602,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function parse_import_stylesheet( Import $item, $options ) {
 
+		$at_rule_args = $item->atRuleArgs();
+		$location     = array_shift( $at_rule_args );
+		$media_query  = array_shift( $at_rule_args );
+
 		if ( isset( $options['stylesheet_url'] ) ) {
-			$this->real_path_urls( array( $item->getLocation() ), $options['stylesheet_url'] );
+			$this->real_path_urls( array( $location ), $options['stylesheet_url'] );
 		}
 
-		$import_stylesheet_url = $item->getLocation()->getURL()->getString();
+		$import_stylesheet_url = $location->getURL()->getString();
 
 		// Prevent importing something that has already been imported, and avoid infinite recursion.
 		if ( isset( $this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] ) ) {
@@ -621,6 +625,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Load the CSS from the filesystem.
 		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+
+		if ( $media_query ) {
+			$stylesheet = sprintf( '@media %s { %s }', $media_query, $stylesheet );
+		}
 
 		$stylesheet = $this->process_stylesheet( $stylesheet, null, array(
 			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
