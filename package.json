@@ -33,8 +33,8 @@
  "main": "blocks/index.js",
  "scripts": {
   "pot-to-php": "pot-to-php languages/amp-js.pot languages/amp-translations.php amp",
-  "makepot": "wp i18n make-pot .",
-  "build": "cross-env BABEL_ENV=production webpack; grunt build; npm run pot-to-php; npm run makepot",
+  "build": "grunt build; grunt create-build-zip",
+  "build-release": "grunt build-release; grunt create-build-zip",
   "deploy": "grunt deploy",
   "dev": "cross-env BABEL_ENV=default webpack --watch"
  }
