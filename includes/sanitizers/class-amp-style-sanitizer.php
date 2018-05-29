@@ -168,6 +168,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $calc_placeholders = array();
 
 	/**
+	 * Log of the stylesheet URLs that have been imported to guard against infinite loops.
+	 *
+	 * @var array
+	 */
+	private $processed_imported_stylesheet_urls = array();
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.7
@@ -586,24 +593,31 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Parse imported stylesheet.
 	 *
-	 * @param Import $item Import object.
+	 * @param Import $item    Import object.
+	 * @param array  $options {
+	 *     Options.
+	 *
+	 *     @type string $stylesheet_url Original URL for stylesheet when originating via link or @import.
+	 * }
 	 */
-	private function parse_import_stylesheet( Import $item ) {
-		$import_url = $item->getLocation()->getURL()->getString();
+	private function parse_import_stylesheet( Import $item, $options ) {
 
-		// If it's local.
-		if ( false === filter_var( $import_url, FILTER_VALIDATE_URL ) && ! file_exists( $import_url ) ) {
-			if ( 0 === strpos( $import_url, '.' ) ) {
-				$import_url = str_replace( '.', '', 0 );
-			}
-			if ( 0 === strpos( $import_url, '/' ) ) {
-				$import_url = substr_replace( $import_url, '', 0, 1 );
-			}
-			$import_url = get_stylesheet_directory_uri() . '/' . $import_url;
+		if ( isset( $options['stylesheet_url'] ) ) {
+			$this->real_path_urls( array( $item->getLocation() ), $options['stylesheet_url'] );
 		}
 
-		// @todo else for external.
-		$css_file_path = $this->get_validated_url_file_path( $import_url, array( 'css', 'less', 'scss', 'sass' ) );
+		$import_stylesheet_url = $item->getLocation()->getURL()->getString();
+
+		// Prevent importing something that has already been imported, and avoid infinite recursion.
+		if ( isset( $this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] ) ) {
+			return;
+		}
+
+		// @todo Handle external per <https://github.com/Automattic/amp-wp/issues/1083>.
+		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, array( 'css', 'less', 'scss', 'sass' ) );
+		if ( is_wp_error( $css_file_path ) ) {
+			return; // @todo Emit error.
+		}
 
 		// Load the CSS from the filesystem.
 		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
@@ -611,7 +625,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet = $this->process_stylesheet( $stylesheet, null, array(
 			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
 			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
-			'stylesheet_url'     => $import_url,
+			'stylesheet_url'     => $import_stylesheet_url,
 			'stylesheet_path'    => $css_file_path,
 		) );
 
@@ -879,7 +893,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$css_list->remove( $css_item );
 				}
 			} elseif ( $css_item instanceof Import ) {
-				$this->parse_import_stylesheet( $css_item );
+				$this->parse_import_stylesheet( $css_item, $options );
 				$css_list->remove( $css_item );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
