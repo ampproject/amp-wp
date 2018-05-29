@@ -732,6 +732,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'stylesheet' => $stylesheet,
 			'node'       => $this->current_node,
 			'sources'    => $this->current_sources,
+			'imported'   => $import_stylesheet_url,
 		);
 
 		// Stylesheet will now be inlined, so @import can be removed.
@@ -1548,21 +1549,32 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			),
 		);
 
+		/*
+		 * On Native AMP themes when there are new/rejected validation errors present, a parsed stylesheet may include
+		 * @import rules. These must be moved to the beginning to be honored.
+		 */
+		$imports = array();
+
 		// Divide pending stylesheet between custom and keyframes, and calculate size of each.
 		while ( ! empty( $this->pending_stylesheets ) ) {
 			$pending_stylesheet = array_shift( $this->pending_stylesheets );
 
 			$set_name = ! empty( $pending_stylesheet['keyframes'] ) ? 'keyframes' : 'custom';
 			$size     = 0;
-			foreach ( $pending_stylesheet['stylesheet'] as $part ) {
+			foreach ( $pending_stylesheet['stylesheet'] as $i => $part ) {
 				if ( is_string( $part ) ) {
 					$size += strlen( $part );
+					if ( '@import' === substr( $part, 0, 7 ) ) {
+						$imports[] = $part;
+						unset( $pending_stylesheet['stylesheet'][ $i ] );
+					}
 				} elseif ( is_array( $part ) ) {
 					$size += strlen( implode( ',', array_keys( $part[0] ) ) ); // Selectors.
 					$size += strlen( $part[1] ); // Declaration block.
 				}
 			}
 			$stylesheet_sets[ $set_name ]['total_size']           += $size;
+			$stylesheet_sets[ $set_name ]['imports']               = $imports;
 			$stylesheet_sets[ $set_name ]['pending_stylesheets'][] = $pending_stylesheet;
 		}
 
@@ -1593,7 +1605,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$head->appendChild( $this->amp_custom_style_element );
 			}
 
-			$css = implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
+			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
+			$css .= implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -1623,6 +1636,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( 'id' !== $attribute->nodeName || 'class' !== $attribute->nodeName ) {
 						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
 					}
+				}
+				if ( ! empty( $pending_stylesheet['imported'] ) ) {
+					$message .= sprintf( ' @import url(%s)', $pending_stylesheet['imported'] );
 				}
 				$message .= sprintf(
 					/* translators: %d is number of bytes */
