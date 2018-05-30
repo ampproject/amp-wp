@@ -18,12 +18,12 @@ const {
 export default registerBlockType(
 	'amp/amp-springboard-player',
 	{
-		title: __( 'AMP Springboard Player' ),
-		description: __( 'Displays the Springboard Player used in the Springboard Video Platform' ),
+		title: __( 'AMP Springboard Player', 'amp' ),
+		description: __( 'Displays the Springboard Player used in the Springboard Video Platform', 'amp' ),
 		category: 'common',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed' )
+			__( 'Embed', 'amp' )
 		],
 
 		attributes: {
@@ -91,10 +91,10 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: __( 'Responsive' ) },
-				{ value: 'fixed', label: __( 'Fixed' ) },
-				{ value: 'fill', label: __( 'Fill' ) },
-				{ value: 'flex-item', label: __( 'Flex-item' ) }
+				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
+				{ value: 'fill', label: __( 'Fill', 'amp' ) },
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) }
 
 			];
 			let url = false;
@@ -106,57 +106,57 @@ export default registerBlockType(
 					{
 						isSelected && (
 							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Springboard Player Settings' ) }>
+								<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
 									<TextControl
-										label={ __( 'SprintBoard site ID (required)' ) }
+										label={ __( 'SprintBoard site ID (required)', 'amp' ) }
 										value={ dataSiteId }
 										onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Player content ID (required)' ) }
+										label={ __( 'Player content ID (required)', 'amp' ) }
 										value={ dataContentId }
 										onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Player ID' ) }
+										label={ __( 'Player ID', 'amp' ) }
 										value={ dataPlayerId }
 										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Springboard partner domain' ) }
+										label={ __( 'Springboard partner domain', 'amp' ) }
 										value={ dataDomain }
 										onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
 									/>
 									<SelectControl
-										label={ __( 'Mode (required)' ) }
+										label={ __( 'Mode (required)', 'amp' ) }
 										value={ dataMode }
 										options={ [
-											{ value: 'video', label: __( 'Video' ) },
-											{ value: 'playlist', label: __( 'Playlist' ) }
+											{ value: 'video', label: __( 'Video', 'amp' ) },
+											{ value: 'playlist', label: __( 'Playlist', 'amp' ) }
 										] }
 										onChange={ value => ( setAttributes( { dataMode: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Number of video is playlist (required)' ) }
+										label={ __( 'Number of video is playlist (required)', 'amp' ) }
 										value={ dataItems }
 										onChange={ value => ( setAttributes( { dataItems: value } ) ) }
 									/>
 									<SelectControl
-										label={ __( 'Layout' ) }
+										label={ __( 'Layout', 'amp' ) }
 										value={ layout }
 										options={ ampLayoutOptions }
 										onChange={ value => ( setAttributes( { layout: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Width (px)' ) }
+										label={ __( 'Width (px)', 'amp' ) }
 										value={ width !== undefined ? width : '' }
 										onChange={ value => ( setAttributes( { width: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Height (px)' ) }
+										label={ __( 'Height (px)', 'amp' ) }
 										value={ height }
 										onChange={ value => ( setAttributes( { height: value } ) ) }
 									/>
@@ -166,16 +166,16 @@ export default registerBlockType(
 					}
 					{
 						url && (
-							<Placeholder label={ __( 'Springboard Player' ) }>
+							<Placeholder label={ __( 'Springboard Player', 'amp' ) }>
 								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
 					{
 						! url && (
-							<Placeholder label={ __( 'Springboard Player' ) }>
-								<p>{ __( 'Add required data to use the block.' ) }</p>
+							<Placeholder label={ __( 'Springboard Player', 'amp' ) }>
+								<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
