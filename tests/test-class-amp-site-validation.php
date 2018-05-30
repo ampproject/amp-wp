@@ -27,6 +27,13 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	const TAG_NAME = 'img';
 
 	/**
+	 * A disallowed element, which should cause a validation error.
+	 *
+	 * @var string
+	 */
+	const DISALLOWED_TAG = '<script>doThis();</script>';
+
+	/**
 	 * An instance of DOMElement to test.
 	 *
 	 * @var DOMElement
@@ -47,13 +54,11 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_post_permalinks.
+	 * Test get_post_ids.
 	 *
-	 * @covers AMP_Site_Validation::get_post_permalinks()
+	 * @covers AMP_Site_Validation::get_post_ids()
 	 */
-	public function test_get_post_permalinks() {
-		$posts                       = array();
-		$permalinks                  = array();
+	public function test_get_post_ids() {
 		$number_posts_each_post_type = 20;
 		$post_types                  = get_post_types( array( 'public' => true ), 'names' );
 
@@ -65,15 +70,13 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		unset( $post_types['attachment'] );
 		foreach ( $post_types as $post_type ) {
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
-				$post         = $this->factory()->post->create_and_get( array(
+				$post_ids[] = $this->factory()->post->create( array(
 					'post_type'   => $post_type,
 					'post_status' => 'publish',
 				) );
-				$posts[]      = $post;
-				$permalinks[] = amp_get_permalink( $post->ID );
 			}
 		}
 		$number_of_posts = count( $post_types ) * $number_posts_each_post_type;
-		$this->assertEquals( $permalinks, AMP_Site_Validation::get_post_permalinks( $number_of_posts ) );
+		$this->assertEquals( $post_ids, AMP_Site_Validation::get_post_permalinks( $number_of_posts ) );
 	}
 }
