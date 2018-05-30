@@ -19,12 +19,12 @@ const {
 export default registerBlockType(
 	'amp/amp-o2-player',
 	{
-		title: __( 'AMP O2 Player' ),
+		title: __( 'AMP O2 Player', 'amp' ),
 		category: 'common',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed' ),
-			__( 'AOL O2Player' )
+			__( 'Embed', 'amp' ),
+			__( 'AOL O2Player', 'amp' )
 		],
 
 		// @todo Add other useful macro toggles, e.g. showing relevant content.
@@ -62,12 +62,12 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { autoPlay, dataPid, dataVid, dataBcid, dataBid, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: __( 'Responsive' ) },
-				{ value: 'fixed-height', label: __( 'Fixed height' ) },
-				{ value: 'fixed', label: __( 'Fixed' ) },
-				{ value: 'fill', label: __( 'Fill' ) },
-				{ value: 'flex-item', label: __( 'Flex-item' ) },
-				{ value: 'nodisplay', label: __( 'No Display' ) }
+				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
+				{ value: 'fill', label: __( 'Fill', 'amp' ) },
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
+				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) }
 
 			];
 			let url = false;
@@ -79,47 +79,47 @@ export default registerBlockType(
 					{
 						isSelected && (
 							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'O2 Player Settings' ) }>
+								<PanelBody title={ __( 'O2 Player Settings', 'amp' ) }>
 									<TextControl
-										label={ __( 'Player ID (required)' ) }
+										label={ __( 'Player ID (required)', 'amp' ) }
 										value={ dataPid }
 										onChange={ value => ( setAttributes( { dataPid: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Buyer Company ID (either buyer or video ID is required)' ) }
+										label={ __( 'Buyer Company ID (either buyer or video ID is required)', 'amp' ) }
 										value={ dataBcid }
 										onChange={ value => ( setAttributes( { dataBcid: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Video ID (either buyer or video ID is required)' ) }
+										label={ __( 'Video ID (either buyer or video ID is required)', 'amp' ) }
 										value={ dataVid }
 										onChange={ value => ( setAttributes( { dataVid: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Playlist ID' ) }
+										label={ __( 'Playlist ID', 'amp' ) }
 										value={ dataBid }
 										onChange={ value => ( setAttributes( { dataBid: value } ) ) }
 									/>
 									<ToggleControl
-										label={ __( 'Autoplay' ) }
+										label={ __( 'Autoplay', 'amp' ) }
 										checked={ autoPlay }
 										onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
 									/>
 									<SelectControl
-										label={ __( 'Layout' ) }
+										label={ __( 'Layout', 'amp' ) }
 										value={ layout }
 										options={ ampLayoutOptions }
 										onChange={ value => ( setAttributes( { layout: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Width (px)' ) }
+										label={ __( 'Width (px)', 'amp' ) }
 										value={ width !== undefined ? width : '' }
 										onChange={ value => ( setAttributes( { width: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Height (px)' ) }
+										label={ __( 'Height (px)', 'amp' ) }
 										value={ height }
 										onChange={ value => ( setAttributes( { height: value } ) ) }
 									/>
@@ -129,16 +129,16 @@ export default registerBlockType(
 					}
 					{
 						url && (
-							<Placeholder label={ __( 'O2 Player' ) }>
+							<Placeholder label={ __( 'O2 Player', 'amp' ) }>
 								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
 					{
 						! url && (
-							<Placeholder label={ __( 'O2 Player' ) }>
-								<p>{ __( 'Add required data to use the block.' ) }</p>
+							<Placeholder label={ __( 'O2 Player', 'amp' ) }>
+								<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}

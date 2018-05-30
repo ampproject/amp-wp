@@ -31,6 +31,7 @@ class AMP_Options_Manager {
 		);
 
 		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
+		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
 	}
 
 	/**
@@ -258,5 +259,21 @@ class AMP_Options_Manager {
 	public static function update_analytics_options( $data ) {
 		_deprecated_function( __METHOD__, '0.6', __CLASS__ . '::update_option' );
 		return self::update_option( 'analytics', wp_unslash( $data ) );
+	}
+
+	/**
+	 * Outputs an admin notice if persistent object cache is not present.
+	 *
+	 * @return void
+	 */
+	public static function persistent_object_caching_notice() {
+		if ( ! wp_using_ext_object_cache() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
+			printf(
+				'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
+				esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
+				esc_url( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching' ),
+				esc_html__( 'More details', 'amp' )
+			);
+		}
 	}
 }

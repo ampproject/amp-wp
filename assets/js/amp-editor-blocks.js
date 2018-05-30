@@ -15,7 +15,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			ampLayoutOptions: [
 				{
 					value: 'nodisplay',
-					label: __( 'No Display' ),
+					label: __( 'No Display', 'amp' ),
 					notAvailable: [
 						'core-embed/vimeo',
 						'core-embed/dailymotion',
@@ -27,7 +27,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{
 					// Not supported by amp-audio and amp-pixel.
 					value: 'fixed',
-					label: __( 'Fixed' ),
+					label: __( 'Fixed', 'amp' ),
 					notAvailable: [
 						'core-embed/soundcloud'
 					]
@@ -35,7 +35,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{
 					// To ensure your AMP element displays, you must specify a width and height for the containing element.
 					value: 'responsive',
-					label: __( 'Responsive' ),
+					label: __( 'Responsive', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/soundcloud'
@@ -43,12 +43,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				},
 				{
 					value: 'fixed-height',
-					label: __( 'Fixed height' ),
+					label: __( 'Fixed height', 'amp' ),
 					notAvailable: []
 				},
 				{
 					value: 'fill',
-					label: __( 'Fill' ),
+					label: __( 'Fill', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/soundcloud'
@@ -56,7 +56,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				},
 				{
 					value: 'flex-item',
-					label: __( 'Flex Item' ),
+					label: __( 'Flex Item', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/soundcloud'
@@ -65,7 +65,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{
 					// Not supported by video.
 					value: 'intrinsic',
-					label: __( 'Intrinsic' ),
+					label: __( 'Intrinsic', 'amp' ),
 					notAvailable: [
 						'core/audio',
 						'core-embed/youtube',
@@ -133,7 +133,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		var layoutOptions = [
 			{
 				value: '',
-				label: __( 'Default' )
+				label: __( 'Default', 'amp' )
 			}
 		];
 
@@ -412,6 +412,54 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	};
 
 	/**
+	 * Default setup for inspector controls.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
+	 */
+	component.setUpInspectorControls = function setUpInspectorControls( props ) {
+		var ampLayout = props.attributes.ampLayout,
+			ampNoLoading = props.attributes.ampNoLoading,
+			isSelected = props.isSelected,
+			name = props.name,
+			el = wp.element.createElement,
+			InspectorControls = wp.editor.InspectorControls,
+			SelectControl = wp.components.SelectControl,
+			ToggleControl = wp.components.ToggleControl,
+			PanelBody = wp.components.PanelBody,
+			label = __( 'AMP Layout', 'amp' );
+
+		if ( 'core/image' === name ) {
+			label = __( 'AMP Layout (modifies width/height)', 'amp' );
+		}
+
+		return isSelected && (
+				el( InspectorControls, { key: 'inspector' },
+					el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
+						el( SelectControl, {
+							label: label,
+							value: ampLayout,
+							options: component.getLayoutOptions( name ),
+							onChange: function( value ) {
+								props.setAttributes( { ampLayout: value } );
+								if ( 'core/image' === props.name ) {
+									component.setImageBlockLayoutAttributes( props, value );
+								}
+							}
+						} ),
+						el( ToggleControl, {
+							label: __( 'AMP loading indicator disabled', 'amp' ),
+							checked: ampNoLoading,
+							onChange: function() {
+								props.setAttributes( { ampNoLoading: ! ampNoLoading } );
+							}
+						} )
+					)
+				)
+			);
+	};
+
+	/**
 	 * Setup inspector controls for text blocks.
 	 *
 	 * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
@@ -593,28 +641,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	};
 
 	/**
-	 * Default setup for inspector controls.
-	 *
-	 * @param {Object} props Props.
-	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
-	 */
-	component.setUpInspectorControls = function setUpInspectorControls( props ) {
-		var isSelected = props.isSelected,
-			el = wp.element.createElement,
-			InspectorControls = wp.editor.InspectorControls,
-			PanelBody = wp.components.PanelBody;
-
-		return isSelected && (
-			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: component.data.ampPanelLabel },
-					component.getAmpLayoutControl( props ),
-					component.getAmpNoloadingToggle( props )
-				)
-			)
-		);
-	};
-
-	/**
 	 * Set up inspector controls for Image block.
 	 *
 	 * @param {Object} props Props.
@@ -627,14 +653,14 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
-			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: component.data.ampPanelLabel },
-					component.getAmpLayoutControl( props ),
-					component.getAmpNoloadingToggle( props ),
-					component.getAmpLightboxToggle( props )
+				el( InspectorControls, { key: 'inspector' },
+					el( PanelBody, { title: component.data.ampPanelLabel },
+						component.getAmpLayoutControl( props ),
+						component.getAmpNoloadingToggle( props ),
+						component.getAmpLightboxToggle( props )
+					)
 				)
-			)
-		);
+			);
 	};
 
 	/**
@@ -651,30 +677,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
-			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: component.data.ampPanelLabel },
-					component.getAmpCarouselToggle( props ),
-					component.getAmpLightboxToggle( props )
-				)
-			)
-		);
-	};
-
-	/**
-	 * Set up inspector controls for shortcode block.
-	 * Adds ampCarousel attribute in case of gallery shortcode.
-	 *
-	 * @param {Object} props Props.
-	 * @return {Object} Inspector controls.
-	 */
-	component.setUpShortcodeInspectorControls = function setUpShortcodeInspectorControls( props ) {
-		var isSelected = props.isSelected,
-			el = wp.element.createElement,
-			InspectorControls = wp.editor.InspectorControls,
-			PanelBody = wp.components.PanelBody;
-
-		if ( component.isGalleryShortcode( props.attributes ) ) {
-			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: component.data.ampPanelLabel },
 						component.getAmpCarouselToggle( props ),
@@ -682,6 +684,39 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					)
 				)
 			);
+	};
+
+	/**
+	 * Set up inspector controls for shortcode block.
+	 * Adds ampCarousel attribute in case of gallery shortcode.
+	 *
+	 * @param {Object} props Props.
+	 * @return {*} Inspector controls.
+	 */
+	component.setUpShortcodeInspectorControls = function setUpShortcodeInspectorControls( props ) {
+		var ampCarousel = props.attributes.ampCarousel,
+			isSelected = props.isSelected,
+			el = wp.element.createElement,
+			InspectorControls = wp.editor.InspectorControls,
+			ToggleControl = wp.components.ToggleControl,
+			PanelBody = wp.components.PanelBody,
+			toggleControl;
+
+		if ( component.isGalleryShortcode( props.attributes ) ) {
+			toggleControl = el( ToggleControl, {
+				label: __( 'Display as AMP carousel', 'amp' ),
+				checked: ampCarousel,
+				onChange: function() {
+					props.setAttributes( { ampCarousel: ! ampCarousel } );
+				}
+			} );
+			return isSelected && (
+					el( InspectorControls, { key: 'inspector' },
+						el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
+							toggleControl
+						)
+					)
+				);
 		}
 
 		return '';
