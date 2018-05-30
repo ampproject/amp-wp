@@ -208,7 +208,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'illegal_css_property',
 			'removed_unused_css_rules',
 			'unrecognized_css',
-			'disallowed_external_file_url',
 			'disallowed_file_extension',
 			'file_path_not_found',
 		);
@@ -410,7 +409,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param string   $url The file URL.
 	 * @param string[] $allowed_extensions Allowed file extensions.
-	 * @return string|WP_Error|bool Style's absolute validated filesystem path, or WP_Error when error.
+	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
 		$needs_base_url = (
@@ -453,7 +452,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
-			return false;
+			/* translators: %s is file URL */
+			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $url_host ) );
 		}
 
 		$file_path = null;
@@ -542,43 +542,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$href = $element->getAttribute( 'href' );
 
 		// Allow font URLs, including protocol-less URLs and recognized URLs that use HTTP instead of HTTPS.
-		$normalized_font_href = preg_replace( '#^(http:)?(?=//)#', 'https:', $href );
-		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $normalized_font_href ) ) {
-			if ( $href !== $normalized_font_href ) {
-				$element->setAttribute( 'href', $normalized_font_href );
+		$normalized_url = preg_replace( '#^(http:)?(?=//)#', 'https:', $href );
+		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $normalized_url ) ) {
+			if ( $href !== $normalized_url ) {
+				$element->setAttribute( 'href', $normalized_url );
 			}
 			return;
 		}
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
 
-		$stylesheet = false;
-		if ( is_wp_error( $css_file_path ) ) {
+		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+			$contents = $this->fetch_external_stylesheet( $normalized_url );
+			if ( is_wp_error( $contents ) ) {
+				$this->remove_invalid_child( $element, array(
+					'code'    => $css_file_path->get_error_code(),
+					'message' => $css_file_path->get_error_message(),
+				) );
+				return;
+			} else {
+				$stylesheet = $contents;
+			}
+		} elseif ( is_wp_error( $css_file_path ) ) {
 			$this->remove_invalid_child( $element, array(
 				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
 			) );
 			return;
-		} elseif ( false === $css_file_path ) {
-
-			// If CSS local path was not received, this must be external URL.
-			$cache_key = md5( $normalized_font_href );
-			$contents  = get_transient( $cache_key );
-			if ( false === $contents ) {
-				$r = wp_remote_get( $normalized_font_href );
-				if ( 200 !== wp_remote_retrieve_response_code( $r ) ) {
-					$contents = new WP_Error( wp_remote_retrieve_response_code( $r ) );
-				} else {
-					$contents = wp_remote_retrieve_body( $r );
-				}
-				set_transient( $cache_key, $contents, MONTH_IN_SECONDS );
-			}
-			if ( ! is_wp_error( $contents ) ) {
-				$stylesheet = $contents;
-			}
 		} else {
-
-			// Load the CSS from the filesystem.
 			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		}
 
@@ -615,6 +606,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$element->parentNode->removeChild( $element );
 
 		$this->set_current_node( null );
+	}
+
+	/**
+	 * Fetch external stylesheet.
+	 *
+	 * @param string $url External stylesheet URL.
+	 * @return string|WP_Error Stylesheet contents or WP_Error.
+	 */
+	private function fetch_external_stylesheet( $url ) {
+		$cache_key = md5( $url );
+		$contents  = get_transient( $cache_key );
+		if ( false === $contents ) {
+			$r = wp_remote_get( $url );
+			if ( 200 !== wp_remote_retrieve_response_code( $r ) ) {
+				$contents = new WP_Error(
+					wp_remote_retrieve_response_code( $r ),
+					wp_remote_retrieve_response_message( $r )
+				);
+			} else {
+				$contents = wp_remote_retrieve_body( $r );
+			}
+			set_transient( $cache_key, $contents, MONTH_IN_SECONDS );
+		}
+		return $contents;
 	}
 
 	/**
@@ -721,10 +736,25 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] = true;
 
-		// @todo Handle external per <https://github.com/Automattic/amp-wp/issues/1083>.
 		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, array( 'css', 'less', 'scss', 'sass' ) );
 
-		if ( is_wp_error( $css_file_path ) ) {
+		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+			$contents = $this->fetch_external_stylesheet( $import_stylesheet_url );
+			if ( is_wp_error( $contents ) ) {
+				$error     = array(
+					'code'    => $contents->get_error_code(),
+					'message' => $contents->get_error_message(),
+				);
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				if ( $sanitized ) {
+					$css_list->remove( $item );
+				}
+				$results[] = compact( 'error', 'sanitized' );
+				return $results;
+			} else {
+				$stylesheet = $contents;
+			}
+		} elseif ( is_wp_error( $css_file_path ) ) {
 			$error     = array(
 				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
@@ -735,10 +765,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$results[] = compact( 'error', 'sanitized' );
 			return $results;
+		} else {
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		}
-
-		// Load the CSS from the filesystem.
-		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 
 		if ( $media_query ) {
 			$stylesheet = sprintf( '@media %s { %s }', $media_query, $stylesheet );
