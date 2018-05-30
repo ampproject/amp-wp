@@ -19,8 +19,8 @@ class AMP_Site_Validation {
 	 * Attachments have a default status of 'inherit,' so they can depend on the status of their parent like a post.
 	 *
 	 * @todo: consider whether this should also return 'attachment' IDs.
-	 * @param int $number_posts The maximum amount of posts to get the IDs for (optional).
-	 * @return int[] $post_ids The post permalinks in an array.
+	 * @param int $number_posts The maximum amount of posts to get the permalinks for (optional).
+	 * @return string[] $permalinks The post permalinks in an array.
 	 */
 	public static function get_post_permalinks( $number_posts = 200 ) {
 		$post_types = get_post_types( array( 'public' => true ), 'names' );
@@ -32,6 +32,31 @@ class AMP_Site_Validation {
 
 		$post_ids = wp_list_pluck( $query->posts, 'ID' );
 		return array_map( 'get_permalink', $post_ids );
+	}
+
+	/**
+	 * Gets the front-end links for public taxonomy terms, like categories and tags.
+	 *
+	 * For example, https://example.org/?cat=2
+	 * This includes categories and tags, and any more that are registered.
+	 * But it excludes post_format terms.
+	 *
+	 * @param int $number_links The maximum amount of links to get (optional).
+	 * @return string[] $links The term links in an array.
+	 */
+	public static function get_taxonomy_links( $number_links = 200 ) {
+		$public_taxonomies = get_taxonomies( array(
+			'public' => true,
+		) );
+
+		// It doesn't seem necessary to get links for post format terms, like asides, galleries, or quotes.
+		unset( $public_taxonomies['post_format'] );
+		$terms = get_terms( array(
+			'taxonomy' => $public_taxonomies,
+			'count'    => $number_links,
+		) );
+
+		return array_map( 'get_term_link', $terms );
 	}
 
 	/**

@@ -72,7 +72,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		foreach ( $post_types as $post_type ) {
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
 				$expected_post_permalinks[] = get_permalink( $this->factory()->post->create( array(
-					'post_type'   => $post_type,
+					'post_type' => $post_type,
 				) ) );
 			}
 		}
@@ -86,5 +86,49 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 */
 		$this->assertEquals( 0, count( array_diff( $expected_post_permalinks, $actual_post_permalinks ) ) );
 		$this->assertEquals( count( $expected_post_permalinks ), count( $actual_post_permalinks ) );
+	}
+
+	/**
+	 * Test get_taxonomy_links.
+	 *
+	 * @covers AMP_Site_Validation::get_taxonomy_links()
+	 */
+	public function test_get_taxonomy_links() {
+		$number_links_each_taxonomy = 20;
+		$taxonomies                 = get_taxonomies( array(
+			'public' => true,
+		) );
+
+		unset( $taxonomies['post_format'] );
+		$all_terms = array();
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$terms_for_current_taxonomy = array();
+			for ( $i = 0; $i < $number_links_each_taxonomy; $i++ ) {
+				$terms_for_current_taxonomy[] = $this->factory()->term->create( array(
+					'taxonomy' => $taxonomy,
+				) );
+			}
+
+			// Terms need to be associated with a post in order to be returned in get_terms().
+			wp_set_post_terms(
+				$this->factory()->post->create(),
+				$terms_for_current_taxonomy,
+				$taxonomy
+			);
+			$all_terms = array_merge( $all_terms, $terms_for_current_taxonomy );
+		}
+
+		$expected_links  = array_map( 'get_term_link', $all_terms );
+		$number_of_links = 100;
+		$actual_links    = AMP_Site_Validation::get_taxonomy_links( $number_of_links );
+
+		/*
+		 * Test that all of the $expected_links are present.
+		 * There is already one term present before this test method adds any,
+		 * so that can also appear in the returned $actual_links.
+		 */
+		$this->assertEquals( 0, count( array_diff( $expected_links, $actual_links ) ) );
+		$this->assertLessThan( $number_of_links, count( $actual_links ) );
 	}
 }
