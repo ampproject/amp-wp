@@ -98,7 +98,6 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$taxonomies                 = get_taxonomies( array(
 			'public' => true,
 		) );
-		$all_terms                  = array();
 
 		foreach ( $taxonomies as $taxonomy ) {
 			$terms_for_current_taxonomy = array();
@@ -114,19 +113,18 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 				$terms_for_current_taxonomy,
 				$taxonomy
 			);
-			$all_terms = array_merge( $all_terms, $terms_for_current_taxonomy );
+
+			$expected_links  = array_map( 'get_term_link', $terms_for_current_taxonomy );
+			$number_of_links = 100;
+			$actual_links    = AMP_Site_Validation::get_taxonomy_links( $taxonomy, $number_of_links );
+
+			/*
+			 * Test that all of the $expected_links are present.
+			 * There is already one term present before this test method adds any,
+			 * so that can also appear in the returned $actual_links.
+			 */
+			$this->assertEquals( 0, count( array_diff( $expected_links, $actual_links ) ) );
+			$this->assertLessThan( $number_of_links, count( $actual_links ) );
 		}
-
-		$expected_links  = array_map( 'get_term_link', $all_terms );
-		$number_of_links = 100;
-		$actual_links    = AMP_Site_Validation::get_taxonomy_links( $number_of_links );
-
-		/*
-		 * Test that all of the $expected_links are present.
-		 * There is already one term present before this test method adds any,
-		 * so that can also appear in the returned $actual_links.
-		 */
-		$this->assertEquals( 0, count( array_diff( $expected_links, $actual_links ) ) );
-		$this->assertLessThan( $number_of_links, count( $actual_links ) );
 	}
 }

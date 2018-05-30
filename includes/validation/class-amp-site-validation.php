@@ -41,16 +41,13 @@ class AMP_Site_Validation {
 	 * This includes categories and tags, and any more that are registered.
 	 * But it excludes post_format terms.
 	 *
-	 * @param int $number_links The maximum amount of links to get (optional).
+	 * @param string $taxonomy The name of the taxonomy.
+	 * @param int    $number_links The maximum amount of links to get (optional).
 	 * @return string[] $links The term links in an array.
 	 */
-	public static function get_taxonomy_links( $number_links = 200 ) {
-		$public_taxonomies = get_taxonomies( array(
-			'public' => true,
-		) );
-
+	public static function get_taxonomy_links( $taxonomy, $number_links = 200 ) {
 		$terms = get_terms( array(
-			'taxonomy' => $public_taxonomies,
+			'taxonomy' => $taxonomy,
 			'count'    => $number_links,
 		) );
 
