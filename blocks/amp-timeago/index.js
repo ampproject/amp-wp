@@ -55,7 +55,7 @@ export default registerBlockType(
 				selector: 'amp-timeago',
 				attribute: 'datetime'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
 				source: 'attribute',
 				selector: 'amp-timeago',
@@ -148,19 +148,19 @@ export default registerBlockType(
 			if ( attributes.cutoff ) {
 				timeagoProps.cutoff = attributes.cutoff;
 			}
-			if ( attributes.layout ) {
-				switch ( attributes.layout ) {
+			if ( attributes.ampLayout ) {
+				switch ( attributes.lampLayout ) {
 					case 'fixed-height':
 						if ( attributes.height ) {
 							timeagoProps.height = attributes.height;
-							timeagoProps.layout = attributes.layout;
+							timeagoProps.layout = attributes.ampLayout;
 						}
 						break;
 					case 'fixed':
 						if ( attributes.height && attributes.width ) {
 							timeagoProps.height = attributes.height;
 							timeagoProps.width = attributes.width;
-							timeagoProps.layout = attributes.layout;
+							timeagoProps.layout = attributes.ampLayout;
 						}
 						break;
 				}

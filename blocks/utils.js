@@ -32,24 +32,24 @@ export function getMediaPlaceholder( name, url ) {
 export function getLayoutControls( props, ampLayoutOptions ) {
 	// @todo Move getting ampLayoutOptions to utils as well.
 	const { attributes, setAttributes } = props;
-	const { layout, height, width } = attributes;
-	const showHeightNotice = ! height && ( 'fixed' === layout || 'fixed-height' === layout );
-	const showWidthNotice = ! width && 'fixed' === layout;
+	const { ampLayout, height, width } = attributes;
+	const showHeightNotice = ! height && ( 'fixed' === ampLayout || 'fixed-height' === ampLayout );
+	const showWidthNotice = ! width && 'fixed' === ampLayout;
 
 	return [
 		<SelectControl
 			key="ampLayout"
 			label={ __( 'Layout', 'amp' ) }
-			value={ layout }
+			value={ ampLayout }
 			options={ ampLayoutOptions }
-			onChange={ value => ( setAttributes( { layout: value } ) ) }
+			onChange={ value => ( setAttributes( { ampLayout: value } ) ) }
 		/>,
 		showWidthNotice && (
 			<Notice key="showWidthNotice" status="error" isDismissible={ false }>
 				{
 					wp.i18n.sprintf(
 						__( 'Width is required for %s layout', 'amp' ),
-						layout
+						ampLayout
 					)
 				}
 			</Notice>
@@ -66,7 +66,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 				{
 					wp.i18n.sprintf(
 						__( 'Height is required for %s layout', 'amp' ),
-						layout
+						ampLayout
 					)
 				}
 			</Notice>

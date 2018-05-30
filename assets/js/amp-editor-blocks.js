@@ -1,5 +1,5 @@
 /* exported ampEditorBlocks */
-/* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0 ] } ] */
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0, 4 ] } ] */
 
 var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	var component, __;
@@ -152,13 +152,14 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * Add extra data-amp-layout attribute to save to DB.
 	 *
 	 * @param {Object} props Properties.
-	 * @param {string} blockType Block type.
+	 * @param {Object} blockType Block type.
 	 * @param {Object} attributes Attributes.
 	 * @return {Object} Props.
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
 		var ampAttributes = {};
-		if ( ! attributes.ampLayout && ! attributes.ampNoLoading ) {
+
+		if ( 'amp/' === blockType.name.substr( 0, 4 ) ) {
 			return props;
 		}
 
