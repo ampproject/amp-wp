@@ -43,7 +43,7 @@ class AMP_Site_Validation {
 	 *
 	 * @param string $taxonomy     The name of the taxonomy.
 	 * @param int    $number_links The maximum amount of links to get (optional).
-	 * @param int    $offset       The number at which to offset the query.
+	 * @param int    $offset       The number at which to offset the query (optional).
 	 * @return string[] $links The term links in an array.
 	 */
 	public static function get_taxonomy_links( $taxonomy, $number_links = 200, $offset = null ) {
