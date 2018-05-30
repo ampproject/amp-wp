@@ -115,17 +115,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'src':
-				case 'alt':
-				case 'class':
-				case 'srcset':
-				case 'on':
-				case 'role':
-				case 'tabindex':
-				case 'attribution':
-					$out[ $name ] = $value;
-					break;
-
 				case 'width':
 				case 'height':
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
@@ -140,6 +129,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				default:
+					$out[ $name ] = $value;
 					break;
 			}
 		}
