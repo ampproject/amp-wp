@@ -51,11 +51,11 @@ export default registerBlockType(
 				selector: 'amp-timeago',
 				attribute: 'datetime'
 			},
-			ampLayout: {
+			layout: {
 				type: 'string',
 				source: 'attribute',
 				selector: 'amp-timeago',
-				attribute: 'data-amp-layout'
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
@@ -79,7 +79,7 @@ export default registerBlockType(
 		},
 
 		edit( { attributes, isSelected, setAttributes } ) {
-			const { align, ampLayout, cutoff, height, width } = attributes;
+			const { align, layout, cutoff, height, width } = attributes;
 			let timeAgo;
 			if ( attributes.dateTime ) {
 				if ( attributes.cutoff && attributes.cutoff < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds' ) ) ) {
@@ -109,9 +109,9 @@ export default registerBlockType(
 							/>
 							<SelectControl
 								label={ __( 'Layout' ) }
-								value={ ampLayout }
+								value={ layout }
 								options={ ampLayoutOptions }
-								onChange={ value => ( setAttributes( { ampLayout: value } ) ) }
+								onChange={ value => ( setAttributes( { layout: value } ) ) }
 							/>
 							<TextControl
 								type="number"
@@ -160,19 +160,19 @@ export default registerBlockType(
 			if ( attributes.cutoff ) {
 				timeagoProps.cutoff = attributes.cutoff;
 			}
-			if ( attributes.ampLayout ) {
-				switch ( attributes.ampLayout ) {
+			if ( attributes.layout ) {
+				switch ( attributes.layout ) {
 					case 'fixed-height':
 						if ( attributes.height ) {
 							timeagoProps.height = attributes.height;
-							timeagoProps.layout = attributes.ampLayout;
+							timeagoProps.layout = attributes.layout;
 						}
 						break;
 					case 'fixed':
 						if ( attributes.height && attributes.width ) {
 							timeagoProps.height = attributes.height;
 							timeagoProps.width = attributes.width;
-							timeagoProps.layout = attributes.ampLayout;
+							timeagoProps.layout = attributes.layout;
 						}
 						break;
 				}
