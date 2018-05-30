@@ -98,9 +98,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$taxonomies                 = get_taxonomies( array(
 			'public' => true,
 		) );
-
-		unset( $taxonomies['post_format'] );
-		$all_terms = array();
+		$all_terms                  = array();
 
 		foreach ( $taxonomies as $taxonomy ) {
 			$terms_for_current_taxonomy = array();

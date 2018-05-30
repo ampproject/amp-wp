@@ -49,8 +49,6 @@ class AMP_Site_Validation {
 			'public' => true,
 		) );
 
-		// It doesn't seem necessary to get links for post format terms, like asides, galleries, or quotes.
-		unset( $public_taxonomies['post_format'] );
 		$terms = get_terms( array(
 			'taxonomy' => $public_taxonomies,
 			'count'    => $number_links,
