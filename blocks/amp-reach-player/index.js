@@ -1,4 +1,9 @@
 /**
+ * Helper methods for blocks.
+ */
+import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
+
+/**
  * Internal block libraries.
  */
 const { __ } = wp.i18n;
@@ -8,7 +13,6 @@ const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
-	SelectControl,
 	Placeholder
 } = wp.components;
 
@@ -29,24 +33,37 @@ export default registerBlockType(
 
 		attributes: {
 			dataEmbedId: {
-				type: 'string'
-			},
-			layout: {
 				type: 'string',
-				default: 'fixed-height'
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'data-embed-id'
+			},
+			ampLayout: {
+				type: 'string',
+				default: 'fixed-height',
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'height'
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { dataEmbedId, layout, height, width } = attributes;
+		edit( props ) {
+			const { attributes, isSelected, setAttributes } = props;
+			const { dataEmbedId } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
@@ -70,35 +87,15 @@ export default registerBlockType(
 										value={ dataEmbedId }
 										onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
 									/>
-									<SelectControl
-										label={ __( 'Layout', 'amp' ) }
-										value={ layout }
-										options={ ampLayoutOptions }
-										onChange={ value => ( setAttributes( { layout: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Width (px)', 'amp' ) }
-										value={ width !== undefined ? width : '' }
-										onChange={ value => ( setAttributes( { width: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Height (px)', 'amp' ) }
-										value={ height }
-										onChange={ value => ( setAttributes( { height: value } ) ) }
-									/>
+									{
+										getLayoutControls( props, ampLayoutOptions )
+									}
 								</PanelBody>
 							</InspectorControls>
 						)
 					}
 					{
-						url && (
-							<Placeholder label={ __( 'Reach Player', 'amp' ) }>
-								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
-							</Placeholder>
-						)
+						url && getMediaPlaceholder( __( 'Reach Player', 'amp' ), url )
 					}
 					{
 						! url && (
@@ -112,14 +109,14 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			const { dataEmbedId, layout, height, width } = attributes;
+			const { dataEmbedId, ampLayout, height, width } = attributes;
 
 			let reachProps = {
-				layout: layout,
+				layout: ampLayout,
 				height: height,
 				'data-embed-id': dataEmbedId
 			};
-			if ( 'fixed-height' !== layout && width ) {
+			if ( 'fixed-height' !== ampLayout && width ) {
 				reachProps.width = width;
 			}
 			return (

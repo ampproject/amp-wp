@@ -1,4 +1,9 @@
 /**
+ * Helper methods for blocks.
+ */
+import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
+
+/**
  * Internal block libraries.
  */
 const { __ } = wp.i18n;
@@ -8,7 +13,6 @@ const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
-	SelectControl,
 	Placeholder,
 	ToggleControl
 } = wp.components;
@@ -29,26 +33,44 @@ export default registerBlockType(
 
 		attributes: {
 			autoPlay: {
-				default: false
+				type: 'boolean'
 			},
 			dataPartner: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-partner'
 			},
 			dataPlayer: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-player'
 			},
 			dataVideo: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-video'
 			},
 			dataPlaylist: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-playlist'
 			},
 			dataOutstream: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-outstream'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
-				default: 'responsive'
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
@@ -56,12 +78,16 @@ export default registerBlockType(
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'height'
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { autoPlay, dataPartner, dataPlayer, dataVideo, dataPlaylist, dataOutstream, layout, height, width } = attributes;
+		edit( props ) {
+			const { attributes, isSelected, setAttributes } = props;
+			const { autoPlay, dataPartner, dataPlayer, dataVideo, dataPlaylist, dataOutstream } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
@@ -111,36 +137,15 @@ export default registerBlockType(
 										checked={ autoPlay }
 										onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
 									/>
-									<SelectControl
-										label={ __( 'Layout', 'amp', 'amp' ) }
-										value={ layout }
-										options={ ampLayoutOptions }
-										onChange={ value => ( setAttributes( { layout: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Width (px)', 'amp' ) }
-										value={ width !== undefined ? width : '' }
-										onChange={ value => ( setAttributes( { width: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Height (px)', 'amp' ) }
-										value={ height }
-										onChange={ value => ( setAttributes( { height: value } ) ) }
-									/>
+									{
+										getLayoutControls( props, ampLayoutOptions )
+									}
 								</PanelBody>
 							</InspectorControls>
 						)
 					}
 					{
-						url && (
-							<Placeholder label={ __( 'Brid Player', 'amp' ) }>
-								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
-							</Placeholder>
-						)
-
+						url && getMediaPlaceholder( __( 'Brid Player', 'amp' ), url )
 					}
 					{
 						! url && (
@@ -155,12 +160,12 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			let bridProps = {
-				layout: attributes.layout,
+				layout: attributes.ampLayout,
 				height: attributes.height,
 				'data-player': attributes.dataPlayer,
 				'data-partner': attributes.dataPartner
 			};
-			if ( 'fixed-height' !== attributes.layout && attributes.width ) {
+			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				bridProps.width = attributes.width;
 			}
 			if ( attributes.dataPlaylist ) {
