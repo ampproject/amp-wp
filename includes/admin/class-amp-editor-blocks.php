@@ -115,6 +115,12 @@ class AMP_Editor_Blocks {
 			AMP__VERSION
 		);
 
+		wp_add_inline_script(
+			'amp-editor-blocks-build',
+			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
+			'before'
+		);
+
 		// Scripts.
 		wp_enqueue_script(
 			'amp-editor-blocks-build',
@@ -133,8 +139,7 @@ class AMP_Editor_Blocks {
 
 		wp_add_inline_script(
 			'amp-editor-blocks',
-			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );' . sprintf( 'ampEditorBlocks.boot();' ),
-			'before'
+			'ampEditorBlocks.boot();'
 		);
 	}
 

@@ -434,29 +434,29 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		}
 
 		return isSelected && (
-				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
-						el( SelectControl, {
-							label: label,
-							value: ampLayout,
-							options: component.getLayoutOptions( name ),
-							onChange: function( value ) {
-								props.setAttributes( { ampLayout: value } );
-								if ( 'core/image' === props.name ) {
-									component.setImageBlockLayoutAttributes( props, value );
-								}
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
+					el( SelectControl, {
+						label: label,
+						value: ampLayout,
+						options: component.getLayoutOptions( name ),
+						onChange: function( value ) {
+							props.setAttributes( { ampLayout: value } );
+							if ( 'core/image' === props.name ) {
+								component.setImageBlockLayoutAttributes( props, value );
 							}
-						} ),
-						el( ToggleControl, {
-							label: __( 'AMP loading indicator disabled', 'amp' ),
-							checked: ampNoLoading,
-							onChange: function() {
-								props.setAttributes( { ampNoLoading: ! ampNoLoading } );
-							}
-						} )
-					)
+						}
+					} ),
+					el( ToggleControl, {
+						label: __( 'AMP loading indicator disabled', 'amp' ),
+						checked: ampNoLoading,
+						onChange: function() {
+							props.setAttributes( { ampNoLoading: ! ampNoLoading } );
+						}
+					} )
 				)
-			);
+			)
+		);
 	};
 
 	/**
@@ -653,14 +653,14 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
-				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: component.data.ampPanelLabel },
-						component.getAmpLayoutControl( props ),
-						component.getAmpNoloadingToggle( props ),
-						component.getAmpLightboxToggle( props )
-					)
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
+					component.getAmpLayoutControl( props ),
+					component.getAmpNoloadingToggle( props ),
+					component.getAmpLightboxToggle( props )
 				)
-			);
+			)
+		);
 	};
 
 	/**
@@ -677,13 +677,13 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
-				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: component.data.ampPanelLabel },
-						component.getAmpCarouselToggle( props ),
-						component.getAmpLightboxToggle( props )
-					)
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
+					component.getAmpCarouselToggle( props ),
+					component.getAmpLightboxToggle( props )
 				)
-			);
+			)
+		);
 	};
 
 	/**
@@ -711,12 +711,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} );
 			return isSelected && (
-					el( InspectorControls, { key: 'inspector' },
-						el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
-							toggleControl
-						)
+				el( InspectorControls, { key: 'inspector' },
+					el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
+						toggleControl
 					)
-				);
+				)
+			);
 		}
 
 		return '';
