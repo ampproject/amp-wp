@@ -13,16 +13,16 @@
 class AMP_Site_Validation {
 
 	/**
-	 * Gets the post IDs of all public post types with the status 'publish,' to check for AMP validity.
+	 * Gets the permalinks of all public post types with the status 'publish,' to check for AMP validity.
 	 *
 	 * This excludes 'attachment' post types, as it only searches for posts with the status 'publish.'
 	 * Attachments have a default status of 'inherit,' so they can depend on the status of their parent like a post.
 	 *
 	 * @todo: consider whether this should also return 'attachment' IDs.
 	 * @param int $number_posts The maximum amount of posts to get the IDs for (optional).
-	 * @return int[] $post_ids The post IDs in an array.
+	 * @return int[] $post_ids The post permalinks in an array.
 	 */
-	public static function get_post_ids( $number_posts = 200 ) {
+	public static function get_post_permalinks( $number_posts = 200 ) {
 		$post_types = get_post_types( array( 'public' => true ), 'names' );
 		$query      = new WP_Query( array(
 			'posts_per_page' => $number_posts,
@@ -30,7 +30,8 @@ class AMP_Site_Validation {
 			'post_status'    => 'publish',
 		) );
 
-		return wp_list_pluck( $query->posts, 'ID' );
+		$post_ids = wp_list_pluck( $query->posts, 'ID' );
+		return array_map( 'get_permalink', $post_ids );
 	}
 
 	/**

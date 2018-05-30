@@ -54,14 +54,14 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_post_ids.
+	 * Test get_post_permalinks.
 	 *
-	 * @covers AMP_Site_Validation::get_post_ids()
+	 * @covers AMP_Site_Validation::get_post_permalinks()
 	 */
-	public function test_get_post_ids() {
+	public function test_get_post_permalinks() {
 		$number_posts_each_post_type = 20;
 		$post_types                  = get_post_types( array( 'public' => true ), 'names' );
-		$post_ids                    = array();
+		$expected_post_permalinks    = array();
 
 		/**
 		 * The tested method does not get attachment permalinks.
@@ -71,19 +71,20 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		unset( $post_types['attachment'] );
 		foreach ( $post_types as $post_type ) {
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
-				$post_ids[] = $this->factory()->post->create( array(
+				$expected_post_permalinks[] = get_permalink( $this->factory()->post->create( array(
 					'post_type'   => $post_type,
-					'post_status' => 'publish',
-				) );
+				) ) );
 			}
 		}
-		$number_of_posts = count( $post_types ) * $number_posts_each_post_type;
+		$number_of_posts        = count( $post_types ) * $number_posts_each_post_type;
+		$actual_post_permalinks = AMP_Site_Validation::get_post_permalinks( $number_of_posts );
 
 		/*
-		 * The factory() method above creates posts so quickly that the WP_Query() argument of 'orderby' => 'date'
+		 * The factory() method above creates posts so quickly that the WP_Query() default argument of 'orderby' => 'date'
 		 * doesn't return them in the exact order they were created.
 		 * So this simply ensures all of the created $post_ids are present in the return value of the tested method.
 		 */
-		$this->assertEquals( 0, count( array_diff( $post_ids, AMP_Site_Validation::get_post_ids( $number_of_posts ) ) ) );
+		$this->assertEquals( 0, count( array_diff( $expected_post_permalinks, $actual_post_permalinks ) ) );
+		$this->assertEquals( count( $expected_post_permalinks ), count( $actual_post_permalinks ) );
 	}
 }
