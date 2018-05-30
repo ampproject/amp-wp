@@ -61,6 +61,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function test_get_post_ids() {
 		$number_posts_each_post_type = 20;
 		$post_types                  = get_post_types( array( 'public' => true ), 'names' );
+		$post_ids                    = array();
 
 		/**
 		 * The tested method does not get attachment permalinks.
@@ -77,6 +78,6 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			}
 		}
 		$number_of_posts = count( $post_types ) * $number_posts_each_post_type;
-		$this->assertEquals( $post_ids, AMP_Site_Validation::get_post_permalinks( $number_of_posts ) );
+		$this->assertEquals( $post_ids, AMP_Site_Validation::get_post_ids( $number_of_posts ) );
 	}
 }
