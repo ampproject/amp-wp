@@ -62,9 +62,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node           = $nodes->item( $i );
-			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-
-			$new_attributes = $this->filter_attributes( $old_attributes );
+			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
 
 			/**
 			 * If the src doesn't exist, remove the node. Either it never
@@ -73,22 +71,22 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @todo: add a filter to allow for a fallback element in this instance.
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
-			if ( empty( $new_attributes['src'] ) ) {
+			if ( empty( $normalized_attributes['src'] ) ) {
 				$this->remove_invalid_child( $node );
 				continue;
 			}
 
 			$this->did_convert_elements = true;
-			$new_attributes             = $this->set_layout( $new_attributes );
-			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
-				$new_attributes['layout'] = 'intrinsic';
-				$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+			$normalized_attributes      = $this->set_layout( $normalized_attributes );
+			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
+				$normalized_attributes['layout'] = 'intrinsic';
+				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
 			}
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $normalized_attributes );
 
 			if ( true === $this->args['add_placeholder'] ) {
-				$placeholder_node = $this->build_placeholder( $new_attributes );
+				$placeholder_node = $this->build_placeholder( $normalized_attributes );
 				$new_node->appendChild( $placeholder_node );
 			}
 
@@ -108,9 +106,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * "Filter" HTML attributes for <amp-iframe> elements.
+	 * Normalize HTML attributes for <amp-iframe> elements.
 	 *
-	 * @since 0.2
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -126,20 +123,13 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
 	 * }
-	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
+	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
 	 */
-	private function filter_attributes( $attributes ) {
+	private function normalize_attributes( $attributes ) {
 		$out = array();
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'sandbox':
-				case 'class':
-				case 'sizes':
-				case 'id':
-					$out[ $name ] = $value;
-					break;
-
 				case 'src':
 					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
@@ -164,6 +154,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				default:
+					$out[ $name ] = $value;
 					break;
 			}
 		}

@@ -1657,9 +1657,7 @@ class AMP_Allowed_Tags_Generated {
 						'value' => '',
 					),
 					'sandbox' => array(),
-					'scrolling' => array(
-						'value_regex' => 'auto|yes|no',
-					),
+
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'value_url' => array(
