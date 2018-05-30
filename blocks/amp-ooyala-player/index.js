@@ -59,7 +59,7 @@ export default registerBlockType(
 				selector: 'amp-ooyala-player',
 				attribute: 'data-playerversion'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
 				default: 'fixed',
 				source: 'attribute',
@@ -148,17 +148,17 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, layout, height, width } = attributes;
+			const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, ampLayout, height, width } = attributes;
 
 			let ooyalaProps = {
-				layout: layout,
+				layout: ampLayout,
 				height: height,
 				'data-embedcode': dataEmbedCode,
 				'data-playerid': dataPlayerId,
 				'data-pcode': dataPcode,
 				'data-playerversion': dataPlayerVersion
 			};
-			if ( 'fixed-height' !== layout && width ) {
+			if ( 'fixed-height' !== ampLayout && width ) {
 				ooyalaProps.width = width;
 			}
 			return (

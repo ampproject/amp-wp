@@ -65,7 +65,7 @@ export default registerBlockType(
 				selector: 'amp-brid-player',
 				attribute: 'data-outstream'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
@@ -160,12 +160,12 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			let bridProps = {
-				layout: attributes.layout,
+				layout: attributes.ampLayout,
 				height: attributes.height,
 				'data-player': attributes.dataPlayer,
 				'data-partner': attributes.dataPartner
 			};
-			if ( 'fixed-height' !== attributes.layout && attributes.width ) {
+			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				bridProps.width = attributes.width;
 			}
 			if ( attributes.dataPlaylist ) {

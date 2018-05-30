@@ -70,7 +70,7 @@ export default registerBlockType(
 				selector: 'amp-springboard-player',
 				attribute: 'data-items'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
@@ -170,9 +170,9 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, layout, height, width } = attributes;
+			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, ampLayout, height, width } = attributes;
 			let springboardProps = {
-				layout: layout,
+				layout: ampLayout,
 				height: height,
 				'data-site-id': dataSiteId,
 				'data-mode': dataMode,
@@ -181,7 +181,7 @@ export default registerBlockType(
 				'data-domain': dataDomain,
 				'data-items': dataItems
 			};
-			if ( 'fixed-height' !== layout && width ) {
+			if ( 'fixed-height' !== ampLayout && width ) {
 				springboardProps.width = attributes.width;
 			}
 			return (

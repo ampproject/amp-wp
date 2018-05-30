@@ -57,7 +57,7 @@ export default registerBlockType(
 				selector: 'amp-ima-video',
 				attribute: 'data-poster'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
@@ -141,7 +141,7 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			let imaProps = {
-				layout: attributes.layout,
+				layout: attributes.ampLayout,
 				height: attributes.height,
 				width: attributes.width,
 				'data-tag': attributes.dataTag,

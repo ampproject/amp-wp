@@ -98,9 +98,9 @@ export default registerBlockType(
 			}
 
 			const ampLayoutOptions = [
-				{ value: '', label: 'Responsive' }, // Default for amp-timeago.
-				{ value: 'fixed', label: 'Fixed' },
-				{ value: 'fixed-height', label: 'Fixed height' }
+				{ value: '', label: __( 'Responsive', 'amp' ) }, // Default for amp-timeago.
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) }
 			];
 
 			return [
@@ -149,7 +149,7 @@ export default registerBlockType(
 				timeagoProps.cutoff = attributes.cutoff;
 			}
 			if ( attributes.ampLayout ) {
-				switch ( attributes.lampLayout ) {
+				switch ( attributes.ampLayout ) {
 					case 'fixed-height':
 						if ( attributes.height ) {
 							timeagoProps.height = attributes.height;

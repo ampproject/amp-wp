@@ -61,7 +61,7 @@ export default registerBlockType(
 				type: 'boolean',
 				default: false
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
@@ -154,11 +154,11 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			let o2Props = {
-				layout: attributes.layout,
+				layout: attributes.ampLayout,
 				height: attributes.height,
 				'data-pid': attributes.dataPid
 			};
-			if ( 'fixed-height' !== attributes.layout && attributes.width ) {
+			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				o2Props.width = attributes.width;
 			}
 			if ( ! attributes.autoPlay ) {

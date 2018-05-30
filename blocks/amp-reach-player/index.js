@@ -38,7 +38,7 @@ export default registerBlockType(
 				selector: 'amp-reach-player',
 				attribute: 'data-embed-id'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
 				default: 'fixed-height',
 				source: 'attribute',
@@ -109,14 +109,14 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			const { dataEmbedId, layout, height, width } = attributes;
+			const { dataEmbedId, ampLayout, height, width } = attributes;
 
 			let reachProps = {
-				layout: layout,
+				layout: ampLayout,
 				height: height,
 				'data-embed-id': dataEmbedId
 			};
-			if ( 'fixed-height' !== layout && width ) {
+			if ( 'fixed-height' !== ampLayout && width ) {
 				reachProps.width = width;
 			}
 			return (
