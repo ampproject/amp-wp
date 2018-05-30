@@ -161,7 +161,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		var ampAttributes = {};
 
 		// Shortcode props are handled differently.
-		if ( 'core/shortcode' === blockType ) {
+		if ( 'core/shortcode' === blockType.name ) {
 			return props;
 		}
 
