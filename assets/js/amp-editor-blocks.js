@@ -373,13 +373,13 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
-				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: component.data.ampPanelLabel },
-						component.getAmpLayoutControl( props ),
-						component.getAmpNoloadingToggle( props )
-					)
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
+					component.getAmpLayoutControl( props ),
+					component.getAmpNoloadingToggle( props )
 				)
-			);
+			)
+		);
 	};
 
 	/**
@@ -577,13 +577,13 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 		if ( component.isGalleryShortcode( props.attributes ) ) {
 			return isSelected && (
-					el( InspectorControls, { key: 'inspector' },
-						el( PanelBody, { title: component.data.ampPanelLabel },
-							component.getAmpCarouselToggle( props ),
-							component.getAmpLightboxToggle( props )
-						)
+				el( InspectorControls, { key: 'inspector' },
+					el( PanelBody, { title: component.data.ampPanelLabel },
+						component.getAmpCarouselToggle( props ),
+						component.getAmpLightboxToggle( props )
 					)
-				);
+				)
+			);
 		}
 
 		return '';
