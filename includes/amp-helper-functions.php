@@ -489,7 +489,9 @@ function amp_get_content_sanitizers( $post = null ) {
 			'AMP_Iframe_Sanitizer'            => array(
 				'add_placeholder' => true,
 			),
-			'AMP_Gallery_Block_Sanitizer'     => array(), // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+				'carousel_required' => ! current_theme_supports( 'amp' ), // For back-compat.
+			),
 			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
 			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.

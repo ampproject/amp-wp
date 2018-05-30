@@ -99,13 +99,20 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				larger: 48
 			},
 			ampPanelLabel: __( 'AMP Settings' )
-		}
+		},
+		hasThemeSupport: true
 	};
 
 	/**
 	 * Add filters.
+	 *
+	 * @param {Object} data Data.
 	 */
-	component.boot = function boot() {
+	component.boot = function boot( data ) {
+		if ( data ) {
+			_.extend( component.data, data );
+		}
+
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
@@ -575,7 +582,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: component.data.ampPanelLabel },
-						component.getAmpCarouselToggle( props ),
+						component.data.hasThemeSupport && component.getAmpCarouselToggle( props ),
 						component.getAmpLightboxToggle( props )
 					)
 				)
@@ -676,7 +683,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
 				el( PanelBody, { title: component.data.ampPanelLabel },
-					component.getAmpCarouselToggle( props ),
+					component.data.hasThemeSupport && component.getAmpCarouselToggle( props ),
 					component.getAmpLightboxToggle( props )
 				)
 			)

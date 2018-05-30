@@ -39,6 +39,25 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'ul';
 
 	/**
+	 * Array of flags used to control sanitization.
+	 *
+	 * @var array {
+	 *      @type int  $content_max_width Max width of content.
+	 *      @type bool $carousel_required Whether carousels are required. This is used when amp theme support is not present, for back-compat.
+	 * }
+	 */
+	protected $args;
+
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'carousel_required' => false,
+	);
+
+	/**
 	 * Sanitize the gallery block contained by <ul> element where necessary.
 	 *
 	 * @since 0.2
@@ -60,7 +79,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 			$attributes      = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
-			$is_amp_carousel = isset( $attributes['data-amp-carousel'] ) && true === filter_var( $attributes['data-amp-carousel'], FILTER_VALIDATE_BOOLEAN );
+			$is_amp_carousel = ! empty( $this->args['carousel_required'] ) || ( isset( $attributes['data-amp-carousel'] ) && true === filter_var( $attributes['data-amp-carousel'], FILTER_VALIDATE_BOOLEAN ) );
 
 			// We are only looking for <ul> elements which have amp-carousel / amp-lightbox true.
 			if ( ! $is_amp_carousel && ! $is_amp_lightbox ) {
