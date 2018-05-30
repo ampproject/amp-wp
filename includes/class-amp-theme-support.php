@@ -1219,6 +1219,8 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
 	 * @param string $html The image markup to filter.
+	 * @param array  $header The header config array.
+	 * @param array  $atts The image markup attributes.
 	 * @return string $html Filtered markup.
 	 */
 	public static function conditionally_output_header( $html, $header, $atts ) {
