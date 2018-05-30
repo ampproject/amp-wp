@@ -877,16 +877,21 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		) );
 		$sanitizer->sanitize();
 		$stylesheets = array_values( $sanitizer->get_stylesheets() );
-		$stylesheet_patterns = array(
-			'/' . preg_quote( 'input[type="checkbox"]:disabled' ) . '/',
-			'/' . preg_quote( 'body.rtl' ) . '/',
-			'/' . preg_quote( '.login .message' ) . '/',
-			'/^' . preg_quote( 'html{background-color:lightblue}' ) . '$/',
-			'/^' . preg_quote( 'body{color:red}' ) . '$/',
+		$this->assertCount( 2, $stylesheets );
+		$this->assertRegExp(
+			'/' . implode( '.*', array(
+				preg_quote( 'input[type="checkbox"]:disabled' ),
+				preg_quote( 'body.rtl' ),
+				preg_quote( '.login .message' ),
+			) ) . '/s',
+			$stylesheets[0]
 		);
-		$this->assertCount( count( $stylesheet_patterns ), $stylesheets );
-		do {
-			$this->assertRegExp( array_shift( $stylesheet_patterns ), array_shift( $stylesheets ) );
-		} while ( ! empty( $stylesheet_patterns ) );
+		$this->assertRegExp(
+			'/' . implode( '.*', array(
+				preg_quote( 'html{background-color:lightblue}' ),
+				preg_quote( 'body{color:red}' ),
+			) ) . '/s',
+			$stylesheets[1]
+		);
 	}
 }

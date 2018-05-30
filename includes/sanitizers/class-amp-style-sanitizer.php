@@ -16,6 +16,7 @@ use \Sabberworm\CSS\Property\Import;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList;
 use \Sabberworm\CSS\Value\RuleValueList;
 use \Sabberworm\CSS\Value\URL;
+use \Sabberworm\CSS\CSSList\Document;
 
 /**
  * Class AMP_Style_Sanitizer
@@ -173,16 +174,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	private $current_sources;
-
-	/**
-	 * Placeholders for calc() values that are temporarily removed from CSS since they cause parse errors.
-	 *
-	 * @since 1.0
-	 * @see AMP_Style_Sanitizer::add_calc_placeholders()
-	 *
-	 * @var array
-	 */
-	private $calc_placeholders = array();
 
 	/**
 	 * Log of the stylesheet URLs that have been imported to guard against infinite loops.
@@ -692,7 +683,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
-			$parsed = $this->parse_stylesheet( $stylesheet, $options );
+			$parsed = $this->prepare_stylesheet( $stylesheet, $options );
 
 			if ( wp_using_ext_object_cache() ) {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
@@ -773,25 +764,28 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = sprintf( '@media %s { %s }', $media_query, $stylesheet );
 		}
 
-		$stylesheet = $this->process_stylesheet( $stylesheet, array(
-			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
-			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
-			'stylesheet_url'     => $import_stylesheet_url,
-			'stylesheet_path'    => $css_file_path,
-		) );
+		$options['stylesheet_url'] = $import_stylesheet_url;
 
-		$pending_stylesheet = array(
-			'keyframes'  => false,
-			'stylesheet' => $stylesheet,
-			'node'       => $this->current_node,
-			'sources'    => $this->current_sources,
-			'imported'   => $import_stylesheet_url,
+		$parsed_stylesheet = $this->parse_stylesheet( $stylesheet, $options );
+
+		$results = array_merge(
+			$results,
+			$parsed_stylesheet['validation_results']
 		);
 
-		// Stylesheet will now be inlined, so @import can be removed.
-		$css_list->remove( $item );
+		/**
+		 * CSS Doc.
+		 *
+		 * @var Document $css_document
+		 */
+		$css_document = $parsed_stylesheet['css_document'];
 
-		$this->pending_stylesheets[] = $pending_stylesheet;
+		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
+			$css_list->replace( $item, $css_document->getContents() );
+		} else {
+			$css_list->remove( $item );
+		}
+
 		return $results;
 	}
 
@@ -805,11 +799,72 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Parsed stylesheet.
 	 *
+	 *    @type Document $css_document       CSS Document.
+	 *    @type array    $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 * }
+	 */
+	private function parse_stylesheet( $stylesheet_string, $options ) {
+		$validation_results = array();
+		$css_document       = null;
+		try {
+			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
+			$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
+
+			// Find calc() functions and replace with placeholders since PHP-CSS-Parser can't handle them.
+			$stylesheet_string = $this->add_calc_placeholders( $stylesheet_string );
+
+			$parser_settings = Sabberworm\CSS\Settings::create();
+			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
+			$css_document    = $css_parser->parse();
+
+			if ( ! empty( $options['stylesheet_url'] ) ) {
+				$this->real_path_urls(
+					array_filter(
+						$css_document->getAllValues(),
+						function ( $value ) {
+							return $value instanceof URL;
+						}
+					),
+					$options['stylesheet_url']
+				);
+			}
+
+			$validation_results = array_merge(
+				$validation_results,
+				$this->process_css_list( $css_document, $options )
+			);
+		} catch ( Exception $exception ) {
+			$error = array(
+				'code'    => 'css_parse_error',
+				'message' => $exception->getMessage(),
+			);
+
+			/*
+			 * This is not a recoverable error, so sanitized here is just used to give user control
+			 * over whether to proceed with serving this exception-raising stylesheet in AMP.
+			 */
+			$sanitized = $this->should_sanitize_validation_error( $error );
+
+			$validation_results[] = compact( 'error', 'sanitized' );
+		}
+		return compact( 'validation_results', 'css_document' );
+	}
+
+	/**
+	 * Prepare stylesheet.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $stylesheet_string Stylesheet.
+	 * @param array  $options           Options. See definition in \AMP_Style_Sanitizer::process_stylesheet().
+	 * @return array {
+	 *    Prepared stylesheet.
+	 *
 	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
 	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 * }
 	 */
-	private function parse_stylesheet( $stylesheet_string, $options = array() ) {
+	private function prepare_stylesheet( $stylesheet_string, $options = array() ) {
 		$start_time = microtime( true );
 
 		$options = array_merge(
@@ -828,32 +883,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$options
 		);
 
-		// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
-		$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
-
-		// Find calc() functions and replace with placeholders since PHP-CSS-Parser can't handle them.
-		$stylesheet_string = $this->add_calc_placeholders( $stylesheet_string );
-
 		$stylesheet         = array();
-		$validation_results = array();
-		try {
-			$parser_settings = Sabberworm\CSS\Settings::create();
-			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
-			$css_document    = $css_parser->parse();
-
-			if ( ! empty( $options['stylesheet_url'] ) ) {
-				$this->real_path_urls(
-					array_filter(
-						$css_document->getAllValues(),
-						function ( $value ) {
-							return $value instanceof URL;
-						}
-					),
-					$options['stylesheet_url']
-				);
-			}
-
-			$validation_results = array_merge( $validation_results, $this->process_css_list( $css_document, $options ) );
+		$parsed_stylesheet  = $this->parse_stylesheet( $stylesheet_string, $options );
+		$validation_results = $parsed_stylesheet['validation_results'];
+		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
+			$css_document = $parsed_stylesheet['css_document'];
 
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
 			$output_format->setSemicolonAfterLastRule( false );
@@ -918,13 +952,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 					// Restore calc() functions that were replaced with placeholders.
-					if ( ! empty( $this->calc_placeholders ) ) {
-						$declaration = str_replace(
-							array_keys( $this->calc_placeholders ),
-							array_values( $this->calc_placeholders ),
-							$declaration
-						);
-					}
+					$declaration = preg_replace_callback(
+						'/-wp-calc-placeholder\("(.+?)"\)/',
+						function( $matches ) {
+							return base64_decode( $matches[1] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+						},
+						$declaration
+					);
 
 					$stylesheet[] = array(
 						$selectors_parsed,
@@ -934,22 +968,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$stylesheet[] = $split_stylesheet[ $i ];
 				}
 			}
-
-			// Reset calc placeholders.
-			$this->calc_placeholders = array();
-		} catch ( Exception $exception ) {
-			$error = array(
-				'code'    => 'css_parse_error',
-				'message' => $exception->getMessage(),
-			);
-
-			/*
-			 * This is not a recoverable error, so sanitized here is just used to give user control
-			 * over whether to proceed with serving this exception-raising stylesheet in AMP.
-			 */
-			$sanitized = $this->should_sanitize_validation_error( $error );
-
-			$validation_results[] = compact( 'error', 'sanitized' );
 		}
 
 		$this->parse_css_duration += ( microtime( true ) - $start_time );
@@ -1005,7 +1023,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Add placeholders for calc() functions which the PHP-CSS-Parser doesn't handle them properly yet.
+	 * Add encoded placeholders for calc() functions which the PHP-CSS-Parser doesn't handle them properly yet.
 	 *
 	 * @since 1.0
 	 * @link https://github.com/sabberworm/PHP-CSS-Parser/issues/79
@@ -1034,10 +1052,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				// Found the end of the calc() function, so replace it with a placeholder function.
 				if ( 0 === $open_parens ) {
 					$matched_calc = substr( $css, $match_offset, $final_offset - $match_offset + 1 );
-					$placeholder  = sprintf( '-wp-calc-placeholder(%d)', count( $this->calc_placeholders ) );
-
-					// Store the placeholder function so the original calc() can be put in its place.
-					$this->calc_placeholders[ $placeholder ] = $matched_calc;
+					$placeholder  = sprintf( '-wp-calc-placeholder("%s")', base64_encode( $matched_calc ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
 					// Update the CSS to replace the matched calc() with the placeholder function.
 					$css = substr( $css, 0, $match_offset ) . $placeholder . substr( $css, $final_offset + 1 );
@@ -1689,9 +1704,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( 'id' !== $attribute->nodeName || 'class' !== $attribute->nodeName ) {
 						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
 					}
-				}
-				if ( ! empty( $pending_stylesheet['imported'] ) ) {
-					$message .= sprintf( ' @import url(%s)', $pending_stylesheet['imported'] );
 				}
 				$message .= sprintf(
 					/* translators: %d is number of bytes */
