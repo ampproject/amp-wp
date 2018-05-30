@@ -63,8 +63,10 @@ class AMP_Editor_Blocks {
 		}
 
 		foreach ( $tags as &$tag ) {
-			$tag['data-amp-layout']    = true;
-			$tag['data-amp-noloading'] = true;
+			$tag['data-amp-layout']              = true;
+			$tag['data-amp-noloading']           = true;
+			$tag['data-amp-lightbox']            = true;
+			$tag['data-close-button-aria-label'] = true;
 		}
 
 		foreach ( $this->amp_blocks as $amp_block ) {
@@ -132,14 +134,16 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n' ),
+			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
 
 		wp_add_inline_script(
 			'amp-editor-blocks',
-			'ampEditorBlocks.boot();'
+			sprintf( 'ampEditorBlocks.boot( %s );', wp_json_encode( array(
+				'hasThemeSupport' => current_theme_supports( 'amp' ),
+			) ) )
 		);
 	}
 

@@ -97,14 +97,22 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			fontSizes: {
 				small: 14,
 				larger: 48
-			}
-		}
+			},
+			ampPanelLabel: __( 'AMP Settings' )
+		},
+		hasThemeSupport: true
 	};
 
 	/**
-	 * Set data, add filters.
+	 * Add filters.
+	 *
+	 * @param {Object} data Data.
 	 */
-	component.boot = function boot() {
+	component.boot = function boot( data ) {
+		if ( data ) {
+			_.extend( component.data, data );
+		}
+
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
@@ -159,6 +167,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
 		var ampAttributes = {};
 
+		// Shortcode props are handled differently.
+		if ( 'core/shortcode' === blockType.name ) {
+			return props;
+		}
+
+		// AMP blocks handle layout and other props on their own.
 		if ( 'amp/' === blockType.name.substr( 0, 4 ) ) {
 			return props;
 		}
@@ -168,6 +182,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		}
 		if ( attributes.ampNoLoading ) {
 			ampAttributes[ 'data-amp-noloading' ] = attributes.ampNoLoading;
+		}
+		if ( attributes.ampLightbox ) {
+			ampAttributes[ 'data-amp-lightbox' ] = attributes.ampLightbox;
+		}
+		if ( attributes.ampCarousel ) {
+			ampAttributes[ 'data-amp-carousel' ] = attributes.ampCarousel;
 		}
 
 		return _.extend( ampAttributes, props );
@@ -181,12 +201,25 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
-		// Gallery settings for shortcode.
-		if ( 'core/shortcode' === name ) {
+		// AMP Carousel settings.
+		if ( 'core/shortcode' === name || 'core/gallery' === name ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
 			settings.attributes.ampCarousel = {
+				type: 'boolean'
+			};
+			settings.attributes.ampLightbox = {
+				type: 'boolean'
+			};
+		}
+
+		// Add AMP Lightbox settings.
+		if ( 'core/image' === name ) {
+			if ( ! settings.attributes ) {
+				settings.attributes = {};
+			}
+			settings.attributes.ampLightbox = {
 				type: 'boolean'
 			};
 		}
@@ -256,6 +289,15 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			ampLayout = attributes.ampLayout;
 
 			if ( 'core/shortcode' === name ) {
+				// Lets remove amp-carousel from edit view.
+				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
+					props.setAttributes( { text: component.removeAmpCarouselFromShortcodeAtts( attributes.text ) } );
+				}
+				// Lets remove amp-lightbox from edit view.
+				if ( component.hasGalleryShortcodeLightboxAttribute( attributes.text || '' ) ) {
+					props.setAttributes( { text: component.removeAmpLightboxFromShortcodeAtts( attributes.text ) } );
+				}
+
 				inspectorControls = component.setUpShortcodeInspectorControls( props );
 				if ( '' === inspectorControls ) {
 					// Return original.
@@ -265,6 +307,10 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						}, props ) )
 					];
 				}
+			} else if ( 'core/gallery' === name ) {
+				inspectorControls = component.setUpGalleryInpsectorControls( props );
+			} else if ( 'core/image' === name ) {
+				inspectorControls = component.setUpImageInpsectorControls( props );
 			} else if ( -1 !== component.data.mediaBlocks.indexOf( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 				inspectorControls = component.setUpInspectorControls( props );
 			} else if ( -1 !== component.data.textBlocks.indexOf( name ) ) {
@@ -300,6 +346,10 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				if ( ! attributes.height ) {
 					props.setAttributes( { height: component.data.defaultHeight } );
 				}
+				// Lightbox doesn't work with fixed height, so unset it.
+				if ( attributes.ampLightbox ) {
+					props.setAttributes( { ampLightbox: false } );
+				}
 				break;
 
 			case 'fixed':
@@ -320,45 +370,70 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
 	 */
 	component.setUpInspectorControls = function setUpInspectorControls( props ) {
-		var ampLayout = props.attributes.ampLayout,
-			ampNoLoading = props.attributes.ampNoLoading,
-			isSelected = props.isSelected,
-			name = props.name,
+		var isSelected = props.isSelected,
 			el = wp.element.createElement,
 			InspectorControls = wp.editor.InspectorControls,
-			SelectControl = wp.components.SelectControl,
-			ToggleControl = wp.components.ToggleControl,
-			PanelBody = wp.components.PanelBody,
-			label = __( 'AMP Layout', 'amp' );
-
-		if ( 'core/image' === name ) {
-			label = __( 'AMP Layout (modifies width/height)', 'amp' );
-		}
+			PanelBody = wp.components.PanelBody;
 
 		return isSelected && (
 			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
-					el( SelectControl, {
-						label: label,
-						value: ampLayout,
-						options: component.getLayoutOptions( name ),
-						onChange: function( value ) {
-							props.setAttributes( { ampLayout: value } );
-							if ( 'core/image' === props.name ) {
-								component.setImageBlockLayoutAttributes( props, value );
-							}
-						}
-					} ),
-					el( ToggleControl, {
-						label: __( 'AMP loading indicator disabled', 'amp' ),
-						checked: ampNoLoading,
-						onChange: function() {
-							props.setAttributes( { ampNoLoading: ! ampNoLoading } );
-						}
-					} )
+				el( PanelBody, { title: component.data.ampPanelLabel },
+					component.getAmpLayoutControl( props ),
+					component.getAmpNoloadingToggle( props )
 				)
 			)
 		);
+	};
+
+	/**
+	 * Get AMP Layout select control.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object} Element.
+	 */
+	component.getAmpLayoutControl = function getAmpLayoutControl( props ) {
+		var ampLayout = props.attributes.ampLayout,
+			el = wp.element.createElement,
+			SelectControl = wp.components.SelectControl,
+			name = props.name,
+			label = __( 'AMP Layout' );
+
+		if ( 'core/image' === name ) {
+			label = __( 'AMP Layout (modifies width/height)' );
+		}
+
+		return el( SelectControl, {
+			label: label,
+			value: ampLayout,
+			options: component.getLayoutOptions( name ),
+			onChange: function( value ) {
+				props.setAttributes( { ampLayout: value } );
+				if ( 'core/image' === props.name ) {
+					component.setImageBlockLayoutAttributes( props, value );
+				}
+			}
+		} );
+	};
+
+	/**
+	 * Get AMP Noloading toggle control.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object} Element.
+	 */
+	component.getAmpNoloadingToggle = function getAmpNoloadingToggle( props ) {
+		var ampNoLoading = props.attributes.ampNoLoading,
+			el = wp.element.createElement,
+			ToggleControl = wp.components.ToggleControl,
+			label = __( 'AMP Noloading' );
+
+		return el( ToggleControl, {
+			label: label,
+			checked: ampNoLoading,
+			onChange: function() {
+				props.setAttributes( { ampNoLoading: ! ampNoLoading } );
+			}
+		} );
 	};
 
 	/**
@@ -495,29 +570,20 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * Adds ampCarousel attribute in case of gallery shortcode.
 	 *
 	 * @param {Object} props Props.
-	 * @return {*} Inspector controls.
+	 * @return {Object} Inspector controls.
 	 */
 	component.setUpShortcodeInspectorControls = function setUpShortcodeInspectorControls( props ) {
-		var ampCarousel = props.attributes.ampCarousel,
-			isSelected = props.isSelected,
+		var isSelected = props.isSelected,
 			el = wp.element.createElement,
 			InspectorControls = wp.editor.InspectorControls,
-			ToggleControl = wp.components.ToggleControl,
-			PanelBody = wp.components.PanelBody,
-			toggleControl;
+			PanelBody = wp.components.PanelBody;
 
 		if ( component.isGalleryShortcode( props.attributes ) ) {
-			toggleControl = el( ToggleControl, {
-				label: __( 'Display as AMP carousel', 'amp' ),
-				checked: ampCarousel,
-				onChange: function() {
-					props.setAttributes( { ampCarousel: ! ampCarousel } );
-				}
-			} );
 			return isSelected && (
 				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: __( 'AMP Settings', 'amp' ) },
-						toggleControl
+					el( PanelBody, { title: component.data.ampPanelLabel },
+						component.data.hasThemeSupport && component.getAmpCarouselToggle( props ),
+						component.getAmpLightboxToggle( props )
 					)
 				)
 			);
@@ -527,50 +593,161 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	};
 
 	/**
+	 * Get AMP Lightbox toggle control.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object} Element.
+	 */
+	component.getAmpLightboxToggle = function getAmpLightboxToggle( props ) {
+		var ampLightbox = props.attributes.ampLightbox,
+			el = wp.element.createElement,
+			ToggleControl = wp.components.ToggleControl,
+			label = __( 'Add lightbox effect' );
+
+		return el( ToggleControl, {
+			label: label,
+			checked: ampLightbox,
+			onChange: function( nextValue ) {
+				props.setAttributes( { ampLightbox: ! ampLightbox } );
+				if ( nextValue ) {
+					// Lightbox doesn't work with fixed height, so change.
+					if ( 'fixed-height' === props.attributes.ampLayout ) {
+						props.setAttributes( { ampLayout: 'fixed' } );
+					}
+					// In case of lightbox set linking images to 'none'.
+					if ( props.attributes.linkTo && 'none' !== props.attributes.linkTo ) {
+						props.setAttributes( { linkTo: 'none' } );
+					}
+				}
+			}
+		} );
+	};
+
+	/**
+	 * Get AMP Carousel toggle control.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object} Element.
+	 */
+	component.getAmpCarouselToggle = function getAmpCarouselToggle( props ) {
+		var ampCarousel = props.attributes.ampCarousel,
+			el = wp.element.createElement,
+			ToggleControl = wp.components.ToggleControl,
+			label = __( 'Display as AMP carousel' );
+
+		return el( ToggleControl, {
+			label: label,
+			checked: ampCarousel,
+			onChange: function() {
+				props.setAttributes( { ampCarousel: ! ampCarousel } );
+			}
+		} );
+	};
+
+	/**
+	 * Set up inspector controls for Image block.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object} Inspector Controls.
+	 */
+	component.setUpImageInpsectorControls = function setUpImageInpsectorControls( props ) {
+		var isSelected = props.isSelected,
+			el = wp.element.createElement,
+			InspectorControls = wp.editor.InspectorControls,
+			PanelBody = wp.components.PanelBody;
+
+		return isSelected && (
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
+					component.getAmpLayoutControl( props ),
+					component.getAmpNoloadingToggle( props ),
+					component.getAmpLightboxToggle( props )
+				)
+			)
+		);
+	};
+
+	/**
+	 * Set up inspector controls for Gallery block.
+	 * Adds ampCarousel attribute for displaying the output as amp-carousel.
+	 *
+	 * @param {Object} props Props.
+	 * @return {Object} Inspector controls.
+	 */
+	component.setUpGalleryInpsectorControls = function setUpGalleryInpsectorControls( props ) {
+		var isSelected = props.isSelected,
+			el = wp.element.createElement,
+			InspectorControls = wp.editor.InspectorControls,
+			PanelBody = wp.components.PanelBody;
+
+		return isSelected && (
+			el( InspectorControls, { key: 'inspector' },
+				el( PanelBody, { title: component.data.ampPanelLabel },
+					component.data.hasThemeSupport && component.getAmpCarouselToggle( props ),
+					component.getAmpLightboxToggle( props )
+				)
+			)
+		);
+	};
+
+	/**
 	 * Filters blocks' save function.
 	 *
 	 * @param {Object} element Element.
 	 * @param {string} blockType Block type.
 	 * @param {Object} attributes Attributes.
-	 * @return {*} Output element.
+	 * @return {Object} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
-		var text,
+		var text = attributes.text || '',
 			fitTextProps = {
 				layout: 'fixed-height',
 				children: element
 			};
 
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
+			if ( ! attributes.ampLightbox ) {
+				if ( component.hasGalleryShortcodeLightboxAttribute( attributes.text || '' ) ) {
+					text = component.removeAmpLightboxFromShortcodeAtts( attributes.text );
+				}
+			}
 			if ( attributes.ampCarousel ) {
-				// If the text contains amp-carousel, lets remove it.
-				if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-					text = component.removeAmpCarouselFromShortcodeAtts( attributes.text );
-
-					return wp.element.createElement(
-						wp.element.RawHTML,
-						{},
-						text
-					);
+				// If the text contains amp-carousel or amp-lightbox, lets remove it.
+				if ( component.hasGalleryShortcodeCarouselAttribute( text ) ) {
+					text = component.removeAmpCarouselFromShortcodeAtts( text );
 				}
 
-				// Else lets return original.
-				return element;
+				// If lightbox is not set, we can return here.
+				if ( ! attributes.ampLightbox ) {
+					if ( attributes.text !== text ) {
+						return wp.element.createElement(
+							wp.element.RawHTML,
+							{},
+							text
+						);
+					}
+
+					// Else lets return original.
+					return element;
+				}
+			} else if ( ! component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
+				// Add amp-carousel=false attribut to the shortcode.
+				text = attributes.text.replace( '[gallery', '[gallery amp-carousel=false' );
+			} else {
+				text = attributes.text;
 			}
 
-			// If the text already contains amp-carousel, return original.
-			if ( component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-				return element;
+			if ( attributes.ampLightbox && ! component.hasGalleryShortcodeLightboxAttribute( text ) ) {
+				text = text.replace( '[gallery', '[gallery amp-lightbox=true' );
 			}
 
-			// Add amp-carousel=false attribut to the shortcode.
-			text = attributes.text.replace( '[gallery', '[gallery amp-carousel=false' );
-
-			return wp.element.createElement(
-				wp.element.RawHTML,
-				{},
-				text
-			);
+			if ( attributes.text !== text ) {
+				return wp.element.createElement(
+					wp.element.RawHTML,
+					{},
+					text
+				);
+			}
 		} else if ( -1 !== component.data.textBlocks.indexOf( blockType.name ) && attributes.ampFitText ) {
 			if ( attributes.minFont ) {
 				fitTextProps[ 'min-font-size' ] = attributes.minFont;
@@ -584,6 +761,26 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			return wp.element.createElement( 'amp-fit-text', fitTextProps );
 		}
 		return element;
+	};
+
+	/**
+	 * Check if AMP Lightbox is set.
+	 *
+	 * @param {Object} attributes Attributes.
+	 * @return {boolean} If is set.
+	 */
+	component.hasAmpLightboxSet = function hasAmpLightboxSet( attributes ) {
+		return attributes.ampLightbox && false !== attributes.ampLightbox;
+	};
+
+	/**
+	 * Check if AMP Carousel is set.
+	 *
+	 * @param {Object} attributes Attributes.
+	 * @return {boolean} If is set.
+	 */
+	component.hasAmpCarouselSet = function hasAmpCarouselSet( attributes ) {
+		return attributes.ampCarousel && false !== attributes.ampCarousel;
 	};
 
 	/**
@@ -617,13 +814,33 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	};
 
 	/**
+	 * Removes amp-lightbox=true from attributes.
+	 *
+	 * @param {string} shortcode Shortcode text.
+	 * @return {string} Modified shortcode.
+	 */
+	component.removeAmpLightboxFromShortcodeAtts = function removeAmpLightboxFromShortcodeAtts( shortcode ) {
+		return shortcode.replace( ' amp-lightbox=true', '' );
+	};
+
+	/**
 	 * Check if shortcode includes amp-carousel attribute.
 	 *
 	 * @param {string} text Shortcode.
 	 * @return {boolean} If has amp-carousel.
 	 */
-	component.hasGalleryShortcodeCarouselAttribute = function galleryShortcodeHasCarouselAttribute( text ) {
+	component.hasGalleryShortcodeCarouselAttribute = function hasGalleryShortcodeCarouselAttribute( text ) {
 		return -1 !== text.indexOf( 'amp-carousel=false' );
+	};
+
+	/**
+	 * Check if shortcode includes amp-lightbox attribute.
+	 *
+	 * @param {string} text Shortcode.
+	 * @return {boolean} If has amp-lightbox.
+	 */
+	component.hasGalleryShortcodeLightboxAttribute = function hasGalleryShortcodeLightboxAttribute( text ) {
+		return -1 !== text.indexOf( 'amp-lightbox=true' );
 	};
 
 	/**
