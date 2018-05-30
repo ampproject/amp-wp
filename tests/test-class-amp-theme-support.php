@@ -288,7 +288,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', array( self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ) ) );
 		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
-		$this->assertEquals( 10, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'conditionally_output_header_video' ) ) );
+		$this->assertEquals( 10, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'conditionally_output_header' ) ) );
 	}
 
 	/**
@@ -1048,7 +1048,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-ad-latest.js\' async custom-element="amp-ad"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
-		$this->assertCount( 3, $removed_nodes );
+		$this->assertCount( 4, $removed_nodes );
 		$this->assertInstanceOf( 'DOMElement', $removed_nodes['script'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['onclick'] );
 		$this->assertInstanceOf( 'DOMAttr', $removed_nodes['handle'] );
@@ -1212,17 +1212,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Theme_Support::conditionally_output_header_video().
+	 * Test AMP_Theme_Support::conditionally_output_header().
 	 *
-	 * @see AMP_Theme_Support::conditionally_output_header_video()
+	 * @see AMP_Theme_Support::conditionally_output_header()
 	 */
-	public function test_conditionally_output_header_video() {
+	public function conditionally_output_header() {
 		$mock_image = '<img src="https://example.com/flower.jpeg">';
 
 		// If there's no theme support for 'custom-header', the callback should simply return the image.
 		$this->assertEquals(
 			$mock_image,
-			AMP_Theme_Support::conditionally_output_header_video( $mock_image )
+			AMP_Theme_Support::conditionally_output_header( $mock_image )
 		);
 
 		// If theme support is present, but there isn't a header video selected, the callback should again return the image.
@@ -1234,7 +1234,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		set_theme_mod( 'external_header_video', 'https://www.youtube.com/watch?v=a8NScvBhVnc' );
 		$this->assertEquals(
 			'<amp-youtube width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0"></amp-youtube>',
-			AMP_Theme_Support::conditionally_output_header_video( $mock_image )
+			AMP_Theme_Support::conditionally_output_header( $mock_image )
 		);
 	}
 }
