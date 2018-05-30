@@ -27,9 +27,7 @@ class AMP_Site_Validation {
 		$query      = new WP_Query( array(
 			'posts_per_page' => $number_posts,
 			'post_type'      => array_values( $post_types ),
-			'orderby'        => 'ID',
-			'order'          => 'ASC',
-			'post_status'    => array( 'publish' ),
+			'post_status'    => 'publish',
 		) );
 
 		return wp_list_pluck( $query->posts, 'ID' );

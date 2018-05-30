@@ -78,6 +78,12 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			}
 		}
 		$number_of_posts = count( $post_types ) * $number_posts_each_post_type;
-		$this->assertEquals( $post_ids, AMP_Site_Validation::get_post_ids( $number_of_posts ) );
+
+		/*
+		 * The factory() method above creates posts so quickly that the WP_Query() argument of 'orderby' => 'date'
+		 * doesn't return them in the exact order they were created.
+		 * So this simply ensures all of the created $post_ids are present in the return value of the tested method.
+		 */
+		$this->assertEquals( 0, count( array_diff( $post_ids, AMP_Site_Validation::get_post_ids( $number_of_posts ) ) ) );
 	}
 }
