@@ -31,7 +31,7 @@ export default registerBlockType(
 				type: 'string',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'data-side-id'
+				attribute: 'data-site-id'
 			},
 			dataContentId: {
 				type: 'string',

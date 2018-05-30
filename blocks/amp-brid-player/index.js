@@ -29,10 +29,7 @@ export default registerBlockType(
 
 		attributes: {
 			autoPlay: {
-				default: false,
-				source: 'attribute',
-				selector: 'amp-brid-player',
-				attribute: 'autoplay'
+				type: 'boolean'
 			},
 			dataPartner: {
 				type: 'number',
