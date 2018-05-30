@@ -38,14 +38,14 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 
 	return [
 		<SelectControl
-			key="layout"
+			key="ampLayout"
 			label={ __( 'Layout', 'amp' ) }
 			value={ layout }
 			options={ ampLayoutOptions }
 			onChange={ value => ( setAttributes( { layout: value } ) ) }
 		/>,
 		showWidthNotice && (
-			<Notice status="error" isDismissble={ false }>
+			<Notice key="showWidthNotice" status="error" isDismissible={ false }>
 				{
 					wp.i18n.sprintf(
 						__( 'Width is required for %s layout', 'amp' ),
@@ -62,7 +62,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 			onChange={ value => ( setAttributes( { width: value } ) ) }
 		/>,
 		showHeightNotice && (
-			<Notice status="error" isDismissble={ false }>
+			<Notice key="showHeightNotice" status="error" isDismissible={ false }>
 				{
 					wp.i18n.sprintf(
 						__( 'Height is required for %s layout', 'amp' ),
