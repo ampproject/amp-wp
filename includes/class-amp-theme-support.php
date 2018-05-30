@@ -288,7 +288,7 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
-		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header_video' ) );
+		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header' ), 10, 3 );
 
 		// @todo Add character conversion.
 	}
@@ -1210,7 +1210,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Conditionally replace the header image markup with a header video.
+	 * Conditionally replace the header image markup with a header video or image.
 	 *
 	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
 	 * So in order for the header video to display,
@@ -1221,29 +1221,51 @@ class AMP_Theme_Support {
 	 * @param string $html The image markup to filter.
 	 * @return string $html Filtered markup.
 	 */
-	public static function conditionally_output_header_video( $html ) {
+	public static function conditionally_output_header( $html, $header, $atts ) {
 		if ( ! is_header_video_active() ) {
 			return $html;
 		};
 
-		$video_settings = get_header_video_settings();
-		if ( ! isset( $video_settings['videoUrl'], $video_settings['width'], $video_settings['height'] ) ) {
-			return $html;
+		if ( ! has_header_video() ) {
+			return self::output_header_image( $atts );
 		}
+
+		return self::output_header_video( $atts );
+	}
+
+	/**
+	 * Replace the header image markup with a header video.
+	 *
+	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
+	 * So in order for the header video to display,
+	 * this replaces the markup of the header image.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @param array $atts The header tag attributes array.
+	 * @return string $html Filtered markup.
+	 */
+	public static function output_header_video( $atts ) {
+
+		$video_settings = get_header_video_settings();
 
 		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
 		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : null;
 		$video_attributes = array(
+			'media'    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
 			'width'    => $video_settings['width'],
 			'height'   => $video_settings['height'],
-			'layout'   => 'responsive',
+			'layout'   => 'fill',
 			'autoplay' => '',
 			'id'       => 'wp-custom-header-video',
 		);
 
+		$atts['placeholder'] = '';
+		$image_placeholder   = self::output_header_image( $atts );
+
 		// If the video URL is for YouTube, return an <amp-youtube> element.
 		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
-			return AMP_HTML_Utils::build_tag(
+			$video_header = AMP_HTML_Utils::build_tag(
 				'amp-youtube',
 				array_merge(
 					$video_attributes,
@@ -1255,7 +1277,7 @@ class AMP_Theme_Support {
 				)
 			);
 		} else {
-			return AMP_HTML_Utils::build_tag(
+			$video_header = AMP_HTML_Utils::build_tag(
 				'amp-video',
 				array_merge(
 					$video_attributes,
@@ -1265,6 +1287,29 @@ class AMP_Theme_Support {
 				)
 			);
 		}
+		return $image_placeholder . $video_header;
 	}
 
+	/**
+	 * Replace the header image markup with a header image.
+	 *
+	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
+	 * So in order for the header video to display,
+	 * this replaces the markup of the header image.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @param array $atts The image tag attributes.
+	 * @return string $html Filtered markup.
+	 */
+	public static function output_header_image( $atts ) {
+
+		$atts['layout'] = 'fill';
+		unset( $atts['width'] );
+
+		$place_holder = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
+
+		return $place_holder;
+
+	}
 }
