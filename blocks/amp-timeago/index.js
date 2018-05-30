@@ -55,7 +55,7 @@ export default registerBlockType(
 				type: 'string',
 				source: 'attribute',
 				selector: 'amp-timeago',
-				attribute: 'layout'
+				attribute: 'data-amp-layout'
 			},
 			width: {
 				type: 'number',
