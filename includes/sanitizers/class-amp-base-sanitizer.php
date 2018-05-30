@@ -54,7 +54,7 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_bind_placeholder_prefix
 	 *      @type bool $allow_dirty_styles
 	 *      @type bool $allow_dirty_scripts
-	 *      @type bool $disable_invalid_removal
+	 *      @type bool $should_locate_sources
 	 *      @type callable $validation_error_callback
 	 * }
 	 */
@@ -76,6 +76,13 @@ abstract class AMP_Base_Sanitizer {
 	 * @var DOMElement
 	 */
 	protected $root_element;
+
+	/**
+	 * Keep track of nodes that should not be removed to prevent duplicated validation errors since sanitization is rejected.
+	 *
+	 * @var array
+	 */
+	private $should_not_removed_nodes = array();
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
@@ -290,20 +297,24 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMNode|DOMElement $node The node to remove.
-	 * @param array              $args Additional args to pass to validation error callback.
-	 *
-	 * @return void
+	 * @param DOMNode|DOMElement $node             The node to remove.
+	 * @param array              $validation_error Validation error details.
+	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
-	public function remove_invalid_child( $node, $args = array() ) {
-		if ( isset( $this->args['validation_error_callback'] ) ) {
-			call_user_func( $this->args['validation_error_callback'],
-				array_merge( compact( 'node' ), $args )
-			);
+	public function remove_invalid_child( $node, $validation_error = array() ) {
+
+		// Prevent double-reporting nodes that are rejected for sanitization.
+		if ( isset( $this->should_not_removed_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_removed_nodes[ $node->nodeName ], true ) ) {
+			return false;
 		}
-		if ( empty( $this->args['disable_invalid_removal'] ) ) {
+
+		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
+		if ( $should_remove ) {
 			$node->parentNode->removeChild( $node );
+		} else {
+			$this->should_not_removed_nodes[ $node->nodeName ][] = $node;
 		}
+		return $should_remove;
 	}
 
 	/**
@@ -316,40 +327,99 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement     $element   The node for which to remove the attribute.
 	 * @param DOMAttr|string $attribute The attribute to remove from the element.
-	 * @param array          $args      Additional args to pass to validation error callback.
-	 * @return void
+	 * @param array          $validation_error Validation error details.
+	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
-	public function remove_invalid_attribute( $element, $attribute, $args = array() ) {
-		if ( isset( $this->args['validation_error_callback'] ) ) {
-			if ( is_string( $attribute ) ) {
-				$attribute = $element->getAttributeNode( $attribute );
-			}
-			if ( $attribute ) {
-				call_user_func( $this->args['validation_error_callback'],
-					array_merge(
-						array(
-							'node' => $attribute,
-						),
-						$args
-					)
-				);
-				if ( empty( $this->args['disable_invalid_removal'] ) ) {
-					$element->removeAttributeNode( $attribute );
-				}
-			}
-		} elseif ( empty( $this->args['disable_invalid_removal'] ) ) {
-			if ( is_string( $attribute ) ) {
-				$element->removeAttribute( $attribute );
-			} else {
-				$element->removeAttributeNode( $attribute );
+	public function remove_invalid_attribute( $element, $attribute, $validation_error = array() ) {
+		if ( is_string( $attribute ) ) {
+			$node = $element->getAttributeNode( $attribute );
+		} else {
+			$node = $attribute;
+		}
+		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
+		if ( $should_remove ) {
+			$element->removeAttributeNode( $node );
+		}
+		return $should_remove;
+	}
+
+	/**
+	 * Check whether or not sanitization should occur in response to validation error.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $validation_error Validation error.
+	 * @param array $data             Data including the node.
+	 * @return bool Whether to sanitize.
+	 */
+	public function should_sanitize_validation_error( $validation_error, $data = array() ) {
+		if ( empty( $this->args['validation_error_callback'] ) || ! is_callable( $this->args['validation_error_callback'] ) ) {
+			return true;
+		}
+		$validation_error = $this->prepare_validation_error( $validation_error, $data );
+		return false !== call_user_func( $this->args['validation_error_callback'], $validation_error, $data );
+	}
+
+	/**
+	 * Prepare validation error.
+	 *
+	 * @param array $error {
+	 *     Error.
+	 *
+	 *     @type string $code Error code.
+	 * }
+	 * @param array $data {
+	 *     Data.
+	 *
+	 *     @type DOMElement|DOMNode $node The removed node.
+	 * }
+	 * @return array Error.
+	 */
+	public function prepare_validation_error( array $error = array(), array $data = array() ) {
+		$node    = null;
+		$matches = null;
+
+		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
+			$node = $data['node'];
+
+			$error['node_name'] = $node->nodeName;
+			if ( $node->parentNode ) {
+				$error['parent_name'] = $node->parentNode->nodeName;
 			}
 		}
+
+		if ( $node instanceof DOMElement ) {
+			if ( ! isset( $error['code'] ) ) {
+				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+			}
+			$error['node_attributes'] = array();
+			foreach ( $node->attributes as $attribute ) {
+				$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			}
+
+			// Capture script contents.
+			if ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) {
+				$error['text'] = $node->textContent;
+			}
+		} elseif ( $node instanceof DOMAttr ) {
+			if ( ! isset( $error['code'] ) ) {
+				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+			}
+			$error['element_attributes'] = array();
+			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
+				foreach ( $node->parentNode->attributes as $attribute ) {
+					$error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+				}
+			}
+		}
+
+		return $error;
 	}
 
 	/**
 	 * Get data-amp-* values from the parent node 'figure' added by editor block.
 	 *
-	 * @param DOMNode $node Base node.
+	 * @param DOMElement $node Base node.
 	 * @return array AMP data array.
 	 */
 	public function get_data_amp_attributes( $node ) {
@@ -390,9 +460,9 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Set attributes to node's parent element according to layout.
 	 *
-	 * @param DOMNode $node Node.
-	 * @param array   $new_attributes Attributes array.
-	 * @param string  $layout Layout.
+	 * @param DOMElement $node Node.
+	 * @param array      $new_attributes Attributes array.
+	 * @param string     $layout Layout.
 	 * @return array New attributes.
 	 */
 	public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {

@@ -107,10 +107,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'illegal_unsafe_properties' => array(
-				'<style>button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } @media screen { button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } }</style><button>Click</button>',
+				'<style>button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ }</style><style> @media screen { button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } }</style><button>Click</button>',
 				'<button>Click</button>',
 				array(
-					'button{font-weight:bold}@media screen{button{font-weight:bold}}',
+					'button{font-weight:bold}',
+					'@media screen{button{font-weight:bold}}',
 				),
 				array( 'illegal_css_property', 'illegal_css_property', 'illegal_css_property', 'illegal_css_property' ),
 			),
@@ -799,5 +800,67 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		} else {
 			$this->assertEmpty( $link );
 		}
+	}
+
+	/**
+	 * Get data for CSS @import test.
+	 *
+	 * @return array
+	 */
+	public function get_css_import_data() {
+		$css_url             = admin_url( 'css/login.css' );
+		$html                = sprintf( '<html><head><link rel="stylesheet" href="%s"></head><style>@import url("https://something.example.com/style.css"); body { color:red; }</style></html>', $css_url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$stylesheet_patterns = array(
+			'/' . preg_quote( 'input[type="checkbox"]:disabled' ) . '/',
+			'/' . preg_quote( 'body.rtl' ) . '/',
+			'/' . preg_quote( '.login .message' ) . '/',
+			'/^' . preg_quote( 'body{color:red}' ) . '$/',
+		);
+		return array(
+			'sanitized'   => array(
+				$html,
+				$stylesheet_patterns,
+				'/^(?!@import)/',
+				true,
+			),
+			'unsanitized' => array(
+				$html,
+				$stylesheet_patterns,
+				'/^@import/',
+				false,
+			),
+		);
+	}
+
+	/**
+	 * Test CSS imports.
+	 *
+	 * @dataProvider get_css_import_data
+	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
+	 *
+	 * @param string $markup              Markup.
+	 * @param array  $stylesheet_patterns Stylesheet patterns.
+	 * @param string $style_pattern       Style pattern for resulting style element.
+	 * @param bool   $sanitized           Whether validation errors should be sanitized.
+	 */
+	public function test_css_import( $markup, $stylesheet_patterns, $style_pattern, $sanitized ) {
+		$dom       = AMP_DOM_Utils::get_dom( $markup );
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'never',
+			'validation_error_callback' => function() use ( $sanitized ) {
+				return $sanitized;
+			},
+		) );
+		$sanitizer->sanitize();
+		$stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertCount( count( $stylesheet_patterns ), $stylesheets );
+		do {
+			$this->assertRegExp( array_shift( $stylesheet_patterns ), array_shift( $stylesheets ) );
+		} while ( ! empty( $stylesheet_patterns ) );
+
+		$dom_xpath  = new DOMXPath( $dom );
+		$amp_custom = $dom_xpath->query( '//style[@amp-custom]' )->item( 0 );
+		$this->assertRegExp( $style_pattern, $amp_custom->textContent );
 	}
 }

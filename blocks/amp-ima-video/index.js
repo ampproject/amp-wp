@@ -19,12 +19,12 @@ const {
 export default registerBlockType(
 	'amp/amp-ima-video',
 	{
-		title: __( 'AMP IMA Video' ),
-		description: __( 'Embeds a video player for instream video ads that are integrated with the IMA SDK' ),
+		title: __( 'AMP IMA Video', 'amp' ),
+		description: __( 'Embeds a video player for instream video ads that are integrated with the IMA SDK', 'amp' ),
 		category: 'common',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed' )
+			__( 'Embed', 'amp' )
 		],
 
 		// @todo Perhaps later add subtitles option and additional source options?
@@ -79,8 +79,8 @@ export default registerBlockType(
 		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataDelayAdRequest, dataTag, dataSrc, dataPoster, layout, height, width } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: __( 'Responsive' ) },
-				{ value: 'fixed', label: __( 'Fixed' ) }
+				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) }
 
 			];
 			let dataSet = false;
@@ -92,42 +92,42 @@ export default registerBlockType(
 					{
 						isSelected && (
 							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'IMA Video Settings' ) }>
+								<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
 									<TextControl
-										label={ __( 'Https URL for your VAST ad document (required)' ) }
+										label={ __( 'Https URL for your VAST ad document (required)', 'amp' ) }
 										value={ dataTag }
 										onChange={ value => ( setAttributes( { dataTag: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Https URL of your video content (required)' ) }
+										label={ __( 'Https URL of your video content (required)', 'amp' ) }
 										value={ dataSrc }
 										onChange={ value => ( setAttributes( { dataSrc: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Https URL to preview image' ) }
+										label={ __( 'Https URL to preview image', 'amp' ) }
 										value={ dataPoster }
 										onChange={ value => ( setAttributes( { dataPoster: value } ) ) }
 									/>
 									<ToggleControl
-										label={ __( 'Delay Ad Request' ) }
+										label={ __( 'Delay Ad Request', 'amp' ) }
 										checked={ dataDelayAdRequest }
 										onChange={ () => ( setAttributes( { dataDelayAdRequest: ! dataDelayAdRequest } ) ) }
 									/>
 									<SelectControl
-										label={ __( 'Layout' ) }
+										label={ __( 'Layout', 'amp' ) }
 										value={ layout }
 										options={ ampLayoutOptions }
 										onChange={ value => ( setAttributes( { layout: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Width (px)' ) }
+										label={ __( 'Width (px)', 'amp' ) }
 										value={ width !== undefined ? width : '' }
 										onChange={ value => ( setAttributes( { width: value } ) ) }
 									/>
 									<TextControl
 										type="number"
-										label={ __( 'Height (px)' ) }
+										label={ __( 'Height (px)', 'amp' ) }
 										value={ height }
 										onChange={ value => ( setAttributes( { height: value } ) ) }
 									/>
@@ -137,16 +137,16 @@ export default registerBlockType(
 					}
 					{
 						dataSet && (
-							<Placeholder label={ __( 'IMA Video' ) }>
+							<Placeholder label={ __( 'IMA Video', 'amp' ) }>
 								<p className="components-placeholder__error">{ dataSrc }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
+								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
 					{
 						! dataSet && (
-							<Placeholder label={ __( 'IMA Video' ) }>
-								<p>{ __( 'Add required data to use the block.' ) }</p>
+							<Placeholder label={ __( 'IMA Video', 'amp' ) }>
+								<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
