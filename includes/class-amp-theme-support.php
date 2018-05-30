@@ -20,6 +20,13 @@ class AMP_Theme_Support {
 	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
 
 	/**
+	 * Response cache group name.
+	 *
+	 * @var string
+	 */
+	const RESPONSE_CACHE_GROUP = 'amp-reponse';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -76,6 +83,14 @@ class AMP_Theme_Support {
 	public static $init_start_time;
 
 	/**
+	 * Whether output buffering has started.
+	 *
+	 * @since 0.7
+	 * @var bool
+	 */
+	protected static $is_output_buffering = false;
+
+	/**
 	 * Initialize.
 	 *
 	 * @since 0.7
@@ -86,6 +101,7 @@ class AMP_Theme_Support {
 		}
 
 		self::$init_start_time = microtime( true );
+		AMP_Validation_Utils::init();
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
@@ -264,7 +280,13 @@ class AMP_Theme_Support {
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
 		 * instead of template_include.
 		 */
-		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), 0 );
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
+		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
+
+		// Add validation hooks *after* output buffering has started for the response.
+		if ( AMP_Validation_Utils::should_validate_response() ) {
+			AMP_Validation_Utils::add_validation_hooks();
+		}
 
 		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
@@ -274,10 +296,7 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
-
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::add_validation_hooks();
-		}
+		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header' ), 10, 3 );
 
 		// @todo Add character conversion.
 	}
@@ -299,6 +318,7 @@ class AMP_Theme_Support {
 			'__amp_source_origin',
 			'_wp_amp_action_xhr_converted',
 			'amp_latest_update_time',
+			'amp_last_check_time',
 		);
 
 		// Scrub input vars.
@@ -754,7 +774,7 @@ class AMP_Theme_Support {
 
 		// Continue to show default link to wp-login when user is not logged-in.
 		if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
-			return $link;
+			return $args['before'] . $link . $args['after'];
 		}
 
 		$state_id  = self::get_comment_form_state_id( get_the_ID() );
@@ -775,7 +795,7 @@ class AMP_Theme_Support {
 			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
 			$args['reply_text']
 		);
-		return $link;
+		return $args['before'] . $link . $args['after'];
 	}
 
 	/**
@@ -939,10 +959,21 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
-		ob_start();
+		ob_start( array( __CLASS__, 'finish_output_buffering' ) );
+		self::$is_output_buffering = true;
+	}
 
-		// Note that the following must be at 0 because wp_ob_end_flush_all() runs at shutdown:1.
-		add_action( 'shutdown', array( __CLASS__, 'finish_output_buffering' ), 0 );
+	/**
+	 * Determine whether output buffering has started.
+	 *
+	 * @since 0.7
+	 * @see AMP_Theme_Support::start_output_buffering()
+	 * @see AMP_Theme_Support::finish_output_buffering()
+	 *
+	 * @return bool Whether output buffering has started.
+	 */
+	public static function is_output_buffering() {
+		return self::$is_output_buffering;
 	}
 
 	/**
@@ -950,10 +981,13 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @see AMP_Theme_Support::start_output_buffering()
+	 *
+	 * @param string $response Buffered Response.
+	 * @return string Processed Response.
 	 */
-	public static function finish_output_buffering() {
-		AMP_Response_Headers::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
-		echo self::prepare_response( ob_get_clean() ); // WPCS: xss ok.
+	public static function finish_output_buffering( $response ) {
+		self::$is_output_buffering = false;
+		return self::prepare_response( $response );
 	}
 
 	/**
@@ -1007,16 +1041,7 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		// Account for case where ob_flush() was called prematurely.
-		if ( false === strpos( $response, '<html' ) ) {
-			$error = sprintf(
-				'<div style="color:red; background: white; padding: 0.5em; position: fixed; z-index: 100000; bottom: 0; border: dashed 1px red;">%s</div>',
-				wp_kses_post( __( '<strong>AMP Plugin Error</strong>: It appears that your WordPress install prematurely flushed the output buffer. You will need to disable AMP theme support until that is fixed.', 'amp' ) )
-			);
-			return $error . $response;
-		}
-
-		$is_validation_debug_mode = ! empty( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
+		$is_validation_debug_mode = isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
 
 		$args = array_merge(
 			array(
@@ -1025,9 +1050,34 @@ class AMP_Theme_Support {
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'disable_invalid_removal' => $is_validation_debug_mode,
+				'enable_response_caching' => (
+					( ! defined( 'WP_DEBUG' ) || true !== WP_DEBUG )
+					&&
+					! AMP_Validation_Utils::should_validate_response()
+				),
 			),
 			$args
 		);
+
+		// Return cache if enabled and found.
+		if ( true === $args['enable_response_caching'] ) {
+			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
+			$response_cache_key = md5( wp_json_encode( array(
+				$args,
+				$response,
+				self::$sanitizer_classes,
+				self::$embed_handlers,
+				AMP__VERSION,
+			) ) );
+
+			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
+
+			if ( ! empty( $response_cache ) ) {
+				return $response_cache;
+			}
+		}
+
+		AMP_Response_Headers::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
 		$dom_parse_start = microtime( true );
 
@@ -1099,10 +1149,25 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Print all scripts, some of which may have already been printed and inject into head.
-		ob_start();
-		wp_print_scripts( array_keys( $amp_scripts ) );
-		$script_tags = ob_get_clean();
+		/*
+		 * Inject additional AMP component scripts which have been discovered by the sanitizers into the head.
+		 * This is adapted from wp_scripts()->do_items(), but it runs only the bare minimum required to output
+		 * the missing scripts, without allowing other filters to apply which may cause an invalid AMP response.
+		 */
+		$script_tags = '';
+		foreach ( array_diff( array_keys( $amp_scripts ), wp_scripts()->done ) as $handle ) {
+			if ( ! wp_script_is( $handle, 'registered' ) ) {
+				continue;
+			}
+			$script_dep   = wp_scripts()->registered[ $handle ];
+			$script_tags .= amp_filter_script_loader_tag(
+				sprintf(
+					"<script type='text/javascript' src='%s'></script>\n", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+					esc_url( $script_dep->src )
+				),
+				$handle
+			);
+		}
 		if ( ! empty( $script_tags ) ) {
 			$response = preg_replace(
 				'#(?=</head>)#',
@@ -1113,6 +1178,11 @@ class AMP_Theme_Support {
 		}
 
 		AMP_Response_Headers::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
+
+		// Cache response if enabled.
+		if ( true === $args['enable_response_caching'] ) {
+			wp_cache_set( $response_cache_key, $response, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
+		}
 
 		return $response;
 	}
@@ -1145,5 +1215,111 @@ class AMP_Theme_Support {
 
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
+	}
+
+	/**
+	 * Conditionally replace the header image markup with a header video or image.
+	 *
+	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
+	 * So in order for the header video to display,
+	 * this replaces the markup of the header image.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @param string $html The image markup to filter.
+	 * @param array  $header The header config array.
+	 * @param array  $atts The image markup attributes.
+	 * @return string $html Filtered markup.
+	 */
+	public static function conditionally_output_header( $html, $header, $atts ) {
+		if ( ! is_header_video_active() ) {
+			return $html;
+		};
+
+		if ( ! has_header_video() ) {
+			return self::output_header_image( $atts );
+		}
+
+		return self::output_header_video( $atts );
+	}
+
+	/**
+	 * Replace the header image markup with a header video.
+	 *
+	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
+	 * So in order for the header video to display,
+	 * this replaces the markup of the header image.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @param array $atts The header tag attributes array.
+	 * @return string $html Filtered markup.
+	 */
+	public static function output_header_video( $atts ) {
+
+		$video_settings = get_header_video_settings();
+
+		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
+		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : null;
+		$video_attributes = array(
+			'media'    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
+			'width'    => $video_settings['width'],
+			'height'   => $video_settings['height'],
+			'layout'   => 'fill',
+			'autoplay' => '',
+			'id'       => 'wp-custom-header-video',
+		);
+
+		$atts['placeholder'] = '';
+		$image_placeholder   = self::output_header_image( $atts );
+
+		// If the video URL is for YouTube, return an <amp-youtube> element.
+		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
+			$video_header = AMP_HTML_Utils::build_tag(
+				'amp-youtube',
+				array_merge(
+					$video_attributes,
+					array(
+						'data-videoid'        => $query['v'],
+						'data-param-rel'      => '0', // Don't show related videos.
+						'data-param-showinfo' => '0', // Don't show video title at the top.
+					)
+				)
+			);
+		} else {
+			$video_header = AMP_HTML_Utils::build_tag(
+				'amp-video',
+				array_merge(
+					$video_attributes,
+					array(
+						'src' => $video_settings['videoUrl'],
+					)
+				)
+			);
+		}
+		return $image_placeholder . $video_header;
+	}
+
+	/**
+	 * Replace the header image markup with a header image.
+	 *
+	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
+	 * So in order for the header video to display,
+	 * this replaces the markup of the header image.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @param array $atts The image tag attributes.
+	 * @return string $html Filtered markup.
+	 */
+	public static function output_header_image( $atts ) {
+
+		$atts['layout'] = 'fill';
+		unset( $atts['width'] );
+
+		$place_holder = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
+
+		return $place_holder;
+
 	}
 }

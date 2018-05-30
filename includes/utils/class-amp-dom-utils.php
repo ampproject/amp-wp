@@ -67,22 +67,6 @@ class AMP_DOM_Utils {
 		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
 		$document = self::convert_amp_bind_attributes( $document );
 
-		/*
-		 * Prevent amp-mustache syntax from getting URL-encoded in attributes when saveHTML is done.
-		 * While this is applying to the entire document, it only really matters inside of <template>
-		 * elements, since URL-encoding of curly braces in href attributes would not normally matter.
-		 * But when this is done inside of a <template> then it breaks Mustache. Since Mustache
-		 * is logic-less and curly braces are not unsafe for HTML, we can do a global replacement.
-		 * The replacement is done on the entire HTML document instead of just inside of the <template>
-		 * elements since it is faster and wouldn't change the outcome.
-		 */
-		$placeholders = self::get_mustache_tag_placeholders();
-		$document     = str_replace(
-			array_keys( $placeholders ),
-			array_values( $placeholders ),
-			$document
-		);
-
 		// Force all self-closing tags to have closing tags since DOMDocument isn't fully aware.
 		$document = preg_replace(
 			'#<(' . implode( '|', self::$self_closing_tags ) . ')[^>]*>(?!</\1>)#',
@@ -223,7 +207,7 @@ class AMP_DOM_Utils {
 		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_prefix();
 
 		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
-		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*"|\'[^\']*\'|[^\'"\s]+))?#';
+		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
 
 		/**
 		 * Replace callback.
@@ -256,9 +240,18 @@ class AMP_DOM_Utils {
 			return '<' . $tag_matches['name'] . $new_attrs . '>';
 		};
 
+		// Match all start tags that contain a binding attribute.
+		$pattern   = join( '', array(
+			'#<',
+			'(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
+			'(?P<attrs>\s',                            // Attributes.
+			'(?:[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+', // Non-binding attributes tokens.
+			'\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
+			'(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
+			')>#s',
+		) );
 		$converted = preg_replace_callback(
-			// Match all start tags that probably contain a binding attribute.
-			'#<(?P<name>[a-zA-Z0-9_\-]+)(?P<attrs>\s[^>]+\]=[^>]+)>#',
+			$pattern,
 			$replace_callback,
 			$html
 		);
@@ -390,11 +383,49 @@ class AMP_DOM_Utils {
 			$self_closing_tags_regex = "#</({$self_closing_tags})>#i";
 		}
 
+		/*
+		 * Prevent amp-mustache syntax from getting URL-encoded in attributes when saveHTML is done.
+		 * While this is applying to the entire document, it only really matters inside of <template>
+		 * elements, since URL-encoding of curly braces in href attributes would not normally matter.
+		 * But when this is done inside of a <template> then it breaks Mustache. Since Mustache
+		 * is logic-less and curly braces are not unsafe for HTML, we can do a global replacement.
+		 * The replacement is done on the entire HTML document instead of just inside of the <template>
+		 * elements since it is faster and wouldn't change the outcome.
+		 */
+		$mustache_tag_placeholders = self::get_mustache_tag_placeholders();
+		$mustache_tags_replaced    = false;
+		$xpath                     = new DOMXPath( $dom );
+		$templates                 = $dom->getElementsByTagName( 'template' );
+		foreach ( $templates as $template ) {
+
+			// These attributes are the only ones that saveHTML() will URL-encode.
+			foreach ( $xpath->query( './/*/@src|.//*/@href|.//*/@action', $template ) as $attribute ) {
+				$attribute->nodeValue = str_replace(
+					array_keys( $mustache_tag_placeholders ),
+					array_values( $mustache_tag_placeholders ),
+					$attribute->nodeValue,
+					$count
+				);
+				if ( $count ) {
+					$mustache_tags_replaced = true;
+				}
+			}
+		}
+
 		$html = $dom->saveHTML( $node );
 
 		// Whitespace just causes unit tests to fail... so whitespace begone.
 		if ( '' === trim( $html ) ) {
 			return '';
+		}
+
+		// Restore amp-mustache placeholders which were replaced to prevent URL-encoded corruption by saveHTML.
+		if ( $mustache_tags_replaced ) {
+			$html = str_replace(
+				array_values( $mustache_tag_placeholders ),
+				array_keys( $mustache_tag_placeholders ),
+				$html
+			);
 		}
 
 		// Restore noscript elements which were temporarily removed to prevent libxml<2.8 parsing problems.
@@ -407,14 +438,6 @@ class AMP_DOM_Utils {
 		}
 
 		$html = self::restore_amp_bind_attributes( $html );
-
-		// Restore amp-mustache placeholders which were replaced to prevent URL-encoded corruption by saveHTML.
-		$placeholders = self::get_mustache_tag_placeholders();
-		$html         = str_replace(
-			array_values( $placeholders ),
-			array_keys( $placeholders ),
-			$html
-		);
 
 		/*
 		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.

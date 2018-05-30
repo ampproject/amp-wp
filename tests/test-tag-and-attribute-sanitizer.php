@@ -709,9 +709,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-bind' ),
 			),
 
+			'amp_bind_with_greater_than_symbol'                         => array(
+				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" [class]="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className => \'\' != className )">hello</div>',
+				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" [class]="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className =&gt; \'\' != className )">hello</div>',
+				array( 'amp-bind' ),
+			),
+
 			'amp_bad_bind_attr'                                         => array(
-				'<a [unrecognized] [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
-				'<a [href]="/">test</a><p [text]="\'Hello \' + name">Hello World</p>',
+				'<a [href]=\'/\' [hidden]>test</a><p [text]="\'Hello \' + name" [unrecognized] title="Foo"><button [disabled]="" [type]=\'\'>Hello World</button></p>',
+				'<a [href]="/" [hidden]>test</a><p [text]="\'Hello \' + name" title="Foo"><button [disabled]="" [type]="">Hello World</button></p>',
 				array( 'amp-bind' ),
 			),
 
@@ -738,6 +744,44 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
 				null, // No change.
 				array( 'amp-date-picker' ),
+			),
+
+			'amp-img-layout-allowed'                                    => array(
+				implode( '', array(
+					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
+					'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
+				) ),
+				null, // No change.
+				array(),
+			),
+
+			'amp-img-layout-illegal'                                    => array(
+				'<amp-img src="/img1.png" width="50" height="50" layout="container"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				array(),
+			),
+
+			'amp-img-layout-unknown'                                    => array(
+				'<amp-img src="/img1.png" width="50" height="50" layout="bogus-value"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				array(),
+			),
+
+			'non-layout-span-element-attrs'                             => array(
+				'<span id="test" width="1" height="1" heights="(min-width:500px) 200px, 80%" sizes="(min-width: 650px) 50vw, 100vw" layout="nodisplay" [height]="1" [width]="1">Test</span>',
+				'<span id="test">Test</span>',
+				array(),
+			),
+
+			'non-layout-col-element-attrs'                              => array(
+				'<table><col class="foo" width="123" style="background:red;"><col class="bar" style="background:green;" width="12%"><col class="baz" style="background:blue;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				array(),
 			),
 		);
 	}
@@ -796,7 +840,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_html_data() {
 		$data = array(
 			'meta_charset_and_viewport_and_canonical' => array(
-				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>', // phpcs:ignore
+				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width, minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>', // phpcs:ignore
 			),
 			'script_tag_externals' => array(
 				'<html amp><head><meta charset="utf-8"><script async type="text/javascript" src="illegal.js"></script><script async src="illegal.js"></script><script src="illegal.js"></script><script type="text/javascript" src="illegal.js"></script></head><body></body></html>', // phpcs:ignore

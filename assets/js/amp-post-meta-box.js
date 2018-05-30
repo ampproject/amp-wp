@@ -7,7 +7,7 @@
  *
  * @since 0.6
  */
-var ampPostMetaBox = ( function( $ ) {
+var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	var component = {
@@ -104,8 +104,8 @@ var ampPostMetaBox = ( function( $ ) {
 			.clone()
 			.insertAfter( previewBtn )
 			.prop( {
-				'href': component.data.previewLink,
-				'id': component.ampPreviewBtnSelector.replace( '#', '' )
+				href: component.data.previewLink,
+				id: component.ampPreviewBtnSelector.replace( '#', '' )
 			} )
 			.text( component.data.l10n.ampPreviewBtnLabel )
 			.parent()
@@ -126,9 +126,9 @@ var ampPostMetaBox = ( function( $ ) {
 		// Flag the AMP preview referer.
 		$input = $( '<input>' )
 			.prop( {
-				'type': 'hidden',
-				'name': 'amp-preview',
-				'value': 'do-preview'
+				type: 'hidden',
+				name: 'amp-preview',
+				value: 'do-preview'
 			} )
 			.insertAfter( component.ampPreviewBtnSelector );
 
@@ -176,4 +176,4 @@ var ampPostMetaBox = ( function( $ ) {
 	};
 
 	return component;
-})( window.jQuery );
+}( window.jQuery ) );

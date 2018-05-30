@@ -7,4 +7,5 @@ SKIP_ECHO_PATHS_SCOPE=1
 function after_wp_install {
     echo "Installing REST API..."
     svn export -q https://plugins.svn.wordpress.org/jetpack/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/jetpack"
+    svn export -q https://plugins.svn.wordpress.org/gutenberg/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
 }

@@ -133,6 +133,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out['layout'] = $value;
 					break;
 
+				case 'data-amp-noloading':
+					$out['noloading'] = $value;
+					break;
+
 				default:
 					break;
 			}
@@ -157,31 +161,48 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $node instanceof DOMElement ) {
 					continue;
 				}
-				if (
-					! is_numeric( $node->getAttribute( 'width' ) ) &&
-					! is_numeric( $node->getAttribute( 'height' ) )
-				) {
-					$height = self::FALLBACK_HEIGHT;
-					$width  = self::FALLBACK_WIDTH;
-					$node->setAttribute( 'width', $width );
-					$node->setAttribute( 'height', $height );
-					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size' : 'amp-wp-unknown-size';
-					$node->setAttribute( 'class', $class );
-				} elseif (
-					! is_numeric( $node->getAttribute( 'height' ) )
-				) {
-					$height = self::FALLBACK_HEIGHT;
-					$node->setAttribute( 'height', $height );
-					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-height' : 'amp-wp-unknown-size amp-wp-unknown-height';
-					$node->setAttribute( 'class', $class );
-				} elseif (
-					! is_numeric( $node->getAttribute( 'width' ) )
-				) {
-					$width = self::FALLBACK_WIDTH;
-					$node->setAttribute( 'width', $width );
-					$class = $node->hasAttribute( 'class' ) ? $node->getAttribute( 'class' ) . ' amp-wp-unknown-size amp-wp-unknown-width' : 'amp-wp-unknown-size amp-wp-unknown-width';
-					$node->setAttribute( 'class', $class );
+				$class = $node->getAttribute( 'class' );
+				if ( ! $class ) {
+					$class = '';
 				}
+				if ( ! $dimensions ) {
+					$class .= ' amp-wp-unknown-size';
+				}
+
+				$width  = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
+				$height = self::FALLBACK_HEIGHT;
+				if ( isset( $dimensions['width'] ) ) {
+					$width = $dimensions['width'];
+				}
+				if ( isset( $dimensions['height'] ) ) {
+					$height = $dimensions['height'];
+				}
+
+				if ( ! is_numeric( $node->getAttribute( 'width' ) ) ) {
+
+					// Let width have the right aspect ratio based on the height attribute.
+					if ( is_numeric( $node->getAttribute( 'height' ) ) && isset( $dimensions['height'] ) && isset( $dimensions['width'] ) ) {
+						$width = ( floatval( $node->getAttribute( 'height' ) ) * $dimensions['width'] ) / $dimensions['height'];
+					}
+
+					$node->setAttribute( 'width', $width );
+					if ( ! isset( $dimensions['width'] ) ) {
+						$class .= ' amp-wp-unknown-width';
+					}
+				}
+				if ( ! is_numeric( $node->getAttribute( 'height' ) ) ) {
+
+					// Let height have the right aspect ratio based on the width attribute.
+					if ( is_numeric( $node->getAttribute( 'width' ) ) && isset( $dimensions['width'] ) && isset( $dimensions['height'] ) ) {
+						$height = ( floatval( $node->getAttribute( 'width' ) ) * $dimensions['height'] ) / $dimensions['width'];
+					}
+
+					$node->setAttribute( 'height', $height );
+					if ( ! isset( $dimensions['height'] ) ) {
+						$class .= ' amp-wp-unknown-height';
+					}
+				}
+				$node->setAttribute( 'class', trim( $class ) );
 			}
 		}
 	}
@@ -205,12 +226,20 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMNode $node The DOMNode to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
+
+		$amp_data       = $this->get_data_amp_attributes( $node );
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+		$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
+
 		$new_attributes = $this->filter_attributes( $old_attributes );
+		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
+		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
+
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
 			$new_attributes['layout'] = 'intrinsic';
 		}
+
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 
@@ -219,6 +248,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$new_tag = 'amp-img';
 		}
 		$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
+		$new_node = $this->handle_centering( $new_node );
 		$node->parentNode->replaceChild( $new_node, $node );
 	}
 
@@ -235,5 +265,44 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
+	}
+
+	/**
+	 * Handles an issue with the aligncenter class.
+	 *
+	 * If the <amp-img> has the class aligncenter, this strips the class and wraps it in a <figure> to center the image.
+	 * There was an issue where the aligncenter class overrode the "display: inline-block" rule of AMP's layout="intrinsic" attribute.
+	 * So this strips that class, and instead wraps the image in a <figure> to center it.
+	 *
+	 * @since 0.7
+	 * @see https://github.com/Automattic/amp-wp/issues/1104
+	 *
+	 * @param DOMElement $node The <amp-img> node.
+	 * @return DOMElement $node The <amp-img> node, possibly wrapped in a <figure>.
+	 */
+	public function handle_centering( $node ) {
+		$align_class = 'aligncenter';
+		$classes     = $node->getAttribute( 'class' );
+		$width       = $node->getAttribute( 'width' );
+
+		// If this doesn't have a width attribute, centering it in the <figure> wrapper won't work.
+		if ( empty( $width ) || ! in_array( $align_class, preg_split( '/\s+/', trim( $classes ) ), true ) ) {
+			return $node;
+		}
+
+		// Strip the class, and wrap the <amp-img> in a <figure>.
+		$classes = trim( str_replace( $align_class, '', $classes ) );
+		$node->setAttribute( 'class', $classes );
+		$figure = AMP_DOM_Utils::create_node(
+			$this->dom,
+			'figure',
+			array(
+				'class' => $align_class,
+				'style' => "max-width: {$width}px;",
+			)
+		);
+		$figure->appendChild( $node );
+
+		return $figure;
 	}
 }

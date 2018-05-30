@@ -110,12 +110,12 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		// Test malformed.
 		$malformed_html = array(
 			'<amp-img width="123" [text]="..."</amp-img>',
-			'<amp-img width="123" [text] data-test="asd"></amp-img>',
+			'<amp-img width="123" [text="..."]></amp-img>',
 			'<amp-img width="123" [text]="..." *bad*></amp-img>',
 		);
 		foreach ( $malformed_html as $html ) {
 			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
-			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted );
+			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted, "Source: $html" );
 		}
 	}
 
@@ -123,6 +123,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * Test handling of empty elements.
 	 *
 	 * @covers \AMP_DOM_Utils::get_dom()
+	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_html5_empty_elements() {
 		$original  = '<amp-video width="432" height="987">';
@@ -144,6 +145,70 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'source', $video->childNodes->item( 3 )->nodeName );
 		$this->assertEquals( 'div', $video->childNodes->item( 4 )->nodeName );
 		$this->assertEquals( 'span', $video->childNodes->item( 5 )->nodeName );
+	}
+
+	/**
+	 * Test parsing DOM with Mustache or Mustache-like templates.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
+	 */
+	public function test_mustache_replacements() {
+
+		$data = array(
+			'foo' => array(
+				'bar' => array(
+					'baz' => array(),
+				),
+			),
+		);
+
+		$html = implode( "\n", array(
+			'<!--amp-source-stack {"block_name":"core\/columns"}-->',
+			'<div class="wp-block-columns has-2-columns">',
+			'<!--amp-source-stack {"block_name":"core\/quote","block_attrs":{"layout":"column-1"}}-->',
+			'<blockquote class="wp-block-quote layout-column-1"><p>Quote</p><cite>Famous</cite></blockquote>',
+			'<!--/amp-source-stack {"block_name":"core\/quote","block_attrs":{"layout":"column-1"}}-->',
+			'<!-- wp:paragraph -->',
+			'<p><a href="https://example.com/"><img src="https://example.com/img.jpg"></a></p>',
+			'<!-- /wp:paragraph -->',
+			'</div>',
+			'<!--/amp-source-stack {"block_name":"core\/columns"}-->',
+			'<!-- wp:html {} -->',
+			'<script type="application/json">' . wp_json_encode( $data ) . '</script>',
+			'<template type="amp-mustache">Hello {{world}}! <a href="{{href}}" title="Hello {{name}}"><img src="{{src}}"></a><blockquote cite="{{cite}}">{{quote}}</blockquote></template>',
+			'<!-- /wp:html -->',
+		) );
+
+		$dom   = AMP_DOM_Utils::get_dom_from_content( $html );
+		$xpath = new DOMXPath( $dom );
+
+		// Ensure that JSON in scripts are left intact.
+		$script = $xpath->query( '//script' )->item( 0 );
+		$this->assertEquals(
+			$data,
+			json_decode( $script->nodeValue, true )
+		);
+
+		// Ensure that mustache var in a[href] attribute is intact.
+		$template_link = $xpath->query( '//template/a' )->item( 0 );
+		$this->assertSame( '{{href}}', $template_link->getAttribute( 'href' ) );
+		$this->assertEquals( 'Hello {{name}}', $template_link->getAttribute( 'title' ) );
+
+		// Ensure that mustache var in img[src] attribute is intact.
+		$template_img = $xpath->query( '//template/a/img' )->item( 0 );
+		$this->assertEquals( '{{src}}', $template_img->getAttribute( 'src' ) );
+
+		// Ensure that mustache var in blockquote[cite] is not changed.
+		$template_blockquote = $xpath->query( '//template/blockquote' )->item( 0 );
+		$this->assertEquals( '{{cite}}', $template_blockquote->getAttribute( 'cite' ) );
+
+		$serialized_html = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+
+		$this->assertContains( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
+		$this->assertContains( '<img src="{{src}}">', $serialized_html );
+		$this->assertContains( '<blockquote cite="{{cite}}">', $serialized_html );
+		$this->assertContains( '"block_attrs":{"layout":"column-1"}}', $serialized_html );
 	}
 
 	/**
@@ -177,6 +242,8 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 			array( 10 ),
 			array( 100 ),
 			array( 1000 ),
+			array( 10000 ),
+			array( 100000 ),
 		);
 	}
 

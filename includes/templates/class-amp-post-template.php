@@ -94,7 +94,13 @@ class AMP_Post_Template {
 		} else {
 			$this->post = get_post( $post );
 		}
-		$this->ID = $this->post->ID;
+
+		// Make sure we have a post, or bail if not.
+		if ( is_a( $this->post, 'WP_Post' ) ) {
+			$this->ID = $this->post->ID;
+		} else {
+			return;
+		}
 
 		$content_max_width = self::CONTENT_MAX_WIDTH;
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
@@ -107,7 +113,7 @@ class AMP_Post_Template {
 
 			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
 			'canonical_url'         => get_permalink( $this->ID ),
-			'home_url'              => home_url(),
+			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
 
 			'html_tag_attributes'   => array(),
@@ -351,7 +357,7 @@ class AMP_Post_Template {
 		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
 		$assets = AMP_Content_Sanitizer::sanitize_document(
 			$dom,
-			array( 'AMP_Img_Sanitizer' => array() ),
+			amp_get_content_sanitizers( $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
