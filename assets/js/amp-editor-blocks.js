@@ -696,7 +696,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
-		var text = '',
+		var text = attributes.text || '',
 			fitTextProps = {
 				layout: 'fixed-height',
 				children: element
@@ -707,8 +707,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				if ( component.hasGalleryShortcodeLightboxAttribute( attributes.text || '' ) ) {
 					text = component.removeAmpLightboxFromShortcodeAtts( attributes.text );
 				}
-			} else {
-				text = attributes.text || '';
 			}
 			if ( attributes.ampCarousel ) {
 				// If the text contains amp-carousel or amp-lightbox, lets remove it.
