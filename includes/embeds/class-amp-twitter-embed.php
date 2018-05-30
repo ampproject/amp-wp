@@ -14,20 +14,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)#i';
 
 	/**
-	 * Default width.
-	 *
-	 * @var int
-	 */
-	protected $DEFAULT_WIDTH = 600;
-
-	/**
-	 * Default height.
-	 *
-	 * @var int
-	 */
-	protected $DEFAULT_HEIGHT = 600;
-
-	/**
 	 * Tag.
 	 *
 	 * @var string embed HTML blockquote tag to identify and replace with AMP version.
@@ -89,7 +75,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		$this->did_convert_elements = true;
 
 		return AMP_HTML_Utils::build_tag(
-			'amp-twitter',
+			$this->amp_tag,
 			array(
 				'data-tweetid' => $id,
 				'layout'       => 'responsive',

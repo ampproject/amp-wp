@@ -108,7 +108,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 
 			'blockquote_embed'                 => array(
 				'<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">just setting up my twttr</p>&mdash; Jack (@jack) <a href="https://twitter.com/wordpress/status/118252236836061184">March 21, 2006</a></blockquote>',
-				'<amp-twitter width="600" height="600" layout="responsive" data-tweetid="118252236836061184"></amp-twitter>',
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="118252236836061184"></amp-twitter>',
 			),
 		);
 	}
