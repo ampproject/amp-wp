@@ -1,6 +1,11 @@
 /* global moment */
 
 /**
+ * Helper methods for blocks.
+ */
+import { getLayoutControls } from '../utils.js';
+
+/**
  * Internal block libraries.
  */
 const { __ } = wp.i18n;
@@ -15,8 +20,7 @@ const {
 const {
 	DateTimePicker,
 	PanelBody,
-	TextControl,
-	SelectControl
+	TextControl
 } = wp.components;
 import timeago from 'timeago.js';
 
@@ -78,8 +82,9 @@ export default registerBlockType(
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { align, layout, cutoff, height, width } = attributes;
+		edit( props ) {
+			const { attributes, isSelected, setAttributes } = props;
+			const { align, cutoff } = attributes;
 			let timeAgo;
 			if ( attributes.dateTime ) {
 				if ( attributes.cutoff && attributes.cutoff < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds' ) ) ) {
@@ -107,26 +112,9 @@ export default registerBlockType(
 								currentDate={ attributes.dateTime || moment() }
 								onChange={ value => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) } // eslint-disable-line
 							/>
-							<SelectControl
-								label={ __( 'Layout' ) }
-								value={ layout }
-								options={ ampLayoutOptions }
-								onChange={ value => ( setAttributes( { layout: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								className="blocks-amp-timeout__width"
-								label={ __( 'Width (px)' ) }
-								value={ width !== undefined ? width : '' }
-								onChange={ value => ( setAttributes( { width: value } ) ) }
-							/>
-							<TextControl
-								type="number"
-								className="blocks-amp-timeout__height"
-								label={ __( 'Height (px)' ) }
-								value={ height !== undefined ? height : '' }
-								onChange={ value => ( setAttributes( { height: value } ) ) }
-							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
 							<TextControl
 								type="number"
 								className="blocks-amp-timeout__cutoff"
