@@ -11,9 +11,11 @@
 class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
-	 * Placeholder test
+	 * Test that analytics scripts are properly replaced by <amp-analytics>
+	 *
+	 * @covers AMP_Script_Sanitizer::sanitize()
 	 */
-	public function test_this() {
+	public function test_processing_analytics_script() {
 		$this->assertTrue( true );
 	}
 }
