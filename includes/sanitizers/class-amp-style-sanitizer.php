@@ -185,6 +185,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $calc_placeholders = array();
 
 	/**
+	 * Log of the stylesheet URLs that have been imported to guard against infinite loops.
+	 *
+	 * @var array
+	 */
+	private $processed_imported_stylesheet_urls = array();
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -201,6 +208,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'illegal_css_property',
 			'removed_unused_css_rules',
 			'unrecognized_css',
+			'disallowed_external_file_url',
+			'disallowed_file_extension',
+			'file_path_not_found',
 		);
 	}
 
@@ -600,8 +610,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 *     @type string[] $property_whitelist          Exclusively-allowed properties.
 	 *     @type string[] $property_blacklist          Disallowed properties.
-	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link (or @import?).
-	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link (or @import?).
+	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link or @import.
+	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link or @import.
 	 *     @type array    $allowed_at_rules            Allowed @-rules.
 	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
 	 * }
@@ -610,7 +620,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v5';
+		$cache_group = 'amp-parsed-stylesheet-v6';
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -657,6 +667,82 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $parsed['stylesheet'];
+	}
+
+	/**
+	 * Parse imported stylesheet.
+	 *
+	 * @param Import  $item     Import object.
+	 * @param CSSList $css_list CSS List.
+	 * @param array   $options {
+	 *     Options.
+	 *
+	 *     @type string $stylesheet_url Original URL for stylesheet when originating via link or @import.
+	 * }
+	 * @return array Validation results.
+	 */
+	private function parse_import_stylesheet( Import $item, CSSList $css_list, $options ) {
+		$results      = array();
+		$at_rule_args = $item->atRuleArgs();
+		$location     = array_shift( $at_rule_args );
+		$media_query  = array_shift( $at_rule_args );
+
+		if ( isset( $options['stylesheet_url'] ) ) {
+			$this->real_path_urls( array( $location ), $options['stylesheet_url'] );
+		}
+
+		$import_stylesheet_url = $location->getURL()->getString();
+
+		// Prevent importing something that has already been imported, and avoid infinite recursion.
+		if ( isset( $this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] ) ) {
+			$css_list->remove( $item );
+			return array();
+		}
+		$this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] = true;
+
+		// @todo Handle external per <https://github.com/Automattic/amp-wp/issues/1083>.
+		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, array( 'css', 'less', 'scss', 'sass' ) );
+
+		if ( is_wp_error( $css_file_path ) ) {
+			$error     = array(
+				'code'    => $css_file_path->get_error_code(),
+				'message' => $css_file_path->get_error_message(),
+			);
+			$sanitized = $this->should_sanitize_validation_error( $error );
+			if ( $sanitized ) {
+				$css_list->remove( $item );
+			}
+			$results[] = compact( 'error', 'sanitized' );
+			return $results;
+		}
+
+		// Load the CSS from the filesystem.
+		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+
+		if ( $media_query ) {
+			$stylesheet = sprintf( '@media %s { %s }', $media_query, $stylesheet );
+		}
+
+		$stylesheet = $this->process_stylesheet( $stylesheet, array(
+			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
+			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'stylesheet_url'     => $import_stylesheet_url,
+			'stylesheet_path'    => $css_file_path,
+		) );
+
+		$pending_stylesheet = array(
+			'keyframes'  => false,
+			'stylesheet' => $stylesheet,
+			'node'       => $this->current_node,
+			'sources'    => $this->current_sources,
+			'imported'   => $import_stylesheet_url,
+		);
+
+		// Stylesheet will now be inlined, so @import can be removed.
+		$css_list->remove( $item );
+
+		$this->pending_stylesheets[] = $pending_stylesheet;
+		return $results;
 	}
 
 	/**
@@ -971,12 +1057,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				}
 			} elseif ( $css_item instanceof Import ) {
-				$error     = array(
-					'code'    => 'illegal_css_at_rule',
-					'at_rule' => 'import',
+				$results = array_merge(
+					$results,
+					$this->parse_import_stylesheet( $css_item, $css_list, $options )
 				);
-				$sanitized = $this->should_sanitize_validation_error( $error );
-				$results[] = compact( 'error', 'sanitized' );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = array(
@@ -1468,21 +1552,32 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			),
 		);
 
+		/*
+		 * On Native AMP themes when there are new/rejected validation errors present, a parsed stylesheet may include
+		 * @import rules. These must be moved to the beginning to be honored.
+		 */
+		$imports = array();
+
 		// Divide pending stylesheet between custom and keyframes, and calculate size of each.
 		while ( ! empty( $this->pending_stylesheets ) ) {
 			$pending_stylesheet = array_shift( $this->pending_stylesheets );
 
 			$set_name = ! empty( $pending_stylesheet['keyframes'] ) ? 'keyframes' : 'custom';
 			$size     = 0;
-			foreach ( $pending_stylesheet['stylesheet'] as $part ) {
+			foreach ( $pending_stylesheet['stylesheet'] as $i => $part ) {
 				if ( is_string( $part ) ) {
 					$size += strlen( $part );
+					if ( '@import' === substr( $part, 0, 7 ) ) {
+						$imports[] = $part;
+						unset( $pending_stylesheet['stylesheet'][ $i ] );
+					}
 				} elseif ( is_array( $part ) ) {
 					$size += strlen( implode( ',', array_keys( $part[0] ) ) ); // Selectors.
 					$size += strlen( $part[1] ); // Declaration block.
 				}
 			}
 			$stylesheet_sets[ $set_name ]['total_size']           += $size;
+			$stylesheet_sets[ $set_name ]['imports']               = $imports;
 			$stylesheet_sets[ $set_name ]['pending_stylesheets'][] = $pending_stylesheet;
 		}
 
@@ -1513,7 +1608,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$head->appendChild( $this->amp_custom_style_element );
 			}
 
-			$css = implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
+			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
+			$css .= implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -1543,6 +1639,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( 'id' !== $attribute->nodeName || 'class' !== $attribute->nodeName ) {
 						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
 					}
+				}
+				if ( ! empty( $pending_stylesheet['imported'] ) ) {
+					$message .= sprintf( ' @import url(%s)', $pending_stylesheet['imported'] );
 				}
 				$message .= sprintf(
 					/* translators: %d is number of bytes */

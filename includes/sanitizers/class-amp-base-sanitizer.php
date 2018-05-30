@@ -78,6 +78,13 @@ abstract class AMP_Base_Sanitizer {
 	protected $root_element;
 
 	/**
+	 * Keep track of nodes that should not be removed to prevent duplicated validation errors since sanitization is rejected.
+	 *
+	 * @var array
+	 */
+	private $should_not_removed_nodes = array();
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
@@ -295,9 +302,17 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $validation_error = array() ) {
+
+		// Prevent double-reporting nodes that are rejected for sanitization.
+		if ( isset( $this->should_not_removed_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_removed_nodes[ $node->nodeName ], true ) ) {
+			return false;
+		}
+
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
 			$node->parentNode->removeChild( $node );
+		} else {
+			$this->should_not_removed_nodes[ $node->nodeName ][] = $node;
 		}
 		return $should_remove;
 	}
@@ -404,7 +419,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Get data-amp-* values from the parent node 'figure' added by editor block.
 	 *
-	 * @param DOMNode $node Base node.
+	 * @param DOMElement $node Base node.
 	 * @return array AMP data array.
 	 */
 	public function get_data_amp_attributes( $node ) {
@@ -445,9 +460,9 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Set attributes to node's parent element according to layout.
 	 *
-	 * @param DOMNode $node Node.
-	 * @param array   $new_attributes Attributes array.
-	 * @param string  $layout Layout.
+	 * @param DOMElement $node Node.
+	 * @param array      $new_attributes Attributes array.
+	 * @param string     $layout Layout.
 	 * @return array New attributes.
 	 */
 	public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {
