@@ -410,7 +410,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param string   $url The file URL.
 	 * @param string[] $allowed_extensions Allowed file extensions.
-	 * @return string|WP_Error|boolean Style's absolute validated filesystem path, or WP_Error when error.
+	 * @return string|WP_Error|bool Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
 		$needs_base_url = (
