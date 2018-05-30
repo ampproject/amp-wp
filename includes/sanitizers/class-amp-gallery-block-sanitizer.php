@@ -78,35 +78,30 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$num_images = 0;
+			$images = null;
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {
-				$images     = $node->getElementsByTagName( 'a' );
-				$num_images = $images->length;
+				$images = $node->getElementsByTagName( 'a' );
 			}
 
-			if ( 0 === $num_images ) {
-
-				// If not linking to anything then look for <amp-img>.
-				$images     = $node->getElementsByTagName( 'amp-img' );
-				$num_images = $images->length;
+			// If not linking to anything then look for <amp-img>.
+			if ( ! $images || 0 === $images->length ) {
+				$images = $node->getElementsByTagName( 'amp-img' );
 			}
 
-			if ( 0 === $num_images ) {
+			// Skip if no images found.
+			if ( ! $images || 0 === $images->length ) {
 				continue;
 			}
 
-			$carousel_height     = $this->get_carousel_height( $node );
-			$carousel_attributes = array(
-				'height' => $carousel_height,
+			$amp_carousel = AMP_DOM_Utils::create_node( $this->dom, 'amp-carousel', array(
+				'height' => $this->get_carousel_height( $node ),
 				'type'   => 'slides',
 				'layout' => 'fixed-height',
-			);
-			$amp_carousel        = AMP_DOM_Utils::create_node( $this->dom, 'amp-carousel', $carousel_attributes );
-
-			for ( $j = $num_images - 1; $j >= 0; $j-- ) {
-				$amp_carousel->appendChild( $images->item( $j ) );
+			) );
+			foreach ( $images as $image ) {
+				$amp_carousel->appendChild( $image );
 			}
 
 			$node->parentNode->replaceChild( $amp_carousel, $node );
@@ -117,39 +112,47 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Get carousel height by containing images.
 	 *
-	 * @param DOMNode $node Node <ul>.
-	 * @return int
+	 * @param DOMElement $element The UL element.
+	 * @return int Height.
 	 */
-	protected function get_carousel_height( $node ) {
-		$images     = $node->getElementsByTagName( 'amp-img' );
+	protected function get_carousel_height( $element ) {
+		$images     = $element->getElementsByTagName( 'amp-img' );
 		$num_images = $images->length;
-		$height     = false;
+		$max_height = 0;
+		$max_width  = 0;
 		if ( 0 === $num_images ) {
 			return self::FALLBACK_HEIGHT;
 		}
-		for ( $i = $num_images - 1; $i >= 0; $i-- ) {
-			$image        = $images->item( $i );
+		foreach ( $images as $image ) {
+			/**
+			 * Image.
+			 *
+			 * @var DOMElement $image
+			 */
 			$image_height = $image->getAttribute( 'height' );
-			if ( ! $image_height || ! is_numeric( $image_height ) ) {
-				continue;
+			if ( is_numeric( $image_height ) ) {
+				$max_height = max( $max_height, $image_height );
 			}
-			if ( ! $height ) {
-				$height = $image_height;
-			} elseif ( $height > $image_height ) {
-				$height = $image_height;
+			$image_width = $image->getAttribute( 'height' );
+			if ( is_numeric( $image_width ) ) {
+				$max_width = max( $max_width, $image_width );
 			}
 		}
 
-		return false === $height ? self::FALLBACK_HEIGHT : $height;
+		if ( ! empty( $this->args['content_max_width'] ) && $max_height > 0 && $max_width > $this->args['content_max_width'] ) {
+			$max_height = ( $max_width * $this->args['content_max_width'] ) / $max_height;
+		}
+
+		return ! $max_height ? self::FALLBACK_HEIGHT : $max_height;
 	}
 
 	/**
 	 * Set lightbox related attributes to <amp-img> within gallery.
 	 *
-	 * @param DOMNode $node <ul> node.
+	 * @param DOMElement $element The UL element.
 	 */
-	protected function add_lightbox_attributes_to_image_nodes( $node ) {
-		$images     = $node->getElementsByTagName( 'amp-img' );
+	protected function add_lightbox_attributes_to_image_nodes( $element ) {
+		$images     = $element->getElementsByTagName( 'amp-img' );
 		$num_images = $images->length;
 		if ( 0 === $num_images ) {
 			return;

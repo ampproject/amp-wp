@@ -180,7 +180,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			ampAttributes[ 'data-amp-lightbox' ] = attributes.ampLightbox;
 		}
 		if ( attributes.ampCarousel ) {
-			ampAttributes[ 'data-amp-carousel' ] = attributes.ampLightbox;
+			ampAttributes[ 'data-amp-carousel' ] = attributes.ampCarousel;
 		}
 
 		return _.extend( ampAttributes, props );
