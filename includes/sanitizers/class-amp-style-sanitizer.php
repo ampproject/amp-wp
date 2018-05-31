@@ -190,13 +190,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $selector_mappings = array();
 
 	/**
-	 * Original element replaced and expanded to the amp equivalent child.
-	 *
-	 * @var array
-	 */
-	private $replaced_internal_selector = array();
-
-	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -318,6 +311,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$used_tag_names[ $el->tagName ] = true;
 			}
 			$this->used_tag_names = array_keys( $used_tag_names );
+			foreach ( $this->selector_mappings as $html_tag => $amp_tags ) {
+				if ( 0 < count( array_intersect( $this->used_tag_names, $amp_tags ) ) ) {
+					$this->used_tag_names[] = $html_tag;
+				}
+			}
 		}
 		return $this->used_tag_names;
 	}
@@ -1815,7 +1813,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( ! $count ) {
 						continue;
 					}
-					$this->replaced_internal_selector[ $edited_selector . '>' . $html_selector ] = $edited_selector;
+					$selectors[]   = $edited_selector . '>' . $html_selector;
 					$replacements += $count;
 					while ( ! empty( $amp_selectors ) ) { // Note: This array contains only a couple items.
 						$amp_selector       = array_shift( $amp_selectors );
@@ -1916,10 +1914,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors = array_keys( $selectors_parsed );
 				}
 				if ( ! empty( $selectors ) ) {
-					$extra = array_intersect( $this->replaced_internal_selector, $selectors );
-					if ( ! empty( $extra ) ) {
-						$selectors = array_merge( $selectors, array_keys( $extra ) );
-					}
 					$stylesheet .= implode( ',', $selectors ) . $declaration_block;
 				}
 			}
