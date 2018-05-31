@@ -28,10 +28,10 @@ class AMP_Site_Validation {
 			'posts_per_page' => $number_posts,
 			'post_type'      => array_values( $post_types ),
 			'post_status'    => 'publish',
+			'fields'         => 'ids',
 		) );
 
-		$post_ids = wp_list_pluck( $query->posts, 'ID' );
-		return array_map( 'get_permalink', $post_ids );
+		return array_map( 'get_permalink', $query->posts );
 	}
 
 	/**
