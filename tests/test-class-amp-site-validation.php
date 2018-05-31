@@ -13,13 +13,6 @@
 class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 	/**
-	 * The name of the tested class.
-	 *
-	 * @var string
-	 */
-	const TESTED_CLASS = 'AMP_Site_Validation';
-
-	/**
 	 * Reset the state after a test method is called.
 	 *
 	 * @inheritdoc

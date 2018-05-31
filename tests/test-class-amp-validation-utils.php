@@ -123,6 +123,7 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_meta_boxes' ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::add_rest_api_fields' ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'after_setup_theme', self::TESTED_CLASS . '::conditionally_force_theme_support' ) );
 	}
 
 	/**
@@ -1603,6 +1604,21 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		$this->assertArrayHasKey( 'errors', $field );
 		$this->assertArrayHasKey( 'link', $field );
 		$this->assertEquals( $field['errors'], $this->get_mock_errors() );
+	}
+
+	/**
+	 * Test conditionally_force_theme_support.
+	 *
+	 * @covers AMP_Validation_Manager::conditionally_force_theme_support()
+	 */
+	public function test_conditionally_force_theme_support() {
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
+		AMP_Validation_Manager::conditionally_force_theme_support();
+		$this->assertFalse( current_theme_supports( 'amp' ) );
+
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
+		AMP_Validation_Manager::conditionally_force_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
 
 	/**

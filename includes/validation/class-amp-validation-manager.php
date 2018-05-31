@@ -152,6 +152,9 @@ class AMP_Validation_Manager {
 
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
+		// Run after other hooks, as this doesn't change the arguments for 'amp' theme support if it already exists.
+		add_action( 'after_setup_theme', array( __CLASS__, 'conditionally_force_theme_support' ), PHP_INT_MAX );
+
 		// Actions and filters involved in validation.
 		add_action( 'activate_plugin', function() {
 			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
@@ -1414,5 +1417,16 @@ class AMP_Validation_Manager {
 			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
+	}
+
+	/**
+	 * Forces Native AMP if the validation query var is present and the theme does not support 'amp.'
+	 *
+	 * @return void
+	 */
+	public static function conditionally_force_theme_support() {
+		if ( ! current_theme_supports( 'amp' ) && self::should_validate_response() ) {
+			add_theme_support( 'amp' );
+		}
 	}
 }
