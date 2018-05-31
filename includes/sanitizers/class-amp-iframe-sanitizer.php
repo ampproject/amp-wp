@@ -49,6 +49,19 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'iframe' => array(
+				'amp-iframe',
+			),
+		);
+	}
+
+	/**
 	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
@@ -189,7 +202,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	private function build_placeholder( $parent_attributes ) {
 		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'div', array(
 			'placeholder' => '',
-			'class' => 'amp-wp-iframe-placeholder',
+			'class'       => 'amp-wp-iframe-placeholder',
 		) );
 
 		return $placeholder_node;
