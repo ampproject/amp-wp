@@ -183,6 +183,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $processed_imported_stylesheet_urls = array();
 
 	/**
+	 * Mapping of HTML element selectors to AMP selector elements.
+	 *
+	 * @var array
+	 */
+	private $selector_mappings = array();
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -306,6 +313,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->used_tag_names = array_keys( $used_tag_names );
 		}
 		return $this->used_tag_names;
+	}
+
+	/**
+	 * Run logic before any sanitizers are run.
+	 *
+	 * After the sanitizers are instantiated but before calling sanitize on each of them, this
+	 * method is called with list of all the instantiated sanitizers.
+	 *
+	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
+	 */
+	public function before_sanitize( $sanitizers ) {
+		parent::before_sanitize( $sanitizers );
+
+		foreach ( $sanitizers as $sanitizer ) {
+			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {
+				if ( ! isset( $this->selector_mappings[ $html_selectors ] ) ) {
+					$this->selector_mappings[ $html_selectors ] = $amp_selectors;
+				} else {
+					$this->selector_mappings[ $html_selectors ] = array_unique(
+						array_merge( $this->selector_mappings[ $html_selectors ], $amp_selectors )
+					);
+				}
+			}
+		}
 	}
 
 	/**
@@ -647,7 +678,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v6';
+		$cache_group = 'amp-parsed-stylesheet-v7';
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1236,10 +1267,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options ) {
 		$results = array();
 
-		if ( method_exists( $ruleset, 'getSelectors' ) ) {
-			foreach ( $ruleset->getSelectors() as $selector ) {
-				$this->ampify_selector( $selector );
-			}
+		if ( $ruleset instanceof DeclarationBlock ) {
+			$this->ampify_ruleset_selectors( $ruleset );
 		}
 
 		// Remove disallowed properties.
@@ -1761,31 +1790,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Ampify CSS selectors.
+	 * Convert CSS selectors.
 	 *
-	 * @param Selector $selector CSS Selector.
+	 * @param DeclarationBlock $ruleset Ruleset.
 	 */
-	private function ampify_selector( $selector ) {
-		// @todo What about amp-anim, amp-playbuzz?
-		$mappings = array(
-			'audio'  => 'amp-audio',
-			'iframe' => 'amp-iframe',
-			'img'    => 'amp-img',
-			'video'  => 'amp-video',
-		);
-
-		$new_selector = $selector->getSelector();
-		foreach ( $mappings as $tag => $amp_tag ) {
-			if ( 0 === strpos( $selector->getSelector(), $tag ) ) {
-				$new_selector = substr_replace( $new_selector, $amp_tag, 0, strlen( $tag ) );
+	private function ampify_ruleset_selectors( $ruleset ) {
+		$selectors    = array();
+		$replacements = 0;
+		foreach ( $ruleset->getSelectors() as $old_selector ) {
+			$edited_selectors = array( $old_selector->getSelector() );
+			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
+				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector ) . '(?=$|[^a-z0-9_-])/i';
+				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
+					$original_selector = $edited_selector;
+					$amp_selector      = array_shift( $amp_selectors );
+					$edited_selector   = preg_replace( $html_pattern, $amp_selector, $edited_selector, -1, $count );
+					if ( ! $count ) {
+						continue;
+					}
+					$replacements += $count;
+					while ( ! empty( $amp_selectors ) ) { // Note: This array contains only a couple items.
+						$amp_selector       = array_shift( $amp_selectors );
+						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
+					}
+				}
 			}
-			if ( false !== strpos( $selector->getSelector(), ' ' . $tag ) ) {
-				$new_selector = str_replace( ' ' . $tag, ' ' . $amp_tag, $new_selector );
-			}
+			$selectors = array_merge( $selectors, $edited_selectors );
 		}
 
-		if ( $selector->getSelector() !== $new_selector ) {
-			$selector->setSelector( $new_selector );
+		if ( $replacements > 0 ) {
+			$ruleset->setSelectors( $selectors );
 		}
 	}
 

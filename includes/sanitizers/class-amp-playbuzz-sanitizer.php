@@ -41,6 +41,18 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	private static $height = '500';
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'div.pb_feed' => array( 'amp-playbuzz' ),
+			'.pb_feed'    => array( 'amp-playbuzz' ),
+		);
+	}
+
+	/**
 	 * Sanitize the Playbuzz elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2

@@ -47,6 +47,20 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private static $anim_extension = '.gif';
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'img' => array(
+				'amp-img',
+				'amp-anim',
+			),
+		);
+	}
+
+	/**
 	 * Sanitize the <img> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2

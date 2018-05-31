@@ -353,6 +353,54 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data for testing AMP selector conversion.
+	 *
+	 * @return array
+	 */
+	public function get_amp_selector_data() {
+		return array(
+			'img' => array(
+				'div img.color{color:red}',
+				'div amp-img.color,div amp-anim.color{color:red}',
+			),
+			'playbuzz' => array(
+				'p + .pb_feed{color:blue}',
+				'p + amp-playbuzz{color:blue}',
+			),
+			'video' => array(
+				'article>video{color:green}',
+				'article>amp-video{color:green}',
+			),
+			'iframe' => array(
+				'p>*:not(iframe){color:purple}',
+				'p>*:not(amp-iframe){color:purple}',
+			),
+			'audio' => array(
+				'audio{color:yellow}',
+				'amp-audio{color:yellow}',
+			),
+		);
+	}
+
+	/**
+	 * Test AMP selector conversion.
+	 *
+	 * @dataProvider get_amp_selector_data
+	 * @param string $input  Input stylesheet.
+	 * @param string $output Output stylesheet.
+	 */
+	public function test_amp_selector_conversion( $input, $output ) {
+		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body></body></html>";
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$sanitized   = AMP_Content_Sanitizer::sanitize_document( $dom, amp_get_content_sanitizers(), array(
+			'use_document_element' => true,
+		) );
+		$stylesheets = array_values( $sanitized['stylesheets'] );
+		$this->assertEquals( $output, $stylesheets[0] );
+	}
+
+	/**
 	 * Test handling of stylesheets with @font-face that have data: url source.
 	 *
 	 * Also confirm that class-based tree-shaking is working.
