@@ -25,6 +25,7 @@ class AMP_Editor_Blocks {
 	 */
 	public $amp_blocks = array(
 		'amp-mathml',
+		'amp-timeago',
 		'amp-o2-player',
 		'amp-ooyala-player',
 		'amp-reach-player',
@@ -62,8 +63,10 @@ class AMP_Editor_Blocks {
 		}
 
 		foreach ( $tags as &$tag ) {
-			$tag['data-amp-layout']    = true;
-			$tag['data-amp-noloading'] = true;
+			$tag['data-amp-layout']              = true;
+			$tag['data-amp-noloading']           = true;
+			$tag['data-amp-lightbox']            = true;
+			$tag['data-close-button-aria-label'] = true;
 		}
 
 		foreach ( $this->amp_blocks as $amp_block ) {
@@ -71,6 +74,7 @@ class AMP_Editor_Blocks {
 				$tags[ $amp_block ] = array();
 			}
 
+			// @todo The global attributes included here should be matched up with what is actually used by each block.
 			$tags[ $amp_block ] = array_merge(
 				array_fill_keys(
 					array(
@@ -121,15 +125,26 @@ class AMP_Editor_Blocks {
 			AMP__VERSION
 		);
 
+		wp_add_inline_script(
+			'amp-editor-blocks-build',
+			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
+			'before'
+		);
+
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n' ),
+			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
 
-		wp_add_inline_script( 'amp-editor-blocks', sprintf( 'ampEditorBlocks.boot();' ) );
+		wp_add_inline_script(
+			'amp-editor-blocks',
+			sprintf( 'ampEditorBlocks.boot( %s );', wp_json_encode( array(
+				'hasThemeSupport' => current_theme_supports( 'amp' ),
+			) ) )
+		);
 	}
 
 	/**

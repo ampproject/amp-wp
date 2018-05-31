@@ -9,7 +9,6 @@ use \Sabberworm\CSS\RuleSet\DeclarationBlock;
 use \Sabberworm\CSS\CSSList\CSSList;
 use \Sabberworm\CSS\Property\Selector;
 use \Sabberworm\CSS\RuleSet\RuleSet;
-use \Sabberworm\CSS\Rule\Rule;
 use \Sabberworm\CSS\Property\AtRule;
 use \Sabberworm\CSS\CSSList\KeyFrame;
 use \Sabberworm\CSS\RuleSet\AtRuleSet;
@@ -17,6 +16,7 @@ use \Sabberworm\CSS\Property\Import;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList;
 use \Sabberworm\CSS\Value\RuleValueList;
 use \Sabberworm\CSS\Value\URL;
+use \Sabberworm\CSS\CSSList\Document;
 
 /**
  * Class AMP_Style_Sanitizer
@@ -35,6 +35,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $require_https_src          Require HTTPS URLs.
 	 *      @type bool     $allow_dirty_styles         Allow dirty styles. This short-circuits the sanitize logic; it is used primarily in Customizer preview.
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
+	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
+	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 * }
 	 */
 	protected $args;
@@ -52,6 +54,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'[submit-error]',
 			'[submit-success]',
 		),
+		'should_locate_sources'     => false,
+		'parsed_cache_variant'      => null,
 	);
 
 	/**
@@ -158,14 +162,47 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $parse_css_duration = 0.0;
 
 	/**
-	 * Placeholders for calc() values that are temporarily removed from CSS since they cause parse errors.
+	 * Current node being processed.
 	 *
-	 * @since 1.0
-	 * @see AMP_Style_Sanitizer::add_calc_placeholders()
+	 * @var DOMElement|DOMAttr
+	 */
+	private $current_node;
+
+	/**
+	 * Current sources for a given node.
 	 *
 	 * @var array
 	 */
-	private $calc_placeholders = array();
+	private $current_sources;
+
+	/**
+	 * Log of the stylesheet URLs that have been imported to guard against infinite loops.
+	 *
+	 * @var array
+	 */
+	private $processed_imported_stylesheet_urls = array();
+
+	/**
+	 * Get error codes that can be raised during parsing of CSS.
+	 *
+	 * This is used to determine which validation errors should be taken into account
+	 * when determining which validation errors should vary the parse cache.
+	 *
+	 * @return array
+	 */
+	public static function get_css_parser_validation_error_codes() {
+		return array(
+			'css_parse_error',
+			'excessive_css',
+			'illegal_css_at_rule',
+			'illegal_css_important',
+			'illegal_css_property',
+			'removed_unused_css_rules',
+			'unrecognized_css',
+			'disallowed_file_extension',
+			'file_path_not_found',
+		);
+	}
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
@@ -304,6 +341,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// If 'width' attribute is present for 'col' tag, convert to proper CSS rule.
 		foreach ( $this->dom->getElementsByTagName( 'col' ) as $col ) {
+			/**
+			 * Col element.
+			 *
+			 * @var DOMElement $col
+			 */
 			$width_attr = $col->getAttribute( 'width' );
 			if ( ! empty( $width_attr ) && ( false === strpos( $width_attr, '*' ) ) ) {
 				$width_style = 'width: ' . $width_attr;
@@ -390,10 +432,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		$url_host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
-			/* translators: %s is the file URL */
-			return new WP_Error( 'disallowed_external_file_url', sprintf( __( 'Skipped file which does not have a recognized local host (%s).', 'amp' ), $url_host ) );
-		}
 
 		// Validate file extensions.
 		if ( ! empty( $allowed_extensions ) ) {
@@ -402,6 +440,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				/* translators: %s is the file URL */
 				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
 			}
+		}
+
+		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
+			/* translators: %s is file URL */
+			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $url_host ) );
 		}
 
 		$file_path = null;
@@ -422,34 +465,49 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Set the current node (and its sources when required).
+	 *
+	 * @since 1.0
+	 * @param DOMElement|DOMAttr|null $node Current node, or null to reset.
+	 */
+	private function set_current_node( $node ) {
+		if ( $this->current_node === $node ) {
+			return;
+		}
+
+		$this->current_node = $node;
+		if ( empty( $node ) ) {
+			$this->current_sources = null;
+		} elseif ( ! empty( $this->args['should_locate_sources'] ) ) {
+			$this->current_sources = AMP_Validation_Manager::locate_sources( $node );
+		}
+	}
+
+	/**
 	 * Process style element.
 	 *
 	 * @param DOMElement $element Style element.
 	 */
 	private function process_style_element( DOMElement $element ) {
+		$this->set_current_node( $element ); // And sources when needing to be located.
 
 		// @todo Any @keyframes rules could be removed from amp-custom and instead added to amp-keyframes.
 		$is_keyframes = $element->hasAttribute( 'amp-keyframes' );
 		$stylesheet   = trim( $element->textContent );
 		$cdata_spec   = $is_keyframes ? $this->style_keyframes_cdata_spec : $this->style_custom_cdata_spec;
-		if ( $stylesheet ) {
 
-			$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
-				'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
-				'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
-				'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
-			) );
+		$stylesheet = $this->process_stylesheet( $stylesheet, array(
+			'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
+			'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
+			'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
+		) );
 
-			$pending_stylesheet = array(
-				'keyframes'  => $is_keyframes,
-				'stylesheet' => $stylesheet,
-				'node'       => $element,
-			);
-			if ( ! empty( $this->args['validation_error_callback'] ) ) {
-				$pending_stylesheet['sources'] = AMP_Validation_Utils::locate_sources( $element ); // Needed because node is removed below.
-			}
-			$this->pending_stylesheets[] = $pending_stylesheet;
-		}
+		$this->pending_stylesheets[] = array(
+			'keyframes'  => $is_keyframes,
+			'stylesheet' => $stylesheet,
+			'node'       => $element,
+			'sources'    => $this->current_sources,
+		);
 
 		if ( $element->hasAttribute( 'amp-custom' ) ) {
 			if ( ! $this->amp_custom_style_element ) {
@@ -462,6 +520,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Remove from DOM since we'll be adding it to amp-custom.
 			$element->parentNode->removeChild( $element );
 		}
+
+		$this->set_current_node( null );
 	}
 
 	/**
@@ -473,28 +533,40 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$href = $element->getAttribute( 'href' );
 
 		// Allow font URLs, including protocol-less URLs and recognized URLs that use HTTP instead of HTTPS.
-		$normalized_font_href = preg_replace( '#^(http:)?(?=//)#', 'https:', $href );
-		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $normalized_font_href ) ) {
-			if ( $href !== $normalized_font_href ) {
-				$element->setAttribute( 'href', $normalized_font_href );
+		$normalized_url = preg_replace( '#^(http:)?(?=//)#', 'https:', $href );
+		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $normalized_url ) ) {
+			if ( $href !== $normalized_url ) {
+				$element->setAttribute( 'href', $normalized_url );
 			}
 			return;
 		}
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
-		if ( is_wp_error( $css_file_path ) ) {
+
+		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+			$contents = $this->fetch_external_stylesheet( $normalized_url );
+			if ( is_wp_error( $contents ) ) {
+				$this->remove_invalid_child( $element, array(
+					'code'    => $css_file_path->get_error_code(),
+					'message' => $css_file_path->get_error_message(),
+				) );
+				return;
+			} else {
+				$stylesheet = $contents;
+			}
+		} elseif ( is_wp_error( $css_file_path ) ) {
 			$this->remove_invalid_child( $element, array(
 				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
 			) );
 			return;
+		} else {
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		}
 
-		// Load the CSS from the filesystem.
-		$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		if ( false === $stylesheet ) {
 			$this->remove_invalid_child( $element, array(
-				'message' => __( 'Unable to load stylesheet from filesystem.', 'amp' ),
+				'code' => 'stylesheet_file_missing',
 			) );
 			return;
 		}
@@ -505,25 +577,50 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
 		}
 
-		$stylesheet = $this->process_stylesheet( $stylesheet, $element, array(
+		$this->set_current_node( $element ); // And sources when needing to be located.
+
+		$stylesheet = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
 			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
 			'stylesheet_url'     => $href,
 			'stylesheet_path'    => $css_file_path,
 		) );
 
-		$pending_stylesheet = array(
+		$this->pending_stylesheets[] = array(
 			'keyframes'  => false,
 			'stylesheet' => $stylesheet,
 			'node'       => $element,
+			'sources'    => $this->current_sources, // Needed because node is removed below.
 		);
-		if ( ! empty( $this->args['validation_error_callback'] ) ) {
-			$pending_stylesheet['sources'] = AMP_Validation_Utils::locate_sources( $element ); // Needed because node is removed below.
-		}
-		$this->pending_stylesheets[] = $pending_stylesheet;
 
 		// Remove now that styles have been processed.
 		$element->parentNode->removeChild( $element );
+
+		$this->set_current_node( null );
+	}
+
+	/**
+	 * Fetch external stylesheet.
+	 *
+	 * @param string $url External stylesheet URL.
+	 * @return string|WP_Error Stylesheet contents or WP_Error.
+	 */
+	private function fetch_external_stylesheet( $url ) {
+		$cache_key = md5( $url );
+		$contents  = get_transient( $cache_key );
+		if ( false === $contents ) {
+			$r = wp_remote_get( $url );
+			if ( 200 !== wp_remote_retrieve_response_code( $r ) ) {
+				$contents = new WP_Error(
+					wp_remote_retrieve_response_code( $r ),
+					wp_remote_retrieve_response_message( $r )
+				);
+			} else {
+				$contents = wp_remote_retrieve_body( $r );
+			}
+			set_transient( $cache_key, $contents, MONTH_IN_SECONDS );
+		}
+		return $contents;
 	}
 
 	/**
@@ -534,37 +631,60 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.0
 	 *
-	 * @param string             $stylesheet Stylesheet.
-	 * @param DOMElement|DOMAttr $node       Element (link/style) or style attribute where the stylesheet came from.
-	 * @param array              $options {
+	 * @param string $stylesheet Stylesheet.
+	 * @param array  $options {
 	 *     Options.
 	 *
-	 *     @type bool     $class_selector_tree_shaking Whether to perform tree shaking to delete rules that reference class names not extant in the current document.
 	 *     @type string[] $property_whitelist          Exclusively-allowed properties.
 	 *     @type string[] $property_blacklist          Disallowed properties.
-	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link (or @import?).
-	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link (or @import?).
+	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link or @import.
+	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link or @import.
 	 *     @type array    $allowed_at_rules            Allowed @-rules.
 	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
 	 * }
 	 * @return array Processed stylesheet parts.
 	 */
-	private function process_stylesheet( $stylesheet, $node, $options = array() ) {
-		$cache_impacting_options = wp_array_slice_assoc(
-			$options,
-			array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
+	private function process_stylesheet( $stylesheet, $options = array() ) {
+		$parsed      = null;
+		$cache_key   = null;
+		$cache_group = 'amp-parsed-stylesheet-v6';
+
+		$cache_impacting_options = array_merge(
+			wp_array_slice_assoc(
+				$options,
+				array( 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' )
+			),
+			wp_array_slice_assoc(
+				$this->args,
+				array( 'should_locate_sources', 'parsed_cache_variant' )
+			)
 		);
 
-		$cache_key = md5( $stylesheet . serialize( $cache_impacting_options ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$cache_key = md5( $stylesheet . wp_json_encode( $cache_impacting_options ) );
 
-		$cache_group = 'amp-parsed-stylesheet-v4';
 		if ( wp_using_ext_object_cache() ) {
 			$parsed = wp_cache_get( $cache_key, $cache_group );
 		} else {
 			$parsed = get_transient( $cache_key . $cache_group );
 		}
+
+		/*
+		 * Make sure that the parsed stylesheet was cached with current sanitizations.
+		 * The should_sanitize_validation_error method prevents duplicates from being reported.
+		 */
+		if ( ! empty( $parsed['validation_results'] ) ) {
+			foreach ( $parsed['validation_results'] as $validation_result ) {
+				$sanitized = $this->should_sanitize_validation_error( $validation_result['error'] );
+				if ( $sanitized !== $validation_result['sanitized'] ) {
+					$parsed = null; // Change to sanitization of validation error detected, so cache cannot be used.
+					break;
+				}
+			}
+		}
+
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
-			$parsed = $this->parse_stylesheet( $stylesheet, $options );
+			$parsed = $this->prepare_stylesheet( $stylesheet, $options );
+
 			if ( wp_using_ext_object_cache() ) {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
 			} else {
@@ -573,13 +693,100 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! empty( $this->args['validation_error_callback'] ) && ! empty( $parsed['validation_errors'] ) ) {
-			foreach ( $parsed['validation_errors'] as $validation_error ) {
-				call_user_func( $this->args['validation_error_callback'], array_merge( $validation_error, compact( 'node' ) ) );
-			}
+		return $parsed['stylesheet'];
+	}
+
+	/**
+	 * Parse imported stylesheet.
+	 *
+	 * @param Import  $item     Import object.
+	 * @param CSSList $css_list CSS List.
+	 * @param array   $options {
+	 *     Options.
+	 *
+	 *     @type string $stylesheet_url Original URL for stylesheet when originating via link or @import.
+	 * }
+	 * @return array Validation results.
+	 */
+	private function parse_import_stylesheet( Import $item, CSSList $css_list, $options ) {
+		$results      = array();
+		$at_rule_args = $item->atRuleArgs();
+		$location     = array_shift( $at_rule_args );
+		$media_query  = array_shift( $at_rule_args );
+
+		if ( isset( $options['stylesheet_url'] ) ) {
+			$this->real_path_urls( array( $location ), $options['stylesheet_url'] );
 		}
 
-		return $parsed['stylesheet'];
+		$import_stylesheet_url = $location->getURL()->getString();
+
+		// Prevent importing something that has already been imported, and avoid infinite recursion.
+		if ( isset( $this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] ) ) {
+			$css_list->remove( $item );
+			return array();
+		}
+		$this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] = true;
+
+		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, array( 'css', 'less', 'scss', 'sass' ) );
+
+		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+			$contents = $this->fetch_external_stylesheet( $import_stylesheet_url );
+			if ( is_wp_error( $contents ) ) {
+				$error     = array(
+					'code'    => $contents->get_error_code(),
+					'message' => $contents->get_error_message(),
+				);
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				if ( $sanitized ) {
+					$css_list->remove( $item );
+				}
+				$results[] = compact( 'error', 'sanitized' );
+				return $results;
+			} else {
+				$stylesheet = $contents;
+			}
+		} elseif ( is_wp_error( $css_file_path ) ) {
+			$error     = array(
+				'code'    => $css_file_path->get_error_code(),
+				'message' => $css_file_path->get_error_message(),
+			);
+			$sanitized = $this->should_sanitize_validation_error( $error );
+			if ( $sanitized ) {
+				$css_list->remove( $item );
+			}
+			$results[] = compact( 'error', 'sanitized' );
+			return $results;
+		} else {
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+		}
+
+		if ( $media_query ) {
+			$stylesheet = sprintf( '@media %s { %s }', $media_query, $stylesheet );
+		}
+
+		$options['stylesheet_url'] = $import_stylesheet_url;
+
+		$parsed_stylesheet = $this->parse_stylesheet( $stylesheet, $options );
+
+		$results = array_merge(
+			$results,
+			$parsed_stylesheet['validation_results']
+		);
+
+		/**
+		 * CSS Doc.
+		 *
+		 * @var Document $css_document
+		 */
+		$css_document = $parsed_stylesheet['css_document'];
+
+		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
+			$css_list->replace( $item, $css_document->getContents() );
+		} else {
+			$css_list->remove( $item );
+		}
+
+		return $results;
 	}
 
 	/**
@@ -592,11 +799,72 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Parsed stylesheet.
 	 *
-	 *    @type array $stylesheet        Stylesheet parts, where arrays are tuples for declaration blocks.
-	 *    @type array $validation_errors Validation errors.
+	 *    @type Document $css_document       CSS Document.
+	 *    @type array    $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 * }
 	 */
-	private function parse_stylesheet( $stylesheet_string, $options = array() ) {
+	private function parse_stylesheet( $stylesheet_string, $options ) {
+		$validation_results = array();
+		$css_document       = null;
+		try {
+			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
+			$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
+
+			// Find calc() functions and replace with placeholders since PHP-CSS-Parser can't handle them.
+			$stylesheet_string = $this->add_calc_placeholders( $stylesheet_string );
+
+			$parser_settings = Sabberworm\CSS\Settings::create();
+			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
+			$css_document    = $css_parser->parse();
+
+			if ( ! empty( $options['stylesheet_url'] ) ) {
+				$this->real_path_urls(
+					array_filter(
+						$css_document->getAllValues(),
+						function ( $value ) {
+							return $value instanceof URL;
+						}
+					),
+					$options['stylesheet_url']
+				);
+			}
+
+			$validation_results = array_merge(
+				$validation_results,
+				$this->process_css_list( $css_document, $options )
+			);
+		} catch ( Exception $exception ) {
+			$error = array(
+				'code'    => 'css_parse_error',
+				'message' => $exception->getMessage(),
+			);
+
+			/*
+			 * This is not a recoverable error, so sanitized here is just used to give user control
+			 * over whether to proceed with serving this exception-raising stylesheet in AMP.
+			 */
+			$sanitized = $this->should_sanitize_validation_error( $error );
+
+			$validation_results[] = compact( 'error', 'sanitized' );
+		}
+		return compact( 'validation_results', 'css_document' );
+	}
+
+	/**
+	 * Prepare stylesheet.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $stylesheet_string Stylesheet.
+	 * @param array  $options           Options. See definition in \AMP_Style_Sanitizer::process_stylesheet().
+	 * @return array {
+	 *    Prepared stylesheet.
+	 *
+	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
+	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 * }
+	 */
+	private function prepare_stylesheet( $stylesheet_string, $options = array() ) {
 		$start_time = microtime( true );
 
 		$options = array_merge(
@@ -615,32 +883,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$options
 		);
 
-		// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
-		$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
-
-		// Find calc() functions and replace with placeholders since PHP-CSS-Parser can't handle them.
-		$stylesheet_string = $this->add_calc_placeholders( $stylesheet_string );
-
-		$stylesheet        = array();
-		$validation_errors = array();
-		try {
-			$parser_settings = Sabberworm\CSS\Settings::create();
-			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
-			$css_document    = $css_parser->parse();
-
-			if ( ! empty( $options['stylesheet_url'] ) ) {
-				$this->real_path_urls(
-					array_filter(
-						$css_document->getAllValues(),
-						function ( $value ) {
-							return $value instanceof URL;
-						}
-					),
-					$options['stylesheet_url']
-				);
-			}
-
-			$validation_errors = $this->process_css_list( $css_document, $options );
+		$stylesheet         = array();
+		$parsed_stylesheet  = $this->parse_stylesheet( $stylesheet_string, $options );
+		$validation_results = $parsed_stylesheet['validation_results'];
+		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
+			$css_document = $parsed_stylesheet['css_document'];
 
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
 			$output_format->setSemicolonAfterLastRule( false );
@@ -705,13 +952,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 					// Restore calc() functions that were replaced with placeholders.
-					if ( ! empty( $this->calc_placeholders ) ) {
-						$declaration = str_replace(
-							array_keys( $this->calc_placeholders ),
-							array_values( $this->calc_placeholders ),
-							$declaration
-						);
-					}
+					$declaration = preg_replace_callback(
+						'/-wp-calc-placeholder\("(.+?)"\)/',
+						function( $matches ) {
+							return base64_decode( $matches[1] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+						},
+						$declaration
+					);
 
 					$stylesheet[] = array(
 						$selectors_parsed,
@@ -721,23 +968,62 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$stylesheet[] = $split_stylesheet[ $i ];
 				}
 			}
-
-			// Reset calc placeholders.
-			$this->calc_placeholders = array();
-		} catch ( Exception $exception ) {
-			$validation_errors[] = array(
-				'code'    => 'css_parse_error',
-				'message' => $exception->getMessage(),
-			);
 		}
 
 		$this->parse_css_duration += ( microtime( true ) - $start_time );
 
-		return compact( 'stylesheet', 'validation_errors' );
+		return compact( 'stylesheet', 'validation_results' );
 	}
 
 	/**
-	 * Add placeholders for calc() functions which the PHP-CSS-Parser doesn't handle them properly yet.
+	 * Previous return values from calls to should_sanitize_validation_error().
+	 *
+	 * This is used to prevent duplicates from being reported when the sanitization status
+	 * changes for a validation error in a previously-cached stylesheet.
+	 *
+	 * @see AMP_Style_Sanitizer::should_sanitize_validation_error()
+	 * @var array
+	 */
+	protected $previous_should_sanitize_validation_error_results = array();
+
+	/**
+	 * Check whether or not sanitization should occur in response to validation error.
+	 *
+	 * Supply sources to the error and the current node to data.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $validation_error Validation error.
+	 * @param array $data Data including the node.
+	 * @return bool Whether to sanitize.
+	 */
+	public function should_sanitize_validation_error( $validation_error, $data = array() ) {
+		if ( ! isset( $data['node'] ) ) {
+			$data['node'] = $this->current_node;
+		}
+		if ( ! isset( $validation_error['sources'] ) ) {
+			$validation_error['sources'] = $this->current_sources;
+		}
+
+		/*
+		 * This is used to prevent duplicates from being reported when the sanitization status
+		 * changes for a validation error in a previously-cached stylesheet.
+		 */
+		$args = compact( 'validation_error', 'data' );
+		foreach ( $this->previous_should_sanitize_validation_error_results as $result ) {
+			if ( $result['args'] === $args ) {
+				return $result['sanitized'];
+			}
+		}
+
+		$sanitized = parent::should_sanitize_validation_error( $validation_error, $data );
+
+		$this->previous_should_sanitize_validation_error_results[] = compact( 'args', 'sanitized' );
+		return $sanitized;
+	}
+
+	/**
+	 * Add encoded placeholders for calc() functions which the PHP-CSS-Parser doesn't handle them properly yet.
 	 *
 	 * @since 1.0
 	 * @link https://github.com/sabberworm/PHP-CSS-Parser/issues/79
@@ -766,10 +1052,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				// Found the end of the calc() function, so replace it with a placeholder function.
 				if ( 0 === $open_parens ) {
 					$matched_calc = substr( $css, $match_offset, $final_offset - $match_offset + 1 );
-					$placeholder  = sprintf( '-wp-calc-placeholder(%d)', count( $this->calc_placeholders ) );
-
-					// Store the placeholder function so the original calc() can be put in its place.
-					$this->calc_placeholders[ $placeholder ] = $matched_calc;
+					$placeholder  = sprintf( '-wp-calc-placeholder("%s")', base64_encode( $matched_calc ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
 					// Update the CSS to replace the matched calc() with the placeholder function.
 					$css = substr( $css, 0, $match_offset ) . $placeholder . substr( $css, $final_offset + 1 );
@@ -814,77 +1097,88 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Validation errors.
 	 */
 	private function process_css_list( CSSList $css_list, $options ) {
-		$validation_errors = array();
+		$results = array();
 
 		foreach ( $css_list->getContents() as $css_item ) {
+			$sanitized = false;
 			if ( $css_item instanceof DeclarationBlock && empty( $options['validate_keyframes'] ) ) {
-				$validation_errors = array_merge(
-					$validation_errors,
+				$results = array_merge(
+					$results,
 					$this->process_css_declaration_block( $css_item, $css_list, $options )
 				);
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
-				if ( in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
-					$validation_errors = array_merge(
-						$validation_errors,
+				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
+					$error     = array(
+						'code'    => 'illegal_css_at_rule',
+						'at_rule' => $css_item->atRuleName(),
+					);
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					$results[] = compact( 'error', 'sanitized' );
+				}
+				if ( ! $sanitized ) {
+					$results = array_merge(
+						$results,
 						$this->process_css_list( $css_item, $options )
 					);
-				} else {
-					$validation_errors[] = array(
-						'code'    => 'illegal_css_at_rule',
-						/* translators: %s is the CSS at-rule name. */
-						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
-					);
-					$css_list->remove( $css_item );
 				}
 			} elseif ( $css_item instanceof Import ) {
-				$validation_errors[] = array(
-					'code'    => 'illegal_css_import_rule',
-					'message' => __( 'CSS @import is currently disallowed.', 'amp' ),
+				$results = array_merge(
+					$results,
+					$this->parse_import_stylesheet( $css_item, $css_list, $options )
 				);
-				$css_list->remove( $css_item );
 			} elseif ( $css_item instanceof AtRuleSet ) {
-				if ( in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
-					$validation_errors = array_merge(
-						$validation_errors,
+				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
+					$error     = array(
+						'code'    => 'illegal_css_at_rule',
+						'at_rule' => $css_item->atRuleName(),
+					);
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					$results[] = compact( 'error', 'sanitized' );
+				}
+
+				if ( ! $sanitized ) {
+					$results = array_merge(
+						$results,
 						$this->process_css_declaration_block( $css_item, $css_list, $options )
 					);
-				} else {
-					$validation_errors[] = array(
-						'code'    => 'illegal_css_at_rule',
-						/* translators: %s is the CSS at-rule name. */
-						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
-					);
-					$css_list->remove( $css_item );
 				}
 			} elseif ( $css_item instanceof KeyFrame ) {
-				if ( in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
-					$validation_errors = array_merge(
-						$validation_errors,
-						$this->process_css_keyframes( $css_item, $options )
-					);
-				} else {
-					$validation_errors[] = array(
+				if ( ! in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
+					$error     = array(
 						'code'    => 'illegal_css_at_rule',
-						/* translators: %s is the CSS at-rule name. */
-						'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
+						'at_rule' => $css_item->atRuleName(),
+					);
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					$results[] = compact( 'error', 'sanitized' );
+				}
+
+				if ( ! $sanitized ) {
+					$results = array_merge(
+						$results,
+						$this->process_css_keyframes( $css_item, $options )
 					);
 				}
 			} elseif ( $css_item instanceof AtRule ) {
-				$validation_errors[] = array(
+				$error     = array(
 					'code'    => 'illegal_css_at_rule',
-					/* translators: %s is the CSS at-rule name. */
-					'message' => sprintf( __( 'CSS @%s rules are currently disallowed.', 'amp' ), $css_item->atRuleName() ),
+					'at_rule' => $css_item->atRuleName(),
 				);
-				$css_list->remove( $css_item );
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				$results[] = compact( 'error', 'sanitized' );
 			} else {
-				$validation_errors[] = array(
-					'code'    => 'unrecognized_css',
-					'message' => __( 'Unrecognized CSS removed.', 'amp' ),
+				$error     = array(
+					'code' => 'unrecognized_css',
+					'item' => get_class( $css_item ),
 				);
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				$results[] = compact( 'error', 'sanitized' );
+			}
+
+			if ( $sanitized ) {
 				$css_list->remove( $css_item );
 			}
 		}
-		return $validation_errors;
+		return $results;
 	}
 
 	/**
@@ -937,10 +1231,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param CSSList $css_list CSS List.
 	 * @param array   $options  Options.
 	 *
-	 * @return array Validation errors.
+	 * @return array Validation results.
 	 */
 	private function process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options ) {
-		$validation_errors = array();
+		$results = array();
 
 		// Remove disallowed properties.
 		if ( ! empty( $options['property_whitelist'] ) ) {
@@ -948,34 +1242,42 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $properties as $property ) {
 				$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
 				if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
-					$validation_errors[] = array(
+					$error     = array(
 						'code'           => 'illegal_css_property',
 						'property_name'  => $property->getRule(),
 						'property_value' => $property->getValue(),
 					);
-					$ruleset->removeRule( $property->getRule() );
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					if ( $sanitized ) {
+						$ruleset->removeRule( $property->getRule() );
+					}
+					$results[] = compact( 'error', 'sanitized' );
 				}
 			}
 		} else {
 			foreach ( $options['property_blacklist'] as $illegal_property_name ) {
 				$properties = $ruleset->getRules( $illegal_property_name );
 				foreach ( $properties as $property ) {
-					$validation_errors[] = array(
+					$error     = array(
 						'code'           => 'illegal_css_property',
 						'property_name'  => $property->getRule(),
-						'property_value' => $property->getValue(),
+						'property_value' => (string) $property->getValue(),
 					);
-					$ruleset->removeRule( $property->getRule() );
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					if ( $sanitized ) {
+						$ruleset->removeRule( $property->getRule() );
+					}
+					$results[] = compact( 'error', 'sanitized' );
 				}
 			}
 		}
 
 		if ( $ruleset instanceof AtRuleSet && 'font-face' === $ruleset->atRuleName() ) {
-			$this->process_font_face_at_rule( $ruleset, $options );
+			$this->process_font_face_at_rule( $ruleset );
 		}
 
-		$validation_errors = array_merge(
-			$validation_errors,
+		$results = array_merge(
+			$results,
 			$this->transform_important_qualifiers( $ruleset, $css_list )
 		);
 
@@ -984,7 +1286,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_list->remove( $ruleset );
 		}
 		// @todo Delete rules with selectors for -amphtml- class and i-amphtml- tags.
-		return $validation_errors;
+		return $results;
 	}
 
 	/**
@@ -993,9 +1295,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 *
 	 * @param AtRuleSet $ruleset Ruleset for @font-face.
-	 * @param array     $options Options.
 	 */
-	private function process_font_face_at_rule( AtRuleSet $ruleset, $options ) {
+	private function process_font_face_at_rule( AtRuleSet $ruleset ) {
 		$src_properties = $ruleset->getRules( 'src' );
 		if ( empty( $src_properties ) ) {
 			return;
@@ -1109,23 +1410,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param KeyFrame $css_list Ruleset.
 	 * @param array    $options  Options.
-	 * @return array Validation errors.
+	 * @return array Validation results.
 	 */
 	private function process_css_keyframes( KeyFrame $css_list, $options ) {
-		$validation_errors = array();
+		$results = array();
 		if ( ! empty( $options['property_whitelist'] ) ) {
 			foreach ( $css_list->getContents() as $rules ) {
 				if ( ! ( $rules instanceof DeclarationBlock ) ) {
-					$validation_errors[] = array(
-						'code'    => 'unrecognized_css',
-						'message' => __( 'Unrecognized CSS removed.', 'amp' ),
+					$error     = array(
+						'code' => 'unrecognized_css',
+						'item' => get_class( $rules ),
 					);
-					$css_list->remove( $rules );
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					if ( $sanitized ) {
+						$css_list->remove( $rules );
+					}
+					$results[] = compact( 'error', 'sanitized' );
 					continue;
 				}
 
-				$validation_errors = array_merge(
-					$validation_errors,
+				$results = array_merge(
+					$results,
 					$this->transform_important_qualifiers( $rules, $css_list )
 				);
 
@@ -1133,17 +1438,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				foreach ( $properties as $property ) {
 					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
 					if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
-						$validation_errors[] = array(
+						$error     = array(
 							'code'           => 'illegal_css_property',
 							'property_name'  => $property->getRule(),
-							'property_value' => $property->getValue(),
+							'property_value' => (string) $property->getValue(),
 						);
-						$rules->removeRule( $property->getRule() );
+						$sanitized = $this->should_sanitize_validation_error( $error );
+						if ( $sanitized ) {
+							$rules->removeRule( $property->getRule() );
+						}
+						$results[] = compact( 'error', 'sanitized' );
 					}
 				}
 			}
 		}
-		return $validation_errors;
+		return $results;
 	}
 
 	/**
@@ -1155,10 +1464,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param RuleSet|DeclarationBlock $ruleset  Rule set.
 	 * @param CSSList                  $css_list CSS List.
-	 * @return array Validation errors.
+	 * @return array Validation results.
 	 */
 	private function transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list ) {
-		$validation_errors    = array();
+		$results = array();
+
+		// An !important only makes sense for rulesets that have selectors.
 		$allow_transformation = (
 			$ruleset instanceof DeclarationBlock
 			&&
@@ -1169,22 +1480,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$importants = array();
 		foreach ( $properties as $property ) {
 			if ( $property->getIsImportant() ) {
-				$property->setIsImportant( false );
-
-				// An !important doesn't make sense for rulesets that don't have selectors.
 				if ( $allow_transformation ) {
 					$importants[] = $property;
+					$property->setIsImportant( false );
 					$ruleset->removeRule( $property->getRule() );
 				} else {
-					$validation_errors[] = array(
-						'code'    => 'illegal_css_important',
-						'message' => __( 'Illegal CSS !important qualifier.', 'amp' ),
+					$error     = array(
+						'code' => 'illegal_css_important',
 					);
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					if ( $sanitized ) {
+						$property->setIsImportant( false );
+					}
+					$results[] = compact( 'error', 'sanitized' );
 				}
 			}
 		}
 		if ( ! $allow_transformation || empty( $importants ) ) {
-			return $validation_errors;
+			return $results;
 		}
 
 		$important_ruleset = clone $ruleset;
@@ -1223,7 +1536,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$important_ruleset->setRules( $importants );
 		$css_list->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
 
-		return $validation_errors;
+		return $results;
 	}
 
 	/**
@@ -1250,33 +1563,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$root  = ':root' . str_repeat( ':not(#_)', 5 ); // @todo The correctness of using "5" should be validated.
 		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
 
-		$stylesheet = $this->process_stylesheet( $rule, $style_attribute, array(
+		$this->set_current_node( $element ); // And sources when needing to be located.
+
+		$stylesheet = $this->process_stylesheet( $rule, array(
 			'allowed_at_rules'   => array(),
 			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
 		) );
 
-		if ( empty( $stylesheet ) ) {
-			$element->removeAttribute( 'style' );
-			return;
-		}
-
-		$pending_stylesheet = array(
-			'stylesheet' => $stylesheet,
-			'node'       => $element,
-			'keyframes'  => false,
-		);
-		if ( ! empty( $this->args['validation_error_callback'] ) ) {
-			$pending_stylesheet['sources'] = AMP_Validation_Utils::locate_sources( $element ); // Needed because node is removed below.
-		}
-
-		$this->pending_stylesheets[] = $pending_stylesheet;
-
 		$element->removeAttribute( 'style' );
-		if ( $element->hasAttribute( 'class' ) ) {
-			$element->setAttribute( 'class', $element->getAttribute( 'class' ) . ' ' . $class );
-		} else {
-			$element->setAttribute( 'class', $class );
+
+		if ( $stylesheet ) {
+			$this->pending_stylesheets[] = array(
+				'stylesheet' => $stylesheet,
+				'node'       => $element,
+				'sources'    => $this->current_sources,
+			);
+
+			if ( $element->hasAttribute( 'class' ) ) {
+				$element->setAttribute( 'class', $element->getAttribute( 'class' ) . ' ' . $class );
+			} else {
+				$element->setAttribute( 'class', $class );
+			}
 		}
+
+		$this->set_current_node( null );
 	}
 
 	/**
@@ -1307,21 +1617,32 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			),
 		);
 
+		/*
+		 * On Native AMP themes when there are new/rejected validation errors present, a parsed stylesheet may include
+		 * @import rules. These must be moved to the beginning to be honored.
+		 */
+		$imports = array();
+
 		// Divide pending stylesheet between custom and keyframes, and calculate size of each.
 		while ( ! empty( $this->pending_stylesheets ) ) {
 			$pending_stylesheet = array_shift( $this->pending_stylesheets );
 
 			$set_name = ! empty( $pending_stylesheet['keyframes'] ) ? 'keyframes' : 'custom';
 			$size     = 0;
-			foreach ( $pending_stylesheet['stylesheet'] as $part ) {
+			foreach ( $pending_stylesheet['stylesheet'] as $i => $part ) {
 				if ( is_string( $part ) ) {
 					$size += strlen( $part );
+					if ( '@import' === substr( $part, 0, 7 ) ) {
+						$imports[] = $part;
+						unset( $pending_stylesheet['stylesheet'][ $i ] );
+					}
 				} elseif ( is_array( $part ) ) {
 					$size += strlen( implode( ',', array_keys( $part[0] ) ) ); // Selectors.
 					$size += strlen( $part[1] ); // Declaration block.
 				}
 			}
 			$stylesheet_sets[ $set_name ]['total_size']           += $size;
+			$stylesheet_sets[ $set_name ]['imports']               = $imports;
 			$stylesheet_sets[ $set_name ]['pending_stylesheets'][] = $pending_stylesheet;
 		}
 
@@ -1352,7 +1673,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$head->appendChild( $this->amp_custom_style_element );
 			}
 
-			$css = implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
+			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
+			$css .= implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -1420,12 +1742,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $stylesheet_sets['keyframes']['final_stylesheets'] ) ) {
 			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( ! $body ) {
-				if ( ! empty( $this->args['validation_error_callback'] ) ) {
-					call_user_func( $this->args['validation_error_callback'], array(
-						'code'    => 'missing_body_element',
-						'message' => __( 'amp-keyframes must be last child of body element.', 'amp' ),
-					) );
-				}
+				$this->should_sanitize_validation_error( array(
+					'code' => 'missing_body_element',
+				) );
 			} else {
 				$style_element = $this->dom->createElement( 'style' );
 				$style_element->setAttribute( 'amp-keyframes', '' );
@@ -1453,10 +1772,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		);
 
-		if ( $is_too_much_css && $should_tree_shake && ! empty( $this->args['validation_error_callback'] ) ) {
-			call_user_func( $this->args['validation_error_callback'], array(
-				'code'    => 'removed_unused_css_rules',
-				'message' => __( 'Too much CSS is enqueued and so seemingly irrelevant rules have been removed.', 'amp' ),
+		if ( $is_too_much_css && $should_tree_shake ) {
+			$should_tree_shake = $this->should_sanitize_validation_error( array(
+				'code' => 'removed_unused_css_rules',
 			) );
 		}
 
@@ -1479,49 +1797,49 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
 					$stylesheet .= $stylesheet_part;
-				} else {
-					list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
-					if ( $should_tree_shake ) {
-						$selectors = array();
-						foreach ( $selectors_parsed as $selector => $parsed_selector ) {
-							$should_include = (
-								( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
-								||
+					continue;
+				}
+				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
+				if ( $should_tree_shake ) {
+					$selectors = array();
+					foreach ( $selectors_parsed as $selector => $parsed_selector ) {
+						$should_include = (
+							( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
+							||
+							(
+								// If all class names are used in the doc.
 								(
-									// If all class names are used in the doc.
-									(
-										empty( $parsed_selector['classes'] )
-										||
-										0 === count( array_diff( $parsed_selector['classes'], $this->get_used_class_names() ) )
-									)
-									&&
-									// If all IDs are used in the doc.
-									(
-										empty( $parsed_selector['ids'] )
-										||
-										0 === count( array_filter( $parsed_selector['ids'], function( $id ) use ( $dom ) {
-											return ! $dom->getElementById( $id );
-										} ) )
-									)
-									&&
-									// If tag names are present in the doc.
-									(
-										empty( $parsed_selector['tags'] )
-										||
-										0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
-									)
+									empty( $parsed_selector['classes'] )
+									||
+									0 === count( array_diff( $parsed_selector['classes'], $this->get_used_class_names() ) )
 								)
-							);
-							if ( $should_include ) {
-								$selectors[] = $selector;
-							}
+								&&
+								// If all IDs are used in the doc.
+								(
+									empty( $parsed_selector['ids'] )
+									||
+									0 === count( array_filter( $parsed_selector['ids'], function( $id ) use ( $dom ) {
+										return ! $dom->getElementById( $id );
+									} ) )
+								)
+								&&
+								// If tag names are present in the doc.
+								(
+									empty( $parsed_selector['tags'] )
+									||
+									0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
+								)
+							)
+						);
+						if ( $should_include ) {
+							$selectors[] = $selector;
 						}
-					} else {
-						$selectors = array_keys( $selectors_parsed );
 					}
-					if ( ! empty( $selectors ) ) {
-						$stylesheet .= implode( ',', $selectors ) . $declaration_block;
-					}
+				} else {
+					$selectors = array_keys( $selectors_parsed );
+				}
+				if ( ! empty( $selectors ) ) {
+					$stylesheet .= implode( ',', $selectors ) . $declaration_block;
 				}
 			}
 			$sheet_size                 = strlen( $stylesheet );
@@ -1536,28 +1854,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Report validation error if size is now too big.
 			if ( $final_size + $sheet_size > $stylesheet_set['cdata_spec']['max_bytes'] ) {
-				if ( ! empty( $this->args['validation_error_callback'] ) ) {
-					$validation_error = array(
-						'code'    => 'excessive_css',
-						'message' => sprintf(
-							/* translators: %d is the number of bytes over the limit */
-							__( 'Too much CSS output (by %d bytes).', 'amp' ),
-							( $final_size + $sheet_size ) - $stylesheet_set['cdata_spec']['max_bytes']
-						),
-						'node'    => $pending_stylesheet['node'],
-					);
-					if ( isset( $pending_stylesheet['sources'] ) ) {
-						$validation_error['sources'] = $pending_stylesheet['sources'];
-					}
-					call_user_func( $this->args['validation_error_callback'], $validation_error );
+				$validation_error = array(
+					'code' => 'excessive_css',
+				);
+				if ( isset( $pending_stylesheet['sources'] ) ) {
+					$validation_error['sources'] = $pending_stylesheet['sources'];
 				}
-				$pending_stylesheet['included'] = false;
-			} else {
-				$final_size += $sheet_size;
 
-				$stylesheet_set['final_stylesheets'][ $hash ] = $stylesheet;
-				$pending_stylesheet['included']               = true;
+				if ( $this->should_sanitize_validation_error( $validation_error, wp_array_slice_assoc( $pending_stylesheet, array( 'node' ) ) ) ) {
+					$pending_stylesheet['included'] = false;
+					continue; // Skip to the next stylesheet.
+				}
 			}
+
+			$final_size += $sheet_size;
+
+			$pending_stylesheet['included']               = true;
+			$stylesheet_set['final_stylesheets'][ $hash ] = $stylesheet;
 		}
 
 		return $stylesheet_set;

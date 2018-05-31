@@ -1,4 +1,9 @@
 /**
+ * Helper methods for blocks.
+ */
+import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
+
+/**
  * Internal block libraries.
  */
 const { __ } = wp.i18n;
@@ -8,7 +13,6 @@ const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
-	SelectControl,
 	Placeholder
 } = wp.components;
 
@@ -18,41 +22,54 @@ const {
 export default registerBlockType(
 	'amp/amp-reach-player',
 	{
-		title: __( 'AMP Reach Player' ),
-		description: __( 'Displays the Reach Player configured in the Beachfront Reach platform.' ),
+		title: __( 'AMP Reach Player', 'amp' ),
+		description: __( 'Displays the Reach Player configured in the Beachfront Reach platform.', 'amp' ),
 		category: 'common',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed' ),
-			__( 'Beachfront Reach video' )
+			__( 'Embed', 'amp' ),
+			__( 'Beachfront Reach video', 'amp' )
 		],
 
 		attributes: {
 			dataEmbedId: {
-				type: 'string'
-			},
-			layout: {
 				type: 'string',
-				default: 'fixed-height'
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'data-embed-id'
+			},
+			ampLayout: {
+				type: 'string',
+				default: 'fixed-height',
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-reach-player',
+				attribute: 'height'
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { dataEmbedId, layout, height, width } = attributes;
+		edit( props ) {
+			const { attributes, isSelected, setAttributes } = props;
+			const { dataEmbedId } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: __( 'Responsive' ) },
-				{ value: 'fixed-height', label: __( 'Fixed Height' ) },
-				{ value: 'fixed', label: __( 'Fixed' ) },
-				{ value: 'fill', label: __( 'Fill' ) },
-				{ value: 'flex-item', label: __( 'Flex-item' ) }
+				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
+				{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
+				{ value: 'fill', label: __( 'Fill', 'amp' ) },
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) }
 
 			];
 			let url = false;
@@ -64,46 +81,26 @@ export default registerBlockType(
 					{
 						isSelected && (
 							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Reach settings' ) }>
+								<PanelBody title={ __( 'Reach settings', 'amp' ) }>
 									<TextControl
-										label={ __( 'The Reach player embed id (required)' ) }
+										label={ __( 'The Reach player embed id (required)', 'amp' ) }
 										value={ dataEmbedId }
 										onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
 									/>
-									<SelectControl
-										label={ __( 'Layout' ) }
-										value={ layout }
-										options={ ampLayoutOptions }
-										onChange={ value => ( setAttributes( { layout: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Width (px)' ) }
-										value={ width !== undefined ? width : '' }
-										onChange={ value => ( setAttributes( { width: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Height (px)' ) }
-										value={ height }
-										onChange={ value => ( setAttributes( { height: value } ) ) }
-									/>
+									{
+										getLayoutControls( props, ampLayoutOptions )
+									}
 								</PanelBody>
 							</InspectorControls>
 						)
 					}
 					{
-						url && (
-							<Placeholder label={ __( 'Reach Player' ) }>
-								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
-							</Placeholder>
-						)
+						url && getMediaPlaceholder( __( 'Reach Player', 'amp' ), url )
 					}
 					{
 						! url && (
-							<Placeholder label={ __( 'Reach Player' ) }>
-								<p>{ __( 'Add Reach player embed ID to use the block.' ) }</p>
+							<Placeholder label={ __( 'Reach Player', 'amp' ) }>
+								<p>{ __( 'Add Reach player embed ID to use the block.', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
@@ -112,14 +109,14 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			const { dataEmbedId, layout, height, width } = attributes;
+			const { dataEmbedId, ampLayout, height, width } = attributes;
 
 			let reachProps = {
-				layout: layout,
+				layout: ampLayout,
 				height: height,
 				'data-embed-id': dataEmbedId
 			};
-			if ( 'fixed-height' !== layout && width ) {
+			if ( 'fixed-height' !== ampLayout && width ) {
 				reachProps.width = width;
 			}
 			return (
