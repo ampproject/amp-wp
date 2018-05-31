@@ -23,7 +23,6 @@ abstract class AMP_Base_Sanitizer {
 	 * Value for <amp-image-lightbox> ID.
 	 *
 	 * @since 1.0
-	 * @todo Move to AMP_Img_Sanitizer?
 	 *
 	 * @const string
 	 */
@@ -137,25 +136,14 @@ abstract class AMP_Base_Sanitizer {
 	 * After the sanitizers are instantiated but before calling sanitize on each of them, this
 	 * method is called with list of all the instantiated sanitizers.
 	 *
-	 * @todo Call this init?
-	 *
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
 	 */
-	public function before_sanitize( $sanitizers ) {}
+	public function init( $sanitizers ) {}
 
 	/**
 	 * Sanitize the HTML contained in the DOMDocument received by the constructor
 	 */
 	abstract public function sanitize();
-
-	/**
-	 * Run logic after all sanitizers are finished.
-	 *
-	 * @todo Do we even need this?
-	 *
-	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
-	 */
-	public function after_sanitize( $sanitizers ) {}
 
 	/**
 	 * Return array of values that would be valid as an HTML `script` element.
@@ -475,11 +463,6 @@ abstract class AMP_Base_Sanitizer {
 			if ( isset( $parent_attributes['data-amp-noloading'] ) && true === filter_var( $parent_attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
 				$attributes['noloading'] = $parent_attributes['data-amp-noloading'];
 			}
-
-			// @todo Move to AMP_Img_Sanitizer subclassed method?
-			if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
-				$attributes['lightbox'] = true;
-			}
 		}
 
 		return $attributes;
@@ -498,13 +481,6 @@ abstract class AMP_Base_Sanitizer {
 		}
 		if ( isset( $amp_data['noloading'] ) ) {
 			$attributes['data-amp-noloading'] = '';
-		}
-		// @todo Move lightbox condition to subclassed method of AMP_Img_Sanitizer.
-		if ( isset( $amp_data['lightbox'] ) ) {
-			$attributes['data-amp-lightbox'] = '';
-			$attributes['on']                = 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID;
-			$attributes['role']              = 'button';
-			$attributes['tabindex']          = 0;
 		}
 		return $attributes;
 	}

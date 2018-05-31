@@ -236,14 +236,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_data       = $this->get_data_amp_attributes( $node );
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 		$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
+		$old_attributes = $this->maybe_add_lightbox_attributes( $old_attributes, $node );
 
 		$new_attributes = $this->filter_attributes( $old_attributes );
 		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
 		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
-
-		if ( isset( $old_attributes['data-amp-lightbox'] ) ) {
-			$this->maybe_add_amp_image_lightbox_node();
-		}
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
@@ -260,6 +257,33 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$new_node = $this->handle_centering( $new_node );
 		$node->parentNode->replaceChild( $new_node, $node );
+	}
+
+	/**
+	 * Set lightbox attributes.
+	 *
+	 * @param array   $attributes Array of attributes.
+	 * @param DomNode $node Array of AMP attributes.
+	 * @return array Updated attributes.
+	 */
+	private function maybe_add_lightbox_attributes( $attributes, $node ) {
+		$parent_node = $node->parentNode;
+		if ( 'figure' !== $parent_node->tagName ) {
+			return $attributes;
+		}
+
+		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+
+		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
+			$attributes['data-amp-lightbox'] = '';
+			$attributes['on']                = 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID;
+			$attributes['role']              = 'button';
+			$attributes['tabindex']          = 0;
+
+			$this->maybe_add_amp_image_lightbox_node();
+		}
+
+		return $attributes;
 	}
 
 	/**

@@ -323,8 +323,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
 	 */
-	public function before_sanitize( $sanitizers ) {
-		parent::before_sanitize( $sanitizers );
+	public function init( $sanitizers ) {
+		parent::init( $sanitizers );
 
 		foreach ( $sanitizers as $sanitizer ) {
 			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {

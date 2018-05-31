@@ -97,7 +97,7 @@ class AMP_Content_Sanitizer {
 
 		// Let the sanitizers know about each other prior to sanitizing.
 		foreach ( $sanitizers as $sanitizer ) {
-			$sanitizer->before_sanitize( $sanitizers );
+			$sanitizer->init( $sanitizers );
 		}
 
 		// Sanitize.
@@ -114,11 +114,6 @@ class AMP_Content_Sanitizer {
 			}
 
 			AMP_Response_Headers::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
-		}
-
-		// Let the sanitizers.
-		foreach ( $sanitizers as $sanitizer ) {
-			$sanitizer->after_sanitize( $sanitizers );
 		}
 
 		return compact( 'scripts', 'styles', 'stylesheets' );
