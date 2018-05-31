@@ -362,13 +362,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'img' => array(
 				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div img.logo{border:solid 1px red}',
-				'div amp-img.logo{border:solid 1px red}', // Note that amp-anim is tree-shaken.
+				'div amp-img.logo,div amp-anim.logo{border:solid 1px red}', // Note that amp-anim is not tree-shaken because amp-anim is added to dynamic_element_selectors.
 			),
-			'img-anim' => array(
-				// Note: The spinner is in the following to prevent tree-shaking of the amp-anim element.
-				sprintf( '<div><img class="logo" src="%s" width="200" height="100"><img class="logo" src="%s" width="100" height="100"></div>', admin_url( 'images/wordpress-logo.png' ), admin_url( 'images/spinner-2x.gif' ) ),
-				'div img.logo{border:solid 1px red}',
-				'div amp-img.logo,div amp-anim.logo{border:solid 1px red}',
+			'img-cover' => array(
+				sprintf( '<div><amp-img class="logo" src="%s" width="200" height="100"></amp-img></div>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div amp-img.logo img{object-fit:cover}',
+				'div amp-img.logo amp-img,div amp-img.logo amp-anim{object-fit:cover}', // Note that amp-anim is not tree-shaken because amp-anim is added to dynamic_element_selectors.
 			),
 			'playbuzz' => array(
 				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
