@@ -12,7 +12,7 @@ class AMP_Image_Dimension_Extractor {
 
 		$return_dimensions = array();
 
-		// Back-compat for users calling this method directly
+		// Back-compat for users calling this method directly.
 		$is_single = is_string( $urls );
 		if ( $is_single ) {
 			$urls = array( $urls );
@@ -42,7 +42,7 @@ class AMP_Image_Dimension_Extractor {
 			$return_dimensions[ $original_url ] = $dimension;
 		}
 
-		// Back-compat: just return the dimensions, not the full mapped array
+		// Back-compat: just return the dimensions, not the full mapped array.
 		if ( $is_single ) {
 			return current( $return_dimensions );
 		}
