@@ -311,6 +311,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$used_tag_names[ $el->tagName ] = true;
 			}
 			$this->used_tag_names = array_keys( $used_tag_names );
+			foreach ( $this->selector_mappings as $html_tag => $amp_tags ) {
+				if ( 0 < count( array_intersect( $this->used_tag_names, $amp_tags ) ) ) {
+					$this->used_tag_names[] = $html_tag;
+				}
+			}
 		}
 		return $this->used_tag_names;
 	}
@@ -1808,10 +1813,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( ! $count ) {
 						continue;
 					}
+					$selectors[]   = $edited_selector . '>' . $html_selector;
 					$replacements += $count;
 					while ( ! empty( $amp_selectors ) ) { // Note: This array contains only a couple items.
 						$amp_selector       = array_shift( $amp_selectors );
-						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
+						$edited_selector    = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
+						$edited_selectors[] = $edited_selector;
+						$selectors[]        = $edited_selector . '>' . $html_selector;
 					}
 				}
 			}
