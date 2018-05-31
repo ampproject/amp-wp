@@ -364,10 +364,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'div img.logo{border:solid 1px red}',
 				'div amp-img.logo,div amp-anim.logo{border:solid 1px red}', // Note that amp-anim is not tree-shaken because amp-anim is added to dynamic_element_selectors.
 			),
+			'img_with_amp_img' => array(
+				'<div></div>',
+				'amp-img img{background-color:red}',
+				'amp-img img{background-color:red}',
+			),
 			'img-cover' => array(
 				sprintf( '<div><amp-img class="logo" src="%s" width="200" height="100"></amp-img></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div amp-img.logo img{object-fit:cover}',
-				'div amp-img.logo amp-img,div amp-img.logo amp-anim{object-fit:cover}', // Note that amp-anim is not tree-shaken because amp-anim is added to dynamic_element_selectors.
+				'div amp-img.logo img{object-fit:cover}',
 			),
 			'playbuzz' => array(
 				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
@@ -378,6 +383,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<article><video src="http://example.com" height="100" width="200"></video></article>',
 				'article>video{border:solid 1px green}',
 				'article>amp-video{border:solid 1px green}',
+			),
+			'video_with_amp_video' => array(
+				'<article></article>',
+				'amp-video.video video{border:solid 1px green}',
+				'amp-video.video video{border:solid 1px green}',
 			),
 			'iframe' => array(
 				'<p><b>purple</b><iframe src="http://example.com" height="100" width="200"></iframe></p>',
