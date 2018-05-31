@@ -1,25 +1,27 @@
 <?php
+/**
+ * Functions for FasterImage.
+ *
+ * @package AMP
+ */
 
+/**
+ * Load classes for FasterImage.
+ *
+ * This is obsolete now that there is an autoloader.
+ *
+ * @deprecated
+ */
 function amp_load_fasterimage_classes() {
-	// We're not using composer to pull in FasterImage so we need to load the files manually
-	$fasterimage__DIR__ = dirname( __FILE__ );
-
-	// Stream files
-	require_once( $fasterimage__DIR__ . '/Stream/Exception/StreamBufferTooSmallException.php' );
-	require_once( $fasterimage__DIR__ . '/Stream/StreamableInterface.php' );
-	require_once( $fasterimage__DIR__ . '/Stream/Stream.php' );
-
-	// FasterImage files
-	require_once( $fasterimage__DIR__ . '/Exception/InvalidImageException.php' );
-	require_once( $fasterimage__DIR__ . '/ExifParser.php' );
-	require_once( $fasterimage__DIR__ . '/ImageParser.php' );
-	require_once( $fasterimage__DIR__ . '/FasterImage.php' );
+	_deprecated_function( __FUNCTION__, '0.6' );
 }
 
+/**
+ * Get FasterImage client for user agent.
+ *
+ * @param string $user_agent User Agent.
+ * @return \FasterImage\FasterImage Instance.
+ */
 function amp_get_fasterimage_client( $user_agent ) {
-	if ( ! class_exists( 'FasterImage\FasterImage' ) ) {
-		amp_load_fasterimage_classes();
-	}
-
 	return new FasterImage\FasterImage( $user_agent );
 }

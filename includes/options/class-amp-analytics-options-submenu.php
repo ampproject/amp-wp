@@ -1,8 +1,13 @@
 <?php
+/**
+ * Class AMP_Analytics_Options_Submenu
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/options/views/class-amp-analytics-options-submenu-page.php' );
-require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-
+/**
+ * Class AMP_Analytics_Options_Submenu
+ */
 class AMP_Analytics_Options_Submenu {
 
 	private $parent_menu_slug;
@@ -37,7 +42,10 @@ class AMP_Analytics_Options_Submenu {
 	public function amp_options_styles() {
 		?>
 		<style>
-			.analytics-data-container #delete {
+			.analytics-data-container .button.delete,
+			.analytics-data-container .button.delete:hover,
+			.analytics-data-container .button.delete:active,
+			.analytics-data-container .button.delete:focus {
 				background: red;
 				border-color: red;
 				text-shadow: 0 0 0;

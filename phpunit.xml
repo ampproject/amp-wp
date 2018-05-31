@@ -6,6 +6,9 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
+	<php>
+		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php" />
+	</php>
 	<testsuites>
 		<testsuite>
 			<directory prefix="test-" suffix=".php">./tests/</directory>
@@ -15,8 +18,16 @@
 	    </testsuite>
 	</testsuites>
 	<filter>
-	  <whitelist processUncoveredFilesFromWhitelist="true">
-	    <file>./includes/sanitizers/class-amp-tag-and-attribute-sanitizer.php</file>
-	  </whitelist>
+		<whitelist processUncoveredFilesFromWhitelist="false">
+			<directory suffix=".php">./</directory>
+			<exclude>
+				<directory suffix=".php">dev-lib</directory>
+				<directory suffix=".php">svn</directory>
+				<directory suffix=".php">node_modules</directory>
+				<directory suffix=".php">tests</directory>
+				<directory suffix=".php">vendor</directory>
+				<directory suffix=".php">build</directory>
+			</exclude>
+		</whitelist>
 	</filter>
 </phpunit>

@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Class AMP_DOM_Utils_Test
+ *
+ * These are here because PhpStorm cannot find them because of phpunit6-compat.php
+ *
+ * @method void assertEquals( mixed $expected, mixed $actual, string $errorMessage=null )
+ * @method void assertTrue( bool $expectsTrue, string $errorMessage=null )
+ * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
+ */
 class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	public function test_utf8_content() {
 		$source = '<p>Iñtërnâtiônàlizætiøn</p>';
@@ -73,8 +82,8 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function test__get_content_from_dom__br_no_closing_tag() {
-		$source = '<br/>';
-		$expected = '<br/>';
+		$source   = '<br>';
+		$expected = '<br>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -82,62 +91,129 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $actual );
 	}
 
-	public function test__recursive_force_closing_tags__ignore_non_elements() {
-		$dom = new DOMDocument;
-		$node = $dom->createAttribute( 'src' );
-		$expected = ' src=""';
+	/**
+	 * Test convert_amp_bind_attributes.
+	 *
+	 * @covers \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @covers \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @covers \AMP_DOM_Utils::get_amp_bind_placeholder_prefix()
+	 */
+	public function test_amp_bind_conversion() {
+		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
+		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
+		$this->assertNotEquals( $converted, $original );
+		$this->assertContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
+		$this->assertContains( 'width=300 height="200" data-foo="bar" selected', $converted );
+		$restored = AMP_DOM_Utils::restore_amp_bind_attributes( $converted );
+		$this->assertEquals( $original, $restored );
 
-		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		// Test malformed.
+		$malformed_html = array(
+			'<amp-img width="123" [text]="..."</amp-img>',
+			'<amp-img width="123" [text] data-test="asd"></amp-img>',
+			'<amp-img width="123" [text]="..." *bad*></amp-img>',
+		);
+		foreach ( $malformed_html as $html ) {
+			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
+			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted );
+		}
 	}
 
-	public function test__recursive_force_closing_tags__ignore_self_closing() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'br' );
-		$expected = '<br/>';
+	/**
+	 * Test handling of empty elements.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 */
+	public function test_html5_empty_elements() {
+		$original  = '<amp-video width="432" height="987">';
+		$original .= '<track kind="subtitles" src="https://example.com/sampleChapters.vtt" srclang="en">';
+		$original .= '<source src="foo.webm" type="video/webm">';
+		$original .= '<source src="foo.ogg" type="video/ogg" />';
+		$original .= '<source src="foo.mpg" type="video/mpeg"></source>';
+		$original .= '<div placeholder>Placeholder</div>';
+		$original .= '<span fallback>Fallback</span>';
+		$original .= '</amp-video>';
+		$document  = AMP_DOM_Utils::get_dom_from_content( $original );
 
-		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		$video = $document->getElementsByTagName( 'amp-video' )->item( 0 );
+		$this->assertNotEmpty( $video );
+		$this->assertEquals( 6, $video->childNodes->length );
+		$this->assertEquals( 'track', $video->childNodes->item( 0 )->nodeName );
+		$this->assertEquals( 'source', $video->childNodes->item( 1 )->nodeName );
+		$this->assertEquals( 'source', $video->childNodes->item( 2 )->nodeName );
+		$this->assertEquals( 'source', $video->childNodes->item( 3 )->nodeName );
+		$this->assertEquals( 'div', $video->childNodes->item( 4 )->nodeName );
+		$this->assertEquals( 'span', $video->childNodes->item( 5 )->nodeName );
 	}
 
-	public function test__recursive_force_closing_tags__ignore_non_empty() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'p' );
-		$text = $dom->createTextNode( 'Hello' );
-		$node->appendChild( $text );
-		$expected = '<p>Hello</p>';
+	/**
+	 * Test encoding.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 */
+	public function test_get_dom_encoding() {
+		$html  = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>';
+		$html .= '<p>Check out ‘this’ and “that” and—other things.</p>';
+		$html .= '<p>Check out &#8216;this&#8217; and &#8220;that&#8221; and&#8212;other things.</p>';
+		$html .= '<p>Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
+		$html .= '</body></html>';
 
-		$actual = AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		$document = AMP_DOM_Utils::get_dom_from_content( $html );
+		$this->assertEquals( 'UTF-8', $document->encoding );
+		$paragraphs = $document->getElementsByTagName( 'p' );
+		$this->assertSame( 3, $paragraphs->length );
+		$this->assertSame( $paragraphs->item( 0 )->textContent, $paragraphs->item( 1 )->textContent );
+		$this->assertSame( $paragraphs->item( 1 )->textContent, $paragraphs->item( 2 )->textContent );
 	}
 
-	public function test__recursive_force_closing_tags__force_close() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'amp-img' );
-		$expected = '<amp-img></amp-img>';
-
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
-
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
-		// Extra test to confirm we added the child node
-		$this->assertTrue( $node->hasChildNodes() );
-		$this->assertEquals( '', $node->firstChild->nodeValue );
+	/**
+	 * Get Table Row Iterations
+	 *
+	 * @return array An array of arrays holding an integer representation of iterations.
+	 */
+	public function get_table_row_iterations() {
+		return array(
+			array( 1 ),
+			array( 10 ),
+			array( 100 ),
+			array( 1000 ),
+		);
 	}
 
-	public function test__recursive_force_closing_tags__force_close_with_children() {
-		$dom = new DOMDocument;
-		$node = $dom->createElement( 'div' );
-		$child_with_closing = $dom->createElement( 'amp-img' );
-		$child_self_closing = $dom->createElement( 'br' );
-		$node->appendChild( $child_with_closing );
-		$node->appendChild( $child_self_closing );
-		$expected = '<div><amp-img></amp-img><br/></div>';
+	/**
+	 * Tests attribute conversions on content with iframe srcdocs of variable lengths.
+	 *
+	 * @dataProvider get_table_row_iterations
+	 *
+	 * @param int $iterations The number of table rows to append to iframe srcdoc.
+	 */
+	public function test_attribute_conversion_on_long_iframe_srcdocs( $iterations ) {
+		$html = '<html amp><head><meta charset="utf-8"></head><body><table>';
 
-		AMP_DOM_Utils::recursive_force_closing_tags( $dom, $node );
+		for ( $i = 0; $i < $iterations; $i++ ) {
+			$html .= '
+				<tr>
+				<td class="rank" style="width:2%;">1453</td>
+				<td class="text" style="width:10%;">1947</td>
+				<td class="text">Pittsburgh Ironmen</td>
+				<td class="boolean" style="width:10%;text-align:center;"></td>
+				<td class="number" style="width:10%;">1242</td>
+				<td class="number">1192</td>
+				<td class="number">1111</td>
+				<td class="number highlight">1182</td>
+				</tr>
+			';
+		}
 
-		$this->assertEquals( $expected, $dom->saveXML( $node ) );
+		$html .= '</table></body></html>';
+
+		$to_convert = sprintf(
+			'<amp-iframe sandbox="allow-scripts" srcdoc="%s"> </amp-iframe>',
+			htmlentities( $html )
+		);
+
+		AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
+
+		$this->assertSame( PREG_NO_ERROR, preg_last_error(), 'Probably failed when backtrack limit was exhausted.' );
 	}
 }

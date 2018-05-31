@@ -1,8 +1,17 @@
 <?php
-// Get content width
-$content_max_width       = absint( $this->get( 'content_max_width' ) );
+/**
+ * Style template.
+ *
+ * @package AMP
+ */
 
-// Get template colors
+/**
+ * Context.
+ *
+ * @var AMP_Post_Template $this
+ */
+
+$content_max_width       = absint( $this->get( 'content_max_width' ) );
 $theme_color             = $this->get_customizer_setting( 'theme_color' );
 $text_color              = $this->get_customizer_setting( 'text_color' );
 $muted_text_color        = $this->get_customizer_setting( 'muted_text_color' );
@@ -160,7 +169,7 @@ blockquote p:last-child {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
-	margin: 1.5em 16px 1.5em;
+	margin: 1.5em 16px 0;
 }
 
 .amp-wp-title {
@@ -180,7 +189,7 @@ blockquote p:last-child {
 	flex: 2 1 50%;
 	font-size: .875em;
 	line-height: 1.5em;
-	margin: 0;
+	margin: 0 0 1.5em;
 	padding: 0;
 }
 

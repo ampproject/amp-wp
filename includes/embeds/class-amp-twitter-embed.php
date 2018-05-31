@@ -1,13 +1,17 @@
 <?php
+/**
+ * Class AMP_Twitter_Embed_Handler
+ *
+ * @package AMP
+ */
 
-require_once( AMP__DIR__ . '/includes/embeds/class-amp-base-embed-handler.php' );
-
-// Much of this class is borrowed from Jetpack embeds
+/**
+ * Class AMP_Twitter_Embed_Handler
+ *
+ *  Much of this class is borrowed from Jetpack embeds
+ */
 class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)#i';
-
-	private static $script_slug = 'amp-twitter';
-	private static $script_src = 'https://cdn.ampproject.org/v0/amp-twitter-0.1.js';
 
 	public function register_embed() {
 		add_shortcode( 'tweet', array( $this, 'shortcode' ) );
@@ -17,14 +21,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function unregister_embed() {
 		remove_shortcode( 'tweet' );
 		wp_embed_unregister_handler( 'amp-twitter', -1 );
-	}
-
-	public function get_scripts() {
-		if ( ! $this->did_convert_elements ) {
-			return array();
-		}
-
-		return array( self::$script_slug => self::$script_src );
 	}
 
 	function shortcode( $attr ) {

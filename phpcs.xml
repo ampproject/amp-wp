@@ -7,16 +7,44 @@
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" value="amp" />
+			<property name="text_domain" value="amp,default" />
 		</properties>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
+		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
+		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>bin/verify-version-consistency.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.EnqueuedResources">
+		<exclude-pattern>includes/actions/class-amp-paired-post-actions.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS,documentElement,removeChild,ownerDocument" />
+		</properties>
+	</rule>
+
+	<!-- Include sniffs for PHP cross-version compatibility. -->
+	<config name="testVersion" value="5.3-99.0"/>
+	<rule ref="PHPCompatibility">
+		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>
 
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>
 
-	<exclude-pattern>*/tests/*</exclude-pattern>
 	<exclude-pattern>*/dev-lib/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>includes/lib/*</exclude-pattern>
+	<exclude-pattern>includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
 </ruleset>

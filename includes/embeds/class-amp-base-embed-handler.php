@@ -1,8 +1,15 @@
 <?php
+/**
+ * Class AMP_Base_Embed_Handler
+ *
+ * Used by some children.
+ *
+ * @package  AMP
+ */
 
-// Used by some children
-require_once( AMP__DIR__ . '/includes/utils/class-amp-html-utils.php' );
-
+/**
+ * Class AMP_Base_Embed_Handler
+ */
 abstract class AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 600;
 	protected $DEFAULT_HEIGHT = 480;
@@ -20,6 +27,16 @@ abstract class AMP_Base_Embed_Handler {
 		) );
 	}
 
+	/**
+	 * Get mapping of AMP component names to AMP script URLs.
+	 *
+	 * This is normally no longer needed because the whitelist
+	 * sanitizer will automatically detect the need for them via
+	 * the spec.
+	 *
+	 * @see AMP_Tag_And_Attribute_Sanitizer::get_scripts()
+	 * @return array Scripts.
+	 */
 	public function get_scripts() {
 		return array();
 	}

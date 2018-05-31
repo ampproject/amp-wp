@@ -1,6 +1,5 @@
 <?php
-
-require_once( AMP__DIR__ . '/includes/sanitizers/class-amp-allowed-tags-generated.php' );
+// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
 
@@ -246,136 +245,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-
-
-
-
-			'test_attr_spec_rule_allowed_protocol_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'a',
-					'attribute_name' => 'href',
-					'attribute_value' => 'http://example.com',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_allowed_protocol_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'a',
-					'attribute_name' => 'href',
-					'attribute_value' => 'evil://example.com',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_na' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'a',
-					'attribute_name' => 'href',
-					'attribute_value' => 'invalid',
-					'include_attr' => false,
-					'include_attr_value' => false,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-
-
-			'test_attr_spec_rule_allowed_protocol_srcset_single_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'http://veryunique.com/img.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'http://example.com/img.jpg, https://example.com/whatever.jpg, image.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_single_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'bad://example.com/img.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'bad://example.com/img.jpg, evil://example.com/whatever.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_good_first' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'https://example.com/img.jpg, evil://example.com/whatever.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_multiple_fail_bad_first' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'evil://example.com/img.jpg, https://example.com/whatever.jpg',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_allowed_protocol_srcset_na' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'amp-img',
-					'attribute_name' => 'srcset',
-					'attribute_value' => 'invalid',
-					'include_attr' => false,
-					'include_attr_value' => false,
-					'func_name' => 'check_attr_spec_rule_allowed_protocol',
-				),
-				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-
-
-
-
 			'test_attr_spec_rule_disallowed_relative_pass' => array(
 				array(
 					'rule_spec_index' => 0,
@@ -451,61 +320,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-
-
-
-			'test_attr_spec_rule_disallowed_domain_pass' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => 'https://example.com',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_disallowed_domain_fail' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => '//cdn.ampproject.org',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_disallowed_domain_fail_2' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => 'https://cdn.ampproject.org',
-					'include_attr' => true,
-					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_disallowed_domain_na' => array(
-				array(
-					'rule_spec_index' => 0,
-					'tag_name' => 'form',
-					'attribute_name' => 'action',
-					'attribute_value' => 'invalid',
-					'include_attr' => false,
-					'include_attr_value' => false,
-					'func_name' => 'check_attr_spec_rule_disallowed_domain',
-				),
-				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-
-
-
-
 			'test_attr_spec_rule_blacklisted_value_regex_pass' => array(
 				array(
 					'rule_spec_index' => 0,
@@ -595,12 +409,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $node, $data['attribute_name'], $attr_spec_rule ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $source );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $source, wp_json_encode( $data ) ) );
 	}
 
 	public function get_is_allowed_attribute_data() {
@@ -752,12 +561,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $data['attribute_name'], $attr_spec_list ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $source );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $source, wp_json_encode( $data ) ) );
 	}
 
 	public function get_remove_node_data() {
@@ -806,10 +610,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'remove_bad_tag_leave_empty_siblings_and_parent' => array(
 				array(
-					'source' => '<div><br/><bad-tag></bad-tag></div>',
+					'source'   => '<div><br><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
 				),
-				'<div><br/></div>',
+				'<div><br></div>',
 			),
 			'remove_single_bad_tag_with_non-empty_parent' => array(
 				array(
@@ -848,13 +652,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-			printf( 'got = %s' .PHP_EOL, $got );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 
@@ -946,10 +744,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'no_children_leave_empty_siblings_and_parent' => array(
 				array(
-					'source' => '<div><br/><bad-tag></bad-tag></div>',
+					'source'   => '<div><br><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
 				),
-				'<div><br/></div>',
+				'<div><br></div>',
 			),
 			'no_childreng_with_non-empty_parent' => array(
 				array(
@@ -967,7 +765,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'no_children_and_empty_grandparent_leave_non-empty_greatgrandparent' => array(
 				array(
-					'source' => '<div><div><div><bad-tag></bad-tag></div></div><p>Good Data</p></div>',
+					'source'   => '<div><div><div><bad-tag></bad-tag></div></div><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
 				),
 				'<div><p>Good Data</p></div>',
@@ -987,14 +785,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->invoke_method( $sanitizer, 'replace_node_with_children', array( $node ) );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$got = preg_replace( '/(?<=>)\s+(?=<)/', '', $got );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-			printf( 'got = %s' .PHP_EOL, $got );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_ancestor_with_tag_name_data() {
@@ -1050,12 +843,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_tag_name', array( $node, $data['ancestor_tag_name'] ) );
 
-		if ( $ancestor_node != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $ancestor_node, $got );
+		$this->assertEquals( $ancestor_node, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_validate_attr_spec_list_for_node_data() {
@@ -1066,7 +854,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(),
 				),
-				0,
+				0.5, // Because there are no mandatory attributes.
 			),
 			'attributes_no_spec' => array(
 				array(
@@ -1074,7 +862,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(),
 				),
-				0,
+				0.5, // Because there are no mandatory attributes.
 			),
 			'attributes_alternative_names' => array(
 				array(
@@ -1090,7 +878,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						),
 					),
 				),
-				0,
+				0.5, // Because there are no mandatory attributes.
 			),
 			'attributes_mandatory' => array(
 				array(
@@ -1169,47 +957,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				1,
 			),
-			'attributes_allowed_protocol_pass' => array(
-				array(
-					'source' => '<div attribute1="http://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'allowed_protocol' => array(
-								'http',
-								'https',
-							),
-						),
-					),
-				),
-				1,
-			),
-			'attributes_allowed_protocol_fail' => array(
-				array(
-					'source' => '<div attribute1="bad://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'allowed_protocol' => array(
-								'http',
-								'https',
-							),
-						),
-					),
-				),
-				0,
-			),
 			'attributes_allow_relative_false_pass' => array(
 				array(
 					'source' => '<div attribute1="http://example.com/relative/path/to/resource"></div>',
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(
 						'attribute1' => array(
-							'allow_relative' => false,
+							'value_url' => array(
+								'allow_relative' => false,
+							),
 						),
 					),
 				),
-				1,
+				2,
 			),
 			'attributes_allow_relative_false_fail' => array(
 				array(
@@ -1217,7 +977,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(
 						'attribute1' => array(
-							'allow_relative' => false,
+							'value_url' => array(
+								'allow_relative' => false,
+							),
 						),
 					),
 				),
@@ -1229,11 +991,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(
 						'attribute1' => array(
-							'allow_empty' => false,
+							'value_url' => array(
+								'allow_empty' => false,
+							),
 						),
 					),
 				),
-				1,
+				2,
 			),
 			'attributes_allow_empty_false_fail' => array(
 				array(
@@ -1241,34 +1005,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => array(
 						'attribute1' => array(
-							'allow_empty' => false,
-						),
-					),
-				),
-				0,
-			),
-			'attributes_disallowed_domain_pass' => array(
-				array(
-					'source' => '<div attribute1="http://example.com/relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'disallowed_domain' => array(
-								'dis.allow.ed'
-							),
-						),
-					),
-				),
-				1,
-			),
-			'attributes_disallowed_domain_fail' => array(
-				array(
-					'source' => '<div attribute1="http://dis.allow.ed/relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'disallowed_domain' => array(
-								'dis.allow.ed'
+							'value_url' => array(
+								'allow_empty' => false,
 							),
 						),
 					),
@@ -1306,12 +1044,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'validate_attr_spec_list_for_node', array( $node, $data['attr_spec_list'] ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_value_data() {
@@ -1433,12 +1166,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_value_casei_data() {
@@ -1585,12 +1313,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value_casei', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_blacklisted_value_regex() {
@@ -1679,76 +1402,79 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_blacklisted_value_regex', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_allowed_protocol() {
 		return array(
-			'no_attributes' => array(
+			'no_attributes'             => array(
 				array(
-					'source' => '<div></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(),
 				),
 				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-			'protocol_pass' => array(
+			'protocol_pass'             => array(
 				array(
-					'source' => '<div attribute1="http://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allowed_protocol' => array(
-							'http',
-							'https',
+						'value_url' => array(
+							'allowed_protocol' => array(
+								'http',
+								'https',
+							),
 						),
 					),
 				),
 				AMP_Rule_Spec::PASS,
 			),
-			'protocol_multiple_pass' => array(
+			'protocol_multiple_pass'    => array(
 				array(
-					'source' => '<div attribute1="http://example.com, https://domain.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="http://example.com, https://domain.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allowed_protocol' => array(
-							'http',
-							'https',
+						'value_url' => array(
+							'allowed_protocol' => array(
+								'http',
+								'https',
+							),
 						),
 					),
 				),
 				AMP_Rule_Spec::PASS,
 			),
-			'protocol_fail' => array(
+			'protocol_fail'             => array(
 				array(
-					'source' => '<div attribute1="data://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="data://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allowed_protocol' => array(
-							'http',
-							'https',
+						'value_url' => array(
+							'allowed_protocol' => array(
+								'http',
+								'https',
+							),
 						),
 					),
 				),
 				AMP_Rule_Spec::FAIL,
 			),
-			'protocol_multiple_fail' => array(
+			'protocol_multiple_fail'    => array(
 				array(
-					'source' => '<div attribute1="http://example.com, data://domain.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="http://example.com, data://domain.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allowed_protocol' => array(
-							'http',
-							'https',
+						'value_url' => array(
+							'allowed_protocol' => array(
+								'http',
+								'https',
+							),
 						),
 					),
 				),
@@ -1756,16 +1482,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'protocol_alternative_pass' => array(
 				array(
-					'source' => '<div attribute1_alternative1="http://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1_alternative1="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
 						'alternative_names' => array(
 							'attribute1_alternative1',
 						),
-						'allowed_protocol' => array(
-							'http',
-							'https',
+						'value_url'         => array(
+							'allowed_protocol' => array(
+								'http',
+								'https',
+							),
 						),
 					),
 				),
@@ -1773,16 +1501,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'protocol_alternative_fail' => array(
 				array(
-					'source' => '<div attribute1_alternative1="data://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1_alternative1="data://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
 						'alternative_names' => array(
 							'attribute1_alternative1',
 						),
-						'allowed_protocol' => array(
-							'http',
-							'https',
+						'value_url'         => array(
+							'allowed_protocol' => array(
+								'http',
+								'https',
+							),
 						),
 					),
 				),
@@ -1802,54 +1532,55 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_disallowed_relative() {
 		return array(
-			'no_attributes' => array(
+			'no_attributes'                                 => array(
 				array(
-					'source' => '<div></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(),
 				),
 				AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-			'disallowed_relative_pass' => array(
+			'disallowed_relative_pass'                      => array(
 				array(
-					'source' => '<div attribute1="http://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url' => array(
+							'allow_relative' => false,
+						),
 					),
 				),
 				AMP_Rule_Spec::PASS,
 			),
-			'disallowed_relative_ multiple_pass' => array(
+			'disallowed_relative_multiple_pass'             => array(
 				array(
-					'source' => '<div attribute1="http://example.com, http://domain.com/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="http://example.com, http://domain.com/path/to/resource"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url' => array(
+							'allow_relative' => false,
+						),
 					),
 				),
 				AMP_Rule_Spec::PASS,
 			),
-			'disallowed_relative_alternative_pass' => array(
+			'disallowed_relative_alternative_pass'          => array(
 				array(
-					'source' => '<div attribute1_alternative1="http://example.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1_alternative1="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url'         => array(
+							'allow_relative' => false,
+						),
 						'alternative_names' => array(
 							'attribute1_alternative1'
 						),
@@ -1859,11 +1590,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'disallowed_relative_alternative_multiple_pass' => array(
 				array(
-					'source' => '<div attribute1_alternative1="http://example.com, http://domain.com"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1_alternative1="http://example.com, http://domain.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url'         => array(
+							'allow_relative' => false,
+						),
 						'alternative_names' => array(
 							'attribute1_alternative1'
 						),
@@ -1871,35 +1604,41 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				AMP_Rule_Spec::PASS,
 			),
-			'disallowed_relative_fail' => array(
+			'disallowed_relative_fail'                      => array(
 				array(
-					'source' => '<div attribute1="/relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="/relative/path/to/resource"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url' => array(
+							'allow_relative' => false,
+						),
 					),
 				),
 				AMP_Rule_Spec::FAIL,
 			),
-			'disallowed_relative_multiple_fail' => array(
+			'disallowed_relative_multiple_fail'             => array(
 				array(
-					'source' => '<div attribute1="//domain.com, /relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1="//domain.com, /relative/path/to/resource"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url' => array(
+							'allow_relative' => false,
+						),
 					),
 				),
 				AMP_Rule_Spec::FAIL,
 			),
-			'disallowed_relative_alternative_fail' => array(
+			'disallowed_relative_alternative_fail'          => array(
 				array(
-					'source' => '<div attribute1_alternative1="/relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1_alternative1="/relative/path/to/resource"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url'         => array(
+							'allow_relative' => false,
+						),
 						'alternative_names' => array(
 							'attribute1_alternative1'
 						),
@@ -1909,11 +1648,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			),
 			'disallowed_relative_alternative_multiple_fail' => array(
 				array(
-					'source' => '<div attribute1_alternative1="http://domain.com,  /relative/path/to/resource"></div>',
-					'node_tag_name' => 'div',
-					'attr_name' => 'attribute1',
+					'source'         => '<div attribute1_alternative1="http://domain.com,  /relative/path/to/resource"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
-						'allow_relative' => false,
+						'value_url'         => array(
+							'allow_relative' => false,
+						),
 						'alternative_names' => array(
 							'attribute1_alternative1'
 						),
@@ -1935,23 +1676,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_disallowed_relative', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
 
-		if ( $expected != $got ) {
-			printf( 'using source: %s' . PHP_EOL, $data['source'] );
-			var_dump( $data );
-		}
-
-		$this->assertEquals( $expected, $got );
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
-	// Use this to call private methods
-	public function invoke_method(&$object, $methodName, array $parameters = array()) {
-	    $reflection = new \ReflectionClass(get_class($object));
-	    $method = $reflection->getMethod($methodName);
-	    $method->setAccessible(true);
+	/**
+	 * Use this to call private methods.
+	 *
+	 * @param object $object      Object.
+	 * @param string $method_name Method name.
+	 * @param array  $parameters  Parameters.
+	 * @return mixed Result.
+	 */
+	public function invoke_method( &$object, $method_name, array $parameters = array() ) {
+		$reflection = new ReflectionClass( get_class( $object ) );
 
-	    return $method->invokeArgs($object, $parameters);
+		$method = $reflection->getMethod( $method_name );
+		$method->setAccessible( true );
+
+		return $method->invokeArgs( $object, $parameters );
 	}
 
 }
-
-?>
