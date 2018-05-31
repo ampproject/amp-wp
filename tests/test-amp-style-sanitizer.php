@@ -371,8 +371,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'playbuzz' => array(
 				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
-				'p + .pb_feed{border:solid 1px blue}',
-				'p + amp-playbuzz{border:solid 1px blue}',
+				'p + div.pb_feed{border:solid 1px blue}',
+				'p + amp-playbuzz.pb_feed{border:solid 1px blue}',
 			),
 			'video' => array(
 				'<article><video src="http://example.com" height="100" width="200"></video></article>',

@@ -47,8 +47,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function get_selector_conversion_mapping() {
 		return array(
-			'div.pb_feed' => array( 'amp-playbuzz' ),
-			'.pb_feed'    => array( 'amp-playbuzz' ),
+			'div.pb_feed' => array( 'amp-playbuzz.pb_feed' ),
 		);
 	}
 
@@ -125,16 +124,14 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
-				case 'data-game-info':
-					$out['data-item-info'] = $value;
-					break;
-
 				case 'data-shares':
 					$out['data-share-buttons'] = $value;
 					break;
 
+				case 'data-game-info':
 				case 'data-comments':
-					$out['data-comments'] = $value;
+				case 'class':
+					$out[ $name ] = $value;
 					break;
 
 				default:
