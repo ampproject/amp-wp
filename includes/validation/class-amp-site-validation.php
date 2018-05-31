@@ -131,6 +131,9 @@ class AMP_Site_Validation {
 		}
 
 		foreach ( $urls as $url ) {
+			if ( AMP_Theme_Support::is_paired_available() ) {
+				$url = add_query_arg( 'amp', 1, $url );
+			}
 			$validation = AMP_Validation_Manager::validate_url( $url );
 			AMP_Invalid_URL_Post_Type::store_validation_errors( $validation, $url );
 			self::$site_validation_urls[] = $url;
