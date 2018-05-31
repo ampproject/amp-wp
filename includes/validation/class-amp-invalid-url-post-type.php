@@ -365,7 +365,7 @@ class AMP_Invalid_URL_Post_Type {
 				&&
 				$placeholder === $post_data['post_content']
 				&&
-				self::POST_TYPE_SLUG === $post_data['post_type']
+				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === $post_data['post_type']
 			);
 			if ( $should_supply_post_content ) {
 				$post_data['post_content'] = wp_slash( $post_content );
