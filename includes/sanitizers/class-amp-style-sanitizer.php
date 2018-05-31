@@ -949,6 +949,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$pattern .= preg_quote( $after_declaration_block, '#' );
 			$pattern .= '#s';
 
+			$dynamic_selector_pattern = null;
+			if ( ! empty( $this->args['dynamic_element_selectors'] ) ) {
+				$dynamic_selector_pattern = implode( '|', array_map(
+					function( $selector ) {
+						return preg_quote( $selector, '#' );
+					},
+					$this->args['dynamic_element_selectors']
+				) );
+			}
+
 			$split_stylesheet = preg_split( $pattern, $stylesheet_string, -1, PREG_SPLIT_DELIM_CAPTURE );
 			$length           = count( $split_stylesheet );
 			for ( $i = 0; $i < $length; $i++ ) {
@@ -965,6 +975,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 						// Remove attribute selectors to eliminate false negative, such as with `.social-navigation a[href*="example.com"]:before`.
 						$reduced_selector = preg_replace( '/\[\w.*?\]/', '', $reduced_selector );
+
+						// Ignore any selector terms that occur under a dynamic selector.
+						if ( $dynamic_selector_pattern ) {
+							$reduced_selector = preg_replace( '#((?:' . $dynamic_selector_pattern . ')(?:\.[a-z0-9_-]+)*)[^a-z0-9_-].*#si', '$1', $reduced_selector . ' ' );
+						}
 
 						$reduced_selector = preg_replace_callback(
 							'/\.([a-zA-Z0-9_-]+)/',
@@ -1858,16 +1873,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			) );
 		}
 
-		$dynamic_selector_pattern = null;
-		if ( $should_tree_shake && ! empty( $this->args['dynamic_element_selectors'] ) ) {
-			$dynamic_selector_pattern = '#' . implode( '|', array_map(
-				function( $selector ) {
-					return preg_quote( $selector, '#' );
-				},
-				$this->args['dynamic_element_selectors']
-			) ) . '#';
-		}
-
 		$stylesheet_set['processed_nodes'] = array();
 
 		$final_size = 0;
@@ -1884,8 +1889,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors = array();
 					foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 						$should_include = (
-							( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
-							||
 							(
 								// If all class names are used in the doc.
 								(
