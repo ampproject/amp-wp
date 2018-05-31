@@ -524,8 +524,6 @@ abstract class AMP_Base_Sanitizer {
 
 	/**
 	 * Add <amp-image-lightbox> element to body tag if it doesn't exist yet.
-	 *
-	 * @todo Move this to AMP_Img_Sanitizer?
 	 */
 	public function maybe_add_amp_image_lightbox_node() {
 

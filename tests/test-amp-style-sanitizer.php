@@ -360,24 +360,35 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_amp_selector_data() {
 		return array(
 			'img' => array(
-				'div img.color{color:red}',
-				'div amp-img.color,div amp-anim.color{color:red}',
+				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div img.logo{border:solid 1px red}',
+				'div amp-img.logo{border:solid 1px red}', // Note that amp-anim is tree-shaken.
+			),
+			'img-anim' => array(
+				// Note: The spinner is in the following to prevent tree-shaking of the amp-anim element.
+				sprintf( '<div><img class="logo" src="%s" width="200" height="100"><img class="logo" src="%s" width="100" height="100"></div>', admin_url( 'images/wordpress-logo.png' ), admin_url( 'images/spinner-2x.gif' ) ),
+				'div img.logo{border:solid 1px red}',
+				'div amp-img.logo,div amp-anim.logo{border:solid 1px red}',
 			),
 			'playbuzz' => array(
-				'p + .pb_feed{color:blue}',
-				'p + amp-playbuzz{color:blue}',
+				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
+				'p + .pb_feed{border:solid 1px blue}',
+				'p + amp-playbuzz{border:solid 1px blue}',
 			),
 			'video' => array(
-				'article>video{color:green}',
-				'article>amp-video{color:green}',
+				'<article><video src="http://example.com" height="100" width="200"></video></article>',
+				'article>video{border:solid 1px green}',
+				'article>amp-video{border:solid 1px green}',
 			),
 			'iframe' => array(
+				'<p><b>purple</b><iframe src="http://example.com" height="100" width="200"></iframe></p>',
 				'p>*:not(iframe){color:purple}',
 				'p>*:not(amp-iframe){color:purple}',
 			),
 			'audio' => array(
-				'audio{color:yellow}',
-				'amp-audio{color:yellow}',
+				'<audio src="http://example.com/foo.mp3" height="100" width="200"></audio>',
+				'audio{border:solid 1px yellow}',
+				'amp-audio{border:solid 1px yellow}',
 			),
 		);
 	}
@@ -386,14 +397,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test AMP selector conversion.
 	 *
 	 * @dataProvider get_amp_selector_data
+	 * @param string $markup Markup.
 	 * @param string $input  Input stylesheet.
 	 * @param string $output Output stylesheet.
 	 */
-	public function test_amp_selector_conversion( $input, $output ) {
-		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body></body></html>";
+	public function test_amp_selector_conversion( $markup, $input, $output ) {
+		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body>$markup</body></html>";
 		$dom  = AMP_DOM_Utils::get_dom( $html );
 
-		$sanitized   = AMP_Content_Sanitizer::sanitize_document( $dom, amp_get_content_sanitizers(), array(
+		$sanitizer_classes = amp_get_content_sanitizers();
+		$sanitizer_classes['AMP_Style_Sanitizer']['remove_unused_rules'] = 'always';
+		$sanitized   = AMP_Content_Sanitizer::sanitize_document( $dom, $sanitizer_classes, array(
 			'use_document_element' => true,
 		) );
 		$stylesheets = array_values( $sanitized['stylesheets'] );
