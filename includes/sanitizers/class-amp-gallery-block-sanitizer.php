@@ -97,20 +97,24 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = null;
+			$images = array();
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {
-				$images = $node->getElementsByTagName( 'a' );
+				foreach ( $node->getElementsByTagName( 'a' ) as $element ) {
+					$images[] = $element;
+				}
 			}
 
 			// If not linking to anything then look for <amp-img>.
-			if ( ! $images || 0 === $images->length ) {
-				$images = $node->getElementsByTagName( 'amp-img' );
+			if ( empty( $images ) ) {
+				foreach ( $node->getElementsByTagName( 'amp-img' ) as $element ) {
+					$images[] = $element;
+				}
 			}
 
 			// Skip if no images found.
-			if ( ! $images || 0 === $images->length ) {
+			if ( empty( $images ) ) {
 				continue;
 			}
 
