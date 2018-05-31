@@ -279,6 +279,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'<html amp><head><meta charset="utf-8">',
 					'<style amp-custom>b.foo, form [submit-success] b, div[submit-failure] b, form.unused b { color: green }</style>',
 					'<style amp-custom>.dead-list li .highlighted, amp-live-list li .highlighted { background: yellow }</style>',
+					'<style amp-custom>article.missing amp-live-list li .highlighted { background: yellow }</style>',
 					'<style amp-custom>body amp-list .portland { color:blue; }</style>',
 					'</head><body>',
 					'<form method="post" action-xhr="https://example.com/subscribe" target="_top"><div submit-success><template type="amp-mustache"><b>Thanks</b>, {{name}}}</template></div></form>',
@@ -289,6 +290,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'form [submit-success] b,div[submit-failure] b{color:green}',
 					'amp-live-list li .highlighted{background:yellow}',
+					'',
 					'body amp-list .portland{color:blue}',
 				),
 				array(),
@@ -341,6 +343,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
+			if ( empty( $expected_stylesheet ) ) {
+				$this->assertEmpty( $actual_stylesheets[ $i ] );
+				continue;
+			}
+
 			if ( false === strpos( $expected_stylesheet, '{' ) ) {
 				$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			} else {
@@ -362,12 +369,27 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'img' => array(
 				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div img.logo{border:solid 1px red}',
-				'div amp-img.logo,div amp-anim.logo{border:solid 1px red}', // Note that amp-anim is not tree-shaken because amp-anim is added to dynamic_element_selectors.
+				'div amp-img.logo{border:solid 1px red}', // Note amp-anim is still tree-shaken because it doesn't occur in the DOM.
+			),
+			'img-missing-class' => array(
+				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div img.missing{border:solid 1px red}',
+				'', // Tree-shaken because missing class doesn't occur in the DOM.
+			),
+			'img-and-anim' => array(
+				sprintf( '<div><img class="logo" src="%s" width="200" height="100"><img class="spinner" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ), admin_url( 'images/spinner-2x.gif' ) ),
+				'div img{border:solid 1px red}',
+				'div amp-img,div amp-anim{border:solid 1px red}',
 			),
 			'img-cover' => array(
 				sprintf( '<div><amp-img class="logo" src="%s" width="200" height="100"></amp-img></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div amp-img.logo img{object-fit:cover}',
 				'div amp-img.logo amp-img,div amp-img.logo amp-anim{object-fit:cover}', // Note that amp-anim is not tree-shaken because amp-anim is added to dynamic_element_selectors.
+			),
+			'img-tree-shaking' => array(
+				sprintf( '<article><img class="logo" src="%s" width="200" height="100"></article>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div img.logo{border:solid 1px red}',
+				'', // The selector is removed because there is no div element.
 			),
 			'playbuzz' => array(
 				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
