@@ -225,4 +225,38 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 'foo_deactivation_error', $error['code'] );
 		$wp_settings_errors = array();
 	}
+
+	/**
+	 * Test for persistent_object_caching_notice()
+	 *
+	 * @covers AMP_Options_Manager::persistent_object_caching_notice()
+	 */
+	public function test_persistent_object_caching_notice() {
+		set_current_screen( 'toplevel_page_amp-options' );
+		$text = 'The AMP plugin performs at its best when persistent object cache is enabled.';
+
+		wp_using_ext_object_cache( null );
+		ob_start();
+		AMP_Options_Manager::persistent_object_caching_notice();
+		$this->assertContains( $text, ob_get_clean() );
+
+		wp_using_ext_object_cache( true );
+		ob_start();
+		AMP_Options_Manager::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
+
+		set_current_screen( 'edit.php' );
+
+		wp_using_ext_object_cache( null );
+		ob_start();
+		AMP_Options_Manager::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
+
+		wp_using_ext_object_cache( true );
+		ob_start();
+		AMP_Options_Manager::persistent_object_caching_notice();
+		$this->assertNotContains( $text, ob_get_clean() );
+
+		wp_using_ext_object_cache( false );
+	}
 }

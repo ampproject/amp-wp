@@ -15,6 +15,8 @@
   "babel-plugin-transform-object-rest-spread": "^6.26.0",
   "babel-plugin-transform-react-jsx": "^6.24.1",
   "babel-plugin-transform-runtime": "^6.23.0",
+  "@wordpress/babel-plugin-makepot": "^1.0.1",
+  "@wordpress/i18n": "^1.1.0",
   "babel-preset-env": "^1.7.0",
   "cross-env": "^5.1.5",
   "eslint": "^4.19.1",
@@ -26,11 +28,14 @@
   "grunt-contrib-jshint": "^1.1.0",
   "grunt-shell": "^2.1.0",
   "grunt-wp-deploy": "^1.2.1",
+  "timeago.js": "3.0.2",
   "webpack": "^3.12.0"
  },
  "main": "blocks/index.js",
  "scripts": {
-  "build": "cross-env BABEL_ENV=production webpack; grunt build",
+  "pot-to-php": "pot-to-php languages/amp-js.pot languages/amp-translations.php amp",
+  "build": "grunt build; grunt create-build-zip",
+  "build-release": "grunt build-release; grunt create-build-zip",
   "deploy": "grunt deploy",
   "dev": "cross-env BABEL_ENV=default webpack --watch"
  }

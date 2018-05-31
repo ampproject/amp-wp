@@ -1,4 +1,9 @@
 /**
+ * Helper methods for blocks.
+ */
+import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
+
+/**
  * Internal block libraries.
  */
 const { __ } = wp.i18n;
@@ -8,7 +13,6 @@ const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
-	SelectControl,
 	Placeholder
 } = wp.components;
 
@@ -18,47 +22,66 @@ const {
 export default registerBlockType(
 	'amp/amp-jwplayer',
 	{
-		title: __( 'AMP JW Player' ),
-		description: __( 'Displays a cloud-hosted JW Player.' ),
+		title: __( 'AMP JW Player', 'amp' ),
+		description: __( 'Displays a cloud-hosted JW Player.', 'amp' ),
 		category: 'common',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed' )
+			__( 'Embed', 'amp' )
 		],
 
 		attributes: {
 			dataPlayerId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'data-player-id'
 			},
 			dataMediaId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'data-media-id'
 			},
 			dataPlaylistId: {
-				type: 'string'
-			},
-			layout: {
 				type: 'string',
-				default: 'responsive'
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'data-playlist-id'
+			},
+			ampLayout: {
+				type: 'string',
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-jwplayer',
+				attribute: 'height'
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { dataPlayerId, dataMediaId, dataPlaylistId, layout, height, width } = attributes;
+		edit( props ) {
+			const { attributes, isSelected, setAttributes } = props;
+			const { dataPlayerId, dataMediaId, dataPlaylistId } = attributes;
 			const ampLayoutOptions = [
-				{ value: 'responsive', label: __( 'Responsive' ) },
-				{ value: 'fixed-height', label: __( 'Fixed height' ) },
-				{ value: 'fixed', label: __( 'Fixed' ) },
-				{ value: 'fill', label: __( 'Fill' ) },
-				{ value: 'flex-item', label: __( 'Flex-item' ) },
-				{ value: 'nodisplay', label: __( 'No Display' ) }
+				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
+				{ value: 'fill', label: __( 'Fill', 'amp' ) },
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
+				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) }
 
 			];
 			let url = false;
@@ -74,56 +97,36 @@ export default registerBlockType(
 					{
 						isSelected && (
 							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'JW Player Settings' ) }>
+								<PanelBody title={ __( 'JW Player Settings', 'amp' ) }>
 									<TextControl
-										label={ __( 'Player ID (required)' ) }
+										label={ __( 'Player ID (required)', 'amp' ) }
 										value={ dataPlayerId }
 										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Media ID (required if playlist ID not set)' ) }
+										label={ __( 'Media ID (required if playlist ID not set)', 'amp' ) }
 										value={ dataMediaId }
 										onChange={ value => ( setAttributes( { dataMediaId: value } ) ) }
 									/>
 									<TextControl
-										label={ __( 'Playlist ID (required if media ID not set)' ) }
+										label={ __( 'Playlist ID (required if media ID not set)', 'amp' ) }
 										value={ dataPlaylistId }
 										onChange={ value => ( setAttributes( { dataPlaylistId: value } ) ) }
 									/>
-									<SelectControl
-										label={ __( 'Layout' ) }
-										value={ layout }
-										options={ ampLayoutOptions }
-										onChange={ value => ( setAttributes( { layout: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Width (px)' ) }
-										value={ width !== undefined ? width : '' }
-										onChange={ value => ( setAttributes( { width: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Height (px)' ) }
-										value={ height }
-										onChange={ value => ( setAttributes( { height: value } ) ) }
-									/>
+									{
+										getLayoutControls( props, ampLayoutOptions )
+									}
 								</PanelBody>
 							</InspectorControls>
 						)
 					}
 					{
-						url && (
-							<Placeholder label={ __( 'JW Player' ) }>
-								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!' ) }</p>
-							</Placeholder>
-						)
+						url && getMediaPlaceholder( __( 'JW Player', 'amp' ), url )
 					}
 					{
 						! url && (
-							<Placeholder label={ __( 'JW Player' ) }>
-								<p>{ __( 'Add required data to use the block.' ) }</p>
+							<Placeholder label={ __( 'JW Player', 'amp' ) }>
+								<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
@@ -133,16 +136,17 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			let jwProps = {
-				layout: attributes.layout,
+				layout: attributes.ampLayout,
 				height: attributes.height,
 				'data-player-id': attributes.dataPlayerId
 			};
-			if ( 'fixed-height' !== attributes.layout && attributes.width ) {
+			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				jwProps.width = attributes.width;
 			}
 			if ( attributes.dataPlaylistId ) {
 				jwProps[ 'data-playlist-id' ] = attributes.dataPlaylistId;
-			} else if ( attributes.dataMediaId ) {
+			}
+			if ( attributes.dataMediaId ) {
 				jwProps[ 'data-media-id' ] = attributes.dataMediaId;
 			}
 			return (

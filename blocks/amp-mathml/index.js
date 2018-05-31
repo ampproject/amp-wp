@@ -16,17 +16,20 @@ const {
 export default registerBlockType(
 	'amp/amp-mathml',
 	{
-		title: __( 'AMP MathML' ),
+		title: __( 'AMP MathML', 'amp' ),
 		category: 'common',
 		icon: 'welcome-learn-more',
 		keywords: [
-			__( 'Mathematical formula' ),
-			__( 'Scientific content ' )
+			__( 'Mathematical formula', 'amp' ),
+			__( 'Scientific content ', 'amp' )
 		],
 
 		attributes: {
 			dataFormula: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-mathml',
+				attribute: 'data-formula'
 			}
 		},
 
@@ -37,7 +40,7 @@ export default registerBlockType(
 				<PlainText
 					key='formula'
 					value={ dataFormula }
-					placeholder={ __( 'Insert formula' ) }
+					placeholder={ __( 'Insert formula', 'amp' ) }
 					onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
 				/>
 			);

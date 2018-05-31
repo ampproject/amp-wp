@@ -100,8 +100,11 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		AMP_Validation_Manager::init( array(
+			'should_locate_sources' => AMP_Validation_Manager::should_validate_response(),
+		) );
+
 		self::$init_start_time = microtime( true );
-		AMP_Validation_Utils::init();
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
@@ -154,6 +157,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
+		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
 	}
 
@@ -161,8 +165,12 @@ class AMP_Theme_Support {
 	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
 	 *
 	 * @since 0.7
+	 * @since 1.0 Added $exit param.
+	 * @todo Rename to redirect_non_amp().
+	 *
+	 * @param bool $exit Whether to exit after redirecting.
 	 */
-	public static function redirect_canonical_amp() {
+	public static function redirect_canonical_amp( $exit = true ) {
 		if ( false !== get_query_var( amp_get_slug(), false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
 			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
 			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
@@ -171,8 +179,14 @@ class AMP_Theme_Support {
 
 			$url = amp_remove_endpoint( $url );
 
-			wp_safe_redirect( $url, 302 ); // Temporary redirect because canonical may change in future.
-			exit;
+			/*
+			 * Temporary redirect because AMP URL may return when blocking validation errors
+			 * occur or when a non-canonical AMP theme is used.
+			 */
+			wp_safe_redirect( $url, 302 );
+			if ( $exit ) {
+				exit;
+			}
 		}
 	}
 
@@ -191,7 +205,13 @@ class AMP_Theme_Support {
 			return false;
 		}
 
-		if ( is_singular() && ! post_supports_amp( get_queried_object() ) ) {
+		/**
+		 * Queried object.
+		 *
+		 * @var WP_Post $queried_object
+		 */
+		$queried_object = get_queried_object();
+		if ( is_singular() && ! post_supports_amp( $queried_object ) ) {
 			return false;
 		}
 
@@ -274,11 +294,6 @@ class AMP_Theme_Support {
 		 */
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
-
-		// Add validation hooks *after* output buffering has started for the response.
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::add_validation_hooks();
-		}
 
 		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
@@ -408,7 +423,7 @@ class AMP_Theme_Support {
 	 *
 	 * @param string     $url     Comment permalink to redirect to.
 	 * @param WP_Comment $comment Posted comment.
-	 * @return string URL.
+	 * @return string|null URL if redirect to be done; otherwise function will exist.
 	 */
 	public static function filter_comment_post_redirect( $url, $comment ) {
 		$theme_support = get_theme_support( 'amp' );
@@ -443,6 +458,7 @@ class AMP_Theme_Support {
 		wp_send_json( array(
 			'message' => self::wp_kses_amp_mustache( $message ),
 		) );
+		return null;
 	}
 
 	/**
@@ -631,7 +647,7 @@ class AMP_Theme_Support {
 	 * @see get_query_template()
 	 *
 	 * @param array $templates Template hierarchy.
-	 * @returns array Templates.
+	 * @return array Templates.
 	 */
 	public static function filter_paired_template_hierarchy( $templates ) {
 		$support = get_theme_support( 'amp' );
@@ -848,6 +864,13 @@ class AMP_Theme_Support {
 	 * @param DOMDocument $dom Doc.
 	 */
 	public static function ensure_required_markup( DOMDocument $dom ) {
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $meta
+		 * @var DOMElement $script
+		 * @var DOMElement $link
+		 */
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
 			$head = $dom->createElement( 'head' );
@@ -856,11 +879,6 @@ class AMP_Theme_Support {
 		$meta_charset  = null;
 		$meta_viewport = null;
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			/**
-			 * Meta.
-			 *
-			 * @var DOMElement $meta
-			 */
 			if ( $meta->hasAttribute( 'charset' ) && 'utf-8' === strtolower( $meta->getAttribute( 'charset' ) ) ) { // @todo Also look for meta[http-equiv="Content-Type"]?
 				$meta_charset = $meta;
 			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
@@ -1012,16 +1030,17 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 *
 	 * @param string $response HTML document response. By default it expects a complete document.
-	 * @param array  $args {
-	 *     Args to send to the preprocessor/sanitizer.
-	 *
-	 *     @type callable $remove_invalid_callback Function to call whenever a node is removed due to being invalid.
-	 * }
+	 * @param array  $args     Args to send to the preprocessor/sanitizer.
 	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
 	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
+
+		if ( isset( $args['validation_error_callback'] ) ) {
+			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
+			unset( $args['validation_error_callback'] );
+		}
 
 		/*
 		 * Check if the response starts with HTML markup.
@@ -1032,25 +1051,23 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		$is_validation_debug_mode = isset( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
-
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element'    => true,
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
-				'disable_invalid_removal' => $is_validation_debug_mode,
 				'enable_response_caching' => (
 					( ! defined( 'WP_DEBUG' ) || true !== WP_DEBUG )
 					&&
-					! AMP_Validation_Utils::should_validate_response()
+					! AMP_Validation_Manager::should_validate_response()
 				),
 			),
 			$args
 		);
 
 		// Return cache if enabled and found.
+		$response_cache_key = null;
 		if ( true === $args['enable_response_caching'] ) {
 			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
 			$response_cache_key = md5( wp_json_encode( array(
@@ -1110,15 +1127,34 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
 
+		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
+			if ( amp_is_canonical() ) {
+				$dom->documentElement->removeAttribute( 'amp' );
+
+				/*
+				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
+				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
+				 */
+				if ( $head ) {
+					$script = $dom->createElement( 'script' );
+					$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+					$head->appendChild( $script );
+				}
+			} else {
+				self::redirect_canonical_amp( false );
+				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
+			}
+		}
+
 		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
 			/* translators: %s is the charset of the current site */
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::finalize_validation( $dom, array(
-				'remove_source_comments' => ! $is_validation_debug_mode,
+		if ( AMP_Validation_Manager::should_validate_response() ) {
+			AMP_Validation_Manager::finalize_validation( $dom, array(
+				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
 			) );
 		}
 

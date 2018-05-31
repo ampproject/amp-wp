@@ -4,7 +4,7 @@
 	object-fit: contain;
 }
 
-.entry__content amp-fit-text blockquote,
+amp-fit-text blockquote,
 amp-fit-text h1,
 amp-fit-text h2,
 amp-fit-text h3,
@@ -13,3 +13,4 @@ amp-fit-text h5,
 amp-fit-text h6 {
 	font-size: inherit;
 }
+
