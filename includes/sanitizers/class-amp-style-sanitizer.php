@@ -1817,7 +1817,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$replacements += $count;
 					while ( ! empty( $amp_selectors ) ) { // Note: This array contains only a couple items.
 						$amp_selector       = array_shift( $amp_selectors );
-						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
+						$edited_selector    = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
+						$edited_selectors[] = $edited_selector;
+						$selectors[]        = $edited_selector . '>' . $html_selector;
 					}
 				}
 			}

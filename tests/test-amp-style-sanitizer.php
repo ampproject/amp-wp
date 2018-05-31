@@ -361,23 +361,23 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return array(
 			'img' => array(
 				'div img.color{color:red}',
-				'div amp-img.color,div amp-anim.color{color:red}',
+				'div amp-img.color>img,div amp-anim.color>img,div amp-anim.color{color:red}',
 			),
 			'playbuzz' => array(
 				'p + .pb_feed{color:blue}',
-				'p + amp-playbuzz{color:blue}',
+				'p + amp-playbuzz>.pb_feed,p + amp-playbuzz{color:blue}',
 			),
 			'video' => array(
 				'article>video{color:green}',
-				'article>amp-video{color:green}',
+				'article>amp-video>video,article>amp-video{color:green}',
 			),
 			'iframe' => array(
 				'p>*:not(iframe){color:purple}',
-				'p>*:not(amp-iframe){color:purple}',
+				'p>*:not(amp-iframe)>iframe,p>*:not(amp-iframe){color:purple}',
 			),
 			'audio' => array(
 				'audio{color:yellow}',
-				'amp-audio{color:yellow}',
+				'amp-audio>audio,amp-audio{color:yellow}',
 			),
 		);
 	}
