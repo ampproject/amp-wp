@@ -28,7 +28,7 @@ class AMP_Image_Dimension_Extractor {
 				$normalized_urls[] = $normalized_url;
 			} else {
 				// This is not a URL we can extract dimensions from, so default to false.
-				$url_map[ $original_url ] = $original_url;
+				$url_map[ $original_url ]           = $original_url;
 				$return_dimensions[ $original_url ] = false;
 			}
 		}
