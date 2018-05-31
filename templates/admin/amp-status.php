@@ -48,7 +48,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 					}
 					if ( in_array( 'post-type-support', $support_errors_codes, true ) ) {
 						/* translators: %s is URL to AMP settings screen */
-						$support_errors[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), admin_url( 'admin.php?page=amp-options' ) ) );
+						$support_errors[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) );
 					}
 					if ( in_array( 'skip-post', $support_errors_codes, true ) ) {
 						$support_errors[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );

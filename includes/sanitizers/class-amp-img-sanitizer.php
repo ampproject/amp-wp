@@ -115,15 +115,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'src':
-				case 'alt':
-				case 'class':
-				case 'srcset':
-				case 'on':
-				case 'attribution':
-					$out[ $name ] = $value;
-					break;
-
 				case 'width':
 				case 'height':
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
@@ -138,6 +129,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				default:
+					$out[ $name ] = $value;
 					break;
 			}
 		}
@@ -234,6 +226,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$new_attributes = $this->filter_attributes( $old_attributes );
 		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
 		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
+
+		if ( isset( $old_attributes['data-amp-lightbox'] ) ) {
+			$this->maybe_add_amp_image_lightbox_node();
+		}
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {

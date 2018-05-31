@@ -107,10 +107,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'illegal_unsafe_properties' => array(
-				'<style>button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } @media screen { button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } }</style><button>Click</button>',
+				'<style>button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ }</style><style> @media screen { button { behavior: url(hilite.htc) /* IE only */; font-weight:bold; -moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox); /*XBL*/ } }</style><button>Click</button>',
 				'<button>Click</button>',
 				array(
-					'button{font-weight:bold}@media screen{button{font-weight:bold}}',
+					'button{font-weight:bold}',
+					'@media screen{button{font-weight:bold}}',
 				),
 				array( 'illegal_css_property', 'illegal_css_property', 'illegal_css_property', 'illegal_css_property' ),
 			),
@@ -525,6 +526,50 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test handling external stylesheet.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 */
+	public function test_external_stylesheet_handling() {
+		$test_case = $this; // For PHP 5.3.
+		$href      = 'https://stylesheets.example.com/style.css';
+		$count     = 0;
+		add_filter( 'pre_http_request', function( $preempt, $request, $url ) use ( $href, &$count ) {
+			unset( $request );
+			if ( $url === $href ) {
+				$count++;
+				$preempt = array(
+					'response' => array(
+						'code' => 200,
+					),
+					'body' => 'html { background-color:lightblue; }',
+				);
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		$sanitize_and_get_stylesheet = function() use ( $href, $test_case ) {
+			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$dom  = AMP_DOM_Utils::get_dom( $html );
+
+			$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+				'use_document_element' => true,
+			) );
+			$sanitizer->sanitize();
+			AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+			$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+			$test_case->assertCount( 1, $actual_stylesheets );
+			return $actual_stylesheets[0];
+		};
+
+		$this->assertEquals( 0, $count );
+		$this->assertContains( 'background-color:lightblue', $sanitize_and_get_stylesheet() );
+		$this->assertEquals( 1, $count );
+		$this->assertContains( 'background-color:lightblue', $sanitize_and_get_stylesheet() );
+		$this->assertEquals( 1, $count );
+	}
+
+	/**
 	 * Get amp-keyframe styles.
 	 *
 	 * @return array
@@ -653,6 +698,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				'file_path_not_found',
 			),
+			'amp_external_file' => array(
+				'//s.w.org/wp-includes/css/dashicons.css',
+				false,
+				'external_file_url',
+			),
 		);
 	}
 
@@ -752,10 +802,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
 				array(),
 			),
-			'bad_host'    => array(
-				'https://bad.example.com/font.css',
-				array( 'disallowed_external_file_url' ),
-			),
 			'bad_ext'    => array(
 				home_url( '/bad.php' ),
 				array( 'disallowed_file_extension' ),
@@ -799,5 +845,53 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		} else {
 			$this->assertEmpty( $link );
 		}
+	}
+
+	/**
+	 * Test CSS imports.
+	 *
+	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
+	 */
+	public function test_css_import() {
+		$local_css_url  = admin_url( 'css/login.css' );
+		$import_css_url = 'https://stylesheets.example.com/style.css';
+		$markup         = sprintf( '<html><head><link rel="stylesheet" href="%s"><style>@import url("%s"); body { color:red; }</style></head><body>hello</body></html>', $local_css_url, $import_css_url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+
+		add_filter( 'pre_http_request', function( $preempt, $request, $url ) use ( $import_css_url ) {
+			unset( $request );
+			if ( $url === $import_css_url ) {
+				$preempt = array(
+					'response' => array(
+						'code' => 200,
+					),
+					'body' => 'html { background-color:lightblue; }',
+				);
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		$dom       = AMP_DOM_Utils::get_dom( $markup );
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+			'remove_unused_rules'  => 'never',
+		) );
+		$sanitizer->sanitize();
+		$stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertCount( 2, $stylesheets );
+		$this->assertRegExp(
+			'/' . implode( '.*', array(
+				preg_quote( 'input[type="checkbox"]:disabled' ),
+				preg_quote( 'body.rtl' ),
+				preg_quote( '.login .message' ),
+			) ) . '/s',
+			$stylesheets[0]
+		);
+		$this->assertRegExp(
+			'/' . implode( '.*', array(
+				preg_quote( 'html{background-color:lightblue}' ),
+				preg_quote( 'body{color:red}' ),
+			) ) . '/s',
+			$stylesheets[1]
+		);
 	}
 }
