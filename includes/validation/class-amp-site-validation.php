@@ -13,23 +13,26 @@
 class AMP_Site_Validation {
 
 	/**
-	 * Gets the permalinks of all public post types with the status 'publish,' to check for AMP validity.
+	 * Gets the permalinks of public, published posts.
 	 *
-	 * This excludes 'attachment' post types, as it only searches for posts with the status 'publish.'
-	 * Attachments have a default status of 'inherit,' so they can depend on the status of their parent like a post.
-	 *
-	 * @todo: consider whether this should also return 'attachment' IDs.
-	 * @param int $number_posts The maximum amount of posts to get the permalinks for (optional).
+	 * @param string $post_type The post type.
+	 * @param int    $number_posts The maximum amount of posts to get the permalinks for (optional).
+	 * @param int    $offset The offset of the query (optional).
 	 * @return string[] $permalinks The post permalinks in an array.
 	 */
-	public static function get_post_permalinks( $number_posts = 200 ) {
-		$post_types = get_post_types( array( 'public' => true ), 'names' );
-		$query      = new WP_Query( array(
+	public static function get_post_permalinks( $post_type, $number_posts = 200, $offset = null ) {
+		$args = array(
+			'post_type'      => $post_type,
 			'posts_per_page' => $number_posts,
-			'post_type'      => array_values( $post_types ),
 			'post_status'    => 'publish',
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
 			'fields'         => 'ids',
-		) );
+		);
+		if ( is_int( $offset ) ) {
+			$args = array_merge( $args, compact( 'offset' ) );
+		}
+		$query = new WP_Query( $args );
 
 		return array_map( 'get_permalink', $query->posts );
 	}

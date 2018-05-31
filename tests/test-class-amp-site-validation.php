@@ -61,31 +61,30 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function test_get_post_permalinks() {
 		$number_posts_each_post_type = 20;
 		$post_types                  = get_post_types( array( 'public' => true ), 'names' );
-		$expected_post_permalinks    = array();
 
 		/**
-		 * The tested method does not get attachment permalinks.
-		 * It only searches for posts with the status 'publish.'
-		 * Attachments have a default status of 'inherit,' to depend on the status of their parent post.
+		 * Exclude attachment permalinks from the test.
+		 * They have a default status of 'inherit,' to depend on the status of their parent post.
 		 */
 		unset( $post_types['attachment'] );
 		foreach ( $post_types as $post_type ) {
+			$expected_post_permalinks = array();
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
 				$expected_post_permalinks[] = get_permalink( $this->factory()->post->create( array(
 					'post_type' => $post_type,
 				) ) );
 			}
-		}
-		$number_of_posts        = count( $post_types ) * $number_posts_each_post_type;
-		$actual_post_permalinks = AMP_Site_Validation::get_post_permalinks( $number_of_posts );
 
-		/*
-		 * The factory() method above creates posts so quickly that the WP_Query() default argument of 'orderby' => 'date'
-		 * doesn't return them in the exact order they were created.
-		 * So this simply ensures all of the created $post_ids are present in the return value of the tested method.
-		 */
-		$this->assertEquals( 0, count( array_diff( $expected_post_permalinks, $actual_post_permalinks ) ) );
-		$this->assertEquals( count( $expected_post_permalinks ), count( $actual_post_permalinks ) );
+			$actual_post_permalinks = AMP_Site_Validation::get_post_permalinks( $post_type );
+			$this->assertEquals( $expected_post_permalinks, array_values( $actual_post_permalinks ) );
+
+			// Test with the 2 optional arguments for AMP_Site_Validation::get_post_permalinks().
+			$number_of_posts        = $number_posts_each_post_type / 2;
+			$offset                 = $number_of_posts;
+			$actual_post_permalinks = AMP_Site_Validation::get_post_permalinks( $post_type, $number_of_posts, $offset );
+			$this->assertEquals( array_slice( $expected_post_permalinks, $offset, $number_of_posts ), array_values( $actual_post_permalinks ) );
+			$this->assertCount( $number_of_posts, $actual_post_permalinks );
+		}
 	}
 
 	/**
