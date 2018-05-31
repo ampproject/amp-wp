@@ -382,7 +382,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'div amp-img,div amp-anim{border:solid 1px red}',
 			),
 			'img_with_amp_img' => array(
-				'<div></div>',
+				'<amp-img></amp-img>',
 				'amp-img img{background-color:red}',
 				'amp-img img{background-color:red}',
 			),
@@ -407,7 +407,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'article>amp-video{border:solid 1px green}',
 			),
 			'video_with_amp_video' => array(
-				'<article></article>',
+				'<amp-video class="video"></amp-video>',
 				'amp-video.video video{border:solid 1px green}',
 				'amp-video.video video{border:solid 1px green}',
 			),
