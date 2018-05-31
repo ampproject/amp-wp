@@ -1292,7 +1292,8 @@ class AMP_Theme_Support {
 	 * @return string $html Filtered markup.
 	 */
 	public static function output_header_video( $atts ) {
-
+		// Remove the script for video.
+		wp_deregister_script( 'wp-custom-header' );
 		$video_settings = get_header_video_settings();
 
 		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
@@ -1319,6 +1320,7 @@ class AMP_Theme_Support {
 						'data-videoid'        => $query['v'],
 						'data-param-rel'      => '0', // Don't show related videos.
 						'data-param-showinfo' => '0', // Don't show video title at the top.
+						'data-param-controls' => '0', // Don't show video controls.
 					)
 				)
 			);
@@ -1353,7 +1355,7 @@ class AMP_Theme_Support {
 		$atts['layout'] = 'fill';
 		unset( $atts['width'] );
 
-		$place_holder = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
+		$place_holder = AMP_HTML_Utils::build_tag( 'img', $atts );
 
 		return $place_holder;
 
