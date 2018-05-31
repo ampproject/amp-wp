@@ -13,6 +13,20 @@
 class AMP_Site_Validation {
 
 	/**
+	 * The size of the batch of URLs to validate.
+	 *
+	 * @var int
+	 */
+	const BATCH_SIZE = 100;
+
+	/**
+	 * All of the site validation results.
+	 *
+	 * @var array
+	 */
+	public static $site_validation_urls = array();
+
+	/**
 	 * Gets the permalinks of public, published posts.
 	 *
 	 * @param string $post_type The post type.
@@ -44,7 +58,7 @@ class AMP_Site_Validation {
 	 * This includes categories and tags, and any more that are registered.
 	 * But it excludes post_format terms.
 	 *
-	 * @param string $taxonomy     The name of the taxonomy.
+	 * @param string $taxonomy     The name of the taxonomy, like 'category' or 'post_tag'.
 	 * @param int    $number_links The maximum amount of links to get (optional).
 	 * @param int    $offset       The number at which to offset the query (optional).
 	 * @return string[] $links The term links in an array.
@@ -63,17 +77,63 @@ class AMP_Site_Validation {
 	}
 
 	/**
-	 * Validates the URLs on the site.
+	 * Validates the URLs of the entire site.
 	 *
 	 * @todo: Consider wrapping this function with another, as different use cases will probably require a different return value or display.
 	 * For example, the <button> in /wp-admin that makes an AJAX request for this will need a different response than a WP-CLI command.
 	 * @return array $validation_result The post ID as the index, and the result of validation as the value.
 	 */
-	public static function validate_site_urls() {
-		$site_post_ids = self::get_post_ids();
-		foreach ( $site_post_ids as $id ) {
-			AMP_Validation_Manager::$posts_pending_frontend_validation[ $id ] = true;
+	public static function validate_entire_site_urls() {
+		// Validate the homepage.
+		self::validate_urls( home_url( '/' ) );
+
+		// Validate all public, published posts.
+		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+		foreach ( $public_post_types as $post_type ) {
+			$permalinks = self::get_post_permalinks( $post_type, self::BATCH_SIZE );
+			$offset     = 0;
+
+			while ( ! empty( $permalinks ) ) {
+				self::validate_urls( $permalinks );
+				$offset    += self::BATCH_SIZE;
+				$permalinks = self::get_post_permalinks( $post_type, self::BATCH_SIZE, $offset );
+			}
 		}
-		return AMP_Validation_Manager::validate_queued_posts_on_frontend();
+
+		// Validate all public taxonomies.
+		$public_taxonomies = get_taxonomies( array( 'public' => true ) );
+		foreach ( $public_taxonomies as $taxonomy ) {
+			$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE );
+			$offset         = 0;
+
+			while ( ! empty( $taxonomy_links ) ) {
+				self::validate_urls( $taxonomy_links );
+				$offset        += self::BATCH_SIZE;
+				$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE, $offset );
+			}
+		}
+
+		return self::$site_validation_urls;
+	}
+
+	/**
+	 * Validates a single URL, and stores the URL in a property.
+	 *
+	 * @todo: Maybe storing the URLS in the property isn't needed, as AMP_Validation_Manager stores the actual errors.
+	 * This could be an extremely large array.
+	 * For now, this is helpful in unit testing.
+	 * @param array|string $urls An array of URLs to validate, or a single string of a URL.
+	 * @return void
+	 */
+	public static function validate_urls( $urls ) {
+		if ( is_string( $urls ) ) {
+			$urls = array( $urls );
+		}
+
+		foreach ( $urls as $url ) {
+			$validation = AMP_Validation_Manager::validate_url( $url );
+			AMP_Invalid_URL_Post_Type::store_validation_errors( $validation, $url );
+			self::$site_validation_urls[] = $url;
+		}
 	}
 }

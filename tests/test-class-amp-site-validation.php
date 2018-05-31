@@ -20,37 +20,14 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	const TESTED_CLASS = 'AMP_Site_Validation';
 
 	/**
-	 * The name of the tag to test.
-	 *
-	 * @var string
-	 */
-	const TAG_NAME = 'img';
-
-	/**
-	 * A disallowed element, which should cause a validation error.
-	 *
-	 * @var string
-	 */
-	const DISALLOWED_TAG = '<script>doThis();</script>';
-
-	/**
-	 * An instance of DOMElement to test.
-	 *
-	 * @var DOMElement
-	 */
-	public $node;
-
-	/**
-	 * Setup.
+	 * Reset the state after a test method is called.
 	 *
 	 * @inheritdoc
 	 * @global $wp_registered_widgets
 	 */
-	public function setUp() {
-		parent::setUp();
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
-		$this->node   = $dom_document->createElement( self::TAG_NAME );
-		AMP_Validation_Manager::reset_validation_results();
+	public function tearDown() {
+		AMP_Site_Validation::$site_validation_urls = array();
+		parent::tearDown();
 	}
 
 	/**
@@ -127,5 +104,57 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$this->assertEquals( array_slice( $expected_links, $offset, $number_of_links ), array_values( $actual_links_using_offset ) );
 			$this->assertEquals( $number_of_links, count( $actual_links_using_offset ) );
 		}
+	}
+
+	/**
+	 * Test validate_entire_site_urls.
+	 *
+	 * @covers AMP_Site_Validation::validate_entire_site_urls()
+	 */
+	public function test_validate_entire_site_urls() {
+		$number_of_posts = 20;
+		$number_of_terms = 30;
+		$posts           = array();
+		$terms           = array();
+
+		for ( $i = 0; $i < $number_of_posts; $i++ ) {
+			$posts[] = $this->factory()->post->create();
+		}
+		$validated_urls = AMP_Site_Validation::validate_entire_site_urls();
+
+		// All of the posts created above should be present in $validated_urls.
+		$this->assertEmpty( array_diff( array_map( 'get_permalink', $posts ), $validated_urls ) );
+
+		for ( $i = 0; $i < $number_of_terms; $i++ ) {
+			$terms[] = $this->factory()->category->create();
+		}
+		// Terms need to be associated with a post in order to be returned in get_terms().
+		wp_set_post_terms( $posts[0], $terms, 'category' );
+		$validated_urls = AMP_Site_Validation::validate_entire_site_urls();
+
+		// All of the terms created above should be present in $validated_urls.
+		$this->assertEmpty( array_diff( array_map( 'get_term_link', $terms ), $validated_urls ) );
+		$this->assertTrue( in_array( home_url( '/' ), $validated_urls, true ) );
+	}
+
+	/**
+	 * Test validate_urls.
+	 *
+	 * @covers AMP_Site_Validation::validate_urls()
+	 */
+	public function test_validate_urls() {
+		$single_post_permalink = get_permalink( $this->factory()->post->create() );
+		AMP_Site_Validation::validate_urls( $single_post_permalink );
+		$this->assertEquals( array( $single_post_permalink ), AMP_Site_Validation::$site_validation_urls );
+
+		AMP_Site_Validation::$site_validation_urls = array();
+		$number_of_posts                           = 30;
+		$post_permalinks                           = array();
+
+		for ( $i = 0; $i < $number_of_posts; $i++ ) {
+			$post_permalinks[] = get_permalink( $this->factory()->post->create() );
+		}
+		AMP_Site_Validation::validate_urls( $post_permalinks );
+		$this->assertEquals( $post_permalinks, AMP_Site_Validation::$site_validation_urls );
 	}
 }
