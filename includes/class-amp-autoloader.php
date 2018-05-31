@@ -29,7 +29,9 @@ class AMP_Autoloader {
 	 * @var string[]
 	 */
 	private static $_classmap = array(
+		'AMP_Editor_Blocks'                           => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                           => 'includes/class-amp-theme-support',
+		'AMP_Response_Headers'                        => 'includes/class-amp-response-headers',
 		'AMP_Comment_Walker'                          => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                           => 'includes/admin/class-amp-post-meta-box',
@@ -38,6 +40,8 @@ class AMP_Autoloader {
 		'AMP_DailyMotion_Embed_Handler'               => 'includes/embeds/class-amp-dailymotion-embed',
 		'AMP_Facebook_Embed_Handler'                  => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'                   => 'includes/embeds/class-amp-gallery-embed',
+		'AMP_Gfycat_Embed_Handler'                    => 'includes/embeds/class-amp-gfycat-embed-handler',
+		'AMP_Core_Block_Handler'                      => 'includes/embeds/class-amp-core-block-handler',
 		'AMP_Instagram_Embed_Handler'                 => 'includes/embeds/class-amp-instagram-embed',
 		'AMP_Issuu_Embed_Handler'                     => 'includes/embeds/class-amp-issuu-embed-handler',
 		'AMP_Meetup_Embed_Handler'                    => 'includes/embeds/class-amp-meetup-embed-handler',
@@ -68,6 +72,8 @@ class AMP_Autoloader {
 		'AMP_Audio_Sanitizer'                         => 'includes/sanitizers/class-amp-audio-sanitizer',
 		'AMP_Base_Sanitizer'                          => 'includes/sanitizers/class-amp-base-sanitizer',
 		'AMP_Blacklist_Sanitizer'                     => 'includes/sanitizers/class-amp-blacklist-sanitizer',
+		'AMP_Block_Sanitizer'                         => 'includes/sanitizers/class-amp-block-sanitizer',
+		'AMP_Gallery_Block_Sanitizer'                 => 'includes/sanitizers/class-amp-gallery-block-sanitizer',
 		'AMP_Iframe_Sanitizer'                        => 'includes/sanitizers/class-amp-iframe-sanitizer',
 		'AMP_Img_Sanitizer'                           => 'includes/sanitizers/class-amp-img-sanitizer',
 		'AMP_Comments_Sanitizer'                      => 'includes/sanitizers/class-amp-comments-sanitizer',
@@ -84,13 +90,14 @@ class AMP_Autoloader {
 		'AMP_DOM_Utils'                               => 'includes/utils/class-amp-dom-utils',
 		'AMP_HTML_Utils'                              => 'includes/utils/class-amp-html-utils',
 		'AMP_Image_Dimension_Extractor'               => 'includes/utils/class-amp-image-dimension-extractor',
-		'AMP_Validation_Utils'                        => 'includes/utils/class-amp-validation-utils',
+		'AMP_Validation_Manager'                      => 'includes/validation/class-amp-validation-manager',
+		'AMP_Invalid_URL_Post_Type'                   => 'includes/validation/class-amp-invalid-url-post-type',
+		'AMP_Validation_Error_Taxonomy'               => 'includes/validation/class-amp-validation-error-taxonomy',
 		'AMP_String_Utils'                            => 'includes/utils/class-amp-string-utils',
 		'AMP_WP_Utils'                                => 'includes/utils/class-amp-wp-utils',
 		'AMP_Widget_Archives'                         => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'                       => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Media_Video'                      => 'includes/widgets/class-amp-widget-media-video',
-		'AMP_Widget_Recent_Comments'                  => 'includes/widgets/class-amp-widget-recent-comments',
 		'AMP_Widget_Text'                             => 'includes/widgets/class-amp-widget-text',
 		'WPCOM_AMP_Polldaddy_Embed'                   => 'wpcom/class-amp-polldaddy-embed',
 		'AMP_Test_Stub_Sanitizer'                     => 'tests/stubs',
@@ -129,6 +136,10 @@ class AMP_Autoloader {
 	 * Called at the end of this file; calling a second time has no effect.
 	 */
 	public static function register() {
+		if ( file_exists( AMP__DIR__ . '/vendor/autoload.php' ) ) {
+			require_once AMP__DIR__ . '/vendor/autoload.php';
+		}
+
 		if ( ! self::$is_registered ) {
 			spl_autoload_register( array( __CLASS__, 'autoload' ) );
 			self::$is_registered = true;

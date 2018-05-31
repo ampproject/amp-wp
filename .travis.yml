@@ -21,6 +21,7 @@ cache:
     - $HOME/deployment-targets
 
 install:
+  - if [[ $DEV_LIB_SKIP =~ composer ]]; then composer install --no-dev; fi
   - nvm install 6 && nvm use 6
   - export DEV_LIB_PATH=dev-lib
   - source $DEV_LIB_PATH/travis.install.sh

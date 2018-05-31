@@ -20,6 +20,13 @@ class AMP_Theme_Support {
 	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
 
 	/**
+	 * Response cache group name.
+	 *
+	 * @var string
+	 */
+	const RESPONSE_CACHE_GROUP = 'amp-reponse';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -68,13 +75,12 @@ class AMP_Theme_Support {
 	public static $purged_amp_query_vars = array();
 
 	/**
-	 * Headers sent (or attempted to be sent).
+	 * Start time when init was called.
 	 *
-	 * @since 0.7
-	 * @see AMP_Theme_Support::send_header()
-	 * @var array[]
+	 * @since 1.0
+	 * @var float
 	 */
-	public static $headers_sent = array();
+	public static $init_start_time;
 
 	/**
 	 * Whether output buffering has started.
@@ -86,13 +92,19 @@ class AMP_Theme_Support {
 
 	/**
 	 * Initialize.
+	 *
+	 * @since 0.7
 	 */
 	public static function init() {
 		if ( ! current_theme_supports( 'amp' ) ) {
 			return;
 		}
 
-		AMP_Validation_Utils::init();
+		AMP_Validation_Manager::init( array(
+			'should_locate_sources' => AMP_Validation_Manager::should_validate_response(),
+		) );
+
+		self::$init_start_time = microtime( true );
 
 		self::purge_amp_query_vars();
 		self::handle_xhr_request();
@@ -145,6 +157,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
+		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
 	}
 
@@ -152,8 +165,12 @@ class AMP_Theme_Support {
 	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
 	 *
 	 * @since 0.7
+	 * @since 1.0 Added $exit param.
+	 * @todo Rename to redirect_non_amp().
+	 *
+	 * @param bool $exit Whether to exit after redirecting.
 	 */
-	public static function redirect_canonical_amp() {
+	public static function redirect_canonical_amp( $exit = true ) {
 		if ( false !== get_query_var( amp_get_slug(), false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
 			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
 			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
@@ -162,8 +179,14 @@ class AMP_Theme_Support {
 
 			$url = amp_remove_endpoint( $url );
 
-			wp_safe_redirect( $url, 302 ); // Temporary redirect because canonical may change in future.
-			exit;
+			/*
+			 * Temporary redirect because AMP URL may return when blocking validation errors
+			 * occur or when a non-canonical AMP theme is used.
+			 */
+			wp_safe_redirect( $url, 302 );
+			if ( $exit ) {
+				exit;
+			}
 		}
 	}
 
@@ -182,7 +205,13 @@ class AMP_Theme_Support {
 			return false;
 		}
 
-		if ( is_singular() && ! post_supports_amp( get_queried_object() ) ) {
+		/**
+		 * Queried object.
+		 *
+		 * @var WP_Post $queried_object
+		 */
+		$queried_object = get_queried_object();
+		if ( is_singular() && ! post_supports_amp( $queried_object ) ) {
 			return false;
 		}
 
@@ -266,11 +295,6 @@ class AMP_Theme_Support {
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
 
-		// Add validation hooks *after* output buffering has started for the response.
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::add_validation_hooks();
-		}
-
 		// Commenting hooks.
 		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
@@ -344,45 +368,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Send an HTTP response header.
-	 *
-	 * This largely exists to facilitate unit testing but it also provides a better interface for sending headers.
-	 *
-	 * @since 0.7.0
-	 *
-	 * @param string $name  Header name.
-	 * @param string $value Header value.
-	 * @param array  $args {
-	 *     Args to header().
-	 *
-	 *     @type bool $replace     Whether to replace a header previously sent. Default true.
-	 *     @type int  $status_code Status code to send with the sent header.
-	 * }
-	 * @return bool Whether the header was sent.
-	 */
-	public static function send_header( $name, $value, $args = array() ) {
-		$args = array_merge(
-			array(
-				'replace'     => true,
-				'status_code' => null,
-			),
-			$args
-		);
-
-		self::$headers_sent[] = array_merge( compact( 'name', 'value' ), $args );
-		if ( headers_sent() ) {
-			return false;
-		}
-
-		header(
-			sprintf( '%s: %s', $name, $value ),
-			$args['replace'],
-			$args['status_code']
-		);
-		return true;
-	}
-
-	/**
 	 * Hook into a POST form submissions, such as the comment form or some other form submission.
 	 *
 	 * @since 0.7.0
@@ -402,7 +387,7 @@ class AMP_Theme_Support {
 		// Send AMP response header.
 		$origin = wp_validate_redirect( wp_sanitize_redirect( esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] ) ) );
 		if ( $origin ) {
-			self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) );
+			AMP_Response_Headers::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) );
 		}
 
 		// Intercept POST requests which redirect.
@@ -438,7 +423,7 @@ class AMP_Theme_Support {
 	 *
 	 * @param string     $url     Comment permalink to redirect to.
 	 * @param WP_Comment $comment Posted comment.
-	 * @return string URL.
+	 * @return string|null URL if redirect to be done; otherwise function will exist.
 	 */
 	public static function filter_comment_post_redirect( $url, $comment ) {
 		$theme_support = get_theme_support( 'amp' );
@@ -473,6 +458,7 @@ class AMP_Theme_Support {
 		wp_send_json( array(
 			'message' => self::wp_kses_amp_mustache( $message ),
 		) );
+		return null;
 	}
 
 	/**
@@ -551,8 +537,8 @@ class AMP_Theme_Support {
 			$absolute_location .= '#' . $parsed_location['fragment'];
 		}
 
-		self::send_header( 'AMP-Redirect-To', $absolute_location );
-		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To' );
+		AMP_Response_Headers::send_header( 'AMP-Redirect-To', $absolute_location );
+		AMP_Response_Headers::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To' );
 
 		wp_send_json_success();
 	}
@@ -661,7 +647,7 @@ class AMP_Theme_Support {
 	 * @see get_query_template()
 	 *
 	 * @param array $templates Template hierarchy.
-	 * @returns array Templates.
+	 * @return array Templates.
 	 */
 	public static function filter_paired_template_hierarchy( $templates ) {
 		$support = get_theme_support( 'amp' );
@@ -878,6 +864,13 @@ class AMP_Theme_Support {
 	 * @param DOMDocument $dom Doc.
 	 */
 	public static function ensure_required_markup( DOMDocument $dom ) {
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $meta
+		 * @var DOMElement $script
+		 * @var DOMElement $link
+		 */
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
 			$head = $dom->createElement( 'head' );
@@ -886,11 +879,6 @@ class AMP_Theme_Support {
 		$meta_charset  = null;
 		$meta_viewport = null;
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			/**
-			 * Meta.
-			 *
-			 * @var DOMElement $meta
-			 */
 			if ( $meta->hasAttribute( 'charset' ) && 'utf-8' === strtolower( $meta->getAttribute( 'charset' ) ) ) { // @todo Also look for meta[http-equiv="Content-Type"]?
 				$meta_charset = $meta;
 			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
@@ -971,7 +959,7 @@ class AMP_Theme_Support {
 	public static function start_output_buffering() {
 		/*
 		 * Disable the New Relic Browser agent on AMP responses.
-		 * This prevents th New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset:
+		 * This prevents the New Relic from causing invalid AMP responses due the NREUM script it injects after the meta charset:
 		 * https://docs.newrelic.com/docs/browser/new-relic-browser/troubleshooting/google-amp-validator-fails-due-3rd-party-script
 		 * Sites with New Relic will need to specially configure New Relic for AMP:
 		 * https://docs.newrelic.com/docs/browser/new-relic-browser/installation/monitor-amp-pages-new-relic-browser
@@ -1042,16 +1030,17 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 *
 	 * @param string $response HTML document response. By default it expects a complete document.
-	 * @param array  $args {
-	 *     Args to send to the preprocessor/sanitizer.
-	 *
-	 *     @type callable $remove_invalid_callback Function to call whenever a node is removed due to being invalid.
-	 * }
+	 * @param array  $args     Args to send to the preprocessor/sanitizer.
 	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
 	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
+
+		if ( isset( $args['validation_error_callback'] ) ) {
+			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
+			unset( $args['validation_error_callback'] );
+		}
 
 		/*
 		 * Check if the response starts with HTML markup.
@@ -1062,18 +1051,43 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		$is_validation_debug_mode = ! empty( $_REQUEST[ AMP_Validation_Utils::DEBUG_QUERY_VAR ] ); // WPCS: csrf ok.
-
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element'    => true,
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
-				'disable_invalid_removal' => $is_validation_debug_mode,
+				'enable_response_caching' => (
+					( ! defined( 'WP_DEBUG' ) || true !== WP_DEBUG )
+					&&
+					! AMP_Validation_Manager::should_validate_response()
+				),
 			),
 			$args
 		);
+
+		// Return cache if enabled and found.
+		$response_cache_key = null;
+		if ( true === $args['enable_response_caching'] ) {
+			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
+			$response_cache_key = md5( wp_json_encode( array(
+				$args,
+				$response,
+				self::$sanitizer_classes,
+				self::$embed_handlers,
+				AMP__VERSION,
+			) ) );
+
+			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
+
+			if ( ! empty( $response_cache ) ) {
+				return $response_cache;
+			}
+		}
+
+		AMP_Response_Headers::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
+
+		$dom_parse_start = microtime( true );
 
 		/*
 		 * Make sure that <meta charset> is present in output prior to parsing.
@@ -1106,9 +1120,31 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
 
+		AMP_Response_Headers::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
+
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
+		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
+
+		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
+			if ( amp_is_canonical() ) {
+				$dom->documentElement->removeAttribute( 'amp' );
+
+				/*
+				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
+				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
+				 */
+				if ( $head ) {
+					$script = $dom->createElement( 'script' );
+					$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+					$head->appendChild( $script );
+				}
+			} else {
+				self::redirect_canonical_amp( false );
+				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
+			}
+		}
 
 		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
@@ -1116,9 +1152,9 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		if ( AMP_Validation_Utils::should_validate_response() ) {
-			AMP_Validation_Utils::finalize_validation( $dom, array(
-				'remove_source_comments' => ! $is_validation_debug_mode,
+		if ( AMP_Validation_Manager::should_validate_response() ) {
+			AMP_Validation_Manager::finalize_validation( $dom, array(
+				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
 			) );
 		}
 
@@ -1166,6 +1202,13 @@ class AMP_Theme_Support {
 				$response,
 				1
 			);
+		}
+
+		AMP_Response_Headers::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
+
+		// Cache response if enabled.
+		if ( true === $args['enable_response_caching'] ) {
+			wp_cache_set( $response_cache_key, $response, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
 		}
 
 		return $response;

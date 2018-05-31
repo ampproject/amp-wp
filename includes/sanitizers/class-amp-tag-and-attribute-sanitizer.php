@@ -433,6 +433,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$attr_spec_list
 		);
 
+		// Amend spec list with layout.
+		if ( isset( $tag_spec['amp_layout'] ) ) {
+			$merged_attr_spec_list = array_merge( $merged_attr_spec_list, $this->layout_allowed_attributes );
+
+			if ( isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
+				$layouts = wp_array_slice_assoc( AMP_Rule_Spec::$layout_enum, $tag_spec['amp_layout']['supported_layouts'] );
+
+				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
+			}
+		}
+
 		// Identify any remaining disallowed attributes.
 		$disallowed_attributes = $this->get_disallowed_attributes_in_node( $node, $merged_attr_spec_list );
 
@@ -1216,7 +1227,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					 * This seems to be an acceptable check since the AMP validator
 					 * will allow a URL with no protocol to pass validation.
 					 */
-					$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
+					$url_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
 					if ( $url_scheme ) {
 						if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 							return AMP_Rule_Spec::FAIL;
@@ -1233,7 +1244,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 							 * This seems to be an acceptable check since the AMP validator
 							 *  will allow a URL with no protocol to pass validation.
 							 */
-							$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
+							$url_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
 							if ( $url_scheme ) {
 								if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 									return AMP_Rule_Spec::FAIL;
@@ -1266,7 +1277,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
 				foreach ( $urls_to_test as $url ) {
-					$parsed_url = AMP_WP_Utils::parse_url( $url );
+					$parsed_url = wp_parse_url( $url );
 
 					/*
 					 *  The JS AMP validator seems to consider 'relative' to mean
@@ -1285,7 +1296,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
 						foreach ( $urls_to_test as $url ) {
-							$parsed_url = AMP_WP_Utils::parse_url( $url );
+							$parsed_url = wp_parse_url( $url );
 							if ( empty( $parsed_url['scheme'] ) ) {
 								return AMP_Rule_Spec::FAIL;
 							}
@@ -1338,7 +1349,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
-			$url_domain = AMP_WP_Utils::parse_url( $attr_value, PHP_URL_HOST );
+			$url_domain = wp_parse_url( $attr_value, PHP_URL_HOST );
 			if ( ! empty( $url_domain ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] as $disallowed_domain ) {
 					if ( strtolower( $url_domain ) === strtolower( $disallowed_domain ) ) {
@@ -1417,7 +1428,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 2 !== count( $pair_parts ) ) {
 					return 0;
 				}
-				$properties[ strtolower( $pair_parts[0] ) ] = $pair_parts[1];
+				$properties[ trim( strtolower( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
 			}
 
 			// Fail if there are unrecognized properties.
@@ -1465,13 +1476,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Return true if attribute name is valid for this attr_spec_list, false otherwise.
 	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || isset( $this->layout_allowed_attributes[ $attr_name ] ) || isset( $attr_spec_list[ $attr_name ] ) ) {
+		if ( isset( $attr_spec_list[ $attr_name ] ) ) {
 			return true;
-		} else {
-			foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
-				if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
-					return true;
-				}
+		}
+		foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
+			if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
+				return true;
 			}
 		}
 

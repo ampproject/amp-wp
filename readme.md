@@ -10,7 +10,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Tested up to:** 4.9  
 **Stable tag:** 0.7.1  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 5.3  
+**Requires PHP:** 5.3.2  
 
 [![Build Status](https://travis-ci.org/Automattic/amp-wp.svg?branch=master)](https://travis-ci.org/Automattic/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com) 
 
@@ -61,6 +61,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
 
 ## Changelog ##
+
+### 1.0 (unreleased) ###
+- Prefer the Custom Logo as the schema.org publisher icon, over the Site Icon. See [#1144](https://github.com/Automattic/amp-wp/pull/1144). Props kienstra, westonruter.
 
 ### 0.7.1 (2018-05-23) ###
 - Limit showing AMP validation warnings to when `amp` theme support is present. See [#1132](https://github.com/Automattic/amp-wp/pull/1132). Props westonruter.

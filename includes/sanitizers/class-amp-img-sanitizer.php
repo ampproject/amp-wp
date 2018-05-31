@@ -115,15 +115,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'src':
-				case 'alt':
-				case 'class':
-				case 'srcset':
-				case 'on':
-				case 'attribution':
-					$out[ $name ] = $value;
-					break;
-
 				case 'width':
 				case 'height':
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
@@ -133,7 +124,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out['layout'] = $value;
 					break;
 
+				case 'data-amp-noloading':
+					$out['noloading'] = $value;
+					break;
+
 				default:
+					$out[ $name ] = $value;
 					break;
 			}
 		}
@@ -222,12 +218,24 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMNode $node The DOMNode to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
+
+		$amp_data       = $this->get_data_amp_attributes( $node );
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+		$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
+
 		$new_attributes = $this->filter_attributes( $old_attributes );
+		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
+		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
+
+		if ( isset( $old_attributes['data-amp-lightbox'] ) ) {
+			$this->maybe_add_amp_image_lightbox_node();
+		}
+
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
 			$new_attributes['layout'] = 'intrinsic';
 		}
+
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 
@@ -251,7 +259,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function is_gif_url( $url ) {
 		$ext  = self::$anim_extension;
-		$path = AMP_WP_Utils::parse_url( $url, PHP_URL_PATH );
+		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
 	}
 

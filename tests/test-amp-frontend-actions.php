@@ -15,6 +15,7 @@ class Test_AMP_Frontend_Actions extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
 		amp_add_frontend_actions();
 	}
 
