@@ -107,8 +107,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$style_element = $this->dom->createElement( 'style' );
 		$style_content = '
 		.has-header-image .custom-header-media amp-img > img,
-		.has-header-video .custom-header-media amp-video > video,
-		.has-header-video .custom-header-media amp-youtube > iframe {
+		.has-header-video .custom-header-media amp-video > video{
 			position: fixed;
 			height: auto;
 			left: 50%;
@@ -137,7 +136,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		@supports ( object-fit: cover ) {
 			.has-header-image .custom-header-media amp-img > img,
 			.has-header-video .custom-header-media amp-video > video,
-			.has-header-video .custom-header-media amp-youtube > iframe,
 			.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
 				height: 100%;
 				left: 0;
