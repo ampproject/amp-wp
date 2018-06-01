@@ -1058,7 +1058,7 @@ class AMP_Theme_Support {
 				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'enable_response_caching' => (
-					( ! defined( 'WP_DEBUG' ) || true !== WP_DEBUG )
+					! ( defined( 'WP_DEBUG' ) && WP_DEBUG )
 					&&
 					! AMP_Validation_Manager::should_validate_response()
 				),
@@ -1080,8 +1080,20 @@ class AMP_Theme_Support {
 
 			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
 
-			if ( ! empty( $response_cache ) ) {
-				return $response_cache;
+			// Make sure that all of the validation errors should be sanitized in the same way; if not, then the cached body should be discarded.
+			if ( isset( $response_cache['validation_results'] ) ) {
+				foreach ( $response_cache['validation_results'] as $validation_result ) {
+					$should_sanitize = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $validation_result['error'] );
+					if ( $should_sanitize !== $validation_result['sanitized'] ) {
+						unset( $response_cache['body'] );
+						break;
+					}
+				}
+			}
+
+			// Short-circuit response with cached body.
+			if ( isset( $response_cache['body'] ) ) {
+				return $response_cache['body'];
 			}
 		}
 
@@ -1102,14 +1114,13 @@ class AMP_Theme_Support {
 				1
 			);
 		}
-		$dom = AMP_DOM_Utils::get_dom( $response );
 
-		$xpath = new DOMXPath( $dom );
-
+		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
+		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
-			// Make sure scripts from the body get moved to the head.
+			$xpath = new DOMXPath( $dom );
 			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
 				$head->appendChild( $script );
 			}
@@ -1208,7 +1219,17 @@ class AMP_Theme_Support {
 
 		// Cache response if enabled.
 		if ( true === $args['enable_response_caching'] ) {
-			wp_cache_set( $response_cache_key, $response, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
+			$response_cache = array(
+				'body'               => $response,
+				'validation_results' => array_map(
+					function( $result ) {
+						unset( $result['error']['sources'] );
+						return $result;
+					},
+					AMP_Validation_Manager::$validation_results
+				),
+			);
+			wp_cache_set( $response_cache_key, $response_cache, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
 		}
 
 		return $response;

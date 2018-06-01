@@ -178,6 +178,74 @@ class AMP_Validation_Error_Taxonomy {
 		);
 	}
 
+
+	/**
+	 * Determine whether a validation error should be sanitized.
+	 *
+	 * @param array $error Validation error.
+	 *
+	 * @return bool Whether error should be sanitized.
+	 */
+	public static function is_validation_error_sanitized( $error ) {
+		$sanitization = self::get_validation_error_sanitization( $error );
+		return self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+	}
+
+	/**
+	 * Get the validation error sanitization.
+	 *
+	 * @param array $error Validation error.
+	 *
+	 * @return array {
+	 *     Validation error sanitization.
+	 *
+	 *     @type int  $status Validation status (0=VALIDATION_ERROR_NEW_STATUS, 1=VALIDATION_ERROR_ACCEPTED_STATUS, 2=VALIDATION_ERROR_REJECTED_STATUS).
+	 *     @type bool $forced Whether sanitization is forced via filter.
+	 * }
+	 */
+	public static function get_validation_error_sanitization( $error ) {
+		$term_data = self::prepare_validation_error_taxonomy_term( $error );
+		$term      = get_term_by( 'slug', $term_data['slug'], self::TAXONOMY_SLUG );
+		$statuses  = array(
+			self::VALIDATION_ERROR_NEW_STATUS,
+			self::VALIDATION_ERROR_ACCEPTED_STATUS,
+			self::VALIDATION_ERROR_REJECTED_STATUS,
+		);
+		if ( isset( AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
+			// See note in AMP_Validation_Manager::add_validation_error_sourcing() for why amp_validation_error_sanitized filter isn't used.
+			$status = AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ];
+		} elseif ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
+			$status = $term->term_group;
+		} else {
+			$status = self::VALIDATION_ERROR_NEW_STATUS;
+		}
+
+		/**
+		 * Filters whether the validation error should be sanitized.
+		 *
+		 * Note that the $node is not passed here to ensure that the filter can be
+		 * applied on validation errors that have been stored. Likewise, the $sources
+		 * are also omitted because these are only available during an explicit
+		 * validation request and so they are not suitable for plugins to vary
+		 * sanitization by. Note that returning false this indicates that the
+		 * validation error should not be considered a blocker to render AMP.
+		 *
+		 * @since 1.0
+		 *
+		 * @param null|bool $sanitized Whether sanitized; this is initially null, and changing it to bool causes the validation error to be forced.
+		 * @param array $error Validation error being sanitized.
+		 */
+		$sanitized = apply_filters( 'amp_validation_error_sanitized', null, $error );
+
+		$forced = false;
+		if ( null !== $sanitized ) {
+			$forced = true;
+			$status = $sanitized ? self::VALIDATION_ERROR_ACCEPTED_STATUS : self::VALIDATION_ERROR_REJECTED_STATUS;
+		}
+
+		return compact( 'status', 'forced' );
+	}
+
 	/**
 	 * Get the count of validation error terms, optionally restricted by term group (e.g. accepted or rejected).
 	 *
@@ -281,7 +349,7 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
-				$source = array_pop( $validation_error['sources'] );
+				$source = array_shift( $validation_error['sources'] );
 
 				if ( isset( $source['type'], $source['name'] ) ) {
 					$invalid_sources[ $source['type'] ][] = $source['name'];
@@ -308,6 +376,9 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function add_admin_hooks() {
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
+		add_action( 'load-edit-tags.php', function() {
+			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
+		} );
 		add_filter( 'terms_clauses', array( __CLASS__, 'filter_terms_clauses_for_description_search' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'add_admin_notices' ) );
 		add_filter( 'tag_row_actions', array( __CLASS__, 'filter_tag_row_actions' ), 10, 2 );
@@ -429,6 +500,35 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Prevent user from being able to delete validation errors in order to disable the checkbox on the post list table.
+	 *
+	 * Yes, this is not ideal.
+	 *
+	 * @param array $allcaps All caps.
+	 * @param array $caps    Requested caps.
+	 * @param array $args    Cap args.
+	 * @return array All caps.
+	 */
+	public static function filter_user_has_cap_for_hiding_term_list_table_checkbox( $allcaps, $caps, $args ) {
+		if ( isset( $args[0] ) && 'delete_term' === $args[0] ) {
+			$term  = get_term( $args[2] );
+			$error = json_decode( $term->description, true );
+			if ( ! is_array( $error ) ) {
+				return $allcaps;
+			}
+
+			$sanitization = self::get_validation_error_sanitization( $error );
+			if ( $sanitization['forced'] ) {
+				$allcaps = array_merge(
+					$allcaps,
+					array_fill_keys( $caps, false )
+				);
+			}
+		}
+		return $allcaps;
+	}
+
+	/**
 	 * Include searching taxonomy term descriptions and sources term meta.
 	 *
 	 * @param array $clauses    Clauses.
@@ -497,37 +597,41 @@ class AMP_Validation_Error_Taxonomy {
 	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
 		if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
 			$term_id = $tag->term_id;
+			$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
 
 			/*
 			 * Hide deletion link since a validation error should only be removed once
-			 * it no longer has an occurence on the site. When an invalid URL is re-checked
+			 * it no longer has an occurrence on the site. When an invalid URL is re-checked
 			 * and it no longer has this validation error, then the count will be decremented.
 			 * When a validation error term no longer has a count, then it is hidden from the
 			 * list table. A cron job could periodically delete terms that have no counts.
 			 */
 			unset( $actions['delete'] );
 
-			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $tag->term_group ) {
-				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-					'<a href="%s" aria-label="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_REJECT_ACTION
-					),
-					esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Reject', 'amp' )
-				);
-			}
-			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $tag->term_group ) {
-				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-					'<a href="%s" aria-label="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_ACCEPT_ACTION
-					),
-					esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Accept', 'amp' )
-				);
+			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
+			if ( ! $sanitization['forced'] ) {
+				if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['status'] ) {
+					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
+						'<a href="%s" aria-label="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_REJECT_ACTION
+						),
+						esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
+						esc_html__( 'Reject', 'amp' )
+					);
+				}
+				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['status'] ) {
+					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
+						'<a href="%s" aria-label="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_ACCEPT_ACTION
+						),
+						esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
+						esc_html__( 'Accept', 'amp' )
+					);
+				}
 			}
 		}
 		return $actions;
@@ -702,9 +806,10 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'status':
-				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
+				$sanitization = self::get_validation_error_sanitization( $validation_error );
+				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
 					$content = '&#x2705; ' . esc_html__( 'Accepted', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ) {
+				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['status'] ) {
 					$content = '&#x274C; ' . esc_html__( 'Rejected', 'amp' );
 				} else {
 					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
