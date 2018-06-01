@@ -614,13 +614,11 @@ class AMP_Invalid_URL_Post_Type {
 		$view_url        = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ); // Prevent redirection to non-AMP page.
 		$actions['view'] = sprintf( '<a href="%s">%s</a>', esc_url( $view_url ), esc_html__( 'View', 'amp' ) );
 
-		if ( ! empty( $url ) ) {
-			$actions[ self::RECHECK_ACTION ] = sprintf(
-				'<a href="%s">%s</a>',
-				self::get_recheck_url( $post, get_edit_post_link( $post->ID, 'raw' ), $url ),
-				esc_html__( 'Re-check', 'amp' )
-			);
-		}
+		$actions[ self::RECHECK_ACTION ] = sprintf(
+			'<a href="%s">%s</a>',
+			self::get_recheck_url( $post, get_edit_post_link( $post->ID, 'raw' ) ),
+			esc_html__( 'Re-check', 'amp' )
+		);
 
 		return $actions;
 	}
@@ -740,9 +738,7 @@ class AMP_Invalid_URL_Post_Type {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
 		$post = get_post( $post_id );
 		$url  = $post->post_title;
-		if ( isset( $_GET['recheck_url'] ) ) {
-			$url = wp_validate_redirect( wp_unslash( $_GET['recheck_url'] ) );
-		}
+
 		$validation_errors = AMP_Validation_Manager::validate_url( $url );
 		$remaining_errors  = true;
 		if ( is_array( $validation_errors ) ) {
@@ -1150,15 +1146,13 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * @param  WP_Post $post         The post storing the validation error.
 	 * @param  string  $redirect_url The URL of the redirect.
-	 * @param  string  $recheck_url  The URL to check. Optional.
 	 * @return string The URL to recheck the post.
 	 */
-	public static function get_recheck_url( $post, $redirect_url, $recheck_url = null ) {
+	public static function get_recheck_url( $post, $redirect_url ) {
 		return wp_nonce_url(
 			add_query_arg(
 				array(
-					'action'      => self::RECHECK_ACTION,
-					'recheck_url' => $recheck_url,
+					'action' => self::RECHECK_ACTION,
 				),
 				$redirect_url
 			),
