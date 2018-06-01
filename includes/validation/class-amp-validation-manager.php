@@ -401,9 +401,7 @@ class AMP_Validation_Manager {
 		 * @param bool|null $sanitized Whether sanitized, or null if no default predetermined.
 		 * @param array     $error     Validation error being sanitized.
 		 */
-		$sanitized = apply_filters( 'amp_validation_error_sanitized', $sanitized, $error );
-
-		return $sanitized;
+		return apply_filters( 'amp_validation_error_sanitized', $sanitized, $error );
 	}
 
 	/**

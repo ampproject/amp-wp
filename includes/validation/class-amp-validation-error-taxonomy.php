@@ -155,41 +155,9 @@ class AMP_Validation_Error_Taxonomy {
 			),
 		) );
 
-		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
-
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
-	}
-
-	/**
-	 * Prevent user from being able to delete validation errors in order to disable the checkbox on the post list table.
-	 *
-	 * Yes, this is not ideal.
-	 *
-	 * @param array $allcaps All caps.
-	 * @param array $caps    Requested caps.
-	 * @param array $args    Cap args.
-	 * @return array All caps.
-	 */
-	public static function filter_user_has_cap_for_hiding_term_list_table_checkbox( $allcaps, $caps, $args ) {
-		if ( isset( $args[0] ) && 'delete_term' === $args[0] ) {
-			$term  = get_term( $args[2] );
-			$error = json_decode( $term->description, true );
-			if ( ! is_array( $error ) ) {
-				return $allcaps;
-			}
-
-			/** This filter is documented in amp/includes/validation/class-amp-validation-manager.php */
-			$forced_sanitization = apply_filters( 'amp_validation_error_sanitized', null, $error );
-			if ( null !== $forced_sanitization ) {
-				$allcaps = array_merge(
-					$allcaps,
-					array_fill_keys( $caps, false )
-				);
-			}
-		}
-		return $allcaps;
 	}
 
 	/**
@@ -340,6 +308,9 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function add_admin_hooks() {
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
+		add_action( 'load-edit-tags.php', function() {
+			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
+		} );
 		add_filter( 'terms_clauses', array( __CLASS__, 'filter_terms_clauses_for_description_search' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'add_admin_notices' ) );
 		add_filter( 'tag_row_actions', array( __CLASS__, 'filter_tag_row_actions' ), 10, 2 );
@@ -458,6 +429,36 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			return $clauses;
 		}, 10, 2 );
+	}
+
+	/**
+	 * Prevent user from being able to delete validation errors in order to disable the checkbox on the post list table.
+	 *
+	 * Yes, this is not ideal.
+	 *
+	 * @param array $allcaps All caps.
+	 * @param array $caps    Requested caps.
+	 * @param array $args    Cap args.
+	 * @return array All caps.
+	 */
+	public static function filter_user_has_cap_for_hiding_term_list_table_checkbox( $allcaps, $caps, $args ) {
+		if ( isset( $args[0] ) && 'delete_term' === $args[0] ) {
+			$term  = get_term( $args[2] );
+			$error = json_decode( $term->description, true );
+			if ( ! is_array( $error ) ) {
+				return $allcaps;
+			}
+
+			/** This filter is documented in amp/includes/validation/class-amp-validation-manager.php */
+			$forced_sanitization = apply_filters( 'amp_validation_error_sanitized', null, $error );
+			if ( null !== $forced_sanitization ) {
+				$allcaps = array_merge(
+					$allcaps,
+					array_fill_keys( $caps, false )
+				);
+			}
+		}
+		return $allcaps;
 	}
 
 	/**
