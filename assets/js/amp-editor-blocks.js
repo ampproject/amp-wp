@@ -731,7 +731,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					return element;
 				}
 			} else if ( ! component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-				// Add amp-carousel=false attribut to the shortcode.
+				// Add amp-carousel=false attribute to the shortcode.
 				text = attributes.text.replace( '[gallery', '[gallery amp-carousel=false' );
 			} else {
 				text = attributes.text;

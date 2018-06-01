@@ -122,6 +122,25 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array();
+	}
+
+	/**
+	 * Run logic before any sanitizers are run.
+	 *
+	 * After the sanitizers are instantiated but before calling sanitize on each of them, this
+	 * method is called with list of all the instantiated sanitizers.
+	 *
+	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
+	 */
+	public function init( $sanitizers ) {}
+
+	/**
 	 * Sanitize the HTML contained in the DOMDocument received by the constructor
 	 */
 	abstract public function sanitize();
@@ -444,9 +463,6 @@ abstract class AMP_Base_Sanitizer {
 			if ( isset( $parent_attributes['data-amp-noloading'] ) && true === filter_var( $parent_attributes['data-amp-noloading'], FILTER_VALIDATE_BOOLEAN ) ) {
 				$attributes['noloading'] = $parent_attributes['data-amp-noloading'];
 			}
-			if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
-				$attributes['lightbox'] = true;
-			}
 		}
 
 		return $attributes;
@@ -465,12 +481,6 @@ abstract class AMP_Base_Sanitizer {
 		}
 		if ( isset( $amp_data['noloading'] ) ) {
 			$attributes['data-amp-noloading'] = '';
-		}
-		if ( isset( $amp_data['lightbox'] ) ) {
-			$attributes['data-amp-lightbox'] = '';
-			$attributes['on']                = 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID;
-			$attributes['role']              = 'button';
-			$attributes['tabindex']          = 0;
 		}
 		return $attributes;
 	}
