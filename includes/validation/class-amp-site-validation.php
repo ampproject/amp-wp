@@ -85,7 +85,7 @@ class AMP_Site_Validation {
 	 * @todo: Consider wrapping this function with another, as different use cases will probably require a different return value or display.
 	 * For example, the <button> in /wp-admin that makes an AJAX request for this will need a different response than a WP-CLI command.
 	 * @param object $wp_cli_progress The object that shows progress in the WP-CLI script to validate the site.
-	 * @return array $validation_result The post ID as the index, and the result of validation as the value.
+	 * @return array $urls_validated The URLs that were visited, regardless of what the validation result was.
 	 */
 	public static function validate_entire_site_urls( $wp_cli_progress = null ) {
 		// Validate the homepage.
