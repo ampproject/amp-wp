@@ -198,20 +198,12 @@ class AMP_Invalid_URL_Post_Type {
 				continue;
 			}
 			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-			if ( ! $term ) {
-				continue;
-			}
-			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
+			if ( $term && $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
 				continue;
 			}
 			$errors[] = array(
 				'term' => $term,
-				'data' => array_merge(
-					json_decode( $term->description, true ),
-					array(
-						'sources' => $stored_validation_error['sources'],
-					)
-				),
+				'data' => $stored_validation_error['data'],
 			);
 		}
 		return $errors;
@@ -318,15 +310,6 @@ class AMP_Invalid_URL_Post_Type {
 
 		$terms = array();
 		foreach ( $validation_errors as $data ) {
-			/*
-			 * Exclude sources from data since not available unless sources are being obtained,
-			 * and thus not able to be matched when hashed.
-			 */
-			$sources = null;
-			if ( isset( $data['sources'] ) ) {
-				$sources = $data['sources'];
-			}
-
 			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
 			$term_slug = $term_data['slug'];
 			if ( ! isset( $terms[ $term_slug ] ) ) {
@@ -352,7 +335,7 @@ class AMP_Invalid_URL_Post_Type {
 				$terms[ $term_slug ] = $term;
 			}
 
-			$stored_validation_errors[] = compact( 'term_slug', 'sources' );
+			$stored_validation_errors[] = compact( 'term_slug', 'data' );
 		}
 
 		$post_content = wp_json_encode( $stored_validation_errors );
