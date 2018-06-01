@@ -52,7 +52,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Deprecate `AMP_WP_Utils`, in favor of `wp_parse_url()`. See [#995](https://github.com/Automattic/amp-wp/pull/995). Props paulschreiber.
 - Display admin notice if there's no persistent object caching. See [#1050](https://github.com/Automattic/amp-wp/pull/1050). Props oscarssanchez.
 - Incorporate Server Timing API. See [#990](https://github.com/Automattic/amp-wp/issues/990). Props westonruter.
-- Add runtime CSS minification, `!important` replacement, and tree shaking. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142). Props westonruter.
+- Add runtime CSS minification, `!important` replacement, and tree shaking. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142). Props westonruter, amedina, pbakaus, igrigorik, camelburrito.
 - Ensure layout attributes are only allowed on supporting elements. See [#1075](https://github.com/Automattic/amp-wp/pull/1075). Props westonruter.
 - Add AMP validation of blocks. See [#1019](https://github.com/Automattic/amp-wp/pull/1019). Props westonruter.
 - Fix handling of font stylesheets with non-HTTPS scheme or scheme-less URLs. See [#1077](https://github.com/Automattic/amp-wp/pull/1077). Props westonruter.
