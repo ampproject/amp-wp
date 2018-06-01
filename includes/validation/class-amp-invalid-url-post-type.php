@@ -175,16 +175,14 @@ class AMP_Invalid_URL_Post_Type {
 	 * @param array       $args {
 	 *     Args.
 	 *
-	 *     @type bool $ignore_accepted           Exclude validation errors that are accepted. Default false.
-	 *     @type bool $check_forced_sanitization Check whether sanitization status is forced via amp_validation_error_sanitized filter. Adds a check_forced_sanitization value to each returned array.
+	 *     @type bool $ignore_accepted Exclude validation errors that are accepted. Default false.
 	 * }
-	 * @return array List of errors.
+	 * @return array List of errors, with keys for term, data, status, and (sanitization) forced.
 	 */
 	public static function get_invalid_url_validation_errors( $post, $args = array() ) {
 		$args   = array_merge(
 			array(
-				'ignore_accepted'           => false,
-				'check_forced_sanitization' => true,
+				'ignore_accepted' => false,
 			),
 			$args
 		);
@@ -201,35 +199,18 @@ class AMP_Invalid_URL_Post_Type {
 			}
 			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
-			$forced_sanitization = null;
-			if ( $args['check_forced_sanitization'] ) {
-				$error = $stored_validation_error['data'];
-				unset( $error['sources'] );
-
-				/** This filter is documented in amp/includes/validation/class-amp-validation-manager.php */
-				$forced_sanitization = apply_filters( 'amp_validation_error_sanitized', $forced_sanitization, $error );
-			}
-
-			if ( $args['ignore_accepted'] && ( true === $forced_sanitization || ( $term && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) ) ) {
+			$sanitization = AMP_Validation_Manager::get_validation_error_sanitization( $stored_validation_error['data'] );
+			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
 				continue;
 			}
 
-			/*
-			 * Note that true means that the validation error is forced to be accepted (sanitized), where as false means that the validation error is forced to be rejected (not sanitized).
-			 * A null value means that there is no forcing because no filter is applying to force the sanitized state.
-			 * @todo It seems a bit strange to override the term_group. Maybe better to return a separate status key with the $error.
-			 */
-			if ( $term && null !== $forced_sanitization ) {
-				$term->term_group = $forced_sanitization ? AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS : AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS;
-			}
-			$error = array(
-				'term' => $term,
-				'data' => $stored_validation_error['data'],
+			$errors[] = array_merge(
+				array(
+					'term' => $term,
+					'data' => $stored_validation_error['data'],
+				),
+				$sanitization
 			);
-			if ( $args['check_forced_sanitization'] ) {
-				$error = array_merge( $error, compact( 'forced_sanitization' ) );
-			}
-			$errors[] = $error;
 		}
 		return $errors;
 	}
@@ -251,10 +232,8 @@ class AMP_Invalid_URL_Post_Type {
 		);
 
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
-		foreach ( wp_list_pluck( $validation_errors, 'term' ) as $term ) {
-			if ( isset( $counts[ $term->term_group ] ) ) {
-				$counts[ $term->term_group ]++;
-			}
+		foreach ( $validation_errors as $error ) {
+			$counts[ $error['status'] ]++;
 		}
 		return $counts;
 	}
@@ -929,7 +908,7 @@ class AMP_Invalid_URL_Post_Type {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 
 		$can_serve_amp = 0 === count( array_filter( $validation_errors, function( $validation_error ) {
-			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['term']->term_group;
+			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['status'];
 		} ) );
 		?>
 		<style>
@@ -977,7 +956,7 @@ class AMP_Invalid_URL_Post_Type {
 		<?php
 		$has_forced_sanitized = false;
 		foreach ( $validation_errors as $validation_error ) {
-			if ( isset( $validation_error['forced_sanitization'] ) ) {
+			if ( $validation_error['forced'] ) {
 				$has_forced_sanitized = true;
 				break;
 			}
@@ -999,24 +978,24 @@ class AMP_Invalid_URL_Post_Type {
 					$select_name       = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 					?>
 					<li>
-						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) ? 'open' : ''; ?>>
+						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) ? 'open' : ''; ?>>
 							<summary>
 								<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 									<?php esc_html_e( 'Status:', 'amp' ); ?>
 								</label>
-								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>" <?php disabled( null !== $error['forced_sanitization'] ); ?>>
-									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
+								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>" <?php disabled( $error['forced'] ); ?>>
+									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) : ?>
 										<option value=""><?php esc_html_e( 'New', 'amp' ); ?></option>
 									<?php endif; ?>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ); ?>><?php esc_html_e( 'Accepted', 'amp' ); ?></option>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ); ?>><?php esc_html_e( 'Rejected', 'amp' ); ?></option>
+									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['status'] ); ?>><?php esc_html_e( 'Accepted', 'amp' ); ?></option>
+									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['status'] ); ?>><?php esc_html_e( 'Rejected', 'amp' ); ?></option>
 								</select>
-								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ) : ?>
-									&#x274C;
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) : ?>
-									&#x2705;
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
+								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) : ?>
 									&#x2753;
+								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['status'] ) : ?>
+									&#x274C;
+								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) : ?>
+									&#x2705;
 								<?php endif; ?>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
 							</summary>

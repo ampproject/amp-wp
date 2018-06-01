@@ -449,9 +449,8 @@ class AMP_Validation_Error_Taxonomy {
 				return $allcaps;
 			}
 
-			/** This filter is documented in amp/includes/validation/class-amp-validation-manager.php */
-			$forced_sanitization = apply_filters( 'amp_validation_error_sanitized', null, $error );
-			if ( null !== $forced_sanitization ) {
+			$sanitization = AMP_Validation_Manager::get_validation_error_sanitization( $error );
+			if ( $sanitization['forced'] ) {
 				$allcaps = array_merge(
 					$allcaps,
 					array_fill_keys( $caps, false )
@@ -541,11 +540,9 @@ class AMP_Validation_Error_Taxonomy {
 			 */
 			unset( $actions['delete'] );
 
-			/** This filter is documented in amp/includes/validation/class-amp-validation-manager.php */
-			$forced_sanitization = apply_filters( 'amp_validation_error_sanitized', null, json_decode( $term->description, true ) );
-
-			if ( null === $forced_sanitization ) {
-				if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $tag->term_group ) {
+			$sanitization = AMP_Validation_Manager::get_validation_error_sanitization( json_decode( $term->description, true ) );
+			if ( ! $sanitization['forced'] ) {
+				if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['status'] ) {
 					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 						'<a href="%s" aria-label="%s">%s</a>',
 						wp_nonce_url(
@@ -556,7 +553,7 @@ class AMP_Validation_Error_Taxonomy {
 						esc_html__( 'Reject', 'amp' )
 					);
 				}
-				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $tag->term_group ) {
+				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['status'] ) {
 					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 						'<a href="%s" aria-label="%s">%s</a>',
 						wp_nonce_url(
@@ -741,12 +738,10 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'status':
-				/** This filter is documented in amp/includes/validation/class-amp-validation-manager.php */
-				$forced_sanitization = apply_filters( 'amp_validation_error_sanitized', null, $validation_error );
-
-				if ( true === $forced_sanitization || self::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
+				$sanitization = AMP_Validation_Manager::get_validation_error_sanitization( $validation_error );
+				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
 					$content = '&#x2705; ' . esc_html__( 'Accepted', 'amp' );
-				} elseif ( false === $forced_sanitization || self::VALIDATION_ERROR_REJECTED_STATUS === $term->term_group ) {
+				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['status'] ) {
 					$content = '&#x274C; ' . esc_html__( 'Rejected', 'amp' );
 				} else {
 					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );

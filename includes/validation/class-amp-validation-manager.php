@@ -348,7 +348,7 @@ class AMP_Validation_Manager {
 			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
 			foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = array(
-					'sanitized' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['term']->term_group,
+					'sanitized' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['status'],
 					'error'     => $result['data'],
 				);
 			}
@@ -375,15 +375,31 @@ class AMP_Validation_Manager {
 	 * @return bool Whether error should be sanitized.
 	 */
 	public static function is_validation_error_sanitized( $error ) {
+		$sanitization = self::get_validation_error_sanitization( $error );
+		return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+	}
+
+	/**
+	 * Get the validation error sanitization.
+	 *
+	 * @param array $error Validation error.
+	 * @return array {
+	 *     Validation error sanitization.
+	 *
+	 *     @type int  $status Validation status (0=VALIDATION_ERROR_NEW_STATUS, 1=VALIDATION_ERROR_ACCEPTED_STATUS, 2=VALIDATION_ERROR_REJECTED_STATUS).
+	 *     @type bool $forced Whether sanitization is forced via filter.
+	 * }
+	 */
+	public static function get_validation_error_sanitization( $error ) {
 		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error );
 
 		$term = get_term_by( 'slug', $term_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		if ( isset( self::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
-			$sanitized = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === self::$validation_error_status_overrides[ $term_data['slug'] ];
-		} elseif ( ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
-			$sanitized = true;
+			$status = self::$validation_error_status_overrides[ $term_data['slug'] ];
+		} elseif ( ! empty( $term ) && in_array( $term->term_group, array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ), true ) ) {
+			$status = $term->term_group;
 		} else {
-			$sanitized = false;
+			$status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS;
 		}
 
 		/**
@@ -398,10 +414,17 @@ class AMP_Validation_Manager {
 		 *
 		 * @since 1.0
 		 *
-		 * @param bool|null $sanitized Whether sanitized, or null if no default predetermined.
-		 * @param array     $error     Validation error being sanitized.
+		 * @param null|bool    $sanitized Whether sanitized; this is initially null, and changing it to bool causes the validation error to be forced.
+		 * @param array $error Validation error being sanitized.
 		 */
-		return apply_filters( 'amp_validation_error_sanitized', $sanitized, $error );
+		$sanitized = apply_filters( 'amp_validation_error_sanitized', null, $error );
+
+		if ( null !== $sanitized ) {
+			$forced = true;
+			$status = $sanitized ? AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS : AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS;
+		}
+
+		return compact( 'status', 'forced' );
 	}
 
 	/**
