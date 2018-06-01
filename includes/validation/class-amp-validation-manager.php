@@ -398,14 +398,10 @@ class AMP_Validation_Manager {
 		 *
 		 * @since 1.0
 		 *
-		 * @param bool  $sanitized Whether sanitized.
-		 * @param array $context   {
-		 *     Context data for validation error sanitization.
-		 *
-		 *     @type array $error Validation error being sanitized.
-		 * }
+		 * @param bool|null $sanitized Whether sanitized, or null if no default predetermined.
+		 * @param array     $error     Validation error being sanitized.
 		 */
-		$sanitized = apply_filters( 'amp_validation_error_sanitized', $sanitized, compact( 'error' ) );
+		$sanitized = apply_filters( 'amp_validation_error_sanitized', $sanitized, $error );
 
 		return $sanitized;
 	}
