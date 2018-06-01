@@ -39,7 +39,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function get_selector_conversion_mapping() {
 		return array(
-			'video' => array( 'amp-video' ),
+			'video' => array( 'amp-video', 'amp-youtube' ),
 		);
 	}
 

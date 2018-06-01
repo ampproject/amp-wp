@@ -24,8 +24,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		'twentyseventeen' => array(
 			'force_svg_support'              => array(),
 			'force_fixed_background_support' => array(),
-			// @todo Header video probably needs special support in the plugin generally.
-			// @todo Header image is not styled properly. Needs layout=responsive and other things?
+			'header_banner_styles'           => array(),
 			// @todo Dequeue scripts and replace with AMP functionality where possible.
 		),
 	);
@@ -87,5 +86,73 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'class',
 			$this->dom->documentElement->getAttribute( 'class' ) . ' background-fixed'
 		);
+	}
+
+	/**
+	 * Add required styles for video and image headers.
+	 *
+	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1687
+	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1743
+	 */
+	public function header_banner_styles() {
+
+		$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( has_header_video() ) {
+			$body->setAttribute(
+				'class',
+				$body->getAttribute( 'class' ) . ' has-header-video'
+			);
+		}
+
+		$style_element = $this->dom->createElement( 'style' );
+		$style_content = '
+		.has-header-image .custom-header-media amp-img > img,
+		.has-header-video .custom-header-media amp-video > video,
+		.has-header-video .custom-header-media amp-youtube > iframe {
+			position: fixed;
+			height: auto;
+			left: 50%;
+			max-width: 1000%;
+			min-height: 100%;
+			min-width: 100%;
+			min-width: 100vw; /* vw prevents 1px gap on left that 100% has */
+			width: auto;
+			top: 50%;
+			padding-bottom: 1px; /* Prevent header from extending beyond the footer */
+			-ms-transform: translateX(-50%) translateY(-50%);
+			-moz-transform: translateX(-50%) translateY(-50%);
+			-webkit-transform: translateX(-50%) translateY(-50%);
+			transform: translateX(-50%) translateY(-50%);
+		}
+		.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
+			bottom: 0;
+			position: absolute;
+			top: auto;
+			-ms-transform: translateX(-50%) translateY(0);
+			-moz-transform: translateX(-50%) translateY(0);
+			-webkit-transform: translateX(-50%) translateY(0);
+			transform: translateX(-50%) translateY(0);
+		}
+		/* For browsers that support \'object-fit\' */
+		@supports ( object-fit: cover ) {
+			.has-header-image .custom-header-media amp-img > img,
+			.has-header-video .custom-header-media amp-video > video,
+			.has-header-video .custom-header-media amp-youtube > iframe,
+			.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
+				height: 100%;
+				left: 0;
+				-o-object-fit: cover;
+				object-fit: cover;
+				top: 0;
+				-ms-transform: none;
+				-moz-transform: none;
+				-webkit-transform: none;
+				transform: none;
+				width: 100%;
+			}
+		}
+		';
+		$style_element->appendChild( $this->dom->createTextNode( $style_content ) );
+		$body->appendChild( $style_element );
 	}
 }

@@ -1288,6 +1288,7 @@ class AMP_Theme_Support {
 	 *
 	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L78
 	 * @param array $atts The header tag attributes array.
 	 * @return string $html Filtered markup.
 	 */
@@ -1302,13 +1303,13 @@ class AMP_Theme_Support {
 			'media'    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
 			'width'    => $video_settings['width'],
 			'height'   => $video_settings['height'],
-			'layout'   => 'fill',
+			'layout'   => 'responsive',
 			'autoplay' => '',
 			'id'       => 'wp-custom-header-video',
 		);
 
-		$atts['placeholder'] = '';
-		$image_placeholder   = self::output_header_image( $atts );
+		// Create image banner to stay behind the video.
+		$image_header = self::output_header_image( $atts );
 
 		// If the video URL is for YouTube, return an <amp-youtube> element.
 		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
@@ -1335,7 +1336,8 @@ class AMP_Theme_Support {
 				)
 			);
 		}
-		return $image_placeholder . $video_header;
+
+		return $image_header . $video_header;
 	}
 
 	/**
@@ -1352,10 +1354,7 @@ class AMP_Theme_Support {
 	 */
 	public static function output_header_image( $atts ) {
 
-		$atts['layout'] = 'fill';
-		unset( $atts['width'] );
-
-		$place_holder = AMP_HTML_Utils::build_tag( 'img', $atts );
+		$place_holder = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
 
 		return $place_holder;
 
