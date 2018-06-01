@@ -79,11 +79,15 @@ class AMP_Site_Validation {
 	/**
 	 * Validates the URLs of the entire site.
 	 *
+	 * Accepts an optional parameter of a WP-CLI progress bar object.
+	 * Calling its tick() method updates the display in WP-CLI to show the percentage of the site crawl that's complete.
+	 *
 	 * @todo: Consider wrapping this function with another, as different use cases will probably require a different return value or display.
 	 * For example, the <button> in /wp-admin that makes an AJAX request for this will need a different response than a WP-CLI command.
+	 * @param object $wp_cli_progress The object that shows progress in the WP-CLI script to validate the site.
 	 * @return array $validation_result The post ID as the index, and the result of validation as the value.
 	 */
-	public static function validate_entire_site_urls() {
+	public static function validate_entire_site_urls( $wp_cli_progress = null ) {
 		// Validate the homepage.
 		self::validate_urls( home_url( '/' ) );
 
@@ -98,6 +102,10 @@ class AMP_Site_Validation {
 				$offset    += self::BATCH_SIZE;
 				$permalinks = self::get_post_permalinks( $post_type, self::BATCH_SIZE, $offset );
 			}
+
+			if ( $wp_cli_progress ) {
+				$wp_cli_progress->tick();
+			}
 		}
 
 		// Validate all public taxonomies.
@@ -110,6 +118,10 @@ class AMP_Site_Validation {
 				self::validate_urls( $taxonomy_links );
 				$offset        += self::BATCH_SIZE;
 				$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE, $offset );
+			}
+
+			if ( $wp_cli_progress ) {
+				$wp_cli_progress->tick();
 			}
 		}
 
