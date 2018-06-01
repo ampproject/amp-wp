@@ -237,6 +237,7 @@ class AMP_Validation_Error_Taxonomy {
 		 */
 		$sanitized = apply_filters( 'amp_validation_error_sanitized', null, $error );
 
+		$forced = false;
 		if ( null !== $sanitized ) {
 			$forced = true;
 			$status = $sanitized ? self::VALIDATION_ERROR_ACCEPTED_STATUS : self::VALIDATION_ERROR_REJECTED_STATUS;

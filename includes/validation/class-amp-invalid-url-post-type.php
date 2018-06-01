@@ -616,7 +616,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		$actions[ self::RECHECK_ACTION ] = sprintf(
 			'<a href="%s">%s</a>',
-			self::get_recheck_url( $post, get_edit_post_link( $post->ID, 'raw' ) ),
+			esc_url( self::get_recheck_url( $post, get_edit_post_link( $post->ID, 'raw' ) ) ),
 			esc_html__( 'Re-check', 'amp' )
 		);
 
@@ -807,7 +807,7 @@ class AMP_Invalid_URL_Post_Type {
 			return;
 		}
 		$post = get_post();
-		if ( ! $post || self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
 		$updated_count = 0;
