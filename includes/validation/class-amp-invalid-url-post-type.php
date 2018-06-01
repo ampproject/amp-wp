@@ -693,9 +693,9 @@ class AMP_Invalid_URL_Post_Type {
 			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // WPCS: CSRF ok.
 			if ( $errors_remain ) {
 				$class   = 'notice-warning';
-				$message = _n( 'The rechecked URL still has validation errors.', 'The rechecked URLs still have validation errors.', $count_urls_tested, 'amp' );
+				$message = _n( 'The rechecked URL still has blocking validation errors.', 'The rechecked URLs still have validation errors.', $count_urls_tested, 'amp' );
 			} else {
-				$message = _n( 'The rechecked URL has no validation errors.', 'The rechecked URLs have no validation errors.', $count_urls_tested, 'amp' );
+				$message = _n( 'The rechecked URL has no blocking validation errors.', 'The rechecked URLs have no validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'updated';
 			}
 
@@ -707,8 +707,8 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-		if ( isset( $_GET['amp_taxonomy_terms_updated'] ) ) { // WPCS: CSRF ok.
-			$count = intval( $_GET['amp_taxonomy_terms_updated'] );
+		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? intval( $_GET['amp_taxonomy_terms_updated'] ) : 0; // WPCS: CSRF ok.
+		if ( $count > 0 ) {
 			$class = 'updated';
 			printf(
 				'<div class="notice is-dismissible %s"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
@@ -736,18 +736,14 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function handle_inline_recheck( $post_id ) {
 		check_admin_referer( self::NONCE_ACTION . $post_id );
-		$post = get_post( $post_id );
-		$url  = $post->post_title;
-
-		$validation_errors = AMP_Validation_Manager::validate_url( $url );
-		$remaining_errors  = true;
-		if ( is_array( $validation_errors ) ) {
-			self::store_validation_errors( $validation_errors, $url );
-			$remaining_errors = ! empty( $validation_errors );
-		}
+		$validation_results = self::recheck_post( $post_id );
 
 		$redirect = wp_get_referer();
-		if ( ! $redirect || empty( $validation_errors ) ) {
+		if ( $redirect ) {
+			$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
+		}
+
+		if ( ! $redirect || is_wp_error( $validation_results ) || empty( $validation_results ) ) {
 			// If there are no remaining errors and the post was deleted, redirect to edit.php instead of post.php.
 			$redirect = add_query_arg(
 				'post_type',
@@ -756,11 +752,46 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 		$args = array(
-			self::URLS_TESTED      => '1',
-			self::REMAINING_ERRORS => $remaining_errors ? '1' : '0',
+			self::URLS_TESTED => '1',
 		);
+
+		// @todo For WP_Error case, see <https://github.com/Automattic/amp-wp/issues/1166>.
+		if ( ! is_wp_error( $validation_results ) ) {
+			$args[ self::REMAINING_ERRORS ] = count( array_filter(
+				$validation_results,
+				function( $result ) {
+					return ! $result['sanitized'];
+				}
+			) );
+		}
+
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();
+	}
+
+	/**
+	 * Re-check invalid URL post for whether it has blocking validation errors.
+	 *
+	 * @param int|WP_Post $post Post.
+	 * @return array|WP_Error List of blocking validation resukts, or a WP_Error in the case of failure.
+	 */
+	public static function recheck_post( $post ) {
+		$post = get_post( $post );
+		$url  = $post->post_title;
+
+		$validation_errors = AMP_Validation_Manager::validate_url( $url );
+		if ( is_wp_error( $validation_errors ) ) {
+			return $validation_errors;
+		}
+
+		$validation_results = array();
+		self::store_validation_errors( $validation_errors, $url );
+		foreach ( $validation_errors as $error ) {
+			$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+
+			$validation_results[] = compact( 'error', 'sanitized' );
+		}
+		return $validation_results;
 	}
 
 	/**
@@ -773,6 +804,10 @@ class AMP_Invalid_URL_Post_Type {
 		check_admin_referer( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' );
 
 		if ( empty( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) || ! is_array( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
+			return;
+		}
+		$post = get_post();
+		if ( ! $post || self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
 			return;
 		}
 		$updated_count = 0;
@@ -802,7 +837,32 @@ class AMP_Invalid_URL_Post_Type {
 		$args = array(
 			'amp_taxonomy_terms_updated' => $updated_count,
 		);
-		wp_safe_redirect( add_query_arg( $args, wp_get_referer() ) );
+
+		/*
+		 * Re-check the post after the validation status change. This is particularly important for validation errors like
+		 * 'removed_unused_css_rules' since whether it is accepted will determine whether other validation errors are triggered
+		 * such as in this case 'excessive_css'.
+		 */
+		if ( $updated_count > 0 ) {
+			$validation_results = self::recheck_post( $post->ID );
+			// @todo For WP_Error case, see <https://github.com/Automattic/amp-wp/issues/1166>.
+			if ( ! is_wp_error( $validation_results ) ) {
+				$args[ self::REMAINING_ERRORS ] = count( array_filter(
+					$validation_results,
+					function( $result ) {
+						return ! $result['sanitized'];
+					}
+				) );
+			}
+		}
+
+		$redirect = wp_get_referer();
+		if ( ! $redirect ) {
+			$redirect = get_edit_post_link( $post->ID );
+		}
+
+		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
+		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();
 	}
 
