@@ -369,6 +369,48 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Determine whether a validation error should be sanitized.
+	 *
+	 * @param array $error Validation error.
+	 * @return bool Whether error should be sanitized.
+	 */
+	public static function is_validation_error_sanitized( $error ) {
+		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error );
+
+		$term = get_term_by( 'slug', $term_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		if ( isset( self::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
+			$sanitized = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === self::$validation_error_status_overrides[ $term_data['slug'] ];
+		} elseif ( ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
+			$sanitized = true;
+		} else {
+			$sanitized = false;
+		}
+
+		/**
+		 * Filters whether the validation error should be sanitized.
+		 *
+		 * Note that the $node is not passed here to ensure that the filter can be
+		 * applied on validation errors that have been stored. Likewise, the $sources
+		 * are also omitted because these are only available during an explicit
+		 * validation request and so they are not suitable for plugins to vary
+		 * sanitization by. Note that returning false this indicates that the
+		 * validation error should not be considered a blocker to render AMP.
+		 *
+		 * @since 1.0
+		 *
+		 * @param bool  $sanitized Whether sanitized.
+		 * @param array $context   {
+		 *     Context data for validation error sanitization.
+		 *
+		 *     @type array $error Validation error being sanitized.
+		 * }
+		 */
+		$sanitized = apply_filters( 'amp_validation_error_sanitized', $sanitized, compact( 'error' ) );
+
+		return $sanitized;
+	}
+
+	/**
 	 * Add validation error.
 	 *
 	 * @param array $error Error info, especially code.
@@ -421,37 +463,7 @@ class AMP_Validation_Manager {
 		 */
 		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
-		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error );
-
-		$term = get_term_by( 'slug', $term_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		if ( isset( self::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
-			$sanitized = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === self::$validation_error_status_overrides[ $term_data['slug'] ];
-		} elseif ( ! empty( $term ) && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $term->term_group ) {
-			$sanitized = true;
-		} else {
-			$sanitized = false;
-		}
-
-		/**
-		 * Filters whether the validation error should be sanitized.
-		 *
-		 * Note that the $node is not passed here to ensure that the filter can be
-		 * applied on validation errors that have been stored. Likewise, the $sources
-		 * are also omitted because these are only available during an explicit
-		 * validation request and so they are not suitable for plugins to vary
-		 * sanitization by. Note that returning false this indicates that the
-		 * validation error should not be considered a blocker to render AMP.
-		 *
-		 * @since 1.0
-		 *
-		 * @param bool  $sanitized Whether sanitized.
-		 * @param array $context   {
-		 *     Context data for validation error sanitization.
-		 *
-		 *     @type array $error Validation error being sanitized.
-		 * }
-		 */
-		$sanitized = apply_filters( 'amp_validation_error_sanitized', $sanitized, compact( 'error' ) );
+		$sanitized = self::is_validation_error_sanitized( $error );
 
 		// Add sources back into the $error for referencing later. @todo It may be cleaner to store sources separately to avoid having to re-remove later during storage.
 		$error = array_merge( $error, compact( 'sources' ) );
