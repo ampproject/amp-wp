@@ -17,8 +17,9 @@ namespace AMP;
  * }
  */
 function crawl_site() {
+	\WP_CLI::log( 'Crawling the entire site to test for AMP validity. This might take a while...' );
 	$count_post_types_and_taxonomies = count( get_post_types( array( 'public' => true ), 'names' ) ) + count( get_taxonomies( array( 'public' => true ) ) );
-	$wp_cli_progress                 = \WP_CLI\Utils\make_progress_bar( 'Validating the URLs of the entire site', $count_post_types_and_taxonomies );
+	$wp_cli_progress                 = \WP_CLI\Utils\make_progress_bar( 'Validating URLs...', $count_post_types_and_taxonomies );
 	$number_crawled                  = count( \AMP_Site_Validation::validate_entire_site_urls( $wp_cli_progress ) );
 	$wp_cli_progress->finish();
 
@@ -36,7 +37,20 @@ function crawl_site() {
 if ( defined( 'WP_CLI' ) ) {
 	try {
 		$validation_counts = crawl_site();
-		\WP_CLI::success( sprintf( '%d URLs were crawled, and %d have AMP validation issue(s).', $validation_counts['number_crawled'], $validation_counts['number_invalid'] ) );
+		$url_more_details  = add_query_arg(
+			'post_type',
+			\AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			admin_url( 'edit.php' )
+		);
+
+		\WP_CLI::success(
+			sprintf(
+				"%d URLs were crawled, and %d have AMP validation issue(s).\nFor more details, please see: \n%s",
+				$validation_counts['number_crawled'],
+				$validation_counts['number_invalid'],
+				$url_more_details
+			)
+		);
 	} catch ( \Exception $e ) {
 		\WP_CLI::error( $e->getMessage() );
 	}
