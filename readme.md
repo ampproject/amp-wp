@@ -63,36 +63,36 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 ## Changelog ##
 
 ### 1.0 (unreleased) ###
-- Discovery to determine support for Gutenberg blocks. See [#845](https://github.com/Automattic/amp-wp/issues/845). Props kienstra.
-- PHPCS fixes, including PHP DocBlocks and strict comparison. See [#1002](https://github.com/Automattic/amp-wp/pull/1002). Props paulschreiber.
+- Add WP-CLI script to test support for Gutenberg blocks. See [#845](https://github.com/Automattic/amp-wp/issues/845). Props kienstra.
+- PHPCS fixes, including PHP DocBlocks and strict comparisons. See [#1002](https://github.com/Automattic/amp-wp/pull/1002). Props paulschreiber.
 - Add AMP-specific functionality to core blocks. See [#1026](https://github.com/Automattic/amp-wp/pull/1026), [#1008](https://github.com/Automattic/amp-wp/issues/1008). Props miina.
 - Fix issues in displaying native blocks. See [#1022](https://github.com/Automattic/amp-wp/pull/1022). Props miina.
-- Deprecate AMP_WP_Utils, in favor of wp_parse_url(). See [#995](https://github.com/Automattic/amp-wp/pull/995). Props paulschreiber.
+- Deprecate `AMP_WP_Utils`, in favor of `wp_parse_url()`. See [#995](https://github.com/Automattic/amp-wp/pull/995). Props paulschreiber.
 - Display admin notice if there's no persistent object caching. See [#1050](https://github.com/Automattic/amp-wp/pull/1050). Props oscarssanchez.
 - Incorporate Server Timing API. See [#990](https://github.com/Automattic/amp-wp/issues/990). Props westonruter.
-- Add tree shaking, CSS minification, and !important replacement. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142). Props westonruter.
-- Only allow layout attributes on the elements that support them. See [#1075](https://github.com/Automattic/amp-wp/pull/1075). Props westonruter.
+- Add runtime CSS minification, !important replacement, and tree shaking. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142). Props westonruter.
+- Ensure layout attributes are only allowed on supporting elements. See [#1075](https://github.com/Automattic/amp-wp/pull/1075). Props westonruter.
 - Add AMP validation of blocks. See [#1019](https://github.com/Automattic/amp-wp/pull/1019). Props westonruter.
-- Correctly handle stylesheets with non-HTTPS scheme, or scheme-less URLs. See [#1077](https://github.com/Automattic/amp-wp/pull/1077). Props westonruter.
-- Correct width attribute in col tags to equivalent CSS rule. See [#1064](https://github.com/Automattic/amp-wp/pull/1064). Props amedina.
-- Refactor storage of validation errors to use taxonomy terms. See [#1093](https://github.com/Automattic/amp-wp/pull/1093), [#1063](https://github.com/Automattic/amp-wp/pull/1063), [#1063](https://github.com/Automattic/amp-wp/issues/1087). Props westonruter.
+- Fix handling of font stylesheets with non-HTTPS scheme or scheme-less URLs. See [#1077](https://github.com/Automattic/amp-wp/pull/1077). Props westonruter.
+- Correct the width attribute in `col` tags to the equivalent CSS rule. See [#1064](https://github.com/Automattic/amp-wp/pull/1064). Props amedina.
+- Add dynamic handling of validation errors. See [#1093](https://github.com/Automattic/amp-wp/pull/1093), [#1063](https://github.com/Automattic/amp-wp/pull/1063), [#1087](https://github.com/Automattic/amp-wp/issues/1087). Props westonruter.
 - Fix inconsistency between singular and plural. See [#1114](https://github.com/Automattic/amp-wp/pull/1114). Props garrett-eclipse.
 - Allow spaces around commas in value property lists. See [#1112](https://github.com/Automattic/amp-wp/pull/1112). Props westonruter.
-- Add workaround to preserve CSS calc() functions. See [#1116](https://github.com/Automattic/amp-wp/pull/1116). Props westonruter.
-- Fix handling of amp-bind attributes to ensure that “>” can appear inside attribute values. See [#1119](https://github.com/Automattic/amp-wp/pull/1119). Props westonruter.
-- Add information about stylesheets included and excluded in style[amp-custom]. See [#1135](https://github.com/Automattic/amp-wp/pull/1135). Props westonruter.
-- Eliminate amp-wp-enforced-sizes style from theme support stylesheet. See [#1153](https://github.com/Automattic/amp-wp/pull/1153). Props westonruter.
+- Add workaround to preserve CSS `calc()` functions. See [#1116](https://github.com/Automattic/amp-wp/pull/1116). Props westonruter.
+- Fix handling of amp-bind attributes to ensure that `“>”` can appear inside attribute values. See [#1119](https://github.com/Automattic/amp-wp/pull/1119). Props westonruter.
+- Add information about stylesheets included and excluded in `style[amp-custom]`. See [#1135](https://github.com/Automattic/amp-wp/pull/1135). Props westonruter.
+- Eliminate `amp-wp-enforced-sizes` style from theme support stylesheet. See [#1153](https://github.com/Automattic/amp-wp/pull/1153). Props westonruter.
 - Add support for extracting (pixel) dimensions from SVG images. See [#1150](https://github.com/Automattic/amp-wp/pull/1150). Props westonruter.
-- Add embed handler for gfycat. See [#1136](https://github.com/Automattic/amp-wp/pull/1136). Props miina.
-- Prefer the Custom Logo as the publisher icon. See [#1144](https://github.com/Automattic/amp-wp/pull/1144). Props ryankienstra, westonruter.
+- Add embed handler for Gfycat. See [#1136](https://github.com/Automattic/amp-wp/pull/1136). Props miina.
+- Prefer the Custom Logo as the publisher icon. See [#1144](https://github.com/Automattic/amp-wp/pull/1144). Props kienstra, westonruter.
 - Add amp-mathml block. See [#1165](https://github.com/Automattic/amp-wp/pull/1165). Props miina.
 - Add AMP media blocks. See [#1155](https://github.com/Automattic/amp-wp/pull/1155). Props miina.
 - Cache post processor response. See [#1156](https://github.com/Automattic/amp-wp/pull/1156), [#959](https://github.com/Automattic/amp-wp/issues/959). Props ThierryA.
-- Add amp-fit-text support to text blocks. See [#1151](https://github.com/Automattic/amp-wp/pull/1151). Props miina.
-- Remove space from 'data: url()' in stylesheets. See [#1164](https://github.com/Automattic/amp-wp/pull/1164/), [#1089](https://github.com/Automattic/amp-wp/issues/1089). Props amedina, JonHendershot, westonruter, mehigh, davisshaver.
+- Add `amp-fit-text` support to text blocks. See [#1151](https://github.com/Automattic/amp-wp/pull/1151). Props miina.
+- Remove space from 'data: url()' in stylesheets. See [#1164](https://github.com/Automattic/amp-wp/pull/1164/), [#1089](https://github.com/Automattic/amp-wp/issues/1089). Props amedina, JonHendershot, westonruter, mehigh, davisshaver, Mte90.
 - Ensure translatable strings in blocks can actually be translated. See [#1173](https://github.com/Automattic/amp-wp/pull/1173). Props miina, swissspidy, westonruter.
 - Add ability to acknowledge and suppress/ignore specific validation errors. See [#1003](https://github.com/Automattic/amp-wp/issues/1003). Props westonruter.
-- Fetch (local) stylesheets with @import instead of removing them. See [#1181](https://github.com/Automattic/amp-wp/pull/1181). Props miina.
+- Fetch (local) stylesheets with `@import`, instead of removing them. See [#1181](https://github.com/Automattic/amp-wp/pull/1181). Props miina.
 - Fetch external stylesheets (which aren't from whitelisted font CDNs) to include in amp-custom style. See [#1174](https://github.com/Automattic/amp-wp/pull/1174). Props miina.
 - Add Gutenberg amp-timeago block. See [#1168](https://github.com/Automattic/amp-wp/pull/1168). Props miina.
 - Gutenberg: Add AMP Carousel for Gallery and AMP Lightbox features for Gallery and Image. See [#1121](https://github.com/Automattic/amp-wp/pull/1121), [#1065](https://github.com/Automattic/amp-wp/issues/1065), [#1187](https://github.com/Automattic/amp-wp/pull/1187). Props miina, westonruter.
