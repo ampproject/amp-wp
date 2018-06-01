@@ -281,7 +281,7 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
-				$source = array_pop( $validation_error['sources'] );
+				$source = array_shift( $validation_error['sources'] );
 
 				if ( isset( $source['type'], $source['name'] ) ) {
 					$invalid_sources[ $source['type'] ][] = $source['name'];
