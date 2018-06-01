@@ -178,6 +178,73 @@ class AMP_Validation_Error_Taxonomy {
 		);
 	}
 
+
+	/**
+	 * Determine whether a validation error should be sanitized.
+	 *
+	 * @param array $error Validation error.
+	 *
+	 * @return bool Whether error should be sanitized.
+	 */
+	public static function is_validation_error_sanitized( $error ) {
+		$sanitization = self::get_validation_error_sanitization( $error );
+		return self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+	}
+
+	/**
+	 * Get the validation error sanitization.
+	 *
+	 * @param array $error Validation error.
+	 *
+	 * @return array {
+	 *     Validation error sanitization.
+	 *
+	 *     @type int  $status Validation status (0=VALIDATION_ERROR_NEW_STATUS, 1=VALIDATION_ERROR_ACCEPTED_STATUS, 2=VALIDATION_ERROR_REJECTED_STATUS).
+	 *     @type bool $forced Whether sanitization is forced via filter.
+	 * }
+	 */
+	public static function get_validation_error_sanitization( $error ) {
+		$term_data = self::prepare_validation_error_taxonomy_term( $error );
+		$term      = get_term_by( 'slug', $term_data['slug'], self::TAXONOMY_SLUG );
+		$statuses  = array(
+			self::VALIDATION_ERROR_NEW_STATUS,
+			self::VALIDATION_ERROR_ACCEPTED_STATUS,
+			self::VALIDATION_ERROR_REJECTED_STATUS,
+		);
+		if ( isset( AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
+			// See note in AMP_Validation_Manager::add_validation_error_sourcing() for why amp_validation_error_sanitized filter isn't used.
+			$status = AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ];
+		} elseif ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
+			$status = $term->term_group;
+		} else {
+			$status = self::VALIDATION_ERROR_NEW_STATUS;
+		}
+
+		/**
+		 * Filters whether the validation error should be sanitized.
+		 *
+		 * Note that the $node is not passed here to ensure that the filter can be
+		 * applied on validation errors that have been stored. Likewise, the $sources
+		 * are also omitted because these are only available during an explicit
+		 * validation request and so they are not suitable for plugins to vary
+		 * sanitization by. Note that returning false this indicates that the
+		 * validation error should not be considered a blocker to render AMP.
+		 *
+		 * @since 1.0
+		 *
+		 * @param null|bool $sanitized Whether sanitized; this is initially null, and changing it to bool causes the validation error to be forced.
+		 * @param array $error Validation error being sanitized.
+		 */
+		$sanitized = apply_filters( 'amp_validation_error_sanitized', null, $error );
+
+		if ( null !== $sanitized ) {
+			$forced = true;
+			$status = $sanitized ? self::VALIDATION_ERROR_ACCEPTED_STATUS : self::VALIDATION_ERROR_REJECTED_STATUS;
+		}
+
+		return compact( 'status', 'forced' );
+	}
+
 	/**
 	 * Get the count of validation error terms, optionally restricted by term group (e.g. accepted or rejected).
 	 *
@@ -449,7 +516,7 @@ class AMP_Validation_Error_Taxonomy {
 				return $allcaps;
 			}
 
-			$sanitization = AMP_Validation_Manager::get_validation_error_sanitization( $error );
+			$sanitization = self::get_validation_error_sanitization( $error );
 			if ( $sanitization['forced'] ) {
 				$allcaps = array_merge(
 					$allcaps,
@@ -540,7 +607,7 @@ class AMP_Validation_Error_Taxonomy {
 			 */
 			unset( $actions['delete'] );
 
-			$sanitization = AMP_Validation_Manager::get_validation_error_sanitization( json_decode( $term->description, true ) );
+			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
 			if ( ! $sanitization['forced'] ) {
 				if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['status'] ) {
 					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
@@ -738,7 +805,7 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'status':
-				$sanitization = AMP_Validation_Manager::get_validation_error_sanitization( $validation_error );
+				$sanitization = self::get_validation_error_sanitization( $validation_error );
 				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
 					$content = '&#x2705; ' . esc_html__( 'Accepted', 'amp' );
 				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['status'] ) {

@@ -1083,7 +1083,7 @@ class AMP_Theme_Support {
 			// Make sure that all of the validation errors should be sanitized in the same way; if not, then the cached body should be discarded.
 			if ( isset( $response_cache['validation_results'] ) ) {
 				foreach ( $response_cache['validation_results'] as $validation_result ) {
-					$should_sanitize = AMP_Validation_Manager::is_validation_error_sanitized( $validation_result['error'] );
+					$should_sanitize = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $validation_result['error'] );
 					if ( $should_sanitize !== $validation_result['sanitized'] ) {
 						unset( $response_cache['body'] );
 						break;
