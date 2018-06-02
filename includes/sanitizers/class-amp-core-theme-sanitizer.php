@@ -27,15 +27,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected $args;
 
 	/**
+	 * Body element.
+	 *
+	 * @var DOMElement
+	 */
+	protected $body;
+
+	/**
 	 * Config for features needed by themes.
 	 *
 	 * @var array
 	 */
 	public $theme_features = array(
 		'twentyseventeen' => array(
-			'force_svg_support'              => array(),
-			'force_fixed_background_support' => array(),
-			'add_header_media_styles'        => array(),
+			'force_svg_support'               => array(),
+			'force_fixed_background_support'  => array(),
+			'fixup_twentyseventeen_masthead'  => array(),
+			'add_has_header_video_body_class' => array(),
 			// @todo Dequeue scripts and replace with AMP functionality where possible.
 		),
 	);
@@ -47,6 +55,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		$theme_features = array();
+
+		$this->body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $this->body ) {
+			return;
+		}
 
 		// Find theme features for core theme.
 		$theme_candidates = wp_array_slice_assoc( $this->args, array( 'stylesheet', 'template' ) );
@@ -100,6 +113,29 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Add body class when there is a header video.
+	 *
+	 * @link https://github.com/WordPress/wordpress-develop/blob/a26c24226c6b131a0ed22c722a836c100d3ba254/src/wp-content/themes/twentyseventeen/assets/js/global.js#L244-L247
+	 *
+	 * @param array $args Args.
+	 */
+	public function add_has_header_video_body_class( $args = array() ) {
+		$args = array_merge(
+			array(
+				'class_name' => 'has-header-video',
+			),
+			$args
+		);
+
+		if ( has_header_video() ) {
+			$this->body->setAttribute(
+				'class',
+				$this->body->getAttribute( 'class' ) . ' ' . $args['class_name']
+			);
+		}
+	}
+
+	/**
 	 * Add required styles for video and image headers.
 	 *
 	 * This is currently used exclusively for Twenty Seventeen.
@@ -107,16 +143,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1687
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1743
 	 */
-	public function add_header_media_styles() {
-
-		$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( has_header_video() ) {
-			$body->setAttribute(
-				'class',
-				$body->getAttribute( 'class' ) . ' has-header-video'
-			);
-		}
-
+	public function fixup_twentyseventeen_masthead() {
 		/*
 		 * The following is necessary because the styles in the theme apply to img and video,
 		 * and the CSS parser will then convert the selectors to amp-img and amp-video respectively.
@@ -169,6 +196,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		';
 		$style_element->appendChild( $this->dom->createTextNode( $style_content ) );
-		$body->appendChild( $style_element ); // Note that AMP_Style_Sanitizer will take the CSS and put it in style[amp-custom].
+		$this->body->appendChild( $style_element ); // Note that AMP_Style_Sanitizer will take the CSS and put it in style[amp-custom].
 	}
 }
