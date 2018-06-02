@@ -1011,7 +1011,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		ob_start();
 		?>
 		<!DOCTYPE html>
-		<html amp <?php language_attributes(); ?>>
+		<html amp>
 			<head>
 				<?php wp_head(); ?>
 				<script data-head>document.write('Illegal');</script>
@@ -1079,43 +1079,53 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$removed_nodes
 		);
 
-		$call_response = function() use ( $original_html ) {
-			return AMP_Theme_Support::prepare_response( $original_html, array(
-				'enable_response_caching' => true,
+		$prepare_response_args = array(
+			'enable_response_caching' => true,
+		);
+
+		$call_prepare_response = function() use ( $original_html, &$prepare_response_args ) {
+			AMP_Response_Headers::$headers_sent         = array();
+			AMP_Validation_Manager::$validation_results = array();
+			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
+		};
+
+		$get_server_timing_header_count = function() {
+			return count( array_filter(
+				AMP_Response_Headers::$headers_sent,
+				function( $header ) {
+					return 'Server-Timing' === $header['name'];
+				}
 			) );
 		};
 
 		// Test that first response isn't cached.
-		$first_response = $call_response();
-		$this->assertGreaterThan( 0, count( array_filter(
-			AMP_Response_Headers::$headers_sent,
-			function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		) ) );
+		$first_response = $call_prepare_response();
+		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+		$this->assertContains( '<html amp>', $first_response ); // Note: AMP because sanitized validation errors.
 
 		// Test that response cache is return upon second call.
-		AMP_Response_Headers::$headers_sent = array();
-		$this->assertEquals( $first_response, $call_response() );
-		$this->assertSame( 0, count( array_filter(
-			AMP_Response_Headers::$headers_sent,
-			function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		) ) );
+		$this->assertEquals( $first_response, $call_prepare_response() );
+		$this->assertSame( 0, $get_server_timing_header_count() );
 
 		// Test new cache upon argument change.
-		AMP_Response_Headers::$headers_sent = array();
-		AMP_Theme_Support::prepare_response( $original_html, array(
-			'enable_response_caching' => true,
-			'test_reset_by_arg'       => true,
-		) );
-		$this->assertGreaterThan( 0, count( array_filter(
-			AMP_Response_Headers::$headers_sent,
-			function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		) ) );
+		$prepare_response_args['test_reset_by_arg'] = true;
+		$call_prepare_response();
+		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+
+		// Test response is cached.
+		$call_prepare_response();
+		$this->assertSame( 0, $get_server_timing_header_count() );
+
+		// Test that response is no longer cached due to a change whether validation errors are sanitized.
+		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
+		add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		$prepared_html = $call_prepare_response();
+		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
+
+		// And test response is cached.
+		$call_prepare_response();
+		$this->assertSame( 0, $get_server_timing_header_count() );
 	}
 
 	/**
