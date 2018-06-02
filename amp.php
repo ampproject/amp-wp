@@ -331,10 +331,11 @@ function amp_add_post_template_actions() {
  * Add action to do post template rendering at template_redirect action.
  *
  * @since 0.2
+ * @since 1.0 The amp_render() function is called at template_redirect action priority 11 instead of priority 10.
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_prepare_render() {
-	add_action( 'template_redirect', 'amp_render' );
+	add_action( 'template_redirect', 'amp_render', 11 );
 }
 
 /**
@@ -389,6 +390,8 @@ function amp_render_post( $post ) {
 
 	/**
 	 * Fires before rendering a post in AMP.
+	 *
+	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
 	 *
 	 * @since 0.2
 	 *
