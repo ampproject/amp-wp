@@ -87,6 +87,17 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10 );
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ) );
+
+		// Now check with theme support added (in paired mode).
+		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
+		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 	}
 
 	/**
@@ -101,6 +112,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
+		$add_anchor_fragment = function( $url ) {
+			return $url . '#anchor';
+		};
+
 		$drafted_post   = $this->factory()->post->create( array(
 			'post_name'   => 'draft',
 			'post_status' => 'draft',
@@ -114,10 +129,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_status' => 'publish',
 			'post_type'   => 'page',
 		) );
-
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+
+		add_filter( 'post_link', $add_anchor_fragment );
+		$this->assertStringEndsWith( '/amp/#anchor', amp_get_permalink( $published_post ) );
+		remove_filter( 'post_link', $add_anchor_fragment );
 
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
@@ -128,6 +146,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10 );
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		remove_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10 );
+
+		// Now check with theme support added (in paired mode).
+		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+
+		// Make sure that if permalink has anchor that it is persists.
+		add_filter( 'post_link', $add_anchor_fragment );
+		$this->assertStringEndsWith( '/?amp#anchor', amp_get_permalink( $published_post ) );
 	}
 
 	/**
@@ -162,6 +195,33 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function.
+	 *
+	 * @covers \is_amp_endpoint()
+	 */
+	public function test_is_amp_endpoint() {
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Legacy query var.
+		set_query_var( amp_get_slug(), '' );
+		$this->assertTrue( is_amp_endpoint() );
+		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Paired theme support.
+		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		$_GET['amp'] = '';
+		$this->assertTrue( is_amp_endpoint() );
+		unset( $_GET['amp'] );
+		$this->assertFalse( is_amp_endpoint() );
+		remove_theme_support( 'amp' );
+
+		// Native theme support.
+		add_theme_support( 'amp' );
+		$this->assertTrue( is_amp_endpoint() );
 	}
 
 	/**
