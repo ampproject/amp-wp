@@ -16,6 +16,17 @@
 class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Array of flags used to control sanitization.
+	 *
+	 * @var array {
+	 *      @type string $stylesheet     Stylesheet slug.
+	 *      @type string $template       Template slug.
+	 *      @type array  $theme_features List of theme features that need to be applied. Features are method names,
+	 * }
+	 */
+	protected $args;
+
+	/**
 	 * Config for features needed by themes.
 	 *
 	 * @var array
@@ -24,7 +35,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		'twentyseventeen' => array(
 			'force_svg_support'              => array(),
 			'force_fixed_background_support' => array(),
-			'header_banner_styles'           => array(),
+			'add_header_media_styles'        => array(),
 			// @todo Dequeue scripts and replace with AMP functionality where possible.
 		),
 	);
@@ -91,10 +102,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Add required styles for video and image headers.
 	 *
+	 * This is currently used exclusively for Twenty Seventeen.
+	 *
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1687
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1743
 	 */
-	public function header_banner_styles() {
+	public function add_header_media_styles() {
 
 		$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( has_header_video() ) {
@@ -104,53 +117,58 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		}
 
+		/*
+		 * The following is necessary because the styles in the theme apply to img and video,
+		 * and the CSS parser will then convert the selectors to amp-img and amp-video respectively.
+		 * Nevertheless, object-fit does not apply on amp-img and it needs to apply on an actual img.
+		 */
 		$style_element = $this->dom->createElement( 'style' );
 		$style_content = '
-		.has-header-image .custom-header-media amp-img > img,
-		.has-header-video .custom-header-media amp-video > video{
-			position: fixed;
-			height: auto;
-			left: 50%;
-			max-width: 1000%;
-			min-height: 100%;
-			min-width: 100%;
-			min-width: 100vw; /* vw prevents 1px gap on left that 100% has */
-			width: auto;
-			top: 50%;
-			padding-bottom: 1px; /* Prevent header from extending beyond the footer */
-			-ms-transform: translateX(-50%) translateY(-50%);
-			-moz-transform: translateX(-50%) translateY(-50%);
-			-webkit-transform: translateX(-50%) translateY(-50%);
-			transform: translateX(-50%) translateY(-50%);
-		}
-		.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-			bottom: 0;
-			position: absolute;
-			top: auto;
-			-ms-transform: translateX(-50%) translateY(0);
-			-moz-transform: translateX(-50%) translateY(0);
-			-webkit-transform: translateX(-50%) translateY(0);
-			transform: translateX(-50%) translateY(0);
-		}
-		/* For browsers that support \'object-fit\' */
-		@supports ( object-fit: cover ) {
 			.has-header-image .custom-header-media amp-img > img,
-			.has-header-video .custom-header-media amp-video > video,
-			.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-				height: 100%;
-				left: 0;
-				-o-object-fit: cover;
-				object-fit: cover;
-				top: 0;
-				-ms-transform: none;
-				-moz-transform: none;
-				-webkit-transform: none;
-				transform: none;
-				width: 100%;
+			.has-header-video .custom-header-media amp-video > video{
+				position: fixed;
+				height: auto;
+				left: 50%;
+				max-width: 1000%;
+				min-height: 100%;
+				min-width: 100%;
+				min-width: 100vw; /* vw prevents 1px gap on left that 100% has */
+				width: auto;
+				top: 50%;
+				padding-bottom: 1px; /* Prevent header from extending beyond the footer */
+				-ms-transform: translateX(-50%) translateY(-50%);
+				-moz-transform: translateX(-50%) translateY(-50%);
+				-webkit-transform: translateX(-50%) translateY(-50%);
+				transform: translateX(-50%) translateY(-50%);
 			}
-		}
+			.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
+				bottom: 0;
+				position: absolute;
+				top: auto;
+				-ms-transform: translateX(-50%) translateY(0);
+				-moz-transform: translateX(-50%) translateY(0);
+				-webkit-transform: translateX(-50%) translateY(0);
+				transform: translateX(-50%) translateY(0);
+			}
+			/* For browsers that support object-fit */
+			@supports ( object-fit: cover ) {
+				.has-header-image .custom-header-media amp-img > img,
+				.has-header-video .custom-header-media amp-video > video,
+				.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
+					height: 100%;
+					left: 0;
+					-o-object-fit: cover;
+					object-fit: cover;
+					top: 0;
+					-ms-transform: none;
+					-moz-transform: none;
+					-webkit-transform: none;
+					transform: none;
+					width: 100%;
+				}
+			}
 		';
 		$style_element->appendChild( $this->dom->createTextNode( $style_content ) );
-		$body->appendChild( $style_element );
+		$body->appendChild( $style_element ); // Note that AMP_Style_Sanitizer will take the CSS and put it in style[amp-custom].
 	}
 }
