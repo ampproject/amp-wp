@@ -122,6 +122,22 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Add filters to manipulate output during output buffering before the DOM is constructed.
+	 *
+	 * Add actions and filters before the page is rendered so that the sanitizer can fix issues during output buffering.
+	 * This provides an alternative to manipulating the DOM in the sanitize method. This is a static function because
+	 * it is invoked before the class is instantiated, as the DOM is not available yet. This method is only called
+	 * when 'amp' theme support is present. It is conceptually similar to the AMP_Base_Embed_Handler class's register_embed
+	 * method.
+	 *
+	 * @since 1.0
+	 * @see \AMP_Base_Embed_Handler::register_embed()
+	 *
+	 * @param array $args Args.
+	 */
+	public static function add_buffering_hooks( $args = array() ) {}
+
+	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
 	 * @return array Mapping.
