@@ -56,6 +56,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_nav_sub_menu_buttons'            => array(),
 			// @todo Dequeue scripts and replace with AMP functionality where possible.
 		),
+		'twentysixteen'   => array(
+			'add_nav_menu_styles'      => array(),
+			'add_nav_menu_toggle'      => array(),
+			'add_nav_sub_menu_buttons' => array(),
+		),
 		'twentyfifteen'   => array(
 			'add_nav_menu_styles'      => array(),
 			'add_nav_menu_toggle'      => array(),
@@ -148,21 +153,36 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected static function get_theme_config( $theme ) {
 		// phpcs:disable WordPress.WP.I18n.TextDomainMismatch
 		$config = array(
-			'dropdown_class' => 'dropdown-toggle',
+			'sub_menu_button_class' => 'dropdown-toggle',
 		);
 		switch ( $theme ) {
 			case 'twentyfifteen':
 				return array_merge(
 					$config,
 					array(
-						'nav_container_id'           => 'secondary',
-						'nav_container_toggle_class' => 'toggled-on',
-						'menu_button_class'          => 'secondary-toggle',
-						'menu_button_query'          => '//header[ @id = "masthead" ]//button[ contains( @class, "secondary-toggle" ) ]',
-						'menu_button_toggle_class'   => 'toggled-on',
-						'sub_menu_toggle_class'      => 'toggle-on',
-						'expand_text '               => __( 'expand child menu', 'twentyfifteen' ),
-						'collapse_text'              => __( 'collapse child menu', 'twentyfifteen' ),
+						'nav_container_id'             => 'secondary',
+						'nav_container_toggle_class'   => 'toggled-on',
+						'menu_button_class'            => 'secondary-toggle',
+						'menu_button_xpath'            => '//header[ @id = "masthead" ]//button[ contains( @class, "secondary-toggle" ) ]',
+						'menu_button_toggle_class'     => 'toggled-on',
+						'sub_menu_button_toggle_class' => 'toggle-on',
+						'expand_text '                 => __( 'expand child menu', 'twentyfifteen' ),
+						'collapse_text'                => __( 'collapse child menu', 'twentyfifteen' ),
+					)
+				);
+
+			case 'twentysixteen':
+				return array_merge(
+					$config,
+					array(
+						'nav_container_id'             => 'site-header-menu',
+						'nav_container_toggle_class'   => 'toggled-on',
+						'menu_button_class'            => 'menu-toggle',
+						'menu_button_xpath'            => '//header[@id = "masthead"]//button[ @id = "menu-toggle" ]',
+						'menu_button_toggle_class'     => 'toggled-on',
+						'sub_menu_button_toggle_class' => 'toggled-on',
+						'expand_text '                 => __( 'expand child menu', 'twentysixteen' ),
+						'collapse_text'                => __( 'collapse child menu', 'twentysixteen' ),
 					)
 				);
 
@@ -171,14 +191,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				return array_merge(
 					$config,
 					array(
-						'nav_container_id'           => 'site-navigation',
-						'nav_container_toggle_class' => 'toggled-on',
-						'menu_button_class'          => 'menu-toggle',
-						'menu_button_query'          => '//nav[@id = "site-navigation"]//button[ contains( @class, "menu-toggle" ) ]',
-						'menu_button_toggle_class'   => 'toggled-on',
-						'sub_menu_toggle_class'      => 'toggled-on',
-						'expand_text '               => __( 'expand child menu', 'twentyseventeen' ),
-						'collapse_text'              => __( 'collapse child menu', 'twentyseventeen' ),
+						'nav_container_id'             => 'site-navigation',
+						'nav_container_toggle_class'   => 'toggled-on',
+						'menu_button_class'            => 'menu-toggle',
+						'menu_button_xpath'            => '//nav[@id = "site-navigation"]//button[ contains( @class, "menu-toggle" ) ]',
+						'menu_button_toggle_class'     => 'toggled-on',
+						'sub_menu_button_toggle_class' => 'toggled-on',
+						'expand_text '                 => __( 'expand child menu', 'twentyseventeen' ),
+						'collapse_text'                => __( 'collapse child menu', 'twentyseventeen' ),
 					)
 				);
 		}
@@ -329,34 +349,30 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			ob_start();
 			?>
 			<style>
-
-				/* Show the button*/
-				.no-js .<?php echo esc_html( $args['menu_button_class'] ); ?> {
-					display: block;
-				}
-
 				/* Override no-js selector in parent theme. */
-				.no-js .main-navigation ul ul,
-				.no-js .widget_nav_menu ul ul {
+				.no-js .main-navigation ul ul {
 					display: none;
 				}
 
 				/* Use sibling selector and re-use class on button instead of toggling toggle-on class on ul.sub-menu */
-				.main-navigation ul .<?php echo esc_html( $args['sub_menu_toggle_class'] ); ?> + .sub-menu,
-				.widget_nav_menu ul .<?php echo esc_html( $args['sub_menu_toggle_class'] ); ?> + .sub-menu {
+				.main-navigation ul .<?php echo esc_html( $args['sub_menu_button_toggle_class'] ); ?> + .sub-menu {
 					display: block;
 				}
 
 				<?php if ( 'twentyseventeen' === get_template() ) : ?>
-					.no-js <?php echo esc_html( '#' . $args['nav_container_id'] ); ?> > div > ul {
+					/* Show the button*/
+					.no-js .<?php echo esc_html( $args['menu_button_class'] ); ?> {
+						display: block;
+					}
+					.no-js .main-navigation > div > ul {
 						display: none;
 					}
-					.no-js <?php echo esc_html( '#' . $args['nav_container_id'] ); ?>.<?php echo esc_html( $args['nav_container_toggle_class'] ); ?> > div > ul {
+					.no-js .main-navigation.<?php echo esc_html( $args['nav_container_toggle_class'] ); ?> > div > ul {
 						display: block;
 					}
 					@media screen and (min-width: 48em) {
 						.no-js .<?php echo esc_html( $args['menu_button_class'] ); ?>,
-						.no-js .<?php echo esc_html( $args['dropdown_class'] ); ?> {
+						.no-js .<?php echo esc_html( $args['sub_menu_button_class'] ); ?> {
 							display: none;
 						}
 						.no-js .main-navigation ul,
@@ -365,15 +381,25 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							display: block;
 						}
 					}
+				<?php elseif ( 'twentysixteen' === get_template() ) : ?>
+					@media screen and (max-width: 56.875em) {
+						/* Show the button*/
+						.no-js .<?php echo esc_html( $args['menu_button_class'] ); ?> {
+							display: block;
+						}
+						.no-js .site-header-menu {
+							display: none;
+						}
+						.no-js .site-header-menu.toggled-on {
+							display: block;
+						}
+					}
+					@media screen and (min-width: 56.875em) {
+						.no-js .main-navigation ul ul {
+							display: block;
+						}
+					}
 				<?php elseif ( 'twentyfifteen' === get_template() ) : ?>
-					.widget_nav_menu li {
-						position: relative;
-					}
-					.widget_nav_menu li .dropdown-toggle {
-						margin: 0;
-						padding: 0;
-					}
-
 					@media screen and (min-width: 59.6875em) {
 						/* Attempt to emulate https://github.com/WordPress/wordpress-develop/blob/5e9a39baa7d4368f7d3c36dcbcd53db6317677c9/src/wp-content/themes/twentyfifteen/js/functions.js#L108-L149 */
 						#sidebar {
@@ -408,7 +434,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$button_el = $this->xpath->query( $args['menu_button_query'] )->item( 0 );
+		$button_el = $this->xpath->query( $args['menu_button_xpath'] )->item( 0 );
 		if ( ! $button_el ) {
 			return;
 		}
@@ -474,7 +500,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 * @param object $item        Nav menu item.
 		 * @return string Modified nav menu item HTML.
 		 */
-		add_filter( 'walker_nav_menu_start_el', function( $item_output, $item ) use ( $args ) {
+		add_filter( 'walker_nav_menu_start_el', function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
+			unset( $depth );
+
+			// Skip adding buttons to nav menu widgets for now.
+			if ( empty( $nav_menu_args->theme_location ) ) {
+				return $item_output;
+			}
+
 			if ( ! in_array( 'menu-item-has-children', $item->classes, true ) ) {
 				return $item_output;
 			}
@@ -495,8 +528,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$dropdown_button  = '<button';
 			$dropdown_button .= sprintf(
 				' class="%s" [class]="%s"',
-				esc_attr( $args['dropdown_class'] . ( $expanded ? ' ' . $args['sub_menu_toggle_class'] : '' ) ),
-				esc_attr( sprintf( "%s + ( $expanded_state_id ? %s : '' )", wp_json_encode( $args['dropdown_class'] ), wp_json_encode( ' ' . $args['sub_menu_toggle_class'] ) ) )
+				esc_attr( $args['sub_menu_button_class'] . ( $expanded ? ' ' . $args['sub_menu_button_toggle_class'] : '' ) ),
+				esc_attr( sprintf( "%s + ( $expanded_state_id ? %s : '' )", wp_json_encode( $args['sub_menu_button_class'] ), wp_json_encode( ' ' . $args['sub_menu_button_toggle_class'] ) ) )
 			);
 			$dropdown_button .= sprintf(
 				' aria-expanded="%s" [aria-expanded]="%s"',
@@ -524,6 +557,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$item_output .= $dropdown_button;
 			return $item_output;
-		}, 10, 2 );
+		}, 10, 4 );
 	}
 }
