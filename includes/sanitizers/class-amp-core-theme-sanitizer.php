@@ -380,6 +380,46 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.no-js .main-navigation > div > ul {
 							display: block;
 						}
+						.main-navigation ul li.menu-item-has-children:focus-within:before,
+						.main-navigation ul li.menu-item-has-children:focus-within:after,
+						.main-navigation ul li.page_item_has_children:focus-within:before,
+						.main-navigation ul li.page_item_has_children:focus-within:after {
+							display: block;
+						}
+						.main-navigation ul ul li:focus-within > ul {
+							<?php if ( is_rtl() ) : ?>
+								left: auto;
+								right: 100%;
+							<?php else : ?>
+								left: 100%;
+								right: auto;
+							<?php endif; ?>
+						}
+						.main-navigation li li:focus-within {
+							background: #767676;
+						}
+						.main-navigation li li:focus-within > a,
+						.main-navigation li li a:focus-within,
+						.main-navigation li li.current_page_item a:focus-within,
+						.main-navigation li li.current-menu-item a:focus-within {
+							color: #fff;
+						}
+						.main-navigation ul li:focus-within > ul {
+							<?php if ( is_rtl() ) : ?>
+								left: auto;
+								right: 0.5em;
+							<?php else : ?>
+								left: 0.5em;
+								right: auto;
+							<?php endif; ?>
+						}
+
+						.main-navigation ul ul li.menu-item-has-children:focus-within:before,
+						.main-navigation ul ul li.menu-item-has-children:focus-within:after,
+						.main-navigation ul ul li.page_item_has_children:focus-within:before,
+						.main-navigation ul ul li.page_item_has_children:focus-within:after {
+							display: none;
+						}
 					}
 				<?php elseif ( 'twentysixteen' === get_template() ) : ?>
 					@media screen and (max-width: 56.875em) {
@@ -397,6 +437,27 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					@media screen and (min-width: 56.875em) {
 						.no-js .main-navigation ul ul {
 							display: block;
+						}
+						.main-navigation li:focus-within > a {
+							color: #007acc;
+						}
+						.main-navigation li:focus-within > ul {
+							<?php if ( is_rtl() ) : ?>
+								left: auto;
+								right: 0;
+							<?php else : ?>
+								left: 0;
+								right: auto;
+							<?php endif; ?>
+						}
+						.main-navigation ul ul li:focus-within > ul {
+							<?php if ( is_rtl() ) : ?>
+								left: 100%;
+								right: auto;
+							<?php else : ?>
+								left: auto;
+								right: 100%;
+							<?php endif; ?>
 						}
 					}
 				<?php elseif ( 'twentyfifteen' === get_template() ) : ?>
