@@ -325,72 +325,79 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1743
 	 */
 	public static function add_twentyseventeen_masthead_styles() {
+		$args = self::get_theme_config( get_template() );
+
 		/*
 		 * The following is necessary because the styles in the theme apply to img and video,
 		 * and the CSS parser will then convert the selectors to amp-img and amp-video respectively.
 		 * Nevertheless, object-fit does not apply on amp-img and it needs to apply on an actual img.
 		 */
-		add_action( 'wp_enqueue_scripts', function() {
+		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
 			ob_start();
 			?>
 			<style>
-			.has-header-image .custom-header-media amp-img > img,
-			.has-header-video .custom-header-media amp-video > video{
-				position: fixed;
-				height: auto;
-				left: 50%;
-				max-width: 1000%;
-				min-height: 100%;
-				min-width: 100%;
-				min-width: 100vw; /* vw prevents 1px gap on left that 100% has */
-				width: auto;
-				top: 50%;
-				padding-bottom: 1px; /* Prevent header from extending beyond the footer */
-				-ms-transform: translateX(-50%) translateY(-50%);
-				-moz-transform: translateX(-50%) translateY(-50%);
-				-webkit-transform: translateX(-50%) translateY(-50%);
-				transform: translateX(-50%) translateY(-50%);
-			}
-			.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-				bottom: 0;
-				position: absolute;
-				top: auto;
-				-ms-transform: translateX(-50%) translateY(0);
-				-moz-transform: translateX(-50%) translateY(0);
-				-webkit-transform: translateX(-50%) translateY(0);
-				transform: translateX(-50%) translateY(0);
-			}
-			/* For browsers that support object-fit */
-			@supports ( object-fit: cover ) {
 				.has-header-image .custom-header-media amp-img > img,
-				.has-header-video .custom-header-media amp-video > video,
-				.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-					height: 100%;
-					left: 0;
-					-o-object-fit: cover;
-					object-fit: cover;
-					top: 0;
-					-ms-transform: none;
-					-moz-transform: none;
-					-webkit-transform: none;
-					transform: none;
-					width: 100%;
+				.has-header-video .custom-header-media amp-video > video{
+					position: fixed;
+					height: auto;
+					left: 50%;
+					max-width: 1000%;
+					min-height: 100%;
+					min-width: 100%;
+					min-width: 100vw; /* vw prevents 1px gap on left that 100% has */
+					width: auto;
+					top: 50%;
+					padding-bottom: 1px; /* Prevent header from extending beyond the footer */
+					-ms-transform: translateX(-50%) translateY(-50%);
+					-moz-transform: translateX(-50%) translateY(-50%);
+					-webkit-transform: translateX(-50%) translateY(-50%);
+					transform: translateX(-50%) translateY(-50%);
 				}
-			}
+				.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
+					bottom: 0;
+					position: absolute;
+					top: auto;
+					-ms-transform: translateX(-50%) translateY(0);
+					-moz-transform: translateX(-50%) translateY(0);
+					-webkit-transform: translateX(-50%) translateY(0);
+					transform: translateX(-50%) translateY(0);
+				}
+				/* For browsers that support object-fit */
+				@supports ( object-fit: cover ) {
+					.has-header-image .custom-header-media amp-img > img,
+					.has-header-video .custom-header-media amp-video > video,
+					.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
+						height: 100%;
+						left: 0;
+						-o-object-fit: cover;
+						object-fit: cover;
+						top: 0;
+						-ms-transform: none;
+						-moz-transform: none;
+						-webkit-transform: none;
+						transform: none;
+						width: 100%;
+					}
+				}
+
+				/* Emulate adjustHeaderHeight() to set margins of branding in header <https://github.com/WordPress/wordpress-develop/blob/a26c24226c6b131a0ed22c722a836c100d3ba254/src/wp-content/themes/twentyseventeen/assets/js/global.js#L88-L103> */
+				@media screen and (min-width: 48em) {
+					<?php if ( ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() ) ) : ?>
+						.custom-header .site-branding {
+							margin-bottom: 72px; /* navigationOuterHeight */
+						}
+					<?php else : ?>
+						.custom-header {
+							margin-bottom: 72px; /* navigationOuterHeight */
+						}
+					<?php endif; ?>
+				}
 			</style>
 			<?php
 			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
 			wp_add_inline_style( get_template() . '-style', $styles );
 		}, 11 );
 	}
-
-	/**
-	 * Adjust header height.
-	 *
-	 * @todo Implement.
-	 * @link https://github.com/WordPress/wordpress-develop/blob/a26c24226c6b131a0ed22c722a836c100d3ba254/src/wp-content/themes/twentyseventeen/assets/js/global.js#L88-L103
-	 */
-	public function adjust_header_height() {}
 
 	/**
 	 * Add styles for the nav menu specifically to deal with AMP running in a no-js context.
