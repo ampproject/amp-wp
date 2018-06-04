@@ -539,6 +539,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 
+				.navigation-top.site-navigation-fixed {
+					display: none;
+				}
+
 				@media screen and (min-width: 48em) {
 					/* Note that adjustHeaderHeight() is irrelevant with this change */
 					<?php if ( ! $is_front_page_layout ) : ?>
@@ -551,6 +555,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					.navigation-top.site-navigation-fixed {
 						opacity: 0;
 						transform: translateY( -72px );
+						display: block;
 					}
 				}
 			</style>
