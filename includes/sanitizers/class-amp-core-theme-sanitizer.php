@@ -49,6 +49,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		'twentyseventeen' => array(
 			'dequeue_scripts'                     => array(
 				'twentyseventeen-html5', // Only relevant for IE<9.
+				'twentyseventeen-global', // There are somethings not yet implemented in AMP. See todos below.
+				'jquery-scrollto', // Implemented via add_smooth_scrolling().
 				'twentyseventeen-navigation', // Handled by add_nav_menu_styles, add_nav_menu_toggle, add_nav_sub_menu_buttons.
 				'twentyseventeen-skip-link-focus-fix', // Only needed by IE11 and when admin bar is present.
 			),
@@ -64,7 +66,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_nav_menu_styles'                 => array(),
 			'add_nav_menu_toggle'                 => array(),
 			'add_nav_sub_menu_buttons'            => array(),
-			// @todo Dequeue scripts and replace with AMP functionality where possible.
+			'add_smooth_scrolling'                => array(
+				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
+			),
+			// @todo Implement setQuotesIcon().
+			// @todo Add support for sticky nav, that is adjustScrollClass().
+			// @todo Try to implement belowEntryMetaClass().
 		),
 		'twentysixteen'   => array(
 			'dequeue_scripts'          => array(
@@ -258,6 +265,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$priority = has_action( $action, $callback );
 				if ( false !== $priority ) {
 					remove_action( $action, $callback, $priority );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add smooth scrolling from link to target element.
+	 *
+	 * @param string[] $link_xpaths XPath queries to the links that should smooth scroll.
+	 */
+	public function add_smooth_scrolling( $link_xpaths ) {
+		foreach ( $link_xpaths as $link_xpath ) {
+			foreach ( $this->xpath->query( $link_xpath ) as $link ) {
+				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( 'href' ), $matches ) ) {
+					$link->setAttribute( 'on', sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
 				}
 			}
 		}
