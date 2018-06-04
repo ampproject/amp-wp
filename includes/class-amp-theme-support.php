@@ -159,6 +159,12 @@ class AMP_Theme_Support {
 		self::$sanitizer_classes = amp_get_content_sanitizers();
 		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
+
+		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
+			if ( method_exists( $sanitizer_class, 'add_buffering_hooks' ) ) {
+				call_user_func( array( $sanitizer_class, 'add_buffering_hooks' ), $args );
+			}
+		}
 	}
 
 	/**
@@ -303,6 +309,10 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
+		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header' ), 10, 3 );
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
+		} );
 
 		// @todo Add character conversion.
 	}
@@ -1263,5 +1273,90 @@ class AMP_Theme_Support {
 
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
+	}
+
+	/**
+	 * Conditionally replace the header image markup with a header video or image.
+	 *
+	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
+	 * So in order for the header video to display,
+	 * this replaces the markup of the header image.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @param string $html The image markup to filter.
+	 * @param array  $header The header config array.
+	 * @param array  $atts The image markup attributes.
+	 * @return string $html Filtered markup.
+	 */
+	public static function conditionally_output_header( $html, $header, $atts ) {
+		unset( $header );
+		if ( ! is_header_video_active() ) {
+			return $html;
+		};
+
+		if ( ! has_header_video() ) {
+			return AMP_HTML_Utils::build_tag( 'amp-img', $atts );
+		}
+
+		return self::output_header_video( $atts );
+	}
+
+	/**
+	 * Replace the header image markup with a header video.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
+	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L78
+	 *
+	 * @param array $atts The header tag attributes array.
+	 * @return string $html Filtered markup.
+	 */
+	public static function output_header_video( $atts ) {
+		// Remove the script for video.
+		wp_deregister_script( 'wp-custom-header' );
+		$video_settings = get_header_video_settings();
+
+		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
+		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : null;
+		$video_attributes = array(
+			'media'    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
+			'width'    => $video_settings['width'],
+			'height'   => $video_settings['height'],
+			'layout'   => 'responsive',
+			'autoplay' => '',
+			'id'       => 'wp-custom-header-video',
+		);
+
+		// Create image banner to stay behind the video.
+		$image_header = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
+
+		// If the video URL is for YouTube, return an <amp-youtube> element.
+		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
+			$video_header = AMP_HTML_Utils::build_tag(
+				'amp-youtube',
+				array_merge(
+					$video_attributes,
+					array(
+						'data-videoid'        => $query['v'],
+						'data-param-rel'      => '0', // Don't show related videos.
+						'data-param-showinfo' => '0', // Don't show video title at the top.
+						'data-param-controls' => '0', // Don't show video controls.
+					)
+				)
+			);
+		} else {
+			$video_header = AMP_HTML_Utils::build_tag(
+				'amp-video',
+				array_merge(
+					$video_attributes,
+					array(
+						'src' => $video_settings['videoUrl'],
+					)
+				)
+			);
+		}
+
+		return $image_header . $video_header;
 	}
 }
