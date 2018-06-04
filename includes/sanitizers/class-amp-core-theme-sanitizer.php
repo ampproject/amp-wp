@@ -82,7 +82,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					),
 				),
 			),
-			// @todo Implement setQuotesIcon().
+			'set_quotes_icon'                     => array(),
+			'add_quotes_icon'                     => array(),
 			// @todo Add support for sticky nav, that is adjustScrollClass().
 			// @todo Try to implement belowEntryMetaClass().
 		),
@@ -206,6 +207,53 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Add filter to output the quote icons in front of the article content.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $args Args.
+	 */
+	public static function add_quotes_icon( $args = array() ) {
+		add_filter( 'the_content', function ( $content ) {
+			$icon  = twentyseventeen_get_svg( array( 'icon' => 'quote-right' ) );
+			$count = substr_count( $content, '<blockquote' );
+			$add   = str_repeat( $icon, $count );
+
+			return $add . $content;
+		} );
+	}
+
+	/**
+	 * Move any found quote icons and move them into blockquotes.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $args Args.
+	 */
+	public function move_quotes_icon( $args = array() ) {
+
+		$args = array_merge(
+			self::get_theme_config( get_template() ),
+			$args
+		);
+
+		$blockquote_el = $this->xpath->query( $args['blockquote_article'] );
+		if ( ! $blockquote_el ) {
+			return;
+		}
+
+		$svg_el = $this->xpath->query( $args['set_quotes_icon'] );
+		if ( 0 === $svg_el->length ) {
+			return;
+		}
+
+		foreach ( $blockquote_el as $index => $el ) {
+			$icon = $svg_el->item( $index );
+			$el->insertBefore( $icon, $el->firstChild );
+		}
+	}
+
+	/**
 	 * Fix up core themes to do things in the AMP way.
 	 *
 	 * @since 1.0
@@ -281,6 +329,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'sub_menu_button_toggle_class' => 'toggled-on',
 						'expand_text '                 => __( 'expand child menu', 'twentyseventeen' ),
 						'collapse_text'                => __( 'collapse child menu', 'twentyseventeen' ),
+						'blockquote_article'           => '//article[ contains( @class, "format-quote" ) ]//blockquote',
+						'set_quotes_icon'              => '//article[ contains( @class, "format-quote" ) ]//svg[ contains( @class, "icon-quote-right" ) ]',
 					)
 				);
 		}
