@@ -82,7 +82,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					),
 				),
 			),
-			'set_quotes_icon'                     => array(),
+			'move_quotes_icon'                    => array(),
 			'add_quotes_icon'                     => array(),
 			// @todo Add support for sticky nav, that is adjustScrollClass().
 			// @todo Try to implement belowEntryMetaClass().
@@ -215,11 +215,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function add_quotes_icon( $args = array() ) {
 		add_filter( 'the_content', function ( $content ) {
-			$icon  = twentyseventeen_get_svg( array( 'icon' => 'quote-right' ) );
-			$count = substr_count( $content, '<blockquote' );
-			$add   = str_repeat( $icon, $count );
 
-			return $add . $content;
+			if ( 'quote' === get_post_format() ) {
+				$icon    = twentyseventeen_get_svg( array( 'icon' => 'quote-right' ) );
+				$count   = substr_count( $content, '<blockquote' );
+				$add     = str_repeat( $icon, $count );
+				$content = $add . $content;
+			}
+
+			return $content;
 		} );
 	}
 
