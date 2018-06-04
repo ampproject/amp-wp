@@ -46,7 +46,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $theme_features = array(
+		// Twenty Seventeen.
 		'twentyseventeen' => array(
+			// @todo Add support for sticky nav, that is adjustScrollClass().
+			// @todo Try to implement belowEntryMetaClass().
 			'dequeue_scripts'                     => array(
 				'twentyseventeen-html5', // Only relevant for IE<9.
 				'twentyseventeen-global', // There are somethings not yet implemented in AMP. See todos below.
@@ -83,12 +86,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				),
 			),
 			'set_twentyseventeen_quotes_icon'     => array(),
-			// @todo Add support for sticky nav, that is adjustScrollClass().
-			// @todo Try to implement belowEntryMetaClass().
 		),
+
+		// Twenty Sixteen.
 		'twentysixteen'   => array(
-			// @todo Implement onResizeARIA().
-			// @todo Implement belowEntryMetaClass().
+			// @todo Figure out an AMP solution for onResizeARIA().
+			// @todo Try to implement belowEntryMetaClass().
 			'dequeue_scripts'          => array(
 				'twentysixteen-script',
 				'twentysixteen-html5', // Only relevant for IE<9.
@@ -105,7 +108,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_nav_sub_menu_buttons' => array(),
 			'accept_validation_errors' => array(
 				'removed_unused_css_rules' => true,
-				'illegal_css_at_rule'      => true, // @todo Be more granular so it only applies in theme's style.css.
+				'illegal_css_at_rule'      => array(
+					array(
+						'at_rule'         => 'viewport',
+						'node_attributes' => array(
+							'id' => 'twentysixteen-style-css',
+						),
+					),
+					array(
+						'at_rule'         => '-ms-viewport',
+						'node_attributes' => array(
+							'id' => 'twentysixteen-style-css',
+						),
+					),
+				),
 				'invalid_element'          => array(
 					array(
 						'node_name'       => 'meta',
@@ -118,8 +134,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				),
 			),
 		),
+
+		// Twenty Fifteen.
 		'twentyfifteen'   => array(
-			// @todo Implement onResizeARIA().
+			// @todo Figure out an AMP solution for onResizeARIA().
 			'dequeue_scripts'          => array(
 				'twentyfifteen-script',
 				'twentyfifteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
@@ -135,7 +153,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_nav_sub_menu_buttons' => array(),
 			'accept_validation_errors' => array(
 				'removed_unused_css_rules' => true,
-				'illegal_css_at_rule'      => true, // @todo Be more granular so it only applies in theme's style.css.
+				'illegal_css_at_rule'      => array(
+					array(
+						'at_rule'         => 'viewport',
+						'node_attributes' => array(
+							'id' => 'twentyfifteen-style-css',
+						),
+					),
+					array(
+						'at_rule'         => '-ms-viewport',
+						'node_attributes' => array(
+							'id' => 'twentyfifteen-style-css',
+						),
+					),
+				),
 				'invalid_element'          => array(
 					array(
 						'node_name'       => 'meta',
@@ -372,36 +403,47 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Accept validation errors.
 	 *
+	 * @todo This needs to be called even in an admin context!!!
 	 * @param array $acceptable_errors Validation errors to accept. Either an validation error array or an error code.
 	 */
-	public function accept_validation_errors( $acceptable_errors ) {
-		$normalized_acceptable_errors = array();
-		foreach ( $acceptable_errors as $code => $acceptable_error_instances ) {
-			if ( true === $acceptable_error_instances ) {
-				$normalized_acceptable_errors[ $code ] = $acceptable_error_instances;
-			} else {
-				// @todo Switch to using proper subset detection.
-				foreach ( $acceptable_error_instances as $acceptable_error_instance ) {
-					$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( array_merge( $acceptable_error_instance, compact( 'code' ) ) );
-
-					$normalized_acceptable_errors[ $code ][] = $term_data['slug'];
-				}
-			}
-		}
-
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $normalized_acceptable_errors ) {
-			if ( isset( $normalized_acceptable_errors[ $error['code'] ] ) ) {
-				if ( true === $normalized_acceptable_errors[ $error['code'] ] ) {
+	public static function accept_validation_errors( $acceptable_errors ) {
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $acceptable_errors ) {
+			if ( isset( $acceptable_errors[ $error['code'] ] ) ) {
+				if ( true === $acceptable_errors[ $error['code'] ] ) {
 					return true;
-				} else {
-					$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( array_merge( $error, array( 'code' => $error['code'] ) ) );
-					if ( in_array( $term_data['slug'], $normalized_acceptable_errors[ $error['code'] ], true ) ) {
+				}
+				foreach ( $acceptable_errors[ $error['code'] ] as $acceptable_error_props ) {
+					if ( AMP_Core_Theme_Sanitizer::is_array_subset( $error, $acceptable_error_props ) ) {
 						return true;
 					}
 				}
 			}
 			return $sanitized;
 		}, 10, 2 );
+	}
+
+	/**
+	 * Check if one array is a sparse subset of another array.
+	 *
+	 * @param array $superset Superset array.
+	 * @param array $subset   Subset array.
+	 *
+	 * @return bool Whether subset is contained in superset.
+	 */
+	public static function is_array_subset( $superset, $subset ) {
+		foreach ( $subset as $key => $subset_value ) {
+			if ( ! isset( $superset[ $key ] ) || gettype( $subset_value ) !== gettype( $superset[ $key ] ) ) {
+				return false;
+			}
+			if ( is_array( $subset_value ) ) {
+				if ( ! self::is_array_subset( $superset[ $key ], $subset_value ) ) {
+					return false;
+				}
+			} elseif ( $superset[ $key ] !== $subset_value ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -692,7 +734,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$state_id = 'navMenuToggledOn';
 		$expanded = false;
 
-		// @todo Not twentyfifteen?
 		$nav_el->setAttribute(
 			AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class',
 			sprintf(
