@@ -82,8 +82,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					),
 				),
 			),
-			'move_quotes_icon'                    => array(),
-			'add_quotes_icon'                     => array(),
+			'set_twentyseventeen_quotes_icon'     => array(),
 			// @todo Add support for sticky nav, that is adjustScrollClass().
 			// @todo Try to implement belowEntryMetaClass().
 		),
@@ -152,6 +151,67 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
+	 * Get theme config.
+	 *
+	 * @param string $theme Theme slug.
+	 * @return array Class names.
+	 */
+	protected static function get_theme_config( $theme ) {
+		// phpcs:disable WordPress.WP.I18n.TextDomainMismatch
+		$config = array(
+			'sub_menu_button_class' => 'dropdown-toggle',
+		);
+		switch ( $theme ) {
+			case 'twentyfifteen':
+				return array_merge(
+					$config,
+					array(
+						'nav_container_id'             => 'secondary',
+						'nav_container_toggle_class'   => 'toggled-on',
+						'menu_button_class'            => 'secondary-toggle',
+						'menu_button_xpath'            => '//header[ @id = "masthead" ]//button[ contains( @class, "secondary-toggle" ) ]',
+						'menu_button_toggle_class'     => 'toggled-on',
+						'sub_menu_button_toggle_class' => 'toggle-on',
+						'expand_text '                 => __( 'expand child menu', 'twentyfifteen' ),
+						'collapse_text'                => __( 'collapse child menu', 'twentyfifteen' ),
+					)
+				);
+
+			case 'twentysixteen':
+				return array_merge(
+					$config,
+					array(
+						'nav_container_id'             => 'site-header-menu',
+						'nav_container_toggle_class'   => 'toggled-on',
+						'menu_button_class'            => 'menu-toggle',
+						'menu_button_xpath'            => '//header[@id = "masthead"]//button[ @id = "menu-toggle" ]',
+						'menu_button_toggle_class'     => 'toggled-on',
+						'sub_menu_button_toggle_class' => 'toggled-on',
+						'expand_text '                 => __( 'expand child menu', 'twentysixteen' ),
+						'collapse_text'                => __( 'collapse child menu', 'twentysixteen' ),
+					)
+				);
+
+			case 'twentyseventeen':
+			default:
+				return array_merge(
+					$config,
+					array(
+						'nav_container_id'             => 'site-navigation',
+						'nav_container_toggle_class'   => 'toggled-on',
+						'menu_button_class'            => 'menu-toggle',
+						'menu_button_xpath'            => '//nav[@id = "site-navigation"]//button[ contains( @class, "menu-toggle" ) ]',
+						'menu_button_toggle_class'     => 'toggled-on',
+						'sub_menu_button_toggle_class' => 'toggled-on',
+						'expand_text '                 => __( 'expand child menu', 'twentyseventeen' ),
+						'collapse_text'                => __( 'collapse child menu', 'twentyseventeen' ),
+					)
+				);
+		}
+		// phpcs:enable WordPress.WP.I18n.TextDomainMismatch
+	}
+
+	/**
 	 * Find theme features for core theme.
 	 *
 	 * @param array $args   Args.
@@ -209,52 +269,22 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Add filter to output the quote icons in front of the article content.
 	 *
-	 * @since 1.0
+	 * This is only used in Twenty Seventeen.
 	 *
-	 * @param array $args Args.
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/f4580c122b7d0d2d66d22f806c6fe6e11023c6f0/src/wp-content/themes/twentyseventeen/assets/js/global.js#L105-L108
 	 */
-	public static function add_quotes_icon( $args = array() ) {
+	public static function set_twentyseventeen_quotes_icon() {
 		add_filter( 'the_content', function ( $content ) {
 
-			if ( 'quote' === get_post_format() ) {
+			// Why isn't Twenty Seventeen doing this to begin with? Why is it using JS to add the quote icon?
+			if ( function_exists( 'twentyseventeen_get_svg' ) && 'quote' === get_post_format() ) {
 				$icon    = twentyseventeen_get_svg( array( 'icon' => 'quote-right' ) );
-				$count   = substr_count( $content, '<blockquote' );
-				$add     = str_repeat( $icon, $count );
-				$content = $add . $content;
+				$content = preg_replace( '#(<blockquote.*?>)#s', '$1' . $icon, $content );
 			}
 
 			return $content;
 		} );
-	}
-
-	/**
-	 * Move any found quote icons and move them into blockquotes.
-	 *
-	 * @since 1.0
-	 *
-	 * @param array $args Args.
-	 */
-	public function move_quotes_icon( $args = array() ) {
-
-		$args = array_merge(
-			self::get_theme_config( get_template() ),
-			$args
-		);
-
-		$blockquote_el = $this->xpath->query( $args['blockquote_article'] );
-		if ( ! $blockquote_el ) {
-			return;
-		}
-
-		$svg_el = $this->xpath->query( $args['set_quotes_icon'] );
-		if ( 0 === $svg_el->length ) {
-			return;
-		}
-
-		foreach ( $blockquote_el as $index => $el ) {
-			$icon = $svg_el->item( $index );
-			$el->insertBefore( $icon, $el->firstChild );
-		}
 	}
 
 	/**
@@ -276,69 +306,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				call_user_func( array( $this, $theme_feature ), $feature_args );
 			}
 		}
-	}
-
-	/**
-	 * Get theme config.
-	 *
-	 * @param string $theme Theme slug.
-	 * @return array Class names.
-	 */
-	protected static function get_theme_config( $theme ) {
-		// phpcs:disable WordPress.WP.I18n.TextDomainMismatch
-		$config = array(
-			'sub_menu_button_class' => 'dropdown-toggle',
-		);
-		switch ( $theme ) {
-			case 'twentyfifteen':
-				return array_merge(
-					$config,
-					array(
-						'nav_container_id'             => 'secondary',
-						'nav_container_toggle_class'   => 'toggled-on',
-						'menu_button_class'            => 'secondary-toggle',
-						'menu_button_xpath'            => '//header[ @id = "masthead" ]//button[ contains( @class, "secondary-toggle" ) ]',
-						'menu_button_toggle_class'     => 'toggled-on',
-						'sub_menu_button_toggle_class' => 'toggle-on',
-						'expand_text '                 => __( 'expand child menu', 'twentyfifteen' ),
-						'collapse_text'                => __( 'collapse child menu', 'twentyfifteen' ),
-					)
-				);
-
-			case 'twentysixteen':
-				return array_merge(
-					$config,
-					array(
-						'nav_container_id'             => 'site-header-menu',
-						'nav_container_toggle_class'   => 'toggled-on',
-						'menu_button_class'            => 'menu-toggle',
-						'menu_button_xpath'            => '//header[@id = "masthead"]//button[ @id = "menu-toggle" ]',
-						'menu_button_toggle_class'     => 'toggled-on',
-						'sub_menu_button_toggle_class' => 'toggled-on',
-						'expand_text '                 => __( 'expand child menu', 'twentysixteen' ),
-						'collapse_text'                => __( 'collapse child menu', 'twentysixteen' ),
-					)
-				);
-
-			case 'twentyseventeen':
-			default:
-				return array_merge(
-					$config,
-					array(
-						'nav_container_id'             => 'site-navigation',
-						'nav_container_toggle_class'   => 'toggled-on',
-						'menu_button_class'            => 'menu-toggle',
-						'menu_button_xpath'            => '//nav[@id = "site-navigation"]//button[ contains( @class, "menu-toggle" ) ]',
-						'menu_button_toggle_class'     => 'toggled-on',
-						'sub_menu_button_toggle_class' => 'toggled-on',
-						'expand_text '                 => __( 'expand child menu', 'twentyseventeen' ),
-						'collapse_text'                => __( 'collapse child menu', 'twentyseventeen' ),
-						'blockquote_article'           => '//article[ contains( @class, "format-quote" ) ]//blockquote',
-						'set_quotes_icon'              => '//article[ contains( @class, "format-quote" ) ]//svg[ contains( @class, "icon-quote-right" ) ]',
-					)
-				);
-		}
-		// phpcs:enable WordPress.WP.I18n.TextDomainMismatch
 	}
 
 	/**
