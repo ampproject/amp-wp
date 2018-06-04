@@ -480,6 +480,10 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers = apply_filters( 'amp_content_sanitizers',
 		array(
+			'AMP_Core_Theme_Sanitizer'        => array(
+				'template'   => get_template(),
+				'stylesheet' => get_stylesheet(),
+			),
 			'AMP_Img_Sanitizer'               => array(),
 			'AMP_Form_Sanitizer'              => array(),
 			'AMP_Comments_Sanitizer'          => array(),

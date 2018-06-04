@@ -158,6 +158,8 @@ class AMP_Validation_Error_Taxonomy {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
+
+		self::accept_validation_errors( AMP_Core_Theme_Sanitizer::get_acceptable_errors( get_template() ) );
 	}
 
 	/**
@@ -244,6 +246,58 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		return compact( 'status', 'forced' );
+	}
+
+	/**
+	 * Automatically (forcibly) accept validation errors that arise.
+	 *
+	 * @since 1.0
+	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
+	 *
+	 * @param array $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset.
+	 */
+	public static function accept_validation_errors( $acceptable_errors ) {
+		if ( empty( $acceptable_errors ) ) {
+			return;
+		}
+
+		/**
+		 * Check if one array is a sparse subset of another array.
+		 *
+		 * @param array $superset Superset array.
+		 * @param array $subset   Subset array.
+		 *
+		 * @return bool Whether subset is contained in superset.
+		 */
+		$is_array_subset = function( $superset, $subset ) use ( &$is_array_subset ) {
+			foreach ( $subset as $key => $subset_value ) {
+				if ( ! isset( $superset[ $key ] ) || gettype( $subset_value ) !== gettype( $superset[ $key ] ) ) {
+					return false;
+				}
+				if ( is_array( $subset_value ) ) {
+					if ( ! $is_array_subset( $superset[ $key ], $subset_value ) ) {
+						return false;
+					}
+				} elseif ( $superset[ $key ] !== $subset_value ) {
+					return false;
+				}
+			}
+			return true;
+		};
+
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $is_array_subset, $acceptable_errors ) {
+			if ( isset( $acceptable_errors[ $error['code'] ] ) ) {
+				if ( true === $acceptable_errors[ $error['code'] ] ) {
+					return true;
+				}
+				foreach ( $acceptable_errors[ $error['code'] ] as $acceptable_error_props ) {
+					if ( $is_array_subset( $error, $acceptable_error_props ) ) {
+						return true;
+					}
+				}
+			}
+			return $sanitized;
+		}, 10, 2 );
 	}
 
 	/**

@@ -11,6 +11,7 @@
  *
  * Fixes up common issues in core themes and others.
  *
+ * @see AMP_Validation_Error_Taxonomy::accept_core_theme_validation_errors()
  * @since 1.0
  */
 class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
@@ -72,19 +73,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_smooth_scrolling'                => array(
 				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
 			),
-			'accept_validation_errors'            => array(
-				'removed_unused_css_rules' => true,
-				'invalid_element'          => array(
-					array(
-						'node_name'       => 'meta',
-						'parent_name'     => 'head',
-						'node_attributes' => array(
-							'name'    => 'viewport',
-							'content' => 'width=device-width, initial-scale=1',
-						),
-					),
-				),
-			),
 			'set_twentyseventeen_quotes_icon'     => array(),
 		),
 
@@ -106,33 +94,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_nav_menu_styles'      => array(),
 			'add_nav_menu_toggle'      => array(),
 			'add_nav_sub_menu_buttons' => array(),
-			'accept_validation_errors' => array(
-				'removed_unused_css_rules' => true,
-				'illegal_css_at_rule'      => array(
-					array(
-						'at_rule'         => 'viewport',
-						'node_attributes' => array(
-							'id' => 'twentysixteen-style-css',
-						),
-					),
-					array(
-						'at_rule'         => '-ms-viewport',
-						'node_attributes' => array(
-							'id' => 'twentysixteen-style-css',
-						),
-					),
-				),
-				'invalid_element'          => array(
-					array(
-						'node_name'       => 'meta',
-						'parent_name'     => 'head',
-						'node_attributes' => array(
-							'name'    => 'viewport',
-							'content' => 'width=device-width, initial-scale=1',
-						),
-					),
-				),
-			),
 		),
 
 		// Twenty Fifteen.
@@ -151,35 +112,90 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_nav_menu_styles'      => array(),
 			'add_nav_menu_toggle'      => array(),
 			'add_nav_sub_menu_buttons' => array(),
-			'accept_validation_errors' => array(
-				'removed_unused_css_rules' => true,
-				'illegal_css_at_rule'      => array(
-					array(
-						'at_rule'         => 'viewport',
-						'node_attributes' => array(
-							'id' => 'twentyfifteen-style-css',
-						),
-					),
-					array(
-						'at_rule'         => '-ms-viewport',
-						'node_attributes' => array(
-							'id' => 'twentyfifteen-style-css',
-						),
-					),
-				),
-				'invalid_element'          => array(
-					array(
-						'node_name'       => 'meta',
-						'parent_name'     => 'head',
-						'node_attributes' => array(
-							'name'    => 'viewport',
-							'content' => 'width=device-width',
-						),
-					),
-				),
-			),
 		),
 	);
+
+	/**
+	 * Get the acceptable validation errors.
+	 *
+	 * @param string $template Template.
+	 * @return array Acceptable errors.
+	 */
+	public static function get_acceptable_errors( $template ) {
+		switch ( $template ) {
+			case 'twentyfifteen':
+				return array(
+					'removed_unused_css_rules' => true,
+					'illegal_css_at_rule'      => array(
+						array(
+							'at_rule'         => 'viewport',
+							'node_attributes' => array(
+								'id' => 'twentyfifteen-style-css',
+							),
+						),
+						array(
+							'at_rule'         => '-ms-viewport',
+							'node_attributes' => array(
+								'id' => 'twentyfifteen-style-css',
+							),
+						),
+					),
+					'invalid_element'          => array(
+						array(
+							'node_name'       => 'meta',
+							'parent_name'     => 'head',
+							'node_attributes' => array(
+								'name'    => 'viewport',
+								'content' => 'width=device-width',
+							),
+						),
+					),
+				);
+			case 'twentysixteen':
+				return array(
+					'removed_unused_css_rules' => true,
+					'illegal_css_at_rule'      => array(
+						array(
+							'at_rule'         => 'viewport',
+							'node_attributes' => array(
+								'id' => 'twentysixteen-style-css',
+							),
+						),
+						array(
+							'at_rule'         => '-ms-viewport',
+							'node_attributes' => array(
+								'id' => 'twentysixteen-style-css',
+							),
+						),
+					),
+					'invalid_element'          => array(
+						array(
+							'node_name'       => 'meta',
+							'parent_name'     => 'head',
+							'node_attributes' => array(
+								'name'    => 'viewport',
+								'content' => 'width=device-width, initial-scale=1',
+							),
+						),
+					),
+				);
+			case 'twentyseventeen':
+				return array(
+					'removed_unused_css_rules' => true,
+					'invalid_element'          => array(
+						array(
+							'node_name'       => 'meta',
+							'parent_name'     => 'head',
+							'node_attributes' => array(
+								'name'    => 'viewport',
+								'content' => 'width=device-width, initial-scale=1',
+							),
+						),
+					),
+				);
+		}
+		return array();
+	}
 
 	/**
 	 * Get theme config.
@@ -398,52 +414,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$this->dom->documentElement->getAttribute( 'class' )
 			)
 		);
-	}
-
-	/**
-	 * Accept validation errors.
-	 *
-	 * @todo This needs to be called even in an admin context!!!
-	 * @param array $acceptable_errors Validation errors to accept. Either an validation error array or an error code.
-	 */
-	public static function accept_validation_errors( $acceptable_errors ) {
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $acceptable_errors ) {
-			if ( isset( $acceptable_errors[ $error['code'] ] ) ) {
-				if ( true === $acceptable_errors[ $error['code'] ] ) {
-					return true;
-				}
-				foreach ( $acceptable_errors[ $error['code'] ] as $acceptable_error_props ) {
-					if ( AMP_Core_Theme_Sanitizer::is_array_subset( $error, $acceptable_error_props ) ) {
-						return true;
-					}
-				}
-			}
-			return $sanitized;
-		}, 10, 2 );
-	}
-
-	/**
-	 * Check if one array is a sparse subset of another array.
-	 *
-	 * @param array $superset Superset array.
-	 * @param array $subset   Subset array.
-	 *
-	 * @return bool Whether subset is contained in superset.
-	 */
-	public static function is_array_subset( $superset, $subset ) {
-		foreach ( $subset as $key => $subset_value ) {
-			if ( ! isset( $superset[ $key ] ) || gettype( $subset_value ) !== gettype( $superset[ $key ] ) ) {
-				return false;
-			}
-			if ( is_array( $subset_value ) ) {
-				if ( ! self::is_array_subset( $superset[ $key ], $subset_value ) ) {
-					return false;
-				}
-			} elseif ( $superset[ $key ] !== $subset_value ) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**
