@@ -47,6 +47,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static $theme_features = array(
 		'twentyseventeen' => array(
+			'dequeue_scripts'                     => array(
+				'twentyseventeen-html5', // Only relevant for IE<9.
+				'twentyseventeen-navigation', // Handled by add_nav_menu_styles, add_nav_menu_toggle, add_nav_sub_menu_buttons.
+				'twentyseventeen-skip-link-focus-fix', // Only needed by IE11 and when admin bar is present.
+			),
+			'remove_actions'                      => array(
+				'wp_head' => array(
+					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+				),
+			),
 			'force_svg_support'                   => array(),
 			'force_fixed_background_support'      => array(),
 			'add_twentyseventeen_masthead_styles' => array(),
@@ -57,11 +67,30 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Dequeue scripts and replace with AMP functionality where possible.
 		),
 		'twentysixteen'   => array(
+			'dequeue_scripts'          => array(
+				'twentysixteen-html5', // Only relevant for IE<9.
+				'twentysixteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
+				'twentysixteen-skip-link-focus-fix', // Only needed by IE11 and when admin bar is present.
+			),
+			'remove_actions'           => array(
+				'wp_head' => array(
+					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+				),
+			),
 			'add_nav_menu_styles'      => array(),
 			'add_nav_menu_toggle'      => array(),
 			'add_nav_sub_menu_buttons' => array(),
 		),
 		'twentyfifteen'   => array(
+			'dequeue_scripts'          => array(
+				'twentyfifteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
+				'twentyfifteen-skip-link-focus-fix', // Only needed by IE11 and when admin bar is present.
+			),
+			'remove_actions'           => array(
+				'wp_head' => array(
+					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+				),
+			),
 			'add_nav_menu_styles'      => array(),
 			'add_nav_menu_toggle'      => array(),
 			'add_nav_sub_menu_buttons' => array(),
@@ -203,6 +232,35 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 		}
 		// phpcs:enable WordPress.WP.I18n.TextDomainMismatch
+	}
+
+	/**
+	 * Dequeue scripts.
+	 *
+	 * @param string[] $handles Handles, where each item value is the script handle.
+	 */
+	public static function dequeue_scripts( $handles = array() ) {
+		add_action( 'wp_enqueue_scripts', function() use ( $handles ) {
+			foreach ( $handles as $handle ) {
+				wp_dequeue_script( $handle );
+			}
+		}, PHP_INT_MAX );
+	}
+
+	/**
+	 * Remove actions.
+	 *
+	 * @param array $actions Actions, with action name as key and value being callback.
+	 */
+	public static function remove_actions( $actions = array() ) {
+		foreach ( $actions as $action => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$priority = has_action( $action, $callback );
+				if ( false !== $priority ) {
+					remove_action( $action, $callback, $priority );
+				}
+			}
+		}
 	}
 
 	/**

@@ -318,6 +318,9 @@ class AMP_Theme_Support {
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header' ), 10, 3 );
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
+		} );
 
 		// @todo Add character conversion.
 	}
