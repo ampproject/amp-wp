@@ -1290,12 +1290,13 @@ class AMP_Theme_Support {
 	 * @return string $html Filtered markup.
 	 */
 	public static function conditionally_output_header( $html, $header, $atts ) {
+		unset( $header );
 		if ( ! is_header_video_active() ) {
 			return $html;
 		};
 
 		if ( ! has_header_video() ) {
-			return self::output_header_image( $atts );
+			return AMP_HTML_Utils::build_tag( 'amp-img', $atts );
 		}
 
 		return self::output_header_video( $atts );
@@ -1304,13 +1305,10 @@ class AMP_Theme_Support {
 	/**
 	 * Replace the header image markup with a header video.
 	 *
-	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
-	 * So in order for the header video to display,
-	 * this replaces the markup of the header image.
-	 *
 	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L78
+	 *
 	 * @param array $atts The header tag attributes array.
 	 * @return string $html Filtered markup.
 	 */
@@ -1331,7 +1329,7 @@ class AMP_Theme_Support {
 		);
 
 		// Create image banner to stay behind the video.
-		$image_header = self::output_header_image( $atts );
+		$image_header = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
 
 		// If the video URL is for YouTube, return an <amp-youtube> element.
 		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
@@ -1360,25 +1358,5 @@ class AMP_Theme_Support {
 		}
 
 		return $image_header . $video_header;
-	}
-
-	/**
-	 * Replace the header image markup with a header image.
-	 *
-	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
-	 * So in order for the header video to display,
-	 * this replaces the markup of the header image.
-	 *
-	 * @since 1.0
-	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
-	 * @param array $atts The image tag attributes.
-	 * @return string $html Filtered markup.
-	 */
-	public static function output_header_image( $atts ) {
-
-		$place_holder = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
-
-		return $place_holder;
-
 	}
 }
