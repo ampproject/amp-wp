@@ -19,6 +19,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Array of flags used to control sanitization.
 	 *
+	 * @since 1.0
 	 * @var array {
 	 *      @type string $stylesheet     Stylesheet slug.
 	 *      @type string $template       Template slug.
@@ -30,6 +31,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Body element.
 	 *
+	 * @since 1.0
 	 * @var DOMElement
 	 */
 	protected $body;
@@ -37,6 +39,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * XPath.
 	 *
+	 * @since 1.0
 	 * @var DOMXPath
 	 */
 	protected $xpath;
@@ -44,12 +47,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Config for features needed by themes.
 	 *
+	 * @since 1.0
 	 * @var array
 	 */
 	protected static $theme_features = array(
 		// Twenty Seventeen.
 		'twentyseventeen' => array(
-			// @todo Add support for sticky nav, that is adjustScrollClass().
 			// @todo Try to implement belowEntryMetaClass().
 			'dequeue_scripts'                     => array(
 				'twentyseventeen-html5', // Only relevant for IE<9.
@@ -66,6 +69,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'force_svg_support'                   => array(),
 			'force_fixed_background_support'      => array(),
 			'add_twentyseventeen_masthead_styles' => array(),
+			'add_twentyseventeen_sticky_nav_menu' => array(),
 			'add_has_header_video_body_class'     => array(),
 			'add_nav_menu_styles'                 => array(),
 			'add_nav_menu_toggle'                 => array(),
@@ -117,6 +121,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Get the acceptable validation errors.
+	 *
+	 * @since 1.0
 	 *
 	 * @param string $template Template.
 	 * @return array Acceptable errors.
@@ -200,6 +206,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Get theme config.
 	 *
+	 * @since 1.0
+	 *
 	 * @param string $theme Theme slug.
 	 * @return array Class names.
 	 */
@@ -260,6 +268,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Find theme features for core theme.
+	 *
+	 * @since 1.0
 	 *
 	 * @param array $args   Args.
 	 * @param bool  $static Static. that is, whether should run during output buffering.
@@ -358,6 +368,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Dequeue scripts.
 	 *
+	 * @since 1.0
+	 *
 	 * @param string[] $handles Handles, where each item value is the script handle.
 	 */
 	public static function dequeue_scripts( $handles = array() ) {
@@ -370,6 +382,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Remove actions.
+	 *
+	 * @since 1.0
 	 *
 	 * @param array $actions Actions, with action name as key and value being callback.
 	 */
@@ -387,6 +401,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Add smooth scrolling from link to target element.
 	 *
+	 * @since 1.0
+	 *
 	 * @param string[] $link_xpaths XPath queries to the links that should smooth scroll.
 	 */
 	public function add_smooth_scrolling( $link_xpaths ) {
@@ -401,6 +417,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Force SVG support, replacing no-svg class name with svg class name.
+	 *
+	 * @since 1.0
 	 *
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/assets/js/global.js#L211-L213
 	 * @link https://caniuse.com/#feat=svg
@@ -419,6 +437,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Force support for fixed background-attachment.
 	 *
+	 * @since 1.0
+	 *
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/assets/js/global.js#L215-L217
 	 * @link https://caniuse.com/#feat=background-attachment
 	 */
@@ -432,6 +452,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Add body class when there is a header video.
 	 *
+	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/a26c24226c6b131a0ed22c722a836c100d3ba254/src/wp-content/themes/twentyseventeen/assets/js/global.js#L244-L247
 	 *
 	 * @param array $args Args.
@@ -457,6 +478,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * This is currently used exclusively for Twenty Seventeen.
 	 *
+	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1687
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1743
 	 */
@@ -469,6 +491,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 * Nevertheless, object-fit does not apply on amp-img and it needs to apply on an actual img.
 		 */
 		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
+			$is_front_page_layout = ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() );
 			ob_start();
 			?>
 			<style>
@@ -516,17 +539,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 
-				/* Emulate adjustHeaderHeight() to set margins of branding in header <https://github.com/WordPress/wordpress-develop/blob/a26c24226c6b131a0ed22c722a836c100d3ba254/src/wp-content/themes/twentyseventeen/assets/js/global.js#L88-L103> */
 				@media screen and (min-width: 48em) {
-					<?php if ( ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() ) ) : ?>
-						.custom-header .site-branding {
-							margin-bottom: 72px; /* navigationOuterHeight */
-						}
-					<?php else : ?>
-						.custom-header {
-							margin-bottom: 72px; /* navigationOuterHeight */
+					/* Note that adjustHeaderHeight() is irrelevant with this change */
+					<?php if ( ! $is_front_page_layout ) : ?>
+						.navigation-top {
+							position: static;
 						}
 					<?php endif; ?>
+
+					/* Initial styles that amp-animations for navigationTopShow and navigationTopHide will override */
+					.navigation-top.site-navigation-fixed {
+						opacity: 0;
+						transform: translateY( -72px );
+					}
 				}
 			</style>
 			<?php
@@ -536,7 +561,94 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Add sticky nav menu to Twenty Seventeen.
+	 *
+	 * This is implemented by cloning the navigation-top element, giving it a fixed position outside of the viewport,
+	 * and then showing it at the top of the window as soon as the original nav begins to get scrolled out of view.
+	 * In order to improve accessibility, the cloned nav gets aria-hidden=true and all of the links get tabindex=-1
+	 * to prevent the keyboard from focusing on elements off the screen; it is not necessary to focus on the elements
+	 * in the fixed nav menu because as soon as the original nav menu is focused then the window is scrolled to the
+	 * top anyway.
+	 *
+	 * @since 1.0
+	 */
+	public function add_twentyseventeen_sticky_nav_menu() {
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $link
+		 * @var DOMElement $navigation_top
+		 * @var DOMElement $navigation_top_fixed
+		 */
+		$navigation_top = $this->xpath->query( '//header[ @id = "masthead" ]//div[ contains( @class, "navigation-top" ) ]' )->item( 0 );
+		if ( ! $navigation_top ) {
+			return;
+		}
+
+		$navigation_top_fixed = $navigation_top->cloneNode( true );
+		$navigation_top_fixed->setAttribute( 'class', $navigation_top_fixed->getAttribute( 'class' ) . ' site-navigation-fixed' );
+
+		$navigation_top_fixed->setAttribute( 'aria-hidden', 'true' );
+		foreach ( $navigation_top_fixed->getElementsByTagName( 'a' ) as $link ) {
+			$link->setAttribute( 'tabindex', '-1' );
+		}
+
+		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
+
+		$position_observer = AMP_DOM_Utils::create_node( $this->dom, 'amp-position-observer', array(
+			'layout'              => 'nodisplay',
+			'intersection-ratios' => 1,
+			'on'                  => implode( ';', array(
+				'exit:navigationTopShow.start',
+				'enter:navigationTopHide.start',
+			) ),
+		) );
+		$navigation_top->appendChild( $position_observer );
+
+		$animations = array(
+			'navigationTopShow' => array(
+				'duration'   => 0,
+				'fill'       => 'both',
+				'animations' => array(
+					'selector'  => '.navigation-top.site-navigation-fixed',
+					'media'     => '(min-width: 48em)',
+					'keyframes' => array(
+						'opacity'   => 1.0,
+						'transform' => 'translateY( 0 )',
+					),
+				),
+			),
+			'navigationTopHide' => array(
+				'duration'   => 0,
+				'fill'       => 'both',
+				'animations' => array(
+					'selector'  => '.navigation-top.site-navigation-fixed',
+					'media'     => '(min-width: 48em)',
+					'keyframes' => array(
+						'opacity'   => 0.0,
+						'transform' => 'translateY( -72px )',
+					),
+				),
+			),
+		);
+
+		foreach ( $animations as $animation_id => $animation ) {
+			$amp_animation   = AMP_DOM_Utils::create_node( $this->dom, 'amp-animation', array(
+				'id'     => $animation_id,
+				'layout' => 'nodisplay',
+			) );
+			$position_script = $this->dom->createElement( 'script' );
+			$position_script->setAttribute( 'type', 'application/json' );
+			$position_script->appendChild( $this->dom->createTextNode( wp_json_encode( $animation ) ) );
+			$amp_animation->appendChild( $position_script );
+			$this->body->appendChild( $amp_animation );
+		}
+	}
+
+	/**
 	 * Add styles for the nav menu specifically to deal with AMP running in a no-js context.
+	 *
+	 * @since 1.0
 	 *
 	 * @param array $args Args.
 	 */
@@ -683,6 +795,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Ensure that JS-only nav menu styles apply to AMP as well since even though scripts are not allowed, there are AMP-bind implementations.
 	 *
+	 * @since 1.0
+	 *
 	 * @param array $args Args.
 	 */
 	public function add_nav_menu_toggle( $args = array() ) {
@@ -734,6 +848,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Add buttons for nav sub-menu items.
 	 *
+	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/a26c24226c6b131a0ed22c722a836c100d3ba254/src/wp-content/themes/twentyseventeen/assets/js/navigation.js#L11-L43
 	 *
 	 * @param array $args Args.
