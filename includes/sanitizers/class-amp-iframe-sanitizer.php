@@ -153,6 +153,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
+				case 'scrolling':
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
