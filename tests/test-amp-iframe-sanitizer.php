@@ -50,7 +50,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 			'iframe_with_blacklisted_attribute' => array(
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" scrolling="auto"></iframe>',
-				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
+				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" scrolling="auto" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
 			),
 
 			'iframe_with_sizes_attribute_is_overridden' => array(
