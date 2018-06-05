@@ -11,6 +11,13 @@
 class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 	/**
+	 * The mock Site Icon value to use in a filter.
+	 *
+	 * @var string
+	 */
+	const MOCK_SITE_ICON = 'https://example.com/new-site-icon.jpg';
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
@@ -80,6 +87,17 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10 );
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ) );
+
+		// Now check with theme support added (in paired mode).
+		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
+		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 	}
 
 	/**
@@ -94,6 +112,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
+		$add_anchor_fragment = function( $url ) {
+			return $url . '#anchor';
+		};
+
 		$drafted_post   = $this->factory()->post->create( array(
 			'post_name'   => 'draft',
 			'post_status' => 'draft',
@@ -107,10 +129,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_status' => 'publish',
 			'post_type'   => 'page',
 		) );
-
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+
+		add_filter( 'post_link', $add_anchor_fragment );
+		$this->assertStringEndsWith( '/amp/#anchor', amp_get_permalink( $published_post ) );
+		remove_filter( 'post_link', $add_anchor_fragment );
 
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
@@ -121,6 +146,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10 );
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		remove_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10 );
+
+		// Now check with theme support added (in paired mode).
+		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+
+		// Make sure that if permalink has anchor that it is persists.
+		add_filter( 'post_link', $add_anchor_fragment );
+		$this->assertStringEndsWith( '/?amp#anchor', amp_get_permalink( $published_post ) );
 	}
 
 	/**
@@ -155,6 +195,33 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function.
+	 *
+	 * @covers \is_amp_endpoint()
+	 */
+	public function test_is_amp_endpoint() {
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Legacy query var.
+		set_query_var( amp_get_slug(), '' );
+		$this->assertTrue( is_amp_endpoint() );
+		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Paired theme support.
+		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		$_GET['amp'] = '';
+		$this->assertTrue( is_amp_endpoint() );
+		unset( $_GET['amp'] );
+		$this->assertFalse( is_amp_endpoint() );
+		remove_theme_support( 'amp' );
+
+		// Native theme support.
+		add_theme_support( 'amp' );
+		$this->assertTrue( is_amp_endpoint() );
 	}
 
 	/**
@@ -381,8 +448,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_schemaorg_metadata() {
 		update_option( 'blogname', 'Foo' );
+		$publisher_type     = 'Organization';
+		$logo_type          = 'ImageObject';
 		$expected_publisher = array(
-			'@type' => 'Organization',
+			'@type' => $publisher_type,
 			'name'  => 'Foo',
 		);
 
@@ -401,13 +470,122 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_author' => $user_id,
 		) );
 
-		// Test non-singular.
+		// Test non-singular, with no publisher logo.
 		$this->go_to( home_url() );
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
 		$this->assertArrayNotHasKey( '@type', $metadata );
 		$this->assertArrayHasKey( 'publisher', $metadata );
 		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+
+		// Test the custom_logo as the publisher logo.
+		$custom_logo_src    = 'example/custom-logo.jpeg';
+		$custom_logo_height = 45;
+		$custom_logo_width  = 600;
+		$custom_logo_id     = $this->factory()->attachment->create_object(
+			$custom_logo_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_logo_img  = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
+
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $custom_logo_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width,
+			),
+			$metadata['publisher']['logo']
+		);
+		set_theme_mod( 'custom_logo', null );
+
+		// Test the site icon as the publisher logo.
+		$site_icon_src          = 'foo/site-icon.jpeg';
+		$site_icon_id           = $this->factory()->attachment->create_object(
+			$site_icon_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_site_icon_img = wp_get_attachment_image_src( $site_icon_id, 'full', false );
+
+		update_option( 'site_icon', $site_icon_id );
+		$expected_schema_site_icon = array(
+			'@type'  => $logo_type,
+			'height' => 32,
+			'url'    => $expected_site_icon_img[0],
+			'width'  => 32,
+		);
+		$metadata                  = amp_get_schemaorg_metadata();
+		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
+		update_option( 'site_icon', null );
+
+		/**
+		 * Test the publisher logo when the Custom Logo naturally has too much height, a common scenario.
+		 *
+		 * It's expected that the URL is the same,
+		 * but the height should be 60, the maximum height for the schema.org publisher logo.
+		 * And the width should be proportional to the new height.
+		 */
+		$custom_logo_excessive_height = 250;
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_excessive_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		update_option( 'site_icon', $site_icon_id );
+		$metadata   = amp_get_schemaorg_metadata();
+		$max_height = 60;
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $max_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width * $max_height / $custom_logo_excessive_height, // Proportional to downsized height.
+			),
+			$metadata['publisher']['logo']
+		);
+		set_theme_mod( 'custom_logo', null );
+		update_option( 'site_icon', null );
+
+		/**
+		 * Test that the 'amp_site_icon_url' filter also applies to the Custom Logo.
+		 *
+		 * Before, this only applied to the Site Icon, as that was the only possible schema.org publisher logo.
+		 * But now that the Custom Logo is preferred, this filter should also apply to that.
+		 */
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		add_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo']['url'] );
+		remove_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		set_theme_mod( 'custom_logo', null );
 
 		// Test page.
 		$this->go_to( get_permalink( $page_id ) );
@@ -459,5 +637,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
+	}
+
+	/**
+	 * Get a mock publisher logo URL, to test that the filter works as expected.
+	 *
+	 * @param string $site_icon The publisher logo in the schema.org data.
+	 * @return string $site_icon The filtered publisher logo in the schema.org data.
+	 */
+	public static function mock_site_icon( $site_icon ) {
+		unset( $site_icon );
+		return self::MOCK_SITE_ICON;
 	}
 }

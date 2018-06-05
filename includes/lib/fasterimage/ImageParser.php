@@ -57,6 +57,8 @@ class ImageParser
                 return $this->parseSizeForPSD();
             case 'webp':
                 return $this->parseSizeForWebp();
+            case 'svg':
+                return $this->parseSizeForSvg();
         }
 
         return null;
@@ -133,7 +135,13 @@ class ImageParser
                 case "MM":
                     return $this->type = 'tiff';
                 default:
-                    return false;
+                    $this->stream->resetPointer();
+                    $markup = $this->stream->read( 1024 );
+                    if ( false !== strpos( $markup, '<svg' ) ) {
+                        $this->type = 'svg';
+                    } else {
+                        return false;
+                    }
             }
         }
 
@@ -343,6 +351,39 @@ class ImageParser
                 return null;
         }
 
+    }
+
+    /**
+     * Parse size for SVG.
+     *
+     * @return array|null Size or null.
+     */
+    protected function parseSizeForSvg()
+    {
+        $this->stream->resetPointer();
+        $markup = $this->stream->read( 1024 );
+        if ( ! preg_match( '#<svg.*?>#s', $markup, $matches ) ) {
+            return null;
+        }
+        $svg_start_tag = $matches[0];
+        $width = null;
+        $height = null;
+        if ( preg_match( '/\swidth=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
+            $width = floatval( $matches[2] );
+        }
+        if ( preg_match( '/\sheight=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
+            $height = floatval( $matches[2] );
+        }
+        if ( $width && $height ) {
+            return [ $width, $height ];
+        }
+        if ( preg_match( '/\sviewBox=([\'"])[^\1]*(?:,|\s)+(?P<width>\d+(?:\.\d+)?)(?:px)?(?:,|\s)+(?P<height>\d+(?:\.\d+)?)(?:px)?\s*\1/', $svg_start_tag, $matches ) ) {
+            return [
+                floatval( $matches['width'] ),
+                floatval( $matches['height'] )
+            ];
+        }
+        return null;
     }
 
     /**

@@ -1,0 +1,31 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "modules": false
+      }
+    ]
+  ],
+  "plugins": [
+    "transform-object-rest-spread",
+    [
+      "transform-react-jsx",
+      {
+        "pragma": "wp.element.createElement"
+      }
+    ],
+    [
+      "@wordpress/babel-plugin-makepot",
+      {
+        "output": "languages/amp-js.pot"
+      }
+    ]
+  ],
+  "env": {
+    "default": {
+      "plugins": ["transform-runtime"]
+    },
+    "production": {}
+  }
+}

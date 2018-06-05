@@ -113,6 +113,13 @@ add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 
 function amp_after_setup_theme() {
 	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
 
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
@@ -139,19 +146,20 @@ function amp_init() {
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
-	AMP_Validation_Utils::init();
 	AMP_Theme_Support::init();
 	AMP_Post_Type_Support::add_post_type_support();
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
-	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
+	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) && version_compare( JETPACK__VERSION, '6.2-alpha', '<' ) ) {
 		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
 
@@ -182,6 +190,7 @@ function amp_force_query_var_value( $query_vars ) {
  * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
  * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
  *
+ * @deprecated This function is not used when 'amp' theme support is added.
  * @global WP_Query $wp_query
  * @since 0.2
  * @return void
@@ -310,6 +319,7 @@ function amp_add_frontend_actions() {
  * Add post template actions.
  *
  * @since 0.2
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
 	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
@@ -321,15 +331,18 @@ function amp_add_post_template_actions() {
  * Add action to do post template rendering at template_redirect action.
  *
  * @since 0.2
+ * @since 1.0 The amp_render() function is called at template_redirect action priority 11 instead of priority 10.
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_prepare_render() {
-	add_action( 'template_redirect', 'amp_render' );
+	add_action( 'template_redirect', 'amp_render', 11 );
 }
 
 /**
  * Render AMP for queried post.
  *
  * @since 0.1
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_render() {
 	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
@@ -344,6 +357,8 @@ function amp_render() {
  * Render AMP post template.
  *
  * @since 0.5
+ * @deprecated This function is not used when 'amp' theme support is added.
+ *
  * @param WP_Post|int $post Post.
  * @global WP_Query $wp_query
  */
@@ -375,6 +390,8 @@ function amp_render_post( $post ) {
 
 	/**
 	 * Fires before rendering a post in AMP.
+	 *
+	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
 	 *
 	 * @since 0.2
 	 *
@@ -411,9 +428,11 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
  * Redirects the old AMP URL to the new AMP URL.
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
  *
- * @param  string $link New URL of the post.
+ * @since 0.5
+ * @deprecated This function is irrelevant when 'amp' theme support is added.
  *
- * @return string $link URL to be redirected.
+ * @param string $link New URL of the post.
+ * @return string URL to be redirected.
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 

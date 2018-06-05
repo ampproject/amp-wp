@@ -16,6 +16,10 @@ To install the `pre-commit` hook, do `bash dev-lib/install-pre-commit-hook.sh`.
 
 Note that pull requests will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint and (for now) JSCS and JSHint.
 
+## Modifying JavaScript for Blocks
+
+To edit JavaScript code which is built/complied, run `npm run dev` to watch the files which Webpack will build. These complied files are excluded from version control but they are included in the release packages.
+
 ## Creating a Plugin Build
 
 To create a build of the plugin for installing in WordPress as a ZIP package, do:
@@ -27,7 +31,15 @@ npm install # (if you haven't done so yet)
 npm run build
 ```
 
-This will create an `amp.zip` in the plugin directory which you can install. The contents of this ZIP are also located in the `build` directory which you can `rsync` somewhere as well. 
+This will create an `amp.zip` in the plugin directory which you can install. The contents of this ZIP are also located in the `build` directory which you can `rsync` somewhere as well.
+
+TO create a build of the plugin as it will be deployed to WordPress.org, run:
+
+```bash
+npm run build-release
+```
+
+Note that this will currently take much longer than a regular build because it generates the files required for translation. You also must have WP-CLI installed with the [`i18n-command` package](https://github.com/wp-cli/i18n-command).
 
 ## Updating Allowed Tags And Attributes
 
@@ -94,7 +106,7 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
-1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
+1. Do `npm run build-release` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 2. Bump plugin versions in `package.json` (×1), `package-lock.json` (×1, just do `npm install` first), `composer.json` (×1), and in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 3. Add changelog entry to readme.
 4. Draft blog post about the new release.
