@@ -446,6 +446,195 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data for testing CSS hack removal.
+	 *
+	 * @return array
+	 */
+	public function get_amp_css_hacks_data() {
+		return array(
+			array(
+				'.selector { !property: value; }',
+			),
+			array(
+				'.selector { $property: value; }',
+			),
+			array(
+				'.selector { &property: value; }',
+			),
+			array(
+				'.selector { *property: value; }',
+			),
+			array(
+				'.selector { )property: value; }',
+			),
+			array(
+				'.selector { =property: value; }',
+			),
+			array(
+				'.selector { %property: value; }',
+			),
+			array(
+				'.selector { +property: value; }',
+			),
+			array(
+				'.selector { @property: value; }',
+			),
+			array(
+				'.selector { ,property: value; }',
+			),
+			array(
+				'.selector { .property: value; }',
+			),
+			array(
+				'.selector { /property: value; }',
+			),
+			array(
+				'.selector { `property: value; }',
+			),
+			array(
+				'.selector { ]property: value; }',
+			),
+			array(
+				'.selector { #property: value; }',
+			),
+			array(
+				'.selector { ~property: value; }',
+			),
+			array(
+				'.selector { ?property: value; }',
+			),
+			array(
+				'.selector { :property: value; }',
+			),
+			array(
+				'.selector { |property: value; }',
+			),
+			array(
+				'_::selection, .selector:not([attr*=\'\']) {}',
+			),
+			array(
+				':root .selector {}',
+			),
+			array(
+				'body:last-child .selector {}',
+			),
+			array(
+				'body:nth-of-type(1) .selector {}',
+			),
+			array(
+				'body:first-of-type .selector {}',
+			),
+			array(
+				'.selector:not([attr*=\'\']) {}',
+			),
+			array(
+				'.selector:not(*:root) {}',
+			),
+			array(
+				'.selector:not(*:root) {}',
+			),
+			array(
+				'body:empty .selector {}',
+			),
+			array(
+				'body:last-child .selector, x:-moz-any-link {}',
+			),
+			array(
+				'body:last-child .selector, x:-moz-any-link, x:default {}',
+			),
+			array(
+				'body:not(:-moz-handler-blocked) .selector {}',
+			),
+			array(
+				'_::-moz-progress-bar, body:last-child .selector {}',
+			),
+			array(
+				'_::-moz-range-track, body:last-child .selector {}',
+			),
+			array(
+				'_:-moz-tree-row(hover), .selector {}',
+			),
+			array(
+				'_::selection, .selector:not([attr*=\'\']) {}',
+			),
+			array(
+				'* html .selector  {}',
+			),
+			array(
+				'.unused-class.selector {}',
+			),
+			array(
+				'html > body .selector {}',
+			),
+			array(
+				'.selector, {}',
+			),
+			array(
+				'*:first-child+html .selector {}',
+			),
+			array(
+				'.selector, x:-IE7 {}',
+			),
+			array(
+				'*+html .selector {}',
+			),
+			array(
+				'body*.selector {}',
+			),
+			array(
+				'.selector\ {}',
+			),
+			array(
+				'html > /**/ body .selector {}',
+			),
+			array(
+				'head ~ /**/ body .selector {}',
+			),
+			array(
+				'_::selection, .selector:not([attr*=\'\']) {}',
+			),
+			array(
+				':root .selector {}',
+			),
+			array(
+				'body:last-child .selector {}',
+			),
+			array(
+				'body:nth-of-type(1) .selector {}',
+			),
+			array(
+				'body:first-of-type .selector {}',
+			),
+			array(
+				'.selector:not([attr*=\'\']) {}',
+			),
+		);
+	}
+
+	/**
+	 * Test removal of IE and Other Browser CSS Hacks
+	 *
+	 * @dataProvider get_amp_css_hacks_data
+	 * @param string $input  Hack input CSS rule.
+	 */
+	public function test_browser_css_hacks( $input ) {
+		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body></body></html>";
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'never',
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertEmpty( $actual_stylesheets[0] );
+	}
+
+	/**
 	 * Test handling of stylesheets with @font-face that have data: url source.
 	 *
 	 * Also confirm that class-based tree-shaking is working.
