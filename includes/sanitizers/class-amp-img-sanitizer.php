@@ -47,6 +47,20 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private static $anim_extension = '.gif';
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'img' => array(
+				'amp-img',
+				'amp-anim',
+			),
+		);
+	}
+
+	/**
 	 * Sanitize the <img> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
@@ -115,15 +129,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'src':
-				case 'alt':
-				case 'class':
-				case 'srcset':
-				case 'on':
-				case 'attribution':
-					$out[ $name ] = $value;
-					break;
-
 				case 'width':
 				case 'height':
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
@@ -133,7 +138,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out['layout'] = $value;
 					break;
 
+				case 'data-amp-noloading':
+					$out['noloading'] = $value;
+					break;
+
 				default:
+					$out[ $name ] = $value;
 					break;
 			}
 		}
@@ -222,12 +232,21 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMNode $node The DOMNode to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
+
+		$amp_data       = $this->get_data_amp_attributes( $node );
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+		$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
+		$old_attributes = $this->maybe_add_lightbox_attributes( $old_attributes, $node );
+
 		$new_attributes = $this->filter_attributes( $old_attributes );
+		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
+		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
+
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
 			$new_attributes['layout'] = 'intrinsic';
 		}
+
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 
@@ -238,6 +257,33 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$new_node = $this->handle_centering( $new_node );
 		$node->parentNode->replaceChild( $new_node, $node );
+	}
+
+	/**
+	 * Set lightbox attributes.
+	 *
+	 * @param array   $attributes Array of attributes.
+	 * @param DomNode $node Array of AMP attributes.
+	 * @return array Updated attributes.
+	 */
+	private function maybe_add_lightbox_attributes( $attributes, $node ) {
+		$parent_node = $node->parentNode;
+		if ( 'figure' !== $parent_node->tagName ) {
+			return $attributes;
+		}
+
+		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+
+		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
+			$attributes['data-amp-lightbox'] = '';
+			$attributes['on']                = 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID;
+			$attributes['role']              = 'button';
+			$attributes['tabindex']          = 0;
+
+			$this->maybe_add_amp_image_lightbox_node();
+		}
+
+		return $attributes;
 	}
 
 	/**

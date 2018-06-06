@@ -8,14 +8,26 @@
 /**
  * Get the slug used in AMP for the query var, endpoint, and post type support.
  *
- * The return value can be overridden by previously defining a AMP_QUERY_VAR
+ * This function always returns 'amp' when 'amp' theme support is present. Otherwise,
+ * the return value can be overridden by previously defining a AMP_QUERY_VAR
  * constant or by adding a 'amp_query_var' filter, but *warning* this ability
  * may be deprecated in the future. Normally the slug should be just 'amp'.
  *
  * @since 0.7
+ * @since 1.0 The return value is always 'amp' when 'amp' theme support is present, and the 'amp_query_var' filter no longer applies.
+ *
  * @return string Slug used for query var, endpoint, and post type support.
  */
 function amp_get_slug() {
+	if ( current_theme_supports( 'amp' ) ) {
+		if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+			define( 'AMP_QUERY_VAR', 'amp' );
+		} elseif ( 'amp' !== AMP_QUERY_VAR ) {
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'The AMP_QUERY_VAR constant should only be defined as "amp" when "amp" theme support is present.', 'amp' ), '1.0' );
+		}
+		return 'amp';
+	}
+
 	if ( defined( 'AMP_QUERY_VAR' ) ) {
 		return AMP_QUERY_VAR;
 	}
@@ -26,6 +38,8 @@ function amp_get_slug() {
 	 * Warning: This filter may become deprecated.
 	 *
 	 * @since 0.3.2
+	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
+	 *
 	 * @param string $query_var The AMP query variable.
 	 */
 	$query_var = apply_filters( 'amp_query_var', 'amp' );
@@ -39,6 +53,7 @@ function amp_get_slug() {
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
  * @since 0.1
+ * @since 1.0 The query var 'amp' is always used exclusively when 'amp' theme support is present; the 'amp_pre_get_permalink' and 'amp_get_permalink' filters do not apply.
  *
  * @param int $post_id Post ID.
  *
@@ -46,12 +61,22 @@ function amp_get_slug() {
  */
 function amp_get_permalink( $post_id ) {
 
+	// When theme support is present, the plain query var should always be used.
+	if ( current_theme_supports( 'amp' ) ) {
+		$permalink = get_permalink( $post_id );
+		if ( ! amp_is_canonical() ) {
+			$permalink = add_query_arg( 'amp', '', $permalink );
+		}
+		return $permalink;
+	}
+
 	/**
 	 * Filters the AMP permalink to short-circuit normal generation.
 	 *
 	 * Returning a non-false value in this filter will cause the `get_permalink()` to get called and the `amp_get_permalink` filter to not apply.
 	 *
 	 * @since 0.4
+	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 	 *
 	 * @param false $url     Short-circuited URL.
 	 * @param int   $post_id Post ID.
@@ -62,15 +87,31 @@ function amp_get_permalink( $post_id ) {
 		return $pre_url;
 	}
 
+	$permalink = get_permalink( $post_id );
+
 	if ( amp_is_canonical() ) {
-		$amp_url = get_permalink( $post_id );
+		$amp_url = $permalink;
 	} else {
-		$parsed_url = wp_parse_url( get_permalink( $post_id ) );
-		$structure  = get_option( 'permalink_structure' );
-		if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', get_permalink( $post_id ) );
+		$parsed_url    = wp_parse_url( get_permalink( $post_id ) );
+		$structure     = get_option( 'permalink_structure' );
+		$use_query_var = (
+			// If pretty permalinks aren't available, then query var must be used.
+			empty( $structure )
+			||
+			// If there are existing query vars, then always use the amp query var as well.
+			! empty( $parsed_url['query'] )
+			||
+			// If the post type is hierarchical then the /amp/ endpoint isn't available.
+			is_post_type_hierarchical( get_post_type( $post_id ) )
+		);
+		if ( $use_query_var ) {
+			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
 		} else {
-			$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
+			$amp_url = preg_replace( '/#.*/', '', $permalink );
+			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
+			if ( ! empty( $parsed_url['fragment'] ) ) {
+				$amp_url .= '#' . $parsed_url['fragment'];
+			}
 		}
 	}
 
@@ -78,6 +119,7 @@ function amp_get_permalink( $post_id ) {
 	 * Filters AMP permalink.
 	 *
 	 * @since 0.2
+	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 	 *
 	 * @param false $amp_url AMP URL.
 	 * @param int   $post_id Post ID.
@@ -166,7 +208,7 @@ function post_supports_amp( $post ) {
 /**
  * Are we currently on an AMP URL?
  *
- * Note: will always return `false` if called before the `parse_query` hook.
+ * @since 1.0 This function can be called before the `parse_query` action because the 'amp' query var is specifically and exclusively used when 'amp' theme support is added.
  *
  * @return bool Whether it is the AMP endpoint.
  */
@@ -175,15 +217,17 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	if ( amp_is_canonical() ) {
+	// When 'amp' theme support is (or will be added) then these are the conditions that are key to be checked.
+	if ( amp_is_canonical() || isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: CSRF OK.
 		return true;
 	}
 
-	if ( 0 === did_action( 'parse_query' ) ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
+	// Condition for non-theme support when /amp/ endpoint is used.
+	if ( false !== get_query_var( amp_get_slug(), false ) ) {
+		return true;
 	}
 
-	return false !== get_query_var( amp_get_slug(), false );
+	return false;
 }
 
 /**
@@ -447,6 +491,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Reddit_Embed_Handler'      => array(),
 			'AMP_Tumblr_Embed_Handler'      => array(),
 			'AMP_Gallery_Embed_Handler'     => array(),
+			'AMP_Gfycat_Embed_Handler'      => array(),
 			'WPCOM_AMP_Polldaddy_Embed'     => array(),
 		),
 		$post
@@ -479,6 +524,10 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers = apply_filters( 'amp_content_sanitizers',
 		array(
+			'AMP_Core_Theme_Sanitizer'        => array(
+				'template'   => get_template(),
+				'stylesheet' => get_stylesheet(),
+			),
 			'AMP_Img_Sanitizer'               => array(),
 			'AMP_Form_Sanitizer'              => array(),
 			'AMP_Comments_Sanitizer'          => array(),
@@ -489,6 +538,10 @@ function amp_get_content_sanitizers( $post = null ) {
 			'AMP_Iframe_Sanitizer'            => array(
 				'add_placeholder' => true,
 			),
+			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+				'carousel_required' => ! current_theme_supports( 'amp' ), // For back-compat.
+			),
+			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
 			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 		),
@@ -580,23 +633,66 @@ function amp_get_schemaorg_metadata() {
 		),
 	);
 
+	/*
+	 * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
+	 * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
+	 * would not be acceptable, even though it fits in the 600x60px rectangle."
+	 * See <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
+	 */
+	$max_logo_width  = 600;
+	$max_logo_height = 60;
+	$custom_logo_id  = get_theme_mod( 'custom_logo' );
+	$schema_img      = array();
+
+	if ( has_custom_logo() && $custom_logo_id ) {
+		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, array( $max_logo_width, $max_logo_height ), false );
+		if ( $custom_logo_img ) {
+			// @todo Warning: The width/height returned may not actually be physically the $max_logo_width and $max_logo_height for the image returned.
+			$schema_img = array(
+				'url'    => $custom_logo_img[0],
+				'width'  => $custom_logo_img[1],
+				'height' => $custom_logo_img[2],
+			);
+		}
+	}
+
+	// Try Site Icon, though it is not ideal because "The logo should be a rectangle, not a square." per <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
+	if ( empty( $schema_img['url'] ) ) {
+		/*
+		 * Note that AMP_Post_Template::SITE_ICON_SIZE is used and not $max_logo_height because 32px is the largest
+		 * size that is defined in \WP_Site_Icon::$site_icon_sizes which is less than 60px. It may be a good idea
+		 * to add a site_icon_image_sizes filter which appends 60 to the list of sizes, but this will only help
+		 * when adding a new site icon and it would be irrelevant when a custom logo is present, per above.
+		 */
+		$schema_img = array(
+			'url'    => get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ),
+			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
+			'height' => AMP_Post_Template::SITE_ICON_SIZE,
+		);
+	}
+
 	/**
-	 * Filters the site icon used in AMP responses.
+	 * Filters the publisher logo URL in the schema.org data.
 	 *
-	 * In general the `get_site_icon_url` filter should be used instead.
+	 * Previously, this only filtered the Site Icon, as that was the only possible schema.org publisher logo.
+	 * But the Custom Logo is now the preferred publisher logo, if it exists and its dimensions aren't too big.
 	 *
 	 * @since 0.3
-	 * @todo Why is the size set to 32px?
 	 *
-	 * @param string $site_icon_url
+	 * @param string $schema_img_url URL of the publisher logo, either the Custom Logo or the Site Icon.
 	 */
-	$site_icon_url = apply_filters( 'amp_site_icon_url', get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ) );
-	if ( $site_icon_url ) {
-		$metadata['publisher']['logo'] = array(
-			'@type'  => 'ImageObject',
-			'url'    => $site_icon_url,
-			'height' => AMP_Post_Template::SITE_ICON_SIZE,
-			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
+	$filtered_schema_img_url = apply_filters( 'amp_site_icon_url', $schema_img['url'] );
+	if ( $filtered_schema_img_url !== $schema_img['url'] ) {
+		$schema_img['url'] = $filtered_schema_img_url;
+		unset( $schema_img['width'], $schema_img['height'] ); // Clear width/height since now unknown, and not required.
+	}
+
+	if ( ! empty( $schema_img['url'] ) ) {
+		$metadata['publisher']['logo'] = array_merge(
+			array(
+				'@type' => 'ImageObject',
+			),
+			$schema_img
 		);
 	}
 

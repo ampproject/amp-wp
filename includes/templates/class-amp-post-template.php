@@ -113,7 +113,7 @@ class AMP_Post_Template {
 
 			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
 			'canonical_url'         => get_permalink( $this->ID ),
-			'home_url'              => home_url(),
+			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
 
 			'html_tag_attributes'   => array(),
