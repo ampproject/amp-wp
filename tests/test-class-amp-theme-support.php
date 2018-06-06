@@ -130,19 +130,104 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test redirect_canonical_amp.
+	 * Test ensure_proper_amp_location for canonical.
 	 *
-	 * @covers AMP_Theme_Support::redirect_canonical_amp()
+	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
 	 */
-	public function test_redirect_canonical_amp() {
-		set_query_var( amp_get_slug(), 1 );
+	public function test_ensure_proper_amp_location_canonical() {
+		add_theme_support( 'amp' );
+		$e = null;
+
+		// Already canonical.
+		$_SERVER['REQUEST_URI'] = '/foo/bar/';
+		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+
+		// URL query param.
+		$_GET[ amp_get_slug() ] = '';
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
 		try {
-			AMP_Theme_Support::redirect_canonical_amp();
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		// wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Endpoint.
+		unset( $_GET[ amp_get_slug() ] );
+		set_query_var( amp_get_slug(), '' );
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+	}
+
+	/**
+	 * Test ensure_proper_amp_location for paired.
+	 *
+	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
+	 */
+	public function test_ensure_proper_amp_location_paired() {
+		add_theme_support( 'amp', array(
+			'template_dir' => './',
+		) );
+		$e = null;
+
+		// URL query param, no redirection.
+		$_GET[ amp_get_slug() ] = '';
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
+		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+
+		// Endpoint, redirect.
+		unset( $_GET[ amp_get_slug() ] );
+		set_query_var( amp_get_slug(), '' );
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+	}
+
+	/**
+	 * Test redirect_ampless_url.
+	 *
+	 * @covers AMP_Theme_Support::redirect_ampless_url()
+	 */
+	public function test_redirect_ampless_url() {
+		$e = null;
+
+		// Try AMP URL param.
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
+		try {
+			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
 		$this->assertTrue( isset( $e ) );
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Try AMP URL endpoint.
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Make sure that if the URL doesn't have AMP that there should be no redirect.
+		$_SERVER['REQUEST_URI'] = '/foo/bar';
+		$this->assertFalse( AMP_Theme_Support::redirect_ampless_url() );
 	}
 
 	/**
