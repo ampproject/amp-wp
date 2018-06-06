@@ -78,7 +78,7 @@ class AMP_Options_Menu {
 
 		add_settings_field(
 			'theme_support',
-			__( 'Theme Support', 'amp' ),
+			__( 'Template Mode', 'amp' ),
 			array( $this, 'render_theme_support' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
