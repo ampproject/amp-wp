@@ -810,12 +810,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$args
 		);
 
-		$nav_el = $this->dom->getElementById( $args['nav_container_id'] );
+		$nav_el    = $this->dom->getElementById( $args['nav_container_id'] );
+		$button_el = $this->xpath->query( $args['menu_button_xpath'] )->item( 0 );
 		if ( ! $nav_el ) {
+			if ( $button_el ) {
+
+				// Remove the button since it won't be used.
+				$button_el->parentNode->removeChild( $button_el );
+			}
 			return;
 		}
 
-		$button_el = $this->xpath->query( $args['menu_button_xpath'] )->item( 0 );
 		if ( ! $button_el ) {
 			return;
 		}
