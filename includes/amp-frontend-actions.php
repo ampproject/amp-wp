@@ -10,6 +10,7 @@ add_action( 'wp_head', 'amp_frontend_add_canonical' );
 /**
  * Add amphtml link to frontend.
  *
+ * @todo If there is a known amp_invalid_url post for this $amp_url that has unaccepted validation errors then this should output nothing.
  * @todo This function's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
  *
  * @since 0.2

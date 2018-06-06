@@ -312,34 +312,50 @@ class AMP_Invalid_URL_Post_Type {
 		 */
 		$stored_validation_errors = array();
 
+		// Prevent Kses from corrupting JSON in description.
+		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
+		if ( false !== $has_pre_term_description_filter ) {
+			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
 		$terms = array();
 		foreach ( $validation_errors as $data ) {
-			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
-			$term_slug = $term_data['slug'];
+			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $data );
+			$term_data    = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
+			$term_slug    = $term_data['slug'];
+
+			/*
+			 * If the sanitization for the error is forced, make sure the term is created/updated with that group since
+			 * the user will not be able to change it from NEW to ACCEPTED or REJECTED.
+			 */
+			if ( $sanitization['forced'] ) {
+				$term_data['term_group'] = $sanitization['status'];
+			}
+
 			if ( ! isset( $terms[ $term_slug ] ) ) {
 
 				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
 				$term = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 				if ( ! ( $term instanceof WP_Term ) ) {
-					$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
-					if ( false !== $has_pre_term_description_filter ) {
-						remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
-					}
 					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
-					if ( false !== $has_pre_term_description_filter ) {
-						add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
-					}
 					if ( is_wp_error( $r ) ) {
 						continue;
 					}
 					$term_id = $r['term_id'];
 					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
 					$term = get_term( $term_id );
+				} elseif ( $term->term_group !== $term_data['term_group'] ) {
+					wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
 				}
 				$terms[ $term_slug ] = $term;
 			}
 
 			$stored_validation_errors[] = compact( 'term_slug', 'data' );
+		}
+
+		// Finish preventing Kses from corrupting JSON in description.
+		if ( false !== $has_pre_term_description_filter ) {
+			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
 		$post_content = wp_json_encode( $stored_validation_errors );
@@ -692,10 +708,10 @@ class AMP_Invalid_URL_Post_Type {
 			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // WPCS: CSRF ok.
 			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // WPCS: CSRF ok.
 			if ( $errors_remain ) {
+				$message = _n( 'The rechecked URL still has unaccepted validation errors.', 'The rechecked URLs still have unaccepted validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'notice-warning';
-				$message = _n( 'The rechecked URL still has blocking validation errors.', 'The rechecked URLs still have validation errors.', $count_urls_tested, 'amp' );
 			} else {
-				$message = _n( 'The rechecked URL has no blocking validation errors.', 'The rechecked URLs have no validation errors.', $count_urls_tested, 'amp' );
+				$message = _n( 'The rechecked URL is free of unaccepted validation errors.', 'The rechecked URLs are free of unaccepted validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'updated';
 			}
 
@@ -773,7 +789,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * Re-check invalid URL post for whether it has blocking validation errors.
 	 *
 	 * @param int|WP_Post $post Post.
-	 * @return array|WP_Error List of blocking validation resukts, or a WP_Error in the case of failure.
+	 * @return array|WP_Error List of blocking validation results, or a WP_Error in the case of failure.
 	 */
 	public static function recheck_post( $post ) {
 		$post = get_post( $post );
@@ -963,7 +979,7 @@ class AMP_Invalid_URL_Post_Type {
 	public static function print_validation_errors_meta_box( $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 
-		$can_serve_amp = 0 === count( array_filter( $validation_errors, function( $validation_error ) {
+		$has_unaccepted_errors = 0 !== count( array_filter( $validation_errors, function( $validation_error ) {
 			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['status'];
 		} ) );
 		?>
@@ -977,13 +993,20 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		</style>
 
-		<?php if ( $can_serve_amp ) : ?>
+		<?php if ( $has_unaccepted_errors ) : ?>
+			<?php if ( amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' ) ) : ?>
+				<div class="notice notice-warning notice-alt inline">
+					<p><?php esc_html_e( 'This URL will be served served as valid AMP but some of the markup will be stripped from the response since it is not valid.', 'amp' ); ?></p>
+				</div>
+			<?php else : ?>
+				<div class="notice notice-error notice-alt inline">
+					<p><?php esc_html_e( 'This URL cannot be served as AMP because it has validation errors which are either new or rejected as being blockers.', 'amp' ); ?></p>
+				</div>
+			<?php endif; ?>
+		<?php else : ?>
+
 			<div class="notice notice-success notice-alt inline">
 				<p><?php esc_html_e( 'This URL can be served as AMP because all validation errors have been accepted as not being blockers.', 'amp' ); ?></p>
-			</div>
-		<?php else : ?>
-			<div class="notice notice-warning notice-alt inline">
-				<p><?php esc_html_e( 'This URL cannot be served as AMP because it has validation errors which are either new or rejected as being blockers.', 'amp' ); ?></p>
 			</div>
 		<?php endif; ?>
 

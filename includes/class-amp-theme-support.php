@@ -96,6 +96,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function init() {
+		self::apply_options();
 		if ( ! current_theme_supports( 'amp' ) ) {
 			return;
 		}
@@ -117,7 +118,7 @@ class AMP_Theme_Support {
 			$args = array_shift( $support );
 			if ( ! is_array( $args ) ) {
 				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list' ) ) ) !== 0 ) {
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', '__added_via_option' ) ) ) !== 0 ) {
 				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
@@ -130,6 +131,28 @@ class AMP_Theme_Support {
 		 * action to template_redirect--the wp action--is used instead.
 		 */
 		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+	}
+
+	/**
+	 * Apply options for whether theme support is enabled via admin and what sanitization is performed by default.
+	 *
+	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
+	 */
+	public static function apply_options() {
+		if ( ! current_theme_supports( 'amp' ) ) {
+			$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+			if ( 'disabled' === $theme_support_option ) {
+				return;
+			}
+
+			$args = array(
+				'__added_via_option' => true,
+			);
+			if ( 'paired' === $theme_support_option ) {
+				$args['template_dir'] = './';
+			}
+			add_theme_support( 'amp', $args );
+		}
 	}
 
 	/**
@@ -1149,6 +1172,8 @@ class AMP_Theme_Support {
 		self::ensure_required_markup( $dom );
 
 		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
+
+			// Note the canonical check will not currently ever be met because dirty AMP is not yet supported; all validation errors will forcibly be sanitized.
 			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 

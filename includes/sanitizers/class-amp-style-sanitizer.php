@@ -26,6 +26,13 @@ use \Sabberworm\CSS\CSSList\Document;
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Error code for tree shaking.
+	 *
+	 * @var string
+	 */
+	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -1869,7 +1876,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $is_too_much_css && $should_tree_shake ) {
 			$should_tree_shake = $this->should_sanitize_validation_error( array(
-				'code' => 'removed_unused_css_rules',
+				'code' => self::TREE_SHAKING_ERROR_CODE,
 			) );
 		}
 

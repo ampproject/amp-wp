@@ -43,8 +43,16 @@ class AMP_Editor_Blocks {
 		if ( function_exists( 'gutenberg_init' ) ) {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
-			add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
-			add_action( 'wp_print_footer_scripts', array( $this, 'print_dirty_amp_scripts' ) );
+
+			/*
+			 * Dirty AMP is currently disabled per <https://github.com/Automattic/amp-wp/issues/1192>.
+			 * Note that when not in native/canonical mode, AMP-specific Gutenberg blocks will not be
+			 * registered for use, and so users will not be likely attempting to serve AMP content in
+			 * non-AMP responses. When/if dirty AMP is allowed, the following can be re-enabled:
+			 *
+			 * add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
+			 * add_action( 'wp_print_footer_scripts', array( $this, 'print_dirty_amp_scripts' ) );
+			*/
 		}
 	}
 

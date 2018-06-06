@@ -159,6 +159,25 @@ class AMP_Validation_Manager {
 			}
 		} );
 
+		// Set sanitization options.
+		if ( amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
+			AMP_Validation_Error_Taxonomy::accept_validation_errors( true, array( 'optional' => true ) );
+		} elseif ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ) {
+			AMP_Validation_Error_Taxonomy::accept_validation_errors(
+				array(
+					AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE => true,
+				),
+				array( 'optional' => true )
+			);
+		}
+
+		// @todo This is not great.
+		// Allow the validation errors to be modified in the admin.
+		AMP_Validation_Error_Taxonomy::$suppress_optional_validation_error_acceptance = true;
+		add_action( 'template_redirect', function() {
+			AMP_Validation_Error_Taxonomy::$suppress_optional_validation_error_acceptance = false;
+		} );
+
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
 		}
@@ -485,7 +504,13 @@ class AMP_Validation_Manager {
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
-		esc_html_e( 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served.', 'amp' );
+		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
+		echo ' ';
+		if ( amp_is_canonical() ) {
+			esc_html_e( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
+		} else {
+			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+		}
 		echo sprintf(
 			' <a href="%s" target="_blank">%s</a>',
 			esc_url( get_edit_post_link( $invalid_url_post ) ),
@@ -1386,6 +1411,7 @@ class AMP_Validation_Manager {
 		$data = wp_json_encode( array(
 			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ), // @todo POT file.
 			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
+			'isCanonical'          => amp_is_canonical(),
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
 	}

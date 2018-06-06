@@ -19,7 +19,8 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		data: {
 			i18n: {},
-			ampValidityRestField: ''
+			ampValidityRestField: '',
+			isCanonical: false
 		},
 
 		/**
@@ -179,7 +180,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
-			noticeMessage += ' ' + wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
+			noticeMessage += ' ';
+			if ( module.data.isCanonical ) {
+				noticeMessage += wp.i18n.__( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
+			} else {
+				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			}
+
 			noticeElement = wp.element.createElement( 'p', {}, [
 				noticeMessage + ' ',
 				ampValidity.review_link && wp.element.createElement(

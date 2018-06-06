@@ -190,7 +190,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function is_validation_error_sanitized( $error ) {
 		$sanitization = self::get_validation_error_sanitization( $error );
-		return self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+		return self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status']; // @todo Change this so when amp_is_canonical() that NEW issues are sanitized by default?
 	}
 
 	/**
@@ -249,55 +249,81 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Whether optionally-accepted validation errors are being suppressed.
+	 *
+	 * @var bool
+	 */
+	public static $suppress_optional_validation_error_acceptance = false;
+
+	/**
 	 * Automatically (forcibly) accept validation errors that arise.
 	 *
 	 * @since 1.0
 	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
 	 *
-	 * @param array $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset.
+	 * @param array|true $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset. If just true, then all validation errors are accepted.
+	 * @param array      $args {
+	 *     Args.
+	 *
+	 *     @var bool $optional Whether the validation errors are accepted via option.
+	 * }
 	 */
-	public static function accept_validation_errors( $acceptable_errors ) {
+	public static function accept_validation_errors( $acceptable_errors, $args = array() ) {
 		if ( empty( $acceptable_errors ) ) {
 			return;
 		}
 
-		/**
-		 * Check if one array is a sparse subset of another array.
-		 *
-		 * @param array $superset Superset array.
-		 * @param array $subset   Subset array.
-		 *
-		 * @return bool Whether subset is contained in superset.
-		 */
-		$is_array_subset = function( $superset, $subset ) use ( &$is_array_subset ) {
-			foreach ( $subset as $key => $subset_value ) {
-				if ( ! isset( $superset[ $key ] ) || gettype( $subset_value ) !== gettype( $superset[ $key ] ) ) {
-					return false;
-				}
-				if ( is_array( $subset_value ) ) {
-					if ( ! $is_array_subset( $superset[ $key ], $subset_value ) ) {
-						return false;
-					}
-				} elseif ( $superset[ $key ] !== $subset_value ) {
-					return false;
-				}
-			}
-			return true;
-		};
+		$args = array_merge(
+			array( 'optional' => false ),
+			$args
+		);
 
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $is_array_subset, $acceptable_errors ) {
+		$optional = ! empty( $args['optional'] );
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $acceptable_errors, $optional ) {
+			if ( $optional && AMP_Validation_Error_Taxonomy::$suppress_optional_validation_error_acceptance ) {
+				return $sanitized;
+			}
+
+			if ( true === $acceptable_errors ) {
+				return true;
+			}
+
 			if ( isset( $acceptable_errors[ $error['code'] ] ) ) {
 				if ( true === $acceptable_errors[ $error['code'] ] ) {
 					return true;
 				}
 				foreach ( $acceptable_errors[ $error['code'] ] as $acceptable_error_props ) {
-					if ( $is_array_subset( $error, $acceptable_error_props ) ) {
+					if ( AMP_Validation_Error_Taxonomy::is_array_subset( $error, $acceptable_error_props ) ) {
 						return true;
 					}
 				}
 			}
 			return $sanitized;
 		}, 10, 2 );
+	}
+
+	/**
+	 * Check if one array is a sparse subset of another array.
+	 *
+	 * @param array $superset Superset array.
+	 * @param array $subset   Subset array.
+	 *
+	 * @return bool Whether subset is contained in superset.
+	 */
+	public static function is_array_subset( $superset, $subset ) {
+		foreach ( $subset as $key => $subset_value ) {
+			if ( ! isset( $superset[ $key ] ) || gettype( $subset_value ) !== gettype( $superset[ $key ] ) ) {
+				return false;
+			}
+			if ( is_array( $subset_value ) ) {
+				if ( ! self::is_array_subset( $superset[ $key ], $subset_value ) ) {
+					return false;
+				}
+			} elseif ( $superset[ $key ] !== $subset_value ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
