@@ -136,7 +136,7 @@ class AMP_Options_Menu {
 				<dt>
 					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
 					<label for="theme_support_disabled">
-						<strong><?php esc_html_e( 'Disabled', 'amp' ); ?></strong>
+						<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
 					</label>
 				</dt>
 				<dd>
