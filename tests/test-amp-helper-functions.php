@@ -49,6 +49,32 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_current_url().
+	 *
+	 * @covers \amp_get_current_url()
+	 */
+	public function test_amp_get_current_url() {
+		$request_uris = array(
+			'/foo',
+			'/bar?baz',
+			null,
+		);
+
+		foreach ( $request_uris as $request_uri ) {
+			if ( $request_uri ) {
+				$_SERVER['REQUEST_URI'] = wp_slash( $request_uri );
+			} else {
+				unset( $_SERVER['REQUEST_URI'] );
+			}
+			$this->assertEquals(
+				home_url( $request_uri ? $request_uri : '/' ),
+				amp_get_current_url(),
+				sprintf( 'Unexpected for URI: %s', wp_json_encode( $request_uri, 64 /* JSON_UNESCAPED_SLASHES */ ) )
+			);
+		}
+	}
+
+	/**
 	 * Test amp_get_permalink() without pretty permalinks.
 	 *
 	 * @covers \amp_get_permalink()

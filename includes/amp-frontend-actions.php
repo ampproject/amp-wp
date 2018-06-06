@@ -29,10 +29,8 @@ function amp_frontend_add_canonical() {
 	$amp_url = null;
 	if ( is_singular() ) {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
-	} elseif ( isset( $_SERVER['REQUEST_URI'] ) ) {
-		$host_url = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) );
-		$self_url = esc_url_raw( $host_url . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-		$amp_url  = add_query_arg( amp_get_slug(), '', $self_url );
+	} else {
+		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 	if ( $amp_url ) {
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );

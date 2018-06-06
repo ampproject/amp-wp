@@ -50,6 +50,26 @@ function amp_get_slug() {
 }
 
 /**
+ * Get the URL for the current request.
+ *
+ * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
+ * This is needed in particular due to subdirectory installs.
+ *
+ * @since 1.0
+ *
+ * @return string Current URL.
+ */
+function amp_get_current_url() {
+	$url = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) );
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		$url = esc_url_raw( $url . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+	} else {
+		$url .= '/';
+	}
+	return $url;
+}
+
+/**
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
  * @since 0.1
