@@ -344,7 +344,7 @@ class AMP_Invalid_URL_Post_Type {
 					$term_id = $r['term_id'];
 					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
 					$term = get_term( $term_id );
-				} elseif ( $term->term_group !== $term_data['term_group'] ) {
+				} elseif ( isset( $term_data['term_group'] ) && $term->term_group !== $term_data['term_group'] ) {
 					wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
 				}
 				$terms[ $term_slug ] = $term;

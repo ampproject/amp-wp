@@ -211,7 +211,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'illegal_css_at_rule',
 			'illegal_css_important',
 			'illegal_css_property',
-			'removed_unused_css_rules',
+			self::TREE_SHAKING_ERROR_CODE,
 			'unrecognized_css',
 			'disallowed_file_extension',
 			'file_path_not_found',
