@@ -110,23 +110,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		) );
 
 		// Test paired mode singular.
-		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test paired mode homepage.
-		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test canonical.
 		remove_theme_support( 'amp' );
 		add_theme_support( 'amp' );
 		$this->go_to( get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 	}
 
 	/**

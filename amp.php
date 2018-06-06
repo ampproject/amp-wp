@@ -312,7 +312,7 @@ function amp_load_classes() {
  * @since 0.2
  */
 function amp_add_frontend_actions() {
-	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
+	add_action( 'wp_head', 'amp_add_amphtml_link' );
 }
 
 /**

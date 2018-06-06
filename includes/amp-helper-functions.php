@@ -167,6 +167,34 @@ function amp_remove_endpoint( $url ) {
 }
 
 /**
+ * Add amphtml link.
+ *
+ * @since 1.0
+ */
+function amp_add_amphtml_link() {
+
+	/**
+	 * Filters whether to show the amphtml link on the frontend.
+	 *
+	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
+	 * @since 0.2
+	 */
+	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+		return;
+	}
+
+	$amp_url = null;
+	if ( is_singular() ) {
+		$amp_url = amp_get_permalink( get_queried_object_id() );
+	} else {
+		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+	}
+	if ( $amp_url ) {
+		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+	}
+}
+
+/**
  * Determine whether a given post supports AMP.
  *
  * @since 0.1

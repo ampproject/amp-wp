@@ -223,6 +223,67 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
 	}
 
+
+	/**
+	 * Test that hook is added.
+	 *
+	 * @covers \amp_add_frontend_actions()
+	 */
+	public function test_amp_add_frontend_actions() {
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+		amp_add_frontend_actions();
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+	}
+
+	/**
+	 * URLs to test amphtml link.
+	 *
+	 * @return array
+	 */
+	public function get_amphtml_urls() {
+		$post_id = $this->factory()->post->create();
+		return array(
+			'home' => array(
+				home_url( '/' ),
+				add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+			),
+			'404'  => array(
+				home_url( '/no-existe/' ),
+				add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+			),
+			'post' => array(
+				get_permalink( $post_id ),
+				amp_get_permalink( $post_id ),
+			),
+		);
+	}
+
+	/**
+	 * Adding link when theme support is not present.
+	 *
+	 * @dataProvider get_amphtml_urls
+	 * @covers \amp_add_amphtml_link()
+	 * @param string $canonical_url Canonical URL.
+	 * @param string $amphtml_url   The amphtml URL.
+	 */
+	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
+		$this->go_to( $canonical_url );
+		ob_start();
+		amp_add_amphtml_link();
+		$output = ob_get_clean();
+		$this->assertEquals(
+			sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+			$output
+		);
+
+		// Make sure adding the filter hides the amphtml link.
+		add_filter( 'amp_frontend_show_canonical', '__return_false' );
+		ob_start();
+		amp_add_amphtml_link();
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+	}
+
 	/**
 	 * Test is_amp_endpoint() function.
 	 *
