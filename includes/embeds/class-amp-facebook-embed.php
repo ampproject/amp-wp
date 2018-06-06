@@ -86,8 +86,10 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 				continue;
 			}
 
-			if ( $this->is_facebook_raw_embed( $node ) ) {
-				$this->create_amp_facebook_and_replace_node( $dom, $node );
+			$embed_type = $this->get_embed_type( $node );
+
+			if ( null !== $embed_type ) {
+				$this->create_amp_facebook_and_replace_node( $dom, $node, $embed_type );
 			}
 		}
 	}
@@ -97,14 +99,20 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param DOMNode $node The DOMNode to adjust and replace.
 	 *
-	 * @return boolean
+	 * @return string
 	 */
-	private function is_facebook_raw_embed( $node ) {
+	private function get_embed_type( $node ) {
 		$class_attr = $node->getAttribute( 'class' );
+		if ( null !== $class_attr && $node->hasAttribute( 'data-href' ) ) {
+			if ( false !== strpos( $class_attr, 'fb-post' ) ) {
+				return 'post';
+			} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
+				return 'video';
+			}
+			return false !== strpos( $class_attr, 'fb-video' ) ? 'video' : 'post';
+		}
 
-		return null !== $class_attr && $node->hasAttribute( 'data-href' )
-			&& ( false !== strpos( $class_attr, 'fb-post' ) || false !== strpos( $class_attr, 'fb-video' ) );
-
+		return null;
 	}
 
 	/**
@@ -112,10 +120,9 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param DOMDocument $dom The HTML Document.
 	 * @param DOMNode     $node The DOMNode to adjust and replace.
+	 * @param String      $embed_type Embed type.
 	 */
-	private function create_amp_facebook_and_replace_node( $dom, $node ) {
-		$embed_type = $this->get_embed_type( $node );
-
+	private function create_amp_facebook_and_replace_node( $dom, $node, $embed_type ) {
 		$amp_facebook_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
 			'data-href'     => $node->getAttribute( 'data-href' ),
 			'data-embed-as' => $embed_type,
@@ -128,18 +135,4 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$this->did_convert_elements = true;
 	}
-
-	/**
-	 * Make final modifications to DOMNode
-	 *
-	 * @param DOMNode $node The DOMNode to adjust and replace.
-	 *
-	 * @return boolean
-	 */
-	private function get_embed_type( $node ) {
-		$class_attr = $node->getAttribute( 'class' );
-
-		return false !== strpos( $class_attr, 'fb-video' ) ? 'video' : 'post';
-	}
-
 }
