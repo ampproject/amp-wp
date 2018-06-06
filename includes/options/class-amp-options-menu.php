@@ -23,6 +23,28 @@ class AMP_Options_Menu {
 	public function init() {
 		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
 		add_action( 'admin_menu', array( $this, 'add_menu_items' ), 9 );
+
+		$plugin_file = preg_replace( '#.+/(?=.+?/.+?)#', '', AMP__FILE__ );
+		add_filter( "plugin_action_links_{$plugin_file}", array( $this, 'add_plugin_action_links' ) );
+	}
+
+	/**
+	 * Add plugin action links.
+	 *
+	 * @param array $links Links.
+	 * @return array Modified links.
+	 */
+	public function add_plugin_action_links( $links ) {
+		return array_merge(
+			array(
+				'settings' => sprintf(
+					'<a href="%1$s">%2$s</a>',
+					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
+					__( 'Settings', 'amp' )
+				),
+			),
+			$links
+		);
 	}
 
 	/**
