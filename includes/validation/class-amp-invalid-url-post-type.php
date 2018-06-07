@@ -137,6 +137,7 @@ class AMP_Invalid_URL_Post_Type {
 			$query_vars[] = 'amp_taxonomy_terms_updated';
 			$query_vars[] = self::REMAINING_ERRORS;
 			$query_vars[] = 'amp_urls_tested';
+			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
 		} );
 	}
@@ -681,6 +682,9 @@ class AMP_Invalid_URL_Post_Type {
 			return $redirect;
 		}
 		$remaining_invalid_urls = array();
+
+		$errors = array();
+
 		foreach ( $items as $item ) {
 			$post = get_post( $item );
 			if ( empty( $post ) ) {
@@ -693,8 +697,9 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			$validity = AMP_Validation_Manager::validate_url( $url );
-			if ( ! is_array( $validity ) ) {
-				continue; // @todo Count this error.
+			if ( is_wp_error( $validity ) ) {
+				$errors[] = $validity->get_error_code();
+				continue;
 			}
 
 			self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post );
@@ -705,10 +710,15 @@ class AMP_Invalid_URL_Post_Type {
 
 		// Get the URLs that still have errors after rechecking.
 		$args = array(
-			self::URLS_TESTED      => count( $items ),
-			self::REMAINING_ERRORS => empty( $remaining_invalid_urls ) ? '0' : '1',
+			self::URLS_TESTED => count( $items ),
 		);
+		if ( ! empty( $errors ) ) {
+			$args['amp_validate_error'] = $errors;
+		} else {
+			$args[ self::REMAINING_ERRORS ] = count( $remaining_invalid_urls );
+		}
 
+		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
 		return add_query_arg( $args, $redirect );
 	}
 
@@ -720,6 +730,31 @@ class AMP_Invalid_URL_Post_Type {
 	public static function print_admin_notice() {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // WPCS: CSRF ok.
 			return;
+		}
+
+		if ( isset( $_GET['amp_validate_error'] ) ) { // WPCS: CSRF OK.
+			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // WPCS: CSRF OK.
+			foreach ( $error_codes as $error_code ) {
+				switch ( $error_code ) {
+					case 'http_request_failed':
+						$message = __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' );
+						break;
+					case '404':
+						$message = __( 'The fetched URL(s) was not found. It may have been deleted. If so, you can trash this.', 'amp' );
+						break;
+					case '500':
+						$message = __( 'An internal server error occurred when fetching the URL.', 'amp' );
+						break;
+					default:
+						/* translators: %s is error code */
+						$message = sprintf( __( 'Unable to validate the URL(s); error code is %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
+				}
+				printf(
+					'<div class="notice is-dismissible error"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+					esc_html( $message ),
+					esc_html__( 'Dismiss this notice.', 'amp' )
+				);
+			}
 		}
 
 		if ( isset( $_GET[ self::REMAINING_ERRORS ] ) ) {
@@ -777,7 +812,7 @@ class AMP_Invalid_URL_Post_Type {
 			$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
 		}
 
-		if ( ! $redirect || is_wp_error( $validation_results ) || empty( $validation_results ) ) {
+		if ( ! $redirect || empty( $validation_results ) ) {
 			// If there are no remaining errors and the post was deleted, redirect to edit.php instead of post.php.
 			$redirect = add_query_arg(
 				'post_type',
@@ -789,8 +824,9 @@ class AMP_Invalid_URL_Post_Type {
 			self::URLS_TESTED => '1',
 		);
 
-		// @todo For WP_Error case, see <https://github.com/Automattic/amp-wp/issues/1166>.
-		if ( ! is_wp_error( $validation_results ) ) {
+		if ( is_wp_error( $validation_results ) ) {
+			$args['amp_validate_error'] = $validation_results->get_error_code();
+		} else {
 			$args[ self::REMAINING_ERRORS ] = count( array_filter(
 				$validation_results,
 				function( $result ) {

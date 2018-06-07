@@ -1320,8 +1320,9 @@ class AMP_Validation_Manager {
 		for ( $redirect_count = 0; $redirect_count < $allowed_redirects; $redirect_count++ ) {
 			$r = wp_remote_get( $validation_url, array(
 				'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
+				'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
 				'sslverify'   => false,
-				'redirection' => 0,
+				'redirection' => 0, // Because we're in a loop for redirection.
 				'headers'     => array(
 					'Cache-Control' => 'no-cache',
 				),
