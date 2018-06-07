@@ -249,41 +249,18 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Whether optionally-accepted validation errors are being suppressed.
-	 *
-	 * @var bool
-	 */
-	public static $suppress_optional_validation_error_acceptance = false;
-
-	/**
 	 * Automatically (forcibly) accept validation errors that arise.
 	 *
 	 * @since 1.0
 	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
 	 *
 	 * @param array|true $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset. If just true, then all validation errors are accepted.
-	 * @param array      $args {
-	 *     Args.
-	 *
-	 *     @var bool $optional Whether the validation errors are accepted via option.
-	 * }
 	 */
-	public static function accept_validation_errors( $acceptable_errors, $args = array() ) {
+	public static function accept_validation_errors( $acceptable_errors ) {
 		if ( empty( $acceptable_errors ) ) {
 			return;
 		}
-
-		$args = array_merge(
-			array( 'optional' => false ),
-			$args
-		);
-
-		$optional = ! empty( $args['optional'] );
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $acceptable_errors, $optional ) {
-			if ( $optional && AMP_Validation_Error_Taxonomy::$suppress_optional_validation_error_acceptance ) {
-				return $sanitized;
-			}
-
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $acceptable_errors ) {
 			if ( true === $acceptable_errors ) {
 				return true;
 			}

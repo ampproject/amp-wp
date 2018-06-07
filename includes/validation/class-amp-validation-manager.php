@@ -159,23 +159,21 @@ class AMP_Validation_Manager {
 			}
 		} );
 
-		// Set sanitization options.
-		if ( amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
-			AMP_Validation_Error_Taxonomy::accept_validation_errors( true, array( 'optional' => true ) );
-		} elseif ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ) {
-			AMP_Validation_Error_Taxonomy::accept_validation_errors(
-				array(
-					AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE => true,
-				),
-				array( 'optional' => true )
-			);
-		}
-
-		// @todo This is not great.
-		// Allow the validation errors to be modified in the admin.
-		AMP_Validation_Error_Taxonomy::$suppress_optional_validation_error_acceptance = true;
+		/*
+		 * Set sanitization options on the frontend. These filters get added only on the frontend so that
+		 * the user is able to keep track of the errors that they haven't seen before and decide whether
+		 * they need to get fixed (rejected) or not (accepted).
+		 */
 		add_action( 'template_redirect', function() {
-			AMP_Validation_Error_Taxonomy::$suppress_optional_validation_error_acceptance = false;
+			if ( amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
+				AMP_Validation_Error_Taxonomy::accept_validation_errors( true );
+			} elseif ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ) {
+				AMP_Validation_Error_Taxonomy::accept_validation_errors(
+					array(
+						AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE => true,
+					)
+				);
+			}
 		} );
 
 		if ( self::$should_locate_sources ) {
