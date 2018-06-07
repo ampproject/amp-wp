@@ -172,28 +172,39 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Gets validation errors for a given invalid URL post.
 	 *
-	 * @param int|WP_Post $post Post of amp_invalid_url type.
-	 * @param array       $args {
+	 * @param string|int|WP_Post $url Either the URL string or a post (ID or WP_Post) of amp_invalid_url type.
+	 * @param array              $args {
 	 *     Args.
 	 *
 	 *     @type bool $ignore_accepted Exclude validation errors that are accepted. Default false.
 	 * }
 	 * @return array List of errors, with keys for term, data, status, and (sanitization) forced.
 	 */
-	public static function get_invalid_url_validation_errors( $post, $args = array() ) {
-		$args   = array_merge(
+	public static function get_invalid_url_validation_errors( $url, $args = array() ) {
+		$args = array_merge(
 			array(
 				'ignore_accepted' => false,
 			),
 			$args
 		);
-		$post   = get_post( $post );
-		$errors = array();
 
+		// Look up post by URL or ensure the amp_invalid_url object.
+		if ( is_string( $url ) ) {
+			$post = self::get_invalid_url_post( $url );
+		} else {
+			$post = get_post( $url );
+		}
+		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return array();
+		}
+
+		// Skip when parse error.
 		$stored_validation_errors = json_decode( $post->post_content, true );
 		if ( ! is_array( $stored_validation_errors ) ) {
 			return array();
 		}
+
+		$errors = array();
 		foreach ( $stored_validation_errors as $stored_validation_error ) {
 			if ( ! isset( $stored_validation_error['term_slug'] ) ) {
 				continue;

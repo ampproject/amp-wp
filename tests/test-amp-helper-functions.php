@@ -305,7 +305,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
 
 		// Allow the URL when the errors are forcibly sanitized.
-		$this->assertEmpty( $get_amp_html_link() );
+		$this->assertContains( '<!--', $get_amp_html_link() );
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$assert_amphtml_link_present();
 	}

@@ -187,20 +187,45 @@ function amp_add_amphtml_link() {
 
 	$current_url = amp_get_current_url();
 
+	$amp_url = null;
+	if ( current_theme_supports( 'amp' ) ) {
+		if ( AMP_Theme_Support::is_paired_available() ) {
+			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+		}
+	} else {
+		if ( is_singular() ) {
+			$amp_url = amp_get_permalink( get_queried_object_id() );
+		} else {
+			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+		}
+	}
+
+	if ( ! $amp_url ) {
+		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
+		return;
+	}
+
 	// Check to see if there are known unaccepted validation errors for this URL.
 	if ( current_theme_supports( 'amp' ) ) {
-		$invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $current_url );
-		if ( $invalid_url_post && count( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_accepted' => true ) ) ) > 0 ) {
+		$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
+		$error_count       = count( $validation_errors );
+		if ( $error_count > 0 ) {
+			echo "<!--\n";
+			echo esc_html( sprintf(
+				/* translators: %s is error count */
+				_n(
+					'There is %s validation error that is blocking the amphtml version from being available.',
+					'There are %s validation errors that are blocking the amphtml version from being available.',
+					$error_count,
+					'amp'
+				),
+				number_format_i18n( $error_count )
+			) );
+			echo "\n-->";
 			return;
 		}
 	}
 
-	$amp_url = null;
-	if ( is_singular() ) {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
-	} else {
-		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-	}
 	if ( $amp_url ) {
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}

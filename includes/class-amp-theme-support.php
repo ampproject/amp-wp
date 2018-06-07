@@ -162,9 +162,7 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
-			if ( self::is_paired_available() ) {
-				amp_add_frontend_actions();
-			}
+			amp_add_frontend_actions();
 			return;
 		}
 
