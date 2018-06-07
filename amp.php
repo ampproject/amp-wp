@@ -436,8 +436,12 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 
-	if ( is_amp_endpoint() ) {
-		$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
+		if ( current_theme_supports( 'amp' ) ) {
+			$link = add_query_arg( amp_get_slug(), '', $link );
+		} else {
+			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+		}
 	}
 
 	return $link;
