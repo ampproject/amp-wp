@@ -269,11 +269,18 @@ class AMP_Validation_Manager {
 			// Prevent re-validating.
 			self::$posts_pending_frontend_validation[ $post->ID ] = false;
 
-			$validation_errors = self::validate_url( $url );
-			if ( is_wp_error( $validation_errors ) ) {
-				$validation_posts[ $post->ID ] = $validation_errors;
+			$validity = self::validate_url( $url );
+			if ( is_wp_error( $validity ) ) {
+				$validation_posts[ $post->ID ] = $validity;
 			} else {
-				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors( $validation_errors, $url );
+				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_invalid_url_post_id', true ) );
+
+				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'], $invalid_url_post_id );
+
+				// Remember the amp_invalid_url post so that when the slug changes the old amp_invalid_url post can be updated.
+				if ( ! is_wp_error( $validation_posts[ $post->ID ] ) && $invalid_url_post_id !== $validation_posts[ $post->ID ] ) {
+					update_post_meta( $post->ID, '_amp_invalid_url_post_id', $validation_posts[ $post->ID ] );
+				}
 			}
 		}
 
@@ -467,8 +474,7 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$amp_url          = amp_get_permalink( $post->ID );
-		$invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
+		$invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( get_permalink( $post->ID ) );
 		if ( ! $invalid_url_post ) {
 			return;
 		}
@@ -1270,14 +1276,14 @@ class AMP_Validation_Manager {
 		if ( ! $url ) {
 			return new WP_Error( 'no_published_post_url_available' );
 		}
-		$validation_errors = self::validate_url( $url );
-		if ( is_array( $validation_errors ) && count( $validation_errors ) > 0 ) {
-			AMP_Invalid_URL_Post_Type::store_validation_errors( $validation_errors, $url );
-			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
+		$validity = self::validate_url( $url );
+		if ( is_array( $validity ) && count( $validity['validation_errors'] ) > 0 ) {
+			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
+			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validity['validation_errors'], 60 );
 		} else {
 			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
 		}
-		return $validation_errors;
+		return $validity['validation_errors'];
 	}
 
 	/**
@@ -1286,33 +1292,91 @@ class AMP_Validation_Manager {
 	 * The validation errors will be stored in the validation status custom post type,
 	 * as well as in a transient.
 	 *
-	 * @param string $url The URL to validate.
-	 * @return array|WP_Error The validation errors, or WP_Error on error.
+	 * @param string $url The URL to validate. This need not include the amp query var.
+	 * @return WP_Error|array {
+	 *     Response.
+	 *
+	 *     @type array  $validation_errors Validation errors.
+	 *     @type string $url               Final URL that was checked or redirected to.
+	 * }
 	 */
 	public static function validate_url( $url ) {
-		$validation_url = add_query_arg(
-			array(
-				self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
-				self::CACHE_BUST_QUERY_VAR => wp_rand(),
-			),
-			$url
-		);
+		if ( amp_is_canonical() ) {
+			$url = remove_query_arg( amp_get_slug(), $url );
+		} else {
+			$url = add_query_arg( amp_get_slug(), '', $url );
+		}
 
-		$r = wp_remote_get( $validation_url, array(
-			'sslverify' => false,
-			'headers'   => array(
-				'Cache-Control' => 'no-cache',
-			),
-		) );
+		$added_query_vars = array(
+			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
+			self::CACHE_BUST_QUERY_VAR => wp_rand(),
+		);
+		$validation_url   = add_query_arg( $added_query_vars, $url );
+
+		$r = null;
+
+		/** This filter is documented in wp-includes/class-http.php */
+		$allowed_redirects = apply_filters( 'http_request_redirection_count', 5 );
+		for ( $redirect_count = 0; $redirect_count < $allowed_redirects; $redirect_count++ ) {
+			$r = wp_remote_get( $validation_url, array(
+				'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
+				'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
+				'sslverify'   => false,
+				'redirection' => 0, // Because we're in a loop for redirection.
+				'headers'     => array(
+					'Cache-Control' => 'no-cache',
+				),
+			) );
+
+			// If the response is not a redirect, then break since $r is all we need.
+			$response_code   = wp_remote_retrieve_response_code( $r );
+			$location_header = wp_remote_retrieve_header( $r, 'Location' );
+			$is_redirect     = (
+				$response_code
+				&&
+				$response_code > 300 && $response_code < 400
+				&&
+				$location_header
+			);
+			if ( ! $is_redirect ) {
+				break;
+			}
+
+			// Ensure absolute URL.
+			if ( '/' === substr( $location_header, 0, 1 ) ) {
+				$location_header = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) ) . $location_header;
+			}
+
+			// Block redirecting to a different host.
+			$location_header = wp_validate_redirect( $location_header );
+			if ( ! $location_header ) {
+				break;
+			}
+
+			// Ensure the redirect URL is formatted for the AMP.
+			if ( amp_is_canonical() ) {
+				$location_header = remove_query_arg( amp_get_slug(), $location_header );
+			} else {
+				$location_header = add_query_arg( amp_get_slug(), '', $location_header );
+			}
+			$validation_url = add_query_arg( $added_query_vars, $location_header );
+		}
+
 		if ( is_wp_error( $r ) ) {
 			return $r;
 		}
-		if ( wp_remote_retrieve_response_code( $r ) >= 400 ) {
+		if ( wp_remote_retrieve_response_code( $r ) >= 300 ) {
 			return new WP_Error(
 				wp_remote_retrieve_response_code( $r ),
 				wp_remote_retrieve_response_message( $r )
 			);
 		}
+
+		$url = remove_query_arg(
+			array_keys( $added_query_vars ),
+			$validation_url
+		);
+
 		$response = wp_remote_retrieve_body( $r );
 		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION_RESULTS\s*:\s*(\[.*?\])\s*-->#s', $response, $matches ) ) {
 			return new WP_Error( 'response_comment_absent' );
@@ -1323,7 +1387,7 @@ class AMP_Validation_Manager {
 		}
 
 		$validation_errors = wp_list_pluck( $validation_results, 'error' );
-		return $validation_errors;
+		return compact( 'validation_errors', 'url' );
 	}
 
 	/**
