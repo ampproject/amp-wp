@@ -525,7 +525,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Replace the primary column to be error instead of the removed name column..
 		add_filter( 'list_table_primary_column', function( $primary_column ) {
-			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+			if ( get_current_screen() && self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
 				$primary_column = 'error';
 			}
 			return $primary_column;

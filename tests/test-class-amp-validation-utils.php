@@ -1055,6 +1055,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_validate_url() {
+		add_theme_support( 'amp' );
+
 		$validation_errors = array(
 			array(
 				'code' => 'example',
@@ -1103,7 +1105,8 @@ class Test_AMP_Validation_Utils extends \WP_UnitTestCase {
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 		$r = AMP_Validation_Manager::validate_url( $validated_url );
-		$this->assertEquals( $validation_errors, $r );
+		$this->assertInternalType( 'array', $r );
+		$this->assertEquals( $validation_errors, $r['validation_errors'] );
 		remove_filter( 'pre_http_request', $filter );
 	}
 
