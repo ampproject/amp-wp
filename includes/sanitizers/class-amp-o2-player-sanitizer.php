@@ -30,18 +30,18 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	public static $xpath_selector = '//div[ contains( @class, \'vdb_player\' ) ]/script';
 
 	/**
-	 * Hardcoded height to set for 02 Player elements.
+	 * Height to set for 02 Player elements.
 	 *
 	 * @var string
 	 */
 	private static $height = '270';
 
 	/**
-	 * Hardcoded height to set for 02 Player elements.
+	 * Width to set for 02 Player elements.
 	 *
 	 * @var string
 	 */
-	private static $width = '600';
+	private static $width = '480';
 
 	/**
 	 * XPath.
