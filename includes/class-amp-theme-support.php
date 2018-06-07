@@ -162,19 +162,15 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
-			// Add amphtml link when paired mode is available.
 			if ( self::is_paired_available() ) {
-				amp_add_frontend_actions(); // @todo This function is poor in how it requires a file that then does add_action().
-				if ( ! has_action( 'wp_head', 'amp_frontend_add_canonical' ) ) {
-					add_action( 'wp_head', 'amp_frontend_add_canonical' );
-				}
+				amp_add_frontend_actions();
 			}
 			return;
 		}
 
-		if ( amp_is_canonical() ) {
-			self::redirect_canonical_amp();
-		} else {
+		self::ensure_proper_amp_location();
+
+		if ( ! amp_is_canonical() ) {
 			self::register_paired_hooks();
 		}
 
@@ -191,32 +187,75 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+	 * Ensure that the current AMP location is correct.
+	 *
+	 * @since 1.0
+	 *
+	 * @param bool $exit Whether to exit after redirecting.
+	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
+	 */
+	public static function ensure_proper_amp_location( $exit = true ) {
+		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
+		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // WPCS: CSRF OK.
+
+		if ( amp_is_canonical() ) {
+			/*
+			 * When AMP native/canonical, then when there is an /amp/ endpoint or ?amp URL param,
+			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
+			 */
+			if ( $has_query_var || $has_url_param ) {
+				return self::redirect_ampless_url( $exit );
+			}
+		} else {
+			/*
+			 * When in AMP paired mode *with* theme support, then the proper AMP URL has the 'amp' URL param
+			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in paired mode
+			 * when amp theme support present. This is important for plugins to be able to reliably call
+			 * is_amp_endpoint() before the parse_query action.
+			 */
+			if ( $has_query_var && ! $has_url_param ) {
+				$old_url = amp_get_current_url();
+				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
+				if ( $old_url !== $new_url ) {
+					wp_safe_redirect( $new_url, 302 );
+					if ( $exit ) {
+						exit;
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Redirect to non-AMP version of the current URL, such as because AMP is canonical or there are unaccepted validation errors.
+	 *
+	 * If the current URL is already AMP-less then do nothing.
 	 *
 	 * @since 0.7
 	 * @since 1.0 Added $exit param.
-	 * @todo Rename to redirect_non_amp().
+	 * @since 1.0 Renamed from redirect_canonical_amp().
 	 *
 	 * @param bool $exit Whether to exit after redirecting.
+	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
 	 */
-	public static function redirect_canonical_amp( $exit = true ) {
-		if ( false !== get_query_var( amp_get_slug(), false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
-			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
-			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
-			}
-
-			$url = amp_remove_endpoint( $url );
-
-			/*
-			 * Temporary redirect because AMP URL may return when blocking validation errors
-			 * occur or when a non-canonical AMP theme is used.
-			 */
-			wp_safe_redirect( $url, 302 );
-			if ( $exit ) {
-				exit;
-			}
+	public static function redirect_ampless_url( $exit = true ) {
+		$current_url = amp_get_current_url();
+		$ampless_url = amp_remove_endpoint( $current_url );
+		if ( $ampless_url === $current_url ) {
+			return false;
 		}
+
+		/*
+		 * Temporary redirect because AMP URL may return when blocking validation errors
+		 * occur or when a non-canonical AMP theme is used.
+		 */
+		wp_safe_redirect( $ampless_url, 302 );
+		if ( $exit ) {
+			exit;
+		}
+		return true;
 	}
 
 	/**
@@ -1187,7 +1226,7 @@ class AMP_Theme_Support {
 					$head->appendChild( $script );
 				}
 			} else {
-				self::redirect_canonical_amp( false );
+				self::redirect_ampless_url( false );
 				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 			}
 		}

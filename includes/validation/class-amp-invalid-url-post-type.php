@@ -137,6 +137,7 @@ class AMP_Invalid_URL_Post_Type {
 			$query_vars[] = 'amp_taxonomy_terms_updated';
 			$query_vars[] = self::REMAINING_ERRORS;
 			$query_vars[] = 'amp_urls_tested';
+			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
 		} );
 	}
@@ -277,7 +278,29 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
 	public static function get_invalid_url_post( $url ) {
+		$url = remove_query_arg( amp_get_slug(), $url );
 		return get_page_by_path( md5( $url ), OBJECT, self::POST_TYPE_SLUG );
+	}
+
+	/**
+	 * Get the URL from a given amp_invalid_url post.
+	 *
+	 * The URL will be returned with the amp query var added to it if the site is not canonical. The post_title
+	 * is always stored using the canonical AMP-less URL.
+	 *
+	 * @param int|WP_post $post Post.
+	 * @return string|null The URL stored for the post or null if post does not exist or it is not the right type.
+	 */
+	public static function get_url_from_post( $post ) {
+		$post = get_post( $post );
+		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return null;
+		}
+		$url = $post->post_title;
+		if ( ! amp_is_canonical() ) {
+			$url = add_query_arg( amp_get_slug(), '', $url );
+		}
+		return $url;
 	}
 
 	/**
@@ -285,16 +308,22 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * If there are no validation errors provided, then any existing amp_invalid_url post is deleted.
 	 *
-	 * @param array  $validation_errors Validation errors.
-	 * @param string $url               URL on which the validation errors occurred.
+	 * @param array       $validation_errors Validation errors.
+	 * @param string      $url               URL on which the validation errors occurred. Will be normalized to non-AMP version.
+	 * @param int|WP_Post $post              Post to update. Optional. If empty, then post is looked up by URL.
 	 * @return int|WP_Error $post_id The post ID of the custom post type used, null if post was deleted due to no validation errors, or WP_Error on failure.
 	 * @global WP $wp
 	 */
-	public static function store_validation_errors( $validation_errors, $url ) {
-		$post_slug = md5( $url );
-		$post      = get_page_by_path( $post_slug, OBJECT, self::POST_TYPE_SLUG );
-		if ( ! $post ) {
-			$post = get_page_by_path( $post_slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
+	public static function store_validation_errors( $validation_errors, $url, $post = null ) {
+		$url  = remove_query_arg( amp_get_slug(), $url ); // Only ever store the canonical version.
+		$slug = md5( $url );
+		if ( $post ) {
+			$post = get_post( $post );
+		} else {
+			$post = get_page_by_path( $slug, OBJECT, self::POST_TYPE_SLUG );
+			if ( ! $post ) {
+				$post = get_page_by_path( $slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
+			}
 		}
 
 		// Since there are no validation errors and there is an existing $existing_post_id, just delete the post.
@@ -383,7 +412,7 @@ class AMP_Invalid_URL_Post_Type {
 				'ID'           => $post ? $post->ID : null,
 				'post_type'    => self::POST_TYPE_SLUG,
 				'post_title'   => $url,
-				'post_name'    => $post_slug,
+				'post_name'    => $slug,
 				'post_content' => $placeholder, // Content is provided via wp_insert_post_data filter above to guard against Kses-corruption.
 				'post_status'  => 'publish',
 			) ),
@@ -625,10 +654,15 @@ class AMP_Invalid_URL_Post_Type {
 			esc_html__( 'Details', 'amp' )
 		);
 		unset( $actions['inline hide-if-no-js'] );
-		$url = $post->post_title;
 
-		$view_url        = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ); // Prevent redirection to non-AMP page.
-		$actions['view'] = sprintf( '<a href="%s">%s</a>', esc_url( $view_url ), esc_html__( 'View', 'amp' ) );
+		$url = self::get_url_from_post( $post );
+		if ( $url ) {
+			$actions['view'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ) ),
+				esc_html__( 'View', 'amp' )
+			);
+		}
 
 		$actions[ self::RECHECK_ACTION ] = sprintf(
 			'<a href="%s">%s</a>',
@@ -664,33 +698,43 @@ class AMP_Invalid_URL_Post_Type {
 			return $redirect;
 		}
 		$remaining_invalid_urls = array();
+
+		$errors = array();
+
 		foreach ( $items as $item ) {
 			$post = get_post( $item );
 			if ( empty( $post ) ) {
 				continue;
 			}
-			$url = $post->post_title;
+
+			$url = self::get_url_from_post( $post );
 			if ( empty( $url ) ) {
 				continue;
 			}
 
-			$validation_errors = AMP_Validation_Manager::validate_url( $url );
-			if ( ! is_array( $validation_errors ) ) {
+			$validity = AMP_Validation_Manager::validate_url( $url );
+			if ( is_wp_error( $validity ) ) {
+				$errors[] = $validity->get_error_code();
 				continue;
 			}
 
-			self::store_validation_errors( $validation_errors, $url );
-			if ( ! empty( $validation_errors ) ) {
-				$remaining_invalid_urls[] = $url;
+			self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post );
+			if ( ! empty( $validity['validation_errors'] ) ) {
+				$remaining_invalid_urls[] = $validity['url'];
 			}
 		}
 
 		// Get the URLs that still have errors after rechecking.
 		$args = array(
-			self::URLS_TESTED      => count( $items ),
-			self::REMAINING_ERRORS => empty( $remaining_invalid_urls ) ? '0' : '1',
+			self::URLS_TESTED => count( $items ),
 		);
+		if ( ! empty( $errors ) ) {
+			$args['amp_validate_error'] = $errors;
+		} else {
+			$args[ self::REMAINING_ERRORS ] = count( $remaining_invalid_urls );
+		}
 
+		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
 		return add_query_arg( $args, $redirect );
 	}
 
@@ -702,6 +746,31 @@ class AMP_Invalid_URL_Post_Type {
 	public static function print_admin_notice() {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // WPCS: CSRF ok.
 			return;
+		}
+
+		if ( isset( $_GET['amp_validate_error'] ) ) { // WPCS: CSRF OK.
+			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // WPCS: CSRF OK.
+			foreach ( $error_codes as $error_code ) {
+				switch ( $error_code ) {
+					case 'http_request_failed':
+						$message = __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' );
+						break;
+					case '404':
+						$message = __( 'The fetched URL(s) was not found. It may have been deleted. If so, you can trash this.', 'amp' );
+						break;
+					case '500':
+						$message = __( 'An internal server error occurred when fetching the URL.', 'amp' );
+						break;
+					default:
+						/* translators: %s is error code */
+						$message = sprintf( __( 'Unable to validate the URL(s); error code is %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
+				}
+				printf(
+					'<div class="notice is-dismissible error"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+					esc_html( $message ),
+					esc_html__( 'Dismiss this notice.', 'amp' )
+				);
+			}
 		}
 
 		if ( isset( $_GET[ self::REMAINING_ERRORS ] ) ) {
@@ -759,7 +828,7 @@ class AMP_Invalid_URL_Post_Type {
 			$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
 		}
 
-		if ( ! $redirect || is_wp_error( $validation_results ) || empty( $validation_results ) ) {
+		if ( ! $redirect || empty( $validation_results ) ) {
 			// If there are no remaining errors and the post was deleted, redirect to edit.php instead of post.php.
 			$redirect = add_query_arg(
 				'post_type',
@@ -771,8 +840,9 @@ class AMP_Invalid_URL_Post_Type {
 			self::URLS_TESTED => '1',
 		);
 
-		// @todo For WP_Error case, see <https://github.com/Automattic/amp-wp/issues/1166>.
-		if ( ! is_wp_error( $validation_results ) ) {
+		if ( is_wp_error( $validation_results ) ) {
+			$args['amp_validate_error'] = $validation_results->get_error_code();
+		} else {
 			$args[ self::REMAINING_ERRORS ] = count( array_filter(
 				$validation_results,
 				function( $result ) {
@@ -793,16 +863,19 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function recheck_post( $post ) {
 		$post = get_post( $post );
-		$url  = $post->post_title;
+		$url  = self::get_url_from_post( $post );
+		if ( ! $url ) {
+			return new WP_Error( 'missing_url' );
+		}
 
-		$validation_errors = AMP_Validation_Manager::validate_url( $url );
-		if ( is_wp_error( $validation_errors ) ) {
-			return $validation_errors;
+		$validity = AMP_Validation_Manager::validate_url( $url );
+		if ( is_wp_error( $validity ) ) {
+			return $validity;
 		}
 
 		$validation_results = array();
-		self::store_validation_errors( $validation_errors, $url );
-		foreach ( $validation_errors as $error ) {
+		self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post->ID );
+		foreach ( $validity['validation_errors'] as $error ) {
 			$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
 
 			$validation_results[] = compact( 'error', 'sanitized' );
@@ -979,6 +1052,8 @@ class AMP_Invalid_URL_Post_Type {
 	public static function print_validation_errors_meta_box( $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 
+		$url = self::get_url_from_post( $post );
+
 		$has_unaccepted_errors = 0 !== count( array_filter( $validation_errors, function( $validation_error ) {
 			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['status'];
 		} ) );
@@ -1017,7 +1092,7 @@ class AMP_Invalid_URL_Post_Type {
 		<script>
 		jQuery( function( $ ) {
 			var validateUrl, postId;
-			validateUrl = <?php echo wp_json_encode( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_amp_validate_nonce(), $post->post_title ) ); ?>;
+			validateUrl = <?php echo wp_json_encode( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_amp_validate_nonce(), $url ) ); ?>;
 			postId = <?php echo wp_json_encode( $post->ID ); ?>;
 			$( '#preview_validation_errors' ).on( 'click', function() {
 				var params = {}, validatePreviewUrl = validateUrl;
@@ -1197,11 +1272,16 @@ class AMP_Invalid_URL_Post_Type {
 			return;
 		}
 
+		$url = self::get_url_from_post( $post );
+		if ( ! $url ) {
+			return;
+		}
+
 		// Remember URL is stored in post_title. Adding query var prevents redirection to non-AMP page.
-		$view_url = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $post->post_title );
+		$view_url = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url );
 		?>
 		<h2 class="amp-invalid-url">
-			<a href="<?php echo esc_url( $view_url ); ?>"><?php echo esc_html( get_the_title( $post ) ); ?></a>
+			<a href="<?php echo esc_url( $view_url ); ?>"><?php echo esc_html( $url ); ?></a>
 		</h2>
 		<?php
 	}
@@ -1215,7 +1295,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return string Title.
 	 */
 	public static function filter_the_title_in_post_list_table( $title, $post ) {
-		if ( function_exists( 'get_current_screen' ) && get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+		if ( function_exists( 'get_current_screen' ) && get_current_screen() && get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
 			$title = preg_replace( '#^(\w+:)?//[^/]+#', '', $title );
 		}
 		return $title;

@@ -2,6 +2,7 @@
 /**
  * Callbacks for adding content to an AMP template.
  *
+ * @todo Rename this file from amp-post-template-actions.php to amp-post-template-functions.php.
  * @package AMP
  */
 
