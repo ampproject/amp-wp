@@ -141,8 +141,8 @@ class AMP_Validation_Manager {
 
 		self::$should_locate_sources = $args['should_locate_sources'];
 
-		add_action( 'init', array( 'AMP_Invalid_URL_Post_Type', 'register' ) );
-		add_action( 'init', array( 'AMP_Validation_Error_Taxonomy', 'register' ) );
+		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validation_Error_Taxonomy::register();
 
 		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );

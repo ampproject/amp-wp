@@ -169,7 +169,8 @@ function amp_remove_endpoint( $url ) {
 /**
  * Add amphtml link.
  *
- * @todo If there is a known amp_invalid_url post for this $amp_url that has unaccepted validation errors then this should output nothing.
+ * If there are known validation errors for the current URL then do not output anything.
+ *
  * @since 1.0
  */
 function amp_add_amphtml_link() {
@@ -184,11 +185,21 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
+	$current_url = amp_get_current_url();
+
+	// Check to see if there are known unaccepted validation errors for this URL.
+	if ( current_theme_supports( 'amp' ) ) {
+		$invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $current_url );
+		if ( $invalid_url_post && count( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_accepted' => true ) ) ) > 0 ) {
+			return;
+		}
+	}
+
 	$amp_url = null;
 	if ( is_singular() ) {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
 	} else {
-		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 	}
 	if ( $amp_url ) {
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );

@@ -267,21 +267,47 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @param string $amphtml_url   The amphtml URL.
 	 */
 	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
+		$test = $this; // For PHP 5.3.
+
+		$get_amp_html_link = function() {
+			ob_start();
+			amp_add_amphtml_link();
+			return ob_get_clean();
+		};
+
+		$assert_amphtml_link_present = function() use ( $test, $amphtml_url, $get_amp_html_link ) {
+			$test->assertEquals(
+				sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+				$get_amp_html_link()
+			);
+		};
+
 		$this->go_to( $canonical_url );
-		ob_start();
-		amp_add_amphtml_link();
-		$output = ob_get_clean();
-		$this->assertEquals(
-			sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
-			$output
-		);
+		$assert_amphtml_link_present();
 
 		// Make sure adding the filter hides the amphtml link.
 		add_filter( 'amp_frontend_show_canonical', '__return_false' );
-		ob_start();
-		amp_add_amphtml_link();
-		$output = ob_get_clean();
-		$this->assertEmpty( $output );
+		$this->assertEmpty( $get_amp_html_link() );
+		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
+		$assert_amphtml_link_present();
+
+		// Make sure that the link is not provided when there are validation errors associated with the URL.
+		add_theme_support( 'amp', array(
+			'template_dir' => './',
+		) );
+		AMP_Theme_Support::init();
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			$canonical_url
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+
+		// Allow the URL when the errors are forcibly sanitized.
+		$this->assertEmpty( $get_amp_html_link() );
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		$assert_amphtml_link_present();
 	}
 
 	/**

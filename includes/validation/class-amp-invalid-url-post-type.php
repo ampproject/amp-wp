@@ -198,7 +198,11 @@ class AMP_Invalid_URL_Post_Type {
 			if ( ! isset( $stored_validation_error['term_slug'] ) ) {
 				continue;
 			}
+
 			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			if ( ! $term ) {
+				continue;
+			}
 
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $stored_validation_error['data'] );
 			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
