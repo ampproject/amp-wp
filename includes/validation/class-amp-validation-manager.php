@@ -1319,6 +1319,7 @@ class AMP_Validation_Manager {
 		$allowed_redirects = apply_filters( 'http_request_redirection_count', 5 );
 		for ( $redirect_count = 0; $redirect_count < $allowed_redirects; $redirect_count++ ) {
 			$r = wp_remote_get( $validation_url, array(
+				'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
 				'sslverify'   => false,
 				'redirection' => 0,
 				'headers'     => array(
