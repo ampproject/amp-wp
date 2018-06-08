@@ -19,7 +19,7 @@ amp-fit-text h6 {
  * It set display:none for audio elements.
  * This selector is the same, though it uses amp-audio instead of audio.
  */
-amp-audio:not([controls]) {
+body amp-audio:not([controls]) {
 	display: inline-block;
 	height: auto;
 }
