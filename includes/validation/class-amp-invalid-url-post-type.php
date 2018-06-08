@@ -1001,9 +1001,11 @@ class AMP_Invalid_URL_Post_Type {
 							<?php esc_html_e( 'Re-check', 'amp' ); ?>
 						</a>
 					</div>
-					<div id="preview-action">
-						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
-					</div>
+					<?php if ( ! AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
+						<div id="preview-action">
+							<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+						</div>
+					<?php endif; ?>
 					<div class="clear"></div>
 				</div>
 				<div id="misc-publishing-actions">
@@ -1055,7 +1057,7 @@ class AMP_Invalid_URL_Post_Type {
 		$url = self::get_url_from_post( $post );
 
 		$has_unaccepted_errors = 0 !== count( array_filter( $validation_errors, function( $validation_error ) {
-			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['status'];
+			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['term_status'];
 		} ) );
 		?>
 		<style>
@@ -1069,9 +1071,16 @@ class AMP_Invalid_URL_Post_Type {
 		</style>
 
 		<?php if ( $has_unaccepted_errors ) : ?>
-			<?php if ( amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' ) ) : ?>
+			<?php if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
 				<div class="notice notice-warning notice-alt inline">
-					<p><?php esc_html_e( 'This URL will be served served as valid AMP but some of the markup will be stripped from the response since it is not valid.', 'amp' ); ?></p>
+					<p>
+						<?php esc_html_e( 'This URL will be served served as valid AMP but some of the markup will be stripped from the response since it is not valid.', 'amp' ); ?>
+						<?php if ( amp_is_canonical() ) : ?>
+							<?php esc_html_e( 'Accepting sanitization is required for native AMP mode.', 'amp' ); ?>
+						<?php else : ?>
+							<?php esc_html_e( 'You have elected in the AMP settings for all sanitization to be accepted.', 'amp' ); ?>
+						<?php endif; ?>
+					</p>
 				</div>
 			<?php else : ?>
 				<div class="notice notice-error notice-alt inline">
@@ -1079,7 +1088,6 @@ class AMP_Invalid_URL_Post_Type {
 				</div>
 			<?php endif; ?>
 		<?php else : ?>
-
 			<div class="notice notice-success notice-alt inline">
 				<p><?php esc_html_e( 'This URL can be served as AMP because all validation errors have been accepted as not being blockers.', 'amp' ); ?></p>
 			</div>
@@ -1118,7 +1126,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 		?>
 
-		<?php if ( $has_forced_sanitized ) : ?>
+		<?php if ( $has_forced_sanitized || ( $has_unaccepted_errors && amp_is_canonical() ) ) : ?>
 			<div class="notice notice-info notice-alt inline">
 				<p>&#x1F6A9; <?php esc_html_e( 'Flagged validation error statuses will not be applied to your site since they are automatically handled by the theme or the plugin\'s settings. You can use the flag to mark issues that you need to follow up on.', 'amp' ); ?></p>
 			</div>
@@ -1152,7 +1160,7 @@ class AMP_Invalid_URL_Post_Type {
 									</option>
 									<option style="text-decoration: line-through" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term']->term_group ); ?>>
 										<?php esc_html_e( 'Rejected', 'amp' ); ?>
-										<?php if ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) : ?>
+										<?php if ( amp_is_canonical() || ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) ) : ?>
 											&#x1F6A9;
 										<?php else : ?>
 											&#x274C;

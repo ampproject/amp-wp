@@ -165,7 +165,7 @@ class AMP_Validation_Manager {
 		 * they need to get fixed (rejected) or not (accepted).
 		 */
 		add_action( 'template_redirect', function() {
-			if ( amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
+			if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) {
 				AMP_Validation_Error_Taxonomy::accept_validation_errors( true );
 			} elseif ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ) {
 				AMP_Validation_Error_Taxonomy::accept_validation_errors(
@@ -179,6 +179,15 @@ class AMP_Validation_Manager {
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
 		}
+	}
+
+	/**
+	 * Return whether sanitization is forcibly accepted, whether because in native mode or via user option.
+	 *
+	 * @return bool Whether sanitization is forcibly accepted.
+	 */
+	public static function is_sanitization_forcibly_accepted() {
+		return amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' );
 	}
 
 	/**
@@ -376,8 +385,11 @@ class AMP_Validation_Manager {
 			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
 			foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = array(
-					'sanitized' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['status'],
-					'error'     => $result['data'],
+					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['status'],
+					'error'       => $result['data'],
+					'status'      => $result['status'],
+					'term_status' => $result['term_status'],
+					'forced'      => $result['forced'],
 				);
 			}
 		}
@@ -478,6 +490,8 @@ class AMP_Validation_Manager {
 	 *
 	 * If it's not valid AMP, it displays an error message above the 'Classic' editor.
 	 *
+	 * This is essentially a PHP implementation of ampBlockValidation.handleValidationErrorsStateChange() in JS.
+	 *
 	 * @param WP_Post $post The updated post.
 	 * @return void
 	 */
@@ -496,10 +510,16 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$validation_errors = wp_list_pluck(
-			AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_accepted' => true ) ),
-			'data'
-		);
+		$has_actually_unaccepted_error = false;
+		$validation_errors             = array();
+		foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
+			if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['term_status'] ) {
+				$validation_errors[] = $error['data'];
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['status'] ) {
+					$has_actually_unaccepted_error = true;
+				}
+			}
+		}
 
 		// No validation errors so abort.
 		if ( empty( $validation_errors ) ) {
@@ -510,10 +530,10 @@ class AMP_Validation_Manager {
 		echo '<p>';
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
-		if ( amp_is_canonical() ) {
-			esc_html_e( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
-		} else {
+		if ( $has_actually_unaccepted_error && ! amp_is_canonical() ) {
 			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+		} else {
+			esc_html_e( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
 		}
 		echo sprintf(
 			' <a href="%s" target="_blank">%s</a>',

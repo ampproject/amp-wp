@@ -211,12 +211,13 @@ class AMP_Options_Menu {
 
 			<?php if ( $forced_sanitization ) : ?>
 				<div class="notice notice-info notice-alt inline">
-					<p>
-						<?php esc_html_e( 'Your install is configured via a theme or plugin to automatically sanitize any AMP validation error that is encountered.', 'amp' ); ?>
-					</p>
+					<p><?php esc_html_e( 'Your install is configured via a theme or plugin to automatically sanitize any AMP validation error that is encountered.', 'amp' ); ?></p>
 				</div>
 				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[force_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'force_sanitization' ) ? 'on' : ''; ?>">
 			<?php else : ?>
+				<div class="amp-force-sanitize-canonical notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'All validation errors are forcibly accepted when in native mode.', 'amp' ); ?></p>
+				</div>
 				<div class="amp-force-sanitize">
 					<p>
 						<label for="force_sanitization">
@@ -248,10 +249,12 @@ class AMP_Options_Menu {
 
 			<script>
 				jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
-					jQuery( '.amp-validation-field' ).toggleClass( 'hidden', 'paired' !== this.value );
+					jQuery( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === this.value );
+					jQuery( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== this.value );
+					jQuery( '#force_sanitization' ).trigger( 'change' );
 				} ).filter( ':checked' ).trigger( 'change' );
 				jQuery( '#force_sanitization' ).change( function() {
-					jQuery( '.amp-tree-shaking' ).toggleClass( 'hidden', this.checked );
+					jQuery( '.amp-tree-shaking' ).toggleClass( 'hidden', this.checked && 'native' !== jQuery( 'input[type=radio][name="amp-options[theme_support]"]:checked' ).val() );
 				} ).trigger( 'change' );
 			</script>
 		</fieldset>
