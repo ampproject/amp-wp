@@ -96,6 +96,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function init() {
+		self::apply_options();
 		if ( ! current_theme_supports( 'amp' ) ) {
 			return;
 		}
@@ -117,7 +118,7 @@ class AMP_Theme_Support {
 			$args = array_shift( $support );
 			if ( ! is_array( $args ) ) {
 				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list' ) ) ) !== 0 ) {
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', '__added_via_option' ) ) ) !== 0 ) {
 				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
@@ -133,15 +134,35 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Apply options for whether theme support is enabled via admin and what sanitization is performed by default.
+	 *
+	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
+	 */
+	public static function apply_options() {
+		if ( ! current_theme_supports( 'amp' ) ) {
+			$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+			if ( 'disabled' === $theme_support_option ) {
+				return;
+			}
+
+			$args = array(
+				'__added_via_option' => true,
+			);
+			if ( 'paired' === $theme_support_option ) {
+				$args['template_dir'] = './';
+			}
+			add_theme_support( 'amp', $args );
+		}
+	}
+
+	/**
 	 * Finish initialization once query vars are set.
 	 *
 	 * @since 0.7
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
-			if ( self::is_paired_available() ) {
-				amp_add_frontend_actions();
-			}
+			amp_add_frontend_actions();
 			return;
 		}
 
@@ -1187,7 +1208,10 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
 
-		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
+		$blocking_error_count = AMP_Validation_Manager::count_blocking_validation_errors();
+		if ( ! AMP_Validation_Manager::should_validate_response() && $blocking_error_count > 0 ) {
+
+			// Note the canonical check will not currently ever be met because dirty AMP is not yet supported; all validation errors will forcibly be sanitized.
 			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 
@@ -1201,7 +1225,19 @@ class AMP_Theme_Support {
 					$head->appendChild( $script );
 				}
 			} else {
-				self::redirect_ampless_url( false );
+				$current_url = amp_get_current_url();
+				$ampless_url = amp_remove_endpoint( $current_url );
+				$ampless_url = add_query_arg(
+					AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
+					$blocking_error_count,
+					$ampless_url
+				);
+
+				/*
+				 * Temporary redirect because AMP URL may return when blocking validation errors
+				 * occur or when a non-canonical AMP theme is used.
+				 */
+				wp_safe_redirect( $ampless_url, 302 );
 				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 			}
 		}

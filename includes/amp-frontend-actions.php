@@ -15,6 +15,7 @@ _deprecated_file( __FILE__, '1.0', null, esc_html__( 'Use amp_add_amphtml_link()
  *
  * @since 0.2
  * @since 1.0 Deprecated
+ * @see amp_add_amphtml_link()
  */
 function amp_frontend_add_canonical() {
 	_deprecated_function( __FUNCTION__, '1.0', 'amp_add_amphtml_link' );

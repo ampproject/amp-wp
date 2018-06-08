@@ -26,6 +26,13 @@ use \Sabberworm\CSS\CSSList\Document;
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Error code for tree shaking.
+	 *
+	 * @var string
+	 */
+	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -37,6 +44,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
+	 *      @type bool     $accept_tree_shaking        Whether to accept tree-shaking by default and bypass a validation error.
 	 * }
 	 */
 	protected $args;
@@ -56,6 +64,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		),
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
+		'accept_tree_shaking'       => false,
 	);
 
 	/**
@@ -204,7 +213,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'illegal_css_at_rule',
 			'illegal_css_important',
 			'illegal_css_property',
-			'removed_unused_css_rules',
+			self::TREE_SHAKING_ERROR_CODE,
 			'unrecognized_css',
 			'disallowed_file_extension',
 			'file_path_not_found',
@@ -1867,9 +1876,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		);
 
-		if ( $is_too_much_css && $should_tree_shake ) {
+		if ( $is_too_much_css && $should_tree_shake && empty( $this->args['accept_tree_shaking'] ) ) {
 			$should_tree_shake = $this->should_sanitize_validation_error( array(
-				'code' => 'removed_unused_css_rules',
+				'code' => self::TREE_SHAKING_ERROR_CODE,
 			) );
 		}
 

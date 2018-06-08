@@ -783,6 +783,22 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			array( 'removed_unused_css_rules', 'excessive_css' ),
 			$error_codes
 		);
+
+		// Make sure the accept_tree_shaking option results in no removed_unused_css_rules error being raised.
+		$error_codes = array();
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'accept_tree_shaking'       => true,
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$this->assertEquals(
+			array( 'excessive_css' ),
+			$error_codes
+		);
 	}
 
 	/**

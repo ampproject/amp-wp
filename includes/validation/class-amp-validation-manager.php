@@ -20,6 +20,13 @@ class AMP_Validation_Manager {
 	const VALIDATE_QUERY_VAR = 'amp_validate';
 
 	/**
+	 * Query var for containing the number of validation errors on the frontend after redirection when invalid.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERRORS_QUERY_VAR = 'amp_validation_errors';
+
+	/**
 	 * Query var for passing status preview/update for validation error.
 	 *
 	 * @var string
@@ -141,8 +148,8 @@ class AMP_Validation_Manager {
 
 		self::$should_locate_sources = $args['should_locate_sources'];
 
-		add_action( 'init', array( 'AMP_Invalid_URL_Post_Type', 'register' ) );
-		add_action( 'init', array( 'AMP_Validation_Error_Taxonomy', 'register' ) );
+		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validation_Error_Taxonomy::register();
 
 		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
@@ -159,8 +166,142 @@ class AMP_Validation_Manager {
 			}
 		} );
 
+		// Prevent query vars from persisting after redirect.
+		add_filter( 'removable_query_args', function( $query_vars ) {
+			$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+			return $query_vars;
+		} );
+
+		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
+
+		/*
+		 * Set sanitization options on the frontend. These filters get added only on the frontend so that
+		 * the user is able to keep track of the errors that they haven't seen before and decide whether
+		 * they need to get fixed (rejected) or not (accepted).
+		 */
+		add_action( 'template_redirect', function() {
+			if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) {
+				AMP_Validation_Error_Taxonomy::accept_validation_errors( true );
+			} elseif ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ) {
+				AMP_Validation_Error_Taxonomy::accept_validation_errors(
+					array(
+						AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE => true,
+					)
+				);
+			}
+		} );
+
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
+		}
+	}
+
+	/**
+	 * Return whether sanitization is forcibly accepted, whether because in native mode or via user option.
+	 *
+	 * @return bool Whether sanitization is forcibly accepted.
+	 */
+	public static function is_sanitization_forcibly_accepted() {
+		return amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' );
+	}
+
+	/**
+	 * Add menu items to admin bar for AMP.
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
+	 */
+	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
+		if ( is_admin() || ! self::has_cap() || ! ( amp_is_canonical() || AMP_Theme_Support::is_paired_available() ) ) {
+			return;
+		}
+
+		$amp_invalid_url_post = null;
+
+		// @todo The amp_invalid_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
+		$amp_url = amp_get_current_url();
+		$amp_url = remove_query_arg( wp_removable_query_args(), $amp_url );
+		if ( ! amp_is_canonical() ) {
+			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
+		}
+
+		$error_count = -1;
+		if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+			$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
+		}
+		if ( $error_count < 0 ) {
+			$amp_invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
+			if ( $amp_invalid_url_post ) {
+				$error_count = count( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post, array( 'ignore_accepted' => true ) ) );
+			}
+		}
+
+		$title = '';
+		if ( $error_count > -1 ) {
+			if ( 0 === $error_count ) {
+				$title .= '&#x2705; ';
+			} else {
+				$title .= '&#x274C; ';
+			}
+		}
+		$title .= 'AMP';
+
+		$wp_admin_bar->add_menu( array(
+			'id'    => 'amp',
+			'title' => $title,
+			'href'  => esc_url( $amp_url ),
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html__( 'View AMP version', 'amp' ),
+			'href'   => esc_url( $amp_url ),
+		) );
+
+		if ( $error_count <= 0 ) {
+			$title = esc_html__( 'Re-validate', 'amp' );
+		} else {
+			$title = esc_html(
+				sprintf(
+					/* translators: %s is count of validation errors */
+					_n(
+						'Re-validate (%s validation error)',
+						'Re-validate (%s validation errors)',
+						$error_count,
+						'amp'
+					),
+					number_format_i18n( $error_count )
+				)
+			);
+		}
+
+		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_invalid_url_post ? $amp_invalid_url_post : $amp_url );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'amp',
+			'id'     => 'amp-validity',
+			'title'  => $title,
+			'href'   => esc_url( $validate_url ),
+		) );
+
+		// Scrub the query var from the URL.
+		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+			add_action( 'wp_before_admin_bar_render', function() {
+				?>
+				<script>
+				(function( queryVar ) {
+					var urlParser = document.createElement( 'a' );
+					urlParser.href = location.href;
+					urlParser.search = urlParser.search.substr( 1 ).split( /&/ ).filter( function( part ) {
+						return 0 !== part.indexOf( queryVar + '=' );
+					} );
+					if ( urlParser.href !== location.href ) {
+						history.replaceState( {}, '', urlParser.href );
+					}
+				})( <?php echo wp_json_encode( self::VALIDATION_ERRORS_QUERY_VAR ); ?> );
+				</script>
+				<?php
+			} );
 		}
 	}
 
@@ -359,8 +500,11 @@ class AMP_Validation_Manager {
 			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
 			foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = array(
-					'sanitized' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['status'],
-					'error'     => $result['data'],
+					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['status'],
+					'error'       => $result['data'],
+					'status'      => $result['status'],
+					'term_status' => $result['term_status'],
+					'forced'      => $result['forced'],
 				);
 			}
 		}
@@ -461,6 +605,8 @@ class AMP_Validation_Manager {
 	 *
 	 * If it's not valid AMP, it displays an error message above the 'Classic' editor.
 	 *
+	 * This is essentially a PHP implementation of ampBlockValidation.handleValidationErrorsStateChange() in JS.
+	 *
 	 * @param WP_Post $post The updated post.
 	 * @return void
 	 */
@@ -479,10 +625,16 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$validation_errors = wp_list_pluck(
-			AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post, array( 'ignore_accepted' => true ) ),
-			'data'
-		);
+		$has_actually_unaccepted_error = false;
+		$validation_errors             = array();
+		foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
+			if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['term_status'] ) {
+				$validation_errors[] = $error['data'];
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['status'] ) {
+					$has_actually_unaccepted_error = true;
+				}
+			}
+		}
 
 		// No validation errors so abort.
 		if ( empty( $validation_errors ) ) {
@@ -491,7 +643,13 @@ class AMP_Validation_Manager {
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
-		esc_html_e( 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served.', 'amp' );
+		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
+		echo ' ';
+		if ( $has_actually_unaccepted_error && ! amp_is_canonical() ) {
+			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+		} else {
+			esc_html_e( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
+		}
 		echo sprintf(
 			' <a href="%s" target="_blank">%s</a>',
 			esc_url( get_edit_post_link( $invalid_url_post ) ),
@@ -1182,15 +1340,16 @@ class AMP_Validation_Manager {
 	/**
 	 * Determine if there are any validation errors which have not been ignored.
 	 *
-	 * @return bool Whether AMP is blocked.
+	 * @return int Count of errors that block AMP.
 	 */
-	public static function has_blocking_validation_errors() {
+	public static function count_blocking_validation_errors() {
+		$count = 0;
 		foreach ( self::$validation_results as $result ) {
 			if ( false === $result['sanitized'] ) {
-				return true;
+				$count++;
 			}
 		}
-		return false;
+		return $count;
 	}
 
 	/**
@@ -1261,6 +1420,7 @@ class AMP_Validation_Manager {
 			if ( ! empty( $css_validation_errors ) ) {
 				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
+			$sanitizers['AMP_Style_Sanitizer']['accept_tree_shaking'] = AMP_Options_Manager::get_option( 'accept_tree_shaking' );
 		}
 
 		return $sanitizers;
@@ -1450,6 +1610,7 @@ class AMP_Validation_Manager {
 		$data = wp_json_encode( array(
 			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ), // @todo POT file.
 			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
+			'isCanonical'          => amp_is_canonical(),
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
 	}

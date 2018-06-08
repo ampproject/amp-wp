@@ -24,7 +24,14 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * @var string
 	 */
-	const RECHECK_ACTION = 'amp_recheck';
+	const VALIDATE_ACTION = 'amp_validate';
+
+	/**
+	 * The action to bulk recheck URLs for AMP validity.
+	 *
+	 * @var string
+	 */
+	const BULK_VALIDATE_ACTION = 'amp_bulk_validate';
 
 	/**
 	 * Action to update the status of AMP validation errors.
@@ -119,7 +126,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
-		add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
+		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, array( __CLASS__, 'handle_validation_error_status_update' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
 
@@ -135,7 +142,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'removable_query_args', function( $query_vars ) {
 			$query_vars[] = 'amp_actioned';
 			$query_vars[] = 'amp_taxonomy_terms_updated';
-			$query_vars[] = self::REMAINING_ERRORS;
+			$query_vars[] = AMP_Invalid_URL_Post_Type::REMAINING_ERRORS;
 			$query_vars[] = 'amp_urls_tested';
 			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
@@ -172,33 +179,48 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Gets validation errors for a given invalid URL post.
 	 *
-	 * @param int|WP_Post $post Post of amp_invalid_url type.
-	 * @param array       $args {
+	 * @param string|int|WP_Post $url Either the URL string or a post (ID or WP_Post) of amp_invalid_url type.
+	 * @param array              $args {
 	 *     Args.
 	 *
 	 *     @type bool $ignore_accepted Exclude validation errors that are accepted. Default false.
 	 * }
 	 * @return array List of errors, with keys for term, data, status, and (sanitization) forced.
 	 */
-	public static function get_invalid_url_validation_errors( $post, $args = array() ) {
-		$args   = array_merge(
+	public static function get_invalid_url_validation_errors( $url, $args = array() ) {
+		$args = array_merge(
 			array(
 				'ignore_accepted' => false,
 			),
 			$args
 		);
-		$post   = get_post( $post );
-		$errors = array();
 
+		// Look up post by URL or ensure the amp_invalid_url object.
+		if ( is_string( $url ) ) {
+			$post = self::get_invalid_url_post( $url );
+		} else {
+			$post = get_post( $url );
+		}
+		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return array();
+		}
+
+		// Skip when parse error.
 		$stored_validation_errors = json_decode( $post->post_content, true );
 		if ( ! is_array( $stored_validation_errors ) ) {
 			return array();
 		}
+
+		$errors = array();
 		foreach ( $stored_validation_errors as $stored_validation_error ) {
 			if ( ! isset( $stored_validation_error['term_slug'] ) ) {
 				continue;
 			}
+
 			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			if ( ! $term ) {
+				continue;
+			}
 
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $stored_validation_error['data'] );
 			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
@@ -217,55 +239,51 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Get counts for the validation errors associated with a given invalid URL.
-	 *
-	 * @param int|WP_Post $post Post of amp_invalid_url type.
-	 * @return array Term counts.
-	 */
-	public static function get_invalid_url_validation_error_counts( $post ) {
-		$counts = array_fill_keys(
-			array(
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
-			),
-			0
-		);
-
-		$validation_errors = self::get_invalid_url_validation_errors( $post );
-		foreach ( $validation_errors as $error ) {
-			$counts[ $error['status'] ]++;
-		}
-		return $counts;
-	}
-
-	/**
 	 * Display summary of the validation error counts for a given post.
 	 *
 	 * @param int|WP_Post $post Post of amp_invalid_url type.
 	 */
 	public static function display_invalid_url_validation_error_counts_summary( $post ) {
+		$counts = array_fill_keys(
+			array( 'new', 'accepted', 'rejected' ),
+			0
+		);
+
+		$validation_errors = self::get_invalid_url_validation_errors( $post );
+		foreach ( $validation_errors as $error ) {
+			switch ( $error['term']->term_group ) {
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS:
+					$counts['new']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS:
+					$counts['accepted']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS:
+					$counts['rejected']++;
+					break;
+			}
+		}
+
 		$result = array();
-		$counts = self::get_invalid_url_validation_error_counts( $post );
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] ) {
+		if ( $counts['new'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
 				__( '&#x2753; New: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] )
+				number_format_i18n( $counts['new'] )
 			) );
 		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] ) {
+		if ( $counts['accepted'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
 				__( '&#x2705; Accepted: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] )
+				number_format_i18n( $counts['accepted'] )
 			) );
 		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] ) {
+		if ( $counts['rejected'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
 				__( '&#x274C; Rejected: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] )
+				number_format_i18n( $counts['rejected'] )
 			) );
 		}
 		echo implode( '<br>', $result ); // WPCS: xss ok.
@@ -311,7 +329,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @param array       $validation_errors Validation errors.
 	 * @param string      $url               URL on which the validation errors occurred. Will be normalized to non-AMP version.
 	 * @param int|WP_Post $post              Post to update. Optional. If empty, then post is looked up by URL.
-	 * @return int|WP_Error $post_id The post ID of the custom post type used, null if post was deleted due to no validation errors, or WP_Error on failure.
+	 * @return int|WP_Error $post_id The post ID of the custom post type used, or WP_Error on failure.
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors( $validation_errors, $url, $post = null ) {
@@ -326,14 +344,6 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		}
 
-		// Since there are no validation errors and there is an existing $existing_post_id, just delete the post.
-		if ( empty( $validation_errors ) ) {
-			if ( $post ) {
-				wp_delete_post( $post->ID, true );
-			}
-			return null;
-		}
-
 		/*
 		 * The details for individual validation errors is stored in the amp_validation_error taxonomy terms.
 		 * The post content just contains the slugs for these terms and the sources for the given instance of
@@ -341,23 +351,23 @@ class AMP_Invalid_URL_Post_Type {
 		 */
 		$stored_validation_errors = array();
 
+		// Prevent Kses from corrupting JSON in description.
+		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
+		if ( false !== $has_pre_term_description_filter ) {
+			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
 		$terms = array();
 		foreach ( $validation_errors as $data ) {
 			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
 			$term_slug = $term_data['slug'];
+
 			if ( ! isset( $terms[ $term_slug ] ) ) {
 
 				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
 				$term = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 				if ( ! ( $term instanceof WP_Term ) ) {
-					$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
-					if ( false !== $has_pre_term_description_filter ) {
-						remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
-					}
 					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
-					if ( false !== $has_pre_term_description_filter ) {
-						add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
-					}
 					if ( is_wp_error( $r ) ) {
 						continue;
 					}
@@ -371,6 +381,11 @@ class AMP_Invalid_URL_Post_Type {
 			$stored_validation_errors[] = compact( 'term_slug', 'data' );
 		}
 
+		// Finish preventing Kses from corrupting JSON in description.
+		if ( false !== $has_pre_term_description_filter ) {
+			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
 		$post_content = wp_json_encode( $stored_validation_errors );
 		$placeholder  = 'amp_invalid_url_content_placeholder' . wp_rand();
 
@@ -381,7 +396,7 @@ class AMP_Invalid_URL_Post_Type {
 				&&
 				$placeholder === $post_data['post_content']
 				&&
-				self::POST_TYPE_SLUG === $post_data['post_type']
+				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === $post_data['post_type']
 			);
 			if ( $should_supply_post_content ) {
 				$post_data['post_content'] = wp_slash( $post_content );
@@ -648,9 +663,9 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-		$actions[ self::RECHECK_ACTION ] = sprintf(
+		$actions[ self::VALIDATE_ACTION ] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( self::get_recheck_url( $post, get_edit_post_link( $post->ID, 'raw' ) ) ),
+			esc_url( self::get_recheck_url( $post ) ),
 			esc_html__( 'Re-check', 'amp' )
 		);
 
@@ -665,7 +680,7 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function add_bulk_action( $actions ) {
 		unset( $actions['edit'] );
-		$actions[ self::RECHECK_ACTION ] = esc_html__( 'Recheck', 'amp' );
+		$actions[ self::BULK_VALIDATE_ACTION ] = esc_html__( 'Recheck', 'amp' );
 		return $actions;
 	}
 
@@ -678,7 +693,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return string $redirect The filtered URL of the redirect.
 	 */
 	public static function handle_bulk_action( $redirect, $action, $items ) {
-		if ( self::RECHECK_ACTION !== $action ) {
+		if ( self::BULK_VALIDATE_ACTION !== $action ) {
 			return $redirect;
 		}
 		$remaining_invalid_urls = array();
@@ -703,7 +718,13 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post );
-			if ( ! empty( $validity['validation_errors'] ) ) {
+			$unaccepted_error_count = count( array_filter(
+				$validity['validation_errors'],
+				function( $error ) {
+					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+				}
+			) );
+			if ( $unaccepted_error_count > 0 ) {
 				$remaining_invalid_urls[] = $validity['url'];
 			}
 		}
@@ -761,10 +782,10 @@ class AMP_Invalid_URL_Post_Type {
 			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // WPCS: CSRF ok.
 			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // WPCS: CSRF ok.
 			if ( $errors_remain ) {
+				$message = _n( 'The rechecked URL still has unaccepted validation errors.', 'The rechecked URLs still have unaccepted validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'notice-warning';
-				$message = _n( 'The rechecked URL still has blocking validation errors.', 'The rechecked URLs still have validation errors.', $count_urls_tested, 'amp' );
 			} else {
-				$message = _n( 'The rechecked URL has no blocking validation errors.', 'The rechecked URLs have no validation errors.', $count_urls_tested, 'amp' );
+				$message = _n( 'The rechecked URL is free of unaccepted validation errors.', 'The rechecked URLs are free of unaccepted validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'updated';
 			}
 
@@ -798,41 +819,70 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Handles clicking 'recheck' on the inline post actions.
+	 * Handles clicking 'recheck' on the inline post actions and in the admin bar on the frontend.
 	 *
-	 * @param int $post_id The post ID of the recheck.
-	 * @return void
+	 * @throws Exception But it is caught. This is here for a PHPCS bug.
 	 */
-	public static function handle_inline_recheck( $post_id ) {
-		check_admin_referer( self::NONCE_ACTION . $post_id );
-		$validation_results = self::recheck_post( $post_id );
+	public static function handle_validate_request() {
+		check_admin_referer( self::NONCE_ACTION );
+		if ( ! AMP_Validation_Manager::has_cap() ) {
+			wp_die( esc_html__( 'You do not have permissions to validate an AMP URL. Did you get logged out?', 'amp' ) );
+		}
 
 		$redirect = wp_get_referer();
-		if ( $redirect ) {
-			$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
-		}
 
-		if ( ! $redirect || empty( $validation_results ) ) {
-			// If there are no remaining errors and the post was deleted, redirect to edit.php instead of post.php.
-			$redirect = add_query_arg(
-				'post_type',
-				self::POST_TYPE_SLUG,
-				admin_url( 'edit.php' )
-			);
-		}
-		$args = array(
-			self::URLS_TESTED => '1',
-		);
+		$post = null;
+		$url  = null;
 
-		if ( is_wp_error( $validation_results ) ) {
-			$args['amp_validate_error'] = $validation_results->get_error_code();
-		} else {
-			$args[ self::REMAINING_ERRORS ] = count( array_filter(
-				$validation_results,
-				function( $result ) {
-					return ! $result['sanitized'];
+		try {
+			if ( isset( $_GET['post'] ) ) {
+				$post = intval( $_GET['post'] );
+				if ( $post <= 0 ) {
+					throw new Exception( 'unknown_post' );
+				}
+				$post = get_post( $post );
+				if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+					throw new Exception( 'invalid_post' );
+				}
+				$url = self::get_url_from_post( $post );
+			} elseif ( isset( $_GET['url'] ) ) {
+				$url = wp_validate_redirect( esc_url_raw( wp_unslash( $_GET['url'] ) ), null );
+				if ( ! $url ) {
+					throw new Exception( 'illegal_url' );
+				}
+			}
+
+			if ( ! $url ) {
+				throw new Exception( 'missing_url' );
+			}
+
+			$validity = AMP_Validation_Manager::validate_url( $url );
+			if ( is_wp_error( $validity ) ) {
+				throw new Exception( esc_html( $validity->get_error_code() ) );
+			}
+
+			$stored = self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post->ID );
+			if ( is_wp_error( $stored ) ) {
+				throw new Exception( esc_html( $stored->get_error_code() ) );
+			}
+			$redirect = get_edit_post_link( $stored, 'raw' );
+
+			$error_count = count( array_filter(
+				$validity['validation_errors'],
+				function ( $error ) {
+					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
 				}
 			) );
+
+			$args[ self::URLS_TESTED ]      = '1';
+			$args[ self::REMAINING_ERRORS ] = $error_count;
+		} catch ( Exception $e ) {
+			$args['amp_validate_error'] = $e->getMessage();
+			$args[ self::URLS_TESTED ]  = '0';
+
+			if ( $post ) {
+				$redirect = get_edit_post_link( $post->ID, 'raw' );
+			}
 		}
 
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
@@ -843,7 +893,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * Re-check invalid URL post for whether it has blocking validation errors.
 	 *
 	 * @param int|WP_Post $post Post.
-	 * @return array|WP_Error List of blocking validation resukts, or a WP_Error in the case of failure.
+	 * @return array|WP_Error List of blocking validation results, or a WP_Error in the case of failure.
 	 */
 	public static function recheck_post( $post ) {
 		$post = get_post( $post );
@@ -960,12 +1010,6 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_status_meta_box( $post ) {
-		$redirect_url = add_query_arg(
-			'post',
-			$post->ID,
-			admin_url( 'post.php' )
-		);
-
 		?>
 		<style>
 			#amp_validation_status .inside {
@@ -981,13 +1025,15 @@ class AMP_Invalid_URL_Post_Type {
 			<div id="minor-publishing">
 				<div id="minor-publishing-actions">
 					<div id="re-check-action">
-						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post, $redirect_url ) ); ?>">
+						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post ) ); ?>">
 							<?php esc_html_e( 'Re-check', 'amp' ); ?>
 						</a>
 					</div>
-					<div id="preview-action">
-						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
-					</div>
+					<?php if ( ! AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
+						<div id="preview-action">
+							<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+						</div>
+					<?php endif; ?>
 					<div class="clear"></div>
 				</div>
 				<div id="misc-publishing-actions">
@@ -1036,10 +1082,19 @@ class AMP_Invalid_URL_Post_Type {
 	public static function print_validation_errors_meta_box( $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 
+		if ( empty( $validation_errors ) ) {
+			?>
+			<div class="notice notice-success notice-alt inline">
+				<p><?php esc_html_e( 'There are no AMP validation errors on this URL.', 'amp' ); ?></p>
+			</div>
+			<?php
+			return;
+		}
+
 		$url = self::get_url_from_post( $post );
 
-		$can_serve_amp = 0 === count( array_filter( $validation_errors, function( $validation_error ) {
-			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['status'];
+		$has_unaccepted_errors = 0 !== count( array_filter( $validation_errors, function( $validation_error ) {
+			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['term_status'];
 		} ) );
 		?>
 		<style>
@@ -1052,13 +1107,26 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		</style>
 
-		<?php if ( $can_serve_amp ) : ?>
+		<?php if ( $has_unaccepted_errors ) : ?>
+			<?php if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
+				<div class="notice notice-warning notice-alt inline">
+					<p>
+						<?php esc_html_e( 'This URL will be served served as valid AMP but some of the markup will be stripped from the response since it is not valid.', 'amp' ); ?>
+						<?php if ( amp_is_canonical() ) : ?>
+							<?php esc_html_e( 'Accepting sanitization is required for native AMP mode.', 'amp' ); ?>
+						<?php else : ?>
+							<?php esc_html_e( 'You have elected in the AMP settings for all sanitization to be accepted.', 'amp' ); ?>
+						<?php endif; ?>
+					</p>
+				</div>
+			<?php else : ?>
+				<div class="notice notice-error notice-alt inline">
+					<p><?php esc_html_e( 'This URL cannot be served as AMP because it has validation errors which are either new or rejected as being blockers.', 'amp' ); ?></p>
+				</div>
+			<?php endif; ?>
+		<?php else : ?>
 			<div class="notice notice-success notice-alt inline">
 				<p><?php esc_html_e( 'This URL can be served as AMP because all validation errors have been accepted as not being blockers.', 'amp' ); ?></p>
-			</div>
-		<?php else : ?>
-			<div class="notice notice-warning notice-alt inline">
-				<p><?php esc_html_e( 'This URL cannot be served as AMP because it has validation errors which are either new or rejected as being blockers.', 'amp' ); ?></p>
 			</div>
 		<?php endif; ?>
 
@@ -1079,6 +1147,7 @@ class AMP_Invalid_URL_Post_Type {
 					}
 				} );
 				validatePreviewUrl += '&' + $.param( params );
+				validatePreviewUrl += '#development=1';
 				window.open( validatePreviewUrl, 'amp-validation-error-term-status-preview-' + String( postId ) );
 			} );
 		} );
@@ -1094,9 +1163,9 @@ class AMP_Invalid_URL_Post_Type {
 		}
 		?>
 
-		<?php if ( $has_forced_sanitized ) : ?>
+		<?php if ( $has_forced_sanitized || ( $has_unaccepted_errors && amp_is_canonical() ) ) : ?>
 			<div class="notice notice-info notice-alt inline">
-				<p><?php esc_html_e( 'This site is configured to automatically decide whether or not some validation errors may be accepted. For these errors, you cannot change their status below.', 'amp' ); ?></p>
+				<p>&#x1F6A9; <?php esc_html_e( 'Flagged validation error statuses will not be applied to your site since they are automatically handled by the theme or the plugin\'s settings. You can use the flag to mark issues that you need to follow up on.', 'amp' ); ?></p>
 			</div>
 		<?php endif; ?>
 
@@ -1109,25 +1178,32 @@ class AMP_Invalid_URL_Post_Type {
 					$select_name       = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 					?>
 					<li>
-						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) ? 'open' : ''; ?>>
+						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) ? 'open' : ''; ?>>
 							<summary>
 								<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 									<?php esc_html_e( 'Status:', 'amp' ); ?>
 								</label>
-								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>" <?php disabled( $error['forced'] ); ?>>
-									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) : ?>
+								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
+									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
 										<option value=""><?php esc_html_e( 'New', 'amp' ); ?></option>
 									<?php endif; ?>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['status'] ); ?>><?php esc_html_e( 'Accepted', 'amp' ); ?></option>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['status'] ); ?>><?php esc_html_e( 'Rejected', 'amp' ); ?></option>
+									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['term']->term_group ); ?>>
+										<?php esc_html_e( 'Accepted', 'amp' ); ?>
+										<?php if ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['status'] ) : ?>
+											&#x1F6A9;
+										<?php else : ?>
+											&#x2705;
+										<?php endif; ?>
+									</option>
+									<option style="text-decoration: line-through" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term']->term_group ); ?>>
+										<?php esc_html_e( 'Rejected', 'amp' ); ?>
+										<?php if ( amp_is_canonical() || ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) ) : ?>
+											&#x1F6A9;
+										<?php else : ?>
+											&#x274C;
+										<?php endif; ?>
+									</option>
 								</select>
-								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) : ?>
-									&#x2753;
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['status'] ) : ?>
-									&#x274C;
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) : ?>
-									&#x2705;
-								<?php endif; ?>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
 							</summary>
 							<?php if ( $term->count > 1 ) : ?>
@@ -1284,19 +1360,22 @@ class AMP_Invalid_URL_Post_Type {
 	 * Appends a query var to $redirect_url.
 	 * On clicking the link, it checks if errors still exist for $post.
 	 *
-	 * @param  WP_Post $post         The post storing the validation error.
-	 * @param  string  $redirect_url The URL of the redirect.
+	 * @param  string|WP_Post $url_or_post   The post storing the validation error or the URL to check.
 	 * @return string The URL to recheck the post.
 	 */
-	public static function get_recheck_url( $post, $redirect_url ) {
+	public static function get_recheck_url( $url_or_post ) {
+		$args = array(
+			'action' => self::VALIDATE_ACTION,
+		);
+		if ( is_string( $url_or_post ) ) {
+			$args['url'] = $url_or_post;
+		} elseif ( $url_or_post instanceof WP_Post && self::POST_TYPE_SLUG === $url_or_post->post_type ) {
+			$args['post'] = $url_or_post->ID;
+		}
+
 		return wp_nonce_url(
-			add_query_arg(
-				array(
-					'action' => self::RECHECK_ACTION,
-				),
-				$redirect_url
-			),
-			self::NONCE_ACTION . $post->ID
+			add_query_arg( $args, admin_url() ),
+			self::NONCE_ACTION
 		);
 	}
 
