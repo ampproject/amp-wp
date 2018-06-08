@@ -20,6 +20,13 @@ class AMP_Validation_Manager {
 	const VALIDATE_QUERY_VAR = 'amp_validate';
 
 	/**
+	 * Query var for containing the number of validation errors on the frontend after redirection when invalid.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERRORS_QUERY_VAR = 'amp_validation_errors';
+
+	/**
 	 * Query var for passing status preview/update for validation error.
 	 *
 	 * @var string
@@ -159,6 +166,14 @@ class AMP_Validation_Manager {
 			}
 		} );
 
+		// Prevent query vars from persisting after redirect.
+		add_filter( 'removable_query_args', function( $query_vars ) {
+			$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+			return $query_vars;
+		} );
+
+		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
+
 		/*
 		 * Set sanitization options on the frontend. These filters get added only on the frontend so that
 		 * the user is able to keep track of the errors that they haven't seen before and decide whether
@@ -188,6 +203,99 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_forcibly_accepted() {
 		return amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' );
+	}
+
+	/**
+	 * Add menu items to admin bar for AMP.
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
+	 */
+	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
+		if ( ! self::has_cap() || ! ( amp_is_canonical() || AMP_Theme_Support::is_paired_available() ) ) {
+			return;
+		}
+
+		$amp_invalid_url_post = null;
+
+		// @todo The amp_invalid_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
+		$amp_url = amp_get_current_url();
+		$amp_url = remove_query_arg( wp_removable_query_args(), $amp_url );
+		if ( ! amp_is_canonical() ) {
+			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
+		}
+
+		$error_count = -1;
+		if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+			$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
+		}
+		if ( $error_count < 0 ) {
+			$amp_invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
+			if ( $amp_invalid_url_post ) {
+				$error_count = count( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post, array( 'ignore_accepted' => true ) ) );
+			}
+		}
+
+		$title = '';
+		if ( $error_count > -1 ) {
+			if ( 0 === $error_count ) {
+				$title .= '&#x2705; ';
+			} else {
+				$title .= '&#x274C; ';
+			}
+		}
+		$title .= 'AMP';
+
+		$wp_admin_bar->add_menu( array(
+			'id'    => 'amp',
+			'title' => $title,
+			'href'  => $amp_url,
+		) );
+
+		if ( $error_count <= 0 ) {
+			$title = esc_html__( 'Re-validate', 'amp' );
+		} else {
+			$title = esc_html(
+				sprintf(
+					/* translators: %s is count of validation errors */
+					_n(
+						'Re-validate (%s validation error)',
+						'Re-validate (%s validation errors)',
+						$error_count,
+						'amp'
+					),
+					number_format_i18n( $error_count )
+				)
+			);
+		}
+
+		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_invalid_url_post ? $amp_invalid_url_post : $amp_url );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'amp',
+			'id'     => 'amp-validity',
+			'title'  => $title,
+			'href'   => esc_url( $validate_url ),
+		) );
+
+		// Scrub the query var from the URL.
+		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+			add_action( 'wp_before_admin_bar_render', function() {
+				?>
+				<script>
+				(function( queryVar ) {
+					var urlParser = document.createElement( 'a' );
+					urlParser.href = location.href;
+					urlParser.search = urlParser.search.substr( 1 ).split( /&/ ).filter( function( part ) {
+						return 0 !== part.indexOf( queryVar + '=' );
+					} );
+					if ( urlParser.href !== location.href ) {
+						history.replaceState( {}, '', urlParser.href );
+					}
+				})( <?php echo wp_json_encode( self::VALIDATION_ERRORS_QUERY_VAR ); ?> );
+				</script>
+				<?php
+			} );
+		}
 	}
 
 	/**
@@ -1225,15 +1333,16 @@ class AMP_Validation_Manager {
 	/**
 	 * Determine if there are any validation errors which have not been ignored.
 	 *
-	 * @return bool Whether AMP is blocked.
+	 * @return int Count of errors that block AMP.
 	 */
-	public static function has_blocking_validation_errors() {
+	public static function count_blocking_validation_errors() {
+		$count = 0;
 		foreach ( self::$validation_results as $result ) {
 			if ( false === $result['sanitized'] ) {
-				return true;
+				$count++;
 			}
 		}
-		return false;
+		return $count;
 	}
 
 	/**

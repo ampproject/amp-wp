@@ -24,7 +24,14 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * @var string
 	 */
-	const RECHECK_ACTION = 'amp_recheck';
+	const VALIDATE_ACTION = 'amp_validate';
+
+	/**
+	 * The action to bulk recheck URLs for AMP validity.
+	 *
+	 * @var string
+	 */
+	const BULK_VALIDATE_ACTION = 'amp_bulk_validate';
 
 	/**
 	 * Action to update the status of AMP validation errors.
@@ -119,7 +126,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
-		add_action( 'post_action_' . self::RECHECK_ACTION, array( __CLASS__, 'handle_inline_recheck' ) );
+		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, array( __CLASS__, 'handle_validation_error_status_update' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
 
@@ -135,7 +142,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'removable_query_args', function( $query_vars ) {
 			$query_vars[] = 'amp_actioned';
 			$query_vars[] = 'amp_taxonomy_terms_updated';
-			$query_vars[] = self::REMAINING_ERRORS;
+			$query_vars[] = AMP_Invalid_URL_Post_Type::REMAINING_ERRORS;
 			$query_vars[] = 'amp_urls_tested';
 			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
@@ -322,7 +329,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @param array       $validation_errors Validation errors.
 	 * @param string      $url               URL on which the validation errors occurred. Will be normalized to non-AMP version.
 	 * @param int|WP_Post $post              Post to update. Optional. If empty, then post is looked up by URL.
-	 * @return int|WP_Error $post_id The post ID of the custom post type used, null if post was deleted due to no validation errors, or WP_Error on failure.
+	 * @return int|WP_Error $post_id The post ID of the custom post type used, or WP_Error on failure.
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors( $validation_errors, $url, $post = null ) {
@@ -335,14 +342,6 @@ class AMP_Invalid_URL_Post_Type {
 			if ( ! $post ) {
 				$post = get_page_by_path( $slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
 			}
-		}
-
-		// Since there are no validation errors and there is an existing $existing_post_id, just delete the post.
-		if ( empty( $validation_errors ) ) {
-			if ( $post ) {
-				wp_delete_post( $post->ID, true );
-			}
-			return null;
 		}
 
 		/*
@@ -664,9 +663,9 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-		$actions[ self::RECHECK_ACTION ] = sprintf(
+		$actions[ self::VALIDATE_ACTION ] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( self::get_recheck_url( $post, get_edit_post_link( $post->ID, 'raw' ) ) ),
+			esc_url( self::get_recheck_url( $post ) ),
 			esc_html__( 'Re-check', 'amp' )
 		);
 
@@ -681,7 +680,7 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function add_bulk_action( $actions ) {
 		unset( $actions['edit'] );
-		$actions[ self::RECHECK_ACTION ] = esc_html__( 'Recheck', 'amp' );
+		$actions[ self::BULK_VALIDATE_ACTION ] = esc_html__( 'Recheck', 'amp' );
 		return $actions;
 	}
 
@@ -694,7 +693,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return string $redirect The filtered URL of the redirect.
 	 */
 	public static function handle_bulk_action( $redirect, $action, $items ) {
-		if ( self::RECHECK_ACTION !== $action ) {
+		if ( self::BULK_VALIDATE_ACTION !== $action ) {
 			return $redirect;
 		}
 		$remaining_invalid_urls = array();
@@ -719,7 +718,13 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post );
-			if ( ! empty( $validity['validation_errors'] ) ) {
+			$unaccepted_error_count = count( array_filter(
+				$validity['validation_errors'],
+				function( $error ) {
+					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+				}
+			) );
+			if ( $unaccepted_error_count > 0 ) {
 				$remaining_invalid_urls[] = $validity['url'];
 			}
 		}
@@ -814,41 +819,70 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Handles clicking 'recheck' on the inline post actions.
+	 * Handles clicking 'recheck' on the inline post actions and in the admin bar on the frontend.
 	 *
-	 * @param int $post_id The post ID of the recheck.
-	 * @return void
+	 * @throws Exception But it is caught. This is here for a PHPCS bug.
 	 */
-	public static function handle_inline_recheck( $post_id ) {
-		check_admin_referer( self::NONCE_ACTION . $post_id );
-		$validation_results = self::recheck_post( $post_id );
+	public static function handle_validate_request() {
+		check_admin_referer( self::NONCE_ACTION );
+		if ( ! AMP_Validation_Manager::has_cap() ) {
+			wp_die( esc_html__( 'You do not have permissions to validate an AMP URL. Did you get logged out?', 'amp' ) );
+		}
 
 		$redirect = wp_get_referer();
-		if ( $redirect ) {
-			$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
-		}
 
-		if ( ! $redirect || empty( $validation_results ) ) {
-			// If there are no remaining errors and the post was deleted, redirect to edit.php instead of post.php.
-			$redirect = add_query_arg(
-				'post_type',
-				self::POST_TYPE_SLUG,
-				admin_url( 'edit.php' )
-			);
-		}
-		$args = array(
-			self::URLS_TESTED => '1',
-		);
+		$post = null;
+		$url  = null;
 
-		if ( is_wp_error( $validation_results ) ) {
-			$args['amp_validate_error'] = $validation_results->get_error_code();
-		} else {
-			$args[ self::REMAINING_ERRORS ] = count( array_filter(
-				$validation_results,
-				function( $result ) {
-					return ! $result['sanitized'];
+		try {
+			if ( isset( $_GET['post'] ) ) {
+				$post = intval( $_GET['post'] );
+				if ( $post <= 0 ) {
+					throw new Exception( 'unknown_post' );
+				}
+				$post = get_post( $post );
+				if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+					throw new Exception( 'invalid_post' );
+				}
+				$url = self::get_url_from_post( $post );
+			} elseif ( isset( $_GET['url'] ) ) {
+				$url = wp_validate_redirect( esc_url_raw( wp_unslash( $_GET['url'] ) ), null );
+				if ( ! $url ) {
+					throw new Exception( 'illegal_url' );
+				}
+			}
+
+			if ( ! $url ) {
+				throw new Exception( 'missing_url' );
+			}
+
+			$validity = AMP_Validation_Manager::validate_url( $url );
+			if ( is_wp_error( $validity ) ) {
+				throw new Exception( esc_html( $validity->get_error_code() ) );
+			}
+
+			$stored = self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post->ID );
+			if ( is_wp_error( $stored ) ) {
+				throw new Exception( esc_html( $stored->get_error_code() ) );
+			}
+			$redirect = get_edit_post_link( $stored, 'raw' );
+
+			$error_count = count( array_filter(
+				$validity['validation_errors'],
+				function ( $error ) {
+					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
 				}
 			) );
+
+			$args[ self::URLS_TESTED ]      = '1';
+			$args[ self::REMAINING_ERRORS ] = $error_count;
+		} catch ( Exception $e ) {
+			$args['amp_validate_error'] = $e->getMessage();
+			$args[ self::URLS_TESTED ]  = '0';
+
+			if ( $post ) {
+				$redirect = get_edit_post_link( $post->ID, 'raw' );
+			}
 		}
 
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
@@ -976,12 +1010,6 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_status_meta_box( $post ) {
-		$redirect_url = add_query_arg(
-			'post',
-			$post->ID,
-			admin_url( 'post.php' )
-		);
-
 		?>
 		<style>
 			#amp_validation_status .inside {
@@ -997,7 +1025,7 @@ class AMP_Invalid_URL_Post_Type {
 			<div id="minor-publishing">
 				<div id="minor-publishing-actions">
 					<div id="re-check-action">
-						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post, $redirect_url ) ); ?>">
+						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post ) ); ?>">
 							<?php esc_html_e( 'Re-check', 'amp' ); ?>
 						</a>
 					</div>
@@ -1053,6 +1081,15 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function print_validation_errors_meta_box( $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
+
+		if ( empty( $validation_errors ) ) {
+			?>
+			<div class="notice notice-success notice-alt inline">
+				<p><?php esc_html_e( 'There are no AMP validation errors on this URL.', 'amp' ); ?></p>
+			</div>
+			<?php
+			return;
+		}
 
 		$url = self::get_url_from_post( $post );
 
@@ -1323,19 +1360,22 @@ class AMP_Invalid_URL_Post_Type {
 	 * Appends a query var to $redirect_url.
 	 * On clicking the link, it checks if errors still exist for $post.
 	 *
-	 * @param  WP_Post $post         The post storing the validation error.
-	 * @param  string  $redirect_url The URL of the redirect.
+	 * @param  string|WP_Post $url_or_post   The post storing the validation error or the URL to check.
 	 * @return string The URL to recheck the post.
 	 */
-	public static function get_recheck_url( $post, $redirect_url ) {
+	public static function get_recheck_url( $url_or_post ) {
+		$args = array(
+			'action' => self::VALIDATE_ACTION,
+		);
+		if ( is_string( $url_or_post ) ) {
+			$args['url'] = $url_or_post;
+		} elseif ( $url_or_post instanceof WP_Post && self::POST_TYPE_SLUG === $url_or_post->post_type ) {
+			$args['post'] = $url_or_post->ID;
+		}
+
 		return wp_nonce_url(
-			add_query_arg(
-				array(
-					'action' => self::RECHECK_ACTION,
-				),
-				$redirect_url
-			),
-			self::NONCE_ACTION . $post->ID
+			add_query_arg( $args, admin_url() ),
+			self::NONCE_ACTION
 		);
 	}
 

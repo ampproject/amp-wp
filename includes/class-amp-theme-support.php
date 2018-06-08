@@ -1208,7 +1208,8 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
 
-		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
+		$blocking_error_count = AMP_Validation_Manager::count_blocking_validation_errors();
+		if ( ! AMP_Validation_Manager::should_validate_response() && $blocking_error_count > 0 ) {
 
 			// Note the canonical check will not currently ever be met because dirty AMP is not yet supported; all validation errors will forcibly be sanitized.
 			if ( amp_is_canonical() ) {
@@ -1224,7 +1225,19 @@ class AMP_Theme_Support {
 					$head->appendChild( $script );
 				}
 			} else {
-				self::redirect_ampless_url( false );
+				$current_url = amp_get_current_url();
+				$ampless_url = amp_remove_endpoint( $current_url );
+				$ampless_url = add_query_arg(
+					AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
+					$blocking_error_count,
+					$ampless_url
+				);
+
+				/*
+				 * Temporary redirect because AMP URL may return when blocking validation errors
+				 * occur or when a non-canonical AMP theme is used.
+				 */
+				wp_safe_redirect( $ampless_url, 302 );
 				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 			}
 		}
