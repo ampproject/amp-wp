@@ -198,12 +198,15 @@ class AMP_Options_Menu {
 		?>
 		<fieldset>
 			<?php
-			$forced_sanitization = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
+			$auto_sanitization         = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
 				'code' => 'non_existent',
 			) );
-			$forced_tree_shaking = $forced_sanitization || AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
+			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
 				'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
 			) );
+
+			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
+			$forced_tree_shaking = $forced_sanitization || 'with_filter' === $tree_shaking_sanitization['forced'];
 			?>
 
 			<?php if ( $forced_sanitization ) : ?>

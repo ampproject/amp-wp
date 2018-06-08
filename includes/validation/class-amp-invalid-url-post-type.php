@@ -232,55 +232,62 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Get counts for the validation errors associated with a given invalid URL.
-	 *
-	 * @param int|WP_Post $post Post of amp_invalid_url type.
-	 * @return array Term counts.
-	 */
-	public static function get_invalid_url_validation_error_counts( $post ) {
-		$counts = array_fill_keys(
-			array(
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
-			),
-			0
-		);
-
-		$validation_errors = self::get_invalid_url_validation_errors( $post );
-		foreach ( $validation_errors as $error ) {
-			$counts[ $error['status'] ]++;
-		}
-		return $counts;
-	}
-
-	/**
 	 * Display summary of the validation error counts for a given post.
 	 *
 	 * @param int|WP_Post $post Post of amp_invalid_url type.
 	 */
 	public static function display_invalid_url_validation_error_counts_summary( $post ) {
+		$counts = array_fill_keys(
+			array( 'new', 'accepted', 'rejected', 'flagged' ),
+			0
+		);
+
+		$validation_errors = self::get_invalid_url_validation_errors( $post );
+		foreach ( $validation_errors as $error ) {
+			switch ( $error['term']->term_group ) {
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS:
+					$counts['new']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS:
+					$counts['accepted']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS:
+					if ( $error['forced'] ) {
+						$counts['flagged']++;
+					} else {
+						$counts['rejected']++;
+					}
+					break;
+			}
+		}
+
 		$result = array();
-		$counts = self::get_invalid_url_validation_error_counts( $post );
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] ) {
+		if ( $counts['new'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
 				__( '&#x2753; New: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS ] )
+				number_format_i18n( $counts['new'] )
 			) );
 		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] ) {
+		if ( $counts['accepted'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
 				__( '&#x2705; Accepted: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ] )
+				number_format_i18n( $counts['accepted'] )
 			) );
 		}
-		if ( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] ) {
+		if ( $counts['flagged'] ) {
+			$result[] = esc_html( sprintf(
+				/* translators: %s is count */
+				__( '&#x1F6A9; Flagged: %s', 'amp' ),
+				number_format_i18n( $counts['flagged'] )
+			) );
+		}
+		if ( $counts['rejected'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
 				__( '&#x274C; Rejected: %s', 'amp' ),
-				number_format_i18n( $counts[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ] )
+				number_format_i18n( $counts['rejected'] )
 			) );
 		}
 		echo implode( '<br>', $result ); // WPCS: xss ok.
@@ -364,17 +371,8 @@ class AMP_Invalid_URL_Post_Type {
 
 		$terms = array();
 		foreach ( $validation_errors as $data ) {
-			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $data );
-			$term_data    = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
-			$term_slug    = $term_data['slug'];
-
-			/*
-			 * If the sanitization for the error is forced, make sure the term is created/updated with that group since
-			 * the user will not be able to change it from NEW to ACCEPTED or REJECTED.
-			 */
-			if ( $sanitization['forced'] ) {
-				$term_data['term_group'] = $sanitization['status'];
-			}
+			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
+			$term_slug = $term_data['slug'];
 
 			if ( ! isset( $terms[ $term_slug ] ) ) {
 
@@ -388,8 +386,6 @@ class AMP_Invalid_URL_Post_Type {
 					$term_id = $r['term_id'];
 					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
 					$term = get_term( $term_id );
-				} elseif ( isset( $term_data['term_group'] ) && $term->term_group !== $term_data['term_group'] ) {
-					wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
 				}
 				$terms[ $term_slug ] = $term;
 			}
@@ -412,7 +408,7 @@ class AMP_Invalid_URL_Post_Type {
 				&&
 				$placeholder === $post_data['post_content']
 				&&
-				self::POST_TYPE_SLUG === $post_data['post_type']
+				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === $post_data['post_type']
 			);
 			if ( $should_supply_post_content ) {
 				$post_data['post_content'] = wp_slash( $post_content );
@@ -522,8 +518,8 @@ class AMP_Invalid_URL_Post_Type {
 			sprintf(
 				/* translators: %s is the post count */
 				_nx(
-					'With Rejected Errors <span class="count">(%s)</span>',
-					'With Rejected Errors <span class="count">(%s)</span>',
+					'With Unacceptable Errors <span class="count">(%s)</span>',
+					'With Unacceptable Errors <span class="count">(%s)</span>',
 					$with_rejected_query->found_posts,
 					'posts',
 					'amp'
@@ -1117,6 +1113,7 @@ class AMP_Invalid_URL_Post_Type {
 					}
 				} );
 				validatePreviewUrl += '&' + $.param( params );
+				validatePreviewUrl += '#development=1';
 				window.open( validatePreviewUrl, 'amp-validation-error-term-status-preview-' + String( postId ) );
 			} );
 		} );
@@ -1134,7 +1131,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		<?php if ( $has_forced_sanitized ) : ?>
 			<div class="notice notice-info notice-alt inline">
-				<p><?php esc_html_e( 'This site is configured to automatically decide whether or not some validation errors may be accepted. For these errors, you cannot change their status below.', 'amp' ); ?></p>
+				<p>&#x1F6A9; <?php esc_html_e( 'Flagged errors will still be sanitized in the response (like accepted errors) but they are marked because you intend to fix them later.', 'amp' ); ?></p>
 			</div>
 		<?php endif; ?>
 
@@ -1147,23 +1144,33 @@ class AMP_Invalid_URL_Post_Type {
 					$select_name       = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 					?>
 					<li>
-						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) ? 'open' : ''; ?>>
+						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) ? 'open' : ''; ?>>
 							<summary>
 								<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 									<?php esc_html_e( 'Status:', 'amp' ); ?>
 								</label>
-								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>" <?php disabled( $error['forced'] ); ?>>
-									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) : ?>
+								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
+									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
 										<option value=""><?php esc_html_e( 'New', 'amp' ); ?></option>
 									<?php endif; ?>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['status'] ); ?>><?php esc_html_e( 'Accepted', 'amp' ); ?></option>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['status'] ); ?>><?php esc_html_e( 'Rejected', 'amp' ); ?></option>
+									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['term']->term_group ); ?>><?php esc_html_e( 'Accepted', 'amp' ); ?></option>
+									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term']->term_group ); ?>>
+										<?php if ( $error['forced'] ) : ?>
+											<?php esc_html_e( 'Flagged', 'amp' ); ?>
+										<?php else : ?>
+											<?php esc_html_e( 'Rejected', 'amp' ); ?>
+										<?php endif; ?>
+									</option>
 								</select>
-								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['status'] ) : ?>
+								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
 									&#x2753;
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['status'] ) : ?>
-									&#x274C;
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) : ?>
+								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['term']->term_group ) : ?>
+									<?php if ( $error['forced'] ) : ?>
+										&#x1F6A9;
+									<?php else : ?>
+										&#x274C;
+									<?php endif; ?>
+								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['term']->term_group ) : ?>
 									&#x2705;
 								<?php endif; ?>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
