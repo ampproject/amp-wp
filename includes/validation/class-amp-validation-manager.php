@@ -211,7 +211,7 @@ class AMP_Validation_Manager {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
 	 */
 	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
-		if ( ! self::has_cap() || ! ( amp_is_canonical() || AMP_Theme_Support::is_paired_available() ) ) {
+		if ( is_admin() || ! self::has_cap() || ! ( amp_is_canonical() || AMP_Theme_Support::is_paired_available() ) ) {
 			return;
 		}
 
