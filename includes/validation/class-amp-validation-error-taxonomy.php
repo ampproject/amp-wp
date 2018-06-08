@@ -808,8 +808,8 @@ class AMP_Validation_Error_Taxonomy {
 			sprintf(
 				/* translators: %s is the term count */
 				_nx(
-					'Unacceptable <span class="count">(%s)</span>',
-					'Unacceptable <span class="count">(%s)</span>',
+					'Rejected <span class="count">(%s)</span>',
+					'Rejected <span class="count">(%s)</span>',
 					$rejected_term_count,
 					'terms',
 					'amp'
@@ -875,13 +875,19 @@ class AMP_Validation_Error_Taxonomy {
 			case 'status':
 				$sanitization = self::get_validation_error_sanitization( $validation_error );
 				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-					$content = '&#x2705; ' . esc_html__( 'Accepted', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
-					if ( $sanitization['forced'] ) {
-						$content = '&#x1F6A9; ' . esc_html__( 'Flagged', 'amp' );
+					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
+						$content .= '&#x1F6A9;';
 					} else {
-						$content = '&#x274C; ' . esc_html__( 'Rejected', 'amp' );
+						$content .= '&#x2705;';
 					}
+					$content .= ' ' . esc_html__( 'Accepted', 'amp' );
+				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
+					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
+						$content .= '&#x1F6A9;';
+					} else {
+						$content .= '&#x274C;';
+					}
+					$content .= ' ' . esc_html__( 'Rejected', 'amp' );
 				} else {
 					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
 				}

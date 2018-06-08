@@ -238,7 +238,7 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function display_invalid_url_validation_error_counts_summary( $post ) {
 		$counts = array_fill_keys(
-			array( 'new', 'accepted', 'rejected', 'flagged' ),
+			array( 'new', 'accepted', 'rejected' ),
 			0
 		);
 
@@ -252,11 +252,7 @@ class AMP_Invalid_URL_Post_Type {
 					$counts['accepted']++;
 					break;
 				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS:
-					if ( $error['forced'] ) {
-						$counts['flagged']++;
-					} else {
-						$counts['rejected']++;
-					}
+					$counts['rejected']++;
 					break;
 			}
 		}
@@ -274,13 +270,6 @@ class AMP_Invalid_URL_Post_Type {
 				/* translators: %s is count */
 				__( '&#x2705; Accepted: %s', 'amp' ),
 				number_format_i18n( $counts['accepted'] )
-			) );
-		}
-		if ( $counts['flagged'] ) {
-			$result[] = esc_html( sprintf(
-				/* translators: %s is count */
-				__( '&#x1F6A9; Flagged: %s', 'amp' ),
-				number_format_i18n( $counts['flagged'] )
 			) );
 		}
 		if ( $counts['rejected'] ) {
@@ -518,8 +507,8 @@ class AMP_Invalid_URL_Post_Type {
 			sprintf(
 				/* translators: %s is the post count */
 				_nx(
-					'With Unacceptable Errors <span class="count">(%s)</span>',
-					'With Unacceptable Errors <span class="count">(%s)</span>',
+					'With Rejected Errors <span class="count">(%s)</span>',
+					'With Rejected Errors <span class="count">(%s)</span>',
 					$with_rejected_query->found_posts,
 					'posts',
 					'amp'
@@ -1131,7 +1120,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		<?php if ( $has_forced_sanitized ) : ?>
 			<div class="notice notice-info notice-alt inline">
-				<p>&#x1F6A9; <?php esc_html_e( 'Flagged errors will still be sanitized in the response (like accepted errors) but they are marked because you intend to fix them later.', 'amp' ); ?></p>
+				<p>&#x1F6A9; <?php esc_html_e( 'Flagged validation error statuses will not be applied to your site since they are automatically handled by the theme or the plugin\'s settings. You can use the flag to mark issues that you need to follow up on.', 'amp' ); ?></p>
 			</div>
 		<?php endif; ?>
 
@@ -1153,26 +1142,23 @@ class AMP_Invalid_URL_Post_Type {
 									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
 										<option value=""><?php esc_html_e( 'New', 'amp' ); ?></option>
 									<?php endif; ?>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['term']->term_group ); ?>><?php esc_html_e( 'Accepted', 'amp' ); ?></option>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term']->term_group ); ?>>
-										<?php if ( $error['forced'] ) : ?>
-											<?php esc_html_e( 'Flagged', 'amp' ); ?>
+									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['term']->term_group ); ?>>
+										<?php esc_html_e( 'Accepted', 'amp' ); ?>
+										<?php if ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['status'] ) : ?>
+											&#x1F6A9;
 										<?php else : ?>
-											<?php esc_html_e( 'Rejected', 'amp' ); ?>
+											&#x2705;
+										<?php endif; ?>
+									</option>
+									<option style="text-decoration: line-through" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term']->term_group ); ?>>
+										<?php esc_html_e( 'Rejected', 'amp' ); ?>
+										<?php if ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) : ?>
+											&#x1F6A9;
+										<?php else : ?>
+											&#x274C;
 										<?php endif; ?>
 									</option>
 								</select>
-								<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
-									&#x2753;
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['term']->term_group ) : ?>
-									<?php if ( $error['forced'] ) : ?>
-										&#x1F6A9;
-									<?php else : ?>
-										&#x274C;
-									<?php endif; ?>
-								<?php elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['term']->term_group ) : ?>
-									&#x2705;
-								<?php endif; ?>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
 							</summary>
 							<?php if ( $term->count > 1 ) : ?>
