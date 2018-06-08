@@ -1284,6 +1284,7 @@ class AMP_Validation_Manager {
 			if ( ! empty( $css_validation_errors ) ) {
 				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
+			$sanitizers['AMP_Style_Sanitizer']['accept_tree_shaking'] = AMP_Options_Manager::get_option( 'accept_tree_shaking' );
 		}
 
 		return $sanitizers;
