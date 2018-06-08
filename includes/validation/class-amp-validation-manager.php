@@ -248,7 +248,14 @@ class AMP_Validation_Manager {
 		$wp_admin_bar->add_menu( array(
 			'id'    => 'amp',
 			'title' => $title,
-			'href'  => $amp_url,
+			'href'  => esc_url( $amp_url ),
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html__( 'View AMP version', 'amp' ),
+			'href'   => esc_url( $amp_url ),
 		) );
 
 		if ( $error_count <= 0 ) {
