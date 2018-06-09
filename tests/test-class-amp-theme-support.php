@@ -41,6 +41,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		parent::tearDown();
 		AMP_Validation_Manager::reset_validation_results();
 		remove_theme_support( 'amp' );
+		remove_theme_support( 'custom-header' );
 		$_REQUEST                = array(); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
 		unset( $_SERVER['REQUEST_URI'] );
@@ -109,39 +110,125 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		) );
 
 		// Test paired mode singular.
-		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test paired mode homepage.
-		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test canonical.
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		remove_theme_support( 'amp' );
 		add_theme_support( 'amp' );
 		$this->go_to( get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 	}
 
 	/**
-	 * Test redirect_canonical_amp.
+	 * Test ensure_proper_amp_location for canonical.
 	 *
-	 * @covers AMP_Theme_Support::redirect_canonical_amp()
+	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
 	 */
-	public function test_redirect_canonical_amp() {
-		set_query_var( amp_get_slug(), 1 );
+	public function test_ensure_proper_amp_location_canonical() {
+		add_theme_support( 'amp' );
+		$e = null;
+
+		// Already canonical.
+		$_SERVER['REQUEST_URI'] = '/foo/bar/';
+		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+
+		// URL query param.
+		$_GET[ amp_get_slug() ] = '';
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
 		try {
-			AMP_Theme_Support::redirect_canonical_amp();
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		// wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Endpoint.
+		unset( $_GET[ amp_get_slug() ] );
+		set_query_var( amp_get_slug(), '' );
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+	}
+
+	/**
+	 * Test ensure_proper_amp_location for paired.
+	 *
+	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
+	 */
+	public function test_ensure_proper_amp_location_paired() {
+		add_theme_support( 'amp', array(
+			'template_dir' => './',
+		) );
+		$e = null;
+
+		// URL query param, no redirection.
+		$_GET[ amp_get_slug() ] = '';
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
+		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+
+		// Endpoint, redirect.
+		unset( $_GET[ amp_get_slug() ] );
+		set_query_var( amp_get_slug(), '' );
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+	}
+
+	/**
+	 * Test redirect_ampless_url.
+	 *
+	 * @covers AMP_Theme_Support::redirect_ampless_url()
+	 */
+	public function test_redirect_ampless_url() {
+		$e = null;
+
+		// Try AMP URL param.
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
+		try {
+			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
 		$this->assertTrue( isset( $e ) );
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Try AMP URL endpoint.
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Make sure that if the URL doesn't have AMP that there should be no redirect.
+		$_SERVER['REQUEST_URI'] = '/foo/bar';
+		$this->assertFalse( AMP_Theme_Support::redirect_ampless_url() );
 	}
 
 	/**
@@ -299,6 +386,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', array( self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ) ) );
 		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
+		$this->assertEquals( 10, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'conditionally_output_header' ) ) );
 	}
 
 	/**
@@ -1009,7 +1097,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		ob_start();
 		?>
 		<!DOCTYPE html>
-		<html amp <?php language_attributes(); ?>>
+		<html amp>
 			<head>
 				<?php wp_head(); ?>
 				<script data-head>document.write('Illegal');</script>
@@ -1077,43 +1165,53 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$removed_nodes
 		);
 
-		$call_response = function() use ( $original_html ) {
-			return AMP_Theme_Support::prepare_response( $original_html, array(
-				'enable_response_caching' => true,
+		$prepare_response_args = array(
+			'enable_response_caching' => true,
+		);
+
+		$call_prepare_response = function() use ( $original_html, &$prepare_response_args ) {
+			AMP_Response_Headers::$headers_sent         = array();
+			AMP_Validation_Manager::$validation_results = array();
+			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
+		};
+
+		$get_server_timing_header_count = function() {
+			return count( array_filter(
+				AMP_Response_Headers::$headers_sent,
+				function( $header ) {
+					return 'Server-Timing' === $header['name'];
+				}
 			) );
 		};
 
 		// Test that first response isn't cached.
-		$first_response = $call_response();
-		$this->assertGreaterThan( 0, count( array_filter(
-			AMP_Response_Headers::$headers_sent,
-			function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		) ) );
+		$first_response = $call_prepare_response();
+		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+		$this->assertContains( '<html amp>', $first_response ); // Note: AMP because sanitized validation errors.
 
 		// Test that response cache is return upon second call.
-		AMP_Response_Headers::$headers_sent = array();
-		$this->assertEquals( $first_response, $call_response() );
-		$this->assertSame( 0, count( array_filter(
-			AMP_Response_Headers::$headers_sent,
-			function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		) ) );
+		$this->assertEquals( $first_response, $call_prepare_response() );
+		$this->assertSame( 0, $get_server_timing_header_count() );
 
 		// Test new cache upon argument change.
-		AMP_Response_Headers::$headers_sent = array();
-		AMP_Theme_Support::prepare_response( $original_html, array(
-			'enable_response_caching' => true,
-			'test_reset_by_arg'       => true,
-		) );
-		$this->assertGreaterThan( 0, count( array_filter(
-			AMP_Response_Headers::$headers_sent,
-			function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		) ) );
+		$prepare_response_args['test_reset_by_arg'] = true;
+		$call_prepare_response();
+		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+
+		// Test response is cached.
+		$call_prepare_response();
+		$this->assertSame( 0, $get_server_timing_header_count() );
+
+		// Test that response is no longer cached due to a change whether validation errors are sanitized.
+		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
+		add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		$prepared_html = $call_prepare_response();
+		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
+
+		// And test response is cached.
+		$call_prepare_response();
+		$this->assertSame( 0, $get_server_timing_header_count() );
 	}
 
 	/**
@@ -1235,5 +1333,32 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html', 10, 2 );
 		$image = '<img data-amp-layout="fill">';
 		$this->assertEquals( $image, wp_kses_post( $image ) );
+	}
+
+	/**
+	 * Test AMP_Theme_Support::conditionally_output_header().
+	 *
+	 * @see AMP_Theme_Support::conditionally_output_header()
+	 */
+	public function conditionally_output_header() {
+		$mock_image = '<img src="https://example.com/flower.jpeg">';
+
+		// If there's no theme support for 'custom-header', the callback should simply return the image.
+		$this->assertEquals(
+			$mock_image,
+			AMP_Theme_Support::conditionally_output_header( $mock_image )
+		);
+
+		// If theme support is present, but there isn't a header video selected, the callback should again return the image.
+		add_theme_support( 'custom-header', array(
+			'video' => true,
+		) );
+
+		// There's a YouTube URL as the header video.
+		set_theme_mod( 'external_header_video', 'https://www.youtube.com/watch?v=a8NScvBhVnc' );
+		$this->assertEquals(
+			'<amp-youtube width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0"></amp-youtube>',
+			AMP_Theme_Support::conditionally_output_header( $mock_image )
+		);
 	}
 }

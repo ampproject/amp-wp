@@ -473,7 +473,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMNode $node Represents an HTML element for which to extract attributes.
+	 * @param DOMElement $node Represents an HTML element for which to extract attributes.
 	 *
 	 * @return string[] The attributes for the passed node, or an
 	 *                  empty array if it has no attributes.

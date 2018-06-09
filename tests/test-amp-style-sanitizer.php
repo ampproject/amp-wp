@@ -279,6 +279,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'<html amp><head><meta charset="utf-8">',
 					'<style amp-custom>b.foo, form [submit-success] b, div[submit-failure] b, form.unused b { color: green }</style>',
 					'<style amp-custom>.dead-list li .highlighted, amp-live-list li .highlighted { background: yellow }</style>',
+					'<style amp-custom>article.missing amp-live-list li .highlighted { background: yellow }</style>',
 					'<style amp-custom>body amp-list .portland { color:blue; }</style>',
 					'</head><body>',
 					'<form method="post" action-xhr="https://example.com/subscribe" target="_top"><div submit-success><template type="amp-mustache"><b>Thanks</b>, {{name}}}</template></div></form>',
@@ -289,6 +290,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'form [submit-success] b,div[submit-failure] b{color:green}',
 					'amp-live-list li .highlighted{background:yellow}',
+					'',
 					'body amp-list .portland{color:blue}',
 				),
 				array(),
@@ -341,6 +343,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
+			if ( empty( $expected_stylesheet ) ) {
+				$this->assertEmpty( $actual_stylesheets[ $i ] );
+				continue;
+			}
+
 			if ( false === strpos( $expected_stylesheet, '{' ) ) {
 				$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			} else {
@@ -350,6 +357,281 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		$this->assertEquals( $expected_errors, $error_codes );
+	}
+
+	/**
+	 * Data for testing AMP selector conversion.
+	 *
+	 * @return array
+	 */
+	public function get_amp_selector_data() {
+		return array(
+			'img' => array(
+				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div img.logo{border:solid 1px red}',
+				'div amp-img.logo{border:solid 1px red}', // Note amp-anim is still tree-shaken because it doesn't occur in the DOM.
+			),
+			'img-missing-class' => array(
+				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div img.missing{border:solid 1px red}',
+				'', // Tree-shaken because missing class doesn't occur in the DOM.
+			),
+			'img-and-anim' => array(
+				sprintf( '<div><img class="logo" src="%s" width="200" height="100"><img class="spinner" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ), admin_url( 'images/spinner-2x.gif' ) ),
+				'div img{border:solid 1px red}',
+				'div amp-img,div amp-anim{border:solid 1px red}',
+			),
+			'img_with_amp_img' => array(
+				'<amp-img></amp-img>',
+				'amp-img img{background-color:red}',
+				'amp-img img{background-color:red}',
+			),
+			'img-cover' => array(
+				sprintf( '<div><amp-img class="logo" src="%s" width="200" height="100"></amp-img></div>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div amp-img.logo img{object-fit:cover}',
+				'div amp-img.logo img{object-fit:cover}',
+			),
+			'img-tree-shaking' => array(
+				sprintf( '<article><img class="logo" src="%s" width="200" height="100"></article>', admin_url( 'images/wordpress-logo.png' ) ),
+				'div img.logo{border:solid 1px red}',
+				'', // The selector is removed because there is no div element.
+			),
+			'playbuzz' => array(
+				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
+				'p + div.pb_feed{border:solid 1px blue}',
+				'p + amp-playbuzz.pb_feed{border:solid 1px blue}',
+			),
+			'video' => array(
+				'<article><video src="http://example.com" height="100" width="200"></video></article>',
+				'article>video{border:solid 1px green}',
+				'article>amp-video{border:solid 1px green}',
+			),
+			'video_with_amp_video' => array(
+				'<amp-video class="video"></amp-video>',
+				'amp-video.video video{border:solid 1px green}',
+				'amp-video.video video{border:solid 1px green}',
+			),
+			'iframe' => array(
+				'<p><b>purple</b><iframe src="http://example.com" height="100" width="200"></iframe></p>',
+				'p>*:not(iframe){color:purple}',
+				'p>*:not(amp-iframe){color:purple}',
+			),
+			'audio' => array(
+				'<audio src="http://example.com/foo.mp3" height="100" width="200"></audio>',
+				'audio{border:solid 1px yellow}',
+				'amp-audio{border:solid 1px yellow}',
+			),
+		);
+	}
+
+	/**
+	 * Test AMP selector conversion.
+	 *
+	 * @dataProvider get_amp_selector_data
+	 * @param string $markup Markup.
+	 * @param string $input  Input stylesheet.
+	 * @param string $output Output stylesheet.
+	 */
+	public function test_amp_selector_conversion( $markup, $input, $output ) {
+		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body>$markup</body></html>";
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$sanitizer_classes = amp_get_content_sanitizers();
+		$sanitizer_classes['AMP_Style_Sanitizer']['remove_unused_rules'] = 'always';
+		$sanitized   = AMP_Content_Sanitizer::sanitize_document( $dom, $sanitizer_classes, array(
+			'use_document_element' => true,
+		) );
+		$stylesheets = array_values( $sanitized['stylesheets'] );
+		$this->assertEquals( $output, $stylesheets[0] );
+	}
+
+	/**
+	 * Data for testing CSS hack removal.
+	 *
+	 * @return array
+	 */
+	public function get_amp_css_hacks_data() {
+		return array(
+			array(
+				'.selector { !property: value; }',
+			),
+			array(
+				'.selector { $property: value; }',
+			),
+			array(
+				'.selector { &property: value; }',
+			),
+			array(
+				'.selector { *property: value; }',
+			),
+			array(
+				'.selector { )property: value; }',
+			),
+			array(
+				'.selector { =property: value; }',
+			),
+			array(
+				'.selector { %property: value; }',
+			),
+			array(
+				'.selector { +property: value; }',
+			),
+			array(
+				'.selector { @property: value; }',
+			),
+			array(
+				'.selector { ,property: value; }',
+			),
+			array(
+				'.selector { .property: value; }',
+			),
+			array(
+				'.selector { /property: value; }',
+			),
+			array(
+				'.selector { `property: value; }',
+			),
+			array(
+				'.selector { ]property: value; }',
+			),
+			array(
+				'.selector { #property: value; }',
+			),
+			array(
+				'.selector { ~property: value; }',
+			),
+			array(
+				'.selector { ?property: value; }',
+			),
+			array(
+				'.selector { :property: value; }',
+			),
+			array(
+				'.selector { |property: value; }',
+			),
+			array(
+				'_::selection, .selector:not([attr*=\'\']) {}',
+			),
+			array(
+				':root .selector {}',
+			),
+			array(
+				'body:last-child .selector {}',
+			),
+			array(
+				'body:nth-of-type(1) .selector {}',
+			),
+			array(
+				'body:first-of-type .selector {}',
+			),
+			array(
+				'.selector:not([attr*=\'\']) {}',
+			),
+			array(
+				'.selector:not(*:root) {}',
+			),
+			array(
+				'.selector:not(*:root) {}',
+			),
+			array(
+				'body:empty .selector {}',
+			),
+			array(
+				'body:last-child .selector, x:-moz-any-link {}',
+			),
+			array(
+				'body:last-child .selector, x:-moz-any-link, x:default {}',
+			),
+			array(
+				'body:not(:-moz-handler-blocked) .selector {}',
+			),
+			array(
+				'_::-moz-progress-bar, body:last-child .selector {}',
+			),
+			array(
+				'_::-moz-range-track, body:last-child .selector {}',
+			),
+			array(
+				'_:-moz-tree-row(hover), .selector {}',
+			),
+			array(
+				'_::selection, .selector:not([attr*=\'\']) {}',
+			),
+			array(
+				'* html .selector  {}',
+			),
+			array(
+				'.unused-class.selector {}',
+			),
+			array(
+				'html > body .selector {}',
+			),
+			array(
+				'.selector, {}',
+			),
+			array(
+				'*:first-child+html .selector {}',
+			),
+			array(
+				'.selector, x:-IE7 {}',
+			),
+			array(
+				'*+html .selector {}',
+			),
+			array(
+				'body*.selector {}',
+			),
+			array(
+				'.selector\ {}',
+			),
+			array(
+				'html > /**/ body .selector {}',
+			),
+			array(
+				'head ~ /**/ body .selector {}',
+			),
+			array(
+				'_::selection, .selector:not([attr*=\'\']) {}',
+			),
+			array(
+				':root .selector {}',
+			),
+			array(
+				'body:last-child .selector {}',
+			),
+			array(
+				'body:nth-of-type(1) .selector {}',
+			),
+			array(
+				'body:first-of-type .selector {}',
+			),
+			array(
+				'.selector:not([attr*=\'\']) {}',
+			),
+		);
+	}
+
+	/**
+	 * Test removal of IE and Other Browser CSS Hacks
+	 *
+	 * @dataProvider get_amp_css_hacks_data
+	 * @param string $input  Hack input CSS rule.
+	 */
+	public function test_browser_css_hacks( $input ) {
+		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body></body></html>";
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'never',
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertEmpty( $actual_stylesheets[0] );
 	}
 
 	/**
@@ -499,6 +781,22 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			array( 'removed_unused_css_rules', 'excessive_css' ),
+			$error_codes
+		);
+
+		// Make sure the accept_tree_shaking option results in no removed_unused_css_rules error being raised.
+		$error_codes = array();
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'accept_tree_shaking'       => true,
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$this->assertEquals(
+			array( 'excessive_css' ),
 			$error_codes
 		);
 	}
