@@ -861,7 +861,7 @@ class AMP_Invalid_URL_Post_Type {
 				throw new Exception( esc_html( $validity->get_error_code() ) );
 			}
 
-			$stored = self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post->ID );
+			$stored = self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post );
 			if ( is_wp_error( $stored ) ) {
 				throw new Exception( esc_html( $stored->get_error_code() ) );
 			}
@@ -1010,6 +1010,10 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_status_meta_box( $post ) {
+		$is_sanitization_forcibly_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
+			'code' => 'does_not_exist',
+		) );
+
 		?>
 		<style>
 			#amp_validation_status .inside {
@@ -1029,7 +1033,7 @@ class AMP_Invalid_URL_Post_Type {
 							<?php esc_html_e( 'Re-check', 'amp' ); ?>
 						</a>
 					</div>
-					<?php if ( ! AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
+					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() || $is_sanitization_forcibly_accepted_by_filter ) ) : ?>
 						<div id="preview-action">
 							<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
 						</div>
@@ -1096,6 +1100,11 @@ class AMP_Invalid_URL_Post_Type {
 		$has_unaccepted_errors = 0 !== count( array_filter( $validation_errors, function( $validation_error ) {
 			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['term_status'];
 		} ) );
+
+		$is_sanitization_forcibly_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
+			'code' => 'does_not_exist',
+		) );
+
 		?>
 		<style>
 			.amp-validation-errors .detailed,
@@ -1108,7 +1117,7 @@ class AMP_Invalid_URL_Post_Type {
 		</style>
 
 		<?php if ( $has_unaccepted_errors ) : ?>
-			<?php if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
+			<?php if ( $is_sanitization_forcibly_accepted_by_filter || AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
 				<div class="notice notice-warning notice-alt inline">
 					<p>
 						<?php esc_html_e( 'This URL will be served served as valid AMP but some of the markup will be stripped from the response since it is not valid.', 'amp' ); ?>
