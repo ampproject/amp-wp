@@ -230,6 +230,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$is_forced_with_option = (
+			amp_is_canonical()
+			||
 			AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] && AMP_Options_Manager::get_option( 'accept_tree_shaking' )
 			||
 			AMP_Options_Manager::get_option( 'force_sanitization' )

@@ -373,6 +373,19 @@ class AMP_Invalid_URL_Post_Type {
 					}
 					$term_id = $r['term_id'];
 					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
+
+					/*
+					 * When sanitization is forced by filter, make sure the term is created with the filtered status.
+					 * For some reason, the wp_insert_term() function doesn't work with the term_group being passed in.
+					 */
+					$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $data );
+					if ( 'with_filter' === $sanitization['forced'] ) {
+						wp_update_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
+							'term_group' => $sanitization['status'],
+						) );
+						$term_data['term_group'] = $sanitization['status'];
+					}
+
 					$term = get_term( $term_id );
 				}
 				$terms[ $term_slug ] = $term;
