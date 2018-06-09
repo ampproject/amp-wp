@@ -45,12 +45,16 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 == Changelog ==
 
 = 1.0 (unreleased) =
+
 - Add runtime CSS minification, `!important` replacement, and tree shaking. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142). Props westonruter, amedina, pbakaus, igrigorik, camelburrito.
 - Add ability to acknowledge and suppress/ignore specific validation errors. See [#1003](https://github.com/Automattic/amp-wp/issues/1003). Props westonruter.
+- Extend admin screen options to add `amp` theme support without any coding required. Toggle between classic, paired, and native. Includes options for whether sanitization should be done by default and whether tree shaking should always be allowed. See [#1199](https://github.com/Automattic/amp-wp/pull/1199). Props westonruter.
+- Add support for three core themes (Twenty Fifteen, Twenty Sixteen, Twenty Seventeen) so that they can be used out of the box with AMP theme support added without needing to create a child theme. See [#1074](https://github.com/Automattic/amp-wp/pull/1074). Props westonruter, DavidCramer, kienstra.
+- Add AMP menu item to admin bar on frontend with indication of AMP validation status; accessing an AMP URL that has unaccepted validation errors will redirect to the non-AMP page and cause the AMP admin bar item to indicate the failure, along with a link to access the validation results. See [#1199](https://github.com/Automattic/amp-wp/pull/1199). Props westonruter.
 - Add dynamic handling of validation errors. See [#1093](https://github.com/Automattic/amp-wp/pull/1093), [#1063](https://github.com/Automattic/amp-wp/pull/1063), [#1087](https://github.com/Automattic/amp-wp/issues/1087). Props westonruter.
 - Add AMP validation of blocks. See [#1019](https://github.com/Automattic/amp-wp/pull/1019). Props westonruter.
 - Add AMP-specific functionality to core blocks. See [#1026](https://github.com/Automattic/amp-wp/pull/1026), [#1008](https://github.com/Automattic/amp-wp/issues/1008). Props miina.
-- Add AMP media blocks. See [#1155](https://github.com/Automattic/amp-wp/pull/1155). Props miina.
+- Add AMP media blocks (when in native AMP mode). See [#1155](https://github.com/Automattic/amp-wp/pull/1155). Props miina.
 - Add embed handler for Gfycat. See [#1136](https://github.com/Automattic/amp-wp/pull/1136). Props miina.
 - Add amp-mathml block. See [#1165](https://github.com/Automattic/amp-wp/pull/1165). Props miina.
 - Add Gutenberg amp-timeago block. See [#1168](https://github.com/Automattic/amp-wp/pull/1168). Props miina.
@@ -59,6 +63,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Fix issues in displaying native blocks. See [#1022](https://github.com/Automattic/amp-wp/pull/1022). Props miina.
 - Gutenberg: Add AMP Carousel for Gallery and AMP Lightbox features for Gallery and Image. See [#1121](https://github.com/Automattic/amp-wp/pull/1121), [#1065](https://github.com/Automattic/amp-wp/issues/1065), [#1187](https://github.com/Automattic/amp-wp/pull/1187). Props miina, westonruter.
 - Cache post processor response. See [#1156](https://github.com/Automattic/amp-wp/pull/1156), [#959](https://github.com/Automattic/amp-wp/issues/959). Props ThierryA.
+- Automatically redirect to `?amp` from `/amp/` URLs when `amp` theme support is present. See [#1203](https://github.com/Automattic/amp-wp/pull/1203), [#1194](https://github.com/Automattic/amp-wp/pull/1194). Props westonruter.
 - Incorporate Server Timing API. See [#990](https://github.com/Automattic/amp-wp/issues/990). Props westonruter.
 - Add information about stylesheets included and excluded in `style[amp-custom]`. See [#1135](https://github.com/Automattic/amp-wp/pull/1135). Props westonruter.
 - Fetch (local) stylesheets with `@import`, instead of removing them. See [#1181](https://github.com/Automattic/amp-wp/pull/1181). Props miina.
