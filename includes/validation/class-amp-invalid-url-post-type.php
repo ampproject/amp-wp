@@ -1194,23 +1194,26 @@ class AMP_Invalid_URL_Post_Type {
 								</label>
 								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
-										<option value=""><?php esc_html_e( 'New', 'amp' ); ?></option>
+										<option value="">
+											&#x2753;
+											<?php esc_html_e( 'New', 'amp' ); ?>
+										</option>
 									<?php endif; ?>
 									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['term']->term_group ); ?>>
-										<?php esc_html_e( 'Accepted', 'amp' ); ?>
 										<?php if ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['status'] ) : ?>
 											&#x1F6A9;
 										<?php else : ?>
 											&#x2705;
 										<?php endif; ?>
+										<?php esc_html_e( 'Accepted', 'amp' ); ?>
 									</option>
 									<option style="text-decoration: line-through" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term']->term_group ); ?>>
-										<?php esc_html_e( 'Rejected', 'amp' ); ?>
 										<?php if ( amp_is_canonical() || ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) ) : ?>
 											&#x1F6A9;
 										<?php else : ?>
 											&#x274C;
 										<?php endif; ?>
+										<?php esc_html_e( 'Rejected', 'amp' ); ?>
 									</option>
 								</select>
 								<code><?php echo esc_html( $error['data']['code'] ); ?></code>
