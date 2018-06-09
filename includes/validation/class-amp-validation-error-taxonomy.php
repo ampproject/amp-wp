@@ -230,6 +230,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$is_forced_with_option = (
+			amp_is_canonical()
+			||
 			AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] && AMP_Options_Manager::get_option( 'accept_tree_shaking' )
 			||
 			AMP_Options_Manager::get_option( 'force_sanitization' )
@@ -678,7 +680,7 @@ class AMP_Validation_Error_Taxonomy {
 			unset( $actions['delete'] );
 
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['status'] ) {
+			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 					'<a href="%s" aria-label="%s">%s</a>',
 					wp_nonce_url(
@@ -689,7 +691,7 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html__( 'Reject', 'amp' )
 				);
 			}
-			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['status'] ) {
+			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s" aria-label="%s">%s</a>',
 					wp_nonce_url(

@@ -174,23 +174,6 @@ class AMP_Validation_Manager {
 
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
 
-		/*
-		 * Set sanitization options on the frontend. These filters get added only on the frontend so that
-		 * the user is able to keep track of the errors that they haven't seen before and decide whether
-		 * they need to get fixed (rejected) or not (accepted).
-		 */
-		add_action( 'template_redirect', function() {
-			if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) {
-				AMP_Validation_Error_Taxonomy::accept_validation_errors( true );
-			} elseif ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ) {
-				AMP_Validation_Error_Taxonomy::accept_validation_errors(
-					array(
-						AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE => true,
-					)
-				);
-			}
-		} );
-
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
 		}

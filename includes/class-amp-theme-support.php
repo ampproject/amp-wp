@@ -1227,11 +1227,13 @@ class AMP_Theme_Support {
 			} else {
 				$current_url = amp_get_current_url();
 				$ampless_url = amp_remove_endpoint( $current_url );
-				$ampless_url = add_query_arg(
-					AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
-					$blocking_error_count,
-					$ampless_url
-				);
+				if ( AMP_Validation_Manager::has_cap() ) {
+					$ampless_url = add_query_arg(
+						AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
+						$blocking_error_count,
+						$ampless_url
+					);
+				}
 
 				/*
 				 * Temporary redirect because AMP URL may return when blocking validation errors
