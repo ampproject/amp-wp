@@ -386,7 +386,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', array( self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ) ) );
 		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
-		$this->assertEquals( 10, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'conditionally_output_header' ) ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'amend_header_image_with_video_header' ) ) );
 	}
 
 	/**
@@ -1338,7 +1338,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test AMP_Theme_Support::conditionally_output_header().
 	 *
-	 * @see AMP_Theme_Support::conditionally_output_header()
+	 * @see AMP_Theme_Support::amend_header_image_with_video_header()
 	 */
 	public function conditionally_output_header() {
 		$mock_image = '<img src="https://example.com/flower.jpeg">';
@@ -1346,7 +1346,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// If there's no theme support for 'custom-header', the callback should simply return the image.
 		$this->assertEquals(
 			$mock_image,
-			AMP_Theme_Support::conditionally_output_header( $mock_image )
+			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
 
 		// If theme support is present, but there isn't a header video selected, the callback should again return the image.
@@ -1358,7 +1358,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		set_theme_mod( 'external_header_video', 'https://www.youtube.com/watch?v=a8NScvBhVnc' );
 		$this->assertEquals(
 			'<amp-youtube width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0"></amp-youtube>',
-			AMP_Theme_Support::conditionally_output_header( $mock_image )
+			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
 	}
 }

@@ -369,7 +369,10 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
-		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header' ), 10, 3 );
+		add_filter( 'get_header_image_tag', array( __CLASS__, 'amend_header_image_with_video_header' ), PHP_INT_MAX );
+		add_action( 'wp_print_footer_scripts', function() {
+			wp_dequeue_script( 'wp-custom-header' );
+		}, 0 );
 		add_action( 'wp_enqueue_scripts', function() {
 			wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 		} );
@@ -1356,46 +1359,25 @@ class AMP_Theme_Support {
 	 * Conditionally replace the header image markup with a header video or image.
 	 *
 	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
-	 * So in order for the header video to display,
-	 * this replaces the markup of the header image.
-	 *
-	 * @since 1.0
-	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
-	 * @param string $html The image markup to filter.
-	 * @param array  $header The header config array.
-	 * @param array  $atts The image markup attributes.
-	 * @return string $html Filtered markup.
-	 */
-	public static function conditionally_output_header( $html, $header, $atts ) {
-		unset( $header );
-		if ( ! is_header_video_active() ) {
-			return $html;
-		};
-
-		if ( ! has_header_video() ) {
-			return AMP_HTML_Utils::build_tag( 'amp-img', $atts );
-		}
-
-		return self::output_header_video( $atts );
-	}
-
-	/**
-	 * Replace the header image markup with a header video.
+	 * So in order for the header video to display, this replaces the markup of the header image.
 	 *
 	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L78
 	 *
-	 * @param array $atts The header tag attributes array.
+	 * @param string $image_markup The image markup to filter.
 	 * @return string $html Filtered markup.
 	 */
-	public static function output_header_video( $atts ) {
-		// Remove the script for video.
-		wp_deregister_script( 'wp-custom-header' );
-		$video_settings = get_header_video_settings();
+	public static function amend_header_image_with_video_header( $image_markup ) {
 
+		// If there is no video, just pass the image through.
+		if ( ! has_header_video() || ! is_header_video_active() ) {
+			return $image_markup;
+		};
+
+		$video_settings   = get_header_video_settings();
 		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
-		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : null;
+		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : array();
 		$video_attributes = array(
 			'media'    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
 			'width'    => $video_settings['width'],
@@ -1405,17 +1387,23 @@ class AMP_Theme_Support {
 			'id'       => 'wp-custom-header-video',
 		);
 
-		// Create image banner to stay behind the video.
-		$image_header = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
+		$youtube_id = null;
+		if ( isset( $parsed_url['host'] ) && preg_match( '/(^|\.)(youtube\.com|youtu\.be)$/', $parsed_url['host'] ) ) {
+			if ( 'youtu.be' === $parsed_url['host'] && ! empty( $parsed_url['path'] ) ) {
+				$youtube_id = trim( $parsed_url['path'], '/' );
+			} elseif ( isset( $query['v'] ) ) {
+				$youtube_id = $query['v'];
+			}
+		}
 
 		// If the video URL is for YouTube, return an <amp-youtube> element.
-		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
-			$video_header = AMP_HTML_Utils::build_tag(
+		if ( ! empty( $youtube_id ) ) {
+			$video_markup = AMP_HTML_Utils::build_tag(
 				'amp-youtube',
 				array_merge(
 					$video_attributes,
 					array(
-						'data-videoid'        => $query['v'],
+						'data-videoid'        => $youtube_id,
 						'data-param-rel'      => '0', // Don't show related videos.
 						'data-param-showinfo' => '0', // Don't show video title at the top.
 						'data-param-controls' => '0', // Don't show video controls.
@@ -1423,7 +1411,7 @@ class AMP_Theme_Support {
 				)
 			);
 		} else {
-			$video_header = AMP_HTML_Utils::build_tag(
+			$video_markup = AMP_HTML_Utils::build_tag(
 				'amp-video',
 				array_merge(
 					$video_attributes,
@@ -1434,6 +1422,6 @@ class AMP_Theme_Support {
 			);
 		}
 
-		return $image_header . $video_header;
+		return $image_markup . $video_markup;
 	}
 }
