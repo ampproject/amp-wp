@@ -1,0 +1,1322 @@
+# Copyright (C) 2018 AMP
+# This file is distributed under the same license as the AMP package.
+msgid ""
+msgstr ""
+"Project-Id-Version: AMP 1.0-alpha\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/amp\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2018-06-01T20:56:31+00:00\n"
+"PO-Revision-Date: 2018-06-01T20:56:31+00:00\n"
+"X-Domain: amp\n"
+
+#: amp.php:24
+#: build/amp.php:24
+msgid "The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version."
+msgstr ""
+
+#: amp.php:41
+#: build/amp.php:41
+msgid "You appear to be running the AMP plugin from source. Please do `composer install` to finish installation."
+msgstr ""
+
+#: back-compat/templates-v0-3/meta-taxonomy.php:1
+#: back-compat/templates-v0-3/meta-taxonomy.php:9
+#: build/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: build/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: build/templates/meta-taxonomy.php:1
+#: build/templates/meta-taxonomy.php:11
+#: svn/tags/0.2/templates/meta-taxonomy.php:1
+#: svn/tags/0.2/templates/meta-taxonomy.php:9
+#: svn/tags/0.3/templates/meta-taxonomy.php:1
+#: svn/tags/0.3/templates/meta-taxonomy.php:9
+#: svn/tags/0.3.1/templates/meta-taxonomy.php:1
+#: svn/tags/0.3.1/templates/meta-taxonomy.php:9
+#: svn/tags/0.3.2/templates/meta-taxonomy.php:1
+#: svn/tags/0.3.2/templates/meta-taxonomy.php:9
+#: svn/tags/0.3.3/templates/meta-taxonomy.php:1
+#: svn/tags/0.3.3/templates/meta-taxonomy.php:9
+#: svn/tags/0.4/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: svn/tags/0.4/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: svn/tags/0.4/templates/meta-taxonomy.php:1
+#: svn/tags/0.4/templates/meta-taxonomy.php:11
+#: svn/tags/0.4.1/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: svn/tags/0.4.1/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: svn/tags/0.4.1/templates/meta-taxonomy.php:1
+#: svn/tags/0.4.1/templates/meta-taxonomy.php:11
+#: svn/tags/0.4.2/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: svn/tags/0.4.2/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: svn/tags/0.4.2/templates/meta-taxonomy.php:1
+#: svn/tags/0.4.2/templates/meta-taxonomy.php:11
+#: svn/tags/0.5/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: svn/tags/0.5/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: svn/tags/0.5/templates/meta-taxonomy.php:1
+#: svn/tags/0.5/templates/meta-taxonomy.php:11
+#: svn/tags/0.5.1/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: svn/tags/0.5.1/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: svn/tags/0.5.1/templates/meta-taxonomy.php:1
+#: svn/tags/0.5.1/templates/meta-taxonomy.php:11
+#: svn/tags/0.6.0/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: svn/tags/0.6.0/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: svn/tags/0.6.0/templates/meta-taxonomy.php:1
+#: svn/tags/0.6.0/templates/meta-taxonomy.php:11
+#: svn/trunk/back-compat/templates-v0-3/meta-taxonomy.php:1
+#: svn/trunk/back-compat/templates-v0-3/meta-taxonomy.php:9
+#: svn/trunk/templates/meta-taxonomy.php:1
+#: svn/trunk/templates/meta-taxonomy.php:11
+#: templates/meta-taxonomy.php:1
+#: templates/meta-taxonomy.php:11
+msgctxt "Used between list items, there is a space after the comma."
+msgid ", "
+msgstr ""
+
+#: back-compat/templates-v0-3/meta-time.php:6
+#: build/back-compat/templates-v0-3/meta-time.php:6
+#: build/templates/meta-time.php:6
+#: svn/tags/0.2/templates/meta-time.php:6
+#: svn/tags/0.3/templates/meta-time.php:6
+#: svn/tags/0.3.1/templates/meta-time.php:6
+#: svn/tags/0.3.2/templates/meta-time.php:6
+#: svn/tags/0.3.3/templates/meta-time.php:6
+#: svn/tags/0.4/back-compat/templates-v0-3/meta-time.php:6
+#: svn/tags/0.4/templates/meta-time.php:6
+#: svn/tags/0.4.1/back-compat/templates-v0-3/meta-time.php:6
+#: svn/tags/0.4.1/templates/meta-time.php:6
+#: svn/tags/0.4.2/back-compat/templates-v0-3/meta-time.php:6
+#: svn/tags/0.4.2/templates/meta-time.php:6
+#: svn/tags/0.5/back-compat/templates-v0-3/meta-time.php:6
+#: svn/tags/0.5/templates/meta-time.php:6
+#: svn/tags/0.5.1/back-compat/templates-v0-3/meta-time.php:6
+#: svn/tags/0.5.1/templates/meta-time.php:6
+#: svn/tags/0.6.0/back-compat/templates-v0-3/meta-time.php:6
+#: svn/tags/0.6.0/templates/meta-time.php:6
+#: svn/trunk/back-compat/templates-v0-3/meta-time.php:6
+#: svn/trunk/templates/meta-time.php:6
+#: templates/meta-time.php:6
+msgctxt "%s = human-readable time difference"
+msgid "%s ago"
+msgstr ""
+
+#. Plugin Name of the plugin
+#: build/includes/admin/class-amp-customizer.php:87
+#: build/includes/admin/functions.php:84
+#: build/includes/admin/functions.php:85
+#: build/includes/options/class-amp-options-menu.php:35
+#: includes/admin/class-amp-customizer.php:87
+#: includes/admin/functions.php:84
+#: includes/admin/functions.php:85
+#: includes/options/class-amp-options-menu.php:35
+#: svn/tags/0.4/includes/admin/class-amp-customizer.php:113
+#: svn/tags/0.4/includes/admin/functions.php:38
+#: svn/tags/0.4/includes/admin/functions.php:39
+#: svn/tags/0.4.1/includes/admin/class-amp-customizer.php:113
+#: svn/tags/0.4.1/includes/admin/functions.php:38
+#: svn/tags/0.4.1/includes/admin/functions.php:39
+#: svn/tags/0.4.2/includes/admin/class-amp-customizer.php:113
+#: svn/tags/0.4.2/includes/admin/functions.php:38
+#: svn/tags/0.4.2/includes/admin/functions.php:39
+#: svn/tags/0.5/includes/admin/class-amp-customizer.php:113
+#: svn/tags/0.5/includes/admin/functions.php:69
+#: svn/tags/0.5/includes/admin/functions.php:70
+#: svn/tags/0.5/includes/options/class-amp-options-menu.php:27
+#: svn/tags/0.5.1/includes/admin/class-amp-customizer.php:113
+#: svn/tags/0.5.1/includes/admin/functions.php:69
+#: svn/tags/0.5.1/includes/admin/functions.php:70
+#: svn/tags/0.5.1/includes/options/class-amp-options-menu.php:27
+#: svn/tags/0.6.0/includes/admin/class-amp-customizer.php:87
+#: svn/tags/0.6.0/includes/admin/functions.php:76
+#: svn/tags/0.6.0/includes/admin/functions.php:77
+#: svn/tags/0.6.0/includes/options/class-amp-options-menu.php:35
+#: svn/trunk/includes/admin/class-amp-customizer.php:87
+#: svn/trunk/includes/admin/functions.php:76
+#: svn/trunk/includes/admin/functions.php:77
+#: svn/trunk/includes/options/class-amp-options-menu.php:35
+msgid "AMP"
+msgstr ""
+
+#. translators: placeholder is URL to AMP project.
+#: build/includes/admin/class-amp-customizer.php:89
+#: includes/admin/class-amp-customizer.php:89
+#: svn/tags/0.4/includes/admin/class-amp-customizer.php:114
+#: svn/tags/0.4.1/includes/admin/class-amp-customizer.php:114
+#: svn/tags/0.4.2/includes/admin/class-amp-customizer.php:114
+#: svn/tags/0.5/includes/admin/class-amp-customizer.php:114
+#: svn/tags/0.5.1/includes/admin/class-amp-customizer.php:114
+#: svn/tags/0.6.0/includes/admin/class-amp-customizer.php:89
+#: svn/trunk/includes/admin/class-amp-customizer.php:89
+msgid "<a href=\"%s\" target=\"_blank\">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them."
+msgstr ""
+
+#: build/includes/admin/class-amp-customizer.php:141
+#: includes/admin/class-amp-customizer.php:141
+#: svn/tags/0.6.0/includes/admin/class-amp-customizer.php:141
+#: svn/trunk/includes/admin/class-amp-customizer.php:141
+msgid "AMP is not available for the page currently being previewed."
+msgstr ""
+
+#: build/includes/admin/class-amp-customizer.php:142
+#: includes/admin/class-amp-customizer.php:142
+#: svn/tags/0.6.0/includes/admin/class-amp-customizer.php:142
+#: svn/trunk/includes/admin/class-amp-customizer.php:142
+msgid "Navigate to an AMP compatible page"
+msgstr ""
+
+#: build/includes/admin/class-amp-customizer.php:265
+#: includes/admin/class-amp-customizer.php:265
+#: svn/tags/0.6.0/includes/admin/class-amp-customizer.php:265
+#: svn/trunk/includes/admin/class-amp-customizer.php:265
+msgid "AMP preview enabled"
+msgstr ""
+
+#: build/includes/admin/class-amp-post-meta-box.php:81
+#: includes/admin/class-amp-post-meta-box.php:81
+#: svn/tags/0.6.0/includes/admin/class-amp-post-meta-box.php:81
+#: svn/trunk/includes/admin/class-amp-post-meta-box.php:81
+msgid "AMP status."
+msgstr ""
+
+#: build/includes/admin/class-amp-post-meta-box.php:154
+#: includes/admin/class-amp-post-meta-box.php:154
+#: svn/tags/0.6.0/includes/admin/class-amp-post-meta-box.php:151
+#: svn/trunk/includes/admin/class-amp-post-meta-box.php:151
+msgid "Preview changes in AMP (opens in new window)"
+msgstr ""
+
+#: build/includes/admin/class-amp-post-meta-box.php:184
+#: includes/admin/class-amp-post-meta-box.php:184
+#: svn/tags/0.6.0/includes/admin/class-amp-post-meta-box.php:177
+#: svn/trunk/includes/admin/class-amp-post-meta-box.php:177
+msgid "Enabled"
+msgstr ""
+
+#: build/includes/admin/class-amp-post-meta-box.php:185
+#: includes/admin/class-amp-post-meta-box.php:185
+#: svn/tags/0.6.0/includes/admin/class-amp-post-meta-box.php:178
+#: svn/trunk/includes/admin/class-amp-post-meta-box.php:178
+msgid "Disabled"
+msgstr ""
+
+#: build/includes/amp-helper-functions.php:183
+#: includes/amp-helper-functions.php:183
+#: svn/tags/0.5/includes/amp-helper-functions.php:44
+#: svn/tags/0.5.1/includes/amp-helper-functions.php:44
+#: svn/tags/0.6.0/includes/amp-helper-functions.php:118
+#: svn/trunk/includes/amp-helper-functions.php:118
+msgid "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called."
+msgstr ""
+
+#. translators: %1$s is analytics entry ID, %2$s is actual entry keys.
+#: build/includes/amp-helper-functions.php:392
+#: includes/amp-helper-functions.php:392
+#: svn/tags/0.6.0/includes/amp-post-template-actions.php:147
+#: svn/trunk/includes/amp-post-template-actions.php:147
+msgid "Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)"
+msgstr ""
+
+#: build/includes/amp-helper-functions.php:419
+#: build/includes/amp-helper-functions.php:468
+#: includes/amp-helper-functions.php:419
+#: includes/amp-helper-functions.php:468
+msgid "The $post argument is deprecated when theme supports AMP."
+msgstr ""
+
+#: build/includes/class-amp-theme-support.php:119
+#: includes/class-amp-theme-support.php:119
+msgid "Expected AMP theme support arg to be array."
+msgstr ""
+
+#: build/includes/class-amp-theme-support.php:121
+#: includes/class-amp-theme-support.php:121
+msgid "Expected AMP theme support to only have template_dir and/or available_callback."
+msgstr ""
+
+#: build/includes/class-amp-theme-support.php:445
+#: includes/class-amp-theme-support.php:445
+msgid "Your comment has been posted."
+msgstr ""
+
+#. translators: %s is embed handler
+#: build/includes/class-amp-theme-support.php:599
+#: build/includes/templates/class-amp-content.php:176
+#: includes/class-amp-theme-support.php:599
+#: includes/templates/class-amp-content.php:176
+#: svn/tags/0.2/includes/class-amp-content.php:57
+#: svn/tags/0.3/includes/class-amp-content.php:57
+#: svn/tags/0.3.1/includes/class-amp-content.php:57
+#: svn/tags/0.3.2/includes/class-amp-content.php:57
+#: svn/tags/0.3.3/includes/class-amp-content.php:57
+#: svn/tags/0.4/includes/class-amp-content.php:66
+#: svn/tags/0.4.1/includes/class-amp-content.php:66
+#: svn/tags/0.4.2/includes/class-amp-content.php:66
+#: svn/tags/0.5/includes/class-amp-content.php:66
+#: svn/tags/0.5.1/includes/class-amp-content.php:66
+#: svn/tags/0.6.0/includes/templates/class-amp-content.php:154
+#: svn/trunk/includes/templates/class-amp-content.php:154
+msgid "Embed Handler (%s) must extend `AMP_Embed_Handler`"
+msgstr ""
+
+#: build/includes/class-amp-theme-support.php:1156
+#: includes/class-amp-theme-support.php:1156
+msgid "Redirecting to non-AMP version."
+msgstr ""
+
+#. translators: %s is the charset of the current site
+#: build/includes/class-amp-theme-support.php:1163
+#: includes/class-amp-theme-support.php:1163
+msgid "The database has the %s encoding when it needs to be utf-8 to work with AMP."
+msgstr ""
+
+#: build/includes/embeds/class-amp-core-block-handler.php:87
+#: includes/embeds/class-amp-core-block-handler.php:87
+msgid "Select Category"
+msgstr ""
+
+#: build/includes/embeds/class-amp-gallery-embed.php:132
+#: build/includes/sanitizers/class-amp-base-sanitizer.php:543
+#: includes/embeds/class-amp-gallery-embed.php:132
+#: includes/sanitizers/class-amp-base-sanitizer.php:543
+msgid "Close"
+msgstr ""
+
+#: build/includes/options/class-amp-analytics-options-submenu.php:34
+#: includes/options/class-amp-analytics-options-submenu.php:34
+#: svn/tags/0.5/includes/options/class-amp-analytics-options-submenu.php:29
+#: svn/tags/0.5.1/includes/options/class-amp-analytics-options-submenu.php:29
+#: svn/tags/0.6.0/includes/options/class-amp-analytics-options-submenu.php:34
+#: svn/trunk/includes/options/class-amp-analytics-options-submenu.php:34
+msgid "AMP Analytics Options"
+msgstr ""
+
+#: build/includes/options/class-amp-analytics-options-submenu.php:35
+#: includes/options/class-amp-analytics-options-submenu.php:35
+#: svn/tags/0.5/includes/options/class-amp-analytics-options-submenu.php:30
+#: svn/tags/0.5.1/includes/options/class-amp-analytics-options-submenu.php:30
+#: svn/tags/0.6.0/includes/options/class-amp-analytics-options-submenu.php:35
+#: svn/trunk/includes/options/class-amp-analytics-options-submenu.php:35
+msgid "Analytics"
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:104
+#: includes/options/class-amp-options-manager.php:104
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:85
+#: svn/trunk/includes/options/class-amp-options-manager.php:85
+msgid "Unrecognized post type."
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:117
+#: includes/options/class-amp-options-manager.php:117
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:98
+#: svn/trunk/includes/options/class-amp-options-manager.php:98
+msgid "Missing vendor type or config."
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:124
+#: includes/options/class-amp-options-manager.php:124
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:105
+#: svn/trunk/includes/options/class-amp-options-manager.php:105
+msgid "Invalid analytics config JSON."
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:140
+#: includes/options/class-amp-options-manager.php:140
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:121
+#: svn/trunk/includes/options/class-amp-options-manager.php:121
+msgid "Duplicate analytics entry found."
+msgstr ""
+
+#. translators: %s: Post type name.
+#: build/includes/options/class-amp-options-manager.php:182
+#: includes/options/class-amp-options-manager.php:182
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:163
+#: svn/trunk/includes/options/class-amp-options-manager.php:163
+msgid "\"%s\" could not be activated because support is removed by a plugin or theme"
+msgstr ""
+
+#. translators: %s: Post type name.
+#: build/includes/options/class-amp-options-manager.php:186
+#: includes/options/class-amp-options-manager.php:186
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:167
+#: svn/trunk/includes/options/class-amp-options-manager.php:167
+msgid "\"%s\" could not be deactivated because support is added by a plugin or theme"
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:226
+#: includes/options/class-amp-options-manager.php:226
+#: svn/tags/0.5/includes/options/views/class-amp-options-manager.php:33
+#: svn/tags/0.5.1/includes/options/views/class-amp-options-manager.php:33
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:207
+#: svn/trunk/includes/options/class-amp-options-manager.php:207
+msgid "Sorry, you do not have the necessary permissions to perform this action"
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:237
+#: includes/options/class-amp-options-manager.php:237
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:65
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:65
+#: svn/tags/0.6.0/includes/options/class-amp-options-manager.php:218
+#: svn/trunk/includes/options/class-amp-options-manager.php:218
+msgid "The analytics entry was successfully saved!"
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:273
+#: includes/options/class-amp-options-manager.php:273
+msgid "The AMP plugin performs at its best when persistent object cache is enabled."
+msgstr ""
+
+#: build/includes/options/class-amp-options-manager.php:275
+#: build/includes/validation/class-amp-validation-manager.php:1357
+#: includes/options/class-amp-options-manager.php:275
+#: includes/validation/class-amp-validation-manager.php:1357
+msgid "More details"
+msgstr ""
+
+#: build/includes/options/class-amp-options-menu.php:34
+#: includes/options/class-amp-options-menu.php:34
+#: svn/tags/0.5/includes/options/class-amp-options-menu.php:26
+#: svn/tags/0.5.1/includes/options/class-amp-options-menu.php:26
+#: svn/tags/0.6.0/includes/options/class-amp-options-menu.php:34
+#: svn/trunk/includes/options/class-amp-options-menu.php:34
+msgid "AMP Options"
+msgstr ""
+
+#: build/includes/options/class-amp-options-menu.php:44
+#: includes/options/class-amp-options-menu.php:44
+#: svn/tags/0.6.0/includes/options/class-amp-options-menu.php:44
+#: svn/trunk/includes/options/class-amp-options-menu.php:44
+msgid "AMP Settings"
+msgstr ""
+
+#: build/includes/options/class-amp-options-menu.php:45
+#: includes/options/class-amp-options-menu.php:45
+#: svn/tags/0.6.0/includes/options/class-amp-options-menu.php:45
+#: svn/trunk/includes/options/class-amp-options-menu.php:45
+msgid "General"
+msgstr ""
+
+#: build/includes/options/class-amp-options-menu.php:58
+#: includes/options/class-amp-options-menu.php:58
+#: svn/tags/0.6.0/includes/options/class-amp-options-menu.php:58
+#: svn/trunk/includes/options/class-amp-options-menu.php:58
+msgid "Post Type Support"
+msgstr ""
+
+#: build/includes/options/class-amp-options-menu.php:108
+#: includes/options/class-amp-options-menu.php:108
+#: svn/tags/0.6.0/includes/options/class-amp-options-menu.php:105
+#: svn/trunk/includes/options/class-amp-options-menu.php:105
+msgid "Enable/disable AMP post type(s) support"
+msgstr ""
+
+#: build/includes/options/class-amp-options-menu.php:110
+#: includes/options/class-amp-options-menu.php:110
+msgid "Canonical AMP is enabled in your theme, so all post types will render."
+msgstr ""
+
+#. translators: %s is the entry slug
+#: build/includes/options/views/class-amp-analytics-options-submenu-page.php:26
+#: includes/options/views/class-amp-analytics-options-submenu-page.php:26
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:13
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:13
+#: svn/tags/0.6.0/includes/options/views/class-amp-analytics-options-submenu-page.php:18
+#: svn/trunk/includes/options/views/class-amp-analytics-options-submenu-page.php:18
+msgid "Analytics: %s"
+msgstr ""
+
+#: build/includes/options/views/class-amp-analytics-options-submenu-page.php:28
+#: includes/options/views/class-amp-analytics-options-submenu-page.php:28
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:15
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:15
+#: svn/tags/0.6.0/includes/options/views/class-amp-analytics-options-submenu-page.php:20
+#: svn/trunk/includes/options/views/class-amp-analytics-options-submenu-page.php:20
+msgid "Add new entry:"
+msgstr ""
+
+#: build/includes/options/views/class-amp-analytics-options-submenu-page.php:42
+#: includes/options/views/class-amp-analytics-options-submenu-page.php:42
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:26
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:26
+#: svn/tags/0.6.0/includes/options/views/class-amp-analytics-options-submenu-page.php:37
+#: svn/trunk/includes/options/views/class-amp-analytics-options-submenu-page.php:37
+msgid "Type:"
+msgstr ""
+
+#: build/includes/options/views/class-amp-analytics-options-submenu-page.php:46
+#: includes/options/views/class-amp-analytics-options-submenu-page.php:46
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:30
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:30
+#: svn/tags/0.6.0/includes/options/views/class-amp-analytics-options-submenu-page.php:41
+#: svn/trunk/includes/options/views/class-amp-analytics-options-submenu-page.php:41
+msgid "ID:"
+msgstr ""
+
+#: build/includes/options/views/class-amp-analytics-options-submenu-page.php:53
+#: includes/options/views/class-amp-analytics-options-submenu-page.php:53
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:37
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:37
+#: svn/tags/0.6.0/includes/options/views/class-amp-analytics-options-submenu-page.php:48
+#: svn/trunk/includes/options/views/class-amp-analytics-options-submenu-page.php:48
+msgid "JSON Configuration:"
+msgstr ""
+
+#: build/includes/options/views/class-amp-analytics-options-submenu-page.php:63
+#: includes/options/views/class-amp-analytics-options-submenu-page.php:63
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:47
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:47
+#: svn/tags/0.6.0/includes/options/views/class-amp-analytics-options-submenu-page.php:58
+#: svn/trunk/includes/options/views/class-amp-analytics-options-submenu-page.php:58
+msgid "Save"
+msgstr ""
+
+#: build/includes/options/views/class-amp-analytics-options-submenu-page.php:65
+#: includes/options/views/class-amp-analytics-options-submenu-page.php:65
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:49
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:49
+#: svn/tags/0.6.0/includes/options/views/class-amp-analytics-options-submenu-page.php:60
+#: svn/trunk/includes/options/views/class-amp-analytics-options-submenu-page.php:60
+msgid "Delete"
+msgstr ""
+
+#. translators: %s is the file URL
+#: build/includes/sanitizers/class-amp-style-sanitizer.php:478
+#: includes/sanitizers/class-amp-style-sanitizer.php:478
+msgid "Skipped file which does not have an allowed file extension (%s)."
+msgstr ""
+
+#. translators: %s is file URL
+#: build/includes/sanitizers/class-amp-style-sanitizer.php:484
+#: includes/sanitizers/class-amp-style-sanitizer.php:484
+msgid "URL is located on an external domain: %s."
+msgstr ""
+
+#. translators: %s is file URL
+#: build/includes/sanitizers/class-amp-style-sanitizer.php:498
+#: includes/sanitizers/class-amp-style-sanitizer.php:498
+msgid "Unable to locate filesystem path for %s."
+msgstr ""
+
+#. translators: %d is number of bytes
+#: build/includes/sanitizers/class-amp-style-sanitizer.php:1766
+#: includes/sanitizers/class-amp-style-sanitizer.php:1766
+msgid " (%d byte)"
+msgid_plural " (%d bytes)"
+msgstr[0] ""
+
+#: build/includes/sanitizers/class-amp-style-sanitizer.php:1779
+#: includes/sanitizers/class-amp-style-sanitizer.php:1779
+msgid "The style[amp-custom] element is populated with:"
+msgstr ""
+
+#. translators: %d is number of bytes
+#: build/includes/sanitizers/class-amp-style-sanitizer.php:1781
+#: includes/sanitizers/class-amp-style-sanitizer.php:1781
+msgid "Total size: %d bytes"
+msgstr ""
+
+#: build/includes/sanitizers/class-amp-style-sanitizer.php:1787
+#: includes/sanitizers/class-amp-style-sanitizer.php:1787
+msgid "The following stylesheets are too large to be included in style[amp-custom]:"
+msgstr ""
+
+#: build/includes/settings/class-amp-customizer-design-settings.php:113
+#: includes/settings/class-amp-customizer-design-settings.php:113
+#: svn/tags/0.4/includes/settings/class-amp-customizer-design-settings.php:48
+#: svn/tags/0.4.1/includes/settings/class-amp-customizer-design-settings.php:48
+#: svn/tags/0.4.2/includes/settings/class-amp-customizer-design-settings.php:48
+#: svn/tags/0.5/includes/settings/class-amp-customizer-design-settings.php:48
+#: svn/tags/0.5.1/includes/settings/class-amp-customizer-design-settings.php:48
+#: svn/tags/0.6.0/includes/settings/class-amp-customizer-design-settings.php:113
+#: svn/trunk/includes/settings/class-amp-customizer-design-settings.php:113
+msgid "Design"
+msgstr ""
+
+#: build/includes/settings/class-amp-customizer-design-settings.php:121
+#: includes/settings/class-amp-customizer-design-settings.php:121
+#: svn/tags/0.4/includes/settings/class-amp-customizer-design-settings.php:56
+#: svn/tags/0.4.1/includes/settings/class-amp-customizer-design-settings.php:56
+#: svn/tags/0.4.2/includes/settings/class-amp-customizer-design-settings.php:56
+#: svn/tags/0.5/includes/settings/class-amp-customizer-design-settings.php:56
+#: svn/tags/0.5.1/includes/settings/class-amp-customizer-design-settings.php:56
+#: svn/tags/0.6.0/includes/settings/class-amp-customizer-design-settings.php:121
+#: svn/trunk/includes/settings/class-amp-customizer-design-settings.php:121
+msgid "Header Text Color"
+msgstr ""
+
+#: build/includes/settings/class-amp-customizer-design-settings.php:131
+#: includes/settings/class-amp-customizer-design-settings.php:131
+#: svn/tags/0.4/includes/settings/class-amp-customizer-design-settings.php:66
+#: svn/tags/0.4.1/includes/settings/class-amp-customizer-design-settings.php:66
+#: svn/tags/0.4.2/includes/settings/class-amp-customizer-design-settings.php:66
+#: svn/tags/0.5/includes/settings/class-amp-customizer-design-settings.php:66
+#: svn/tags/0.5.1/includes/settings/class-amp-customizer-design-settings.php:66
+#: svn/tags/0.6.0/includes/settings/class-amp-customizer-design-settings.php:131
+#: svn/trunk/includes/settings/class-amp-customizer-design-settings.php:131
+msgid "Header Background & Link Color"
+msgstr ""
+
+#: build/includes/settings/class-amp-customizer-design-settings.php:140
+#: includes/settings/class-amp-customizer-design-settings.php:140
+#: svn/tags/0.4/includes/settings/class-amp-customizer-design-settings.php:75
+#: svn/tags/0.4.1/includes/settings/class-amp-customizer-design-settings.php:75
+#: svn/tags/0.4.2/includes/settings/class-amp-customizer-design-settings.php:75
+#: svn/tags/0.5/includes/settings/class-amp-customizer-design-settings.php:75
+#: svn/tags/0.5.1/includes/settings/class-amp-customizer-design-settings.php:75
+#: svn/tags/0.6.0/includes/settings/class-amp-customizer-design-settings.php:140
+#: svn/trunk/includes/settings/class-amp-customizer-design-settings.php:140
+msgid "Color Scheme"
+msgstr ""
+
+#: build/includes/settings/class-amp-customizer-design-settings.php:240
+#: includes/settings/class-amp-customizer-design-settings.php:240
+#: svn/tags/0.4/includes/settings/class-amp-customizer-design-settings.php:112
+#: svn/tags/0.4.1/includes/settings/class-amp-customizer-design-settings.php:112
+#: svn/tags/0.4.2/includes/settings/class-amp-customizer-design-settings.php:112
+#: svn/tags/0.5/includes/settings/class-amp-customizer-design-settings.php:112
+#: svn/tags/0.5.1/includes/settings/class-amp-customizer-design-settings.php:112
+#: svn/tags/0.6.0/includes/settings/class-amp-customizer-design-settings.php:240
+#: svn/trunk/includes/settings/class-amp-customizer-design-settings.php:240
+msgid "Light"
+msgstr ""
+
+#: build/includes/settings/class-amp-customizer-design-settings.php:241
+#: includes/settings/class-amp-customizer-design-settings.php:241
+#: svn/tags/0.4/includes/settings/class-amp-customizer-design-settings.php:113
+#: svn/tags/0.4.1/includes/settings/class-amp-customizer-design-settings.php:113
+#: svn/tags/0.4.2/includes/settings/class-amp-customizer-design-settings.php:113
+#: svn/tags/0.5/includes/settings/class-amp-customizer-design-settings.php:113
+#: svn/tags/0.5.1/includes/settings/class-amp-customizer-design-settings.php:113
+#: svn/tags/0.6.0/includes/settings/class-amp-customizer-design-settings.php:241
+#: svn/trunk/includes/settings/class-amp-customizer-design-settings.php:241
+msgid "Dark"
+msgstr ""
+
+#. translators: %s is sanitizer class
+#: build/includes/templates/class-amp-content-sanitizer.php:78
+#: includes/templates/class-amp-content-sanitizer.php:78
+#: svn/tags/0.4.1/includes/class-amp-content.php:102
+#: svn/tags/0.4.2/includes/class-amp-content.php:102
+#: svn/tags/0.5/includes/class-amp-content.php:102
+#: svn/tags/0.5.1/includes/class-amp-content.php:102
+#: svn/tags/0.6.0/includes/templates/class-amp-content-sanitizer.php:30
+#: svn/trunk/includes/templates/class-amp-content-sanitizer.php:30
+#: try.php:46
+msgid "Sanitizer (%s) class does not exist"
+msgstr ""
+
+#. translators: %s is sanitizer class
+#: build/includes/templates/class-amp-content-sanitizer.php:91
+#: includes/templates/class-amp-content-sanitizer.php:91
+#: svn/tags/0.2/includes/class-amp-content.php:82
+#: svn/tags/0.3/includes/class-amp-content.php:82
+#: svn/tags/0.3.1/includes/class-amp-content.php:82
+#: svn/tags/0.3.2/includes/class-amp-content.php:82
+#: svn/tags/0.3.3/includes/class-amp-content.php:82
+#: svn/tags/0.4/includes/class-amp-content.php:91
+#: svn/tags/0.4.1/includes/class-amp-content.php:109
+#: svn/tags/0.4.2/includes/class-amp-content.php:109
+#: svn/tags/0.5/includes/class-amp-content.php:109
+#: svn/tags/0.5.1/includes/class-amp-content.php:109
+#: svn/tags/0.6.0/includes/templates/class-amp-content-sanitizer.php:38
+#: svn/trunk/includes/templates/class-amp-content-sanitizer.php:38
+#: try.php:53
+msgid "Sanitizer (%s) must extend `AMP_Base_Sanitizer`"
+msgstr ""
+
+#. translators: %s is key name
+#: build/includes/templates/class-amp-post-template.php:173
+#: includes/templates/class-amp-post-template.php:173
+#: svn/tags/0.6.0/includes/templates/class-amp-post-template.php:176
+#: svn/trunk/includes/templates/class-amp-post-template.php:176
+msgid "Called for non-existent key (\"%s\")."
+msgstr ""
+
+#: build/includes/templates/class-amp-post-template.php:303
+#: includes/templates/class-amp-post-template.php:303
+#: svn/tags/0.4/includes/class-amp-post-template.php:201
+#: svn/tags/0.4.1/includes/class-amp-post-template.php:209
+#: svn/tags/0.4.2/includes/class-amp-post-template.php:212
+#: svn/tags/0.5/includes/class-amp-post-template.php:221
+#: svn/tags/0.5.1/includes/class-amp-post-template.php:221
+#: svn/tags/0.6.0/includes/templates/class-amp-post-template.php:342
+#: svn/trunk/includes/templates/class-amp-post-template.php:342
+msgid "Leave a Comment"
+msgstr ""
+
+#: build/includes/templates/class-amp-post-template.php:304
+#: includes/templates/class-amp-post-template.php:304
+#: svn/tags/0.4/includes/class-amp-post-template.php:202
+#: svn/tags/0.4.1/includes/class-amp-post-template.php:210
+#: svn/tags/0.4.2/includes/class-amp-post-template.php:213
+#: svn/tags/0.5/includes/class-amp-post-template.php:222
+#: svn/tags/0.5.1/includes/class-amp-post-template.php:222
+#: svn/tags/0.6.0/includes/templates/class-amp-post-template.php:343
+#: svn/trunk/includes/templates/class-amp-post-template.php:343
+msgid "View Comments"
+msgstr ""
+
+#. translators: %1$s is template file, %2$s is 'WP_CONTENT_DIR' string.
+#: build/includes/templates/class-amp-post-template.php:440
+#: includes/templates/class-amp-post-template.php:440
+#: svn/tags/0.6.0/includes/templates/class-amp-post-template.php:550
+#: svn/trunk/includes/templates/class-amp-post-template.php:550
+msgid "Path validation for template (%1$s) failed. Path cannot traverse and must be located in `%2$s`."
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:81
+#: includes/validation/class-amp-invalid-url-post-type.php:81
+msgctxt "post type general name"
+msgid "Invalid AMP Pages (URLs)"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:82
+#: includes/validation/class-amp-invalid-url-post-type.php:82
+msgid "Invalid Pages"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:83
+#: build/includes/validation/class-amp-invalid-url-post-type.php:87
+#: includes/validation/class-amp-invalid-url-post-type.php:83
+#: includes/validation/class-amp-invalid-url-post-type.php:87
+msgid "Invalid AMP Page (URL)"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:84
+#: includes/validation/class-amp-invalid-url-post-type.php:84
+msgid "No invalid AMP pages found"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:85
+#: includes/validation/class-amp-invalid-url-post-type.php:85
+msgid "No invalid AMP pages in trash"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:86
+#: includes/validation/class-amp-invalid-url-post-type.php:86
+msgid "Search invalid AMP pages"
+msgstr ""
+
+#. translators: %s is count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:252
+#: includes/validation/class-amp-invalid-url-post-type.php:252
+msgid "&#x2753; New: %s"
+msgstr ""
+
+#. translators: %s is count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:259
+#: includes/validation/class-amp-invalid-url-post-type.php:259
+msgid "&#x2705; Accepted: %s"
+msgstr ""
+
+#. translators: %s is count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:266
+#: includes/validation/class-amp-invalid-url-post-type.php:266
+msgid "&#x274C; Rejected: %s"
+msgstr ""
+
+#. translators: %s is the post count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:441
+#: includes/validation/class-amp-invalid-url-post-type.php:441
+msgctxt "posts"
+msgid "With New Errors <span class=\"count\">(%s)</span>"
+msgid_plural "With New Errors <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+
+#. translators: %s is the post count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:464
+#: includes/validation/class-amp-invalid-url-post-type.php:464
+msgctxt "posts"
+msgid "With Rejected Errors <span class=\"count\">(%s)</span>"
+msgid_plural "With Rejected Errors <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+
+#. translators: %s is the post count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:487
+#: includes/validation/class-amp-invalid-url-post-type.php:487
+msgctxt "posts"
+msgid "With Accepted Errors <span class=\"count\">(%s)</span>"
+msgid_plural "With Accepted Errors <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:511
+#: includes/validation/class-amp-invalid-url-post-type.php:511
+msgid "Error Status"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:512
+#: includes/validation/class-amp-invalid-url-post-type.php:512
+msgid "Removed Elements"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:513
+#: includes/validation/class-amp-invalid-url-post-type.php:513
+msgid "Removed Attributes"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:514
+#: includes/validation/class-amp-invalid-url-post-type.php:514
+msgid "Incompatible Sources"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:560
+#: build/includes/validation/class-amp-invalid-url-post-type.php:575
+#: includes/validation/class-amp-invalid-url-post-type.php:560
+#: includes/validation/class-amp-invalid-url-post-type.php:575
+msgid "--"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:609
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:438
+#: includes/validation/class-amp-invalid-url-post-type.php:609
+#: includes/validation/class-amp-validation-error-taxonomy.php:438
+msgid "Details"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:615
+#: includes/validation/class-amp-invalid-url-post-type.php:615
+msgid "View"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:620
+#: build/includes/validation/class-amp-invalid-url-post-type.php:912
+#: includes/validation/class-amp-invalid-url-post-type.php:620
+#: includes/validation/class-amp-invalid-url-post-type.php:912
+msgid "Re-check"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:634
+#: includes/validation/class-amp-invalid-url-post-type.php:634
+msgid "Recheck"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:696
+#: includes/validation/class-amp-invalid-url-post-type.php:696
+msgid "The rechecked URL still has blocking validation errors."
+msgid_plural "The rechecked URLs still have validation errors."
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:698
+#: includes/validation/class-amp-invalid-url-post-type.php:698
+msgid "The rechecked URL has no blocking validation errors."
+msgid_plural "The rechecked URLs have no validation errors."
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:706
+#: build/includes/validation/class-amp-invalid-url-post-type.php:726
+#: build/includes/validation/class-amp-validation-manager.php:1364
+#: includes/validation/class-amp-invalid-url-post-type.php:706
+#: includes/validation/class-amp-invalid-url-post-type.php:726
+#: includes/validation/class-amp-validation-manager.php:1364
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:81
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:81
+msgid "Dismiss this notice."
+msgstr ""
+
+#. translators: %s is count of validation errors updated
+#: build/includes/validation/class-amp-invalid-url-post-type.php:718
+#: includes/validation/class-amp-invalid-url-post-type.php:718
+msgid "Updated %s validation error."
+msgid_plural "Updated %s validation errors."
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:876
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:131
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:644
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:655
+#: includes/validation/class-amp-invalid-url-post-type.php:876
+#: includes/validation/class-amp-validation-error-taxonomy.php:131
+#: includes/validation/class-amp-validation-error-taxonomy.php:644
+#: includes/validation/class-amp-validation-error-taxonomy.php:655
+msgid "Validation Errors"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:877
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:437
+#: includes/validation/class-amp-invalid-url-post-type.php:877
+#: includes/validation/class-amp-validation-error-taxonomy.php:437
+msgid "Status"
+msgstr ""
+
+#. translators: %s: The date this was published
+#: build/includes/validation/class-amp-invalid-url-post-type.php:926
+#: includes/validation/class-amp-invalid-url-post-type.php:926
+msgid "Last checked: <b>%s</b>"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:982
+#: includes/validation/class-amp-invalid-url-post-type.php:982
+msgid "This URL can be served as AMP because all validation errors have been accepted as not being blockers."
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:986
+#: includes/validation/class-amp-invalid-url-post-type.php:986
+msgid "This URL cannot be served as AMP because it has validation errors which are either new or rejected as being blockers."
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:991
+#: includes/validation/class-amp-invalid-url-post-type.php:991
+msgid "An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity. A validation error that is accepted here will also be accepted for any other URL it occurs on."
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1024
+#: includes/validation/class-amp-invalid-url-post-type.php:1024
+msgid "This site is configured to automatically decide whether or not some validation errors may be accepted. For these errors, you cannot change their status below."
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1040
+#: includes/validation/class-amp-invalid-url-post-type.php:1040
+msgid "Status:"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1044
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:815
+#: includes/validation/class-amp-invalid-url-post-type.php:1044
+#: includes/validation/class-amp-validation-error-taxonomy.php:815
+msgid "New"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1046
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:811
+#: includes/validation/class-amp-invalid-url-post-type.php:1046
+#: includes/validation/class-amp-validation-error-taxonomy.php:811
+msgid "Accepted"
+msgstr ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1047
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:813
+#: includes/validation/class-amp-invalid-url-post-type.php:1047
+#: includes/validation/class-amp-validation-error-taxonomy.php:813
+msgid "Rejected"
+msgstr ""
+
+#. translators: %1$s is URL to invalid URL page, and %2$s is the count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1072
+#: includes/validation/class-amp-invalid-url-post-type.php:1072
+msgid "There is at least <a href=\"%1$s\">%2$s other URL</a> which has this validation error. Accepting or rejecting the error here will also apply to the other URL."
+msgid_plural "There are at least <a href=\"%1$s\">%2$s other URLs</a> which have this validation error. Accepting or rejecting the error here will also apply to the other URLs."
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1088
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1117
+#: includes/validation/class-amp-invalid-url-post-type.php:1088
+#: includes/validation/class-amp-invalid-url-post-type.php:1117
+msgid "Removed:"
+msgstr ""
+
+#. translators: %s is the validation error count
+#: build/includes/validation/class-amp-invalid-url-post-type.php:1252
+#: includes/validation/class-amp-invalid-url-post-type.php:1252
+msgid "%s URL w/ new AMP errors"
+msgid_plural "%s URLs w/ new AMP errors"
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:125
+#: includes/validation/class-amp-validation-error-taxonomy.php:125
+msgctxt "taxonomy general name"
+msgid "AMP Validation Errors"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:126
+#: includes/validation/class-amp-validation-error-taxonomy.php:126
+msgctxt "taxonomy singular name"
+msgid "AMP Validation Error"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:127
+#: includes/validation/class-amp-validation-error-taxonomy.php:127
+msgid "Search AMP Validation Errors"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:128
+#: includes/validation/class-amp-validation-error-taxonomy.php:128
+msgid "All AMP Validation Errors"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:129
+#: includes/validation/class-amp-validation-error-taxonomy.php:129
+msgid "Edit AMP Validation Error"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:130
+#: includes/validation/class-amp-validation-error-taxonomy.php:130
+msgid "Update AMP Validation Error"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:132
+#: includes/validation/class-amp-validation-error-taxonomy.php:132
+msgid "Back to AMP Validation Errors"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:133
+#: includes/validation/class-amp-validation-error-taxonomy.php:133
+msgid "Frequent Validation Errors"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:134
+#: includes/validation/class-amp-validation-error-taxonomy.php:134
+msgid "View Validation Error"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:135
+#: includes/validation/class-amp-validation-error-taxonomy.php:135
+msgid "Add New Validation Error"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:136
+#: includes/validation/class-amp-validation-error-taxonomy.php:136
+msgid "New Validation Error Hash"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:137
+#: includes/validation/class-amp-validation-error-taxonomy.php:137
+msgid "No validation errors found."
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:138
+#: includes/validation/class-amp-validation-error-taxonomy.php:138
+msgid "Validation Error"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:139
+#: includes/validation/class-amp-validation-error-taxonomy.php:139
+msgid "Validation errors navigation"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:140
+#: includes/validation/class-amp-validation-error-taxonomy.php:140
+msgid "Validation errors list"
+msgstr ""
+
+#. translators: Tab heading when selecting from the most used terms
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:142
+#: includes/validation/class-amp-validation-error-taxonomy.php:142
+msgid "Most Used Validation Errors"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:426
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:632
+#: includes/validation/class-amp-validation-error-taxonomy.php:426
+#: includes/validation/class-amp-validation-error-taxonomy.php:632
+msgid "Accept"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:427
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:621
+#: includes/validation/class-amp-validation-error-taxonomy.php:427
+#: includes/validation/class-amp-validation-error-taxonomy.php:621
+msgid "Reject"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:435
+#: includes/validation/class-amp-validation-error-taxonomy.php:435
+msgid "Error"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:436
+#: includes/validation/class-amp-validation-error-taxonomy.php:436
+msgid "Created Date"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:439
+#: includes/validation/class-amp-validation-error-taxonomy.php:439
+msgid "URLs"
+msgstr ""
+
+#. translators: %s is number of errors accepted
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:564
+#: includes/validation/class-amp-validation-error-taxonomy.php:564
+msgid "Accepted %s error. It will no longer block related URLs from being served as AMP."
+msgid_plural "Accepted %s errors. They will no longer block related URLs from being served as AMP."
+msgstr[0] ""
+
+#. translators: %s is number of errors rejected
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:575
+#: includes/validation/class-amp-validation-error-taxonomy.php:575
+msgid "Rejected %s error. It will continue to block related URLs from being served as AMP."
+msgid_plural "Rejected %s errors. They will continue to block related URLs from being served as AMP."
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:620
+#: includes/validation/class-amp-validation-error-taxonomy.php:620
+msgid "Rejecting an error acknowledges that it should block a URL from being served as AMP."
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:631
+#: includes/validation/class-amp-validation-error-taxonomy.php:631
+msgid "Accepting an error means it will get sanitized and not block a URL from being served as AMP."
+msgstr ""
+
+#. translators: %s is the term count
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:697
+#: includes/validation/class-amp-validation-error-taxonomy.php:697
+msgctxt "terms"
+msgid "All <span class=\"count\">(%s)</span>"
+msgid_plural "All <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+
+#. translators: %s is the term count
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:720
+#: includes/validation/class-amp-validation-error-taxonomy.php:720
+msgctxt "terms"
+msgid "New <span class=\"count\">(%s)</span>"
+msgid_plural "New <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+
+#. translators: %s is the term count
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:743
+#: includes/validation/class-amp-validation-error-taxonomy.php:743
+msgctxt "terms"
+msgid "Rejected <span class=\"count\">(%s)</span>"
+msgid_plural "Rejected <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+
+#. translators: %s is the term count
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:766
+#: includes/validation/class-amp-validation-error-taxonomy.php:766
+msgctxt "terms"
+msgid "Accepted <span class=\"count\">(%s)</span>"
+msgid_plural "Accepted <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+
+#: build/includes/validation/class-amp-validation-error-taxonomy.php:836
+#: includes/validation/class-amp-validation-error-taxonomy.php:836
+msgid "n/a"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-manager.php:306
+#: includes/validation/class-amp-validation-manager.php:306
+msgid "AMP validity status"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-manager.php:488
+#: includes/validation/class-amp-validation-manager.php:488
+msgid "There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served."
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-manager.php:492
+#: includes/validation/class-amp-validation-manager.php:492
+msgid "Review issues"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-manager.php:500
+#: includes/validation/class-amp-validation-manager.php:500
+msgid "Invalid elements:"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-manager.php:506
+#: includes/validation/class-amp-validation-manager.php:506
+msgid "Invalid attributes:"
+msgstr ""
+
+#: build/includes/validation/class-amp-validation-manager.php:1361
+#: includes/validation/class-amp-validation-manager.php:1361
+msgid "Warning: The following plugin may be incompatible with AMP:"
+msgid_plural "Warning: The following plugins may be incompatible with AMP:"
+msgstr[0] ""
+
+#: build/templates/admin/amp-status.php:23
+#: svn/tags/0.6.0/templates/admin/amp-status.php:23
+#: svn/trunk/templates/admin/amp-status.php:23
+#: templates/admin/amp-status.php:23
+msgid "AMP:"
+msgstr ""
+
+#: build/templates/admin/amp-status.php:26
+#: svn/tags/0.6.0/templates/admin/amp-status.php:26
+#: svn/trunk/templates/admin/amp-status.php:26
+#: templates/admin/amp-status.php:26
+msgid "Edit"
+msgstr ""
+
+#: build/templates/admin/amp-status.php:27
+#: svn/tags/0.6.0/templates/admin/amp-status.php:27
+#: svn/trunk/templates/admin/amp-status.php:27
+#: templates/admin/amp-status.php:27
+msgid "Edit Status"
+msgstr ""
+
+#: build/templates/admin/amp-status.php:47
+#: svn/tags/0.6.0/templates/admin/amp-status.php:47
+#: svn/trunk/templates/admin/amp-status.php:47
+#: templates/admin/amp-status.php:47
+msgid "AMP cannot be enabled on password protected posts."
+msgstr ""
+
+#. translators: %s is URL to AMP settings screen
+#: build/templates/admin/amp-status.php:51
+#: svn/tags/0.6.0/templates/admin/amp-status.php:51
+#: svn/trunk/templates/admin/amp-status.php:51
+#: templates/admin/amp-status.php:51
+msgid "AMP cannot be enabled because this <a href=\"%s\">post type does not support it</a>."
+msgstr ""
+
+#: build/templates/admin/amp-status.php:54
+#: svn/tags/0.6.0/templates/admin/amp-status.php:54
+#: svn/trunk/templates/admin/amp-status.php:54
+#: templates/admin/amp-status.php:54
+msgid "A plugin or theme has disabled AMP support."
+msgstr ""
+
+#: build/templates/admin/amp-status.php:57
+#: svn/tags/0.6.0/templates/admin/amp-status.php:57
+#: svn/trunk/templates/admin/amp-status.php:57
+#: templates/admin/amp-status.php:57
+msgid "Unavailable for an unknown reason."
+msgstr ""
+
+#: build/templates/admin/amp-status.php:66
+#: svn/tags/0.6.0/templates/admin/amp-status.php:66
+#: svn/trunk/templates/admin/amp-status.php:66
+#: templates/admin/amp-status.php:66
+msgid "OK"
+msgstr ""
+
+#: build/templates/admin/amp-status.php:68
+#: svn/tags/0.6.0/templates/admin/amp-status.php:68
+#: svn/trunk/templates/admin/amp-status.php:68
+#: templates/admin/amp-status.php:68
+msgid "Cancel"
+msgstr ""
+
+#: build/templates/footer.php:18
+#: svn/tags/0.4/templates/footer.php:5
+#: svn/tags/0.4.1/templates/footer.php:5
+#: svn/tags/0.4.2/templates/footer.php:5
+#: svn/tags/0.5/templates/footer.php:5
+#: svn/tags/0.5.1/templates/footer.php:5
+#: svn/tags/0.6.0/templates/footer.php:18
+#: svn/trunk/templates/footer.php:18
+#: templates/footer.php:18
+msgid "https://wordpress.org/"
+msgstr ""
+
+#. translators: %s is WordPress.
+#: build/templates/footer.php:21
+#: svn/tags/0.4/templates/footer.php:5
+#: svn/tags/0.4.1/templates/footer.php:5
+#: svn/tags/0.4.2/templates/footer.php:5
+#: svn/tags/0.5/templates/footer.php:5
+#: svn/tags/0.5.1/templates/footer.php:5
+#: svn/tags/0.6.0/templates/footer.php:21
+#: svn/trunk/templates/footer.php:21
+#: templates/footer.php:21
+msgid "Powered by %s"
+msgstr ""
+
+#: build/templates/footer.php:25
+#: svn/tags/0.4/templates/footer.php:7
+#: svn/tags/0.4.1/templates/footer.php:7
+#: svn/tags/0.4.2/templates/footer.php:7
+#: svn/tags/0.5/templates/footer.php:7
+#: svn/tags/0.5.1/templates/footer.php:7
+#: svn/tags/0.6.0/templates/footer.php:25
+#: svn/trunk/templates/footer.php:25
+#: templates/footer.php:25
+msgid "Back to top"
+msgstr ""
+
+#: build/templates/meta-taxonomy.php:4
+#: svn/tags/0.4/templates/meta-taxonomy.php:4
+#: svn/tags/0.4.1/templates/meta-taxonomy.php:4
+#: svn/tags/0.4.2/templates/meta-taxonomy.php:4
+#: svn/tags/0.5/templates/meta-taxonomy.php:4
+#: svn/tags/0.5.1/templates/meta-taxonomy.php:4
+#: svn/tags/0.6.0/templates/meta-taxonomy.php:4
+#: svn/trunk/templates/meta-taxonomy.php:4
+#: templates/meta-taxonomy.php:4
+msgid "Categories: %s"
+msgstr ""
+
+#: build/templates/meta-taxonomy.php:17
+#: svn/tags/0.4/templates/meta-taxonomy.php:17
+#: svn/tags/0.4.1/templates/meta-taxonomy.php:17
+#: svn/tags/0.4.2/templates/meta-taxonomy.php:17
+#: svn/tags/0.5/templates/meta-taxonomy.php:17
+#: svn/tags/0.5.1/templates/meta-taxonomy.php:17
+#: svn/tags/0.6.0/templates/meta-taxonomy.php:17
+#: svn/trunk/templates/meta-taxonomy.php:17
+#: templates/meta-taxonomy.php:17
+msgid "Tags: %s"
+msgstr ""
+
+#: build/wpcom/class-amp-polldaddy-embed.php:81
+#: svn/tags/0.6.0/wpcom/class-amp-polldaddy-embed.php:81
+#: svn/trunk/wpcom/class-amp-polldaddy-embed.php:81
+#: wpcom/class-amp-polldaddy-embed.php:81
+msgid "View Survey"
+msgstr ""
+
+#: build/wpcom/class-amp-polldaddy-embed.php:83
+#: svn/tags/0.6.0/wpcom/class-amp-polldaddy-embed.php:83
+#: svn/trunk/wpcom/class-amp-polldaddy-embed.php:83
+#: wpcom/class-amp-polldaddy-embed.php:83
+msgid "View Poll"
+msgstr ""
+
+#: svn/tags/0.2/includes/class-amp-post-template.php:57
+#: svn/tags/0.3/includes/class-amp-post-template.php:58
+#: svn/tags/0.3.1/includes/class-amp-post-template.php:62
+#: svn/tags/0.3.2/includes/class-amp-post-template.php:77
+#: svn/tags/0.3.3/includes/class-amp-post-template.php:78
+#: svn/tags/0.4/includes/class-amp-post-template.php:95
+#: svn/tags/0.4.1/includes/class-amp-post-template.php:95
+#: svn/tags/0.4.2/includes/class-amp-post-template.php:98
+#: svn/tags/0.5/includes/class-amp-post-template.php:107
+#: svn/tags/0.5.1/includes/class-amp-post-template.php:107
+msgid "Called for non-existant key (\"%s\")."
+msgstr ""
+
+#: svn/tags/0.2/includes/class-amp-post-template.php:221
+#: svn/tags/0.3/includes/class-amp-post-template.php:227
+#: svn/tags/0.3.1/includes/class-amp-post-template.php:231
+#: svn/tags/0.3.2/includes/class-amp-post-template.php:246
+#: svn/tags/0.3.3/includes/class-amp-post-template.php:247
+#: svn/tags/0.4/includes/class-amp-post-template.php:355
+#: svn/tags/0.4.1/includes/class-amp-post-template.php:358
+#: svn/tags/0.4.2/includes/class-amp-post-template.php:384
+#: svn/tags/0.5/includes/class-amp-post-template.php:399
+#: svn/tags/0.5.1/includes/class-amp-post-template.php:399
+msgid "Path validation for template (%s) failed. Path cannot traverse and must be located in `%s`."
+msgstr ""
+
+#: svn/tags/0.3.2/includes/amp-post-template-actions.php:63
+#: svn/tags/0.3.3/includes/amp-post-template-actions.php:63
+#: svn/tags/0.4/includes/amp-post-template-actions.php:83
+#: svn/tags/0.4.1/includes/amp-post-template-actions.php:83
+#: svn/tags/0.4.2/includes/amp-post-template-actions.php:83
+#: svn/tags/0.5/includes/amp-post-template-actions.php:87
+#: svn/tags/0.5.1/includes/amp-post-template-actions.php:87
+msgid "Analytics entry for %s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %s)"
+msgstr ""
+
+#: svn/tags/0.5/includes/options/views/class-amp-analytics-options-submenu-page.php:68
+#: svn/tags/0.5.1/includes/options/views/class-amp-analytics-options-submenu-page.php:68
+msgid "Failed to save the analytics entry. Please make sure that the JSON configuration is valid and unique."
+msgstr ""
+
+#: svn/tags/0.5/includes/options/views/class-amp-options-menu-page.php:7
+#: svn/tags/0.5.1/includes/options/views/class-amp-options-menu-page.php:7
+msgid "AMP Plugin Options"
+msgstr ""
+
+#: svn/tags/0.5/includes/options/views/class-amp-options-menu-page.php:10
+#: svn/tags/0.5.1/includes/options/views/class-amp-options-menu-page.php:10
+msgid "This admin panel menu contains configuration options for the AMP Plugin."
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://github.com/automattic/amp-wp"
+msgstr ""
+
+#. Description of the plugin
+msgid "Add AMP support to your WordPress site."
+msgstr ""
+
+#. Author of the plugin
+msgid "WordPress.com VIP, XWP, Google, and contributors"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://github.com/Automattic/amp-wp/graphs/contributors"
+msgstr ""
