@@ -343,6 +343,16 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
 					'requires_extension' => array(
 						'amp-addthis',
 					),
@@ -891,6 +901,17 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							9,
+							1,
+							4,
+						),
+					),
 					'requires_extension' => array(
 						'amp-carousel',
 					),
@@ -1625,6 +1646,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
 					'requires_extension' => array(
 						'amp-geo',
 					),
@@ -2962,6 +2988,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
 					'mandatory_parent' => 'amp-consent',
 					'requires_extension' => array(
 						'amp-consent',
