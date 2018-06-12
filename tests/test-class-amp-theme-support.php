@@ -1336,11 +1336,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Theme_Support::conditionally_output_header().
+	 * Test AMP_Theme_Support::amend_header_image_with_video_header().
 	 *
 	 * @see AMP_Theme_Support::amend_header_image_with_video_header()
 	 */
-	public function conditionally_output_header() {
+	public function test_amend_header_image_with_video_header() {
 		$mock_image = '<img src="https://example.com/flower.jpeg">';
 
 		// If there's no theme support for 'custom-header', the callback should simply return the image.
@@ -1357,7 +1357,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// There's a YouTube URL as the header video.
 		set_theme_mod( 'external_header_video', 'https://www.youtube.com/watch?v=a8NScvBhVnc' );
 		$this->assertEquals(
-			'<amp-youtube width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0"></amp-youtube>',
+			$mock_image . '<amp-youtube media="(min-width: 900px)" width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0" data-param-controls="0"></amp-youtube>',
 			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
 	}
