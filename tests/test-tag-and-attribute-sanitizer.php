@@ -290,6 +290,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-carousel' ),
 			),
 
+			'carousel_lightbox'                                         => array(
+				'<amp-carousel width="450" height="300" delay="100" arrows [slide]="foo" autoplay loop lightbox></amp-carousel>',
+				null,
+				array( 'amp-bind', 'amp-carousel', 'amp-lightbox-gallery' ),
+			),
+
 			'amp-dailymotion'                                           => array(
 				'<amp-dailymotion data-videoid="x3rdtfy" width="500" height="281"></amp-dailymotion><h4>Default (responsive)</h4><amp-dailymotion data-videoid="x3rdtfy" width="500" height="281" layout="responsive"></amp-dailymotion><h4>Custom</h4><amp-dailymotion data-videoid="x3rdtfy" data-endscreen-enable="false" data-sharing-enable="false" data-ui-highlight="444444" data-ui-logo="false" data-info="false" width="640" height="360"></amp-dailymotion>',
 				'<amp-dailymotion data-videoid="x3rdtfy" width="500" height="281"></amp-dailymotion><h4>Default (responsive)</h4><amp-dailymotion data-videoid="x3rdtfy" width="500" height="281" layout="responsive"></amp-dailymotion><h4>Custom</h4><amp-dailymotion data-videoid="x3rdtfy" data-endscreen-enable="false" data-sharing-enable="false" data-ui-highlight="444444" data-ui-logo="false" data-info="false" width="640" height="360"></amp-dailymotion>',
@@ -384,8 +390,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="https://example.com/path/to/content">Click me.</a>',
 			),
 
-			'node_with_whiteilsted_protocol_fb-messenger_allowed'       => array(
-				'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
+			'node_with_whiteilsted_protocol_other_allowed'              => array(
+				implode( '', array(
+					'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
+					'<a href="webcal:foo">Click me.</a>',
+					'<a href="whatsapp:foo">Click me.</a>',
+				) ),
 			),
 
 			'attribute_value_valid'                                     => array(
@@ -788,6 +798,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<table><col class="foo" width="123" style="background:red;"><col class="bar" style="background:green;" width="12%"><col class="baz" style="background:blue;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				array(),
+			),
+
+			'amp-geo'                                                   => array(
+				'<amp-geo layout="nodisplay"><script type="application/json">{ "AmpBind": true, "ISOCountryGroups": { "nafta": [ "ca", "mx", "us", "unknown" ], "waldo": [ "unknown" ], "anz": [ "au", "nz" ] } }</script></amp-geo>',
+				null,
+				array( 'amp-geo' ),
+			),
+
+			'amp-addthis'                                               => array(
+				'<amp-addthis width="320" height="92" data-pub-id="ra-59c2c366435ef478" data-widget-id="0fyg"></amp-addthis>',
+				null,
+				array( 'amp-addthis' ),
 			),
 		);
 	}
