@@ -693,7 +693,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v7';
+		$cache_group = 'amp-parsed-stylesheet-v8';
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -972,6 +972,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$length           = count( $split_stylesheet );
 			for ( $i = 0; $i < $length; $i++ ) {
 				if ( $before_declaration_block === $split_stylesheet[ $i ] ) {
+
+					// Skip keyframe-selector, which is can be: from | to | <percentage>.
+					if ( preg_match( '/^((from|to)\b|-?\d+(\.\d+)?%)/i', $split_stylesheet[ $i + 1 ] ) ) {
+						$stylesheet[] = str_replace( $between_selectors, '', $split_stylesheet[ ++$i ] ) . $split_stylesheet[ ++$i ];
+						continue;
+					}
+
 					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
 					$declaration = $split_stylesheet[ ++$i ];
 
