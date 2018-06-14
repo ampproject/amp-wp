@@ -421,6 +421,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'audio{border:solid 1px yellow}',
 				'amp-audio{border:solid 1px yellow}',
 			),
+			'keyframes' => array(
+				'<div>test</div>',
+				'span {color:red;} @keyframes foo { from: { opacity:0; } 50% {opacity:0.5} 75%,80% { opacity:0.6 } to { opacity:1 }  }',
+				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
+			),
 		);
 	}
 
