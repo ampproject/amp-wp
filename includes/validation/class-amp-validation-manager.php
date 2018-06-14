@@ -915,6 +915,7 @@ class AMP_Validation_Manager {
 				continue;
 			}
 			$source['widget_id'] = $widget_id;
+			unset( $source['reflection'] ); // Omit from stored source.
 
 			$function      = $registered_widget['callback'];
 			$accepted_args = 2; // For the $instance and $args arguments.
@@ -1076,6 +1077,7 @@ class AMP_Validation_Manager {
 	public static function get_source( $callback ) {
 		$reflection = null;
 		$class_name = null; // Because ReflectionMethod::getDeclaringClass() can return a parent class.
+		$file       = null;
 		try {
 			if ( is_string( $callback ) && is_callable( $callback ) ) {
 				// The $callback is a function or static method.
@@ -1093,9 +1095,21 @@ class AMP_Validation_Manager {
 				} elseif ( is_object( $callback[0] ) ) {
 					$class_name = get_class( $callback[0] );
 				}
+
+				/*
+				 * Obtain file from ReflectionClass because if the method is not on base class then
+				 * file returned by ReflectionMethod will be for the base class not the subclass.
+				 */
+				$reflection = new ReflectionClass( $callback[0] );
+				$file       = $reflection->getFileName();
+
+				// This is needed later for AMP_Validation_Manager::has_parameters_passed_by_reference().
 				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
 			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
 				$reflection = new ReflectionFunction( $callback );
+			}
+			if ( $reflection && ! $file ) {
+				$file = $reflection->getFileName();
 			}
 		} catch ( Exception $e ) {
 			return null;
@@ -1107,7 +1121,6 @@ class AMP_Validation_Manager {
 
 		$source = compact( 'reflection' );
 
-		$file = $reflection->getFileName();
 		if ( $file ) {
 			$file         = wp_normalize_path( $file );
 			$slug_pattern = '([^/]+)';
