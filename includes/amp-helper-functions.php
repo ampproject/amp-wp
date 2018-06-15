@@ -287,6 +287,10 @@ function is_amp_endpoint() {
 		return false;
 	}
 
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		return true;
+	}
+
 	$availability = AMP_Theme_Support::get_template_availability();
 	return amp_is_canonical() ? $availability['supported'] : ( $has_amp_query_var && $availability['supported'] );
 }

@@ -100,7 +100,8 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			},
 			ampPanelLabel: __( 'AMP Settings' )
 		},
-		hasThemeSupport: true
+		hasThemeSupport: true,
+		isCanonical: false
 	};
 
 	/**

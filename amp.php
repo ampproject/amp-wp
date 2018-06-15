@@ -148,6 +148,7 @@ function amp_init() {
 
 	AMP_Theme_Support::init();
 	AMP_Post_Type_Support::add_post_type_support();
+	AMP_Story_Post_Type::register();
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
@@ -205,6 +206,10 @@ function amp_maybe_add_actions() {
 	// The remaining logic here is for paired mode running in themes that don't support AMP, the template system in AMP<=0.6.
 	global $wp_query;
 	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
+		return;
+	}
+
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 		return;
 	}
 
