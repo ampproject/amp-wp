@@ -352,7 +352,23 @@ class AMP_Theme_Support {
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
 		 * combine to surpass the 50K limit imposed for the amp-custom style.
 		 */
-		add_filter( 'show_admin_bar', '__return_false', 100 );
+		add_action( 'admin_bar_init', function() {
+			wp_dequeue_script( 'admin-bar' );
+			wp_styles()->registered['admin-bar']->src = amp_get_asset_url( 'css/admin-bar.css' );
+			wp_styles()->registered['admin-bar']->ver = AMP__VERSION;
+			add_filter( 'body_class', function( $body_classes ) {
+				return array_merge(
+					array_diff(
+						$body_classes,
+						array( 'no-customize-support' )
+					),
+					array( 'customize-support' )
+				);
+			} );
+			add_action( 'admin_bar_menu', function() {
+				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
+			}, 41 );
+		} );
 
 		/*
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
