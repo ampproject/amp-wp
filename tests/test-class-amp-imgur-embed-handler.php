@@ -36,6 +36,13 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
+			$width  = 600;
+			$height = 480;
+		} else {
+			$width  = 500;
+			$height = 750;
+		}
 		return array(
 			'no_embed'        => array(
 				'<p>Hello world.</p>',
@@ -44,17 +51,17 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 
 			'url_simple'      => array(
 				'https://imgur.com/f462IUj' . PHP_EOL,
-				'<p><amp-imgur width="500" height="750" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
 			),
 
 			'url_with_detail' => array(
 				'https://imgur.com/gallery/f462IUj' . PHP_EOL,
-				'<p><amp-imgur width="500" height="750" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
 			),
 
 			'url_with_params' => array(
 				'https://imgur.com/gallery/f462IUj?foo=bar' . PHP_EOL,
-				'<p><amp-imgur width="500" height="750" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
 			),
 
 		);
