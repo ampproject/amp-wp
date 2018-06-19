@@ -16,7 +16,7 @@
 
 class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	/**
-	 * Pattern to extract the information required for amp-o2-player element.d
+	 * Pattern to extract the information required for amp-o2-player element: data-pid, data-vid, data-bcid.
 	 *
 	 * @since 1.0
 	 */
