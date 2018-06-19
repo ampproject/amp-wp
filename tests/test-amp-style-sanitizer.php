@@ -310,6 +310,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'style_with_media_element' => array(
+				'<html amp><head><meta charset="utf-8"><style media="print">.print { display:none; }</style></head><body><button class="print" on="tap:AMP.print()"></button></body></html>',
+				array(
+					'@media print{.print{display:none}}',
+				),
+				array(),
+			),
 		);
 	}
 

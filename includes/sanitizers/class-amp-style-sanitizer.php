@@ -542,6 +542,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet   = trim( $element->textContent );
 		$cdata_spec   = $is_keyframes ? $this->style_keyframes_cdata_spec : $this->style_custom_cdata_spec;
 
+		// Honor the style's media attribute.
+		$media = $element->getAttribute( 'media' );
+		if ( $media && 'all' !== $media ) {
+			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
+		}
+
 		$stylesheet = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
 			'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
