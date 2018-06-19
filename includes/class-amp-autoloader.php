@@ -41,6 +41,8 @@ class AMP_Autoloader {
 		'AMP_Facebook_Embed_Handler'                  => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'                   => 'includes/embeds/class-amp-gallery-embed',
 		'AMP_Gfycat_Embed_Handler'                    => 'includes/embeds/class-amp-gfycat-embed-handler',
+		'AMP_Hulu_Embed_Handler'                      => 'includes/embeds/class-amp-hulu-embed-handler',
+		'AMP_Imgur_Embed_Handler'                     => 'includes/embeds/class-amp-imgur-embed-handler',
 		'AMP_Core_Block_Handler'                      => 'includes/embeds/class-amp-core-block-handler',
 		'AMP_Instagram_Embed_Handler'                 => 'includes/embeds/class-amp-instagram-embed',
 		'AMP_Issuu_Embed_Handler'                     => 'includes/embeds/class-amp-issuu-embed-handler',
