@@ -317,6 +317,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'selectors_with_ie_hacks_removed' => array(
+				'<html amp><head><meta charset="utf-8"><style>* html span { color:red; background: blue !important; } span { text-decoration:underline; } *+html span { border: solid green; }</style></head><body><span>Test</span></body></html>',
+				array(
+					'span{text-decoration:underline}',
+				),
+				array(),
+			),
 		);
 	}
 
