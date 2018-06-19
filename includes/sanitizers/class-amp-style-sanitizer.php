@@ -699,7 +699,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v8';
+		$cache_group = 'amp-parsed-stylesheet-v9';
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1616,7 +1616,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$ruleset->getSelectors()
 		) );
 		$important_ruleset->setRules( $importants );
-		$css_list->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
+
+		$i = array_search( $ruleset, $css_list->getContents(), true );
+		if ( false !== $i ) {
+			$css_list->splice( $i + 1, 0, array( $important_ruleset ) );
+		} else {
+			$css_list->append( $important_ruleset );
+		}
 
 		return $results;
 	}
