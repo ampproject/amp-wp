@@ -1355,11 +1355,9 @@ class AMP_Invalid_URL_Post_Type {
 			return;
 		}
 
-		// Remember URL is stored in post_title. Adding query var prevents redirection to non-AMP page.
-		$view_url = add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url );
 		?>
 		<h2 class="amp-invalid-url">
-			<a href="<?php echo esc_url( $view_url ); ?>"><?php echo esc_html( $url ); ?></a>
+			<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $url ); ?></a>
 		</h2>
 		<?php
 	}

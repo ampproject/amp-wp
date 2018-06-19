@@ -129,6 +129,13 @@ class AMP_Validation_Manager {
 	public static $validation_error_status_overrides = array();
 
 	/**
+	 * Whether the admin bar item was added for AMP.
+	 *
+	 * @var bool
+	 */
+	protected static $amp_admin_bar_item_added = false;
+
+	/**
 	 * Add the actions.
 	 *
 	 * @param array $args {
@@ -191,56 +198,151 @@ class AMP_Validation_Manager {
 	/**
 	 * Add menu items to admin bar for AMP.
 	 *
+	 * When on a non-AMP response (paired mode), then the admin bar item should include:
+	 * - Icon: LINK SYMBOL when AMP not known to be invalid and sanitization is not forced, or CROSS MARK when AMP is known to be valid.
+	 * - Parent admin item and first submenu item: link to AMP version.
+	 * - Second submenu item: link to validate the URL.
+	 *
+	 * When on paired AMP response:
+	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors which are being forcibly sanitized.
+	 *         Otherwise, if there are unsanitized validation errors then a redirect to the non-AMP version will be done.
+	 * - Parent admin item and first submenu item: link to non-AMP version.
+	 * - Second submenu item: link to validate the URL.
+	 *
+	 * When on native AMP response:
+	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors.
+	 * - Parent admin and first submenu item: link to validate the URL.
+	 *
+	 * @see AMP_Validation_Manager::finalize_validation() Where the emoji is updated.
+	 *
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
 	 */
 	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
 		if ( is_admin() || ! self::has_cap() || ! ( amp_is_canonical() || AMP_Theme_Support::is_paired_available() ) ) {
+			self::$amp_admin_bar_item_added = false;
 			return;
 		}
 
 		$amp_invalid_url_post = null;
 
-		// @todo The amp_invalid_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
-		$amp_url = amp_get_current_url();
-		$amp_url = remove_query_arg( wp_removable_query_args(), $amp_url );
+		$current_url = amp_get_current_url();
+		$non_amp_url = amp_remove_endpoint( $current_url );
+
+		$amp_url = remove_query_arg(
+			array_merge(
+				wp_removable_query_args(),
+				array(
+					self::VALIDATE_QUERY_VAR,
+					'amp_preserve_source_comments',
+				)
+			),
+			$current_url
+		);
 		if ( ! amp_is_canonical() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
 		}
 
 		$error_count = -1;
-		if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
-			$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
-		}
-		if ( $error_count < 0 ) {
-			$amp_invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
-			if ( $amp_invalid_url_post ) {
-				$error_count = count( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post, array( 'ignore_accepted' => true ) ) );
+
+		/*
+		 * If not an AMP response, then obtain the count of validation errors from either the query param supplied after redirecting from AMP
+		 * to non-AMP due to validation errors (see AMP_Theme_Support::prepare_response()), or if there is an amp_invalid_url post that already
+		 * is populated with the last-known validation errors. Otherwise, if it *is* an AMP response then the error count is obtained after
+		 * when the response is being prepared by AMP_Validation_Manager::finalize_validation().
+		 */
+		if ( ! is_amp_endpoint() ) {
+			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+				$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
+			}
+			if ( $error_count < 0 ) {
+				$amp_invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
+				if ( $amp_invalid_url_post ) {
+					$error_count = 0;
+					foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post ) as $error ) {
+						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['term_status'] ) {
+							$error_count++;
+						}
+					}
+				}
 			}
 		}
 
-		$title = '';
-		if ( $error_count > -1 ) {
-			if ( 0 === $error_count ) {
-				$title .= '&#x2705; ';
-			} else {
-				$title .= '&#x274C; ';
-			}
+		// @todo The amp_invalid_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
+		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_invalid_url_post ? $amp_invalid_url_post : $amp_url );
+
+		if ( is_amp_endpoint() ) {
+			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
+		} elseif ( $error_count > 0 && ! self::is_sanitization_forcibly_accepted() ) {
+			$icon = '&#x274C;'; // CROSS MARK.
+		} else {
+			$icon = '&#x1F517;'; // LINK SYMBOL.
 		}
-		$title .= 'AMP';
 
-		$wp_admin_bar->add_menu( array(
-			'id'    => 'amp',
-			'title' => $title,
-			'href'  => esc_url( $amp_url ),
-		) );
-
-		$wp_admin_bar->add_menu( array(
+		$validate_item = array(
 			'parent' => 'amp',
-			'id'     => 'amp-view',
-			'title'  => esc_html__( 'View AMP version', 'amp' ),
-			'href'   => esc_url( $amp_url ),
-		) );
+			'id'     => 'amp-validity',
+			'href'   => esc_url( $validate_url ),
+		);
+		if ( $error_count <= 0 ) {
+			$validate_item['item'] = esc_html__( 'Re-validate', 'amp' );
+		} else {
+			$validate_item['item'] = esc_html(
+				sprintf(
+					/* translators: %s is count of validation errors */
+					_n(
+						'Re-validate (%s validation error)',
+						'Re-validate (%s validation errors)',
+						$error_count,
+						'amp'
+					),
+					number_format_i18n( $error_count )
+				)
+			);
+		}
 
+		$parent = array(
+			'id'    => 'amp',
+			'title' => sprintf(
+				'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
+				$icon,
+				esc_html( is_amp_endpoint() ? __( 'AMP', 'amp' ) : __( 'View AMP', 'amp' ) )
+			),
+		);
+
+		$first_item_is_validate = (
+			amp_is_canonical()
+			||
+			( ! is_amp_endpoint() && $error_count > 0 && ! self::is_sanitization_forcibly_accepted() )
+		);
+		if ( $first_item_is_validate ) {
+			$title          = __( 'Validate AMP', 'amp' );
+			$parent['href'] = esc_url( $validate_url );
+		} elseif ( is_amp_endpoint() ) {
+			$title          = __( 'AMP', 'amp' );
+			$parent['href'] = esc_url( $non_amp_url );
+		} else {
+			$title          = __( 'View AMP', 'amp' );
+			$parent['href'] = esc_url( $amp_url );
+		}
+		$parent['title'] = sprintf(
+			'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
+			$icon,
+			esc_html( $title )
+		);
+
+		$wp_admin_bar->add_menu( $parent );
+
+		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
+		if ( ! $first_item_is_validate ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'amp',
+				'id'     => 'amp-view',
+				'title'  => esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+				'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
+			) );
+		}
+
+		// Validate admin bar item.
 		if ( $error_count <= 0 ) {
 			$title = esc_html__( 'Re-validate', 'amp' );
 		} else {
@@ -257,13 +359,10 @@ class AMP_Validation_Manager {
 				)
 			);
 		}
-
-		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_invalid_url_post ? $amp_invalid_url_post : $amp_url );
-
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'amp',
 			'id'     => 'amp-validity',
-			'title'  => $title,
+			'title'  => esc_html( $title ),
 			'href'   => esc_url( $validate_url ),
 		) );
 
@@ -286,6 +385,8 @@ class AMP_Validation_Manager {
 				<?php
 			} );
 		}
+
+		self::$amp_admin_bar_item_added = true;
 	}
 
 	/**
@@ -1351,6 +1452,8 @@ class AMP_Validation_Manager {
 	/**
 	 * Finalize validation.
 	 *
+	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
+	 *
 	 * @param DOMDocument $dom Document.
 	 * @param array       $args {
 	 *     Args.
@@ -1368,15 +1471,55 @@ class AMP_Validation_Manager {
 			$args
 		);
 
-		if ( $args['remove_source_comments'] ) {
-			self::remove_source_comments( $dom );
+		/*
+		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
+		 * when there are validation errors which have not been explicitly accepted.
+		 */
+		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ) {
+			$error_count = 0;
+			foreach ( self::$validation_results as $validation_result ) {
+				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'] ) {
+					$error_count++;
+				}
+			}
+
+			if ( $error_count > 0 ) {
+				$validate_item = $dom->getElementById( 'wp-admin-bar-amp-validity' );
+				if ( $validate_item ) {
+					$link = $validate_item->getElementsByTagName( 'a' )->item( 0 );
+					if ( $link ) {
+						$link->textContent = sprintf(
+							/* translators: %s is count of validation errors */
+							_n(
+								'Re-validate (%s validation error)',
+								'Re-validate (%s validation errors)',
+								$error_count,
+								'amp'
+							),
+							number_format_i18n( $error_count )
+						);
+					}
+				}
+
+				$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
+				if ( $admin_bar_icon ) {
+					$admin_bar_icon->textContent = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
+				}
+			}
 		}
 
-		if ( $args['append_validation_status_comment'] ) {
-			$encoded = wp_json_encode( self::$validation_results, 128 /* JSON_PRETTY_PRINT */ );
-			$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
-			$comment = $dom->createComment( 'AMP_VALIDATION_RESULTS:' . $encoded . "\n" );
-			$dom->documentElement->appendChild( $comment );
+		if ( self::should_validate_response() ) {
+			if ( $args['remove_source_comments'] ) {
+				self::remove_source_comments( $dom );
+			}
+
+			if ( $args['append_validation_status_comment'] ) {
+				$encoded = wp_json_encode( self::$validation_results, 128 /* JSON_PRETTY_PRINT */ );
+				$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
+				$comment = $dom->createComment( 'AMP_VALIDATION_RESULTS:' . $encoded . "\n" );
+				$dom->documentElement->appendChild( $comment );
+			}
 		}
 	}
 

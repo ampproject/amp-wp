@@ -257,6 +257,16 @@ class AMP_Options_Menu {
 					jQuery( '.amp-tree-shaking' ).toggleClass( 'hidden', this.checked && 'native' !== jQuery( 'input[type=radio][name="amp-options[theme_support]"]:checked' ).val() );
 				} ).trigger( 'change' );
 			</script>
+
+			<p>
+				<label for="disable_admin_bar">
+					<input id="disable_admin_bar" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[disable_admin_bar]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'disable_admin_bar' ) ); ?>>
+					<?php esc_html_e( 'Disable admin bar on AMP pages.', 'amp' ); ?>
+				</label>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'An additional stylesheet is required to properly render the admin bar. If the additional stylesheet causes the total CSS to surpass 50KB then the admin bar should be disabled to prevent a validation error or an unstyled admin bar in AMP responses.', 'amp' ); ?>
+			</p>
 		</fieldset>
 		<?php
 	}

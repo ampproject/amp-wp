@@ -97,6 +97,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'analytics'            => array(),
 				'force_sanitization'   => false,
 				'accept_tree_shaking'  => false,
+				'disable_admin_bar'    => false,
 			),
 			AMP_Options_Manager::get_options()
 		);

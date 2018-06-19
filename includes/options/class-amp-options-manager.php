@@ -28,6 +28,7 @@ class AMP_Options_Manager {
 		'analytics'            => array(),
 		'force_sanitization'   => false,
 		'accept_tree_shaking'  => false,
+		'disable_admin_bar'    => false,
 	);
 
 	/**
@@ -117,6 +118,7 @@ class AMP_Options_Manager {
 
 		$options['force_sanitization']  = ! empty( $new_options['force_sanitization'] );
 		$options['accept_tree_shaking'] = ! empty( $new_options['accept_tree_shaking'] );
+		$options['disable_admin_bar']   = ! empty( $new_options['disable_admin_bar'] );
 
 		// Validate post type support.
 		if ( isset( $new_options['supported_post_types'] ) ) {
