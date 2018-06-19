@@ -24,7 +24,7 @@ export default registerBlockType(
 	'amp/amp-o2-player',
 	{
 		title: __( 'AMP O2 Player', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' ),

@@ -25,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP IMA Video', 'amp' ),
 		description: __( 'Embeds a video player for instream video ads that are integrated with the IMA SDK', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )

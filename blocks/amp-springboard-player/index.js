@@ -25,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Springboard Player', 'amp' ),
 		description: __( 'Displays the Springboard Player used in the Springboard Video Platform', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )

@@ -24,7 +24,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP JW Player', 'amp' ),
 		description: __( 'Displays a cloud-hosted JW Player.', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )

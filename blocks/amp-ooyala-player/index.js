@@ -25,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Ooyala Player', 'amp' ),
 		description: __( 'Displays an Ooyala video.', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' ),

@@ -10,3 +10,5 @@ import './amp-springboard-player';
 import './amp-jwplayer';
 import './amp-brid-player';
 import './amp-ima-video';
+import './amp-hulu';
+import './amp-imgur';

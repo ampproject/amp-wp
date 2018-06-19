@@ -20,70 +20,69 @@ const {
  * Register block.
  */
 export default registerBlockType(
-	'amp/amp-reach-player',
+	'amp/amp-imgur',
 	{
-		title: __( 'AMP Reach Player', 'amp' ),
-		description: __( 'Displays the Reach Player configured in the Beachfront Reach platform.', 'amp' ),
+		title: __( 'AMP Imgur', 'amp' ),
+		description: __( 'Displays an Imgur post.', 'amp' ),
 		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed', 'amp' ),
-			__( 'Beachfront Reach video', 'amp' )
+			__( 'Embed', 'amp' )
 		],
 
 		attributes: {
-			dataEmbedId: {
+			dataImgurId: {
 				type: 'string',
 				source: 'attribute',
-				selector: 'amp-reach-player',
-				attribute: 'data-embed-id'
+				selector: 'amp-imgur',
+				attribute: 'data-imgur-id'
 			},
 			ampLayout: {
 				type: 'string',
-				default: 'fixed-height',
+				default: 'responsive',
 				source: 'attribute',
-				selector: 'amp-reach-player',
+				selector: 'amp-imgur',
 				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
 				default: 600,
 				source: 'attribute',
-				selector: 'amp-reach-player',
+				selector: 'amp-imgur',
 				attribute: 'width'
 			},
 			height: {
 				type: 'number',
 				default: 400,
 				source: 'attribute',
-				selector: 'amp-reach-player',
+				selector: 'amp-imgur',
 				attribute: 'height'
 			}
 		},
 
 		edit( props ) {
 			const { attributes, setAttributes } = props;
-			const { dataEmbedId } = attributes;
+			const { dataImgurId } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-				{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
+				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fill', label: __( 'Fill', 'amp' ) },
-				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) }
-
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
+				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) }
 			];
 			let url = false;
-			if ( dataEmbedId ) {
-				url = 'https://media-cdn.beachfrontreach.com/acct_1/video/';
+			if ( dataImgurId ) {
+				url = `https://imgur.com/${dataImgurId}/embed?pub=true`;
 			}
 			return (
 				<Fragment>
 					<InspectorControls key='inspector'>
-						<PanelBody title={ __( 'Reach settings', 'amp' ) }>
+						<PanelBody title={ __( 'Imgur Settings', 'amp' ) }>
 							<TextControl
-								label={ __( 'The Reach player embed id (required)', 'amp' ) }
-								value={ dataEmbedId }
-								onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
+								label={ __( 'The ID of the video (required)', 'amp' ) }
+								value={ dataImgurId }
+								onChange={ value => ( setAttributes( { dataImgurId: value } ) ) }
 							/>
 							{
 								getLayoutControls( props, ampLayoutOptions )
@@ -91,12 +90,12 @@ export default registerBlockType(
 						</PanelBody>
 					</InspectorControls>
 					{
-						url && getMediaPlaceholder( __( 'Reach Player', 'amp' ), url )
+						url && getMediaPlaceholder( __( 'Imgur', 'amp' ), url )
 					}
 					{
 						! url && (
-							<Placeholder label={ __( 'Reach Player', 'amp' ) }>
-								<p>{ __( 'Add Reach player embed ID to use the block.', 'amp' ) }</p>
+							<Placeholder label={ __( 'Imgur', 'amp' ) }>
+								<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 							</Placeholder>
 						)
 					}
@@ -105,18 +104,16 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			const { dataEmbedId, ampLayout, height, width } = attributes;
-
-			let reachProps = {
-				layout: ampLayout,
-				height: height,
-				'data-embed-id': dataEmbedId
+			let imgurProps = {
+				layout: attributes.ampLayout,
+				height: attributes.height,
+				'data-imgur-id': attributes.dataImgurId
 			};
-			if ( 'fixed-height' !== ampLayout && width ) {
-				reachProps.width = width;
+			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
+				imgurProps.width = attributes.width;
 			}
 			return (
-				<amp-reach-player { ...reachProps }></amp-reach-player>
+				<amp-imgur { ...imgurProps }></amp-imgur>
 			);
 		}
 	}

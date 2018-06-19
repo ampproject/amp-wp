@@ -25,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Brid Player', 'amp' ),
 		description: __( 'Displays the Brid Player used in Brid.tv Video Platform.', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )
