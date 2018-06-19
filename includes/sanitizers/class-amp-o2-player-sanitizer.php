@@ -10,14 +10,22 @@
  *
  * Converts <div class="vdb_player><script></script></div> embed to <amp-o2-player>
  *
+ * @since 1.0
  * @see https://www.ampproject.org/docs/reference/components/amp-o2-player
  */
+
 class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
-	const URL_PATTERN = '#.*delivery.vidible.tv\/jsonp\/pid=(.*)\/vid=(.*)\/(.*).js.*#i';
+	/**
+	 * Pattern to extract the information required for amp-o2-player element.d
+	 *
+	 * @since 1.0
+	 */
+	const URL_PATTERN = '#.*delivery.vidible.tv\/jsonp\/pid=(?<data_pid>.*)\/vid=(?<data_vid>.*)\/(?<data_bcid>.*).js.*#i';
 
 	/**
 	 * AMP Tag.
 	 *
+	 * @since 1.0
 	 * @var string AMP Tag.
 	 */
 	public static $amp_tag = 'amp-o2-player';
@@ -25,52 +33,46 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Amp O2 Player class.
 	 *
+	 * @since 1.0
 	 * @var string CSS class to identify O2 Player <div> to replace with AMP version.
 	 */
 	public static $xpath_selector = '//div[ contains( @class, \'vdb_player\' ) ]/script';
 
 	/**
-	 * Height to set for 02 Player elements.
+	 * Height to set for O2 Player elements.
 	 *
+	 * @since 1.0
 	 * @var string
 	 */
 	private static $height = '270';
 
 	/**
-	 * Width to set for 02 Player elements.
+	 * Width to set for O2 Player elements.
 	 *
+	 * @since 1.0
 	 * @var string
 	 */
 	private static $width = '480';
 
 	/**
-	 * XPath.
-	 *
-	 * @var DOMXPath
-	 */
-	private $xpath;
-
-	/**
-	 * AMP_O2_Player_Sanitizer constructor.
-	 *
-	 * @param DOMDocument $dom  Represents the HTML document to sanitize.
-	 * @param array       $args Args.
-	 */
-	public function __construct( DOMDocument $dom, array $args = array() ) {
-		parent::__construct( $dom, $args );
-		$this->xpath = new DOMXPath( $dom );
-	}
-
-	/**
 	 * Sanitize the O2 Player elements from the HTML contained in this instance's DOMDocument.
+	 *
+	 * @since 1.0
 	 */
 	public function sanitize() {
+		/**
+		 * XPath.
+		 *
+		 * @var DOMXPath $xpath
+		 */
+		$xpath = new DOMXPath( $this->dom );
+
 		/**
 		 * Node list.
 		 *
 		 * @var DOMNodeList $nodes
 		 */
-		$nodes     = $this->xpath->query( self::$xpath_selector );
+		$nodes     = $xpath->query( self::$xpath_selector );
 		$num_nodes = $nodes->length;
 
 		if ( 0 === $num_nodes ) {
@@ -88,6 +90,7 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Replaces node with amp-o2-player
 	 *
+	 * @since 1.0
 	 * @param DOMDocument $dom The HTML Document.
 	 * @param DOMNode     $node The DOMNode to adjust and replace.
 	 */
@@ -118,6 +121,7 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Gets O2 Player's required attributes from script src
 	 *
+	 * @since 1.0
 	 * @param string $src script src.
 	 *
 	 * @return array data-attributes for o2 player.
@@ -126,9 +130,9 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 		$found = preg_match( self::URL_PATTERN, $src, $matches );
 		if ( $found ) {
 			return array(
-				'data-pid'  => $matches[1],
-				'data-vid'  => $matches[2],
-				'data-bcid' => $matches[3],
+				'data-pid'  => $matches['data_pid'],
+				'data-vid'  => $matches['data_vid'],
+				'data-bcid' => $matches['data_bcid'],
 			);
 		}
 		return array();
