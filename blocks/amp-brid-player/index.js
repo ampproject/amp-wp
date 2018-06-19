@@ -86,7 +86,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { autoPlay, dataPartner, dataPlayer, dataVideo, dataPlaylist, dataOutstream } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
@@ -103,47 +103,43 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'Brid.tv partner ID (required)', 'amp' ) }
-										value={ dataPartner }
-										onChange={ value => ( setAttributes( { dataPartner: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Brid.tv player ID (required)', 'amp' ) }
-										value={ dataPlayer }
-										onChange={ value => ( setAttributes( { dataPlayer: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Video ID (one of video / playlist / outstream ID is required)', 'amp' ) }
-										value={ dataVideo }
-										onChange={ value => ( setAttributes( { dataVideo: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Outstream unit ID (one of video / playlist / outstream ID is required)', 'amp' ) }
-										value={ dataOutstream }
-										onChange={ value => ( setAttributes( { dataOutstream: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Playlist ID (one of video / playlist / outstream ID is required)', 'amp' ) }
-										value={ dataPlaylist }
-										onChange={ value => ( setAttributes( { dataPlaylist: value } ) ) }
-									/>
-									<ToggleControl
-										label={ __( 'Autoplay', 'amp' ) }
-										checked={ autoPlay }
-										onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
-									/>
-									{
-										getLayoutControls( props, ampLayoutOptions )
-									}
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'Brid.tv partner ID (required)', 'amp' ) }
+								value={ dataPartner }
+								onChange={ value => ( setAttributes( { dataPartner: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Brid.tv player ID (required)', 'amp' ) }
+								value={ dataPlayer }
+								onChange={ value => ( setAttributes( { dataPlayer: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Video ID (one of video / playlist / outstream ID is required)', 'amp' ) }
+								value={ dataVideo }
+								onChange={ value => ( setAttributes( { dataVideo: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Outstream unit ID (one of video / playlist / outstream ID is required)', 'amp' ) }
+								value={ dataOutstream }
+								onChange={ value => ( setAttributes( { dataOutstream: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Playlist ID (one of video / playlist / outstream ID is required)', 'amp' ) }
+								value={ dataPlaylist }
+								onChange={ value => ( setAttributes( { dataPlaylist: value } ) ) }
+							/>
+							<ToggleControl
+								label={ __( 'Autoplay', 'amp' ) }
+								checked={ autoPlay }
+								onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
 						url && getMediaPlaceholder( __( 'Brid Player', 'amp' ), url )
 					}

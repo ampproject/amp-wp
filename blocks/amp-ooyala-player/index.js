@@ -83,7 +83,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
@@ -98,41 +98,37 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'Video embed code (required)', 'amp' ) }
-										value={ dataEmbedCode }
-										onChange={ value => ( setAttributes( { dataEmbedCode: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Player ID (required)', 'amp' ) }
-										value={ dataPlayerId }
-										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Provider code for the account (required)', 'amp' ) }
-										value={ dataPcode }
-										onChange={ value => ( setAttributes( { dataPcode: value } ) ) }
-									/>
-									<SelectControl
-										label={ __( 'Player version', 'amp' ) }
-										value={ dataPlayerVersion }
-										options={ [
-											{ value: 'v3', label: __( 'V3', 'amp' ) },
-											{ value: 'v4', label: __( 'V4', 'amp' ) }
-										] }
-										onChange={ value => ( setAttributes( { dataPlayerVersion: value } ) ) }
-									/>
-									{
-										getLayoutControls( props, ampLayoutOptions )
-									}
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'Video embed code (required)', 'amp' ) }
+								value={ dataEmbedCode }
+								onChange={ value => ( setAttributes( { dataEmbedCode: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Player ID (required)', 'amp' ) }
+								value={ dataPlayerId }
+								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Provider code for the account (required)', 'amp' ) }
+								value={ dataPcode }
+								onChange={ value => ( setAttributes( { dataPcode: value } ) ) }
+							/>
+							<SelectControl
+								label={ __( 'Player version', 'amp' ) }
+								value={ dataPlayerVersion }
+								options={ [
+									{ value: 'v3', label: __( 'V3', 'amp' ) },
+									{ value: 'v4', label: __( 'V4', 'amp' ) }
+								] }
+								onChange={ value => ( setAttributes( { dataPlayerVersion: value } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
 						url && getMediaPlaceholder( __( 'Ooyala Player', 'amp' ), url )
 					}

@@ -73,7 +73,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { dataPlayerId, dataMediaId, dataPlaylistId } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
@@ -94,32 +94,28 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'JW Player Settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'Player ID (required)', 'amp' ) }
-										value={ dataPlayerId }
-										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Media ID (required if playlist ID not set)', 'amp' ) }
-										value={ dataMediaId }
-										onChange={ value => ( setAttributes( { dataMediaId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Playlist ID (required if media ID not set)', 'amp' ) }
-										value={ dataPlaylistId }
-										onChange={ value => ( setAttributes( { dataPlaylistId: value } ) ) }
-									/>
-									{
-										getLayoutControls( props, ampLayoutOptions )
-									}
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'JW Player Settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'Player ID (required)', 'amp' ) }
+								value={ dataPlayerId }
+								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Media ID (required if playlist ID not set)', 'amp' ) }
+								value={ dataMediaId }
+								onChange={ value => ( setAttributes( { dataMediaId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Playlist ID (required if media ID not set)', 'amp' ) }
+								value={ dataPlaylistId }
+								onChange={ value => ( setAttributes( { dataPlaylistId: value } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
 						url && getMediaPlaceholder( __( 'JW Player', 'amp' ), url )
 					}
