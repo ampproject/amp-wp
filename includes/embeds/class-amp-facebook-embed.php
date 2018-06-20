@@ -55,15 +55,15 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 			$this->amp_tag,
 			array(
 				'data-href' => $args['url'],
-				'layout' => 'responsive',
-				'width' => $this->args['width'],
-				'height' => $this->args['height'],
+				'layout'    => 'responsive',
+				'width'     => $this->args['width'],
+				'height'    => $this->args['height'],
 			)
 		);
 	}
 
 	/**
-	 * Sanitized <div class="fb-video" data-href=> tags to <amp-facebook>
+	 * Sanitized <div class="fb-video" data-href=> tags to <amp-facebook>.
 	 *
 	 * @param DOMDocument $dom DOM.
 	 */
@@ -95,11 +95,10 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Make final modifications to DOMNode
+	 * Get embed type.
 	 *
-	 * @param DOMNode $node The DOMNode to adjust and replace.
-	 *
-	 * @return string
+	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @return string|null Embed type or null if not detected.
 	 */
 	private function get_embed_type( $node ) {
 		$class_attr = $node->getAttribute( 'class' );
@@ -116,11 +115,11 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Make final modifications to DOMNode
+	 * Create amp-facebook and replace node.
 	 *
-	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMNode     $node The DOMNode to adjust and replace.
-	 * @param String      $embed_type Embed type.
+	 * @param DOMDocument $dom        The HTML Document.
+	 * @param DOMElement  $node       The DOMNode to adjust and replace.
+	 * @param string      $embed_type Embed type.
 	 */
 	private function create_amp_facebook_and_replace_node( $dom, $node, $embed_type ) {
 		$amp_facebook_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(

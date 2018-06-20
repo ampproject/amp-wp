@@ -8,7 +8,7 @@
 /**
  * Class AMP_Embed_Sanitizer
  *
- * Calls embed hanlders sanitize_raw_embeds
+ * Calls sanitize_raw_embeds method on embed handlers.
  */
 class AMP_Embed_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -45,5 +45,3 @@ class AMP_Embed_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 }
-
-

@@ -67,7 +67,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	public function render( $args ) {
 		$args = wp_parse_args( $args, array(
-			'url' => false,
+			'url'          => false,
 			'instagram_id' => false,
 		) );
 
@@ -81,13 +81,19 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 			$this->amp_tag,
 			array(
 				'data-shortcode' => $args['instagram_id'],
-				'layout' => 'responsive',
-				'width' => $this->args['width'],
-				'height' => $this->args['height'],
+				'layout'         => 'responsive',
+				'width'          => $this->args['width'],
+				'height'         => $this->args['height'],
 			)
 		);
 	}
 
+	/**
+	 * Get Instagram ID from URL.
+	 *
+	 * @param string $url URL.
+	 * @return string|false The ID parsed from the URL or false if not found.
+	 */
 	private function get_instagram_id_from_url( $url ) {
 		$found = preg_match( self::URL_PATTERN, $url, $matches );
 
@@ -123,7 +129,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			if ( $node->hasAttribute( 'data-instgrm-permalink' ) ) {
-				$this->create_amp_instragram_and_replace_node( $dom, $node );
+				$this->create_amp_instagram_and_replace_node( $dom, $node );
 			}
 		}
 	}
@@ -132,9 +138,9 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Make final modifications to DOMNode
 	 *
 	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMNode     $node The DOMNode to adjust and replace.
+	 * @param DOMElement  $node The DOMNode to adjust and replace.
 	 */
-	private function create_amp_instragram_and_replace_node( $dom, $node ) {
+	private function create_amp_instagram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
 
 		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
@@ -151,18 +157,38 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 		$this->did_convert_elements = true;
 	}
 
-
 	/**
-	 * Removes instagram's embed <script> tag
+	 * Removes Instagram's embed <script> tag.
 	 *
-	 * @param DOMNode $node The DOMNode to whose sibling is the instagram script.
+	 * @param DOMElement $node The DOMNode to whose sibling is the instagram script.
 	 */
 	private function sanitize_embed_script( $node ) {
-		$next_sibling = $node->nextSibling;
+		$next_element_sibling = $node->nextSibling;
+		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
+			$next_element_sibling = $next_element_sibling->nextSibling;
+		}
 
-		if ( null !== $next_sibling && 'script' === strtolower( $next_sibling->nodeName )
-			&& false !== strpos( $next_sibling->getAttribute( 'src' ), 'instagram.com/embed.js' ) ) {
-			$next_sibling->parentNode->removeChild( $next_sibling );
+		$script_src = 'instagram.com/embed.js';
+
+		// Handle case where script is wrapped in paragraph by wpautop.
+		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
+			$children = $next_element_sibling->getElementsByTagName( '*' );
+			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $script_src ) ) {
+				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+				return;
+			}
+		}
+
+		// Handle case where script is immediately following.
+		$is_embed_script = (
+			$next_element_sibling
+			&&
+			'script' === strtolower( $next_element_sibling->nodeName )
+			&&
+			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
+		);
+		if ( $is_embed_script ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 		}
 	}
 }

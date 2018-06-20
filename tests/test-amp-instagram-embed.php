@@ -3,21 +3,21 @@
 class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return array(
-			'no_embed' => array(
+			'no_embed'                 => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
-			'simple_url' => array(
+			'simple_url'               => array(
 				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
 				'<p><amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
 			),
 
-			'short_url' => array(
+			'short_url'                => array(
 				'https://instagr.am/p/7-l0z_p4A4' . PHP_EOL,
 				'<p><amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
 			),
 
-			'shortcode_simple' => array(
+			'shortcode_simple'         => array(
 				'[instagram url=https://www.instagram.com/p/BIyO4vXjE6b]' . PHP_EOL,
 				'<amp-instagram data-shortcode="BIyO4vXjE6b" layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
 			),
@@ -35,7 +35,11 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test conversion.
+	 *
 	 * @dataProvider get_conversion_data
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
 	public function test__conversion( $source, $expected ) {
 		$embed = new AMP_Instagram_Embed_Handler();
@@ -45,13 +49,18 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $filtered_content );
 	}
 
+	/**
+	 * Get scripts data.
+	 *
+	 * @return array
+	 */
 	public function get_scripts_data() {
 		return array(
 			'not_converted' => array(
 				'<p>Hello World.</p>',
 				array(),
 			),
-			'converted' => array(
+			'converted'     => array(
 				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
 				array( 'amp-instagram' => true ),
 			),
@@ -59,7 +68,11 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_scripts().
+	 *
 	 * @dataProvider get_scripts_data
+	 * @param string $source   Source.
+	 * @param array  $expected Expected.
 	 */
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Instagram_Embed_Handler();
@@ -89,12 +102,17 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello world.</p>',
 			),
 			'embed_blockquote_without_instagram' => array(
-				'<blockquote>lorem ipsum</blockquote>',
-				'<blockquote>lorem ipsum</blockquote>',
+				'<blockquote><p>lorem ipsum</p></blockquote>',
+				'<blockquote><p>lorem ipsum</p></blockquote>',
 			),
 
 			'blockquote_embed'                   => array(
-				'<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote>',
+				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>',
+			),
+
+			'blockquote_embed_notautop'          => array(
+				'<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
 				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>',
 			),
 		);
@@ -115,6 +133,7 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 		$embed->sanitize_raw_embeds( $dom );
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
 
 		$this->assertEquals( $expected, $content );
 	}

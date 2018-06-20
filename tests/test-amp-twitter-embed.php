@@ -8,8 +8,8 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
 			'url_simple' => array(
-				'https://twitter.com/wordpress/status/118252236836061184' . PHP_EOL,
-				'<p><amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
+				'https://twitter.com/wordpress/status/987437752164737025' . PHP_EOL,
+				'<p><amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
 			),
 			'url_with_big_tweet_id' => array(
 				'https://twitter.com/wordpress/status/705219971425574912' . PHP_EOL,
@@ -21,20 +21,20 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'' . PHP_EOL,
 			),
 			'shortcode_simple' => array(
-				'[tweet 118252236836061184]' . PHP_EOL,
-				'<amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
+				'[tweet 987437752164737025]' . PHP_EOL,
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
 			'shortcode_with_tweet_attribute' => array(
-				'[tweet tweet=118252236836061184]' . PHP_EOL,
-				'<amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
+				'[tweet tweet=987437752164737025]' . PHP_EOL,
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
 			'shortcode_with_big_tweet_id' => array(
 				'[tweet 705219971425574912]' . PHP_EOL,
 				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
 			'shortcode_with_url' => array(
-				'[tweet https://twitter.com/wordpress/status/118252236836061184]' . PHP_EOL,
-				'<amp-twitter data-tweetid="118252236836061184" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
+				'[tweet https://twitter.com/wordpress/status/987437752164737025]' . PHP_EOL,
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
 			'shortcode_with_url_with_big_tweet_id' => array(
 				'[tweet https://twitter.com/wordpress/status/705219971425574912]' . PHP_EOL,
@@ -65,7 +65,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				array(),
 			),
 			'converted' => array(
-				'https://twitter.com/altjoen/status/118252236836061184' . PHP_EOL,
+				'https://twitter.com/altjoen/status/987437752164737025' . PHP_EOL,
 				array( 'amp-twitter' => true ),
 			),
 		);
@@ -107,8 +107,13 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 			),
 
 			'blockquote_embed'                 => array(
-				'<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">just setting up my twttr</p>&mdash; Jack (@jack) <a href="https://twitter.com/wordpress/status/118252236836061184">March 21, 2006</a></blockquote>',
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="118252236836061184"></amp-twitter>',
+				wpautop( '<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"></amp-twitter>',
+			),
+
+			'blockquote_embed_not_autop'       => array(
+				'<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"></amp-twitter>',
 			),
 		);
 	}

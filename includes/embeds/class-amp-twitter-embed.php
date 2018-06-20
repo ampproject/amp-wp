@@ -91,7 +91,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @see \WP_Embed::shortcode()
 	 *
 	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attribues.
+	 * @param array  $attr    Shortcode attributes.
 	 * @param string $url     URL.
 	 * @param string $rawattr Unmodified shortcode attributes.
 	 * @return string Rendered oEmbed.
@@ -111,7 +111,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Sanitized <blockquote class="twitter-tweet"> tags to <amp-twitter>
+	 * Sanitized <blockquote class="twitter-tweet"> tags to <amp-twitter>.
 	 *
 	 * @param DOMDocument $dom DOM.
 	 */
@@ -134,7 +134,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 				continue;
 			}
 
-			if ( $this->is_twitter_raw_embed( $node ) ) {
+			if ( $this->is_tweet_raw_embed( $node ) ) {
 				$this->create_amp_twitter_and_replace_node( $dom, $node );
 			}
 		}
@@ -143,11 +143,10 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Checks whether it's a twitter blockquote or not
 	 *
-	 * @param DOMNode $node The DOMNode to adjust and replace.
-	 *
-	 * @return boolean
+	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @return bool Whether node is for raw embed.
 	 */
-	private function is_twitter_raw_embed( $node ) {
+	private function is_tweet_raw_embed( $node ) {
 		$class_attr = $node->getAttribute( 'class' );
 
 		return null !== $class_attr && false !== strpos( $class_attr, 'twitter-tweet' );
@@ -157,34 +156,35 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Make final modifications to DOMNode
 	 *
 	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMNode     $node The DOMNode to adjust and replace.
+	 * @param DOMElement  $node The DOMNode to adjust and replace.
 	 */
 	private function create_amp_twitter_and_replace_node( $dom, $node ) {
-		$twitter_id = $this->get_twitter_id( $node );
-
-		if ( null !== $twitter_id ) {
-
-			$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
-				'width'        => $this->DEFAULT_WIDTH,
-				'height'       => $this->DEFAULT_HEIGHT,
-				'layout'       => 'responsive',
-				'data-tweetid' => $twitter_id,
-			) );
-
-			$node->parentNode->replaceChild( $new_node, $node );
-
-			$this->did_convert_elements = true;
+		$tweet_id = $this->get_tweet_id( $node );
+		if ( ! $tweet_id ) {
+			return;
 		}
+
+		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
+			'width'        => $this->DEFAULT_WIDTH,
+			'height'       => $this->DEFAULT_HEIGHT,
+			'layout'       => 'responsive',
+			'data-tweetid' => $tweet_id,
+		) );
+
+		$this->sanitize_embed_script( $node );
+
+		$node->parentNode->replaceChild( $new_node, $node );
+
+		$this->did_convert_elements = true;
 	}
 
 	/**
-	 * Extracts twitter id
+	 * Extracts Tweet id.
 	 *
-	 * @param DOMNode $node The DOMNode to adjust and replace.
-	 *
-	 * @return String
+	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @return string Tweet ID.
 	 */
-	private function get_twitter_id( $node ) {
+	private function get_tweet_id( $node ) {
 		/**
 		 * DOMNode
 		 *
@@ -192,6 +192,11 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		 */
 		$anchors = $node->getElementsByTagName( 'a' );
 
+		/**
+		 * Anchor.
+		 *
+		 * @type DOMElement $anchor
+		 */
 		foreach ( $anchors as $anchor ) {
 			$found = preg_match( self::URL_PATTERN, $anchor->getAttribute( 'href' ), $matches );
 			if ( $found ) {
@@ -200,5 +205,40 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Removes Twitter's embed <script> tag.
+	 *
+	 * @param DOMElement $node The DOMNode to whose sibling is the instagram script.
+	 */
+	private function sanitize_embed_script( $node ) {
+		$next_element_sibling = $node->nextSibling;
+		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
+			$next_element_sibling = $next_element_sibling->nextSibling;
+		}
+
+		$script_src = 'platform.twitter.com/widgets.js';
+
+		// Handle case where script is wrapped in paragraph by wpautop.
+		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
+			$children = $next_element_sibling->getElementsByTagName( '*' );
+			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $script_src ) ) {
+				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+				return;
+			}
+		}
+
+		// Handle case where script is immediately following.
+		$is_embed_script = (
+			$next_element_sibling
+			&&
+			'script' === strtolower( $next_element_sibling->nodeName )
+			&&
+			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
+		);
+		if ( $is_embed_script ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+		}
 	}
 }
