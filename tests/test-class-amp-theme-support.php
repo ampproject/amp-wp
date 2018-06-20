@@ -1102,7 +1102,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				<?php wp_head(); ?>
 				<script data-head>document.write('Illegal');</script>
 			</head>
-			<body>
+			<body><!-- </body></html> -->
 				<img width="100" height="100" src="https://example.com/test.png">
 				<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
 				<amp-ad type="a9"
@@ -1111,6 +1111,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					data-aax_size="300x250"
 					data-aax_pubname="test123"
 					data-aax_src="302"></amp-ad>
+
 				<?php wp_footer(); ?>
 
 				<button onclick="alert('Illegal');">no-onclick</button>
@@ -1118,6 +1119,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				<style>body { background: black; }</style>
 			</body>
 		</html>
+		<!--comment-after-html-->
+		<div id="after-html"></div>
+		<!--comment-end-html-->
 		<?php
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
@@ -1164,6 +1168,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			),
 			$removed_nodes
 		);
+
+		// Make sure trailing content after </html> gets moved.
+		$this->assertRegExp( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
 
 		$prepare_response_args = array(
 			'enable_response_caching' => true,
