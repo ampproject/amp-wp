@@ -7,6 +7,8 @@
 
 /**
  * Test AMP_O2_Player_Sanitizer
+ *
+ * @covers AMP_O2_Player_Sanitizer
  */
 class AMP_O2_Player_Sanitizer_Test extends WP_UnitTestCase {
 
@@ -40,12 +42,15 @@ class AMP_O2_Player_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Dataset to test amp-o2-player sanitizer/
+	 * Dataset to test amp-o2-player sanitizer.
 	 *
 	 * @param string $source  Content.
 	 * @param string $expected Expected content.
 	 *
 	 * @dataProvider get_data
+	 * @covers AMP_O2_Player_Sanitizer::sanitize()
+	 * @covers AMP_O2_Player_Sanitizer::create_amp_o2_player()
+	 * @covers AMP_O2_Player_Sanitizer::get_o2_player_attributes()
 	 */
 	public function test_converter( $source, $expected ) {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );

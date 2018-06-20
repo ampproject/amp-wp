@@ -27,7 +27,7 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 * @var string AMP Tag.
 	 */
-	public static $amp_tag = 'amp-o2-player';
+	private static $amp_tag = 'amp-o2-player';
 
 	/**
 	 * Amp O2 Player class.
@@ -35,7 +35,7 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 * @var string CSS class to identify O2 Player <div> to replace with AMP version.
 	 */
-	public static $xpath_selector = '//div[ contains( @class, \'vdb_player\' ) ]/script';
+	private static $xpath_selector = '//div[ contains( @class, \'vdb_player\' ) ]/script';
 
 	/**
 	 * Height to set for O2 Player elements.
@@ -90,8 +90,8 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	 * Replaces node with amp-o2-player
 	 *
 	 * @since 1.0
-	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMNode     $node The DOMNode to adjust and replace.
+	 * @param DOMDocument $dom  The HTML Document.
+	 * @param DOMElement  $node The DOMNode to adjust and replace.
 	 */
 	private function create_amp_o2_player( $dom, $node ) {
 		$o2_attributes = $this->get_o2_player_attributes( $node->getAttribute( 'src' ) );
@@ -121,9 +121,9 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	 * Gets O2 Player's required attributes from script src
 	 *
 	 * @since 1.0
-	 * @param string $src script src.
+	 * @param string $src Script src.
 	 *
-	 * @return array data-attributes for o2 player.
+	 * @return array The data-* attributes for o2 player.
 	 */
 	private function get_o2_player_attributes( $src ) {
 		$found = preg_match( self::URL_PATTERN, $src, $matches );
