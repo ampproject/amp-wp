@@ -176,6 +176,7 @@ class AMP_Theme_Support {
 		self::$sanitizer_classes = amp_get_content_sanitizers();
 		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
+		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
 
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
 			if ( method_exists( $sanitizer_class, 'add_buffering_hooks' ) ) {
