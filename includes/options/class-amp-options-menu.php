@@ -23,6 +23,28 @@ class AMP_Options_Menu {
 	public function init() {
 		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
 		add_action( 'admin_menu', array( $this, 'add_menu_items' ), 9 );
+
+		$plugin_file = preg_replace( '#.+/(?=.+?/.+?)#', '', AMP__FILE__ );
+		add_filter( "plugin_action_links_{$plugin_file}", array( $this, 'add_plugin_action_links' ) );
+	}
+
+	/**
+	 * Add plugin action links.
+	 *
+	 * @param array $links Links.
+	 * @return array Modified links.
+	 */
+	public function add_plugin_action_links( $links ) {
+		return array_merge(
+			array(
+				'settings' => sprintf(
+					'<a href="%1$s">%2$s</a>',
+					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
+					__( 'Settings', 'amp' )
+				),
+			),
+			$links
+		);
 	}
 
 	/**
@@ -48,17 +70,43 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_section(
-			'post_types',
+			'general',
 			false,
 			'__return_false',
 			AMP_Options_Manager::OPTION_NAME
 		);
+
+		add_settings_field(
+			'theme_support',
+			__( 'Template Mode', 'amp' ),
+			array( $this, 'render_theme_support' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'theme_support',
+			)
+		);
+
+		add_settings_field(
+			'validation',
+			__( 'Validation Handling', 'amp' ),
+			array( $this, 'render_validation_handling' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'amp-validation-field',
+			)
+		);
+
 		add_settings_field(
 			'supported_post_types',
 			__( 'Post Type Support', 'amp' ),
 			array( $this, 'render_post_types_support' ),
 			AMP_Options_Manager::OPTION_NAME,
-			'post_types'
+			'general',
+			array(
+				'class' => 'amp-post-type-support-field',
+			)
 		);
 
 		$submenus = array(
@@ -72,6 +120,148 @@ class AMP_Options_Menu {
 	}
 
 	/**
+	 * Render theme support.
+	 *
+	 * @since 1.0
+	 */
+	public function render_theme_support() {
+		$theme_support = AMP_Options_Manager::get_option( 'theme_support' );
+
+		$support_args = get_theme_support( 'amp' );
+
+		$theme_support_mutable = (
+			empty( $support_args )
+			||
+			! empty( $support_args[0]['__added_via_option'] )
+		);
+		if ( ! $theme_support_mutable ) {
+			if ( amp_is_canonical() ) {
+				$theme_support = 'native';
+			} else {
+				$theme_support = 'paired';
+			}
+		}
+
+		$should_have_theme_support = in_array( get_template(), array( 'twentyfifteen', 'twentysixteen', 'twentyseventeen' ), true );
+		?>
+		<fieldset>
+			<?php if ( current_theme_supports( 'amp' ) && ! $theme_support_mutable ) : ?>
+				<div class="notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
+				</div>
+			<?php elseif ( $should_have_theme_support ) : ?>
+				<div class="notice notice-success notice-alt inline">
+					<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
+				</div>
+			<?php endif; ?>
+			<dl>
+				<dt>
+					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+					<label for="theme_support_disabled">
+						<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+				</dd>
+				<dt>
+					<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+					<label for="theme_support_paired">
+						<strong><?php esc_html_e( 'Paired', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php esc_html_e( 'Reuse active theme\'s templates to display AMP responses, but use separate URLs for AMP. The canonical URLs for your site will not have AMP. If there are AMP validation errors encountered in the AMP response and the validation errors are not accepted for sanitization, then the AMP version will redirect to the non-AMP version.', 'amp' ); ?>
+				</dd>
+				<dt>
+					<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+					<label for="theme_support_native">
+						<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php esc_html_e( 'Reuse active theme\'s templates to display AMP responses but do not use separate URLs for AMP. Your canonical URLs are AMP. Select this if you want to use AMP-specific blocks in your content. Any AMP validation errors will be automatically sanitized.', 'amp' ); ?>
+				</dd>
+			</dl>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Post types support section renderer.
+	 *
+	 * @todo If dirty AMP is ever allowed, then automatically forcing sanitization in native should be able to be turned off.
+	 *
+	 * @since 1.0
+	 */
+	public function render_validation_handling() {
+		?>
+		<fieldset>
+			<?php
+			$auto_sanitization         = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
+				'code' => 'non_existent',
+			) );
+			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
+				'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
+			) );
+
+			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
+			$forced_tree_shaking = $forced_sanitization || 'with_filter' === $tree_shaking_sanitization['forced'];
+			?>
+
+			<?php if ( $forced_sanitization ) : ?>
+				<div class="notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'Your install is configured via a theme or plugin to automatically sanitize any AMP validation error that is encountered.', 'amp' ); ?></p>
+				</div>
+				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[force_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'force_sanitization' ) ? 'on' : ''; ?>">
+			<?php else : ?>
+				<div class="amp-force-sanitize-canonical notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'All validation errors are forcibly accepted when in native mode.', 'amp' ); ?></p>
+				</div>
+				<div class="amp-force-sanitize">
+					<p>
+						<label for="force_sanitization">
+							<input id="force_sanitization" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[force_sanitization]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'force_sanitization' ) ); ?>>
+							<?php esc_html_e( 'Automatically accept sanitization for any AMP validation error that is encountered.', 'amp' ); ?>
+						</label>
+					</p>
+					<p class="description">
+						<?php esc_html_e( 'This will ensure your responses are always valid AMP but some important content may get stripped out (e.g. scripts).', 'amp' ); ?>
+					</p>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $forced_tree_shaking ) : ?>
+				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[accept_tree_shaking]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ? 'on' : ''; ?>">
+			<?php else : ?>
+				<div class="amp-tree-shaking">
+					<p>
+						<label for="accept_tree_shaking">
+							<input id="accept_tree_shaking" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[accept_tree_shaking]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ); ?>>
+							<?php esc_html_e( 'Automatically remove CSS rules that are not relevant to a given page (tree shaking).', 'amp' ); ?>
+						</label>
+					</p>
+					<p class="description">
+						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; if you have more, than it is a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
+					</p>
+				</div>
+			<?php endif; ?>
+
+			<script>
+				jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
+					jQuery( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === this.value );
+					jQuery( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== this.value );
+					jQuery( '#force_sanitization' ).trigger( 'change' );
+				} ).filter( ':checked' ).trigger( 'change' );
+				jQuery( '#force_sanitization' ).change( function() {
+					jQuery( '.amp-tree-shaking' ).toggleClass( 'hidden', this.checked && 'native' !== jQuery( 'input[type=radio][name="amp-options[theme_support]"]:checked' ).val() );
+				} ).trigger( 'change' );
+			</script>
+		</fieldset>
+		<?php
+	}
+
+	/**
 	 * Post types support section renderer.
 	 *
 	 * @since 0.6
@@ -80,11 +270,16 @@ class AMP_Options_Menu {
 		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
 		$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
 		?>
+		<script>
+			jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
+				jQuery( '.amp-post-type-support-field' ).toggleClass( 'hidden', 'paired' !== this.value && 'disabled' !== this.value );
+			} ).filter( ':checked' ).trigger( 'change' );
+		</script>
 		<fieldset>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<?php
 				$element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}";
-				$is_builtin = amp_is_canonical() || in_array( $post_type->name, $builtin_support, true );
+				$is_builtin = in_array( $post_type->name, $builtin_support, true );
 				?>
 				<?php if ( $is_builtin ) : ?>
 					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $post_type->name ); ?>">
@@ -103,13 +298,7 @@ class AMP_Options_Menu {
 				<br>
 			<?php endforeach; ?>
 			<p class="description">
-				<?php
-				if ( ! amp_is_canonical() ) :
-					esc_html_e( 'Enable/disable AMP post type(s) support', 'amp' );
-				else :
-					esc_html_e( 'Canonical AMP is enabled in your theme, so all post types will render.', 'amp' );
-				endif;
-			?>
+				<?php esc_html_e( 'Select the content types that you would like to be made available in AMP.', 'amp' ); ?>
 			</p>
 		</fieldset>
 		<?php
@@ -132,9 +321,7 @@ class AMP_Options_Menu {
 				<?php
 				settings_fields( AMP_Options_Manager::OPTION_NAME );
 				do_settings_sections( AMP_Options_Manager::OPTION_NAME );
-				if ( ! amp_is_canonical() ) {
-					submit_button();
-				}
+				submit_button();
 				?>
 			</form>
 		</div>

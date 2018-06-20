@@ -96,6 +96,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function init() {
+		self::apply_options();
 		if ( ! current_theme_supports( 'amp' ) ) {
 			return;
 		}
@@ -117,7 +118,7 @@ class AMP_Theme_Support {
 			$args = array_shift( $support );
 			if ( ! is_array( $args ) ) {
 				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list' ) ) ) !== 0 ) {
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', '__added_via_option' ) ) ) !== 0 ) {
 				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
@@ -133,25 +134,41 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Apply options for whether theme support is enabled via admin and what sanitization is performed by default.
+	 *
+	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
+	 */
+	public static function apply_options() {
+		if ( ! current_theme_supports( 'amp' ) ) {
+			$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+			if ( 'disabled' === $theme_support_option ) {
+				return;
+			}
+
+			$args = array(
+				'__added_via_option' => true,
+			);
+			if ( 'paired' === $theme_support_option ) {
+				$args['template_dir'] = './';
+			}
+			add_theme_support( 'amp', $args );
+		}
+	}
+
+	/**
 	 * Finish initialization once query vars are set.
 	 *
 	 * @since 0.7
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
-			// Add amphtml link when paired mode is available.
-			if ( self::is_paired_available() ) {
-				amp_add_frontend_actions(); // @todo This function is poor in how it requires a file that then does add_action().
-				if ( ! has_action( 'wp_head', 'amp_frontend_add_canonical' ) ) {
-					add_action( 'wp_head', 'amp_frontend_add_canonical' );
-				}
-			}
+			amp_add_frontend_actions();
 			return;
 		}
 
-		if ( amp_is_canonical() ) {
-			self::redirect_canonical_amp();
-		} else {
+		self::ensure_proper_amp_location();
+
+		if ( ! amp_is_canonical() ) {
 			self::register_paired_hooks();
 		}
 
@@ -169,32 +186,75 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Redirect to canonical URL if the AMP URL was loaded, since canonical is now AMP.
+	 * Ensure that the current AMP location is correct.
+	 *
+	 * @since 1.0
+	 *
+	 * @param bool $exit Whether to exit after redirecting.
+	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
+	 */
+	public static function ensure_proper_amp_location( $exit = true ) {
+		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
+		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // WPCS: CSRF OK.
+
+		if ( amp_is_canonical() ) {
+			/*
+			 * When AMP native/canonical, then when there is an /amp/ endpoint or ?amp URL param,
+			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
+			 */
+			if ( $has_query_var || $has_url_param ) {
+				return self::redirect_ampless_url( $exit );
+			}
+		} else {
+			/*
+			 * When in AMP paired mode *with* theme support, then the proper AMP URL has the 'amp' URL param
+			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in paired mode
+			 * when amp theme support present. This is important for plugins to be able to reliably call
+			 * is_amp_endpoint() before the parse_query action.
+			 */
+			if ( $has_query_var && ! $has_url_param ) {
+				$old_url = amp_get_current_url();
+				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
+				if ( $old_url !== $new_url ) {
+					wp_safe_redirect( $new_url, 302 );
+					if ( $exit ) {
+						exit;
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Redirect to non-AMP version of the current URL, such as because AMP is canonical or there are unaccepted validation errors.
+	 *
+	 * If the current URL is already AMP-less then do nothing.
 	 *
 	 * @since 0.7
 	 * @since 1.0 Added $exit param.
-	 * @todo Rename to redirect_non_amp().
+	 * @since 1.0 Renamed from redirect_canonical_amp().
 	 *
 	 * @param bool $exit Whether to exit after redirecting.
+	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
 	 */
-	public static function redirect_canonical_amp( $exit = true ) {
-		if ( false !== get_query_var( amp_get_slug(), false ) ) { // Because is_amp_endpoint() now returns true if amp_is_canonical().
-			$url = preg_replace( '#^(https?://.+?)(/.*)$#', '$1', home_url( '/' ) );
-			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-				$url .= wp_unslash( $_SERVER['REQUEST_URI'] );
-			}
-
-			$url = amp_remove_endpoint( $url );
-
-			/*
-			 * Temporary redirect because AMP URL may return when blocking validation errors
-			 * occur or when a non-canonical AMP theme is used.
-			 */
-			wp_safe_redirect( $url, 302 );
-			if ( $exit ) {
-				exit;
-			}
+	public static function redirect_ampless_url( $exit = true ) {
+		$current_url = amp_get_current_url();
+		$ampless_url = amp_remove_endpoint( $current_url );
+		if ( $ampless_url === $current_url ) {
+			return false;
 		}
+
+		/*
+		 * Temporary redirect because AMP URL may return when blocking validation errors
+		 * occur or when a non-canonical AMP theme is used.
+		 */
+		wp_safe_redirect( $ampless_url, 302 );
+		if ( $exit ) {
+			exit;
+		}
+		return true;
 	}
 
 	/**
@@ -310,7 +370,10 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', array( __CLASS__, 'amend_comment_form' ), 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
-		add_filter( 'get_header_image_tag', array( __CLASS__, 'conditionally_output_header' ), 10, 3 );
+		add_filter( 'get_header_image_tag', array( __CLASS__, 'amend_header_image_with_video_header' ), PHP_INT_MAX );
+		add_action( 'wp_print_footer_scripts', function() {
+			wp_dequeue_script( 'wp-custom-header' );
+		}, 0 );
 		add_action( 'wp_enqueue_scripts', function() {
 			wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 		} );
@@ -1129,6 +1192,22 @@ class AMP_Theme_Support {
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
+		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( $body ) {
+			while ( $dom->documentElement->nextSibling ) {
+				// Trailing elements after </html> will get wrapped in additional <html> elements.
+				if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
+					while ( $dom->documentElement->nextSibling->firstChild ) {
+						$body->appendChild( $dom->documentElement->nextSibling->firstChild );
+					}
+					$dom->removeChild( $dom->documentElement->nextSibling );
+				} else {
+					$body->appendChild( $dom->documentElement->nextSibling );
+				}
+			}
+		}
+
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
 			$xpath = new DOMXPath( $dom );
@@ -1149,7 +1228,10 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
 
-		if ( ! AMP_Validation_Manager::should_validate_response() && AMP_Validation_Manager::has_blocking_validation_errors() ) {
+		$blocking_error_count = AMP_Validation_Manager::count_blocking_validation_errors();
+		if ( ! AMP_Validation_Manager::should_validate_response() && $blocking_error_count > 0 ) {
+
+			// Note the canonical check will not currently ever be met because dirty AMP is not yet supported; all validation errors will forcibly be sanitized.
 			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 
@@ -1163,7 +1245,21 @@ class AMP_Theme_Support {
 					$head->appendChild( $script );
 				}
 			} else {
-				self::redirect_canonical_amp( false );
+				$current_url = amp_get_current_url();
+				$ampless_url = amp_remove_endpoint( $current_url );
+				if ( AMP_Validation_Manager::has_cap() ) {
+					$ampless_url = add_query_arg(
+						AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
+						$blocking_error_count,
+						$ampless_url
+					);
+				}
+
+				/*
+				 * Temporary redirect because AMP URL may return when blocking validation errors
+				 * occur or when a non-canonical AMP theme is used.
+				 */
+				wp_safe_redirect( $ampless_url, 302 );
 				return esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 			}
 		}
@@ -1280,46 +1376,25 @@ class AMP_Theme_Support {
 	 * Conditionally replace the header image markup with a header video or image.
 	 *
 	 * This is JS-driven in Core themes like Twenty Sixteen and Twenty Seventeen.
-	 * So in order for the header video to display,
-	 * this replaces the markup of the header image.
-	 *
-	 * @since 1.0
-	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
-	 * @param string $html The image markup to filter.
-	 * @param array  $header The header config array.
-	 * @param array  $atts The image markup attributes.
-	 * @return string $html Filtered markup.
-	 */
-	public static function conditionally_output_header( $html, $header, $atts ) {
-		unset( $header );
-		if ( ! is_header_video_active() ) {
-			return $html;
-		};
-
-		if ( ! has_header_video() ) {
-			return AMP_HTML_Utils::build_tag( 'amp-img', $atts );
-		}
-
-		return self::output_header_video( $atts );
-	}
-
-	/**
-	 * Replace the header image markup with a header video.
+	 * So in order for the header video to display, this replaces the markup of the header image.
 	 *
 	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L54
 	 * @link https://github.com/WordPress/wordpress-develop/blob/d002fde80e5e3a083e5f950313163f566561517f/src/wp-includes/js/wp-custom-header.js#L78
 	 *
-	 * @param array $atts The header tag attributes array.
+	 * @param string $image_markup The image markup to filter.
 	 * @return string $html Filtered markup.
 	 */
-	public static function output_header_video( $atts ) {
-		// Remove the script for video.
-		wp_deregister_script( 'wp-custom-header' );
-		$video_settings = get_header_video_settings();
+	public static function amend_header_image_with_video_header( $image_markup ) {
 
+		// If there is no video, just pass the image through.
+		if ( ! has_header_video() || ! is_header_video_active() ) {
+			return $image_markup;
+		};
+
+		$video_settings   = get_header_video_settings();
 		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
-		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : null;
+		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : array();
 		$video_attributes = array(
 			'media'    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
 			'width'    => $video_settings['width'],
@@ -1329,17 +1404,23 @@ class AMP_Theme_Support {
 			'id'       => 'wp-custom-header-video',
 		);
 
-		// Create image banner to stay behind the video.
-		$image_header = AMP_HTML_Utils::build_tag( 'amp-img', $atts );
+		$youtube_id = null;
+		if ( isset( $parsed_url['host'] ) && preg_match( '/(^|\.)(youtube\.com|youtu\.be)$/', $parsed_url['host'] ) ) {
+			if ( 'youtu.be' === $parsed_url['host'] && ! empty( $parsed_url['path'] ) ) {
+				$youtube_id = trim( $parsed_url['path'], '/' );
+			} elseif ( isset( $query['v'] ) ) {
+				$youtube_id = $query['v'];
+			}
+		}
 
 		// If the video URL is for YouTube, return an <amp-youtube> element.
-		if ( isset( $parsed_url['host'], $query['v'] ) && ( false !== strpos( $parsed_url['host'], 'youtube' ) ) ) {
-			$video_header = AMP_HTML_Utils::build_tag(
+		if ( ! empty( $youtube_id ) ) {
+			$video_markup = AMP_HTML_Utils::build_tag(
 				'amp-youtube',
 				array_merge(
 					$video_attributes,
 					array(
-						'data-videoid'        => $query['v'],
+						'data-videoid'        => $youtube_id,
 						'data-param-rel'      => '0', // Don't show related videos.
 						'data-param-showinfo' => '0', // Don't show video title at the top.
 						'data-param-controls' => '0', // Don't show video controls.
@@ -1347,7 +1428,7 @@ class AMP_Theme_Support {
 				)
 			);
 		} else {
-			$video_header = AMP_HTML_Utils::build_tag(
+			$video_markup = AMP_HTML_Utils::build_tag(
 				'amp-video',
 				array_merge(
 					$video_attributes,
@@ -1358,6 +1439,6 @@ class AMP_Theme_Support {
 			);
 		}
 
-		return $image_header . $video_header;
+		return $image_markup . $video_markup;
 	}
 }

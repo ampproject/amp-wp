@@ -18,6 +18,19 @@ class AMP_Options_Manager {
 	const OPTION_NAME = 'amp-options';
 
 	/**
+	 * Default option values.
+	 *
+	 * @var array
+	 */
+	protected static $defaults = array(
+		'theme_support'        => 'disabled',
+		'supported_post_types' => array(),
+		'analytics'            => array(),
+		'force_sanitization'   => false,
+		'accept_tree_shaking'  => false,
+	);
+
+	/**
 	 * Register settings.
 	 */
 	public static function register_settings() {
@@ -58,7 +71,11 @@ class AMP_Options_Manager {
 	 * @return array Options.
 	 */
 	public static function get_options() {
-		return get_option( self::OPTION_NAME, array() );
+		$options = get_option( self::OPTION_NAME, array() );
+		if ( empty( $options ) ) {
+			$options = array();
+		}
+		return array_merge( self::$defaults, $options );
 	}
 
 	/**
@@ -86,15 +103,20 @@ class AMP_Options_Manager {
 	 * @return array Options.
 	 */
 	public static function validate_options( $new_options ) {
-		$defaults = array(
-			'supported_post_types' => array(),
-			'analytics'            => array(),
-		);
+		$options = self::get_options();
 
-		$options = array_merge(
-			$defaults,
-			self::get_options()
+		// Theme support.
+		$recognized_theme_supports = array(
+			'disabled',
+			'paired',
+			'native',
 		);
+		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
+			$options['theme_support'] = $new_options['theme_support'];
+		}
+
+		$options['force_sanitization']  = ! empty( $new_options['force_sanitization'] );
+		$options['accept_tree_shaking'] = ! empty( $new_options['accept_tree_shaking'] );
 
 		// Validate post type support.
 		if ( isset( $new_options['supported_post_types'] ) ) {
@@ -155,7 +177,6 @@ class AMP_Options_Manager {
 
 		return $options;
 	}
-
 
 	/**
 	 * Check for errors with updating the supported post types.

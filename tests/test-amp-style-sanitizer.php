@@ -421,6 +421,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'audio{border:solid 1px yellow}',
 				'amp-audio{border:solid 1px yellow}',
 			),
+			'keyframes' => array(
+				'<div>test</div>',
+				'span {color:red;} @keyframes foo { from: { opacity:0; } 50% {opacity:0.5} 75%,80% { opacity:0.6 } to { opacity:1 }  }',
+				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
+			),
 		);
 	}
 
@@ -781,6 +786,22 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			array( 'removed_unused_css_rules', 'excessive_css' ),
+			$error_codes
+		);
+
+		// Make sure the accept_tree_shaking option results in no removed_unused_css_rules error being raised.
+		$error_codes = array();
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'accept_tree_shaking'       => true,
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$this->assertEquals(
+			array( 'excessive_css' ),
 			$error_codes
 		);
 	}

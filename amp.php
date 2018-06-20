@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
- * Version: 1.0-alpha
+ * Version: 1.0-alpha1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -49,7 +49,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0-alpha' );
+define( 'AMP__VERSION', '1.0-alpha1' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -312,7 +312,7 @@ function amp_load_classes() {
  * @since 0.2
  */
 function amp_add_frontend_actions() {
-	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
+	add_action( 'wp_head', 'amp_add_amphtml_link' );
 }
 
 /**
@@ -436,8 +436,12 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 
-	if ( is_amp_endpoint() ) {
-		$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
+		if ( current_theme_supports( 'amp' ) ) {
+			$link = add_query_arg( amp_get_slug(), '', $link );
+		} else {
+			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+		}
 	}
 
 	return $link;
