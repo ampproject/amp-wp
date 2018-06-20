@@ -26,6 +26,13 @@ use \Sabberworm\CSS\CSSList\Document;
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Error code for tree shaking.
+	 *
+	 * @var string
+	 */
+	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -37,6 +44,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
+	 *      @type bool     $accept_tree_shaking        Whether to accept tree-shaking by default and bypass a validation error.
 	 * }
 	 */
 	protected $args;
@@ -56,6 +64,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		),
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
+		'accept_tree_shaking'       => false,
 	);
 
 	/**
@@ -204,7 +213,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'illegal_css_at_rule',
 			'illegal_css_important',
 			'illegal_css_property',
-			'removed_unused_css_rules',
+			self::TREE_SHAKING_ERROR_CODE,
 			'unrecognized_css',
 			'disallowed_file_extension',
 			'file_path_not_found',
@@ -533,6 +542,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet   = trim( $element->textContent );
 		$cdata_spec   = $is_keyframes ? $this->style_keyframes_cdata_spec : $this->style_custom_cdata_spec;
 
+		// Honor the style's media attribute.
+		$media = $element->getAttribute( 'media' );
+		if ( $media && 'all' !== $media ) {
+			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
+		}
+
 		$stylesheet = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
 			'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
@@ -684,7 +699,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v7';
+		$cache_group = 'amp-parsed-stylesheet-v9';
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -963,6 +978,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$length           = count( $split_stylesheet );
 			for ( $i = 0; $i < $length; $i++ ) {
 				if ( $before_declaration_block === $split_stylesheet[ $i ] ) {
+
+					// Skip keyframe-selector, which is can be: from | to | <percentage>.
+					if ( preg_match( '/^((from|to)\b|-?\d+(\.\d+)?%)/i', $split_stylesheet[ $i + 1 ] ) ) {
+						$stylesheet[] = str_replace( $between_selectors, '', $split_stylesheet[ ++$i ] ) . $split_stylesheet[ ++$i ];
+						continue;
+					}
+
 					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
 					$declaration = $split_stylesheet[ ++$i ];
 
@@ -1290,6 +1312,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $ruleset instanceof DeclarationBlock ) {
 			$this->ampify_ruleset_selectors( $ruleset );
+			if ( 0 === count( $ruleset->getSelectors() ) ) {
+				$css_list->remove( $ruleset );
+				return $results;
+			}
 		}
 
 		// Remove disallowed properties.
@@ -1590,7 +1616,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$ruleset->getSelectors()
 		) );
 		$important_ruleset->setRules( $importants );
-		$css_list->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
+
+		$i = array_search( $ruleset, $css_list->getContents(), true );
+		if ( false !== $i ) {
+			$css_list->splice( $i + 1, 0, array( $important_ruleset ) );
+		} else {
+			$css_list->append( $important_ruleset );
+		}
 
 		return $results;
 	}
@@ -1811,15 +1843,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Convert CSS selectors.
+	 * Convert CSS selectors and remove obsolete selector hacks for IE.
 	 *
 	 * @param DeclarationBlock $ruleset Ruleset.
 	 */
 	private function ampify_ruleset_selectors( $ruleset ) {
-		$selectors    = array();
-		$replacements = 0;
+		$selectors = array();
+		$changes   = 0;
 		foreach ( $ruleset->getSelectors() as $old_selector ) {
-			$edited_selectors = array( $old_selector->getSelector() );
+			$selector = $old_selector->getSelector();
+
+			// Automatically tree-shake IE6/IE7 hacks for selectors with `* html` and `*+html`.
+			if ( preg_match( '/^\*\s*\+?\s*html/', $selector ) ) {
+				$changes++;
+				continue;
+			}
+
+			$edited_selectors = array( $selector );
 			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
 				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector ) . '(?=$|[^a-z0-9_-])/i';
 				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
@@ -1834,7 +1874,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( ! $count ) {
 						continue;
 					}
-					$replacements += $count;
+					$changes += $count;
 					while ( ! empty( $amp_selectors ) ) { // Note: This array contains only a couple items.
 						$amp_selector       = array_shift( $amp_selectors );
 						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
@@ -1844,7 +1884,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$selectors = array_merge( $selectors, $edited_selectors );
 		}
 
-		if ( $replacements > 0 ) {
+		if ( $changes > 0 ) {
 			$ruleset->setSelectors( $selectors );
 		}
 	}
@@ -1867,9 +1907,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		);
 
-		if ( $is_too_much_css && $should_tree_shake ) {
+		if ( $is_too_much_css && $should_tree_shake && empty( $this->args['accept_tree_shaking'] ) ) {
 			$should_tree_shake = $this->should_sanitize_validation_error( array(
-				'code' => 'removed_unused_css_rules',
+				'code' => self::TREE_SHAKING_ERROR_CODE,
 			) );
 		}
 

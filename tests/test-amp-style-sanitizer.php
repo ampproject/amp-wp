@@ -102,7 +102,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>div > span { font-weight:bold !important; font-style: italic; } @media screen and ( max-width: 640px ) { div > span { font-weight:normal !important; font-style: normal; } }</style><div><span>bold!</span></div>',
 				'<div><span>bold!</span></div>',
 				array(
-					'div > span{font-style:italic}@media screen and ( max-width: 640px ){div > span{font-style:normal}:root:not(#_):not(#_) div > span{font-weight:normal}}:root:not(#_):not(#_) div > span{font-weight:bold}',
+					'div > span{font-style:italic}:root:not(#_):not(#_) div > span{font-weight:bold}@media screen and ( max-width: 640px ){div > span{font-style:normal}:root:not(#_):not(#_) div > span{font-weight:normal}}',
 				),
 			),
 
@@ -310,6 +310,20 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'style_with_media_element' => array(
+				'<html amp><head><meta charset="utf-8"><style media="print">.print { display:none; }</style></head><body><button class="print" on="tap:AMP.print()"></button></body></html>',
+				array(
+					'@media print{.print{display:none}}',
+				),
+				array(),
+			),
+			'selectors_with_ie_hacks_removed' => array(
+				'<html amp><head><meta charset="utf-8"><style>* html span { color:red; background: blue !important; } span { text-decoration:underline; } *+html span { border: solid green; }</style></head><body><span>Test</span></body></html>',
+				array(
+					'span{text-decoration:underline}',
+				),
+				array(),
+			),
 		);
 	}
 
@@ -420,6 +434,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<audio src="http://example.com/foo.mp3" height="100" width="200"></audio>',
 				'audio{border:solid 1px yellow}',
 				'amp-audio{border:solid 1px yellow}',
+			),
+			'keyframes' => array(
+				'<div>test</div>',
+				'span {color:red;} @keyframes foo { from: { opacity:0; } 50% {opacity:0.5} 75%,80% { opacity:0.6 } to { opacity:1 }  }',
+				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
 			),
 		);
 	}
@@ -781,6 +800,22 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			array( 'removed_unused_css_rules', 'excessive_css' ),
+			$error_codes
+		);
+
+		// Make sure the accept_tree_shaking option results in no removed_unused_css_rules error being raised.
+		$error_codes = array();
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element'      => true,
+			'accept_tree_shaking'       => true,
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		) );
+		$sanitizer->sanitize();
+		$this->assertEquals(
+			array( 'excessive_css' ),
 			$error_codes
 		);
 	}

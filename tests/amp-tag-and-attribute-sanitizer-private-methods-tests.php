@@ -795,7 +795,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
-	public function get_ancestor_with_tag_name_data() {
+	/**
+	 * Get data for testing get_ancestor_with_matching_spec_name.
+	 *
+	 * @return array Data.
+	 */
+	public function get_ancestor_with_matching_spec_name_data() {
 		return array(
 			'empty' => array(
 				array(
@@ -803,7 +808,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
 				),
-				null
+				null,
 			),
 			'ancestor_is_immediate_parent' => array(
 				array(
@@ -811,7 +816,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
 				),
-				'article'
+				'article',
 			),
 			'ancestor_is_distant_parent' => array(
 				array(
@@ -819,7 +824,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
 				),
-				'article'
+				'article',
+			),
+			'ancestor_has_attributes' => array(
+				array(
+					'source' => '<form method="post"><div><div><div><p>Good Data</p></div></div></div><article>',
+					'node_tag_name' => 'p',
+					'ancestor_tag_name' => 'form [method=post]',
+				),
+				'form',
 			),
 			'ancestor_does_not_exist' => array(
 				array(
@@ -827,26 +840,32 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
 				),
-				null
+				null,
 			),
 		);
 	}
 
 	/**
-	 * @dataProvider get_ancestor_with_tag_name_data
+	 * Test get_ancestor_with_matching_spec_name.
+	 *
+	 * @dataProvider get_ancestor_with_matching_spec_name_data
 	 * @group allowed-tags-private-methods
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::get_ancestor_with_matching_spec_name()
+	 *
+	 * @param array  $data     Data.
+	 * @param string $expected Expected.
 	 */
-	public function test_get_ancestor_with_tag_name( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+	public function test_get_ancestor_with_matching_spec_name( $data, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		if ( $expected ) {
 			$ancestor_node = $dom->getElementsByTagName( $expected )->item( 0 );
 		} else {
 			$ancestor_node = null;
 		}
 
-		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_tag_name', array( $node, $data['ancestor_tag_name'] ) );
+		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_matching_spec_name', array( $node, $data['ancestor_tag_name'] ) );
 
 		$this->assertEquals( $ancestor_node, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}

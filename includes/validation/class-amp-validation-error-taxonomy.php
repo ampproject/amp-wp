@@ -201,8 +201,9 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array {
 	 *     Validation error sanitization.
 	 *
-	 *     @type int  $status Validation status (0=VALIDATION_ERROR_NEW_STATUS, 1=VALIDATION_ERROR_ACCEPTED_STATUS, 2=VALIDATION_ERROR_REJECTED_STATUS).
-	 *     @type bool $forced Whether sanitization is forced via filter.
+	 *     @type int          $status      Validation status (0=VALIDATION_ERROR_NEW_STATUS, 1=VALIDATION_ERROR_ACCEPTED_STATUS, 2=VALIDATION_ERROR_REJECTED_STATUS).
+	 *     @type int          $term_status The initial validation status prior to being overridden by previewing, option, or filter.
+	 *     @type false|string $forced      If and how the status is overridden from its initial term status.
 	 * }
 	 */
 	public static function get_validation_error_sanitization( $error ) {
@@ -213,24 +214,45 @@ class AMP_Validation_Error_Taxonomy {
 			self::VALIDATION_ERROR_ACCEPTED_STATUS,
 			self::VALIDATION_ERROR_REJECTED_STATUS,
 		);
-		if ( isset( AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
-			// See note in AMP_Validation_Manager::add_validation_error_sourcing() for why amp_validation_error_sanitized filter isn't used.
-			$status = AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ];
-		} elseif ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
-			$status = $term->term_group;
+		if ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
+			$term_status = $term->term_group;
 		} else {
-			$status = self::VALIDATION_ERROR_NEW_STATUS;
+			$term_status = self::VALIDATION_ERROR_NEW_STATUS;
+		}
+
+		$forced = false;
+		$status = $term_status;
+
+		// See note in AMP_Validation_Manager::add_validation_error_sourcing() for why amp_validation_error_sanitized filter isn't used.
+		if ( isset( AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
+			$status = AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ];
+			$forced = 'with_preview';
+		}
+
+		$is_forced_with_option = (
+			amp_is_canonical()
+			||
+			AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] && AMP_Options_Manager::get_option( 'accept_tree_shaking' )
+			||
+			AMP_Options_Manager::get_option( 'force_sanitization' )
+		);
+		if ( $is_forced_with_option ) {
+			$forced = 'with_option';
+			$status = self::VALIDATION_ERROR_ACCEPTED_STATUS;
 		}
 
 		/**
 		 * Filters whether the validation error should be sanitized.
 		 *
+		 * Returning true this indicates that the validation error is acceptable
+		 * and should not be considered a blocker to render AMP. Returning null
+		 * means that the default status should be used.
+		 *
 		 * Note that the $node is not passed here to ensure that the filter can be
 		 * applied on validation errors that have been stored. Likewise, the $sources
 		 * are also omitted because these are only available during an explicit
 		 * validation request and so they are not suitable for plugins to vary
-		 * sanitization by. Note that returning false this indicates that the
-		 * validation error should not be considered a blocker to render AMP.
+		 * sanitization by.
 		 *
 		 * @since 1.0
 		 *
@@ -239,13 +261,12 @@ class AMP_Validation_Error_Taxonomy {
 		 */
 		$sanitized = apply_filters( 'amp_validation_error_sanitized', null, $error );
 
-		$forced = false;
 		if ( null !== $sanitized ) {
-			$forced = true;
+			$forced = 'with_filter';
 			$status = $sanitized ? self::VALIDATION_ERROR_ACCEPTED_STATUS : self::VALIDATION_ERROR_REJECTED_STATUS;
 		}
 
-		return compact( 'status', 'forced' );
+		return compact( 'status', 'forced', 'term_status' );
 	}
 
 	/**
@@ -254,50 +275,53 @@ class AMP_Validation_Error_Taxonomy {
 	 * @since 1.0
 	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
 	 *
-	 * @param array $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset.
+	 * @param array|true $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset. If just true, then all validation errors are accepted.
 	 */
 	public static function accept_validation_errors( $acceptable_errors ) {
 		if ( empty( $acceptable_errors ) ) {
 			return;
 		}
-
-		/**
-		 * Check if one array is a sparse subset of another array.
-		 *
-		 * @param array $superset Superset array.
-		 * @param array $subset   Subset array.
-		 *
-		 * @return bool Whether subset is contained in superset.
-		 */
-		$is_array_subset = function( $superset, $subset ) use ( &$is_array_subset ) {
-			foreach ( $subset as $key => $subset_value ) {
-				if ( ! isset( $superset[ $key ] ) || gettype( $subset_value ) !== gettype( $superset[ $key ] ) ) {
-					return false;
-				}
-				if ( is_array( $subset_value ) ) {
-					if ( ! $is_array_subset( $superset[ $key ], $subset_value ) ) {
-						return false;
-					}
-				} elseif ( $superset[ $key ] !== $subset_value ) {
-					return false;
-				}
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $acceptable_errors ) {
+			if ( true === $acceptable_errors ) {
+				return true;
 			}
-			return true;
-		};
 
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) use ( $is_array_subset, $acceptable_errors ) {
 			if ( isset( $acceptable_errors[ $error['code'] ] ) ) {
 				if ( true === $acceptable_errors[ $error['code'] ] ) {
 					return true;
 				}
 				foreach ( $acceptable_errors[ $error['code'] ] as $acceptable_error_props ) {
-					if ( $is_array_subset( $error, $acceptable_error_props ) ) {
+					if ( AMP_Validation_Error_Taxonomy::is_array_subset( $error, $acceptable_error_props ) ) {
 						return true;
 					}
 				}
 			}
 			return $sanitized;
 		}, 10, 2 );
+	}
+
+	/**
+	 * Check if one array is a sparse subset of another array.
+	 *
+	 * @param array $superset Superset array.
+	 * @param array $subset   Subset array.
+	 *
+	 * @return bool Whether subset is contained in superset.
+	 */
+	public static function is_array_subset( $superset, $subset ) {
+		foreach ( $subset as $key => $subset_value ) {
+			if ( ! isset( $superset[ $key ] ) || gettype( $subset_value ) !== gettype( $superset[ $key ] ) ) {
+				return false;
+			}
+			if ( is_array( $subset_value ) ) {
+				if ( ! self::is_array_subset( $superset[ $key ], $subset_value ) ) {
+					return false;
+				}
+			} elseif ( $superset[ $key ] !== $subset_value ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -525,7 +549,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Replace the primary column to be error instead of the removed name column..
 		add_filter( 'list_table_primary_column', function( $primary_column ) {
-			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+			if ( get_current_screen() && self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
 				$primary_column = 'error';
 			}
 			return $primary_column;
@@ -564,19 +588,12 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array All caps.
 	 */
 	public static function filter_user_has_cap_for_hiding_term_list_table_checkbox( $allcaps, $caps, $args ) {
+		unset( $caps );
 		if ( isset( $args[0] ) && 'delete_term' === $args[0] ) {
 			$term  = get_term( $args[2] );
 			$error = json_decode( $term->description, true );
 			if ( ! is_array( $error ) ) {
 				return $allcaps;
-			}
-
-			$sanitization = self::get_validation_error_sanitization( $error );
-			if ( $sanitization['forced'] ) {
-				$allcaps = array_merge(
-					$allcaps,
-					array_fill_keys( $caps, false )
-				);
 			}
 		}
 		return $allcaps;
@@ -663,29 +680,27 @@ class AMP_Validation_Error_Taxonomy {
 			unset( $actions['delete'] );
 
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-			if ( ! $sanitization['forced'] ) {
-				if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['status'] ) {
-					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-						'<a href="%s" aria-label="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_REJECT_ACTION
-						),
-						esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
-						esc_html__( 'Reject', 'amp' )
-					);
-				}
-				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['status'] ) {
-					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-						'<a href="%s" aria-label="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_ACCEPT_ACTION
-						),
-						esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
-						esc_html__( 'Accept', 'amp' )
-					);
-				}
+			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['term_status'] ) {
+				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
+					'<a href="%s" aria-label="%s">%s</a>',
+					wp_nonce_url(
+						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_REJECT_ACTION
+					),
+					esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
+					esc_html__( 'Reject', 'amp' )
+				);
+			}
+			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
+				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
+					'<a href="%s" aria-label="%s">%s</a>',
+					wp_nonce_url(
+						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_ACCEPT_ACTION
+					),
+					esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
+					esc_html__( 'Accept', 'amp' )
+				);
 			}
 		}
 		return $actions;
@@ -861,10 +876,20 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'status':
 				$sanitization = self::get_validation_error_sanitization( $validation_error );
-				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
-					$content = '&#x2705; ' . esc_html__( 'Accepted', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['status'] ) {
-					$content = '&#x274C; ' . esc_html__( 'Rejected', 'amp' );
+				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
+						$content .= '&#x1F6A9;';
+					} else {
+						$content .= '&#x2705;';
+					}
+					$content .= ' ' . esc_html__( 'Accepted', 'amp' );
+				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
+					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
+						$content .= '&#x1F6A9;';
+					} else {
+						$content .= '&#x274C;';
+					}
+					$content .= ' ' . esc_html__( 'Rejected', 'amp' );
 				} else {
 					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
 				}

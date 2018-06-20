@@ -110,39 +110,125 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		) );
 
 		// Test paired mode singular.
-		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test paired mode homepage.
-		remove_action( 'wp_head', 'amp_frontend_add_canonical' );
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test canonical.
+		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		remove_theme_support( 'amp' );
 		add_theme_support( 'amp' );
 		$this->go_to( get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_frontend_add_canonical' ) );
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 	}
 
 	/**
-	 * Test redirect_canonical_amp.
+	 * Test ensure_proper_amp_location for canonical.
 	 *
-	 * @covers AMP_Theme_Support::redirect_canonical_amp()
+	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
 	 */
-	public function test_redirect_canonical_amp() {
-		set_query_var( amp_get_slug(), 1 );
+	public function test_ensure_proper_amp_location_canonical() {
+		add_theme_support( 'amp' );
+		$e = null;
+
+		// Already canonical.
+		$_SERVER['REQUEST_URI'] = '/foo/bar/';
+		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+
+		// URL query param.
+		$_GET[ amp_get_slug() ] = '';
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
 		try {
-			AMP_Theme_Support::redirect_canonical_amp();
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		// wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Endpoint.
+		unset( $_GET[ amp_get_slug() ] );
+		set_query_var( amp_get_slug(), '' );
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+	}
+
+	/**
+	 * Test ensure_proper_amp_location for paired.
+	 *
+	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
+	 */
+	public function test_ensure_proper_amp_location_paired() {
+		add_theme_support( 'amp', array(
+			'template_dir' => './',
+		) );
+		$e = null;
+
+		// URL query param, no redirection.
+		$_GET[ amp_get_slug() ] = '';
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
+		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+
+		// Endpoint, redirect.
+		unset( $_GET[ amp_get_slug() ] );
+		set_query_var( amp_get_slug(), '' );
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+	}
+
+	/**
+	 * Test redirect_ampless_url.
+	 *
+	 * @covers AMP_Theme_Support::redirect_ampless_url()
+	 */
+	public function test_redirect_ampless_url() {
+		$e = null;
+
+		// Try AMP URL param.
+		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
+		try {
+			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
 		$this->assertTrue( isset( $e ) );
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Try AMP URL endpoint.
+		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
+		try {
+			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
+		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$e = null;
+
+		// Make sure that if the URL doesn't have AMP that there should be no redirect.
+		$_SERVER['REQUEST_URI'] = '/foo/bar';
+		$this->assertFalse( AMP_Theme_Support::redirect_ampless_url() );
 	}
 
 	/**
@@ -290,7 +376,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 1000, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'dequeue_customize_preview_scripts' ) ) );
 		$this->assertEquals( 10, has_filter( 'customize_partial_render', array( self::TESTED_CLASS, 'filter_customize_partial_render' ) ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', 'amp_print_analytics' ) );
-		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
+		$this->assertEquals( 10, has_action( 'admin_bar_init', array( self::TESTED_CLASS, 'init_admin_bar' ) ) );
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
 		$this->assertEquals( $priority, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
 
@@ -300,7 +386,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', array( self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ) ) );
 		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
-		$this->assertEquals( 10, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'conditionally_output_header' ) ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'amend_header_image_with_video_header' ) ) );
+	}
+
+	/**
+	 * Test add_hooks() when admin bar is turned off.
+	 */
+	public function test_add_hooks_no_admin_bar() {
+		AMP_Options_Manager::update_option( 'disable_admin_bar', true );
+		AMP_Theme_Support::add_hooks();
+		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
 	}
 
 	/**
@@ -1016,7 +1111,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				<?php wp_head(); ?>
 				<script data-head>document.write('Illegal');</script>
 			</head>
-			<body>
+			<body><!-- </body></html> -->
 				<img width="100" height="100" src="https://example.com/test.png">
 				<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
 				<amp-ad type="a9"
@@ -1025,6 +1120,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					data-aax_size="300x250"
 					data-aax_pubname="test123"
 					data-aax_src="302"></amp-ad>
+
 				<?php wp_footer(); ?>
 
 				<button onclick="alert('Illegal');">no-onclick</button>
@@ -1032,6 +1128,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				<style>body { background: black; }</style>
 			</body>
 		</html>
+		<!--comment-after-html-->
+		<div id="after-html"></div>
+		<!--comment-end-html-->
 		<?php
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
@@ -1078,6 +1177,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			),
 			$removed_nodes
 		);
+
+		// Make sure trailing content after </html> gets moved.
+		$this->assertRegExp( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
 
 		$prepare_response_args = array(
 			'enable_response_caching' => true,
@@ -1250,17 +1352,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Theme_Support::conditionally_output_header().
+	 * Test AMP_Theme_Support::amend_header_image_with_video_header().
 	 *
-	 * @see AMP_Theme_Support::conditionally_output_header()
+	 * @see AMP_Theme_Support::amend_header_image_with_video_header()
 	 */
-	public function conditionally_output_header() {
+	public function test_amend_header_image_with_video_header() {
 		$mock_image = '<img src="https://example.com/flower.jpeg">';
 
 		// If there's no theme support for 'custom-header', the callback should simply return the image.
 		$this->assertEquals(
 			$mock_image,
-			AMP_Theme_Support::conditionally_output_header( $mock_image )
+			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
 
 		// If theme support is present, but there isn't a header video selected, the callback should again return the image.
@@ -1271,8 +1373,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// There's a YouTube URL as the header video.
 		set_theme_mod( 'external_header_video', 'https://www.youtube.com/watch?v=a8NScvBhVnc' );
 		$this->assertEquals(
-			'<amp-youtube width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0"></amp-youtube>',
-			AMP_Theme_Support::conditionally_output_header( $mock_image )
+			$mock_image . '<amp-youtube media="(min-width: 900px)" width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0" data-param-controls="0"></amp-youtube>',
+			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
 	}
 }

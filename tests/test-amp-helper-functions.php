@@ -49,6 +49,32 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_current_url().
+	 *
+	 * @covers \amp_get_current_url()
+	 */
+	public function test_amp_get_current_url() {
+		$request_uris = array(
+			'/foo',
+			'/bar?baz',
+			null,
+		);
+
+		foreach ( $request_uris as $request_uri ) {
+			if ( $request_uri ) {
+				$_SERVER['REQUEST_URI'] = wp_slash( $request_uri );
+			} else {
+				unset( $_SERVER['REQUEST_URI'] );
+			}
+			$this->assertEquals(
+				home_url( $request_uri ? $request_uri : '/' ),
+				amp_get_current_url(),
+				sprintf( 'Unexpected for URI: %s', wp_json_encode( $request_uri, 64 /* JSON_UNESCAPED_SLASHES */ ) )
+			);
+		}
+	}
+
+	/**
 	 * Test amp_get_permalink() without pretty permalinks.
 	 *
 	 * @covers \amp_get_permalink()
@@ -195,6 +221,93 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
+	}
+
+
+	/**
+	 * Test that hook is added.
+	 *
+	 * @covers \amp_add_frontend_actions()
+	 */
+	public function test_amp_add_frontend_actions() {
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+		amp_add_frontend_actions();
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+	}
+
+	/**
+	 * URLs to test amphtml link.
+	 *
+	 * @return array
+	 */
+	public function get_amphtml_urls() {
+		$post_id = $this->factory()->post->create();
+		return array(
+			'home' => array(
+				home_url( '/' ),
+				add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+			),
+			'404'  => array(
+				home_url( '/no-existe/' ),
+				add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+			),
+			'post' => array(
+				get_permalink( $post_id ),
+				amp_get_permalink( $post_id ),
+			),
+		);
+	}
+
+	/**
+	 * Adding link when theme support is not present.
+	 *
+	 * @dataProvider get_amphtml_urls
+	 * @covers \amp_add_amphtml_link()
+	 * @param string $canonical_url Canonical URL.
+	 * @param string $amphtml_url   The amphtml URL.
+	 */
+	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
+		$test = $this; // For PHP 5.3.
+
+		$get_amp_html_link = function() {
+			ob_start();
+			amp_add_amphtml_link();
+			return ob_get_clean();
+		};
+
+		$assert_amphtml_link_present = function() use ( $test, $amphtml_url, $get_amp_html_link ) {
+			$test->assertEquals(
+				sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+				$get_amp_html_link()
+			);
+		};
+
+		$this->go_to( $canonical_url );
+		$assert_amphtml_link_present();
+
+		// Make sure adding the filter hides the amphtml link.
+		add_filter( 'amp_frontend_show_canonical', '__return_false' );
+		$this->assertEmpty( $get_amp_html_link() );
+		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
+		$assert_amphtml_link_present();
+
+		// Make sure that the link is not provided when there are validation errors associated with the URL.
+		add_theme_support( 'amp', array(
+			'template_dir' => './',
+		) );
+		AMP_Theme_Support::init();
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			$canonical_url
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+
+		// Allow the URL when the errors are forcibly sanitized.
+		$this->assertContains( '<!--', $get_amp_html_link() );
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		$assert_amphtml_link_present();
 	}
 
 	/**
