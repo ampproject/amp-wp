@@ -981,8 +981,9 @@ class AMP_Theme_Support {
 			}
 		}
 		if ( ! $has_schema_org_metadata ) {
-			$script = $dom->createElement( 'script', wp_json_encode( amp_get_schemaorg_metadata() ) );
+			$script = $dom->createElement( 'script' );
 			$script->setAttribute( 'type', 'application/ld+json' );
+			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata() ) ) );
 			$head->appendChild( $script );
 		}
 		// Ensure rel=canonical link.
