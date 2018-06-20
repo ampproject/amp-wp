@@ -1191,6 +1191,22 @@ class AMP_Theme_Support {
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
+		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( $body ) {
+			while ( $dom->documentElement->nextSibling ) {
+				// Trailing elements after </html> will get wrapped in additional <html> elements.
+				if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
+					while ( $dom->documentElement->nextSibling->firstChild ) {
+						$body->appendChild( $dom->documentElement->nextSibling->firstChild );
+					}
+					$dom->removeChild( $dom->documentElement->nextSibling );
+				} else {
+					$body->appendChild( $dom->documentElement->nextSibling );
+				}
+			}
+		}
+
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
 			$xpath = new DOMXPath( $dom );
