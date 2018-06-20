@@ -353,7 +353,11 @@ class AMP_Theme_Support {
 		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
 		 * combine to surpass the 50K limit imposed for the amp-custom style.
 		 */
-		add_filter( 'show_admin_bar', '__return_false', 100 );
+		if ( AMP_Options_Manager::get_option( 'disable_admin_bar' ) ) {
+			add_filter( 'show_admin_bar', '__return_false', 100 );
+		} else {
+			add_action( 'admin_bar_init', array( __CLASS__, 'init_admin_bar' ) );
+		}
 
 		/*
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
@@ -918,6 +922,37 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Configure the admin bar for AMP.
+	 *
+	 * @since 1.0
+	 */
+	public static function init_admin_bar() {
+
+		// Replace admin-bar.css in core with forked version which makes use of :focus-within among other change for AMP-compat.
+		wp_styles()->registered['admin-bar']->src = amp_get_asset_url( 'css/admin-bar.css' );
+		wp_styles()->registered['admin-bar']->ver = AMP__VERSION;
+
+		// Remove script which is almost entirely made obsolete by :focus-inside in the forked admin-bar.css.
+		wp_dequeue_script( 'admin-bar' );
+
+		// Remove customize support script since not valid AMP.
+		add_action( 'admin_bar_menu', function() {
+			remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
+		}, 41 );
+
+		// Emulate customize support script in PHP, to assume Customizer.
+		add_filter( 'body_class', function( $body_classes ) {
+			return array_merge(
+				array_diff(
+					$body_classes,
+					array( 'no-customize-support' )
+				),
+				array( 'customize-support' )
+			);
+		} );
+	}
+
+	/**
 	 * Print AMP boilerplate and custom styles.
 	 */
 	public static function print_amp_styles() {
@@ -1270,11 +1305,9 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		if ( AMP_Validation_Manager::should_validate_response() ) {
-			AMP_Validation_Manager::finalize_validation( $dom, array(
-				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
-			) );
-		}
+		AMP_Validation_Manager::finalize_validation( $dom, array(
+			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
+		) );
 
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );

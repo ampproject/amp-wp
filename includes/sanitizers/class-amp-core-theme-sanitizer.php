@@ -600,14 +600,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
 
-		$position_observer = AMP_DOM_Utils::create_node( $this->dom, 'amp-position-observer', array(
+		$attributes = array(
 			'layout'              => 'nodisplay',
 			'intersection-ratios' => 1,
 			'on'                  => implode( ';', array(
 				'exit:navigationTopShow.start',
 				'enter:navigationTopHide.start',
 			) ),
-		) );
+		);
+		if ( is_admin_bar_showing() ) {
+			$attributes['viewport-margins'] = '32px 0';
+		}
+		$position_observer = AMP_DOM_Utils::create_node( $this->dom, 'amp-position-observer', $attributes );
 		$navigation_top->appendChild( $position_observer );
 
 		$animations = array(

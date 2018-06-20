@@ -102,7 +102,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>div > span { font-weight:bold !important; font-style: italic; } @media screen and ( max-width: 640px ) { div > span { font-weight:normal !important; font-style: normal; } }</style><div><span>bold!</span></div>',
 				'<div><span>bold!</span></div>',
 				array(
-					'div > span{font-style:italic}@media screen and ( max-width: 640px ){div > span{font-style:normal}:root:not(#_):not(#_) div > span{font-weight:normal}}:root:not(#_):not(#_) div > span{font-weight:bold}',
+					'div > span{font-style:italic}:root:not(#_):not(#_) div > span{font-weight:bold}@media screen and ( max-width: 640px ){div > span{font-style:normal}:root:not(#_):not(#_) div > span{font-weight:normal}}',
 				),
 			),
 
@@ -307,6 +307,20 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'body{color:red;width:-webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) );outline:solid 1px blue}',
 					'.alignwide{max-width:calc(50% + 22.5rem);border:solid 1px red}',
 					'.alignwide{color:red;content:")"}',
+				),
+				array(),
+			),
+			'style_with_media_element' => array(
+				'<html amp><head><meta charset="utf-8"><style media="print">.print { display:none; }</style></head><body><button class="print" on="tap:AMP.print()"></button></body></html>',
+				array(
+					'@media print{.print{display:none}}',
+				),
+				array(),
+			),
+			'selectors_with_ie_hacks_removed' => array(
+				'<html amp><head><meta charset="utf-8"><style>* html span { color:red; background: blue !important; } span { text-decoration:underline; } *+html span { border: solid green; }</style></head><body><span>Test</span></body></html>',
+				array(
+					'span{text-decoration:underline}',
 				),
 				array(),
 			),

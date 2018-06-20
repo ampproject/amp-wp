@@ -376,7 +376,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 1000, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'dequeue_customize_preview_scripts' ) ) );
 		$this->assertEquals( 10, has_filter( 'customize_partial_render', array( self::TESTED_CLASS, 'filter_customize_partial_render' ) ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', 'amp_print_analytics' ) );
-		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
+		$this->assertEquals( 10, has_action( 'admin_bar_init', array( self::TESTED_CLASS, 'init_admin_bar' ) ) );
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
 		$this->assertEquals( $priority, has_action( 'template_redirect', array( self::TESTED_CLASS, 'start_output_buffering' ) ) );
 
@@ -387,6 +387,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'amend_header_image_with_video_header' ) ) );
+	}
+
+	/**
+	 * Test add_hooks() when admin bar is turned off.
+	 */
+	public function test_add_hooks_no_admin_bar() {
+		AMP_Options_Manager::update_option( 'disable_admin_bar', true );
+		AMP_Theme_Support::add_hooks();
+		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
 	}
 
 	/**
