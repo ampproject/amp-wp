@@ -324,6 +324,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'unamerican_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
+				'<html amp><head><meta charset="utf-8"><style>html[lang=en-US] {color:red} html[lang="en-US"] {color:white} html[lang^=en] {color:blue} html[lang="en-CA"] {color:red}  html[lang^=ar] { color:green; } html[lang="es-MX"] { color:green; }</style></head><body><span>Test</span></body></html>',
+				array(
+					'html[lang=en-US]{color:red}html[lang="en-US"]{color:white}html[lang^=en]{color:blue}',
+				),
+				array(),
+			),
 		);
 	}
 
@@ -336,6 +343,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param array  $expected_errors      Expected error codes.
 	 */
 	public function test_link_and_style_elements( $source, $expected_stylesheets, $expected_errors = array() ) {
+		add_filter( 'locale', function() {
+			return 'en_US';
+		} );
 		$dom = AMP_DOM_Utils::get_dom( $source );
 
 		$error_codes = array();
