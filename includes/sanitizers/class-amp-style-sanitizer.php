@@ -709,6 +709,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			wp_array_slice_assoc(
 				$this->args,
 				array( 'should_locate_sources', 'parsed_cache_variant' )
+			),
+			array(
+				'language' => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
 			)
 		);
 
@@ -1850,11 +1853,29 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function ampify_ruleset_selectors( $ruleset ) {
 		$selectors = array();
 		$changes   = 0;
+		$language  = get_bloginfo( 'language' );
 		foreach ( $ruleset->getSelectors() as $old_selector ) {
 			$selector = $old_selector->getSelector();
 
 			// Automatically tree-shake IE6/IE7 hacks for selectors with `* html` and `*+html`.
 			if ( preg_match( '/^\*\s*\+?\s*html/', $selector ) ) {
+				$changes++;
+				continue;
+			}
+
+			// Automatically remove selectors that are for another language (and thus are irrelevant). This is safe because amp-bind'ed [lang] is not allowed.
+			$is_other_language = (
+				preg_match( '/^html\[lang(?P<starts_with>\^?)=([\'"]?)(?P<lang>.+?)\2\]/', $selector, $matches )
+				&&
+				(
+					empty( $matches['starts_with'] )
+					?
+					$language !== $matches['lang']
+					:
+					substr( $language, 0, strlen( $matches['lang'] ) ) !== $matches['lang']
+				)
+			);
+			if ( $is_other_language ) {
 				$changes++;
 				continue;
 			}
