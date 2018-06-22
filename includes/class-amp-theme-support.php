@@ -24,7 +24,7 @@ class AMP_Theme_Support {
 	 *
 	 * @var string
 	 */
-	const RESPONSE_CACHE_GROUP = 'amp-reponse';
+	const RESPONSE_CACHE_GROUP = 'amp-response';
 
 	/**
 	 * Sanitizer classes.
@@ -148,8 +148,24 @@ class AMP_Theme_Support {
 			$args = array(
 				'__added_via_option' => true,
 			);
-			if ( 'paired' === $theme_support_option ) {
-				$args['template_dir'] = './';
+			if ( 'native' === $theme_support_option ) {
+				$args['available_callback'] = function() {
+					/**
+					 * Queried object.
+					 *
+					 * @var WP_Post $queried_object
+					 */
+					$queried_object = get_queried_object();
+					if ( is_singular() && post_supports_amp( $queried_object ) ) {
+						return 'native';
+					}
+
+					if ( AMP_Options_Manager::get_option( 'non_singular_supported' ) ) {
+						return 'native';
+					}
+
+					return false;
+				};
 			}
 			add_theme_support( 'amp', $args );
 		}
@@ -168,8 +184,9 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		if ( ! amp_is_canonical() ) {
-			self::register_paired_hooks();
+		$theme_support = get_theme_support( 'amp' );
+		if ( ! empty( $theme_support[0]['template_dir'] ) ) {
+			self::add_amp_template_filters();
 		}
 
 		self::add_hooks();
@@ -285,8 +302,14 @@ class AMP_Theme_Support {
 		$args = array_shift( $support );
 
 		if ( isset( $args['available_callback'] ) && is_callable( $args['available_callback'] ) ) {
-			return call_user_func( $args['available_callback'] );
+			/*
+			 * The available_callback here will return a bool or the string 'paired'.
+			 * If it returns 'native' then `amp_is_canonical()` above would have short-circuited.
+			 */
+			return (bool) call_user_func( $args['available_callback'] );
 		}
+
+		// This is the same as if there is a template_dir defined with no available_callback.
 		return true;
 	}
 
@@ -303,13 +326,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Register hooks for paired mode.
+	 * Register filters for loading AMP-specific templates.
 	 */
-	public static function register_paired_hooks() {
+	public static function add_amp_template_filters() {
 		foreach ( self::$template_types as $template_type ) {
-			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_paired_template_hierarchy' ) );
+			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
 		}
-		add_filter( 'template_include', array( __CLASS__, 'filter_paired_template_include' ), 100 );
+		add_filter( 'template_include', array( __CLASS__, 'filter_amp_template_include' ), 100 );
 	}
 
 	/**
@@ -727,7 +750,7 @@ class AMP_Theme_Support {
 	 * @param array $templates Template hierarchy.
 	 * @return array Templates.
 	 */
-	public static function filter_paired_template_hierarchy( $templates ) {
+	public static function filter_amp_template_hierarchy( $templates ) {
 		$support = get_theme_support( 'amp' );
 		$args    = array_shift( $support );
 		if ( isset( $args['template_dir'] ) ) {
@@ -749,8 +772,8 @@ class AMP_Theme_Support {
 	 * @param string $template Template to include.
 	 * @return string Template to include.
 	 */
-	public static function filter_paired_template_include( $template ) {
-		if ( empty( $template ) || ! self::is_paired_available() ) {
+	public static function filter_amp_template_include( $template ) {
+		if ( empty( $template ) ) {
 			wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because support may come later.
 			exit;
 		}

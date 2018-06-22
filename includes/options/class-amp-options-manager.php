@@ -23,12 +23,13 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = array(
-		'theme_support'        => 'disabled',
-		'supported_post_types' => array(),
-		'analytics'            => array(),
-		'force_sanitization'   => false,
-		'accept_tree_shaking'  => false,
-		'disable_admin_bar'    => false,
+		'theme_support'          => 'disabled',
+		'supported_post_types'   => array(),
+		'analytics'              => array(),
+		'force_sanitization'     => false,
+		'accept_tree_shaking'    => false,
+		'disable_admin_bar'      => false,
+		'non_singular_supported' => true,
 	);
 
 	/**
@@ -116,9 +117,10 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $new_options['theme_support'];
 		}
 
-		$options['force_sanitization']  = ! empty( $new_options['force_sanitization'] );
-		$options['accept_tree_shaking'] = ! empty( $new_options['accept_tree_shaking'] );
-		$options['disable_admin_bar']   = ! empty( $new_options['disable_admin_bar'] );
+		$options['force_sanitization']     = ! empty( $new_options['force_sanitization'] );
+		$options['accept_tree_shaking']    = ! empty( $new_options['accept_tree_shaking'] );
+		$options['disable_admin_bar']      = ! empty( $new_options['disable_admin_bar'] );
+		$options['non_singular_supported'] = ! empty( $new_options['non_singular_supported'] );
 
 		// Validate post type support.
 		if ( isset( $new_options['supported_post_types'] ) ) {

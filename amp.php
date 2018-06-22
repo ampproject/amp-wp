@@ -272,15 +272,36 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 }
 
 /**
- * Whether this is in 'canonical mode.'
+ * Whether this is in 'canonical mode'.
  *
- * Themes can register support for this with `add_theme_support( 'amp' )`.
- * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
- * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
- * `add_theme_support( 'amp', array( 'template_dir' => 'my-amp-templates' ) )`
- * it will retain 'paired mode.
+ * Themes can register support for this with `add_theme_support( 'amp' )`, or via the
+ * following so that only so that single blog posts will be native/canonical, pages are paired,
+ * and everything else has AMP unavailable:
  *
- * @return boolean Whether this is in AMP 'canonical mode'.
+ *      add_theme_support( 'amp', array(
+ *          'template_dir'       => 'amp-templates/', // Optional. In case you need to override the template as a whole.
+ *          'available_callback' => function() {
+ *              // @todo Warning: If a plugin or theme calls is_amp_endpoint() before parse_query() then the conditionals will not work!
+ *              if ( is_single() ) {
+ *                  return 'native';
+ *              } elseif ( is_page() ) {
+ *                  return 'paired'; // Or 'true'.
+ *              } else {
+ *                  return false;
+ *              }
+ *          },
+ *      ) );
+ *
+ * Then, this will change the plugin so that it won't run in 'paired mode' with separate URLs.
+ * Neither will it output the rel=amphtml link on the frontend.
+ *
+ * Paired mode will be retained if the theme registers support for AMP with just a template_dir and no available_callback:
+ *
+ *     add_theme_support( 'amp', array(
+ *         'template_dir' => 'my-amp-templates',
+ *     ) );
+ *
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
 	$support = get_theme_support( 'amp' );
@@ -289,8 +310,21 @@ function amp_is_canonical() {
 	}
 	if ( is_array( $support ) ) {
 		$args = array_shift( $support );
-		if ( empty( $args['template_dir'] ) ) {
+
+		$is_native = (
+			isset( $args['available_callback'] )
+			&&
+			is_callable( $args['available_callback'] )
+			&&
+			'native' === call_user_func( $args['available_callback'] )
+		);
+		if ( $is_native ) {
 			return true;
+		}
+
+		// If there is no available_callback and yet there is a template_dir, then paired mode is implied.
+		if ( empty( $args['available_callback'] ) && ! empty( $args['template_dir'] ) ) {
+			return false;
 		}
 	}
 	return false;

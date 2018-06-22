@@ -99,9 +99,9 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'supported_post_types',
-			__( 'Post Type Support', 'amp' ),
-			array( $this, 'render_post_types_support' ),
+			'supported_queries',
+			__( 'Supported Queries', 'amp' ),
+			array( $this, 'render_supported_queries' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
 			array(
@@ -276,16 +276,36 @@ class AMP_Options_Menu {
 	 *
 	 * @since 0.6
 	 */
-	public function render_post_types_support() {
-		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
-		$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
+	public function render_supported_queries() {
 		?>
 		<script>
 			jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
-				jQuery( '.amp-post-type-support-field' ).toggleClass( 'hidden', 'paired' !== this.value && 'disabled' !== this.value );
+				jQuery( 'fieldset.non_singular_supported' ).toggleClass( 'hidden', 'disabled' === this.value );
 			} ).filter( ':checked' ).trigger( 'change' );
 		</script>
+
+		<fieldset class="non_singular_supported">
+			<p>
+				<label for="non_singular_supported">
+					<input id="non_singular_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[non_singular_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'non_singular_supported' ) ); ?>>
+					<?php esc_html_e( 'Serve non-singular templates as AMP.', 'amp' ); ?>
+				</label>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'Non-singular means templates like categories, date archives, author pages, and so on.', 'amp' ); ?>
+			</p>
+		</fieldset>
+
 		<fieldset>
+			<?php
+			$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
+			$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
+			?>
+			<legend>
+				<h2 class="title"><?php esc_html_e( 'Post Types', 'amp' ); ?></h2>
+			</legend>
+
+			<!-- TODO Checkbox to allow other queries -->
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<?php
 				$element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}";
@@ -299,7 +319,7 @@ class AMP_Options_Menu {
 					id="<?php echo esc_attr( $element_id ); ?>"
 					name="<?php echo esc_attr( $element_name ); ?>"
 					value="<?php echo esc_attr( $post_type->name ); ?>"
-					<?php checked( true, amp_is_canonical() || post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
+					<?php checked( true, post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
 					<?php disabled( $is_builtin ); ?>
 					>
 				<label for="<?php echo esc_attr( $element_id ); ?>">

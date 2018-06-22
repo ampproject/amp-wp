@@ -298,7 +298,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test register_paired_hooks.
 	 *
-	 * @covers AMP_Theme_Support::register_paired_hooks()
+	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
 	public function test_register_paired_hooks() {
 		$template_types = array(
@@ -309,7 +309,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'author',
 			'category',
 		);
-		AMP_Theme_Support::register_paired_hooks();
+		AMP_Theme_Support::add_amp_template_filters();
 		foreach ( $template_types as $template_type ) {
 			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_paired_template_hierarchy' ) ) );
 		}
@@ -761,7 +761,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test filter_paired_template_hierarchy.
 	 *
-	 * @covers AMP_Theme_Support::filter_paired_template_hierarchy()
+	 * @covers AMP_Theme_Support::filter_amp_template_hierarchy()
 	 */
 	public function test_filter_paired_template_hierarchy() {
 		$template_dir = 'amp-templates';
@@ -773,7 +773,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'single-post.php',
 			'single.php',
 		);
-		$filtered_templates = AMP_Theme_Support::filter_paired_template_hierarchy( $templates );
+		$filtered_templates = AMP_Theme_Support::filter_amp_template_hierarchy( $templates );
 		foreach ( $filtered_templates as $key => $filtered_template ) {
 			$this->assertEquals( $template_dir . '/' . $templates[ $key ], $filtered_template );
 		}
@@ -782,7 +782,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test filter_paired_template_include.
 	 *
-	 * @covers AMP_Theme_Support::filter_paired_template_include()
+	 * @covers AMP_Theme_Support::filter_amp_template_include()
 	 */
 	public function test_filter_paired_template_include() {
 		$template_dir = 'amp-templates';
@@ -790,10 +790,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( 'amp', array(
 			'template_dir' => $template_dir,
 		) );
-		$this->assertEquals( $template, AMP_Theme_Support::filter_paired_template_include( $template ) );
+		$this->assertEquals( $template, AMP_Theme_Support::filter_amp_template_include( $template ) );
 		remove_theme_support( 'amp' );
 		try {
-			AMP_Theme_Support::filter_paired_template_include( $template );
+			AMP_Theme_Support::filter_amp_template_include( $template );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
