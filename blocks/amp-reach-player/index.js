@@ -24,7 +24,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Reach Player', 'amp' ),
 		description: __( 'Displays the Reach Player configured in the Beachfront Reach platform.', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' ),
@@ -62,7 +62,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { dataEmbedId } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
@@ -78,22 +78,18 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Reach settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'The Reach player embed id (required)', 'amp' ) }
-										value={ dataEmbedId }
-										onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
-									/>
-									{
-										getLayoutControls( props, ampLayoutOptions )
-									}
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'Reach settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'The Reach player embed id (required)', 'amp' ) }
+								value={ dataEmbedId }
+								onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
 						url && getMediaPlaceholder( __( 'Reach Player', 'amp' ), url )
 					}

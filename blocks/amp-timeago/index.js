@@ -22,6 +22,7 @@ const {
 	PanelBody,
 	TextControl
 } = wp.components;
+const { Fragment } = wp.element;
 import timeago from 'timeago.js';
 
 /**
@@ -83,7 +84,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { align, cutoff } = attributes;
 			let timeAgo;
 			if ( attributes.dateTime ) {
@@ -103,8 +104,8 @@ export default registerBlockType(
 				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) }
 			];
 
-			return [
-				isSelected && (
+			return (
+				<Fragment>
 					<InspectorControls key='inspector'>
 						<PanelBody title={ __( 'AMP Timeago Settings' ) }>
 							<DateTimePicker
@@ -124,18 +125,18 @@ export default registerBlockType(
 							/>
 						</PanelBody>
 					</InspectorControls>
-				),
-				<BlockControls key='controls'>
-					<BlockAlignmentToolbar
-						value={ align }
-						onChange={ ( nextAlign ) => {
-							setAttributes( { align: nextAlign } );
-						} }
-						controls={ [ 'left', 'center', 'right' ] }
-					/>
-				</BlockControls>,
-				<time key='timeago' dateTime={ attributes.dateTime }>{ timeAgo }</time>
-			];
+					<BlockControls key='controls'>
+						<BlockAlignmentToolbar
+							value={ align }
+							onChange={ ( nextAlign ) => {
+								setAttributes( { align: nextAlign } );
+							} }
+							controls={ [ 'left', 'center', 'right' ] }
+						/>
+					</BlockControls>
+					<time key='timeago' dateTime={ attributes.dateTime }>{ timeAgo }</time>
+				</Fragment>
+			);
 		},
 
 		save( { attributes } ) {

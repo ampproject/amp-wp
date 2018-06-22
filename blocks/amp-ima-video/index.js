@@ -25,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP IMA Video', 'amp' ),
 		description: __( 'Embeds a video player for instream video ads that are integrated with the IMA SDK', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )
@@ -81,7 +81,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { dataDelayAdRequest, dataTag, dataSrc, dataPoster } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
@@ -94,37 +94,33 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'Https URL for your VAST ad document (required)', 'amp' ) }
-										value={ dataTag }
-										onChange={ value => ( setAttributes( { dataTag: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Https URL of your video content (required)', 'amp' ) }
-										value={ dataSrc }
-										onChange={ value => ( setAttributes( { dataSrc: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Https URL to preview image', 'amp' ) }
-										value={ dataPoster }
-										onChange={ value => ( setAttributes( { dataPoster: value } ) ) }
-									/>
-									<ToggleControl
-										label={ __( 'Delay Ad Request', 'amp' ) }
-										checked={ dataDelayAdRequest }
-										onChange={ () => ( setAttributes( { dataDelayAdRequest: ! dataDelayAdRequest } ) ) }
-									/>
-									{
-										getLayoutControls( props, ampLayoutOptions )
-									}
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'Https URL for your VAST ad document (required)', 'amp' ) }
+								value={ dataTag }
+								onChange={ value => ( setAttributes( { dataTag: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Https URL of your video content (required)', 'amp' ) }
+								value={ dataSrc }
+								onChange={ value => ( setAttributes( { dataSrc: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Https URL to preview image', 'amp' ) }
+								value={ dataPoster }
+								onChange={ value => ( setAttributes( { dataPoster: value } ) ) }
+							/>
+							<ToggleControl
+								label={ __( 'Delay Ad Request', 'amp' ) }
+								checked={ dataDelayAdRequest }
+								onChange={ () => ( setAttributes( { dataDelayAdRequest: ! dataDelayAdRequest } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
 						dataSet && getMediaPlaceholder( __( 'IMA Video', 'amp' ), dataSrc )
 					}

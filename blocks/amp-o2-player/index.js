@@ -24,7 +24,7 @@ export default registerBlockType(
 	'amp/amp-o2-player',
 	{
 		title: __( 'AMP O2 Player', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' ),
@@ -85,7 +85,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { autoPlay, dataPid, dataVid, dataBcid, dataBid } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
@@ -102,42 +102,38 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'O2 Player Settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'Player ID (required)', 'amp' ) }
-										value={ dataPid }
-										onChange={ value => ( setAttributes( { dataPid: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Buyer Company ID (either buyer or video ID is required)', 'amp' ) }
-										value={ dataBcid }
-										onChange={ value => ( setAttributes( { dataBcid: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Video ID (either buyer or video ID is required)', 'amp' ) }
-										value={ dataVid }
-										onChange={ value => ( setAttributes( { dataVid: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Playlist ID', 'amp' ) }
-										value={ dataBid }
-										onChange={ value => ( setAttributes( { dataBid: value } ) ) }
-									/>
-									<ToggleControl
-										label={ __( 'Autoplay', 'amp' ) }
-										checked={ autoPlay }
-										onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
-									/>
-									{
-										getLayoutControls( props, ampLayoutOptions )
-									}
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'O2 Player Settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'Player ID (required)', 'amp' ) }
+								value={ dataPid }
+								onChange={ value => ( setAttributes( { dataPid: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Buyer Company ID (either buyer or video ID is required)', 'amp' ) }
+								value={ dataBcid }
+								onChange={ value => ( setAttributes( { dataBcid: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Video ID (either buyer or video ID is required)', 'amp' ) }
+								value={ dataVid }
+								onChange={ value => ( setAttributes( { dataVid: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Playlist ID', 'amp' ) }
+								value={ dataBid }
+								onChange={ value => ( setAttributes( { dataBid: value } ) ) }
+							/>
+							<ToggleControl
+								label={ __( 'Autoplay', 'amp' ) }
+								checked={ autoPlay }
+								onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
 						url && getMediaPlaceholder( __( 'O2 Player', 'amp' ), url )
 					}
