@@ -279,27 +279,25 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * and everything else has AMP unavailable:
  *
  *      add_theme_support( 'amp', array(
- *          'template_dir'       => 'amp-templates/', // Optional. In case you need to override the template as a whole.
- *          'available_callback' => function() {
- *              // @todo Warning: If a plugin or theme calls is_amp_endpoint() before parse_query() then the conditionals will not work!
- *              if ( is_single() ) {
- *                  return 'native';
- *              } elseif ( is_page() ) {
- *                  return 'paired'; // Or 'true'.
- *              } else {
- *                  return false;
- *              }
- *          },
+ *          'available_callback' => 'is_single',
  *      ) );
  *
  * Then, this will change the plugin so that it won't run in 'paired mode' with separate URLs.
- * Neither will it output the rel=amphtml link on the frontend.
+ * Neither will it output the rel=amphtml link on the frontend. To serve a site in paired mode, add the paired arg:
  *
- * Paired mode will be retained if the theme registers support for AMP with just a template_dir and no available_callback:
+ *      add_theme_support( 'amp', array(
+ *          'paired' => true,
+ *          'available_callback' => 'is_single',
+ *      ) );
+ *
+ * Paired mode will also be retained if the theme registers support for AMP with just a template_dir and no available_callback:
  *
  *     add_theme_support( 'amp', array(
  *         'template_dir' => 'my-amp-templates',
  *     ) );
+ *
+ * @todo Why do we even need this function?
+ * @see \AMP_Theme_Support::is_paired_available()
  *
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
@@ -308,27 +306,31 @@ function amp_is_canonical() {
 	if ( true === $support ) {
 		return true;
 	}
+
 	if ( is_array( $support ) ) {
 		$args = array_shift( $support );
 
-		$is_native = (
-			isset( $args['available_callback'] )
-			&&
-			is_callable( $args['available_callback'] )
-			&&
-			'native' === call_user_func( $args['available_callback'] )
-		);
-		if ( $is_native ) {
-			return true;
-		}
-
-		// If there is no available_callback and yet there is a template_dir, then paired mode is implied.
-		if ( empty( $args['available_callback'] ) && ! empty( $args['template_dir'] ) ) {
+		// If paired arg is supplied, then it is never canonical.
+		if ( ! empty( $args['paired'] ) ) {
 			return false;
 		}
+
+		// If there is a template_dir, then paired mode is implied.
+		if ( ! empty( $args['template_dir'] ) ) {
+			return false;
+		}
+//
+//		// Otherwise, the available_callback dictates whether AMP is available.
+//		if ( isset( $args['available_callback'] ) && is_callable( $args['available_callback'] ) ) {
+//			return call_user_func( $args['available_callback'] );
+//		}
 	}
-	return false;
+	return true;
 }
+//
+//function amp_is_available() {
+//
+//}
 
 /**
  * Load classes.
@@ -460,6 +462,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 
 /**
  * Redirects the old AMP URL to the new AMP URL.
+ *
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
  *
  * @since 0.5

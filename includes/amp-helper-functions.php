@@ -243,10 +243,6 @@ function amp_add_amphtml_link() {
  * @return bool Whether the post supports AMP.
  */
 function post_supports_amp( $post ) {
-	if ( amp_is_canonical() ) {
-		return true;
-	}
-
 	$errors = AMP_Post_Type_Support::get_support_errors( $post );
 
 	// Return false if an error is found.
@@ -261,9 +257,9 @@ function post_supports_amp( $post ) {
 		case AMP_Post_Meta_Box::DISABLED_STATUS:
 			return false;
 
-		// Disabled by default for custom page templates, page on front and page for posts.
+		// Disabled by default for custom page templates, page on front and page for posts, unless 'amp' theme support is present.
 		default:
-			$enabled = (
+			$enabled = current_theme_supports( 'amp' ) || (
 				! (bool) get_page_template_slug( $post )
 				&&
 				! (
@@ -291,10 +287,12 @@ function post_supports_amp( $post ) {
 }
 
 /**
- * Are we currently on an AMP URL?
+ * Determine whether the current response being served as AMP.
  *
- * @since 1.0 This function can be called before the `parse_query` action because the 'amp' query var is specifically and exclusively used when 'amp' theme support is added.
+ * This function cannot be called before the parse_query action because it needs to be able
+ * to determine the queried object is able to be served as AMP.
  *
+ * @see is_header_video_active()
  * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
@@ -302,17 +300,47 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	// When 'amp' theme support is (or will be added) then these are the conditions that are key to be checked.
-	if ( amp_is_canonical() || isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: CSRF OK.
-		return true;
+	$did_parse_query = did_action( 'parse_query' );
+
+	if ( ! $did_parse_query ) {
+		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
-	// Condition for non-theme support when /amp/ endpoint is used.
-	if ( false !== get_query_var( amp_get_slug(), false ) ) {
-		return true;
+	$has_amp_query_var = (
+		isset( $_GET[ amp_get_slug() ] ) // WPCS: CSRF OK.
+		||
+		false !== get_query_var( amp_get_slug(), false )
+	);
+
+	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
+	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
+		return false;
 	}
 
-	return false;
+	/*
+	 * If theme suport is present and there is available_callback, it is what determines whether this is
+	 * an AMP endpoint. The available_callback is is presumed to check post_supports_amp().
+	 * @todo Should available_callback take a WP_Query as its arg? We need to be able to determine whether AMP is supported for another URL.
+	 * @todo Should this not be a filter?
+	 */
+	if ( current_theme_supports( 'amp' ) ) {
+		$args = get_theme_support( 'amp' );
+		if ( isset( $args[0]['available_callback'] ) && is_callable( $args[0]['available_callback'] ) ) {
+			return call_user_func( $args[0]['available_callback'] );
+		}
+	}
+
+	// When there is no theme support, then
+	if ( $did_parse_query ) {
+		$queried_object = get_queried_object();
+		return (
+			is_singular() && $queried_object instanceof WP_Post && post_supports_amp( $queried_object )
+			||
+			! is_singular() && AMP_Options_Manager::get_option( 'non_singular_supported' )
+		);
+	}
+
+	return true;
 }
 
 /**

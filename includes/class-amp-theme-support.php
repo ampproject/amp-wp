@@ -281,6 +281,7 @@ class AMP_Theme_Support {
 	 * Returns true when there is a template_dir defined in theme support, and if a defined available_callback
 	 * returns true.
 	 *
+	 * @see amp_is_canonical()
 	 * @return bool Whether available.
 	 */
 	public static function is_paired_available() {
@@ -296,6 +297,10 @@ class AMP_Theme_Support {
 		 */
 		$queried_object = get_queried_object();
 		if ( is_singular() && ! post_supports_amp( $queried_object ) ) {
+			return false;
+		}
+
+		if ( ! is_singular() && ! AMP_Options_Manager::get_option( 'non_singular_supported' ) ) {
 			return false;
 		}
 
