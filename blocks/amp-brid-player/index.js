@@ -1,4 +1,9 @@
 /**
+ * Helper methods for blocks.
+ */
+import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
+
+/**
  * Internal block libraries.
  */
 const { __ } = wp.i18n;
@@ -8,7 +13,6 @@ const { Fragment } = wp.element;
 const {
 	PanelBody,
 	TextControl,
-	SelectControl,
 	Placeholder,
 	ToggleControl
 } = wp.components;
@@ -21,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Brid Player', 'amp' ),
 		description: __( 'Displays the Brid Player used in Brid.tv Video Platform.', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )
@@ -29,26 +33,44 @@ export default registerBlockType(
 
 		attributes: {
 			autoPlay: {
-				default: false
+				type: 'boolean'
 			},
 			dataPartner: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-partner'
 			},
 			dataPlayer: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-player'
 			},
 			dataVideo: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-video'
 			},
 			dataPlaylist: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-playlist'
 			},
 			dataOutstream: {
-				type: 'number'
+				type: 'number',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'data-outstream'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
-				default: 'responsive'
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
@@ -56,12 +78,16 @@ export default registerBlockType(
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-brid-player',
+				attribute: 'height'
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { autoPlay, dataPartner, dataPlayer, dataVideo, dataPlaylist, dataOutstream, layout, height, width } = attributes;
+		edit( props ) {
+			const { attributes, setAttributes } = props;
+			const { autoPlay, dataPartner, dataPlayer, dataVideo, dataPlaylist, dataOutstream } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
@@ -77,70 +103,45 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'Brid.tv partner ID (required)', 'amp' ) }
+								value={ dataPartner }
+								onChange={ value => ( setAttributes( { dataPartner: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Brid.tv player ID (required)', 'amp' ) }
+								value={ dataPlayer }
+								onChange={ value => ( setAttributes( { dataPlayer: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Video ID (one of video / playlist / outstream ID is required)', 'amp' ) }
+								value={ dataVideo }
+								onChange={ value => ( setAttributes( { dataVideo: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Outstream unit ID (one of video / playlist / outstream ID is required)', 'amp' ) }
+								value={ dataOutstream }
+								onChange={ value => ( setAttributes( { dataOutstream: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Playlist ID (one of video / playlist / outstream ID is required)', 'amp' ) }
+								value={ dataPlaylist }
+								onChange={ value => ( setAttributes( { dataPlaylist: value } ) ) }
+							/>
+							<ToggleControl
+								label={ __( 'Autoplay', 'amp' ) }
+								checked={ autoPlay }
+								onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'Brid.tv partner ID (required)', 'amp' ) }
-										value={ dataPartner }
-										onChange={ value => ( setAttributes( { dataPartner: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Brid.tv player ID (required)', 'amp' ) }
-										value={ dataPlayer }
-										onChange={ value => ( setAttributes( { dataPlayer: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Video ID (one of video / playlist / outstream ID is required)', 'amp' ) }
-										value={ dataVideo }
-										onChange={ value => ( setAttributes( { dataVideo: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Outstream unit ID (one of video / playlist / outstream ID is required)', 'amp' ) }
-										value={ dataOutstream }
-										onChange={ value => ( setAttributes( { dataOutstream: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Playlist ID (one of video / playlist / outstream ID is required)', 'amp' ) }
-										value={ dataPlaylist }
-										onChange={ value => ( setAttributes( { dataPlaylist: value } ) ) }
-									/>
-									<ToggleControl
-										label={ __( 'Autoplay', 'amp' ) }
-										checked={ autoPlay }
-										onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
-									/>
-									<SelectControl
-										label={ __( 'Layout', 'amp', 'amp' ) }
-										value={ layout }
-										options={ ampLayoutOptions }
-										onChange={ value => ( setAttributes( { layout: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Width (px)', 'amp' ) }
-										value={ width !== undefined ? width : '' }
-										onChange={ value => ( setAttributes( { width: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Height (px)', 'amp' ) }
-										value={ height }
-										onChange={ value => ( setAttributes( { height: value } ) ) }
-									/>
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
-					{
-						url && (
-							<Placeholder label={ __( 'Brid Player', 'amp' ) }>
-								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
-							</Placeholder>
-						)
-
+						url && getMediaPlaceholder( __( 'Brid Player', 'amp' ), url )
 					}
 					{
 						! url && (
@@ -155,12 +156,12 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			let bridProps = {
-				layout: attributes.layout,
+				layout: attributes.ampLayout,
 				height: attributes.height,
 				'data-player': attributes.dataPlayer,
 				'data-partner': attributes.dataPartner
 			};
-			if ( 'fixed-height' !== attributes.layout && attributes.width ) {
+			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				bridProps.width = attributes.width;
 			}
 			if ( attributes.dataPlaylist ) {

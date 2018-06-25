@@ -8,14 +8,26 @@
 /**
  * Get the slug used in AMP for the query var, endpoint, and post type support.
  *
- * The return value can be overridden by previously defining a AMP_QUERY_VAR
+ * This function always returns 'amp' when 'amp' theme support is present. Otherwise,
+ * the return value can be overridden by previously defining a AMP_QUERY_VAR
  * constant or by adding a 'amp_query_var' filter, but *warning* this ability
  * may be deprecated in the future. Normally the slug should be just 'amp'.
  *
  * @since 0.7
+ * @since 1.0 The return value is always 'amp' when 'amp' theme support is present, and the 'amp_query_var' filter no longer applies.
+ *
  * @return string Slug used for query var, endpoint, and post type support.
  */
 function amp_get_slug() {
+	if ( current_theme_supports( 'amp' ) ) {
+		if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+			define( 'AMP_QUERY_VAR', 'amp' );
+		} elseif ( 'amp' !== AMP_QUERY_VAR ) {
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'The AMP_QUERY_VAR constant should only be defined as "amp" when "amp" theme support is present.', 'amp' ), '1.0' );
+		}
+		return 'amp';
+	}
+
 	if ( defined( 'AMP_QUERY_VAR' ) ) {
 		return AMP_QUERY_VAR;
 	}
@@ -26,6 +38,8 @@ function amp_get_slug() {
 	 * Warning: This filter may become deprecated.
 	 *
 	 * @since 0.3.2
+	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
+	 *
 	 * @param string $query_var The AMP query variable.
 	 */
 	$query_var = apply_filters( 'amp_query_var', 'amp' );
@@ -36,9 +50,30 @@ function amp_get_slug() {
 }
 
 /**
+ * Get the URL for the current request.
+ *
+ * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
+ * This is needed in particular due to subdirectory installs.
+ *
+ * @since 1.0
+ *
+ * @return string Current URL.
+ */
+function amp_get_current_url() {
+	$url = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) );
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		$url = esc_url_raw( $url . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+	} else {
+		$url .= '/';
+	}
+	return $url;
+}
+
+/**
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
  * @since 0.1
+ * @since 1.0 The query var 'amp' is always used exclusively when 'amp' theme support is present; the 'amp_pre_get_permalink' and 'amp_get_permalink' filters do not apply.
  *
  * @param int $post_id Post ID.
  *
@@ -46,12 +81,22 @@ function amp_get_slug() {
  */
 function amp_get_permalink( $post_id ) {
 
+	// When theme support is present, the plain query var should always be used.
+	if ( current_theme_supports( 'amp' ) ) {
+		$permalink = get_permalink( $post_id );
+		if ( ! amp_is_canonical() ) {
+			$permalink = add_query_arg( 'amp', '', $permalink );
+		}
+		return $permalink;
+	}
+
 	/**
 	 * Filters the AMP permalink to short-circuit normal generation.
 	 *
 	 * Returning a non-false value in this filter will cause the `get_permalink()` to get called and the `amp_get_permalink` filter to not apply.
 	 *
 	 * @since 0.4
+	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 	 *
 	 * @param false $url     Short-circuited URL.
 	 * @param int   $post_id Post ID.
@@ -62,15 +107,31 @@ function amp_get_permalink( $post_id ) {
 		return $pre_url;
 	}
 
+	$permalink = get_permalink( $post_id );
+
 	if ( amp_is_canonical() ) {
-		$amp_url = get_permalink( $post_id );
+		$amp_url = $permalink;
 	} else {
-		$parsed_url = wp_parse_url( get_permalink( $post_id ) );
-		$structure  = get_option( 'permalink_structure' );
-		if ( empty( $structure ) || ! empty( $parsed_url['query'] ) || is_post_type_hierarchical( get_post_type( $post_id ) ) ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', get_permalink( $post_id ) );
+		$parsed_url    = wp_parse_url( get_permalink( $post_id ) );
+		$structure     = get_option( 'permalink_structure' );
+		$use_query_var = (
+			// If pretty permalinks aren't available, then query var must be used.
+			empty( $structure )
+			||
+			// If there are existing query vars, then always use the amp query var as well.
+			! empty( $parsed_url['query'] )
+			||
+			// If the post type is hierarchical then the /amp/ endpoint isn't available.
+			is_post_type_hierarchical( get_post_type( $post_id ) )
+		);
+		if ( $use_query_var ) {
+			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
 		} else {
-			$amp_url = trailingslashit( get_permalink( $post_id ) ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
+			$amp_url = preg_replace( '/#.*/', '', $permalink );
+			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
+			if ( ! empty( $parsed_url['fragment'] ) ) {
+				$amp_url .= '#' . $parsed_url['fragment'];
+			}
 		}
 	}
 
@@ -78,6 +139,7 @@ function amp_get_permalink( $post_id ) {
 	 * Filters AMP permalink.
 	 *
 	 * @since 0.2
+	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 	 *
 	 * @param false $amp_url AMP URL.
 	 * @param int   $post_id Post ID.
@@ -102,6 +164,71 @@ function amp_remove_endpoint( $url ) {
 	$url = remove_query_arg( amp_get_slug(), $url );
 
 	return $url;
+}
+
+/**
+ * Add amphtml link.
+ *
+ * If there are known validation errors for the current URL then do not output anything.
+ *
+ * @since 1.0
+ */
+function amp_add_amphtml_link() {
+
+	/**
+	 * Filters whether to show the amphtml link on the frontend.
+	 *
+	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
+	 * @since 0.2
+	 */
+	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+		return;
+	}
+
+	$current_url = amp_get_current_url();
+
+	$amp_url = null;
+	if ( current_theme_supports( 'amp' ) ) {
+		if ( AMP_Theme_Support::is_paired_available() ) {
+			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+		}
+	} else {
+		if ( is_singular() ) {
+			$amp_url = amp_get_permalink( get_queried_object_id() );
+		} else {
+			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+		}
+	}
+
+	if ( ! $amp_url ) {
+		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
+		return;
+	}
+
+	// Check to see if there are known unaccepted validation errors for this URL.
+	if ( current_theme_supports( 'amp' ) ) {
+		$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
+		$error_count       = count( $validation_errors );
+		if ( $error_count > 0 ) {
+			echo "<!--\n";
+			echo esc_html( sprintf(
+				/* translators: %s is error count */
+				_n(
+					'There is %s validation error that is blocking the amphtml version from being available.',
+					'There are %s validation errors that are blocking the amphtml version from being available.',
+					$error_count,
+					'amp'
+				),
+				number_format_i18n( $error_count )
+			) );
+			echo "\n-->";
+			return;
+		}
+	}
+
+	if ( $amp_url ) {
+		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+	}
 }
 
 /**
@@ -166,7 +293,7 @@ function post_supports_amp( $post ) {
 /**
  * Are we currently on an AMP URL?
  *
- * Note: will always return `false` if called before the `parse_query` hook.
+ * @since 1.0 This function can be called before the `parse_query` action because the 'amp' query var is specifically and exclusively used when 'amp' theme support is added.
  *
  * @return bool Whether it is the AMP endpoint.
  */
@@ -175,15 +302,17 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	if ( amp_is_canonical() ) {
+	// When 'amp' theme support is (or will be added) then these are the conditions that are key to be checked.
+	if ( amp_is_canonical() || isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: CSRF OK.
 		return true;
 	}
 
-	if ( 0 === did_action( 'parse_query' ) ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
+	// Condition for non-theme support when /amp/ endpoint is used.
+	if ( false !== get_query_var( amp_get_slug(), false ) ) {
+		return true;
 	}
 
-	return false !== get_query_var( amp_get_slug(), false );
+	return false;
 }
 
 /**
@@ -448,6 +577,8 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Tumblr_Embed_Handler'      => array(),
 			'AMP_Gallery_Embed_Handler'     => array(),
 			'AMP_Gfycat_Embed_Handler'      => array(),
+			'AMP_Hulu_Embed_Handler'        => array(),
+			'AMP_Imgur_Embed_Handler'       => array(),
 			'WPCOM_AMP_Polldaddy_Embed'     => array(),
 		),
 		$post
@@ -480,16 +611,25 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers = apply_filters( 'amp_content_sanitizers',
 		array(
+			'AMP_Core_Theme_Sanitizer'        => array(
+				'template'   => get_template(),
+				'stylesheet' => get_stylesheet(),
+			),
 			'AMP_Img_Sanitizer'               => array(),
 			'AMP_Form_Sanitizer'              => array(),
 			'AMP_Comments_Sanitizer'          => array(),
 			'AMP_Video_Sanitizer'             => array(),
+			'AMP_O2_Player_Sanitizer'         => array(),
 			'AMP_Audio_Sanitizer'             => array(),
-			'AMP_Block_Sanitizer'             => array(),
 			'AMP_Playbuzz_Sanitizer'          => array(),
+			'AMP_Embed_Sanitizer'             => array(),
 			'AMP_Iframe_Sanitizer'            => array(
 				'add_placeholder' => true,
 			),
+			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+				'carousel_required' => ! current_theme_supports( 'amp' ), // For back-compat.
+			),
+			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
 			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Script_Sanitizer'            => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.

@@ -26,6 +26,13 @@ use \Sabberworm\CSS\CSSList\Document;
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Error code for tree shaking.
+	 *
+	 * @var string
+	 */
+	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -37,6 +44,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
+	 *      @type bool     $accept_tree_shaking        Whether to accept tree-shaking by default and bypass a validation error.
 	 * }
 	 */
 	protected $args;
@@ -56,6 +64,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		),
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
+		'accept_tree_shaking'       => false,
 	);
 
 	/**
@@ -183,6 +192,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $processed_imported_stylesheet_urls = array();
 
 	/**
+	 * Mapping of HTML element selectors to AMP selector elements.
+	 *
+	 * @var array
+	 */
+	private $selector_mappings = array();
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -197,7 +213,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'illegal_css_at_rule',
 			'illegal_css_important',
 			'illegal_css_property',
-			'removed_unused_css_rules',
+			self::TREE_SHAKING_ERROR_CODE,
 			'unrecognized_css',
 			'disallowed_file_extension',
 			'file_path_not_found',
@@ -306,6 +322,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->used_tag_names = array_keys( $used_tag_names );
 		}
 		return $this->used_tag_names;
+	}
+
+	/**
+	 * Run logic before any sanitizers are run.
+	 *
+	 * After the sanitizers are instantiated but before calling sanitize on each of them, this
+	 * method is called with list of all the instantiated sanitizers.
+	 *
+	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
+	 */
+	public function init( $sanitizers ) {
+		parent::init( $sanitizers );
+
+		foreach ( $sanitizers as $sanitizer ) {
+			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {
+				if ( ! isset( $this->selector_mappings[ $html_selectors ] ) ) {
+					$this->selector_mappings[ $html_selectors ] = $amp_selectors;
+				} else {
+					$this->selector_mappings[ $html_selectors ] = array_unique(
+						array_merge( $this->selector_mappings[ $html_selectors ], $amp_selectors )
+					);
+				}
+
+				// Prevent selectors like `amp-img img` getting deleted since `img` does not occur in the DOM.
+				$this->args['dynamic_element_selectors'] = array_merge(
+					$this->args['dynamic_element_selectors'],
+					$this->selector_mappings[ $html_selectors ]
+				);
+			}
+		}
 	}
 
 	/**
@@ -496,6 +542,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet   = trim( $element->textContent );
 		$cdata_spec   = $is_keyframes ? $this->style_keyframes_cdata_spec : $this->style_custom_cdata_spec;
 
+		// Honor the style's media attribute.
+		$media = $element->getAttribute( 'media' );
+		if ( $media && 'all' !== $media ) {
+			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
+		}
+
 		$stylesheet = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
 			'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
@@ -647,7 +699,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v6';
+		$cache_group = 'amp-parsed-stylesheet-v9';
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -657,6 +709,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			wp_array_slice_assoc(
 				$this->args,
 				array( 'should_locate_sources', 'parsed_cache_variant' )
+			),
+			array(
+				'language' => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
 			)
 		);
 
@@ -912,10 +967,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$pattern .= preg_quote( $after_declaration_block, '#' );
 			$pattern .= '#s';
 
+			$dynamic_selector_pattern = null;
+			if ( ! empty( $this->args['dynamic_element_selectors'] ) ) {
+				$dynamic_selector_pattern = implode( '|', array_map(
+					function( $selector ) {
+						return preg_quote( $selector, '#' );
+					},
+					$this->args['dynamic_element_selectors']
+				) );
+			}
+
 			$split_stylesheet = preg_split( $pattern, $stylesheet_string, -1, PREG_SPLIT_DELIM_CAPTURE );
 			$length           = count( $split_stylesheet );
 			for ( $i = 0; $i < $length; $i++ ) {
 				if ( $before_declaration_block === $split_stylesheet[ $i ] ) {
+
+					// Skip keyframe-selector, which is can be: from | to | <percentage>.
+					if ( preg_match( '/^((from|to)\b|-?\d+(\.\d+)?%)/i', $split_stylesheet[ $i + 1 ] ) ) {
+						$stylesheet[] = str_replace( $between_selectors, '', $split_stylesheet[ ++$i ] ) . $split_stylesheet[ ++$i ];
+						continue;
+					}
+
 					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
 					$declaration = $split_stylesheet[ ++$i ];
 
@@ -928,6 +1000,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 						// Remove attribute selectors to eliminate false negative, such as with `.social-navigation a[href*="example.com"]:before`.
 						$reduced_selector = preg_replace( '/\[\w.*?\]/', '', $reduced_selector );
+
+						// Ignore any selector terms that occur under a dynamic selector.
+						if ( $dynamic_selector_pattern ) {
+							$reduced_selector = preg_replace( '#((?:' . $dynamic_selector_pattern . ')(?:\.[a-z0-9_-]+)*)[^a-z0-9_-].*#si', '$1', $reduced_selector . ' ' );
+						}
 
 						$reduced_selector = preg_replace_callback(
 							'/\.([a-zA-Z0-9_-]+)/',
@@ -1236,6 +1313,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options ) {
 		$results = array();
 
+		if ( $ruleset instanceof DeclarationBlock ) {
+			$this->ampify_ruleset_selectors( $ruleset );
+			if ( 0 === count( $ruleset->getSelectors() ) ) {
+				$css_list->remove( $ruleset );
+				return $results;
+			}
+		}
+
 		// Remove disallowed properties.
 		if ( ! empty( $options['property_whitelist'] ) ) {
 			$properties = $ruleset->getRules();
@@ -1534,7 +1619,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$ruleset->getSelectors()
 		) );
 		$important_ruleset->setRules( $importants );
-		$css_list->append( $important_ruleset ); // @todo It would be preferable if the important ruleset were inserted adjacent to the original rule.
+
+		$i = array_search( $ruleset, $css_list->getContents(), true );
+		if ( false !== $i ) {
+			$css_list->splice( $i + 1, 0, array( $important_ruleset ) );
+		} else {
+			$css_list->append( $important_ruleset );
+		}
 
 		return $results;
 	}
@@ -1755,6 +1846,71 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Convert CSS selectors and remove obsolete selector hacks for IE.
+	 *
+	 * @param DeclarationBlock $ruleset Ruleset.
+	 */
+	private function ampify_ruleset_selectors( $ruleset ) {
+		$selectors = array();
+		$changes   = 0;
+		$language  = get_bloginfo( 'language' );
+		foreach ( $ruleset->getSelectors() as $old_selector ) {
+			$selector = $old_selector->getSelector();
+
+			// Automatically tree-shake IE6/IE7 hacks for selectors with `* html` and `*+html`.
+			if ( preg_match( '/^\*\s*\+?\s*html/', $selector ) ) {
+				$changes++;
+				continue;
+			}
+
+			// Automatically remove selectors that are for another language (and thus are irrelevant). This is safe because amp-bind'ed [lang] is not allowed.
+			$is_other_language = (
+				preg_match( '/^html\[lang(?P<starts_with>\^?)=([\'"]?)(?P<lang>.+?)\2\]/', $selector, $matches )
+				&&
+				(
+					empty( $matches['starts_with'] )
+					?
+					$language !== $matches['lang']
+					:
+					substr( $language, 0, strlen( $matches['lang'] ) ) !== $matches['lang']
+				)
+			);
+			if ( $is_other_language ) {
+				$changes++;
+				continue;
+			}
+
+			$edited_selectors = array( $selector );
+			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
+				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector ) . '(?=$|[^a-z0-9_-])/i';
+				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
+					$original_selector = $edited_selector;
+					$amp_selector      = array_shift( $amp_selectors );
+					$amp_tag_pattern   = '/(?<=^|[^a-z0-9_-])' . preg_quote( $amp_selector ) . '(?=$|[^a-z0-9_-])/i';
+					preg_match( $amp_tag_pattern, $edited_selector, $matches );
+					if ( ! empty( $matches ) && $amp_selector === $matches[0] ) {
+						continue;
+					}
+					$edited_selector = preg_replace( $html_pattern, $amp_selector, $edited_selector, -1, $count );
+					if ( ! $count ) {
+						continue;
+					}
+					$changes += $count;
+					while ( ! empty( $amp_selectors ) ) { // Note: This array contains only a couple items.
+						$amp_selector       = array_shift( $amp_selectors );
+						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
+					}
+				}
+			}
+			$selectors = array_merge( $selectors, $edited_selectors );
+		}
+
+		if ( $changes > 0 ) {
+			$ruleset->setSelectors( $selectors );
+		}
+	}
+
+	/**
 	 * Finalize a stylesheet set (amp-custom or amp-keyframes).
 	 *
 	 * @since 1.0
@@ -1772,20 +1928,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		);
 
-		if ( $is_too_much_css && $should_tree_shake ) {
+		if ( $is_too_much_css && $should_tree_shake && empty( $this->args['accept_tree_shaking'] ) ) {
 			$should_tree_shake = $this->should_sanitize_validation_error( array(
-				'code' => 'removed_unused_css_rules',
+				'code' => self::TREE_SHAKING_ERROR_CODE,
 			) );
-		}
-
-		$dynamic_selector_pattern = null;
-		if ( $should_tree_shake && ! empty( $this->args['dynamic_element_selectors'] ) ) {
-			$dynamic_selector_pattern = '#' . implode( '|', array_map(
-				function( $selector ) {
-					return preg_quote( $selector, '#' );
-				},
-				$this->args['dynamic_element_selectors']
-			) ) . '#';
 		}
 
 		$stylesheet_set['processed_nodes'] = array();
@@ -1804,8 +1950,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors = array();
 					foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 						$should_include = (
-							( $dynamic_selector_pattern && preg_match( $dynamic_selector_pattern, $selector ) )
-							||
 							(
 								// If all class names are used in the doc.
 								(

@@ -28,6 +28,7 @@
   "grunt-contrib-jshint": "^1.1.0",
   "grunt-shell": "^2.1.0",
   "grunt-wp-deploy": "^1.2.1",
+  "timeago.js": "3.0.2",
   "webpack": "^3.12.0"
  },
  "main": "blocks/index.js",

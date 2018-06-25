@@ -19,7 +19,8 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		data: {
 			i18n: {},
-			ampValidityRestField: ''
+			ampValidityRestField: '',
+			isCanonical: false
 		},
 
 		/**
@@ -91,10 +92,12 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		/**
 		 * Handle state change regarding validation errors.
 		 *
+		 * This is essentially a JS implementation of \AMP_Validation_Manager::print_edit_form_validation_status() in PHP.
+		 *
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity;
+			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity, hasActuallyUnacceptedError;
 
 			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
 			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
@@ -102,11 +105,15 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				return;
 			}
 
+			hasActuallyUnacceptedError = false;
 			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
 			validationErrors = _.map(
 				_.filter( ampValidity.results, function( result ) {
-					return ! result.sanitized;
+					if ( result.status !== 1 /* ACCEPTED */ ) {
+						hasActuallyUnacceptedError = true;
+					}
+					return result.term_status !== 1; /* ACCEPTED */
 				} ),
 				function( result ) {
 					return result.error;
@@ -179,7 +186,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
-			noticeMessage += ' ' + wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
+			noticeMessage += ' ';
+			if ( hasActuallyUnacceptedError && ! module.data.isCanonical ) {
+				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			} else {
+				noticeMessage += wp.i18n.__( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
+			}
+
 			noticeElement = wp.element.createElement( 'p', {}, [
 				noticeMessage + ' ',
 				ampValidity.review_link && wp.element.createElement(
