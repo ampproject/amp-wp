@@ -317,30 +317,61 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	/*
-	 * If theme suport is present and there is available_callback, it is what determines whether this is
-	 * an AMP endpoint. The available_callback is is presumed to check post_supports_amp().
-	 * @todo Should available_callback take a WP_Query as its arg? We need to be able to determine whether AMP is supported for another URL.
-	 * @todo Should this not be a filter?
-	 */
+	// Otherwise, it is an AMP endpoint if AMP is available.
+	return amp_get_availability();
+}
+
+/**
+ * Determine availability of AMP for the given query.
+ *
+ * @since 1.0
+ * @global WP_Query $wp_the_query
+ *
+ * @param WP_Query|null $query Query. If null then the global query will be used.
+ * @return bool Whether AMP is available.
+ */
+function amp_get_availability( $query = null ) {
+	global $wp_the_query;
+	if ( ! $query ) {
+		$query = $wp_the_query;
+	}
+
+	if ( ! ( $query instanceof WP_Query ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'No WP_Query available.', 'amp' ), '1.0' );
+		return false;
+	}
+
+	$available = null;
 	if ( current_theme_supports( 'amp' ) ) {
 		$args = get_theme_support( 'amp' );
 		if ( isset( $args[0]['available_callback'] ) && is_callable( $args[0]['available_callback'] ) ) {
-			return call_user_func( $args[0]['available_callback'] );
+			$callback = $args[0]['available_callback'];
+
+			// If the available_callback is a method on the query, then call the method on the query itself.
+			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
+				$available = call_user_func( array( $query, $callback ) );
+			} else {
+				$available = call_user_func( $callback );
+			}
 		}
 	}
 
-	// When there is no theme support, then
-	if ( $did_parse_query ) {
-		$queried_object = get_queried_object();
-		return (
-			is_singular() && $queried_object instanceof WP_Post && post_supports_amp( $queried_object )
-			||
-			! is_singular() && AMP_Options_Manager::get_option( 'non_singular_supported' )
-		);
+	// Availability has been is programmatically determined via the available_callback.
+	if ( is_bool( $available ) ) {
+		return $available;
 	}
 
-	return true;
+	if ( $query->is_singular() ) {
+		/**
+		 * Post.
+		 *
+		 * @var WP_Post $queried_object
+		 */
+		$queried_object = $query->get_queried_object();
+		return post_supports_amp( $queried_object ); // @todo FAIL: This is calling get_support_errors(), and get_support_errors() is calling amp_get_availability().
+	} else {
+		return (bool) AMP_Options_Manager::get_option( 'non_singular_supported' ); // @todo Consider other kinds of queries.
+	}
 }
 
 /**

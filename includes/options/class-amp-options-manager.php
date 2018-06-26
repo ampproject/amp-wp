@@ -23,13 +23,16 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = array(
-		'theme_support'          => 'disabled',
-		'supported_post_types'   => array(),
-		'analytics'              => array(),
-		'force_sanitization'     => false,
-		'accept_tree_shaking'    => false,
-		'disable_admin_bar'      => false,
-		'non_singular_supported' => true,
+		'theme_support'           => 'disabled',
+		'supported_post_types'    => array(),
+		'analytics'               => array(),
+		'force_sanitization'      => false,
+		'accept_tree_shaking'     => false,
+		'disable_admin_bar'       => false,
+		'all_templates_supported' => false,
+		'supported_templates'     => array(
+			'single',
+		),
 	);
 
 	/**

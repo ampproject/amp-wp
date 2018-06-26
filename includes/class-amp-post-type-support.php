@@ -94,6 +94,23 @@ class AMP_Post_Type_Support {
 			$errors[] = 'skip-post';
 		}
 
+		$query = new WP_Query();
+
+		$query->queried_object    = $post;
+		$query->queried_object_id = $post->ID;
+		if ( 'page' === $post->post_type ) {
+			$query->set( 'post_id', $post->ID );
+		} else {
+			$query->set( 'p', $post->ID );
+		}
+		$query->parse_query();
+
+		$availability = amp_get_availability( $query );
+		if ( ! $availability ) {
+			$errors[] = '';
+		}
+
+
 		return $errors;
 	}
 }

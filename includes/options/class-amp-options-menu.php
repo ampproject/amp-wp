@@ -99,13 +99,13 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'supported_queries',
-			__( 'Supported Queries', 'amp' ),
-			array( $this, 'render_supported_queries' ),
+			'supported_templates',
+			__( 'Supported Templates', 'amp' ),
+			array( $this, 'render_supported_templates' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
 			array(
-				'class' => 'amp-post-type-support-field',
+				'class' => 'amp-template-support-field',
 			)
 		);
 
@@ -272,23 +272,23 @@ class AMP_Options_Menu {
 	}
 
 	/**
-	 * Post types support section renderer.
+	 * Supported templates section renderer.
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 */
-	public function render_supported_queries() {
+	public function render_supported_templates() {
 		?>
 		<script>
 			jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
-				jQuery( 'fieldset.non_singular_supported' ).toggleClass( 'hidden', 'disabled' === this.value );
+				jQuery( 'fieldset.non_singular_supported, fieldset.all_templates_supported' ).toggleClass( 'hidden', 'disabled' === this.value );
 			} ).filter( ':checked' ).trigger( 'change' );
 		</script>
 
-		<fieldset class="non_singular_supported">
+		<fieldset class="all_templates_supported">
 			<p>
-				<label for="non_singular_supported">
-					<input id="non_singular_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[non_singular_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'non_singular_supported' ) ); ?>>
-					<?php esc_html_e( 'Serve non-singular templates as AMP.', 'amp' ); ?>
+				<label for="all_templates_supported">
+					<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'all_templates_supported' ) ); ?>>
+					<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
 				</label>
 			</p>
 			<p class="description">
@@ -302,10 +302,9 @@ class AMP_Options_Menu {
 			$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
 			?>
 			<legend>
-				<h2 class="title"><?php esc_html_e( 'Post Types', 'amp' ); ?></h2>
+				<h2 class="title"><?php esc_html_e( 'Single Templates', 'amp' ); ?></h2>
 			</legend>
 
-			<!-- TODO Checkbox to allow other queries -->
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<?php
 				$element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}";
@@ -329,6 +328,35 @@ class AMP_Options_Menu {
 			<?php endforeach; ?>
 			<p class="description">
 				<?php esc_html_e( 'Select the content types that you would like to be made available in AMP.', 'amp' ); ?>
+			</p>
+		</fieldset>
+
+		<?php
+		// This is inspired by Jetpack's Widget Conditions.
+		$templates = array(
+			'page' => array(
+				'front' => array(),
+				'posts' => array(),
+				'date'  => array(),
+			),
+			'author' => array(
+				'' => __( 'All author pages', 'amp' ),
+			),
+			'category' => array(
+				'' => __( 'All category pages', 'amp' ),
+			)
+		);
+		?>
+
+		<fieldset class="non_singular_supported">
+			<p>
+				<label for="non_singular_supported">
+					<input id="non_singular_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[non_singular_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'non_singular_supported' ) ); ?>>
+					<?php esc_html_e( 'Serve non-singular templates as AMP.', 'amp' ); ?>
+				</label>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'Non-singular means templates like categories, date archives, author pages, and so on.', 'amp' ); ?>
 			</p>
 		</fieldset>
 		<?php
