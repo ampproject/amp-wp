@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 0.7.1
+Stable tag: 0.7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.3
@@ -43,6 +43,14 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
 
 == Changelog ==
+
+= 0.7.2 (2018-06-27) =
+
+- Prevent plugins from outputting custom scripts in classic templates via `wp_print_scripts` action. See [#1225](https://github.com/Automattic/amp-wp/issues/1225), [#1227](https://github.com/Automattic/amp-wp/pull/1227). Props westonruter.
+- Display Schema.org image data for 'attachment' post type. See [#1157](https://github.com/Automattic/amp-wp/issues/1157), [#1176](https://github.com/Automattic/amp-wp/pull/1176). Props kienstra.
+- Output `alt` attribute in legacy templating gravatar image. See [#1179](https://github.com/Automattic/amp-wp/pull/1179). Props kienstra.
+
+See [0.7.2 milestone](https://github.com/Automattic/amp-wp/milestone/9?closed=1).
 
 = 0.7.1 (2018-05-23) =
 
