@@ -7,6 +7,8 @@
 
 /**
  * Test AMP_Script_Sanitizer.
+ *
+ * @covers AMP_Script_Sanitizer
  */
 class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 

@@ -28,7 +28,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		$noscripts = $this->dom->getElementsByTagName( 'noscript' );
 
 		for ( $i = $noscripts->length - 1; $i >= 0; $i-- ) {
-			$noscript = $noscripts[ $i ];
+			$noscript = $noscripts->item( $i );
 
 			// Skip AMP boilerplate.
 			if ( $noscript->firstChild instanceof DOMElement && $noscript->firstChild->hasAttribute( 'amp-boilerplate' ) ) {
