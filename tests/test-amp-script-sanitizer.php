@@ -37,7 +37,8 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Script_Sanitizer::sanitize()
 	 */
 	public function test_noscript_promotion( $source, $expected = null ) {
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );

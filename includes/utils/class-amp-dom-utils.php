@@ -82,13 +82,22 @@ class AMP_DOM_Utils {
 			 * When appearing in the head element, a noscript can cause the head to close prematurely
 			 * and the noscript gets moved to the body and anything after it which was in the head.
 			 * See <https://stackoverflow.com/questions/39013102/why-does-noscript-move-into-body-tag-instead-of-head-tag>.
+			 * This is limited to only running in the head element because this is where the problem lies,
+			 * and it is important for the AMP_Script_Sanitizer to be able to access the noscript elements
+			 * in the body otherwise.
 			 */
 			$document = preg_replace_callback(
-				'#<noscript[^>]*>.*?</noscript>#si',
-				function( $matches ) {
-					$placeholder = sprintf( '<!--noscript:%s-->', (string) wp_rand() );
-					AMP_DOM_Utils::$noscript_placeholder_comments[ $placeholder ] = $matches[0];
-					return $placeholder;
+				'#^.+?(?=<body)#is',
+				function( $head_matches ) {
+					return preg_replace_callback(
+						'#<noscript[^>]*>.*?</noscript>#si',
+						function( $noscript_matches ) {
+							$placeholder = sprintf( '<!--noscript:%s-->', (string) wp_rand() );
+							AMP_DOM_Utils::$noscript_placeholder_comments[ $placeholder ] = $noscript_matches[0];
+							return $placeholder;
+						},
+						$head_matches[0]
+					);
 				},
 				$document
 			);
