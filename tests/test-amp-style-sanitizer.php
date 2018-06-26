@@ -732,7 +732,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				<style>.sidebar2{ visibility:hidden }</style>
 				<style>.sidebar2.visible { display:block }</style>
 				<style>.nothing { visibility:hidden; }</style>
-				</style>
 			</head>
 			<body>
 				<amp-state id="mySidebar">
