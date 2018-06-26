@@ -895,6 +895,13 @@ class AMP_Invalid_URL_Post_Type {
 
 			if ( $post ) {
 				$redirect = get_edit_post_link( $post->ID, 'raw' );
+			} else {
+				$redirect = admin_url(
+					add_query_arg(
+						array( 'post_type' => self::POST_TYPE_SLUG ),
+						'edit.php'
+					)
+				);
 			}
 		}
 
