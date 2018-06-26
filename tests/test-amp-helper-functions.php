@@ -183,6 +183,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @covers \amp_register_default_scripts()
 	 * @covers \amp_filter_script_loader_tag()
+	 * @covers \amp_render_scripts()
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function test_script_registering() {
@@ -211,6 +212,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-latest.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-0.1.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
+		// Try rendering via amp_render_scripts() instead of amp_render_scripts(), which is how component scripts get added normally.
+		$output = amp_render_scripts( array(
+			'amp-mathml'    => true, // But already printed above.
+			'amp-carousel'  => 'https://cdn.ampproject.org/v0/amp-mustache-2.0.js',
+			'amp-accordion' => true,
+		) );
+		$this->assertNotContains( 'amp-mathml', $output, 'The amp-mathml component was already printed above.' );
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-latest.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Try some experimental component to ensure expected script attributes are added.
 		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', array( 'amp-runtime' ), null );
