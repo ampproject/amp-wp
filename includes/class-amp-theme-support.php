@@ -1133,32 +1133,8 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Allow for embed handlers to override the default extension version by defining a different URL.
-		foreach ( $amp_scripts as $handle => $value ) {
-			if ( is_string( $value ) && wp_script_is( $handle, 'registered' ) ) {
-				wp_scripts()->registered[ $handle ]->src = $value;
-			}
-		}
-
-		/*
-		 * Inject additional AMP component scripts which have been discovered by the sanitizers into the head.
-		 * This is adapted from wp_scripts()->do_items(), but it runs only the bare minimum required to output
-		 * the missing scripts, without allowing other filters to apply which may cause an invalid AMP response.
-		 */
-		$script_tags = '';
-		foreach ( array_diff( array_keys( $amp_scripts ), wp_scripts()->done ) as $handle ) {
-			if ( ! wp_script_is( $handle, 'registered' ) ) {
-				continue;
-			}
-			$script_dep   = wp_scripts()->registered[ $handle ];
-			$script_tags .= amp_filter_script_loader_tag(
-				sprintf(
-					"<script type='text/javascript' src='%s'></script>\n", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-					esc_url( $script_dep->src )
-				),
-				$handle
-			);
-		}
+		// Inject additional AMP component scripts which have been discovered by the sanitizers into the head.
+		$script_tags = amp_render_scripts( $amp_scripts );
 		if ( ! empty( $script_tags ) ) {
 			$response = preg_replace(
 				'#(?=</head>)#',

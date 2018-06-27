@@ -271,6 +271,53 @@ function amp_register_default_scripts( $wp_scripts ) {
 }
 
 /**
+ * Generate HTML for AMP scripts that have not yet been printed.
+ *
+ * This is adapted from `wp_scripts()->do_items()`, but it runs only the bare minimum required to output
+ * the missing scripts, without allowing other filters to apply which may cause an invalid AMP response.
+ * The HTML for the scripts is returned instead of being printed.
+ *
+ * @since 0.7.2
+ * @see WP_Scripts::do_items()
+ * @see AMP_Base_Embed_Handler::get_scripts()
+ * @see AMP_Base_Sanitizer::get_scripts()
+ *
+ * @param array $scripts Script handles mapped to URLs or true.
+ * @return string HTML for scripts tags that have not yet been done.
+ */
+function amp_render_scripts( $scripts ) {
+	$script_tags = '';
+
+	/*
+	 * Make sure the src is up to date. This allows for embed handlers to override the
+	 * default extension version by defining a different URL.
+	 */
+	foreach ( $scripts as $handle => $src ) {
+		if ( is_string( $src ) && wp_script_is( $handle, 'registered' ) ) {
+			wp_scripts()->registered[ $handle ]->src = $src;
+		}
+	}
+
+	foreach ( array_diff( array_keys( $scripts ), wp_scripts()->done ) as $handle ) {
+		if ( ! wp_script_is( $handle, 'registered' ) ) {
+			continue;
+		}
+
+		$script_dep   = wp_scripts()->registered[ $handle ];
+		$script_tags .= amp_filter_script_loader_tag(
+			sprintf(
+				"<script type='text/javascript' src='%s'></script>\n", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				esc_url( $script_dep->src )
+			),
+			$handle
+		);
+
+		wp_scripts()->done[] = $handle;
+	}
+	return $script_tags;
+}
+
+/**
  * Add AMP script attributes to enqueued scripts.
  *
  * @link https://core.trac.wordpress.org/ticket/12009
@@ -524,6 +571,8 @@ function amp_get_post_image_metadata( $post = null ) {
 
 	if ( has_post_thumbnail( $post->ID ) ) {
 		$post_image_id = get_post_thumbnail_id( $post->ID );
+	} elseif ( ( 'attachment' === $post->post_type ) && wp_attachment_is( 'image', $post ) ) {
+		$post_image_id = $post->ID;
 	} else {
 		$attached_image_ids = get_posts(
 			array(
