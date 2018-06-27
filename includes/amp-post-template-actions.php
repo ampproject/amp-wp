@@ -52,22 +52,13 @@ function amp_post_template_add_canonical( $amp_template ) {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_scripts( $amp_template ) {
-
-	// Just in case the runtime has been overridden by amp_post_template_data filter.
-	wp_scripts()->registered['amp-runtime']->src = $amp_template->get( 'amp_runtime_script' );
-
-	// Make sure any filtered extension script URLs get updated in registered scripts before printing.
-	$scripts = $amp_template->get( 'amp_component_scripts', array() );
-	foreach ( $scripts as $handle => $value ) {
-		if ( is_string( $value ) && wp_script_is( $handle, 'registered' ) ) {
-			wp_scripts()->registered[ $handle ]->src = $value;
-		}
-	}
-
-	wp_print_scripts( array_merge(
-		array( 'amp-runtime' ),
-		array_keys( $scripts )
-	) );
+	echo amp_render_scripts( array_merge(
+		array(
+			// Just in case the runtime has been overridden by amp_post_template_data filter.
+			'amp-runtime' => $amp_template->get( 'amp_runtime_script' ),
+		),
+		$amp_template->get( 'amp_component_scripts', array() )
+	) ); // WPCS: xss ok.
 }
 
 /**
