@@ -278,13 +278,7 @@ class AMP_Options_Menu {
 	 */
 	public function render_supported_templates() {
 		?>
-		<script>
-			jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
-				jQuery( 'fieldset.non_singular_supported, fieldset.all_templates_supported' ).toggleClass( 'hidden', 'disabled' === this.value );
-			} ).filter( ':checked' ).trigger( 'change' );
-		</script>
-
-		<fieldset class="all_templates_supported">
+		<fieldset id="all_templates_supported_fieldset">
 			<p>
 				<label for="all_templates_supported">
 					<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'all_templates_supported' ) ); ?>>
@@ -296,88 +290,85 @@ class AMP_Options_Menu {
 			</p>
 		</fieldset>
 
-		<fieldset>
-			<?php
-			$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
-			$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
-			?>
-			<legend>
-				<h4 class="title"><?php esc_html_e( 'Singular', 'amp' ); ?></h4>
-			</legend>
-
+		<fieldset id="singular_templates_fieldset">
+			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
+			<h4 class="title"><?php esc_html_e( 'Singular Templates', 'amp' ); ?></h4>
+			<ul>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
-				<?php
-				$element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}";
-				$is_builtin = in_array( $post_type->name, $builtin_support, true );
-				?>
-				<?php if ( $is_builtin ) : ?>
-					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $post_type->name ); ?>">
-				<?php endif; ?>
+				<li>
+				<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
 				<input
 					type="checkbox"
 					id="<?php echo esc_attr( $element_id ); ?>"
 					name="<?php echo esc_attr( $element_name ); ?>"
 					value="<?php echo esc_attr( $post_type->name ); ?>"
 					<?php checked( true, post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
-					<?php disabled( $is_builtin ); ?>
 					>
+				<!-- @todo Hidden to capture actual state? -->
 				<label for="<?php echo esc_attr( $element_id ); ?>">
 					<?php echo esc_html( $post_type->label ); ?>
 				</label>
-				<br>
+				</li>
 			<?php endforeach; ?>
-			<p class="description">
-				<?php esc_html_e( 'Select the content types that you would like to be made available in AMP.', 'amp' ); ?>
-			</p>
+			</ul>
 		</fieldset>
 
+		<fieldset id="non_singular_templates_fieldset">
+			<style>
+				#non_singular_templates_fieldset ul ul {
+					margin-left: 40px;
+				}
+			</style>
+			<h4 class="title"><?php esc_html_e( 'Non-Singular Templates', 'amp' ); ?></h4>
+			<?php self::list_template_conditional_options( AMP_Theme_Support::get_template_conditional_options() ); ?>
+		</fieldset>
+
+		<script>
+			(function ( $ ) {
+				var templateModeInputs, themeSupportDisabledInput, allTemplatesSupportedInput;
+				templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
+				themeSupportDisabledInput = $( '#theme_support_disabled' );
+				allTemplatesSupportedInput = $( '#all_templates_supported' );
+
+				function updateFieldsetVisibility() {
+					$( '#all_templates_supported_fieldset' ).toggleClass( 'hidden', themeSupportDisabledInput.prop( 'checked' ) );
+					$( '#singular_templates_fieldset' ).toggleClass( 'hidden', allTemplatesSupportedInput.prop( 'checked' ) && ! themeSupportDisabledInput.prop( 'checked' ) );
+					$( '#non_singular_templates_fieldset' ).toggleClass( 'hidden', allTemplatesSupportedInput.prop( 'checked' ) || themeSupportDisabledInput.prop( 'checked' ) );
+				}
+
+				templateModeInputs.on( 'change', updateFieldsetVisibility );
+				allTemplatesSupportedInput.on( 'click', updateFieldsetVisibility );
+				updateFieldsetVisibility();
+			})( jQuery );
+		</script>
 		<?php
-		// This is inspired by Jetpack's Widget Conditions.
-		// @todo We need to construct a WP_Query for each? There will neeed to
-		$templates = array(
-			'author'   => array(
-				'' => __( 'All author pages', 'amp' ),
-			),
-			'category' => array_merge(
-				array(
-					'' => __( 'All category pages', 'amp' ),
-				)
-			),
-			'tag'      => array_merge(
-				array(
-					'' => __( 'All tag pages', 'amp' ),
-				)
-			),
-			'date'     => array(
-				''      => __( 'All date archives', 'amp' ),
-				'day'   => __( 'Daily archives', 'amp' ),
-				'month' => __( 'Monthly archives', 'amp' ),
-				'year'  => __( 'Yearly archives', 'amp' ),
-			),
-			'page'     => array(
-				'front'   => __( 'Front page', 'amp' ),
-				'posts'   => __( 'Posts page', 'amp' ),
-				'archive' => __( 'Archive page', 'amp' ),
-				'404'     => __( '404 error page', 'amp' ),
-				'search'  => __( 'Search results', 'amp' ),
-			),
-			// @todo Post type archives.
-			// @todo Custom taxonomies.
-		);
+	}
 
+	/**
+	 * @param array $options Options.
+	 * @param bool $parent_checked
+	 */
+	private function list_template_conditional_options( $options, $parent_checked = false ) {
+		$element_name = AMP_Options_Manager::OPTION_NAME . '[supported_templates][]';
 		?>
+		<ul>
+			<?php foreach ( $options as $id => $option ) : ?>
+				<?php
+				$has_children = ! empty( $option['children'] );
+				$element_id   = AMP_Options_Manager::OPTION_NAME . '-supported-templates-' . $id;
+				?>
+				<li>
+					<input type="checkbox" id="<?php echo esc_attr( $element_id ); ?>" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $id ); ?>">
+					<label for="<?php echo esc_attr( $element_id ); ?>">
+						<?php echo esc_html( $option['label'] ); ?>
+					</label>
 
-		<fieldset class="non_singular_supported">
-			<p>
-				<label for="non_singular_supported">
-					<input id="non_singular_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[non_singular_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'non_singular_supported' ) ); ?>>
-					<?php esc_html_e( 'Serve non-singular templates as AMP.', 'amp' ); ?>
-				</label>
-			</p>
-			<p class="description">
-				<?php esc_html_e( 'Non-singular means templates like categories, date archives, author pages, and so on.', 'amp' ); ?>
-			</p>
-		</fieldset>
+					<?php if ( $has_children ) : ?>
+						<?php self::list_template_conditional_options( $option['children'] ); ?>
+					<?php endif; ?>
+				</li>
+			<?php endforeach; ?>
+		</ul>
 		<?php
 	}
 

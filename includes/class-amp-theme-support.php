@@ -450,6 +450,91 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Get conditionals which are used for determining availability.
+	 *
+	 * @return array Selections.
+	 */
+	public static function get_template_conditional_options() {
+		$templates = array(
+			'home'     => array(
+				'label'    => __( 'Homepage', 'amp' ),
+				'callback' => 'is_front_page',
+			),
+			'blog'     => array(
+				'label'    => __( 'Blog', 'amp' ),
+				'callback' => 'is_home',
+			),
+			'archives' => array(
+				'label'       => __( 'Archives', 'amp' ),
+				'description' => __( 'Including index pages for categories, tags, authors, and dates.', 'amp' ),
+				'callback'    => 'is_archive',
+				'children'    => array(
+					'author' => array(
+						'label'    => __( 'Author', 'amp' ),
+						'callback' => 'is_author',
+					),
+					'date'   => array(
+						'label'    => __( 'Date', 'amp' ),
+						'callback' => 'is_date',
+					),
+				),
+			),
+			'search'   => array(
+				'label'    => __( 'Search', 'amp' ),
+				'callback' => 'is_search',
+			),
+			'404'      => array(
+				'label'    => __( 'Not Found (404)', 'amp' ),
+				'callback' => 'is_404',
+			),
+			'other'    => array(
+				'label'    => __( 'Other', 'amp' ),
+				'callback' => '__return_true',
+			),
+		);
+
+		if ( taxonomy_exists( 'category' ) ) {
+			$templates['archives']['children']['category'] = array(
+				'label'    => get_taxonomy( 'category' )->labels->name,
+				'callback' => 'is_category',
+			);
+		}
+		if ( taxonomy_exists( 'post_tag' ) ) {
+			$templates['archives']['children']['tag'] = array(
+				'label'    => get_taxonomy( 'post_tag' )->labels->name,
+				'callback' => 'is_tag',
+			);
+		}
+		$taxonomy_args = array(
+			'_builtin'           => false,
+			'publicly_queryable' => true,
+		);
+		foreach ( get_taxonomies( $taxonomy_args, 'objects' ) as $taxonomy ) {
+			$templates['archives']['children'][ 'tax_' . $taxonomy->name ] = array(
+				'label'    => $taxonomy->labels->name,
+				'callback' => function ( WP_Query $query ) use ( $taxonomy ) {
+					return $query->is_tax( $taxonomy->name );
+				},
+			);
+		}
+
+		$post_type_args = array(
+			'has_archive'        => true,
+			'publicly_queryable' => true,
+		);
+		foreach ( get_post_types( $post_type_args, 'objects' ) as $post_type ) {
+			$templates['archives']['children'][ 'post_type_archive_' . $post_type->name ] = array(
+				'label'    => $post_type->labels->archives,
+				'callback' => function ( WP_Query $query ) use ( $post_type ) {
+					return $query->is_post_type_archive( $post_type->name );
+				},
+			);
+		}
+
+		return $templates;
+	}
+
+	/**
 	 * Register hooks.
 	 */
 	public static function add_hooks() {

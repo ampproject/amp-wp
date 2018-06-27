@@ -29,7 +29,7 @@ class AMP_Post_Type_Support {
 	public static function get_eligible_post_types() {
 		return array_merge(
 			self::get_builtin_supported_post_types(),
-			array( 'page' ),
+			array( 'page', 'attachment' ),
 			array_values( get_post_types(
 				array(
 					'public'   => true,

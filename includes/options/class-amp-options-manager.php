@@ -120,10 +120,10 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $new_options['theme_support'];
 		}
 
-		$options['force_sanitization']     = ! empty( $new_options['force_sanitization'] );
-		$options['accept_tree_shaking']    = ! empty( $new_options['accept_tree_shaking'] );
-		$options['disable_admin_bar']      = ! empty( $new_options['disable_admin_bar'] );
-		$options['non_singular_supported'] = ! empty( $new_options['non_singular_supported'] );
+		$options['force_sanitization']      = ! empty( $new_options['force_sanitization'] );
+		$options['accept_tree_shaking']     = ! empty( $new_options['accept_tree_shaking'] );
+		$options['disable_admin_bar']       = ! empty( $new_options['disable_admin_bar'] );
+		$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
 
 		// Validate post type support.
 		if ( isset( $new_options['supported_post_types'] ) ) {
