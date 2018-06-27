@@ -296,7 +296,6 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *         'template_dir' => 'my-amp-templates',
  *     ) );
  *
- * @todo Why do we even need this function?
  * @see \AMP_Theme_Support::is_paired_available()
  *
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
@@ -319,18 +318,9 @@ function amp_is_canonical() {
 		if ( ! empty( $args['template_dir'] ) ) {
 			return false;
 		}
-//
-//		// Otherwise, the available_callback dictates whether AMP is available.
-//		if ( isset( $args['available_callback'] ) && is_callable( $args['available_callback'] ) ) {
-//			return call_user_func( $args['available_callback'] );
-//		}
 	}
 	return true;
 }
-//
-//function amp_is_available() {
-//
-//}
 
 /**
  * Load classes.

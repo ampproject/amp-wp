@@ -292,7 +292,7 @@ class AMP_Options_Menu {
 				</label>
 			</p>
 			<p class="description">
-				<?php esc_html_e( 'Non-singular means templates like categories, date archives, author pages, and so on.', 'amp' ); ?>
+				<?php esc_html_e( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ); ?>
 			</p>
 		</fieldset>
 
@@ -302,7 +302,7 @@ class AMP_Options_Menu {
 			$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
 			?>
 			<legend>
-				<h2 class="title"><?php esc_html_e( 'Single Templates', 'amp' ); ?></h2>
+				<h4 class="title"><?php esc_html_e( 'Singular', 'amp' ); ?></h4>
 			</legend>
 
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
@@ -333,19 +333,38 @@ class AMP_Options_Menu {
 
 		<?php
 		// This is inspired by Jetpack's Widget Conditions.
+		// @todo We need to construct a WP_Query for each? There will neeed to
 		$templates = array(
-			'page' => array(
-				'front' => array(),
-				'posts' => array(),
-				'date'  => array(),
-			),
-			'author' => array(
+			'author'   => array(
 				'' => __( 'All author pages', 'amp' ),
 			),
-			'category' => array(
-				'' => __( 'All category pages', 'amp' ),
-			)
+			'category' => array_merge(
+				array(
+					'' => __( 'All category pages', 'amp' ),
+				)
+			),
+			'tag'      => array_merge(
+				array(
+					'' => __( 'All tag pages', 'amp' ),
+				)
+			),
+			'date'     => array(
+				''      => __( 'All date archives', 'amp' ),
+				'day'   => __( 'Daily archives', 'amp' ),
+				'month' => __( 'Monthly archives', 'amp' ),
+				'year'  => __( 'Yearly archives', 'amp' ),
+			),
+			'page'     => array(
+				'front'   => __( 'Front page', 'amp' ),
+				'posts'   => __( 'Posts page', 'amp' ),
+				'archive' => __( 'Archive page', 'amp' ),
+				'404'     => __( '404 error page', 'amp' ),
+				'search'  => __( 'Search results', 'amp' ),
+			),
+			// @todo Post type archives.
+			// @todo Custom taxonomies.
 		);
+
 		?>
 
 		<fieldset class="non_singular_supported">

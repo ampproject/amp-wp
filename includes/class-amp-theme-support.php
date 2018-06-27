@@ -337,7 +337,116 @@ class AMP_Theme_Support {
 		foreach ( self::$template_types as $template_type ) {
 			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
 		}
-		add_filter( 'template_include', array( __CLASS__, 'filter_amp_template_include' ), 100 );
+	}
+
+	/**
+	 * Locate the template for a given query.
+	 *
+	 * @param WP_Query $query Query.
+	 * @return string The template filename if one is located.
+	 */
+	public static function get_query_template( $query ) {
+		foreach ( self::$template_types as $template_type ) {
+			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
+		}
+
+		// phpcs:disable -- This is copied from wp-includes/template-loader.php
+		if     ( $query->is_embed()             && $template = get_embed_template()             ) :
+		elseif ( $query->is_404()               && $template = get_404_template()               ) :
+		elseif ( $query->is_search()            && $template = get_search_template()            ) :
+		elseif ( $query->is_front_page()        && $template = get_front_page_template()        ) :
+		elseif ( $query->is_home()              && $template = get_home_template()              ) :
+		elseif ( $query->is_post_type_archive() && $template = get_post_type_archive_template() ) :
+		elseif ( $query->is_tax()               && $template = get_taxonomy_template()          ) :
+		elseif ( $query->is_attachment()        && $template = get_attachment_template()        ) :
+		elseif ( $query->is_single()            && $template = get_single_template()            ) :
+		elseif ( $query->is_page()              && $template = get_page_template()              ) :
+		elseif ( $query->is_singular()          && $template = get_singular_template()          ) :
+		elseif ( $query->is_category()          && $template = get_category_template()          ) :
+		elseif ( $query->is_tag()               && $template = get_tag_template()               ) :
+		elseif ( $query->is_author()            && $template = get_author_template()            ) :
+		elseif ( $query->is_date()              && $template = get_date_template()              ) :
+		elseif ( $query->is_archive()           && $template = get_archive_template()           ) :
+		else :
+			$template = get_index_template();
+		endif;
+		// phpcs:enable
+
+		/** This filter is documented in wp-includes/template-loader.php */
+		$template = apply_filters( 'template_include', $template );
+
+		foreach ( self::$template_types as $template_type ) {
+			remove_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Determine template availability of AMP for the given query.
+	 *
+	 * This is not intended to return whether AMP is available for a _specific_ post. For that, use `post_supports_amp()`.
+	 *
+	 * @since 1.0
+	 * @global WP_Query $wp_query
+	 * @see post_supports_amp()
+	 *
+	 * @param WP_Query|WP_Post|null $query Query or queried post. If null then the global query will be used.
+	 * @return true|WP_Error True if template is available, WP_Error if otherwise.
+	 */
+	public static function get_template_availability( $query = null ) {
+		global $wp_query;
+
+		if ( $query instanceof WP_Post ) {
+			$post  = $query;
+			$query = new WP_Query();
+
+			$query->queried_object    = $post;
+			$query->queried_object_id = $post->ID;
+			if ( 'page' === $post->post_type ) {
+				$query->set( 'post_id', $post->ID );
+			} else {
+				$query->set( 'p', $post->ID );
+			}
+			$query->parse_query();
+		} elseif ( ! $query ) {
+			$query = $wp_query;
+		}
+
+		if ( ! ( $query instanceof WP_Query ) ) {
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'No WP_Query available.', 'amp' ), '1.0' );
+			return new WP_Error( 'no_query_available' );
+		}
+
+		if ( ! current_theme_supports( 'amp' ) ) {
+			return new WP_Error( 'no_theme_support' );
+		}
+
+		$args = get_theme_support( 'amp' );
+		if ( isset( $args[0]['available_callback'] ) && is_callable( $args[0]['available_callback'] ) ) {
+			$callback = $args[0]['available_callback'];
+
+			// If the available_callback is a method on the query, then call the method on the query itself.
+			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
+				$available = call_user_func( array( $query, $callback ) );
+			} else {
+				$available = call_user_func( $callback );
+			}
+			if ( false === $available ) {
+				return new WP_Error( 'unavailable_by_callback' );
+			}
+		}
+
+		// Make sure there is a template available for the query in the template_dir if it is defined..
+		if ( ! empty( $args[0]['template_dir'] ) ) {
+			$template = self::get_query_template( $query );
+			if ( empty( $template ) || ! file_exists( $template ) ) {
+				return new WP_Error( 'no_existing_template' );
+			}
+		}
+
+		// If all checks have passed, then the template is available.
+		return true;
 	}
 
 	/**
@@ -766,23 +875,6 @@ class AMP_Theme_Support {
 			$templates = $amp_templates;
 		}
 		return $templates;
-	}
-
-	/**
-	 * Redirect to the non-canonical URL when the template to include is empty.
-	 *
-	 * This is a failsafe in case an index.php is not located in the AMP template_dir,
-	 * and the available_callback fails to omit a given request from being available in AMP.
-	 *
-	 * @param string $template Template to include.
-	 * @return string Template to include.
-	 */
-	public static function filter_amp_template_include( $template ) {
-		if ( empty( $template ) ) {
-			wp_safe_redirect( self::get_current_canonical_url(), 302 ); // Temporary redirect because support may come later.
-			exit;
-		}
-		return $template;
 	}
 
 	/**

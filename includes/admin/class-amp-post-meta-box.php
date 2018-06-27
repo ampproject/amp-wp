@@ -170,8 +170,6 @@ class AMP_Post_Meta_Box {
 			is_post_type_viewable( $post->post_type )
 			&&
 			current_user_can( 'edit_post', $post->ID )
-			&&
-			! amp_is_canonical()
 		);
 
 		if ( true !== $verify ) {
