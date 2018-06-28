@@ -140,7 +140,7 @@ class AMP_Options_Manager {
 		if ( isset( $new_options['supported_templates'] ) ) {
 			$options['supported_templates'] = array_intersect(
 				$new_options['supported_templates'],
-				array_keys( AMP_Theme_Support::get_template_conditional_options() )
+				array_keys( AMP_Theme_Support::get_supportable_templates() )
 			);
 		}
 

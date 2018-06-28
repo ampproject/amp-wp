@@ -323,7 +323,7 @@ class AMP_Options_Menu {
 			</style>
 			<h4 class="title"><?php esc_html_e( 'Non-Singular Templates', 'amp' ); ?></h4>
 			<?php
-			self::list_template_conditional_options( AMP_Theme_Support::get_template_conditional_options() );
+			self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
 			?>
 			<script>
 				// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
@@ -390,6 +390,7 @@ class AMP_Options_Menu {
 						name="<?php echo esc_attr( $element_name ); ?>"
 						value="<?php echo esc_attr( $id ); ?>"
 						<?php checked( ! empty( $option['supported'] ) ); ?>
+						<?php disabled( ! empty( $option['immutable'] ) ); ?>
 					>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $option['label'] ); ?>

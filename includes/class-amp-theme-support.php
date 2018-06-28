@@ -380,6 +380,13 @@ class AMP_Theme_Support {
 		}
 
 		$args = get_theme_support( 'amp' );
+
+		// @todo All of this needs to be refactored.
+		$supported_templates = AMP_Theme_Support::get_supportable_templates();
+
+		// @todo For each $supported_templates, call the callback. Then for each callback that returns true, check if also 'supported'. If supported is false but there is a decendant that is true, then consider true.
+		// @todo A theme can prevent a template from being offered by filtering the. ELIMINATE available_callback.
+
 		if ( isset( $args[0]['available_callback'] ) && is_callable( $args[0]['available_callback'] ) ) {
 			$callback = $args[0]['available_callback'];
 
@@ -399,11 +406,11 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Get conditionals which are used for determining availability.
+	 * Get the templates which can be supported.
 	 *
-	 * @return array Selections.
+	 * @return array Supportable templates.
 	 */
-	public static function get_template_conditional_options() {
+	public static function get_supportable_templates() {
 		$templates = array(
 			'home'     => array(
 				'label'    => __( 'Homepage', 'amp' ),
@@ -484,9 +491,25 @@ class AMP_Theme_Support {
 			);
 		}
 
+		/**
+		 * Filters list of supportable templates.
+		 *
+		 * A theme or plugin can force a given template to be supported or not by preemptively
+		 * setting the 'supported' flag for a given template. Otherwise, if the flag is undefined
+		 * then the user will be able to toggle it themselves in the admin.
+		 *
+		 * @since 1.0
+		 *
+		 * @param array $templates Supportable templates.
+		 */
+		$templates = apply_filters( 'amp_supportable_templates', $templates );
+
 		$supported_templates = AMP_Options_Manager::get_option( 'supported_templates' );
 		foreach ( $templates as $id => &$template ) {
-			$template['supported'] = in_array( $id, $supported_templates, true );
+			$template['immutable'] = isset( $template['supported'] );
+			if ( ! $template['immutable'] ) {
+				$template['supported'] = in_array( $id, $supported_templates, true );
+			}
 		}
 
 		return $templates;
