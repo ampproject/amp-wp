@@ -340,49 +340,6 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Locate the template for a given query.
-	 *
-	 * @param WP_Query $query Query.
-	 * @return string The template filename if one is located.
-	 */
-	public static function get_query_template( $query ) {
-		foreach ( self::$template_types as $template_type ) {
-			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
-		}
-
-		// phpcs:disable -- This is copied from wp-includes/template-loader.php
-		if     ( $query->is_embed()             && $template = get_embed_template()             ) :
-		elseif ( $query->is_404()               && $template = get_404_template()               ) :
-		elseif ( $query->is_search()            && $template = get_search_template()            ) :
-		elseif ( $query->is_front_page()        && $template = get_front_page_template()        ) :
-		elseif ( $query->is_home()              && $template = get_home_template()              ) :
-		elseif ( $query->is_post_type_archive() && $template = get_post_type_archive_template() ) :
-		elseif ( $query->is_tax()               && $template = get_taxonomy_template()          ) :
-		elseif ( $query->is_attachment()        && $template = get_attachment_template()        ) :
-		elseif ( $query->is_single()            && $template = get_single_template()            ) :
-		elseif ( $query->is_page()              && $template = get_page_template()              ) :
-		elseif ( $query->is_singular()          && $template = get_singular_template()          ) :
-		elseif ( $query->is_category()          && $template = get_category_template()          ) :
-		elseif ( $query->is_tag()               && $template = get_tag_template()               ) :
-		elseif ( $query->is_author()            && $template = get_author_template()            ) :
-		elseif ( $query->is_date()              && $template = get_date_template()              ) :
-		elseif ( $query->is_archive()           && $template = get_archive_template()           ) :
-		else :
-			$template = get_index_template();
-		endif;
-		// phpcs:enable
-
-		/** This filter is documented in wp-includes/template-loader.php */
-		$template = apply_filters( 'template_include', $template );
-
-		foreach ( self::$template_types as $template_type ) {
-			remove_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
-		}
-
-		return $template;
-	}
-
-	/**
 	 * Determine template availability of AMP for the given query.
 	 *
 	 * This is not intended to return whether AMP is available for a _specific_ post. For that, use `post_supports_amp()`.
@@ -437,14 +394,6 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Make sure there is a template available for the query in the template_dir if it is defined..
-		if ( ! empty( $args[0]['template_dir'] ) ) {
-			$template = self::get_query_template( $query );
-			if ( empty( $template ) || ! file_exists( $template ) ) {
-				return new WP_Error( 'no_existing_template' );
-			}
-		}
-
 		// If all checks have passed, then the template is available.
 		return true;
 	}
@@ -469,12 +418,12 @@ class AMP_Theme_Support {
 				'description' => __( 'Including index pages for categories, tags, authors, and dates.', 'amp' ),
 				'callback'    => 'is_archive',
 			),
-			'author' => array(
+			'author'   => array(
 				'label'    => __( 'Author', 'amp' ),
 				'callback' => 'is_author',
 				'parent'   => 'archives',
 			),
-			'date'   => array(
+			'date'     => array(
 				'label'    => __( 'Date', 'amp' ),
 				'callback' => 'is_date',
 				'parent'   => 'archives',
@@ -953,8 +902,6 @@ class AMP_Theme_Support {
 	/**
 	 * Prepends template hierarchy with template_dir for AMP paired mode templates.
 	 *
-	 * @see get_query_template()
-	 *
 	 * @param array $templates Template hierarchy.
 	 * @return array Templates.
 	 */
@@ -964,7 +911,8 @@ class AMP_Theme_Support {
 		if ( isset( $args['template_dir'] ) ) {
 			$amp_templates = array();
 			foreach ( $templates as $template ) {
-				$amp_templates[] = $args['template_dir'] . '/' . $template;
+				$amp_templates[] = $args['template_dir'] . '/' . $template; // Let template_dir have precedence.
+				$amp_templates[] = $template;
 			}
 			$templates = $amp_templates;
 		}
