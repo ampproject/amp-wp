@@ -468,16 +468,16 @@ class AMP_Theme_Support {
 				'label'       => __( 'Archives', 'amp' ),
 				'description' => __( 'Including index pages for categories, tags, authors, and dates.', 'amp' ),
 				'callback'    => 'is_archive',
-				'children'    => array(
-					'author' => array(
-						'label'    => __( 'Author', 'amp' ),
-						'callback' => 'is_author',
-					),
-					'date'   => array(
-						'label'    => __( 'Date', 'amp' ),
-						'callback' => 'is_date',
-					),
-				),
+			),
+			'author' => array(
+				'label'    => __( 'Author', 'amp' ),
+				'callback' => 'is_author',
+				'parent'   => 'archives',
+			),
+			'date'   => array(
+				'label'    => __( 'Date', 'amp' ),
+				'callback' => 'is_date',
+				'parent'   => 'archives',
 			),
 			'search'   => array(
 				'label'    => __( 'Search', 'amp' ),
@@ -494,24 +494,28 @@ class AMP_Theme_Support {
 		);
 
 		if ( taxonomy_exists( 'category' ) ) {
-			$templates['archives']['children']['category'] = array(
+			$templates['tax[category]'] = array(
 				'label'    => get_taxonomy( 'category' )->labels->name,
 				'callback' => 'is_category',
+				'parent'   => 'archives',
 			);
 		}
 		if ( taxonomy_exists( 'post_tag' ) ) {
-			$templates['archives']['children']['tag'] = array(
+			$templates['tax[post_tag]'] = array(
 				'label'    => get_taxonomy( 'post_tag' )->labels->name,
 				'callback' => 'is_tag',
+				'parent'   => 'archives',
 			);
 		}
+
 		$taxonomy_args = array(
 			'_builtin'           => false,
 			'publicly_queryable' => true,
 		);
 		foreach ( get_taxonomies( $taxonomy_args, 'objects' ) as $taxonomy ) {
-			$templates['archives']['children'][ 'tax_' . $taxonomy->name ] = array(
+			$templates[ sprintf( 'tax[%s]', $taxonomy->name ) ] = array(
 				'label'    => $taxonomy->labels->name,
+				'parent'   => 'archives',
 				'callback' => function ( WP_Query $query ) use ( $taxonomy ) {
 					return $query->is_tax( $taxonomy->name );
 				},
@@ -523,12 +527,17 @@ class AMP_Theme_Support {
 			'publicly_queryable' => true,
 		);
 		foreach ( get_post_types( $post_type_args, 'objects' ) as $post_type ) {
-			$templates['archives']['children'][ 'post_type_archive_' . $post_type->name ] = array(
+			$templates[ sprintf( 'post_type_archive[%s]', $post_type->name ) ] = array(
 				'label'    => $post_type->labels->archives,
 				'callback' => function ( WP_Query $query ) use ( $post_type ) {
 					return $query->is_post_type_archive( $post_type->name );
 				},
 			);
+		}
+
+		$supported_templates = AMP_Options_Manager::get_option( 'supported_templates' );
+		foreach ( $templates as $id => &$template ) {
+			$template['supported'] = in_array( $id, $supported_templates, true );
 		}
 
 		return $templates;

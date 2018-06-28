@@ -322,7 +322,9 @@ class AMP_Options_Menu {
 				}
 			</style>
 			<h4 class="title"><?php esc_html_e( 'Non-Singular Templates', 'amp' ); ?></h4>
-			<?php self::list_template_conditional_options( AMP_Theme_Support::get_template_conditional_options() ); ?>
+			<?php
+			self::list_template_conditional_options( AMP_Theme_Support::get_template_conditional_options() );
+			?>
 			<script>
 				// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
 				(function ( $ ) {
@@ -365,27 +367,35 @@ class AMP_Options_Menu {
 	}
 
 	/**
-	 * @param array $options Options.
-	 * @param bool $parent_checked
+	 * List template conditional options.
+	 *
+	 * @param array       $options Options.
+	 * @param string|null $parent  ID of the parent option.
 	 */
-	private function list_template_conditional_options( $options, $parent_checked = false ) {
+	private function list_template_conditional_options( $options, $parent = null ) {
 		$element_name = AMP_Options_Manager::OPTION_NAME . '[supported_templates][]';
 		?>
 		<ul>
 			<?php foreach ( $options as $id => $option ) : ?>
 				<?php
-				$has_children = ! empty( $option['children'] );
-				$element_id   = AMP_Options_Manager::OPTION_NAME . '-supported-templates-' . $id;
+				$element_id = AMP_Options_Manager::OPTION_NAME . '-supported-templates-' . $id;
+				if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
+					continue;
+				}
 				?>
 				<li>
-					<input type="checkbox" id="<?php echo esc_attr( $element_id ); ?>" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $id ); ?>">
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $element_id ); ?>"
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $id ); ?>"
+						<?php checked( ! empty( $option['supported'] ) ); ?>
+					>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $option['label'] ); ?>
 					</label>
 
-					<?php if ( $has_children ) : ?>
-						<?php self::list_template_conditional_options( $option['children'] ); ?>
-					<?php endif; ?>
+					<?php self::list_template_conditional_options( $options, $id ); ?>
 				</li>
 			<?php endforeach; ?>
 		</ul>

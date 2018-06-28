@@ -29,10 +29,8 @@ class AMP_Options_Manager {
 		'force_sanitization'      => false,
 		'accept_tree_shaking'     => false,
 		'disable_admin_bar'       => false,
-		'all_templates_supported' => false,
-		'supported_templates'     => array(
-			'single',
-		),
+		'all_templates_supported' => true,
+		'supported_templates'     => array(),
 	);
 
 	/**
@@ -135,6 +133,15 @@ class AMP_Options_Manager {
 					$options['supported_post_types'][] = $post_type;
 				}
 			}
+		}
+
+		// Validate supported templates.
+		$options['supported_templates'] = array();
+		if ( isset( $new_options['supported_templates'] ) ) {
+			$options['supported_templates'] = array_intersect(
+				$new_options['supported_templates'],
+				array_keys( AMP_Theme_Support::get_template_conditional_options() )
+			);
 		}
 
 		// Validate analytics.
