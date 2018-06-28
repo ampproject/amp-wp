@@ -293,6 +293,9 @@ class AMP_Options_Menu {
 		<fieldset id="singular_templates_fieldset">
 			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
 			<h4 class="title"><?php esc_html_e( 'Singular Templates', 'amp' ); ?></h4>
+			<p>
+				<?php esc_html_e( 'The following content types will be available as AMP by default, but you can override this on an item-by-item basis:', 'amp' ); ?>
+			</p>
 			<ul>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<li>
@@ -304,7 +307,6 @@ class AMP_Options_Menu {
 					value="<?php echo esc_attr( $post_type->name ); ?>"
 					<?php checked( true, post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
 					>
-				<!-- @todo Hidden to capture actual state? -->
 				<label for="<?php echo esc_attr( $element_id ); ?>">
 					<?php echo esc_html( $post_type->label ); ?>
 				</label>
@@ -321,9 +323,18 @@ class AMP_Options_Menu {
 			</style>
 			<h4 class="title"><?php esc_html_e( 'Non-Singular Templates', 'amp' ); ?></h4>
 			<?php self::list_template_conditional_options( AMP_Theme_Support::get_template_conditional_options() ); ?>
+			<script>
+				// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
+				(function ( $ ) {
+					$( '#non_singular_templates_fieldset input[type=checkbox]' ).on( 'click', function() {
+						$( this ).siblings( 'ul' ).find( 'input[type=checkbox]' ).prop( 'checked', this.checked );
+					} );
+				})( jQuery );
+			</script>
 		</fieldset>
 
 		<script>
+			// Update the visibility of the fieldsets based on the selected template mode and then whether all templates are indicated to be supported.
 			(function ( $ ) {
 				var templateModeInputs, themeSupportDisabledInput, allTemplatesSupportedInput;
 				templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
@@ -331,9 +342,18 @@ class AMP_Options_Menu {
 				allTemplatesSupportedInput = $( '#all_templates_supported' );
 
 				function updateFieldsetVisibility() {
-					$( '#all_templates_supported_fieldset' ).toggleClass( 'hidden', themeSupportDisabledInput.prop( 'checked' ) );
-					$( '#singular_templates_fieldset' ).toggleClass( 'hidden', allTemplatesSupportedInput.prop( 'checked' ) && ! themeSupportDisabledInput.prop( 'checked' ) );
-					$( '#non_singular_templates_fieldset' ).toggleClass( 'hidden', allTemplatesSupportedInput.prop( 'checked' ) || themeSupportDisabledInput.prop( 'checked' ) );
+					$( '#all_templates_supported_fieldset, #singular_templates_fieldset > .title' ).toggleClass(
+						'hidden',
+						themeSupportDisabledInput.prop( 'checked' )
+					);
+					$( '#singular_templates_fieldset' ).toggleClass(
+						'hidden',
+						allTemplatesSupportedInput.prop( 'checked' ) && ! themeSupportDisabledInput.prop( 'checked' )
+					);
+					$( '#non_singular_templates_fieldset' ).toggleClass(
+						'hidden',
+						allTemplatesSupportedInput.prop( 'checked' ) || themeSupportDisabledInput.prop( 'checked' )
+					);
 				}
 
 				templateModeInputs.on( 'change', updateFieldsetVisibility );

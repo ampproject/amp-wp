@@ -23,15 +23,6 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_builtin_supported_post_types.
-	 *
-	 * @covers AMP_Post_Type_Support::get_builtin_supported_post_types()
-	 */
-	public function test_get_builtin_supported_post_types() {
-		$this->assertEquals( array( 'post' ), AMP_Post_Type_Support::get_builtin_supported_post_types() );
-	}
-
-	/**
 	 * Test get_eligible_post_types.
 	 *
 	 * @covers AMP_Post_Type_Support::get_eligible_post_types()
@@ -46,10 +37,11 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			'public' => false,
 		) );
 
-		$this->assertEquals(
+		$this->assertEqualSets(
 			array(
 				'post',
 				'page',
+				'attachment',
 				'book',
 			),
 			AMP_Post_Type_Support::get_eligible_post_types()

@@ -14,9 +14,11 @@ class AMP_Post_Type_Support {
 	/**
 	 * Get post types that plugin supports out of the box (which cannot be disabled).
 	 *
+	 * @deprecated
 	 * @return string[] Post types.
 	 */
 	public static function get_builtin_supported_post_types() {
+		_deprecated_function( __METHOD__, '1.0' );
 		return array_filter( array( 'post' ), 'post_type_exists' );
 	}
 
@@ -27,17 +29,12 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types eligible for AMP.
 	 */
 	public static function get_eligible_post_types() {
-		return array_merge(
-			self::get_builtin_supported_post_types(),
-			array( 'page', 'attachment' ),
-			array_values( get_post_types(
-				array(
-					'public'   => true,
-					'_builtin' => false,
-				),
-				'names'
-			) )
-		);
+		return array_values( get_post_types(
+			array(
+				'public' => true,
+			),
+			'names'
+		) );
 	}
 
 	/**
@@ -49,10 +46,11 @@ class AMP_Post_Type_Support {
 	 * @since 0.6
 	 */
 	public static function add_post_type_support() {
-		$post_types = array_merge(
-			self::get_builtin_supported_post_types(),
-			AMP_Options_Manager::get_option( 'supported_post_types', array() )
-		);
+		if ( current_theme_supports( 'amp' ) && AMP_Options_Manager::get_option( 'all_templates_supported' ) ) {
+			$post_types = self::get_eligible_post_types();
+		} else {
+			$post_types = AMP_Options_Manager::get_option( 'supported_post_types', array() );
+		}
 		foreach ( $post_types as $post_type ) {
 			add_post_type_support( $post_type, amp_get_slug() );
 		}
@@ -72,8 +70,7 @@ class AMP_Post_Type_Support {
 		}
 		$errors = array();
 
-		// Because `add_rewrite_endpoint` doesn't let us target specific post_types.
-		if ( isset( $post->post_type ) && ! post_type_supports( $post->post_type, amp_get_slug() ) ) {
+		if ( ! post_type_supports( $post->post_type, amp_get_slug() ) ) {
 			$errors[] = 'post-type-support';
 		}
 

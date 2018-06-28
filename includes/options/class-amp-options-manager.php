@@ -24,7 +24,7 @@ class AMP_Options_Manager {
 	 */
 	protected static $defaults = array(
 		'theme_support'           => 'disabled',
-		'supported_post_types'    => array(),
+		'supported_post_types'    => array( 'post' ),
 		'analytics'               => array(),
 		'force_sanitization'      => false,
 		'accept_tree_shaking'     => false,
@@ -126,8 +126,8 @@ class AMP_Options_Manager {
 		$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
 
 		// Validate post type support.
+		$options['supported_post_types'] = array();
 		if ( isset( $new_options['supported_post_types'] ) ) {
-			$options['supported_post_types'] = array();
 			foreach ( $new_options['supported_post_types'] as $post_type ) {
 				if ( ! post_type_exists( $post_type ) ) {
 					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
@@ -192,11 +192,10 @@ class AMP_Options_Manager {
 	 * @see add_settings_error()
 	 */
 	public static function check_supported_post_type_update_errors() {
-		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
 		$supported_types = self::get_option( 'supported_post_types', array() );
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
 			$post_type = get_post_type_object( $name );
-			if ( empty( $post_type ) || in_array( $post_type->name, $builtin_support, true ) ) {
+			if ( empty( $post_type ) ) {
 				continue;
 			}
 
