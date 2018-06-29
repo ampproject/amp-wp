@@ -239,54 +239,10 @@ function amp_add_amphtml_link() {
  * @see   AMP_Post_Type_Support::get_support_errors()
  *
  * @param WP_Post $post Post.
- *
  * @return bool Whether the post supports AMP.
  */
 function post_supports_amp( $post ) {
-	$errors = AMP_Post_Type_Support::get_support_errors( $post );
-
-	// Return false if an error is found.
-	if ( ! empty( $errors ) ) {
-		return false;
-	}
-
-	switch ( get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
-		case AMP_Post_Meta_Box::ENABLED_STATUS:
-			return true;
-
-		case AMP_Post_Meta_Box::DISABLED_STATUS:
-			return false;
-
-		/*
-		 * Disabled by default for custom page templates, page on front and page for posts, unless 'amp' theme
-		 * support is present (in which case AMP_Theme_Support::get_template_availability() determines availability).
-		 */
-		default:
-			$enabled = current_theme_supports( 'amp' ) || (
-				! (bool) get_page_template_slug( $post )
-				&&
-				! (
-					'page' === $post->post_type
-					&&
-					'page' === get_option( 'show_on_front' )
-					&&
-					in_array( (int) $post->ID, array(
-						(int) get_option( 'page_on_front' ),
-						(int) get_option( 'page_for_posts' ),
-					), true )
-				)
-			);
-
-			/**
-			 * Filters whether default AMP status should be enabled or not.
-			 *
-			 * @since 0.6
-			 *
-			 * @param string  $status Status.
-			 * @param WP_Post $post   Post.
-			 */
-			return apply_filters( 'amp_post_status_default_enabled', $enabled, $post );
-	}
+	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
 }
 
 /**
@@ -299,6 +255,7 @@ function post_supports_amp( $post ) {
  * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
+	global $wp_query;
 	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 		return false;
 	}
@@ -326,7 +283,7 @@ function is_amp_endpoint() {
 	} else {
 
 		// Check if the queried object supports AMP.
-		if ( is_singular() ) {
+		if ( is_singular() || ( $wp_query instanceof WP_Query && $wp_query->is_posts_page ) ) {
 			/**
 			 * Post.
 			 *

@@ -274,29 +274,34 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 /**
  * Whether this is in 'canonical mode'.
  *
- * Themes can register support for this with `add_theme_support( 'amp' )`, or via the
- * following so that only so that single blog posts will be native/canonical, pages are paired,
- * and everything else has AMP unavailable:
+ * Themes can register support for this with `add_theme_support( 'amp' )`:
+ *
+ *      add_theme_support( 'amp' );
+ *
+ * This will serve templates in native AMP by default but the user would be able to change the template mode
+ * from native to paired in the admin. To force only native to be available, such as when you are using AMP components
+ * in your theme templates, do:
  *
  *      add_theme_support( 'amp', array(
- *          'available_callback' => 'is_single',
+ *          'mode' => 'native',
  *      ) );
  *
- * Then, this will change the plugin so that it won't run in 'paired mode' with separate URLs.
- * Neither will it output the rel=amphtml link on the frontend. To serve a site in paired mode, add the paired arg:
+ * If you want to force AMP to always be served on a given template, use the amp_supportable_templates filter,
+ * for example to always serve the Category template in AMP:
  *
- *      add_theme_support( 'amp', array(
- *          'paired' => true,
- *          'available_callback' => 'is_single',
- *      ) );
+ *      add_filter( 'amp_supportable_templates', function( $templates ) {
+ *          $templates['is_category']['supported'] = true;
+ *          return $template;
+ *      } );
  *
- * Paired mode will also be retained if the theme registers support for AMP with just a template_dir and no available_callback:
+ * Or if you want to prevent AMP from ever being served on the homepage:
  *
- *     add_theme_support( 'amp', array(
- *         'template_dir' => 'my-amp-templates',
- *     ) );
+ *      add_filter( 'amp_supportable_templates', function( $templates ) {
+ *          $templates['is_front_page']['supported'] = false;
+ *          return $template;
+ *      } );
  *
- * @see \AMP_Theme_Support::is_paired_available()
+ * @todo There needs to be a required flag which is the same as forcing all to be supported. This would be the same in the UI as the all_templates_supported flag. Might as well rename all_templates_supported to just required. If required is set to be false, or if any of the supported templates are immutable, then this option should not be available.
  *
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
@@ -305,25 +310,17 @@ function amp_is_canonical() {
 		return false;
 	}
 
+	$mode    = 'native';
 	$support = get_theme_support( 'amp' );
-	if ( true === $support ) {
-		return true;
-	}
-
 	if ( is_array( $support ) ) {
 		$args = array_shift( $support );
-
-		// If paired arg is supplied, then it is never canonical.
-		if ( isset( $args['paired'] ) ) {
-			return ! $args['paired'];
-		}
-
-		// If there is a template_dir, then paired mode is implied.
-		if ( ! empty( $args['template_dir'] ) ) {
-			return false;
+		if ( isset( $args['mode'] ) ) {
+			$mode = $args['mode'];
+		} elseif ( ! empty( $args['template_dir'] ) ) {
+			$mode = 'paired'; // If there is a template_dir, then paired mode is implied.
 		}
 	}
-	return true;
+	return 'native' === $mode;
 }
 
 /**

@@ -91,6 +91,14 @@ class AMP_Theme_Support {
 	protected static $is_output_buffering = false;
 
 	/**
+	 * Theme support options that were added via option.
+	 *
+	 * @since 1.0
+	 * @var false|array
+	 */
+	protected static $support_added_via_option = false;
+
+	/**
 	 * Initialize.
 	 *
 	 * @since 0.7
@@ -118,7 +126,7 @@ class AMP_Theme_Support {
 			$args = array_shift( $support );
 			if ( ! is_array( $args ) ) {
 				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', 'paired', '__added_via_option' ) ) ) !== 0 ) {
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', 'mode', 'optional' ) ) ) !== 0 ) {
 				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
@@ -134,23 +142,55 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Determine whether theme support as added via option.
+	 *
+	 * @since 1.0
+	 * @return bool Optional support added.
+	 */
+	public static function is_support_added_via_option() {
+		return false !== self::$support_added_via_option;
+	}
+
+	/**
 	 * Apply options for whether theme support is enabled via admin and what sanitization is performed by default.
 	 *
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
 	 */
 	public static function apply_options() {
+		self::$support_added_via_option = false;
+
+		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+		$theme_support_args   = false;
+
+		// @todo Do we really need this optional flag? Yes. As it allows us to define the mode. Maybe it should be 'required' instead. Key for theme marketplaces? But if a theme is using the AMP features anyway, then it should have AMP as built-in and not be optional.
+
+		// If theme support is present in the theme, but it is marked as optional, then go ahead and remove it if theme support is not enabled in the admin.
+		if ( current_theme_supports( 'amp' ) ) {
+			$support            = get_theme_support( 'amp' );
+			$theme_support_args = array();
+			if ( is_array( $support ) ) {
+				$theme_support_args = array_shift( $support );
+				if ( ! empty( $theme_support_args['optional'] ) && 'disabled' === $theme_support_option ) {
+					remove_theme_support( 'amp' );
+					return;
+				}
+			}
+		}
+
+		// If theme support is not present, then allow it to be added via the admin.
 		if ( ! current_theme_supports( 'amp' ) ) {
-			$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
 			if ( 'disabled' === $theme_support_option ) {
 				return;
 			}
 
-			$args = array(
-				'__added_via_option' => true,
-				'paired'             => ( 'paired' === $theme_support_option ),
+			$option_args = array(
+				'mode' => $theme_support_option,
 			);
-			add_theme_support( 'amp', $args );
+			add_theme_support( 'amp', array_merge( $option_args, $theme_support_args ) );
+			self::$support_added_via_option = $option_args;
 		}
+
+		// @todo Allow paired mode to be switched via option if optional flag is true?
 	}
 
 	/**
@@ -404,15 +444,20 @@ class AMP_Theme_Support {
 		}
 
 		// For singular queries, post_supports_amp() is given the final say.
-		if ( $query->is_singular() ) {
+		if ( $query->is_singular() || $query->is_posts_page ) {
 			/**
 			 * Queried object.
 			 *
 			 * @var WP_Post $queried_object
 			 */
 			$queried_object = $query->get_queried_object();
-			if ( ! post_supports_amp( $queried_object ) ) {
-				return new WP_Error( 'post_lacks_amp_support' );
+			$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
+			if ( ! empty( $support_errors ) ) {
+				$error = new WP_Error();
+				foreach ( $support_errors as $support_error ) {
+					$error->add( $support_error, '' );
+				}
+				return $error;
 			}
 		}
 
@@ -428,16 +473,35 @@ class AMP_Theme_Support {
 	 */
 	public static function get_supportable_templates() {
 		$templates = array(
-			'is_front_page' => array(
-				'label' => __( 'Homepage', 'amp' ),
+			'is_singular' => array(
+				'label' => __( 'Singular', 'amp' ),
+				// This needs to default to true.
 			),
 		);
 		if ( 'page' === get_option( 'show_on_front' ) ) {
-			// In other words, same as is_posts_page.
+			$templates['is_front_page'] = array(
+				'label'  => __( 'Homepage', 'amp' ),
+				'parent' => 'is_singular',
+			);
+			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_on_front' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
+				/* translators: %s is the URL to the edit post screen */
+				$templates['is_front_page']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_on_front' ) ) ) );
+			}
+
+			// In other words, same as is_posts_page, *but* it not is_singular.
 			$templates['is_home'] = array(
 				'label' => __( 'Blog', 'amp' ),
 			);
+			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_for_posts' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
+				/* translators: %s is the URL to the edit post screen */
+				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
+			}
+		} else {
+			$templates['is_home'] = array(
+				'label' => __( 'Homepage', 'amp' ),
+			);
 		}
+
 		$templates = array_merge(
 			$templates,
 			array(

@@ -91,6 +91,48 @@ class AMP_Post_Type_Support {
 			$errors[] = 'skip-post';
 		}
 
+		$status = get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true );
+		if ( $status ) {
+			if ( AMP_Post_Meta_Box::DISABLED_STATUS === $status ) {
+				$errors[] = 'post-status-disabled';
+			}
+		} else {
+			/*
+			 * Disabled by default for custom page templates, page on front and page for posts, unless 'amp' theme
+			 * support is present (in which case AMP_Theme_Support::get_template_availability() determines availability).
+			 */
+			$enabled = (
+				current_theme_supports( 'amp' )
+				||
+				(
+					! (bool) get_page_template_slug( $post )
+					&&
+					! (
+						'page' === $post->post_type
+						&&
+						'page' === get_option( 'show_on_front' )
+						&&
+						in_array( (int) $post->ID, array(
+							(int) get_option( 'page_on_front' ),
+							(int) get_option( 'page_for_posts' ),
+						), true )
+					)
+				)
+			);
+
+			/**
+			 * Filters whether default AMP status should be enabled or not.
+			 *
+			 * @since 0.6
+			 *
+			 * @param string  $status Status.
+			 * @param WP_Post $post   Post.
+			 */
+			$enabled = apply_filters( 'amp_post_status_default_enabled', $enabled, $post );
+			if ( ! $enabled ) {
+				$errors[] = 'post-status-disabled';
+			}
+		}
 		return $errors;
 	}
 }

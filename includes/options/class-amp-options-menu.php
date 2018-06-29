@@ -132,7 +132,7 @@ class AMP_Options_Menu {
 		$theme_support_mutable = (
 			empty( $support_args )
 			||
-			! empty( $support_args[0]['__added_via_option'] )
+			AMP_Theme_Support::is_support_added_via_option()
 		);
 
 		// @todo Consider $theme_support['paired'] and if set, and true, only show Paired option; otherwise, show Native option.
@@ -387,6 +387,12 @@ class AMP_Options_Menu {
 				if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
 					continue;
 				}
+
+				// Skip showing an option if it doesn't have a label.
+				if ( empty( $option['label'] ) ) {
+					continue;
+				}
+
 				?>
 				<li>
 					<input
@@ -403,7 +409,7 @@ class AMP_Options_Menu {
 
 					<?php if ( ! empty( $option['description'] ) ) : ?>
 						<span class="description">
-							&mdash; <?php echo esc_html( $option['description'] ); ?>
+							&mdash; <?php echo wp_kses_post( $option['description'] ); ?>
 						</span>
 					<?php endif; ?>
 

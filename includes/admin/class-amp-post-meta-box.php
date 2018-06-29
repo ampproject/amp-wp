@@ -177,29 +177,26 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$status = post_supports_amp( $post ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
 		$errors = AMP_Post_Type_Support::get_support_errors( $post );
+		$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+		$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
 
-		// @todo This logic is duplicated with get_template_availability().
-		// @todo It would really be ideal if we could get_template_availability() here to support custom special cases.
+		// @todo If ! supported and immutable, don't show the toggle at all?
 		// Handle special case of the static front page or page for posts.
-		if ( current_theme_supports( 'amp' ) && 'page' === get_option( 'show_on_front' ) ) {
-			$supportable_templates = AMP_Theme_Support::get_supportable_templates();
-			$is_template_supported = false;
-			if ( (int) get_option( 'page_on_front' ) === (int) $post->ID ) {
-				$is_template_supported = (
-					! empty( $supportable_templates['is_front_page']['supported'] )
-					||
-					( empty( $supportable_templates['is_front_page']['immutable'] ) && AMP_Options_Manager::get_option( 'all_templates_supported' ) )
-				);
-			} elseif ( (int) get_option( 'page_for_posts' ) === (int) $post->ID ) {
-				$is_template_supported = (
-					! empty( $supportable_templates['is_home']['supported'] )
-					||
-					( empty( $supportable_templates['is_home']['immutable'] ) && AMP_Options_Manager::get_option( 'all_templates_supported' ) )
-				);
+		if ( current_theme_supports( 'amp' ) ) {
+
+			$query = new WP_Query();
+			if ( 'page' === $post->post_type ) {
+				$query->set( 'page_id', $post->ID );
+			} else {
+				$query->set( 'p', $post->ID );
 			}
-			if ( ! $is_template_supported ) {
+			$query->queried_object    = $post;
+			$query->queried_object_id = $post->ID;
+			$query->parse_query_vars();
+
+			$availability = AMP_Theme_Support::get_template_availability( $query );
+			if ( $availability instanceof WP_Error && 0 !== count( array_diff( $availability->get_error_codes(), $errors, array( 'post-status-disabled' ) ) ) ) {
 				$errors[] = 'template-unavailable';
 				$status   = self::DISABLED_STATUS;
 			}
