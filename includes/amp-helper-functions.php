@@ -257,7 +257,10 @@ function post_supports_amp( $post ) {
 		case AMP_Post_Meta_Box::DISABLED_STATUS:
 			return false;
 
-		// Disabled by default for custom page templates, page on front and page for posts, unless 'amp' theme support is present.
+		/*
+		 * Disabled by default for custom page templates, page on front and page for posts, unless 'amp' theme
+		 * support is present (in which case AMP_Theme_Support::get_template_availability() determines availability).
+		 */
 		default:
 			$enabled = current_theme_supports( 'amp' ) || (
 				! (bool) get_page_template_slug( $post )

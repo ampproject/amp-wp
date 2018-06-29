@@ -176,8 +176,34 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$errors = AMP_Post_Type_Support::get_support_errors( $post );
 		$status = post_supports_amp( $post ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+		$errors = AMP_Post_Type_Support::get_support_errors( $post );
+
+		// @todo This logic is duplicated with get_template_availability().
+		// @todo It would really be ideal if we could get_template_availability() here to support custom special cases.
+		// Handle special case of the static front page or page for posts.
+		if ( current_theme_supports( 'amp' ) && 'page' === get_option( 'show_on_front' ) ) {
+			$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+			$is_template_supported = false;
+			if ( (int) get_option( 'page_on_front' ) === (int) $post->ID ) {
+				$is_template_supported = (
+					! empty( $supportable_templates['is_front_page']['supported'] )
+					||
+					( empty( $supportable_templates['is_front_page']['immutable'] ) && AMP_Options_Manager::get_option( 'all_templates_supported' ) )
+				);
+			} elseif ( (int) get_option( 'page_for_posts' ) === (int) $post->ID ) {
+				$is_template_supported = (
+					! empty( $supportable_templates['is_home']['supported'] )
+					||
+					( empty( $supportable_templates['is_home']['immutable'] ) && AMP_Options_Manager::get_option( 'all_templates_supported' ) )
+				);
+			}
+			if ( ! $is_template_supported ) {
+				$errors[] = 'template-unavailable';
+				$status   = self::DISABLED_STATUS;
+			}
+		}
+
 		$labels = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),

@@ -134,6 +134,9 @@ class AMP_Options_Menu {
 			||
 			! empty( $support_args[0]['__added_via_option'] )
 		);
+
+		// @todo Consider $theme_support['paired'] and if set, and true, only show Paired option; otherwise, show Native option.
+		// @todo Change $theme_support_mutable to be if ! empty( $theme_support['optional'] ) or ! $theme_support['required']?
 		if ( ! $theme_support_mutable ) {
 			if ( amp_is_canonical() ) {
 				$theme_support = 'native';
@@ -277,6 +280,8 @@ class AMP_Options_Menu {
 	 * @since 1.0
 	 */
 	public function render_supported_templates() {
+
+		// @todo If AMP theme support is native and required, let all_templates_supported be true? Maybe template support could have an all_templates_supported flag?
 		?>
 		<fieldset id="all_templates_supported_fieldset">
 			<p>
@@ -299,17 +304,17 @@ class AMP_Options_Menu {
 			<ul>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<li>
-				<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
-				<input
-					type="checkbox"
-					id="<?php echo esc_attr( $element_id ); ?>"
-					name="<?php echo esc_attr( $element_name ); ?>"
-					value="<?php echo esc_attr( $post_type->name ); ?>"
-					<?php checked( true, post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
-					>
-				<label for="<?php echo esc_attr( $element_id ); ?>">
-					<?php echo esc_html( $post_type->label ); ?>
-				</label>
+					<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $element_id ); ?>"
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $post_type->name ); ?>"
+						<?php checked( true, post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
+						>
+					<label for="<?php echo esc_attr( $element_id ); ?>">
+						<?php echo esc_html( $post_type->label ); ?>
+					</label>
 				</li>
 			<?php endforeach; ?>
 			</ul>
@@ -395,6 +400,12 @@ class AMP_Options_Menu {
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $option['label'] ); ?>
 					</label>
+
+					<?php if ( ! empty( $option['description'] ) ) : ?>
+						<span class="description">
+							&mdash; <?php echo esc_html( $option['description'] ); ?>
+						</span>
+					<?php endif; ?>
 
 					<?php self::list_template_conditional_options( $options, $id ); ?>
 				</li>

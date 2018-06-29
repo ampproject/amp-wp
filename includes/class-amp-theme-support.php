@@ -348,25 +348,12 @@ class AMP_Theme_Support {
 	 * @global WP_Query $wp_query
 	 * @see post_supports_amp()
 	 *
-	 * @param WP_Query|WP_Post|null $query Query or queried post. If null then the global query will be used.
+	 * @param WP_Query|null $query Query or queried post. If null then the global query will be used.
 	 * @return true|WP_Error True if template is available, WP_Error if otherwise.
 	 */
 	public static function get_template_availability( $query = null ) {
 		global $wp_query;
-
-		if ( $query instanceof WP_Post ) {
-			$post  = $query;
-			$query = new WP_Query();
-
-			$query->queried_object    = $post;
-			$query->queried_object_id = $post->ID;
-			if ( 'page' === $post->post_type ) {
-				$query->set( 'post_id', $post->ID );
-			} else {
-				$query->set( 'p', $post->ID );
-			}
-			$query->parse_query();
-		} elseif ( ! $query ) {
+		if ( ! $query ) {
 			$query = $wp_query;
 		}
 
@@ -379,26 +366,79 @@ class AMP_Theme_Support {
 			return new WP_Error( 'no_theme_support' );
 		}
 
-		$args = get_theme_support( 'amp' );
+		// @todo Add theme support flag
 
-		// @todo All of this needs to be refactored.
-		$supported_templates = AMP_Theme_Support::get_supportable_templates();
+		if ( $query->is_singular() ) {
+//				return true;
+		}
 
-		// @todo For each $supported_templates, call the callback. Then for each callback that returns true, check if also 'supported'. If supported is false but there is a decendant that is true, then consider true.
-		// @todo A theme can prevent a template from being offered by filtering the. ELIMINATE available_callback.
+		// Singular queries
+//			if ( $query->is_singular() ) {
+//				/**
+//				 * Queried object.
+//				 *
+//				 * @var WP_Post $queried_object
+//				 */
+//				$queried_object = $query->get_queried_object();
+//				return post_supports_amp( $queried_object )
+//			}
 
-		if ( isset( $args[0]['available_callback'] ) && is_callable( $args[0]['available_callback'] ) ) {
-			$callback = $args[0]['available_callback'];
+		$matching_templates    = array();
+		$supportable_templates = self::get_supportable_templates();
+		foreach ( $supportable_templates as $id => $supportable_template ) {
+			if ( empty( $supportable_template['callback'] ) ) {
+				$callback = $id;
+			} else {
+				$callback = $supportable_template['callback'];
+			}
 
+			// @todo Consider using the $id as the conditional callback.
 			// If the available_callback is a method on the query, then call the method on the query itself.
 			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
-				$available = call_user_func( array( $query, $callback ) );
+				$is_match = call_user_func( array( $query, $callback ) );
 			} else {
-				$available = call_user_func( $callback );
+				$is_match = call_user_func( $callback );
 			}
-			if ( false === $available ) {
-				return new WP_Error( 'unavailable_by_callback' );
+
+			if ( $is_match ) {
+				$matching_templates[ $id ] = (
+					! empty( $supportable_template['supported'] )
+					||
+					( AMP_Options_Manager::get_option( 'all_templates_supported' ) && empty( $supportable_template['immutable'] ) )
+				);
 			}
+		}
+
+		// Make sure children override their parents.
+		$matching_template_ids = array_keys( $matching_templates );
+		foreach ( $matching_template_ids as $id ) {
+			$has_children = false;
+			foreach ( $supportable_templates as $other_id => $supportable_template ) {
+				if ( $other_id === $id ) {
+					continue;
+				}
+				if ( isset( $supportable_template['parent'] ) && $id === $supportable_template['parent'] ) {
+					$has_children = true;
+					break;
+				}
+			}
+
+			// Delete all matching parent templates since the child will override them.
+			if ( ! $has_children ) {
+				$supportable_template = $supportable_templates[ $id ];
+				while ( ! empty( $supportable_template['parent'] ) ) {
+					$parent               = $supportable_template['parent'];
+					$supportable_template = $supportable_templates[ $parent ];
+
+					// Let the child supported status override the parent's supported status.
+					unset( $matching_templates[ $parent ] );
+				}
+			}
+		}
+
+		// If there aren't any matching templates left that are supported, then we consider it to not be available.
+		if ( ! in_array( true, $matching_templates, true ) ) {
+			return new WP_Error( 'no_supported_template' );
 		}
 
 		// If all checks have passed, then the template is available.
@@ -412,55 +452,53 @@ class AMP_Theme_Support {
 	 */
 	public static function get_supportable_templates() {
 		$templates = array(
-			'home'     => array(
-				'label'    => __( 'Homepage', 'amp' ),
-				'callback' => 'is_front_page',
+			'is_front_page' => array(
+				'label' => __( 'Homepage', 'amp' ),
 			),
-			'blog'     => array(
-				'label'    => __( 'Blog', 'amp' ),
-				'callback' => 'is_home',
-			),
-			'archives' => array(
-				'label'       => __( 'Archives', 'amp' ),
-				'description' => __( 'Including index pages for categories, tags, authors, and dates.', 'amp' ),
-				'callback'    => 'is_archive',
-			),
-			'author'   => array(
-				'label'    => __( 'Author', 'amp' ),
-				'callback' => 'is_author',
-				'parent'   => 'archives',
-			),
-			'date'     => array(
-				'label'    => __( 'Date', 'amp' ),
-				'callback' => 'is_date',
-				'parent'   => 'archives',
-			),
-			'search'   => array(
-				'label'    => __( 'Search', 'amp' ),
-				'callback' => 'is_search',
-			),
-			'404'      => array(
-				'label'    => __( 'Not Found (404)', 'amp' ),
-				'callback' => 'is_404',
-			),
-			'other'    => array(
-				'label'    => __( 'Other', 'amp' ),
-				'callback' => '__return_true',
-			),
+		);
+		if ( 'page' === get_option( 'show_on_front' ) ) {
+			// In other words, same as is_posts_page.
+			$templates['is_home'] = array(
+				'label' => __( 'Blog', 'amp' ),
+			);
+		}
+		$templates = array_merge(
+			$templates,
+			array(
+				'is_archive' => array(
+					'label'       => __( 'Archives', 'amp' ),
+				),
+				'is_author'  => array(
+					'label'    => __( 'Author', 'amp' ),
+					'parent' => 'is_archive',
+				),
+				'is_date'    => array(
+					'label'  => __( 'Date', 'amp' ),
+					'parent' => 'is_archive',
+				),
+				'is_search'  => array(
+					'label' => __( 'Search', 'amp' ),
+				),
+				'is_404'     => array(
+					'label' => __( 'Not Found (404)', 'amp' ),
+				),
+//				'other'    => array(
+//					'label'    => __( 'Other', 'amp' ),
+//					'callback' => '__return_true', // @todo This can be treated as the parent of all, as the default.
+//				),
+			)
 		);
 
 		if ( taxonomy_exists( 'category' ) ) {
-			$templates['tax[category]'] = array(
+			$templates['is_category'] = array(
 				'label'    => get_taxonomy( 'category' )->labels->name,
-				'callback' => 'is_category',
-				'parent'   => 'archives',
+				'parent'   => 'is_archive',
 			);
 		}
 		if ( taxonomy_exists( 'post_tag' ) ) {
-			$templates['tax[post_tag]'] = array(
-				'label'    => get_taxonomy( 'post_tag' )->labels->name,
-				'callback' => 'is_tag',
-				'parent'   => 'archives',
+			$templates['is_tag'] = array(
+				'label'  => get_taxonomy( 'post_tag' )->labels->name,
+				'parent' => 'is_archive',
 			);
 		}
 
@@ -469,9 +507,9 @@ class AMP_Theme_Support {
 			'publicly_queryable' => true,
 		);
 		foreach ( get_taxonomies( $taxonomy_args, 'objects' ) as $taxonomy ) {
-			$templates[ sprintf( 'tax[%s]', $taxonomy->name ) ] = array(
+			$templates[ sprintf( 'is_tax[%s]', $taxonomy->name ) ] = array(
 				'label'    => $taxonomy->labels->name,
-				'parent'   => 'archives',
+				'parent'   => 'is_archive',
 				'callback' => function ( WP_Query $query ) use ( $taxonomy ) {
 					return $query->is_tax( $taxonomy->name );
 				},
@@ -483,7 +521,7 @@ class AMP_Theme_Support {
 			'publicly_queryable' => true,
 		);
 		foreach ( get_post_types( $post_type_args, 'objects' ) as $post_type ) {
-			$templates[ sprintf( 'post_type_archive[%s]', $post_type->name ) ] = array(
+			$templates[ sprintf( 'is_post_type_archive[%s]', $post_type->name ) ] = array(
 				'label'    => $post_type->labels->archives,
 				'callback' => function ( WP_Query $query ) use ( $post_type ) {
 					return $query->is_post_type_archive( $post_type->name );
