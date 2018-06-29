@@ -374,19 +374,6 @@ class AMP_Theme_Support {
 
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
-
-		/*
-		 * Singular template support is included here though it is not explicitly listed among the templates by default.
-		 * It is the post type support that is used to indicate whether a given singular post template should be served
-		 * via post_supports_amp() including the metabox toggle to enable/disable AMP, and the amp_skip_post filter.
-		 */
-		if ( ! isset( $supportable_templates['is_singular'] ) ) {
-			$supportable_templates['is_singular'] = array(
-				'callback'  => 'is_singular',
-				'supported' => true,
-			);
-		}
-
 		foreach ( $supportable_templates as $id => $supportable_template ) {
 			if ( empty( $supportable_template['callback'] ) ) {
 				$callback = $id;
@@ -468,14 +455,13 @@ class AMP_Theme_Support {
 	/**
 	 * Get the templates which can be supported.
 	 *
-	 * @todo The callback could have support for running in an admin context.
 	 * @return array Supportable templates.
 	 */
 	public static function get_supportable_templates() {
 		$templates = array(
 			'is_singular' => array(
-				'label' => __( 'Singular', 'amp' ),
-				// This needs to default to true.
+				'label'       => __( 'Singular', 'amp' ),
+				'description' => __( 'Required for the above content types.', 'amp' ),
 			),
 		);
 		if ( 'page' === get_option( 'show_on_front' ) ) {

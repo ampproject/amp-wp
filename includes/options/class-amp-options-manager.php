@@ -30,7 +30,9 @@ class AMP_Options_Manager {
 		'accept_tree_shaking'     => false,
 		'disable_admin_bar'       => false,
 		'all_templates_supported' => true,
-		'supported_templates'     => array(),
+		'supported_templates'     => array(
+			'is_singular',
+		),
 	);
 
 	/**
