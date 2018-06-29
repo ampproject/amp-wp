@@ -118,7 +118,7 @@ class AMP_Theme_Support {
 			$args = array_shift( $support );
 			if ( ! is_array( $args ) ) {
 				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', '__added_via_option' ) ) ) !== 0 ) {
+			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', 'paired', '__added_via_option' ) ) ) !== 0 ) {
 				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
@@ -147,26 +147,8 @@ class AMP_Theme_Support {
 
 			$args = array(
 				'__added_via_option' => true,
+				'paired'             => ( 'paired' === $theme_support_option ),
 			);
-			if ( 'native' === $theme_support_option ) {
-				$args['available_callback'] = function() {
-					/**
-					 * Queried object.
-					 *
-					 * @var WP_Post $queried_object
-					 */
-					$queried_object = get_queried_object();
-					if ( is_singular() && post_supports_amp( $queried_object ) ) {
-						return 'native';
-					}
-
-					if ( AMP_Options_Manager::get_option( 'non_singular_supported' ) ) {
-						return 'native';
-					}
-
-					return false;
-				};
-			}
 			add_theme_support( 'amp', $args );
 		}
 	}
@@ -278,43 +260,27 @@ class AMP_Theme_Support {
 	 * Determines whether paired mode is available.
 	 *
 	 * When 'amp' theme support has not been added or canonical mode is enabled, then this returns false.
-	 * Returns true when there is a template_dir defined in theme support, and if a defined available_callback
-	 * returns true.
+	 *
+	 * @since 0.7
+	 * @since 1.0 This no longer looks at the available_callback bit instead calls get_template_availability.
 	 *
 	 * @see amp_is_canonical()
 	 * @return bool Whether available.
 	 */
 	public static function is_paired_available() {
-		$support = get_theme_support( 'amp' );
-		if ( empty( $support ) || amp_is_canonical() ) {
+		if ( ! current_theme_supports( 'amp' ) ) {
 			return false;
 		}
 
-		/**
-		 * Queried object.
-		 *
-		 * @var WP_Post $queried_object
-		 */
-		$queried_object = get_queried_object();
-		if ( is_singular() && ! post_supports_amp( $queried_object ) ) {
+		if ( amp_is_canonical() ) {
 			return false;
 		}
 
-		if ( ! is_singular() && ! AMP_Options_Manager::get_option( 'non_singular_supported' ) ) {
+		$availability = self::get_template_availability();
+		if ( is_wp_error( $availability ) ) {
 			return false;
 		}
 
-		$args = array_shift( $support );
-
-		if ( isset( $args['available_callback'] ) && is_callable( $args['available_callback'] ) ) {
-			/*
-			 * The available_callback here will return a bool or the string 'paired'.
-			 * If it returns 'native' then `amp_is_canonical()` above would have short-circuited.
-			 */
-			return (bool) call_user_func( $args['available_callback'] );
-		}
-
-		// This is the same as if there is a template_dir defined with no available_callback.
 		return true;
 	}
 
@@ -431,8 +397,6 @@ class AMP_Theme_Support {
 				}
 			}
 		}
-
-		error_log( json_encode( $matching_templates ) );
 
 		// If there aren't any matching templates left that are supported, then we consider it to not be available.
 		if ( ! in_array( true, $matching_templates, true ) ) {

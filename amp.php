@@ -301,6 +301,10 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
+	if ( ! current_theme_supports( 'amp' ) ) {
+		return false;
+	}
+
 	$support = get_theme_support( 'amp' );
 	if ( true === $support ) {
 		return true;
@@ -310,8 +314,8 @@ function amp_is_canonical() {
 		$args = array_shift( $support );
 
 		// If paired arg is supplied, then it is never canonical.
-		if ( ! empty( $args['paired'] ) ) {
-			return false;
+		if ( isset( $args['paired'] ) ) {
+			return ! $args['paired'];
 		}
 
 		// If there is a template_dir, then paired mode is implied.

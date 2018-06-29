@@ -321,7 +321,8 @@ function is_amp_endpoint() {
 	}
 
 	if ( current_theme_supports( 'amp' ) ) {
-		return true === AMP_Theme_Support::get_template_availability();
+		$template_available = true === AMP_Theme_Support::get_template_availability();
+		return amp_is_canonical() ? $template_available : $has_amp_query_var;
 	} else {
 
 		// Check if the queried object supports AMP.
