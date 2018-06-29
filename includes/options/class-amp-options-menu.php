@@ -297,7 +297,7 @@ class AMP_Options_Menu {
 
 		<fieldset id="singular_templates_fieldset">
 			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
-			<h4 class="title"><?php esc_html_e( 'Singular Templates', 'amp' ); ?></h4>
+			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
 				<?php esc_html_e( 'The following content types will be available as AMP by default, but you can override this on an item-by-item basis:', 'amp' ); ?>
 			</p>
@@ -326,7 +326,7 @@ class AMP_Options_Menu {
 					margin-left: 40px;
 				}
 			</style>
-			<h4 class="title"><?php esc_html_e( 'Non-Singular Templates', 'amp' ); ?></h4>
+			<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
 			<?php
 			self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
 			?>

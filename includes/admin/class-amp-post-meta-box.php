@@ -170,6 +170,7 @@ class AMP_Post_Meta_Box {
 			is_post_type_viewable( $post->post_type )
 			&&
 			current_user_can( 'edit_post', $post->ID )
+			// @todo What if a site does not have non-AMP pages? Formerly this was indicated via amp_is_canonical(). Now we need a flag for whether AMP is exclusive to a theme, in which case all templates and post types must render AMP. In other words, all_templates_supported.
 		);
 
 		if ( true !== $verify ) {

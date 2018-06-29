@@ -366,25 +366,21 @@ class AMP_Theme_Support {
 			return new WP_Error( 'no_theme_support' );
 		}
 
-		// @todo Add theme support flag
-
-		if ( $query->is_singular() ) {
-//				return true;
-		}
-
-		// Singular queries
-//			if ( $query->is_singular() ) {
-//				/**
-//				 * Queried object.
-//				 *
-//				 * @var WP_Post $queried_object
-//				 */
-//				$queried_object = $query->get_queried_object();
-//				return post_supports_amp( $queried_object )
-//			}
-
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
+
+		/*
+		 * Singular template support is included here though it is not explicitly listed among the templates by default.
+		 * It is the post type support that is used to indicate whether a given singular post template should be served
+		 * via post_supports_amp() including the metabox toggle to enable/disable AMP, and the amp_skip_post filter.
+		 */
+		if ( ! isset( $supportable_templates['is_singular'] ) ) {
+			$supportable_templates['is_singular'] = array(
+				'callback'  => 'is_singular',
+				'supported' => true,
+			);
+		}
+
 		foreach ( $supportable_templates as $id => $supportable_template ) {
 			if ( empty( $supportable_template['callback'] ) ) {
 				$callback = $id;
@@ -436,9 +432,24 @@ class AMP_Theme_Support {
 			}
 		}
 
+		error_log( json_encode( $matching_templates ) );
+
 		// If there aren't any matching templates left that are supported, then we consider it to not be available.
 		if ( ! in_array( true, $matching_templates, true ) ) {
 			return new WP_Error( 'no_supported_template' );
+		}
+
+		// For singular queries, post_supports_amp() is given the final say.
+		if ( $query->is_singular() ) {
+			/**
+			 * Queried object.
+			 *
+			 * @var WP_Post $queried_object
+			 */
+			$queried_object = $query->get_queried_object();
+			if ( ! post_supports_amp( $queried_object ) ) {
+				return new WP_Error( 'post_lacks_amp_support' );
+			}
 		}
 
 		// If all checks have passed, then the template is available.
@@ -448,6 +459,7 @@ class AMP_Theme_Support {
 	/**
 	 * Get the templates which can be supported.
 	 *
+	 * @todo The callback could have support for running in an admin context.
 	 * @return array Supportable templates.
 	 */
 	public static function get_supportable_templates() {
@@ -466,10 +478,10 @@ class AMP_Theme_Support {
 			$templates,
 			array(
 				'is_archive' => array(
-					'label'       => __( 'Archives', 'amp' ),
+					'label' => __( 'Archives', 'amp' ),
 				),
 				'is_author'  => array(
-					'label'    => __( 'Author', 'amp' ),
+					'label'  => __( 'Author', 'amp' ),
 					'parent' => 'is_archive',
 				),
 				'is_date'    => array(
@@ -491,8 +503,8 @@ class AMP_Theme_Support {
 
 		if ( taxonomy_exists( 'category' ) ) {
 			$templates['is_category'] = array(
-				'label'    => get_taxonomy( 'category' )->labels->name,
-				'parent'   => 'is_archive',
+				'label'  => get_taxonomy( 'category' )->labels->name,
+				'parent' => 'is_archive',
 			);
 		}
 		if ( taxonomy_exists( 'post_tag' ) ) {

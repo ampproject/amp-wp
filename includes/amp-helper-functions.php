@@ -320,22 +320,21 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	// Check if the queried object supports AMP.
-	if ( is_singular() ) {
-		/**
-		 * Post.
-		 *
-		 * @var WP_Post $queried_object
-		 */
-		$queried_object = get_queried_object();
-		if ( ! post_supports_amp( $queried_object ) ) {
-			return false;
-		}
-	}
-
 	if ( current_theme_supports( 'amp' ) ) {
 		return true === AMP_Theme_Support::get_template_availability();
 	} else {
+
+		// Check if the queried object supports AMP.
+		if ( is_singular() ) {
+			/**
+			 * Post.
+			 *
+			 * @var WP_Post $queried_object
+			 */
+			$queried_object = get_queried_object();
+			return post_supports_amp( $queried_object );
+		}
+
 		return false; // Legacy templates only support posts via AMP_Post_Template.
 	}
 }
