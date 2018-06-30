@@ -184,20 +184,17 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$errors = AMP_Post_Type_Support::get_support_errors( $post );
-		$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
-		$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
-
-		// Handle special case of the static front page or page for posts.
 		if ( current_theme_supports( 'amp' ) ) {
 			$availability = AMP_Theme_Support::get_template_availability( $post );
+			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+			$errors       = array_diff( $availability['errors'], array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
 			if ( true === $availability['immutable'] ) {
 				$errors[] = 'status_immutable';
-				$status   = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
-			} elseif ( ! $availability['supported'] && in_array( 'template_unsupported', $availability['errors'], true ) ) {
-				$errors[] = 'template_unsupported';
-				$status   = self::DISABLED_STATUS;
 			}
+		} else {
+			$errors = AMP_Post_Type_Support::get_support_errors( $post );
+			$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+			$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
 		}
 
 		$labels = array(
