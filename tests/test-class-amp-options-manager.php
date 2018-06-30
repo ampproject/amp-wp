@@ -90,14 +90,18 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
-		$this->assertSame(
+		$this->assertEquals(
 			array(
-				'theme_support'        => 'disabled',
-				'supported_post_types' => array(),
-				'analytics'            => array(),
-				'force_sanitization'   => false,
-				'accept_tree_shaking'  => false,
-				'disable_admin_bar'    => false,
+				'theme_support'           => 'disabled',
+				'supported_post_types'    => array(),
+				'analytics'               => array(),
+				'force_sanitization'      => false,
+				'accept_tree_shaking'     => false,
+				'disable_admin_bar'       => false,
+				'all_templates_supported' => true,
+				'supported_templates'     => array(
+					'is_singular',
+				),
 			),
 			AMP_Options_Manager::get_options()
 		);

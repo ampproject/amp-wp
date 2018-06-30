@@ -76,19 +76,19 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Settings::render_status()
 	 */
 	public function test_render_status() {
-		$post = $this->factory->post->create_and_get();
-		wp_set_current_user( $this->factory->user->create( array(
+		$post = $this->factory()->post->create_and_get();
+		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'administrator',
 		) ) );
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 
-		// This is in AMP 'canonical mode,' so it shouldn't have the AMP status.
+		// This is in AMP 'native mode' so it shouldn't have the AMP status.
 		add_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
-		$this->assertNotContains( $amp_status_markup, ob_get_clean() );
+		$this->assertContains( $amp_status_markup, ob_get_clean() );
 
-		// This is not in AMP 'canonical mode'.
+		// This is not in AMP 'canonical mode', but rather classic mode.
 		remove_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
@@ -101,7 +101,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEmpty( ob_get_clean() );
 
 		add_post_type_support( 'post', amp_get_slug() );
-		wp_set_current_user( $this->factory->user->create( array(
+		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'subscriber',
 		) ) );
 

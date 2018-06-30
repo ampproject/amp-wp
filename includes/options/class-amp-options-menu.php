@@ -299,7 +299,7 @@ class AMP_Options_Menu {
 			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
-				<?php esc_html_e( 'The following content types will be available as AMP by default, but you can override this on an item-by-item basis:', 'amp' ); ?>
+				<?php esc_html_e( 'The following content types will be available as AMP:', 'amp' ); ?>
 			</p>
 			<ul>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
@@ -310,7 +310,7 @@ class AMP_Options_Menu {
 						id="<?php echo esc_attr( $element_id ); ?>"
 						name="<?php echo esc_attr( $element_name ); ?>"
 						value="<?php echo esc_attr( $post_type->name ); ?>"
-						<?php checked( true, post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
+						<?php checked( post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
 						>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $post_type->label ); ?>

@@ -142,7 +142,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Determine whether theme support as added via option.
+	 * Determine whether theme support was added via option.
 	 *
 	 * @since 1.0
 	 * @return bool Optional support added.
@@ -175,6 +175,10 @@ class AMP_Theme_Support {
 					return;
 				}
 			}
+		}
+
+		if ( ! $theme_support_args ) {
+			$theme_support_args = array();
 		}
 
 		// If theme support is not present, then allow it to be added via the admin.
@@ -317,11 +321,7 @@ class AMP_Theme_Support {
 		}
 
 		$availability = self::get_template_availability();
-		if ( is_wp_error( $availability ) ) {
-			return false;
-		}
-
-		return true;
+		return $availability['supported'];
 	}
 
 	/**
@@ -354,23 +354,58 @@ class AMP_Theme_Support {
 	 * @global WP_Query $wp_query
 	 * @see post_supports_amp()
 	 *
-	 * @param WP_Query|null $query Query or queried post. If null then the global query will be used.
-	 * @return true|WP_Error True if template is available, WP_Error if otherwise.
+	 * @param WP_Query|WP_Post|null $query Query or queried post. If null then the global query will be used.
+	 * @return array {
+	 *     Template availability.
+	 *
+	 *     @type bool        $supported Whether the template is supported in AMP.
+	 *     @type bool|null   $immutable Whether the supported status is known to be unchangeable.
+	 *     @type string|null $template  The ID of the matched template (conditional), such as 'is_singular', or null if nothing was matched.
+	 *     @type string[]    $errors    List of the errors or reasons for why the template is not available.
+	 * }
 	 */
 	public static function get_template_availability( $query = null ) {
 		global $wp_query;
 		if ( ! $query ) {
 			$query = $wp_query;
+		} elseif ( $query instanceof WP_Post ) {
+			$post  = $query;
+			$query = new WP_Query();
+			if ( 'page' === $post->post_type ) {
+				$query->set( 'page_id', $post->ID );
+			} else {
+				$query->set( 'p', $post->ID );
+			}
+			$query->queried_object    = $post;
+			$query->queried_object_id = $post->ID;
+			$query->parse_query_vars();
 		}
+
+		$default_response = array(
+			'errors'    => array(),
+			'supported' => false,
+			'immutable' => null,
+			'template'  => null,
+		);
 
 		if ( ! ( $query instanceof WP_Query ) ) {
 			_doing_it_wrong( __FUNCTION__, esc_html__( 'No WP_Query available.', 'amp' ), '1.0' );
-			return new WP_Error( 'no_query_available' );
+			return array_merge(
+				$default_response,
+				array( 'errors' => array( 'no_query_available' ) )
+			);
 		}
 
 		if ( ! current_theme_supports( 'amp' ) ) {
-			return new WP_Error( 'no_theme_support' );
+			return array_merge(
+				$default_response,
+				array( 'errors' => array( 'no_theme_support' ) )
+			);
 		}
+
+		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
+		$prev_query = $wp_query;
+		$wp_query   = $query; // WPCS: override ok.
 
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
@@ -381,22 +416,32 @@ class AMP_Theme_Support {
 				$callback = $supportable_template['callback'];
 			}
 
-			// @todo Consider using the $id as the conditional callback.
 			// If the available_callback is a method on the query, then call the method on the query itself.
 			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
 				$is_match = call_user_func( array( $query, $callback ) );
-			} else {
+			} elseif ( is_callable( $callback ) ) {
 				$is_match = call_user_func( $callback );
+			} else {
+				/* translators: %s is the supportable template ID. */
+				_doing_it_wrong( __FUNCTION__, esc_html__( 'Supportable template "%s" does not have a callable callback.', 'amp' ), '1.0' );
+				$is_match = false;
 			}
 
 			if ( $is_match ) {
-				$matching_templates[ $id ] = (
-					! empty( $supportable_template['supported'] )
-					||
-					( AMP_Options_Manager::get_option( 'all_templates_supported' ) && empty( $supportable_template['immutable'] ) )
+				$matching_templates[ $id ] = array(
+					'template'  => $id,
+					'supported' => (
+						! empty( $supportable_template['supported'] )
+						||
+						( AMP_Options_Manager::get_option( 'all_templates_supported' ) && empty( $supportable_template['immutable'] ) )
+					),
+					'immutable' => ! empty( $supportable_template['immutable'] ),
 				);
 			}
 		}
+
+		// Restore previous $wp_query (if any).
+		$wp_query = $prev_query; // WPCS: override ok.
 
 		// Make sure children override their parents.
 		$matching_template_ids = array_keys( $matching_templates );
@@ -425,9 +470,24 @@ class AMP_Theme_Support {
 			}
 		}
 
+		if ( count( $matching_templates ) > 1 ) {
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'Did not expect there to be more than one matching template. Did you filter amp_supportable_templates to not honor the template hierarchy?', 'amp' ), '1.0' );
+		}
+
+		$matching_template = array_shift( $matching_templates );
+
 		// If there aren't any matching templates left that are supported, then we consider it to not be available.
-		if ( ! in_array( true, $matching_templates, true ) ) {
-			return new WP_Error( 'no_supported_template' );
+		if ( ! $matching_template ) {
+			return array_merge(
+				$default_response,
+				array( 'errors' => array( 'no_matching_template' ) )
+			);
+		}
+		$matching_template = array_merge( $default_response, $matching_template );
+
+		// If there aren't any matching templates left that are supported, then we consider it to not be available.
+		if ( empty( $matching_template['supported'] ) ) {
+			$matching_template['errors'][] = 'template_unsupported';
 		}
 
 		// For singular queries, post_supports_amp() is given the final say.
@@ -440,16 +500,12 @@ class AMP_Theme_Support {
 			$queried_object = $query->get_queried_object();
 			$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
 			if ( ! empty( $support_errors ) ) {
-				$error = new WP_Error();
-				foreach ( $support_errors as $support_error ) {
-					$error->add( $support_error, '' );
-				}
-				return $error;
+				$matching_template['errors']    = array_merge( $matching_template['errors'], $support_errors );
+				$matching_template['supported'] = false;
 			}
 		}
 
-		// If all checks have passed, then the template is available.
-		return true;
+		return $matching_template;
 	}
 
 	/**
@@ -560,7 +616,13 @@ class AMP_Theme_Support {
 		 *
 		 * A theme or plugin can force a given template to be supported or not by preemptively
 		 * setting the 'supported' flag for a given template. Otherwise, if the flag is undefined
-		 * then the user will be able to toggle it themselves in the admin.
+		 * then the user will be able to toggle it themselves in the admin. Each array item should
+		 * have a key that corresponds to a template conditional function. If the key is such a
+		 * function, then the key is used to evaluate whether the given template entry is a match.
+		 * Otherwise, a supportable template item can include a callback value which is used instead.
+		 * Each item needs a 'label' value. Additionally, if the supportable template is a subset of
+		 * another condition (e.g. is_singular > is_single) then this relationship needs to be
+		 * indicated via the 'parent' value.
 		 *
 		 * @since 1.0
 		 *
@@ -572,7 +634,7 @@ class AMP_Theme_Support {
 		foreach ( $templates as $id => &$template ) {
 			$template['immutable'] = isset( $template['supported'] );
 			if ( ! $template['immutable'] ) {
-				$template['supported'] = in_array( $id, $supported_templates, true );
+				$template['supported'] = AMP_Options_Manager::get_option( 'all_templates_supported' ) || in_array( $id, $supported_templates, true );
 			}
 		}
 

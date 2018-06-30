@@ -218,7 +218,13 @@ class AMP_Validation_Manager {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
 	 */
 	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
-		if ( is_admin() || ! self::has_cap() || is_wp_error( AMP_Theme_Support::get_template_availability() ) ) {
+		if ( is_admin() || ! self::has_cap() ) {
+			self::$amp_admin_bar_item_added = false;
+			return;
+		}
+
+		$availability = AMP_Theme_Support::get_template_availability();
+		if ( ! $availability['supported'] ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
 		}

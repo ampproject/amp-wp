@@ -249,13 +249,14 @@ function post_supports_amp( $post ) {
  * Determine whether the current response being served as AMP.
  *
  * This function cannot be called before the parse_query action because it needs to be able
- * to determine the queried object is able to be served as AMP.
+ * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
+ * present, this function returns true just if the query var is present. If theme support is
+ * present, then it returns true in paired mode if an AMP template is available and the query
+ * var is present, or else in native mode if just the template is available.
  *
- * @see is_header_video_active()
  * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
-	global $wp_query;
 	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 		return false;
 	}
@@ -272,29 +273,17 @@ function is_amp_endpoint() {
 		false !== get_query_var( amp_get_slug(), false )
 	);
 
+	if ( ! current_theme_supports( 'amp' ) ) {
+		return $has_amp_query_var;
+	}
+
 	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
 	}
 
-	if ( current_theme_supports( 'amp' ) ) {
-		$template_available = true === AMP_Theme_Support::get_template_availability();
-		return amp_is_canonical() ? $template_available : $has_amp_query_var;
-	} else {
-
-		// Check if the queried object supports AMP.
-		if ( is_singular() || ( $wp_query instanceof WP_Query && $wp_query->is_posts_page ) ) {
-			/**
-			 * Post.
-			 *
-			 * @var WP_Post $queried_object
-			 */
-			$queried_object = get_queried_object();
-			return post_supports_amp( $queried_object );
-		}
-
-		return false; // Legacy templates only support posts via AMP_Post_Template.
-	}
+	$availability = AMP_Theme_Support::get_template_availability();
+	return amp_is_canonical() ? $availability['supported'] : ( $has_amp_query_var && $availability['supported'] );
 }
 
 /**

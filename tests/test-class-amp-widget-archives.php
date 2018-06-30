@@ -33,6 +33,16 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		remove_theme_support( 'amp' );
+	}
+
+	/**
 	 * Test construct().
 	 *
 	 * @see AMP_Widget_Archives::__construct().

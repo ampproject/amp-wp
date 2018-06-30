@@ -311,9 +311,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		AMP_Theme_Support::add_amp_template_filters();
 		foreach ( $template_types as $template_type ) {
-			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_paired_template_hierarchy' ) ) );
+			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_amp_template_hierarchy' ) ) );
 		}
-		$this->assertEquals( 100, has_filter( 'template_include', array( self::TESTED_CLASS, 'filter_paired_template_include' ) ) );
 	}
 
 	/**
@@ -774,30 +773,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'single.php',
 		);
 		$filtered_templates = AMP_Theme_Support::filter_amp_template_hierarchy( $templates );
-		foreach ( $filtered_templates as $key => $filtered_template ) {
-			$this->assertEquals( $template_dir . '/' . $templates[ $key ], $filtered_template );
-		}
-	}
 
-	/**
-	 * Test filter_paired_template_include.
-	 *
-	 * @covers AMP_Theme_Support::filter_amp_template_include()
-	 */
-	public function test_filter_paired_template_include() {
-		$template_dir = 'amp-templates';
-		$template     = 'single.php';
-		add_theme_support( 'amp', array(
-			'template_dir' => $template_dir,
-		) );
-		$this->assertEquals( $template, AMP_Theme_Support::filter_amp_template_include( $template ) );
-		remove_theme_support( 'amp' );
-		try {
-			AMP_Theme_Support::filter_amp_template_include( $template );
-		} catch ( Exception $exception ) {
-			$e = $exception;
+		$expected_templates = array();
+		foreach ( $templates as $template ) {
+			$expected_templates[] = $template_dir . '/' . $template;
+			$expected_templates[] = $template;
 		}
-		$this->assertTrue( isset( $e ) );
+
+		$this->assertEquals( $expected_templates, $filtered_templates );
 	}
 
 	/**

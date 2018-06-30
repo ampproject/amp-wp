@@ -143,12 +143,20 @@ class AMP_Post_Meta_Box {
 			array( 'jquery' ),
 			AMP__VERSION
 		);
+
+		if ( current_theme_supports( 'amp' ) ) {
+			$availability   = AMP_Theme_Support::get_template_availability( $post );
+			$support_errors = $availability['errors'];
+		} else {
+			$support_errors = AMP_Post_Type_Support::get_support_errors( $post );
+		}
+
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
 				'canonical'       => amp_is_canonical(),
-				'enabled'         => post_supports_amp( $post ),
-				'canSupport'      => count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0,
+				'enabled'         => empty( $support_errors ),
+				'canSupport'      => 0 === count( array_diff( $support_errors, array( 'post-status-disabled' ) ) ),
 				'statusInputName' => self::STATUS_INPUT_NAME,
 				'l10n'            => array(
 					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
@@ -170,7 +178,6 @@ class AMP_Post_Meta_Box {
 			is_post_type_viewable( $post->post_type )
 			&&
 			current_user_can( 'edit_post', $post->ID )
-			// @todo What if a site does not have non-AMP pages? Formerly this was indicated via amp_is_canonical(). Now we need a flag for whether AMP is exclusive to a theme, in which case all templates and post types must render AMP. In other words, all_templates_supported.
 		);
 
 		if ( true !== $verify ) {
@@ -181,23 +188,14 @@ class AMP_Post_Meta_Box {
 		$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
 		$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
 
-		// @todo If ! supported and immutable, don't show the toggle at all?
 		// Handle special case of the static front page or page for posts.
 		if ( current_theme_supports( 'amp' ) ) {
-
-			$query = new WP_Query();
-			if ( 'page' === $post->post_type ) {
-				$query->set( 'page_id', $post->ID );
-			} else {
-				$query->set( 'p', $post->ID );
-			}
-			$query->queried_object    = $post;
-			$query->queried_object_id = $post->ID;
-			$query->parse_query_vars();
-
-			$availability = AMP_Theme_Support::get_template_availability( $query );
-			if ( $availability instanceof WP_Error && 0 !== count( array_diff( $availability->get_error_codes(), $errors, array( 'post-status-disabled' ) ) ) ) {
-				$errors[] = 'template-unavailable';
+			$availability = AMP_Theme_Support::get_template_availability( $post );
+			if ( true === $availability['immutable'] ) {
+				$errors[] = 'status_immutable';
+				$status   = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+			} elseif ( ! $availability['supported'] && in_array( 'template_unsupported', $availability['errors'], true ) ) {
+				$errors[] = 'template_unsupported';
 				$status   = self::DISABLED_STATUS;
 			}
 		}

@@ -42,7 +42,14 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 				<p>
 					<?php
 					$error_messages = array();
-					if ( in_array( 'template-unavailable', $errors, true ) ) {
+					if ( in_array( 'status_immutable', $errors, true ) ) {
+						if ( self::ENABLED_STATUS === $status ) {
+							$error_messages[] = __( 'Your site does not allow AMP to be disabled.', 'amp' );
+						} else {
+							$error_messages[] = __( 'Your site does not allow AMP to be enabled.', 'amp' );
+						}
+					}
+					if ( in_array( 'template_unsupported', $errors, true ) ) {
 						/* translators: %s is URL to AMP settings screen */
 						$error_messages[] = wp_kses_post( sprintf( __( 'There are no <a href="%s">supported templates</a> to display this in AMP.', 'amp' ), esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) ) );
 					}
@@ -56,7 +63,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 					if ( in_array( 'skip-post', $errors, true ) ) {
 						$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 					}
-					if ( count( array_diff( $errors, array( 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template-unavailable' ) ) ) > 0 ) {
+					if ( count( array_diff( $errors, array( 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported' ) ) ) > 0 ) {
 						$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 					}
 					echo implode( ' ', $error_messages ); // WPCS: xss ok.
