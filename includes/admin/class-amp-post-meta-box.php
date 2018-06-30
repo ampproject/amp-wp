@@ -203,7 +203,7 @@ class AMP_Post_Meta_Box {
 		);
 
 		// The preceding variables are used inside the following amp-status.php template.
-		include_once AMP__DIR__ . '/templates/admin/amp-status.php';
+		include AMP__DIR__ . '/templates/admin/amp-status.php';
 	}
 
 	/**

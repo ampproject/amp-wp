@@ -80,26 +80,44 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'administrator',
 		) ) );
+		add_post_type_support( 'post', amp_get_slug() );
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
+		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
 
-		// This is in AMP 'native mode' so it shouldn't have the AMP status.
-		add_theme_support( 'amp' );
-		ob_start();
-		$this->instance->render_status( $post );
-		$this->assertContains( $amp_status_markup, ob_get_clean() );
-
-		// This is not in AMP 'canonical mode', but rather classic mode.
+		// This is not in AMP 'canonical mode' but rather classic paired mode.
 		remove_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
-		$this->assertContains( $amp_status_markup, ob_get_clean() );
+		$output = ob_get_clean();
+		$this->assertContains( $amp_status_markup, $output );
+		$this->assertContains( $checkbox_enabled, $output );
 
-		remove_post_type_support( 'post', amp_get_slug() );
-
+		// This is in AMP native mode with a template that can be rendered.
+		add_theme_support( 'amp' );
 		ob_start();
 		$this->instance->render_status( $post );
-		$this->assertEmpty( ob_get_clean() );
+		$output = ob_get_clean();
+		$this->assertContains( $amp_status_markup, $output );
+		$this->assertContains( $checkbox_enabled, $output );
 
+		// Post type no longer supports AMP, so no status input.
+		remove_post_type_support( 'post', amp_get_slug() );
+		ob_start();
+		$this->instance->render_status( $post );
+		$output = ob_get_clean();
+		$this->assertContains( 'post type does not support it', $output );
+		$this->assertNotContains( $checkbox_enabled, $output );
+		add_post_type_support( 'post', amp_get_slug() );
+
+		// No template is available to render the post.
+		add_filter( 'amp_supportable_templates', '__return_empty_array' );
+		ob_start();
+		$this->instance->render_status( $post );
+		$output = ob_get_clean();
+		$this->assertContains( 'no supported templates to display this in AMP.', strip_tags( $output ) );
+		$this->assertNotContains( $checkbox_enabled, $output );
+
+		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', amp_get_slug() );
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'subscriber',
