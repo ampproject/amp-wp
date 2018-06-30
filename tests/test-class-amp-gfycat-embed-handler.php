@@ -19,6 +19,20 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 		global $post;
 		parent::setUp();
 
+		// Mock the HTTP request.
+		add_filter( 'pre_http_request', function( $pre, $r, $url ) {
+			if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
+				return $pre;
+			}
+			return array(
+				'body'     => '{"version":"1.0","type":"video","provider_name":"https://gfycat.com","width":500,"height":281,"title":"Melanie Raccoon riding bike-side angle (reddit)","html":"<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'500\' height=\'281.25\'  allowfullscreen></iframe>"}',
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+			);
+		}, 10, 3 );
+
 		/*
 		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()
 		 * method would short-circuit when this is the case:

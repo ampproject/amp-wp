@@ -114,7 +114,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		ob_start();
 		$this->instance->render_status( $post );
 		$output = ob_get_clean();
-		$this->assertContains( 'no supported templates to display this in AMP.', strip_tags( $output ) );
+		$this->assertContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
 		$this->assertNotContains( $checkbox_enabled, $output );
 
 		// User doesn't have the capability to display the metabox.
