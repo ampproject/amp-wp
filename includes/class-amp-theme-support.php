@@ -504,13 +504,7 @@ class AMP_Theme_Support {
 			if ( $is_match ) {
 				$matching_templates[ $id ] = array(
 					'template'  => $id,
-					'supported' => (
-						! empty( $supportable_template['supported'] )
-						||
-						( AMP_Options_Manager::get_option( 'all_templates_supported' ) && empty( $supportable_template['immutable'] ) )
-						||
-						$all_templates_supported_by_theme_support // Make sure theme support flag is given final say.
-					),
+					'supported' => ! empty( $supportable_template['supported'] ),
 					'immutable' => ! empty( $supportable_template['immutable'] ),
 				);
 			}
@@ -692,16 +686,6 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Pre-populate template supported state by theme support flag.
-		$theme_support_args = self::get_theme_support_args( array( 'initial' => true ) );
-		if ( isset( $theme_support_args['templates_supported'] ) && is_array( $theme_support_args['templates_supported'] ) ) {
-			foreach ( $templates as $id => &$template ) {
-				if ( isset( $theme_support_args['templates_supported'][ $id ] ) ) {
-					$templates[ $id ]['supported'] = $theme_support_args['templates_supported'][ $id ];
-				}
-			}
-		}
-
 		/**
 		 * Filters list of supportable templates.
 		 *
@@ -721,11 +705,34 @@ class AMP_Theme_Support {
 		 */
 		$templates = apply_filters( 'amp_supportable_templates', $templates );
 
+		// Obtain the initial template supported state by theme support flag.
+		$theme_support_args        = self::get_theme_support_args( array( 'initial' => true ) );
+		$theme_supported_templates = array();
+		if ( isset( $theme_support_args['templates_supported'] ) ) {
+			$theme_supported_templates = $theme_support_args['templates_supported'];
+		}
+
 		$supported_templates = AMP_Options_Manager::get_option( 'supported_templates' );
 		foreach ( $templates as $id => &$template ) {
+
+			// Capture user-elected support from options. This allows us to preserve the original user selection through programmatic overrides.
+			$template['user_supported'] = in_array( $id, $supported_templates, true );
+
+			// Consider supported templates from theme support args.
+			if ( ! isset( $template['supported'] ) ) {
+				if ( 'all' === $theme_supported_templates ) {
+					$template['supported'] = true;
+				} elseif ( is_array( $theme_supported_templates ) && isset( $theme_supported_templates[ $id ] ) ) {
+					$template['supported'] = $theme_supported_templates[ $id ];
+				}
+			}
+
+			// Make supported state immutable if it was programmatically set.
 			$template['immutable'] = isset( $template['supported'] );
+
+			// Set supported state from user preference.
 			if ( ! $template['immutable'] ) {
-				$template['supported'] = AMP_Options_Manager::get_option( 'all_templates_supported' ) || in_array( $id, $supported_templates, true );
+				$template['supported'] = AMP_Options_Manager::get_option( 'all_templates_supported' ) || $template['user_supported'];
 			}
 		}
 
