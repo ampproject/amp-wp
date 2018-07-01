@@ -286,22 +286,29 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *          'mode' => 'native',
  *      ) );
  *
- * If you want to force AMP to always be served on a given template, use the amp_supportable_templates filter,
+ * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
  * for example to always serve the Category template in AMP:
  *
- *      add_filter( 'amp_supportable_templates', function( $templates ) {
- *          $templates['is_category']['supported'] = true;
- *          return $template;
- *      } );
+ *      add_theme_support( 'amp', array(
+ *          'templates_supported' => array(
+ *              'is_category' => true,
+ *          ),
+ *      ) );
  *
- * Or if you want to prevent AMP from ever being served on the homepage:
+ * Or if you want to prevent AMP from being used on the front page and on any Other template that is unrecognized:
  *
- *      add_filter( 'amp_supportable_templates', function( $templates ) {
- *          $templates['is_front_page']['supported'] = false;
- *          return $template;
- *      } );
+ *      add_theme_support( 'amp', array(
+ *          'templates_supported' => array(
+ *              'is_front_page' => false,
+ *              'unrecognized' => false,
+ *          ),
+ *      ) );
  *
- * @todo There needs to be a required flag which is the same as forcing all to be supported. This would be the same in the UI as the all_templates_supported flag. Might as well rename all_templates_supported to just required. If required is set to be false, or if any of the supported templates are immutable, then this option should not be available.
+ * Or if you want to force AMP to be used on all templates:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'templates_supported' => 'all',
+ *      ) );
  *
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */

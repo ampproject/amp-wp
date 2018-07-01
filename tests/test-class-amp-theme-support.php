@@ -92,7 +92,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		$this->assertEquals( 'Expected AMP theme support to only have template_dir and/or available_callback.', $e->getMessage() );
+		$this->assertStringStartsWith( 'Expected AMP theme support to keys', $e->getMessage() );
 	}
 
 	/**

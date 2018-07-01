@@ -91,6 +91,19 @@ class AMP_Theme_Support {
 	protected static $is_output_buffering = false;
 
 	/**
+	 * Original theme support args prior to being read.
+	 *
+	 * This is needed to be able to properly populate the admin screen with AMP options defined by theme support
+	 * when the theme support is optional and disabled in the admin. For example, it allows for the original
+	 * template `mode` from the theme support to be displayed in the admin screen even though read_theme_support
+	 * may have removed the `optional` the theme support.
+	 *
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @var array
+	 */
+	protected static $initial_theme_support_args = array();
+
+	/**
 	 * Theme support options that were added via option.
 	 *
 	 * @since 1.0
@@ -104,7 +117,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function init() {
-		self::apply_options();
+		self::read_theme_support();
 		if ( ! current_theme_supports( 'amp' ) ) {
 			return;
 		}
@@ -119,17 +132,6 @@ class AMP_Theme_Support {
 		self::handle_xhr_request();
 
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
-
-		// Validate theme support usage.
-		$support = get_theme_support( 'amp' );
-		if ( WP_DEBUG && is_array( $support ) ) {
-			$args = array_shift( $support );
-			if ( ! is_array( $args ) ) {
-				trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			} elseif ( count( array_diff( array_keys( $args ), array( 'template_dir', 'available_callback', 'comments_live_list', 'mode', 'optional' ) ) ) !== 0 ) {
-				trigger_error( esc_html__( 'Expected AMP theme support to only have template_dir and/or available_callback.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			}
-		}
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
@@ -152,28 +154,45 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Apply options for whether theme support is enabled via admin and what sanitization is performed by default.
+	 * Read theme support and apply options from admin for whether theme support is enabled and via what template is enabled.
 	 *
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
 	 */
-	public static function apply_options() {
+	public static function read_theme_support() {
 		self::$support_added_via_option = false;
 
-		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
-		$theme_support_args   = false;
-
-		// @todo Do we really need this optional flag? Yes. As it allows us to define the mode. Maybe it should be 'required' instead. Key for theme marketplaces? But if a theme is using the AMP features anyway, then it should have AMP as built-in and not be optional.
-		// If theme support is present in the theme, but it is marked as optional, then go ahead and remove it if theme support is not enabled in the admin.
+		self::$initial_theme_support_args = false;
 		if ( current_theme_supports( 'amp' ) ) {
-			$support            = get_theme_support( 'amp' );
-			$theme_support_args = array();
+			self::$initial_theme_support_args = array();
+
+			$support = get_theme_support( 'amp' );
 			if ( is_array( $support ) ) {
-				$theme_support_args = array_shift( $support );
-				if ( ! empty( $theme_support_args['optional'] ) && 'disabled' === $theme_support_option ) {
-					remove_theme_support( 'amp' );
-					return;
+				self::$initial_theme_support_args = array_shift( $support );
+
+				// Validate theme support usage.
+				if ( WP_DEBUG ) {
+					$keys = array( 'template_dir', 'comments_live_list', 'mode', 'optional', 'templates_supported' );
+					if ( ! is_array( self::$initial_theme_support_args ) ) {
+						trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+					} elseif ( count( array_diff( array_keys( self::$initial_theme_support_args ), $keys ) ) !== 0 ) {
+						trigger_error( esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+							/* translators: %1$s is expected keys and %2$s is actual keys */
+							__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
+							join( ', ', $keys ),
+							join( ', ', array_keys( self::$initial_theme_support_args ) )
+						) ) );
+					}
 				}
 			}
+		}
+
+		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+		$theme_support_args   = self::$initial_theme_support_args;
+
+		// If theme support is present in the theme, but it is marked as optional, then go ahead and remove it if theme support is not enabled in the admin.
+		if ( current_theme_supports( 'amp' ) && ! empty( $theme_support_args['optional'] ) && 'disabled' === $theme_support_option ) {
+			remove_theme_support( 'amp' );
+			return;
 		}
 
 		if ( ! $theme_support_args ) {
@@ -192,8 +211,37 @@ class AMP_Theme_Support {
 			add_theme_support( 'amp', array_merge( $option_args, $theme_support_args ) );
 			self::$support_added_via_option = $option_args;
 		}
+	}
 
-		// @todo Allow paired mode to be switched via option if optional flag is true?
+	/**
+	 * Get the theme support args.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $options Options.
+	 * @return array|false Theme support args.
+	 */
+	public static function get_theme_support_args( $options = array() ) {
+		$options = array_merge(
+			array( 'initial' => false ),
+			$options
+		);
+
+		if ( $options['initial'] ) {
+			return self::$initial_theme_support_args;
+		}
+
+		if ( ! current_theme_supports( 'amp' ) ) {
+			return false;
+		}
+
+		$theme_support_args = get_theme_support( 'amp' );
+		if ( is_array( $theme_support_args ) ) {
+			$theme_support_args = array_shift( $theme_support_args );
+		} else {
+			$theme_support_args = array();
+		}
+		return $theme_support_args;
 	}
 
 	/**
@@ -209,8 +257,8 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		$theme_support = get_theme_support( 'amp' );
-		if ( ! empty( $theme_support[0]['template_dir'] ) ) {
+		$theme_support = self::get_theme_support_args();
+		if ( ! empty( $theme_support['template_dir'] ) ) {
 			self::add_amp_template_filters();
 		}
 
@@ -345,6 +393,17 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Return whether support for all templates is required by the theme.
+	 *
+	 * @since 1.0
+	 * @return bool Whether theme requires all templates to support AMP.
+	 */
+	public static function is_template_support_required() {
+		$theme_support_args = self::get_theme_support_args( array( 'initial' => true ) );
+		return ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
+	}
+
+	/**
 	 * Determine template availability of AMP for the given query.
 	 *
 	 * This is not intended to return whether AMP is available for a _specific_ post. For that, use `post_supports_amp()`.
@@ -395,12 +454,28 @@ class AMP_Theme_Support {
 			);
 		}
 
-		if ( ! current_theme_supports( 'amp' ) ) {
+		$theme_support_args = self::get_theme_support_args();
+		if ( false === $theme_support_args ) {
 			return array_merge(
 				$default_response,
 				array( 'errors' => array( 'no_theme_support' ) )
 			);
 		}
+
+		$all_templates_supported_by_theme_support = false;
+		$theme_templates_supported                = array();
+		if ( isset( $theme_support_args['templates_supported'] ) ) {
+			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
+			if ( is_array( $theme_support_args['templates_supported'] ) ) {
+				$theme_templates_supported = $theme_support_args['templates_supported'];
+			}
+		}
+		$all_templates_supported          = (
+			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( 'all_templates_supported' )
+		);
+		$unrecognized_templates_supported = (
+			isset( $theme_templates_supported['unrecognized'] ) ? true === $theme_templates_supported['unrecognized'] : AMP_Options_Manager::get_option( 'unrecognized_templates_supported' )
+		);
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
@@ -415,7 +490,7 @@ class AMP_Theme_Support {
 				$callback = $supportable_template['callback'];
 			}
 
-			// If the available_callback is a method on the query, then call the method on the query itself.
+			// If the callback is a method on the query, then call the method on the query itself.
 			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
 				$is_match = call_user_func( array( $query, $callback ) );
 			} elseif ( is_callable( $callback ) ) {
@@ -433,6 +508,8 @@ class AMP_Theme_Support {
 						! empty( $supportable_template['supported'] )
 						||
 						( AMP_Options_Manager::get_option( 'all_templates_supported' ) && empty( $supportable_template['immutable'] ) )
+						||
+						$all_templates_supported_by_theme_support // Make sure theme support flag is given final say.
 					),
 					'immutable' => ! empty( $supportable_template['immutable'] ),
 				);
@@ -477,7 +554,7 @@ class AMP_Theme_Support {
 
 		// If there aren't any matching templates left that are supported, then we consider it to not be available.
 		if ( ! $matching_template ) {
-			if ( AMP_Options_Manager::get_option( 'all_templates_supported' ) || AMP_Options_Manager::get_option( 'unrecognized_templates_supported' ) ) {
+			if ( $all_templates_supported || $unrecognized_templates_supported ) {
 				return array_merge(
 					$default_response,
 					array(
@@ -613,6 +690,16 @@ class AMP_Theme_Support {
 					return $query->is_post_type_archive( $post_type->name );
 				},
 			);
+		}
+
+		// Pre-populate template supported state by theme support flag.
+		$theme_support_args = self::get_theme_support_args( array( 'initial' => true ) );
+		if ( isset( $theme_support_args['templates_supported'] ) && is_array( $theme_support_args['templates_supported'] ) ) {
+			foreach ( $templates as $id => &$template ) {
+				if ( isset( $theme_support_args['templates_supported'][ $id ] ) ) {
+					$templates[ $id ]['supported'] = $theme_support_args['templates_supported'][ $id ];
+				}
+			}
 		}
 
 		/**
@@ -837,10 +924,10 @@ class AMP_Theme_Support {
 	 * @return string|null URL if redirect to be done; otherwise function will exist.
 	 */
 	public static function filter_comment_post_redirect( $url, $comment ) {
-		$theme_support = get_theme_support( 'amp' );
+		$theme_support = self::get_theme_support_args();
 
 		// Cause a page refresh if amp-live-list is not implemented for comments via add_theme_support( 'amp', array( 'comments_live_list' => true ) ).
-		if ( empty( $theme_support[0]['comments_live_list'] ) ) {
+		if ( empty( $theme_support['comments_live_list'] ) ) {
 			/*
 			 * Add the comment ID to the URL to force AMP to refresh the page.
 			 * This is ideally a temporary workaround to deal with https://github.com/ampproject/amphtml/issues/14170
@@ -1059,8 +1146,7 @@ class AMP_Theme_Support {
 	 * @return array Templates.
 	 */
 	public static function filter_amp_template_hierarchy( $templates ) {
-		$support = get_theme_support( 'amp' );
-		$args    = array_shift( $support );
+		$args = self::get_theme_support_args();
 		if ( isset( $args['template_dir'] ) ) {
 			$amp_templates = array();
 			foreach ( $templates as $template ) {

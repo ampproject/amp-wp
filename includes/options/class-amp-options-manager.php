@@ -121,31 +121,37 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $new_options['theme_support'];
 		}
 
-		$options['force_sanitization']               = ! empty( $new_options['force_sanitization'] );
-		$options['accept_tree_shaking']              = ! empty( $new_options['accept_tree_shaking'] );
-		$options['disable_admin_bar']                = ! empty( $new_options['disable_admin_bar'] );
-		$options['all_templates_supported']          = ! empty( $new_options['all_templates_supported'] );
-		$options['unrecognized_templates_supported'] = ! empty( $new_options['unrecognized_templates_supported'] );
+		$options['force_sanitization']  = ! empty( $new_options['force_sanitization'] );
+		$options['accept_tree_shaking'] = ! empty( $new_options['accept_tree_shaking'] );
+		$options['disable_admin_bar']   = ! empty( $new_options['disable_admin_bar'] );
 
-		// Validate post type support.
-		$options['supported_post_types'] = array();
-		if ( isset( $new_options['supported_post_types'] ) ) {
-			foreach ( $new_options['supported_post_types'] as $post_type ) {
-				if ( ! post_type_exists( $post_type ) ) {
-					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
-				} else {
-					$options['supported_post_types'][] = $post_type;
+		$theme_support_args = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) );
+		if ( ! AMP_Theme_Support::is_template_support_required() ) {
+			$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
+			if ( ! isset( $theme_support_args['templates_supported']['unrecognized'] ) ) {
+				$options['unrecognized_templates_supported'] = ! empty( $new_options['unrecognized_templates_supported'] );
+			}
+
+			// Validate post type support.
+			$options['supported_post_types'] = array();
+			if ( isset( $new_options['supported_post_types'] ) ) {
+				foreach ( $new_options['supported_post_types'] as $post_type ) {
+					if ( ! post_type_exists( $post_type ) ) {
+						add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
+					} else {
+						$options['supported_post_types'][] = $post_type;
+					}
 				}
 			}
-		}
 
-		// Validate supported templates.
-		$options['supported_templates'] = array();
-		if ( isset( $new_options['supported_templates'] ) ) {
-			$options['supported_templates'] = array_intersect(
-				$new_options['supported_templates'],
-				array_keys( AMP_Theme_Support::get_supportable_templates() )
-			);
+			// Validate supported templates.
+			$options['supported_templates'] = array();
+			if ( isset( $new_options['supported_templates'] ) ) {
+				$options['supported_templates'] = array_intersect(
+					$new_options['supported_templates'],
+					array_keys( AMP_Theme_Support::get_supportable_templates() )
+				);
+			}
 		}
 
 		// Validate analytics.
