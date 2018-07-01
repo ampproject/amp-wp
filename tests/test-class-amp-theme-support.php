@@ -73,26 +73,76 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', array( self::TESTED_CLASS, 'finish_init' ) ) );
 		$this->assertFalse( isset( $_REQUEST['__amp_source_origin'] ) ); // WPCS: CSRF ok.
+	}
 
-		add_theme_support( 'amp', 'invalid_argumnet_type' );
+	/**
+	 * Test read_theme_support, get_theme_support_args, and is_support_added_via_option.
+	 *
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 * @covers \AMP_Theme_Support::is_support_added_via_option()
+	 * @covers \AMP_Theme_Support::get_theme_support_args()
+	 */
+	public function test_read_theme_support_and_support_args() {
+
+		// Test invalid arg for theme support.
+		add_theme_support( 'amp', 'invalid_argument_type' );
 		$e = null;
 		try {
-			AMP_Theme_Support::init();
+			AMP_Theme_Support::read_theme_support( true );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
 		$this->assertInstanceOf( 'PHPUnit_Framework_Error_Notice', $e );
 		$this->assertEquals( 'Expected AMP theme support arg to be array.', $e->getMessage() );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
 
-		add_theme_support( 'amp', array(
+		// Test invalid args for theme support.
+		$args = array(
+			'mode'              => 'native',
 			'invalid_param_key' => array(),
-		) );
+		);
+		add_theme_support( 'amp', $args );
 		try {
-			AMP_Theme_Support::init();
+			AMP_Theme_Support::read_theme_support( true );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
 		$this->assertStringStartsWith( 'Expected AMP theme support to keys', $e->getMessage() );
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+
+		// Test behavior of optional flag, that AMP is not enabled if the DB option is not set.
+		$args = array(
+			'optional' => true,
+			'mode'     => 'native',
+		);
+		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		add_theme_support( 'amp', $args );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
+		$this->assertFalse( AMP_Theme_Support::get_theme_support_args() );
+		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertFalse( current_theme_supports( 'amp' ) );
+
+		// Test again with option set, but some configs supplied via theme support.
+		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		$args = array(
+			'optional'            => true,
+			'templates_supported' => 'native',
+		);
+		add_theme_support( 'amp', $args );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
+		$this->assertEquals(
+			array_merge(
+				$args,
+				array( 'mode' => 'native' )
+			),
+			AMP_Theme_Support::get_theme_support_args( array( 'initial' => false ) )
+		);
+		$this->assertTrue( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
 
 	/**

@@ -24,16 +24,14 @@ class AMP_Options_Manager {
 	 */
 	protected static $defaults = array(
 		'theme_support'                    => 'disabled',
-		'supported_post_types'             => array( 'post' ), // @todo Try updating from 0.7 to 1.0.
+		'supported_post_types'             => array( 'post' ),
 		'analytics'                        => array(),
 		'force_sanitization'               => false,
 		'accept_tree_shaking'              => false,
 		'disable_admin_bar'                => false,
 		'all_templates_supported'          => true,
-		'unrecognized_templates_supported' => true,
-		'supported_templates'              => array(
-			'is_singular', // @todo Why?
-		),
+		'unrecognized_templates_supported' => false,
+		'supported_templates'              => array( 'is_singular' ),
 	);
 
 	/**
@@ -132,7 +130,6 @@ class AMP_Options_Manager {
 				$options['unrecognized_templates_supported'] = ! empty( $new_options['unrecognized_templates_supported'] );
 			}
 
-			// @todo Store associative array instead?
 			// Validate post type support.
 			$options['supported_post_types'] = array();
 			if ( isset( $new_options['supported_post_types'] ) ) {
@@ -145,7 +142,6 @@ class AMP_Options_Manager {
 				}
 			}
 
-			// @todo Store associative array instead.
 			// Validate supported templates.
 			$options['supported_templates'] = array();
 			if ( isset( $new_options['supported_templates'] ) ) {
@@ -200,6 +196,9 @@ class AMP_Options_Manager {
 				}
 			}
 		}
+
+		// Store the current version with the options so we know the format.
+		$options['version'] = AMP__VERSION;
 
 		return $options;
 	}

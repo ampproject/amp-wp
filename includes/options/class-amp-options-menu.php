@@ -258,6 +258,7 @@ class AMP_Options_Menu {
 			<script>
 				jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
 					jQuery( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === this.value );
+					jQuery( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === this.value );
 					jQuery( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== this.value );
 					jQuery( '#force_sanitization' ).trigger( 'change' );
 				} ).filter( ':checked' ).trigger( 'change' );

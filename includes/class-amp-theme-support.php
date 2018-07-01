@@ -157,8 +157,10 @@ class AMP_Theme_Support {
 	 * Read theme support and apply options from admin for whether theme support is enabled and via what template is enabled.
 	 *
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
+	 *
+	 * @param bool $check_args Whether the theme support args should be checked.
 	 */
-	public static function read_theme_support() {
+	public static function read_theme_support( $check_args = WP_DEBUG ) {
 		self::$support_added_via_option = false;
 
 		self::$initial_theme_support_args = false;
@@ -170,7 +172,7 @@ class AMP_Theme_Support {
 				self::$initial_theme_support_args = array_shift( $support );
 
 				// Validate theme support usage.
-				if ( WP_DEBUG ) {
+				if ( $check_args ) {
 					$keys = array( 'template_dir', 'comments_live_list', 'mode', 'optional', 'templates_supported' );
 					if ( ! is_array( self::$initial_theme_support_args ) ) {
 						trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
@@ -199,8 +201,8 @@ class AMP_Theme_Support {
 			$theme_support_args = array();
 		}
 
-		// If theme support is not present, then allow it to be added via the admin.
-		if ( ! current_theme_supports( 'amp' ) ) {
+		// If theme support is not present (or it is optional), then allow it to be added via the admin.
+		if ( ! current_theme_supports( 'amp' ) || ! empty( $theme_support_args['optional'] ) ) {
 			if ( 'disabled' === $theme_support_option ) {
 				return;
 			}
