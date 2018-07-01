@@ -264,11 +264,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 		remove_filter( 'amp_skip_post', '__return_true' );
 
-		// Check that available_callback works.
+		// Check that mode=paired works.
 		add_theme_support( 'amp', array(
-			'template_dir'       => 'amp-templates',
-			'available_callback' => 'is_singular',
+			'mode' => 'paired',
 		) );
+		add_filter( 'amp_supportable_templates', function( $supportable_templates ) {
+			$supportable_templates['is_singular']['supported'] = true;
+			$supportable_templates['is_search']['supported']   = false;
+			return $supportable_templates;
+		} );
 		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
 		$this->assertTrue( is_singular() );
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
@@ -1067,6 +1071,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::finish_init();
 		$wp_widget_factory = new WP_Widget_Factory();
 		wp_widgets_init();
+
+		$this->assertTrue( is_amp_endpoint() );
 
 		add_action( 'wp_enqueue_scripts', function() {
 			wp_enqueue_script( 'amp-list' );

@@ -478,10 +478,19 @@ class AMP_Theme_Support {
 
 		// If there aren't any matching templates left that are supported, then we consider it to not be available.
 		if ( ! $matching_template ) {
-			return array_merge(
-				$default_response,
-				array( 'errors' => array( 'no_matching_template' ) )
-			);
+			if ( AMP_Options_Manager::get_option( 'all_templates_supported' ) ) {
+				return array_merge(
+					$default_response,
+					array(
+						'supported' => true,
+					)
+				);
+			} else {
+				return array_merge(
+					$default_response,
+					array( 'errors' => array( 'no_matching_template' ) )
+				);
+			}
 		}
 		$matching_template = array_merge( $default_response, $matching_template );
 

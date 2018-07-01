@@ -93,7 +93,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals(
 			array(
 				'theme_support'           => 'disabled',
-				'supported_post_types'    => array(),
+				'supported_post_types'    => array(
+					'post',
+				),
 				'analytics'               => array(),
 				'force_sanitization'      => false,
 				'accept_tree_shaking'     => false,
@@ -210,6 +212,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_check_supported_post_type_update_errors() {
 		global $wp_settings_errors;
+		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		foreach ( get_post_types() as $post_type ) {
+			remove_post_type_support( $post_type, 'amp' );
+		}
 
 		register_post_type( 'foo', array(
 			'public' => true,
