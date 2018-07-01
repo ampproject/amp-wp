@@ -23,14 +23,15 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = array(
-		'theme_support'           => 'disabled',
-		'supported_post_types'    => array( 'post' ),
-		'analytics'               => array(),
-		'force_sanitization'      => false,
-		'accept_tree_shaking'     => false,
-		'disable_admin_bar'       => false,
-		'all_templates_supported' => true,
-		'supported_templates'     => array(
+		'theme_support'                    => 'disabled',
+		'supported_post_types'             => array( 'post' ),
+		'analytics'                        => array(),
+		'force_sanitization'               => false,
+		'accept_tree_shaking'              => false,
+		'disable_admin_bar'                => false,
+		'all_templates_supported'          => true,
+		'unrecognized_templates_supported' => true,
+		'supported_templates'              => array(
 			'is_singular',
 		),
 	);
@@ -120,10 +121,11 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $new_options['theme_support'];
 		}
 
-		$options['force_sanitization']      = ! empty( $new_options['force_sanitization'] );
-		$options['accept_tree_shaking']     = ! empty( $new_options['accept_tree_shaking'] );
-		$options['disable_admin_bar']       = ! empty( $new_options['disable_admin_bar'] );
-		$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
+		$options['force_sanitization']               = ! empty( $new_options['force_sanitization'] );
+		$options['accept_tree_shaking']              = ! empty( $new_options['accept_tree_shaking'] );
+		$options['disable_admin_bar']                = ! empty( $new_options['disable_admin_bar'] );
+		$options['all_templates_supported']          = ! empty( $new_options['all_templates_supported'] );
+		$options['unrecognized_templates_supported'] = ! empty( $new_options['unrecognized_templates_supported'] );
 
 		// Validate post type support.
 		$options['supported_post_types'] = array();

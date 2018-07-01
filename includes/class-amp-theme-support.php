@@ -163,7 +163,6 @@ class AMP_Theme_Support {
 		$theme_support_args   = false;
 
 		// @todo Do we really need this optional flag? Yes. As it allows us to define the mode. Maybe it should be 'required' instead. Key for theme marketplaces? But if a theme is using the AMP features anyway, then it should have AMP as built-in and not be optional.
-
 		// If theme support is present in the theme, but it is marked as optional, then go ahead and remove it if theme support is not enabled in the admin.
 		if ( current_theme_supports( 'amp' ) ) {
 			$support            = get_theme_support( 'amp' );
@@ -478,7 +477,7 @@ class AMP_Theme_Support {
 
 		// If there aren't any matching templates left that are supported, then we consider it to not be available.
 		if ( ! $matching_template ) {
-			if ( AMP_Options_Manager::get_option( 'all_templates_supported' ) ) {
+			if ( AMP_Options_Manager::get_option( 'all_templates_supported' ) || AMP_Options_Manager::get_option( 'unrecognized_templates_supported' ) ) {
 				return array_merge(
 					$default_response,
 					array(
@@ -573,10 +572,6 @@ class AMP_Theme_Support {
 				'is_404'     => array(
 					'label' => __( 'Not Found (404)', 'amp' ),
 				),
-//				'other'    => array(
-//					'label'    => __( 'Other', 'amp' ),
-//					'callback' => '__return_true', // @todo This can be treated as the parent of all, as the default.
-//				),
 			)
 		);
 

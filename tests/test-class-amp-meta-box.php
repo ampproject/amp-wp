@@ -112,6 +112,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// No template is available to render the post.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( 'unrecognized_templates_supported', false );
 		ob_start();
 		$this->instance->render_status( $post );
 		$output = ob_get_clean();
