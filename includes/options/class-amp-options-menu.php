@@ -290,7 +290,7 @@ class AMP_Options_Menu {
 
 		?>
 		<fieldset id="all_templates_supported_fieldset">
-			<?php if ( AMP_Theme_Support::is_template_support_required() ) : ?>
+			<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
 				<div class="notice notice-info notice-alt inline">
 					<p>
 						<?php esc_html_e( 'The current theme requires all templates to support AMP.', 'amp' ); ?>

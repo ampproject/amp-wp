@@ -57,7 +57,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test init.
 	 *
 	 * @covers AMP_Theme_Support::init()
-	 * @covers AMP_Theme_Support::finish_init()
 	 */
 	public function test_init() {
 		$_REQUEST['__amp_source_origin'] = 'foo';
@@ -146,38 +145,43 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that amphtml link is added at the right time.
+	 * Test that init finalization, including amphtml link is added at the right time.
 	 *
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
-	public function test_amphtml_link() {
+	public function test_finish_init() {
 		$post_id = $this->factory()->post->create( array( 'post_title' => 'Test' ) );
 		add_theme_support( 'amp', array(
-			'template_dir'       => '...',
-			'available_callback' => function() {
-				return is_singular();
-			},
+			'mode'         => 'paired',
+			'template_dir' => 'amp',
 		) );
 
-		// Test paired mode singular.
+		// Test paired mode singular, where not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
+		$this->assertFalse( is_amp_endpoint() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
-		// Test paired mode homepage.
+		// Test paired mode homepage, where still not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
+		$this->assertFalse( is_amp_endpoint() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
-		// Test canonical.
+		// Test canonical, so amphtml link is not added and init finalizes.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
-		remove_theme_support( 'amp' );
-		add_theme_support( 'amp' );
+		add_theme_support( 'amp', array(
+			'mode'         => 'native',
+			'template_dir' => 'amp',
+		) );
 		$this->go_to( get_permalink( $post_id ) );
+		$this->assertTrue( is_amp_endpoint() );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', array( 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ) ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
+		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ), 'Expected add_hooks to have been called' );
 	}
 
 	/**
@@ -350,11 +354,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test register_paired_hooks.
+	 * Test add_amp_template_filters.
 	 *
 	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
-	public function test_register_paired_hooks() {
+	public function test_add_amp_template_filters() {
 		$template_types = array(
 			'paged',
 			'index',
@@ -407,6 +411,34 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// MathML script was added.
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+	}
+
+	/**
+	 * Test get_template_availability.
+	 *
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability() {
+		$this->markTestIncomplete();
+		// @todo Test nested.
+		// @todo Test callback vs ID.
+		// @todo Test with query, post, or page.
+		// @todo Test without availability of WP_Query (no_query_available).
+		// @todo Test without theme support (no_theme_support).
+		// @todo Test unrecognized by theme support arg.
+		// @todo Test unrecognized.
+	}
+
+	/**
+	 * Test get_supportable_templates.
+	 *
+	 * @covers AMP_Theme_Support::get_supportable_templates()
+	 */
+	public function test_get_supportable_templates() {
+		$this->markTestIncomplete();
+		// @todo Register custom taxonomy.
+		// @todo Set static front page
+		// @todo Add custom post types.
 	}
 
 	/**
@@ -812,11 +844,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test filter_paired_template_hierarchy.
+	 * Test filter_amp_template_hierarchy.
 	 *
 	 * @covers AMP_Theme_Support::filter_amp_template_hierarchy()
 	 */
-	public function test_filter_paired_template_hierarchy() {
+	public function test_filter_amp_template_hierarchy() {
 		$template_dir = 'amp-templates';
 		add_theme_support( 'amp', array(
 			'template_dir' => $template_dir,
@@ -948,6 +980,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$filtered_link_no_text_passed = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, '' );
 		$this->assertContains( 'Click here to cancel reply.', $filtered_link_no_text_passed );
+	}
+
+	/**
+	 * Test init_admin_bar.
+	 *
+	 * @covers \AMP_Theme_Support::init_admin_bar()
+	 */
+	public function test_init_admin_bar() {
+		$this->markTestIncomplete();
 	}
 
 	/**

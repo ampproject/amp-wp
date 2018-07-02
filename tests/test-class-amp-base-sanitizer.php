@@ -108,7 +108,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param array $source_attributes   Source Attrs.
 	 * @param array $expected_attributes Expected Attrs.
 	 * @param array $args                Args.
-	 * @covers AMP_Base_Sanitizer::enforce_fixed_height()
+	 * @covers AMP_Base_Sanitizer::set_layout()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = array() ) {
 		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
@@ -316,7 +316,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests set_attachment_layout_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::set_attachment_layout_attributes()
+	 * @covers AMP_Base_Sanitizer::filter_attachment_layout_attributes()
 	 */
 	public function test_filter_attachment_layout_attributes() {
 		$sanitizer    = new AMP_Test_Stub_Sanitizer( new DOMDocument(), array() );

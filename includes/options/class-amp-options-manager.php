@@ -124,7 +124,9 @@ class AMP_Options_Manager {
 		$options['disable_admin_bar']   = ! empty( $new_options['disable_admin_bar'] );
 
 		$theme_support_args = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) );
-		if ( ! AMP_Theme_Support::is_template_support_required() ) {
+
+		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
+		if ( ! $is_template_support_required ) {
 			$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
 			if ( ! isset( $theme_support_args['templates_supported']['unrecognized'] ) ) {
 				$options['unrecognized_templates_supported'] = ! empty( $new_options['unrecognized_templates_supported'] );

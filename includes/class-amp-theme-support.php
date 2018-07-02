@@ -309,10 +309,12 @@ class AMP_Theme_Support {
 				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
 				if ( $old_url !== $new_url ) {
 					wp_safe_redirect( $new_url, 302 );
+					// @codeCoverageIgnoreStart
 					if ( $exit ) {
 						exit;
 					}
 					return true;
+					// @codeCoverageIgnoreEnd
 				}
 			}
 		}
@@ -343,10 +345,12 @@ class AMP_Theme_Support {
 		 * occur or when a non-canonical AMP theme is used.
 		 */
 		wp_safe_redirect( $ampless_url, 302 );
+		// @codeCoverageIgnoreStart
 		if ( $exit ) {
 			exit;
 		}
 		return true;
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -392,17 +396,6 @@ class AMP_Theme_Support {
 		foreach ( self::$template_types as $template_type ) {
 			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
 		}
-	}
-
-	/**
-	 * Return whether support for all templates is required by the theme.
-	 *
-	 * @since 1.0
-	 * @return bool Whether theme requires all templates to support AMP.
-	 */
-	public static function is_template_support_required() {
-		$theme_support_args = self::get_theme_support_args( array( 'initial' => true ) );
-		return ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
 	}
 
 	/**
@@ -475,7 +468,7 @@ class AMP_Theme_Support {
 		$all_templates_supported          = (
 			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( 'all_templates_supported' )
 		);
-		$unrecognized_templates_supported = (
+		$unrecognized_templates_supported = ( // @todo Get this from $supportable_templates.
 			isset( $theme_templates_supported['unrecognized'] ) ? true === $theme_templates_supported['unrecognized'] : AMP_Options_Manager::get_option( 'unrecognized_templates_supported' )
 		);
 
