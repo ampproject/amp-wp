@@ -489,7 +489,7 @@ class AMP_Theme_Support {
 			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
 				$is_match = call_user_func( array( $query, $callback ) );
 			} elseif ( is_callable( $callback ) ) {
-				$is_match = call_user_func( $callback );
+				$is_match = call_user_func( $callback, $query );
 			} else {
 				/* translators: %s is the supportable template ID. */
 				_doing_it_wrong( __FUNCTION__, esc_html__( 'Supportable template "%s" does not have a callable callback.', 'amp' ), '1.0' );
@@ -535,6 +535,15 @@ class AMP_Theme_Support {
 			}
 		}
 
+		// The is_home() condition is the default so discard it if there are other matching templates.
+		if ( count( $matching_templates ) > 1 && isset( $matching_templates['is_home'] ) ) {
+			unset( $matching_templates['is_home'] );
+		}
+
+		/*
+		 * If there are more than one matching templates, then something is probably not right.
+		 * Template conditions need to be set up properly to prevent this from happening.
+		 */
 		if ( count( $matching_templates ) > 1 ) {
 			_doing_it_wrong( __FUNCTION__, esc_html__( 'Did not expect there to be more than one matching template. Did you filter amp_supportable_templates to not honor the template hierarchy?', 'amp' ), '1.0' );
 		}
