@@ -123,6 +123,9 @@ function amp_get_permalink( $post_id ) {
 			||
 			// If the post type is hierarchical then the /amp/ endpoint isn't available.
 			is_post_type_hierarchical( get_post_type( $post_id ) )
+			||
+			// Attachment pages don't accept the /amp/ endpoint.
+			'attachment' === get_post_type( $post_id )
 		);
 		if ( $use_query_var ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );

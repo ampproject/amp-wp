@@ -172,6 +172,7 @@ class AMP_Theme_Support {
 				// Validate theme support usage.
 				$keys = array( 'template_dir', 'comments_live_list', 'mode', 'optional', 'templates_supported', 'available_callback' );
 				if ( ! is_array( self::$initial_theme_support_args ) ) {
+					self::$initial_theme_support_args = array();
 					_doing_it_wrong( 'add_theme_support', esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ), '1.0' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 				} elseif ( count( array_diff( array_keys( self::$initial_theme_support_args ), $keys ) ) !== 0 ) {
 					_doing_it_wrong( 'add_theme_support', esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
