@@ -442,7 +442,7 @@ class AMP_Theme_Support {
 		);
 
 		if ( ! ( $query instanceof WP_Query ) ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'No WP_Query available.', 'amp' ), '1.0' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'No WP_Query available.', 'amp' ), '1.0' );
 			return array_merge(
 				$default_response,
 				array( 'errors' => array( 'no_query_available' ) )
@@ -503,6 +503,9 @@ class AMP_Theme_Support {
 
 		// Make sure children override their parents.
 		$matching_template_ids = array_keys( $matching_templates );
+		foreach ( array_diff( array_keys( $supportable_templates ), $matching_template_ids ) as $template_id ) {
+			unset( $supportable_templates[ $template_id ] );
+		}
 		foreach ( $matching_template_ids as $id ) {
 			$has_children = false;
 			foreach ( $supportable_templates as $other_id => $supportable_template ) {
@@ -538,7 +541,7 @@ class AMP_Theme_Support {
 		 * Template conditions need to be set up properly to prevent this from happening.
 		 */
 		if ( count( $matching_templates ) > 1 ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'Did not expect there to be more than one matching template. Did you filter amp_supportable_templates to not honor the template hierarchy?', 'amp' ), '1.0' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Did not expect there to be more than one matching template. Did you filter amp_supportable_templates to not honor the template hierarchy?', 'amp' ), '1.0' );
 		}
 
 		$matching_template = array_shift( $matching_templates );

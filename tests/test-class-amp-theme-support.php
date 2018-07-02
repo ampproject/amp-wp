@@ -414,17 +414,108 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test incorrect usage for get_template_availability.
+	 *
+	 * @expectedIncorrectUsage AMP_Theme_Support::get_template_availability
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_incorrect_usage_get_template_availability() {
+		global $wp_query;
+
+		// Test no query available.
+		$wp_query     = null; // WPCS: override ok.
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertInternalType( 'array', $availability );
+		$this->assertEquals( array( 'no_query_available' ), $availability['errors'] );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertNull( $availability['immutable'] );
+		$this->assertNull( $availability['template'] );
+
+		// Test no theme support.
+		remove_theme_support( 'amp' );
+		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEquals( array( 'no_theme_support' ), $availability['errors'] );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertNull( $availability['immutable'] );
+		$this->assertNull( $availability['template'] );
+	}
+
+	/**
 	 * Test get_template_availability.
 	 *
 	 * @covers AMP_Theme_Support::get_template_availability()
 	 */
 	public function test_get_template_availability() {
-		$this->markTestIncomplete();
-		// @todo Test nested.
-		// @todo Test callback vs ID.
-		// @todo Test with query, post, or page.
-		// @todo Test without availability of WP_Query (no_query_available).
-		// @todo Test without theme support (no_theme_support).
+		global $wp_query;
+		$post_id = $this->factory()->post->create();
+		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
+
+		// Test successful match of singular template.
+		$this->assertTrue( is_singular() );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		add_theme_support( 'amp' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEmpty( $availability['errors'] );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertFalse( $availability['immutable'] );
+		$this->assertEquals( 'is_singular', $availability['template'] );
+
+		// Test successful match when passing WP_Query and WP_Post into method.
+		$query        = $wp_query;
+		$wp_query     = null; // WPCS: override ok.
+		$availability = AMP_Theme_Support::get_template_availability( $query );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_singular', $availability['template'] );
+		$availability = AMP_Theme_Support::get_template_availability( get_post( $post_id ) );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_singular', $availability['template'] );
+		$this->assertNull( $wp_query ); // Make sure it is reset.
+
+		// Test nested hierarchy.
+		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_special' ) );
+		add_filter( 'amp_supportable_templates', function( $templates ) {
+			$templates['is_single']  = array(
+				'label'     => 'Single post',
+				'supported' => false,
+				'parent'    => 'is_singular',
+			);
+			$templates['is_special'] = array(
+				'label'    => 'Special post',
+				'parent'   => 'is_single',
+				'callback' => function( WP_Query $query ) {
+					return $query->is_singular() && 'special' === get_post( $query->get_queried_object_id() )->post_name;
+				},
+			);
+			$templates['is_page']    = array(
+				'label'     => 'Page',
+				'supported' => true,
+				'parent'    => 'is_singular',
+			);
+			return $templates;
+		} );
+
+		$availability = AMP_Theme_Support::get_template_availability( get_post( $post_id ) );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertTrue( $availability['immutable'] );
+		$this->assertEquals( 'is_single', $availability['template'] );
+
+		$special_id   = $this->factory()->post->create( array(
+			'post_type' => 'post',
+			'post_name' => 'special',
+		) );
+		$availability = AMP_Theme_Support::get_template_availability( get_post( $special_id ) );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_special', $availability['template'] );
+		$this->assertFalse( $availability['immutable'] );
+
+		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertEquals( array( 'post-type-support' ), $availability['errors'] );
+		$this->assertEquals( 'is_page', $availability['template'] );
+		add_post_type_support( 'page', 'amp' );
+		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
+		$this->assertTrue( $availability['supported'] );
 	}
 
 	/**
