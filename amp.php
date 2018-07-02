@@ -272,28 +272,67 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 }
 
 /**
- * Whether this is in 'canonical mode.'
+ * Whether this is in 'canonical mode'.
  *
- * Themes can register support for this with `add_theme_support( 'amp' )`.
- * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
- * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
- * `add_theme_support( 'amp', array( 'template_dir' => 'my-amp-templates' ) )`
- * it will retain 'paired mode.
+ * Themes can register support for this with `add_theme_support( 'amp' )`:
  *
- * @return boolean Whether this is in AMP 'canonical mode'.
+ *      add_theme_support( 'amp' );
+ *
+ * This will serve templates in native AMP by default but the user would be able to change the template mode
+ * from native to paired in the admin. To force only native to be available, such as when you are using AMP components
+ * in your theme templates, do:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'mode' => 'native',
+ *      ) );
+ *
+ * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
+ * for example to always serve the Category template in AMP:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'templates_supported' => array(
+ *              'is_category' => true,
+ *          ),
+ *      ) );
+ *
+ * Or if you want to force AMP to be used on all templates:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'templates_supported' => 'all',
+ *      ) );
+ *
+ * @see AMP_Theme_Support::read_theme_support()
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
-	$support = get_theme_support( 'amp' );
-	if ( true === $support ) {
-		return true;
+	if ( ! current_theme_supports( 'amp' ) ) {
+		return false;
 	}
+
+	$mode    = 'native';
+	$support = get_theme_support( 'amp' );
 	if ( is_array( $support ) ) {
-		$args = array_shift( $support );
-		if ( empty( $args['template_dir'] ) ) {
-			return true;
+		$args    = array_shift( $support );
+		$support = AMP_Options_Manager::get_option( 'theme_support' );
+
+		// If support is optional, look at DB option if mode is not explicitly set in theme support.
+		if ( ! empty( $args['optional'] ) ) {
+			if ( 'disabled' === $support ) {
+				return false;
+			} elseif ( ! isset( $args['mode'] ) ) {
+				return 'native' === $support;
+			}
+		}
+
+		if ( isset( $args['mode'] ) ) {
+			$mode = $args['mode'];
+		} elseif ( 'disabled' !== $support ) {
+			$mode = $support; // Supplied via admin screen.
+		} elseif ( ! empty( $args['template_dir'] ) ) {
+			$mode = 'paired'; // If there is a template_dir, then paired mode is implied.
 		}
 	}
-	return false;
+	return 'native' === $mode;
 }
 
 /**
@@ -426,6 +465,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 
 /**
  * Redirects the old AMP URL to the new AMP URL.
+ *
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
  *
  * @since 0.5

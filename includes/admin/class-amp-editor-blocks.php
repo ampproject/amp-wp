@@ -43,6 +43,22 @@ class AMP_Editor_Blocks {
 		if ( function_exists( 'gutenberg_init' ) ) {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
+
+			/*
+			 * Dirty AMP is required when a site is in native mode but not all templates are being served
+			 * as AMP. In particular, if a single post is using AMP-specific Gutenberg Blocks which make
+			 * use of AMP components, and the singular template is served as AMP but the blog page is not,
+			 * then the non-AMP blog page need to load the AMP runtime scripts so that the AMP components
+			 * in the posts displayed there will be rendered properly. This is only relevant on native AMP
+			 * sites because the AMP Gutenberg blocks are only made available in that mode; they are not
+			 * presented in the Gutenberg inserter in paired mode. In general, using AMP components in
+			 * non-AMP documents is still not officially supported, so it's occurrence is being minimized
+			 * as much as possible. For more, see <https://github.com/Automattic/amp-wp/issues/1192>.
+			 */
+			if ( amp_is_canonical() ) {
+				add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
+				add_action( 'wp_print_footer_scripts', array( $this, 'print_dirty_amp_scripts' ) );
+			}
 		}
 	}
 
@@ -144,5 +160,33 @@ class AMP_Editor_Blocks {
 				'hasThemeSupport' => current_theme_supports( 'amp' ),
 			) ) )
 		);
+	}
+
+	/**
+	 * Tally the AMP component scripts that are needed in a dirty AMP document.
+	 *
+	 * @param string $content Content.
+	 * @return string Content (unmodified).
+	 */
+	public function tally_content_requiring_amp_scripts( $content ) {
+		if ( ! is_amp_endpoint() ) {
+			$pattern = sprintf( '/<(%s)\b.*?>/s', join( '|', $this->amp_blocks ) );
+			if ( preg_match_all( $pattern, $content, $matches ) ) {
+				$this->content_required_amp_scripts = array_merge(
+					$this->content_required_amp_scripts,
+					$matches[1]
+				);
+			}
+		}
+		return $content;
+	}
+
+	/**
+	 * Print AMP scripts required for AMP components used in a non-AMP document (dirty AMP).
+	 */
+	public function print_dirty_amp_scripts() {
+		if ( ! is_amp_endpoint() && ! empty( $this->content_required_amp_scripts ) ) {
+			wp_scripts()->do_items( $this->content_required_amp_scripts );
+		}
 	}
 }

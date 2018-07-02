@@ -57,7 +57,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test init.
 	 *
 	 * @covers AMP_Theme_Support::init()
-	 * @covers AMP_Theme_Support::finish_init()
 	 */
 	public function test_init() {
 		$_REQUEST['__amp_source_origin'] = 'foo';
@@ -73,61 +72,137 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', array( self::TESTED_CLASS, 'finish_init' ) ) );
 		$this->assertFalse( isset( $_REQUEST['__amp_source_origin'] ) ); // WPCS: CSRF ok.
-
-		add_theme_support( 'amp', 'invalid_argumnet_type' );
-		$e = null;
-		try {
-			AMP_Theme_Support::init();
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertInstanceOf( 'PHPUnit_Framework_Error_Notice', $e );
-		$this->assertEquals( 'Expected AMP theme support arg to be array.', $e->getMessage() );
-
-		add_theme_support( 'amp', array(
-			'invalid_param_key' => array(),
-		) );
-		try {
-			AMP_Theme_Support::init();
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertEquals( 'Expected AMP theme support to only have template_dir and/or available_callback.', $e->getMessage() );
 	}
 
 	/**
-	 * Test that amphtml link is added at the right time.
+	 * Test add_theme_support(amp) with invalid arg.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 * @covers \AMP_Theme_Support::get_theme_support_args()
+	 */
+	public function test_read_theme_support_bad_arg_type() {
+		add_theme_support( 'amp', 'invalid_argument_type' );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+	}
+
+	/**
+	 * Test add_theme_support(amp) with invalid args.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 * @covers \AMP_Theme_Support::get_theme_support_args()
+	 */
+	public function test_read_theme_support_bad_args_array() {
+		$args = array(
+			'mode'              => 'native',
+			'invalid_param_key' => array(),
+		);
+		add_theme_support( 'amp', $args );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+	}
+
+	/**
+	 * Test add_theme_support(amp) with invalid args.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 */
+	public function test_read_theme_support_bad_available_callback() {
+		add_theme_support( 'amp', array(
+			'available_callback' => function() {
+				return (bool) wp_rand( 0, 1 );
+			},
+		) );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+	}
+
+	/**
+	 * Test read_theme_support, get_theme_support_args, and is_support_added_via_option.
+	 *
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 * @covers \AMP_Theme_Support::is_support_added_via_option()
+	 * @covers \AMP_Theme_Support::get_theme_support_args()
+	 */
+	public function test_read_theme_support_and_support_args() {
+
+		// Test behavior of optional flag, that AMP is not enabled if the DB option is not set.
+		$args = array(
+			'optional' => true,
+			'mode'     => 'native',
+		);
+		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		add_theme_support( 'amp', $args );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
+		$this->assertFalse( AMP_Theme_Support::get_theme_support_args() );
+		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertFalse( current_theme_supports( 'amp' ) );
+
+		// Test again with option set, but some configs supplied via theme support.
+		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		$args = array(
+			'optional'            => true,
+			'templates_supported' => 'native',
+		);
+		add_theme_support( 'amp', $args );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
+		$this->assertEquals(
+			array_merge(
+				$args,
+				array( 'mode' => 'native' )
+			),
+			AMP_Theme_Support::get_theme_support_args( array( 'initial' => false ) )
+		);
+		$this->assertTrue( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+	}
+
+	/**
+	 * Test that init finalization, including amphtml link is added at the right time.
 	 *
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
-	public function test_amphtml_link() {
+	public function test_finish_init() {
 		$post_id = $this->factory()->post->create( array( 'post_title' => 'Test' ) );
 		add_theme_support( 'amp', array(
-			'template_dir'       => '...',
-			'available_callback' => function() {
-				return is_singular();
-			},
+			'mode'         => 'paired',
+			'template_dir' => 'amp',
 		) );
 
-		// Test paired mode singular.
+		// Test paired mode singular, where not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
+		$this->assertFalse( is_amp_endpoint() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
-		// Test paired mode homepage.
+		// Test paired mode homepage, where still not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
+		$this->assertFalse( is_amp_endpoint() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
-		// Test canonical.
+		// Test canonical, so amphtml link is not added and init finalizes.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
-		remove_theme_support( 'amp' );
-		add_theme_support( 'amp' );
+		add_theme_support( 'amp', array(
+			'mode'         => 'native',
+			'template_dir' => 'amp',
+		) );
 		$this->go_to( get_permalink( $post_id ) );
+		$this->assertTrue( is_amp_endpoint() );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', array( 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ) ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
+		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ), 'Expected add_hooks to have been called' );
 	}
 
 	/**
@@ -264,11 +339,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 		remove_filter( 'amp_skip_post', '__return_true' );
 
-		// Check that available_callback works.
+		// Check that mode=paired works.
 		add_theme_support( 'amp', array(
-			'template_dir'       => 'amp-templates',
-			'available_callback' => 'is_singular',
+			'mode' => 'paired',
 		) );
+		add_filter( 'amp_supportable_templates', function( $supportable_templates ) {
+			$supportable_templates['is_singular']['supported'] = true;
+			$supportable_templates['is_search']['supported']   = false;
+			return $supportable_templates;
+		} );
 		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
 		$this->assertTrue( is_singular() );
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
@@ -296,11 +375,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test register_paired_hooks.
+	 * Test add_amp_template_filters.
 	 *
-	 * @covers AMP_Theme_Support::register_paired_hooks()
+	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
-	public function test_register_paired_hooks() {
+	public function test_add_amp_template_filters() {
 		$template_types = array(
 			'paged',
 			'index',
@@ -309,11 +388,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'author',
 			'category',
 		);
-		AMP_Theme_Support::register_paired_hooks();
+		AMP_Theme_Support::add_amp_template_filters();
 		foreach ( $template_types as $template_type ) {
-			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_paired_template_hierarchy' ) ) );
+			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_amp_template_hierarchy' ) ) );
 		}
-		$this->assertEquals( 100, has_filter( 'template_include', array( self::TESTED_CLASS, 'filter_paired_template_include' ) ) );
 	}
 
 	/**
@@ -354,6 +432,284 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// MathML script was added.
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+	}
+
+	/**
+	 * Test incorrect usage for get_template_availability.
+	 *
+	 * @expectedIncorrectUsage AMP_Theme_Support::get_template_availability
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_incorrect_usage_get_template_availability() {
+		global $wp_query;
+
+		// Test no query available.
+		$wp_query     = null; // WPCS: override ok.
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertInternalType( 'array', $availability );
+		$this->assertEquals( array( 'no_query_available' ), $availability['errors'] );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertNull( $availability['immutable'] );
+		$this->assertNull( $availability['template'] );
+
+		// Test no theme support.
+		remove_theme_support( 'amp' );
+		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEquals( array( 'no_theme_support' ), $availability['errors'] );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertNull( $availability['immutable'] );
+		$this->assertNull( $availability['template'] );
+	}
+
+	/**
+	 * Test get_template_availability with available_callback.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability_with_available_callback() {
+		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		add_theme_support( 'amp', array(
+			'available_callback' => '__return_true',
+		) );
+		AMP_Theme_Support::init();
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEquals(
+			$availability,
+			array(
+				'supported' => true,
+				'immutable' => true,
+				'template'  => null,
+				'errors'    => array(),
+			)
+		);
+
+		add_theme_support( 'amp', array(
+			'available_callback' => '__return_false',
+		) );
+		AMP_Theme_Support::init();
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEquals(
+			$availability,
+			array(
+				'supported' => false,
+				'immutable' => true,
+				'template'  => null,
+				'errors'    => array( 'available_callback' ),
+			)
+		);
+	}
+
+	/**
+	 * Test get_template_availability.
+	 *
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability() {
+		global $wp_query;
+		$post_id = $this->factory()->post->create();
+		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
+
+		// Test successful match of singular template.
+		$this->assertTrue( is_singular() );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		add_theme_support( 'amp' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEmpty( $availability['errors'] );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertFalse( $availability['immutable'] );
+		$this->assertEquals( 'is_singular', $availability['template'] );
+
+		// Test successful match when passing WP_Query and WP_Post into method.
+		$query        = $wp_query;
+		$wp_query     = null; // WPCS: override ok.
+		$availability = AMP_Theme_Support::get_template_availability( $query );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_singular', $availability['template'] );
+		$availability = AMP_Theme_Support::get_template_availability( get_post( $post_id ) );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_singular', $availability['template'] );
+		$this->assertNull( $wp_query ); // Make sure it is reset.
+
+		// Test nested hierarchy.
+		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_special', 'is_custom' ) );
+		add_filter( 'amp_supportable_templates', function( $templates ) {
+			$templates['is_single']  = array(
+				'label'     => 'Single post',
+				'supported' => false,
+				'parent'    => 'is_singular',
+			);
+			$templates['is_special'] = array(
+				'label'    => 'Special post',
+				'parent'   => 'is_single',
+				'callback' => function( WP_Query $query ) {
+					return $query->is_singular() && 'special' === get_post( $query->get_queried_object_id() )->post_name;
+				},
+			);
+			$templates['is_page']    = array(
+				'label'     => 'Page',
+				'supported' => true,
+				'parent'    => 'is_singular',
+			);
+			$templates['is_custom']  = array(
+				'label'    => 'Custom',
+				'callback' => function( WP_Query $query ) {
+					return false !== $query->get( 'custom', false );
+				},
+			);
+			return $templates;
+		} );
+		add_filter( 'query_vars', function( $vars ) {
+			$vars[] = 'custom';
+			return $vars;
+		} );
+
+		$availability = AMP_Theme_Support::get_template_availability( get_post( $post_id ) );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertTrue( $availability['immutable'] );
+		$this->assertEquals( 'is_single', $availability['template'] );
+
+		$special_id   = $this->factory()->post->create( array(
+			'post_type' => 'post',
+			'post_name' => 'special',
+		) );
+		$availability = AMP_Theme_Support::get_template_availability( get_post( $special_id ) );
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_special', $availability['template'] );
+		$this->assertFalse( $availability['immutable'] );
+
+		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
+		$this->assertFalse( $availability['supported'] );
+		$this->assertEquals( array( 'post-type-support' ), $availability['errors'] );
+		$this->assertEquals( 'is_page', $availability['template'] );
+		add_post_type_support( 'page', 'amp' );
+		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
+		$this->assertTrue( $availability['supported'] );
+
+		// Test custom.
+		$this->go_to( '/?custom=1' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_custom', $availability['template'] );
+	}
+
+	/**
+	 * Test get_supportable_templates.
+	 *
+	 * @covers AMP_Theme_Support::get_supportable_templates()
+	 */
+	public function test_get_supportable_templates() {
+
+		register_taxonomy( 'accolade', 'post', array(
+			'public' => true,
+		) );
+		register_taxonomy( 'complaint', 'post', array(
+			'public' => false,
+		) );
+		register_post_type( 'announcement', array(
+			'public'      => true,
+			'has_archive' => true,
+		) );
+
+		// Test default case with non-static front page.
+		update_option( 'show_on_front', 'posts' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		foreach ( $supportable_templates as $id => $supportable_template ) {
+			$this->assertFalse( is_numeric( $id ) );
+			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
+			$this->assertTrue( $supportable_template['supported'] );
+			$this->assertFalse( $supportable_template['immutable'] );
+		}
+		$this->assertArrayHasKey( 'is_singular', $supportable_templates );
+		$this->assertArrayNotHasKey( 'is_front_page', $supportable_templates );
+		$this->assertArrayHasKey( 'is_home', $supportable_templates );
+		$this->assertArrayNotHasKey( 'parent', $supportable_templates['is_home'] );
+
+		// Test common templates.
+		$this->assertArrayHasKey( 'is_singular', $supportable_templates );
+		$this->assertArrayHasKey( 'is_archive', $supportable_templates );
+		$this->assertArrayHasKey( 'is_author', $supportable_templates );
+		$this->assertArrayHasKey( 'is_date', $supportable_templates );
+		$this->assertArrayHasKey( 'is_search', $supportable_templates );
+		$this->assertArrayHasKey( 'is_404', $supportable_templates );
+		$this->assertArrayHasKey( 'is_category', $supportable_templates );
+		$this->assertArrayHasKey( 'is_tag', $supportable_templates );
+		$this->assertArrayHasKey( 'is_tax[accolade]', $supportable_templates );
+		$this->assertEquals( 'is_archive', $supportable_templates['is_tax[accolade]']['parent'] );
+		$this->assertArrayNotHasKey( 'is_tax[complaint]', $supportable_templates );
+		$this->assertArrayHasKey( 'is_post_type_archive[announcement]', $supportable_templates );
+		$this->assertEquals( 'is_archive', $supportable_templates['is_post_type_archive[announcement]']['parent'] );
+
+		// Test static homepage and page for posts.
+		$page_on_front  = $this->factory()->post->create( array( 'post_type' => 'page' ) );
+		$page_for_posts = $this->factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_for_posts', $page_for_posts );
+		update_option( 'page_on_front', $page_on_front );
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		foreach ( $supportable_templates as $id => $supportable_template ) {
+			$this->assertFalse( is_numeric( $id ) );
+			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
+		}
+		$this->assertArrayHasKey( 'is_front_page', $supportable_templates );
+		$this->assertArrayHasKey( 'parent', $supportable_templates['is_front_page'] );
+		$this->assertEquals( 'is_singular', $supportable_templates['is_front_page']['parent'] );
+
+		// Test inclusion of custom template, forcing category to be not-supported, and singular to be supported.
+		add_filter( 'amp_supportable_templates', function( $templates ) {
+			$templates['is_category']['supported'] = false;
+			$templates['is_singular']['supported'] = true;
+
+			$templates['is_custom'] = array(
+				'label'    => 'Custom',
+				'callback' => function( WP_Query $query ) {
+					return false !== $query->get( 'custom', false );
+				},
+			);
+			return $templates;
+		} );
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		$this->assertTrue( $supportable_templates['is_category']['immutable'] );
+		$this->assertFalse( $supportable_templates['is_category']['supported'] );
+		$this->assertFalse( $supportable_templates['is_category']['user_supported'] );
+		$this->assertTrue( $supportable_templates['is_singular']['immutable'] );
+		$this->assertTrue( $supportable_templates['is_singular']['supported'] );
+		$this->assertTrue( $supportable_templates['is_singular']['user_supported'] );
+		$this->assertArrayHasKey( 'is_custom', $supportable_templates );
+		remove_all_filters( 'amp_supportable_templates' );
+
+		// Test supporting templates by theme support args: all.
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		add_theme_support( 'amp', array(
+			'templates_supported' => 'all',
+		) );
+		AMP_Theme_Support::init();
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		foreach ( $supportable_templates as $supportable_template ) {
+			$this->assertTrue( $supportable_template['supported'] );
+			$this->assertTrue( $supportable_template['immutable'] );
+		}
+
+		// Test supporting templates by theme support args: selective templates.
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		add_theme_support( 'amp', array(
+			'templates_supported' => array(
+				'is_date'   => true,
+				'is_author' => false,
+			),
+		) );
+		AMP_Theme_Support::init();
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		$this->assertTrue( $supportable_templates['is_date']['supported'] );
+		$this->assertTrue( $supportable_templates['is_date']['immutable'] );
+		$this->assertFalse( $supportable_templates['is_author']['supported'] );
+		$this->assertTrue( $supportable_templates['is_author']['immutable'] );
+		$this->assertTrue( $supportable_templates['is_singular']['supported'] );
+		$this->assertFalse( $supportable_templates['is_singular']['immutable'] );
+		$this->assertFalse( $supportable_templates['is_category']['supported'] );
+		$this->assertFalse( $supportable_templates['is_category']['immutable'] );
 	}
 
 	/**
@@ -759,11 +1115,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test filter_paired_template_hierarchy.
+	 * Test filter_amp_template_hierarchy.
 	 *
-	 * @covers AMP_Theme_Support::filter_paired_template_hierarchy()
+	 * @covers AMP_Theme_Support::filter_amp_template_hierarchy()
 	 */
-	public function test_filter_paired_template_hierarchy() {
+	public function test_filter_amp_template_hierarchy() {
 		$template_dir = 'amp-templates';
 		add_theme_support( 'amp', array(
 			'template_dir' => $template_dir,
@@ -773,31 +1129,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'single-post.php',
 			'single.php',
 		);
-		$filtered_templates = AMP_Theme_Support::filter_paired_template_hierarchy( $templates );
-		foreach ( $filtered_templates as $key => $filtered_template ) {
-			$this->assertEquals( $template_dir . '/' . $templates[ $key ], $filtered_template );
-		}
-	}
+		$filtered_templates = AMP_Theme_Support::filter_amp_template_hierarchy( $templates );
 
-	/**
-	 * Test filter_paired_template_include.
-	 *
-	 * @covers AMP_Theme_Support::filter_paired_template_include()
-	 */
-	public function test_filter_paired_template_include() {
-		$template_dir = 'amp-templates';
-		$template     = 'single.php';
-		add_theme_support( 'amp', array(
-			'template_dir' => $template_dir,
-		) );
-		$this->assertEquals( $template, AMP_Theme_Support::filter_paired_template_include( $template ) );
-		remove_theme_support( 'amp' );
-		try {
-			AMP_Theme_Support::filter_paired_template_include( $template );
-		} catch ( Exception $exception ) {
-			$e = $exception;
+		$expected_templates = array();
+		foreach ( $templates as $template ) {
+			$expected_templates[] = $template_dir . '/' . $template;
+			$expected_templates[] = $template;
 		}
-		$this->assertTrue( isset( $e ) );
+
+		$this->assertEquals( $expected_templates, $filtered_templates );
 	}
 
 	/**
@@ -911,6 +1251,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$filtered_link_no_text_passed = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, '' );
 		$this->assertContains( 'Click here to cancel reply.', $filtered_link_no_text_passed );
+	}
+
+	/**
+	 * Test init_admin_bar.
+	 *
+	 * @covers \AMP_Theme_Support::init_admin_bar()
+	 */
+	public function test_init_admin_bar() {
+		$this->markTestIncomplete();
 	}
 
 	/**
@@ -1084,6 +1433,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::finish_init();
 		$wp_widget_factory = new WP_Widget_Factory();
 		wp_widgets_init();
+
+		$this->assertTrue( is_amp_endpoint() );
 
 		add_action( 'wp_enqueue_scripts', function() {
 			wp_enqueue_script( 'amp-list' );

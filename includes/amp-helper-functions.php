@@ -123,6 +123,9 @@ function amp_get_permalink( $post_id ) {
 			||
 			// If the post type is hierarchical then the /amp/ endpoint isn't available.
 			is_post_type_hierarchical( get_post_type( $post_id ) )
+			||
+			// Attachment pages don't accept the /amp/ endpoint.
+			'attachment' === get_post_type( $post_id )
 		);
 		if ( $use_query_var ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
@@ -239,61 +242,20 @@ function amp_add_amphtml_link() {
  * @see   AMP_Post_Type_Support::get_support_errors()
  *
  * @param WP_Post $post Post.
- *
  * @return bool Whether the post supports AMP.
  */
 function post_supports_amp( $post ) {
-	if ( amp_is_canonical() ) {
-		return true;
-	}
-
-	$errors = AMP_Post_Type_Support::get_support_errors( $post );
-
-	// Return false if an error is found.
-	if ( ! empty( $errors ) ) {
-		return false;
-	}
-
-	switch ( get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
-		case AMP_Post_Meta_Box::ENABLED_STATUS:
-			return true;
-
-		case AMP_Post_Meta_Box::DISABLED_STATUS:
-			return false;
-
-		// Disabled by default for custom page templates, page on front and page for posts.
-		default:
-			$enabled = (
-				! (bool) get_page_template_slug( $post )
-				&&
-				! (
-					'page' === $post->post_type
-					&&
-					'page' === get_option( 'show_on_front' )
-					&&
-					in_array( (int) $post->ID, array(
-						(int) get_option( 'page_on_front' ),
-						(int) get_option( 'page_for_posts' ),
-					), true )
-				)
-			);
-
-			/**
-			 * Filters whether default AMP status should be enabled or not.
-			 *
-			 * @since 0.6
-			 *
-			 * @param string  $status Status.
-			 * @param WP_Post $post   Post.
-			 */
-			return apply_filters( 'amp_post_status_default_enabled', $enabled, $post );
-	}
+	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
 }
 
 /**
- * Are we currently on an AMP URL?
+ * Determine whether the current response being served as AMP.
  *
- * @since 1.0 This function can be called before the `parse_query` action because the 'amp' query var is specifically and exclusively used when 'amp' theme support is added.
+ * This function cannot be called before the parse_query action because it needs to be able
+ * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
+ * present, this function returns true just if the query var is present. If theme support is
+ * present, then it returns true in paired mode if an AMP template is available and the query
+ * var is present, or else in native mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
  */
@@ -302,17 +264,29 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	// When 'amp' theme support is (or will be added) then these are the conditions that are key to be checked.
-	if ( amp_is_canonical() || isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: CSRF OK.
-		return true;
+	$did_parse_query = did_action( 'parse_query' );
+
+	if ( ! $did_parse_query ) {
+		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
-	// Condition for non-theme support when /amp/ endpoint is used.
-	if ( false !== get_query_var( amp_get_slug(), false ) ) {
-		return true;
+	$has_amp_query_var = (
+		isset( $_GET[ amp_get_slug() ] ) // WPCS: CSRF OK.
+		||
+		false !== get_query_var( amp_get_slug(), false )
+	);
+
+	if ( ! current_theme_supports( 'amp' ) ) {
+		return $has_amp_query_var;
 	}
 
-	return false;
+	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
+	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
+		return false;
+	}
+
+	$availability = AMP_Theme_Support::get_template_availability();
+	return amp_is_canonical() ? $availability['supported'] : ( $has_amp_query_var && $availability['supported'] );
 }
 
 /**

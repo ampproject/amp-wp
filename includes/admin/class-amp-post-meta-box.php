@@ -143,12 +143,20 @@ class AMP_Post_Meta_Box {
 			array( 'jquery' ),
 			AMP__VERSION
 		);
+
+		if ( current_theme_supports( 'amp' ) ) {
+			$availability   = AMP_Theme_Support::get_template_availability( $post );
+			$support_errors = $availability['errors'];
+		} else {
+			$support_errors = AMP_Post_Type_Support::get_support_errors( $post );
+		}
+
 		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
 			wp_json_encode( array(
 				'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
 				'canonical'       => amp_is_canonical(),
-				'enabled'         => post_supports_amp( $post ),
-				'canSupport'      => count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0,
+				'enabled'         => empty( $support_errors ),
+				'canSupport'      => 0 === count( array_diff( $support_errors, array( 'post-status-disabled' ) ) ),
 				'statusInputName' => self::STATUS_INPUT_NAME,
 				'l10n'            => array(
 					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
@@ -170,23 +178,37 @@ class AMP_Post_Meta_Box {
 			is_post_type_viewable( $post->post_type )
 			&&
 			current_user_can( 'edit_post', $post->ID )
-			&&
-			! amp_is_canonical()
 		);
 
 		if ( true !== $verify ) {
 			return;
 		}
 
-		$errors = AMP_Post_Type_Support::get_support_errors( $post );
-		$status = post_supports_amp( $post ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+		/*
+		 * When theme support is present then theme templates can be served in AMP and we check first if the template is available.
+		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present
+		 * then we just check get_support_errors.
+		 */
+		if ( current_theme_supports( 'amp' ) ) {
+			$availability = AMP_Theme_Support::get_template_availability( $post );
+			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+			$errors       = array_diff( $availability['errors'], array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
+			if ( true === $availability['immutable'] ) {
+				$errors[] = 'status_immutable';
+			}
+		} else {
+			$errors = AMP_Post_Type_Support::get_support_errors( $post );
+			$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+			$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
+		}
+
 		$labels = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),
 		);
 
 		// The preceding variables are used inside the following amp-status.php template.
-		include_once AMP__DIR__ . '/templates/admin/amp-status.php';
+		include AMP__DIR__ . '/templates/admin/amp-status.php';
 	}
 
 	/**

@@ -99,13 +99,13 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'supported_post_types',
-			__( 'Post Type Support', 'amp' ),
-			array( $this, 'render_post_types_support' ),
+			'supported_templates',
+			__( 'Supported Templates', 'amp' ),
+			array( $this, 'render_supported_templates' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
 			array(
-				'class' => 'amp-post-type-support-field',
+				'class' => 'amp-template-support-field',
 			)
 		);
 
@@ -126,20 +126,18 @@ class AMP_Options_Menu {
 	 */
 	public function render_theme_support() {
 		$theme_support = AMP_Options_Manager::get_option( 'theme_support' );
-
-		$support_args = get_theme_support( 'amp' );
+		$support_args  = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) );
 
 		$theme_support_mutable = (
-			empty( $support_args )
+			! empty( $support_args['optional'] )
 			||
-			! empty( $support_args[0]['__added_via_option'] )
+			AMP_Theme_Support::is_support_added_via_option()
 		);
-		if ( ! $theme_support_mutable ) {
-			if ( amp_is_canonical() ) {
-				$theme_support = 'native';
-			} else {
-				$theme_support = 'paired';
-			}
+
+		$mode_mutable = ! isset( $support_args['mode'] );
+
+		if ( ! $theme_support_mutable || ( ! $mode_mutable && 'disabled' !== $theme_support ) ) {
+			$theme_support = isset( $support_args['mode'] ) ? $support_args['mode'] : 'native';
 		}
 
 		$should_have_theme_support = in_array( get_template(), array( 'twentyfifteen', 'twentysixteen', 'twentyseventeen' ), true );
@@ -164,24 +162,28 @@ class AMP_Options_Menu {
 				<dd>
 					<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
 				</dd>
-				<dt>
-					<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
-					<label for="theme_support_paired">
-						<strong><?php esc_html_e( 'Paired', 'amp' ); ?></strong>
-					</label>
-				</dt>
-				<dd>
-					<?php esc_html_e( 'Reuse active theme\'s templates to display AMP responses, but use separate URLs for AMP. The canonical URLs for your site will not have AMP. If there are AMP validation errors encountered in the AMP response and the validation errors are not accepted for sanitization, then the AMP version will redirect to the non-AMP version.', 'amp' ); ?>
-				</dd>
-				<dt>
-					<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
-					<label for="theme_support_native">
-						<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
-					</label>
-				</dt>
-				<dd>
-					<?php esc_html_e( 'Reuse active theme\'s templates to display AMP responses but do not use separate URLs for AMP. Your canonical URLs are AMP. Select this if you want to use AMP-specific blocks in your content. Any AMP validation errors will be automatically sanitized.', 'amp' ); ?>
-				</dd>
+				<?php if ( $mode_mutable || 'paired' === $support_args['mode'] ) : ?>
+					<dt>
+						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+						<label for="theme_support_paired">
+							<strong><?php esc_html_e( 'Paired', 'amp' ); ?></strong>
+						</label>
+					</dt>
+					<dd>
+						<?php esc_html_e( 'Reuse active theme\'s templates to display AMP responses, but use separate URLs for AMP. The canonical URLs for your site will not have AMP. If there are AMP validation errors encountered in the AMP response and the validation errors are not accepted for sanitization, then the AMP version will redirect to the non-AMP version.', 'amp' ); ?>
+					</dd>
+				<?php endif; ?>
+				<?php if ( $mode_mutable || 'native' === $support_args['mode'] ) : ?>
+					<dt>
+						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+						<label for="theme_support_native">
+							<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
+						</label>
+					</dt>
+					<dd>
+						<?php esc_html_e( 'Reuse active theme\'s templates to display AMP responses but do not use separate URLs for AMP. Your canonical URLs are AMP. Select this if you want to use AMP-specific blocks in your content. Any AMP validation errors will be automatically sanitized.', 'amp' ); ?>
+					</dd>
+				<?php endif; ?>
 			</dl>
 		</fieldset>
 		<?php
@@ -190,7 +192,7 @@ class AMP_Options_Menu {
 	/**
 	 * Post types support section renderer.
 	 *
-	 * @todo If dirty AMP is ever allowed, then automatically forcing sanitization in native should be able to be turned off.
+	 * @todo If dirty AMP is ever allowed (that is, post-processed documents which can be served with non-sanitized valdation errors), then automatically forcing sanitization in native should be able to be turned off.
 	 *
 	 * @since 1.0
 	 */
@@ -250,6 +252,7 @@ class AMP_Options_Menu {
 			<script>
 				jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
 					jQuery( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === this.value );
+					jQuery( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === this.value );
 					jQuery( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== this.value );
 					jQuery( '#force_sanitization' ).trigger( 'change' );
 				} ).filter( ':checked' ).trigger( 'change' );
@@ -272,45 +275,178 @@ class AMP_Options_Menu {
 	}
 
 	/**
-	 * Post types support section renderer.
+	 * Supported templates section renderer.
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 */
-	public function render_post_types_support() {
-		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
-		$element_name    = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
+	public function render_supported_templates() {
+		$theme_support_args = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ); // Initial so we can get before removed if optional.
 		?>
-		<script>
-			jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
-				jQuery( '.amp-post-type-support-field' ).toggleClass( 'hidden', 'paired' !== this.value && 'disabled' !== this.value );
-			} ).filter( ':checked' ).trigger( 'change' );
-		</script>
-		<fieldset>
-			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
-				<?php
-				$element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}";
-				$is_builtin = in_array( $post_type->name, $builtin_support, true );
-				?>
-				<?php if ( $is_builtin ) : ?>
-					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $post_type->name ); ?>">
+
+		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
+			<fieldset id="all_templates_supported_fieldset">
+				<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
+					<div class="notice notice-info notice-alt inline">
+						<p>
+							<?php esc_html_e( 'The current theme requires all templates to support AMP.', 'amp' ); ?>
+						</p>
+					</div>
+				<?php else : ?>
+					<p>
+						<label for="all_templates_supported">
+							<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'all_templates_supported' ) ); ?>>
+							<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
+						</label>
+					</p>
+					<p class="description">
+						<?php esc_html_e( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ); ?>
+					</p>
 				<?php endif; ?>
-				<input
-					type="checkbox"
-					id="<?php echo esc_attr( $element_id ); ?>"
-					name="<?php echo esc_attr( $element_name ); ?>"
-					value="<?php echo esc_attr( $post_type->name ); ?>"
-					<?php checked( true, amp_is_canonical() || post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
-					<?php disabled( $is_builtin ); ?>
-					>
-				<label for="<?php echo esc_attr( $element_id ); ?>">
-					<?php echo esc_html( $post_type->label ); ?>
-				</label>
-				<br>
-			<?php endforeach; ?>
-			<p class="description">
-				<?php esc_html_e( 'Select the content types that you would like to be made available in AMP.', 'amp' ); ?>
+			</fieldset>
+		<?php else : ?>
+			<div class="notice notice-warning notice-alt inline">
+				<p>
+					<?php esc_html_e( 'Your theme is using the deprecated available_callback argument for AMP theme support.', 'amp' ); ?>
+				</p>
+			</div>
+		<?php endif; ?>
+
+		<fieldset id="supported_post_types_fieldset">
+			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
+			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
+			<p>
+				<?php esc_html_e( 'The following content types will be available as AMP:', 'amp' ); ?>
 			</p>
+			<ul>
+			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
+				<li>
+					<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $element_id ); ?>"
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $post_type->name ); ?>"
+						<?php checked( post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
+						>
+					<label for="<?php echo esc_attr( $element_id ); ?>">
+						<?php echo esc_html( $post_type->label ); ?>
+					</label>
+				</li>
+			<?php endforeach; ?>
+			</ul>
 		</fieldset>
+
+		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
+			<fieldset id="supported_templates_fieldset">
+				<style>
+					#supported_templates_fieldset ul ul {
+						margin-left: 40px;
+					}
+				</style>
+				<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
+				<?php
+				self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
+				?>
+				<script>
+					// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
+					(function ( $ ) {
+						$( '#supported_templates_fieldset input[type=checkbox]' ).on( 'click', function() {
+							$( this ).siblings( 'ul' ).find( 'input[type=checkbox]' ).prop( 'checked', this.checked );
+						} );
+					})( jQuery );
+				</script>
+			</fieldset>
+
+			<script>
+				// Update the visibility of the fieldsets based on the selected template mode and then whether all templates are indicated to be supported.
+				(function ( $ ) {
+					var templateModeInputs, themeSupportDisabledInput, allTemplatesSupportedInput;
+					templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
+					themeSupportDisabledInput = $( '#theme_support_disabled' );
+					allTemplatesSupportedInput = $( '#all_templates_supported' );
+
+					function updateFieldsetVisibility() {
+						var allTemplatesSupported = 0 === allTemplatesSupportedInput.length || allTemplatesSupportedInput.prop( 'checked' );
+						$( '#all_templates_supported_fieldset, #supported_post_types_fieldset > .title' ).toggleClass(
+							'hidden',
+							themeSupportDisabledInput.prop( 'checked' )
+						);
+						$( '#supported_post_types_fieldset' ).toggleClass(
+							'hidden',
+							allTemplatesSupported && ! themeSupportDisabledInput.prop( 'checked' )
+						);
+						$( '#supported_templates_fieldset' ).toggleClass(
+							'hidden',
+							allTemplatesSupported || themeSupportDisabledInput.prop( 'checked' )
+						);
+					}
+
+					templateModeInputs.on( 'change', updateFieldsetVisibility );
+					allTemplatesSupportedInput.on( 'click', updateFieldsetVisibility );
+					updateFieldsetVisibility();
+				})( jQuery );
+			</script>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * List template conditional options.
+	 *
+	 * @param array       $options Options.
+	 * @param string|null $parent  ID of the parent option.
+	 */
+	private function list_template_conditional_options( $options, $parent = null ) {
+		$element_name = AMP_Options_Manager::OPTION_NAME . '[supported_templates][]';
+		?>
+		<ul>
+			<?php foreach ( $options as $id => $option ) : ?>
+				<?php
+				$element_id = AMP_Options_Manager::OPTION_NAME . '-supported-templates-' . $id;
+				if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
+					continue;
+				}
+
+				// Skip showing an option if it doesn't have a label.
+				if ( empty( $option['label'] ) ) {
+					continue;
+				}
+
+				?>
+				<li>
+					<?php if ( empty( $option['immutable'] ) ) : ?>
+						<input
+							type="checkbox"
+							id="<?php echo esc_attr( $element_id ); ?>"
+							name="<?php echo esc_attr( $element_name ); ?>"
+							value="<?php echo esc_attr( $id ); ?>"
+							<?php checked( ! empty( $option['user_supported'] ) ); ?>
+						>
+					<?php else : // Persist user selection even when checkbox disabled, when selection forced by theme/filter. ?>
+						<input
+							type="checkbox"
+							id="<?php echo esc_attr( $element_id ); ?>"
+							<?php checked( ! empty( $option['supported'] ) ); ?>
+							<?php disabled( true ); ?>
+						>
+						<?php if ( ! empty( $option['user_supported'] ) ) : ?>
+							<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $id ); ?>">
+						<?php endif; ?>
+					<?php endif; ?>
+					<label for="<?php echo esc_attr( $element_id ); ?>">
+						<?php echo esc_html( $option['label'] ); ?>
+					</label>
+
+					<?php if ( ! empty( $option['description'] ) ) : ?>
+						<span class="description">
+							&mdash; <?php echo wp_kses_post( $option['description'] ); ?>
+						</span>
+					<?php endif; ?>
+
+					<?php self::list_template_conditional_options( $options, $id ); ?>
+				</li>
+			<?php endforeach; ?>
+		</ul>
 		<?php
 	}
 

@@ -41,22 +41,32 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 			<div class="inline notice notice-warning notice-alt">
 				<p>
 					<?php
-					$support_errors_codes = AMP_Post_Type_Support::get_support_errors( $post );
-					$support_errors       = array();
-					if ( in_array( 'password-protected', $support_errors_codes, true ) ) {
-						$support_errors[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
+					$error_messages = array();
+					if ( in_array( 'status_immutable', $errors, true ) ) {
+						if ( self::ENABLED_STATUS === $status ) {
+							$error_messages[] = __( 'Your site does not allow AMP to be disabled.', 'amp' );
+						} else {
+							$error_messages[] = __( 'Your site does not allow AMP to be enabled.', 'amp' );
+						}
 					}
-					if ( in_array( 'post-type-support', $support_errors_codes, true ) ) {
+					if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
 						/* translators: %s is URL to AMP settings screen */
-						$support_errors[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) );
+						$error_messages[] = wp_kses_post( sprintf( __( 'There are no <a href="%s">supported templates</a> to display this in AMP.', 'amp' ), esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) ) );
 					}
-					if ( in_array( 'skip-post', $support_errors_codes, true ) ) {
-						$support_errors[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
+					if ( in_array( 'password-protected', $errors, true ) ) {
+						$error_messages[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
 					}
-					if ( count( array_diff( $support_errors_codes, array( 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post' ) ) ) > 0 ) {
-						$support_errors[] = __( 'Unavailable for an unknown reason.', 'amp' );
+					if ( in_array( 'post-type-support', $errors, true ) ) {
+						/* translators: %s is URL to AMP settings screen */
+						$error_messages[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) ) );
 					}
-					echo implode( ' ', $support_errors ); // WPCS: xss ok.
+					if ( in_array( 'skip-post', $errors, true ) ) {
+						$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
+					}
+					if ( count( array_diff( $errors, array( 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ) ) ) > 0 ) {
+						$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
+					}
+					echo implode( ' ', $error_messages ); // WPCS: xss ok.
 					?>
 				</p>
 			</div>

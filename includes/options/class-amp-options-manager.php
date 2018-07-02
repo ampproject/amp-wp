@@ -23,12 +23,14 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = array(
-		'theme_support'        => 'disabled',
-		'supported_post_types' => array(),
-		'analytics'            => array(),
-		'force_sanitization'   => false,
-		'accept_tree_shaking'  => false,
-		'disable_admin_bar'    => false,
+		'theme_support'           => 'disabled',
+		'supported_post_types'    => array( 'post' ),
+		'analytics'               => array(),
+		'force_sanitization'      => false,
+		'accept_tree_shaking'     => false,
+		'disable_admin_bar'       => false,
+		'all_templates_supported' => true,
+		'supported_templates'     => array( 'is_singular' ),
 	);
 
 	/**
@@ -121,14 +123,30 @@ class AMP_Options_Manager {
 		$options['disable_admin_bar']   = ! empty( $new_options['disable_admin_bar'] );
 
 		// Validate post type support.
+		$options['supported_post_types'] = array();
 		if ( isset( $new_options['supported_post_types'] ) ) {
-			$options['supported_post_types'] = array();
 			foreach ( $new_options['supported_post_types'] as $post_type ) {
 				if ( ! post_type_exists( $post_type ) ) {
 					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
 				} else {
 					$options['supported_post_types'][] = $post_type;
 				}
+			}
+		}
+
+		$theme_support_args = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) );
+
+		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
+		if ( ! $is_template_support_required && ! isset( $theme_support_args['available_callback'] ) ) {
+			$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
+
+			// Validate supported templates.
+			$options['supported_templates'] = array();
+			if ( isset( $new_options['supported_templates'] ) ) {
+				$options['supported_templates'] = array_intersect(
+					$new_options['supported_templates'],
+					array_keys( AMP_Theme_Support::get_supportable_templates() )
+				);
 			}
 		}
 
@@ -177,6 +195,9 @@ class AMP_Options_Manager {
 			}
 		}
 
+		// Store the current version with the options so we know the format.
+		$options['version'] = AMP__VERSION;
+
 		return $options;
 	}
 
@@ -187,11 +208,10 @@ class AMP_Options_Manager {
 	 * @see add_settings_error()
 	 */
 	public static function check_supported_post_type_update_errors() {
-		$builtin_support = AMP_Post_Type_Support::get_builtin_supported_post_types();
 		$supported_types = self::get_option( 'supported_post_types', array() );
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
 			$post_type = get_post_type_object( $name );
-			if ( empty( $post_type ) || in_array( $post_type->name, $builtin_support, true ) ) {
+			if ( empty( $post_type ) ) {
 				continue;
 			}
 

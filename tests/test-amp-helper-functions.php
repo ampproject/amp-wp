@@ -316,6 +316,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \is_amp_endpoint()
 	 */
 	public function test_is_amp_endpoint() {
+		$this->go_to( get_permalink( $this->factory()->post->create() ) );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Legacy query var.
