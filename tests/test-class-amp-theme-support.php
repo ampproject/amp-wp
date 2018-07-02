@@ -473,7 +473,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNull( $wp_query ); // Make sure it is reset.
 
 		// Test nested hierarchy.
-		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_special' ) );
+		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_special', 'is_custom' ) );
 		add_filter( 'amp_supportable_templates', function( $templates ) {
 			$templates['is_single']  = array(
 				'label'     => 'Single post',
@@ -492,7 +492,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'supported' => true,
 				'parent'    => 'is_singular',
 			);
+			$templates['is_custom']  = array(
+				'label'    => 'Custom',
+				'callback' => function( WP_Query $query ) {
+					return false !== $query->get( 'custom', false );
+				},
+			);
 			return $templates;
+		} );
+		add_filter( 'query_vars', function( $vars ) {
+			$vars[] = 'custom';
+			return $vars;
 		} );
 
 		$availability = AMP_Theme_Support::get_template_availability( get_post( $post_id ) );
@@ -516,6 +526,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_post_type_support( 'page', 'amp' );
 		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
 		$this->assertTrue( $availability['supported'] );
+
+		// Test custom.
+		$this->go_to( '/?custom=1' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'is_custom', $availability['template'] );
 	}
 
 	/**
