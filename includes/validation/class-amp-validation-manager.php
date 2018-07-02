@@ -1441,21 +1441,6 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Determine if there are any validation errors which have not been ignored.
-	 *
-	 * @return int Count of errors that block AMP.
-	 */
-	public static function count_blocking_validation_errors() {
-		$count = 0;
-		foreach ( self::$validation_results as $result ) {
-			if ( false === $result['sanitized'] ) {
-				$count++;
-			}
-		}
-		return $count;
-	}
-
-	/**
 	 * Finalize validation.
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()

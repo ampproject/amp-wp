@@ -1592,6 +1592,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
 
 		// JSON.
 		$input = '{"success":true}';
@@ -1616,7 +1617,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
-		AMP_Theme_Support::add_hooks();
+		AMP_Theme_Support::finish_init();
 		ob_start();
 		?>
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
@@ -1627,6 +1628,78 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
 		$this->assertContains( '<html amp', $sanitized_html );
+	}
+
+	/**
+	 * Test prepare_response will cache redirects when validation errors happen.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_redirect() {
+		add_filter( 'amp_validation_error_sanitized', '__return_false', 100 );
+
+		$this->go_to( home_url( '/?amp' ) );
+		add_theme_support( 'amp', array(
+			'mode' => 'paired',
+		) );
+		add_filter( 'amp_content_sanitizers', function( $sanitizers ) {
+			$sanitizers['AMP_Theme_Support_Sanitizer_Counter'] = array();
+			return $sanitizers;
+		} );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+		$this->assertTrue( is_amp_endpoint() );
+
+		ob_start();
+		?>
+		<html>
+			<head>
+			</head>
+			<body>
+				<script>bad</script>
+			</body>
+		</html>
+		<?php
+		$original_html = trim( ob_get_clean() );
+
+		$redirects = array();
+		add_filter( 'wp_redirect', function( $url ) use ( &$redirects ) {
+			array_unshift( $redirects, $url );
+			return '';
+		} );
+
+		AMP_Theme_Support_Sanitizer_Counter::$count = 0;
+		AMP_Validation_Manager::reset_validation_results();
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array( 'enable_response_caching' => true ) );
+		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertCount( 1, $redirects );
+		$this->assertEquals( home_url( '/' ), $redirects[0] );
+		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
+
+		AMP_Validation_Manager::reset_validation_results();
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array( 'enable_response_caching' => true ) );
+		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertCount( 2, $redirects );
+		$this->assertEquals( home_url( '/' ), $redirects[0] );
+		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not be invoked.' );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		AMP_Validation_Manager::add_validation_error_sourcing();
+
+		AMP_Validation_Manager::reset_validation_results();
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array( 'enable_response_caching' => true ) );
+		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertCount( 3, $redirects );
+		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
+		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer be invoked after validation changed.' );
+
+		AMP_Validation_Manager::reset_validation_results();
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, array( 'enable_response_caching' => true ) );
+		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertCount( 4, $redirects );
+		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
+		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not now be invoked since previous validation results now cached.' );
+
 	}
 
 	/**
@@ -1729,5 +1802,27 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$mock_image . '<amp-youtube media="(min-width: 900px)" width="0" height="0" layout="responsive" autoplay id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0" data-param-controls="0"></amp-youtube>',
 			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
+	}
+}
+
+// phpcs:disable Generic.Files.OneClassPerFile.MultipleFound
+
+/**
+ * Class AMP_Theme_Support_Sanitizer_Counter
+ */
+class AMP_Theme_Support_Sanitizer_Counter extends AMP_Base_Sanitizer {
+
+	/**
+	 * Count.
+	 *
+	 * @var int
+	 */
+	public static $count = 0;
+
+	/**
+	 * "Sanitize".
+	 */
+	public function sanitize() {
+		self::$count++;
 	}
 }
