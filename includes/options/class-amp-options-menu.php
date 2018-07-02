@@ -287,27 +287,35 @@ class AMP_Options_Menu {
 	 */
 	public function render_supported_templates() {
 		$theme_support_args = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ); // Initial so we can get before removed if optional.
-
 		?>
-		<fieldset id="all_templates_supported_fieldset">
-			<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
-				<div class="notice notice-info notice-alt inline">
+
+		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
+			<fieldset id="all_templates_supported_fieldset">
+				<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
+					<div class="notice notice-info notice-alt inline">
+						<p>
+							<?php esc_html_e( 'The current theme requires all templates to support AMP.', 'amp' ); ?>
+						</p>
+					</div>
+				<?php else : ?>
 					<p>
-						<?php esc_html_e( 'The current theme requires all templates to support AMP.', 'amp' ); ?>
+						<label for="all_templates_supported">
+							<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'all_templates_supported' ) ); ?>>
+							<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
+						</label>
 					</p>
-				</div>
-			<?php else : ?>
+					<p class="description">
+						<?php esc_html_e( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ); ?>
+					</p>
+				<?php endif; ?>
+			</fieldset>
+		<?php else : ?>
+			<div class="notice notice-warning notice-alt inline">
 				<p>
-					<label for="all_templates_supported">
-						<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'all_templates_supported' ) ); ?>>
-						<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
-					</label>
+					<?php esc_html_e( 'Your theme is using the deprecated available_callback argument for AMP theme support.', 'amp' ); ?>
 				</p>
-				<p class="description">
-					<?php esc_html_e( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ); ?>
-				</p>
-			<?php endif; ?>
-		</fieldset>
+			</div>
+		<?php endif; ?>
 
 		<fieldset id="supported_post_types_fieldset">
 			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
@@ -334,55 +342,57 @@ class AMP_Options_Menu {
 			</ul>
 		</fieldset>
 
-		<fieldset id="supported_templates_fieldset">
-			<style>
-				#supported_templates_fieldset ul ul {
-					margin-left: 40px;
-				}
-			</style>
-			<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
-			<?php
-			self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
-			?>
+		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
+			<fieldset id="supported_templates_fieldset">
+				<style>
+					#supported_templates_fieldset ul ul {
+						margin-left: 40px;
+					}
+				</style>
+				<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
+				<?php
+				self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
+				?>
+				<script>
+					// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
+					(function ( $ ) {
+						$( '#supported_templates_fieldset input[type=checkbox]' ).on( 'click', function() {
+							$( this ).siblings( 'ul' ).find( 'input[type=checkbox]' ).prop( 'checked', this.checked );
+						} );
+					})( jQuery );
+				</script>
+			</fieldset>
+
 			<script>
-				// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
+				// Update the visibility of the fieldsets based on the selected template mode and then whether all templates are indicated to be supported.
 				(function ( $ ) {
-					$( '#supported_templates_fieldset input[type=checkbox]' ).on( 'click', function() {
-						$( this ).siblings( 'ul' ).find( 'input[type=checkbox]' ).prop( 'checked', this.checked );
-					} );
+					var templateModeInputs, themeSupportDisabledInput, allTemplatesSupportedInput;
+					templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
+					themeSupportDisabledInput = $( '#theme_support_disabled' );
+					allTemplatesSupportedInput = $( '#all_templates_supported' );
+
+					function updateFieldsetVisibility() {
+						var allTemplatesSupported = 0 === allTemplatesSupportedInput.length || allTemplatesSupportedInput.prop( 'checked' );
+						$( '#all_templates_supported_fieldset, #supported_post_types_fieldset > .title' ).toggleClass(
+							'hidden',
+							themeSupportDisabledInput.prop( 'checked' )
+						);
+						$( '#supported_post_types_fieldset' ).toggleClass(
+							'hidden',
+							allTemplatesSupported && ! themeSupportDisabledInput.prop( 'checked' )
+						);
+						$( '#supported_templates_fieldset' ).toggleClass(
+							'hidden',
+							allTemplatesSupported || themeSupportDisabledInput.prop( 'checked' )
+						);
+					}
+
+					templateModeInputs.on( 'change', updateFieldsetVisibility );
+					allTemplatesSupportedInput.on( 'click', updateFieldsetVisibility );
+					updateFieldsetVisibility();
 				})( jQuery );
 			</script>
-		</fieldset>
-
-		<script>
-			// Update the visibility of the fieldsets based on the selected template mode and then whether all templates are indicated to be supported.
-			(function ( $ ) {
-				var templateModeInputs, themeSupportDisabledInput, allTemplatesSupportedInput;
-				templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
-				themeSupportDisabledInput = $( '#theme_support_disabled' );
-				allTemplatesSupportedInput = $( '#all_templates_supported' );
-
-				function updateFieldsetVisibility() {
-					var allTemplatesSupported = 0 === allTemplatesSupportedInput.length || allTemplatesSupportedInput.prop( 'checked' );
-					$( '#all_templates_supported_fieldset, #supported_post_types_fieldset > .title' ).toggleClass(
-						'hidden',
-						themeSupportDisabledInput.prop( 'checked' )
-					);
-					$( '#supported_post_types_fieldset' ).toggleClass(
-						'hidden',
-						allTemplatesSupported && ! themeSupportDisabledInput.prop( 'checked' )
-					);
-					$( '#supported_templates_fieldset' ).toggleClass(
-						'hidden',
-						allTemplatesSupported || themeSupportDisabledInput.prop( 'checked' )
-					);
-				}
-
-				templateModeInputs.on( 'change', updateFieldsetVisibility );
-				allTemplatesSupportedInput.on( 'click', updateFieldsetVisibility );
-				updateFieldsetVisibility();
-			})( jQuery );
-		</script>
+		<?php endif; ?>
 		<?php
 	}
 

@@ -184,6 +184,11 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		/*
+		 * When theme support is present then theme templates can be served in AMP and we check first if the template is available.
+		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present
+		 * then we just check get_support_errors.
+		 */
 		if ( current_theme_supports( 'amp' ) ) {
 			$availability = AMP_Theme_Support::get_template_availability( $post );
 			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;

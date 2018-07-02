@@ -75,6 +75,55 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test add_theme_support(amp) with invalid arg.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 * @covers \AMP_Theme_Support::get_theme_support_args()
+	 */
+	public function test_read_theme_support_bad_arg_type() {
+		add_theme_support( 'amp', 'invalid_argument_type' );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+	}
+
+	/**
+	 * Test add_theme_support(amp) with invalid args.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 * @covers \AMP_Theme_Support::get_theme_support_args()
+	 */
+	public function test_read_theme_support_bad_args_array() {
+		$args = array(
+			'mode'              => 'native',
+			'invalid_param_key' => array(),
+		);
+		add_theme_support( 'amp', $args );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+	}
+
+	/**
+	 * Test add_theme_support(amp) with invalid args.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers \AMP_Theme_Support::read_theme_support()
+	 */
+	public function test_read_theme_support_bad_available_callback() {
+		add_theme_support( 'amp', array(
+			'available_callback' => function() {
+				return (bool) wp_rand( 0, 1 );
+			},
+		) );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+	}
+
+	/**
 	 * Test read_theme_support, get_theme_support_args, and is_support_added_via_option.
 	 *
 	 * @covers \AMP_Theme_Support::read_theme_support()
@@ -82,34 +131,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers \AMP_Theme_Support::get_theme_support_args()
 	 */
 	public function test_read_theme_support_and_support_args() {
-
-		// Test invalid arg for theme support.
-		add_theme_support( 'amp', 'invalid_argument_type' );
-		$e = null;
-		try {
-			AMP_Theme_Support::read_theme_support( true );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertInstanceOf( 'PHPUnit_Framework_Error_Notice', $e );
-		$this->assertEquals( 'Expected AMP theme support arg to be array.', $e->getMessage() );
-		$this->assertTrue( current_theme_supports( 'amp' ) );
-
-		// Test invalid args for theme support.
-		$args = array(
-			'mode'              => 'native',
-			'invalid_param_key' => array(),
-		);
-		add_theme_support( 'amp', $args );
-		try {
-			AMP_Theme_Support::read_theme_support( true );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertStringStartsWith( 'Expected AMP theme support to keys', $e->getMessage() );
-		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
-		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
-		$this->assertTrue( current_theme_supports( 'amp' ) );
 
 		// Test behavior of optional flag, that AMP is not enabled if the DB option is not set.
 		$args = array(
@@ -439,6 +460,45 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( $availability['supported'] );
 		$this->assertNull( $availability['immutable'] );
 		$this->assertNull( $availability['template'] );
+	}
+
+	/**
+	 * Test get_template_availability with available_callback.
+	 *
+	 * @expectedIncorrectUsage add_theme_support
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability_with_available_callback() {
+		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		add_theme_support( 'amp', array(
+			'available_callback' => '__return_true',
+		) );
+		AMP_Theme_Support::init();
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEquals(
+			$availability,
+			array(
+				'supported' => true,
+				'immutable' => true,
+				'template'  => null,
+				'errors'    => array(),
+			)
+		);
+
+		add_theme_support( 'amp', array(
+			'available_callback' => '__return_false',
+		) );
+		AMP_Theme_Support::init();
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertEquals(
+			$availability,
+			array(
+				'supported' => false,
+				'immutable' => true,
+				'template'  => null,
+				'errors'    => array( 'available_callback' ),
+			)
+		);
 	}
 
 	/**

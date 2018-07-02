@@ -157,10 +157,8 @@ class AMP_Theme_Support {
 	 * Read theme support and apply options from admin for whether theme support is enabled and via what template is enabled.
 	 *
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
-	 *
-	 * @param bool $check_args Whether the theme support args should be checked.
 	 */
-	public static function read_theme_support( $check_args = WP_DEBUG ) {
+	public static function read_theme_support() {
 		self::$support_added_via_option = false;
 
 		self::$initial_theme_support_args = false;
@@ -172,18 +170,20 @@ class AMP_Theme_Support {
 				self::$initial_theme_support_args = array_shift( $support );
 
 				// Validate theme support usage.
-				if ( $check_args ) {
-					$keys = array( 'template_dir', 'comments_live_list', 'mode', 'optional', 'templates_supported' );
-					if ( ! is_array( self::$initial_theme_support_args ) ) {
-						trigger_error( esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-					} elseif ( count( array_diff( array_keys( self::$initial_theme_support_args ), $keys ) ) !== 0 ) {
-						trigger_error( esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-							/* translators: %1$s is expected keys and %2$s is actual keys */
-							__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
-							join( ', ', $keys ),
-							join( ', ', array_keys( self::$initial_theme_support_args ) )
-						) ) );
-					}
+				$keys = array( 'template_dir', 'comments_live_list', 'mode', 'optional', 'templates_supported', 'available_callback' );
+				if ( ! is_array( self::$initial_theme_support_args ) ) {
+					_doing_it_wrong( 'add_theme_support', esc_html__( 'Expected AMP theme support arg to be array.', 'amp' ), '1.0' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				} elseif ( count( array_diff( array_keys( self::$initial_theme_support_args ), $keys ) ) !== 0 ) {
+					_doing_it_wrong( 'add_theme_support', esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+						/* translators: %1$s is expected keys and %2$s is actual keys */
+						__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
+						join( ', ', $keys ),
+						join( ', ', array_keys( self::$initial_theme_support_args ) )
+					) ), '1.0' );
+				}
+
+				if ( isset( self::$initial_theme_support_args['available_callback'] ) ) {
+					_doing_it_wrong( 'add_theme_support', esc_html__( 'The available_callback is deprecated when adding amp theme support in favor of declaratively setting the supported_templates.', 'amp' ), '1.0' );
 				}
 			}
 		}
@@ -359,7 +359,6 @@ class AMP_Theme_Support {
 	 * When 'amp' theme support has not been added or canonical mode is enabled, then this returns false.
 	 *
 	 * @since 0.7
-	 * @since 1.0 This no longer looks at the available_callback bit instead calls get_template_availability.
 	 *
 	 * @see amp_is_canonical()
 	 * @return bool Whether available.
@@ -455,6 +454,38 @@ class AMP_Theme_Support {
 				$default_response,
 				array( 'errors' => array( 'no_theme_support' ) )
 			);
+		}
+
+		// Support available_callback from 0.7, though it is deprecated.
+		if ( isset( $theme_support_args['available_callback'] ) && is_callable( $theme_support_args['available_callback'] ) ) {
+			/**
+			 * Queried object.
+			 *
+			 * @var WP_Post $queried_object
+			 */
+			$queried_object = $query->get_queried_object();
+			if ( ( is_singular() || $query->is_posts_page ) && ! post_supports_amp( $queried_object ) ) {
+				return array_merge(
+					$default_response,
+					array(
+						'errors'    => array( 'no-post-support' ),
+						'supported' => false,
+						'immutable' => true,
+					)
+				);
+			}
+
+			$response = array_merge(
+				$default_response,
+				array(
+					'supported' => call_user_func( $theme_support_args['available_callback'] ),
+					'immutable' => true,
+				)
+			);
+			if ( ! $response['supported'] ) {
+				$response['errors'][] = 'available_callback';
+			}
+			return $response;
 		}
 
 		$all_templates_supported_by_theme_support = false;
