@@ -425,8 +425,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// @todo Test with query, post, or page.
 		// @todo Test without availability of WP_Query (no_query_available).
 		// @todo Test without theme support (no_theme_support).
-		// @todo Test unrecognized by theme support arg.
-		// @todo Test unrecognized.
 	}
 
 	/**

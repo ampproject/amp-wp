@@ -23,15 +23,14 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = array(
-		'theme_support'                    => 'disabled',
-		'supported_post_types'             => array( 'post' ),
-		'analytics'                        => array(),
-		'force_sanitization'               => false,
-		'accept_tree_shaking'              => false,
-		'disable_admin_bar'                => false,
-		'all_templates_supported'          => true,
-		'unrecognized_templates_supported' => false,
-		'supported_templates'              => array( 'is_singular' ),
+		'theme_support'           => 'disabled',
+		'supported_post_types'    => array( 'post' ),
+		'analytics'               => array(),
+		'force_sanitization'      => false,
+		'accept_tree_shaking'     => false,
+		'disable_admin_bar'       => false,
+		'all_templates_supported' => true,
+		'supported_templates'     => array( 'is_singular' ),
 	);
 
 	/**
@@ -128,9 +127,6 @@ class AMP_Options_Manager {
 		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
 		if ( ! $is_template_support_required ) {
 			$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
-			if ( ! isset( $theme_support_args['templates_supported']['unrecognized'] ) ) {
-				$options['unrecognized_templates_supported'] = ! empty( $new_options['unrecognized_templates_supported'] );
-			}
 
 			// Validate post type support.
 			$options['supported_post_types'] = array();

@@ -344,16 +344,6 @@ class AMP_Options_Menu {
 			<?php
 			self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
 			?>
-			<p>
-				<?php
-				$disabled = isset( $theme_support_args['templates_supported']['unrecognized'] );
-				$checked  = $disabled ? $theme_support_args['templates_supported']['unrecognized'] : AMP_Options_Manager::get_option( 'unrecognized_templates_supported' );
-				?>
-				<label for="unrecognized_templates_supported">
-					<input id="unrecognized_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[unrecognized_templates_supported]' ); ?>" <?php checked( $checked ); ?> <?php disabled( $disabled ); ?>>
-					<?php esc_html_e( 'Other', 'amp' ); ?>
-				</label>
-			</p>
 			<script>
 				// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
 				(function ( $ ) {

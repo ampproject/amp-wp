@@ -468,9 +468,6 @@ class AMP_Theme_Support {
 		$all_templates_supported          = (
 			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( 'all_templates_supported' )
 		);
-		$unrecognized_templates_supported = ( // @todo Get this from $supportable_templates.
-			isset( $theme_templates_supported['unrecognized'] ) ? true === $theme_templates_supported['unrecognized'] : AMP_Options_Manager::get_option( 'unrecognized_templates_supported' )
-		);
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
@@ -552,7 +549,7 @@ class AMP_Theme_Support {
 
 		// If there aren't any matching templates left that are supported, then we consider it to not be available.
 		if ( ! $matching_template ) {
-			if ( $all_templates_supported || $unrecognized_templates_supported ) {
+			if ( $all_templates_supported ) {
 				return array_merge(
 					$default_response,
 					array(
