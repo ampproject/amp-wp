@@ -301,6 +301,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *          'templates_supported' => 'all',
  *      ) );
  *
+ * @see AMP_Theme_Support::read_theme_support()
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
@@ -311,9 +312,22 @@ function amp_is_canonical() {
 	$mode    = 'native';
 	$support = get_theme_support( 'amp' );
 	if ( is_array( $support ) ) {
-		$args = array_shift( $support );
+		$args    = array_shift( $support );
+		$support = AMP_Options_Manager::get_option( 'theme_support' );
+
+		// If support is optional, look at DB option if mode is not explicitly set in theme support.
+		if ( ! empty( $args['optional'] ) ) {
+			if ( 'disabled' === $support ) {
+				return false;
+			} elseif ( ! isset( $args['mode'] ) ) {
+				return 'native' === $support;
+			}
+		}
+
 		if ( isset( $args['mode'] ) ) {
 			$mode = $args['mode'];
+		} elseif ( 'disabled' !== $support ) {
+			$mode = $support; // Supplied via admin screen.
 		} elseif ( ! empty( $args['template_dir'] ) ) {
 			$mode = 'paired'; // If there is a template_dir, then paired mode is implied.
 		}

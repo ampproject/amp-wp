@@ -129,21 +129,15 @@ class AMP_Options_Menu {
 		$support_args  = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) );
 
 		$theme_support_mutable = (
-			empty( $support_args )
-			||
 			! empty( $support_args['optional'] )
 			||
 			AMP_Theme_Support::is_support_added_via_option()
 		);
 
-		$mode_mutable = ! ( is_array( $support_args ) && isset( $support_args['mode'] ) );
+		$mode_mutable = ! isset( $support_args['mode'] );
 
 		if ( ! $theme_support_mutable || ( ! $mode_mutable && 'disabled' !== $theme_support ) ) {
-			if ( amp_is_canonical() ) {
-				$theme_support = 'native';
-			} else {
-				$theme_support = 'paired';
-			}
+			$theme_support = isset( $support_args['mode'] ) ? $support_args['mode'] : 'native';
 		}
 
 		$should_have_theme_support = in_array( get_template(), array( 'twentyfifteen', 'twentysixteen', 'twentyseventeen' ), true );
@@ -168,7 +162,7 @@ class AMP_Options_Menu {
 				<dd>
 					<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
 				</dd>
-				<?php if ( $mode_mutable || ! amp_is_canonical() ) : ?>
+				<?php if ( $mode_mutable || 'paired' === $support_args['mode'] ) : ?>
 					<dt>
 						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
 						<label for="theme_support_paired">
@@ -179,7 +173,7 @@ class AMP_Options_Menu {
 						<?php esc_html_e( 'Reuse active theme\'s templates to display AMP responses, but use separate URLs for AMP. The canonical URLs for your site will not have AMP. If there are AMP validation errors encountered in the AMP response and the validation errors are not accepted for sanitization, then the AMP version will redirect to the non-AMP version.', 'amp' ); ?>
 					</dd>
 				<?php endif; ?>
-				<?php if ( $mode_mutable || amp_is_canonical() ) : ?>
+				<?php if ( $mode_mutable || 'native' === $support_args['mode'] ) : ?>
 					<dt>
 						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
 						<label for="theme_support_native">
