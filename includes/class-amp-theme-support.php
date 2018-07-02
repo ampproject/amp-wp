@@ -458,14 +458,10 @@ class AMP_Theme_Support {
 		}
 
 		$all_templates_supported_by_theme_support = false;
-		$theme_templates_supported                = array();
 		if ( isset( $theme_support_args['templates_supported'] ) ) {
 			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
-			if ( is_array( $theme_support_args['templates_supported'] ) ) {
-				$theme_templates_supported = $theme_support_args['templates_supported'];
-			}
 		}
-		$all_templates_supported          = (
+		$all_templates_supported = (
 			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( 'all_templates_supported' )
 		);
 

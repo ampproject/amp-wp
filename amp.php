@@ -295,15 +295,6 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *          ),
  *      ) );
  *
- * Or if you want to prevent AMP from being used on the front page and on any Other template that is unrecognized:
- *
- *      add_theme_support( 'amp', array(
- *          'templates_supported' => array(
- *              'is_front_page' => false,
- *              'unrecognized' => false,
- *          ),
- *      ) );
- *
  * Or if you want to force AMP to be used on all templates:
  *
  *      add_theme_support( 'amp', array(
