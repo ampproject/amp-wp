@@ -1618,6 +1618,9 @@ class AMP_Theme_Support {
 			$args
 		);
 
+		$current_url = amp_get_current_url();
+		$ampless_url = amp_remove_endpoint( $current_url );
+
 		// Return cache if enabled and found.
 		$cache_response = null;
 		if ( true === $args['enable_response_caching'] ) {
@@ -1633,8 +1636,12 @@ class AMP_Theme_Support {
 			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
 
 			// Make sure that all of the validation errors should be sanitized in the same way; if not, then the cached body should be discarded.
+			$blocking_error_count = 0;
 			if ( isset( $response_cache['validation_results'] ) ) {
 				foreach ( $response_cache['validation_results'] as $validation_result ) {
+					if ( ! $validation_result['sanitized'] ) {
+						$blocking_error_count++;
+					}
 					$should_sanitize = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $validation_result['error'] );
 					if ( $should_sanitize !== $validation_result['sanitized'] ) {
 						unset( $response_cache['body'] );
@@ -1643,19 +1650,23 @@ class AMP_Theme_Support {
 				}
 			}
 
-			if ( ! empty( $response_cache['redirect_url'] ) ) {
-				wp_safe_redirect( $response_cache['redirect_url'] );
-			}
-
 			// Short-circuit response with cached body.
 			if ( isset( $response_cache['body'] ) ) {
+
+				// Redirect to non-AMP version.
+				if ( ! amp_is_canonical() ) {
+					if ( AMP_Validation_Manager::has_cap() ) {
+						$ampless_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $ampless_url );
+					}
+					wp_safe_redirect( $ampless_url );
+				}
 				return $response_cache['body'];
 			}
 
-			$cache_response = function( $body, $validation_results, $redirect_url = null ) use ( $response_cache_key ) {
-				wp_cache_set(
+			$cache_response = function( $body, $validation_results ) use ( $response_cache_key ) {
+				return wp_cache_set(
 					$response_cache_key,
-					compact( 'body', 'validation_results', 'redirect_url' ),
+					compact( 'body', 'validation_results' ),
 					AMP_Theme_Support::RESPONSE_CACHE_GROUP,
 					MONTH_IN_SECONDS
 				);
@@ -1746,26 +1757,19 @@ class AMP_Theme_Support {
 					$head->appendChild( $script );
 				}
 			} else {
-				$current_url = amp_get_current_url();
-				$ampless_url = amp_remove_endpoint( $current_url );
-				if ( AMP_Validation_Manager::has_cap() ) {
-					$ampless_url = add_query_arg(
-						AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
-						$blocking_error_count,
-						$ampless_url
-					);
-				}
-
 				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 
 				if ( $cache_response ) {
-					$cache_response( $response, $validation_results, $ampless_url );
+					$cache_response( $response, $validation_results );
 				}
 
 				/*
 				 * Temporary redirect because AMP URL may return when blocking validation errors
 				 * occur or when a non-canonical AMP theme is used.
 				 */
+				if ( AMP_Validation_Manager::has_cap() ) {
+					$ampless_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $ampless_url );
+				}
 				wp_safe_redirect( $ampless_url, 302 );
 				return $response;
 			}
@@ -1808,17 +1812,6 @@ class AMP_Theme_Support {
 		// Cache response if enabled.
 		if ( $cache_response ) {
 			$cache_response( $response, $validation_results );
-			$response_cache = array(
-				'body'               => $response,
-				'validation_results' => array_map(
-					function( $result ) {
-						unset( $result['error']['sources'] );
-						return $result;
-					},
-					AMP_Validation_Manager::$validation_results
-				),
-			);
-			wp_cache_set( $response_cache_key, $response_cache, self::RESPONSE_CACHE_GROUP, MONTH_IN_SECONDS );
 		}
 
 		return $response;
