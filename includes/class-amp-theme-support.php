@@ -677,6 +677,7 @@ class AMP_Theme_Support {
 		foreach ( get_post_types( $post_type_args, 'objects' ) as $post_type ) {
 			$templates[ sprintf( 'is_post_type_archive[%s]', $post_type->name ) ] = array(
 				'label'    => $post_type->labels->archives,
+				'parent'   => 'is_archive',
 				'callback' => function ( WP_Query $query ) use ( $post_type ) {
 					return $query->is_post_type_archive( $post_type->name );
 				},

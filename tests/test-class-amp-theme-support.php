@@ -433,10 +433,116 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_supportable_templates()
 	 */
 	public function test_get_supportable_templates() {
-		$this->markTestIncomplete();
-		// @todo Register custom taxonomy.
-		// @todo Set static front page
-		// @todo Add custom post types.
+
+		register_taxonomy( 'accolade', 'post', array(
+			'public' => true,
+		) );
+		register_taxonomy( 'complaint', 'post', array(
+			'public' => false,
+		) );
+		register_post_type( 'announcement', array(
+			'public'      => true,
+			'has_archive' => true,
+		) );
+
+		// Test default case with non-static front page.
+		update_option( 'show_on_front', 'posts' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		foreach ( $supportable_templates as $id => $supportable_template ) {
+			$this->assertFalse( is_numeric( $id ) );
+			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
+			$this->assertTrue( $supportable_template['supported'] );
+			$this->assertFalse( $supportable_template['immutable'] );
+		}
+		$this->assertArrayHasKey( 'is_singular', $supportable_templates );
+		$this->assertArrayNotHasKey( 'is_front_page', $supportable_templates );
+		$this->assertArrayHasKey( 'is_home', $supportable_templates );
+		$this->assertArrayNotHasKey( 'parent', $supportable_templates['is_home'] );
+
+		// Test common templates.
+		$this->assertArrayHasKey( 'is_singular', $supportable_templates );
+		$this->assertArrayHasKey( 'is_archive', $supportable_templates );
+		$this->assertArrayHasKey( 'is_author', $supportable_templates );
+		$this->assertArrayHasKey( 'is_date', $supportable_templates );
+		$this->assertArrayHasKey( 'is_search', $supportable_templates );
+		$this->assertArrayHasKey( 'is_404', $supportable_templates );
+		$this->assertArrayHasKey( 'is_category', $supportable_templates );
+		$this->assertArrayHasKey( 'is_tag', $supportable_templates );
+		$this->assertArrayHasKey( 'is_tax[accolade]', $supportable_templates );
+		$this->assertEquals( 'is_archive', $supportable_templates['is_tax[accolade]']['parent'] );
+		$this->assertArrayNotHasKey( 'is_tax[complaint]', $supportable_templates );
+		$this->assertArrayHasKey( 'is_post_type_archive[announcement]', $supportable_templates );
+		$this->assertEquals( 'is_archive', $supportable_templates['is_post_type_archive[announcement]']['parent'] );
+
+		// Test static homepage and page for posts.
+		$page_on_front  = $this->factory()->post->create( array( 'post_type' => 'page' ) );
+		$page_for_posts = $this->factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_for_posts', $page_for_posts );
+		update_option( 'page_on_front', $page_on_front );
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		foreach ( $supportable_templates as $id => $supportable_template ) {
+			$this->assertFalse( is_numeric( $id ) );
+			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
+		}
+		$this->assertArrayHasKey( 'is_front_page', $supportable_templates );
+		$this->assertArrayHasKey( 'parent', $supportable_templates['is_front_page'] );
+		$this->assertEquals( 'is_singular', $supportable_templates['is_front_page']['parent'] );
+
+		// Test inclusion of custom template, forcing category to be not-supported, and singular to be supported.
+		add_filter( 'amp_supportable_templates', function( $templates ) {
+			$templates['is_category']['supported'] = false;
+			$templates['is_singular']['supported'] = true;
+
+			$templates['is_custom'] = array(
+				'label'    => 'Custom',
+				'callback' => function( WP_Query $query ) {
+					return false !== $query->get( 'custom', false );
+				},
+			);
+			return $templates;
+		} );
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		$this->assertTrue( $supportable_templates['is_category']['immutable'] );
+		$this->assertFalse( $supportable_templates['is_category']['supported'] );
+		$this->assertFalse( $supportable_templates['is_category']['user_supported'] );
+		$this->assertTrue( $supportable_templates['is_singular']['immutable'] );
+		$this->assertTrue( $supportable_templates['is_singular']['supported'] );
+		$this->assertTrue( $supportable_templates['is_singular']['user_supported'] );
+		$this->assertArrayHasKey( 'is_custom', $supportable_templates );
+		remove_all_filters( 'amp_supportable_templates' );
+
+		// Test supporting templates by theme support args: all.
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		add_theme_support( 'amp', array(
+			'templates_supported' => 'all',
+		) );
+		AMP_Theme_Support::init();
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		foreach ( $supportable_templates as $supportable_template ) {
+			$this->assertTrue( $supportable_template['supported'] );
+			$this->assertTrue( $supportable_template['immutable'] );
+		}
+
+		// Test supporting templates by theme support args: selective templates.
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		add_theme_support( 'amp', array(
+			'templates_supported' => array(
+				'is_date'   => true,
+				'is_author' => false,
+			),
+		) );
+		AMP_Theme_Support::init();
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		$this->assertTrue( $supportable_templates['is_date']['supported'] );
+		$this->assertTrue( $supportable_templates['is_date']['immutable'] );
+		$this->assertFalse( $supportable_templates['is_author']['supported'] );
+		$this->assertTrue( $supportable_templates['is_author']['immutable'] );
+		$this->assertTrue( $supportable_templates['is_singular']['supported'] );
+		$this->assertFalse( $supportable_templates['is_singular']['immutable'] );
+		$this->assertFalse( $supportable_templates['is_category']['supported'] );
+		$this->assertFalse( $supportable_templates['is_category']['immutable'] );
 	}
 
 	/**
