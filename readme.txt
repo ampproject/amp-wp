@@ -79,9 +79,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Restore admin bar on AMP pages and improve AMP menu items. See [#1219](https://github.com/Automattic/amp-wp/pull/1219). Props westonruter.
 - Display admin notice if there's no persistent object caching. See [#1050](https://github.com/Automattic/amp-wp/pull/1050). Props oscarssanchez.
 - Add workaround to preserve CSS `calc()` functions. See [#1116](https://github.com/Automattic/amp-wp/pull/1116). Props westonruter.
-- Add sanitizer to support amp-o2-player. See [#1202](https://github.com/Automattic/amp-wp/pull/1202). Props juanchaur1.
+- Add sanitizer to support `amp-o2-player`. See [#1202](https://github.com/Automattic/amp-wp/pull/1202). Props juanchaur1.
 - Add `Amp_Embed_Sanitizer`. See [#1128](https://github.com/Automattic/amp-wp/pull/1128). Props juanchaur1.
-- Add AMP_Script_Sanitizer to replace noscript elements with their contents. See [#1226](https://github.com/Automattic/amp-wp/pull/1226). Props westonruter.
+- Add `AMP_Script_Sanitizer` to replace `noscript` elements with their contents. See [#1226](https://github.com/Automattic/amp-wp/pull/1226). Props westonruter.
 - Fix header image filtering and YouTube header video detection. See [#1208](https://github.com/Automattic/amp-wp/pull/1208). Props westonruter.
 - Improve support for Hulu & Imgur embeds. See [#1218](https://github.com/Automattic/amp-wp/pull/1218). Props miina.
 - Update spec generated from amphtml to file revision 642 (commit 3953b25). See [#1172](https://github.com/Automattic/amp-wp/pull/1172). Props westonruter.
@@ -90,7 +90,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Fix handling of amp-bind attributes to ensure that `“>”` can appear inside attribute values. See [#1119](https://github.com/Automattic/amp-wp/pull/1119). Props westonruter.
 - Tree-shake CSS selectors for HTML elements that target non-active languages. See [#1221](https://github.com/Automattic/amp-wp/pull/1221). Props westonruter.
 - Redirect to post list table in case of admin bar validate request failure. See [#1229](https://github.com/Automattic/amp-wp/pull/1229). Props westonruter.
-- Prevent erroneously tree-shaking keyframe selectors like 'from', 'to', and percentages. See [#1211](https://github.com/Automattic/amp-wp/pull/1211). Props westonruter.
+- Prevent erroneously tree-shaking keyframe selectors like `from`, `to`, and percentages. See [#1211](https://github.com/Automattic/amp-wp/pull/1211). Props westonruter.
 - Add caching of redirect to non-AMP URL when validation errors present. See [#1207](https://github.com/Automattic/amp-wp/pull/1207). Props westonruter.
 - Move any content output during shutdown to be injected before closing body tag. See [#1102](https://github.com/Automattic/amp-wp/pull/1102). Props westonruter.
 - Fix obtaining source for widgets. See [#1212](https://github.com/Automattic/amp-wp/pull/1212). Props westonruter.
@@ -107,7 +107,7 @@ For a full list of the closed issues and merged pull requests in this release, s
 = 0.7.2 (2018-06-27) =
 
 - Prevent plugins from outputting custom scripts in classic templates via `wp_print_scripts` action. See [#1225](https://github.com/Automattic/amp-wp/issues/1225), [#1227](https://github.com/Automattic/amp-wp/pull/1227). Props westonruter.
-- Introduce amp_render_scripts() to print AMP component scripts and nothing else. See [#1227](https://github.com/Automattic/amp-wp/pull/1227). Props westonruter.
+- Introduce `amp_render_scripts()` to print AMP component scripts and nothing else. See [#1227](https://github.com/Automattic/amp-wp/pull/1227). Props westonruter.
 - Display Schema.org image data for 'attachment' post type. See [#1157](https://github.com/Automattic/amp-wp/issues/1157), [#1176](https://github.com/Automattic/amp-wp/pull/1176). Props kienstra.
 - Output `alt` attribute in legacy templating gravatar image. See [#1179](https://github.com/Automattic/amp-wp/pull/1179). Props kienstra.
 
