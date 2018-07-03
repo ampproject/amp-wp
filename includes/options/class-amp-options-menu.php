@@ -154,7 +154,7 @@ class AMP_Options_Menu {
 			<?php endif; ?>
 			<dl>
 				<dt>
-					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?> <?php disabled( ! $mode_mutable ); ?>>
 					<label for="theme_support_disabled">
 						<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
 					</label>
@@ -164,7 +164,7 @@ class AMP_Options_Menu {
 				</dd>
 				<?php if ( $mode_mutable || 'paired' === $support_args['mode'] ) : ?>
 					<dt>
-						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?> <?php disabled( ! $mode_mutable ); ?>>
 						<label for="theme_support_paired">
 							<strong><?php esc_html_e( 'Paired', 'amp' ); ?></strong>
 						</label>
@@ -175,7 +175,7 @@ class AMP_Options_Menu {
 				<?php endif; ?>
 				<?php if ( $mode_mutable || 'native' === $support_args['mode'] ) : ?>
 					<dt>
-						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?> <?php disabled( ! $theme_support_mutable ); ?>>
+						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?> <?php disabled( ! $mode_mutable ); ?>>
 						<label for="theme_support_native">
 							<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
 						</label>
