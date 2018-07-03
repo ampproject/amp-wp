@@ -101,7 +101,7 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 - Add `AMP_Script_Sanitizer` to replace `noscript` elements with their contents. See [#1226](https://github.com/Automattic/amp-wp/pull/1226). Props westonruter.
 - Fix header image filtering and YouTube header video detection. See [#1208](https://github.com/Automattic/amp-wp/pull/1208). Props westonruter.
 - Improve support for Hulu & Imgur embeds. See [#1218](https://github.com/Automattic/amp-wp/pull/1218). Props miina.
-- Update spec generated from amphtml to file revision 642 (commit 3953b25). See [#1172](https://github.com/Automattic/amp-wp/pull/1172). Props westonruter.
+- Update spec generated from amphtml to file revision 642 (commit [3953b25](https://github.com/ampproject/amphtml/tree/3953b2513ac1a6e2e7da64911354f88e5fe42cfe)). See [#1172](https://github.com/Automattic/amp-wp/pull/1172). Props westonruter.
 - PHPCS fixes, including PHP DocBlocks and strict comparisons. See [#1002](https://github.com/Automattic/amp-wp/pull/1002). Props paulschreiber.
 - Add script to create built tag. See [#1209](https://github.com/Automattic/amp-wp/pull/1209). Props westonruter.
 - Fix handling of amp-bind attributes to ensure that `“>”` can appear inside attribute values. See [#1119](https://github.com/Automattic/amp-wp/pull/1119). Props westonruter.
