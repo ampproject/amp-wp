@@ -1654,7 +1654,7 @@ class AMP_Theme_Support {
 			if ( isset( $response_cache['body'] ) ) {
 
 				// Redirect to non-AMP version.
-				if ( ! amp_is_canonical() ) {
+				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
 					if ( AMP_Validation_Manager::has_cap() ) {
 						$ampless_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $ampless_url );
 					}
