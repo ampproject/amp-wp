@@ -211,6 +211,12 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
+
+			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
+			if ( isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: csrf ok.
+				self::redirect_ampless_url();
+			}
+
 			amp_add_frontend_actions();
 			return;
 		}
