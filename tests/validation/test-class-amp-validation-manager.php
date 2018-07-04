@@ -101,6 +101,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$_REQUEST = array();
 		unset( $GLOBALS['current_screen'] );
 		AMP_Validation_Manager::$should_locate_sources = false;
+		AMP_Validation_Manager::$hook_source_stack     = array();
 		parent::tearDown();
 	}
 
@@ -982,7 +983,22 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Manager::wrap_buffer_with_source_comments()
 	 */
 	public function test_wrap_buffer_with_source_comments() {
-		$this->markTestIncomplete();
+		$initial_content = '<html><body></body></html>';
+		$this->assertEquals( $initial_content, AMP_Validation_Manager::wrap_buffer_with_source_comments( $initial_content ) );
+
+		$earliest_source = array( 'plugin' => 'foo' );
+		$latest_source   = array( 'theme' => 'bar' );
+
+		// Doesn't use array_merge, as wrap_buffer_with_source_comments() accesses this array with indices like 1 or 2.
+		AMP_Validation_Manager::$hook_source_stack[] = $earliest_source;
+		AMP_Validation_Manager::$hook_source_stack[] = $latest_source;
+
+		$wrapped_content = AMP_Validation_Manager::wrap_buffer_with_source_comments( $initial_content );
+		$this->assertContains( $initial_content, $wrapped_content );
+		$this->assertContains( '<!--amp-source-stack', $wrapped_content );
+		$this->assertContains( '<!--/amp-source-stack', $wrapped_content );
+		$this->assertContains( wp_json_encode( $latest_source ), $wrapped_content );
+		$this->assertNotContains( wp_json_encode( $earliest_source ), $wrapped_content );
 	}
 
 	/**
