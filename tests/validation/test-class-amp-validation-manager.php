@@ -883,7 +883,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
 		$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"}';
-		if ( function_exists( 'do_blocks' ) ) {
+		if ( 9 === has_filter( 'the_content', 'do_blocks' ) ) {
 			$source_json .= ',{"type":"plugin","name":"gutenberg","function":"gutenberg_wpautop"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"plugin","name":"gutenberg","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"}';
 		} else {
 			$source_json .= ',{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"}';
