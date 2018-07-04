@@ -1612,6 +1612,8 @@ class AMP_Theme_Support {
 					! ( defined( 'WP_DEBUG' ) && WP_DEBUG )
 					&&
 					! AMP_Validation_Manager::should_validate_response()
+					&&
+					! is_customize_preview()
 				),
 				'user_can_validate'       => AMP_Validation_Manager::has_cap(),
 			),
@@ -1741,7 +1743,7 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 		self::ensure_required_markup( $dom );
 
-		if ( ! AMP_Validation_Manager::should_validate_response() && $blocking_error_count > 0 ) {
+		if ( ! AMP_Validation_Manager::should_validate_response() && $blocking_error_count > 0 && ! self::is_customize_preview_iframe() ) {
 
 			// Note the canonical check will not currently ever be met because dirty AMP is not yet supported; all validation errors will forcibly be sanitized.
 			if ( amp_is_canonical() ) {
