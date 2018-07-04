@@ -90,8 +90,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::read_theme_support();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
-		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
-		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
 
 	/**
@@ -120,7 +118,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_read_theme_support_and_support_args() {
 
 		// Test with option set, but some configs supplied via theme support.
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', 'native' ); // Will be ignored since theme support flag set.
 		$args = array(
 			'templates_supported' => 'all',
 			'paired'              => true,
@@ -130,6 +128,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::read_theme_support();
 		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
 		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+
+		add_theme_support( 'amp' );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertEquals( array( 'paired' => false ), AMP_Theme_Support::get_theme_support_args() );
+
+		remove_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( 'theme_support', 'native' ); // Will be ignored since theme support flag set.
+		AMP_Theme_Support::read_theme_support();
+		$this->assertTrue( AMP_Theme_Support::is_support_added_via_option() );
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
 

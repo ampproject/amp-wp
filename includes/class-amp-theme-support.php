@@ -94,7 +94,7 @@ class AMP_Theme_Support {
 	 * Theme support options that were added via option.
 	 *
 	 * @since 1.0
-	 * @var false|array
+	 * @var bool
 	 */
 	protected static $support_added_via_option = false;
 
