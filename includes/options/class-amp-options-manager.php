@@ -134,7 +134,7 @@ class AMP_Options_Manager {
 			}
 		}
 
-		$theme_support_args = AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) );
+		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 
 		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
 		if ( ! $is_template_support_required && ! isset( $theme_support_args['available_callback'] ) ) {
