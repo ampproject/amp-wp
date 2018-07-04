@@ -1007,7 +1007,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Manager::get_amp_validate_nonce()
 	 */
 	public function test_get_amp_validate_nonce() {
-		$this->markTestIncomplete();
+		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
+		$this->assertTrue( is_string( $nonce ) );
+		$this->assertEquals( 10, strlen( $nonce ) );
 	}
 
 	/**
