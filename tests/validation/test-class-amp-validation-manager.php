@@ -852,6 +852,21 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test has_parameters_passed_by_reference.
+	 *
+	 * @covers AMP_Validation_Manager::has_parameters_passed_by_reference()
+	 */
+	public function test_has_parameters_passed_by_reference() {
+		$tested_method = new ReflectionMethod( 'AMP_Validation_Manager', 'has_parameters_passed_by_reference' );
+		$tested_method->setAccessible( true );
+		$reflection_by_reference = new ReflectionFunction( 'wp_default_styles' );
+		$reflection_by_value     = new ReflectionFunction( 'get_bloginfo' );
+
+		$this->assertTrue( $tested_method->invoke( null, $reflection_by_reference ) );
+		$this->assertFalse( $tested_method->invoke( null, $reflection_by_value ) );
+	}
+
+	/**
 	 * Test decorate_shortcode_source.
 	 *
 	 * @covers AMP_Validation_Manager::add_validation_error_sourcing()
