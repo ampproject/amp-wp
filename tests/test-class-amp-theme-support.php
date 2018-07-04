@@ -75,19 +75,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_theme_support(amp) with invalid arg.
-	 *
-	 * @expectedIncorrectUsage add_theme_support
-	 * @covers \AMP_Theme_Support::read_theme_support()
-	 * @covers \AMP_Theme_Support::get_theme_support_args()
-	 */
-	public function test_read_theme_support_bad_arg_type() {
-		add_theme_support( 'amp', 'invalid_argument_type' );
-		AMP_Theme_Support::read_theme_support();
-		$this->assertTrue( current_theme_supports( 'amp' ) );
-	}
-
-	/**
 	 * Test add_theme_support(amp) with invalid args.
 	 *
 	 * @expectedIncorrectUsage add_theme_support
@@ -96,15 +83,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_read_theme_support_bad_args_array() {
 		$args = array(
-			'mode'              => 'native',
+			'paired'            => false,
 			'invalid_param_key' => array(),
 		);
 		add_theme_support( 'amp', $args );
 		AMP_Theme_Support::read_theme_support();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
-		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
-		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
 
 	/**
@@ -132,35 +117,27 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_read_theme_support_and_support_args() {
 
-		// Test behavior of optional flag, that AMP is not enabled if the DB option is not set.
+		// Test with option set, but some configs supplied via theme support.
+		AMP_Options_Manager::update_option( 'theme_support', 'native' ); // Will be ignored since theme support flag set.
 		$args = array(
-			'optional' => true,
-			'mode'     => 'native',
+			'templates_supported' => 'all',
+			'paired'              => true,
+			'comments_live_list'  => true,
 		);
-		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
 		add_theme_support( 'amp', $args );
 		AMP_Theme_Support::read_theme_support();
-		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
-		$this->assertFalse( AMP_Theme_Support::get_theme_support_args() );
+		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
 		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
-		$this->assertFalse( current_theme_supports( 'amp' ) );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
 
-		// Test again with option set, but some configs supplied via theme support.
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
-		$args = array(
-			'optional'            => true,
-			'templates_supported' => 'native',
-		);
-		add_theme_support( 'amp', $args );
+		add_theme_support( 'amp' );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertEquals( array( 'paired' => false ), AMP_Theme_Support::get_theme_support_args() );
+
+		remove_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( 'theme_support', 'native' ); // Will be ignored since theme support flag set.
 		AMP_Theme_Support::read_theme_support();
-		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args( array( 'initial' => true ) ) );
-		$this->assertEquals(
-			array_merge(
-				$args,
-				array( 'mode' => 'native' )
-			),
-			AMP_Theme_Support::get_theme_support_args( array( 'initial' => false ) )
-		);
 		$this->assertTrue( AMP_Theme_Support::is_support_added_via_option() );
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
@@ -173,7 +150,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_finish_init() {
 		$post_id = $this->factory()->post->create( array( 'post_title' => 'Test' ) );
 		add_theme_support( 'amp', array(
-			'mode'         => 'paired',
+			'paired'       => true,
 			'template_dir' => 'amp',
 		) );
 
@@ -194,7 +171,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test canonical, so amphtml link is not added and init finalizes.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		add_theme_support( 'amp', array(
-			'mode'         => 'native',
+			'paired'       => false,
 			'template_dir' => 'amp',
 		) );
 		$this->go_to( get_permalink( $post_id ) );
@@ -341,7 +318,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Check that mode=paired works.
 		add_theme_support( 'amp', array(
-			'mode' => 'paired',
+			'paired' => true,
 		) );
 		add_filter( 'amp_supportable_templates', function( $supportable_templates ) {
 			$supportable_templates['is_singular']['supported'] = true;
@@ -1640,7 +1617,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$this->go_to( home_url( '/?amp' ) );
 		add_theme_support( 'amp', array(
-			'mode' => 'paired',
+			'paired' => true,
 		) );
 		add_filter( 'amp_content_sanitizers', function( $sanitizers ) {
 			$sanitizers['AMP_Theme_Support_Sanitizer_Counter'] = array();
