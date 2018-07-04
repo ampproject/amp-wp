@@ -136,7 +136,7 @@ class AMP_Options_Menu {
 
 		$mode_mutable = ! isset( $support_args['mode'] );
 
-		if ( ! $theme_support_mutable || ( ! $mode_mutable && 'disabled' !== $theme_support ) ) {
+		if ( ( ! $theme_support_mutable && 'disabled' !== $theme_support ) || ! $mode_mutable ) {
 			$theme_support = isset( $support_args['mode'] ) ? $support_args['mode'] : 'native';
 		}
 
