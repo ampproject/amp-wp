@@ -180,7 +180,6 @@ class AMP_Validation_Error_Taxonomy {
 		);
 	}
 
-
 	/**
 	 * Determine whether a validation error should be sanitized.
 	 *
