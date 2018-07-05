@@ -12,13 +12,25 @@
  */
 class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
+	const TESTED_CLASS = 'AMP_Invalid_URL_Post_Type';
+
+	/**
+	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 */
+	public function tearDown() {
+		global $current_screen;
+		parent::tearDown();
+		$current_screen = null; // WPCS: override ok.
+	}
+
 	/**
 	 * Test register.
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::register()
+	 * @covers \AMP_Invalid_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_register() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
+		$this->assertFalse( is_admin() );
 
 		AMP_Invalid_URL_Post_Type::register();
 		$amp_post_type = get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
@@ -26,27 +38,116 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, get_post_types(), true ) );
 		$this->assertEquals( array(), get_all_post_type_supports( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $amp_post_type->name );
-		$this->assertEquals( 'Validation Status', $amp_post_type->label );
+		$this->assertEquals( 'Invalid AMP Pages (URLs)', $amp_post_type->label );
 		$this->assertEquals( false, $amp_post_type->public );
 		$this->assertTrue( $amp_post_type->show_ui );
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
 		$this->assertTrue( $amp_post_type->show_in_admin_bar );
+		$this->assertNotContains( AMP_Invalid_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
 
-		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Manager::POST_TYPE_SLUG . '_posts_columns', self::TESTED_CLASS . '::add_post_columns' ) );
-		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', self::TESTED_CLASS . '::output_custom_column' ) );
-		$this->assertEquals( 10, has_filter( 'post_row_actions', self::TESTED_CLASS . '::filter_row_actions' ) );
-		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validation_Manager::POST_TYPE_SLUG, self::TESTED_CLASS . '::add_bulk_action' ) );
-		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Manager::POST_TYPE_SLUG, self::TESTED_CLASS . '::handle_bulk_action' ) );
-		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::remaining_error_notice' ) );
-		$this->assertEquals( 10, has_action( 'admin_notices', self::TESTED_CLASS . '::persistent_object_caching_notice' ) );
-		$this->assertEquals( 10, has_action( 'admin_menu', self::TESTED_CLASS . '::remove_publish_meta_box' ) );
-		$this->assertEquals( 10, has_action( 'add_meta_boxes', self::TESTED_CLASS . '::add_meta_boxes' ) );
+		// Make sure that add_admin_hooks() gets called.
+		set_current_screen( 'index.php' );
+		AMP_Invalid_URL_Post_Type::register();
+		$this->assertContains( AMP_Invalid_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+	}
+
+	/**
+	 * Test add_admin_hooks.
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::add_admin_hooks()
+	 */
+	public function test_add_admin_hooks() {
+		AMP_Invalid_URL_Post_Type::add_admin_hooks();
+
+		$this->assertEquals( 10, has_filter( 'dashboard_glance_items', array( self::TESTED_CLASS, 'filter_dashboard_glance_items' ) ) );
+		$this->assertEquals( 10, has_action( 'rightnow_end', array( self::TESTED_CLASS, 'print_dashboard_glance_styles' ) ) );
+		$this->assertEquals( 10, has_action( 'add_meta_boxes', array( self::TESTED_CLASS, 'add_meta_boxes' ) ) );
+		$this->assertEquals( 10, has_action( 'edit_form_top', array( self::TESTED_CLASS, 'print_url_as_title' ) ) );
+		$this->assertEquals( 10, has_filter( 'the_title', array( self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ) ) );
+
+		$this->assertEquals( 10, has_filter( 'views_edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_views_edit' ) ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
+		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
+		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
+		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'add_bulk_action' ) ) );
+		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'handle_bulk_action' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'print_admin_notice' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, array( self::TESTED_CLASS, 'handle_validate_request' ) ) );
+		$this->assertEquals( 10, has_action( 'post_action_' . AMP_Invalid_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION, array( self::TESTED_CLASS, 'handle_validation_error_status_update' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_menu', array( self::TESTED_CLASS, 'add_admin_menu_new_invalid_url_count' ) ) );
+
+		$post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertEquals( '', apply_filters( 'post_date_column_status', 'publish', $post ) );
+		$this->assertEquals( 'publish', apply_filters( 'post_date_column_status', 'publish', $this->factory()->post->create_and_get() ) );
+
+		$this->assertContains( 'amp_actioned', wp_removable_query_args() );
+		$this->assertContains( 'amp_taxonomy_terms_updated', wp_removable_query_args() );
+		$this->assertContains( AMP_Invalid_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+		$this->assertContains( 'amp_urls_tested', wp_removable_query_args() );
+		$this->assertContains( 'amp_validate_error', wp_removable_query_args() );
+	}
+
+	/**
+	 * Test add_admin_menu_new_invalid_url_count.
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::add_admin_menu_new_invalid_url_count()
+	 */
+	public function test_add_admin_menu_new_invalid_url_count() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test get_invalid_url_validation_errors.
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors()
+	 */
+	public function test_get_invalid_url_validation_errors() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test display_invalid_url_validation_error_counts_summary.
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary()
+	 */
+	public function test_display_invalid_url_validation_error_counts_summary() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test for get_invalid_url_post().
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_invalid_url_post()
+	 */
+	public function test_get_invalid_url_post() {
+		$this->markTestSkipped( 'Needs rewrite for refactor' );
+
+		global $post;
+		$post           = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$custom_post_id = $this->factory()->post->create( array(
+			'post_type' => AMP_Validation_Manager::POST_TYPE_SLUG,
+		) );
+
+		$url = get_permalink( $custom_post_id );
+		$this->assertEquals( null, AMP_Validation_Manager::get_invalid_url_post( $url ) );
+
+		update_post_meta( $custom_post_id, AMP_Validation_Manager::AMP_URL_META, $url );
+		$this->assertEquals( $custom_post_id, AMP_Validation_Manager::get_invalid_url_post( $url )->ID );
+	}
+
+	/**
+	 * Test get_url_from_post.
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_url_from_post()
+	 */
+	public function test_get_url_from_post() {
+		$this->markTestIncomplete();
 	}
 
 	/**
 	 * Test for store_validation_errors()
 	 *
-	 * @covers AMP_Validation_Manager::store_validation_errors()
+	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_store_validation_errors() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -133,7 +234,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	/**
 	 * Test for store_validation_errors() when existing post is trashed.
 	 *
-	 * @covers AMP_Validation_Manager::store_validation_errors()
+	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_store_validation_errors_untrashing() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -162,30 +263,18 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for get_validation_status_post().
+	 * Test filter_views_edit.
 	 *
-	 * @covers AMP_Validation_Manager::get_invalid_url_post()
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_views_edit()
 	 */
-	public function test_get_validation_status_post() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
-
-		global $post;
-		$post           = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		$custom_post_id = $this->factory()->post->create( array(
-			'post_type' => AMP_Validation_Manager::POST_TYPE_SLUG,
-		) );
-
-		$url = get_permalink( $custom_post_id );
-		$this->assertEquals( null, AMP_Validation_Manager::get_invalid_url_post( $url ) );
-
-		update_post_meta( $custom_post_id, AMP_Validation_Manager::AMP_URL_META, $url );
-		$this->assertEquals( $custom_post_id, AMP_Validation_Manager::get_invalid_url_post( $url )->ID );
+	public function test_filter_views_edit() {
+		$this->markTestIncomplete();
 	}
 
 	/**
 	 * Test for add_post_columns()
 	 *
-	 * @covers AMP_Validation_Manager::add_post_columns()
+	 * @covers AMP_Invalid_URL_Post_Type::add_post_columns()
 	 */
 	public function test_add_post_columns() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -237,7 +326,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * Test for output_custom_column()
 	 *
 	 * @dataProvider get_custom_columns
-	 * @covers       AMP_Validation_Manager::output_custom_column()
+	 * @covers       AMP_Invalid_URL_Post_Type::output_custom_column()
 	 *
 	 * @param string $column_name The name of the column.
 	 * @param string $expected_value The value that is expected to be present in the column markup.
@@ -251,25 +340,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for add_bulk_action()
-	 *
-	 * @covers AMP_Validation_Manager::add_bulk_action()
-	 */
-	public function test_add_bulk_action() {
-		$this->markTestSkipped( 'Needs refactoring' );
-
-		$initial_action = array(
-			'edit' => 'Edit',
-		);
-		$actions        = AMP_Validation_Manager::add_bulk_action( $initial_action );
-		$this->assertFalse( isset( $action['edit'] ) );
-		$this->assertEquals( 'Recheck', $actions[ AMP_Validation_Manager::RECHECK_ACTION ] );
-	}
-
-	/**
 	 * Test for filter_row_actions()
 	 *
-	 * @covers AMP_Validation_Manager::filter_row_actions()
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_row_actions()
 	 */
 	public function test_filter_row_actions() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -289,11 +362,26 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
 	}
 
+	/**
+	 * Test for add_bulk_action()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::add_bulk_action()
+	 */
+	public function test_add_bulk_action() {
+		$this->markTestSkipped( 'Needs refactoring' );
+
+		$initial_action = array(
+			'edit' => 'Edit',
+		);
+		$actions        = AMP_Validation_Manager::add_bulk_action( $initial_action );
+		$this->assertFalse( isset( $action['edit'] ) );
+		$this->assertEquals( 'Recheck', $actions[ AMP_Validation_Manager::RECHECK_ACTION ] );
+	}
 
 	/**
 	 * Test for handle_bulk_action()
 	 *
-	 * @covers AMP_Validation_Manager::handle_bulk_action()
+	 * @covers \AMP_Invalid_URL_Post_Type::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -333,9 +421,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	/**
 	 * Test for print_admin_notice()
 	 *
-	 * @covers AMP_Validation_Manager::print_admin_notice()
+	 * @covers \AMP_Invalid_URL_Post_Type::print_admin_notice()
 	 */
-	public function test_remaining_error_notice() {
+	public function test_print_admin_notice() {
 		$this->markTestSkipped( 'Needs refactoring' );
 
 		ob_start();
@@ -377,7 +465,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	/**
 	 * Test for handle_validate_request()
 	 *
-	 * @covers AMP_Validation_Manager::handle_validate_request()
+	 * @covers \AMP_Invalid_URL_Post_Type::handle_validate_request()
 	 */
 	public function test_handle_validate_request() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -398,27 +486,28 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertTrue( isset( $exception ) );
 	}
 
+	/**
+	 * Test for recheck_post()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::recheck_post()
+	 */
+	public function test_recheck_post() {
+		$this->markTestSkipped( 'Needs refactoring' );
+	}
 
 	/**
-	 * Test for remove_publish_meta_box()
+	 * Test for handle_validation_error_status_update()
 	 *
-	 * @covers AMP_Validation_Manager::remove_publish_meta_box()
+	 * @covers \AMP_Invalid_URL_Post_Type::handle_validation_error_status_update()
 	 */
-	public function test_remove_publish_meta_box() {
+	public function test_handle_validation_error_status_update() {
 		$this->markTestSkipped( 'Needs refactoring' );
-
-		global $wp_meta_boxes;
-		AMP_Validation_Manager::remove_publish_meta_box();
-		$contexts = $wp_meta_boxes[ AMP_Validation_Manager::POST_TYPE_SLUG ]['side'];
-		foreach ( $contexts as $context ) {
-			$this->assertFalse( $context['submitdiv'] );
-		}
 	}
 
 	/**
 	 * Test for add_meta_boxes()
 	 *
-	 * @covers AMP_Validation_Manager::add_meta_boxes()
+	 * @covers \AMP_Invalid_URL_Post_Type::add_meta_boxes()
 	 */
 	public function test_add_meta_boxes() {
 		$this->markTestSkipped( 'Needs refactoring' );
@@ -446,12 +535,19 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			),
 			$full_meta_box['callback']
 		);
+
+		global $wp_meta_boxes;
+		AMP_Validation_Manager::remove_publish_meta_box();
+		$contexts = $wp_meta_boxes[ AMP_Validation_Manager::POST_TYPE_SLUG ]['side'];
+		foreach ( $contexts as $context ) {
+			$this->assertFalse( $context['submitdiv'] );
+		}
 	}
 
 	/**
 	 * Test for print_status_meta_box()
 	 *
-	 * @covers AMP_Validation_Manager::print_status_meta_box()
+	 * @covers \AMP_Invalid_URL_Post_Type::print_status_meta_box()
 	 */
 	public function test_print_status_meta_box() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -483,9 +579,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for print_status_meta_box()
+	 * Test for print_validation_errors_meta_box()
 	 *
-	 * @covers AMP_Validation_Manager::print_status_meta_box()
+	 * @covers \AMP_Invalid_URL_Post_Type::print_validation_errors_meta_box()
 	 */
 	public function test_print_validation_errors_meta_box() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
@@ -508,20 +604,47 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for get_recheck_link()
+	 * Test for print_url_as_title()
 	 *
-	 * @covers AMP_Validation_Manager::get_recheck_link()
+	 * @covers \AMP_Invalid_URL_Post_Type::print_url_as_title()
 	 */
-	public function test_get_recheck_link() {
+	public function test_print_url_as_title() {
+		$this->markTestSkipped( 'Needs refactoring' );
+	}
+
+	/**
+	 * Test for filter_the_title_in_post_list_table()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_the_title_in_post_list_table()
+	 */
+	public function test_filter_the_title_in_post_list_table() {
+		$this->markTestSkipped( 'Needs refactoring' );
+	}
+
+	/**
+	 * Test for get_recheck_url()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_recheck_url()
+	 */
+	public function test_get_recheck_url() {
 		$this->markTestSkipped( 'Needs rewrite for refactor' );
 
 		$this->set_capability();
 		$post_id = $this->create_custom_post();
 		$url     = get_edit_post_link( $post_id, 'raw' );
-		$link    = AMP_Validation_Manager::get_recheck_link( get_post( $post_id ), $url );
+		$link    = AMP_Validation_Manager::get_recheck_url( get_post( $post_id ), $url );
 		$this->assertContains( AMP_Validation_Manager::RECHECK_ACTION, $link );
 		$this->assertContains( wp_create_nonce( AMP_Validation_Manager::NONCE_ACTION . $post_id ), $link );
 		$this->assertContains( 'Recheck the URL for AMP validity', $link );
+	}
+
+	/**
+	 * Test for filter_dashboard_glance_items()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_dashboard_glance_items()
+	 */
+	public function test_filter_dashboard_glance_items() {
+		$this->markTestSkipped( 'Needs refactoring' );
 	}
 
 	/**
@@ -539,28 +662,28 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	public function get_mock_errors() {
 		return array(
 			array(
-				'code'            => AMP_Validation_Manager::INVALID_ELEMENT_CODE,
-				'node_name'       => $this->disallowed_tag_name,
+				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'node_name'       => 'script',
 				'parent_name'     => 'div',
 				'node_attributes' => array(),
 				'sources'         => array(
 					array(
 						'type' => 'plugin',
-						'name' => $this->plugin_name,
+						'name' => 'amp',
 					),
 				),
 			),
 			array(
-				'code'               => AMP_Validation_Manager::INVALID_ATTRIBUTE_CODE,
-				'node_name'          => $this->disallowed_attribute_name,
+				'code'               => AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE,
+				'node_name'          => 'onclick',
 				'parent_name'        => 'div',
 				'element_attributes' => array(
-					$this->disallowed_attribute_name => '',
+					'onclick' => '',
 				),
 				'sources'            => array(
 					array(
 						'type' => 'plugin',
-						'name' => $this->plugin_name,
+						'name' => 'amp',
 					),
 				),
 			),
