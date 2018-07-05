@@ -475,20 +475,18 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	public function test_add_admin_menu_validation_error_item() {
 		global $submenu;
 
+		$submenu = array(); // WPCS: global override OK.
 		AMP_Validation_Error_Taxonomy::register();
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
-		$this->assertEquals(
-			array(
-				array(
-					'Validation Errors',
-					'manage_categories',
-					'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
-					'Validation Errors',
-				),
-			),
-			$submenu[ AMP_Options_Manager::OPTION_NAME ]
+		$expected_submenu = array(
+			'Validation Errors',
+			'manage_categories',
+			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
+			'Validation Errors',
 		);
+		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
+		$this->assertEquals( $expected_submenu, end( $amp_options ) );
 	}
 
 	/**
