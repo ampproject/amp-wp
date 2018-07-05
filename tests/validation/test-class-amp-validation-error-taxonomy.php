@@ -233,7 +233,25 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status()
 	 */
 	public function test_filter_posts_where_for_validation_error_status() {
-		$this->markTestIncomplete();
+		global $wpdb;
+
+		$initial_where = 'WHERE foo-condition';
+		$wp_query      = new WP_Query();
+
+		// The conditional isn't met, so this shouldn't filter the WHERE clause.
+		$this->assertEquals( $initial_where, AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query ) );
+
+		// Only the first part of the conditional is met, so this still shouldn't filter the WHERE clause.
+		$wp_query->set( 'post_type', array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertEquals( $initial_where, AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query ) );
+
+		// The entire conditional should now be true, so this should filter the WHERE clause.
+		$wp_query->set( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, 1 );
+		$filtered_where = AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query );
+		$this->assertContains( 'SELECT 1', $filtered_where );
+		$this->assertContains( 'INNER JOIN', $filtered_where );
+		$this->assertContains( $wpdb->term_relationships, $filtered_where );
+		$this->assertContains( $wpdb->term_taxonomy, $filtered_where );
 	}
 
 	/**
