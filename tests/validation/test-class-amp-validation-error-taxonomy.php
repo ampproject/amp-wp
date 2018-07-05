@@ -495,7 +495,21 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_views_edit()
 	 */
 	public function test_filter_views_edit() {
-		$this->markTestIncomplete();
+		AMP_Validation_Error_Taxonomy::register();
+		$views = AMP_Validation_Error_Taxonomy::filter_views_edit( array() );
+		$this->assertContains( 'Accepted', $views['accepted'] );
+		$this->assertContains( '(0)', $views['accepted'] );
+
+		$this->assertContains( 'All', $views['all'] );
+		$this->assertContains( '(0)', $views['all'] );
+
+		$this->assertContains( 'New', $views['new'] );
+		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $views['new'] );
+		$this->assertContains( '(0)', $views['new'] );
+
+		$this->assertContains( 'Rejected', $views['rejected'] );
+		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $views['rejected'] );
+		$this->assertContains( '(0)', $views['rejected'] );
 	}
 
 	/**
@@ -504,7 +518,33 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
 	 */
 	public function test_filter_manage_custom_columns() {
-		$this->markTestIncomplete();
+		AMP_Validation_Error_Taxonomy::register();
+		$validation_error = $this->get_mock_error();
+		$initial_content  = 'example initial content';
+		$term_id          = $this->factory()->term->create( array(
+			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			'description' => wp_json_encode( $validation_error ),
+		) );
+
+		// Test the 'error' block in the switch.
+		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
+		$this->assertEquals( $initial_content . '<p><code>illegal_css_at_rule</code></p>', $filtered_content );
+
+		// Test the 'status' block in the switch.
+		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
+		$this->assertEquals( '&#x2753; New', $filtered_content );
+
+		// Test the 'created_date_gmt' block in the switch.
+		$date = current_time( 'mysql', true );
+		update_term_meta( $term_id, 'created_date_gmt', $date );
+		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'created_date_gmt', $term_id );
+		$this->assertContains( '<time datetime=', $filtered_content );
+		$this->assertContains( '<abbr title=', $filtered_content );
+
+		// Test the 'details' block in the switch.
+		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
+		$this->assertContains( $validation_error['node_attributes']['id'], $filtered_content );
+		$this->assertContains( $validation_error['node_name'], $filtered_content );
 	}
 
 	/**
