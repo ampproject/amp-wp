@@ -336,6 +336,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Native theme support.
 		add_theme_support( 'amp' );
 		$this->assertTrue( is_amp_endpoint() );
+
+		// Special core pages.
+		$pages = array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' );
+		foreach ( $pages as $page ) {
+			$GLOBALS['pagenow'] = $page;
+			$this->assertFalse( is_amp_endpoint() );
+		}
 	}
 
 	/**
