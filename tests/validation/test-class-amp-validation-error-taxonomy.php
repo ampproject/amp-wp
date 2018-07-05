@@ -13,6 +13,15 @@
 class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 	/**
+	 * Resets the state after each test method.
+	 */
+	public function tearDown() {
+		remove_theme_support( 'amp' );
+		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
+		parent::tearDown();
+	}
+
+	/**
 	 * Test register.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::register()
@@ -60,20 +69,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term()
 	 */
 	public function test_prepare_validation_error_taxonomy_term() {
-		$error = array(
-			'at_rule'         => '-ms-viewport',
-			'code'            => 'illegal_css_at_rule',
-			'node_attributes' => array(
-				'href'  => 'https://example.com',
-				'id'    => 'twentysixteen-style-css',
-				'media' => 'all',
-				'rel'   => 'stylesheet',
-				'type'  => 'text/css',
-			),
-			'node_name'       => 'link',
-			'parent_name'     => 'head',
-		);
-
+		$error              = $this->get_mock_error();
 		$sources            = array(
 			array(
 				'type' => 'plugin',
@@ -110,8 +106,35 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 */
 	public function test_get_validation_error_sanitization() {
-		$this->markTestIncomplete();
-		$this->markTestIncomplete( 'Test amp_validation_error_sanitized filter' );
+		$this->assertEquals(
+			array(
+				'forced'      => false,
+				'status'      => 0,
+				'term_status' => 0,
+			),
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $this->get_mock_error() )
+		);
+
+		// Trigger Native AMP, which should result in 'forced' => 'with_option'.
+		add_theme_support( 'amp' );
+		$this->assertEquals(
+			array(
+				'forced'      => 'with_option',
+				'status'      => 1,
+				'term_status' => 0,
+			),
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $this->get_mock_error() )
+		);
+
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		$this->assertEquals(
+			array(
+				'forced'      => 'with_filter',
+				'status'      => 1,
+				'term_status' => 0,
+			),
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $this->get_mock_error() )
+		);
 	}
 
 	/**
@@ -285,5 +308,26 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function test_handle_validation_error_update() {
 		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Gets a mock validation error for testing.
+	 *
+	 * @return array $error Mock validation error.
+	 */
+	public function get_mock_error() {
+		return array(
+			'at_rule'         => '-ms-viewport',
+			'code'            => 'illegal_css_at_rule',
+			'node_attributes' => array(
+				'href'  => 'https://example.com',
+				'id'    => 'twentysixteen-style-css',
+				'media' => 'all',
+				'rel'   => 'stylesheet',
+				'type'  => 'text/css',
+			),
+			'node_name'       => 'link',
+			'parent_name'     => 'head',
+		);
 	}
 }
