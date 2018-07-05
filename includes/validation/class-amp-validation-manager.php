@@ -1440,6 +1440,7 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function finalize_validation( DOMDocument $dom, $args = array() ) {
+		printf( "finalize_validation() was called\n" );
 		$args = array_merge(
 			array(
 				'remove_source_comments'           => true,
@@ -1453,6 +1454,7 @@ class AMP_Validation_Manager {
 		 * when there are validation errors which have not been explicitly accepted.
 		 */
 		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ) {
+			printf( "The first conditional in finalize_validation() is true\n" );
 			$error_count = 0;
 			foreach ( self::$validation_results as $validation_result ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
@@ -1487,6 +1489,7 @@ class AMP_Validation_Manager {
 		}
 
 		if ( self::should_validate_response() ) {
+			printf( "The second conditional in finalize_validation() is true\n" );
 			if ( $args['remove_source_comments'] ) {
 				self::remove_source_comments( $dom );
 			}
