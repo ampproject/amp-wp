@@ -441,7 +441,27 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_tag_row_actions()
 	 */
 	public function test_filter_tag_row_actions() {
-		$this->markTestIncomplete();
+		AMP_Validation_Error_Taxonomy::register();
+		$initial_actions = array(
+			'delete' => '<a href="#">Delete</a>',
+		);
+
+		// When the term isn't for the invalid post type taxonomy, the actions shouldn't be altered.
+		$term_other_taxonomy = $this->factory()->term->create_and_get();
+		$this->assertEquals( $initial_actions, AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_other_taxonomy ) );
+
+		// The term is for this taxonomy, so this should filter the actions.
+		$term_this_taxonomy = $this->factory()->term->create_and_get( array(
+			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			'description' => wp_json_encode( $this->get_mock_error() ),
+		) );
+		$filtered_actions   = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_this_taxonomy );
+		$accept_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
+		$reject_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
+		$this->assertContains( strval( $term_this_taxonomy->term_id ), $accept_action );
+		$this->assertContains( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', $accept_action );
+		$this->assertContains( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', $reject_action );
+
 	}
 
 	/**
