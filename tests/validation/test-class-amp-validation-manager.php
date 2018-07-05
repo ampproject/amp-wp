@@ -1052,16 +1052,15 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$tested_class->getProperty( 'validation_results' )->setValue( $validation_results );
 
 		// should_validate_response() will be false, so finalize_validation() won't append the AMP_VALIDATION_RESULTS comment.
-		$tested_method = $tested_class->getMethod( 'finalize_validation' );
-		$tested_method->invoke( null, $dom );
+		$tested_class->getMethod( 'finalize_validation' )->invoke( null, $dom );
 		$this->assertNotContains( 'AMP_VALIDATION_RESULTS:[', $dom->documentElement->lastChild->nodeValue );
 
 		// Ensure that the first conditional is true: ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ).
-		$show_admin_bar = true; // WPCS: Global override OK.
-		$admin_bar_item_added = $tested_class->getProperty( 'amp_admin_bar_item_added' );
-		$admin_bar_item_added->setAccessible( true );
-		$admin_bar_item_added->setValue( true );
-		$tested_method->invoke( null, $dom );
+		$show_admin_bar     = true; // WPCS: Global override OK.
+		$admin_bar_property = $tested_class->getProperty( 'amp_admin_bar_item_added' );
+		$admin_bar_property->setAccessible( true );
+		$admin_bar_property->setValue( true );
+		$tested_class->getMethod( 'finalize_validation' )->invoke( null, $dom );
 		$this->assertContains( 'Re-validate (1 validation error)', $dom->getElementById( 'wp-admin-bar-amp-validity' )->getElementsByTagName( 'a' )->item( 0 )->textContent );
 		$this->assertContains( "\xE2\x9A\xA0\xEF\xB8\x8F", $dom->getElementById( 'amp-admin-bar-item-status-icon' )->textContent );
 
@@ -1069,7 +1068,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
 		$this->set_capability();
-		$tested_method->invoke( null, $dom );
+		$tested_class->getMethod( 'finalize_validation' )->invoke( null, $dom );
 		$this->assertContains( 'AMP_VALIDATION_RESULTS:[', $dom->documentElement->lastChild->nodeValue );
 		$this->assertContains( wp_json_encode( $validation_results, 128 ), $dom->documentElement->lastChild->nodeValue );
 	}
