@@ -124,30 +124,32 @@ class AMP_Template_Customizer {
 	 * @since 0.6
 	 */
 	public function add_customizer_scripts() {
-		wp_enqueue_script(
-			'amp-customize-controls',
-			amp_get_asset_url( 'js/amp-customize-controls.js' ),
-			array( 'jquery', 'customize-controls' ),
-			AMP__VERSION,
-			true
-		);
+		if ( ! amp_is_canonical() ) {
+			wp_enqueue_script(
+				'amp-customize-controls',
+				amp_get_asset_url( 'js/amp-customize-controls.js' ),
+				array( 'jquery', 'customize-controls' ),
+				AMP__VERSION,
+				true
+			);
 
-		wp_add_inline_script( 'amp-customize-controls', sprintf( 'ampCustomizeControls.boot( %s );',
-			wp_json_encode( array(
-				'queryVar' => amp_get_slug(),
-				'panelId'  => self::PANEL_ID,
-				'ampUrl'   => amp_admin_get_preview_permalink(),
-				'l10n'     => array(
-					'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
-					'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
-				),
-			) )
-		) );
+			wp_add_inline_script( 'amp-customize-controls', sprintf( 'ampCustomizeControls.boot( %s );',
+				wp_json_encode( array(
+					'queryVar' => amp_get_slug(),
+					'panelId'  => self::PANEL_ID,
+					'ampUrl'   => amp_admin_get_preview_permalink(),
+					'l10n'     => array(
+						'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
+						'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
+					),
+				) )
+			) );
 
-		wp_enqueue_style(
-			'amp-customizer',
-			amp_get_asset_url( 'css/amp-customizer.css' )
-		);
+			wp_enqueue_style(
+				'amp-customizer',
+				amp_get_asset_url( 'css/amp-customizer.css' )
+			);
+		}
 
 		/**
 		 * Fires when plugins should register settings for AMP.
