@@ -60,7 +60,39 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term()
 	 */
 	public function test_prepare_validation_error_taxonomy_term() {
-		$this->markTestIncomplete();
+		$error = array(
+			'at_rule'         => '-ms-viewport',
+			'code'            => 'illegal_css_at_rule',
+			'node_attributes' => array(
+				'href'  => 'https://example.com',
+				'id'    => 'twentysixteen-style-css',
+				'media' => 'all',
+				'rel'   => 'stylesheet',
+				'type'  => 'text/css',
+			),
+			'node_name'       => 'link',
+			'parent_name'     => 'head',
+		);
+
+		$sources            = array(
+			array(
+				'type' => 'plugin',
+				'name' => 'baz',
+			),
+		);
+		$error_with_sources = array_merge( $error, compact( 'sources' ) );
+		ksort( $error );
+
+		$description = wp_json_encode( $error );
+		$term_slug   = md5( $description );
+		$this->assertEquals(
+			AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error_with_sources ),
+			array(
+				'slug'        => $term_slug,
+				'name'        => $term_slug,
+				'description' => $description,
+			)
+		);
 	}
 
 	/**
