@@ -93,7 +93,46 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::add_admin_menu_new_invalid_url_count()
 	 */
 	public function test_add_admin_menu_new_invalid_url_count() {
-		$this->markTestIncomplete();
+		global $submenu;
+		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
+
+		unset( $submenu[ AMP_Options_Manager::OPTION_NAME ] );
+		AMP_Invalid_URL_Post_Type::add_admin_menu_new_invalid_url_count();
+
+		$submenu[ AMP_Options_Manager::OPTION_NAME ] = array( // WPCS: override ok.
+			0 => array(
+				0 => 'General',
+				1 => 'manage_options',
+				2 => 'amp-options',
+				3 => 'AMP Settings',
+			),
+			1 => array(
+				0 => 'Analytics',
+				1 => 'manage_options',
+				2 => 'amp-analytics-options',
+				3 => 'AMP Analytics Options',
+			),
+			2 => array(
+				0 => 'Invalid Pages',
+				1 => 'edit_posts',
+				2 => 'edit.php?post_type=amp_invalid_url',
+				3 => 'Invalid AMP Pages (URLs)',
+			),
+		);
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array(
+					'code' => 'hello',
+				),
+			),
+			get_permalink( $this->factory()->post->create() )
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+
+		AMP_Invalid_URL_Post_Type::add_admin_menu_new_invalid_url_count();
+
+		$this->assertContains( '<span class="awaiting-mod"><span class="pending-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 	}
 
 	/**
@@ -102,7 +141,51 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors()
 	 */
 	public function test_get_invalid_url_validation_errors() {
-		$this->markTestIncomplete();
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		AMP_Validation_Manager::init();
+		$post = $this->factory()->post->create();
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
+
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) {
+			if ( 'accepted' === $error['code'] ) {
+				$sanitized = true;
+			} elseif ( 'rejected' === $error['code'] ) {
+				$sanitized = false;
+			}
+			return $sanitized;
+		}, 10, 2 );
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'accepted' ),
+				array( 'code' => 'rejected' ),
+				array( 'code' => 'new' ),
+			),
+			get_permalink( $post )
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+
+		$errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) );
+		$this->assertCount( 3, $errors );
+
+		$error = array_shift( $errors );
+		$this->assertEquals( 'accepted', $error['data']['code'] );
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['term_status'] );
+		$error = array_shift( $errors );
+		$this->assertEquals( 'rejected', $error['data']['code'] );
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term_status'] );
+		$error = array_shift( $errors );
+		$this->assertEquals( 'new', $error['data']['code'] );
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, $error['term_status'] );
+
+		$errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ), array( 'ignore_accepted' => true ) );
+		$this->assertCount( 2, $errors );
+		$error = array_shift( $errors );
+		$this->assertEquals( 'rejected', $error['data']['code'] );
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term_status'] );
+		$error = array_shift( $errors );
+		$this->assertEquals( 'new', $error['data']['code'] );
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, $error['term_status'] );
 	}
 
 	/**
