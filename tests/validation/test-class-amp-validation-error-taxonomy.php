@@ -18,9 +18,41 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::register()
 	 */
 	public function test_register() {
-		$this->markTestIncomplete();
-	}
+		global $wp_taxonomies;
 
+		AMP_Validation_Error_Taxonomy::register();
+		$taxonomy_object = $wp_taxonomies[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ];
+
+		$this->assertFalse( $taxonomy_object->public );
+		$this->assertTrue( $taxonomy_object->show_ui );
+		$this->assertFalse( $taxonomy_object->show_tagcloud );
+		$this->assertFalse( $taxonomy_object->show_in_quick_edit );
+		$this->assertFalse( $taxonomy_object->hierarchical );
+		$this->assertTrue( $taxonomy_object->show_in_menu );
+		$this->assertFalse( $taxonomy_object->meta_box_cb );
+		$this->assertEquals( 'AMP Validation Errors', $taxonomy_object->label );
+		$this->assertEquals( 'do_not_allow', $taxonomy_object->cap->assign_terms );
+		$this->assertEquals( array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ), $taxonomy_object->object_type );
+
+		$labels = $taxonomy_object->labels;
+		$this->assertEquals( 'AMP Validation Errors', $labels->name );
+		$this->assertEquals( 'AMP Validation Error', $labels->singular_name );
+		$this->assertEquals( 'Search AMP Validation Errors', $labels->search_items );
+		$this->assertEquals( 'All AMP Validation Errors', $labels->all_items );
+		$this->assertEquals( 'Edit AMP Validation Error', $labels->edit_item );
+		$this->assertEquals( 'Update AMP Validation Error', $labels->update_item );
+		$this->assertEquals( 'Validation Errors', $labels->menu_name );
+		$this->assertEquals( 'Back to AMP Validation Errors', $labels->back_to_items );
+		$this->assertEquals( 'Frequent Validation Errors', $labels->popular_items );
+		$this->assertEquals( 'View Validation Error', $labels->view_item );
+		$this->assertEquals( 'Add New Validation Error', $labels->add_new_item );
+		$this->assertEquals( 'New Validation Error Hash', $labels->new_item_name );
+		$this->assertEquals( 'No validation errors found.', $labels->not_found );
+		$this->assertEquals( 'Validation Error', $labels->no_terms );
+		$this->assertEquals( 'Validation errors navigation', $labels->items_list_navigation );
+		$this->assertEquals( 'Validation errors list', $labels->items_list );
+		$this->assertEquals( 'Most Used Validation Errors', $labels->most_used );
+	}
 
 	/**
 	 * Test summarize_validation_errors.
