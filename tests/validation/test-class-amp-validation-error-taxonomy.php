@@ -175,7 +175,33 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::is_array_subset()
 	 */
 	public function test_is_array_subset() {
-		$this->markTestIncomplete();
+		$error = $this->get_mock_error();
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_array_subset( $error, $error ) );
+
+		// The superset argument now has an extra key and value, but the superset still has all of the values of the subset.
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_array_subset( array_merge( $error, array( 'foo' => 'bar' ) ), $error ) );
+
+		// The subset has a key and value that the superset doesn't have, so this should be false.
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_array_subset( $error, array_merge( $error, array( 'foo' => 'bar' ) ) ) );
+
+		$sources = array(
+			array(
+				'type' => 'plugin',
+				'name' => 'foo',
+			),
+			array(
+				'type' => 'theme',
+				'name' => 'baz',
+			),
+		);
+
+		/**
+		 * Add only the plugin sources to the superset, but all of the sources to the subset.
+		 * This should make is_array_subset() false, as the superset does not have all of the values of the subset.
+		 */
+		$superset = array_merge( $error, array( 'sources' => array( $sources[0] ) ) );
+		$subset   = array_merge( $error, compact( 'sources' ) );
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_array_subset( $superset, $subset ) );
 	}
 
 	/**
