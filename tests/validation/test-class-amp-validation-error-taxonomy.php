@@ -441,6 +441,9 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_tag_row_actions()
 	 */
 	public function test_filter_tag_row_actions() {
+
+		// Prevent an error in add_query_arg().
+		$_SERVER['REQUEST_URI'] = 'https://example.com';
 		AMP_Validation_Error_Taxonomy::register();
 		$initial_actions = array(
 			'delete' => '<a href="#">Delete</a>',
@@ -470,7 +473,22 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item()
 	 */
 	public function test_add_admin_menu_validation_error_item() {
-		$this->markTestIncomplete();
+		global $submenu;
+
+		AMP_Validation_Error_Taxonomy::register();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
+		$this->assertEquals(
+			array(
+				array(
+					'Validation Errors',
+					'manage_categories',
+					'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
+					'Validation Errors',
+				),
+			),
+			$submenu[ AMP_Options_Manager::OPTION_NAME ]
+		);
 	}
 
 	/**
