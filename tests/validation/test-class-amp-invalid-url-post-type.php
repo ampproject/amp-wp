@@ -730,7 +730,24 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_dashboard_glance_items()
 	 */
 	public function test_filter_dashboard_glance_items() {
-		$this->markTestSkipped( 'Needs refactoring' );
+
+		// There are no validation errors, so this should return the argument unchanged.
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::filter_dashboard_glance_items( array() ) );
+
+		// Create validation errors, so that the method returns items.
+		$post_id = $this->factory()->post->create();
+		AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'accepted' ),
+				array( 'code' => 'rejected' ),
+				array( 'code' => 'new' ),
+			),
+			get_permalink( $post_id )
+		);
+		$items = AMP_Invalid_URL_Post_Type::filter_dashboard_glance_items( array() );
+		$this->assertContains( '1 URL w/ new AMP errors', $items[0] );
+		$this->assertContains( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $items[0] );
+		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $items[0] );
 	}
 
 	/**
