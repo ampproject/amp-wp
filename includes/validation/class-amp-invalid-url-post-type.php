@@ -132,7 +132,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		// Hide irrelevant "published" label in the invalid URL post list.
 		add_filter( 'post_date_column_status', function( $status, $post ) {
-			if ( self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+			if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post ) ) {
 				$status = '';
 			}
 			return $status;
