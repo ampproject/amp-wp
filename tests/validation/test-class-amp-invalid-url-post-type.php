@@ -136,9 +136,10 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_invalid_url_validation_errors.
+	 * Test get_invalid_url_validation_errors and display_invalid_url_validation_error_counts_summary.
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors()
+	 * @covers \AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary()
 	 */
 	public function test_get_invalid_url_validation_errors() {
 		add_theme_support( 'amp', array( 'paired' => true ) );
@@ -186,15 +187,13 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$error = array_shift( $errors );
 		$this->assertEquals( 'new', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, $error['term_status'] );
-	}
 
-	/**
-	 * Test display_invalid_url_validation_error_counts_summary.
-	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary()
-	 */
-	public function test_display_invalid_url_validation_error_counts_summary() {
-		$this->markTestIncomplete();
+		ob_start();
+		AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary( $invalid_url_post_id );
+		$summary = ob_get_clean();
+		$this->assertContains( 'New: 1', $summary );
+		$this->assertContains( 'Accepted: 1', $summary );
+		$this->assertContains( 'Rejected: 1', $summary );
 	}
 
 	/**
@@ -203,19 +202,23 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::get_invalid_url_post()
 	 */
 	public function test_get_invalid_url_post() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		AMP_Validation_Manager::init();
+		$post = $this->factory()->post->create_and_get();
+		$this->assertEquals( null, AMP_Invalid_URL_Post_Type::get_invalid_url_post( get_permalink( $post ) ) );
 
-		global $post;
-		$post           = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		$custom_post_id = $this->factory()->post->create( array(
-			'post_type' => AMP_Validation_Manager::POST_TYPE_SLUG,
-		) );
+		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			get_permalink( $post )
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_post_id );
 
-		$url = get_permalink( $custom_post_id );
-		$this->assertEquals( null, AMP_Validation_Manager::get_invalid_url_post( $url ) );
-
-		update_post_meta( $custom_post_id, AMP_Validation_Manager::AMP_URL_META, $url );
-		$this->assertEquals( $custom_post_id, AMP_Validation_Manager::get_invalid_url_post( $url )->ID );
+		$this->assertEquals(
+			$invalid_post_id,
+			AMP_Invalid_URL_Post_Type::get_invalid_url_post( get_permalink( $post ) )->ID
+		);
 	}
 
 	/**

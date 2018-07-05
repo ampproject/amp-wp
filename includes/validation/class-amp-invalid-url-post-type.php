@@ -292,7 +292,7 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Gets the existing custom post that stores errors for the $url, if it exists.
 	 *
-	 * @param string $url The URL of the post.
+	 * @param string $url The (in)valid URL.
 	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
 	public static function get_invalid_url_post( $url ) {
