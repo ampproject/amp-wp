@@ -33,6 +33,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		remove_theme_support( 'amp' );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		remove_all_filters( 'amp_validation_error_sanitized' );
+		remove_all_filters( 'terms_clauses' );
 		parent::tearDown();
 	}
 
@@ -339,7 +340,23 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter()
 	 */
 	public function test_add_group_terms_clauses_filter() {
-		$this->markTestIncomplete();
+		global $current_screen;
+
+		set_current_screen( 'front' );
+		$tested_filter = 'terms_clauses';
+		remove_all_filters( $tested_filter );
+		AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter();
+		$this->assertFalse( has_filter( $tested_filter ) );
+
+		// Only the first part of the conditional will be true, so this shouldn't add the filter.
+		$current_screen->taxonomy = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
+		AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter();
+		$this->assertFalse( has_filter( $tested_filter ) );
+
+		// The entire conditional should be true, and this should add the filter.
+		$_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] = 1;
+		AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter();
+		$this->assertTrue( has_filter( $tested_filter ) );
 	}
 
 	/**
