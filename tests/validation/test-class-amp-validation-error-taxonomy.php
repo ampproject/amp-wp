@@ -13,11 +13,19 @@
 class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 	/**
+	 * A mock acceptable error code.
+	 *
+	 * @var string
+	 */
+	const MOCK_ACCEPTABLE_ERROR = 'illegal_css_at_rule';
+
+	/**
 	 * Resets the state after each test method.
 	 */
 	public function tearDown() {
 		remove_theme_support( 'amp' );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
+		remove_all_filters( 'amp_validation_error_sanitized' );
 		parent::tearDown();
 	}
 
@@ -147,7 +155,18 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::accept_validation_errors()
 	 */
 	public function test_accept_validation_errors() {
-		$this->markTestIncomplete();
+		$error = $this->get_mock_error();
+		AMP_Validation_Error_Taxonomy::accept_validation_errors( array() );
+		$this->assertNull( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
+		remove_all_filters( 'amp_validation_error_sanitized' );
+
+		AMP_Validation_Error_Taxonomy::accept_validation_errors( array( self::MOCK_ACCEPTABLE_ERROR => true ) );
+		$this->assertTrue( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
+		remove_all_filters( 'amp_validation_error_sanitized' );
+
+		AMP_Validation_Error_Taxonomy::accept_validation_errors( true );
+		$this->assertTrue( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
+		remove_all_filters( 'amp_validation_error_sanitized' );
 	}
 
 	/**
@@ -322,7 +341,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	public function get_mock_error() {
 		return array(
 			'at_rule'         => '-ms-viewport',
-			'code'            => 'illegal_css_at_rule',
+			'code'            => self::MOCK_ACCEPTABLE_ERROR,
 			'node_attributes' => array(
 				'href'  => 'https://example.com',
 				'id'    => 'twentysixteen-style-css',
