@@ -22,8 +22,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( 'amp' );
-		global $wp_scripts;
+		global $wp_scripts, $pagenow;
 		$wp_scripts = null;
+		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
 		parent::tearDown();
 	}
 
