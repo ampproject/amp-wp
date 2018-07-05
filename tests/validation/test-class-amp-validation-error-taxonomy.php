@@ -210,7 +210,21 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_count()
 	 */
 	public function test_get_validation_error_count() {
-		$this->markTestIncomplete();
+		AMP_Validation_Error_Taxonomy::register();
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		$this->factory()->term->create( array(
+			'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+		) );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		$terms_to_add = 11;
+		for ( $i = 0; $i < $terms_to_add; $i++ ) {
+			$this->factory()->term->create( array(
+				'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			) );
+		}
+		$this->assertEquals( 1 + $terms_to_add, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
 	}
 
 	/**
