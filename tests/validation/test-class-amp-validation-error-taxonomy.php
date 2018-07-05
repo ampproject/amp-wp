@@ -55,6 +55,70 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test prepare_validation_error_taxonomy_term.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term()
+	 */
+	public function test_prepare_validation_error_taxonomy_term() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test is_validation_error_sanitized.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::is_validation_error_sanitized()
+	 */
+	public function test_is_validation_error_sanitized() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test get_validation_error_sanitization.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
+	 */
+	public function test_get_validation_error_sanitization() {
+		$this->markTestIncomplete();
+		$this->markTestIncomplete( 'Test amp_validation_error_sanitized filter' );
+	}
+
+	/**
+	 * Test accept_validation_errors.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::accept_validation_errors()
+	 */
+	public function test_accept_validation_errors() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test is_array_subset.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::is_array_subset()
+	 */
+	public function test_is_array_subset() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test get_validation_error_count.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_count()
+	 */
+	public function test_get_validation_error_count() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test filter_posts_where_for_validation_error_status.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status()
+	 */
+	public function test_filter_posts_where_for_validation_error_status() {
+		$this->markTestIncomplete();
+	}
+
+	/**
 	 * Test summarize_validation_errors.
 	 *
 	 * @covers AMP_Validation_Manager::summarize_validation_errors()
@@ -99,5 +163,95 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			),
 		);
 		$this->assertEquals( $expected_results, $results );
+	}
+
+	/**
+	 * Test add_admin_hooks.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_hooks()
+	 */
+	public function test_add_admin_hooks() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test add_group_terms_clauses_filter.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter()
+	 */
+	public function test_add_group_terms_clauses_filter() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test filter_user_has_cap_for_hiding_term_list_table_checkbox.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox()
+	 */
+	public function test_filter_user_has_cap_for_hiding_term_list_table_checkbox() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test filter_terms_clauses_for_description_search.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search()
+	 */
+	public function test_filter_terms_clauses_for_description_search() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test add_admin_notices.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_notices()
+	 */
+	public function test_add_admin_notices() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test filter_tag_row_actions.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::filter_tag_row_actions()
+	 */
+	public function test_filter_tag_row_actions() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test add_admin_menu_validation_error_item.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item()
+	 */
+	public function test_add_admin_menu_validation_error_item() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test filter_views_edit.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::filter_views_edit()
+	 */
+	public function test_filter_views_edit() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test filter_manage_custom_columns.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
+	 */
+	public function test_filter_manage_custom_columns() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * Test handle_validation_error_update.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::handle_validation_error_update()
+	 */
+	public function test_handle_validation_error_update() {
+		$this->markTestIncomplete();
 	}
 }
