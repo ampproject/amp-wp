@@ -387,7 +387,14 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search()
 	 */
 	public function test_filter_terms_clauses_for_description_search() {
-		$this->markTestIncomplete();
+		$initial_where = 'tt.taxonomy IN (\'amp_validation_error\') AND tt.count > 0';
+		$clauses       = array( 'where' => $initial_where );
+		$args          = array( 'search' => 'baz' );
+
+		// The condition won't be true, so it shouldn't alter the 'where' clause.
+		$this->assertEquals( $clauses, AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search( $clauses, array(), $args ) );
+
+		$this->markTestIncomplete( 'This still needs an assertion for when the preg_replace() alters the WHERE clause' );
 	}
 
 	/**
@@ -396,7 +403,36 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_notices()
 	 */
 	public function test_add_admin_notices() {
-		$this->markTestIncomplete();
+		global $current_screen;
+		set_current_screen( 'edit.php' );
+
+		// Test that the method exits when the first conditional isn't true.
+		ob_start();
+		AMP_Validation_Error_Taxonomy::add_admin_notices();
+		$this->assertEmpty( ob_get_clean() );
+
+		// Test the first conditional, where the error is accepted.
+		$_GET['amp_actioned']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION;
+		$count                      = 5;
+		$_GET['amp_actioned_count'] = $count;
+		$current_screen->taxonomy   = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
+		ob_start();
+		AMP_Validation_Error_Taxonomy::add_admin_notices();
+		$message = ob_get_clean();
+		$this->assertEquals(
+			sprintf( '<div class="notice notice-success is-dismissible"><p>Accepted %s errors. They will no longer block related URLs from being served as AMP.</p></div>', $count ),
+			$message
+		);
+
+		// Test the second conditional, where the error is rejected.
+		$_GET['amp_actioned'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
+		ob_start();
+		AMP_Validation_Error_Taxonomy::add_admin_notices();
+		$message = ob_get_clean();
+		$this->assertEquals(
+			sprintf( '<div class="notice notice-success is-dismissible"><p>Rejected %s errors. They will continue to block related URLs from being served as AMP.</p></div>', $count ),
+			$message
+		);
 	}
 
 	/**
