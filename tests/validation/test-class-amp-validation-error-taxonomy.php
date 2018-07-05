@@ -97,7 +97,11 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::is_validation_error_sanitized()
 	 */
 	public function test_is_validation_error_sanitized() {
-		$this->markTestIncomplete();
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $this->get_mock_error() ) );
+
+		// Trigger Native AMP, which makes all errors accepted.
+		add_theme_support( 'amp' );
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $this->get_mock_error() ) );
 	}
 
 	/**
