@@ -103,6 +103,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::$should_locate_sources = false;
 		AMP_Validation_Manager::$hook_source_stack     = array();
 		AMP_Validation_Manager::$validation_results    = array();
+		AMP_Validation_Manager::reset_validation_results();
 		parent::tearDown();
 	}
 
@@ -440,6 +441,16 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_add_validation_error_track_removed() {
 		AMP_Validation_Manager::$should_locate_sources = true;
 		$this->assertEmpty( AMP_Validation_Manager::$validation_results );
+
+		$that = $this;
+		$node = $this->node;
+		add_filter( 'amp_validation_error', function( $error, $context ) use ( $node, $that ) {
+			$error['filtered'] = true;
+			$that->assertEquals( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE, $error['code'] );
+			$that->assertSame( $node, $context['node'] );
+			return $error;
+		}, 10, 2 );
+
 		AMP_Validation_Manager::add_validation_error(
 			array(
 				'node_name'       => $this->node->nodeName,
@@ -458,12 +469,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				'sources'         => array(),
 				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
 				'node_attributes' => array(),
+				'filtered'        => true,
 			),
 			AMP_Validation_Manager::$validation_results[0]['error']
 		);
-		AMP_Validation_Manager::reset_validation_results();
-
-		$this->markTestIncomplete( 'Need to implement amp_validation_error filter check.' );
 	}
 
 	/**
