@@ -260,7 +260,9 @@ function post_supports_amp( $post ) {
  * @return bool Whether it is the AMP endpoint.
  */
 function is_amp_endpoint() {
-	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+	global $pagenow;
+
+	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ), true ) ) {
 		return false;
 	}
 
