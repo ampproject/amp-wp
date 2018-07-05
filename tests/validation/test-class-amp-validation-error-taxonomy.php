@@ -393,8 +393,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// The condition won't be true, so it shouldn't alter the 'where' clause.
 		$this->assertEquals( $clauses, AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search( $clauses, array(), $args ) );
-
-		$this->markTestIncomplete( 'This still needs an assertion for when the preg_replace() alters the WHERE clause' );
 	}
 
 	/**
@@ -553,7 +551,23 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::handle_validation_error_update()
 	 */
 	public function test_handle_validation_error_update() {
-		$this->markTestIncomplete();
+		$initial_redirect_to = 'https://example.com';
+
+		// The action argument isn't either an accepted or rejected status, so the redirect shouldn't change.
+		$this->assertEquals( $initial_redirect_to, AMP_Validation_Error_Taxonomy::handle_validation_error_update( $initial_redirect_to, 'unexpected-action', array() ) );
+
+		$action = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION;
+		$this->assertEquals(
+			add_query_arg(
+				array(
+					'amp_actioned'       => $action,
+					'amp_actioned_count' => 0,
+				),
+				$initial_redirect_to
+			),
+			AMP_Validation_Error_Taxonomy::handle_validation_error_update( $initial_redirect_to, $action, array() )
+		);
+		$this->assertNotFalse( has_filter( 'pre_term_description', 'wp_filter_kses' ) );
 	}
 
 	/**
