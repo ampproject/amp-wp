@@ -123,7 +123,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', self::TESTED_CLASS . '::enqueue_block_validation' ) );
 
 		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::print_edit_form_validation_status' ) );
-		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::plugin_notice' ) );
+		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::print_plugin_notice' ) );
 
 		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::add_rest_api_fields' ) );
 
@@ -509,11 +509,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::print_edit_form_validation_status()
 	 */
 	public function test_print_edit_form_validation_status() {
-		$this->markTestSkipped( 'Needs refactoring' );
-
 		add_theme_support( 'amp' );
 
-		AMP_Validation_Manager::register_post_type();
+		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validation_Error_Taxonomy::register();
 		$this->set_capability();
 		$post = $this->factory()->post->create_and_get();
 		ob_start();
@@ -522,10 +521,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
-		$this->create_custom_post(
+		AMP_Invalid_URL_Post_Type::store_validation_errors(
 			array(
 				array(
-					'code'            => AMP_Validation_Manager::INVALID_ELEMENT_CODE,
+					'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
 					'node_name'       => $this->disallowed_tag_name,
 					'parent_name'     => 'div',
 					'node_attributes' => array(),
@@ -537,7 +536,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 					),
 				),
 			),
-			amp_get_permalink( $post->ID )
+			get_permalink( $post->ID )
 		);
 		ob_start();
 		AMP_Validation_Manager::print_edit_form_validation_status( $post );
@@ -930,10 +929,14 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	/**
 	 * Test can_output_buffer.
 	 *
+	 * Note that this method cannot currently be fully tested because
+	 * it relies on `AMP_Theme_Support::start_output_buffering()` having
+	 * been called, and this method starts an output buffer with a callback
+	 *
 	 * @covers AMP_Validation_Manager::can_output_buffer()
 	 */
 	public function test_can_output_buffer() {
-		$this->markTestIncomplete();
+		$this->assertFalse( AMP_Validation_Manager::can_output_buffer() );
 	}
 
 	/**
@@ -1101,34 +1104,36 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_after_plugin_activation()
 	 */
 	public function test_validate_after_plugin_activation() {
-		$this->markTestSkipped( 'Needs refactoring' );
-
 		add_filter( 'amp_pre_get_permalink', '__return_empty_string' );
 		$r = AMP_Validation_Manager::validate_after_plugin_activation();
 		$this->assertInstanceOf( 'WP_Error', $r );
 		$this->assertEquals( 'no_published_post_url_available', $r->get_error_code() );
 		remove_filter( 'amp_pre_get_permalink', '__return_empty_string' );
 
-		$validation_errors = array(
+		$validation_error   = array(
+			'code' => 'example',
+		);
+		$validation_results = array(
 			array(
-				'code' => 'example',
+				'error'     => $validation_error,
+				'sanitized' => false,
 			),
 		);
 
 		$this->factory()->post->create();
-		$filter = function() use ( $validation_errors ) {
+		$filter = function() use ( $validation_results ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_ERRORS:' . wp_json_encode( $validation_errors )
+					'AMP_VALIDATION_RESULTS:' . wp_json_encode( $validation_results )
 				),
 			);
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 		$r = AMP_Validation_Manager::validate_after_plugin_activation();
 		remove_filter( 'pre_http_request', $filter );
-		$this->assertEquals( $validation_errors, $r );
-		$this->assertEquals( $validation_errors, get_transient( AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY ) );
+		$this->assertEquals( array( $validation_error ), $r );
+		$this->assertEquals( array( $validation_error ), get_transient( AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY ) );
 	}
 
 	/**
@@ -1193,16 +1198,14 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for plugin_notice()
+	 * Test for print_plugin_notice()
 	 *
-	 * @covers AMP_Validation_Manager::plugin_notice()
+	 * @covers AMP_Validation_Manager::print_plugin_notice()
 	 */
-	public function test_plugin_notice() {
-		$this->markTestSkipped( 'Needs refactoring' );
-
+	public function test_print_plugin_notice() {
 		global $pagenow;
 		ob_start();
-		AMP_Validation_Manager::plugin_notice();
+		AMP_Validation_Manager::print_plugin_notice();
 		$output = ob_get_clean();
 		$this->assertEmpty( $output );
 		$pagenow          = 'plugins.php'; // WPCS: global override ok.
@@ -1220,7 +1223,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			),
 		) );
 		ob_start();
-		AMP_Validation_Manager::plugin_notice();
+		AMP_Validation_Manager::print_plugin_notice();
 		$output = ob_get_clean();
 		$this->assertContains( 'Warning: The following plugin may be incompatible with AMP', $output );
 		$this->assertContains( $this->plugin_name, $output );

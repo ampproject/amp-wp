@@ -162,7 +162,7 @@ class AMP_Validation_Manager {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
 
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
-		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
+		add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
 
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
@@ -766,7 +766,7 @@ class AMP_Validation_Manager {
 		foreach ( $removed_sets as $removed_set ) {
 			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
 			$items = array();
-			foreach ( $removed_set as $name => $count ) {
+			foreach ( $removed_set['names'] as $name => $count ) {
 				if ( 1 === intval( $count ) ) {
 					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 				} else {
@@ -1553,6 +1553,9 @@ class AMP_Validation_Manager {
 			return new WP_Error( 'no_published_post_url_available' );
 		}
 		$validity = self::validate_url( $url );
+		if ( is_wp_error( $validity ) ) {
+			return $validity;
+		}
 		if ( is_array( $validity ) && count( $validity['validation_errors'] ) > 0 ) {
 			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
 			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validity['validation_errors'], 60 );
@@ -1669,10 +1672,9 @@ class AMP_Validation_Manager {
 	/**
 	 * On activating a plugin, display a notice if a plugin causes an AMP validation error.
 	 *
-	 * @todo Rename method to be verb.
 	 * @return void
 	 */
-	public static function plugin_notice() {
+	public static function print_plugin_notice() {
 		global $pagenow;
 		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
 			$validation_errors = get_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
