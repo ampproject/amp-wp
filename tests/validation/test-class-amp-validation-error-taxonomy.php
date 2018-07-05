@@ -365,7 +365,20 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox()
 	 */
 	public function test_filter_user_has_cap_for_hiding_term_list_table_checkbox() {
-		$this->markTestIncomplete();
+		$initial_caps = array( 'manage_options' );
+		$this->assertEquals( $initial_caps, AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox( $initial_caps, array(), array() ) );
+
+		$term_id_with_description = $this->factory()->term->create( array(
+			'description' => wp_json_encode( array( 'foo' => 'bar' ) ),
+		) );
+		$args                     = array( 'delete_term', null, $term_id_with_description );
+		$this->assertEquals( $initial_caps, AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox( $initial_caps, array(), $args ) );
+
+		$term_id_no_description = $this->factory()->term->create( array(
+			'description' => wp_json_encode( array( 'foo' => 'bar' ) ),
+		) );
+		$args                   = array( 'delete_term', null, $term_id_no_description );
+		$this->assertEquals( $initial_caps, AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox( $initial_caps, array(), $args ) );
 	}
 
 	/**
