@@ -1036,10 +1036,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		global $post, $show_admin_bar;
 
 		$show_admin_bar = true; // WPCS: Global override OK.
-		$tested_class  = new ReflectionClass( 'AMP_Validation_Manager' );
-		$tested_method = $tested_class->getMethod( 'finalize_validation' );
-		$dom           = new DOMDocument( '1.0' );
-		$html          = '<html><body><div id="wp-admin-bar-amp-validity"><a href="#"></a></div><span id="amp-admin-bar-item-status-icon"></span><br></body></html>';
+		$tested_class   = new ReflectionClass( 'AMP_Validation_Manager' );
+		$dom            = new DOMDocument( '1.0' );
+		$html           = '<html><body><div id="wp-admin-bar-amp-validity"><a href="#"></a></div><span id="amp-admin-bar-item-status-icon"></span><br></body></html>';
 		$dom->loadHTML( $html );
 
 		$validation_results = array(
@@ -1053,6 +1052,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$tested_class->getProperty( 'validation_results' )->setValue( $validation_results );
 
 		// should_validate_response() will be false, so finalize_validation() won't append the AMP_VALIDATION_RESULTS comment.
+		$tested_method = $tested_class->getMethod( 'finalize_validation' );
 		$tested_method->invoke( null, $dom );
 		$this->assertNotContains( 'AMP_VALIDATION_RESULTS:[', $dom->documentElement->lastChild->nodeValue );
 
