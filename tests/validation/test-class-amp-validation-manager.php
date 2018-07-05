@@ -102,6 +102,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		unset( $GLOBALS['current_screen'] );
 		AMP_Validation_Manager::$should_locate_sources = false;
 		AMP_Validation_Manager::$hook_source_stack     = array();
+		AMP_Validation_Manager::$validation_results    = array();
 		parent::tearDown();
 	}
 
@@ -1036,12 +1037,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		global $post, $show_admin_bar;
 
 		$show_admin_bar = true; // WPCS: Global override OK.
-		$tested_class   = new ReflectionClass( 'AMP_Validation_Manager' );
 		$dom            = new DOMDocument( '1.0' );
 		$html           = '<html><body><div id="wp-admin-bar-amp-validity"><a href="#"></a></div><span id="amp-admin-bar-item-status-icon"></span><br></body></html>';
 		$dom->loadHTML( $html );
 
-		$validation_results = array(
+		$validation_results                         = array(
 			array(
 				'error'       => array( 'code' => 'invalid_attribute' ),
 				'sanitized'   => false,
@@ -1049,26 +1049,17 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				'term_status' => 0,
 			),
 		);
-		$tested_class->getProperty( 'validation_results' )->setValue( $validation_results );
+		AMP_Validation_Manager::$validation_results = $validation_results;
 
 		// should_validate_response() will be false, so finalize_validation() won't append the AMP_VALIDATION_RESULTS comment.
-		$tested_class->getMethod( 'finalize_validation' )->invoke( null, $dom );
+		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertNotContains( 'AMP_VALIDATION_RESULTS:[', $dom->documentElement->lastChild->nodeValue );
-
-		// Ensure that the first conditional is true: ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ).
-		$show_admin_bar     = true; // WPCS: Global override OK.
-		$admin_bar_property = $tested_class->getProperty( 'amp_admin_bar_item_added' );
-		$admin_bar_property->setAccessible( true );
-		$admin_bar_property->setValue( true );
-		$tested_class->getMethod( 'finalize_validation' )->invoke( null, $dom );
-		$this->assertContains( 'Re-validate (1 validation error)', $dom->getElementById( 'wp-admin-bar-amp-validity' )->getElementsByTagName( 'a' )->item( 0 )->textContent );
-		$this->assertContains( "\xE2\x9A\xA0\xEF\xB8\x8F", $dom->getElementById( 'amp-admin-bar-item-status-icon' )->textContent );
 
 		// Ensure that should_validate_response() is true, so finalize_validation() will append the AMP_VALIDATION_RESULTS comment.
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
 		$this->set_capability();
-		$tested_class->getMethod( 'finalize_validation' )->invoke( null, $dom );
+		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertContains( 'AMP_VALIDATION_RESULTS:[', $dom->documentElement->lastChild->nodeValue );
 		$this->assertContains( wp_json_encode( $validation_results, 128 ), $dom->documentElement->lastChild->nodeValue );
 	}
