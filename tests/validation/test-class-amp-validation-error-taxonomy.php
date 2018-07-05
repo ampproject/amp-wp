@@ -17,6 +17,13 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 *
 	 * @var string
 	 */
+	const TESTED_CLASS = 'AMP_Validation_Error_Taxonomy';
+
+	/**
+	 * A mock acceptable error code.
+	 *
+	 * @var string
+	 */
 	const MOCK_ACCEPTABLE_ERROR = 'illegal_css_at_rule';
 
 	/**
@@ -307,7 +314,23 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
-		$this->markTestIncomplete();
+
+		// add_group_terms_clauses_filter() needs the screen to be set.
+		set_current_screen( 'front' );
+		AMP_Validation_Error_Taxonomy::add_admin_hooks();
+		do_action( 'load-edit-tags.php' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+
+		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
+		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
+		$this->assertEquals( 10, has_filter( 'terms_clauses', array( self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'add_admin_notices' ) ) );
+		$this->assertEquals( 10, has_filter( 'tag_row_actions', array( self::TESTED_CLASS, 'filter_tag_row_actions' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_menu', array( self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ) ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', array( self::TESTED_CLASS, 'filter_manage_custom_columns' ) ) );
+		$this->assertEquals( 10, has_filter( 'views_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'filter_views_edit' ) ) );
+		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
+		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
+		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
 	}
 
 	/**
