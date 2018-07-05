@@ -1050,8 +1050,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				'term_status' => 0,
 			),
 		);
-		$property           = $tested_class->getProperty( 'validation_results' );
-		$property->setValue( $validation_results );
+		$tested_class->getProperty( 'validation_results' )->setValue( $validation_results );
 
 		// should_validate_response() will be false, so finalize_validation() won't append the AMP_VALIDATION_RESULTS comment.
 		$tested_method->invoke( null, $dom );
