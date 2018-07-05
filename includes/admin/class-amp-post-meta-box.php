@@ -180,7 +180,7 @@ class AMP_Post_Meta_Box {
 			current_user_can( 'edit_post', $post->ID )
 		);
 
-		if ( true !== $verify ) {
+		if ( true !== apply_filters( 'amp_metabox_render_status', $verify, $post ) ) {
 			return;
 		}
 
