@@ -140,6 +140,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors()
 	 * @covers \AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary()
+	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_get_invalid_url_validation_errors() {
 		add_theme_support( 'amp', array( 'paired' => true ) );
@@ -227,7 +228,31 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::get_url_from_post()
 	 */
 	public function test_get_url_from_post() {
-		$this->markTestIncomplete();
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		AMP_Validation_Manager::init();
+		$post = $this->factory()->post->create_and_get();
+
+		$this->assertNull( AMP_Invalid_URL_Post_Type::get_url_from_post( 0 ) );
+		$this->assertNull( AMP_Invalid_URL_Post_Type::get_url_from_post( $post ) );
+
+		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			get_permalink( $post )
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_post_id );
+
+		$this->assertEquals(
+			add_query_arg( amp_get_slug(), '', get_permalink( $post ) ),
+			AMP_Invalid_URL_Post_Type::get_url_from_post( $invalid_post_id )
+		);
+
+		add_theme_support( 'amp', array( 'paired' => false ) );
+		$this->assertEquals(
+			get_permalink( $post ),
+			AMP_Invalid_URL_Post_Type::get_url_from_post( $invalid_post_id )
+		);
 	}
 
 	/**
@@ -236,116 +261,120 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_store_validation_errors() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		AMP_Validation_Manager::init();
+		$post = $this->factory()->post->create_and_get();
 
-		global $post;
-		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
-		add_theme_support( 'amp' );
-		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) {
+			if ( 'accepted' === $error['code'] ) {
+				$sanitized = true;
+			} elseif ( 'rejected' === $error['code'] ) {
+				$sanitized = false;
+			}
+			return $sanitized;
+		}, 10, 2 );
 
-		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
-		$this->assertEquals( 'script', AMP_Validation_Manager::$validation_results[0]['error']['node_name'] );
+		$errors = array(
+			array(
+				'code'    => 'accepted',
+				'sources' => array(
+					array(
+						'type' => 'plugin',
+						'name' => 'amp',
+						'evil' => '<script>\o/</script>', // Test slash preservation and kses suspension.
+					),
+				),
+			),
+			array(
+				'code'    => 'rejected',
+				'evil'    => '<script>\o/</script>', // Test slash preservation and kses suspension.
+				'sources' => array(
+					array(
+						'type' => 'theme',
+						'name' => 'twentyseventeen',
+					),
+				),
+			),
+			array(
+				'code'    => 'new',
+				'sources' => array(
+					array(
+						'type' => 'core',
+						'name' => 'wp-includes',
+					),
+				),
+			),
+		);
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			$errors,
+			get_permalink( $post )
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+
+		// Test resurrection from trash.
+		wp_trash_post( $invalid_url_post_id );
 		$this->assertEquals(
-			array(
-				'type' => 'plugin',
-				'name' => 'foo',
-			),
-			AMP_Validation_Manager::$validation_results[0]['error']['sources'][0]
+			$invalid_url_post_id,
+			AMP_Invalid_URL_Post_Type::store_validation_errors(
+				$errors,
+				get_permalink( $post )
+			)
+		);
+		$this->assertEquals( 'publish', get_post_status( $invalid_url_post_id ) );
+
+		// Test passing specific post to override the URL.
+		$this->assertEquals(
+			$invalid_url_post_id,
+			AMP_Invalid_URL_Post_Type::store_validation_errors(
+				$errors,
+				home_url( '/something/else/' ),
+				$invalid_url_post_id
+			)
 		);
 
-		$url     = home_url( '/' );
-		$post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
-		$this->assertNotEmpty( $post_id );
-		$custom_post               = get_post( $post_id );
-		$validation                = AMP_Validation_Manager::summarize_validation_errors( json_decode( $custom_post->post_content, true ) );
-		$expected_removed_elements = array(
-			'script' => 1,
-		);
-		AMP_Validation_Manager::reset_validation_results();
-
-		// This should create a new post for the errors.
-		$this->assertEquals( AMP_Validation_Manager::POST_TYPE_SLUG, $custom_post->post_type );
-		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Manager::REMOVED_ELEMENTS ] );
-		$this->assertEquals( array(), $validation[ AMP_Validation_Manager::REMOVED_ATTRIBUTES ] );
-		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Manager::SOURCES_INVALID_OUTPUT ]['plugin'] );
-		$meta = get_post_meta( $post_id, AMP_Validation_Manager::AMP_URL_META, true );
-		$this->assertEquals( $url, $meta );
-
-		AMP_Validation_Manager::reset_validation_results();
-		$url = home_url( '/?baz' );
-		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
-		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
-		AMP_Validation_Manager::reset_validation_results();
-		$meta = get_post_meta( $post_id, AMP_Validation_Manager::AMP_URL_META, false );
-		// A post exists for these errors, so the URL should be stored in the 'additional URLs' meta data.
-		$this->assertEquals( $post_id, $custom_post_id );
-		$this->assertContains( $url, $meta );
-
-		$url = home_url( '/?foo-bar' );
-		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}-->' . $this->disallowed_tag . '<!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
-		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
-		AMP_Validation_Manager::reset_validation_results();
-		$meta = get_post_meta( $post_id, AMP_Validation_Manager::AMP_URL_META, false );
-
-		// The URL should again be stored in the 'additional URLs' meta data.
-		$this->assertEquals( $post_id, $custom_post_id );
-		$this->assertContains( $url, $meta );
-
-		AMP_Validation_Manager::reset_validation_results();
-		$this->process_markup( '<!--amp-source-stack {"type":"plugin","name":"foo"}--><nonexistent></nonexistent><!--/amp-source-stack {"type":"plugin","name":"foo"}-->' );
-		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
-		AMP_Validation_Manager::reset_validation_results();
-		$error_post                = get_post( $custom_post_id );
-		$validation                = AMP_Validation_Manager::summarize_validation_errors( json_decode( $error_post->post_content, true ) );
-		$expected_removed_elements = array(
-			'nonexistent' => 1,
+		$this->assertEquals(
+			home_url( '/something/else/' ),
+			get_post( $invalid_url_post_id )->post_title
 		);
 
-		// A post already exists for this URL, so it should be updated.
-		$this->assertEquals( $expected_removed_elements, $validation[ AMP_Validation_Manager::REMOVED_ELEMENTS ] );
-		$this->assertEquals( array( 'foo' ), $validation[ AMP_Validation_Manager::SOURCES_INVALID_OUTPUT ]['plugin'] );
-		$this->assertContains( $url, get_post_meta( $custom_post_id, AMP_Validation_Manager::AMP_URL_META, false ) );
-
-		AMP_Validation_Manager::reset_validation_results();
-		$this->process_markup( $this->valid_amp_img );
-
-		// There are no errors, so the existing error post should be deleted.
-		$custom_post_id = AMP_Validation_Manager::store_validation_errors( wp_list_pluck( AMP_Validation_Manager::$validation_results, 'error' ), $url );
-		AMP_Validation_Manager::reset_validation_results();
-
-		$this->assertNull( $custom_post_id );
-		remove_theme_support( 'amp' );
-	}
-
-	/**
-	 * Test for store_validation_errors() when existing post is trashed.
-	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
-	 */
-	public function test_store_validation_errors_untrashing() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
-
-		$validation_errors = $this->get_mock_errors();
-
-		$first_post_id = AMP_Validation_Manager::store_validation_errors( $validation_errors, home_url( '/foo/' ) );
-		$this->assertInternalType( 'int', $first_post_id );
-
-		$post_name = get_post( $first_post_id )->post_name;
-		wp_trash_post( $first_post_id );
-		$this->assertEquals( $post_name . '__trashed', get_post( $first_post_id )->post_name );
-
-		$next_post_id = AMP_Validation_Manager::store_validation_errors( $validation_errors, home_url( '/bar/' ) );
-		$this->assertInternalType( 'int', $next_post_id );
-		$this->assertEquals( $post_name, get_post( $next_post_id )->post_name );
-		$this->assertEquals( $next_post_id, $first_post_id );
-
-		$this->assertEqualSets(
-			array(
-				home_url( '/foo/' ),
-				home_url( '/bar/' ),
-			),
-			get_post_meta( $next_post_id, AMP_Validation_Manager::AMP_URL_META, false )
+		$stored_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
+		$this->assertEquals(
+			$errors,
+			array_map(
+				function( $stored_error ) {
+					return $stored_error['data'];
+				},
+				$stored_errors
+			)
 		);
+
+		$error_groups = array(
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+		);
+
+		foreach ( $errors as $i => $error ) {
+			$stored_error = $stored_errors[ $i ];
+
+			$this->assertEquals( $error, $stored_error['data'] );
+
+			$sourceless_error = $error;
+			unset( $sourceless_error['sources'] );
+
+			/**
+			 * Term.
+			 *
+			 * @var WP_Term $term
+			 */
+			$term = $stored_error['term'];
+			$this->assertEquals( $sourceless_error, json_decode( $term->description, true ) );
+
+			$this->assertNotEmpty( get_term_meta( $term->term_id, 'created_date_gmt', true ) );
+			$this->assertEquals( $error_groups[ $i ], $stored_error['term_status'] );
+			$this->assertEquals( $error_groups[ $i ], $term->term_group );
+		}
 	}
 
 	/**
