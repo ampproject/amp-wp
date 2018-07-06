@@ -383,7 +383,58 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_views_edit()
 	 */
 	public function test_filter_views_edit() {
-		$this->markTestIncomplete();
+		$_SERVER['REQUEST_URI'] = '/wp-admin/edit.php?post_type=amp_invalid_url&amp_validation_error_status=0';
+
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		AMP_Validation_Manager::init();
+		AMP_Validation_Error_Taxonomy::add_admin_hooks();
+		$post = $this->factory()->post->create();
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
+
+		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) {
+			if ( 'accepted' === $error['code'] ) {
+				$sanitized = true;
+			} elseif ( 'rejected' === $error['code'] ) {
+				$sanitized = false;
+			}
+			return $sanitized;
+		}, 10, 2 );
+
+		$errors = array(
+			array( 'code' => 'accepted' ),
+			array( 'code' => 'rejected' ),
+			array( 'code' => 'new' ),
+		);
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			$errors,
+			get_permalink( $post )
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+
+		$views = AMP_Invalid_URL_Post_Type::filter_views_edit( array(
+			'publish' => 'Published',
+		) );
+
+		$this->assertArrayNotHasKey( 'publish', $views );
+		$this->assertContains( '(1)', $views['new'] );
+		$this->assertContains( '(1)', $views['rejected'] );
+		$this->assertContains( '(1)', $views['accepted'] );
+
+		$terms = get_terms( array( 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		foreach ( $terms as $term ) {
+			wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
+				'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
+			) );
+		}
+
+		$views = AMP_Invalid_URL_Post_Type::filter_views_edit( array(
+			'publish' => 'Published',
+		) );
+		$this->assertArrayNotHasKey( 'publish', $views );
+		$this->assertContains( '(0)', $views['new'] );
+		$this->assertContains( '(0)', $views['rejected'] );
+		$this->assertContains( '(1)', $views['accepted'] );
 	}
 
 	/**
@@ -392,8 +443,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers AMP_Invalid_URL_Post_Type::add_post_columns()
 	 */
 	public function test_add_post_columns() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
-
 		$initial_columns = array(
 			'cb' => '<input type="checkbox">',
 		);
@@ -401,13 +450,13 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			array_merge(
 				$initial_columns,
 				array(
-					'url_count' => 'Count',
-					AMP_Validation_Manager::REMOVED_ELEMENTS => 'Removed Elements',
-					AMP_Validation_Manager::REMOVED_ATTRIBUTES => 'Removed Attributes',
-					AMP_Validation_Manager::SOURCES_INVALID_OUTPUT => 'Incompatible Sources',
+					AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS => 'Removed Elements',
+					AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES => 'Removed Attributes',
+					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Incompatible Sources',
+					'error_status' => 'Error Status',
 				)
 			),
-			AMP_Validation_Manager::add_post_columns( $initial_columns )
+			AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns )
 		);
 	}
 
@@ -417,22 +466,38 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @return array $columns
 	 */
 	public function get_custom_columns() {
-		return array(
-			'url_count'             => array(
-				'url_count',
-				'1',
+		$source = array(
+			'type' => 'plugin',
+			'name' => 'amp',
+		);
+		$errors = array(
+			array(
+				'code'      => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'node_name' => 'script',
+				'sources'   => array( $source ),
 			),
+			array(
+				'code'      => AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE,
+				'node_name' => 'onclick',
+				'sources'   => array( $source ),
+			),
+		);
+
+		return array(
 			'invalid_element'       => array(
 				AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS,
-				$this->disallowed_tag_name,
+				'script',
+				$errors,
 			),
 			'removed_attributes'    => array(
 				AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES,
-				$this->disallowed_attribute_name,
+				'onclick',
+				$errors,
 			),
 			'sources_invalid_input' => array(
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT,
-				$this->plugin_name,
+				'amp',
+				$errors,
 			),
 		);
 	}
@@ -443,14 +508,16 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @dataProvider get_custom_columns
 	 * @covers       AMP_Invalid_URL_Post_Type::output_custom_column()
 	 *
-	 * @param string $column_name The name of the column.
+	 * @param string $column_name    The name of the column.
 	 * @param string $expected_value The value that is expected to be present in the column markup.
+	 * @param array  $errors         Errors.
 	 */
-	public function test_output_custom_column( $column_name, $expected_value ) {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
+	public function test_output_custom_column( $column_name, $expected_value, $errors ) {
+		AMP_Validation_Manager::init();
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( $errors, home_url( '/' ) );
 
 		ob_start();
-		AMP_Validation_Manager::output_custom_column( $column_name, $this->create_custom_post() );
+		AMP_Invalid_URL_Post_Type::output_custom_column( $column_name, $invalid_url_post_id );
 		$this->assertContains( $expected_value, ob_get_clean() );
 	}
 
@@ -460,20 +527,27 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_row_actions()
 	 */
 	public function test_filter_row_actions() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
-
-		$this->set_capability();
+		add_theme_support( 'amp' );
+		AMP_Validation_Manager::init();
 
 		$initial_actions = array(
 			'trash' => '<a href="https://example.com">Trash</a>',
 		);
-		$post            = $this->factory()->post->create_and_get();
-		$this->assertEquals( $initial_actions, AMP_Validation_Manager::filter_row_actions( $initial_actions, $post ) );
 
-		$custom_post_id = $this->create_custom_post();
-		$actions        = AMP_Validation_Manager::filter_row_actions( $initial_actions, get_post( $custom_post_id ) );
-		$url            = get_post_meta( $custom_post_id, AMP_Validation_Manager::AMP_URL_META, true );
-		$this->assertContains( $url, $actions[ AMP_Validation_Manager::RECHECK_ACTION ] );
+		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/' )
+		);
+
+		$this->assertEquals( $initial_actions, AMP_Invalid_URL_Post_Type::filter_row_actions( $initial_actions, $this->factory()->post->create_and_get() ) );
+
+		$actions = AMP_Invalid_URL_Post_Type::filter_row_actions( $initial_actions, get_post( $invalid_post_id ) );
+		$this->assertArrayNotHasKey( 'inline hide-if-no-js', $actions );
+		$this->assertArrayHasKey( 'view', $actions );
+		$this->assertArrayHasKey( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $actions );
+
 		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
 	}
 
@@ -483,14 +557,12 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::add_bulk_action()
 	 */
 	public function test_add_bulk_action() {
-		$this->markTestSkipped( 'Needs refactoring' );
-
 		$initial_action = array(
 			'edit' => 'Edit',
 		);
-		$actions        = AMP_Validation_Manager::add_bulk_action( $initial_action );
+		$actions        = AMP_Invalid_URL_Post_Type::add_bulk_action( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
-		$this->assertEquals( 'Recheck', $actions[ AMP_Validation_Manager::RECHECK_ACTION ] );
+		$this->assertEquals( 'Recheck', $actions[ AMP_Invalid_URL_Post_Type::BULK_VALIDATE_ACTION ] );
 	}
 
 	/**
@@ -499,22 +571,39 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		AMP_Validation_Manager::init();
 
-		$initial_redirect                            = admin_url( 'plugins.php' );
-		$items                                       = array( $this->create_custom_post() );
-		$urls_tested                                 = '1';
-		$_GET[ AMP_Validation_Manager::URLS_TESTED ] = $urls_tested;
+		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/' )
+		);
+
+		$initial_redirect = admin_url( 'plugins.php' );
+		$items            = array( $invalid_post_id );
+		$urls_tested      = (string) count( $items );
+
+		$_GET[ AMP_Invalid_URL_Post_Type::URLS_TESTED ] = $urls_tested;
 
 		// The action isn't correct, so the callback should return the URL unchanged.
-		$this->assertEquals( $initial_redirect, AMP_Validation_Manager::handle_bulk_action( $initial_redirect, 'trash', $items ) );
+		$this->assertEquals( $initial_redirect, AMP_Invalid_URL_Post_Type::handle_bulk_action( $initial_redirect, 'trash', $items ) );
 
 		$that   = $this;
 		$filter = function() use ( $that ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_ERRORS:' . wp_json_encode( $that->get_mock_errors() )
+					'AMP_VALIDATION_RESULTS:' . wp_json_encode( array_map(
+						function( $error ) {
+							return array_merge(
+								compact( 'error' ),
+								array( 'sanitized' => false )
+							);
+						},
+						$that->get_mock_errors()
+					) )
 				),
 			);
 		};
@@ -522,16 +611,32 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals(
 			add_query_arg(
 				array(
-					AMP_Validation_Manager::URLS_TESTED => $urls_tested,
-					AMP_Validation_Manager::REMAINING_ERRORS => count( $items ),
+					AMP_Invalid_URL_Post_Type::URLS_TESTED => $urls_tested,
+					AMP_Invalid_URL_Post_Type::REMAINING_ERRORS => count( $items ),
 				),
 				$initial_redirect
 			),
-			AMP_Validation_Manager::handle_bulk_action( $initial_redirect, AMP_Validation_Manager::RECHECK_ACTION, $items )
+			AMP_Invalid_URL_Post_Type::handle_bulk_action( $initial_redirect, AMP_Invalid_URL_Post_Type::BULK_VALIDATE_ACTION, $items )
 		);
-		remove_filter( 'pre_http_request', $filter, 10, 3 );
-	}
+		remove_filter( 'pre_http_request', $filter, 10 );
 
+		// Test error scenario.
+		add_filter( 'pre_http_request', function() {
+			return array(
+				'body' => '<html></html>',
+			);
+		} );
+		$this->assertEquals(
+			add_query_arg(
+				array(
+					AMP_Invalid_URL_Post_Type::URLS_TESTED => $urls_tested,
+					'amp_validate_error'                   => array( 'response_comment_absent' ),
+				),
+				$initial_redirect
+			),
+			AMP_Invalid_URL_Post_Type::handle_bulk_action( $initial_redirect, AMP_Invalid_URL_Post_Type::BULK_VALIDATE_ACTION, $items )
+		);
+	}
 
 	/**
 	 * Test for print_admin_notice()
@@ -539,40 +644,46 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::print_admin_notice()
 	 */
 	public function test_print_admin_notice() {
-		$this->markTestSkipped( 'Needs refactoring' );
+		add_theme_support( 'amp' );
+		AMP_Validation_Manager::init();
 
 		ob_start();
-		AMP_Validation_Manager::remaining_error_notice();
+		AMP_Invalid_URL_Post_Type::print_admin_notice();
 		$this->assertEmpty( ob_get_clean() );
 
 		$_GET['post_type'] = 'post';
 		ob_start();
-		AMP_Validation_Manager::remaining_error_notice();
+		AMP_Invalid_URL_Post_Type::print_admin_notice();
 		$this->assertEmpty( ob_get_clean() );
 
 		set_current_screen( 'edit.php' );
-		get_current_screen()->post_type = AMP_Validation_Manager::POST_TYPE_SLUG;
+		get_current_screen()->post_type = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
 
-		$_GET[ AMP_Validation_Manager::REMAINING_ERRORS ] = '1';
-		$_GET[ AMP_Validation_Manager::URLS_TESTED ]      = '1';
+		$_GET[ AMP_Invalid_URL_Post_Type::REMAINING_ERRORS ] = '1';
+		$_GET[ AMP_Invalid_URL_Post_Type::URLS_TESTED ]      = '1';
 		ob_start();
-		AMP_Validation_Manager::remaining_error_notice();
-		$this->assertContains( 'The rechecked URL still has validation errors', ob_get_clean() );
+		AMP_Invalid_URL_Post_Type::print_admin_notice();
+		$this->assertContains( 'The rechecked URL still has unaccepted validation errors', ob_get_clean() );
 
-		$_GET[ AMP_Validation_Manager::URLS_TESTED ] = '2';
+		$_GET[ AMP_Invalid_URL_Post_Type::URLS_TESTED ] = '2';
 		ob_start();
-		AMP_Validation_Manager::remaining_error_notice();
-		$this->assertContains( 'The rechecked URLs still have validation errors', ob_get_clean() );
+		AMP_Invalid_URL_Post_Type::print_admin_notice();
+		$this->assertContains( 'The rechecked URLs still have unaccepted validation errors', ob_get_clean() );
 
-		$_GET[ AMP_Validation_Manager::REMAINING_ERRORS ] = '0';
+		$_GET[ AMP_Invalid_URL_Post_Type::REMAINING_ERRORS ] = '0';
 		ob_start();
-		AMP_Validation_Manager::remaining_error_notice();
-		$this->assertContains( 'The rechecked URLs have no validation error', ob_get_clean() );
+		AMP_Invalid_URL_Post_Type::print_admin_notice();
+		$this->assertContains( 'The rechecked URLs are free of unaccepted validation errors', ob_get_clean() );
 
-		$_GET[ AMP_Validation_Manager::URLS_TESTED ] = '1';
+		$_GET[ AMP_Invalid_URL_Post_Type::URLS_TESTED ] = '1';
 		ob_start();
-		AMP_Validation_Manager::remaining_error_notice();
-		$this->assertContains( 'The rechecked URL has no validation error', ob_get_clean() );
+		AMP_Invalid_URL_Post_Type::print_admin_notice();
+		$this->assertContains( 'The rechecked URL is free of unaccepted validation errors', ob_get_clean() );
+
+		$_GET['amp_validate_error'] = array( 'http_request_failed' );
+		ob_start();
+		AMP_Invalid_URL_Post_Type::print_admin_notice();
+		$this->assertContains( 'Failed to fetch URL(s) to validate', ob_get_clean() );
 
 		unset( $GLOBALS['current_screen'] );
 	}

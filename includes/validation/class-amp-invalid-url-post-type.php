@@ -762,7 +762,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_admin_notice() {
-		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // WPCS: CSRF ok.
+		if ( ! get_current_screen() || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // WPCS: CSRF ok.
 			return;
 		}
 
