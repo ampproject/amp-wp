@@ -1004,23 +1004,16 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::print_validation_errors_meta_box()
 	 */
 	public function test_print_validation_errors_meta_box() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
-		$this->set_capability();
-		$post_storing_error     = get_post( $this->create_custom_post() );
-		$first_url              = get_post_meta( $post_storing_error->ID, AMP_Validation_Manager::AMP_URL_META, true );
-		$second_url_same_errors = get_permalink( $this->factory()->post->create() );
-		AMP_Validation_Manager::store_validation_errors( $this->get_mock_errors(), $second_url_same_errors );
+		AMP_Validation_Manager::init();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( $this->get_mock_errors(), home_url( '/' ) );
 		ob_start();
-		AMP_Validation_Manager::print_validation_errors_meta_box( $post_storing_error );
+		AMP_Invalid_URL_Post_Type::print_validation_errors_meta_box( get_post( $post_id ) );
 		$output = ob_get_clean();
 
 		$this->assertContains( '<details', $output );
-		$this->assertContains( $this->disallowed_tag_name, $output );
-		$this->assertContains( $this->disallowed_attribute_name, $output );
-		$this->assertContains( 'URLs', $output );
-		$this->assertContains( $first_url, $output );
-		$this->assertContains( $second_url_same_errors, $output );
-		AMP_Validation_Manager::reset_validation_results();
+		$this->assertContains( 'script', $output );
+		$this->assertContains( 'onclick', $output );
 	}
 
 	/**
@@ -1092,15 +1085,12 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::get_recheck_url()
 	 */
 	public function test_get_recheck_url() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
-
-		$this->set_capability();
-		$post_id = $this->create_custom_post();
-		$url     = get_edit_post_link( $post_id, 'raw' );
-		$link    = AMP_Validation_Manager::get_recheck_url( get_post( $post_id ), $url );
-		$this->assertContains( AMP_Validation_Manager::RECHECK_ACTION, $link );
-		$this->assertContains( wp_create_nonce( AMP_Validation_Manager::NONCE_ACTION . $post_id ), $link );
-		$this->assertContains( 'Recheck the URL for AMP validity', $link );
+		AMP_Validation_Manager::init();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( $this->get_mock_errors(), home_url( '/' ) );
+		$link    = AMP_Invalid_URL_Post_Type::get_recheck_url( get_post( $post_id ) );
+		$this->assertContains( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $link );
+		$this->assertContains( wp_create_nonce( AMP_Invalid_URL_Post_Type::NONCE_ACTION ), $link );
 	}
 
 	/**
