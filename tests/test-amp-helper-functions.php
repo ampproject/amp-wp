@@ -22,8 +22,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( 'amp' );
-		global $wp_scripts;
+		global $wp_scripts, $pagenow;
 		$wp_scripts = null;
+		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
 		parent::tearDown();
 	}
 
@@ -336,6 +337,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Native theme support.
 		add_theme_support( 'amp' );
 		$this->assertTrue( is_amp_endpoint() );
+
+		// Special core pages.
+		$pages = array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' );
+		foreach ( $pages as $page ) {
+			$GLOBALS['pagenow'] = $page;
+			$this->assertFalse( is_amp_endpoint() );
+		}
 	}
 
 	/**

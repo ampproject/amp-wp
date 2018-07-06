@@ -278,12 +278,24 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  *      add_theme_support( 'amp' );
  *
- * This will serve templates in native AMP by default but the user would be able to change the template mode
- * from native to paired in the admin. To force only native to be available, such as when you are using AMP components
- * in your theme templates, do:
+ * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
+ * If you want to make available in paired mode, where templates are served in AMP or non-AMP documents, do:
  *
  *      add_theme_support( 'amp', array(
- *          'mode' => 'native',
+ *          'paired' => true,
+ *      ) );
+ *
+ * Paired mode is also implied if you define a template_dir:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to have AMP-specific templates in addition to serving native AMP, do:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'paired'       => false,
+ *          'template_dir' => 'amp',
  *      ) );
  *
  * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
@@ -309,30 +321,13 @@ function amp_is_canonical() {
 		return false;
 	}
 
-	$mode    = 'native';
-	$support = get_theme_support( 'amp' );
-	if ( is_array( $support ) ) {
-		$args    = array_shift( $support );
-		$support = AMP_Options_Manager::get_option( 'theme_support' );
-
-		// If support is optional, look at DB option if mode is not explicitly set in theme support.
-		if ( ! empty( $args['optional'] ) ) {
-			if ( 'disabled' === $support ) {
-				return false;
-			} elseif ( ! isset( $args['mode'] ) ) {
-				return 'native' === $support;
-			}
-		}
-
-		if ( isset( $args['mode'] ) ) {
-			$mode = $args['mode'];
-		} elseif ( 'disabled' !== $support ) {
-			$mode = $support; // Supplied via admin screen.
-		} elseif ( ! empty( $args['template_dir'] ) ) {
-			$mode = 'paired'; // If there is a template_dir, then paired mode is implied.
-		}
+	$args = AMP_Theme_Support::get_theme_support_args();
+	if ( isset( $args['paired'] ) ) {
+		return empty( $args['paired'] );
 	}
-	return 'native' === $mode;
+
+	// If there is a template_dir, then paired mode is implied.
+	return empty( $args['template_dir'] );
 }
 
 /**

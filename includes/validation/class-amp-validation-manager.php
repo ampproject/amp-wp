@@ -158,11 +158,11 @@ class AMP_Validation_Manager {
 		AMP_Invalid_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
-		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ), 10, 2 );
+		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
 
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
-		add_action( 'all_admin_notices', array( __CLASS__, 'plugin_notice' ) );
+		add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
 
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
@@ -449,10 +449,11 @@ class AMP_Validation_Manager {
 	 *
 	 * @see AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 *
-	 * @param int     $post_id Post ID.
-	 * @param WP_Post $post    Post.
+	 * @param int $post_id Post ID.
 	 */
-	public static function handle_save_post_prompting_validation( $post_id, $post ) {
+	public static function handle_save_post_prompting_validation( $post_id ) {
+		$post = get_post( $post_id );
+
 		$should_validate_post = (
 			is_post_type_viewable( $post->post_type )
 			&&
@@ -764,7 +765,15 @@ class AMP_Validation_Manager {
 		// @todo There are other kinds of errors other than REMOVED_ELEMENTS and REMOVED_ATTRIBUTES.
 		foreach ( $removed_sets as $removed_set ) {
 			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
-			self::output_removed_set( $removed_set['names'] );
+			$items = array();
+			foreach ( $removed_set['names'] as $name => $count ) {
+				if ( 1 === intval( $count ) ) {
+					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+				} else {
+					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+				}
+			}
+			echo implode( ', ', $items ); // WPCS: XSS OK.
 			echo '</p>';
 		}
 
@@ -1391,29 +1400,6 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Output a removed set, each wrapped in <code></code>.
-	 *
-	 * @param array[][] $set {
-	 *     The removed elements to output.
-	 *
-	 *     @type string $name  The name of the source.
-	 *     @type string $count The number that were invalid.
-	 * }
-	 * @return void
-	 */
-	protected static function output_removed_set( $set ) {
-		$items = array();
-		foreach ( $set as $name => $count ) {
-			if ( 1 === intval( $count ) ) {
-				$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
-			} else {
-				$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
-			}
-		}
-		echo implode( ', ', $items ); // WPCS: XSS OK.
-	}
-
-	/**
 	 * Get nonce for performing amp_validate request.
 	 *
 	 * The returned nonce is irrespective of the authenticated user.
@@ -1567,6 +1553,9 @@ class AMP_Validation_Manager {
 			return new WP_Error( 'no_published_post_url_available' );
 		}
 		$validity = self::validate_url( $url );
+		if ( is_wp_error( $validity ) ) {
+			return $validity;
+		}
 		if ( is_array( $validity ) && count( $validity['validation_errors'] ) > 0 ) {
 			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
 			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validity['validation_errors'], 60 );
@@ -1675,7 +1664,6 @@ class AMP_Validation_Manager {
 		if ( ! is_array( $validation_results ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
-
 		$validation_errors = wp_list_pluck( $validation_results, 'error' );
 		return compact( 'validation_errors', 'url' );
 	}
@@ -1685,7 +1673,7 @@ class AMP_Validation_Manager {
 	 *
 	 * @return void
 	 */
-	public static function plugin_notice() {
+	public static function print_plugin_notice() {
 		global $pagenow;
 		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
 			$validation_errors = get_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
