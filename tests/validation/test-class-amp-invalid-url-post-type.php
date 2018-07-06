@@ -844,7 +844,27 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_the_title_in_post_list_table()
 	 */
 	public function test_filter_the_title_in_post_list_table() {
-		$this->markTestSkipped( 'Needs refactoring' );
+		global $current_screen;
+		$post  = $this->factory()->post->create_and_get();
+		$title = 'https://example.com/baz';
+		set_current_screen( 'front' );
+
+		// The first conditional isn't true yet, so $title should be unchanged.
+		$this->assertEquals( $title, AMP_Invalid_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post ) );
+
+		/*
+		 * The first conditional still isn't true yet, as the $post->post_type isn't correct.
+		 * So this should again return $ttile unchanged.
+		 */
+		set_current_screen( 'edit.php' );
+		$current_screen->post_type = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		$this->assertEquals( $title, AMP_Invalid_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post ) );
+
+		// The conditional should be true, and this should return the filtered $title.
+		$post_correct_post_type = $this->factory()->post->create_and_get( array(
+			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+		) );
+		$this->assertEquals( '/baz', AMP_Invalid_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post_correct_post_type ) );
 	}
 
 	/**
