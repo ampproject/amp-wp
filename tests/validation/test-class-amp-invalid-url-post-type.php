@@ -1029,7 +1029,32 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::print_url_as_title()
 	 */
 	public function test_print_url_as_title() {
-		$this->markTestSkipped( 'Needs refactoring' );
+		$post_wrong_post_type = $this->factory()->post->create_and_get();
+
+		// The $post has the wrong post type, so the method should exit without echoing anything.
+		ob_start();
+		AMP_Invalid_URL_Post_Type::print_url_as_title( $post_wrong_post_type );
+		$this->assertEmpty( ob_get_clean() );
+
+		// The post type is correct, but it doesn't have a validation URL associated with it, so this shouldn't output anything.
+		$post_correct_post_type = $this->factory()->post->create_and_get( array(
+			'post-type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+		) );
+		ob_start();
+		AMP_Invalid_URL_Post_Type::print_url_as_title( $post_correct_post_type );
+		$this->assertEmpty( ob_get_clean() );
+
+		// The post has the correct type and a validation URL in the title, so this should output markup.
+		$url                    = 'https://example.com';
+		$post_correct_post_type = $this->factory()->post->create_and_get( array(
+			'post_type'  => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'post_title' => $url,
+		) );
+		ob_start();
+		AMP_Invalid_URL_Post_Type::print_url_as_title( $post_correct_post_type );
+		$output = ob_get_clean();
+		$this->assertContains( '<h2 class="amp-invalid-url">', $output );
+		$this->assertContains( $url, $output );
 	}
 
 	/**
