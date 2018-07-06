@@ -13,7 +13,7 @@
 class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 	/**
-	 * A mock acceptable error code.
+	 * The tested class.
 	 *
 	 * @var string
 	 */
@@ -387,12 +387,19 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search()
 	 */
 	public function test_filter_terms_clauses_for_description_search() {
-		$initial_where = 'tt.taxonomy IN (\'amp_validation_error\') AND tt.count > 0';
+		global $wpdb;
+
+		$initial_where = '((t.name LIKE \'foo\'))';
 		$clauses       = array( 'where' => $initial_where );
 		$args          = array( 'search' => 'baz' );
 
-		// The condition won't be true, so it shouldn't alter the 'where' clause.
+		// The conditional shouldn't be true, so it shouldn't alter the 'where' clause.
 		$this->assertEquals( $clauses, AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search( $clauses, array(), $args ) );
+
+		// The conditional should be true, so test the preg_replace() call for $clauses['where'].
+		$clauses = AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search( $clauses, array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ), $args );
+		$this->assertContains( '(tt.description LIKE ', $clauses['where'] );
+		$this->assertContains( $wpdb->esc_like( $args['search'] ), $clauses['where'] );
 	}
 
 	/**
