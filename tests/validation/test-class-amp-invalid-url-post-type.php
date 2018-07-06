@@ -694,22 +694,124 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_validate_request()
 	 */
 	public function test_handle_validate_request() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		AMP_Validation_Manager::init();
 
-		$post_id              = $this->create_custom_post();
-		$_REQUEST['_wpnonce'] = wp_create_nonce( AMP_Validation_Manager::NONCE_ACTION . $post_id );
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		$post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/' )
+		);
 
-		try {
-			AMP_Validation_Manager::handle_inline_recheck( $post_id );
-		} catch ( WPDieException $e ) {
-			$exception = $e;
-		}
+		$_REQUEST['_wpnonce'] = wp_create_nonce( AMP_Invalid_URL_Post_Type::NONCE_ACTION );
 
-		// This calls wp_redirect(), which throws an exception.
-		$this->assertTrue( isset( $exception ) );
+		$exception = null;
+		add_filter( 'wp_redirect', function( $url, $status ) {
+			throw new Exception( $url, $status );
+		}, 10, 2 );
+
+		$that   = $this;
+		$filter = function() use ( $that ) {
+			return array(
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION_RESULTS:' . wp_json_encode( array_map(
+						function( $error ) {
+							return array_merge(
+								compact( 'error' ),
+								array( 'sanitized' => false )
+							);
+						},
+						$that->get_mock_errors()
+					) )
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+
+		$handle_validate_request = function() {
+			try {
+				AMP_Invalid_URL_Post_Type::handle_validate_request();
+			} catch ( Exception $exception ) {
+				return $exception;
+			}
+			return null;
+		};
+
+		// Test validating with missing args.
+		$exception = $handle_validate_request();
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith(
+			'/edit.php?post_type=amp_invalid_url&amp_validate_error=missing_url&amp_urls_tested=0',
+			$exception->getMessage()
+		);
+		unset( $_GET['post'] );
+
+		// Test validating for a non-valid post.
+		$_GET['post'] = 1234567890;
+		$exception    = $handle_validate_request();
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith(
+			'/edit.php?post_type=amp_invalid_url&amp_validate_error=invalid_post&amp_urls_tested=0',
+			$exception->getMessage()
+		);
+		unset( $_GET['post'] );
+
+		// Test validating for a non-valid post type.
+		$_GET['post'] = $this->factory()->post->create();
+		$exception    = $handle_validate_request();
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith(
+			'/edit.php?post_type=amp_invalid_url&amp_validate_error=invalid_post&amp_urls_tested=0',
+			$exception->getMessage()
+		);
+		unset( $_GET['post'] );
+
+		// Verify that redirect is happening for a successful case.
+		$_GET['post'] = $post_id;
+		$exception    = $handle_validate_request();
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith(
+			sprintf( 'post.php?post=%s&action=edit&amp_urls_tested=1&amp_remaining_errors=2', $post_id ),
+			$exception->getMessage()
+		);
+		unset( $_GET['post'] );
+
+		// Test validating by URL.
+		$_GET['url'] = home_url( '/' );
+		$exception   = $handle_validate_request();
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith(
+			sprintf( 'post.php?post=%s&action=edit&amp_urls_tested=1&amp_remaining_errors=2', $post_id ),
+			$exception->getMessage()
+		);
+
+		// Test validating by URL which doesn't have a post already.
+		$_GET['url'] = home_url( '/new-URL/' );
+		$exception   = $handle_validate_request();
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith(
+			'&action=edit&amp_urls_tested=1&amp_remaining_errors=2',
+			$exception->getMessage()
+		);
+
+		// Test validating a bad URL.
+		$_GET['url'] = 'http://badurl.example.com/';
+		$exception   = $handle_validate_request();
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith(
+			'wp-admin/edit.php?post_type=amp_invalid_url&amp_validate_error=illegal_url&amp_urls_tested=0',
+			$exception->getMessage()
+		);
 	}
 
 	/**
@@ -718,7 +820,60 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::recheck_post()
 	 */
 	public function test_recheck_post() {
-		$this->markTestSkipped( 'Needs refactoring' );
+		AMP_Validation_Manager::init();
+
+		$r = AMP_Invalid_URL_Post_Type::recheck_post( 'nope' );
+		$this->assertInstanceOf( 'WP_Error', $r );
+		$this->assertEquals( 'missing_post', $r->get_error_code() );
+
+		$r = AMP_Invalid_URL_Post_Type::recheck_post( $this->factory()->post->create() );
+		$this->assertInstanceOf( 'WP_Error', $r );
+		$this->assertEquals( 'missing_url', $r->get_error_code() );
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/' )
+		);
+		add_filter( 'pre_http_request', function() {
+			return array(
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION_RESULTS:' . wp_json_encode(
+						array(
+							array(
+								'sanitized' => false,
+								'error'     => array(
+									'code' => 'bar',
+								),
+							),
+							array(
+								'sanitized' => false,
+								'error'     => array(
+									'code' => 'baz',
+								),
+							),
+						)
+					)
+				),
+			);
+		} );
+
+		$r = AMP_Invalid_URL_Post_Type::recheck_post( $invalid_url_post_id );
+		$this->assertInternalType( 'array', $r );
+		$this->assertCount( 2, $r );
+		$this->assertEquals( 'bar', $r[0]['error']['code'] );
+		$this->assertEquals( 'baz', $r[1]['error']['code'] );
+
+		$errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
+		$this->assertCount( 2, $errors );
+		foreach ( $errors as $i => $error ) {
+			$this->assertEquals(
+				$r[ $i ]['error'],
+				$error['data']
+			);
+		}
 	}
 
 	/**
@@ -727,7 +882,55 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_validation_error_status_update()
 	 */
 	public function test_handle_validation_error_status_update() {
-		$this->markTestSkipped( 'Needs refactoring' );
+		global $post;
+		AMP_Validation_Manager::init();
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$_REQUEST[ AMP_Invalid_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' ] = wp_create_nonce( AMP_Invalid_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION );
+		AMP_Invalid_URL_Post_Type::handle_validation_error_status_update(); // No-op since no post.
+
+		$error = array( 'code' => 'foo' );
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array( $error ),
+			home_url( '/' )
+		);
+		add_filter( 'pre_http_request', function() use ( $error ) {
+			return array(
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION_RESULTS:' . wp_json_encode(
+						array(
+							array(
+								'sanitized' => false,
+								'error'     => $error,
+							),
+						)
+					)
+				),
+			);
+		} );
+
+		$post = get_post( $invalid_url_post_id ); // WPCS: override ok.
+
+		$errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
+
+		$_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = array(
+			$errors[0]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
+		);
+
+		add_filter( 'wp_redirect', function( $url, $status ) {
+			throw new Exception( $url, $status );
+		}, 10, 2 );
+		$exception = null;
+		try {
+			AMP_Invalid_URL_Post_Type::handle_validation_error_status_update();
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( 'Exception', $exception );
+		$this->assertEquals( 302, $exception->getCode() );
+		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=1&amp_remaining_errors=0', $exception->getMessage() );
 	}
 
 	/**
@@ -736,12 +939,10 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::add_meta_boxes()
 	 */
 	public function test_add_meta_boxes() {
-		$this->markTestSkipped( 'Needs refactoring' );
-
 		global $wp_meta_boxes;
-		AMP_Validation_Manager::add_meta_boxes();
-		$side_meta_box = $wp_meta_boxes[ AMP_Validation_Manager::POST_TYPE_SLUG ]['side']['default'][ AMP_Validation_Manager::STATUS_META_BOX ];
-		$this->assertEquals( AMP_Validation_Manager::STATUS_META_BOX, $side_meta_box['id'] );
+		AMP_Invalid_URL_Post_Type::add_meta_boxes();
+		$side_meta_box = $wp_meta_boxes[ AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ]['side']['default'][ AMP_Invalid_URL_Post_Type::STATUS_META_BOX ];
+		$this->assertEquals( AMP_Invalid_URL_Post_Type::STATUS_META_BOX, $side_meta_box['id'] );
 		$this->assertEquals( 'Status', $side_meta_box['title'] );
 		$this->assertEquals(
 			array(
@@ -751,8 +952,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			$side_meta_box['callback']
 		);
 
-		$full_meta_box = $wp_meta_boxes[ AMP_Validation_Manager::POST_TYPE_SLUG ]['normal']['default'][ AMP_Validation_Manager::VALIDATION_ERRORS_META_BOX ];
-		$this->assertEquals( AMP_Validation_Manager::VALIDATION_ERRORS_META_BOX, $full_meta_box['id'] );
+		$full_meta_box = $wp_meta_boxes[ AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ]['normal']['default'][ AMP_Invalid_URL_Post_Type::VALIDATION_ERRORS_META_BOX ];
+		$this->assertEquals( AMP_Invalid_URL_Post_Type::VALIDATION_ERRORS_META_BOX, $full_meta_box['id'] );
 		$this->assertEquals( 'Validation Errors', $full_meta_box['title'] );
 		$this->assertEquals(
 			array(
@@ -762,9 +963,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			$full_meta_box['callback']
 		);
 
-		global $wp_meta_boxes;
-		AMP_Validation_Manager::remove_publish_meta_box();
-		$contexts = $wp_meta_boxes[ AMP_Validation_Manager::POST_TYPE_SLUG ]['side'];
+		$contexts = $wp_meta_boxes[ AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ]['side'];
 		foreach ( $contexts as $context ) {
 			$this->assertFalse( $context['submitdiv'] );
 		}
@@ -776,32 +975,27 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::print_status_meta_box()
 	 */
 	public function test_print_status_meta_box() {
-		$this->markTestSkipped( 'Needs rewrite for refactor' );
+		AMP_Validation_Manager::init();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		$this->set_capability();
-		$post_storing_error = get_post( $this->create_custom_post() );
-		$url                = get_post_meta( $post_storing_error->ID, AMP_Validation_Manager::AMP_URL_META, true );
-		$post_with_error    = AMP_Validation_Manager::get_invalid_url_post( $url );
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/' )
+		);
+
+		$post_storing_error = get_post( $invalid_url_post_id );
+
 		ob_start();
-		AMP_Validation_Manager::print_status_meta_box( $post_storing_error );
+		AMP_Invalid_URL_Post_Type::print_status_meta_box( get_post( $invalid_url_post_id ) );
 		$output = ob_get_clean();
 
-		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_with_error->post_date ) ), $output );
-		$this->assertContains( 'Published on:', $output );
+		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_storing_error->post_date ) ), $output );
+		$this->assertContains( 'Last checked:', $output );
 		$this->assertContains( 'Move to Trash', $output );
 		$this->assertContains( esc_url( get_delete_post_link( $post_storing_error->ID ) ), $output );
 		$this->assertContains( 'misc-pub-section', $output );
-		$this->assertContains(
-			AMP_Validation_Manager::get_recheck_link(
-				$post_with_error,
-				add_query_arg(
-					'post',
-					$post_with_error->ID,
-					admin_url( 'post.php' )
-				)
-			),
-			$output
-		);
 	}
 
 	/**

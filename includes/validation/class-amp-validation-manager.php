@@ -1664,7 +1664,6 @@ class AMP_Validation_Manager {
 		if ( ! is_array( $validation_results ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
-
 		$validation_errors = wp_list_pluck( $validation_results, 'error' );
 		return compact( 'validation_errors', 'url' );
 	}

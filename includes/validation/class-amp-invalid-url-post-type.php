@@ -842,8 +842,6 @@ class AMP_Invalid_URL_Post_Type {
 			wp_die( esc_html__( 'You do not have permissions to validate an AMP URL. Did you get logged out?', 'amp' ) );
 		}
 
-		$redirect = wp_get_referer();
-
 		$post = null;
 		$url  = null;
 
@@ -893,7 +891,7 @@ class AMP_Invalid_URL_Post_Type {
 			$args['amp_validate_error'] = $e->getMessage();
 			$args[ self::URLS_TESTED ]  = '0';
 
-			if ( $post ) {
+			if ( $post && self::POST_TYPE_SLUG === $post->post_type ) {
 				$redirect = get_edit_post_link( $post->ID, 'raw' );
 			} else {
 				$redirect = admin_url(
@@ -916,8 +914,14 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return array|WP_Error List of blocking validation results, or a WP_Error in the case of failure.
 	 */
 	public static function recheck_post( $post ) {
+		if ( ! $post ) {
+			return new WP_Error( 'missing_post' );
+		}
 		$post = get_post( $post );
-		$url  = self::get_url_from_post( $post );
+		if ( ! $post ) {
+			return new WP_Error( 'missing_post' );
+		}
+		$url = self::get_url_from_post( $post );
 		if ( ! $url ) {
 			return new WP_Error( 'missing_url' );
 		}
@@ -945,6 +949,9 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function handle_validation_error_status_update() {
 		check_admin_referer( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' );
+		if ( ! AMP_Validation_Manager::has_cap() ) {
+			wp_die( esc_html__( 'You do not have permissions to validate an AMP URL. Did you get logged out?', 'amp' ) );
+		}
 
 		if ( empty( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) || ! is_array( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
 			return;
