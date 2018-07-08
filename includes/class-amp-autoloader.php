@@ -31,6 +31,7 @@ class AMP_Autoloader {
 	private static $_classmap = array(
 		'AMP_Editor_Blocks'                           => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                           => 'includes/class-amp-theme-support',
+		'AMP_Service_Workers'                         => 'includes/class-amp-service-workers',
 		'AMP_Response_Headers'                        => 'includes/class-amp-response-headers',
 		'AMP_Comment_Walker'                          => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
