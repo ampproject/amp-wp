@@ -43,7 +43,6 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 				'page',
 				'attachment',
 				'book',
-				AMP_Story_Post_Type::POST_TYPE_SLUG,
 			),
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
