@@ -62,7 +62,7 @@ export default registerBlockType(
 				! props.attributes.id && (
 					<Notice status="error" isDismissible={ false }>{ __( 'You must supply an ID for the page.', 'amp' ) }</Notice>
 				),
-				<InnerBlocks key='contents' />
+				<InnerBlocks key='contents' allowedBlocks={ [ 'amp/amp-story-grid-layer' ] } />
 			];
 		},
 
