@@ -11,6 +11,21 @@ const {
 	Notice
 } = wp.components;
 
+const TEMPLATE = [
+	[
+		'amp/amp-story-grid-layer',
+		[],
+		[
+			[
+				'core/paragraph',
+				{
+					placeholder: __( 'Add content to layer.', 'amp' )
+				}
+			]
+		]
+	]
+];
+
 /**
  * Register block.
  */
@@ -62,7 +77,7 @@ export default registerBlockType(
 				! props.attributes.id && (
 					<Notice status="error" isDismissible={ false }>{ __( 'You must supply an ID for the page.', 'amp' ) }</Notice>
 				),
-				<InnerBlocks key='contents' />
+				<InnerBlocks key='contents' template={ TEMPLATE } />
 			];
 		},
 
