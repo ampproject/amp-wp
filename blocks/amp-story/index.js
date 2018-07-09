@@ -2,7 +2,6 @@ import './amp-story-page';
 import './amp-story-grid-layer';
 
 const blockParents = {
-	'amp/amp-story-grid-layer': 'amp-story-page',
 	'core/button': 'amp/amp-story-grid-layer',
 	'core/code': 'amp/amp-story-grid-layer',
 	'core/embed': 'amp/amp-story-grid-layer',
@@ -37,7 +36,7 @@ wp.hooks.addFilter(
 // Remove all blocks that are not known to be allowed in AMP Stories (ref. amp-story-cta-layer-allowed-descendants).
 window.addEventListener( 'load', () => { // @todo Should be better event.
 	wp.blocks.getBlockTypes().forEach( function( blockType ) {
-		if ( 'amp/amp-story-page' !== blockType.name && ! blockParents[ blockType.name ] ) {
+		if ( -1 === blockType.name.indexOf( 'amp/amp-story-' ) && ! blockParents[ blockType.name ] ) {
 			wp.blocks.unregisterBlockType( blockType.name );
 		}
 	} );

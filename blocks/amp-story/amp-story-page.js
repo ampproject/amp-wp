@@ -21,6 +21,7 @@ export default registerBlockType(
 		category: 'layout',
 		icon: 'admin-page',
 
+		// @todo Enforce that the amp-story-page can only be a root-level block; Using `parent: []` does not work, and it causes the inserter to be disabled entirely.
 		attributes: {
 			id: {
 				type: 'string',

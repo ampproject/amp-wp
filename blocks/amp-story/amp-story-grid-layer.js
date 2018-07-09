@@ -20,6 +20,7 @@ export default registerBlockType(
 		category: 'layout',
 		icon: 'grid-view',
 
+		parent: [ 'amp/amp-story-page' ],
 		attributes: {
 			template: {
 				type: 'string',
