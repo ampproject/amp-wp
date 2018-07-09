@@ -10,37 +10,6 @@ const {
 	SelectControl
 } = wp.components;
 
-export const ALLOWED_BLOCKS = [
-	'core/button',
-	'core/code',
-	'core/embed',
-	'core/image',
-	'core/list',
-	'core/paragraph',
-	'core/preformatted',
-	'core/pullquote',
-	'core/quote',
-	'core/table',
-	'core/verse',
-	'core/video'
-];
-
-function setBlockParent( props ) {
-	if ( ALLOWED_BLOCKS.includes( props.name ) ) {
-		return {
-			...props,
-			...{ parent: [ 'amp/amp-story-grid-layer' ] }
-		};
-	}
-	return props;
-}
-
-wp.hooks.addFilter(
-	'blocks.registerBlockType',
-	'amp/set-block-parents',
-	setBlockParent
-);
-
 /**
  * Register block.
  */
@@ -101,7 +70,7 @@ export default registerBlockType(
 						/>
 					</InspectorControls>
 				),
-				<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
+				<InnerBlocks key='contents' />
 			];
 		},
 
