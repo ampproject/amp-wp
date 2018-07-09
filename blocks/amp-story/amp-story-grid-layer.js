@@ -10,6 +10,47 @@ const {
 	SelectControl
 } = wp.components;
 
+const ALLOWED_BLOCKS = [
+	'core/button',
+	'core/code',
+	'core/embed',
+	'core/image',
+	'core/list',
+	'core/paragraph',
+	'core/preformatted',
+	'core/pullquote',
+	'core/quote',
+	'core/table',
+	'core/verse',
+	'core/video'
+];
+
+function setBlockParent( props ) {
+	if ( ALLOWED_BLOCKS.includes( props.name ) ) {
+		return Object.assign(
+			{},
+			props,
+			{ parent: [ 'amp/amp-story-grid-layer' ] }
+		);
+	}
+	return props;
+}
+
+wp.hooks.addFilter(
+	'blocks.registerBlockType',
+	'amp/set-block-parents',
+	setBlockParent
+);
+
+// Remove all blocks that are not known to be allowed in AMP Stories (ref. amp-story-cta-layer-allowed-descendants).
+window.addEventListener( 'load', () => { // @todo Should be better event.
+	wp.blocks.getBlockTypes().forEach( function( blockType ) {
+		if ( -1 === blockType.name.indexOf( 'amp/amp-story-' ) && ! ALLOWED_BLOCKS.includes( blockType.name ) ) {
+			wp.blocks.unregisterBlockType( blockType.name );
+		}
+	} );
+} );
+
 /**
  * Register block.
  */
