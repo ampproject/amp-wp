@@ -22,7 +22,7 @@ class AMP_Service_Workers {
 	 * Init.
 	 */
 	public static function init() {
-		if ( ! class_exists( 'WP_Service_Workers' ) ) {
+		if ( ! function_exists( 'wp_register_service_worker' ) ) {
 			return;
 		}
 
@@ -31,6 +31,10 @@ class AMP_Service_Workers {
 			return $vars;
 		} );
 
+		wp_register_service_worker(
+			'amp-asset-caching',
+			amp_get_asset_url( 'js/amp-service-worker-asset-cache.js' )
+		);
 		add_action( 'wp_default_service_workers', array( __CLASS__, 'register_script' ) );
 		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
 		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
@@ -53,21 +57,9 @@ class AMP_Service_Workers {
 	}
 
 	/**
-	 * Register service worker script.
-	 *
-	 * @param WP_Service_Workers $workers Workers.
-	 */
-	public static function register_script( WP_Service_Workers $workers ) {
-		$workers->register(
-			'amp-asset-caching',
-			amp_get_asset_url( 'js/amp-service-worker-asset-cache.js' )
-		);
-	}
-
-	/**
 	 * Install service worker(s).
 	 *
-	 * @since ?
+	 * @since 1.0
 	 * @see wp_print_service_workers()
 	 * @link https://github.com/xwp/pwa-wp
 	 */
@@ -76,29 +68,22 @@ class AMP_Service_Workers {
 			return;
 		}
 
-		$scopes = wp_service_workers()->get_scopes();
-		if ( empty( $scopes ) ) {
-			return; // No service worker scripts are installed.
-		}
-
-		// Find the scope that has the longest match with the current path.
-		$current_url_path  = wp_parse_url( amp_get_current_url(), PHP_URL_PATH );
-		$max_matched_scope = '';
-		foreach ( $scopes as $scope ) {
-			if ( strlen( $scope ) > strlen( $max_matched_scope ) && substr( $current_url_path, 0, strlen( $scope ) ) === $scope ) {
-				$max_matched_scope = $scope;
+		// Get the frontend-scoped service worker scripts.
+		$front_handles = array();
+		foreach ( wp_service_workers()->registered as $handle => $item ) {
+			if ( 'all' === $item->args['scope'] || 'front' === $item->args['scope'] ) {
+				$front_handles[] = $handle;
 			}
 		}
 
-		// None of the registered scripts' scopes are a match for the current URL path.
-		if ( empty( $max_matched_scope ) ) {
-			return;
+		if ( empty( $front_handles ) ) {
+			return; // No service worker scripts are installed.
 		}
 
-		$src        = wp_get_service_worker_url( $max_matched_scope );
+		$src        = wp_get_service_worker_url( 'front' );
 		$iframe_src = add_query_arg(
 			self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR,
-			$max_matched_scope,
+			'front',
 			home_url( '/', 'https' )
 		);
 		?>
@@ -122,9 +107,8 @@ class AMP_Service_Workers {
 			return;
 		}
 
-		$scope  = $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ];
-		$scopes = wp_service_workers()->get_scopes();
-		if ( ! in_array( $scope, $scopes, true ) ) {
+		$scope = $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ];
+		if ( 'front' !== $scope && 'admin' !== $scope ) {
 			wp_die(
 				esc_html__( 'No service workers registered for the requested scope.', 'amp' ),
 				esc_html__( 'Service Worker Installation', 'amp' ),
@@ -139,12 +123,13 @@ class AMP_Service_Workers {
 				<title><?php esc_html_e( 'Service Worker Installation', 'amp' ); ?></title>
 			</head>
 			<body>
+				<?php esc_html_e( 'Installing service worker...', 'amp' ); ?>
 				<?php
 				printf(
 					'<script>navigator.serviceWorker.register( %s, %s );</script>',
 					wp_json_encode( wp_get_service_worker_url( $scope ) ),
 					wp_json_encode( compact( 'scope' ) )
-				)
+				);
 				?>
 			</body>
 		</html>
