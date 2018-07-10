@@ -3,7 +3,6 @@
   "curly": true,
   "eqeqeq": true,
   "eqnull": true,
-  "es3": true,
   "esversion": 6,
   "expr": true,
   "immed": true,
@@ -22,6 +21,8 @@
     "Backbone": false,
     "jQuery": false,
     "JSON": false,
-    "wp": false
+    "wp": false,
+    "caches": false,
+    "self": false
   }
 }

@@ -1,36 +1,35 @@
-/* global Promise */
 ( () => {
 	/*
-	 * Use a stale-while-revalidate strategy to cache responses from the AMP CDN.
+	 * Use a stale-while-revalidate strategy to cache responses from the AMP CDN and Google Fonts.
 	 * This should eventually be implemented using Workbox.
 	 */
-	const CACHE = 'amp';
+
+	const cachedOrigins = new Set( [
+		'https://fonts.googleapis.com',
+		'https://cdn.ampproject.org',
+		'https://fonts.gstatic.com'
+	] );
 
 	self.addEventListener( 'fetch', ( event ) => {
 		if ( 'GET' !== event.request.method ) {
 			return;
 		}
 		const url = new URL( event.request.url );
-		if ( 'https://cdn.ampproject.org' !== url.origin ) {
+		if ( ! cachedOrigins.has( url.origin ) ) {
 			return;
 		}
-		event.respondWith( fromCache( event.request ) );
-		event.waitUntil( update( event.request ) );
+
+		// Props jakearchibald: https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook/#stale-while-revalidate
+		event.respondWith(
+			caches.open( 'amp' ).then( ( cache ) => {
+				return cache.match( event.request ).then( ( response ) => {
+					var fetchPromise = fetch( event.request ).then( ( networkResponse ) => {
+						cache.put( event.request, networkResponse.clone() );
+						return networkResponse;
+					} );
+					return response || fetchPromise;
+				} );
+			} )
+		);
 	} );
-
-	function fromCache( request ) {
-		return caches.open( CACHE ).then( ( cache ) => {
-			return cache.match( request ).then( ( matching ) => {
-				return matching || Promise.reject( 'no-match' );
-			} );
-		} );
-	}
-
-	function update( request ) {
-		return caches.open( CACHE ).then( ( cache ) => {
-			return fetch( request ).then( ( response ) => {
-				return cache.put( request, response );
-			} );
-		} );
-	}
 } )();
