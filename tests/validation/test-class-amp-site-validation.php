@@ -184,7 +184,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		);
 
 		return array(
-			'body' => sprintf(
+			'body'     => sprintf(
 				'<html amp><head></head><body></body><!--%s--></html>',
 				'AMP_VALIDATION_RESULTS:' . wp_json_encode( $mock_validation_results )
 			),

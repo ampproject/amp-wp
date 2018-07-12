@@ -20,11 +20,69 @@ class AMP_Site_Validation {
 	const BATCH_SIZE = 100;
 
 	/**
+	 * The argument to validate the site.
+	 *
+	 * @var int
+	 */
+	const WP_CLI_ARGUMENT = 'validate-site';
+
+	/**
 	 * All of the site validation results.
 	 *
 	 * @var array
 	 */
 	public static $site_validation_urls = array();
+
+	/**
+	 * Inits the class.
+	 */
+	public static function init() {
+		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+			return;
+		}
+		WP_CLI::add_command( 'amp', array( __CLASS__, 'crawl_site' ) );
+	}
+
+	/**
+	 * Crawls the entire site to validate it, and gets the results.
+	 *
+	 * @param array $args The arguments for the command.
+	 */
+	public function crawl_site( $args ) {
+		if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! isset( $args[0] ) && self::WP_CLI_ARGUMENT !== $args[0] ) {
+			return;
+		}
+
+		WP_CLI::log( __( 'Crawling the entire site to test for AMP validity. This might take a while...', 'amp' ) );
+		$count_post_types_and_taxonomies = count( get_post_types( array( 'public' => true ), 'names' ) ) + count( get_taxonomies( array( 'public' => true ) ) );
+		$wp_cli_progress                 = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', $count_post_types_and_taxonomies );
+		$number_crawled                  = count( self::validate_entire_site_urls( $wp_cli_progress ) );
+		$wp_cli_progress->finish();
+
+		$query_invalid_urls = new \WP_Query( array(
+			'post_type'      => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'posts_per_page' => $number_crawled,
+			'fields'         => 'ids',
+		) );
+		$number_invalid     = count( $query_invalid_urls->posts );
+
+		$validation_counts = compact( 'number_crawled', 'number_invalid' );
+		$url_more_details  = add_query_arg(
+			'post_type',
+			\AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			admin_url( 'edit.php' )
+		);
+
+		WP_CLI::success(
+			sprintf(
+				/* Translators: $1%d: the number of URls crawled, $2%d: the number of validation issues, $3%s: link for more details */
+				__( "%1\$d URLs were crawled, and %2\$d have AMP validation issue(s).\nFor more details, please see: \n%3\$s", 'amp' ),
+				$validation_counts['number_crawled'],
+				$validation_counts['number_invalid'],
+				$url_more_details
+			)
+		);
+	}
 
 	/**
 	 * Gets the permalinks of public, published posts.
