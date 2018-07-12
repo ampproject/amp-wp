@@ -60,7 +60,7 @@ class AMP_Site_Validation {
 			return;
 		}
 
-		WP_CLI::log( __( 'Crawling the entire site to test for AMP validity. This might take a while...', 'amp' ) );
+		WP_CLI::log( __( 'Crawling the entire site to test for AMP validity.', 'amp' ) );
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', self::count_posts_and_terms() );
 		$number_crawled        = count( self::validate_entire_site_urls() );
 		self::$wp_cli_progress->finish();
