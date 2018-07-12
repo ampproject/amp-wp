@@ -33,6 +33,45 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test count_posts_and_terms.
+	 *
+	 * @covers AMP_Site_Validation::count_posts_and_terms()
+	 */
+	public function test_count_posts_and_terms() {
+		$this->assertEquals( 0, AMP_Site_Validation::count_posts_and_terms() );
+
+		$number_of_posts = 20;
+		$post_ids        = array();
+		for ( $i = 0; $i < $number_of_posts; $i++ ) {
+			$post_ids[] = $this->factory()->post->create();
+		}
+
+		/**
+		 * The term (category) of 'Uncategorized' should be present, as there are posts now.
+		 * So account for it with +1.
+		 */
+		$this->assertEquals( $number_of_posts + 1, AMP_Site_Validation::count_posts_and_terms() );
+
+		$number_of_new_terms        = 20;
+		$taxonomy                   = 'category';
+		$terms_for_current_taxonomy = array();
+		for ( $i = 0; $i < $number_of_new_terms; $i++ ) {
+			$terms_for_current_taxonomy[] = $this->factory()->term->create( array(
+				'taxonomy' => $taxonomy,
+			) );
+		}
+
+		// Terms need to be associated with a post in order to be returned in get_terms().
+		wp_set_post_terms(
+			$post_ids[0],
+			$terms_for_current_taxonomy,
+			$taxonomy
+		);
+
+		$this->assertEquals( $number_of_posts + $number_of_new_terms + 1, AMP_Site_Validation::count_posts_and_terms() );
+	}
+
+	/**
 	 * Test get_post_permalinks.
 	 *
 	 * @covers AMP_Site_Validation::get_post_permalinks()

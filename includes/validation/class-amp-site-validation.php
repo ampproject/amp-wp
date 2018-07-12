@@ -34,6 +34,13 @@ class AMP_Site_Validation {
 	public static $site_validation_urls = array();
 
 	/**
+	 * The WP CLI progress bar.
+	 *
+	 * @var cli\progress\Bar|WP_CLI\NoOp
+	 */
+	public static $wp_cli_progress;
+
+	/**
 	 * Inits the class.
 	 */
 	public static function init() {
@@ -54,10 +61,9 @@ class AMP_Site_Validation {
 		}
 
 		WP_CLI::log( __( 'Crawling the entire site to test for AMP validity. This might take a while...', 'amp' ) );
-		$count_post_types_and_taxonomies = count( get_post_types( array( 'public' => true ), 'names' ) ) + count( get_taxonomies( array( 'public' => true ) ) );
-		$wp_cli_progress                 = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', $count_post_types_and_taxonomies );
-		$number_crawled                  = count( self::validate_entire_site_urls( $wp_cli_progress ) );
-		$wp_cli_progress->finish();
+		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', self::count_posts_and_terms() );
+		$number_crawled        = count( self::validate_entire_site_urls() );
+		self::$wp_cli_progress->finish();
 
 		$query_invalid_urls = new \WP_Query( array(
 			'post_type'      => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
@@ -82,6 +88,32 @@ class AMP_Site_Validation {
 				$url_more_details
 			)
 		);
+	}
+
+	/**
+	 * Finds the total number of posts and terms on the site.
+	 *
+	 * @return int The number of posts and terms.
+	 */
+	public static function count_posts_and_terms() {
+
+		/**
+		 * Because of the posts_per_page => -1 value, this is only suited for use in WP-CLI.
+		 * This is necessary to pass as an argument to WP_CLI\Utils\make_progress_bar(),
+		 * in order to show the progress of every post.
+		 */
+		$post_query = new WP_Query( array(
+			'post_types'     => get_post_types( array( 'public' => true ), 'names' ),
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		) );
+
+		$term_query = new WP_Term_Query( array(
+			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
+			'fields'   => 'ids',
+		) );
+
+		return $post_query->found_posts + count( $term_query->terms );
 	}
 
 	/**
@@ -160,10 +192,6 @@ class AMP_Site_Validation {
 				$offset    += self::BATCH_SIZE;
 				$permalinks = self::get_post_permalinks( $post_type, self::BATCH_SIZE, $offset );
 			}
-
-			if ( $wp_cli_progress ) {
-				$wp_cli_progress->tick();
-			}
 		}
 
 		// Validate all public taxonomies.
@@ -176,10 +204,6 @@ class AMP_Site_Validation {
 				self::validate_urls( $taxonomy_links );
 				$offset        += self::BATCH_SIZE;
 				$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE, $offset );
-			}
-
-			if ( $wp_cli_progress ) {
-				$wp_cli_progress->tick();
 			}
 		}
 
@@ -209,6 +233,9 @@ class AMP_Site_Validation {
 			if ( ! is_wp_error( $validity ) ) {
 				AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
 				self::$site_validation_urls[] = $url;
+				if ( self::$wp_cli_progress ) {
+					self::$wp_cli_progress->tick();
+				}
 			}
 		}
 	}
