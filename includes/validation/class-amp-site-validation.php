@@ -14,6 +14,7 @@ class AMP_Site_Validation {
 
 	/**
 	 * The size of the batch of URLs to validate.
+	 * To avoid making loopback requests for all of a site's posts at the same time.
 	 *
 	 * @var int
 	 */
@@ -76,7 +77,7 @@ class AMP_Site_Validation {
 		$count_urls_to_crawl = self::count_posts_and_terms();
 
 		/* Translators: %d: The number of URLs. */
-		WP_CLI::log( sprintf( __( 'Crawling %d URLs to test for AMP validity.', 'amp' ), $count_urls_to_crawl ) );
+		WP_CLI::log( sprintf( __( 'Crawling %d URLs to test the entire site for AMP validity.', 'amp' ), $count_urls_to_crawl ) );
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', $count_urls_to_crawl );
 		self::validate_entire_site_urls();
 		self::$wp_cli_progress->finish();
@@ -104,6 +105,13 @@ class AMP_Site_Validation {
 	 * @return int The number of posts and terms.
 	 */
 	public static function count_posts_and_terms() {
+		$total_count       = 0;
+		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+		$term_query        = new WP_Term_Query( array(
+			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
+			'fields'   => 'ids',
+		) );
+		$total_count      += count( $term_query->terms );
 
 		/**
 		 * Because of the posts_per_page => -1 value, this is only suited for use in WP-CLI.
@@ -111,17 +119,24 @@ class AMP_Site_Validation {
 		 * in order to show the progress of every post.
 		 */
 		$post_query = new WP_Query( array(
-			'post_types'     => get_post_types( array( 'public' => true ), 'names' ),
+			'post_type'      => $public_post_types,
 			'fields'         => 'ids',
 			'posts_per_page' => -1,
 		) );
+		$total_count += $post_query->found_posts;
 
-		$term_query = new WP_Term_Query( array(
-			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
-			'fields'   => 'ids',
-		) );
+		// Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
+		if ( in_array( 'attachment', $public_post_types, true ) ) {
+			$attachment_query = new WP_Query( array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+			) );
+			$total_count     += $attachment_query->found_posts;
+		}
 
-		return $post_query->found_posts + count( $term_query->terms );
+		return $total_count;
 	}
 
 	/**
@@ -143,6 +158,11 @@ class AMP_Site_Validation {
 		);
 		if ( is_int( $offset ) ) {
 			$args = array_merge( $args, compact( 'offset' ) );
+		}
+
+		// Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
+		if ( 'attachment' === $post_type ) {
+			$args['post_status'] = 'inherit';
 		}
 		$query = new WP_Query( $args );
 
@@ -250,9 +270,11 @@ class AMP_Site_Validation {
 				if ( self::$wp_cli_progress ) {
 					self::$wp_cli_progress->tick();
 				}
+
+				self::$number_crawled++;
 			}
 
-			self::$number_crawled++;
+
 		}
 	}
 }
