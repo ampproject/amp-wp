@@ -200,8 +200,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$this->assertEquals( array( add_query_arg( 'amp', 1, $single_post_permalink ) ), AMP_Site_Validation::$site_invalid_urls );
 
 		AMP_Site_Validation::$site_invalid_urls = array();
-		$number_of_posts                           = 30;
-		$post_permalinks                           = array();
+		$number_of_posts                        = 30;
+		$post_permalinks                        = array();
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
 			$post_permalinks[] = add_query_arg( 'amp', 1, get_permalink( $this->factory()->post->create() ) );
