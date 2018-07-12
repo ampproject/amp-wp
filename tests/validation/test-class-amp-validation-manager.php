@@ -126,7 +126,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::print_plugin_notice' ) );
 
 		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::add_rest_api_fields' ) );
-		$this->assertEquals( PHP_INT_MAX, has_action( 'after_setup_theme', self::TESTED_CLASS . '::conditionally_force_theme_support' ) );
 		$this->assertContains( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, wp_removable_query_args() );
 		$this->assertEquals( 100, has_action( 'admin_bar_menu', array( self::TESTED_CLASS, 'add_admin_bar_menu_items' ) ) );
 
@@ -1372,21 +1371,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function get_string() {
 		return 'Example string';
-	}
-
-	/**
-	 * Test conditionally_force_theme_support.
-	 *
-	 * @covers AMP_Validation_Manager::conditionally_force_theme_support()
-	 */
-	public function test_conditionally_force_theme_support() {
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
-		AMP_Validation_Manager::conditionally_force_theme_support();
-		$this->assertFalse( current_theme_supports( 'amp' ) );
-
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
-		AMP_Validation_Manager::conditionally_force_theme_support();
-		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
 
 	/**
