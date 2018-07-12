@@ -71,7 +71,7 @@ class AMP_Service_Workers {
 		// Get the frontend-scoped service worker scripts.
 		$front_handles = array();
 		foreach ( wp_service_workers()->registered as $handle => $item ) {
-			if ( 'all' === $item->args['scope'] || 'front' === $item->args['scope'] ) {
+			if ( $item->args['scope'] & WP_Service_Workers::SCOPE_FRONT ) { // Yes, bitwise AND intended.
 				$front_handles[] = $handle;
 			}
 		}
@@ -80,10 +80,10 @@ class AMP_Service_Workers {
 			return; // No service worker scripts are installed.
 		}
 
-		$src        = wp_get_service_worker_url( 'front' );
+		$src        = wp_get_service_worker_url( WP_Service_Workers::SCOPE_FRONT );
 		$iframe_src = add_query_arg(
 			self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR,
-			'front',
+			WP_Service_Workers::SCOPE_FRONT,
 			home_url( '/', 'https' )
 		);
 		?>
@@ -103,18 +103,21 @@ class AMP_Service_Workers {
 	 * @link https://www.ampproject.org/docs/reference/components/amp-install-serviceworker#data-iframe-src-(optional)
 	 */
 	public static function handle_service_worker_iframe_install() {
-		if ( empty( $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ] ) ) {
+		if ( ! isset( $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ] ) ) {
 			return;
 		}
 
-		$scope = $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ];
-		if ( 'front' !== $scope && 'admin' !== $scope ) {
+		$scope = intval( $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ] );
+		if ( WP_Service_Workers::SCOPE_ADMIN !== $scope && WP_Service_Workers::SCOPE_FRONT !== $scope ) {
 			wp_die(
 				esc_html__( 'No service workers registered for the requested scope.', 'amp' ),
 				esc_html__( 'Service Worker Installation', 'amp' ),
 				array( 'response' => 404 )
 			);
 		}
+
+		$front_scope = home_url( '/', 'relative' );
+
 		?>
 		<!DOCTYPE html>
 		<html>
@@ -128,7 +131,7 @@ class AMP_Service_Workers {
 				printf(
 					'<script>navigator.serviceWorker.register( %s, %s );</script>',
 					wp_json_encode( wp_get_service_worker_url( $scope ) ),
-					wp_json_encode( compact( 'scope' ) )
+					wp_json_encode( array( 'scope' => $front_scope ) )
 				);
 				?>
 			</body>
