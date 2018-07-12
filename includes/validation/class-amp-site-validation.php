@@ -118,7 +118,7 @@ class AMP_Site_Validation {
 		 * This is necessary to pass as an argument to WP_CLI\Utils\make_progress_bar(),
 		 * in order to show the progress of every post.
 		 */
-		$post_query = new WP_Query( array(
+		$post_query   = new WP_Query( array(
 			'post_type'      => $public_post_types,
 			'fields'         => 'ids',
 			'posts_per_page' => -1,
