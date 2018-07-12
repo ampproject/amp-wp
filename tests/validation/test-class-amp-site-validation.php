@@ -28,6 +28,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 * @inheritdoc
 	 */
 	public function tearDown() {
+		AMP_Site_Validation::$total_errors      = 0;
 		AMP_Site_Validation::$site_invalid_urls = array();
 		parent::tearDown();
 	}

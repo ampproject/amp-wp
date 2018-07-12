@@ -35,9 +35,9 @@ class AMP_Site_Validation {
 	public static $wp_cli_progress;
 
 	/**
-	 * All of the site validation URLs that have at least one unaccepted error.
+	 * All of the invalid URLs.
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	public static $site_invalid_urls = array();
 
@@ -47,6 +47,13 @@ class AMP_Site_Validation {
 	 * @var array
 	 */
 	public static $total_errors = 0;
+
+	/**
+	 * All of the unaccepted site validation errors.
+	 *
+	 * @var array
+	 */
+	public static $unaccepted_errors = 0;
 
 	/**
 	 * The number of URLs crawled.
@@ -76,9 +83,12 @@ class AMP_Site_Validation {
 		}
 		$count_urls_to_crawl = self::count_posts_and_terms();
 
-		/* Translators: %d: The number of URLs. */
-		WP_CLI::log( sprintf( __( 'Crawling %d URLs to test the entire site for AMP validity.', 'amp' ), $count_urls_to_crawl ) );
-		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', $count_urls_to_crawl );
+		WP_CLI::log( sprintf( __( 'Crawling the entire site for AMP validity.', 'amp' ) ) );
+		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar(
+			/* Translators: %d: The number of URLs. */
+			sprintf( __( 'Validating %d URLs...', 'amp' ), $count_urls_to_crawl ),
+			$count_urls_to_crawl
+		);
 		self::validate_entire_site_urls();
 		self::$wp_cli_progress->finish();
 
@@ -90,10 +100,11 @@ class AMP_Site_Validation {
 
 		WP_CLI::success(
 			sprintf(
-				/* Translators: $1%d: the number of URls crawled, $2%d: the number of validation issues, $3%s: link for more details */
-				__( "%1\$d URLs were crawled, and %2\$d have AMP validation issue(s).\nFor more details, please see: \n%3\$s", 'amp' ),
+				/* Translators: $1%d: the number of URls crawled, $2%d: the number of validation issues, $3%d: The number of unaccepted issues, $4%s: link for more details */
+				__( "Of the %1\$d URLs crawled, %2\$d have AMP validation issue(s), and %3\$d have unaccepted issue(s).\nFor more details, please see: \n%4\$s", 'amp' ),
 				self::$number_crawled,
 				self::$total_errors,
+				self::$unaccepted_errors,
 				$url_more_details
 			)
 		);
@@ -200,7 +211,6 @@ class AMP_Site_Validation {
 	 * Accepts an optional parameter of a WP-CLI progress bar object.
 	 * Calling its tick() method updates the display in WP-CLI to show the percentage of the site crawl that's complete.
 	 *
-	 * @todo: Consider wrapping this function with another, as different use cases will probably require a different return value or display.
 	 * For example, the <button> in /wp-admin that makes an AJAX request for this will need a different response than a WP-CLI command.
 	 */
 	public static function validate_entire_site_urls() {
@@ -262,11 +272,11 @@ class AMP_Site_Validation {
 
 				if ( $error_count > 0 ) {
 					self::$total_errors++;
-				}
-				if ( $unaccepted_error_count > 0 ) {
 					self::$site_invalid_urls[] = $url;
 				}
-
+				if ( $unaccepted_error_count > 0 ) {
+					self::$unaccepted_errors++;
+				}
 				if ( self::$wp_cli_progress ) {
 					self::$wp_cli_progress->tick();
 				}
