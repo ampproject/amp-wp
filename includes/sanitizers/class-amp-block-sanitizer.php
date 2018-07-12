@@ -48,7 +48,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// We are looking for <figure> elements with layout attribute only.
-			if ( ! isset( $attributes['data-amp-layout'] ) && ! isset( $attributes['data-amp-noloading'] ) ) {
+			if (
+				! isset( $attributes['data-amp-layout'] ) &&
+				! isset( $attributes['data-amp-noloading'] ) &&
+				! isset( $attributes['data-amp-lightbox'] )
+			) {
 				continue;
 			}
 

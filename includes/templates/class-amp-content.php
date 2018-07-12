@@ -55,11 +55,11 @@ class AMP_Content {
 	private $args = array();
 
 	/**
-	 * Embed handler class names.
+	 * Embed handlers.
 	 *
-	 * @var string[]
+	 * @var AMP_Base_Embed_Handler[] AMP_Base_Embed_Handler[]
 	 */
-	private $embed_handler_classes = array();
+	private $embed_handlers = array();
 
 	/**
 	 * Sanitizer class names.
@@ -77,10 +77,12 @@ class AMP_Content {
 	 * @param array    $args                  Args.
 	 */
 	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() ) {
-		$this->content               = $content;
-		$this->args                  = $args;
-		$this->embed_handler_classes = $embed_handler_classes;
-		$this->sanitizer_classes     = $sanitizer_classes;
+		$this->content           = $content;
+		$this->args              = $args;
+		$this->embed_handlers    = $this->register_embed_handlers( $embed_handler_classes );
+		$this->sanitizer_classes = $sanitizer_classes;
+
+		$this->sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = $this->embed_handlers;
 
 		$this->transform();
 	}
@@ -131,9 +133,8 @@ class AMP_Content {
 		$content = $this->content;
 
 		// First, embeds + the_content filter.
-		$embed_handlers = $this->register_embed_handlers();
 		$content        = apply_filters( 'the_content', $content );
-		$this->unregister_embed_handlers( $embed_handlers );
+		$this->unregister_embed_handlers( $this->embed_handlers );
 
 		// Then, sanitize to strip and/or convert non-amp content.
 		$content = $this->sanitize( $content );
@@ -163,12 +164,13 @@ class AMP_Content {
 	/**
 	 * Register embed handlers.
 	 *
+	 * @param string[] $embed_handler_classes Embed handler class names.
 	 * @return array
 	 */
-	private function register_embed_handlers() {
+	private function register_embed_handlers( $embed_handler_classes ) {
 		$embed_handlers = array();
 
-		foreach ( $this->embed_handler_classes as $embed_handler_class => $args ) {
+		foreach ( $embed_handler_classes as $embed_handler_class => $args ) {
 			$embed_handler = new $embed_handler_class( array_merge( $this->args, $args ) );
 
 			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {

@@ -13,10 +13,19 @@
 class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 	/**
-	 * Reset the state after a test method is called.
+	 * Setup.
 	 *
 	 * @inheritdoc
-	 * @global $wp_registered_widgets
+	 */
+	public function setUp() {
+		parent::setUp();
+		add_filter( 'pre_http_request', array( $this, 'add_comment' ) );
+	}
+
+	/**
+	 * Resets the state after a test method is called.
+	 *
+	 * @inheritdoc
 	 */
 	public function tearDown() {
 		AMP_Site_Validation::$site_validation_urls = array();
@@ -108,26 +117,36 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$number_of_posts = 20;
 		$number_of_terms = 30;
 		$posts           = array();
+		$post_permalinks = array();
 		$terms           = array();
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$posts[] = $this->factory()->post->create();
+			$post_id           = $this->factory()->post->create();
+			$posts[]           = $post_id;
+			$post_permalinks[] = add_query_arg( 'amp', '1', get_permalink( $post_id ) );
 		}
 		$validated_urls = AMP_Site_Validation::validate_entire_site_urls();
 
 		// All of the posts created above should be present in $validated_urls.
-		$this->assertEmpty( array_diff( array_map( 'get_permalink', $posts ), $validated_urls ) );
+		$this->assertEmpty( array_diff( $post_permalinks, $validated_urls ) );
 
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
 			$terms[] = $this->factory()->category->create();
 		}
 		// Terms need to be associated with a post in order to be returned in get_terms().
 		wp_set_post_terms( $posts[0], $terms, 'category' );
-		$validated_urls = AMP_Site_Validation::validate_entire_site_urls();
+
+		$actual_validated_urls   = AMP_Site_Validation::validate_entire_site_urls();
+		$expected_validated_urls = array_map(
+			function( $term ) {
+				return add_query_arg( 'amp', '1', get_term_link( $term ) );
+			},
+			$terms
+		);
 
 		// All of the terms created above should be present in $validated_urls.
-		$this->assertEmpty( array_diff( array_map( 'get_term_link', $terms ), $validated_urls ) );
-		$this->assertTrue( in_array( home_url( '/' ), $validated_urls, true ) );
+		$this->assertEmpty( array_diff( $expected_validated_urls, $actual_validated_urls ) );
+		$this->assertTrue( in_array( add_query_arg( 'amp', '1', home_url( '/' ) ), $actual_validated_urls, true ) );
 	}
 
 	/**
@@ -138,16 +157,41 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function test_validate_urls() {
 		$single_post_permalink = get_permalink( $this->factory()->post->create() );
 		AMP_Site_Validation::validate_urls( $single_post_permalink );
-		$this->assertEquals( array( $single_post_permalink ), AMP_Site_Validation::$site_validation_urls );
+		$this->assertEquals( array( add_query_arg( 'amp', 1, $single_post_permalink ) ), AMP_Site_Validation::$site_validation_urls );
 
 		AMP_Site_Validation::$site_validation_urls = array();
 		$number_of_posts                           = 30;
 		$post_permalinks                           = array();
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$post_permalinks[] = get_permalink( $this->factory()->post->create() );
+			$post_permalinks[] = add_query_arg( 'amp', 1, get_permalink( $this->factory()->post->create() ) );
 		}
 		AMP_Site_Validation::validate_urls( $post_permalinks );
 		$this->assertEquals( $post_permalinks, AMP_Site_Validation::$site_validation_urls );
+	}
+
+	/**
+	 * Adds the AMP_VALIDATION_RESULTS: comment to the <html> body.
+	 */
+	public function add_comment() {
+		$mock_validation_results = array(
+			array(
+				'error'     => array(
+					'code' => 'foo',
+				),
+				'sanitized' => false,
+			),
+		);
+
+		return array(
+			'body' => sprintf(
+				'<html amp><head></head><body></body><!--%s--></html>',
+				'AMP_VALIDATION_RESULTS:' . wp_json_encode( $mock_validation_results )
+			),
+			'response' => array(
+				'code'    => 200,
+				'message' => 'ok',
+			),
+		);
 	}
 }

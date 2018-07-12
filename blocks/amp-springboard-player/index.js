@@ -1,4 +1,9 @@
 /**
+ * Helper methods for blocks.
+ */
+import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
+
+/**
  * Internal block libraries.
  */
 const { __ } = wp.i18n;
@@ -20,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Springboard Player', 'amp' ),
 		description: __( 'Displays the Springboard Player used in the Springboard Video Platform', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )
@@ -28,41 +33,69 @@ export default registerBlockType(
 
 		attributes: {
 			dataSiteId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-site-id'
 			},
 			dataContentId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-content-id'
 			},
 			dataPlayerId: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-player-id'
 			},
 			dataDomain: {
-				type: 'string'
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-domain'
 			},
 			dataMode: {
 				type: 'string',
-				default: 'video'
+				default: 'video',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-mode'
 			},
 			dataItems: {
 				type: 'number',
-				default: 1
+				default: 1,
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'data-items'
 			},
-			layout: {
+			ampLayout: {
 				type: 'string',
-				default: 'responsive'
+				default: 'responsive',
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'layout'
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'width'
 			},
 			height: {
 				type: 'number',
-				default: 400
+				default: 400,
+				source: 'attribute',
+				selector: 'amp-springboard-player',
+				attribute: 'height'
 			}
 		},
 
-		edit( { attributes, isSelected, setAttributes } ) {
-			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, layout, height, width } = attributes;
+		edit( props ) {
+			const { attributes, setAttributes } = props;
+			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
@@ -76,74 +109,50 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'SprintBoard site ID (required)', 'amp' ) }
+								value={ dataSiteId }
+								onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Player content ID (required)', 'amp' ) }
+								value={ dataContentId }
+								onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Player ID', 'amp' ) }
+								value={ dataPlayerId }
+								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Springboard partner domain', 'amp' ) }
+								value={ dataDomain }
+								onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
+							/>
+							<SelectControl
+								label={ __( 'Mode (required)', 'amp' ) }
+								value={ dataMode }
+								options={ [
+									{ value: 'video', label: __( 'Video', 'amp' ) },
+									{ value: 'playlist', label: __( 'Playlist', 'amp' ) }
+								] }
+								onChange={ value => ( setAttributes( { dataMode: value } ) ) }
+							/>
+							<TextControl
+								type="number"
+								label={ __( 'Number of video is playlist (required)', 'amp' ) }
+								value={ dataItems }
+								onChange={ value => ( setAttributes( { dataItems: value } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'SprintBoard site ID (required)', 'amp' ) }
-										value={ dataSiteId }
-										onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Player content ID (required)', 'amp' ) }
-										value={ dataContentId }
-										onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Player ID', 'amp' ) }
-										value={ dataPlayerId }
-										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Springboard partner domain', 'amp' ) }
-										value={ dataDomain }
-										onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
-									/>
-									<SelectControl
-										label={ __( 'Mode (required)', 'amp' ) }
-										value={ dataMode }
-										options={ [
-											{ value: 'video', label: __( 'Video', 'amp' ) },
-											{ value: 'playlist', label: __( 'Playlist', 'amp' ) }
-										] }
-										onChange={ value => ( setAttributes( { dataMode: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Number of video is playlist (required)', 'amp' ) }
-										value={ dataItems }
-										onChange={ value => ( setAttributes( { dataItems: value } ) ) }
-									/>
-									<SelectControl
-										label={ __( 'Layout', 'amp' ) }
-										value={ layout }
-										options={ ampLayoutOptions }
-										onChange={ value => ( setAttributes( { layout: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Width (px)', 'amp' ) }
-										value={ width !== undefined ? width : '' }
-										onChange={ value => ( setAttributes( { width: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Height (px)', 'amp' ) }
-										value={ height }
-										onChange={ value => ( setAttributes( { height: value } ) ) }
-									/>
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
-					{
-						url && (
-							<Placeholder label={ __( 'Springboard Player', 'amp' ) }>
-								<p className="components-placeholder__error">{ url }</p>
-								<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
-							</Placeholder>
-						)
+						url && getMediaPlaceholder( __( 'Springboard Player', 'amp' ), url )
 					}
 					{
 						! url && (
@@ -157,9 +166,9 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, layout, height, width } = attributes;
+			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, ampLayout, height, width } = attributes;
 			let springboardProps = {
-				layout: layout,
+				layout: ampLayout,
 				height: height,
 				'data-site-id': dataSiteId,
 				'data-mode': dataMode,
@@ -168,7 +177,7 @@ export default registerBlockType(
 				'data-domain': dataDomain,
 				'data-items': dataItems
 			};
-			if ( 'fixed-height' !== layout && width ) {
+			if ( 'fixed-height' !== ampLayout && width ) {
 				springboardProps.width = attributes.width;
 			}
 			return (

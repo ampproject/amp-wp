@@ -25,6 +25,7 @@ class AMP_Editor_Blocks {
 	 */
 	public $amp_blocks = array(
 		'amp-mathml',
+		'amp-timeago',
 		'amp-o2-player',
 		'amp-ooyala-player',
 		'amp-reach-player',
@@ -42,8 +43,22 @@ class AMP_Editor_Blocks {
 		if ( function_exists( 'gutenberg_init' ) ) {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
-			add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
-			add_action( 'wp_print_footer_scripts', array( $this, 'print_dirty_amp_scripts' ) );
+
+			/*
+			 * Dirty AMP is required when a site is in native mode but not all templates are being served
+			 * as AMP. In particular, if a single post is using AMP-specific Gutenberg Blocks which make
+			 * use of AMP components, and the singular template is served as AMP but the blog page is not,
+			 * then the non-AMP blog page need to load the AMP runtime scripts so that the AMP components
+			 * in the posts displayed there will be rendered properly. This is only relevant on native AMP
+			 * sites because the AMP Gutenberg blocks are only made available in that mode; they are not
+			 * presented in the Gutenberg inserter in paired mode. In general, using AMP components in
+			 * non-AMP documents is still not officially supported, so it's occurrence is being minimized
+			 * as much as possible. For more, see <https://github.com/Automattic/amp-wp/issues/1192>.
+			 */
+			if ( amp_is_canonical() ) {
+				add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
+				add_action( 'wp_print_footer_scripts', array( $this, 'print_dirty_amp_scripts' ) );
+			}
 		}
 	}
 
@@ -62,8 +77,10 @@ class AMP_Editor_Blocks {
 		}
 
 		foreach ( $tags as &$tag ) {
-			$tag['data-amp-layout']    = true;
-			$tag['data-amp-noloading'] = true;
+			$tag['data-amp-layout']              = true;
+			$tag['data-amp-noloading']           = true;
+			$tag['data-amp-lightbox']            = true;
+			$tag['data-close-button-aria-label'] = true;
 		}
 
 		foreach ( $this->amp_blocks as $amp_block ) {
@@ -71,6 +88,7 @@ class AMP_Editor_Blocks {
 				$tags[ $amp_block ] = array();
 			}
 
+			// @todo The global attributes included here should be matched up with what is actually used by each block.
 			$tags[ $amp_block ] = array_merge(
 				array_fill_keys(
 					array(
@@ -105,34 +123,42 @@ class AMP_Editor_Blocks {
 	 */
 	public function enqueue_block_editor_assets() {
 
-		// Styles.
-		wp_enqueue_style(
-			'amp-editor-blocks-style',
-			amp_get_asset_url( 'css/amp-editor-blocks.css' ),
-			array(),
-			AMP__VERSION
-		);
+		// Enqueue script and style for AMP-specific blocks.
+		if ( amp_is_canonical() ) {
+			wp_enqueue_style(
+				'amp-editor-blocks-style',
+				amp_get_asset_url( 'css/amp-editor-blocks.css' ),
+				array(),
+				AMP__VERSION
+			);
 
-		// Scripts.
-		wp_enqueue_script(
-			'amp-editor-blocks-build',
-			amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-			array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-			AMP__VERSION
-		);
+			wp_enqueue_script(
+				'amp-editor-blocks-build',
+				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
+				array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+				AMP__VERSION
+			);
+
+			wp_add_inline_script(
+				'amp-editor-blocks-build',
+				'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
+				'before'
+			);
+		}
 
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n' ),
+			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
 
 		wp_add_inline_script(
 			'amp-editor-blocks',
-			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );' . sprintf( 'ampEditorBlocks.boot();' ),
-			'before'
+			sprintf( 'ampEditorBlocks.boot( %s );', wp_json_encode( array(
+				'hasThemeSupport' => current_theme_supports( 'amp' ),
+			) ) )
 		);
 	}
 
