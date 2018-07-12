@@ -73,9 +73,11 @@ class AMP_Site_Validation {
 		if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! isset( $args[0] ) && self::WP_CLI_ARGUMENT !== $args[0] ) {
 			return;
 		}
+		$count_urls_to_crawl = self::count_posts_and_terms();
 
-		WP_CLI::log( __( 'Crawling the entire site to test for AMP validity.', 'amp' ) );
-		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', self::count_posts_and_terms() );
+		/* Translators: %d: The number of URLs. */
+		WP_CLI::log( sprintf( __( 'Crawling %d URLs to test for AMP validity.', 'amp' ), $count_urls_to_crawl ) );
+		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', $count_urls_to_crawl );
 		self::validate_entire_site_urls();
 		self::$wp_cli_progress->finish();
 
@@ -227,10 +229,6 @@ class AMP_Site_Validation {
 		}
 
 		foreach ( $urls as $url ) {
-			if ( AMP_Theme_Support::is_paired_available() ) {
-				$url = add_query_arg( 'amp', 1, $url );
-			}
-
 			$validity = AMP_Validation_Manager::validate_url( $url );
 			if ( ! is_wp_error( $validity ) ) {
 				AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
