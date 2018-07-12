@@ -27,18 +27,25 @@ class AMP_Site_Validation {
 	const WP_CLI_ARGUMENT = 'validate-site';
 
 	/**
-	 * All of the site validation results.
+	 * The WP CLI progress bar.
+	 *
+	 * @var cli\progress\Bar|WP_CLI\NoOp
+	 */
+	public static $wp_cli_progress;
+
+	/**
+	 * All of the site validation URLs that have at least one unaccepted error.
 	 *
 	 * @var array
 	 */
 	public static $site_invalid_urls = array();
 
 	/**
-	 * The WP CLI progress bar.
+	 * All of the site validation errors.
 	 *
-	 * @var cli\progress\Bar|WP_CLI\NoOp
+	 * @var array
 	 */
-	public static $wp_cli_progress;
+	public static $total_errors = 0;
 
 	/**
 	 * The number of URLs crawled.
@@ -83,7 +90,7 @@ class AMP_Site_Validation {
 				/* Translators: $1%d: the number of URls crawled, $2%d: the number of validation issues, $3%s: link for more details */
 				__( "%1\$d URLs were crawled, and %2\$d have AMP validation issue(s).\nFor more details, please see: \n%3\$s", 'amp' ),
 				self::$number_crawled,
-				count( self::$site_invalid_urls ),
+				self::$total_errors,
 				$url_more_details
 			)
 		);
@@ -227,6 +234,7 @@ class AMP_Site_Validation {
 			$validity = AMP_Validation_Manager::validate_url( $url );
 			if ( ! is_wp_error( $validity ) ) {
 				AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
+				$error_count            = count( $validity['validation_errors'] );
 				$unaccepted_error_count = count( array_filter(
 					$validity['validation_errors'],
 					function( $error ) {
@@ -234,6 +242,9 @@ class AMP_Site_Validation {
 					}
 				) );
 
+				if ( $error_count > 0 ) {
+					self::$total_errors++;
+				}
 				if ( $unaccepted_error_count > 0 ) {
 					self::$site_invalid_urls[] = $url;
 				}
