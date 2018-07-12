@@ -273,8 +273,6 @@ class AMP_Site_Validation {
 
 				self::$number_crawled++;
 			}
-
-
 		}
 	}
 }
