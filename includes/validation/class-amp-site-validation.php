@@ -232,7 +232,17 @@ class AMP_Site_Validation {
 			$validity = AMP_Validation_Manager::validate_url( $url );
 			if ( ! is_wp_error( $validity ) ) {
 				AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
-				self::$site_validation_urls[] = $url;
+				$unaccepted_error_count = count( array_filter(
+					$validity['validation_errors'],
+					function( $error ) {
+						return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+					}
+				) );
+
+				if ( $unaccepted_error_count > 0 ) {
+					self::$site_validation_urls[] = $url;
+				}
+
 				if ( self::$wp_cli_progress ) {
 					self::$wp_cli_progress->tick();
 				}
