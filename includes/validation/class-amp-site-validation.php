@@ -31,7 +31,7 @@ class AMP_Site_Validation {
 	 *
 	 * @var array
 	 */
-	public static $site_validation_urls = array();
+	public static $site_invalid_urls = array();
 
 	/**
 	 * The WP CLI progress bar.
@@ -39,6 +39,13 @@ class AMP_Site_Validation {
 	 * @var cli\progress\Bar|WP_CLI\NoOp
 	 */
 	public static $wp_cli_progress;
+
+	/**
+	 * The number of URLs crawled.
+	 *
+	 * @var int
+	 */
+	public static $number_crawled = 0;
 
 	/**
 	 * Inits the class.
@@ -62,18 +69,10 @@ class AMP_Site_Validation {
 
 		WP_CLI::log( __( 'Crawling the entire site to test for AMP validity.', 'amp' ) );
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar( 'Validating URLs...', self::count_posts_and_terms() );
-		$number_crawled        = count( self::validate_entire_site_urls() );
+		self::validate_entire_site_urls();
 		self::$wp_cli_progress->finish();
 
-		$query_invalid_urls = new \WP_Query( array(
-			'post_type'      => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-			'posts_per_page' => $number_crawled,
-			'fields'         => 'ids',
-		) );
-		$number_invalid     = count( $query_invalid_urls->posts );
-
-		$validation_counts = compact( 'number_crawled', 'number_invalid' );
-		$url_more_details  = add_query_arg(
+		$url_more_details = add_query_arg(
 			'post_type',
 			\AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 			admin_url( 'edit.php' )
@@ -83,8 +82,8 @@ class AMP_Site_Validation {
 			sprintf(
 				/* Translators: $1%d: the number of URls crawled, $2%d: the number of validation issues, $3%s: link for more details */
 				__( "%1\$d URLs were crawled, and %2\$d have AMP validation issue(s).\nFor more details, please see: \n%3\$s", 'amp' ),
-				$validation_counts['number_crawled'],
-				$validation_counts['number_invalid'],
+				self::$number_crawled,
+				count( self::$site_invalid_urls ),
 				$url_more_details
 			)
 		);
@@ -174,10 +173,8 @@ class AMP_Site_Validation {
 	 *
 	 * @todo: Consider wrapping this function with another, as different use cases will probably require a different return value or display.
 	 * For example, the <button> in /wp-admin that makes an AJAX request for this will need a different response than a WP-CLI command.
-	 * @param object $wp_cli_progress The object that shows progress in the WP-CLI script to validate the site.
-	 * @return array $urls_validated The URLs that were visited, regardless of what the validation result was.
 	 */
-	public static function validate_entire_site_urls( $wp_cli_progress = null ) {
+	public static function validate_entire_site_urls() {
 		// Validate the homepage.
 		self::validate_urls( home_url( '/' ) );
 
@@ -206,8 +203,6 @@ class AMP_Site_Validation {
 				$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE, $offset );
 			}
 		}
-
-		return self::$site_validation_urls;
 	}
 
 	/**
@@ -240,13 +235,15 @@ class AMP_Site_Validation {
 				) );
 
 				if ( $unaccepted_error_count > 0 ) {
-					self::$site_validation_urls[] = $url;
+					self::$site_invalid_urls[] = $url;
 				}
 
 				if ( self::$wp_cli_progress ) {
 					self::$wp_cli_progress->tick();
 				}
 			}
+
+			self::$number_crawled++;
 		}
 	}
 }
