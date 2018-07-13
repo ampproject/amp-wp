@@ -38,7 +38,9 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 * @covers AMP_Site_Validation::count_posts_and_terms()
 	 */
 	public function test_count_posts_and_terms() {
-		$this->assertEquals( 0, AMP_Site_Validation::count_posts_and_terms() );
+		$method = new ReflectionMethod( 'AMP_Site_Validation::count_posts_and_terms' );
+		$method->setAccessible( true );
+		$this->assertEquals( 0, $method->invoke( null ) );
 
 		$number_of_posts = 20;
 		$post_ids        = array();
@@ -50,7 +52,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * The term (category) of 'Uncategorized' should be present, as there are posts now.
 		 * So account for it with +1.
 		 */
-		$this->assertEquals( $number_of_posts + 1, AMP_Site_Validation::count_posts_and_terms() );
+		$this->assertEquals( $number_of_posts + 1, $method->invoke( null ) );
 
 		$number_of_new_terms        = 20;
 		$taxonomy                   = 'category';
@@ -68,7 +70,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$taxonomy
 		);
 
-		$this->assertEquals( $number_of_posts + $number_of_new_terms + 1, AMP_Site_Validation::count_posts_and_terms() );
+		$this->assertEquals( $number_of_posts + $number_of_new_terms + 1, $method->invoke( null ) );
 	}
 
 	/**

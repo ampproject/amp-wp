@@ -106,9 +106,14 @@ class AMP_Site_Validation {
 	/**
 	 * Finds the total number of posts and terms on the site.
 	 *
+	 * The access level is private,
+	 * as this passes 'posts_per_page' => -1 to WP_Query().
+	 * This is only intended for use with WP-CLI,
+	 * and it's a performance risk otherwise.
+	 *
 	 * @return int The number of posts and terms.
 	 */
-	public static function count_posts_and_terms() {
+	private static function count_posts_and_terms() {
 		$total_count       = 0;
 		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
 		$term_query        = new WP_Term_Query( array(
