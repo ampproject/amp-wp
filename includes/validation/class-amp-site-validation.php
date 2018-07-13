@@ -35,13 +35,6 @@ class AMP_Site_Validation {
 	public static $wp_cli_progress;
 
 	/**
-	 * All of the invalid URLs.
-	 *
-	 * @var string[]
-	 */
-	public static $site_invalid_urls = array();
-
-	/**
 	 * All of the site validation errors.
 	 *
 	 * @var array
@@ -272,7 +265,6 @@ class AMP_Site_Validation {
 
 				if ( $error_count > 0 ) {
 					self::$total_errors++;
-					self::$site_invalid_urls[] = $url;
 				}
 				if ( $unaccepted_error_count > 0 ) {
 					self::$unaccepted_errors++;
