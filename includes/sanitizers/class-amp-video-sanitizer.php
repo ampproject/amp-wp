@@ -47,6 +47,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
+	 * @since 1.0 Set the filtered child node's src attribute.
 	 */
 	public function sanitize() {
 		$nodes     = $this->dom->getElementsByTagName( self::$tag );
@@ -95,11 +96,14 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
+				if ( $old_child_attributes['src'] !== $new_child_attributes['src'] ) {
+					$new_child_node->setAttribute( 'src', $new_child_attributes['src'] );
+				}
+
 				/**
 				 * Only append source tags with a valid src attribute
 				 */
 				$new_node->appendChild( $new_child_node );
-
 			}
 
 			/*
@@ -158,6 +162,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * "Filter" HTML attributes for <amp-audio> elements.
 	 *
 	 * @since 0.2
+	 * @since 1.0 Force src HTTPS.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -180,7 +185,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'src':
-					$out[ $name ] = $this->maybe_enforce_https_src( $value );
+					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
 
 				case 'width':
