@@ -94,7 +94,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'http_video_with_children' => array(
-				'<video width="480" height="300" poster="https://example.com/video-image.gif">
+				'<video width="480" height="300" poster="http://example.com/video-image.gif">
 	<source src="http://example.com/video.mp4" type="video/mp4">
 	<source src="http://example.com/video.ogv" type="video/ogg">
 </video>',
