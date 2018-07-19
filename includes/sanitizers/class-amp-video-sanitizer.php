@@ -162,7 +162,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * "Filter" HTML attributes for <amp-audio> elements.
 	 *
 	 * @since 0.2
-	 * @since 1.0 Force HTTPS for src and poster attributes.
+	 * @since 1.0 Force HTTPS for the src attribute.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -184,7 +184,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'poster':
 				case 'src':
 					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
@@ -194,6 +193,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
 					break;
 
+				case 'poster':
 				case 'class':
 				case 'sizes':
 					$out[ $name ] = $value;

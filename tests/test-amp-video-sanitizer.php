@@ -98,7 +98,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	<source src="http://example.com/video.mp4" type="video/mp4">
 	<source src="http://example.com/video.ogv" type="video/ogg">
 </video>',
-				'<amp-video width="480" height="300" poster="https://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
+				'<amp-video width="480" height="300" poster="http://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
 			),
 		);
 	}
