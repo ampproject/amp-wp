@@ -14,6 +14,13 @@
 class Test_AMP_Admin_Pointer extends \WP_UnitTestCase {
 
 	/**
+	 * The meta key of the dismissed pointers.
+	 *
+	 * @var string
+	 */
+	const DISMISSED_KEY = 'dismissed_wp_pointers';
+
+	/**
 	 * An instance of the class to test.
 	 *
 	 * @var AMP_Admin_Pointer
@@ -47,18 +54,11 @@ class Test_AMP_Admin_Pointer extends \WP_UnitTestCase {
 	 */
 	public function test_enqueue_pointer() {
 		$user_id             = $this->factory()->user->create();
-		$dismissed_key       = 'dismissed_wp_pointers';
 		$pointer_script_slug = 'wp-pointer';
 		wp_set_current_user( $user_id );
 
-		// When this is in the meta value of dismissed pointers, the tested method should exit without enqueuing the assets.
-		update_user_meta( $user_id, $dismissed_key, AMP_Admin_Pointer::TEMPLATE_POINTER_ID );
-		$this->instance->enqueue_pointer();
-		$this->assertFalse( wp_style_is( $pointer_script_slug ) );
-		$this->assertFalse( wp_script_is( AMP_Admin_Pointer::SCRIPT_SLUG ) );
-
-		// When this isn't in the meta value of dismissed pointers, the method should enqueue the assets.
-		update_user_meta( $user_id, $dismissed_key, 'foo-pointer' );
+		// This pointer isn't in the meta value of dismissed pointers, so the method should enqueue the assets.
+		update_user_meta( $user_id, self::DISMISSED_KEY, 'foo-pointer' );
 		$this->instance->enqueue_pointer();
 		$script = wp_scripts()->registered[ AMP_Admin_Pointer::SCRIPT_SLUG ];
 
@@ -69,6 +69,27 @@ class Test_AMP_Admin_Pointer extends \WP_UnitTestCase {
 		$this->assertEquals( amp_get_asset_url( 'js/amp-admin-pointer.js' ), $script->src );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertContains( 'ampAdminPointer.load(', $script->extra['after'][1] );
+	}
+
+	/**
+	 * Test is_pointer_dismissed.
+	 *
+	 * @covers AMP_Admin_Pointer::is_pointer_dismissed()
+	 */
+	public function test_is_pointer_dismissed() {
+		$user_id = $this->factory()->user->create();
+		wp_set_current_user( $user_id );
+		$method = new ReflectionMethod( 'AMP_Admin_Pointer', 'is_pointer_dismissed' );
+		$method->setAccessible( true );
+
+		// When this pointer is in the meta value of dismissed pointers, this should be true.
+		update_user_meta( $user_id, self::DISMISSED_KEY, AMP_Admin_Pointer::TEMPLATE_POINTER_ID );
+		$this->instance->enqueue_pointer();
+		$this->assertTrue( $method->invoke( $this->instance ) );
+
+		// When this pointer isn't in the meta value of dismissed pointers, this should be false.
+		update_user_meta( $user_id, self::DISMISSED_KEY, 'foo-pointer' );
+		$this->assertFalse( $method->invoke( $this->instance ) );
 	}
 
 	/**

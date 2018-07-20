@@ -48,10 +48,7 @@ class AMP_Admin_Pointer {
 	 * @since 1.0
 	 */
 	public function enqueue_pointer() {
-		$dismissed = explode( ',', strval( get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
-
-		// Exit if the pointer has been dismissed.
-		if ( in_array( self::TEMPLATE_POINTER_ID, $dismissed, true ) ) {
+		if ( $this->is_pointer_dismissed() ) {
 			return;
 		}
 
@@ -69,6 +66,22 @@ class AMP_Admin_Pointer {
 			self::SCRIPT_SLUG,
 			sprintf( 'ampAdminPointer.load( %s );', wp_json_encode( $this->get_pointer_data() ) )
 		);
+	}
+
+	/**
+	 * Whether the AMP admin pointer has been dismissed.
+	 *
+	 * @since 1.0
+	 * @return boolean
+	 */
+	protected function is_pointer_dismissed() {
+		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
+		if ( empty( $dismissed ) ) {
+			return false;
+		}
+		$dismissed = explode( ',', strval( $dismissed ) );
+
+		return in_array( self::TEMPLATE_POINTER_ID, $dismissed, true );
 	}
 
 	/**
