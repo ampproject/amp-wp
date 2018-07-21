@@ -160,6 +160,14 @@ class AMP_Editor_Blocks {
 				'hasThemeSupport' => current_theme_supports( 'amp' ),
 			) ) )
 		);
+
+		wp_enqueue_script(
+			'amp-editor-toggle',
+			amp_get_asset_url( 'js/amp-editor-toggle.js' ),
+			array( 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			AMP__VERSION,
+			true
+		);
 	}
 
 	/**
