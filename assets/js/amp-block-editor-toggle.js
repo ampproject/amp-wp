@@ -79,7 +79,6 @@ var ampBlockEditorToggle = ( function() { // eslint-disable-line no-unused-vars
 		ComposedAMPToggle: function ComposedAMPToggle() {
 			return wp.compose.compose(
 				wp.data.withSelect( function( select ) {
-
 					/**
 					 * Gets the AMP enabled status.
 					 *
