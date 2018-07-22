@@ -12,7 +12,13 @@ var ampBlockEditorToggle = ( function() { // eslint-disable-line no-unused-vars
 		/**
 		 * Data from the server.
 		 *
-		 * @param {Object}
+		 * @param {Object} {
+		 *     The module data.
+		 *
+		 *     @type {Object} i18n          The internationalization strings.
+		 *     @type {Array}  possibleStati The possible enabled stati, including 'enabled'.
+		 *     @type {String} defaultStatus The default enabled status for this post.
+		 * }
 		 */
 		data: {
 			i18n: {},
@@ -37,12 +43,12 @@ var ampBlockEditorToggle = ( function() { // eslint-disable-line no-unused-vars
 		},
 
 		/**
-		 * The AMP Toggle component
+		 * The AMP Toggle component.
 		 *
 		 * @param {Object} props The properties, including enabledStatus.
 		 * @return {void}
 		 */
-		AMPToggle: function( props ) {
+		AMPToggle: function AMPToggle( props ) {
 			var el = wp.element.createElement;
 			return el(
 				wp.element.Fragment,
@@ -56,9 +62,9 @@ var ampBlockEditorToggle = ( function() { // eslint-disable-line no-unused-vars
 						{
 							id: 'amp-enabled',
 							onChange: function() {
-								props.onAmpChange( props.enabledStatus );
+								props.onAmpChange( props.enabledStatus ); // Use onAMPChange() from ComposedAMPToggle.
 							},
-							checked: ( 'enabled' === props.enabledStatus )
+							checked: ( 'enabled' === props.enabledStatus ) // Use enabledStatus from ComposedAMPToggle.
 						}
 					)
 				)
@@ -70,9 +76,19 @@ var ampBlockEditorToggle = ( function() { // eslint-disable-line no-unused-vars
 		 *
 		 * @return {void}
 		 */
-		ComposedAMPToggle: function() {
+		ComposedAMPToggle: function ComposedAMPToggle() {
 			return wp.compose.compose(
 				wp.data.withSelect( function( select ) {
+
+					/**
+					 * Gets the AMP enabled status.
+					 *
+					 * Uses the select object from the enclosing function to get the meta value.
+					 * If it doesn't exist, uses the default value.
+					 * This applies especially for a new post, where there probably won't be a meta value yet.
+					 *
+					 * @return {string} Enabled status, either 'enabled' or 'disabled'.
+					 */
 					var getEnabledStatus = function() {
 						var metaSetatus = select( 'core/editor' ).getEditedPostAttribute( 'meta' ).amp_status;
 						if ( module.data.possibleStati.includes( metaSetatus ) ) {
@@ -80,10 +96,17 @@ var ampBlockEditorToggle = ( function() { // eslint-disable-line no-unused-vars
 						}
 						return module.data.defaultStatus;
 					};
+
 					return { enabledStatus: getEnabledStatus() };
 				} ),
 				wp.data.withDispatch( function( dispatch ) {
 					return {
+						/**
+						 * Toggles the status.
+						 * If it was previously 'enabled', it changes to 'disabled'.
+						 *
+						 * @param {string} enabledStatus The AMP enabled status.
+						 */
 						onAmpChange: function( enabledStatus ) {
 							var newStatus = ( 'enabled' === enabledStatus ) ? 'disabled' : 'enabled';
 							dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
