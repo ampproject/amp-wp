@@ -35,6 +35,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	public function test_init() {
 		$this->instance->init();
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( $this->instance, 'enqueue_admin_assets' ) ) );
+		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_assets' ) ) );
 		$this->assertEquals( 10, has_action( 'post_submitbox_misc_actions', array( $this->instance, 'render_status' ) ) );
 		$this->assertEquals( 10, has_action( 'save_post', array( $this->instance, 'save_amp_status' ) ) );
 	}
@@ -68,6 +69,38 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertTrue( false !== stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
 		unset( $GLOBALS['post'] );
 		unset( $GLOBALS['current_screen'] );
+	}
+
+	/**
+	 * Test enqueue_block_assets.
+	 *
+	 * @see AMP_Settings::enqueue_block_assets()
+	 */
+	public function test_enqueue_block_assets() {
+		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
+		$GLOBALS['post'] = self::factory()->post->create_and_get( array(
+			'post_type' => 'draft',
+		) );
+		$this->instance->enqueue_block_assets();
+		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
+
+		// If a post type has AMP enabled, the script should be enqueued.
+		$GLOBALS['post'] = self::factory()->post->create_and_get();
+		$this->instance->enqueue_block_assets();
+		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
+
+		$block_script = wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ];
+		$this->assertEquals(
+			array(
+				'wp-hooks',
+				'wp-i18n',
+				'wp-components',
+			),
+			$block_script->deps
+		);
+		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
+		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
+		$this->assertEquals( AMP__VERSION, $block_script->ver );
 	}
 
 	/**

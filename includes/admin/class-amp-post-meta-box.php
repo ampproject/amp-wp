@@ -22,6 +22,14 @@ class AMP_Post_Meta_Box {
 	const ASSETS_HANDLE = 'amp-post-meta-box';
 
 	/**
+	 * Block asset handle.
+	 *
+	 * @since 1.0
+	 * @var string
+	 */
+	const BLOCK_ASSET_HANDLE = 'amp-block-editor-toggle';
+
+	/**
 	 * The enabled status post meta value.
 	 *
 	 * @since 0.6
@@ -84,6 +92,7 @@ class AMP_Post_Meta_Box {
 		) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_assets' ) );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'render_status' ) );
 		add_action( 'save_post', array( $this, 'save_amp_status' ) );
 		add_filter( 'preview_post_link', array( $this, 'preview_post_link' ) );
@@ -163,6 +172,34 @@ class AMP_Post_Meta_Box {
 				),
 			) )
 		) );
+	}
+
+	/**
+	 * Enqueues block assets.
+	 * The name of gutenberg_get_jed_locale_data() may change, as the Gutenberg Core merge approaches.
+	 *
+	 * @since 1.0
+	 */
+	public function enqueue_block_assets() {
+		$post = get_post();
+		if ( ! is_post_type_viewable( $post->post_type ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			self::BLOCK_ASSET_HANDLE,
+			amp_get_asset_url( 'js/' . self::BLOCK_ASSET_HANDLE . '.js' ),
+			array( 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			AMP__VERSION,
+			true
+		);
+
+		$data = wp_json_encode( array(
+			'i18n'          => gutenberg_get_jed_locale_data( 'amp' ), // @todo create a POT file.
+			'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
+			'defaultStatus' => self::ENABLED_STATUS,
+		) );
+		wp_add_inline_script( self::BLOCK_ASSET_HANDLE, sprintf( 'ampBlockEditorToggle.boot( %s );', $data ) );
 	}
 
 	/**
