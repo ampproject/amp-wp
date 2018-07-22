@@ -194,10 +194,13 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
+		$status_and_errors = $this->get_status_and_errors( $post );
+		$enabled_status    = $status_and_errors['status'];
+
 		$data = wp_json_encode( array(
 			'i18n'          => gutenberg_get_jed_locale_data( 'amp' ), // @todo create a POT file.
 			'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
-			'defaultStatus' => self::ENABLED_STATUS,
+			'defaultStatus' => $enabled_status,
 		) );
 		wp_add_inline_script( self::BLOCK_ASSET_HANDLE, sprintf( 'ampBlockEditorToggle.boot( %s );', $data ) );
 	}
@@ -221,6 +224,33 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		$status_and_errors = $this->get_status_and_errors( $post );
+		$status            = $status_and_errors['status'];
+		$errors            = $status_and_errors['errors'];
+
+		$labels = array(
+			'enabled'  => __( 'Enabled', 'amp' ),
+			'disabled' => __( 'Disabled', 'amp' ),
+		);
+
+		// The preceding variables are used inside the following amp-status.php template.
+		include AMP__DIR__ . '/templates/admin/amp-status.php';
+	}
+
+	/**
+	 * Gets the AMP enabled status and errors.
+	 *
+	 * @since 1.0
+	 * @param WP_Post $post The post to check.
+	 * @return array {
+	 *     The status and errors.
+	 *
+	 *     @type string    $status The AMP enabled status.
+	 *     @type string[]  $errors AMP errors.
+	 * }
+	 */
+	public function get_status_and_errors( $post ) {
+
 		/*
 		 * When theme support is present then theme templates can be served in AMP and we check first if the template is available.
 		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present
@@ -239,13 +269,7 @@ class AMP_Post_Meta_Box {
 			$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
 		}
 
-		$labels = array(
-			'enabled'  => __( 'Enabled', 'amp' ),
-			'disabled' => __( 'Disabled', 'amp' ),
-		);
-
-		// The preceding variables are used inside the following amp-status.php template.
-		include AMP__DIR__ . '/templates/admin/amp-status.php';
+		return compact( 'status', 'errors' );
 	}
 
 	/**

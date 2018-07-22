@@ -77,6 +77,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Settings::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
+		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$this->markTestSkipped( 'Gutenberg is not available' );
+		}
+
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
 		$GLOBALS['post'] = self::factory()->post->create_and_get( array(
 			'post_type' => 'draft',
@@ -160,6 +164,54 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		ob_start();
 		$this->instance->render_status( $post );
 		$this->assertEmpty( ob_get_clean() );
+	}
+
+	/**
+	 * Test get_status_and_errors.
+	 *
+	 * @see AMP_Settings::get_status_and_errors()
+	 */
+	public function test_get_status_and_errors() {
+		$expected_status_and_errors = array(
+			'status' => 'enabled',
+			'errors' => array(),
+		);
+
+		// A post of type post shouldn't have errors, and AMP should be enabled.
+		$post = $this->factory()->post->create_and_get();
+		$this->assertEquals(
+			$expected_status_and_errors,
+			$this->instance->get_status_and_errors( $post )
+		);
+
+		// In Native AMP, there also shouldn't be errors.
+		add_theme_support( 'amp' );
+		$this->assertEquals(
+			$expected_status_and_errors,
+			$this->instance->get_status_and_errors( $post )
+		);
+
+		// If post type doesn't support AMP, this method should return AMP as being disabled.
+		remove_post_type_support( 'post', amp_get_slug() );
+		$this->assertEquals(
+			array(
+				'status' => 'disabled',
+				'errors' => array( 'post-type-support' ),
+			),
+			$this->instance->get_status_and_errors( $post )
+		);
+		add_post_type_support( 'post', amp_get_slug() );
+
+		// There's no template to render this post, so this method should also return AMP as disabled.
+		add_filter( 'amp_supportable_templates', '__return_empty_array' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		$this->assertEquals(
+			array(
+				'status' => 'disabled',
+				'errors' => array( 'no_matching_template' ),
+			),
+			$this->instance->get_status_and_errors( $post )
+		);
 	}
 
 	/**
