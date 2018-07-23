@@ -56,7 +56,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		for ( $i = $num_nodes - 1; $i >= 0; $i -- ) {
+		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node           = $nodes->item( $i );
 			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
@@ -165,17 +165,17 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0 Force HTTPS for the src attribute.
 	 *
 	 * @param string[] $attributes {
-	 *                             Attributes.
+	 *      Attributes.
 	 *
-	 * @type string    $src        Video URL - Empty if HTTPS required per $this->args['require_https_src']
-	 * @type int       $width      <video> attribute - Set to numeric value if px or %
-	 * @type int       $height     <video> attribute - Set to numeric value if px or %
-	 * @type string    $poster     <video> attribute - Pass along if found
-	 * @type string    $class      <video> attribute - Pass along if found
-	 * @type bool      $controls   <video> attribute - Convert 'false' to empty string ''
-	 * @type bool      $loop       <video> attribute - Convert 'false' to empty string ''
-	 * @type bool      $muted      <video> attribute - Convert 'false' to empty string ''
-	 * @type bool      $autoplay   <video> attribute - Convert 'false' to empty string ''
+	 *      @type string    $src        Video URL - Empty if HTTPS required per $this->args['require_https_src']
+	 *      @type int       $width      <video> attribute - Set to numeric value if px or %
+	 *      @type int       $height     <video> attribute - Set to numeric value if px or %
+	 *      @type string    $poster     <video> attribute - Pass along if found
+	 *      @type string    $class      <video> attribute - Pass along if found
+	 *      @type bool      $controls   <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $loop       <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $muted      <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $autoplay   <video> attribute - Convert 'false' to empty string ''
 	 * }
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
