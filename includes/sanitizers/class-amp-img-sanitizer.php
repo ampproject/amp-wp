@@ -229,7 +229,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMNode $node The DOMNode to adjust and replace.
+	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
 
@@ -269,7 +269,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function maybe_add_lightbox_attributes( $attributes, $node ) {
 		$parent_node = $node->parentNode;
-		if ( 'figure' !== $parent_node->tagName ) {
+		if ( ! ( $parent_node instanceof DOMElement ) || 'figure' !== $parent_node->tagName ) {
 			return $attributes;
 		}
 
@@ -347,11 +347,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 * @see https://github.com/Automattic/amp-wp/issues/1086
 	 *
-	 * @param DOMNode $node The DOMNode to adjust and replace.
+	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
 	protected function add_auto_width_to_figure( $node ) {
 		$figure = $node->parentNode;
-		if ( ! $figure instanceof DOMElement || 'figure' !== $figure->tagName ) {
+		if ( ! ( $figure instanceof DOMElement ) || 'figure' !== $figure->tagName ) {
 			return;
 		}
 
@@ -366,10 +366,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$new_style = 'width: auto;';
 		if ( $figure->hasAttribute( 'style' ) ) {
-			$figure->setAttribute( 'style', 'width: auto;' . $figure->getAttribute( 'style' ) );
+			$figure->setAttribute( 'style', $new_style . $figure->getAttribute( 'style' ) );
 		} else {
-			$figure->setAttribute( 'style', 'width: auto' );
+			$figure->setAttribute( 'style', $new_style );
 		}
 	}
 }
