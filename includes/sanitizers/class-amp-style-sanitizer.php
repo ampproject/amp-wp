@@ -699,7 +699,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v9';
+		$cache_group = 'amp-parsed-stylesheet-v10'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1823,11 +1823,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$edited_selectors = array( $selector );
 			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
-				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector ) . '(?=$|[^a-z0-9_-])/i';
+				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
 				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
 					$original_selector = $edited_selector;
 					$amp_selector      = array_shift( $amp_selectors );
-					$amp_tag_pattern   = '/(?<=^|[^a-z0-9_-])' . preg_quote( $amp_selector ) . '(?=$|[^a-z0-9_-])/i';
+					$amp_tag_pattern   = '/(?<=^|[^a-z0-9_-])' . preg_quote( $amp_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
 					preg_match( $amp_tag_pattern, $edited_selector, $matches );
 					if ( ! empty( $matches ) && $amp_selector === $matches[0] ) {
 						continue;
