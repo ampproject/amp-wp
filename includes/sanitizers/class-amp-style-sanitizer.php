@@ -865,9 +865,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
 			$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
 
-			// Find calc() functions and replace with placeholders since PHP-CSS-Parser can't handle them.
-			$stylesheet_string = $this->add_calc_placeholders( $stylesheet_string );
-
 			$parser_settings = Sabberworm\CSS\Settings::create();
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
 			$css_document    = $css_parser->parse();
@@ -1028,15 +1025,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-					// Restore calc() functions that were replaced with placeholders.
-					$declaration = preg_replace_callback(
-						'/-wp-calc-placeholder\("(.+?)"\)/',
-						function( $matches ) {
-							return base64_decode( $matches[1] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-						},
-						$declaration
-					);
-
 					$stylesheet[] = array(
 						$selectors_parsed,
 						$declaration,
@@ -1097,53 +1085,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->previous_should_sanitize_validation_error_results[] = compact( 'args', 'sanitized' );
 		return $sanitized;
-	}
-
-	/**
-	 * Add encoded placeholders for calc() functions which the PHP-CSS-Parser doesn't handle them properly yet.
-	 *
-	 * @since 1.0
-	 * @link https://github.com/sabberworm/PHP-CSS-Parser/issues/79
-	 *
-	 * @param string $css CSS.
-	 * @return string CSS with calc() functions replaced with placeholders.
-	 */
-	private function add_calc_placeholders( $css ) {
-		$offset = 0;
-		while ( preg_match( '/(?:-\w+-)?\bcalc\(/', $css, $matches, PREG_OFFSET_CAPTURE, $offset ) ) {
-			$match_string = $matches[0][0];
-			$match_offset = $matches[0][1];
-			$css_length   = strlen( $css );
-			$open_parens  = 1;
-			$start_offset = $match_offset + strlen( $match_string );
-			$final_offset = $start_offset;
-			for ( ; $final_offset < $css_length; $final_offset++ ) {
-				if ( '(' === $css[ $final_offset ] ) {
-					$open_parens++;
-				} elseif ( ')' === $css[ $final_offset ] ) {
-					$open_parens--;
-				} elseif ( ';' === $css[ $final_offset ] || '}' === $css[ $final_offset ] ) {
-					break; // Stop looking since clearly came to the end of the property. Unbalanced parentheses.
-				}
-
-				// Found the end of the calc() function, so replace it with a placeholder function.
-				if ( 0 === $open_parens ) {
-					$matched_calc = substr( $css, $match_offset, $final_offset - $match_offset + 1 );
-					$placeholder  = sprintf( '-wp-calc-placeholder("%s")', base64_encode( $matched_calc ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-
-					// Update the CSS to replace the matched calc() with the placeholder function.
-					$css = substr( $css, 0, $match_offset ) . $placeholder . substr( $css, $final_offset + 1 );
-
-					// Update offset based on difference of length of placeholder vs original matched calc().
-					$final_offset += strlen( $placeholder ) - strlen( $matched_calc );
-					break;
-				}
-			}
-
-			// Start matching at the next byte after the match.
-			$offset = $final_offset + 1;
-		}
-		return $css;
 	}
 
 	/**

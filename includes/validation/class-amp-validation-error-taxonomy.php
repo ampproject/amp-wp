@@ -476,7 +476,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
 		add_filter( 'query_vars', function( $query_vars ) {
-			$query_vars[] = self::VALIDATION_ERROR_STATUS_QUERY_VAR;
+			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR;
 			return $query_vars;
 		} );
 
@@ -500,8 +500,8 @@ class AMP_Validation_Error_Taxonomy {
 		// Add bulk actions.
 		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
 			unset( $bulk_actions['delete'] );
-			$bulk_actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
-			$bulk_actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
+			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
+			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
 			return $bulk_actions;
 		} );
 
@@ -525,7 +525,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Hide empty term addition form.
 		add_action( 'admin_enqueue_scripts', function() {
-			if ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
 				wp_add_inline_style( 'common', '
 					#col-left { display: none; }
 					#col-right { float:none; width: auto; }
@@ -540,7 +540,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Make sure parent menu item is expanded when visiting the taxonomy term page.
 		add_filter( 'parent_file', function( $parent_file ) {
-			if ( get_current_screen()->taxonomy === self::TAXONOMY_SLUG ) {
+			if ( get_current_screen()->taxonomy === AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) {
 				$parent_file = AMP_Options_Manager::OPTION_NAME;
 			}
 			return $parent_file;
@@ -548,7 +548,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Replace the primary column to be error instead of the removed name column..
 		add_filter( 'list_table_primary_column', function( $primary_column ) {
-			if ( get_current_screen() && self::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+			if ( get_current_screen() && AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
 				$primary_column = 'error';
 			}
 			return $primary_column;
@@ -569,7 +569,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $group ) {
 			global $wpdb;
-			if ( self::TAXONOMY_SLUG === $taxonomies[0] && self::$should_filter_terms_clauses_for_error_validation_status ) {
+			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] && AMP_Validation_Error_Taxonomy::$should_filter_terms_clauses_for_error_validation_status ) {
 				$clauses['where'] .= $wpdb->prepare( ' AND t.term_group = %d', $group );
 			}
 			return $clauses;
