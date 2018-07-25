@@ -101,7 +101,7 @@ class AMP_Content_Sanitizer {
 		}
 
 		// Sanitize.
-		foreach ( $sanitizers as $sanitizer ) {
+		foreach ( $sanitizers as $sanitizer_class => $sanitizer ) {
 			$sanitize_class_start = microtime( true );
 
 			$sanitizer->sanitize();
