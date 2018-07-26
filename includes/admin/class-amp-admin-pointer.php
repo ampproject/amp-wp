@@ -72,7 +72,7 @@ class AMP_Admin_Pointer {
 	 * Whether the AMP admin pointer has been dismissed.
 	 *
 	 * @since 1.0
-	 * @return boolean
+	 * @return boolean Is dismissed.
 	 */
 	protected function is_pointer_dismissed() {
 		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
@@ -88,7 +88,7 @@ class AMP_Admin_Pointer {
 	 * Gets the pointer data to pass to the script.
 	 *
 	 * @since 1.0
-	 * @return array
+	 * @return array Pointer data.
 	 */
 	public function get_pointer_data() {
 		return array(
@@ -100,7 +100,7 @@ class AMP_Admin_Pointer {
 						'<h3>%s</h3><p><strong>%s</strong></p><p>%s</p>',
 						__( 'AMP', 'amp' ),
 						__( 'New AMP Template Modes', 'amp' ),
-						__( 'You can now reuse your theme\'s styles in AMP responses, using "Paired" or "Native" mode.', 'amp' )
+						__( 'You can now reuse your theme\'s templates and styles in AMP responses, in both &#8220;Paired&#8221; and &#8220;Native&#8221; modes.', 'amp' )
 					),
 					'position' => array(
 						'edge'  => 'left',
