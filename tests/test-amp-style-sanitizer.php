@@ -189,6 +189,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c8aa9e9{width:50px;width:60px;background-color:red}',
 				),
 			),
+
+			'multi_selector_in_not_pseudo_class'         => array(
+				'<style>.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul { color:red; }</style><div class="widget"></div>',
+				'<div class="widget"></div>',
+				array(
+					'.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul{color:red}',
+				),
+			),
 		);
 	}
 
