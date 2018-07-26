@@ -230,7 +230,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( $amp_url ) {
-		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+		printf( '<link rel="amphtml" href="%s">', esc_url( apply_filters( 'amp_amphtml_url', $amp_url ) ) );
 	}
 }
 
