@@ -166,3 +166,13 @@ function amp_editor_core_blocks() {
 	$editor_blocks = new AMP_Editor_Blocks();
 	$editor_blocks->init();
 }
+
+/**
+ * Bootstrap the AMP admin pointer class.
+ *
+ * @since 1.0
+ */
+function amp_admin_pointer() {
+	$admin_pointer = new AMP_Admin_Pointer();
+	$admin_pointer->init();
+}
