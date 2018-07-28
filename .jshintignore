@@ -2,3 +2,4 @@
 **/node_modules/**
 **/vendor/**
 **/assets/js/amp-blocks-compiled.js
+**/assets/js/amp-block-editor-toggle-compiled.js

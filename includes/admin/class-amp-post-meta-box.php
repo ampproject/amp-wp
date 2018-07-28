@@ -27,7 +27,7 @@ class AMP_Post_Meta_Box {
 	 * @since 1.0
 	 * @var string
 	 */
-	const BLOCK_ASSET_HANDLE = 'amp-block-editor-toggle';
+	const BLOCK_ASSET_HANDLE = 'amp-block-editor-toggle-compiled';
 
 	/**
 	 * The enabled status post meta value.
@@ -193,16 +193,6 @@ class AMP_Post_Meta_Box {
 			AMP__VERSION,
 			true
 		);
-
-		$status_and_errors = $this->get_status_and_errors( $post );
-		$enabled_status    = $status_and_errors['status'];
-
-		$data = wp_json_encode( array(
-			'i18n'          => gutenberg_get_jed_locale_data( 'amp' ), // @todo create a POT file.
-			'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
-			'defaultStatus' => $enabled_status,
-		) );
-		wp_add_inline_script( self::BLOCK_ASSET_HANDLE, sprintf( 'ampBlockEditorToggle.boot( %s );', $data ) );
 	}
 
 	/**
