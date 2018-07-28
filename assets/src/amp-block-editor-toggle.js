@@ -1,7 +1,6 @@
 /**
- * WordPress Dependencies
+ * WordPress dependencies
  */
-
 const { __ } = wp.i18n;
 const { FormToggle } = wp.components;
 const { Fragment } = wp.element;
@@ -14,7 +13,7 @@ const possibleStati = [ 'enabled', 'disabled' ];
 const defaultStatus = 'enabled';
 
 /**
- * Adds an 'Enable AMP' toggle to the Gutenberg 'Status & Visibility' section.
+ * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
  *
  * @return {Object} AMPToggle component.
  */
@@ -62,7 +61,7 @@ function ComposedAMPToggle() {
 		} ),
 		withDispatch( ( dispatch ) => ( {
 			onAmpChange: function( enabledStatus ) {
-				let newStatus = ( 'enabled' === enabledStatus ) ? 'disabled' : 'enabled';
+				let newStatus = 'enabled' === enabledStatus ? 'disabled' : 'enabled';
 				dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
 			}
 		} ) ),
