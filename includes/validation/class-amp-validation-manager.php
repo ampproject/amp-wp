@@ -386,7 +386,7 @@ class AMP_Validation_Manager {
 					if ( urlParser.href !== location.href ) {
 						history.replaceState( {}, '', urlParser.href );
 					}
-				})( <?php echo wp_json_encode( self::VALIDATION_ERRORS_QUERY_VAR ); ?> );
+				})( <?php echo wp_json_encode( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ); ?> );
 				</script>
 				<?php
 			} );

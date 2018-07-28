@@ -117,10 +117,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'illegal_at_rule_in_style_attribute' => array(
-				'<span style="color:brown; @media screen { color:green }">Parse error.</span>',
-				'<span>Parse error.</span>',
+				'<span style="color:brown; @media screen { color:green }">invalid @-rule omitted.</span>',
+				'<span class="amp-wp-481af57">invalid @-rule omitted.</span>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-481af57{color:brown}',
+				),
 				array(),
-				array( 'css_parse_error' ),
 			),
 
 			'illegal_at_rules_removed' => array(
@@ -147,6 +149,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					':root:not(#_) #child{color:red}:root:not(#_):not(#_) #parent #child{color:pink}:root:not(#_) .foo{color:blue}:root:not(#_):not(#_) #me .foo{color:green}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-64b4fd4{color:yellow}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-ab79d9e{color:purple}',
+				),
+			),
+
+			'grid_lines'                                  => array(
+				'<style>.wrapper {display: grid;grid-template-columns: [main-start] 1fr [content-start] 1fr [content-end] 1fr [main-end];grid-template-rows: [main-start] 100px [content-start] 100px [content-end] 100px [main-end];}</style><div class="wrapper"></div>',
+				'<div class="wrapper"></div>',
+				array(
+					'.wrapper{display:grid;grid-template-columns:[main-start] 1fr [content-start] 1fr [content-end] 1fr [main-end];grid-template-rows:[main-start] 100px [content-start] 100px [content-end] 100px [main-end]}',
 				),
 			),
 
@@ -177,6 +187,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<table><colgroup><col class="amp-wp-c8aa9e9"></colgroup></table>',
 				array(
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c8aa9e9{width:50px;width:60px;background-color:red}',
+				),
+			),
+
+			'multi_selector_in_not_pseudo_class'         => array(
+				'<style>.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul { color:red; }</style><div class="widget"></div>',
+				'<div class="widget"></div>',
+				array(
+					'.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul{color:red}',
 				),
 			),
 		);
@@ -298,14 +316,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'styles_with_calc_functions' => array(
 				implode( '', array(
 					'<html amp><head>',
-					'<style amp-custom>body { color: red; width: -webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) ); outline: solid 1px blue; }</style>',
-					'<style amp-custom>.alignwide{ max-width: calc(50% + 22.5rem); border: solid 1px red; }</style>',
+					'<style amp-custom>body { color: red; width: calc( 1px + calc( 2vh / 3 ) - 2px * 5 ); outline: solid 1px blue; }</style>',
+					'<style amp-custom>.alignwide{ max-width: -webkit-calc(50% + 22.5rem); border: solid 1px red; }</style>',
 					'<style amp-custom>.alignwide{ height: calc(10% + ( 1px ); color: red; content: ")"}</style>', // Test unbalanced parentheses.
 					'</head><body><div class="alignwide"></div></body></html>',
 				) ),
 				array(
-					'body{color:red;width:-webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) );outline:solid 1px blue}',
-					'.alignwide{max-width:calc(50% + 22.5rem);border:solid 1px red}',
+					'body{color:red;width:calc(1px + calc(2vh / 3) - 2px * 5);outline:solid 1px blue}',
+					'.alignwide{max-width:-webkit-calc(50% + 22.5rem);border:solid 1px red}',
 					'.alignwide{color:red;content:")"}',
 				),
 				array(),

@@ -86,6 +86,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $script_components = array();
 
 	/**
+	 * Keep track of nodes that should not be replaced to prevent duplicated validation errors since sanitization is rejected.
+	 *
+	 * @var array
+	 */
+	protected $should_not_replace_nodes = array();
+
+	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
 	 *
 	 * @since 0.5
@@ -412,7 +419,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$attr_spec_list = $first_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 				}
 			}
-		} // End if().
+		}
 
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
@@ -1656,34 +1663,46 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Also adds them to the stack for processing by the sanitize() function.
 	 *
 	 * @since 0.3.3
+	 * @since 1.0 Fix silently removing unrecognized elements.
+	 * @see https://github.com/Automattic/amp-wp/issues/1100
 	 *
 	 * @param DOMNode $node Node.
 	 */
 	private function replace_node_with_children( $node ) {
 
+		// If node has no children or no parent, just remove the node.
 		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
-			// If node has no children or no parent, just remove the node.
 			$this->remove_node( $node );
 
-		} else {
-			/*
-			 * If node has children, replace it with them and push children onto stack
-			 *
-			 * Create a DOM fragment to hold the children
-			 */
-			$fragment = $this->dom->createDocumentFragment();
+			return;
+		}
 
-			// Add all children to fragment/stack.
-			$child = $node->firstChild;
-			while ( $child ) {
-				$fragment->appendChild( $child );
-				$this->stack[] = $child;
-				$child         = $node->firstChild;
-			}
+		/*
+		 * If node has children, replace it with them and push children onto stack
+		 *
+		 * Create a DOM fragment to hold the children
+		 */
+		$fragment = $this->dom->createDocumentFragment();
 
-			// Replace node with fragment.
+		// Add all children to fragment/stack.
+		$child = $node->firstChild;
+		while ( $child ) {
+			$fragment->appendChild( $child );
+			$this->stack[] = $child;
+			$child         = $node->firstChild;
+		}
+
+		// Prevent double-reporting nodes that are rejected for sanitization.
+		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
+			return;
+		}
+
+		// Replace node with fragment.
+		$should_replace = $this->should_sanitize_validation_error( array(), compact( 'node' ) );
+		if ( $should_replace ) {
 			$node->parentNode->replaceChild( $fragment, $node );
-
+		} else {
+			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
 		}
 	}
 
