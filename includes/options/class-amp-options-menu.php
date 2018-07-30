@@ -177,7 +177,7 @@ class AMP_Options_Menu {
 					</dt>
 					<dd>
 						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
-					</dd>					
+					</dd>
 				</dl>
 			</fieldset>
 		<?php endif; ?>
