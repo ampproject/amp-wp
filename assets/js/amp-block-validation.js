@@ -382,7 +382,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			return wp.data.withSelect( function( select, ownProps ) {
 				return _.extend( {}, ownProps, {
-					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.id )
+					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.clientId )
 				} );
 			} )( AmpNoticeBlockEdit );
 		}
