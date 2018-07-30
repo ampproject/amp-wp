@@ -150,15 +150,15 @@ class AMP_Options_Menu {
 						<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
-				<dl>
+				<dl>					
 					<dt>
-						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
-						<label for="theme_support_disabled">
-							<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
+						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?>>
+						<label for="theme_support_native">
+							<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+						<?php echo esc_html( $native_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
@@ -170,14 +170,14 @@ class AMP_Options_Menu {
 						<?php echo esc_html( $paired_description ); ?>
 					</dd>
 					<dt>
-						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?>>
-						<label for="theme_support_native">
-							<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
+						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
+						<label for="theme_support_disabled">
+							<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php echo esc_html( $native_description ); ?>
-					</dd>
+						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+					</dd>					
 				</dl>
 			</fieldset>
 		<?php endif; ?>
