@@ -150,7 +150,7 @@ class AMP_Options_Menu {
 						<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
-				<dl>					
+				<dl>
 					<dt>
 						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?>>
 						<label for="theme_support_native">
