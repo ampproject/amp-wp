@@ -1373,9 +1373,10 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 * @todo All of this might be better placed inside of a sanitizer.
 	 *
-	 * @param DOMDocument $dom Doc.
+	 * @param DOMDocument $dom            Document.
+	 * @param string[]    $script_handles AMP script handles.
 	 */
-	public static function ensure_required_markup( DOMDocument $dom ) {
+	public static function ensure_required_markup( DOMDocument $dom, $script_handles = array() ) {
 		/**
 		 * Elements.
 		 *
@@ -1425,20 +1426,84 @@ class AMP_Theme_Support {
 			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata() ) ) );
 			$head->appendChild( $script );
 		}
+
+		$links         = array();
+		$link_elements = $head->getElementsByTagName( 'link' );
+
 		// Ensure rel=canonical link.
 		$rel_canonical = null;
-		foreach ( $head->getElementsByTagName( 'link' ) as $link ) {
-			if ( 'canonical' === $link->getAttribute( 'rel' ) ) {
-				$rel_canonical = $link;
-				break;
+		foreach ( $link_elements as $link ) {
+			if ( $link->hasAttribute( 'rel' ) ) {
+				$links[ $link->getAttribute( 'rel' ) ][ $link->getAttribute( 'href' ) ] = $link;
 			}
 		}
-		if ( ! $rel_canonical ) {
+		if ( empty( $links['canonical'] ) ) {
 			$rel_canonical = AMP_DOM_Utils::create_node( $dom, 'link', array(
 				'rel'  => 'canonical',
 				'href' => self::get_current_canonical_url(),
 			) );
 			$head->appendChild( $rel_canonical );
+		}
+
+		$prioritized_preloads = array();
+		if ( ! isset( $links['preload'] ) ) {
+			$links['preload'] = array();
+		}
+
+		/*
+		 * "AMP is already quite restrictive about which markup is allowed in the <head> section. However,
+		 * there are a few basic optimizations that you can apply. The key is to structure the <head> section
+		 * in a way so that all render-blocking scripts and custom fonts load as fast as possible."
+		 * https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos
+		 */
+		$runtime_src = wp_scripts()->registered['amp-runtime']->src;
+		if ( isset( $links['preload'][ $runtime_src ] ) ) {
+			$prioritized_preloads[ $runtime_src ] = $links['preload'][ $runtime_src ];
+		} else {
+			$prioritized_preloads[ $runtime_src ] = AMP_DOM_Utils::create_node( $dom, 'link', array(
+				'rel'  => 'preload',
+				'as'   => 'script',
+				'href' => $runtime_src,
+			) );
+		}
+
+		/*
+		 * "Specify the <script> tags for render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, and amp-story)."
+		 * "Specify the <script> tags for remaining extensions (e.g., amp-bind, ...). These extensions are not render-delaying and therefore
+		 *  should not be preloaded because they might take away important bandwidth for the initial render."
+		 * https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#
+		 */
+		$render_delaying_extensions    = array( 'amp-experiment', 'amp-dynamic-css-classes', 'amp-story' ); // See <https://github.com/ampproject/amphtml/blob/2fd30ca984bceac05905bd5b17f9e0010629d719/src/render-delaying-services.js#L39-L43>.
+		$priority_order_script_handles = array_unique( array_merge(
+			array_intersect( $render_delaying_extensions, $script_handles ),
+			$script_handles
+		) );
+		foreach ( $priority_order_script_handles as $script_handle ) {
+			if ( ! wp_script_is( $script_handle, 'registered' ) ) {
+				continue;
+			}
+			$src = wp_scripts()->registered[ $script_handle ]->src;
+			if ( isset( $links['preload'][ $src ] ) ) {
+				$prioritized_preloads[ $src ] = $links['preload'][ $src ];
+			} else {
+				$prioritized_preloads[ $src ] = AMP_DOM_Utils::create_node( $dom, 'link', array(
+					'rel'  => 'preload',
+					'as'   => 'script',
+					'href' => $src,
+				) );
+			}
+		}
+		$links['preload'] = array_merge( $prioritized_preloads, $links['preload'] );
+
+		// Make sure resource hints and preload links are put at the top of the head.
+		$resource_hint_rels = array( 'preconnect', 'dns-prefetch', 'preload', 'prerender', 'prefetch' );
+		foreach ( $resource_hint_rels as $rel ) {
+			if ( ! isset( $links[ $rel ] ) ) {
+				continue;
+			}
+			foreach ( array_reverse( $links[ $rel ] ) as $link ) {
+				$head->insertBefore( $link, $meta_viewport->nextSibling );
+			}
 		}
 	}
 
@@ -1703,7 +1768,18 @@ class AMP_Theme_Support {
 		}
 
 		$dom_serialize_start = microtime( true );
-		self::ensure_required_markup( $dom );
+
+		// Gather the all component scripts that are used in the document, and render any not already printed.
+		$amp_scripts = $assets['scripts'];
+		foreach ( self::$embed_handlers as $embed_handler ) {
+			$amp_scripts = array_merge(
+				$amp_scripts,
+				$embed_handler->get_scripts()
+			);
+		}
+		$script_tags = amp_render_scripts( $amp_scripts );
+
+		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
 		if ( ! AMP_Validation_Manager::should_validate_response() && $blocking_error_count > 0 && ! self::is_customize_preview_iframe() ) {
 
@@ -1752,16 +1828,7 @@ class AMP_Theme_Support {
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
-		$amp_scripts = $assets['scripts'];
-		foreach ( self::$embed_handlers as $embed_handler ) {
-			$amp_scripts = array_merge(
-				$amp_scripts,
-				$embed_handler->get_scripts()
-			);
-		}
-
 		// Inject additional AMP component scripts which have been discovered by the sanitizers into the head.
-		$script_tags = amp_render_scripts( $amp_scripts );
 		if ( ! empty( $script_tags ) ) {
 			$response = preg_replace(
 				'#(?=</head>)#',
