@@ -7,10 +7,7 @@ const { Fragment } = wp.element;
 const { withSelect, withDispatch } = wp.data;
 const { PluginPostStatusInfo } = wp.editPost;
 const { compose, withInstanceId } = wp.compose;
-
-// @todo: export these values
-const possibleStati = [ 'enabled', 'disabled' ];
-const defaultStatus = 'enabled';
+const { possibleStati, defaultStatus } = window.wpAmpEditor;
 
 /**
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.

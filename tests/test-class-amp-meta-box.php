@@ -105,6 +105,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
 		$this->assertEquals( AMP__VERSION, $block_script->ver );
+		$this->assertContains( 'wpAmpEditor', $block_script->extra['data'] );
+		$this->assertContains( AMP_Post_Meta_Box::ENABLED_STATUS, $block_script->extra['data'] );
 	}
 
 	/**

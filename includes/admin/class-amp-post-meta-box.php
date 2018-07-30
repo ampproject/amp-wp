@@ -193,6 +193,19 @@ class AMP_Post_Meta_Box {
 			AMP__VERSION,
 			true
 		);
+
+		$status_and_errors = $this->get_status_and_errors( $post );
+		$enabled_status    = $status_and_errors['status'];
+		wp_localize_script(
+			self::BLOCK_ASSET_HANDLE,
+			'wpAmpEditor',
+			array(
+				'i18n'          => gutenberg_get_jed_locale_data( 'amp' ), // @todo create a POT file.
+				'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
+				'defaultStatus' => $enabled_status,
+			)
+		);
+
 	}
 
 	/**
