@@ -2,12 +2,12 @@
  * WordPress dependencies
  */
 const { __ } = wp.i18n;
-const { FormToggle } = wp.components;
+const { FormToggle, Notice } = wp.components;
 const { Fragment } = wp.element;
 const { withSelect, withDispatch } = wp.data;
 const { PluginPostStatusInfo } = wp.editPost;
 const { compose, withInstanceId } = wp.compose;
-const { possibleStati, defaultStatus } = window.wpAmpEditor;
+const { possibleStati, defaultStatus, errorMessages } = window.wpAmpEditor;
 
 /**
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
@@ -18,12 +18,28 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 	return (
 		<Fragment>
 			<PluginPostStatusInfo>
-				{ __( 'Enable AMP', 'amp' ) }
-				<FormToggle
-					checked={ 'enabled' === enabledStatus }
-					onChange={ () => onAmpChange( enabledStatus ) }
-					id={ 'amp-enabled' }
-				/>
+				{ ! errorMessages.length && __( 'Enable AMP', 'amp' ) }
+				{
+					! errorMessages.length &&
+					(
+						<FormToggle
+							checked={ 'enabled' === enabledStatus }
+							onChange={ () => onAmpChange( enabledStatus ) }
+							id={ 'amp-enabled' }
+						/>
+					)
+				}
+				{
+					!! errorMessages.length &&
+					(
+						<Notice
+							status={ 'warning' }
+							isDismissible={ false }
+						>
+							{ errorMessages.join( ' ' ) }
+						</Notice>
+					)
+				}
 			</PluginPostStatusInfo>
 		</Fragment>
 	);

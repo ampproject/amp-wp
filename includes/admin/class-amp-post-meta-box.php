@@ -196,6 +196,8 @@ class AMP_Post_Meta_Box {
 
 		$status_and_errors = $this->get_status_and_errors( $post );
 		$enabled_status    = $status_and_errors['status'];
+		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
+
 		wp_localize_script(
 			self::BLOCK_ASSET_HANDLE,
 			'wpAmpEditor',
@@ -203,6 +205,7 @@ class AMP_Post_Meta_Box {
 				'i18n'          => gutenberg_get_jed_locale_data( 'amp' ), // @todo create a POT file.
 				'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
 				'defaultStatus' => $enabled_status,
+				'errorMessages' => $error_messages,
 			)
 		);
 
@@ -230,6 +233,7 @@ class AMP_Post_Meta_Box {
 		$status_and_errors = $this->get_status_and_errors( $post );
 		$status            = $status_and_errors['status'];
 		$errors            = $status_and_errors['errors'];
+		$error_messages    = $this->get_error_messages( $status, $errors );
 
 		$labels = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
@@ -272,6 +276,50 @@ class AMP_Post_Meta_Box {
 		}
 
 		return compact( 'status', 'errors' );
+	}
+
+	/**
+	 * Gets the AMP enabled error message(s).
+	 *
+	 * AMP can be disabled for several reasons,
+	 * like if the user disables it in Supported Templates > Content Types.
+	 * Then, it would not make sense to allow the user to enable AMP in the post editor,
+	 * as it's already disabled.
+	 * So this gets the message(s) that should display.
+	 *
+	 * @since 1.0
+	 * @param string $status The AMP enabled status.
+	 * @param array  $errors The AMP enabled errors.
+	 * @return array $error_messages The error message(s), as an array of strings.
+	 */
+	public function get_error_messages( $status, $errors ) {
+		$error_messages = array();
+		if ( in_array( 'status_immutable', $errors, true ) ) {
+			if ( self::ENABLED_STATUS === $status ) {
+				$error_messages[] = __( 'Your site does not allow AMP to be disabled.', 'amp' );
+			} else {
+				$error_messages[] = __( 'Your site does not allow AMP to be enabled.', 'amp' );
+			}
+		}
+		if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
+			/* translators: %s is URL to AMP settings screen */
+			$error_messages[] = wp_kses_post( sprintf( __( 'There are no <a href="%s">supported templates</a> to display this in AMP.', 'amp' ), esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) ) );
+		}
+		if ( in_array( 'password-protected', $errors, true ) ) {
+			$error_messages[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
+		}
+		if ( in_array( 'post-type-support', $errors, true ) ) {
+			/* translators: %s is URL to AMP settings screen */
+			$error_messages[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) ) );
+		}
+		if ( in_array( 'skip-post', $errors, true ) ) {
+			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
+		}
+		if ( count( array_diff( $errors, array( 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ) ) ) > 0 ) {
+			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
+		}
+
+		return $error_messages;
 	}
 
 	/**

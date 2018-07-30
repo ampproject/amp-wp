@@ -217,6 +217,53 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_error_messages.
+	 *
+	 * @see AMP_Settings::get_error_messages()
+	 */
+	public function test_get_error_messages() {
+		$this->assertEquals(
+			array( 'Your site does not allow AMP to be disabled.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, array( 'status_immutable' ) )
+		);
+
+		$this->assertEquals(
+			array( 'Your site does not allow AMP to be enabled.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'status_immutable' ) )
+		);
+
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
+		$this->assertContains(
+			'There are no <a href=',
+			$messages[0]
+		);
+
+		$this->assertEquals(
+			array( 'AMP cannot be enabled on password protected posts.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'password-protected' ) )
+		);
+
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
+		$this->assertContains(
+			'AMP cannot be enabled because this <a href="',
+			$messages[0]
+		);
+
+		$this->assertEquals(
+			array(
+				'A plugin or theme has disabled AMP support.',
+				'Unavailable for an unknown reason.',
+			),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) )
+		);
+
+		$this->assertEquals(
+			array( 'Unavailable for an unknown reason.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) )
+		);
+	}
+
+	/**
 	 * Test save_amp_status.
 	 *
 	 * @see AMP_Settings::save_amp_status()
