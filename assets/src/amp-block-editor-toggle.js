@@ -16,9 +16,9 @@ const { possibleStati, defaultStatus, errorMessages } = window.wpAmpEditor;
 /**
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
  *
- * If there are errors that block AMP from being enabled or disabled,
- * this only display a Notice with the error, not a toggle.
- * These errors are imported as errorMessages via wp_localize_script().
+ * If there are error(s) that block AMP from being enabled or disabled,
+ * this only display a Notice with the error(s), not a toggle.
+ * Error(s) are imported as errorMessages via wp_localize_script().
  *
  * @return {Object} AMPToggle component.
  */
@@ -84,7 +84,7 @@ function ComposedAMPToggle() {
 			 * Gets the AMP enabled status.
 			 *
 			 * Uses select from the enclosing function to get the meta value.
-			 * If it doesn't exist, uses the default value.
+			 * If it doesn't exist, it uses the default value.
 			 * This applies especially for a new post, where there probably won't be a meta value yet.
 			 *
 			 * @return {string} Enabled status, either 'enabled' or 'disabled'.
