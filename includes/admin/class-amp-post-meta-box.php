@@ -196,7 +196,7 @@ class AMP_Post_Meta_Box {
 
 		$status_and_errors = $this->get_status_and_errors( $post );
 		$enabled_status    = $status_and_errors['status'];
-		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
+		$error_messages    = $this->get_raw_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
 
 		wp_localize_script(
 			self::BLOCK_ASSET_HANDLE,
@@ -230,10 +230,11 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$status_and_errors = $this->get_status_and_errors( $post );
-		$status            = $status_and_errors['status'];
-		$errors            = $status_and_errors['errors'];
-		$error_messages    = $this->get_error_messages( $status, $errors );
+		$status_and_errors  = $this->get_status_and_errors( $post );
+		$status             = $status_and_errors['status'];
+		$errors             = $status_and_errors['errors'];
+		$raw_error_messages = $this->get_raw_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
+		$error_messages     = $this->get_classic_editor_error_messages( $raw_error_messages );
 
 		$labels = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
@@ -279,20 +280,22 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
-	 * Gets the AMP enabled error message(s).
+	 * Gets the raw AMP enabled error message(s).
 	 *
-	 * AMP can be disabled for several reasons,
-	 * like if the user disables it in Supported Templates > Content Types.
-	 * Then, it would not make sense to allow the user to enable AMP in the post editor,
-	 * as it's already disabled.
-	 * So this gets the message(s) that should display.
+	 * When there is an <a> in the message, this does not use sprintf() yet to create a single string message.
+	 * This is because the block editor toggle script has to construct this message with JS,
+	 * and it needs the text of the message to be separate from the URL.
+	 * So when there is an <a>, this adds a %s for the beginning and a %s for the end.
+	 * For example, 'There are no <a href="">supported templates</a> to display this in AMP.'
+	 * Is outputs as: 'There are no %ssupported templates%s to display this in AMP.'
+	 * That string is in the 0 index of the array(), and the href is in the 1 index.
 	 *
 	 * @since 1.0
 	 * @param string $status The AMP enabled status.
 	 * @param array  $errors The AMP enabled errors.
-	 * @return array $error_messages The error message(s), as an array of strings.
+	 * @return array $error_messages The error message(s), each message being either a string or an array of strings.
 	 */
-	public function get_error_messages( $status, $errors ) {
+	public function get_raw_error_messages( $status, $errors ) {
 		$error_messages = array();
 		if ( in_array( 'status_immutable', $errors, true ) ) {
 			if ( self::ENABLED_STATUS === $status ) {
@@ -302,15 +305,21 @@ class AMP_Post_Meta_Box {
 			}
 		}
 		if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
-			/* translators: %s is URL to AMP settings screen */
-			$error_messages[] = wp_kses_post( sprintf( __( 'There are no <a href="%s">supported templates</a> to display this in AMP.', 'amp' ), esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) ) );
+			$error_messages[] = array(
+				/* translators: %s is opening <a> for AMP settings screen, %s is closing </a> */
+				__( 'There are no %ssupported templates%s to display this in AMP.', 'amp' ), // phpcs:ignore WordPress.WP.I18n.UnorderedPlaceholdersText, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ),
+			);
 		}
 		if ( in_array( 'password-protected', $errors, true ) ) {
 			$error_messages[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
 		}
 		if ( in_array( 'post-type-support', $errors, true ) ) {
-			/* translators: %s is URL to AMP settings screen */
-			$error_messages[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ) ) );
+			$error_messages[] = array(
+				/* translators: %s is opening <a> for AMP settings screen, %s is closing </a> */
+				__( 'AMP cannot be enabled because this %spost type does not support it%s.', 'amp' ), // phpcs:ignore WordPress.WP.I18n.UnorderedPlaceholdersText, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) ),
+			);
 		}
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
@@ -320,6 +329,46 @@ class AMP_Post_Meta_Box {
 		}
 
 		return $error_messages;
+	}
+
+	/**
+	 * Gets the AMP enabled error message(s) for the Classic Editor.
+	 *
+	 * AMP can be disabled for several reasons,
+	 * like if the user disables it in Supported Templates > Content Types.
+	 * Then, it would not make sense to allow the user to enable AMP in the post editor,
+	 * as it's already disabled.
+	 * So this gets the message(s) that should display.
+	 *
+	 * @param array $raw_error_messages The raw error messages, possibly with URLs.
+	 * @return array $error_messages The error message(s), as an array of strings.
+	 */
+	public function get_classic_editor_error_messages( $raw_error_messages ) {
+		$processed_error_messages = array();
+		foreach ( $raw_error_messages as $raw_message ) {
+			if ( is_array( $raw_message ) && isset( $raw_message[0], $raw_message[1] ) ) {
+				/**
+				 * Processes the error message(s), using sprintf() to create <a> elements.
+				 * $raw_message[0] should have two %s, like 'AMP cannot be enabled because this %spost type does not support it%s'.
+				 * And $raw_message[1] should have the href.
+				 * This happens at this stage so the block editor can also use get_raw_error_messages().
+				 * It has to produce the <a> elements with JS, so it can't receive a single string with the <a> included.
+				 */
+				$processed_error_messages[] = wp_kses_post( sprintf(
+					$raw_message[0],
+					sprintf(
+						'<a href="%s">',
+						$raw_message[1]
+					),
+					'</a>'
+				) );
+			} elseif ( is_string( $raw_message ) ) {
+				// The message is only a string without an <a>, so simply add it to the processed error messages.
+				$processed_error_messages[] = $raw_message;
+			}
+		}
+
+		return $processed_error_messages;
 	}
 
 	/**

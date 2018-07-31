@@ -217,49 +217,100 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_error_messages.
+	 * Test get_raw_error_messages.
 	 *
-	 * @see AMP_Settings::get_error_messages()
+	 * @see AMP_Settings::get_raw_error_messages()
 	 */
-	public function test_get_error_messages() {
+	public function test_get_raw_error_messages() {
 		$this->assertEquals(
 			array( 'Your site does not allow AMP to be disabled.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, array( 'status_immutable' ) )
+			$this->instance->get_raw_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, array( 'status_immutable' ) )
 		);
 
 		$this->assertEquals(
 			array( 'Your site does not allow AMP to be enabled.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'status_immutable' ) )
+			$this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'status_immutable' ) )
 		);
 
-		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
-		$this->assertContains(
-			'There are no <a href=',
-			$messages[0]
-		);
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
+		$this->assertEquals( 'There are no %ssupported templates%s to display this in AMP.', $raw_messages[0][0] );
+		$this->assertContains( 'page=amp-options', $raw_messages[0][1] );
 
 		$this->assertEquals(
 			array( 'AMP cannot be enabled on password protected posts.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'password-protected' ) )
+			$this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'password-protected' ) )
 		);
 
-		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
-		$this->assertContains(
-			'AMP cannot be enabled because this <a href="',
-			$messages[0]
-		);
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
+		$this->assertEquals( 'AMP cannot be enabled because this %spost type does not support it%s.', $raw_messages[0][0] );
 
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) );
 		$this->assertEquals(
 			array(
 				'A plugin or theme has disabled AMP support.',
 				'Unavailable for an unknown reason.',
 			),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) )
+			$raw_messages
 		);
 
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) );
 		$this->assertEquals(
 			array( 'Unavailable for an unknown reason.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) )
+			$raw_messages
+		);
+	}
+
+	/**
+	 * Test get_classic_editor_error_messages.
+	 *
+	 * @see AMP_Settings::get_classic_editor_error_messages()
+	 */
+	public function test_get_classic_editor_error_messages() {
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, array( 'status_immutable' ) );
+		$this->assertEquals(
+			array( 'Your site does not allow AMP to be disabled.' ),
+			$this->instance->get_classic_editor_error_messages( $raw_messages )
+		);
+
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'status_immutable' ) );
+		$this->assertEquals(
+			array( 'Your site does not allow AMP to be enabled.' ),
+			$this->instance->get_classic_editor_error_messages( $raw_messages )
+		);
+
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
+		$messages     = $this->instance->get_classic_editor_error_messages( $raw_messages );
+		$this->assertContains(
+			'There are no <a href=',
+			$messages[0]
+		);
+
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'password-protected' ) );
+		$this->assertEquals(
+			array( 'AMP cannot be enabled on password protected posts.' ),
+			$this->instance->get_classic_editor_error_messages( $raw_messages )
+		);
+
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
+		$messages     = $this->instance->get_classic_editor_error_messages( $raw_messages );
+		$this->assertContains(
+			'AMP cannot be enabled because this <a href="',
+			$messages[0]
+		);
+
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) );
+		$this->assertEquals(
+			array(
+				'A plugin or theme has disabled AMP support.',
+				'Unavailable for an unknown reason.',
+			),
+			$this->instance->get_classic_editor_error_messages( $raw_messages )
+		);
+
+		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) );
+		$this->assertEquals(
+			array( 'Unavailable for an unknown reason.' ),
+			$this->instance->get_classic_editor_error_messages( $raw_messages )
 		);
 	}
 

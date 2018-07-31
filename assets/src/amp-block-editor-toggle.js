@@ -7,6 +7,10 @@ const { Fragment } = wp.element;
 const { withSelect, withDispatch } = wp.data;
 const { PluginPostStatusInfo } = wp.editPost;
 const { compose, withInstanceId } = wp.compose;
+
+/**
+ * Exported via wp_localize_script().
+ */
 const { possibleStati, defaultStatus, errorMessages } = window.wpAmpEditor;
 
 /**
@@ -36,7 +40,17 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 							status={ 'warning' }
 							isDismissible={ false }
 						>
-							{ errorMessages.join( ' ' ) }
+							{
+								errorMessages.map( function( message ) {
+									if ( 'string' === typeof message ) {
+										return message;
+									}
+									if ( message[ 0 ].split( '%s' ).length > 1 ) {
+										let splitMessage = message[ 0 ].split( '%s' );
+										return ( <p>{ splitMessage[ 0 ] }<a href={ message[ 1 ] }>{ splitMessage[ 1 ] }</a>{ splitMessage[ 2 ] }</p> );
+									}
+								} )
+							}
 						</Notice>
 					)
 				}
