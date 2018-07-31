@@ -197,16 +197,20 @@ class AMP_Post_Meta_Box {
 		$status_and_errors = $this->get_status_and_errors( $post );
 		$enabled_status    = $status_and_errors['status'];
 		$error_messages    = $this->get_raw_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
+		$localization      = array(
+			'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
+			'defaultStatus' => $enabled_status,
+			'errorMessages' => $error_messages,
+		);
+
+		if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$localization['i18n'] = gutenberg_get_jed_locale_data( 'amp' ); // @todo create a POT file.
+		}
 
 		wp_localize_script(
 			self::BLOCK_ASSET_HANDLE,
 			'wpAmpEditor',
-			array(
-				'i18n'          => gutenberg_get_jed_locale_data( 'amp' ), // @todo create a POT file.
-				'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
-				'defaultStatus' => $enabled_status,
-				'errorMessages' => $error_messages,
-			)
+			$localization
 		);
 
 	}
@@ -230,11 +234,10 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$status_and_errors  = $this->get_status_and_errors( $post );
-		$status             = $status_and_errors['status'];
-		$errors             = $status_and_errors['errors'];
-		$raw_error_messages = $this->get_raw_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
-		$error_messages     = $this->get_classic_editor_error_messages( $raw_error_messages );
+		$status_and_errors = $this->get_status_and_errors( $post );
+		$status            = $status_and_errors['status'];
+		$errors            = $status_and_errors['errors'];
+		$error_messages    = $this->get_classic_editor_error_messages( $this->get_raw_error_messages( $status, $errors ) );
 
 		$labels = array(
 			'enabled'  => __( 'Enabled', 'amp' ),
@@ -285,9 +288,9 @@ class AMP_Post_Meta_Box {
 	 * When there is an <a> in the message, this does not use sprintf() yet to create a single string message.
 	 * This is because the block editor toggle script has to construct this message with JS,
 	 * and it needs the text of the message to be separate from the URL.
-	 * So when there is an <a>, this adds a %s for the beginning and a %s for the end.
+	 * So when there is an <a>, this adds a %s for the opening <a> and a %s for the closing </a>.
 	 * For example, 'There are no <a href="">supported templates</a> to display this in AMP.'
-	 * Is outputs as: 'There are no %ssupported templates%s to display this in AMP.'
+	 * is outputs as: 'There are no %ssupported templates%s to display this in AMP.'
 	 * That string is in the 0 index of the array(), and the href is in the 1 index.
 	 *
 	 * @since 1.0
