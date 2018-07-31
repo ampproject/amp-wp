@@ -1186,9 +1186,34 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				preg_replace( '#^(http:)?(?=//)#', 'https:', $url ),
 				$link->getAttribute( 'href' )
 			);
+			$this->assertEquals( 'anonymous', $link->getAttribute( 'crossorigin' ) );
 		} else {
 			$this->assertEmpty( $link );
 		}
+	}
+
+	/**
+	 * Test addition of crossorigin attribute to external stylesheet links.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 */
+	public function test_cors_enabled_stylesheet_url() {
+
+		// Test supplying crossorigin attribute.
+		$document  = AMP_DOM_Utils::get_dom( '<html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"></head></html>' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$sanitizer = new AMP_Style_Sanitizer( $document, array( 'use_document_element' => true ) );
+		$sanitizer->sanitize();
+		$link = $document->getElementsByTagName( 'link' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $link );
+		$this->assertEquals( 'anonymous', $link->getAttribute( 'crossorigin' ) );
+
+		// Test that existing crossorigin attribute is not overridden.
+		$document  = AMP_DOM_Utils::get_dom( '<html><head><link rel="stylesheet" crossorigin="use-credentials" href="https://fonts.googleapis.com/css?family=Tangerine"></head></html>' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$sanitizer = new AMP_Style_Sanitizer( $document, array( 'use_document_element' => true ) );
+		$sanitizer->sanitize();
+		$link = $document->getElementsByTagName( 'link' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $link );
+		$this->assertEquals( 'use-credentials', $link->getAttribute( 'crossorigin' ) );
 	}
 
 	/**
