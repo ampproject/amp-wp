@@ -17,7 +17,7 @@ const { possibleStati, defaultStatus, errorMessages } = window.wpAmpEditor;
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
  *
  * If there are error(s) that block AMP from being enabled or disabled,
- * this only display a Notice with the error(s), not a toggle.
+ * this only displays a Notice with the error(s), not a toggle.
  * Error(s) are imported as errorMessages via wp_localize_script().
  *
  * @return {Object} AMPToggle component.

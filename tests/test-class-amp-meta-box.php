@@ -253,10 +253,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			$raw_messages
 		);
 
-		$raw_messages = $this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) );
 		$this->assertEquals(
 			array( 'Unavailable for an unknown reason.' ),
-			$raw_messages
+			$this->instance->get_raw_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) )
 		);
 	}
 
