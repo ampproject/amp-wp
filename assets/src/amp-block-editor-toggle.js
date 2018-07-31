@@ -16,6 +16,10 @@ const { possibleStati, defaultStatus, errorMessages } = window.wpAmpEditor;
 /**
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
  *
+ * If there are errors that block AMP from being enabled or disabled,
+ * this only display a Notice with the error, not a toggle.
+ * These errors are imported as errorMessages via wp_localize_script().
+ *
  * @return {Object} AMPToggle component.
  */
 function AMPToggle( { enabledStatus, onAmpChange } ) {
@@ -42,10 +46,19 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 						>
 							{
 								errorMessages.map( function( message ) {
+									let minSplitLength = 2;
+
 									if ( 'string' === typeof message ) {
+										// The message is only a string, so return it.
 										return message;
 									}
-									if ( message[ 0 ].split( '%s' ).length > 1 ) {
+									if ( message[ 0 ].split( '%s' ).length > minSplitLength ) {
+										/**
+										 * The message is an array with the text in the 0 index, and the href in the 1 index.
+										 * And the text should have two %s as placeholders for <a>, like 'AMP cannot be enabled because this %spost type does not support it%s.'.
+										 * So split it along %s, to construct the message with the <a>, like:
+										 * 'AMP cannot be enabled because this <a href="foo">post type does not support it</a>.'.
+										 */
 										let splitMessage = message[ 0 ].split( '%s' );
 										return ( <p>{ splitMessage[ 0 ] }<a href={ message[ 1 ] }>{ splitMessage[ 1 ] }</a>{ splitMessage[ 2 ] }</p> );
 									}
@@ -70,7 +83,7 @@ function ComposedAMPToggle() {
 			/**
 			 * Gets the AMP enabled status.
 			 *
-			 * Uses the select object from the enclosing function to get the meta value.
+			 * Uses select from the enclosing function to get the meta value.
 			 * If it doesn't exist, uses the default value.
 			 * This applies especially for a new post, where there probably won't be a meta value yet.
 			 *
