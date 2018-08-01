@@ -3,7 +3,7 @@
  */
 const { __ } = wp.i18n;
 const { FormToggle, Notice } = wp.components;
-const { Fragment } = wp.element;
+const { Fragment, RawHTML } = wp.element;
 const { withSelect, withDispatch } = wp.data;
 const { PluginPostStatusInfo } = wp.editPost;
 const { compose, withInstanceId } = wp.compose;
@@ -45,23 +45,8 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 							isDismissible={ false }
 						>
 							{
-								errorMessages.map( function( message ) {
-									let minSplitLength = 2;
-
-									if ( 'string' === typeof message ) {
-										// The message is only a string, so return it.
-										return message;
-									}
-									if ( message[ 0 ].split( '%s' ).length > minSplitLength ) {
-										/**
-										 * The message is an array with the text in the 0 index, and the href in the 1 index.
-										 * And the text should have two %s as placeholders for <a>, like 'AMP cannot be enabled because this %spost type does not support it%s.'.
-										 * So split it along %s, to construct the message with the <a>, like:
-										 * 'AMP cannot be enabled because this <a href="foo">post type does not support it</a>.'.
-										 */
-										let splitMessage = message[ 0 ].split( '%s' );
-										return ( <p>{ splitMessage[ 0 ] }<a href={ message[ 1 ] }>{ splitMessage[ 1 ] }</a>{ splitMessage[ 2 ] }</p> );
-									}
+								errorMessages.map( function( message, index ) {
+									return ( <RawHTML key={ index }>{ message }</RawHTML> );
 								} )
 							}
 						</Notice>
