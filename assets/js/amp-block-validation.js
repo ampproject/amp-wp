@@ -30,8 +30,14 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		storeName: 'amp/blockValidation',
 
+        /**
+		 * Holds the last states which are used for comparisons.
+		 *
+		 * @param {Object}
+         */
         lastStates: {
-            validationErrors: []
+            validationErrors: [],
+            blockOrder: []
         },
 
 		/**
@@ -238,11 +244,32 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
          * @returns {boolean|*} Returns true when the validation errors change.
          */
         didValidationErrorsChange: function didValidationErrorsChange( validationErrors ) {
+            if ( module.areBlocksOutOfSync() ) {
+                module.lastStates.validationErrors = [];
+			}
+
             return (
                 module.lastStates.validationErrors.length !== validationErrors.length
                 ||
                 ( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
             );
+        },
+
+        /**
+         * Checks if the block order is out of sync.
+         *
+         * Block uids change on page load and can get out of sync during normal editing and saving processes.  This method gives a check to determine if an "out of sync" condition occurred.
+         *
+         * @returns {boolean}
+         */
+        areBlocksOutOfSync: function areBlocksOutOfSync() {
+            var blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
+            if ( module.lastStates.blockOrder.length !== blockOrder.length || ! _.isEqual( module.lastStates.blockOrder, blockOrder ) ) {
+                module.lastStates.blockOrder = blockOrder;
+                return true;
+            }
+
+            return false;
         },
 
 		/**
