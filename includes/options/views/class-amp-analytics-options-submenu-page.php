@@ -93,14 +93,17 @@ class AMP_Analytics_Options_Submenu_Page {
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php settings_errors(); ?>
+			<p>
+				<?php echo wp_kses_post( __( 'Please see <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank">Adding Analytics to your AMP pages</a> for information on the required JSON configuration format. See also the <a href="https://github.com/Automattic/amp-wp/wiki/Analytics" target="_blank">Analytics wiki page</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a &#8220;{&#8221; and end with a &#8220;}&#8221;. Do not include any HTML tags like &#8220;<code>&lt;amp-analytics&gt;</code>&#8221; or &#8220;<code>&lt;script&gt;</code>&#8221;.', 'amp' ) ); ?>
+			</p>
 		</div><!-- .wrap -->
 		<?php
 	}
 
 	/**
-	 * Render.
+	 * Render styles.
 	 */
-	public function render() {
+	protected function render_styles() {
 		?>
 		<style>
 			.amp-analytics-input {
@@ -111,25 +114,12 @@ class AMP_Analytics_Options_Submenu_Page {
 			}
 		</style>
 		<?php
+	}
 
-		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
-
-		$this->render_title();
-
-		?>
-		<p>
-			<?php echo wp_kses_post( __( 'Please see <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank">Adding Analytics to your AMP pages</a> for information on the required JSON configuration format. See also the <a href="https://github.com/Automattic/amp-wp/wiki/Analytics" target="_blank">Analytics wiki page</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a &#8220;{&#8221; and end with a &#8220;}&#8221;. Do not include any HTML tags like &#8220;<code>&lt;amp-analytics&gt;</code>&#8221; or &#8220;<code>&lt;script&gt;</code>&#8221;.', 'amp' ) ); ?>
-		</p>
-		<?php
-
-		// Render entries stored in the DB.
-		foreach ( $analytics_entries as $entry_id => $entry ) {
-			$this->render_entry( $entry_id, $entry['type'], $entry['config'] );
-		}
-
-		// Empty form for adding more entries.
-		$this->render_entry();
-
+	/**
+	 * Render scripts.
+	 */
+	protected function render_scripts() {
 		?>
 		<script>
 			Array.prototype.forEach.call( document.querySelectorAll( '.amp-analytics-input' ), function( textarea ) {
@@ -152,5 +142,26 @@ class AMP_Analytics_Options_Submenu_Page {
 			} );
 		</script>
 		<?php
+	}
+
+	/**
+	 * Render.
+	 */
+	public function render() {
+		$this->render_styles();
+
+		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
+
+		$this->render_title();
+
+		// Render entries stored in the DB.
+		foreach ( $analytics_entries as $entry_id => $entry ) {
+			$this->render_entry( $entry_id, $entry['type'], $entry['config'] );
+		}
+
+		// Empty form for adding more entries.
+		$this->render_entry();
+
+		$this->render_scripts();
 	}
 }
