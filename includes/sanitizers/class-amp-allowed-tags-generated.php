@@ -2519,7 +2519,7 @@ class AMP_Allowed_Tags_Generated {
 					'noloading' => array(
 						'value' => '',
 					),
-					'target' => array(),
+					'target-id' => array(),
 					'viewport-margins' => array(
 						'value_regex' => '^(\\d+$|\\d+px$|\\d+vh$)|((\\d+|\\d+px|\\d+vh)\\s{1}(\\d+$|\\d+px$|\\d+vh$))',
 					),
