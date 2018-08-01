@@ -149,6 +149,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			if ( ! module.isAMPEnabled() ) {
 				if ( ! module.lastStates.noticesAreReset ) {
+					module.lastStates.validationErrors = [];
 					module.lastStates.noticesAreReset = true;
 					module.resetWarningNotice();
 					module.resetBlockNotices();
