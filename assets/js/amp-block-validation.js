@@ -44,7 +44,8 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			wp.hooks.addFilter(
 				'editor.BlockEdit',
 				'amp/add-notice',
-				module.conditionallyAddNotice
+				module.conditionallyAddNotice,
+				99
 			);
 
 			module.store = module.registerStore();
@@ -89,6 +90,29 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			} );
 		},
 
+        /**
+		 * Checks if the validate errors state change handler should wait before processing.
+		 *
+         * @returns {boolean}
+         */
+        waitToHandleStateChange: function waitToHandleStateChange() {
+            var currentPost;
+
+            // @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
+            // We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
+            if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || wp.data.select( 'core/editor' ).isCleanNewPost() ) {
+                return true;
+            }
+
+            // Wait for the current post to be set up.
+            currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+            if ( ! currentPost.hasOwnProperty( 'id' ) ) {
+                return true;
+            }
+
+            return false;
+        },
+
 		/**
 		 * Handle state change regarding validation errors.
 		 *
@@ -99,19 +123,12 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
 			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity, hasActuallyUnacceptedError;
 
-			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
-			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
-			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() ) {
-				return;
-			}
-
-            // Wait for the current post to be set up.
-            currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-            if ( ! currentPost.hasOwnProperty( 'id' ) ) {
+            if ( module.waitToHandleStateChange() ) {
                 return;
             }
 
 			hasActuallyUnacceptedError = false;
+            currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
 			validationErrors = _.map(
 				_.filter( ampValidity.results, function( result ) {
