@@ -105,8 +105,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				return;
 			}
 
+            // Wait for the current post to be set up.
+            currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+            if ( ! currentPost.hasOwnProperty( 'id' ) ) {
+                return;
+            }
+
 			hasActuallyUnacceptedError = false;
-			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
 			validationErrors = _.map(
 				_.filter( ampValidity.results, function( result ) {
