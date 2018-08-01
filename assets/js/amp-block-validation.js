@@ -167,12 +167,6 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			// Remove any existing notice.
 			module.resetWarningNotice();
 
-			// If there are no validation errors then just make sure the validation notices are cleared from the blocks.
-			if ( ! validationErrors.length ) {
-				module.resetBlockNotices();
-				return;
-			}
-
 			noticeMessage = wp.i18n.sprintf(
 				wp.i18n._n(
 					'There is %s issue from AMP validation.',
