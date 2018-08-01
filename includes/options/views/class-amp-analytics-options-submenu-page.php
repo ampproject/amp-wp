@@ -46,7 +46,7 @@ class AMP_Analytics_Options_Submenu_Page {
 					<p>
 						<label>
 							<?php esc_html_e( 'Type:', 'amp' ); ?>
-							<input class="option-input" type="text" name="<?php echo esc_attr( $id_base . '[type]' ); ?>" value="<?php echo esc_attr( $type ); ?>" />
+							<input class="option-input" type="text" name="<?php echo esc_attr( $id_base . '[type]' ); ?>" placeholder="<?php echo esc_attr_e( 'e.g. googleanalytics', 'amp' ); ?>" value="<?php echo esc_attr( $type ); ?>" />
 						</label>
 						<label>
 							<?php esc_html_e( 'ID:', 'amp' ); ?>
@@ -94,7 +94,7 @@ class AMP_Analytics_Options_Submenu_Page {
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php settings_errors(); ?>
 			<p>
-				<?php echo wp_kses_post( __( 'Please see <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank">Adding Analytics to your AMP pages</a> for information on the required JSON configuration format. See also the <a href="https://github.com/Automattic/amp-wp/wiki/Analytics" target="_blank">Analytics wiki page</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a &#8220;{&#8221; and end with a &#8220;}&#8221;. Do not include any HTML tags like &#8220;<code>&lt;amp-analytics&gt;</code>&#8221; or &#8220;<code>&lt;script&gt;</code>&#8221;. A common configuration will look like the following, where <code>UA-XXXXX-Y</code> is replaced with your own site\'s account number:', 'amp' ) ); ?>
+				<?php echo wp_kses_post( __( 'For Google Analytics, please see <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank">Adding Analytics to your AMP pages</a>; see also the <a href="https://github.com/Automattic/amp-wp/wiki/Analytics" target="_blank">Analytics wiki page</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a &#8220;{&#8221; and end with a &#8220;}&#8221;. Do not include any HTML tags like &#8220;<code>&lt;amp-analytics&gt;</code>&#8221; or &#8220;<code>&lt;script&gt;</code>&#8221;. A common entry would have the type &#8220;<code>googleanalytics</code>&#8221; and a configuration that looks like the following (where <code>UA-XXXXX-Y</code> is replaced with your own site\'s account number):', 'amp' ) ); ?>
 
 				<pre>{
 	"vars": {
