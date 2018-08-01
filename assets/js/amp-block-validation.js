@@ -205,7 +205,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} catch ( e ) {
 				// Clear out block validation errors in case the block sand errors cannot be aligned.
-				module.resetBLockNotices();
+				module.resetBlockNotices();
 
 				noticeMessage += ' ' + wp.i18n._n(
 					'It may not be due to content here.',
