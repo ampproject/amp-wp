@@ -64,7 +64,7 @@ class AMP_Analytics_Options_Submenu_Page {
 								name="<?php echo esc_attr( $id_base . '[config]' ); ?>"
 								class="amp-analytics-input"
 								placeholder="{...}"
-								title="<?php esc_attr_e( 'A JSON object begins with a "{" and ends with a "}". Do not include any HTML tags like "<amp-analytics>" or "<script>".', 'amp' ); ?>"
+								title="<?php esc_attr_e( 'A JSON object begins with a &#8220;{&#8221; and ends with a &#8220;}&#8221;. Do not include any HTML tags like "<amp-analytics>" or "<script>".', 'amp' ); ?>"
 								required
 								><?php echo esc_textarea( $config ); ?></textarea>
 						</label>
@@ -115,6 +115,12 @@ class AMP_Analytics_Options_Submenu_Page {
 		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
 		$this->render_title();
+
+		?>
+		<p>
+			<?php echo wp_kses_post( __( 'Please see <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank">Adding Analytics to your AMP pages</a> for information on the required JSON configuration format. See also the <a href="https://github.com/Automattic/amp-wp/wiki/Analytics" target="_blank">Analytics wiki page</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a &#8220;{&#8221; and end with a &#8220;}&#8221;. Do not include any HTML tags like &#8220;<code>&lt;amp-analytics&gt;</code>&#8221; or &#8220;<code>&lt;script&gt;</code>&#8221;.', 'amp' ) ); ?>
+		</p>
+		<?php
 
 		// Render entries stored in the DB.
 		foreach ( $analytics_entries as $entry_id => $entry ) {
