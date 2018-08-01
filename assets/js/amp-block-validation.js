@@ -36,6 +36,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @param {Object}
 		 */
 		lastStates: {
+			noticesAreReset: false,
 			validationErrors: [],
 			blockOrder: []
 		},
@@ -154,19 +155,21 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			// Short-circuit if there was no change to the validation errors.
 			if ( ! module.didValidationErrorsChange( validationErrors ) ) {
+				if ( ! validationErrors.length && ! module.lastStates.noticesAreReset ) {
+					module.lastStates.noticesAreReset = true;
+					module.resetWarningNotice();
+				}
 				return;
 			}
 			module.lastStates.validationErrors = validationErrors;
+			module.lastStates.noticesAreReset = false;
 
 			// Remove any existing notice.
-			if ( module.validationWarningNoticeId ) {
-				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
-				module.validationWarningNoticeId = null;
-			}
+			module.resetWarningNotice();
 
 			// If there are no validation errors then just make sure the validation notices are cleared from the blocks.
 			if ( ! validationErrors.length ) {
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+				module.resetBlockNotices();
 				return;
 			}
 
@@ -208,7 +211,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} catch ( e ) {
 				// Clear out block validation errors in case the block sand errors cannot be aligned.
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+				module.resetBLockNotices();
 
 				noticeMessage += ' ' + wp.i18n._n(
 					'It may not be due to content here.',
@@ -270,6 +273,27 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			return false;
+		},
+
+		/**
+		 * Resets the validation warning notice.
+		 *
+		 * @return {void}
+		 */
+		resetWarningNotice: function resetWarningNotice() {
+			if ( module.validationWarningNoticeId ) {
+				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
+				module.validationWarningNoticeId = null;
+			}
+		},
+
+		/**
+		 * Resets the block level validation errors.
+		 *
+		 * @return {void}
+		 */
+		resetBlockNotices: function resetBlockNotices() {
+			wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
 		},
 
 		/**
