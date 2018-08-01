@@ -30,15 +30,15 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		storeName: 'amp/blockValidation',
 
-        /**
+		/**
 		 * Holds the last states which are used for comparisons.
 		 *
 		 * @param {Object}
-         */
-        lastStates: {
-            validationErrors: [],
-            blockOrder: []
-        },
+		 */
+		lastStates: {
+			validationErrors: [],
+			blockOrder: []
+		},
 
 		/**
 		 * Boot module.
@@ -55,7 +55,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				'editor.BlockEdit',
 				'amp/add-notice',
 				module.conditionallyAddNotice,
-				99
+				99 // eslint-disable-line
 			);
 
 			module.store = module.registerStore();
@@ -100,28 +100,28 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			} );
 		},
 
-        /**
+		/**
 		 * Checks if the validate errors state change handler should wait before processing.
 		 *
-         * @returns {boolean}
-         */
-        waitToHandleStateChange: function waitToHandleStateChange() {
-            var currentPost;
+		 * @return {boolean} Whether should wait.
+		 */
+		waitToHandleStateChange: function waitToHandleStateChange() {
+			var currentPost;
 
-            // @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
-            // We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
-            if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || wp.data.select( 'core/editor' ).isCleanNewPost() ) {
-                return true;
-            }
+			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
+			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
+			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || wp.data.select( 'core/editor' ).isCleanNewPost() ) {
+				return true;
+			}
 
-            // Wait for the current post to be set up.
-            currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-            if ( ! currentPost.hasOwnProperty( 'id' ) ) {
-                return true;
-            }
+			// Wait for the current post to be set up.
+			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
+				return true;
+			}
 
-            return false;
-        },
+			return false;
+		},
 
 		/**
 		 * Handle state change regarding validation errors.
@@ -133,12 +133,12 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
 			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity, hasActuallyUnacceptedError;
 
-            if ( module.waitToHandleStateChange() ) {
-                return;
-            }
+			if ( module.waitToHandleStateChange() ) {
+				return;
+			}
 
 			hasActuallyUnacceptedError = false;
-            currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
 			validationErrors = _.map(
 				_.filter( ampValidity.results, function( result ) {
@@ -152,11 +152,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				}
 			);
 
-            // Short-circuit if there was no change to the validation errors.
-            if ( ! module.didValidationErrorsChange( validationErrors ) ) {
-                return;
-            }
-            module.lastStates.validationErrors = validationErrors;
+			// Short-circuit if there was no change to the validation errors.
+			if ( ! module.didValidationErrorsChange( validationErrors ) ) {
+				return;
+			}
+			module.lastStates.validationErrors = validationErrors;
 
 			// Remove any existing notice.
 			if ( module.validationWarningNoticeId ) {
@@ -237,40 +237,40 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeElement, { spokenMessage: noticeMessage } ).notice.id;
 		},
 
-        /**
+		/**
 		 * Checks if the validation errors have changed.
 		 *
-         * @param {Object[]} validationErrors A list of validation errors.
-         * @returns {boolean|*} Returns true when the validation errors change.
-         */
-        didValidationErrorsChange: function didValidationErrorsChange( validationErrors ) {
-            if ( module.areBlocksOutOfSync() ) {
-                module.lastStates.validationErrors = [];
+		 * @param {Object[]} validationErrors A list of validation errors.
+		 * @return {boolean|*} Returns true when the validation errors change.
+		 */
+		didValidationErrorsChange: function didValidationErrorsChange( validationErrors ) {
+			if ( module.areBlocksOutOfSync() ) {
+				module.lastStates.validationErrors = [];
 			}
 
-            return (
-                module.lastStates.validationErrors.length !== validationErrors.length
-                ||
-                ( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
-            );
-        },
+			return (
+				module.lastStates.validationErrors.length !== validationErrors.length
+				||
+				( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
+			);
+		},
 
-        /**
-         * Checks if the block order is out of sync.
-         *
-         * Block uids change on page load and can get out of sync during normal editing and saving processes.  This method gives a check to determine if an "out of sync" condition occurred.
-         *
-         * @returns {boolean}
-         */
-        areBlocksOutOfSync: function areBlocksOutOfSync() {
-            var blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
-            if ( module.lastStates.blockOrder.length !== blockOrder.length || ! _.isEqual( module.lastStates.blockOrder, blockOrder ) ) {
-                module.lastStates.blockOrder = blockOrder;
-                return true;
-            }
+		/**
+		 * Checks if the block order is out of sync.
+		 *
+		 * Block uids change on page load and can get out of sync during normal editing and saving processes.  This method gives a check to determine if an "out of sync" condition occurred.
+		 *
+		 * @return {boolean} Whether out of sync.
+		 */
+		areBlocksOutOfSync: function areBlocksOutOfSync() {
+			var blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
+			if ( module.lastStates.blockOrder.length !== blockOrder.length || ! _.isEqual( module.lastStates.blockOrder, blockOrder ) ) {
+				module.lastStates.blockOrder = blockOrder;
+				return true;
+			}
 
-            return false;
-        },
+			return false;
+		},
 
 		/**
 		 * Get flattened block order.
