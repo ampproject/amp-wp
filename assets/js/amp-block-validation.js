@@ -72,29 +72,29 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			return wp.data.registerStore( module.storeName, {
 				reducer: function( _state, action ) {
 					var state = _state || {
-						blockValidationErrorsByUid: {}
+						blockValidationErrorsByClientId: {}
 					};
 
 					switch ( action.type ) {
 						case 'UPDATE_BLOCKS_VALIDATION_ERRORS':
 							return _.extend( {}, state, {
-								blockValidationErrorsByUid: action.blockValidationErrorsByUid
+								blockValidationErrorsByClientId: action.blockValidationErrorsByClientId
 							} );
 						default:
 							return state;
 					}
 				},
 				actions: {
-					updateBlocksValidationErrors: function( blockValidationErrorsByUid ) {
+					updateBlocksValidationErrors: function( blockValidationErrorsByClientId ) {
 						return {
 							type: 'UPDATE_BLOCKS_VALIDATION_ERRORS',
-							blockValidationErrorsByUid: blockValidationErrorsByUid
+							blockValidationErrorsByClientId: blockValidationErrorsByClientId
 						};
 					}
 				},
 				selectors: {
-					getBlockValidationErrors: function( state, uid ) {
-						return state.blockValidationErrorsByUid[ uid ] || [];
+					getBlockValidationErrors: function( state, clientId ) {
+						return state.blockValidationErrorsByClientId[ clientId ] || [];
 					}
 				}
 			} );
@@ -145,7 +145,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					if ( result.status !== 1 /* ACCEPTED */ ) {
 						hasActuallyUnacceptedError = true;
 					}
-					return result.term_status !== 1; /* ACCEPTED */
+					return result.term_status !== 1; // ACCEPTED
 				} ),
 				function( result ) {
 					return result.error;
@@ -182,7 +182,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			try {
 				blockValidationErrors = module.getBlocksValidationErrors();
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byUid );
+				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byClientId );
 
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
 				if ( blockErrorCount > 0 ) {
@@ -258,7 +258,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		/**
 		 * Checks if the block order is out of sync.
 		 *
-		 * Block uids change on page load and can get out of sync during normal editing and saving processes.  This method gives a check to determine if an "out of sync" condition occurred.
+		 * Block change on page load and can get out of sync during normal editing and saving processes.  This method gives a check to determine if an "out of sync" condition occurred.
 		 *
 		 * @return {boolean} Whether out of sync.
 		 */
@@ -281,7 +281,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		getFlattenedBlockOrder: function getFlattenedBlockOrder( blocks ) {
 			var blockOrder = [];
 			_.each( blocks, function( block ) {
-				blockOrder.push( block.uid );
+				blockOrder.push( block.clientId );
 				if ( block.innerBlocks.length > 0 ) {
 					Array.prototype.push.apply( blockOrder, module.getFlattenedBlockOrder( block.innerBlocks ) );
 				}
@@ -295,7 +295,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
-			var blockValidationErrorsByUid, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			var blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
 			validationErrors = _.map(
@@ -309,13 +309,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
 
 			otherValidationErrors = [];
-			blockValidationErrorsByUid = {};
-			_.each( blockOrder, function( uid ) {
-				blockValidationErrorsByUid[ uid ] = [];
+			blockValidationErrorsByClientId = {};
+			_.each( blockOrder, function( clientId ) {
+				blockValidationErrorsByClientId[ clientId ] = [];
 			} );
 
 			_.each( validationErrors, function( validationError ) {
-				var i, source, uid, block, matched;
+				var i, source, clientId, block, matched;
 				if ( ! validationError.sources ) {
 					otherValidationErrors.push( validationError );
 					return;
@@ -332,13 +332,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					}
 
 					// Look up the block ID by index, assuming the blocks of content in the editor are the same as blocks rendered on frontend.
-					uid = blockOrder[ source.block_content_index ];
-					if ( _.isUndefined( uid ) ) {
+					clientId = blockOrder[ source.block_content_index ];
+					if ( _.isUndefined( clientId ) ) {
 						throw new Error( 'undefined_block_index' );
 					}
 
-					// Sanity check that block exists for uid.
-					block = editorSelect.getBlock( uid );
+					// Sanity check that block exists for clientId.
+					block = editorSelect.getBlock( clientId );
 					if ( ! block ) {
 						throw new Error( 'block_lookup_failure' );
 					}
@@ -348,7 +348,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 						throw new Error( 'ordered_block_alignment_mismatch' );
 					}
 
-					blockValidationErrorsByUid[ uid ].push( validationError );
+					blockValidationErrorsByClientId[ clientId ].push( validationError );
 					matched = true;
 
 					// Stop looking for sources, since we aren't looking for parent blocks.
@@ -361,7 +361,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			} );
 
 			return {
-				byUid: blockValidationErrorsByUid,
+				byClientId: blockValidationErrorsByClientId,
 				other: otherValidationErrors
 			};
 		},
