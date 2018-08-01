@@ -35,6 +35,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	public function test_init() {
 		$this->instance->init();
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( $this->instance, 'enqueue_admin_assets' ) ) );
+		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_assets' ) ) );
 		$this->assertEquals( 10, has_action( 'post_submitbox_misc_actions', array( $this->instance, 'render_status' ) ) );
 		$this->assertEquals( 10, has_action( 'save_post', array( $this->instance, 'save_amp_status' ) ) );
 	}
@@ -68,6 +69,44 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertTrue( false !== stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
 		unset( $GLOBALS['post'] );
 		unset( $GLOBALS['current_screen'] );
+	}
+
+	/**
+	 * Test enqueue_block_assets.
+	 *
+	 * @see AMP_Post_Meta_Box::enqueue_block_assets()
+	 */
+	public function test_enqueue_block_assets() {
+		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$this->markTestSkipped( 'Gutenberg is not available' );
+		}
+
+		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
+		$GLOBALS['post'] = self::factory()->post->create_and_get( array(
+			'post_type' => 'draft',
+		) );
+		$this->instance->enqueue_block_assets();
+		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
+
+		// If a post type has AMP enabled, the script should be enqueued.
+		$GLOBALS['post'] = self::factory()->post->create_and_get();
+		$this->instance->enqueue_block_assets();
+		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
+
+		$block_script = wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ];
+		$this->assertEquals(
+			array(
+				'wp-hooks',
+				'wp-i18n',
+				'wp-components',
+			),
+			$block_script->deps
+		);
+		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
+		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
+		$this->assertEquals( AMP__VERSION, $block_script->ver );
+		$this->assertContains( 'wpAmpEditor', $block_script->extra['data'] );
+		$this->assertContains( AMP_Post_Meta_Box::ENABLED_STATUS, $block_script->extra['data'] );
 	}
 
 	/**
@@ -127,6 +166,97 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		ob_start();
 		$this->instance->render_status( $post );
 		$this->assertEmpty( ob_get_clean() );
+	}
+
+	/**
+	 * Test get_status_and_errors.
+	 *
+	 * @see AMP_Post_Meta_Box::get_status_and_errors()
+	 */
+	public function test_get_status_and_errors() {
+		$expected_status_and_errors = array(
+			'status' => 'enabled',
+			'errors' => array(),
+		);
+
+		// A post of type post shouldn't have errors, and AMP should be enabled.
+		$post = $this->factory()->post->create_and_get();
+		$this->assertEquals(
+			$expected_status_and_errors,
+			$this->instance->get_status_and_errors( $post )
+		);
+
+		// In Native AMP, there also shouldn't be errors.
+		add_theme_support( 'amp' );
+		$this->assertEquals(
+			$expected_status_and_errors,
+			$this->instance->get_status_and_errors( $post )
+		);
+
+		// If post type doesn't support AMP, this method should return AMP as being disabled.
+		remove_post_type_support( 'post', amp_get_slug() );
+		$this->assertEquals(
+			array(
+				'status' => 'disabled',
+				'errors' => array( 'post-type-support' ),
+			),
+			$this->instance->get_status_and_errors( $post )
+		);
+		add_post_type_support( 'post', amp_get_slug() );
+
+		// There's no template to render this post, so this method should also return AMP as disabled.
+		add_filter( 'amp_supportable_templates', '__return_empty_array' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		$this->assertEquals(
+			array(
+				'status' => 'disabled',
+				'errors' => array( 'no_matching_template' ),
+			),
+			$this->instance->get_status_and_errors( $post )
+		);
+	}
+
+	/**
+	 * Test get_error_messages.
+	 *
+	 * @see AMP_Post_Meta_Box::get_error_messages()
+	 */
+	public function test_get_error_messages() {
+		$this->assertEquals(
+			array( 'Your site does not allow AMP to be disabled.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, array( 'status_immutable' ) )
+		);
+
+		$this->assertEquals(
+			array( 'Your site does not allow AMP to be enabled.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'status_immutable' ) )
+		);
+
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
+		$this->assertContains( 'There are no', $messages[0] );
+		$this->assertContains( 'page=amp-options', $messages[0] );
+
+		$this->assertEquals(
+			array( 'AMP cannot be enabled on password protected posts.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'password-protected' ) )
+		);
+
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
+		$this->assertContains( 'AMP cannot be enabled because this', $messages[0] );
+		$this->assertContains( 'page=amp-options', $messages[0] );
+
+		$this->assertEquals(
+			array(
+				'A plugin or theme has disabled AMP support.',
+				'Unavailable for an unknown reason.',
+			),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) )
+		);
+
+		$this->assertEquals(
+			array( 'Unavailable for an unknown reason.' ),
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) )
+		);
 	}
 
 	/**
