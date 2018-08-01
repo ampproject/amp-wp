@@ -42,7 +42,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			wp.i18n.setLocaleData( module.data.i18n, 'amp' );
 
 			wp.hooks.addFilter(
-				'blocks.BlockEdit',
+				'editor.BlockEdit',
 				'amp/add-notice',
 				module.conditionallyAddNotice
 			);
