@@ -74,7 +74,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_assets.
 	 *
-	 * @see AMP_Settings::enqueue_block_assets()
+	 * @see AMP_Post_Meta_Box::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
 		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
@@ -171,7 +171,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test get_status_and_errors.
 	 *
-	 * @see AMP_Settings::get_status_and_errors()
+	 * @see AMP_Post_Meta_Box::get_status_and_errors()
 	 */
 	public function test_get_status_and_errors() {
 		$expected_status_and_errors = array(
@@ -219,7 +219,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test get_error_messages.
 	 *
-	 * @see AMP_Settings::get_error_messages()
+	 * @see AMP_Post_Meta_Box::get_error_messages()
 	 */
 	public function test_get_error_messages() {
 		$this->assertEquals(
@@ -232,25 +232,25 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'status_immutable' ) )
 		);
 
-		$raw_messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
-		$this->assertEquals( 'There are no %ssupported templates%s to display this in AMP.', $raw_messages[0][0] );
-		$this->assertContains( 'page=amp-options', $raw_messages[0][1] );
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
+		$this->assertContains( 'There are no', $messages[0] );
+		$this->assertContains( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(
 			array( 'AMP cannot be enabled on password protected posts.' ),
 			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'password-protected' ) )
 		);
 
-		$raw_messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
-		$this->assertEquals( 'AMP cannot be enabled because this %spost type does not support it%s.', $raw_messages[0][0] );
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
+		$this->assertContains( 'AMP cannot be enabled because this', $messages[0] );
+		$this->assertContains( 'page=amp-options', $messages[0] );
 
-		$raw_messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) );
 		$this->assertEquals(
 			array(
 				'A plugin or theme has disabled AMP support.',
 				'Unavailable for an unknown reason.',
 			),
-			$raw_messages
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) )
 		);
 
 		$this->assertEquals(
