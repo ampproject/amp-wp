@@ -45,9 +45,9 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 							isDismissible={ false }
 						>
 							{
-								errorMessages.map( function( message, index ) {
-									return ( <RawHTML key={ index }>{ message }</RawHTML> );
-								} )
+								errorMessages.map(
+									( message, index ) => <RawHTML key={ index }>{ message }</RawHTML>
+								)
 							}
 						</Notice>
 					)
@@ -74,10 +74,10 @@ function ComposedAMPToggle() {
 			 *
 			 * @return {string} Enabled status, either 'enabled' or 'disabled'.
 			 */
-			let getEnabledStatus = function() {
-				let metaSetatus = select( 'core/editor' ).getEditedPostAttribute( 'meta' ).amp_status;
-				if ( possibleStati.includes( metaSetatus ) ) {
-					return metaSetatus;
+			const getEnabledStatus = () => {
+				const meta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+				if ( meta && meta.amp_status && possibleStati.includes( meta.amp_status ) ) {
+					return meta.amp_status;
 				}
 				return defaultStatus;
 			};
@@ -85,8 +85,8 @@ function ComposedAMPToggle() {
 			return { enabledStatus: getEnabledStatus() };
 		} ),
 		withDispatch( ( dispatch ) => ( {
-			onAmpChange: function( enabledStatus ) {
-				let newStatus = 'enabled' === enabledStatus ? 'disabled' : 'enabled';
+			onAmpChange: ( enabledStatus ) => {
+				const newStatus = 'enabled' === enabledStatus ? 'disabled' : 'enabled';
 				dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
 			}
 		} ) ),
