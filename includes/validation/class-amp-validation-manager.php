@@ -461,6 +461,8 @@ class AMP_Validation_Manager {
 			&&
 			! wp_is_post_revision( $post )
 			&&
+			'auto-draft' !== $post->post_status
+			&&
 			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
 		);
 		if ( $should_validate_post ) {

@@ -283,6 +283,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 		$this->assertEmpty( AMP_Validation_Manager::validate_queued_posts_on_frontend() );
 
+		$auto_draft = $this->factory()->post->create_and_get( array( 'post_status' => 'auto-draft' ) );
+		AMP_Validation_Manager::handle_save_post_prompting_validation( $auto_draft->ID );
+		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
+		$this->assertEmpty( AMP_Validation_Manager::validate_queued_posts_on_frontend() );
+
 		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'post' ) );
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
 		$this->assertEquals( 10, has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
