@@ -590,6 +590,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $href !== $normalized_url ) {
 				$element->setAttribute( 'href', $normalized_url );
 			}
+
+			/*
+			 * Opt-in to CORS Mode for the stylesheet. This ensures that a service worker caching the external
+			 * stylesheet will not inflate the storage quota.
+			 *
+			 * See:
+			 * - https://developers.google.com/web/tools/workbox/guides/storage-quota#beware_of_opaque_responses
+			 * - https://developers.google.com/web/tools/workbox/guides/handle-third-party-requests#cross-origin_requests_and_opaque_responses
+			 */
+			if ( ! $element->hasAttribute( 'crossorigin' ) ) {
+				$element->setAttribute( 'crossorigin', 'anonymous' );
+			}
 			return;
 		}
 
