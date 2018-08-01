@@ -30,6 +30,10 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		storeName: 'amp/blockValidation',
 
+        lastStates: {
+            validationErrors: []
+        },
+
 		/**
 		 * Boot module.
 		 *
@@ -142,11 +146,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				}
 			);
 
-			// Short-circuit if there was no change to the validation errors.
-			if ( ! validationErrors || _.isEqual( module.lastValidationErrors, validationErrors ) ) {
-				return;
-			}
-			module.lastValidationErrors = validationErrors;
+            // Short-circuit if there was no change to the validation errors.
+            if ( ! module.didValidationErrorsChange( validationErrors ) ) {
+                return;
+            }
+            module.lastStates.validationErrors = validationErrors;
 
 			// Remove any existing notice.
 			if ( module.validationWarningNoticeId ) {
@@ -226,6 +230,20 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeElement, { spokenMessage: noticeMessage } ).notice.id;
 		},
+
+        /**
+		 * Checks if the validation errors have changed.
+		 *
+         * @param {Object[]} validationErrors A list of validation errors.
+         * @returns {boolean|*} Returns true when the validation errors change.
+         */
+        didValidationErrorsChange: function didValidationErrorsChange( validationErrors ) {
+            return (
+                module.lastStates.validationErrors.length !== validationErrors.length
+                ||
+                ( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
+            );
+        },
 
 		/**
 		 * Get flattened block order.
