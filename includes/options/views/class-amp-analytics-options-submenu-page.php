@@ -17,7 +17,7 @@ class AMP_Analytics_Options_Submenu_Page {
 	 * @param string $type   Entry type.
 	 * @param string $config Entry config as serialized JSON.
 	 */
-	private function render_entry( $id = '', $type = '', $config = '' ) {
+	private function render_entry( $id = '', $type = '', $config = '{}' ) {
 		$is_existing_entry = ! empty( $id );
 
 		if ( $is_existing_entry ) {
@@ -27,6 +27,12 @@ class AMP_Analytics_Options_Submenu_Page {
 		} else {
 			$analytics_title = __( 'Add new entry:', 'amp' );
 			$id              = '__new__';
+		}
+
+		// Tidy-up the JSON for display.
+		if ( $config ) {
+			$options = ( 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ );
+			$config  = wp_json_encode( json_decode( $config ), $options );
 		}
 
 		$id_base = sprintf( '%s[analytics][%s]', AMP_Options_Manager::OPTION_NAME, $id );
@@ -52,7 +58,15 @@ class AMP_Analytics_Options_Submenu_Page {
 						<label>
 							<?php esc_html_e( 'JSON Configuration:', 'amp' ); ?>
 							<br />
-							<textarea rows="10" cols="100" name="<?php echo esc_attr( $id_base . '[config]' ); ?>"><?php echo esc_textarea( $config ); ?></textarea>
+							<textarea
+								rows="10"
+								cols="100"
+								name="<?php echo esc_attr( $id_base . '[config]' ); ?>"
+								class="amp-analytics-input"
+								placeholder="{...}"
+								title="<?php esc_attr_e( 'A JSON object begins with a "{" and ends with a "}". Do not include any HTML tags like "<amp-analytics>" or "<script>".', 'amp' ); ?>"
+								required
+								><?php echo esc_textarea( $config ); ?></textarea>
 						</label>
 					</p>
 					<input type="hidden" name="action" value="amp_analytics_options">
@@ -87,6 +101,17 @@ class AMP_Analytics_Options_Submenu_Page {
 	 * Render.
 	 */
 	public function render() {
+		?>
+		<style>
+			.amp-analytics-input {
+				font-family: monospace;
+			}
+			.amp-analytics-input:invalid {
+				border-color: red;
+			}
+		</style>
+		<?php
+
 		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
 
 		$this->render_title();
@@ -98,5 +123,28 @@ class AMP_Analytics_Options_Submenu_Page {
 
 		// Empty form for adding more entries.
 		$this->render_entry();
+
+		?>
+		<script>
+			Array.prototype.forEach.call( document.querySelectorAll( '.amp-analytics-input' ), function( textarea ) {
+				textarea.addEventListener( 'input', function() {
+					if ( ! this.value ) {
+						this.setCustomValidity( '' );
+						return;
+					}
+					try {
+						var value = JSON.parse( this.value );
+						if ( null === value || typeof value !== 'object' || Array.isArray( value ) ) {
+							this.setCustomValidity( <?php echo wp_json_encode( __( 'A JSON object is required, e.g. {...}', 'amp' ) ); ?> )
+						} else {
+							this.setCustomValidity( '' );
+						}
+					} catch ( e ) {
+						this.setCustomValidity( e.message )
+					}
+				} );
+			} );
+		</script>
+		<?php
 	}
 }
