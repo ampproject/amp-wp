@@ -26,14 +26,14 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 	return (
 		<Fragment>
 			<PluginPostStatusInfo>
-				{ ! errorMessages.length && __( 'Enable AMP', 'amp' ) }
+				{ ! errorMessages.length && <label htmlFor='amp-enabled'>{ __( 'Enable AMP', 'amp' ) }</label> }
 				{
 					! errorMessages.length &&
 					(
 						<FormToggle
 							checked={ 'enabled' === enabledStatus }
 							onChange={ () => onAmpChange( enabledStatus ) }
-							id={ 'amp-enabled' }
+							id='amp-enabled'
 						/>
 					)
 				}
@@ -41,7 +41,7 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 					!! errorMessages.length &&
 					(
 						<Notice
-							status={ 'warning' }
+							status='warning'
 							isDismissible={ false }
 						>
 							{
