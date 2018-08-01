@@ -102,6 +102,19 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		},
 
 		/**
+		 * Checks if AMP is enabled for this post.
+		 *
+		 * @return {boolean} Returns true when the AMP toggle is on; else, false is returned.
+		 */
+		isAMPEnabled: function isAMPEnabled() {
+			var meta = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+			if ( meta && meta.amp_status && window.wpAmpEditor.possibleStati.includes( meta.amp_status ) ) {
+				return 'enabled' === meta.amp_status;
+			}
+			return false;
+		},
+
+		/**
 		 * Checks if the validate errors state change handler should wait before processing.
 		 *
 		 * @return {boolean} Whether should wait.
@@ -133,6 +146,15 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
 			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity, hasActuallyUnacceptedError;
+
+			if ( ! module.isAMPEnabled() ) {
+				if ( ! module.lastStates.noticesAreReset ) {
+					module.lastStates.noticesAreReset = true;
+					module.resetWarningNotice();
+					module.resetBlockNotices();
+				}
+				return;
+			}
 
 			if ( module.waitToHandleStateChange() ) {
 				return;
