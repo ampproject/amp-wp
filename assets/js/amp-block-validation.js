@@ -318,7 +318,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			currentPost = editorSelect.getCurrentPost();
 			validationErrors = _.map(
 				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
-					return ! result.sanitized;
+					return result.term_status !== 1; // If not accepted by the user.
 				} ),
 				function( result ) {
 					return result.error;
