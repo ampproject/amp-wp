@@ -44,7 +44,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * callback to return dimension array.
+	 * Callback to rdeturn dimension array.
 	 */
 	public function single_url__mock_dimension_callback() {
 		return array(
