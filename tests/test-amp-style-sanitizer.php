@@ -1042,6 +1042,21 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				'file_path_not_found',
 			),
+			'amp_file_path_illegal_linux' => array(
+				content_url( '../../../../../../../../../../../../../../../bad.css' ),
+				null,
+				'file_path_not_allowed',
+			),
+			'amp_file_path_illegal_windows' => array(
+				content_url( '..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\bad.css' ),
+				null,
+				'file_path_not_allowed',
+			),
+			'amp_file_path_illegal_location' => array(
+				site_url( 'outside/root.css' ),
+				null,
+				'file_path_not_allowed',
+			),
 			'amp_external_file' => array(
 				'//s.w.org/wp-includes/css/dashicons.css',
 				false,
@@ -1152,7 +1167,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'bad_file'    => array(
 				home_url( '/bad.css' ),
-				array( 'file_path_not_found' ),
+				array( 'file_path_not_allowed' ),
 			),
 		);
 	}
