@@ -36,10 +36,16 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		remove_all_filters( 'amp_extract_image_dimensions_batch' );
 	}
 
+	/**
+	 * Add Mock dimension callback to amp_extract_image_dimensions_batch filter.
+	 */
 	public function single_url__add_mock_dimension_callback() {
 		add_filter( 'amp_extract_image_dimensions_batch', array( $this, 'single_url__mock_dimension_callback' ) );
 	}
 
+	/**
+	 * callback to return dimension array.
+	 */
 	public function single_url__mock_dimension_callback() {
 		return array(
 			'https://example.com/image.png' => array(
@@ -49,11 +55,14 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * Test single url returns expected dimensions.
+	 */
 	public function test__single_url() {
-		add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', array( $this, 'single_url__add_mock_dimension_callback' ), 9999 ); // Run after the `disable_downloads`
+		add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', array( $this, 'single_url__add_mock_dimension_callback' ), 9999 ); // Run after the `disable_downloads`.
 
 		$source_url = 'https://example.com/image.png';
-		$expected = array( 100, 101 );
+		$expected   = array( 100, 101 );
 
 		$actual = AMP_Image_Dimension_Extractor::extract( $source_url );
 
