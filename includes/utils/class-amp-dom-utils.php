@@ -410,14 +410,27 @@ class AMP_DOM_Utils {
 			}
 		}
 
-		/*
-		 * Temporarily add fragment boundary comments in order to locate the desired node to extract from
-		 * the given HTML document. This is required because libxml seems to only preserve whitespace when
-		 * serializing when calling DOMDocument::saveHTML() on the entire document. If you pass the element
-		 * to DOMDocument::saveHTML() then formatting whitespace gets added unexpectedly. This is seen to
-		 * be fixed in PHP 7.3, but for older versions of PHP the following workaround is needed.
-		 */
-		if ( version_compare( PHP_VERSION, '7.3', '<' ) ) {
+		if ( version_compare( PHP_VERSION, '7.3', '>=' ) ) {
+			$html = $dom->saveHTML( $node );
+		} else {
+			/*
+			 * Temporarily add fragment boundary comments in order to locate the desired node to extract from
+			 * the given HTML document. This is required because libxml seems to only preserve whitespace when
+			 * serializing when calling DOMDocument::saveHTML() on the entire document. If you pass the element
+			 * to DOMDocument::saveHTML() then formatting whitespace gets added unexpectedly. This is seen to
+			 * be fixed in PHP 7.3, but for older versions of PHP the following workaround is needed.
+			 */
+
+			/*
+			 * First make sure meta[charset] gets http-equiv and content attributes to work around issue
+			 * with $dom->saveHTML() erroneously encoding UTF-8 as HTML entities.
+			 */
+			$meta_charset = $xpath->query( '/html/head/meta[ @charset ]' )->item( 0 );
+			if ( $meta_charset ) {
+				$meta_charset->setAttribute( 'http-equiv', 'Content-Type' );
+				$meta_charset->setAttribute( 'content', sprintf( 'text/html; charset=%s', $meta_charset->getAttribute( 'charset' ) ) );
+			}
+
 			$boundary       = 'fragment_boundary:' . (string) wp_rand();
 			$start_boundary = $boundary . ':start';
 			$end_boundary   = $boundary . ':end';
@@ -430,10 +443,19 @@ class AMP_DOM_Utils {
 				'$1',
 				$dom->saveHTML()
 			);
+
+			// Remove meta[http-equiv] and meta[content] attributes which were added to meta[charset] for HTML serialization.
+			if ( $meta_charset ) {
+				if ( $dom->documentElement === $node ) {
+					$html = preg_replace( '#(<meta\scharset=\S+)[^<]*?>#i', '$1>', $html );
+				}
+
+				$meta_charset->removeAttribute( 'http-equiv' );
+				$meta_charset->removeAttribute( 'content' );
+			}
+
 			$node->parentNode->removeChild( $comment_start );
 			$node->parentNode->removeChild( $comment_end );
-		} else {
-			$html = $dom->saveHTML( $node );
 		}
 
 		// Whitespace just causes unit tests to fail... so whitespace begone.
