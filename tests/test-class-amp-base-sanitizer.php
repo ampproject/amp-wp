@@ -108,7 +108,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param array $source_attributes   Source Attrs.
 	 * @param array $expected_attributes Expected Attrs.
 	 * @param array $args                Args.
-	 * @covers AMP_Base_Sanitizer::enforce_fixed_height()
+	 * @covers AMP_Base_Sanitizer::set_layout()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = array() ) {
 		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
@@ -196,73 +196,133 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests remove_child.
+	 * Tests remove_invalid_child.
 	 *
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
+	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
+	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
 	 */
-	public function test_remove_child() {
+	public function test_remove_invalid_child() {
 		$parent_tag_name = 'div';
 		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
 		$child           = $dom_document->createElement( 'h1' );
+		$child->setAttribute( 'id', 'foo' );
 		$parent->appendChild( $child );
 
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		$expected_error = array(
+			'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+			'node_name'       => $child->nodeName,
+			'parent_name'     => $parent_tag_name,
+			'node_attributes' => array(
+				'id' => 'foo',
+			),
+			'foo'             => 'bar',
+			'sources'         => null,
+		);
 
+		// Test sanitized.
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(
 			$dom_document, array(
 				'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error',
 			)
 		);
-		$sanitizer->remove_invalid_child( $child );
+		$sanitizer->remove_invalid_child( $child, array( 'foo' => 'bar' ) );
 		$this->assertEquals( null, $parent->firstChild );
 		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
-		$this->assertEquals( $child->nodeName, AMP_Validation_Manager::$validation_results[0]['error']['node_name'] );
+		$this->assertEquals(
+			array(
+				'error'     => $expected_error,
+				'sanitized' => true,
+			),
+			AMP_Validation_Manager::$validation_results[0]
+		);
+		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 
+		// Test unsanitized.
+		add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		AMP_Validation_Manager::reset_validation_results();
 		$parent->appendChild( $child );
+		$sanitizer->remove_invalid_child( $child, array( 'foo' => 'bar' ) );
 		$this->assertEquals( $child, $parent->firstChild );
-		$sanitizer->remove_invalid_child( $child );
+		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
+		$this->assertEquals(
+			array(
+				'error'     => $expected_error,
+				'sanitized' => false,
+			),
+			AMP_Validation_Manager::$validation_results[0]
+		);
 
-		$this->assertEquals( null, $parent->firstChild );
-		$this->assertEquals( null, $child->parentNode );
+		// Make sure the validation error is not duplicated since it was not sanitized.
+		$sanitizer->remove_invalid_child( $child, array( 'foo' => 'bar' ) );
+		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
 		AMP_Validation_Manager::$validation_results = null;
 	}
 
 	/**
-	 * Tests remove_child.
+	 * Tests remove_invalid_child and should_sanitize_validation_error.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
+	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
+	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
+	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
 	 */
-	public function test_remove_attribute() {
-		$this->markTestSkipped( 'Needs refactoring.' );
+	public function test_remove_invalid_attribute() {
+		$that = $this;
 
-		AMP_Validation_Manager::$should_locate_sources = true;
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		$video_name   = 'amp-video';
-		$attribute    = 'onload';
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
-		$video        = $dom_document->createElement( $video_name );
-		$video->setAttribute( $attribute, 'someFunction()' );
-		$attr_node = $video->getAttributeNode( $attribute );
-		$args      = array(
-			'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error',
-		);
-		$sanitizer = new AMP_Video_Sanitizer( $dom_document, $args );
-		$sanitizer->remove_invalid_attribute( $video, $attribute );
-		$this->assertEquals( null, $video->getAttribute( $attribute ) );
-		$this->assertEquals(
-			array(
-				'code'               => AMP_Validation_Manager::INVALID_ATTRIBUTE_CODE,
-				'node_name'          => $attr_node->nodeName,
-				'parent_name'        => $video->nodeName,
-				'sources'            => array(),
-				'element_attributes' => array(
-					'onload' => 'someFunction()',
-				),
-			),
-			AMP_Validation_Manager::$validation_results[0]['error']
-		);
+		// Test sanitizing.
+		$dom       = AMP_DOM_Utils::get_dom_from_content( '<amp-video id="bar" onload="someFunc()"></amp-video>' );
+		$sanitizer = new AMP_Video_Sanitizer( $dom, array(
+			'validation_error_callback' => function( $error, $context ) use ( $that ) {
+				$that->assertEquals(
+					array(
+						'node_name'          => 'onload',
+						'parent_name'        => 'amp-video',
+						'code'               => 'invalid_attribute',
+						'element_attributes' =>
+							array(
+								'id'     => 'bar',
+								'onload' => 'someFunc()',
+							),
+					),
+					$error
+				);
+				$that->assertInstanceOf( 'DOMAttr', $context['node'] );
+				$that->assertEquals( 'onload', $context['node']->nodeName );
+				return true;
+			},
+		) );
+		$element   = $dom->getElementsByTagName( 'amp-video' )->item( 0 );
+		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, 'onload' ) );
+		$this->assertFalse( $element->hasAttribute( 'onload' ) );
+
+		// Test not sanitizing.
+		$dom       = AMP_DOM_Utils::get_dom_from_content( '<amp-video id="bar" onload="someFunc()"></amp-video>' );
+		$sanitizer = new AMP_Video_Sanitizer( $dom, array(
+			'validation_error_callback' => function( $error, $context ) use ( $that ) {
+				$that->assertEquals(
+					array(
+						'node_name'          => 'onload',
+						'parent_name'        => 'amp-video',
+						'code'               => 'invalid_attribute',
+						'element_attributes' =>
+							array(
+								'id'     => 'bar',
+								'onload' => 'someFunc()',
+							),
+					),
+					$error
+				);
+				$that->assertInstanceOf( 'DOMAttr', $context['node'] );
+				$that->assertEquals( 'onload', $context['node']->nodeName );
+				return false;
+			},
+		) );
+		$element   = $dom->getElementsByTagName( 'amp-video' )->item( 0 );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $element, 'onload' ) );
+		$this->assertTrue( $element->hasAttribute( 'onload' ) );
 	}
 
 	/**
@@ -316,7 +376,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests set_attachment_layout_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::set_attachment_layout_attributes()
+	 * @covers AMP_Base_Sanitizer::filter_attachment_layout_attributes()
 	 */
 	public function test_filter_attachment_layout_attributes() {
 		$sanitizer    = new AMP_Test_Stub_Sanitizer( new DOMDocument(), array() );

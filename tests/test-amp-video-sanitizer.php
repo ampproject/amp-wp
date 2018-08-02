@@ -90,7 +90,15 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'https_not_required' => array(
 				'<video width="300" height="300" src="http://example.com/video.mp4"></video>',
-				'<amp-video width="300" height="300" src="http://example.com/video.mp4" layout="responsive"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
+			),
+
+			'http_video_with_children' => array(
+				'<video width="480" height="300" poster="http://example.com/video-image.gif">
+	<source src="http://example.com/video.mp4" type="video/mp4">
+	<source src="http://example.com/video.ogv" type="video/ogg">
+</video>',
+				'<amp-video width="480" height="300" poster="http://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
 			),
 		);
 	}

@@ -73,6 +73,11 @@ function amp_admin_get_preview_permalink() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
+	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
+	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( 'amp' ) ) {
+		return;
+	}
+
 	$menu_slug = add_query_arg( array(
 		'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
 		'url'              => rawurlencode( amp_admin_get_preview_permalink() ),
@@ -160,4 +165,14 @@ function amp_post_meta_box() {
 function amp_editor_core_blocks() {
 	$editor_blocks = new AMP_Editor_Blocks();
 	$editor_blocks->init();
+}
+
+/**
+ * Bootstrap the AMP admin pointer class.
+ *
+ * @since 1.0
+ */
+function amp_admin_pointer() {
+	$admin_pointer = new AMP_Admin_Pointer();
+	$admin_pointer->init();
 }

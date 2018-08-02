@@ -86,6 +86,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $script_components = array();
 
 	/**
+	 * Keep track of nodes that should not be replaced to prevent duplicated validation errors since sanitization is rejected.
+	 *
+	 * @var array
+	 */
+	protected $should_not_replace_nodes = array();
+
+	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
 	 *
 	 * @since 0.5
@@ -412,7 +419,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$attr_spec_list = $first_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 				}
 			}
-		} // End if().
+		}
 
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
@@ -1118,6 +1125,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check 'value_regex' - case sensitive regex match.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ];
+			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			/*
 			 * The regex pattern has '^' and '$' though they are not in the AMP spec.
@@ -1125,7 +1133,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * matched by a regex rule of '(_blank|_self|_top)'. As the AMP JS validator
 			 * only accepts '_blank' we leave it this way for now.
 			 */
-			if ( preg_match( '@^' . $rule_value . '$@u', $node->getAttribute( $attr_name ) ) ) {
+			if ( preg_match( '/^(' . $rule_value . ')$/u', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
 			} else {
 				return AMP_Rule_Spec::FAIL;
@@ -1153,9 +1161,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ];
+			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			// See note above regarding the '^' and '$' that are added here.
-			if ( preg_match( '/^' . $rule_value . '$/ui', $node->getAttribute( $attr_name ) ) ) {
+			if ( preg_match( '/^(' . $rule_value . ')$/ui', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
 			} else {
 				return AMP_Rule_Spec::FAIL;
@@ -1521,19 +1530,34 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Determine if the supplied $node has a parent with the specified tag name.
+	 * Determine if the supplied $node has a parent with the specified spec name.
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMNode $node            Node.
-	 * @param string  $parent_tag_name Parent tag name.
+	 * @todo It would be more robust if the the actual tag spec were looked up and then matched against the parent, but this is currently overkill.
+	 *
+	 * @param DOMNode $node             Node.
+	 * @param string  $parent_spec_name Parent spec name, for example 'body' or 'form [method=post]'.
 	 * @return bool Return true if given node has direct parent with the given name, false otherwise.
 	 */
-	private function has_parent( $node, $parent_tag_name ) {
-		if ( $node && $node->parentNode && ( $node->parentNode->nodeName === $parent_tag_name ) ) {
-			return true;
+	private function has_parent( $node, $parent_spec_name ) {
+		if ( ! $node ) {
+			return false;
 		}
-		return false;
+		$parsed_spec_name = $this->parse_tag_and_attributes_from_spec_name( $parent_spec_name );
+
+		if ( ! $node->parentNode || $node->parentNode->nodeName !== $parsed_spec_name['tag_name'] ) {
+			return false;
+		}
+
+		// Ensure attributes match; if not move up to the next node.
+		foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
+			if ( $node instanceof DOMElement && strtolower( $node->getAttribute( $attr_name ) ) !== $attr_value ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -1541,31 +1565,92 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @todo The $ancestor_tag_name here is not sufficient as it is not just a tag name but an entire selector that is used.
 	 * @param DOMNode $node              Node.
 	 * @param string  $ancestor_tag_name Ancestor tag name.
 	 * @return bool Return true if given node has any ancestor with the give name, false otherwise.
 	 */
 	private function has_ancestor( $node, $ancestor_tag_name ) {
-		if ( $this->get_ancestor_with_tag_name( $node, $ancestor_tag_name ) ) {
+		if ( $this->get_ancestor_with_matching_spec_name( $node, $ancestor_tag_name ) ) {
 			return true;
 		}
 		return false;
 	}
 
 	/**
+	 * Parse tag name and attributes from spec name.
+	 *
+	 * Given a spec name like 'form [method=post]', extract the tag name 'form' and the attributes.
+	 *
+	 * @todo This is admittedly rudimentary. It would be more robust to actually look up the tag spec by the name and obtain the required attributes from there, but this is not necessary yet.
+	 *
+	 * @param string $spec_name Spec name.
+	 * @return array Tag name and attributes.
+	 */
+	private function parse_tag_and_attributes_from_spec_name( $spec_name ) {
+		static $parsed_specs = array();
+		if ( isset( $parsed_specs[ $spec_name ] ) ) {
+			return $parsed_specs[ $spec_name ];
+		}
+
+		$attributes = array();
+
+		/*
+		 * This matches spec names like:
+		 * - body
+		 * - form [method=post]
+		 * - form > div [submit-error][template]
+		 */
+		if ( preg_match( '/^(?P<ancestors>.+? )?(?P<tag_name>[a-z0-9_-]+?)( (?P<raw_attrs>\[.+?\]))?$/i', $spec_name, $matches ) ) {
+			$tag_name = $matches['tag_name'];
+
+			if ( isset( $matches['raw_attrs'] ) ) {
+				$raw_attr_pairs = explode( '][', trim( $matches['raw_attrs'], '[]' ) );
+				foreach ( $raw_attr_pairs as $raw_attr_pair ) {
+					$raw_attr_pair = explode( '=', $raw_attr_pair );
+
+					$attr_key = $raw_attr_pair[0];
+					$attr_val = isset( $raw_attr_pair[1] ) ? $raw_attr_pair[1] : true;
+
+					$attributes[ $attr_key ] = $attr_val;
+				}
+			}
+		} else {
+			$tag_name = strtok( $spec_name, ' ' ); // Fallback case.
+		}
+
+		$parsed_specs[ $spec_name ] = compact( 'tag_name', 'attributes' );
+		return $parsed_specs[ $spec_name ];
+	}
+
+	/**
 	 * Get the first ancestor node matching the specified tag name for the supplied $node.
 	 *
 	 * @since 0.5
+	 * @todo It would be more robust if the the actual tag spec were looked up and then matched for each ancestor, but this is currently overkill.
 	 *
-	 * @param DOMNode $node              Node.
-	 * @param string  $ancestor_tag_name Ancestor tag name.
+	 * @param DOMNode $node               Node.
+	 * @param string  $ancestor_spec_name Ancestor spec name, e.g. 'body' or 'form [method=post]'.
 	 * @return DOMNode|null Returns an ancestor node for the name specified, or null if not found.
 	 */
-	private function get_ancestor_with_tag_name( $node, $ancestor_tag_name ) {
+	private function get_ancestor_with_matching_spec_name( $node, $ancestor_spec_name ) {
+		$parsed_spec_name = $this->parse_tag_and_attributes_from_spec_name( $ancestor_spec_name );
+
 		while ( $node && $node->parentNode ) {
 			$node = $node->parentNode;
-			if ( $node->nodeName === $ancestor_tag_name ) {
+			if ( $node->nodeName === $parsed_spec_name['tag_name'] ) {
+
+				// Ensure attributes match; if not move up to the next node.
+				foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
+					$match = (
+						$node instanceof DOMElement
+						&&
+						true === $attr_value ? $node->hasAttribute( $attr_name ) : strtolower( $node->getAttribute( $attr_name ) ) === $attr_value
+					);
+					if ( ! $match ) {
+						continue 2;
+					}
+				}
+
 				return $node;
 			}
 		}
@@ -1578,34 +1663,46 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Also adds them to the stack for processing by the sanitize() function.
 	 *
 	 * @since 0.3.3
+	 * @since 1.0 Fix silently removing unrecognized elements.
+	 * @see https://github.com/Automattic/amp-wp/issues/1100
 	 *
 	 * @param DOMNode $node Node.
 	 */
 	private function replace_node_with_children( $node ) {
 
+		// If node has no children or no parent, just remove the node.
 		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
-			// If node has no children or no parent, just remove the node.
 			$this->remove_node( $node );
 
-		} else {
-			/*
-			 * If node has children, replace it with them and push children onto stack
-			 *
-			 * Create a DOM fragment to hold the children
-			 */
-			$fragment = $this->dom->createDocumentFragment();
+			return;
+		}
 
-			// Add all children to fragment/stack.
-			$child = $node->firstChild;
-			while ( $child ) {
-				$fragment->appendChild( $child );
-				$this->stack[] = $child;
-				$child         = $node->firstChild;
-			}
+		/*
+		 * If node has children, replace it with them and push children onto stack
+		 *
+		 * Create a DOM fragment to hold the children
+		 */
+		$fragment = $this->dom->createDocumentFragment();
 
-			// Replace node with fragment.
+		// Add all children to fragment/stack.
+		$child = $node->firstChild;
+		while ( $child ) {
+			$fragment->appendChild( $child );
+			$this->stack[] = $child;
+			$child         = $node->firstChild;
+		}
+
+		// Prevent double-reporting nodes that are rejected for sanitization.
+		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
+			return;
+		}
+
+		// Replace node with fragment.
+		$should_replace = $this->should_sanitize_validation_error( array(), compact( 'node' ) );
+		if ( $should_replace ) {
 			$node->parentNode->replaceChild( $fragment, $node );
-
+		} else {
+			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
 		}
 	}
 

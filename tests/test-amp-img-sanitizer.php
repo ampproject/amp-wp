@@ -180,8 +180,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'image_with_custom_lightbox_attrs'         => array(
-				'<img src="http://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="true" />',
-				'<amp-img src="http://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="true" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<figure data-amp-lightbox="true"><img src="http://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure>',
+				'<figure data-amp-lightbox="true"><amp-img src="http://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" on="tap:amp-image-lightbox" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></figure><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
 			),
 		);
 	}

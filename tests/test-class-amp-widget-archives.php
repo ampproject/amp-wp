@@ -33,6 +33,16 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		remove_theme_support( 'amp' );
+	}
+
+	/**
 	 * Test construct().
 	 *
 	 * @see AMP_Widget_Archives::__construct().
@@ -52,6 +62,7 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 	 * @see AMP_Widget_Archives::widget().
 	 */
 	public function test_widget() {
+		$this->assertTrue( is_amp_endpoint() );
 		$arguments = array(
 			'before_widget' => '<div>',
 			'after_widget'  => '</div>',

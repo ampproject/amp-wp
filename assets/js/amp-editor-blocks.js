@@ -115,7 +115,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
-		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
+		wp.hooks.addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
 	};
 
@@ -731,7 +731,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					return element;
 				}
 			} else if ( ! component.hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-				// Add amp-carousel=false attribut to the shortcode.
+				// Add amp-carousel=false attribute to the shortcode.
 				text = attributes.text.replace( '[gallery', '[gallery amp-carousel=false' );
 			} else {
 				text = attributes.text;

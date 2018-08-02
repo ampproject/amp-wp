@@ -25,7 +25,7 @@ export default registerBlockType(
 	{
 		title: __( 'AMP Springboard Player', 'amp' ),
 		description: __( 'Displays the Springboard Player used in the Springboard Video Platform', 'amp' ),
-		category: 'common',
+		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' )
@@ -94,7 +94,7 @@ export default registerBlockType(
 		},
 
 		edit( props ) {
-			const { attributes, isSelected, setAttributes } = props;
+			const { attributes, setAttributes } = props;
 			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
@@ -109,52 +109,48 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					{
-						isSelected && (
-							<InspectorControls key='inspector'>
-								<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
-									<TextControl
-										label={ __( 'SprintBoard site ID (required)', 'amp' ) }
-										value={ dataSiteId }
-										onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Player content ID (required)', 'amp' ) }
-										value={ dataContentId }
-										onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Player ID', 'amp' ) }
-										value={ dataPlayerId }
-										onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
-									/>
-									<TextControl
-										label={ __( 'Springboard partner domain', 'amp' ) }
-										value={ dataDomain }
-										onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
-									/>
-									<SelectControl
-										label={ __( 'Mode (required)', 'amp' ) }
-										value={ dataMode }
-										options={ [
-											{ value: 'video', label: __( 'Video', 'amp' ) },
-											{ value: 'playlist', label: __( 'Playlist', 'amp' ) }
-										] }
-										onChange={ value => ( setAttributes( { dataMode: value } ) ) }
-									/>
-									<TextControl
-										type="number"
-										label={ __( 'Number of video is playlist (required)', 'amp' ) }
-										value={ dataItems }
-										onChange={ value => ( setAttributes( { dataItems: value } ) ) }
-									/>
-									{
-										getLayoutControls( props, ampLayoutOptions )
-									}
-								</PanelBody>
-							</InspectorControls>
-						)
-					}
+					<InspectorControls key='inspector'>
+						<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
+							<TextControl
+								label={ __( 'SprintBoard site ID (required)', 'amp' ) }
+								value={ dataSiteId }
+								onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Player content ID (required)', 'amp' ) }
+								value={ dataContentId }
+								onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Player ID', 'amp' ) }
+								value={ dataPlayerId }
+								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+							/>
+							<TextControl
+								label={ __( 'Springboard partner domain', 'amp' ) }
+								value={ dataDomain }
+								onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
+							/>
+							<SelectControl
+								label={ __( 'Mode (required)', 'amp' ) }
+								value={ dataMode }
+								options={ [
+									{ value: 'video', label: __( 'Video', 'amp' ) },
+									{ value: 'playlist', label: __( 'Playlist', 'amp' ) }
+								] }
+								onChange={ value => ( setAttributes( { dataMode: value } ) ) }
+							/>
+							<TextControl
+								type="number"
+								label={ __( 'Number of video is playlist (required)', 'amp' ) }
+								value={ dataItems }
+								onChange={ value => ( setAttributes( { dataItems: value } ) ) }
+							/>
+							{
+								getLayoutControls( props, ampLayoutOptions )
+							}
+						</PanelBody>
+					</InspectorControls>
 					{
 						url && getMediaPlaceholder( __( 'Springboard Player', 'amp' ), url )
 					}

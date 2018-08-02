@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
- * Version: 1.0-alpha
+ * Version: 1.0-beta1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -49,7 +49,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '0.7.1' );
+define( 'AMP__VERSION', '1.0-beta1' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -113,6 +113,13 @@ add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 
 function amp_after_setup_theme() {
 	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
 
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
@@ -147,6 +154,7 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'wp_loaded', 'amp_admin_pointer' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 
 	// Redirect the old url of amp page to the updated url.
@@ -183,6 +191,7 @@ function amp_force_query_var_value( $query_vars ) {
  * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
  * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
  *
+ * @deprecated This function is not used when 'amp' theme support is added.
  * @global WP_Query $wp_query
  * @since 0.2
  * @return void
@@ -264,28 +273,62 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 }
 
 /**
- * Whether this is in 'canonical mode.'
+ * Whether this is in 'canonical mode'.
  *
- * Themes can register support for this with `add_theme_support( 'amp' )`.
- * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
- * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
- * `add_theme_support( 'amp', array( 'template_dir' => 'my-amp-templates' ) )`
- * it will retain 'paired mode.
+ * Themes can register support for this with `add_theme_support( 'amp' )`:
  *
- * @return boolean Whether this is in AMP 'canonical mode'.
+ *      add_theme_support( 'amp' );
+ *
+ * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
+ * If you want to make available in paired mode, where templates are served in AMP or non-AMP documents, do:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'paired' => true,
+ *      ) );
+ *
+ * Paired mode is also implied if you define a template_dir:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to have AMP-specific templates in addition to serving native AMP, do:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'paired'       => false,
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
+ * for example to always serve the Category template in AMP:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'templates_supported' => array(
+ *              'is_category' => true,
+ *          ),
+ *      ) );
+ *
+ * Or if you want to force AMP to be used on all templates:
+ *
+ *      add_theme_support( 'amp', array(
+ *          'templates_supported' => 'all',
+ *      ) );
+ *
+ * @see AMP_Theme_Support::read_theme_support()
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
-	$support = get_theme_support( 'amp' );
-	if ( true === $support ) {
-		return true;
+	if ( ! current_theme_supports( 'amp' ) ) {
+		return false;
 	}
-	if ( is_array( $support ) ) {
-		$args = array_shift( $support );
-		if ( empty( $args['template_dir'] ) ) {
-			return true;
-		}
+
+	$args = AMP_Theme_Support::get_theme_support_args();
+	if ( isset( $args['paired'] ) ) {
+		return empty( $args['paired'] );
 	}
-	return false;
+
+	// If there is a template_dir, then paired mode is implied.
+	return empty( $args['template_dir'] );
 }
 
 /**
@@ -304,13 +347,14 @@ function amp_load_classes() {
  * @since 0.2
  */
 function amp_add_frontend_actions() {
-	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
+	add_action( 'wp_head', 'amp_add_amphtml_link' );
 }
 
 /**
  * Add post template actions.
  *
  * @since 0.2
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
 	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
@@ -322,15 +366,18 @@ function amp_add_post_template_actions() {
  * Add action to do post template rendering at template_redirect action.
  *
  * @since 0.2
+ * @since 1.0 The amp_render() function is called at template_redirect action priority 11 instead of priority 10.
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_prepare_render() {
-	add_action( 'template_redirect', 'amp_render' );
+	add_action( 'template_redirect', 'amp_render', 11 );
 }
 
 /**
  * Render AMP for queried post.
  *
  * @since 0.1
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_render() {
 	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
@@ -345,6 +392,8 @@ function amp_render() {
  * Render AMP post template.
  *
  * @since 0.5
+ * @deprecated This function is not used when 'amp' theme support is added.
+ *
  * @param WP_Post|int $post Post.
  * @global WP_Query $wp_query
  */
@@ -376,6 +425,8 @@ function amp_render_post( $post ) {
 
 	/**
 	 * Fires before rendering a post in AMP.
+	 *
+	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
 	 *
 	 * @since 0.2
 	 *
@@ -410,16 +461,23 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 
 /**
  * Redirects the old AMP URL to the new AMP URL.
+ *
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
  *
- * @param  string $link New URL of the post.
+ * @since 0.5
+ * @deprecated This function is irrelevant when 'amp' theme support is added.
  *
- * @return string $link URL to be redirected.
+ * @param string $link New URL of the post.
+ * @return string URL to be redirected.
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 
-	if ( is_amp_endpoint() ) {
-		$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
+		if ( current_theme_supports( 'amp' ) ) {
+			$link = add_query_arg( amp_get_slug(), '', $link );
+		} else {
+			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+		}
 	}
 
 	return $link;

@@ -23,15 +23,6 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_builtin_supported_post_types.
-	 *
-	 * @covers AMP_Post_Type_Support::get_builtin_supported_post_types()
-	 */
-	public function test_get_builtin_supported_post_types() {
-		$this->assertEquals( array( 'post' ), AMP_Post_Type_Support::get_builtin_supported_post_types() );
-	}
-
-	/**
 	 * Test get_eligible_post_types.
 	 *
 	 * @covers AMP_Post_Type_Support::get_eligible_post_types()
@@ -46,10 +37,11 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			'public' => false,
 		) );
 
-		$this->assertEquals(
+		$this->assertEqualSets(
 			array(
 				'post',
 				'page',
+				'attachment',
 				'book',
 			),
 			AMP_Post_Type_Support::get_eligible_post_types()
@@ -62,6 +54,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 * @covers AMP_Post_Type_Support::add_post_type_support()
 	 */
 	public function test_add_post_type_support() {
+		remove_theme_support( 'amp' );
 		register_post_type( 'book', array(
 			'label'  => 'Book',
 			'public' => true,
@@ -70,7 +63,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			'label'  => 'Poem',
 			'public' => true,
 		) );
-		AMP_Options_Manager::update_option( 'supported_post_types', array( 'poem' ) );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'poem' ) );
 
 		AMP_Post_Type_Support::add_post_type_support();
 		$this->assertTrue( post_type_supports( 'post', amp_get_slug() ) );
@@ -84,6 +77,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 * @covers AMP_Post_Type_Support::get_support_errors()
 	 */
 	public function test_get_support_error() {
+		remove_theme_support( 'amp' );
 		register_post_type( 'book', array(
 			'label'  => 'Book',
 			'public' => true,
