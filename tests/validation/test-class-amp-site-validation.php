@@ -192,7 +192,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 */
 	public function test_validate_urls() {
 		$single_post_permalink = get_permalink( $this->factory()->post->create() );
-		AMP_Site_Validation::validate_urls( $single_post_permalink );
+		AMP_Site_Validation::validate_urls( array( $single_post_permalink ) );
 		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
 
 		$number_of_posts = 30;
