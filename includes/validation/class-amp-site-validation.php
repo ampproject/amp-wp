@@ -14,14 +14,15 @@ class AMP_Site_Validation {
 
 	/**
 	 * The size of the batch of URLs to validate.
-	 * To avoid making loopback requests for all of a site's posts at the same time.
+	 * Grouped in a batch to avoid making loopback requests for all of a site's URLs at the same time.
 	 *
 	 * @var int
 	 */
 	const BATCH_SIZE = 100;
 
 	/**
-	 * The argument to validate the site.
+	 * The WP-CLI argument to validate the site.
+	 * The full command is: wp amp validate-site.
 	 *
 	 * @var int
 	 */
@@ -30,26 +31,30 @@ class AMP_Site_Validation {
 	/**
 	 * The WP CLI progress bar.
 	 *
+	 * @see https://make.wordpress.org/cli/handbook/internal-api/wp-cli-utils-make-progress-bar/
 	 * @var cli\progress\Bar|WP_CLI\NoOp
 	 */
 	public static $wp_cli_progress;
 
 	/**
-	 * All of the site validation errors.
+	 * All of the site validation errors, regardless of whether they were accepted.
 	 *
-	 * @var array
+	 * @var int
 	 */
 	public static $total_errors = 0;
 
 	/**
 	 * All of the unaccepted site validation errors.
 	 *
-	 * @var array
+	 * If an error has been accepted in the /wp-admin validation UI,
+	 * it won't count toward this.
+	 *
+	 * @var int
 	 */
 	public static $unaccepted_errors = 0;
 
 	/**
-	 * The number of URLs crawled.
+	 * The number of URLs crawled, regardless of whether they have validation errors.
 	 *
 	 * @var int
 	 */
@@ -59,10 +64,9 @@ class AMP_Site_Validation {
 	 * Inits the class.
 	 */
 	public static function init() {
-		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
-			return;
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			WP_CLI::add_command( 'amp', array( __CLASS__, 'crawl_site' ) );
 		}
-		WP_CLI::add_command( 'amp', array( __CLASS__, 'crawl_site' ) );
 	}
 
 	/**
@@ -71,16 +75,17 @@ class AMP_Site_Validation {
 	 * @param array $args The arguments for the command.
 	 */
 	public function crawl_site( $args ) {
-		if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! isset( $args[0] ) && self::WP_CLI_ARGUMENT !== $args[0] ) {
+		if ( ! isset( $args[0] ) || ! self::WP_CLI_ARGUMENT === $args[0] ) {
 			return;
 		}
-		$count_urls_to_crawl = self::count_posts_and_terms();
 
+		$number_urls_to_crawl = self::count_posts_and_terms();
 		WP_CLI::log( sprintf( __( 'Crawling the entire site for AMP validity.', 'amp' ) ) );
+
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar(
-			/* Translators: %d: The number of URLs. */
-			sprintf( __( 'Validating %d URLs...', 'amp' ), $count_urls_to_crawl ),
-			$count_urls_to_crawl
+			/* translators: %d is the number of URLs. */
+			sprintf( __( 'Validating %d URLs...', 'amp' ), $number_urls_to_crawl ),
+			$number_urls_to_crawl
 		);
 		self::validate_entire_site_urls();
 		self::$wp_cli_progress->finish();
@@ -93,7 +98,7 @@ class AMP_Site_Validation {
 
 		WP_CLI::success(
 			sprintf(
-				/* Translators: $1%d: the number of URls crawled, $2%d: the number of validation issues, $3%d: The number of unaccepted issues, $4%s: link for more details */
+				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the link for more details */
 				__( "Of the %1\$d URLs crawled, %2\$d have AMP validation issue(s), and %3\$d have unaccepted issue(s).\nFor more details, please see: \n%4\$s", 'amp' ),
 				self::$number_crawled,
 				self::$total_errors,
@@ -205,15 +210,11 @@ class AMP_Site_Validation {
 
 	/**
 	 * Validates the URLs of the entire site.
-	 *
-	 * Accepts an optional parameter of a WP-CLI progress bar object.
-	 * Calling its tick() method updates the display in WP-CLI to show the percentage of the site crawl that's complete.
-	 *
-	 * For example, the <button> in /wp-admin that makes an AJAX request for this will need a different response than a WP-CLI command.
+	 * Includes the URLs of public, published posts, and public taxonomies.
 	 */
 	public static function validate_entire_site_urls() {
 		// Validate the homepage.
-		self::validate_urls( home_url( '/' ) );
+		self::validate_urls( array( home_url( '/' ) ) );
 
 		// Validate all public, published posts.
 		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
@@ -243,19 +244,12 @@ class AMP_Site_Validation {
 	}
 
 	/**
-	 * Validates a single URL, and stores the URL in a property.
+	 * Validates a single URL, and increments the counts as needed.
 	 *
-	 * @todo: Maybe storing the URLS in the property isn't needed, as AMP_Validation_Manager stores the actual errors.
-	 * This could be an extremely large array.
-	 * For now, this is helpful in unit testing.
-	 * @param array|string $urls An array of URLs to validate, or a single string of a URL.
+	 * @param array $urls The URLs to validate.
 	 * @return void
 	 */
 	public static function validate_urls( $urls ) {
-		if ( is_string( $urls ) ) {
-			$urls = array( $urls );
-		}
-
 		foreach ( $urls as $url ) {
 			$validity = AMP_Validation_Manager::validate_url( $url );
 			if ( ! is_wp_error( $validity ) ) {
