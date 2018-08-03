@@ -812,6 +812,42 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				array( 'amp-addthis' ),
 			),
+
+			'amp-3d-gltf' => array(
+				'<amp-3d-gltf layout="responsive" width="320" height="240" alpha="true" antialiasing="true" src="path/to/model.glb"></amp-3d-gltf>',
+				null,
+				array( 'amp-3d-gltf' ),
+			),
+
+			'amp-date-countdown' => array(
+				'<amp-date-countdown timestamp-seconds="2147483648" layout="fixed-height" height="50"><template type="amp-mustache"><p class="p1"> {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.</p></template></amp-date-countdown>',
+				null,
+				array( 'amp-date-countdown', 'amp-mustache' ),
+			),
+
+			'amp-google-document-embed' => array(
+				'<amp-google-document-embed src="https://www.example.com/document.pdf" width="800" height="600" layout="responsive"></amp-google-document-embed>',
+				null,
+				array( 'amp-google-document-embed' ),
+			),
+
+			'amp-orientation-observer' => array(
+				'<amp-orientation-observer on="beta:clockAnim1.seekTo(percent=event.percent)" layout="nodisplay"></amp-orientation-observer>',
+				null,
+				array( 'amp-orientation-observer' ),
+			),
+
+			'amp-pan-zoom' => array(
+				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill"><svg> ... </svg></amp-pan-zoom></amp-layout>',
+				null,
+				array( 'amp-pan-zoom' ),
+			),
+
+			'amp-yotpo' => array(
+				'<amp-yotpo width="550" height="700" layout="responsive" data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5" data-widget-type="MainWidget" data-product-id="9408616206" data-name="hockey skates" data-url="https://ranabram.myshopify.com/products/hockey-skates" data-image-url="https://ichef.bbci.co.uk/news/320/media/images/83351000/jpg/_83351965_explorer273lincolnshirewoldssouthpicturebynicholassilkstone.jpg" data-descriptipn="skates" data-yotpo-element-id="1"></amp-yotpo>',
+				null,
+				array( 'amp-yotpo' ),
+			),
 		);
 	}
 
