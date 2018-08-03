@@ -167,7 +167,7 @@ if ( defined( 'WP_CLI' ) ) {
 		$post_id = create_gutenberg_test_post( get_test_block_fixtures() );
 		\WP_CLI::success( sprintf( 'The test page is at: %s', \amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( \Exception $e ) {
-		\wP_CLI::error( $e->getMessage() );
+		\WP_CLI::error( $e->getMessage() );
 	}
 } else {
 	echo "This script should be run WP-CLI via: wp eval-file bin/create-gutenberg-test-post.php\n";

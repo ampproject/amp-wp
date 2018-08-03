@@ -37,14 +37,14 @@ class AMP_Site_Validation {
 	public static $wp_cli_progress;
 
 	/**
-	 * All of the site validation errors, regardless of whether they were accepted.
+	 * The total number of validation errors, regardless of whether they were accepted.
 	 *
 	 * @var int
 	 */
 	public static $total_errors = 0;
 
 	/**
-	 * All of the unaccepted site validation errors.
+	 * The total number of unaccepted validation errors.
 	 *
 	 * If an error has been accepted in the /wp-admin validation UI,
 	 * it won't count toward this.
@@ -74,7 +74,7 @@ class AMP_Site_Validation {
 	 *
 	 * @param array $args The arguments for the command.
 	 */
-	public function crawl_site( $args ) {
+	public static function crawl_site( $args ) {
 		if ( ! isset( $args[0] ) || ! self::WP_CLI_ARGUMENT === $args[0] ) {
 			return;
 		}
@@ -83,7 +83,7 @@ class AMP_Site_Validation {
 		WP_CLI::log( sprintf( __( 'Crawling the entire site for AMP validity.', 'amp' ) ) );
 
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar(
-			/* translators: %d is the number of URLs. */
+			/* translators: %d is the number of URLs */
 			sprintf( __( 'Validating %d URLs...', 'amp' ), $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
