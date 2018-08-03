@@ -30,8 +30,8 @@ class AMP_Image_Dimension_Extractor {
 		$extracted_dimensions = apply_filters( 'amp_extract_image_dimensions_batch', $extracted_dimensions );
 
 		// We need to return a map with the original (un-normalized URL) as we that to match nodes that need dimensions.
-		foreach ($url_map as $original_url => $normalized_url) {
-			$return_dimensions[$original_url] = $extracted_dimensions[$normalized_url];
+		foreach ( $url_map as $original_url => $normalized_url ) {
+			$return_dimensions[ $original_url ] = $extracted_dimensions[ $normalized_url ];
 		}
 
 		return $return_dimensions;
