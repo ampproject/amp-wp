@@ -569,7 +569,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'disallowed_attributes' => array(
-				'<a href="/path/to/file.jpg" style="border: 1px solid red;">Link</a>',
+				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
@@ -583,12 +583,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'multiple_disallowed_attributes' => array(
-				'<a href="/path/to/file.jpg" style="border: 1px solid red;" onclick="alert(e);">Link</a>',
+				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;" onclick="alert(e);">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
 			'attribute_recursive' => array(
-				'<div style="border: 1px solid red;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
+				'<div style="border: 1px solid red !important;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
 				'<div><a href="/path/to/file.jpg">Hello World</a></div>',
 			),
 
@@ -668,7 +668,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'a_empty_with_children_with_restricted_attributes' => array(
-				'<a><span style="color: red;">Red</span>&amp;<span style="color: blue;">Orange</span></a>',
+				'<a><span style="color: red !important;">Red</span>&amp;<span style="color: blue !important;">Orange</span></a>',
 				'<a><span>Red</span>&amp;<span>Orange</span></a>',
 			),
 
@@ -716,7 +716,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements' => array(
-				'<font size="1">Headline</font><span style="color: blue">Span</span>',
+				'<font size="1">Headline</font><span style="color: blue !important">Span</span>',
 				'Headline<span>Span</span>',
 			),
 
@@ -796,7 +796,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'non-layout-col-element-attrs' => array(
-				'<table><col class="foo" width="123" style="background:red;"><col class="bar" style="background:green;" width="12%"><col class="baz" style="background:blue;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				'<table><col class="foo" width="123" style="background:red !important;"><col class="bar" style="background:green !important;" width="12%"><col class="baz" style="background:blue !important;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				array(),
 			),
