@@ -1735,5 +1735,4 @@ class AMP_Validation_Manager {
 		) );
 		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', $data ) );
 	}
-
 }

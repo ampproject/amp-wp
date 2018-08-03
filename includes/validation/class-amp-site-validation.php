@@ -8,6 +8,9 @@
 /**
  * Class AMP_Site_Validation
  *
+ * Registers a WP-CLI command to crawl the entire site to check for AMP validity.
+ * To use this, run: wp amp validate-site.
+ *
  * @since 1.0
  */
 class AMP_Site_Validation {
