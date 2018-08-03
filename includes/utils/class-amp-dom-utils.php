@@ -334,32 +334,21 @@ class AMP_DOM_Utils {
 	 * @see AMP_DOM_Utils::get_content_from_dom_node() Reciprocal function.
 	 *
 	 * @param DOMDocument $dom Represents an HTML document from which to extract HTML content.
-	 *
 	 * @return string Returns the HTML content of the body element represented in the DOMDocument.
 	 */
 	public static function get_content_from_dom( $dom ) {
-
-		/**
-		 * We only want children of the body tag, since we have a subset of HTML.
-		 *
-		 * @todo We will want to get the full HTML eventually.
-		 */
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
-		/**
-		 * The DOMDocument may contain no body. In which case return nothing.
-		 */
+		// The DOMDocument may contain no body. In which case return nothing.
 		if ( is_null( $body ) ) {
 			return '';
 		}
 
-		$out = '';
-
-		foreach ( $body->childNodes as $child_node ) {
-			$out .= self::get_content_from_dom_node( $dom, $child_node );
-		}
-
-		return $out;
+		return preg_replace(
+			'#^.*?<body.*?>(.*)</body>.*?$#si',
+			'$1',
+			self::get_content_from_dom_node( $dom, $body )
+		);
 	}
 
 
@@ -421,7 +410,53 @@ class AMP_DOM_Utils {
 			}
 		}
 
-		$html = $dom->saveHTML( $node );
+		if ( version_compare( PHP_VERSION, '7.3', '>=' ) ) {
+			$html = $dom->saveHTML( $node );
+		} else {
+			/*
+			 * Temporarily add fragment boundary comments in order to locate the desired node to extract from
+			 * the given HTML document. This is required because libxml seems to only preserve whitespace when
+			 * serializing when calling DOMDocument::saveHTML() on the entire document. If you pass the element
+			 * to DOMDocument::saveHTML() then formatting whitespace gets added unexpectedly. This is seen to
+			 * be fixed in PHP 7.3, but for older versions of PHP the following workaround is needed.
+			 */
+
+			/*
+			 * First make sure meta[charset] gets http-equiv and content attributes to work around issue
+			 * with $dom->saveHTML() erroneously encoding UTF-8 as HTML entities.
+			 */
+			$meta_charset = $xpath->query( '/html/head/meta[ @charset ]' )->item( 0 );
+			if ( $meta_charset ) {
+				$meta_charset->setAttribute( 'http-equiv', 'Content-Type' );
+				$meta_charset->setAttribute( 'content', sprintf( 'text/html; charset=%s', $meta_charset->getAttribute( 'charset' ) ) );
+			}
+
+			$boundary       = 'fragment_boundary:' . (string) wp_rand();
+			$start_boundary = $boundary . ':start';
+			$end_boundary   = $boundary . ':end';
+			$comment_start  = $dom->createComment( $start_boundary );
+			$comment_end    = $dom->createComment( $end_boundary );
+			$node->parentNode->insertBefore( $comment_start, $node );
+			$node->parentNode->insertBefore( $comment_end, $node->nextSibling );
+			$html = preg_replace(
+				'/^.*?' . preg_quote( "<!--$start_boundary-->", '/' ) . '(.*)' . preg_quote( "<!--$end_boundary-->", '/' ) . '.*?\s*$/s',
+				'$1',
+				$dom->saveHTML()
+			);
+
+			// Remove meta[http-equiv] and meta[content] attributes which were added to meta[charset] for HTML serialization.
+			if ( $meta_charset ) {
+				if ( $dom->documentElement === $node ) {
+					$html = preg_replace( '#(<meta\scharset=\S+)[^<]*?>#i', '$1>', $html );
+				}
+
+				$meta_charset->removeAttribute( 'http-equiv' );
+				$meta_charset->removeAttribute( 'content' );
+			}
+
+			$node->parentNode->removeChild( $comment_start );
+			$node->parentNode->removeChild( $comment_end );
+		}
 
 		// Whitespace just causes unit tests to fail... so whitespace begone.
 		if ( '' === trim( $html ) ) {

@@ -943,7 +943,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'style_amp_keyframes_last_child'   => array(
 				'<b>before</b> <style amp-keyframes>@keyframes anim1 {}</style> between <style amp-keyframes>@keyframes anim2 {}</style> as <b>after</b>',
-				'<b>before</b> between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
+				'<b>before</b>  between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
 				array(),
 			),
 
@@ -1262,5 +1262,36 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			) ) . '/s',
 			$stylesheets[1]
 		);
+	}
+
+	/**
+	 * Test CSS with Unicode characters.
+	 *
+	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
+	 */
+	public function test_unicode_stylesheet() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html amp>
+			<head>
+				<meta charset="utf-8">
+				<?php wp_print_styles( array( 'dashicons' ) ); ?>
+				<style>span::after { content:"⚡️"; }</style>
+			</head>
+			<body>
+				<span class="dashicons dashicons-admin-customizer"></span>
+			</body>
+		</html>
+		<?php
+		$original_html  = trim( ob_get_clean() );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+
+		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
+		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
 	}
 }
