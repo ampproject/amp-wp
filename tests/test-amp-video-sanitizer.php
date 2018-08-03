@@ -74,18 +74,26 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'multiple_same_video' => array(
-				'<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+				implode( '', array(
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+				) ),
 				'<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video>',
 			),
 
 			'multiple_different_videos' => array(
-				'<video src="https://example.com/video1.mp4" width="480" height="300"></video>
-<video src="https://example.com/video2.ogv" width="300" height="480"></video>
-<video src="https://example.com/video3.webm" height="100" width="200"></video>',
-				'<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"></amp-video><amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"></amp-video>',
+				implode( '', array(
+					'<video src="https://example.com/video1.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video2.ogv" width="300" height="480"></video>',
+					'<video src="https://example.com/video3.webm" height="100" width="200"></video>',
+				) ),
+				implode( '', array(
+					'<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"></amp-video>',
+					'<amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"></amp-video>',
+					'<amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"></amp-video>',
+				) ),
 			),
 
 			'https_not_required' => array(
