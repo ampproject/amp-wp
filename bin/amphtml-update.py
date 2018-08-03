@@ -370,7 +370,7 @@ def GetTagSpec(tag_spec, attr_lists):
 						continue
 					css_spec['allowed_at_rules'].append( at_rule_spec.name )
 
-				for css_spec_field_name in ( 'allowed_declarations', 'font_url_spec', 'image_url_spec', 'validate_keyframes' ):
+				for css_spec_field_name in ( 'allowed_declarations', 'declaration', 'font_url_spec', 'image_url_spec', 'validate_keyframes' ):
 					if not hasattr( field_value, css_spec_field_name ):
 						continue
 					css_spec_field_value = getattr( field_value, css_spec_field_name )
@@ -522,12 +522,12 @@ def GetValues(attr_spec):
 		value_dict['mandatory'] = attr_spec.mandatory
 
 	# Add allowed value
-	if attr_spec.HasField('value'):
-		value_dict['value'] = attr_spec.value
+	if attr_spec.value:
+		value_dict['value'] = list( attr_spec.value )
 
 	# value_casei
-	if attr_spec.HasField('value_casei'):
-		value_dict['value_casei'] = attr_spec.value_casei
+	if attr_spec.value_casei:
+		value_dict['value_casei'] = list( attr_spec.value_casei )
 
 	# value_regex
 	if attr_spec.HasField('value_regex'):

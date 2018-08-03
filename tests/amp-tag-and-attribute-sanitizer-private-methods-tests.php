@@ -168,7 +168,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => '_blank',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_value_regex',
+					'func_name' => 'check_attr_spec_rule_value',
 				),
 				'expected' => AMP_Rule_Spec::PASS,
 			),
@@ -180,7 +180,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => '_blankzzz',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_value_regex',
+					'func_name' => 'check_attr_spec_rule_value',
 				),
 				'expected' => AMP_Rule_Spec::FAIL,
 			),
@@ -207,7 +207,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => 'false',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_value_regex_casei',
+					'func_name' => 'check_attr_spec_rule_value_casei',
 				),
 				'expected' => AMP_Rule_Spec::PASS,
 			),
@@ -219,7 +219,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => 'FALSE',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_value_regex_casei',
+					'func_name' => 'check_attr_spec_rule_value_casei',
 				),
 				'expected' => AMP_Rule_Spec::PASS,
 			),
@@ -231,7 +231,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => 'invalid',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_value_regex_casei',
+					'func_name' => 'check_attr_spec_rule_value_casei',
 				),
 				'expected' => AMP_Rule_Spec::FAIL,
 			),
@@ -1447,7 +1447,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
 						'value_url' => array(
-							'allowed_protocol' => array(
+							'protocol' => array(
 								'http',
 								'https',
 							),
@@ -1463,7 +1463,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
 						'value_url' => array(
-							'allowed_protocol' => array(
+							'protocol' => array(
 								'http',
 								'https',
 							),
@@ -1479,7 +1479,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
 						'value_url' => array(
-							'allowed_protocol' => array(
+							'protocol' => array(
 								'http',
 								'https',
 							),
@@ -1495,7 +1495,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attr_name'      => 'attribute1',
 					'attr_spec_rule' => array(
 						'value_url' => array(
-							'allowed_protocol' => array(
+							'protocol' => array(
 								'http',
 								'https',
 							),
@@ -1514,7 +1514,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 							'attribute1_alternative1',
 						),
 						'value_url'         => array(
-							'allowed_protocol' => array(
+							'protocol' => array(
 								'http',
 								'https',
 							),
@@ -1533,7 +1533,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 							'attribute1_alternative1',
 						),
 						'value_url'         => array(
-							'allowed_protocol' => array(
+							'protocol' => array(
 								'http',
 								'https',
 							),

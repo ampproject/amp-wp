@@ -533,8 +533,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'leave_attribute_on_node_with_present_mandatory_parent' => array(
-				'<form action="form.php" target="_top"><div submit-success>This is a test.</div></form>',
-				'<form action="form.php" target="_top"><div submit-success>This is a test.</div></form>',
+				'<form action-xhr="form.php" method="post" target="_top"><div submit-success>This is a test.</div></form>',
+				null,
 				array( 'amp-form' ),
 			),
 
