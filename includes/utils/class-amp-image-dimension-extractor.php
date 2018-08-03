@@ -5,7 +5,15 @@ class AMP_Image_Dimension_Extractor {
 	const STATUS_FAILED_LAST_ATTEMPT = 'failed';
 	const STATUS_IMAGE_EXTRACTION_FAILED = 'failed';
 
-	static public function extract( $urls ) {
+	/**
+	 * Extract dimensions from image URLs.
+	 *
+	 * @since 0.2
+	 *
+	 * @param array|string $urls Array of URLs to extract dimensions from, or a single URL string.
+	 * @return array|string Extracted dimensions keyed by original URL, or else the single set of dimensions if one URL string is passed.
+	 */
+	public static function extract( $urls ) {
 		if ( ! self::$callbacks_registered ) {
 			self::register_callbacks();
 		}
