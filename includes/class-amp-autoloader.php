@@ -35,6 +35,7 @@ class AMP_Autoloader {
 		'AMP_Comment_Walker'                          => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                           => 'includes/admin/class-amp-post-meta-box',
+		'AMP_Admin_Pointer'                           => 'includes/admin/class-amp-admin-pointer',
 		'AMP_Post_Type_Support'                       => 'includes/class-amp-post-type-support',
 		'AMP_Base_Embed_Handler'                      => 'includes/embeds/class-amp-base-embed-handler',
 		'AMP_DailyMotion_Embed_Handler'               => 'includes/embeds/class-amp-dailymotion-embed',

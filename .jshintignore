@@ -1,4 +1,4 @@
 **/*.min.js
 **/node_modules/**
 **/vendor/**
-**/assets/js/amp-blocks-compiled.js
+**/assets/js/*-compiled.js
