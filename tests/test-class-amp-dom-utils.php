@@ -283,4 +283,24 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 		$this->assertSame( PREG_NO_ERROR, preg_last_error(), 'Probably failed when backtrack limit was exhausted.' );
 	}
+
+	/**
+	 * Test preserving whitespace when serializing DOMDocument as HTML string.
+	 *
+	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
+	 * @covers \AMP_DOM_Utils::get_content_from_dom()
+	 * @link https://github.com/Automattic/amp-wp/issues/1304
+	 */
+	public function test_whitespace_preservation() {
+		$body = " start <ul><li>First</li><li>Second</li></ul><style>pre::before { content:'⚡️'; }</style><script type=\"application/json\">\"⚡️\"</script><pre>\t* one\n\t* two\n\t* three</pre> end ";
+		$html = "<html><head><meta charset=\"utf-8\"></head><body data-foo=\"&gt;\">$body</body></html>";
+
+		$dom = AMP_DOM_Utils::get_dom( "<!DOCTYPE html>$html" );
+
+		$output = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$this->assertEquals( $html, $output );
+
+		$output = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $body, $output );
+	}
 }
