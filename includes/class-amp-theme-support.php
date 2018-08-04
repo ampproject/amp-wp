@@ -754,16 +754,15 @@ class AMP_Theme_Support {
 		} );
 
 		/*
-		 * "AMP HTML documents MUST contain the AMP boilerplate code (head > style[amp-boilerplate] and noscript > style[amp-boilerplate]) in their head tag."
-		 * https://www.ampproject.org/docs/fundamentals/spec#required-markup
+		 * "AMP HTML documents MUST contain the AMP boilerplate code (head > style[amp-boilerplate] and noscript > style[amp-boilerplate])
+		 * in their head tag." {@link https://www.ampproject.org/docs/fundamentals/spec#required-markup AMP Required markup}
 		 *
 		 * After "Specify the <link> tag for your favicon.", then
 		 * "Specify any custom styles by using the <style amp-custom> tag."
 		 *
 		 * Note that the boilerplate is added at the very end because:
-		 * "Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles
-		 * from accidentally overriding the boilerplate css rules."
-		 * https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit
+		 * "Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles from accidentally
+		 * overriding the boilerplate css rules." {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
 		 *
 		 * Other required markup is added in the ensure_required_markup method, including meta charset, meta viewport, and rel=canonical link.
 		 */
@@ -1366,11 +1365,11 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Ensure markup required by AMP, and ensure the elements are in the optimal loading order.
+	 * Ensure the markup exists as required by AMP and elements are in the optimal loading order.
 	 *
-	 * Ensure meta[charset], meta[name=viewport], and link[rel=canonical]; a the whitelist sanitizer
-	 * may have removed an illegal meta[http-equiv] or meta[name=viewport]. Core only outputs a
-	 * canonical URL by default if a singular post. Add preload links.
+	 * Ensure meta[charset], meta[name=viewport], and link[rel=canonical] exist, as the whitelist sanitizer
+	 * may have removed an illegal meta[http-equiv] or meta[name=viewport]. For a singular post, core only outputs a
+	 * canonical URL by default. Adds the preload links.
 	 *
 	 * @since 0.7
 	 * @link https://www.ampproject.org/docs/reference/spec#required-markup
@@ -1396,7 +1395,7 @@ class AMP_Theme_Support {
 			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
 		}
 
-		// Ensure there is a Schema.org script.
+		// Ensure there is a schema.org script.
 		$schema_org_meta_script = null;
 		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
 			if ( 'application/ld+json' === $script->getAttribute( 'type' ) && false !== strpos( $script->nodeValue, 'schema.org' ) ) {
@@ -1437,13 +1436,13 @@ class AMP_Theme_Support {
 		 *
 		 * "The first tag should be the meta charset tag, followed by any remaining meta tags."
 		 *
-		 * https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos
+		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
 		 */
 		$meta_charset  = null;
 		$meta_viewport = null;
 		$meta_elements = array();
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			if ( $meta->hasAttribute( 'charset' ) ) { // There will not be a meta[http-equiv] because sanitizer would have removed.
+			if ( $meta->hasAttribute( 'charset' ) ) { // There will not be a meta[http-equiv] because the sanitizer removed it.
 				$meta_charset = $meta;
 			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
 				$meta_viewport = $meta;
@@ -1485,7 +1484,7 @@ class AMP_Theme_Support {
 			$previous_node = $title;
 		}
 
-		// See <https://github.com/ampproject/amphtml/blob/2fd30ca984bceac05905bd5b17f9e0010629d719/src/render-delaying-services.js#L39-L43>.
+		// @see https://github.com/ampproject/amphtml/blob/2fd30ca984bceac05905bd5b17f9e0010629d719/src/render-delaying-services.js#L39-L43 AMPHTML Render Delaying Services SERVICES definition.
 		$render_delaying_extensions = array(
 			'amp-experiment',
 			'amp-dynamic-css-classes',
@@ -1535,11 +1534,12 @@ class AMP_Theme_Support {
 			$amp_scripts[ $missing_script_handle ] = AMP_DOM_Utils::create_node( $dom, 'script', $attrs );
 		}
 
-		/*
-		 * "Next, preload the AMP runtime v0.js <script> tag with  <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
+		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		 *
+		 * "Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
 		 * The AMP runtime should start downloading as soon as possible because the AMP boilerplate hides the document via body { visibility:hidden }
 		 * until the AMP runtime has loaded. Preloading the AMP runtime tells the browser to download the script with a higher priority."
-		 * https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos
+		 * {@see https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
 		 */
 		$prioritized_preloads = array();
 		if ( ! isset( $links['preload'] ) ) {
@@ -1579,8 +1579,8 @@ class AMP_Theme_Support {
 		/*
 		 * "Specify the <script> tags for render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, and amp-story)."
 		 * "Specify the <script> tags for remaining extensions (e.g., amp-bind, ...). These extensions are not render-delaying and therefore
-		 *  should not be preloaded because they might take away important bandwidth for the initial render."
-		 * https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#
+		 * should not be preloaded because they might take away important bandwidth for the initial render."
+		 * {@see https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
 		 */
 		if ( isset( $amp_scripts['amp-runtime'] ) ) {
 			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
@@ -1600,7 +1600,7 @@ class AMP_Theme_Support {
 
 		/*
 		 * "Specify the <link> tag for your favicon."
-		 * https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit
+		 * {@see https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
 		 */
 		if ( isset( $links['icon'] ) ) {
 			foreach ( $links['icon'] as $link ) {
@@ -1876,7 +1876,7 @@ class AMP_Theme_Support {
 
 		$dom_serialize_start = microtime( true );
 
-		// Gather the all component scripts that are used in the document, and render any not already printed.
+		// Gather all component scripts that are used in the document and then render any not already printed.
 		$amp_scripts = $assets['scripts'];
 		foreach ( self::$embed_handlers as $embed_handler ) {
 			$amp_scripts = array_merge(
@@ -1886,7 +1886,7 @@ class AMP_Theme_Support {
 		}
 		foreach ( $amp_scripts as $handle => $src ) {
 			/*
-			 * Make sure the src is up to date. This allows for embed handlers to override the
+			 * Make sure the src is up-to-date. This allows for embed handlers to override the
 			 * default extension version by defining a different URL.
 			 */
 			if ( is_string( $src ) && wp_script_is( $handle, 'registered' ) ) {
