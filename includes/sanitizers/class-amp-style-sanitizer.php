@@ -1769,12 +1769,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
 			$included_size    = 0;
+			$excluded_size    = 0;
 			$included_sources = array();
 			foreach ( $stylesheet_sets['custom']['pending_stylesheets'] as $i => $pending_stylesheet ) {
 				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) ) {
 					continue;
 				}
-				$message = $pending_stylesheet['node']->nodeName;
+				$message  = sprintf( '% 6d B: ', $pending_stylesheet['size'] );
+				$message .= $pending_stylesheet['node']->nodeName;
 				if ( $pending_stylesheet['node']->getAttribute( 'id' ) ) {
 					$message .= '#' . $pending_stylesheet['node']->getAttribute( 'id' );
 				}
@@ -1786,30 +1788,29 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
 					}
 				}
-				$message .= sprintf(
-					/* translators: %d is number of bytes */
-					_n( ' (%d byte)', ' (%d bytes)', $pending_stylesheet['size'], 'amp' ),
-					$pending_stylesheet['size']
-				);
 
 				if ( ! empty( $pending_stylesheet['included'] ) ) {
 					$included_sources[] = $message;
 					$included_size     += $pending_stylesheet['size'];
 				} else {
 					$excluded_sources[] = $message;
+					$excluded_size     += $pending_stylesheet['size'];
 				}
 			}
 			$comment = '';
 			if ( ! empty( $included_sources ) ) {
-				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n- " . implode( "\n- ", $included_sources ) . "\n";
+				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n" . implode( "\n", $included_sources ) . "\n";
 				/* translators: %d is number of bytes */
-				$comment .= sprintf( esc_html__( 'Total size: %d bytes', 'amp' ), $included_size ) . "\n";
+				$comment .= sprintf( esc_html__( 'Total included size: %d bytes', 'amp' ), $included_size ) . "\n";
 			}
 			if ( ! empty( $excluded_sources ) ) {
 				if ( $comment ) {
 					$comment .= "\n";
 				}
-				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n- " . implode( "\n- ", $excluded_sources ) . "\n";
+				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n" . implode( "\n", $excluded_sources ) . "\n";
+
+				/* translators: %d is number of bytes */
+				$comment .= sprintf( esc_html__( 'Total excluded size: %d bytes', 'amp' ), $excluded_size ) . "\n";
 			}
 			if ( $comment ) {
 				$this->amp_custom_style_element->parentNode->insertBefore(
