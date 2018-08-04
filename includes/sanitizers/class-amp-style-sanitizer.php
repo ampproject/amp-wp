@@ -1746,7 +1746,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) ) {
 					continue;
 				}
-				$message  = sprintf( '% 6dB: ', $pending_stylesheet['size'] );
+				$message  = sprintf( '% 6d B: ', $pending_stylesheet['size'] );
 				$message .= $pending_stylesheet['node']->nodeName;
 				if ( $pending_stylesheet['node']->getAttribute( 'id' ) ) {
 					$message .= '#' . $pending_stylesheet['node']->getAttribute( 'id' );
