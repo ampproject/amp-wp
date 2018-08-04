@@ -1539,7 +1539,7 @@ class AMP_Theme_Support {
 		 * "Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
 		 * The AMP runtime should start downloading as soon as possible because the AMP boilerplate hides the document via body { visibility:hidden }
 		 * until the AMP runtime has loaded. Preloading the AMP runtime tells the browser to download the script with a higher priority."
-		 * {@see https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
+		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
 		 */
 		$prioritized_preloads = array();
 		if ( ! isset( $links['preload'] ) ) {
@@ -1580,7 +1580,7 @@ class AMP_Theme_Support {
 		 * "Specify the <script> tags for render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, and amp-story)."
 		 * "Specify the <script> tags for remaining extensions (e.g., amp-bind, ...). These extensions are not render-delaying and therefore
 		 * should not be preloaded because they might take away important bandwidth for the initial render."
-		 * {@see https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
+		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
 		 */
 		if ( isset( $amp_scripts['amp-runtime'] ) ) {
 			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
@@ -1600,7 +1600,7 @@ class AMP_Theme_Support {
 
 		/*
 		 * "Specify the <link> tag for your favicon."
-		 * {@see https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
+		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
 		 */
 		if ( isset( $links['icon'] ) ) {
 			foreach ( $links['icon'] as $link ) {
