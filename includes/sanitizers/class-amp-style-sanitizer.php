@@ -171,6 +171,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $parse_css_duration = 0.0;
 
 	/**
+	 * THe HEAD element.
+	 *
+	 * @var DOMElement
+	 */
+	private $head;
+
+	/**
 	 * Current node being processed.
 	 *
 	 * @var DOMElement|DOMAttr
@@ -365,6 +372,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Do nothing if inline styles are allowed.
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 			return;
+		}
+
+		$this->head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+		if ( ! $this->head ) {
+			$this->head = $this->dom->createElement( 'head' );
+			$this->dom->documentElement->insertBefore( $this->head, $this->dom->documentElement->firstChild );
 		}
 
 		$this->parse_css_duration = 0.0;
@@ -609,6 +622,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( ! $element->hasAttribute( 'crossorigin' ) ) {
 				$element->setAttribute( 'crossorigin', 'anonymous' );
+			}
+
+			/*
+			 * Make sure rel=preconnect link is present for Google Fonts stylesheet.
+			 * Note that core themes normally do this already, per <https://core.trac.wordpress.org/ticket/37171>.
+			 * But not always, per <https://core.trac.wordpress.org/ticket/44668>.
+			 * This also ensures that other themes will get the preconnect link when
+			 * they don't implement the resource hint.
+			 */
+			$needs_preconnect_link = (
+				'https://fonts.googleapis.com/' === substr( $normalized_url, 0, 29 )
+				&&
+				0 === $this->xpath->query( '//link[ @rel = "preconnect" and @crossorigin and starts-with( @href, "https://fonts.gstatic.com" ) ]', $this->head )->length
+			);
+			if ( $needs_preconnect_link ) {
+				$link = AMP_DOM_Utils::create_node( $this->dom, 'link', array(
+					'rel'         => 'preconnect',
+					'href'        => 'https://fonts.gstatic.com/',
+					'crossorigin' => '',
+				) );
+				$this->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
 			}
 			return;
 		}
@@ -1717,12 +1751,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $this->amp_custom_style_element ) {
 				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
 				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
-				$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-				if ( ! $head ) {
-					$head = $this->dom->createElement( 'head' );
-					$this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
-				}
-				$head->appendChild( $this->amp_custom_style_element );
+				$this->head->appendChild( $this->amp_custom_style_element );
 			}
 
 			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
