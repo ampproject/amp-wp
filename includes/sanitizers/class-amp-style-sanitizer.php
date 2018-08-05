@@ -33,6 +33,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
 
 	/**
+	 * Inline style selector's specificity multiplier, i.e. used to generate the number of ':not(#_)' placeholders.
+	 *
+	 * @var int
+	 */
+	const INLINE_SPECIFICITY_MULTIPLIER = 5; // @todo The correctness of using "5" should be validated.
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -1593,7 +1600,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			function( Selector $old_selector ) {
 				$specific = ':not(#_)'; // Here "_" is just a short single-char ID.
 
-				$selector_mod = str_repeat( $specific, 5 + 1 + floor( $old_selector->getSpecificity() / 100 ) );
+				$selector_mod = str_repeat( $specific, self::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 ) );
 				if ( $old_selector->getSpecificity() % 100 > 0 ) {
 					$selector_mod .= $specific;
 				}
@@ -1646,7 +1653,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$class = 'amp-wp-' . substr( md5( $style_attribute->nodeValue ), 0, 7 );
-		$root  = ':root' . str_repeat( ':not(#_)', 5 ); // @todo The correctness of using "5" should be validated.
+		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
 		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
