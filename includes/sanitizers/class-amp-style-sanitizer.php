@@ -1598,15 +1598,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * @return Selector The new more-specific selector.
 			 */
 			function( Selector $old_selector ) {
-				$specific = ':not(#_)'; // Here "_" is just a short single-char ID.
-
-				$selector_mod = str_repeat( $specific, self::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 ) );
+				// Calculate the specificity multiplier for the placeholder.
+				$specificity_multiplier = self::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
 				if ( $old_selector->getSpecificity() % 100 > 0 ) {
-					$selector_mod .= $specific;
+					$specificity_multiplier++;
 				}
 				if ( $old_selector->getSpecificity() % 10 > 0 ) {
-					$selector_mod .= $specific;
+					$specificity_multiplier++;
 				}
+				$selector_mod = str_repeat( ':not(#_)', $specificity_multiplier ); // Here "_" is just a short single-char ID.
 
 				$new_selector = $old_selector->getSelector();
 
