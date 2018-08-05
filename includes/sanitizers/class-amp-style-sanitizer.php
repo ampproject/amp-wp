@@ -1593,7 +1593,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			function( Selector $old_selector ) {
 				$specific = ':not(#_)'; // Here "_" is just a short single-char ID.
 
-				$selector_mod = str_repeat( $specific, floor( $old_selector->getSpecificity() / 100 ) );
+				$selector_mod = str_repeat( $specific, 5 + 1 + floor( $old_selector->getSpecificity() / 100 ) );
 				if ( $old_selector->getSpecificity() % 100 > 0 ) {
 					$selector_mod .= $specific;
 				}
