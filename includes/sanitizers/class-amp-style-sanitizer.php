@@ -1599,7 +1599,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			function( Selector $old_selector ) {
 				// Calculate the specificity multiplier for the placeholder.
-				$specificity_multiplier = self::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
+				$specificity_multiplier = AMP_Style_Sanitizer::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
 				if ( $old_selector->getSpecificity() % 100 > 0 ) {
 					$specificity_multiplier++;
 				}
