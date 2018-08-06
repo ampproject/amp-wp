@@ -1571,6 +1571,9 @@ class AMP_Theme_Support {
 				continue;
 			}
 			foreach ( $links[ $rel ] as $link ) {
+				if ( $link->parentNode ) {
+					$link->parentNode->removeChild( $link ); // So we can move it.
+				}
 				$head->insertBefore( $link, $previous_node->nextSibling );
 				$previous_node = $link;
 			}
