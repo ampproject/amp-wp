@@ -1564,7 +1564,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test the response is not cached after exceeding the cache miss threshold.
-		$post_processor_cache_key = md5( amp_get_current_url() );
 		for ( $num_calls = 1, $max = AMP_Theme_Support::CACHE_MISS_THRESHOLD + 1; $num_calls <= $max; $num_calls++ ) {
 			// Simulate dynamic changes in the content.
 			$original_html = str_replace( 'dynamic-id-', "dynamic-id-{$num_calls}-", $original_html );
@@ -1573,15 +1572,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			AMP_Validation_Manager::$validation_results = array();
 			AMP_Theme_Support::prepare_response( $original_html, $args );
 
-			$caches_for_url = wp_cache_get( $post_processor_cache_key, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS );
+			$caches_for_url = wp_cache_get( AMP_Theme_Support::$post_processor_cache_key, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS );
 
 			// When we've met the threshold, check that caching did not happen.
 			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
 				$this->assertEquals( $num_calls - 1, count( $caches_for_url ) );
-				// @todo Need to check if the response was not cached.
+				$this->assertEmpty( AMP_Theme_Support::$response_cache_key );
 			} else {
 				$this->assertEquals( $num_calls, count( $caches_for_url ) );
-				// @todo Need to check if the response was cached.
+				$this->assertNotEmpty( AMP_Theme_Support::$response_cache_key );
+				$this->assertNotEmpty( wp_cache_get( AMP_Theme_Support::$response_cache_key, AMP_Theme_Support::RESPONSE_CACHE_GROUP ) );
 			}
 
 			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );

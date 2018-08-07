@@ -113,6 +113,20 @@ class AMP_Theme_Support {
 	protected static $support_added_via_option = false;
 
 	/**
+	 * Response cache key.
+	 *
+	 * @var string
+	 */
+	public static $response_cache_key;
+
+	/**
+	 * Post-processor cache key.
+	 *
+	 * @var string
+	 */
+	public static $post_processor_cache_key;
+
+	/**
 	 * Initialize.
 	 *
 	 * @since 0.7
@@ -1775,13 +1789,12 @@ class AMP_Theme_Support {
 		$ampless_url = amp_remove_endpoint( $current_url );
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
-		$caches_for_url           = null;
-		$post_processor_cache_key = null;
+		$caches_for_url                 = null;
+		self::$post_processor_cache_key = null;
 		if ( true === $args['enable_response_caching'] ) {
-			$post_processor_cache_key = md5( $current_url );
-			$caches_for_url           = wp_cache_get( $post_processor_cache_key, self::POST_PROCESSOR_CACHE_EFFECTIVENESS );
+			self::$post_processor_cache_key = md5( $current_url );
+			$caches_for_url                 = wp_cache_get( self::$post_processor_cache_key, self::POST_PROCESSOR_CACHE_EFFECTIVENESS );
 
-			// Turn off response caching when the number of cached URLs exceeds the threshold.
 			$args['enable_response_caching'] = (
 				empty( $caches_for_url )
 				||
@@ -1792,10 +1805,11 @@ class AMP_Theme_Support {
 		}
 
 		// Return cache if enabled and found.
-		$cache_response = null;
+		$cache_response           = null;
+		self::$response_cache_key = '';
 		if ( true === $args['enable_response_caching'] ) {
 			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
-			$response_cache_key = md5( wp_json_encode( array(
+			self::$response_cache_key = md5( wp_json_encode( array(
 				$args,
 				$response,
 				self::$sanitizer_classes,
@@ -1803,7 +1817,7 @@ class AMP_Theme_Support {
 				AMP__VERSION,
 			) ) );
 
-			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
+			$response_cache = wp_cache_get( self::$response_cache_key, self::RESPONSE_CACHE_GROUP );
 
 			// Make sure that all of the validation errors should be sanitized in the same way; if not, then the cached body should be discarded.
 			$blocking_error_count = 0;
@@ -1833,21 +1847,21 @@ class AMP_Theme_Support {
 				return $response_cache['body'];
 			}
 
-			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url, $post_processor_cache_key ) {
+			$cache_response = function( $body, $validation_results ) use ( $caches_for_url ) {
 				if ( empty( $caches_for_url ) ) {
-					$caches_for_url = array( $response_cache_key );
+					$caches_for_url = array( AMP_Theme_Support::$response_cache_key );
 				} else {
-					$caches_for_url[] = $response_cache_key;
+					$caches_for_url[] = AMP_Theme_Support::$response_cache_key;
 				}
 				wp_cache_set(
-					$post_processor_cache_key,
+					AMP_Theme_Support::$post_processor_cache_key,
 					$caches_for_url,
 					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS,
 					MONTH_IN_SECONDS
 				);
 
 				return wp_cache_set(
-					$response_cache_key,
+					AMP_Theme_Support::$response_cache_key,
 					compact( 'body', 'validation_results' ),
 					AMP_Theme_Support::RESPONSE_CACHE_GROUP,
 					MONTH_IN_SECONDS
