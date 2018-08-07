@@ -1522,19 +1522,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$first_response = $call_prepare_response();
 		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
 		$this->assertContains( '<html amp>', $first_response ); // Note: AMP because sanitized validation errors.
+		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that response cache is return upon second call.
 		$this->assertEquals( $first_response, $call_prepare_response() );
 		$this->assertSame( 0, $this->get_server_timing_header_count() );
+		$this->reset_post_processor_cache_effectiveness();
 
 		// Test new cache upon argument change.
 		$prepare_response_args['test_reset_by_arg'] = true;
 		$call_prepare_response();
 		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
+		$this->reset_post_processor_cache_effectiveness();
 
 		// Test response is cached.
 		$call_prepare_response();
 		$this->assertSame( 0, $this->get_server_timing_header_count() );
+		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that response is no longer cached due to a change whether validation errors are sanitized.
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
@@ -1542,6 +1546,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$prepared_html = $call_prepare_response();
 		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
 		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
+		$this->reset_post_processor_cache_effectiveness();
 
 		// And test response is cached.
 		$call_prepare_response();
@@ -1572,12 +1577,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 			// When we've met the threshold, check that caching did not happen.
 			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
-				// @todo change count to -1.
-				$this->assertEquals( $num_calls, count( $caches_for_url ) );
+				$this->assertEquals( $num_calls - 1, count( $caches_for_url ) );
 				// @todo Need to check if the response was not cached.
 			} else {
 				$this->assertEquals( $num_calls, count( $caches_for_url ) );
-				// Need to check if the response was cached.
+				// @todo Need to check if the response was cached.
 			}
 
 			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );

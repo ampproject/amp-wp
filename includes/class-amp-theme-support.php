@@ -1780,6 +1780,15 @@ class AMP_Theme_Support {
 		if ( true === $args['enable_response_caching'] ) {
 			$post_processor_cache_key = md5( $current_url );
 			$caches_for_url           = wp_cache_get( $post_processor_cache_key, self::POST_PROCESSOR_CACHE_EFFECTIVENESS );
+
+			// Turn off response caching when the number of cached URLs exceeds the threshold.
+			$args['enable_response_caching'] = (
+				empty( $caches_for_url )
+				||
+				! is_array( $caches_for_url )
+				||
+				count( $caches_for_url ) < self::CACHE_MISS_THRESHOLD
+			);
 		}
 
 		// Return cache if enabled and found.
