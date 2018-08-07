@@ -1423,85 +1423,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_prepare_response() {
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		global $wp_widget_factory, $wp_scripts, $wp_styles;
-		$wp_scripts = null;
-		$wp_styles  = null;
-
-		add_theme_support( 'amp' );
-		AMP_Theme_Support::init();
-		AMP_Theme_Support::finish_init();
-		$wp_widget_factory = new WP_Widget_Factory();
-		wp_widgets_init();
-
-		$this->assertTrue( is_amp_endpoint() );
-
-		add_action( 'wp_enqueue_scripts', function() {
-			wp_enqueue_script( 'amp-list' );
-		} );
-		add_action( 'wp_print_scripts', function() {
-			echo '<!-- wp_print_scripts -->';
-		} );
-
-		add_action( 'wp_print_styles', function() {
-			echo '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">';
-		} );
-
-		add_filter( 'script_loader_tag', function( $tag, $handle ) {
-			if ( ! wp_scripts()->get_data( $handle, 'conditional' ) ) {
-				$tag = preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
-			}
-			return $tag;
-		}, 10, 2 );
-
-		add_action( 'wp_footer', function() {
-			wp_print_scripts( 'amp-mathml' );
-			?>
-			<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
-			<?php
-		}, 1 );
-
-		add_filter( 'get_site_icon_url', function() {
-			return home_url( '/favicon.png' );
-		} );
-
-		ob_start();
-		?>
-		<!DOCTYPE html>
-		<html amp>
-			<head>
-				<?php wp_head(); ?>
-				<script data-head>document.write('Illegal');</script>
-				<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
-			</head>
-			<body><!-- </body></html> -->
-				<img width="100" height="100" src="https://example.com/test.png">
-				<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
-				<amp-ad type="a9"
-					width="300"
-					height="250"
-					data-aax_size="300x250"
-					data-aax_pubname="test123"
-					data-aax_src="302"></amp-ad>
-
-				<?php wp_footer(); ?>
-
-				<button onclick="alert('Illegal');">no-onclick</button>
-
-				<style>body { background: black; }</style>
-
-				<amp-experiment>
-					<script type="application/json">
-					{ "aExperiment": {} }
-					</script>
-				</amp-experiment>
-			</body>
-		</html>
-		<!--comment-after-html-->
-		<div id="after-html"></div>
-		<!--comment-end-html-->
-		<?php
-		$original_html  = trim( ob_get_clean() );
+		$original_html  = $this->get_original_html();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
 		$this->assertNotContains( 'handle=', $sanitized_html );
@@ -1596,45 +1518,177 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
 		};
 
-		$get_server_timing_header_count = function() {
-			return count( array_filter(
-				AMP_Response_Headers::$headers_sent,
-				function( $header ) {
-					return 'Server-Timing' === $header['name'];
-				}
-			) );
-		};
-
 		// Test that first response isn't cached.
 		$first_response = $call_prepare_response();
-		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
 		$this->assertContains( '<html amp>', $first_response ); // Note: AMP because sanitized validation errors.
 
 		// Test that response cache is return upon second call.
 		$this->assertEquals( $first_response, $call_prepare_response() );
-		$this->assertSame( 0, $get_server_timing_header_count() );
+		$this->assertSame( 0, $this->get_server_timing_header_count() );
 
 		// Test new cache upon argument change.
 		$prepare_response_args['test_reset_by_arg'] = true;
 		$call_prepare_response();
-		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
 
 		// Test response is cached.
 		$call_prepare_response();
-		$this->assertSame( 0, $get_server_timing_header_count() );
+		$this->assertSame( 0, $this->get_server_timing_header_count() );
 
 		// Test that response is no longer cached due to a change whether validation errors are sanitized.
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_filter( 'amp_validation_error_sanitized', '__return_false' );
 		$prepared_html = $call_prepare_response();
-		$this->assertGreaterThan( 0, $get_server_timing_header_count() );
+		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
 		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
 
 		// And test response is cached.
 		$call_prepare_response();
-		$this->assertSame( 0, $get_server_timing_header_count() );
+		$this->assertSame( 0, $this->get_server_timing_header_count() );
 
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	}
+
+	/**
+	 * Test post-processor cache effectiveness in AMP_Theme_Support::prepare_response().
+	 */
+	public function test_post_processor_cache_effectiveness() {
+		$original_html = $this->get_original_html();
+		$args          = array( 'enable_response_caching' => true );
+		$this->reset_post_processor_cache_effectiveness();
+
+		// Test the response is not cached after exceeding the cache miss threshold.
+		$post_processor_cache_key = md5( amp_get_current_url() );
+		for ( $num_calls = 1, $max = AMP_Theme_Support::CACHE_MISS_THRESHOLD + 1; $num_calls <= $max; $num_calls++ ) {
+			// Simulate dynamic changes in the content.
+			$original_html = str_replace( 'dynamic-id-', "dynamic-id-{$num_calls}-", $original_html );
+
+			AMP_Response_Headers::$headers_sent         = array();
+			AMP_Validation_Manager::$validation_results = array();
+			AMP_Theme_Support::prepare_response( $original_html, $args );
+
+			$caches_for_url = wp_cache_get( $post_processor_cache_key, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS );
+
+			// When we've met the threshold, check that caching did not happen.
+			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
+				// @todo change count to -1.
+				$this->assertEquals( $num_calls, count( $caches_for_url ) );
+				// @todo Need to check if the response was not cached.
+			} else {
+				$this->assertEquals( $num_calls, count( $caches_for_url ) );
+				// Need to check if the response was cached.
+			}
+
+			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
+		}
+	}
+
+	/**
+	 * Initializes and returns the original HTML.
+	 */
+	private function get_original_html() {
+		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		global $wp_widget_factory, $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+		$wp_widget_factory = new WP_Widget_Factory();
+		wp_widgets_init();
+
+		$this->assertTrue( is_amp_endpoint() );
+
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_enqueue_script( 'amp-list' );
+		} );
+		add_action( 'wp_print_scripts', function() {
+			echo '<!-- wp_print_scripts -->';
+		} );
+
+		add_action( 'wp_print_styles', function() {
+			echo '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">';
+		} );
+
+		add_filter( 'script_loader_tag', function( $tag, $handle ) {
+			if ( ! wp_scripts()->get_data( $handle, 'conditional' ) ) {
+				$tag = preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
+			}
+			return $tag;
+		}, 10, 2 );
+
+		add_action( 'wp_footer', function() {
+			wp_print_scripts( 'amp-mathml' );
+			?>
+			<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+			<?php
+		}, 1 );
+
+		add_filter( 'get_site_icon_url', function() {
+			return home_url( '/favicon.png' );
+		} );
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html amp>
+		<head>
+			<?php wp_head(); ?>
+			<script data-head>document.write('Illegal');</script>
+			<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
+		</head>
+		<body><!-- </body></html> -->
+		<div id="dynamic-id-0"></div>
+		<img width="100" height="100" src="https://example.com/test.png">
+		<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
+		<amp-ad type="a9"
+				width="300"
+				height="250"
+				data-aax_size="300x250"
+				data-aax_pubname="test123"
+				data-aax_src="302"></amp-ad>
+
+		<?php wp_footer(); ?>
+
+		<button onclick="alert('Illegal');">no-onclick</button>
+
+		<style>body { background: black; }</style>
+
+		<amp-experiment>
+			<script type="application/json">
+				{ "aExperiment": {} }
+			</script>
+		</amp-experiment>
+		</body>
+		</html>
+		<!--comment-after-html-->
+		<div id="after-html"></div>
+		<!--comment-end-html-->
+		<?php
+		return trim( ob_get_clean() );
+		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	}
+
+	/**
+	 * Returns the "Server-Timing" header count.
+	 */
+	private function get_server_timing_header_count() {
+		return count( array_filter(
+			AMP_Response_Headers::$headers_sent,
+			function( $header ) {
+				return 'Server-Timing' === $header['name'];
+			}
+		) );
+	}
+
+	/**
+	 * Reset cached URLs in post-processor cache effectiveness.
+	 */
+	private function reset_post_processor_cache_effectiveness() {
+		wp_cache_delete( md5( amp_get_current_url() ), AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS );
 	}
 
 	/**
