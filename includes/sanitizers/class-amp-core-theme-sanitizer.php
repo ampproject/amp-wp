@@ -361,8 +361,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
 			if ( false !== $sizes ) {
-				$attr['layout'] = 'responsive';
-				$attr['sizes']  = $sizes;
+				$attr['sizes'] = $sizes;
 			}
 
 			return $attr;
