@@ -1577,11 +1577,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			// When we've met the threshold, check that caching did not happen.
 			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
 				$this->assertEquals( $num_calls - 1, count( $caches_for_url ) );
-				$this->assertEmpty( AMP_Theme_Support::$response_cache_key );
 			} else {
 				$this->assertEquals( $num_calls, count( $caches_for_url ) );
-				$this->assertNotEmpty( AMP_Theme_Support::$response_cache_key );
-				$this->assertNotEmpty( wp_cache_get( AMP_Theme_Support::$response_cache_key, AMP_Theme_Support::RESPONSE_CACHE_GROUP ) );
 			}
 
 			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
