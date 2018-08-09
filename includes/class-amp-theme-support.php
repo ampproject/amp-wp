@@ -113,13 +113,6 @@ class AMP_Theme_Support {
 	protected static $support_added_via_option = false;
 
 	/**
-	 * Post-processor cache key.
-	 *
-	 * @var string
-	 */
-	public static $post_processor_cache_key;
-
-	/**
 	 * Initialize.
 	 *
 	 * @since 0.7
@@ -1782,11 +1775,10 @@ class AMP_Theme_Support {
 		$ampless_url = amp_remove_endpoint( $current_url );
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
-		$caches_for_url                 = null;
-		self::$post_processor_cache_key = null;
+		$caches_for_url = null;
 		if ( true === $args['enable_response_caching'] ) {
-			self::$post_processor_cache_key = md5( $current_url );
-			$caches_for_url                 = wp_cache_get( self::$post_processor_cache_key, self::POST_PROCESSOR_CACHE_EFFECTIVENESS );
+			$post_processor_cache_key = md5( $current_url );
+			$caches_for_url           = wp_cache_get( $post_processor_cache_key, self::POST_PROCESSOR_CACHE_EFFECTIVENESS );
 
 			$args['enable_response_caching'] = (
 				empty( $caches_for_url )
@@ -1839,14 +1831,14 @@ class AMP_Theme_Support {
 				return $response_cache['body'];
 			}
 
-			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
+			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $post_processor_cache_key, $caches_for_url ) {
 				if ( empty( $caches_for_url ) ) {
 					$caches_for_url = array( $response_cache_key );
 				} else {
 					$caches_for_url[] = $response_cache_key;
 				}
 				wp_cache_set(
-					AMP_Theme_Support::$post_processor_cache_key,
+					$post_processor_cache_key,
 					$caches_for_url,
 					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS,
 					MONTH_IN_SECONDS

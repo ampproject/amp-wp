@@ -1559,8 +1559,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test post-processor cache effectiveness in AMP_Theme_Support::prepare_response().
 	 */
 	public function test_post_processor_cache_effectiveness() {
-		$original_html = $this->get_original_html();
-		$args          = array( 'enable_response_caching' => true );
+		$original_html            = $this->get_original_html();
+		$args                     = array( 'enable_response_caching' => true );
+		$current_url              = amp_get_current_url();
+		$post_processor_cache_key = md5( $current_url );
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test the response is not cached after exceeding the cache miss threshold.
@@ -1572,7 +1574,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			AMP_Validation_Manager::$validation_results = array();
 			AMP_Theme_Support::prepare_response( $original_html, $args );
 
-			$caches_for_url = wp_cache_get( AMP_Theme_Support::$post_processor_cache_key, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS );
+			$caches_for_url = wp_cache_get( $post_processor_cache_key, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS );
 
 			// When we've met the threshold, check that caching did not happen.
 			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
