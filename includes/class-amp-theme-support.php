@@ -1839,7 +1839,7 @@ class AMP_Theme_Support {
 					$post_processor_cache_key,
 					$caches_for_url,
 					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS,
-					MONTH_IN_SECONDS
+					600 // 10 minute cache.
 				);
 
 				return wp_cache_set(
