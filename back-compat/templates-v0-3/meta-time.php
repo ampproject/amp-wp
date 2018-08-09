@@ -3,6 +3,7 @@
 		<?php
 		echo esc_html(
 			sprintf(
+				/* translators: %s is the human-readable time difference */
 				_x( '%s ago', '%s = human-readable time difference', 'amp' ),
 				human_time_diff( $this->get( 'post_publish_timestamp' ), current_time( 'timestamp' ) )
 			)
