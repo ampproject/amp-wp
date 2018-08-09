@@ -92,6 +92,8 @@ module.exports = function( grunt ) {
 		stdout = [];
 
 		grunt.task.run( 'shell:webpack_production' );
+		grunt.task.run( 'shell:makepot' );
+		grunt.task.run( 'shell:pot_to_php' );
 
 		spawnQueue.push(
 			{
@@ -178,17 +180,10 @@ module.exports = function( grunt ) {
 		'shell:create_build_zip'
 	] );
 
-	grunt.registerTask( 'build-release', [
-		'shell:makepot',
-		'shell:pot_to_php',
-		'build'
-	] );
-
 	grunt.registerTask( 'deploy', [
 		'jshint',
 		'shell:phpunit',
 		'shell:verify_matching_versions',
-		'build-release',
 		'wp_deploy'
 	] );
 };

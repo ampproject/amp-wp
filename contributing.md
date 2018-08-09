@@ -33,14 +33,6 @@ npm run build
 
 This will create an `amp.zip` in the plugin directory which you can install. The contents of this ZIP are also located in the `build` directory which you can `rsync` somewhere as well.
 
-TO create a build of the plugin as it will be deployed to WordPress.org, run:
-
-```bash
-npm run build-release
-```
-
-Note that this will currently take much longer than a regular build because it generates the files required for translation. You also must have WP-CLI installed with the [`i18n-command` package](https://github.com/wp-cli/i18n-command).
-
 ## Updating Allowed Tags And Attributes
 
 The file `class-amp-allowed-tags-generated.php` has the AMP specification's allowed tags and attributes. It's used in sanitization.
@@ -106,7 +98,7 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
-1. Do `npm run build-release` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
+1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 2. Bump plugin versions in `package.json` (×1), `package-lock.json` (×1, just do `npm install` first), `composer.json` (×1), and in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 3. Add changelog entry to readme.
 4. Draft blog post about the new release.
