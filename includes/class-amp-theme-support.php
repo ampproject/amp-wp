@@ -27,11 +27,18 @@ class AMP_Theme_Support {
 	const RESPONSE_CACHE_GROUP = 'amp-response';
 
 	/**
-	 * Post-processor cache group name.
+	 * Post-processor cache effectiveness group name.
 	 *
 	 * @var string
 	 */
-	const POST_PROCESSOR_CACHE_EFFECTIVENESS = 'post_processor_cache_effectiveness';
+	const POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP = 'post_processor_cache_effectiveness_group';
+
+	/**
+	 * Post-processor cache effectiveness key name.
+	 *
+	 * @var string
+	 */
+	const POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY = 'post_processor_cache_effectiveness';
 
 	/**
 	 * Cache miss threshold for determining when to disable post-processor cache.
@@ -1775,11 +1782,9 @@ class AMP_Theme_Support {
 		$ampless_url = amp_remove_endpoint( $current_url );
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
-		$caches_for_url           = null;
-		$post_processor_cache_key = '';
+		$caches_for_url = null;
 		if ( true === $args['enable_response_caching'] ) {
-			$post_processor_cache_key = md5( $current_url );
-			$caches_for_url           = wp_cache_get( $post_processor_cache_key, self::POST_PROCESSOR_CACHE_EFFECTIVENESS );
+			$caches_for_url = wp_cache_get( self::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, self::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
 			if ( is_array( $caches_for_url ) ) {
 				$args['enable_response_caching'] = (
 					empty( $caches_for_url )
@@ -1833,12 +1838,12 @@ class AMP_Theme_Support {
 				return $response_cache['body'];
 			}
 
-			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $post_processor_cache_key, $caches_for_url ) {
+			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
 				$caches_for_url[] = $response_cache_key;
 				wp_cache_set(
-					$post_processor_cache_key,
+					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY,
 					$caches_for_url,
-					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS,
+					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP,
 					600 // 10 minute cache.
 				);
 
