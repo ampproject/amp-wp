@@ -45,11 +45,8 @@ module.exports = function( grunt ) {
 			webpack_production: {
 				command: 'cross-env BABEL_ENV=production webpack'
 			},
-			pot_to_php: {
-				command: 'npm run pot-to-php'
-			},
 			makepot: {
-				command: 'wp i18n make-pot .'
+				command: 'wp i18n make-pot . languages/amp.pot --include="$( git ls-files | grep -v test | tr \'\\n\' \',\' )"'
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
@@ -93,7 +90,6 @@ module.exports = function( grunt ) {
 
 		grunt.task.run( 'shell:webpack_production' );
 		grunt.task.run( 'shell:makepot' );
-		grunt.task.run( 'shell:pot_to_php' );
 
 		spawnQueue.push(
 			{
@@ -119,7 +115,6 @@ module.exports = function( grunt ) {
 			paths.push( 'assets/js/*-compiled.js' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
-			paths.push( 'languages/amp-translations.php' );
 			paths.push( 'languages/amp.pot' );
 
 			grunt.task.run( 'clean' );
