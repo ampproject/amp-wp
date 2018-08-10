@@ -48,6 +48,13 @@ class AMP_Theme_Support {
 	const CACHE_MISS_THRESHOLD = 3;
 
 	/**
+	 * Cache miss URL option name.
+	 *
+	 * @var string
+	 */
+	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -1784,16 +1791,8 @@ class AMP_Theme_Support {
 		// When response caching is enabled, determine if it should be turned off for cache misses.
 		$caches_for_url = null;
 		if ( true === $args['enable_response_caching'] ) {
-			$caches_for_url = wp_cache_get( self::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, self::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
-			if ( is_array( $caches_for_url ) ) {
-				$args['enable_response_caching'] = (
-					empty( $caches_for_url )
-					||
-					count( $caches_for_url ) < self::CACHE_MISS_THRESHOLD
-				);
-			} else {
-				$caches_for_url = array();
-			}
+			list( $disable_response_caching, $caches_for_url ) = self::check_for_cache_misses();
+			$args['enable_response_caching']                   = ! $disable_response_caching;
 		}
 
 		// Return cache if enabled and found.
@@ -1998,6 +1997,45 @@ class AMP_Theme_Support {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Check for cache misses. When found, store in an option to retain the URL.
+	 *
+	 * @since 1.0
+	 *
+	 * @return array {
+	 *     State.
+	 *
+	 *     @type bool       Flag indicating if the threshold has been exceeded.
+	 *     @type string[]   Collection of URLs.
+	 * }
+	 */
+	private static function check_for_cache_misses() {
+		// If the cache miss threshold is exceeded, return true.
+		$cache_miss_url     = get_option( self::CACHE_MISS_URL_OPTION, false );
+		$exceeded_threshold = ! empty( $cache_miss_url );
+		if ( $exceeded_threshold ) {
+			return array( true, null );
+		}
+
+		// Get the cache miss URLs.
+		$cache_miss_urls = wp_cache_get( self::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, self::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
+		$cache_miss_urls = is_array( $cache_miss_urls ) ? $cache_miss_urls : array();
+
+		$exceeded_threshold = (
+			! empty( $cache_miss_urls )
+			&&
+			count( $cache_miss_urls ) >= self::CACHE_MISS_THRESHOLD
+		);
+
+		if ( ! $exceeded_threshold ) {
+			return array( $exceeded_threshold, $cache_miss_urls );
+		}
+
+		// When the threshold is exceeded, store the URL for cache miss.
+		update_option( self::CACHE_MISS_URL_OPTION, amp_get_current_url() );
+		return array( true, null );
 	}
 
 	/**

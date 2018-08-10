@@ -1564,7 +1564,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test the response is not cached after exceeding the cache miss threshold.
-		for ( $num_calls = 1, $max = AMP_Theme_Support::CACHE_MISS_THRESHOLD + 1; $num_calls <= $max; $num_calls++ ) {
+		for ( $num_calls = 1, $max = AMP_Theme_Support::CACHE_MISS_THRESHOLD + 2; $num_calls <= $max; $num_calls++ ) {
 			// Simulate dynamic changes in the content.
 			$original_html = str_replace( 'dynamic-id-', "dynamic-id-{$num_calls}-", $original_html );
 
@@ -1573,12 +1573,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			AMP_Theme_Support::prepare_response( $original_html, $args );
 
 			$caches_for_url = wp_cache_get( AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
+			$cache_miss_url = get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false );
 
 			// When we've met the threshold, check that caching did not happen.
 			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
-				$this->assertEquals( $num_calls - 1, count( $caches_for_url ) );
+				$this->assertEquals( AMP_Theme_Support::CACHE_MISS_THRESHOLD, count( $caches_for_url ) );
+				$this->assertEquals( amp_get_current_url(), $cache_miss_url );
 			} else {
 				$this->assertEquals( $num_calls, count( $caches_for_url ) );
+				$this->assertFalse( $cache_miss_url );
 			}
 
 			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
@@ -1690,6 +1693,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	private function reset_post_processor_cache_effectiveness() {
 		wp_cache_delete( AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
+		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );
 	}
 
 	/**
