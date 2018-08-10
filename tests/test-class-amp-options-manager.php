@@ -276,4 +276,31 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		wp_using_ext_object_cache( false );
 	}
+
+	/**
+	 * Test for render_cache_miss_notice()
+	 *
+	 * @covers AMP_Options_Manager::render_cache_miss_notice()
+	 */
+	public function test_render_cache_miss_notice() {
+		set_current_screen( 'toplevel_page_amp-options' );
+
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/sample-post' );
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$notice   = ob_get_clean();
+		$expected = 'Response caching was disabled due to exceeding the cache miss threshold.';
+		$this->assertContains( $expected, $notice );
+		$this->assertContains( 'http://example.org/sample-post', $notice );
+
+		set_current_screen( 'edit.php' );
+
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+	}
 }

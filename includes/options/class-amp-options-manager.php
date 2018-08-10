@@ -48,6 +48,7 @@ class AMP_Options_Manager {
 
 		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
 	}
 
 	/**
@@ -318,5 +319,28 @@ class AMP_Options_Manager {
 				esc_html__( 'More details', 'amp' )
 			);
 		}
+	}
+
+	/**
+	 * Render the cache miss admin notice.
+	 *
+	 * @return void
+	 */
+	public static function render_cache_miss_notice() {
+		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+			return;
+		}
+
+		$cache_miss_url = get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false );
+		if ( empty( $cache_miss_url ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( 'Response caching was disabled due to exceeding the cache miss threshold.', 'amp' ),
+			esc_url( $cache_miss_url ),
+			esc_html__( 'This URL is where it last occurred.', 'amp' )
+		);
 	}
 }
