@@ -61,7 +61,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<span style="padding:1px; margin: 2px !important; outline: 3px;">!important is converted.</span>',
 				'<span class="amp-wp-6a75598">!important is converted.</span>',
 				array(
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{padding:1px;outline:3px}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{margin:2px}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{padding:1px;outline:3px}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{margin:2px}',
 				),
 			),
 
@@ -69,7 +69,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<span style="color: red  !  important;">!important is converted.</span>',
 				'<span class="amp-wp-952600b">!important is converted.</span>',
 				array(
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-952600b{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-952600b{color:red}',
 				),
 			),
 
@@ -77,7 +77,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<span style="color: red !important; background: blue!important;">!important is converted.</span>',
 				'<span class="amp-wp-1e2bfaa">!important is converted.</span>',
 				array(
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-1e2bfaa{color:red;background:blue}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-1e2bfaa{color:red;background:blue}',
+				),
+			),
+
+			'!important_takes_precedence_over_inline' => array(
+				'<header id="header" style="display: none;"><h1>This is the header.</h1></header><style>#header { display: block !important;width: 100%;background: #fff; }',
+				'<header id="header" class="amp-wp-224b51a"><h1>This is the header.</h1></header>',
+				array(
+					'#header{width:100%;background:#fff}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #header{display:block}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-224b51a{display:none}',
 				),
 			),
 
@@ -102,7 +111,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>div > span { font-weight:bold !important; font-style: italic; } @media screen and ( max-width: 640px ) { div > span { font-weight:normal !important; font-style: normal; } }</style><div><span>bold!</span></div>',
 				'<div><span>bold!</span></div>',
 				array(
-					'div > span{font-style:italic}:root:not(#_):not(#_) div > span{font-weight:bold}@media screen and ( max-width: 640px ){div > span{font-style:normal}:root:not(#_):not(#_) div > span{font-weight:normal}}',
+					'div > span{font-style:italic}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) div > span{font-weight:bold}@media screen and ( max-width: 640px ){div > span{font-style:normal}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) div > span{font-weight:normal}}',
 				),
 			),
 
@@ -117,10 +126,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'illegal_at_rule_in_style_attribute' => array(
-				'<span style="color:brown; @media screen { color:green }">Parse error.</span>',
-				'<span>Parse error.</span>',
+				'<span style="color:brown; @media screen { color:green }">invalid @-rule omitted.</span>',
+				'<span class="amp-wp-481af57">invalid @-rule omitted.</span>',
+				array(
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-481af57{color:brown}',
+				),
 				array(),
-				array( 'css_parse_error' ),
 			),
 
 			'illegal_at_rules_removed' => array(
@@ -144,9 +155,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>#child {color:red !important} #parent #child {color:pink !important} .foo { color:blue !important; } #me .foo { color: green !important; }</style><div id="parent"><span id="child" class="foo bar baz">one</span><span style="color: yellow;">two</span><span style="color: purple !important;">three</span></div>',
 				'<div id="parent"><span id="child" class="foo bar baz">one</span><span class="amp-wp-64b4fd4">two</span><span class="amp-wp-ab79d9e">three</span></div>',
 				array(
-					':root:not(#_) #child{color:red}:root:not(#_):not(#_) #parent #child{color:pink}:root:not(#_) .foo{color:blue}:root:not(#_):not(#_) #me .foo{color:green}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #child{color:red}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #parent #child{color:pink}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:blue}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #me .foo{color:green}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-64b4fd4{color:yellow}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-ab79d9e{color:purple}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-ab79d9e{color:purple}',
+				),
+			),
+
+			'grid_lines'                                  => array(
+				'<style>.wrapper {display: grid;grid-template-columns: [main-start] 1fr [content-start] 1fr [content-end] 1fr [main-end];grid-template-rows: [main-start] 100px [content-start] 100px [content-end] 100px [main-end];}</style><div class="wrapper"></div>',
+				'<div class="wrapper"></div>',
+				array(
+					'.wrapper{display:grid;grid-template-columns:[main-start] 1fr [content-start] 1fr [content-end] 1fr [main-end];grid-template-rows:[main-start] 100px [content-start] 100px [content-end] 100px [main-end]}',
 				),
 			),
 
@@ -177,6 +196,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<table><colgroup><col class="amp-wp-c8aa9e9"></colgroup></table>',
 				array(
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c8aa9e9{width:50px;width:60px;background-color:red}',
+				),
+			),
+
+			'multi_selector_in_not_pseudo_class'         => array(
+				'<style>.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul { color:red; }</style><div class="widget"></div>',
+				'<div class="widget"></div>',
+				array(
+					'.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul{color:red}',
 				),
 			),
 		);
@@ -225,9 +252,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'multiple_amp_custom_and_other_styles' => array(
 				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green; text-decoration: underline !important}</style></head><body><style>s {color:yellow} /* So !important! */</style><b>1</b><i>i</i><u>u</u><s>s</s></body></html>',
 				array(
-					':root:not(#_):not(#_) b{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) b{color:red}',
 					'i{color:blue}',
-					'u{color:green}:root:not(#_):not(#_) u{text-decoration:underline}',
+					'u{color:green}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) u{text-decoration:underline}',
 					's{color:yellow}',
 				),
 				array(),
@@ -241,7 +268,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'strong.before-dashicon',
 					'.dashicons-dashboard:before',
 					'strong.after-dashicon',
-					':root:not(#_):not(#_) s{color:yellow}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) s{color:yellow}',
 				),
 				array(),
 			),
@@ -269,7 +296,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'style_on_root_element' => array(
 				'<html amp style="color:red;"><head><meta charset="utf-8"><style amp-custom>html { background-color: blue !important; }</style></head><body>Hi</body></html>',
 				array(
-					'html:not(#_):not(#_){background-color:blue}',
+					'html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_){background-color:blue}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-10b06ba{color:red}',
 				),
 				array(),
@@ -298,14 +325,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'styles_with_calc_functions' => array(
 				implode( '', array(
 					'<html amp><head>',
-					'<style amp-custom>body { color: red; width: -webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) ); outline: solid 1px blue; }</style>',
-					'<style amp-custom>.alignwide{ max-width: calc(50% + 22.5rem); border: solid 1px red; }</style>',
+					'<style amp-custom>body { color: red; width: calc( 1px + calc( 2vh / 3 ) - 2px * 5 ); outline: solid 1px blue; }</style>',
+					'<style amp-custom>.alignwide{ max-width: -webkit-calc(50% + 22.5rem); border: solid 1px red; }</style>',
 					'<style amp-custom>.alignwide{ height: calc(10% + ( 1px ); color: red; content: ")"}</style>', // Test unbalanced parentheses.
 					'</head><body><div class="alignwide"></div></body></html>',
 				) ),
 				array(
-					'body{color:red;width:-webkit-calc( 1px + 2vh * 3pt - ( 4em / 5 ) );outline:solid 1px blue}',
-					'.alignwide{max-width:calc(50% + 22.5rem);border:solid 1px red}',
+					'body{color:red;width:calc(1px + calc(2vh / 3) - 2px * 5);outline:solid 1px blue}',
+					'.alignwide{max-width:-webkit-calc(50% + 22.5rem);border:solid 1px red}',
 					'.alignwide{color:red;content:")"}',
 				),
 				array(),
@@ -925,7 +952,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'style_amp_keyframes_last_child'   => array(
 				'<b>before</b> <style amp-keyframes>@keyframes anim1 {}</style> between <style amp-keyframes>@keyframes anim2 {}</style> as <b>after</b>',
-				'<b>before</b> between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
+				'<b>before</b>  between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
 				array(),
 			),
 
@@ -1023,6 +1050,21 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				content_url( 'themes/twentyseventeen/404.css' ),
 				null,
 				'file_path_not_found',
+			),
+			'amp_file_path_illegal_linux' => array(
+				content_url( '../../../../../../../../../../../../../../../bad.css' ),
+				null,
+				'file_path_not_allowed',
+			),
+			'amp_file_path_illegal_windows' => array(
+				content_url( '..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\bad.css' ),
+				null,
+				'file_path_not_allowed',
+			),
+			'amp_file_path_illegal_location' => array(
+				site_url( 'outside/root.css' ),
+				null,
+				'file_path_not_allowed',
 			),
 			'amp_external_file' => array(
 				'//s.w.org/wp-includes/css/dashicons.css',
@@ -1134,7 +1176,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'bad_file'    => array(
 				home_url( '/bad.css' ),
-				array( 'file_path_not_found' ),
+				array( 'file_path_not_allowed' ),
 			),
 		);
 	}
@@ -1168,9 +1210,34 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				preg_replace( '#^(http:)?(?=//)#', 'https:', $url ),
 				$link->getAttribute( 'href' )
 			);
+			$this->assertEquals( 'anonymous', $link->getAttribute( 'crossorigin' ) );
 		} else {
 			$this->assertEmpty( $link );
 		}
+	}
+
+	/**
+	 * Test addition of crossorigin attribute to external stylesheet links.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 */
+	public function test_cors_enabled_stylesheet_url() {
+
+		// Test supplying crossorigin attribute.
+		$document  = AMP_DOM_Utils::get_dom( '<html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"></head></html>' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$sanitizer = new AMP_Style_Sanitizer( $document, array( 'use_document_element' => true ) );
+		$sanitizer->sanitize();
+		$link = $document->getElementsByTagName( 'link' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $link );
+		$this->assertEquals( 'anonymous', $link->getAttribute( 'crossorigin' ) );
+
+		// Test that existing crossorigin attribute is not overridden.
+		$document  = AMP_DOM_Utils::get_dom( '<html><head><link rel="stylesheet" crossorigin="use-credentials" href="https://fonts.googleapis.com/css?family=Tangerine"></head></html>' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$sanitizer = new AMP_Style_Sanitizer( $document, array( 'use_document_element' => true ) );
+		$sanitizer->sanitize();
+		$link = $document->getElementsByTagName( 'link' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $link );
+		$this->assertEquals( 'use-credentials', $link->getAttribute( 'crossorigin' ) );
 	}
 
 	/**
@@ -1219,5 +1286,36 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			) ) . '/s',
 			$stylesheets[1]
 		);
+	}
+
+	/**
+	 * Test CSS with Unicode characters.
+	 *
+	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
+	 */
+	public function test_unicode_stylesheet() {
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html amp>
+			<head>
+				<meta charset="utf-8">
+				<?php wp_print_styles( array( 'dashicons' ) ); ?>
+				<style>span::after { content:"⚡️"; }</style>
+			</head>
+			<body>
+				<span class="dashicons dashicons-admin-customizer"></span>
+			</body>
+		</html>
+		<?php
+		$original_html  = trim( ob_get_clean() );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+
+		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
+		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
 	}
 }

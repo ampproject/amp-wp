@@ -167,7 +167,7 @@ class AMP_Options_Manager {
 					continue;
 				}
 
-				$entry_vendor_type = sanitize_key( $data['type'] );
+				$entry_vendor_type = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $data['type'] );
 				$entry_config      = trim( $data['config'] );
 
 				if ( ! empty( $data['id'] ) && '__new__' !== $data['id'] ) {

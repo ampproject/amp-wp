@@ -47,6 +47,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
+	 * @since 1.0 Set the filtered child node's src attribute.
 	 */
 	public function sanitize() {
 		$nodes     = $this->dom->getElementsByTagName( self::$tag );
@@ -95,11 +96,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
+				$this->update_src( $new_child_node, $new_child_attributes['src'], $old_child_attributes['src'] );
+
 				/**
 				 * Only append source tags with a valid src attribute
 				 */
 				$new_node->appendChild( $new_child_node );
-
 			}
 
 			/*
@@ -124,6 +126,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * Filter video dimensions, try to get width and height from original file if missing.
 	 *
 	 * @param array $new_attributes Attributes.
+	 *
 	 * @return array Modified attributes.
 	 */
 	protected function filter_video_dimensions( $new_attributes ) {
@@ -151,6 +154,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
+
 		return $new_attributes;
 	}
 
@@ -158,19 +162,20 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * "Filter" HTML attributes for <amp-audio> elements.
 	 *
 	 * @since 0.2
+	 * @since 1.0 Force HTTPS for the src attribute.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
 	 *
-	 *      @type string $src Video URL - Empty if HTTPS required per $this->args['require_https_src']
-	 *      @type int $width <video> attribute - Set to numeric value if px or %
-	 *      @type int $height <video> attribute - Set to numeric value if px or %
-	 *      @type string $poster <video> attribute - Pass along if found
-	 *      @type string $class <video> attribute - Pass along if found
-	 *      @type bool $controls <video> attribute - Convert 'false' to empty string ''
-	 *      @type bool $loop <video> attribute - Convert 'false' to empty string ''
-	 *      @type bool $muted <video> attribute - Convert 'false' to empty string ''
-	 *      @type bool $autoplay <video> attribute - Convert 'false' to empty string ''
+	 *      @type string    $src        Video URL - Empty if HTTPS required per $this->args['require_https_src']
+	 *      @type int       $width      <video> attribute - Set to numeric value if px or %
+	 *      @type int       $height     <video> attribute - Set to numeric value if px or %
+	 *      @type string    $poster     <video> attribute - Pass along if found
+	 *      @type string    $class      <video> attribute - Pass along if found
+	 *      @type bool      $controls   <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $loop       <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $muted      <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $autoplay   <video> attribute - Convert 'false' to empty string ''
 	 * }
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
@@ -180,7 +185,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'src':
-					$out[ $name ] = $this->maybe_enforce_https_src( $value );
+					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
 
 				case 'width':
@@ -217,5 +222,19 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Update the node's src attribute if it is different from the old src attribute.
+	 *
+	 * @param DOMNode $node    The given DOMNode.
+	 * @param string  $new_src The new src attribute.
+	 * @param string  $old_src The old src attribute.
+	 */
+	protected function update_src( &$node, $new_src, $old_src ) {
+		if ( $old_src === $new_src ) {
+			return;
+		}
+		$node->setAttribute( 'src', $new_src );
 	}
 }

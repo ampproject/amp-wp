@@ -116,7 +116,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
-		wp.hooks.addFilter( 'blocks.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
+		wp.hooks.addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
 	};
 

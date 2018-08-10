@@ -22,6 +22,14 @@ class AMP_Post_Meta_Box {
 	const ASSETS_HANDLE = 'amp-post-meta-box';
 
 	/**
+	 * Block asset handle.
+	 *
+	 * @since 1.0
+	 * @var string
+	 */
+	const BLOCK_ASSET_HANDLE = 'amp-block-editor-toggle-compiled';
+
+	/**
 	 * The enabled status post meta value.
 	 *
 	 * @since 0.6
@@ -84,6 +92,7 @@ class AMP_Post_Meta_Box {
 		) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_assets' ) );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'render_status' ) );
 		add_action( 'save_post', array( $this, 'save_amp_status' ) );
 		add_filter( 'preview_post_link', array( $this, 'preview_post_link' ) );
@@ -166,6 +175,47 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
+	 * Enqueues block assets.
+	 * The name of gutenberg_get_jed_locale_data() may change, as the Gutenberg Core merge approaches.
+	 *
+	 * @since 1.0
+	 */
+	public function enqueue_block_assets() {
+		$post = get_post();
+		if ( ! is_post_type_viewable( $post->post_type ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			self::BLOCK_ASSET_HANDLE,
+			amp_get_asset_url( 'js/' . self::BLOCK_ASSET_HANDLE . '.js' ),
+			array( 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			AMP__VERSION,
+			true
+		);
+
+		$status_and_errors = $this->get_status_and_errors( $post );
+		$enabled_status    = $status_and_errors['status'];
+		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
+		$localization      = array(
+			'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
+			'defaultStatus' => $enabled_status,
+			'errorMessages' => $error_messages,
+		);
+
+		if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$localization['i18n'] = gutenberg_get_jed_locale_data( 'amp' ); // @todo create a POT file.
+		}
+
+		wp_localize_script(
+			self::BLOCK_ASSET_HANDLE,
+			'wpAmpEditor',
+			$localization
+		);
+
+	}
+
+	/**
 	 * Render AMP status.
 	 *
 	 * @since 0.6
@@ -184,6 +234,33 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		$status_and_errors = $this->get_status_and_errors( $post );
+		$status            = $status_and_errors['status'];
+		$errors            = $status_and_errors['errors'];
+		$error_messages    = $this->get_error_messages( $status, $errors );
+
+		$labels = array(
+			'enabled'  => __( 'Enabled', 'amp' ),
+			'disabled' => __( 'Disabled', 'amp' ),
+		);
+
+		// The preceding variables are used inside the following amp-status.php template.
+		include AMP__DIR__ . '/templates/admin/amp-status.php';
+	}
+
+	/**
+	 * Gets the AMP enabled status and errors.
+	 *
+	 * @since 1.0
+	 * @param WP_Post $post The post to check.
+	 * @return array {
+	 *     The status and errors.
+	 *
+	 *     @type string    $status The AMP enabled status.
+	 *     @type string[]  $errors AMP errors.
+	 * }
+	 */
+	public function get_status_and_errors( $post ) {
 		/*
 		 * When theme support is present then theme templates can be served in AMP and we check first if the template is available.
 		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present
@@ -202,13 +279,51 @@ class AMP_Post_Meta_Box {
 			$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
 		}
 
-		$labels = array(
-			'enabled'  => __( 'Enabled', 'amp' ),
-			'disabled' => __( 'Disabled', 'amp' ),
-		);
+		return compact( 'status', 'errors' );
+	}
 
-		// The preceding variables are used inside the following amp-status.php template.
-		include AMP__DIR__ . '/templates/admin/amp-status.php';
+	/**
+	 * Gets the AMP enabled error message(s).
+	 *
+	 * @since 1.0
+	 * @param string $status The AMP enabled status.
+	 * @param array  $errors The AMP enabled errors.
+	 * @return array $error_messages The error messages, as an array of strings.
+	 */
+	public function get_error_messages( $status, $errors ) {
+		$error_messages = array();
+		if ( in_array( 'status_immutable', $errors, true ) ) {
+			if ( self::ENABLED_STATUS === $status ) {
+				$error_messages[] = __( 'Your site does not allow AMP to be disabled.', 'amp' );
+			} else {
+				$error_messages[] = __( 'Your site does not allow AMP to be enabled.', 'amp' );
+			}
+		}
+		if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
+			$error_messages[] = sprintf(
+				/* translators: %s is a link to the AMP settings screen */
+				__( 'There are no <a href="%s">supported templates</a> to display this in AMP.', 'amp' ),
+				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+			);
+		}
+		if ( in_array( 'password-protected', $errors, true ) ) {
+			$error_messages[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
+		}
+		if ( in_array( 'post-type-support', $errors, true ) ) {
+			$error_messages[] = sprintf(
+				/* translators: %s is a link to the AMP settings screen */
+				__( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ),
+				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+			);
+		}
+		if ( in_array( 'skip-post', $errors, true ) ) {
+			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
+		}
+		if ( count( array_diff( $errors, array( 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ) ) ) > 0 ) {
+			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
+		}
+
+		return $error_messages;
 	}
 
 	/**
