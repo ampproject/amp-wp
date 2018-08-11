@@ -66,6 +66,24 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test should return both urls
+	 */
+	public function test__should_return_both_urls() {
+		$source_urls = array(
+			site_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ),
+			'/wp-content/uploads/2018/06/IMG_0183-300x300.jpg',
+		);
+		$expected    = array(
+			site_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ) => false,
+			'/wp-content/uploads/2018/06/IMG_0183-300x300.jpg'             => false,
+		);
+
+		$actual = AMP_Image_Dimension_Extractor::extract( $source_urls );
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
 	 * Test where processed URLs should match originals.
 	 */
 	public function test__should_return_original_urls() {
