@@ -38,13 +38,16 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 * @covers AMP_Site_Validation::count_posts_and_terms()
 	 */
 	public function test_count_posts_and_terms() {
-		$method = new ReflectionMethod( 'AMP_Site_Validation::count_posts_and_terms' );
-		$method->setAccessible( true );
-		$this->assertEquals( 0, $method->invoke( null ) );
+		/**
+		 * The number of original URLs present before adding these test URLs.
+		 * These include a post, a term, and the home URL.
+		 */
+		$number_original_urls = $this->get_inital_url_count();
+		$this->assertEquals( $number_original_urls, AMP_Site_Validation::count_posts_and_terms() );
 
-		$number_of_posts = 20;
-		$post_ids        = array();
-		for ( $i = 0; $i < $number_of_posts; $i++ ) {
+		$number_new_posts = AMP_Site_Validation::BATCH_SIZE * 3;
+		$post_ids         = array();
+		for ( $i = 0; $i < $number_new_posts; $i++ ) {
 			$post_ids[] = $this->factory()->post->create();
 		}
 
@@ -52,7 +55,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * The term (category) of 'Uncategorized' should be present, as there are posts now.
 		 * So account for it with +1.
 		 */
-		$this->assertEquals( $number_of_posts + 1, $method->invoke( null ) );
+		$this->assertEquals( $number_new_posts + $number_original_urls, AMP_Site_Validation::count_posts_and_terms() );
 
 		$number_of_new_terms        = 20;
 		$taxonomy                   = 'category';
@@ -70,15 +73,15 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$taxonomy
 		);
 
-		$this->assertEquals( $number_of_posts + $number_of_new_terms + 1, $method->invoke( null ) );
+		$this->assertEquals( $number_new_posts + $number_of_new_terms + $number_original_urls, AMP_Site_Validation::count_posts_and_terms() );
 	}
 
 	/**
-	 * Test get_post_permalinks.
+	 * Test get_posts_by_type.
 	 *
-	 * @covers AMP_Site_Validation::get_post_permalinks()
+	 * @covers AMP_Site_Validation::get_posts_by_type()
 	 */
-	public function test_get_post_permalinks() {
+	public function test_get_posts_by_type() {
 		$number_posts_each_post_type = 20;
 		$post_types                  = get_post_types( array( 'public' => true ), 'names' );
 
@@ -87,23 +90,31 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * They have a default status of 'inherit,' to depend on the status of their parent post.
 		 */
 		unset( $post_types['attachment'] );
+
 		foreach ( $post_types as $post_type ) {
-			$expected_post_permalinks = array();
+			// Start the expected posts with the existing post.
+			$query          = new WP_Query( array(
+				'fields'    => 'ids',
+				'post_type' => $post_type,
+			) );
+			$expected_posts = $query->posts;
+
+			// Store the initial count of posts to test that the newly-created posts are found.
+			$initial_post_count = count( $expected_posts );
+
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
-				$expected_post_permalinks[] = get_permalink( $this->factory()->post->create( array(
+				$expected_posts[] = $this->factory()->post->create( array(
 					'post_type' => $post_type,
-				) ) );
+				) );
 			}
 
-			$actual_post_permalinks = AMP_Site_Validation::get_post_permalinks( $post_type );
-			$this->assertEquals( $expected_post_permalinks, array_values( $actual_post_permalinks ) );
+			$actual_posts = AMP_Site_Validation::get_posts_by_type( $post_type );
+			$this->assertEquals( $expected_posts, array_values( $actual_posts ) );
 
-			// Test with the 2 optional arguments for AMP_Site_Validation::get_post_permalinks().
-			$number_of_posts        = $number_posts_each_post_type / 2;
-			$offset                 = $number_of_posts;
-			$actual_post_permalinks = AMP_Site_Validation::get_post_permalinks( $post_type, $number_of_posts, $offset );
-			$this->assertEquals( array_slice( $expected_post_permalinks, $offset, $number_of_posts ), array_values( $actual_post_permalinks ) );
-			$this->assertCount( $number_of_posts, $actual_post_permalinks );
+			// Test with the 2 optional arguments for AMP_Site_Validation::get_posts_by_type().
+			$number_of_posts = $number_posts_each_post_type / 2;
+			$actual_posts    = AMP_Site_Validation::get_posts_by_type( $post_type, $number_of_posts );
+			$this->assertEquals( array_slice( $expected_posts, $number_of_posts ), $actual_posts );
 		}
 	}
 
@@ -119,6 +130,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		) );
 
 		foreach ( $taxonomies as $taxonomy ) {
+			// Begin the expected links with the term links that already exist.
+			$expected_links             = array_map( 'get_term_link', get_terms( array( 'taxonomy' => $taxonomy ) ) );
 			$terms_for_current_taxonomy = array();
 			for ( $i = 0; $i < $number_links_each_taxonomy; $i++ ) {
 				$terms_for_current_taxonomy[] = $this->factory()->term->create( array(
@@ -133,7 +146,10 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 				$taxonomy
 			);
 
-			$expected_links  = array_map( 'get_term_link', $terms_for_current_taxonomy );
+			$expected_links  = array_merge(
+				$expected_links,
+				array_map( 'get_term_link', $terms_for_current_taxonomy )
+			);
 			$number_of_links = 100;
 			$actual_links    = AMP_Site_Validation::get_taxonomy_links( $taxonomy, $number_of_links );
 
@@ -205,6 +221,23 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 		// All of the posts created should be present in the validated URLs.
 		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
+	}
+
+	/**
+	 * Gets the initial count of URLs on the site.
+	 *
+	 * @return int The initial count of URLs.
+	 */
+	public function get_inital_url_count() {
+		$total_count  = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
+		$post_query   = new WP_Query( array( 'post_type' => 'post' ) );
+		$total_count += $post_query->found_posts;
+
+		$term_query   = new WP_Term_Query( array(
+			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
+		) );
+		$total_count += count( $term_query->terms );
+		return $total_count;
 	}
 
 	/**

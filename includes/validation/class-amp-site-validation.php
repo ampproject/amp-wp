@@ -16,8 +16,8 @@
 class AMP_Site_Validation {
 
 	/**
-	 * The size of the batch of URLs to validate.
-	 * Grouped in a batch to avoid making loopback requests for all of a site's URLs at the same time.
+	 * The size of the batch of URLs to query and validate.
+	 * Grouped in a batch to avoid passing 'posts_per_page' => -1 to WP_Query.
 	 *
 	 * @var int
 	 */
@@ -27,7 +27,7 @@ class AMP_Site_Validation {
 	 * The WP-CLI argument to validate the site.
 	 * The full command is: wp amp validate-site.
 	 *
-	 * @var int
+	 * @var string
 	 */
 	const WP_CLI_ARGUMENT = 'validate-site';
 
@@ -83,7 +83,7 @@ class AMP_Site_Validation {
 		}
 
 		$number_urls_to_crawl = self::count_posts_and_terms();
-		WP_CLI::log( sprintf( __( 'Crawling the entire site for AMP validity.', 'amp' ) ) );
+		WP_CLI::log( __( 'Crawling the entire site for AMP validity.', 'amp' ) );
 
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar(
 			/* translators: %d is the number of URLs */
@@ -95,7 +95,7 @@ class AMP_Site_Validation {
 
 		$url_more_details = add_query_arg(
 			'post_type',
-			\AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 			admin_url( 'edit.php' )
 		);
 
@@ -112,45 +112,52 @@ class AMP_Site_Validation {
 	}
 
 	/**
-	 * Finds the total number of posts and terms on the site.
-	 *
-	 * The access level is private,
-	 * as this passes 'posts_per_page' => -1 to WP_Query().
-	 * This is only intended for use with WP-CLI,
-	 * and it's a performance risk otherwise.
+	 * Gets the total number of posts and terms on the site.
 	 *
 	 * @return int The number of posts and terms.
 	 */
-	private static function count_posts_and_terms() {
-		$total_count       = 0;
+	public static function count_posts_and_terms() {
+		/*
+		 * If the homepage is set to 'Your latest posts,' start the $total_count at 1.
+		 * Otherwise, the homepage wouldn't be counted here, even though validate_entire_site_urls() visits it.
+		 * If it's not set to that, it will probably be counted in the query for pages.
+		 */
+		$total_count       = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
 		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
-		$term_query        = new WP_Term_Query( array(
+
+		// Count all public taxonomy terms.
+		$term_query   = new WP_Term_Query( array(
 			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
 			'fields'   => 'ids',
 		) );
-		$total_count      += count( $term_query->terms );
+		$total_count += count( $term_query->terms );
 
 		/**
-		 * Because of the posts_per_page => -1 value, this is only suited for use in WP-CLI.
-		 * This is necessary to pass as an argument to WP_CLI\Utils\make_progress_bar(),
-		 * in order to show the progress of every post.
+		 * Count all public posts.
+		 * This batches the queries, to avoid passing posts_per_page => -1 to WP_Query.
+		 * After the first iteration, it passes an 'offset' value to WP_Query.
+		 * And by passing 'orderby' => 'ID' to WP_Query, it ensures there isn't an issue if a post is added while counting them.
 		 */
-		$post_query   = new WP_Query( array(
-			'post_type'      => $public_post_types,
-			'fields'         => 'ids',
-			'posts_per_page' => -1,
-		) );
-		$total_count += $post_query->found_posts;
+		$offset = 0;
+		$posts  = self::get_posts_by_type( $public_post_types );
+		while ( ! empty( $posts ) ) {
+			$offset      += self::BATCH_SIZE;
+			$total_count += count( $posts );
+			$posts        = self::get_posts_by_type( $public_post_types, $offset );
+		}
 
-		// Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
+		/**
+		 * Count all attachments.
+		 * Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
+		 */
 		if ( in_array( 'attachment', $public_post_types, true ) ) {
-			$attachment_query = new WP_Query( array(
-				'post_type'      => 'attachment',
-				'post_status'    => 'inherit',
-				'fields'         => 'ids',
-				'posts_per_page' => -1,
-			) );
-			$total_count     += $attachment_query->found_posts;
+			$offset      = 0;
+			$attachments = self::get_posts_by_type( 'attachment' );
+			while ( ! empty( $attachments ) ) {
+				$offset      += self::BATCH_SIZE;
+				$total_count += count( $attachments );
+				$attachments  = self::get_posts_by_type( 'attachment', $offset );
+			}
 		}
 
 		return $total_count;
@@ -160,21 +167,20 @@ class AMP_Site_Validation {
 	 * Gets the permalinks of public, published posts.
 	 *
 	 * @param string $post_type The post type.
-	 * @param int    $number_posts The maximum amount of posts to get the permalinks for (optional).
 	 * @param int    $offset The offset of the query (optional).
 	 * @return string[] $permalinks The post permalinks in an array.
 	 */
-	public static function get_post_permalinks( $post_type, $number_posts = 200, $offset = null ) {
+	public static function get_posts_by_type( $post_type, $offset = null ) {
 		$args = array(
 			'post_type'      => $post_type,
-			'posts_per_page' => $number_posts,
+			'posts_per_page' => self::BATCH_SIZE,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
 			'fields'         => 'ids',
 		);
 		if ( is_int( $offset ) ) {
-			$args = array_merge( $args, compact( 'offset' ) );
+			$args['offset'] = $offset;
 		}
 
 		// Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
@@ -183,7 +189,7 @@ class AMP_Site_Validation {
 		}
 		$query = new WP_Query( $args );
 
-		return array_map( 'get_permalink', $query->posts );
+		return $query->posts;
 	}
 
 	/**
@@ -222,13 +228,13 @@ class AMP_Site_Validation {
 		// Validate all public, published posts.
 		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
 		foreach ( $public_post_types as $post_type ) {
-			$permalinks = self::get_post_permalinks( $post_type, self::BATCH_SIZE );
+			$permalinks = array_map( 'get_permalink', self::get_posts_by_type( $post_type ) );
 			$offset     = 0;
 
 			while ( ! empty( $permalinks ) ) {
 				self::validate_urls( $permalinks );
 				$offset    += self::BATCH_SIZE;
-				$permalinks = self::get_post_permalinks( $post_type, self::BATCH_SIZE, $offset );
+				$permalinks = array_map( 'get_permalink', self::get_posts_by_type( $post_type, $offset ) );
 			}
 		}
 
@@ -255,28 +261,34 @@ class AMP_Site_Validation {
 	public static function validate_urls( $urls ) {
 		foreach ( $urls as $url ) {
 			$validity = AMP_Validation_Manager::validate_url( $url );
-			if ( ! is_wp_error( $validity ) ) {
-				AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
-				$error_count            = count( $validity['validation_errors'] );
-				$unaccepted_error_count = count( array_filter(
-					$validity['validation_errors'],
-					function( $error ) {
-						return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
-					}
-				) );
 
-				if ( $error_count > 0 ) {
-					self::$total_errors++;
-				}
-				if ( $unaccepted_error_count > 0 ) {
-					self::$unaccepted_errors++;
-				}
+			if ( is_wp_error( $validity ) ) {
 				if ( self::$wp_cli_progress ) {
 					self::$wp_cli_progress->tick();
 				}
-
-				self::$number_crawled++;
+				continue;
 			}
+
+			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
+			$error_count            = count( $validity['validation_errors'] );
+			$unaccepted_error_count = count( array_filter(
+				$validity['validation_errors'],
+				function( $error ) {
+					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+				}
+			) );
+
+			if ( $error_count > 0 ) {
+				self::$total_errors++;
+			}
+			if ( $unaccepted_error_count > 0 ) {
+				self::$unaccepted_errors++;
+			}
+			if ( self::$wp_cli_progress ) {
+				self::$wp_cli_progress->tick();
+			}
+
+			self::$number_crawled++;
 		}
 	}
 }
