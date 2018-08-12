@@ -1060,16 +1060,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 </div>
 EOB;
 		$expected_errors[] = array(
-			'node_name'       => 'bazfoo',
-			'parent_name'     => 'div',
-			'code'            => 'invalid_element',
-			'node_attributes' => array(),
-		);
-		$expected_errors[] = array(
 			'node_name'       => 'invalid_p',
 			'parent_name'     => 'div',
 			'code'            => 'invalid_element',
 			'node_attributes' => array( 'id' => 'invalid' ),
+		);
+		$expected_errors[] = array(
+			'node_name'       => 'bazfoo',
+			'parent_name'     => 'div',
+			'code'            => 'invalid_element',
+			'node_attributes' => array(),
 		);
 		$content[]         = <<<EOB
 <ul>
