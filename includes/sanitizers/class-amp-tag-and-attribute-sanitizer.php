@@ -255,7 +255,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		while ( ! empty( $this->stack ) ) {
 
 			// Get the next node to process.
-			$node = array_pop( $this->stack );
+			$node = array_shift( $this->stack );
 
 			/**
 			 * Process this node.

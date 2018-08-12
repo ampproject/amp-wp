@@ -33,6 +33,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
 
 	/**
+	 * Inline style selector's specificity multiplier, i.e. used to generate the number of ':not(#_)' placeholders.
+	 *
+	 * @var int
+	 */
+	const INLINE_SPECIFICITY_MULTIPLIER = 5; // @todo The correctness of using "5" should be validated.
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -169,6 +176,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var float
 	 */
 	private $parse_css_duration = 0.0;
+
+	/**
+	 * THe HEAD element.
+	 *
+	 * @var DOMElement
+	 */
+	private $head;
 
 	/**
 	 * Current node being processed.
@@ -367,6 +381,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$this->head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+		if ( ! $this->head ) {
+			$this->head = $this->dom->createElement( 'head' );
+			$this->dom->documentElement->insertBefore( $this->head, $this->dom->documentElement->firstChild );
+		}
+
 		$this->parse_css_duration = 0.0;
 
 		/*
@@ -493,21 +513,29 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $url_host ) );
 		}
 
+		$base_path = null;
 		$file_path = null;
 		if ( 0 === strpos( $url, $content_url ) ) {
-			$file_path = WP_CONTENT_DIR . substr( $url, strlen( $content_url ) - 1 );
+			$base_path = WP_CONTENT_DIR;
+			$file_path = substr( $url, strlen( $content_url ) - 1 );
 		} elseif ( 0 === strpos( $url, $includes_url ) ) {
-			$file_path = ABSPATH . WPINC . substr( $url, strlen( $includes_url ) - 1 );
+			$base_path = ABSPATH . WPINC;
+			$file_path = substr( $url, strlen( $includes_url ) - 1 );
 		} elseif ( 0 === strpos( $url, $admin_url ) ) {
-			$file_path = ABSPATH . 'wp-admin' . substr( $url, strlen( $admin_url ) - 1 );
+			$base_path = ABSPATH . 'wp-admin';
+			$file_path = substr( $url, strlen( $admin_url ) - 1 );
 		}
 
-		if ( ! $file_path || false !== strpos( '../', $file_path ) || 0 !== validate_file( $file_path ) || ! file_exists( $file_path ) ) {
+		if ( ! $file_path || false !== strpos( $file_path, '../' ) || false !== strpos( $file_path, '..\\' ) ) {
+			/* translators: %s is file URL */
+			return new WP_Error( 'file_path_not_allowed', sprintf( __( 'Disallowed URL filesystem path for %s.', 'amp' ), $url ) );
+		}
+		if ( ! file_exists( $base_path . $file_path ) ) {
 			/* translators: %s is file URL */
 			return new WP_Error( 'file_path_not_found', sprintf( __( 'Unable to locate filesystem path for %s.', 'amp' ), $url ) );
 		}
 
-		return $file_path;
+		return $base_path . $file_path;
 	}
 
 	/**
@@ -601,6 +629,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( ! $element->hasAttribute( 'crossorigin' ) ) {
 				$element->setAttribute( 'crossorigin', 'anonymous' );
+			}
+
+			/*
+			 * Make sure rel=preconnect link is present for Google Fonts stylesheet.
+			 * Note that core themes normally do this already, per <https://core.trac.wordpress.org/ticket/37171>.
+			 * But not always, per <https://core.trac.wordpress.org/ticket/44668>.
+			 * This also ensures that other themes will get the preconnect link when
+			 * they don't implement the resource hint.
+			 */
+			$needs_preconnect_link = (
+				'https://fonts.googleapis.com/' === substr( $normalized_url, 0, 29 )
+				&&
+				0 === $this->xpath->query( '//link[ @rel = "preconnect" and @crossorigin and starts-with( @href, "https://fonts.gstatic.com" ) ]', $this->head )->length
+			);
+			if ( $needs_preconnect_link ) {
+				$link = AMP_DOM_Utils::create_node( $this->dom, 'link', array(
+					'rel'         => 'preconnect',
+					'href'        => 'https://fonts.gstatic.com/',
+					'crossorigin' => '',
+				) );
+				$this->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
 			}
 			return;
 		}
@@ -1549,15 +1598,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * @return Selector The new more-specific selector.
 			 */
 			function( Selector $old_selector ) {
-				$specific = ':not(#_)'; // Here "_" is just a short single-char ID.
-
-				$selector_mod = str_repeat( $specific, floor( $old_selector->getSpecificity() / 100 ) );
+				// Calculate the specificity multiplier for the placeholder.
+				$specificity_multiplier = AMP_Style_Sanitizer::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
 				if ( $old_selector->getSpecificity() % 100 > 0 ) {
-					$selector_mod .= $specific;
+					$specificity_multiplier++;
 				}
 				if ( $old_selector->getSpecificity() % 10 > 0 ) {
-					$selector_mod .= $specific;
+					$specificity_multiplier++;
 				}
+				$selector_mod = str_repeat( ':not(#_)', $specificity_multiplier ); // Here "_" is just a short single-char ID.
 
 				$new_selector = $old_selector->getSelector();
 
@@ -1604,7 +1653,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$class = 'amp-wp-' . substr( md5( $style_attribute->nodeValue ), 0, 7 );
-		$root  = ':root' . str_repeat( ':not(#_)', 5 ); // @todo The correctness of using "5" should be validated.
+		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
 		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
@@ -1709,12 +1758,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $this->amp_custom_style_element ) {
 				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
 				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
-				$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-				if ( ! $head ) {
-					$head = $this->dom->createElement( 'head' );
-					$this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
-				}
-				$head->appendChild( $this->amp_custom_style_element );
+				$this->head->appendChild( $this->amp_custom_style_element );
 			}
 
 			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
@@ -1732,12 +1776,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
 			$included_size    = 0;
+			$excluded_size    = 0;
 			$included_sources = array();
 			foreach ( $stylesheet_sets['custom']['pending_stylesheets'] as $i => $pending_stylesheet ) {
 				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) ) {
 					continue;
 				}
-				$message = $pending_stylesheet['node']->nodeName;
+				$message  = sprintf( '% 6d B: ', $pending_stylesheet['size'] );
+				$message .= $pending_stylesheet['node']->nodeName;
 				if ( $pending_stylesheet['node']->getAttribute( 'id' ) ) {
 					$message .= '#' . $pending_stylesheet['node']->getAttribute( 'id' );
 				}
@@ -1749,30 +1795,29 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
 					}
 				}
-				$message .= sprintf(
-					/* translators: %d is number of bytes */
-					_n( ' (%d byte)', ' (%d bytes)', $pending_stylesheet['size'], 'amp' ),
-					$pending_stylesheet['size']
-				);
 
 				if ( ! empty( $pending_stylesheet['included'] ) ) {
 					$included_sources[] = $message;
 					$included_size     += $pending_stylesheet['size'];
 				} else {
 					$excluded_sources[] = $message;
+					$excluded_size     += $pending_stylesheet['size'];
 				}
 			}
 			$comment = '';
 			if ( ! empty( $included_sources ) ) {
-				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n- " . implode( "\n- ", $included_sources ) . "\n";
+				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n" . implode( "\n", $included_sources ) . "\n";
 				/* translators: %d is number of bytes */
-				$comment .= sprintf( esc_html__( 'Total size: %d bytes', 'amp' ), $included_size ) . "\n";
+				$comment .= sprintf( esc_html__( 'Total included size: %d bytes', 'amp' ), $included_size ) . "\n";
 			}
 			if ( ! empty( $excluded_sources ) ) {
 				if ( $comment ) {
 					$comment .= "\n";
 				}
-				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n- " . implode( "\n- ", $excluded_sources ) . "\n";
+				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n" . implode( "\n", $excluded_sources ) . "\n";
+
+				/* translators: %d is number of bytes */
+				$comment .= sprintf( esc_html__( 'Total excluded size: %d bytes', 'amp' ), $excluded_size ) . "\n";
 			}
 			if ( $comment ) {
 				$this->amp_custom_style_element->parentNode->insertBefore(

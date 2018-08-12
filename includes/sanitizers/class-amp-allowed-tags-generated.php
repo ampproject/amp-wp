@@ -13,8 +13,8 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 642;
-	private static $minimum_validator_revision_required = 328;
+	private static $spec_file_revision = 675;
+	private static $minimum_validator_revision_required = 338;
 
 	private static $allowed_tags = array(
 		'a' => array(
@@ -92,6 +92,54 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(),
 			),
 		),
+		'amp-3d-gltf' => array(
+			array(
+				'attr_spec_list' => array(
+					'alpha' => array(
+						'value_regex' => 'false|true',
+					),
+					'antialiasing' => array(
+						'value_regex' => 'false|true',
+					),
+					'autorotate' => array(
+						'value_regex' => 'false|true',
+					),
+					'enablezoom' => array(
+						'value_regex' => 'false|true',
+					),
+					'maxpixelratio' => array(
+						'value_regex' => '[+-]?(\\d*\\.)?\\d+',
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'src' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => true,
+							'allowed_protocol' => array(
+								'https',
+							),
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-3d-gltf',
+					),
+				),
+			),
+		),
 		'amp-3q-player' => array(
 			array(
 				'attr_spec_list' => array(
@@ -131,6 +179,10 @@ class AMP_Allowed_Tags_Generated {
 						'value' => '',
 					),
 					'expand-single-section' => array(
+						'value' => '',
+					),
+					'media' => array(),
+					'noloading' => array(
 						'value' => '',
 					),
 				),
@@ -779,6 +831,9 @@ class AMP_Allowed_Tags_Generated {
 					'[data-player]' => array(),
 					'[data-playlist-id]' => array(),
 					'[data-video-id]' => array(),
+					'autoplay' => array(
+						'value' => '',
+					),
 					'data-account' => array(
 						'mandatory' => true,
 					),
@@ -1038,6 +1093,52 @@ class AMP_Allowed_Tags_Generated {
 						'amp-dailymotion',
 					),
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-dailymotion',
+				),
+			),
+		),
+		'amp-date-countdown' => array(
+			array(
+				'attr_spec_list' => array(
+					'biggest-unit' => array(
+						'value_regex_casei' => 'days|hours|minutes|seconds',
+					),
+					'end-date' => array(
+						'value_regex' => '\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])',
+					),
+					'locale' => array(
+						'value_regex_casei' => 'de|en|es|fr|id|it|ja|ko|nl|pt|ru|th|tr|vi|zh-cn|zh-tw',
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'offset-seconds' => array(
+						'value_regex' => '-?\\d+',
+					),
+					'timestamp-ms' => array(
+						'value_regex' => '\\d{13}',
+					),
+					'timestamp-seconds' => array(
+						'value_regex' => '\\d{10}',
+					),
+					'when-ended' => array(
+						'value_casei' => 'stop',
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-date-countdown',
+					),
 				),
 			),
 		),
@@ -1710,6 +1811,43 @@ class AMP_Allowed_Tags_Generated {
 						'amp-gist',
 					),
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-gist',
+				),
+			),
+		),
+		'amp-google-document-embed' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'src' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => false,
+							'allowed_protocol' => array(
+								'https',
+							),
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							9,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-google-document-embed',
+					),
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-google-document-embed',
 				),
 			),
 		),
@@ -2411,6 +2549,73 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-orientation-observer' => array(
+			array(
+				'attr_spec_list' => array(
+					'alpha-range' => array(
+						'value_regex' => '(\\d+)\\s{1}(\\d+)',
+					),
+					'beta-range' => array(
+						'value_regex' => '(\\d+)\\s{1}(\\d+)',
+					),
+					'gamma-range' => array(
+						'value_regex' => '(\\d+)\\s{1}(\\d+)',
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-orientation-observer',
+					),
+				),
+			),
+		),
+		'amp-pan-zoom' => array(
+			array(
+				'attr_spec_list' => array(
+					'initial-scale' => array(
+						'value_regex' => '[0-9]+(\\.[0-9]+)?',
+					),
+					'initial-x' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'initial-y' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'max-scale' => array(
+						'value_regex' => '[0-9]+(\\.[0-9]+)?',
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+					'reset-on-resize' => array(
+						'value' => '',
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-pan-zoom',
+					),
+				),
+			),
+		),
 		'amp-pinterest' => array(
 			array(
 				'attr_spec_list' => array(
@@ -2517,6 +2722,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'media' => array(),
 					'noloading' => array(
+						'value' => '',
+					),
+					'once' => array(
 						'value' => '',
 					),
 					'target' => array(),
@@ -2966,6 +3174,10 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-bookend' => array(
 			array(
 				'attr_spec_list' => array(
+					'layout' => array(
+						'mandatory' => true,
+						'value' => 'nodisplay',
+					),
 					'src' => array(
 						'value_url' => array(
 							'allowed_protocol' => array(
@@ -3080,9 +3292,15 @@ class AMP_Allowed_Tags_Generated {
 		'amp-twitter' => array(
 			array(
 				'attr_spec_list' => array(
-					'data-tweetid' => array(
-						'mandatory' => true,
+					'data-cards' => array(),
+					'data-conversation' => array(),
+					'data-limit' => array(),
+					'data-link-color' => array(),
+					'data-momentid' => array(
+						'value_regex' => '\\d+',
 					),
+					'data-theme' => array(),
+					'data-tweetid' => array(),
 					'media' => array(),
 					'noloading' => array(
 						'value' => '',
@@ -3319,6 +3537,9 @@ class AMP_Allowed_Tags_Generated {
 		'amp-vimeo' => array(
 			array(
 				'attr_spec_list' => array(
+					'autoplay' => array(
+						'value' => '',
+					),
 					'data-videoid' => array(
 						'mandatory' => true,
 						'value_regex' => '[0-9]+',
@@ -3502,6 +3723,38 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-wistia-player',
 					),
+				),
+			),
+		),
+		'amp-yotpo' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-app-key' => array(
+						'mandatory' => true,
+					),
+					'data-widget-type' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => '',
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-yotpo',
+					),
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-yotpo',
 				),
 			),
 		),
@@ -4994,7 +5247,6 @@ class AMP_Allowed_Tags_Generated {
 					'name' => array(),
 					'novalidate' => array(),
 					'target' => array(
-						'mandatory' => true,
 						'value_regex_casei' => '_blank|_top',
 					),
 					'verify-xhr' => array(
@@ -5681,7 +5933,6 @@ class AMP_Allowed_Tags_Generated {
 					'[size]' => array(),
 					'[spellcheck]' => array(),
 					'[step]' => array(),
-					'[type]' => array(),
 					'[value]' => array(),
 					'[width]' => array(),
 					'accept' => array(),
@@ -5746,7 +5997,6 @@ class AMP_Allowed_Tags_Generated {
 					'[size]' => array(),
 					'[spellcheck]' => array(),
 					'[step]' => array(),
-					'[type]' => array(),
 					'[value]' => array(),
 					'[width]' => array(),
 					'accept' => array(),
@@ -7755,6 +8005,27 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 							'latest',
 						),
+						'name' => 'amp-3d-gltf',
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
 						'name' => 'amp-3q-player',
 					),
 				),
@@ -8420,6 +8691,27 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 							'latest',
 						),
+						'name' => 'amp-date-countdown',
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
 						'name' => 'amp-date-picker',
 					),
 				),
@@ -8777,6 +9069,27 @@ class AMP_Allowed_Tags_Generated {
 							'latest',
 						),
 						'name' => 'amp-gist',
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
+						'name' => 'amp-google-document-embed',
 					),
 				),
 			),
@@ -9240,6 +9553,48 @@ class AMP_Allowed_Tags_Generated {
 							'latest',
 						),
 						'name' => 'amp-ooyala-player',
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
+						'name' => 'amp-orientation-observer',
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
+						'name' => 'amp-pan-zoom',
 					),
 				),
 			),
@@ -9878,6 +10233,28 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'name' => 'amp-wistia-player',
 					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => '',
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => 'text/javascript',
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'allowed_versions' => array(
+							'0.1',
+							'latest',
+						),
+						'name' => 'amp-yotpo',
+					),
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-yotpo',
 				),
 			),
 			array(
@@ -10647,13 +11024,12 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'date-template' => array(
+						'dispatch_key' => 1,
 						'mandatory' => true,
 						'value' => '',
 					),
-					'dates' => array(
-						'dispatch_key' => 1,
-						'mandatory' => true,
-					),
+					'dates' => array(),
+					'default' => array(),
 					'type' => array(
 						'mandatory' => true,
 						'value' => 'amp-mustache',
@@ -10664,31 +11040,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-mustache',
 					),
-					'spec_name' => 'amp-date-picker > template [date-template] [dates]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'date-template' => array(
-						'mandatory' => true,
-						'value' => '',
-					),
-					'default' => array(
-						'dispatch_key' => 1,
-						'mandatory' => true,
-						'value' => '',
-					),
-					'type' => array(
-						'mandatory' => true,
-						'value' => 'amp-mustache',
-					),
-				),
-				'tag_spec' => array(
-					'mandatory_parent' => 'amp-date-picker',
-					'requires_extension' => array(
-						'amp-mustache',
-					),
-					'spec_name' => 'amp-date-picker > template [date-template] [default]',
+					'spec_name' => 'amp-date-picker > template [date-template]',
 				),
 			),
 			array(
@@ -11860,6 +12212,9 @@ class AMP_Allowed_Tags_Generated {
 		'resource' => array(),
 		'rev' => array(),
 		'role' => array(),
+		'style' => array(
+			'blacklisted_value_regex' => '(!important|<!--)',
+		),
 		'subscriptions-action' => array(),
 		'subscriptions-actions' => array(
 			'value' => '',
