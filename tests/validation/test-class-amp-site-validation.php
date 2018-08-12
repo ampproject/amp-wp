@@ -235,7 +235,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$post_query   = new WP_Query( array( 'post_type' => get_post_types( array( 'public' => true ), 'names' ) ) );
 		$total_count += $post_query->found_posts;
 
-		$term_query   = new WP_Term_Query( array(
+		$term_query = new WP_Term_Query( array(
 			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
 			'fields'   => 'ids',
 		) );
