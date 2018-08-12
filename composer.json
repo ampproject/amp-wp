@@ -4,7 +4,6 @@
     "homepage": "https://github.com/Automattic/amp-wp",
     "type": "wordpress-plugin",
     "license": "GPL-2.0",
-    "version": "1.0.0",
     "repositories": [
         {
             "type": "vcs",
