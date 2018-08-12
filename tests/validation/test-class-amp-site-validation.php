@@ -38,26 +38,28 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 * @covers AMP_Site_Validation::count_posts_and_terms()
 	 */
 	public function test_count_posts_and_terms() {
-		/**
-		 * The number of original URLs present before adding these test URLs.
-		 * These include a post, a term, and the home URL.
-		 */
+		// The number of original URLs present before adding these test URLs.
 		$number_original_urls = $this->get_inital_url_count();
 		$this->assertEquals( $number_original_urls, AMP_Site_Validation::count_posts_and_terms() );
 
+		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
 		$number_new_posts = AMP_Site_Validation::BATCH_SIZE * 3;
 		$post_ids         = array();
 		for ( $i = 0; $i < $number_new_posts; $i++ ) {
-			$post_ids[] = $this->factory()->post->create();
+			$post_ids[] = $this->factory()->post->create( array(
+				'tax_input' => array( 'category' => $category ),
+			) );
 		}
 
 		/**
-		 * The term (category) of 'Uncategorized' should be present, as there are posts now.
-		 * So account for it with +1.
+		 * Add the number of new posts, original URLs, and 1 for the $category that all of them have.
+		 * And ensure that the tested method finds a URL for all of them.
 		 */
-		$this->assertEquals( $number_new_posts + $number_original_urls, AMP_Site_Validation::count_posts_and_terms() );
+		$expected_url_count = $number_new_posts + $number_original_urls + 1;
+		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_posts_and_terms() );
 
 		$number_of_new_terms        = 20;
+		$expected_url_count        += $number_of_new_terms;
 		$taxonomy                   = 'category';
 		$terms_for_current_taxonomy = array();
 		for ( $i = 0; $i < $number_of_new_terms; $i++ ) {
@@ -73,7 +75,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$taxonomy
 		);
 
-		$this->assertEquals( $number_new_posts + $number_of_new_terms + $number_original_urls, AMP_Site_Validation::count_posts_and_terms() );
+		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_posts_and_terms() );
 	}
 
 	/**
@@ -230,12 +232,15 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 */
 	public function get_inital_url_count() {
 		$total_count  = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
-		$post_query   = new WP_Query( array( 'post_type' => 'post' ) );
+		$post_query   = new WP_Query( array( 'post_type' => get_post_types( array( 'public' => true ), 'names' ) ) );
 		$total_count += $post_query->found_posts;
 
 		$term_query   = new WP_Term_Query( array(
 			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
+			'fields'   => 'ids',
 		) );
+
+		$total_count += count( $term_query->terms );
 		$total_count += count( $term_query->terms );
 		return $total_count;
 	}
