@@ -160,7 +160,7 @@ class AMP_Theme_Support {
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
 				_doing_it_wrong( 'add_theme_support', esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-					/* translators: %1$s is expected keys and %2$s is actual keys */
+					/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
 					__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
 					join( ', ', $keys ),
 					join( ', ', array_keys( $args ) )
@@ -479,7 +479,7 @@ class AMP_Theme_Support {
 			} elseif ( is_callable( $callback ) ) {
 				$is_match = call_user_func( $callback, $query );
 			} else {
-				/* translators: %s is the supportable template ID. */
+				/* translators: %s: the supportable template ID. */
 				_doing_it_wrong( __FUNCTION__, esc_html__( 'Supportable template "%s" does not have a callable callback.', 'amp' ), '1.0' );
 				$is_match = false;
 			}
@@ -600,7 +600,7 @@ class AMP_Theme_Support {
 				'parent' => 'is_singular',
 			);
 			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_on_front' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
-				/* translators: %s is the URL to the edit post screen */
+				/* translators: %s: the URL to the edit post screen. */
 				$templates['is_front_page']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_on_front' ) ) ) );
 			}
 
@@ -609,7 +609,7 @@ class AMP_Theme_Support {
 				'label' => __( 'Blog', 'amp' ),
 			);
 			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_for_posts' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
-				/* translators: %s is the URL to the edit post screen */
+				/* translators: %s: the URL to the edit post screen. */
 				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
 			}
 		} else {
@@ -1935,7 +1935,7 @@ class AMP_Theme_Support {
 
 		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
 		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
-			/* translators: %s is the charset of the current site */
+			/* translators: %s: the charset of the current site. */
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
