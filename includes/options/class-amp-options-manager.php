@@ -200,7 +200,7 @@ class AMP_Options_Manager {
 		// Store the current version with the options so we know the format.
 		$options['version'] = AMP__VERSION;
 
-		// Validate caching option.
+		// Validate the caching option.
 		$options['enable_response_caching'] = ! empty( $new_options['enable_response_caching'] );
 
 		return $options;

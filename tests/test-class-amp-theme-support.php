@@ -1579,9 +1579,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
 				$this->assertEquals( AMP_Theme_Support::CACHE_MISS_THRESHOLD, count( $caches_for_url ) );
 				$this->assertEquals( amp_get_current_url(), $cache_miss_url );
+
+				// Check that response caching was automatically disabled.
+				$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 			} else {
 				$this->assertEquals( $num_calls, count( $caches_for_url ) );
 				$this->assertFalse( $cache_miss_url );
+				$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 			}
 
 			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );

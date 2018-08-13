@@ -2033,8 +2033,9 @@ class AMP_Theme_Support {
 			return array( $exceeded_threshold, $cache_miss_urls );
 		}
 
-		// When the threshold is exceeded, store the URL for cache miss.
+		// When the threshold is exceeded, store the URL for cache miss and turn off response caching.
 		update_option( self::CACHE_MISS_URL_OPTION, amp_get_current_url() );
+		AMP_Options_Manager::update_option( 'enable_response_caching', false );
 		return array( true, null );
 	}
 
