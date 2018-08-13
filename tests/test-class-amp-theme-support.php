@@ -1446,8 +1446,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-latest.js" async custom-element="amp-mathml"></script>',
 
 			// Note these are single-quoted because they are injected after the DOM has been re-serialized, so the type and src attributes come from WP_Scripts::do_item().
-			'<script src="https://cdn.ampproject.org/v0/amp-ad-latest.js" async="" custom-element="amp-ad"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-audio-latest.js" async="" custom-element="amp-audio"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-ad-latest.js" async="" custom-element="amp-ad"></script>',
 
 			'<link rel="icon" href="http://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="http://example.org/favicon.png" sizes="192x192">',
