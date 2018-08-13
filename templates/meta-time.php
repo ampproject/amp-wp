@@ -3,8 +3,8 @@
 		<?php
 		echo esc_html(
 			sprintf(
-                /* translators: %s: the human-readable time difference. */
-                __( '%s ago', 'amp' ),
+				/* translators: %s: the human-readable time difference. */
+				__( '%s ago', 'amp' ),
 				human_time_diff( $this->get( 'post_publish_timestamp' ), current_time( 'timestamp' ) )
 			)
 		);
