@@ -413,7 +413,7 @@ class AMP_Options_Menu {
 		<fieldset>
 			<?php if ( ! AMP_Options_Manager::get_option( 'enable_response_caching' ) ) : ?>
 				<div class="notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'Response caching was disabled due to exceeding the cache miss threshold.', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false ) ); ?>"><?php esc_html_e( 'This URL is where it last occurred.', 'amp' ); ?></a></p>
+					<p><?php esc_html_e( 'The response cache disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
 				</div>
 			<?php endif; ?>
 			<p>
@@ -423,7 +423,8 @@ class AMP_Options_Menu {
 				</label>
 			</p>
 			<p class="description">
-				<?php esc_html_e( 'This is a description to help them out.....', 'amp' ); ?>
+				<?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s response cache was automatically disabled.', 'amp' ); ?>
+				<a href="<?php echo esc_url( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache' ); ?>"><?php esc_html_e( 'More details are available here.', 'amp' ); ?></a>
 			</p>
 		</fieldset>
 		<?php
