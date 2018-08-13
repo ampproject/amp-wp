@@ -84,6 +84,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Options_Manager::get_option()
 	 * @covers AMP_Options_Manager::update_option()
 	 * @covers AMP_Options_Manager::validate_options()
+	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
 	 */
 	public function test_get_and_set_options() {
 		global $wp_settings_errors;
@@ -106,7 +107,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$this->assertSame( false, AMP_Options_Manager::get_option( 'foo' ) );
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
-
 		// Test supported_post_types validation.
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'page', 'attachment' ) );
 		$this->assertSame(
@@ -200,6 +200,15 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$entries = AMP_Options_Manager::get_option( 'analytics' );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
+
+		// Test re-enabling response cache works.
+		add_action( 'amp_reenable_response_cache', array( 'AMP_Theme_Support', 'reset_cache_miss_url_option' ) );
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
+		$times_reenable_fired = did_action( 'amp_reenable_response_cache' );
+		AMP_Options_Manager::update_option( 'enable_response_caching', true );
+		$this->assertEquals( $times_reenable_fired + 1, did_action( 'amp_reenable_response_cache' ) );
+		$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
+		$this->assertNull( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
 	}
 
 	/**
@@ -209,6 +218,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_check_supported_post_type_update_errors() {
 		global $wp_settings_errors;
+		$wp_settings_errors = array(); // clear any errors before starting.
 		add_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		foreach ( get_post_types() as $post_type ) {

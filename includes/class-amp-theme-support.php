@@ -156,6 +156,8 @@ class AMP_Theme_Support {
 		 * action to template_redirect--the wp action--is used instead.
 		 */
 		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+
+		add_action( 'amp_reenable_response_cache', array( __CLASS__, 'reset_cache_miss_url_option' ) );
 	}
 
 	/**
@@ -2037,6 +2039,17 @@ class AMP_Theme_Support {
 		update_option( self::CACHE_MISS_URL_OPTION, amp_get_current_url() );
 		AMP_Options_Manager::update_option( 'enable_response_caching', false );
 		return array( true, null );
+	}
+
+	/**
+	 * Reset the cache miss URL option.
+	 *
+	 * @since 1.0
+	 */
+	public static function reset_cache_miss_url_option() {
+		if ( get_option( self::CACHE_MISS_URL_OPTION ) ) {
+			delete_option( self::CACHE_MISS_URL_OPTION );
+		}
 	}
 
 	/**
