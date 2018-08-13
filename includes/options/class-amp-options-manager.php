@@ -338,16 +338,15 @@ class AMP_Options_Manager {
 			return;
 		}
 
-		$cache_miss_url = get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false );
-		if ( empty( $cache_miss_url ) ) {
+		if ( self::get_option( 'enable_response_caching' ) ) {
 			return;
 		}
 
 		printf(
 			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
-			esc_html__( 'Response caching was disabled due to exceeding the cache miss threshold.', 'amp' ),
-			esc_url( $cache_miss_url ),
-			esc_html__( 'This URL is where it last occurred.', 'amp' )
+			esc_html__( "The AMP plugin's response cache disabled due to detecting randomly generated content.", 'amp' ),
+			esc_url( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache' ),
+			esc_html__( 'More details', 'amp' )
 		);
 	}
 }

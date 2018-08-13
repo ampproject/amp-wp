@@ -300,13 +300,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::render_cache_miss_notice();
 		$this->assertEmpty( ob_get_clean() );
 
-		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/sample-post' );
+		AMP_Options_Manager::update_option( 'enable_response_caching', false );
 		ob_start();
 		AMP_Options_Manager::render_cache_miss_notice();
-		$notice   = ob_get_clean();
-		$expected = 'Response caching was disabled due to exceeding the cache miss threshold.';
-		$this->assertContains( $expected, $notice );
-		$this->assertContains( 'http://example.org/sample-post', $notice );
+		$notice = ob_get_clean();
+		$this->assertContains( 'The AMP plugin&#039;s response cache disabled due to detecting randomly generated content.', $notice );
+		$this->assertContains( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache', $notice );
 
 		set_current_screen( 'edit.php' );
 
