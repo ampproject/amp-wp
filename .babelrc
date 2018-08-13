@@ -14,12 +14,6 @@
       {
         "pragma": "wp.element.createElement"
       }
-    ],
-    [
-      "@wordpress/babel-plugin-makepot",
-      {
-        "output": "languages/amp-js.pot"
-      }
     ]
   ],
   "env": {

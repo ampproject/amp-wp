@@ -204,7 +204,7 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$localization['i18n'] = gutenberg_get_jed_locale_data( 'amp' ); // @todo create a POT file.
+			$localization['i18n'] = gutenberg_get_jed_locale_data( 'amp' );
 		}
 
 		wp_localize_script(
