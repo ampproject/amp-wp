@@ -344,7 +344,7 @@ class AMP_Options_Manager {
 		}
 
 		printf(
-			'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
+			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
 			esc_html__( 'Response caching was disabled due to exceeding the cache miss threshold.', 'amp' ),
 			esc_url( $cache_miss_url ),
 			esc_html__( 'This URL is where it last occurred.', 'amp' )
