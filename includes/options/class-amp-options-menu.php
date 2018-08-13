@@ -109,6 +109,17 @@ class AMP_Options_Menu {
 			)
 		);
 
+		add_settings_field(
+			'caching',
+			__( 'Caching', 'amp' ),
+			array( $this, 'render_caching' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'amp-caching-field',
+			)
+		);
+
 		$submenus = array(
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
 		);
@@ -387,6 +398,34 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Render the caching settings section.
+	 *
+	 * @since 1.0
+	 *
+	 * @todo Change the messaging and description to be user-friendly and helpful.
+	 */
+	public function render_caching() {
+		?>
+		<fieldset>
+			<?php if ( ! AMP_Options_Manager::get_option( 'enable_response_caching' ) ) : ?>
+				<div class="notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'Response caching was disabled due to exceeding the cache miss threshold.', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false ) ); ?>"><?php esc_html_e( 'This URL is where it last occurred.', 'amp' ); ?></a></p>
+				</div>
+			<?php endif; ?>
+			<p>
+				<label for="enable_response_caching">
+					<input id="enable_response_caching" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_response_caching]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'enable_response_caching' ) ); ?>>
+					<?php esc_html_e( 'Enable response caching.', 'amp' ); ?>
+				</label>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'This is a description to help them out.....', 'amp' ); ?>
+			</p>
+		</fieldset>
 		<?php
 	}
 

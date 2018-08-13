@@ -100,6 +100,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'disable_admin_bar'       => false,
 				'all_templates_supported' => true,
 				'supported_templates'     => array( 'is_singular' ),
+				'enable_response_caching' => true,
 			),
 			AMP_Options_Manager::get_options()
 		);

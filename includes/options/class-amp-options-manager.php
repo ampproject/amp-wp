@@ -31,6 +31,7 @@ class AMP_Options_Manager {
 		'disable_admin_bar'       => false,
 		'all_templates_supported' => true,
 		'supported_templates'     => array( 'is_singular' ),
+		'enable_response_caching' => true,
 	);
 
 	/**
@@ -198,6 +199,9 @@ class AMP_Options_Manager {
 
 		// Store the current version with the options so we know the format.
 		$options['version'] = AMP__VERSION;
+
+		// Validate caching option.
+		$options['enable_response_caching'] = ! empty( $new_options['enable_response_caching'] );
 
 		return $options;
 	}
