@@ -208,8 +208,12 @@ class AMP_Options_Manager {
 	 * @see add_settings_error()
 	 */
 	public static function check_supported_post_type_update_errors() {
-		$supported_types = self::get_option( 'supported_post_types', array() );
-		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
+		$all_eligible_post_types = AMP_Post_Type_Support::get_eligible_post_types();
+		$supported_types         = self::get_option( 'all_templates_supported', false )
+			? $all_eligible_post_types
+			: self::get_option( 'supported_post_types', array() );
+
+		foreach ( $all_eligible_post_types as $name ) {
 			$post_type = get_post_type_object( $name );
 			if ( empty( $post_type ) ) {
 				continue;
