@@ -101,9 +101,6 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			) );
 			$expected_posts = $query->posts;
 
-			// Store the initial count of posts to test that the newly-created posts are found.
-			$initial_post_count = count( $expected_posts );
-
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
 				$expected_posts[] = $this->factory()->post->create( array(
 					'post_type' => $post_type,
@@ -192,6 +189,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
 			$terms[] = $this->factory()->category->create();
 		}
+
 		// Terms need to be associated with a post in order to be returned in get_terms().
 		wp_set_post_terms( $posts[0], $terms, 'category' );
 		AMP_Site_Validation::validate_entire_site_urls();
@@ -241,7 +239,6 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		) );
 
 		$total_count += count( $term_query->terms );
-		$total_count += count( $term_query->terms );
 		return $total_count;
 	}
 
@@ -267,6 +264,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 	/**
 	 * Adds the AMP_VALIDATION_RESULTS: comment to the <html> body.
+	 *
+	 * @return array The response, with a comment in the body.
 	 */
 	public function add_comment() {
 		$mock_validation_results = array(

@@ -253,10 +253,9 @@ class AMP_Site_Validation {
 	}
 
 	/**
-	 * Validates a single URL, and increments the counts as needed.
+	 * Validates the URLs, and increments the counts.
 	 *
 	 * @param array $urls The URLs to validate.
-	 * @return void
 	 */
 	public static function validate_urls( $urls ) {
 		foreach ( $urls as $url ) {
