@@ -147,6 +147,7 @@ function amp_init() {
 	AMP_Theme_Support::init();
 	AMP_Post_Type_Support::add_post_type_support();
 	add_filter( 'request', 'amp_force_query_var_value' );
+	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );

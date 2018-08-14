@@ -18,6 +18,13 @@ class AMP_Options_Manager {
 	const OPTION_NAME = 'amp-options';
 
 	/**
+	 * Option name for the AMP version.
+	 *
+	 * @var string
+	 */
+	const AMP_VERSION_OPTION = 'amp-version';
+
+	/**
 	 * Default option values.
 	 *
 	 * @var array
@@ -32,6 +39,25 @@ class AMP_Options_Manager {
 		'all_templates_supported' => true,
 		'supported_templates'     => array( 'is_singular' ),
 	);
+
+	/**
+	 * Initialize the options manager.
+	 *
+	 * @since 1.0
+	 */
+	public static function init() {
+		// Initialize options on version change.
+		if ( AMP__VERSION === get_option( self::AMP_VERSION_OPTION ) ) {
+			return;
+		}
+
+		$options = get_option( self::OPTION_NAME, array() );
+		if ( empty( $options ) ) {
+			self::update_option( 'all_templates_supported', false );
+		}
+
+		update_option( self::AMP_VERSION_OPTION, AMP__VERSION );
+	}
 
 	/**
 	 * Register settings.
