@@ -25,6 +25,31 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_constants() {
 		$this->assertEquals( 'amp-options', AMP_Options_Manager::OPTION_NAME );
+		$this->assertEquals( 'amp-version', AMP_Options_Manager::AMP_VERSION_OPTION );
+	}
+
+	/**
+	 * Test init.
+	 *
+	 * @covers AMP_Options_Manager::init()
+	 */
+	public function test_init() {
+		// Test when options are empty.
+		$this->assertNull( get_option( AMP_Options_Manager::AMP_VERSION_OPTION, null ) );
+		$this->assertEmpty( get_option( AMP_Options_Manager::OPTION_NAME ) );
+		AMP_Options_Manager::init();
+		$this->assertEquals( AMP__VERSION, get_option( AMP_Options_Manager::AMP_VERSION_OPTION ) );
+		$this->assertArraySubset( array( 'all_templates_supported' => false ), get_option( AMP_Options_Manager::OPTION_NAME ) );
+
+		// Test when options where previously saved.
+		update_option( AMP_Options_Manager::AMP_VERSION_OPTION, '0.7.2' );
+		update_option( AMP_Options_Manager::OPTION_NAME, array(
+			'theme_support'        => 'disabled',
+			'supported_post_types' => array( 'post' ),
+			'analytics'            => array(),
+		) );
+		AMP_Options_Manager::init();
+		$this->assertArrayNotHasKey( 'all_templates_supported', get_option( AMP_Options_Manager::OPTION_NAME ) );
 	}
 
 	/**
