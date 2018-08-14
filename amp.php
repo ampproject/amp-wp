@@ -142,8 +142,6 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
-
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
 	AMP_Theme_Support::init();

@@ -4,7 +4,6 @@
     "homepage": "https://github.com/Automattic/amp-wp",
     "type": "wordpress-plugin",
     "license": "GPL-2.0",
-    "version": "1.0.0",
     "repositories": [
         {
             "type": "vcs",
@@ -12,6 +11,7 @@
         }
     ],
     "require": {
+        "php": "^5.3.2 || ^7.0",
         "sabberworm/php-css-parser": "dev-master"
     },
     "require-dev": {
