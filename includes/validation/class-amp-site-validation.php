@@ -262,10 +262,10 @@ class AMP_Site_Validation {
 		foreach ( $urls as $url ) {
 			$validity = AMP_Validation_Manager::validate_url( $url );
 
+			if ( self::$wp_cli_progress ) {
+				self::$wp_cli_progress->tick();
+			}
 			if ( is_wp_error( $validity ) ) {
-				if ( self::$wp_cli_progress ) {
-					self::$wp_cli_progress->tick();
-				}
 				continue;
 			}
 
@@ -283,9 +283,6 @@ class AMP_Site_Validation {
 			}
 			if ( $unaccepted_error_count > 0 ) {
 				self::$unaccepted_errors++;
-			}
-			if ( self::$wp_cli_progress ) {
-				self::$wp_cli_progress->tick();
 			}
 
 			self::$number_crawled++;
