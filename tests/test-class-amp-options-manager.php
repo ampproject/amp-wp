@@ -209,17 +209,26 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	public function test_check_supported_post_type_update_errors() {
 		global $wp_settings_errors;
 		add_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		foreach ( get_post_types() as $post_type ) {
-			remove_post_type_support( $post_type, 'amp' );
-		}
-
 		register_post_type( 'foo', array(
 			'public' => true,
 			'label'  => 'Foo',
 		) );
-		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
 		AMP_Post_Type_Support::add_post_type_support();
+
+		// Test when 'all_templates_supported' is selected.
+		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
+		AMP_Options_Manager::check_supported_post_type_update_errors();
+		$this->assertEmpty( get_settings_errors() );
+
+		// Test when 'all_templates_supported' is not selected.
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		foreach ( get_post_types() as $post_type ) {
+			if ( 'foo' !== $post_type ) {
+				remove_post_type_support( $post_type, 'amp' );
+			}
+		}
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
