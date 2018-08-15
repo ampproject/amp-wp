@@ -29,7 +29,18 @@ class AMP_Site_Validation {
 	 *
 	 * @var string
 	 */
-	const WP_CLI_ARGUMENT = 'validate-site';
+	const WP_CLI_COMMAND = 'amp validate-site';
+
+	/**
+	 * The WP-CLI flag to force validation of all URLs.
+	 *
+	 * By default, this does not validate templates that the user has opted-out of.
+	 * For example, by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * But with this command flag, this will validate all URLs.
+	 *
+	 * @var string
+	 */
+	const FLAG_NAME_FORCE_VALIDATE_ALL = 'force-validate-all';
 
 	/**
 	 * The WP CLI progress bar.
@@ -76,11 +87,26 @@ class AMP_Site_Validation {
 	public static $force_crawl_all_urls = false;
 
 	/**
-	 * Inits the class.
+	 * Adds the WP-CLI command to validate the site.
 	 */
 	public static function init() {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			WP_CLI::add_command( 'amp', array( __CLASS__, 'crawl_site' ) );
+			WP_CLI::add_command(
+				self::WP_CLI_COMMAND,
+				array( __CLASS__, 'crawl_site' ),
+				array(
+					'shortdesc' => __( 'Crawl the entire site to get AMP validation results', 'amp' ),
+					'synopsis'  => array(
+						array(
+							'type'     => 'flag',
+							'name'     => self::FLAG_NAME_FORCE_VALIDATE_ALL,
+							'optional' => true,
+						),
+					),
+					'when'      => 'after_wp_load',
+					'longdesc'  => '## EXAMPLES' . "\n\n" . 'wp ' . self::WP_CLI_COMMAND,
+				)
+			);
 		}
 	}
 
@@ -88,10 +114,12 @@ class AMP_Site_Validation {
 	 * Crawls the entire site to validate it, and gets the results.
 	 *
 	 * @param array $args The arguments for the command.
+	 * @param array $assoc_args The associative arguments, which can also include command flags like --force-validate-all.
 	 */
-	public static function crawl_site( $args ) {
-		if ( ! isset( $args[0] ) || ! self::WP_CLI_ARGUMENT === $args[0] ) {
-			return;
+	public static function crawl_site( $args, $assoc_args ) {
+		unset( $args );
+		if ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATE_ALL ] ) ) {
+			self::$force_crawl_all_urls = true;
 		}
 
 		$number_urls_to_crawl = self::count_posts_and_terms();
