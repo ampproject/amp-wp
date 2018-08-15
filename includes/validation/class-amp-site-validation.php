@@ -185,12 +185,14 @@ class AMP_Site_Validation {
 			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
 		);
 
-		// Count all public taxonomy terms.
-		$term_query   = new WP_Term_Query( array(
-			'taxonomy' => $amp_enabled_taxonomies,
-			'fields'   => 'ids',
-		) );
-		$total_count += count( $term_query->terms );
+		if ( ! empty( $amp_enabled_taxonomies ) ) {
+			// Count all public taxonomy terms.
+			$term_query   = new WP_Term_Query( array(
+				'taxonomy' => $amp_enabled_taxonomies,
+				'fields'   => 'ids',
+			) );
+			$total_count += count( $term_query->terms );
+		}
 
 		/**
 		 * Count all public posts.
