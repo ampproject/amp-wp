@@ -43,6 +43,18 @@ class AMP_Site_Validation {
 	const FLAG_NAME_FORCE_VALIDATE_ALL = 'force-validate-all';
 
 	/**
+	 * The query var key to force AMP validation, regardless or whether the user has deselected support for a URL.
+	 *
+	 * If the WP-CLI flag above is present in the command,
+	 * this query var is added to the URL.
+	 * Then, this forces validation, no matter whether the user has deselected a certain template.
+	 * Like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 *
+	 * @var string
+	 */
+	const FORCE_VALIDATION_QUERY_VAR = 'amp_force_validation';
+
+	/**
 	 * The WP CLI progress bar.
 	 *
 	 * @see https://make.wordpress.org/cli/handbook/internal-api/wp-cli-utils-make-progress-bar/
@@ -90,7 +102,7 @@ class AMP_Site_Validation {
 	 * Adds the WP-CLI command to validate the site.
 	 */
 	public static function init() {
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		if ( class_exists( 'WP_CLI' ) ) {
 			WP_CLI::add_command(
 				self::WP_CLI_COMMAND,
 				array( __CLASS__, 'crawl_site' ),
@@ -370,6 +382,9 @@ class AMP_Site_Validation {
 	 */
 	public static function validate_urls( $urls ) {
 		foreach ( $urls as $url ) {
+			if ( self::$force_crawl_all_urls ) {
+				$url = add_query_arg( self::FORCE_VALIDATION_QUERY_VAR, '', $url );
+			}
 			$validity = AMP_Validation_Manager::validate_url( $url );
 
 			if ( is_wp_error( $validity ) ) {

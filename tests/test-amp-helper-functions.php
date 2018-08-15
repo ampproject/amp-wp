@@ -344,6 +344,27 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			$GLOBALS['pagenow'] = $page;
 			$this->assertFalse( is_amp_endpoint() );
 		}
+		unset( $GLOBALS['pagenow'] );
+
+		/**
+		 * Simulate a user unchecking almost all of the boxes in 'AMP Settings' > 'Supported Templates'.
+		 * The user has chosen not to show them as AMP, so most URLs should not be AMP endpoints.
+		 */
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
+
+		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.
+		$this->go_to( $this->factory()->post->create() );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// The homepage shouldn't be an AMP endpoint, as it was also unchecked in the UI.
+		$this->go_to( home_url( '/' ) );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// When the user passes a flag to the WP-CLI command, it forces AMP validation no matter whether the user disabled AMP on any template.
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ]      = 1;
+		$_GET[ AMP_Site_Validation::FORCE_VALIDATION_QUERY_VAR ] = 1;
+		$this->assertTrue( is_amp_endpoint() );
 	}
 
 	/**
