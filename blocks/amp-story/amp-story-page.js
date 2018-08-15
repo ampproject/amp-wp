@@ -28,7 +28,7 @@ const TEMPLATE = [
 
 const ALLOWED_BLOCKS = [
 	'amp/amp-story-grid-layer',
-	'amp/amp-story-cta-layer',
+	'amp/amp-story-cta-layer'
 ];
 
 /**
