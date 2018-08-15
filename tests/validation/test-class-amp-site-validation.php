@@ -79,6 +79,55 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_posts_that_support_amp.
+	 *
+	 * @covers AMP_Site_Validation::get_posts_that_support_amp()
+	 */
+	public function test_get_posts_that_support_amp() {
+		$number_of_posts = 20;
+		$ids             = array();
+		for ( $i = 0; $i < $number_of_posts; $i++ ) {
+			$ids[] = $this->factory()->post->create();
+		}
+
+		// This should count all of the newly-created posts as supporting AMP (when you add the query ary).
+		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
+
+		// Simulate 'Enable AMP' being unchecked in the post editor, in which case get_url_count() should not count it.
+		$first_id = $ids[0];
+		update_post_meta(
+			$first_id,
+			AMP_Post_Meta_Box::STATUS_POST_META_KEY,
+			AMP_Post_Meta_Box::DISABLED_STATUS
+		);
+		$this->assertEquals( array(), AMP_Site_Validation::get_posts_that_support_amp( array( $first_id ) ) );
+
+		update_post_meta(
+			$first_id,
+			AMP_Post_Meta_Box::STATUS_POST_META_KEY,
+			AMP_Post_Meta_Box::ENABLED_STATUS
+		);
+
+		/**
+		 * When the second $force_count_all_urls argument is true, all of the newly-created posts should be part of the URL count,
+		 * even though they're not AMP endpoints.
+		 */
+		AMP_Site_Validation::$force_crawl_all_urls = true;
+		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids, true ) );
+		AMP_Site_Validation::$force_crawl_all_urls = false;
+
+		// In Native AMP, the URL count should include all of the newly-created posts.
+		add_theme_support( 'amp' );
+		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
+
+		// In Paired Mode, the URL count should also include all of the newly-created posts.
+		add_theme_support( 'amp', array(
+			'paired' => true,
+		) );
+		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
+	}
+
+	/**
 	 * Test get_posts_by_type.
 	 *
 	 * @covers AMP_Site_Validation::get_posts_by_type()

@@ -64,6 +64,18 @@ class AMP_Site_Validation {
 	public static $number_crawled = 0;
 
 	/**
+	 * Whether to force crawling of all URLs.
+	 *
+	 * By default, this script only crawls URLs that support AMP,
+	 * where the user hasn't opted-out of AMP for the URL.
+	 * For example, by unchecking 'Posts' in 'AMP Settings' > 'Supported Templates'.
+	 * Or unchecking 'Enable AMP' in the post's editor.
+	 *
+	 * @var int
+	 */
+	public static $force_crawl_all_urls = false;
+
+	/**
 	 * Inits the class.
 	 */
 	public static function init() {
@@ -114,6 +126,9 @@ class AMP_Site_Validation {
 	/**
 	 * Gets the total number of posts and terms on the site.
 	 *
+	 * By default, this only counts AMP-enabled posts and terms.
+	 * But if $force_crawl_all_urls is true, it counts all of them, regardless of their AMP status.
+	 *
 	 * @return int The number of posts and terms.
 	 */
 	public static function count_posts_and_terms() {
@@ -138,12 +153,12 @@ class AMP_Site_Validation {
 		 * After the first iteration, it passes an 'offset' value to WP_Query.
 		 * And by passing 'orderby' => 'ID' to WP_Query, it ensures there isn't an issue if a post is added while counting them.
 		 */
-		$offset = 0;
-		$posts  = self::get_posts_by_type( $public_post_types );
-		while ( ! empty( $posts ) ) {
+		$offset   = 0;
+		$post_ids = self::get_posts_by_type( $public_post_types );
+		while ( ! empty( $post_ids ) ) {
 			$offset      += self::BATCH_SIZE;
-			$total_count += count( $posts );
-			$posts        = self::get_posts_by_type( $public_post_types, $offset );
+			$total_count += count( self::get_posts_that_support_amp( $post_ids ) );
+			$post_ids     = self::get_posts_by_type( $public_post_types, $offset );
 		}
 
 		/**
@@ -151,12 +166,12 @@ class AMP_Site_Validation {
 		 * Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
 		 */
 		if ( in_array( 'attachment', $public_post_types, true ) ) {
-			$offset      = 0;
-			$attachments = self::get_posts_by_type( 'attachment' );
-			while ( ! empty( $attachments ) ) {
-				$offset      += self::BATCH_SIZE;
-				$total_count += count( $attachments );
-				$attachments  = self::get_posts_by_type( 'attachment', $offset );
+			$offset         = 0;
+			$attachment_ids = self::get_posts_by_type( 'attachment' );
+			while ( ! empty( $attachment_ids ) ) {
+				$offset        += self::BATCH_SIZE;
+				$total_count   += count( self::get_posts_that_support_amp( $attachment_ids ) );
+				$attachment_ids = self::get_posts_by_type( 'attachment', $offset );
 			}
 		}
 
@@ -164,11 +179,34 @@ class AMP_Site_Validation {
 	}
 
 	/**
+	 * Gets the posts IDs that support AMP.
+	 *
+	 * Only get the post IDs if they support AMP.
+	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
+	 * And 'Enable AMP' isn't unchecked in the post's editor.
+	 *
+	 * @param array $ids The post or term IDs.
+	 * @return array The post IDs that support AMP.
+	 */
+	public static function get_posts_that_support_amp( $ids ) {
+		if ( self::$force_crawl_all_urls ) {
+			return $ids;
+		} else {
+			return array_filter(
+				$ids,
+				function( $id ) {
+					return post_supports_amp( $id );
+				}
+			);
+		}
+	}
+
+	/**
 	 * Gets the permalinks of public, published posts.
 	 *
 	 * @param string $post_type The post type.
 	 * @param int    $offset The offset of the query (optional).
-	 * @return string[] $permalinks The post permalinks in an array.
+	 * @return int[] $post_ids The post IDs in an array.
 	 */
 	public static function get_posts_by_type( $post_type, $offset = null ) {
 		$args = array(
@@ -228,7 +266,8 @@ class AMP_Site_Validation {
 		// Validate all public, published posts.
 		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
 		foreach ( $public_post_types as $post_type ) {
-			$permalinks = array_map( 'get_permalink', self::get_posts_by_type( $post_type ) );
+			$post_ids   = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type ) );
+			$permalinks = array_map( 'get_permalink', $post_ids );
 			$offset     = 0;
 
 			while ( ! empty( $permalinks ) ) {
@@ -261,11 +300,11 @@ class AMP_Site_Validation {
 		foreach ( $urls as $url ) {
 			$validity = AMP_Validation_Manager::validate_url( $url );
 
-			if ( self::$wp_cli_progress ) {
-				self::$wp_cli_progress->tick();
-			}
 			if ( is_wp_error( $validity ) ) {
 				continue;
+			}
+			if ( self::$wp_cli_progress ) {
+				self::$wp_cli_progress->tick();
 			}
 
 			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
