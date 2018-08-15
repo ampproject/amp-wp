@@ -128,6 +128,42 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test does_taxonomy_support_amp.
+	 *
+	 * @covers AMP_Site_Validation::does_taxonomy_support_amp()
+	 */
+	public function test_does_taxonomy_support_amp() {
+		$custom_taxonomy = 'foo_custom_taxonomy';
+		register_taxonomy( $custom_taxonomy, 'post' );
+		$taxonomies_to_test = array( $custom_taxonomy, 'category', 'post_tag' );
+
+		// When no template is unchecked in the 'AMP Settings' UI, these should be supported.
+		foreach ( $taxonomies_to_test as $taxonomy ) {
+			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
+		}
+
+		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
+		foreach ( $taxonomies_to_test as $taxonomy ) {
+			$this->assertFalse( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
+		}
+
+		// When $force_crawl_all_urls is true, all taxonomies should be supported.
+		AMP_Site_Validation::$force_crawl_all_urls = true;
+		foreach ( $taxonomies_to_test as $taxonomy ) {
+			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
+		}
+		AMP_Site_Validation::$force_crawl_all_urls = false;
+
+		// When the user has the 'all_templates_supported' box, this should always be true.
+		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		foreach ( $taxonomies_to_test as $taxonomy ) {
+			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
+		}
+	}
+
+	/**
 	 * Test get_posts_by_type.
 	 *
 	 * @covers AMP_Site_Validation::get_posts_by_type()

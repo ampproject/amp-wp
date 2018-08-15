@@ -140,9 +140,14 @@ class AMP_Site_Validation {
 		$total_count       = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
 		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
 
+		$amp_enabled_taxonomies = array_filter(
+			get_taxonomies( array( 'public' => true ) ),
+			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
+		);
+
 		// Count all public taxonomy terms.
 		$term_query   = new WP_Term_Query( array(
-			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
+			'taxonomy' => $amp_enabled_taxonomies,
 			'fields'   => 'ids',
 		) );
 		$total_count += count( $term_query->terms );
@@ -181,9 +186,10 @@ class AMP_Site_Validation {
 	/**
 	 * Gets the posts IDs that support AMP.
 	 *
-	 * Only get the post IDs if they support AMP.
+	 * By default, only get the post IDs if they support AMP.
 	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
 	 * And 'Enable AMP' isn't unchecked in the post's editor.
+	 * But if $force_crawl_all_urls is true, this simply returns all of the IDs.
 	 *
 	 * @param array $ids The post or term IDs.
 	 * @return array The post IDs that support AMP.
@@ -199,6 +205,40 @@ class AMP_Site_Validation {
 				}
 			);
 		}
+	}
+
+	/**
+	 * Gets whether the taxonomy supports AMP.
+	 *
+	 * Only get the term IDs if they support AMP.
+	 * If their taxonomy is unchecked in 'AMP Settings' > 'Supported Templates,' don't return them.
+	 * For example, if 'Categories' is unchecked there, don't return any category IDs.
+	 *
+	 * @param string $taxonomy The taxonomy.
+	 * @return boolean Wether the taxonomy supports AMP.
+	 */
+	public static function does_taxonomy_support_amp( $taxonomy ) {
+		if ( self::$force_crawl_all_urls ) {
+			return true;
+		}
+
+		if ( 'post_tag' === $taxonomy ) {
+			$taxonomy = 'tag';
+		}
+
+		/**
+		 * Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
+		 * This first conditional is for default taxonomies like categories.
+		 */
+		$templates    = AMP_Theme_Support::get_supportable_templates();
+		$taxonomy_key = 'is_' . $taxonomy;
+		if ( isset( $templates[ $taxonomy_key ]['supported'] ) && $templates[ $taxonomy_key ]['supported'] ) {
+			return true;
+		}
+
+		// If this is a custom taxonomy, find if it supports AMP.
+		$custom_taxonomy_key = sprintf( 'is_tax[%s]', $taxonomy );
+		return isset( $templates[ $custom_taxonomy_key ]['supported'] ) && $templates[ $custom_taxonomy_key ]['supported'];
 	}
 
 	/**
@@ -277,9 +317,13 @@ class AMP_Site_Validation {
 			}
 		}
 
-		// Validate all public taxonomies.
-		$public_taxonomies = get_taxonomies( array( 'public' => true ) );
-		foreach ( $public_taxonomies as $taxonomy ) {
+		// Validate all public taxonomies that don't have AMP disabled.
+		$amp_enabled_taxonomies = array_filter(
+			get_taxonomies( array( 'public' => true ) ),
+			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
+		);
+
+		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
 			$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE );
 			$offset         = 0;
 
