@@ -11,7 +11,6 @@ const {
 } = wp.components;
 
 const ALLOWED_BLOCKS = [
-	'core/button',
 	'core/code',
 	'core/embed',
 	'core/image',
@@ -42,14 +41,15 @@ wp.hooks.addFilter(
 	setBlockParent
 );
 
+// @todo Perhaps this should wait behind https://github.com/WordPress/gutenberg/issues/8589?
 // Remove all blocks that are not known to be allowed in AMP Stories (ref. amp-story-cta-layer-allowed-descendants).
-window.addEventListener( 'load', () => { // @todo Should be better event.
+/*window.addEventListener( 'load', () => { // @todo Should be better event.
 	wp.blocks.getBlockTypes().forEach( function( blockType ) {
 		if ( -1 === blockType.name.indexOf( 'amp/amp-story-' ) && ! ALLOWED_BLOCKS.includes( blockType.name ) ) {
 			wp.blocks.unregisterBlockType( blockType.name );
 		}
 	} );
-} );
+} );*/
 
 /**
  * Register block.
@@ -81,37 +81,35 @@ export default registerBlockType(
 		 */
 
 		edit( props ) {
-			const { isSelected, setAttributes } = props;
+			const { setAttributes } = props;
 			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<SelectControl
-							key="template"
-							label={ __( 'Template', 'amp' ) }
-							value={ props.attributes.template }
-							options={ [
-								{
-									value: 'fill',
-									label: __( 'Fill', 'amp' )
-								},
-								{
-									value: 'horizontal',
-									label: __( 'Horizontal', 'amp' )
-								},
-								{
-									value: 'thirds',
-									label: __( 'Thirds', 'amp' )
-								},
-								{
-									value: 'vertical',
-									label: __( 'Vertical', 'amp' )
-								}
-							] }
-							onChange={ value => ( setAttributes( { template: value } ) ) }
-						/>
-					</InspectorControls>
-				),
-				<InnerBlocks key='contents' />
+				<InspectorControls key='inspector'>
+					<SelectControl
+						key="template"
+						label={ __( 'Template', 'amp' ) }
+						value={ props.attributes.template }
+						options={ [
+							{
+								value: 'fill',
+								label: __( 'Fill', 'amp' )
+							},
+							{
+								value: 'horizontal',
+								label: __( 'Horizontal', 'amp' )
+							},
+							{
+								value: 'thirds',
+								label: __( 'Thirds', 'amp' )
+							},
+							{
+								value: 'vertical',
+								label: __( 'Vertical', 'amp' )
+							}
+						] }
+						onChange={ value => ( setAttributes( { template: value } ) ) }
+					/>
+				</InspectorControls>,
+				<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
 			];
 		},
 

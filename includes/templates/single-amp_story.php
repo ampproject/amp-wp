@@ -27,6 +27,7 @@ the_post();
 		}
 		$publisher = isset( $metadata['publisher']['name'] ) ? $metadata['publisher']['name'] : get_option( 'blogname' );
 
+		// @todo poster-portrait-src can't be empty.
 		$poster_portrait_src = null;
 		if ( has_post_thumbnail() ) {
 			$src = wp_get_attachment_image_src( get_post_thumbnail_id(), 'amp-story-poster-portrait' );

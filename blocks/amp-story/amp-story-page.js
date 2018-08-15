@@ -26,6 +26,11 @@ const TEMPLATE = [
 	]
 ];
 
+const ALLOWED_BLOCKS = [
+	'amp/amp-story-grid-layer',
+	'amp/amp-story-cta-layer',
+];
+
 /**
  * Register block.
  */
@@ -35,8 +40,6 @@ export default registerBlockType(
 		title: __( 'AMP Story Page', 'amp' ),
 		category: 'layout',
 		icon: 'admin-page',
-
-		// @todo Enforce that the amp-story-page can only be a root-level block; Using `parent: []` does not work, and it causes the inserter to be disabled entirely.
 		attributes: {
 			id: {
 				type: 'string',
@@ -60,24 +63,22 @@ export default registerBlockType(
 
 		// @todo Show error if no ID is supplied.
 		edit( props ) {
-			const { isSelected, setAttributes } = props;
+			const { setAttributes } = props;
 			return [
-				isSelected && (
-					<InspectorControls key='inspector'>
-						<TextControl
-							type="text"
-							className="blocks-amp-story-page__id"
-							required={ true }
-							label={ __( 'ID', 'amp' ) }
-							value={ props.attributes.id }
-							onChange={ value => ( setAttributes( { id: value } ) ) }
-						/>
-					</InspectorControls>
-				),
+				<InspectorControls key='inspector'>
+					<TextControl
+						type="text"
+						className="blocks-amp-story-page__id"
+						required={ true }
+						label={ __( 'ID', 'amp' ) }
+						value={ props.attributes.id }
+						onChange={ value => ( setAttributes( { id: value } ) ) }
+					/>
+				</InspectorControls>,
 				! props.attributes.id && (
 					<Notice status="error" isDismissible={ false }>{ __( 'You must supply an ID for the page.', 'amp' ) }</Notice>
 				),
-				<InnerBlocks key='contents' template={ TEMPLATE } />
+				<InnerBlocks key='contents' template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 			];
 		},
 
