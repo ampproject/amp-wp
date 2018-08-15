@@ -55,6 +55,17 @@ class AMP_Site_Validation {
 	const FORCE_VALIDATION_QUERY_VAR = 'amp_force_validation';
 
 	/**
+	 * The WP-CLI argument to validate based on certain conditionals
+	 *
+	 * For example, --include=is_tag,is_author
+	 * Normally, this script will validate all of the templates that don't have AMP disabled.
+	 * But this allows validating only specific templates.
+	 *
+	 * @var string
+	 */
+	const INCLUDE_ARGUMENT = 'include';
+
+	/**
 	 * The WP CLI progress bar.
 	 *
 	 * @see https://make.wordpress.org/cli/handbook/internal-api/wp-cli-utils-make-progress-bar/
@@ -99,6 +110,16 @@ class AMP_Site_Validation {
 	public static $force_crawl_all_urls = false;
 
 	/**
+	 * A whitelist of conditionals to use for validation.
+	 *
+	 * Usually, this script will validate all of the templates that don't have AMP disabled.
+	 * But this allows validating based on only these conditionals.
+	 *
+	 * @var array
+	 */
+	public static $include_conditionals;
+
+	/**
 	 * Adds the WP-CLI command to validate the site.
 	 */
 	public static function init() {
@@ -114,9 +135,16 @@ class AMP_Site_Validation {
 							'name'     => self::FLAG_NAME_FORCE_VALIDATE_ALL,
 							'optional' => true,
 						),
+						array(
+							'type'        => 'assoc',
+							'name'        => self::INCLUDE_ARGUMENT,
+							'description' => __( 'Only validate if one of the conditionals is true', 'amp' ),
+							'optional'    => true,
+							'options'     => array( 'is_singular', 'is_home', 'is_author', 'is_date', 'is_category', 'is_tag', 'is_search', 'is_404' ),
+						),
 					),
 					'when'      => 'after_wp_load',
-					'longdesc'  => '## EXAMPLES' . "\n\n" . 'wp ' . self::WP_CLI_COMMAND,
+					'longdesc'  => '## EXAMPLES' . "\n\n" . 'wp ' . self::WP_CLI_COMMAND . ' --include=is_author,is_tag',
 				)
 			);
 		}
@@ -132,6 +160,9 @@ class AMP_Site_Validation {
 		unset( $args );
 		if ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATE_ALL ] ) ) {
 			self::$force_crawl_all_urls = true;
+		}
+		if ( isset( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
+			self::$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ], ',' );
 		}
 
 		$number_urls_to_crawl = self::count_posts_and_terms();
