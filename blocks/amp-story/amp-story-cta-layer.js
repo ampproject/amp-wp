@@ -15,7 +15,8 @@ const {
 	dispatch
 } = wp.data;
 const {
-	moveBlockToPosition
+	moveBlockToPosition,
+	removeBlock
 } = dispatch( 'core/editor' );
 
 const {
@@ -72,6 +73,13 @@ export default registerBlockType(
 				return true;
 			}
 
+			componentDidMount() {
+				if ( this.props.attributes.hasMultipleCtaBlocks ) {
+					removeBlock( this.props.clientId );
+					dispatch( 'core/editor' ).createWarningNotice( __( 'Multiple CTA Layers are not allowed, the block was removed.', 'amp' ) );
+				}
+			}
+
 			ensureBeingLastBlock() {
 				// @todo Display notice if the block gets moved.
 				const rootClientID = getBlockRootClientId( this.props.clientId );
@@ -84,7 +92,7 @@ export default registerBlockType(
 			}
 
 			render() {
-				// @todo Add proper handling of allowing only one CTA layer. This here will just notify but still allow.
+				// In case of successful block removal this won't be visible.
 				if ( this.props.attributes.hasMultipleCtaBlocks ) {
 					return (
 						<Notice status="error" isDismissible={ false }>{ __( 'Multiple CTA Layers are not allowed. Please remove all but one.', 'amp' ) }</Notice>
