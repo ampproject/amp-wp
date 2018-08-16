@@ -5,6 +5,9 @@ const {
 const {
 	InnerBlocks
 } = wp.editor;
+const {
+	Notice
+} = wp.components;
 const { Component } = wp.element;
 
 const {
@@ -14,6 +17,12 @@ const {
 const {
 	moveBlockToPosition
 } = dispatch( 'core/editor' );
+
+const {
+	getBlock,
+	getBlockRootClientId,
+	getBlockOrder
+} = select( 'core/editor' );
 
 const ALLOWED_BLOCKS = [
 	'core/button',
@@ -41,7 +50,6 @@ export default registerBlockType(
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],
 
-		// @todo Allow only once.
 		/*
 		 * <amp-story-cta-layer>:
 		 *   mandatory_ancestor: "AMP-STORY-PAGE"
@@ -54,17 +62,20 @@ export default registerBlockType(
 			constructor( props ) {
 				super( ...arguments );
 				this.props = props;
+				this.props.attributes.hasMultipleCtaBlocks = this.hasMoreThanOneCtaBlock();
 			}
 
 			shouldComponentUpdate() {
-				this.ensureBeingLastBlock();
+				if ( ! this.props.attributes.hasMultipleCtaBlocks ) {
+					this.ensureBeingLastBlock();
+				}
 				return true;
 			}
 
 			ensureBeingLastBlock() {
-				// @todo Hide navigation arrows for CTA block.
-				const rootClientID = select( 'core/editor' ).getBlockRootClientId( this.props.clientId );
-				const order = select( 'core/editor' ).getBlockOrder( rootClientID );
+				// @todo Display notice if the block gets moved.
+				const rootClientID = getBlockRootClientId( this.props.clientId );
+				const order = getBlockOrder( rootClientID );
 
 				// If the CTA is not the last block, move it there.
 				if ( _.last( order ) !== this.props.clientId ) {
@@ -73,9 +84,29 @@ export default registerBlockType(
 			}
 
 			render() {
+				// @todo Add proper handling of allowing only one CTA layer. This here will just notify but still allow.
+				if ( this.props.attributes.hasMultipleCtaBlocks ) {
+					return (
+						<Notice status="error" isDismissible={ false }>{ __( 'Multiple CTA Layers are not allowed. Please remove all but one.', 'amp' ) }</Notice>
+					);
+				}
 				return (
 					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
 				);
+			}
+
+			hasMoreThanOneCtaBlock() {
+				const parentBlock = getBlock( getBlockRootClientId( this.props.clientId ) );
+				if ( ! parentBlock ) {
+					return false;
+				}
+				let ctaBlocks = 0;
+				_.each( parentBlock.innerBlocks, function( child ) {
+					if ( 'amp/amp-story-cta-layer' === child.name ) {
+						ctaBlocks++;
+					}
+				} );
+				return 1 < ctaBlocks;
 			}
 		},
 

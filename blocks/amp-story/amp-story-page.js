@@ -15,7 +15,7 @@ const {
 const { select } = wp.data;
 const { getBlock } = select( 'core/editor' );
 
-let ALLOWED_BLOCKS = [
+const ALLOWED_BLOCKS = [
 	'amp/amp-story-grid-layer',
 	'amp/amp-story-cta-layer'
 ];
