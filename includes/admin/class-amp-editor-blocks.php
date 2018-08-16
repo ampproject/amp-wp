@@ -138,12 +138,6 @@ class AMP_Editor_Blocks {
 				array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 				AMP__VERSION
 			);
-
-			wp_add_inline_script(
-				'amp-editor-blocks-build',
-				'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
-				'before'
-			);
 		}
 
 		wp_enqueue_script(
@@ -159,6 +153,12 @@ class AMP_Editor_Blocks {
 			sprintf( 'ampEditorBlocks.boot( %s );', wp_json_encode( array(
 				'hasThemeSupport' => current_theme_supports( 'amp' ),
 			) ) )
+		);
+
+		wp_add_inline_script(
+			'wp-i18n',
+			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
+			'after'
 		);
 	}
 
