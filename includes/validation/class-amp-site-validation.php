@@ -174,7 +174,17 @@ class AMP_Site_Validation {
 		}
 
 		$number_urls_to_crawl = self::count_posts_and_terms();
-		WP_CLI::log( __( 'Crawling the entire site for AMP validity.', 'amp' ) );
+		if ( ! $number_urls_to_crawl ) {
+			WP_CLI::error(
+				sprintf(
+					/* translators: %s is the command line argument to force validation */
+					__( 'All of your template might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.', 'amp' ),
+					self::FLAG_NAME_FORCE_VALIDATE_ALL
+				)
+			);
+		}
+
+		WP_CLI::log( __( 'Crawling the site for AMP validity.', 'amp' ) );
 
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar(
 			/* translators: %d is the number of URLs */
