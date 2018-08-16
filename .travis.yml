@@ -22,7 +22,7 @@ cache:
 
 install:
   - if [[ $DEV_LIB_SKIP =~ composer ]]; then composer install --no-dev; fi
-  - nvm install 6 && nvm use 6
+  - nvm install 8.11.4 && nvm use 8.11.4
   - export DEV_LIB_PATH=dev-lib
   - source $DEV_LIB_PATH/travis.install.sh
 
