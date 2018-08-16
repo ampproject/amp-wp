@@ -98,7 +98,7 @@ class AMP_Site_Validation {
 	public static $number_crawled = 0;
 
 	/**
-	 * Whether to force crawling of all URLs.
+	 * Whether to force crawling of URLs.
 	 *
 	 * By default, this script only crawls URLs that support AMP,
 	 * where the user hasn't opted-out of AMP for the URL.
@@ -107,7 +107,7 @@ class AMP_Site_Validation {
 	 *
 	 * @var int
 	 */
-	public static $force_crawl_all_urls = false;
+	public static $force_crawl_urls = false;
 
 	/**
 	 * A whitelist of conditionals to use for validation.
@@ -157,11 +157,11 @@ class AMP_Site_Validation {
 	 */
 	public static function crawl_site( $args, $assoc_args ) {
 		unset( $args );
-		if ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATE_ALL ] ) ) {
-			self::$force_crawl_all_urls = true;
-		}
 		if ( isset( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
 			self::$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
+			self::$force_crawl_urls     = true;
+		} elseif ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATE_ALL ] ) ) {
+			self::$force_crawl_urls = true;
 		}
 
 		$number_urls_to_crawl = self::count_posts_and_terms();
@@ -197,7 +197,7 @@ class AMP_Site_Validation {
 	 * Gets the total number of posts and terms on the site.
 	 *
 	 * By default, this only counts AMP-enabled posts and terms.
-	 * But if $force_crawl_all_urls is true, it counts all of them, regardless of their AMP status.
+	 * But if $force_crawl_urls is true, it counts all of them, regardless of their AMP status.
 	 *
 	 * @return int The number of posts and terms.
 	 */
@@ -252,6 +252,9 @@ class AMP_Site_Validation {
 			}
 		}
 
+		// Count author pages, like https://example.com/author/admin/.
+		$total_count += count( self::get_author_page_urls() );
+
 		return $total_count;
 	}
 
@@ -261,16 +264,12 @@ class AMP_Site_Validation {
 	 * By default, only get the post IDs if they support AMP.
 	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
 	 * And 'Enable AMP' isn't unchecked in the post's editor.
-	 * But if $force_crawl_all_urls is true, this simply returns all of the IDs.
+	 * But if $force_crawl_urls is true, this simply returns all of the IDs.
 	 *
 	 * @param array $ids The post or term IDs.
 	 * @return array The post IDs that support AMP.
 	 */
 	public static function get_posts_that_support_amp( $ids ) {
-		if ( self::$force_crawl_all_urls ) {
-			return $ids;
-		}
-
 		/**
 		 * If the user has passed an include argument to the WP-CLI command,
 		 * is_singular must be present in that argument.
@@ -280,6 +279,10 @@ class AMP_Site_Validation {
 		 */
 		if ( isset( self::$include_conditionals ) && ! in_array( 'is_singular', self::$include_conditionals, true ) ) {
 			return array();
+		}
+
+		if ( self::$force_crawl_urls ) {
+			return $ids;
 		}
 
 		return array_filter(
@@ -301,10 +304,6 @@ class AMP_Site_Validation {
 	 * @return boolean Wether the taxonomy supports AMP.
 	 */
 	public static function does_taxonomy_support_amp( $taxonomy ) {
-		if ( self::$force_crawl_all_urls ) {
-			return true;
-		}
-
 		if ( 'post_tag' === $taxonomy ) {
 			$taxonomy = 'tag';
 		}
@@ -323,6 +322,10 @@ class AMP_Site_Validation {
 				||
 				in_array( $custom_taxonomy_key, self::$include_conditionals, true )
 			);
+		}
+
+		if ( self::$force_crawl_urls ) {
+			return true;
 		}
 
 		/**
@@ -394,6 +397,29 @@ class AMP_Site_Validation {
 	}
 
 	/**
+	 * Gets the author page URLs, like https://example.com/author/admin/.
+	 *
+	 * @return array The author page URLs, or
+	 */
+	public static function get_author_page_urls() {
+		/**
+		 * If the user has passed an include argument to the WP-CLI command,
+		 * is_author must be present in that argument.
+		 * For example, wp amp validate-site --include=is_author,is_tag,is_category
+		 */
+		if ( ! isset( self::$force_crawl_urls ) && isset( self::$include_conditionals ) && ! in_array( 'is_author', self::$include_conditionals, true ) ) {
+			return array();
+		}
+
+		$urls = array();
+		foreach ( get_users() as $author ) {
+			$urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
+		}
+
+		return $urls;
+	}
+
+	/**
 	 * Validates the URLs of the entire site.
 	 * Includes the URLs of public, published posts, and public taxonomies.
 	 */
@@ -431,6 +457,9 @@ class AMP_Site_Validation {
 				$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE, $offset );
 			}
 		}
+
+		// Validate author pages.
+		self::validate_urls( self::get_author_page_urls() );
 	}
 
 	/**
@@ -440,7 +469,7 @@ class AMP_Site_Validation {
 	 */
 	public static function validate_urls( $urls ) {
 		foreach ( $urls as $url ) {
-			if ( self::$force_crawl_all_urls ) {
+			if ( self::$force_crawl_urls ) {
 				$url = add_query_arg( self::FORCE_VALIDATION_QUERY_VAR, '', $url );
 			}
 			$validity = AMP_Validation_Manager::validate_url( $url );

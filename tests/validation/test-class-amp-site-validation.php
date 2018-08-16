@@ -40,7 +40,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function test_count_posts_and_terms() {
 		// The number of original URLs present before adding these test URLs.
 		$number_original_urls = $this->get_inital_url_count();
-		$this->assertEquals( $number_original_urls, AMP_Site_Validation::count_posts_and_terms() );
+		$number_author_pages  = count( AMP_Site_Validation::get_author_page_urls() );
+		$this->assertEquals( $number_original_urls + $number_author_pages, AMP_Site_Validation::count_posts_and_terms() );
 
 		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
 		$number_new_posts = AMP_Site_Validation::BATCH_SIZE * 3;
@@ -55,7 +56,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * Add the number of new posts, original URLs, and 1 for the $category that all of them have.
 		 * And ensure that the tested method finds a URL for all of them.
 		 */
-		$expected_url_count = $number_new_posts + $number_original_urls + 1;
+		$expected_url_count = $number_new_posts + $number_original_urls + $number_author_pages + 1;
 		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_posts_and_terms() );
 
 		$number_of_new_terms        = 20;
@@ -112,9 +113,9 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * When the second $force_count_all_urls argument is true, all of the newly-created posts should be part of the URL count,
 		 * even though they're not AMP endpoints.
 		 */
-		AMP_Site_Validation::$force_crawl_all_urls = true;
+		AMP_Site_Validation::$force_crawl_urls = true;
 		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids, true ) );
-		AMP_Site_Validation::$force_crawl_all_urls = false;
+		AMP_Site_Validation::$force_crawl_urls = false;
 
 		// In Native AMP, the URL count should include all of the newly-created posts.
 		add_theme_support( 'amp' );
@@ -139,6 +140,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 */
 		AMP_Site_Validation::$include_conditionals = array( 'is_singular', 'is_category' );
 		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
+		AMP_Site_Validation::$include_conditionals = null;
 	}
 
 	/**
@@ -163,12 +165,12 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$this->assertFalse( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
 		}
 
-		// When $force_crawl_all_urls is true, all taxonomies should be supported.
-		AMP_Site_Validation::$force_crawl_all_urls = true;
+		// When $force_crawl_urls is true, all taxonomies should be supported.
+		AMP_Site_Validation::$force_crawl_urls = true;
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
 		}
-		AMP_Site_Validation::$force_crawl_all_urls = false;
+		AMP_Site_Validation::$force_crawl_urls = false;
 
 		// When the user has the 'all_templates_supported' box, this should always be true.
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
@@ -273,6 +275,28 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_author_page_urls.
+	 *
+	 * @covers AMP_Site_Validation::get_author_page_urls()
+	 */
+	public function test_get_author_page_urls() {
+		$this->factory()->user->create();
+		$users = get_users();
+
+		$this->assertEquals( count( $users ), count( AMP_Site_Validation::get_author_page_urls() ) );
+
+		// If $include_conditionals is set and does not have is_author, this should not return any URL.
+		AMP_Site_Validation::$include_conditionals = array( 'is_category' );
+		AMP_Site_Validation::$force_crawl_urls     = null;
+		$this->assertEquals( array(), AMP_Site_Validation::get_author_page_urls() );
+
+		// If $include_conditionals is set and has is_author, this should not return any URL.
+		AMP_Site_Validation::$include_conditionals = array( 'is_author' );
+		$this->assertEquals( count( $users ), count( AMP_Site_Validation::get_author_page_urls() ) );
+		AMP_Site_Validation::$include_conditionals = null;
+	}
+
+	/**
 	 * Test validate_entire_site_urls.
 	 *
 	 * @covers AMP_Site_Validation::validate_entire_site_urls()
@@ -358,7 +382,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function get_validated_urls() {
 		$query = new WP_Query( array(
 			'post_type'      => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-			'posts_per_page' => 100,
+			'posts_per_page' => 150,
 			'fields'         => 'ids',
 		) );
 
