@@ -138,6 +138,8 @@ class AMP_Editor_Blocks {
 				array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 				AMP__VERSION
 			);
+
+			wp_enqueue_script( 'amp-mathml' );
 		}
 
 		wp_enqueue_script(

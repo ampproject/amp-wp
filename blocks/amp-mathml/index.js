@@ -33,17 +33,20 @@ export default registerBlockType(
 			}
 		},
 
-		edit( { attributes, setAttributes } ) {
+		edit( { attributes, isSelected, setAttributes } ) {
 			const { dataFormula } = attributes;
 
-			return (
-				<PlainText
-					key='formula'
-					value={ dataFormula }
-					placeholder={ __( 'Insert formula', 'amp' ) }
-					onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
-				/>
-			);
+			if ( isSelected ) {
+				return (
+					<PlainText
+						key='formula'
+						value={ dataFormula }
+						placeholder={ __( 'Insert formula', 'amp' ) }
+						onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
+					/>
+				);
+			}
+			return <amp-mathml layout="container" data-formula={ dataFormula }></amp-mathml>;
 		},
 
 		save( { attributes } ) {
