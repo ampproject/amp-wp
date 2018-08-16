@@ -20,6 +20,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		add_filter( 'pre_http_request', array( $this, 'add_comment' ) );
+		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 	}
 
 	/**
@@ -41,7 +42,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		// The number of original URLs present before adding these test URLs.
 		$number_original_urls = $this->get_inital_url_count();
 		$number_author_pages  = count( AMP_Site_Validation::get_author_page_urls() );
-		$this->assertEquals( $number_original_urls + $number_author_pages, AMP_Site_Validation::count_posts_and_terms() );
+		$number_search_pages  = is_string( AMP_Site_Validation::get_search_page() ) ? 1 : 0;
+		$this->assertEquals( $number_original_urls + $number_author_pages + $number_search_pages, AMP_Site_Validation::count_posts_and_terms() );
 
 		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
 		$number_new_posts = AMP_Site_Validation::BATCH_SIZE * 3;
@@ -56,7 +58,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * Add the number of new posts, original URLs, and 1 for the $category that all of them have.
 		 * And ensure that the tested method finds a URL for all of them.
 		 */
-		$expected_url_count = $number_new_posts + $number_original_urls + $number_author_pages + 1;
+		$expected_url_count = $number_new_posts + $number_original_urls + $number_author_pages + $number_search_pages + 1;
 		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_posts_and_terms() );
 
 		$number_of_new_terms        = 20;
@@ -139,7 +141,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * For example, wp amp validate-site include=is_singular,is_category
 		 */
 		AMP_Site_Validation::$include_conditionals = array( 'is_singular', 'is_category' );
-		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
+		$this->assertEmpty( array_diff( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) ) );
 		AMP_Site_Validation::$include_conditionals = null;
 	}
 
@@ -152,8 +154,10 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$custom_taxonomy = 'foo_custom_taxonomy';
 		register_taxonomy( $custom_taxonomy, 'post' );
 		$taxonomies_to_test = array( $custom_taxonomy, 'category', 'post_tag' );
+		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ) );
+		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 
-		// When no template is unchecked in the 'AMP Settings' UI, these should be supported.
+		// When these templates are not unchecked in the 'AMP Settings' UI, these should be supported.
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
 		}
@@ -161,6 +165,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
+		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertFalse( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
 		}
@@ -174,10 +179,11 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 		// When the user has the 'all_templates_supported' box, this should always be true.
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
 		}
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( 'all_templates_supported', null );
 
 		/**
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
@@ -186,6 +192,26 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		AMP_Site_Validation::$include_conditionals = array( 'is_category', 'is_tag' );
 		$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( 'category' ) );
 		$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( 'tag' ) );
+		AMP_Site_Validation::$include_conditionals = null;
+	}
+
+	/**
+	 * Test is_template_supported.
+	 *
+	 * @covers AMP_Site_Validation::is_template_supported()
+	 */
+	public function test_is_template_supported() {
+		$author_conditional = 'is_author';
+		$search_conditional = 'is_search';
+		AMP_Options_Manager::update_option( 'supported_templates', array( $author_conditional ) );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		$this->assertTrue( AMP_Site_Validation::is_template_supported( $author_conditional ) );
+
+		AMP_Options_Manager::update_option( 'supported_templates', array( $search_conditional ) );
+		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		$this->assertTrue( AMP_Site_Validation::is_template_supported( $search_conditional ) );
+		$this->assertFalse( AMP_Site_Validation::is_template_supported( $author_conditional ) );
 	}
 
 	/**
@@ -293,6 +319,25 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		// If $include_conditionals is set and has is_author, this should not return any URL.
 		AMP_Site_Validation::$include_conditionals = array( 'is_author' );
 		$this->assertEquals( count( $users ), count( AMP_Site_Validation::get_author_page_urls() ) );
+		AMP_Site_Validation::$include_conditionals = null;
+	}
+
+	/**
+	 * Test get_search_page.
+	 *
+	 * @covers AMP_Site_Validation::get_search_page()
+	 */
+	public function test_get_search_page() {
+		// Normally, this should return a string, unless the user has opted out of the search template.
+		$this->assertTrue( is_string( AMP_Site_Validation::get_search_page() ) );
+
+		// If $include_conditionals is set and does not have is_search, this should not return a URL.
+		AMP_Site_Validation::$include_conditionals = array( 'is_author' );
+		$this->assertEquals( null, AMP_Site_Validation::get_search_page() );
+
+		// If $include_conditionals has is_search, this should return a URL.
+		AMP_Site_Validation::$include_conditionals = array( 'is_search' );
+		$this->assertTrue( is_string( AMP_Site_Validation::get_search_page() ) );
 		AMP_Site_Validation::$include_conditionals = null;
 	}
 

@@ -40,7 +40,7 @@ class AMP_Site_Validation {
 	 *
 	 * @var string
 	 */
-	const FLAG_NAME_FORCE_VALIDATE_ALL = 'force-validate-all';
+	const FLAG_NAME_FORCE_VALIDATE_ALL = 'force-validation';
 
 	/**
 	 * The query var key to force AMP validation, regardless or whether the user has deselected support for a URL.
@@ -64,6 +64,13 @@ class AMP_Site_Validation {
 	 * @var string
 	 */
 	const INCLUDE_ARGUMENT = 'include';
+
+	/**
+	 * The supportable templates, mainly based on a user's selection in 'AMP Settings' > 'Supported Templates'.
+	 *
+	 * @var array
+	 */
+	public static $supportable_templates;
 
 	/**
 	 * The WP CLI progress bar.
@@ -124,6 +131,8 @@ class AMP_Site_Validation {
 	 */
 	public static function init() {
 		if ( class_exists( 'WP_CLI' ) ) {
+			self::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+
 			WP_CLI::add_command(
 				self::WP_CLI_COMMAND,
 				array( __CLASS__, 'crawl_site' ),
@@ -255,6 +264,11 @@ class AMP_Site_Validation {
 		// Count author pages, like https://example.com/author/admin/.
 		$total_count += count( self::get_author_page_urls() );
 
+		// Count a single example search page, like https://example.com/?s=example.
+		if ( self::get_search_page() ) {
+			$total_count++;
+		}
+
 		return $total_count;
 	}
 
@@ -277,7 +291,7 @@ class AMP_Site_Validation {
 		 * That argument is a whitelist of conditionals, one of which must be true to validate a URL.
 		 * And is_singular must be true to access posts.
 		 */
-		if ( isset( self::$include_conditionals ) && ! in_array( 'is_singular', self::$include_conditionals, true ) ) {
+		if ( ! self::is_template_supported( 'is_singular' ) ) {
 			return array();
 		}
 
@@ -307,23 +321,27 @@ class AMP_Site_Validation {
 		if ( 'post_tag' === $taxonomy ) {
 			$taxonomy = 'tag';
 		}
-
 		$taxonomy_key        = 'is_' . $taxonomy;
 		$custom_taxonomy_key = sprintf( 'is_tax[%s]', $taxonomy );
+		return self::is_template_supported( $taxonomy_key ) || self::is_template_supported( $custom_taxonomy_key );
+	}
 
-		/**
-		 * If the user has passed an include argument to the WP-CLI command, use that to find if this taxonomy supports AMP.
-		 * For example, wp amp validate-site --include=is_tag,is_category
-		 * This would return true only if is_tag() or is_category().
-		 */
-		if ( isset( self::$include_conditionals ) ) {
-			return (
-				in_array( $taxonomy_key, self::$include_conditionals, true )
-				||
-				in_array( $custom_taxonomy_key, self::$include_conditionals, true )
-			);
+	/**
+	 * Gets whether the template is supported.
+	 *
+	 * If the user has passed an include argument to the WP-CLI command, use that to find if this template supports AMP.
+	 * For example, wp amp validate-site --include=is_tag,is_category
+	 * would return true only if is_tag() or is_category().
+	 * Then, if the user has not unchecked the template in 'AMP Settings' > 'Supported Templates', return false.
+	 *
+	 * @param string $template The template to check.
+	 * @return bool Whether the template is supported.
+	 */
+	public static function is_template_supported( $template ) {
+		// If the include argument is present in the WP-CLI command, this template conditional must be present in it.
+		if ( isset( self::$include_conditionals ) && ! in_array( $template, self::$include_conditionals, true ) ) {
+			return false;
 		}
-
 		if ( self::$force_crawl_urls ) {
 			return true;
 		}
@@ -332,14 +350,7 @@ class AMP_Site_Validation {
 		 * Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
 		 * This first conditional is for default taxonomies like categories.
 		 */
-		$templates = AMP_Theme_Support::get_supportable_templates();
-
-		if ( isset( $templates[ $taxonomy_key ]['supported'] ) && $templates[ $taxonomy_key ]['supported'] ) {
-			return true;
-		}
-
-		// If this is a custom taxonomy, find if it supports AMP.
-		return isset( $templates[ $custom_taxonomy_key ]['supported'] ) && $templates[ $custom_taxonomy_key ]['supported'];
+		return isset( self::$supportable_templates[ $template ]['supported'] ) && self::$supportable_templates[ $template ]['supported'];
 	}
 
 	/**
@@ -399,24 +410,32 @@ class AMP_Site_Validation {
 	/**
 	 * Gets the author page URLs, like https://example.com/author/admin/.
 	 *
-	 * @return array The author page URLs, or
+	 * @return array The author page URLs, or an empty array.
 	 */
 	public static function get_author_page_urls() {
-		/**
-		 * If the user has passed an include argument to the WP-CLI command,
-		 * is_author must be present in that argument.
-		 * For example, wp amp validate-site --include=is_author,is_tag,is_category
-		 */
-		if ( ! isset( self::$force_crawl_urls ) && isset( self::$include_conditionals ) && ! in_array( 'is_author', self::$include_conditionals, true ) ) {
-			return array();
+		$urls = array();
+		if ( ! self::is_template_supported( 'is_author' ) ) {
+			return $urls;
 		}
 
-		$urls = array();
 		foreach ( get_users() as $author ) {
 			$urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 		}
 
 		return $urls;
+	}
+
+	/**
+	 * Gets a search page URLs, like https://example.com/?s=example.
+	 *
+	 * @return string|null An example search page, or null.
+	 */
+	public static function get_search_page() {
+		if ( ! self::is_template_supported( 'is_search' ) ) {
+			return null;
+		}
+
+		return add_query_arg( 's', 'example', home_url( '/' ) );
 	}
 
 	/**
@@ -458,8 +477,8 @@ class AMP_Site_Validation {
 			}
 		}
 
-		// Validate author pages.
 		self::validate_urls( self::get_author_page_urls() );
+		self::validate_urls( array( self::get_search_page() ) );
 	}
 
 	/**
