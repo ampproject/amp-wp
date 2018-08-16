@@ -140,7 +140,6 @@ class AMP_Site_Validation {
 							'name'        => self::INCLUDE_ARGUMENT,
 							'description' => __( 'Only validate if one of the conditionals is true', 'amp' ),
 							'optional'    => true,
-							'options'     => array( 'is_singular', 'is_home', 'is_author', 'is_date', 'is_category', 'is_tag', 'is_search', 'is_404' ),
 						),
 					),
 					'when'      => 'after_wp_load',
@@ -162,7 +161,7 @@ class AMP_Site_Validation {
 			self::$force_crawl_all_urls = true;
 		}
 		if ( isset( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
-			self::$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ], ',' );
+			self::$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
 		}
 
 		$number_urls_to_crawl = self::count_posts_and_terms();
@@ -270,14 +269,25 @@ class AMP_Site_Validation {
 	public static function get_posts_that_support_amp( $ids ) {
 		if ( self::$force_crawl_all_urls ) {
 			return $ids;
-		} else {
-			return array_filter(
-				$ids,
-				function( $id ) {
-					return post_supports_amp( $id );
-				}
-			);
 		}
+
+		/**
+		 * If the user has passed an include argument to the WP-CLI command,
+		 * is_singular must be present in that argument.
+		 * For example, wp amp validate-site --include=is_singular,is_tag,is_category
+		 * That argument is a whitelist of conditionals, one of which must be true to validate a URL.
+		 * And is_singular must be true to access posts.
+		 */
+		if ( isset( self::$include_conditionals ) && ! in_array( 'is_singular', self::$include_conditionals, true ) ) {
+			return array();
+		}
+
+		return array_filter(
+			$ids,
+			function( $id ) {
+				return post_supports_amp( $id );
+			}
+		);
 	}
 
 	/**
@@ -299,18 +309,33 @@ class AMP_Site_Validation {
 			$taxonomy = 'tag';
 		}
 
+		$taxonomy_key        = 'is_' . $taxonomy;
+		$custom_taxonomy_key = sprintf( 'is_tax[%s]', $taxonomy );
+
+		/**
+		 * If the user has passed an include argument to the WP-CLI command, use that to find if this taxonomy supports AMP.
+		 * For example, wp amp validate-site --include=is_tag,is_category
+		 * This would return true only if is_tag() or is_category().
+		 */
+		if ( isset( self::$include_conditionals ) ) {
+			return (
+				in_array( $taxonomy_key, self::$include_conditionals, true )
+				||
+				in_array( $custom_taxonomy_key, self::$include_conditionals, true )
+			);
+		}
+
 		/**
 		 * Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
 		 * This first conditional is for default taxonomies like categories.
 		 */
-		$templates    = AMP_Theme_Support::get_supportable_templates();
-		$taxonomy_key = 'is_' . $taxonomy;
+		$templates = AMP_Theme_Support::get_supportable_templates();
+
 		if ( isset( $templates[ $taxonomy_key ]['supported'] ) && $templates[ $taxonomy_key ]['supported'] ) {
 			return true;
 		}
 
 		// If this is a custom taxonomy, find if it supports AMP.
-		$custom_taxonomy_key = sprintf( 'is_tax[%s]', $taxonomy );
 		return isset( $templates[ $custom_taxonomy_key ]['supported'] ) && $templates[ $custom_taxonomy_key ]['supported'];
 	}
 

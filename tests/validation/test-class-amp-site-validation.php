@@ -125,6 +125,20 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			'paired' => true,
 		) );
 		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
+
+		/**
+		 * If the WP-CLI command has an include argument, and is_singular isn't in it, no posts will have AMP enabled.
+		 * For example, wp amp validate-site include=is_tag,is_category
+		 */
+		AMP_Site_Validation::$include_conditionals = array( 'is_tag', 'is_category' );
+		$this->assertEquals( array(), AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
+
+		/*
+		 * If is_singular is in the WP-CLI argument, it should allow return these posts as being AMP-enabled.
+		 * For example, wp amp validate-site include=is_singular,is_category
+		 */
+		AMP_Site_Validation::$include_conditionals = array( 'is_singular', 'is_category' );
+		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
 	}
 
 	/**
@@ -161,6 +175,15 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
 		}
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+
+		/**
+		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
+		 * these should be supported taxonomies.
+		 */
+		AMP_Site_Validation::$include_conditionals = array( 'is_category', 'is_tag' );
+		$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( 'category' ) );
+		$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( 'tag' ) );
 	}
 
 	/**
