@@ -284,7 +284,8 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			var attributes = props.attributes,
 				name = props.name,
 				ampLayout,
-				inspectorControls;
+				inspectorControls,
+				WrappedBlockEdit;
 
 			ampLayout = attributes.ampLayout;
 
@@ -324,11 +325,25 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 
+			WrappedBlockEdit = el( BlockEdit, _.extend( {
+				key: 'original'
+			}, props ) );
+
+			if ( -1 !== component.data.textBlocks.indexOf( name ) && props.attributes.ampFitText ) {
+				WrappedBlockEdit = el(
+					'amp-fit-text',
+					{
+						'min-font-size': props.attributes.minFont,
+						'max-font-size': props.attributes.maxFont,
+						height: props.attributes.height
+					},
+					WrappedBlockEdit
+				);
+			}
+
 			return [
 				inspectorControls,
-				el( BlockEdit, _.extend( {
-					key: 'original'
-				}, props ) )
+				WrappedBlockEdit
 			];
 		};
 	};

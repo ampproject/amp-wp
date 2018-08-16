@@ -140,6 +140,7 @@ class AMP_Editor_Blocks {
 			);
 
 			wp_enqueue_script( 'amp-mathml' );
+			wp_enqueue_script( 'amp-fit-text' );
 		}
 
 		wp_enqueue_script(

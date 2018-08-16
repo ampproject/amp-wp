@@ -2,3 +2,6 @@
 .is-amp-fit-text + .blocks-font-size > .components-font-size-picker__custom-input {
     display: none;
 }
+.edit-post-visual-editor amp-fit-text p {
+    font-size: inherit;
+}
