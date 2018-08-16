@@ -307,18 +307,28 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 */
 	public function test_get_author_page_urls() {
 		$this->factory()->user->create();
-		$users = get_users();
+		$users             = get_users();
+		$first_author      = $users[0];
+		$first_author_url  = get_author_posts_url( $first_author->ID, $first_author->user_nicename );
+		$second_author     = $users[1];
+		$second_author_url = get_author_posts_url( $second_author->ID, $second_author->user_nicename );
 
-		$this->assertEquals( count( $users ), count( AMP_Site_Validation::get_author_page_urls() ) );
+		// Passing 0 as the offset argument should get the first author.
+		$this->assertEquals( array( $first_author_url ), $actual_urls = AMP_Site_Validation::get_author_page_urls( 0, 1 ) );
 
-		// If $include_conditionals is set and does not have is_author, this should not return any URL.
+		// Passing 1 as the offset argument should get the second author.
+		$this->assertEquals( array( $second_author_url ), $actual_urls = AMP_Site_Validation::get_author_page_urls( 1, 1 ) );
+
+		// If $include_conditionals is set and does not have is_author, this should not return a URL.
 		AMP_Site_Validation::$include_conditionals = array( 'is_category' );
-		AMP_Site_Validation::$force_crawl_urls     = null;
 		$this->assertEquals( array(), AMP_Site_Validation::get_author_page_urls() );
 
-		// If $include_conditionals is set and has is_author, this should not return any URL.
+		// If $include_conditionals is set and has is_author, this should return URLs.
 		AMP_Site_Validation::$include_conditionals = array( 'is_author' );
-		$this->assertEquals( count( $users ), count( AMP_Site_Validation::get_author_page_urls() ) );
+		$this->assertEquals(
+			array( $first_author_url, $second_author_url ),
+			AMP_Site_Validation::get_author_page_urls()
+		);
 		AMP_Site_Validation::$include_conditionals = null;
 	}
 

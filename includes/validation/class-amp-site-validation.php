@@ -420,19 +420,30 @@ class AMP_Site_Validation {
 	/**
 	 * Gets the author page URLs, like https://example.com/author/admin/.
 	 *
+	 * Accepts an $offset parameter, for the query of authors.
+	 * 0 is the first author in the query, and 1 is the second.
+	 *
+	 * @param int $offset The offset for the URL to query for.
+	 * @param int $number The total number to query for.
 	 * @return array The author page URLs, or an empty array.
 	 */
-	public static function get_author_page_urls() {
-		$urls = array();
+	public static function get_author_page_urls( $offset = 0, $number = null ) {
+		$author_page_urls = array();
 		if ( ! self::is_template_supported( 'is_author' ) ) {
-			return $urls;
+			return $author_page_urls;
 		}
 
-		foreach ( get_users() as $author ) {
-			$urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
+		$get_users_args = compact( 'offset' );
+		if ( isset( $number ) ) {
+			$get_users_args['number'] = $number;
+		}
+		$users = get_users( $get_users_args );
+
+		foreach ( $users as $author ) {
+			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 		}
 
-		return $urls;
+		return $author_page_urls;
 	}
 
 	/**
@@ -487,7 +498,7 @@ class AMP_Site_Validation {
 			}
 		}
 
-		self::validate_urls( self::get_author_page_urls() );
+		self::validate_urls( self::get_author_page_urls( 0, 1 ) );
 		self::validate_urls( array( self::get_search_page() ) );
 	}
 
