@@ -761,7 +761,7 @@ class AMP_Validation_Error_Taxonomy {
 			esc_url( remove_query_arg( self::VALIDATION_ERROR_STATUS_QUERY_VAR, $current_url ) ),
 			null === $current_status ? 'current' : '',
 			sprintf(
-				/* translators: %s is the term count */
+				/* translators: %s: the term count. */
 				_nx(
 					'All <span class="count">(%s)</span>',
 					'All <span class="count">(%s)</span>',
@@ -784,7 +784,7 @@ class AMP_Validation_Error_Taxonomy {
 			),
 			self::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
 			sprintf(
-				/* translators: %s is the term count */
+				/* translators: %s: the term count. */
 				_nx(
 					'New <span class="count">(%s)</span>',
 					'New <span class="count">(%s)</span>',
@@ -807,7 +807,7 @@ class AMP_Validation_Error_Taxonomy {
 			),
 			self::VALIDATION_ERROR_REJECTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
-				/* translators: %s is the term count */
+				/* translators: %s: the term count. */
 				_nx(
 					'Rejected <span class="count">(%s)</span>',
 					'Rejected <span class="count">(%s)</span>',
@@ -830,7 +830,7 @@ class AMP_Validation_Error_Taxonomy {
 			),
 			self::VALIDATION_ERROR_ACCEPTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
-				/* translators: %s is the term count */
+				/* translators: %s: the term count. */
 				_nx(
 					'Accepted <span class="count">(%s)</span>',
 					'Accepted <span class="count">(%s)</span>',
@@ -913,7 +913,6 @@ class AMP_Validation_Error_Taxonomy {
 				if ( ! $created_datetime ) {
 					$time_ago = __( 'n/a', 'amp' );
 				} elseif ( time() - $created_datetime->getTimestamp() < DAY_IN_SECONDS ) {
-					/* translators: %s is the relative time */
 					$time_ago = sprintf(
 						'<abbr title="%s">%s</abbr>',
 						esc_attr( $created_datetime->format( __( 'Y/m/d g:i:s a', 'default' ) ) ),

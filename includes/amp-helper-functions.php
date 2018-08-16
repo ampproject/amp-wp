@@ -550,7 +550,7 @@ function amp_print_analytics( $analytics ) {
 	// Can enter multiple configs within backend.
 	foreach ( $analytics_entries as $id => $analytics_entry ) {
 		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
-			/* translators: %1$s is analytics entry ID, %2$s is actual entry keys. */
+			/* translators: 1: the analytics entry ID, 2: comma-separated list of the actual entry keys. */
 			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
 			continue;
 		}
