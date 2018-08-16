@@ -286,7 +286,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 				array_map( 'get_term_link', $terms_for_current_taxonomy )
 			);
 			$number_of_links = 100;
-			$actual_links    = AMP_Site_Validation::get_taxonomy_links( $taxonomy, $number_of_links );
+			$actual_links    = AMP_Site_Validation::get_taxonomy_links( $taxonomy, 0, $number_of_links );
 
 			// The get_terms() call in get_taxonomy_links() returns an array with a first index of 1, so correct for that with array_values().
 			$this->assertEquals( $expected_links, array_values( $actual_links ) );
@@ -294,7 +294,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 			$number_of_links           = 5;
 			$offset                    = 10;
-			$actual_links_using_offset = AMP_Site_Validation::get_taxonomy_links( $taxonomy, $number_of_links, $offset );
+			$actual_links_using_offset = AMP_Site_Validation::get_taxonomy_links( $taxonomy, $offset, $number_of_links );
 			$this->assertEquals( array_slice( $expected_links, $offset, $number_of_links ), array_values( $actual_links_using_offset ) );
 			$this->assertEquals( $number_of_links, count( $actual_links_using_offset ) );
 		}

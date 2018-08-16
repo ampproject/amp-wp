@@ -127,6 +127,17 @@ class AMP_Site_Validation {
 	public static $include_conditionals;
 
 	/**
+	 * The maximum number of URLs to validate for each type.
+	 *
+	 * Templates are each a separate type, like those for is_category() and is_tag().
+	 * Also, post types are a separate type.
+	 * So by default, this validates 100 posts of each post type.
+	 *
+	 * @var int
+	 */
+	public static $maximum_urls_to_validate_for_each_type = 100;
+
+	/**
 	 * Adds the WP-CLI command to validate the site.
 	 */
 	public static function init() {
@@ -368,12 +379,13 @@ class AMP_Site_Validation {
 	 *
 	 * @param string $post_type The post type.
 	 * @param int    $offset The offset of the query (optional).
+	 * @param int    $number The number of posts to query for (optional).
 	 * @return int[] $post_ids The post IDs in an array.
 	 */
-	public static function get_posts_by_type( $post_type, $offset = null ) {
+	public static function get_posts_by_type( $post_type, $offset = null, $number = null ) {
 		$args = array(
 			'post_type'      => $post_type,
-			'posts_per_page' => self::BATCH_SIZE,
+			'posts_per_page' => isset( $number ) ? $number : self::BATCH_SIZE,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
@@ -400,11 +412,11 @@ class AMP_Site_Validation {
 	 * But it excludes post_format terms.
 	 *
 	 * @param string $taxonomy     The name of the taxonomy, like 'category' or 'post_tag'.
-	 * @param int    $number_links The maximum amount of links to get (optional).
 	 * @param int    $offset       The number at which to offset the query (optional).
+	 * @param int    $number_links The maximum amount of links to get (optional).
 	 * @return string[] $links The term links in an array.
 	 */
-	public static function get_taxonomy_links( $taxonomy, $number_links = 200, $offset = null ) {
+	public static function get_taxonomy_links( $taxonomy, $offset = null, $number_links = 200 ) {
 		$args = array(
 			'taxonomy' => $taxonomy,
 			'orderby'  => 'id',
@@ -461,44 +473,39 @@ class AMP_Site_Validation {
 
 	/**
 	 * Validates the URLs of the entire site.
-	 * Includes the URLs of public, published posts, and public taxonomies.
+	 *
+	 * Includes the URLs of public, published posts, public taxonomies, and other templates.
+	 * This validates one of each type at a time.
+	 * And continues this until it reaches the maximum number of URLs for each type.
 	 */
 	public static function validate_entire_site_urls() {
-		// Validate the homepage.
-		self::validate_urls( array( home_url( '/' ) ) );
-
-		// Validate all public, published posts.
-		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
-		foreach ( $public_post_types as $post_type ) {
-			$post_ids   = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type ) );
-			$permalinks = array_map( 'get_permalink', $post_ids );
-			$offset     = 0;
-
-			while ( ! empty( $permalinks ) ) {
-				self::validate_urls( $permalinks );
-				$offset    += self::BATCH_SIZE;
-				$permalinks = array_map( 'get_permalink', self::get_posts_by_type( $post_type, $offset ) );
-			}
-		}
-
-		// Validate all public taxonomies that don't have AMP disabled.
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
 			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
 		);
+		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
+		$offset                 = 0;
 
-		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-			$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE );
-			$offset         = 0;
-
-			while ( ! empty( $taxonomy_links ) ) {
-				self::validate_urls( $taxonomy_links );
-				$offset        += self::BATCH_SIZE;
-				$taxonomy_links = self::get_taxonomy_links( $taxonomy, self::BATCH_SIZE, $offset );
+		while ( $offset < self::$maximum_urls_to_validate_for_each_type ) {
+			// Validate all public, published posts.
+			foreach ( $public_post_types as $post_type ) {
+				$post_ids = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type, $offset, 1 ) );
+				if ( ! empty( $post_ids ) ) {
+					self::validate_urls( array_map( 'get_permalink', $post_ids ) );
+				}
 			}
+
+			foreach ( $amp_enabled_taxonomies as $taxonomy ) {
+				self::validate_urls( self::get_taxonomy_links( $taxonomy, $offset, 1 ) );
+			}
+
+			self::validate_urls( self::get_author_page_urls( $offset, 1 ) );
+
+			$offset++;
 		}
 
-		self::validate_urls( self::get_author_page_urls( 0, 1 ) );
+		// Validate the homepage and search page outside the loop, as there is only one of each here.
+		self::validate_urls( array( home_url( '/' ) ) );
 		self::validate_urls( array( self::get_search_page() ) );
 	}
 
