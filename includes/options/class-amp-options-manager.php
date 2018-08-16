@@ -208,12 +208,14 @@ class AMP_Options_Manager {
 	 * @see add_settings_error()
 	 */
 	public static function check_supported_post_type_update_errors() {
-		$all_eligible_post_types = AMP_Post_Type_Support::get_eligible_post_types();
-		$supported_types         = self::get_option( 'all_templates_supported', false )
-			? $all_eligible_post_types
-			: self::get_option( 'supported_post_types', array() );
 
-		foreach ( $all_eligible_post_types as $name ) {
+		// If all templates are supported then skip check since all post types are also supported. This option only applies with native/paired theme support.
+		if ( self::get_option( 'all_templates_supported', false ) && 'disabled' !== self::get_option( 'theme_support' ) ) {
+			return;
+		}
+
+		$supported_types = self::get_option( 'supported_post_types', array() );
+		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
 			$post_type = get_post_type_object( $name );
 			if ( empty( $post_type ) ) {
 				continue;
