@@ -5,6 +5,15 @@ const {
 const {
 	InnerBlocks
 } = wp.editor;
+const { Component } = wp.element;
+
+const {
+	select,
+	dispatch
+} = wp.data;
+const {
+	moveBlockToPosition
+} = dispatch( 'core/editor' );
 
 const ALLOWED_BLOCKS = [
 	'core/button',
@@ -32,7 +41,7 @@ export default registerBlockType(
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],
 
-		// @todo Allow only once and only as the last element.
+		// @todo Allow only once.
 		/*
 		 * <amp-story-cta-layer>:
 		 *   mandatory_ancestor: "AMP-STORY-PAGE"
@@ -41,10 +50,33 @@ export default registerBlockType(
 		 * https://github.com/ampproject/amphtml/blob/87fe1d02f902be97b596b36ec3421592c83d241e/extensions/amp-story/validator-amp-story.protoascii#L172-L188
 		 */
 
-		edit() {
-			return (
-				<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
-			);
+		edit: class extends Component {
+			constructor( props ) {
+				super( ...arguments );
+				this.props = props;
+			}
+
+			shouldComponentUpdate() {
+				this.ensureBeingLastBlock();
+				return true;
+			}
+
+			ensureBeingLastBlock() {
+				// @todo Hide navigation arrows for CTA block.
+				const rootClientID = select( 'core/editor' ).getBlockRootClientId( this.props.clientId );
+				const order = select( 'core/editor' ).getBlockOrder( rootClientID );
+
+				// If the CTA is not the last block, move it there.
+				if ( _.last( order ) !== this.props.clientId ) {
+					moveBlockToPosition( this.props.clientId, rootClientID, rootClientID, this.props.attributes.layout, order.length - 1 );
+				}
+			}
+
+			render() {
+				return (
+					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
+				);
+			}
 		},
 
 		save( { attributes } ) {
