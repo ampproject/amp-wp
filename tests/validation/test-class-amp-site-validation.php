@@ -34,19 +34,19 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test count_posts_and_terms.
+	 * Test count_urls_to_validate.
 	 *
-	 * @covers AMP_Site_Validation::count_posts_and_terms()
+	 * @covers AMP_Site_Validation::count_urls_to_validate()
 	 */
-	public function test_count_posts_and_terms() {
+	public function test_count_urls_to_validate() {
 		// The number of original URLs present before adding these test URLs.
 		$number_original_urls = $this->get_inital_url_count();
 		$number_author_pages  = count( AMP_Site_Validation::get_author_page_urls() );
 		$number_search_pages  = is_string( AMP_Site_Validation::get_search_page() ) ? 1 : 0;
-		$this->assertEquals( $number_original_urls + $number_author_pages + $number_search_pages, AMP_Site_Validation::count_posts_and_terms() );
+		$this->assertEquals( $number_original_urls + $number_author_pages + $number_search_pages, AMP_Site_Validation::count_urls_to_validate() );
 
 		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
-		$number_new_posts = AMP_Site_Validation::BATCH_SIZE * 3;
+		$number_new_posts = AMP_Site_Validation::$maximum_urls_to_validate_for_each_type / 2;
 		$post_ids         = array();
 		for ( $i = 0; $i < $number_new_posts; $i++ ) {
 			$post_ids[] = $this->factory()->post->create( array(
@@ -59,7 +59,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * And ensure that the tested method finds a URL for all of them.
 		 */
 		$expected_url_count = $number_new_posts + $number_original_urls + $number_author_pages + $number_search_pages + 1;
-		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_posts_and_terms() );
+		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_urls_to_validate() );
 
 		$number_of_new_terms        = 20;
 		$expected_url_count        += $number_of_new_terms;
@@ -78,7 +78,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$taxonomy
 		);
 
-		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_posts_and_terms() );
+		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_urls_to_validate() );
 	}
 
 	/**
@@ -352,11 +352,11 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test validate_entire_site_urls.
+	 * Test validate_site.
 	 *
-	 * @covers AMP_Site_Validation::validate_entire_site_urls()
+	 * @covers AMP_Site_Validation::validate_site()
 	 */
-	public function test_validate_entire_site_urls() {
+	public function test_validate_site() {
 		$number_of_posts = 20;
 		$number_of_terms = 30;
 		$posts           = array();
@@ -368,7 +368,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$posts[]           = $post_id;
 			$post_permalinks[] = get_permalink( $post_id );
 		}
-		AMP_Site_Validation::validate_entire_site_urls();
+		AMP_Site_Validation::validate_site();
 
 		// All of the posts created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
@@ -379,7 +379,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
 		wp_set_post_terms( $posts[0], $terms, 'category' );
-		AMP_Site_Validation::validate_entire_site_urls();
+		AMP_Site_Validation::validate_site();
 		$expected_validated_urls = array_map( 'get_term_link', $terms );
 		$actual_validated_urls   = self::get_validated_urls();
 

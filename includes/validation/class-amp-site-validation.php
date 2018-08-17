@@ -16,14 +16,6 @@
 class AMP_Site_Validation {
 
 	/**
-	 * The size of the batch of URLs to query and validate.
-	 * Grouped in a batch to avoid passing 'posts_per_page' => -1 to WP_Query.
-	 *
-	 * @var int
-	 */
-	const BATCH_SIZE = 100;
-
-	/**
 	 * The WP-CLI argument to validate the site.
 	 * The full command is: wp amp validate-site.
 	 *
@@ -177,6 +169,8 @@ class AMP_Site_Validation {
 	 */
 	public static function crawl_site( $args, $assoc_args ) {
 		unset( $args );
+
+		// Handle the argument and flag passed to the command: --include and --force-validation.
 		if ( isset( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
 			self::$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
 			self::$force_crawl_urls     = true;
@@ -184,12 +178,12 @@ class AMP_Site_Validation {
 			self::$force_crawl_urls = true;
 		}
 
-		$number_urls_to_crawl = self::count_posts_and_terms();
+		$number_urls_to_crawl = self::count_urls_to_validate();
 		if ( ! $number_urls_to_crawl ) {
 			WP_CLI::error(
 				sprintf(
 					/* translators: %s is the command line argument to force validation */
-					__( 'All of your template might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.', 'amp' ),
+					__( 'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.', 'amp' ),
 					self::FLAG_NAME_FORCE_VALIDATE_ALL
 				)
 			);
@@ -202,7 +196,7 @@ class AMP_Site_Validation {
 			sprintf( __( 'Validating %d URLs...', 'amp' ), $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		self::validate_entire_site_urls();
+		self::validate_site();
 		self::$wp_cli_progress->finish();
 
 		$url_more_details = add_query_arg(
@@ -231,55 +225,35 @@ class AMP_Site_Validation {
 	 *
 	 * @return int The number of posts and terms.
 	 */
-	public static function count_posts_and_terms() {
+	public static function count_urls_to_validate() {
 		/*
 		 * If the homepage is set to 'Your latest posts,' start the $total_count at 1.
-		 * Otherwise, the homepage wouldn't be counted here, even though validate_entire_site_urls() visits it.
+		 * Otherwise, the homepage wouldn't be counted here, even though validate_site() visits it.
 		 * If it's not set to that, it will probably be counted in the query for pages.
 		 */
-		$total_count       = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
-		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+		$total_count = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
 			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
 		);
 
-		if ( ! empty( $amp_enabled_taxonomies ) ) {
-			// Count all public taxonomy terms.
+		// Count all public taxonomy terms.
+		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
 			$term_query   = new WP_Term_Query( array(
-				'taxonomy' => $amp_enabled_taxonomies,
+				'taxonomy' => $taxonomy,
 				'fields'   => 'ids',
+				'number'   => self::$maximum_urls_to_validate_for_each_type,
 			) );
-			$total_count += count( $term_query->terms );
+			// If $term_query->terms is an empty array, passing it to count() will throw an error.
+			$total_count += ! empty( $term_query->terms ) ? count( $term_query->terms ) : 0;
 		}
 
-		/**
-		 * Count all public posts.
-		 * This batches the queries, to avoid passing posts_per_page => -1 to WP_Query.
-		 * After the first iteration, it passes an 'offset' value to WP_Query.
-		 * And by passing 'orderby' => 'ID' to WP_Query, it ensures there isn't an issue if a post is added while counting them.
-		 */
-		$offset   = 0;
-		$post_ids = self::get_posts_by_type( $public_post_types );
-		while ( ! empty( $post_ids ) ) {
-			$offset      += self::BATCH_SIZE;
-			$total_count += count( self::get_posts_that_support_amp( $post_ids ) );
-			$post_ids     = self::get_posts_by_type( $public_post_types, $offset );
-		}
-
-		/**
-		 * Count all attachments.
-		 * Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
-		 */
-		if ( in_array( 'attachment', $public_post_types, true ) ) {
-			$offset         = 0;
-			$attachment_ids = self::get_posts_by_type( 'attachment' );
-			while ( ! empty( $attachment_ids ) ) {
-				$offset        += self::BATCH_SIZE;
-				$total_count   += count( self::get_posts_that_support_amp( $attachment_ids ) );
-				$attachment_ids = self::get_posts_by_type( 'attachment', $offset );
-			}
+		// Count posts by type, like post, page, attachment, etc.
+		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+		foreach ( $public_post_types as $post_type ) {
+			$posts        = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type ) );
+			$total_count += ! empty( $posts ) ? count( $posts ) : 0;
 		}
 
 		// Count author pages, like https://example.com/author/admin/.
@@ -385,7 +359,7 @@ class AMP_Site_Validation {
 	public static function get_posts_by_type( $post_type, $offset = null, $number = null ) {
 		$args = array(
 			'post_type'      => $post_type,
-			'posts_per_page' => isset( $number ) ? $number : self::BATCH_SIZE,
+			'posts_per_page' => isset( $number ) ? $number : self::$maximum_urls_to_validate_for_each_type,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
@@ -411,22 +385,23 @@ class AMP_Site_Validation {
 	 * This includes categories and tags, and any more that are registered.
 	 * But it excludes post_format terms.
 	 *
-	 * @param string $taxonomy     The name of the taxonomy, like 'category' or 'post_tag'.
-	 * @param int    $offset       The number at which to offset the query (optional).
-	 * @param int    $number_links The maximum amount of links to get (optional).
-	 * @return string[] $links The term links in an array.
+	 * @param string     $taxonomy The name of the taxonomy, like 'category' or 'post_tag'.
+	 * @param int|string $offset The number at which to offset the query (optional).
+	 * @param int        $number The maximum amount of links to get (optional).
+	 * @return string[]  The term links in an array.
 	 */
-	public static function get_taxonomy_links( $taxonomy, $offset = null, $number_links = 200 ) {
-		$args = array(
-			'taxonomy' => $taxonomy,
-			'orderby'  => 'id',
-			'number'   => $number_links,
+	public static function get_taxonomy_links( $taxonomy, $offset = '', $number = 200 ) {
+		return array_map(
+			'get_term_link',
+			get_terms(
+				array_merge(
+					compact( 'taxonomy', 'offset', 'number' ),
+					array(
+						'orderby' => 'id',
+					)
+				)
+			)
 		);
-		if ( is_int( $offset ) ) {
-			$args = array_merge( $args, compact( 'offset' ) );
-		}
-
-		return array_map( 'get_term_link', get_terms( $args ) );
 	}
 
 	/**
@@ -435,23 +410,18 @@ class AMP_Site_Validation {
 	 * Accepts an $offset parameter, for the query of authors.
 	 * 0 is the first author in the query, and 1 is the second.
 	 *
-	 * @param int $offset The offset for the URL to query for.
-	 * @param int $number The total number to query for.
+	 * @param int|string $offset The offset for the URL to query for, should be an int if passing an argument.
+	 * @param int|string $number The total number to query for, should be an int if passing an argument.
 	 * @return array The author page URLs, or an empty array.
 	 */
-	public static function get_author_page_urls( $offset = 0, $number = null ) {
+	public static function get_author_page_urls( $offset = '', $number = '' ) {
 		$author_page_urls = array();
 		if ( ! self::is_template_supported( 'is_author' ) ) {
 			return $author_page_urls;
 		}
 
-		$get_users_args = compact( 'offset' );
-		if ( isset( $number ) ) {
-			$get_users_args['number'] = $number;
-		}
-		$users = get_users( $get_users_args );
-
-		foreach ( $users as $author ) {
+		$number = ! empty( $number ) ? $number : self::$maximum_urls_to_validate_for_each_type;
+		foreach ( get_users( compact( 'offset', 'number' ) ) as $author ) {
 			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 		}
 
@@ -478,30 +448,31 @@ class AMP_Site_Validation {
 	 * This validates one of each type at a time.
 	 * And continues this until it reaches the maximum number of URLs for each type.
 	 */
-	public static function validate_entire_site_urls() {
+	public static function validate_site() {
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
 			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
 		);
 		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
-		$offset                 = 0;
+		$i                      = 0;
 
-		while ( $offset < self::$maximum_urls_to_validate_for_each_type ) {
+		// Validate one URL of each type at a time, then another URL of each type on the next iteration.
+		while ( $i < self::$maximum_urls_to_validate_for_each_type ) {
 			// Validate all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
-				$post_ids = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type, $offset, 1 ) );
+				$post_ids = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type, $i, 1 ) );
 				if ( ! empty( $post_ids ) ) {
 					self::validate_urls( array_map( 'get_permalink', $post_ids ) );
 				}
 			}
 
 			foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-				self::validate_urls( self::get_taxonomy_links( $taxonomy, $offset, 1 ) );
+				self::validate_urls( self::get_taxonomy_links( $taxonomy, $i, 1 ) );
 			}
 
-			self::validate_urls( self::get_author_page_urls( $offset, 1 ) );
+			self::validate_urls( self::get_author_page_urls( $i, 1 ) );
 
-			$offset++;
+			$i++;
 		}
 
 		// Validate the homepage and search page outside the loop, as there is only one of each here.
