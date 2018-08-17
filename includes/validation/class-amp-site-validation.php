@@ -475,21 +475,28 @@ class AMP_Site_Validation {
 		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
 		$i                      = 0;
 
-		// Validate one URL of each type at a time, then another URL of each type on the next iteration.
+		// Validate one URL of each type, then another URL of each type on the next iteration.
 		while ( $i < self::$maximum_urls_to_validate_for_each_type ) {
 			// Validate all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type, $i, 1 ) );
-				if ( ! empty( $post_ids ) ) {
-					self::validate_urls( array_map( 'get_permalink', $post_ids ) );
+				if ( ! empty( $post_ids[0] ) ) {
+					self::validate_and_store_url( get_permalink( $post_ids[0] ) );
 				}
 			}
 
 			foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-				self::validate_urls( self::get_taxonomy_links( $taxonomy, $i, 1 ) );
+				$taxonomy_links = self::get_taxonomy_links( $taxonomy, $i, 1 );
+				$link           = reset( $taxonomy_links );
+				if ( ! empty( $link ) ) {
+					self::validate_and_store_url( $link );
+				}
 			}
 
-			self::validate_urls( self::get_author_page_urls( $i, 1 ) );
+			$author_page_urls = self::get_author_page_urls( $i, 1 );
+			if ( ! empty( $author_page_urls[0] ) ) {
+				self::validate_and_store_url( $author_page_urls[0] );
+			}
 
 			$i++;
 		}
@@ -500,48 +507,46 @@ class AMP_Site_Validation {
 		 * It would not have been validated above in the page validation.
 		 */
 		if ( 'posts' === get_option( 'show_on_front' ) && self::is_template_supported( 'is_home' ) ) {
-			self::validate_urls( array( home_url( '/' ) ) );
+			self::validate_and_store_url( home_url( '/' ) );
 		}
 
-		self::validate_urls( array( self::get_search_page() ) );
+		self::validate_and_store_url( self::get_search_page() );
 	}
 
 	/**
-	 * Validates the URLs, and increments the counts.
+	 * Validates the URL, stores the results, and increments the counts.
 	 *
-	 * @param array $urls The URLs to validate.
+	 * @param string $url The URL to validate.
 	 */
-	public static function validate_urls( $urls ) {
-		foreach ( $urls as $url ) {
-			if ( self::$force_crawl_urls ) {
-				$url = add_query_arg( self::FORCE_VALIDATION_QUERY_VAR, '', $url );
-			}
-			$validity = AMP_Validation_Manager::validate_url( $url );
-
-			if ( is_wp_error( $validity ) ) {
-				continue;
-			}
-			if ( self::$wp_cli_progress ) {
-				self::$wp_cli_progress->tick();
-			}
-
-			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
-			$error_count            = count( $validity['validation_errors'] );
-			$unaccepted_error_count = count( array_filter(
-				$validity['validation_errors'],
-				function( $error ) {
-					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
-				}
-			) );
-
-			if ( $error_count > 0 ) {
-				self::$total_errors++;
-			}
-			if ( $unaccepted_error_count > 0 ) {
-				self::$unaccepted_errors++;
-			}
-
-			self::$number_crawled++;
+	public static function validate_and_store_url( $url ) {
+		if ( self::$force_crawl_urls ) {
+			$url = add_query_arg( self::FORCE_VALIDATION_QUERY_VAR, '', $url );
 		}
+		$validity = AMP_Validation_Manager::validate_url( $url );
+
+		if ( is_wp_error( $validity ) ) {
+			return;
+		}
+		if ( self::$wp_cli_progress ) {
+			self::$wp_cli_progress->tick();
+		}
+
+		AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
+		$error_count            = count( $validity['validation_errors'] );
+		$unaccepted_error_count = count( array_filter(
+			$validity['validation_errors'],
+			function( $error ) {
+				return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+			}
+		) );
+
+		if ( $error_count > 0 ) {
+			self::$total_errors++;
+		}
+		if ( $unaccepted_error_count > 0 ) {
+			self::$unaccepted_errors++;
+		}
+
+		self::$number_crawled++;
 	}
 }

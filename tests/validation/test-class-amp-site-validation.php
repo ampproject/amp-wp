@@ -389,22 +389,23 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test validate_urls.
+	 * Test validate_and_store_url.
 	 *
-	 * @covers AMP_Site_Validation::validate_urls()
+	 * @covers AMP_Site_Validation::validate_and_store_url()
 	 */
-	public function test_validate_urls() {
+	public function test_validate_and_store_url() {
 		$single_post_permalink = get_permalink( $this->factory()->post->create() );
-		AMP_Site_Validation::validate_urls( array( $single_post_permalink ) );
+		AMP_Site_Validation::validate_and_store_url( $single_post_permalink );
 		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
 
 		$number_of_posts = 30;
 		$post_permalinks = array();
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$post_permalinks[] = get_permalink( $this->factory()->post->create() );
+			$permalink         = get_permalink( $this->factory()->post->create() );
+			$post_permalinks[] = $permalink;
+			AMP_Site_Validation::validate_and_store_url( $permalink );
 		}
-		AMP_Site_Validation::validate_urls( $post_permalinks );
 
 		// All of the posts created should be present in the validated URLs.
 		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
