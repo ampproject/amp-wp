@@ -58,6 +58,16 @@ class AMP_Site_Validation {
 	const INCLUDE_ARGUMENT = 'include';
 
 	/**
+	 * The WP-CLI argument for the maximum URLs to validate for each type.
+	 *
+	 * If this is passed in the command,
+	 * it's applied to self::$maximum_urls_to_validate_for_each_type.
+	 *
+	 * @var string
+	 */
+	const MAXIMUM_URLS_ARGUMENT = 'max-url-count';
+
+	/**
 	 * The supportable templates, mainly based on a user's selection in 'AMP Settings' > 'Supported Templates'.
 	 *
 	 * @var array
@@ -150,7 +160,13 @@ class AMP_Site_Validation {
 						array(
 							'type'        => 'assoc',
 							'name'        => self::INCLUDE_ARGUMENT,
-							'description' => __( 'Only validate if one of the conditionals is true', 'amp' ),
+							'description' => __( 'Only validates a URL if one of the conditionals is true', 'amp' ),
+							'optional'    => true,
+						),
+						array(
+							'type'        => 'assoc',
+							'name'        => self::MAXIMUM_URLS_ARGUMENT,
+							'description' => __( 'The maximum number of URLs to validate for each template and content type', 'amp' ),
 							'optional'    => true,
 						),
 					),
@@ -171,11 +187,15 @@ class AMP_Site_Validation {
 		unset( $args );
 
 		// Handle the argument and flag passed to the command: --include and --force-validation.
-		if ( isset( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
+		if ( ! empty( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
 			self::$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
 			self::$force_crawl_urls     = true;
 		} elseif ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATE_ALL ] ) ) {
 			self::$force_crawl_urls = true;
+		}
+
+		if ( ! empty( $assoc_args[ self::MAXIMUM_URLS_ARGUMENT ] ) ) {
+			self::$maximum_urls_to_validate_for_each_type = intval( $assoc_args[ self::MAXIMUM_URLS_ARGUMENT ] );
 		}
 
 		$number_urls_to_crawl = self::count_urls_to_validate();
@@ -240,7 +260,7 @@ class AMP_Site_Validation {
 
 		// Count all public taxonomy terms.
 		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-			$term_query   = new WP_Term_Query( array(
+			$term_query = new WP_Term_Query( array(
 				'taxonomy' => $taxonomy,
 				'fields'   => 'ids',
 				'number'   => self::$maximum_urls_to_validate_for_each_type,
