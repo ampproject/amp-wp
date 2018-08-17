@@ -146,6 +146,34 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test handle_error_count.
+	 *
+	 * @covers AMP_Site_Validation::handle_error_count()
+	 */
+	public function test_handle_error_count() {
+		$custom_post_type = 'foo_custom_post';
+		$expected_errors  = array(
+			$custom_post_type => array(
+				'valid' => 0,
+				'total' => 1,
+			),
+		);
+		AMP_Site_Validation::handle_error_count( true, $custom_post_type );
+		$this->assertEquals( $expected_errors, AMP_Site_Validation::$validity_by_type );
+
+		// When the first argument is true, there was a validation error, and this shouldn't increment the 'valid' count.
+		AMP_Site_Validation::handle_error_count( true, $custom_post_type );
+		$expected_errors[ $custom_post_type ]['total']++;
+		$this->assertEquals( $expected_errors, AMP_Site_Validation::$validity_by_type );
+
+		// When the first argument is false, there was no validation error, and both counts should be incremented.
+		AMP_Site_Validation::handle_error_count( false, $custom_post_type );
+		$expected_errors[ $custom_post_type ]['total']++;
+		$expected_errors[ $custom_post_type ]['valid']++;
+		$this->assertEquals( $expected_errors, AMP_Site_Validation::$validity_by_type );
+	}
+
+	/**
 	 * Test does_taxonomy_support_amp.
 	 *
 	 * @covers AMP_Site_Validation::does_taxonomy_support_amp()
@@ -395,7 +423,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	 */
 	public function test_validate_and_store_url() {
 		$single_post_permalink = get_permalink( $this->factory()->post->create() );
-		AMP_Site_Validation::validate_and_store_url( $single_post_permalink );
+		AMP_Site_Validation::validate_and_store_url( $single_post_permalink, 'post' );
 		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
 
 		$number_of_posts = 30;
@@ -404,7 +432,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
 			$permalink         = get_permalink( $this->factory()->post->create() );
 			$post_permalinks[] = $permalink;
-			AMP_Site_Validation::validate_and_store_url( $permalink );
+			AMP_Site_Validation::validate_and_store_url( $permalink, 'post' );
 		}
 
 		// All of the posts created should be present in the validated URLs.

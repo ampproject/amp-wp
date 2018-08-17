@@ -140,6 +140,13 @@ class AMP_Site_Validation {
 	public static $maximum_urls_to_validate_for_each_type = 100;
 
 	/**
+	 * The validation errors by type, like template or post type.
+	 *
+	 * @var array
+	 */
+	public static $validity_by_type = array();
+
+	/**
 	 * Adds the WP-CLI command to validate the site.
 	 */
 	public static function init() {
@@ -225,13 +232,19 @@ class AMP_Site_Validation {
 			admin_url( 'edit.php' )
 		);
 
+		$validation_by_type = __( "Number of valid URLs by type:\n", 'amp' );
+		foreach ( self::$validity_by_type as $type_name => $validity ) {
+			$validation_by_type .= sprintf( "%1\$s: %2\$d/%3\$d\n", $type_name, $validity['valid'], $validity['total'] );
+		}
+
 		WP_CLI::success(
 			sprintf(
-				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the link for more details */
-				__( "Of the %1\$d URLs crawled, %2\$d have AMP validation issue(s), and %3\$d have unaccepted issue(s).\nFor more details, please see: \n%4\$s", 'amp' ),
+				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the list of validation by type, $5%s is the link for more details */
+				__( "Of the %1\$d URLs crawled, %2\$d have AMP validation issue(s), and %3\$d have unaccepted issue(s).\n\n%4\$s \nFor more details, please see: \n%5\$s", 'amp' ),
 				self::$number_crawled,
 				self::$total_errors,
 				self::$unaccepted_errors,
+				$validation_by_type,
 				$url_more_details
 			)
 		);
@@ -319,6 +332,26 @@ class AMP_Site_Validation {
 				return post_supports_amp( $id );
 			}
 		);
+	}
+
+	/**
+	 * Handles the error count, based on the validation results.
+	 *
+	 * @param bool   $is_error Whether the validation resulted in an error.
+	 * @param string $key The key to store the validation result.
+	 */
+	public static function handle_error_count( $is_error, $key ) {
+		if ( ! isset( self::$validity_by_type[ $key ] ) ) {
+			self::$validity_by_type[ $key ] = array(
+				'valid' => $is_error ? 0 : 1,
+				'total' => 1,
+			);
+		} else {
+			self::$validity_by_type[ $key ]['total']++;
+			if ( ! $is_error ) {
+				self::$validity_by_type[ $key ]['valid']++;
+			}
+		}
 	}
 
 	/**
@@ -468,6 +501,16 @@ class AMP_Site_Validation {
 	 * And continues this until it reaches the maximum number of URLs for each type.
 	 */
 	public static function validate_site() {
+		/**
+		 * If 'Your homepage displays' is set to 'Your latest posts',
+		 * validate the homepage.
+		 * It would not have been validated above in the page validation.
+		 */
+		if ( 'posts' === get_option( 'show_on_front' ) && self::is_template_supported( 'is_home' ) ) {
+			self::validate_and_store_url( home_url( '/' ), 'home' );
+		}
+		self::validate_and_store_url( self::get_search_page(), 'search' );
+
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
 			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
@@ -481,7 +524,7 @@ class AMP_Site_Validation {
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type, $i, 1 ) );
 				if ( ! empty( $post_ids[0] ) ) {
-					self::validate_and_store_url( get_permalink( $post_ids[0] ) );
+					self::validate_and_store_url( get_permalink( $post_ids[0] ), $post_type );
 				}
 			}
 
@@ -489,41 +532,32 @@ class AMP_Site_Validation {
 				$taxonomy_links = self::get_taxonomy_links( $taxonomy, $i, 1 );
 				$link           = reset( $taxonomy_links );
 				if ( ! empty( $link ) ) {
-					self::validate_and_store_url( $link );
+					self::validate_and_store_url( $link, $taxonomy );
 				}
 			}
 
 			$author_page_urls = self::get_author_page_urls( $i, 1 );
 			if ( ! empty( $author_page_urls[0] ) ) {
-				self::validate_and_store_url( $author_page_urls[0] );
+				self::validate_and_store_url( $author_page_urls[0], 'author' );
 			}
 
 			$i++;
 		}
-
-		/**
-		 * If 'Your homepage displays' is set to 'Your latest posts',
-		 * validate the homepage.
-		 * It would not have been validated above in the page validation.
-		 */
-		if ( 'posts' === get_option( 'show_on_front' ) && self::is_template_supported( 'is_home' ) ) {
-			self::validate_and_store_url( home_url( '/' ) );
-		}
-
-		self::validate_and_store_url( self::get_search_page() );
 	}
 
 	/**
 	 * Validates the URL, stores the results, and increments the counts.
 	 *
 	 * @param string $url The URL to validate.
+	 * @param string $type The type of template, post, or taxonomy.
 	 */
-	public static function validate_and_store_url( $url ) {
+	public static function validate_and_store_url( $url, $type ) {
 		if ( self::$force_crawl_urls ) {
 			$url = add_query_arg( self::FORCE_VALIDATION_QUERY_VAR, '', $url );
 		}
 		$validity = AMP_Validation_Manager::validate_url( $url );
 
+		// If there is an error in the request to validate this, return true.
 		if ( is_wp_error( $validity ) ) {
 			return;
 		}
@@ -533,6 +567,7 @@ class AMP_Site_Validation {
 
 		AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
 		$error_count            = count( $validity['validation_errors'] );
+		$has_error              = $error_count > 0;
 		$unaccepted_error_count = count( array_filter(
 			$validity['validation_errors'],
 			function( $error ) {
@@ -540,7 +575,7 @@ class AMP_Site_Validation {
 			}
 		) );
 
-		if ( $error_count > 0 ) {
+		if ( $has_error ) {
 			self::$total_errors++;
 		}
 		if ( $unaccepted_error_count > 0 ) {
@@ -548,5 +583,6 @@ class AMP_Site_Validation {
 		}
 
 		self::$number_crawled++;
+		self::handle_error_count( $has_error, $type );
 	}
 }
