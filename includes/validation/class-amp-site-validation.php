@@ -248,10 +248,9 @@ class AMP_Site_Validation {
 	public static function count_urls_to_validate() {
 		/*
 		 * If the homepage is set to 'Your latest posts,' start the $total_count at 1.
-		 * Otherwise, the homepage wouldn't be counted here, even though validate_site() visits it.
-		 * If it's not set to that, it will probably be counted in the query for pages.
+		 * Otherwise, it will probably be counted in the query for pages below.
 		 */
-		$total_count = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
+		$total_count = 'posts' === get_option( 'show_on_front' ) && self::is_template_supported( 'is_home' ) ? 1 : 0;
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
@@ -495,8 +494,15 @@ class AMP_Site_Validation {
 			$i++;
 		}
 
-		// Validate the homepage and search page outside the loop, as there is only one of each here.
-		self::validate_urls( array( home_url( '/' ) ) );
+		/**
+		 * If 'Your homepage displays' is set to 'Your latest posts',
+		 * validate the homepage.
+		 * It would not have been validated above in the page validation.
+		 */
+		if ( 'posts' === get_option( 'show_on_front' ) && self::is_template_supported( 'is_home' ) ) {
+			self::validate_urls( array( home_url( '/' ) ) );
+		}
+
 		self::validate_urls( array( self::get_search_page() ) );
 	}
 
