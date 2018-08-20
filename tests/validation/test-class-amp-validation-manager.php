@@ -638,7 +638,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			),
 			'latest_posts' => array(
 				'<!-- wp:latest-posts /-->',
-				'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts aligncenter"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
+				'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
 				array(
 					'element' => 'ul',
 					'blocks'  => array( 'core/latest-posts' ),
