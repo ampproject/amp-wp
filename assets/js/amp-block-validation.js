@@ -111,7 +111,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			if ( meta && meta.amp_status && window.wpAmpEditor.possibleStati.includes( meta.amp_status ) ) {
 				return 'enabled' === meta.amp_status;
 			}
-			return false;
+			return window.wpAmpEditor.defaultStatus;
 		},
 
 		/**
