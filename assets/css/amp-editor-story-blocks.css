@@ -1,14 +1,35 @@
-
-.editor-block-list__layout {
-	background-color: #ffdddd;
-}
-.editor-block-list__layout .editor-block-list__layout {
-	background-color: white;
-}
 div[data-type="amp/amp-story-page"] {
-	background-color: #ddffdd;
+	border: 1px solid #ffdddd;
 }
-div[data-type="amp/amp-story-grid-layer"] {
-	background-color: #ddddff;
+
+div[data-type="amp/amp-story-page"],
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout {
+	min-height: 450px;
+}
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout .editor-block-list__layout {
+	background-color: initial;
+	min-height: initial;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"] {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
+	position: absolute;
+	height: 20%;
+	width: 100%;
+	bottom: 0;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"],
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
+	border: 1px solid #ddffdd;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected ~ div[data-type="amp/amp-story-grid-layer"] {
+	display: none;
 }
 
