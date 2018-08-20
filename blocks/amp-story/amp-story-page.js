@@ -1,17 +1,13 @@
 import memoize from 'memize';
+import uuid from 'uuid/v4';
 
 const { __ } = wp.i18n;
 const {
 	registerBlockType
 } = wp.blocks;
 const {
-	InspectorControls,
 	InnerBlocks
 } = wp.editor;
-const {
-	TextControl,
-	Notice
-} = wp.components;
 const { select } = wp.data;
 const { getBlock } = select( 'core/editor' );
 
@@ -58,6 +54,8 @@ export default registerBlockType(
 		title: __( 'AMP Story Page', 'amp' ),
 		category: 'layout',
 		icon: 'admin-page',
+
+		// @todo Enforce that the amp-story-page can only be a root-level block; Using `parent: []` does not work, and it causes the inserter to be disabled entirely.
 		attributes: {
 			id: {
 				type: 'string',
@@ -80,6 +78,12 @@ export default registerBlockType(
 		 * */
 
 		edit( props ) {
+			const { setAttributes } = props;
+
+			// If the page ID is not set, add one.
+			if ( ! props.attributes.id ) {
+				setAttributes( { id: uuid() } );
+			}
 			const block = getBlock( props.clientId );
 			let grids = block.innerBlocks.length;
 			let hasCTALayer = false;
@@ -91,25 +95,16 @@ export default registerBlockType(
 					grids--;
 				}
 			} );
-			const { setAttributes } = props;
-			return [
-				<InspectorControls key='inspector'>
-					<TextControl
-						type="text"
-						className="blocks-amp-story-page__id"
-						required={ true }
-						label={ __( 'ID', 'amp' ) }
-						value={ props.attributes.id }
-						onChange={ value => ( setAttributes( { id: value } ) ) }
-					/>
-				</InspectorControls>,
-				! props.attributes.id && (
-					<Notice status="error" isDismissible={ false }>{ __( 'You must supply an ID for the page.', 'amp' ) }</Notice>
-				),
 
+			// Have at least one layout grid in the template.
+			if ( 0 === grids ) {
+				grids = 1;
+			}
+
+			return (
 				// Get the template dynamically.
 				<InnerBlocks key='contents' template={ getStoryPageTemplate( grids, hasCTALayer ) } allowedBlocks={ ALLOWED_BLOCKS } />
-			];
+			);
 		},
 
 		save( { attributes } ) {
