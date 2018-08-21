@@ -472,6 +472,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$total_count += count( $term_query->terms );
 		$total_count += count( AMP_Site_Validation::get_author_page_urls() );
 		$total_count += is_string( AMP_Site_Validation::get_search_page() ) ? 1 : 0;
+		$total_count += is_string( AMP_Site_Validation::get_date_page() ) ? 1 : 0;
 
 		return $total_count;
 	}

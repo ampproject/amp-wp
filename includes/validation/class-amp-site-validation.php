@@ -315,6 +315,11 @@ class AMP_Site_Validation {
 		// Count author pages, like https://example.com/author/admin/.
 		$total_count += count( self::get_author_page_urls() );
 
+		// Count a single example date page, like https://example.com/?year=2019.
+		if ( self::get_date_page() ) {
+			$total_count++;
+		}
+
 		// Count a single example search page, like https://example.com/?s=example.
 		if ( self::get_search_page() ) {
 			$total_count++;
