@@ -217,13 +217,23 @@ class AMP_Site_Validation {
 
 		$number_urls_to_crawl = self::count_urls_to_validate();
 		if ( ! $number_urls_to_crawl ) {
-			WP_CLI::error(
-				sprintf(
-					/* translators: %s is the command line argument to force validation */
-					__( 'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.', 'amp' ),
-					self::FLAG_NAME_FORCE_VALIDATION
-				)
-			);
+			if ( self::$include_conditionals ) {
+				WP_CLI::error(
+					sprintf(
+						/* translators: %s is the command line argument to include certain templates */
+						__( 'The templates passed via the --%s argument did not match any URLs. You might try passing different templates to it.', 'amp' ),
+						self::INCLUDE_ARGUMENT
+					)
+				);
+			} else {
+				WP_CLI::error(
+					sprintf(
+						/* translators: %s is the command line argument to force validation */
+						__( 'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.', 'amp' ),
+						self::FLAG_NAME_FORCE_VALIDATION
+					)
+				);
+			}
 		}
 
 		WP_CLI::log( __( 'Crawling the site for AMP validity.', 'amp' ) );
