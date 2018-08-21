@@ -65,7 +65,7 @@ class AMP_Site_Validation {
 	 *
 	 * @var string
 	 */
-	const MAXIMUM_URLS_ARGUMENT = 'max-url-count';
+	const MAXIMUM_URLS_ARGUMENT = 'n';
 
 	/**
 	 * The supportable templates, mainly based on a user's selection in 'AMP Settings' > 'Supported Templates'.
@@ -494,6 +494,19 @@ class AMP_Site_Validation {
 	}
 
 	/**
+	 * Gets a date page URL, like https://example.com/?year=2018.
+	 *
+	 * @return string|null An example search page, or null.
+	 */
+	public static function get_date_page() {
+		if ( ! self::is_template_supported( 'is_date' ) ) {
+			return null;
+		}
+
+		return add_query_arg( 'year', date( 'Y' ), home_url( '/' ) );
+	}
+
+	/**
 	 * Validates the URLs of the entire site.
 	 *
 	 * Includes the URLs of public, published posts, public taxonomies, and other templates.
@@ -510,6 +523,7 @@ class AMP_Site_Validation {
 			self::validate_and_store_url( home_url( '/' ), 'home' );
 		}
 		self::validate_and_store_url( self::get_search_page(), 'search' );
+		self::validate_and_store_url( self::get_date_page(), 'date' );
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),

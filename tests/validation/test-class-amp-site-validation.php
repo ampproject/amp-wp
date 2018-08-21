@@ -380,6 +380,28 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_date_page.
+	 *
+	 * @covers AMP_Site_Validation::get_date_page()
+	 */
+	public function test_get_date_page() {
+		$year = date( 'Y' );
+
+		// Normally, this should return the date page, unless the user has opted out of the page template.
+		$this->assertContains( $year, AMP_Site_Validation::get_date_page() );
+
+		// If $include_conditionals is set and does not have is_date, this should not return a URL.
+		AMP_Site_Validation::$include_conditionals = array( 'is_search' );
+		$this->assertEquals( null, AMP_Site_Validation::get_date_page() );
+
+		// If $include_conditionals has is_date, this should return a URL.
+		AMP_Site_Validation::$include_conditionals = array( 'is_date' );
+		$parsed_page_url                           = wp_parse_url( AMP_Site_Validation::get_date_page() );
+		$this->assertContains( $year, $parsed_page_url['query'] );
+		AMP_Site_Validation::$include_conditionals = null;
+	}
+
+	/**
 	 * Test validate_site.
 	 *
 	 * @covers AMP_Site_Validation::validate_site()
