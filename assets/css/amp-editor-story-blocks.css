@@ -46,11 +46,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	margin-bottom: 2px;
 }
 
-.editor-selectors .component-editor__selector a {
-	color: #656565;
-	font-size: 13px;
+.editor-selectors .component-editor__selector button {
+	cursor: pointer;
 }
 
-.editor-selectors .is-selected.component-editor__selector a {
+.editor-selectors .is-selected.component-editor__selector button {
 	text-decoration: underline;
 }

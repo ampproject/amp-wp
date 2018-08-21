@@ -1,7 +1,8 @@
 import forEachRight from 'lodash'; // eslint-disable-line no-unused-vars
 
+const { __, sprintf } = wp.i18n;
 const { Component } = wp.element;
-const { getBlockType } = wp.blocks;
+const { Button } = wp.components;
 const {
 	dispatch,
 	select
@@ -35,16 +36,17 @@ class BlockSelector extends Component {
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
 			}
-			let blockType = getBlockType( block.name );
 			links.push(
 				<li className={ className } key={ 'selector-' + index }>
-					<a onClick={ ( e ) => {
+					<Button onClick={ ( e ) => {
 						e.stopPropagation();
 						if ( getSelectedBlock.clientId !== block.clientId ) {
 							// @todo This selects the first inner child instead for some reason.
 							selectBlock( block.clientId );
 						}
-					}}>{ blockType.title }</a>
+					}}>
+						{ sprintf( __( 'Layout %d ', 'amp' ), index + 1 ) }
+					</Button>
 				</li>
 			);
 		} );
@@ -56,9 +58,14 @@ class BlockSelector extends Component {
 
 		links.push(
 			<li className={ className } key='page-selector'>
-				<a onClick={ () => {
-					selectBlock( this.props.rootClientId );
-				}}>Page</a>
+				<Button onClick={ ( e ) => {
+					e.stopPropagation();
+					if ( getSelectedBlock.clientId !== this.props.rootClientId ) {
+						selectBlock( this.props.rootClientId );
+					}
+				}}>
+					{ __( 'Page', 'amp' ) }
+				</Button>
 			</li>
 		);
 
