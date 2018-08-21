@@ -29,7 +29,28 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	border: 1px solid #ddffdd;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected ~ div[data-type="amp/amp-story-grid-layer"] {
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected ~ div[data-type="amp/amp-story-grid-layer"],
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected-parent ~ div[data-type="amp/amp-story-grid-layer"]{
 	display: none;
 }
 
+.editor-selectors {
+	position: absolute;
+	right: -150px;
+	bottom: 0px;
+	width: 100px;
+	z-index: 80;
+}
+
+.editor-selectors .component-editor__selector {
+	margin-bottom: 2px;
+}
+
+.editor-selectors .component-editor__selector a {
+	color: #656565;
+	font-size: 13px;
+}
+
+.editor-selectors .is-selected.component-editor__selector a {
+	text-decoration: underline;
+}
