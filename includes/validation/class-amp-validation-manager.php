@@ -1655,7 +1655,7 @@ class AMP_Validation_Manager {
 		}
 
 		$url = remove_query_arg(
-			array_merge( array_keys( $added_query_vars ), array( AMP_Site_Validation::FORCE_VALIDATION_QUERY_VAR ) ),
+			array_keys( $added_query_vars ),
 			$validation_url
 		);
 
