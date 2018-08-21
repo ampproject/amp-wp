@@ -41,9 +41,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function test_count_urls_to_validate() {
 		// The number of original URLs present before adding these test URLs.
 		$number_original_urls = $this->get_inital_url_count();
-		$number_author_pages  = count( AMP_Site_Validation::get_author_page_urls() );
-		$number_search_pages  = is_string( AMP_Site_Validation::get_search_page() ) ? 1 : 0;
-		$this->assertEquals( $number_original_urls + $number_author_pages + $number_search_pages, AMP_Site_Validation::count_urls_to_validate() );
+		$this->assertEquals( $number_original_urls, AMP_Site_Validation::count_urls_to_validate() );
 
 		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
 		$number_new_posts = AMP_Site_Validation::$maximum_urls_to_validate_for_each_type / 2;
@@ -58,7 +56,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		 * Add the number of new posts, original URLs, and 1 for the $category that all of them have.
 		 * And ensure that the tested method finds a URL for all of them.
 		 */
-		$expected_url_count = $number_new_posts + $number_original_urls + $number_author_pages + $number_search_pages + 1;
+		$expected_url_count = $number_new_posts + $number_original_urls + 1;
 		$this->assertEquals( $expected_url_count, AMP_Site_Validation::count_urls_to_validate() );
 
 		$number_of_new_terms        = 20;
@@ -93,7 +91,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$ids[] = $this->factory()->post->create();
 		}
 
-		// This should count all of the newly-created posts as supporting AMP (when you add the query ary).
+		// This should count all of the newly-created posts as supporting AMP.
 		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
 
 		// Simulate 'Enable AMP' being unchecked in the post editor, in which case get_url_count() should not count it.
@@ -111,19 +109,16 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			AMP_Post_Meta_Box::ENABLED_STATUS
 		);
 
-		/**
-		 * When the second $force_count_all_urls argument is true, all of the newly-created posts should be part of the URL count,
-		 * even though they're not AMP endpoints.
-		 */
+		// When the second $force_count_all_urls argument is true, all of the newly-created posts should be part of the URL count.
 		AMP_Site_Validation::$force_crawl_urls = true;
 		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids, true ) );
 		AMP_Site_Validation::$force_crawl_urls = false;
 
-		// In Native AMP, the URL count should include all of the newly-created posts.
+		// In Native AMP, the IDs should include all of the newly-created posts.
 		add_theme_support( 'amp' );
 		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
 
-		// In Paired Mode, the URL count should also include all of the newly-created posts.
+		// In Paired Mode, the IDs should also include all of the newly-created posts.
 		add_theme_support( 'amp', array(
 			'paired' => true,
 		) );
@@ -131,7 +126,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 		/**
 		 * If the WP-CLI command has an include argument, and is_singular isn't in it, no posts will have AMP enabled.
-		 * For example, wp amp validate-site include=is_tag,is_category
+		 * For example, wp amp validate-site --include=is_tag,is_category
 		 */
 		AMP_Site_Validation::$include_conditionals = array( 'is_tag', 'is_category' );
 		$this->assertEquals( array(), AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
@@ -191,8 +186,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		}
 
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertFalse( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
@@ -205,13 +200,13 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		}
 		AMP_Site_Validation::$force_crawl_urls = false;
 
-		// When the user has the 'all_templates_supported' box, this should always be true.
+		// When the user has checked the 'all_templates_supported' box, this should always be true.
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( $taxonomy ) );
 		}
-		AMP_Options_Manager::update_option( 'all_templates_supported', null );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 
 		/**
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
@@ -220,6 +215,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		AMP_Site_Validation::$include_conditionals = array( 'is_category', 'is_tag' );
 		$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( 'category' ) );
 		$this->assertTrue( AMP_Site_Validation::does_taxonomy_support_amp( 'tag' ) );
+		$this->assertFalse( AMP_Site_Validation::does_taxonomy_support_amp( 'author' ) );
+		$this->assertFalse( AMP_Site_Validation::does_taxonomy_support_amp( 'search' ) );
 		AMP_Site_Validation::$include_conditionals = null;
 	}
 
@@ -231,10 +228,12 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function test_is_template_supported() {
 		$author_conditional = 'is_author';
 		$search_conditional = 'is_search';
+
 		AMP_Options_Manager::update_option( 'supported_templates', array( $author_conditional ) );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		$this->assertTrue( AMP_Site_Validation::is_template_supported( $author_conditional ) );
+		$this->assertFalse( AMP_Site_Validation::is_template_supported( $search_conditional ) );
 
 		AMP_Options_Manager::update_option( 'supported_templates', array( $search_conditional ) );
 		AMP_Site_Validation::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
@@ -251,14 +250,8 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		$number_posts_each_post_type = 20;
 		$post_types                  = get_post_types( array( 'public' => true ), 'names' );
 
-		/**
-		 * Exclude attachment permalinks from the test.
-		 * They have a default status of 'inherit,' to depend on the status of their parent post.
-		 */
-		unset( $post_types['attachment'] );
-
 		foreach ( $post_types as $post_type ) {
-			// Start the expected posts with the existing post.
+			// Start the expected posts with the existing post(s).
 			$query          = new WP_Query( array(
 				'fields'    => 'ids',
 				'post_type' => $post_type,
@@ -274,10 +267,10 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 			$actual_posts = AMP_Site_Validation::get_posts_by_type( $post_type );
 			$this->assertEquals( $expected_posts, array_values( $actual_posts ) );
 
-			// Test with the 2 optional arguments for AMP_Site_Validation::get_posts_by_type().
-			$number_of_posts = $number_posts_each_post_type / 2;
-			$actual_posts    = AMP_Site_Validation::get_posts_by_type( $post_type, $number_of_posts );
-			$this->assertEquals( array_slice( $expected_posts, $number_of_posts ), $actual_posts );
+			// Test with the $offset and $number arguments.
+			$offset       = 0;
+			$actual_posts = AMP_Site_Validation::get_posts_by_type( $post_type, $offset, $number_posts_each_post_type );
+			$this->assertEquals( array_slice( $expected_posts, $offset, $number_posts_each_post_type ), $actual_posts );
 		}
 	}
 
@@ -387,7 +380,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function test_get_date_page() {
 		$year = date( 'Y' );
 
-		// Normally, this should return the date page, unless the user has opted out of the page template.
+		// Normally, this should return the date page, unless the user has opted out of that template.
 		$this->assertContains( $year, AMP_Site_Validation::get_date_page() );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
@@ -477,6 +470,9 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 		) );
 
 		$total_count += count( $term_query->terms );
+		$total_count += count( AMP_Site_Validation::get_author_page_urls() );
+		$total_count += is_string( AMP_Site_Validation::get_search_page() ) ? 1 : 0;
+
 		return $total_count;
 	}
 
