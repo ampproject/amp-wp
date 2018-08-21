@@ -8,7 +8,7 @@
 /**
  * Class AMP_Site_Validation
  *
- * Registers a WP-CLI command to crawl the entire site to check for AMP validity.
+ * Registers and implements a WP-CLI command to crawl the entire site for AMP validity.
  * To use this, run: wp amp validate-site.
  *
  * @since 1.0
@@ -16,31 +16,31 @@
 class AMP_Site_Validation {
 
 	/**
-	 * The WP-CLI argument to validate the site.
-	 * The full command is: wp amp validate-site.
+	 * The WP-CLI command to validate the site.
+	 * To use this, run: wp amp validate-site.
 	 *
 	 * @var string
 	 */
 	const WP_CLI_COMMAND = 'amp validate-site';
 
 	/**
-	 * The WP-CLI flag to force validation of all URLs.
+	 * The WP-CLI flag to force validation.
 	 *
-	 * By default, this does not validate templates that the user has opted-out of.
+	 * By default, the WP-CLI command does not validate templates that the user has opted-out of.
 	 * For example, by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 * But with this command flag, this will validate all URLs.
+	 * But with this flag, validation will ignore these options.
 	 *
 	 * @var string
 	 */
-	const FLAG_NAME_FORCE_VALIDATE_ALL = 'force-validation';
+	const FLAG_NAME_FORCE_VALIDATION = 'force-validation';
 
 	/**
 	 * The query var key to force AMP validation, regardless or whether the user has deselected support for a URL.
 	 *
 	 * If the WP-CLI flag above is present in the command,
-	 * this query var is added to the URL.
-	 * Then, this forces validation, no matter whether the user has deselected a certain template.
-	 * Like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * this query var is added to the validation URL.
+	 * Then, this forces validation, no matter whether the user has deselected a certain template,
+	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
 	 *
 	 * @var string
 	 */
@@ -61,7 +61,7 @@ class AMP_Site_Validation {
 	 * The WP-CLI argument for the maximum URLs to validate for each type.
 	 *
 	 * If this is passed in the command,
-	 * it's applied to self::$maximum_urls_to_validate_for_each_type.
+	 * it overrides the value of self::$maximum_urls_to_validate_for_each_type.
 	 *
 	 * @var string
 	 */
@@ -110,9 +110,9 @@ class AMP_Site_Validation {
 	 * Whether to force crawling of URLs.
 	 *
 	 * By default, this script only crawls URLs that support AMP,
-	 * where the user hasn't opted-out of AMP for the URL.
-	 * For example, by unchecking 'Posts' in 'AMP Settings' > 'Supported Templates'.
-	 * Or unchecking 'Enable AMP' in the post's editor.
+	 * where the user has not opted-out of AMP for the URL.
+	 * For example, by un-checking 'Posts' in 'AMP Settings' > 'Supported Templates'.
+	 * Or un-checking 'Enable AMP' in the post's editor.
 	 *
 	 * @var int
 	 */
@@ -123,6 +123,7 @@ class AMP_Site_Validation {
 	 *
 	 * Usually, this script will validate all of the templates that don't have AMP disabled.
 	 * But this allows validating based on only these conditionals.
+	 * This is set if the WP-CLI command has an --include argument.
 	 *
 	 * @var array
 	 */
@@ -132,17 +133,22 @@ class AMP_Site_Validation {
 	 * The maximum number of URLs to validate for each type.
 	 *
 	 * Templates are each a separate type, like those for is_category() and is_tag().
-	 * Also, post types are a separate type.
-	 * So by default, this validates 100 posts of each post type.
+	 * Also, each post type is a separate type.
+	 * This value is overridden if the WP-CLI command has an --n argument, like --n=10.
 	 *
 	 * @var int
 	 */
 	public static $maximum_urls_to_validate_for_each_type = 100;
 
 	/**
-	 * The validation errors by type, like template or post type.
+	 * The validation counts by type, like template or post type.
 	 *
-	 * @var array
+	 * @var array[][] {
+	 *     Validity by type.
+	 *
+	 *     @type int $valid The number of valid URLs for this type.
+	 *     @type int $total The total number of URLs for this type, valid or invalid.
+	 * }
 	 */
 	public static $validity_by_type = array();
 
@@ -161,7 +167,7 @@ class AMP_Site_Validation {
 					'synopsis'  => array(
 						array(
 							'type'     => 'flag',
-							'name'     => self::FLAG_NAME_FORCE_VALIDATE_ALL,
+							'name'     => self::FLAG_NAME_FORCE_VALIDATION,
 							'optional' => true,
 						),
 						array(
@@ -193,11 +199,15 @@ class AMP_Site_Validation {
 	public static function crawl_site( $args, $assoc_args ) {
 		unset( $args );
 
-		// Handle the argument and flag passed to the command: --include and --force-validation.
+		/**
+		 * Handle the argument and flag passed to the command: --include and --force-validation.
+		 * If the self::INCLUDE_ARGUMENT is present, force crawling or URLs.
+		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
+		 */
 		if ( ! empty( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
 			self::$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
 			self::$force_crawl_urls     = true;
-		} elseif ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATE_ALL ] ) ) {
+		} elseif ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATION ] ) ) {
 			self::$force_crawl_urls = true;
 		}
 
@@ -211,7 +221,7 @@ class AMP_Site_Validation {
 				sprintf(
 					/* translators: %s is the command line argument to force validation */
 					__( 'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.', 'amp' ),
-					self::FLAG_NAME_FORCE_VALIDATE_ALL
+					self::FLAG_NAME_FORCE_VALIDATION
 				)
 			);
 		}
@@ -232,31 +242,44 @@ class AMP_Site_Validation {
 			admin_url( 'edit.php' )
 		);
 
-		$validation_by_type = __( "Number of valid URLs by type:\n", 'amp' );
+		$key_template_type        = __( 'Template or content type', 'amp' );
+		$key_valid_ratio          = __( 'Valid URLs', 'amp' );
+		$table_validation_by_type = array();
 		foreach ( self::$validity_by_type as $type_name => $validity ) {
-			$validation_by_type .= sprintf( "%1\$s: %2\$d/%3\$d\n", $type_name, $validity['valid'], $validity['total'] );
+			$table_validation_by_type[] = array(
+				$key_template_type => $type_name,
+				$key_valid_ratio   => sprintf( '%1$s/%2$d', $validity['valid'], $validity['total'] ),
+			);
 		}
 
 		WP_CLI::success(
 			sprintf(
 				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the list of validation by type, $5%s is the link for more details */
-				__( "Of the %1\$d URLs crawled, %2\$d have AMP validation issue(s), and %3\$d have unaccepted issue(s).\n\n%4\$s \nFor more details, please see: \n%5\$s", 'amp' ),
+				__( "Of the %1\$d URLs crawled, %2\$d have AMP validation issue(s), and %3\$d have unaccepted issue(s). \n\nFor more details, please see: \n%4\$s \n", 'amp' ),
 				self::$number_crawled,
 				self::$total_errors,
 				self::$unaccepted_errors,
-				$validation_by_type,
 				$url_more_details
 			)
+		);
+
+		// Output a table of validity by template/content type.
+		WP_CLI\Utils\format_items(
+			'table',
+			$table_validation_by_type,
+			array( $key_template_type, $key_valid_ratio )
 		);
 	}
 
 	/**
-	 * Gets the total number of posts and terms on the site.
+	 * Gets the total number of URLs to validate.
 	 *
 	 * By default, this only counts AMP-enabled posts and terms.
 	 * But if $force_crawl_urls is true, it counts all of them, regardless of their AMP status.
+	 * It also uses self::$maximum_urls_to_validate_for_each_type,
+	 * which can be overridden with a command line argument.
 	 *
-	 * @return int The number of posts and terms.
+	 * @return int The number of URLs to validate.
 	 */
 	public static function count_urls_to_validate() {
 		/*
@@ -277,6 +300,7 @@ class AMP_Site_Validation {
 				'fields'   => 'ids',
 				'number'   => self::$maximum_urls_to_validate_for_each_type,
 			) );
+
 			// If $term_query->terms is an empty array, passing it to count() will throw an error.
 			$total_count += ! empty( $term_query->terms ) ? count( $term_query->terms ) : 0;
 		}
@@ -302,22 +326,15 @@ class AMP_Site_Validation {
 	/**
 	 * Gets the posts IDs that support AMP.
 	 *
-	 * By default, only get the post IDs if they support AMP.
+	 * By default, this only gets the post IDs if they support AMP.
 	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
 	 * And 'Enable AMP' isn't unchecked in the post's editor.
 	 * But if $force_crawl_urls is true, this simply returns all of the IDs.
 	 *
-	 * @param array $ids The post or term IDs.
-	 * @return array The post IDs that support AMP.
+	 * @param array $ids THe post IDs to check for AMP support.
+	 * @return array The post IDs that support AMP, or an empty array.
 	 */
 	public static function get_posts_that_support_amp( $ids ) {
-		/**
-		 * If the user has passed an include argument to the WP-CLI command,
-		 * is_singular must be present in that argument.
-		 * For example, wp amp validate-site --include=is_singular,is_tag,is_category
-		 * That argument is a whitelist of conditionals, one of which must be true to validate a URL.
-		 * And is_singular must be true to access posts.
-		 */
 		if ( ! self::is_template_supported( 'is_singular' ) ) {
 			return array();
 		}
@@ -336,6 +353,9 @@ class AMP_Site_Validation {
 
 	/**
 	 * Handles the error count, based on the validation results.
+	 *
+	 * Increments the template's 'total' count,
+	 * and increments the 'valid' count if there is no error.
 	 *
 	 * @param bool   $is_error Whether the validation resulted in an error.
 	 * @param string $key The key to store the validation result.
@@ -357,9 +377,10 @@ class AMP_Site_Validation {
 	/**
 	 * Gets whether the taxonomy supports AMP.
 	 *
-	 * Only get the term IDs if they support AMP.
-	 * If their taxonomy is unchecked in 'AMP Settings' > 'Supported Templates,' don't return them.
-	 * For example, if 'Categories' is unchecked there, don't return any category IDs.
+	 * This only gets the term IDs if they support AMP.
+	 * If their taxonomy is unchecked in 'AMP Settings' > 'Supported Templates,' this does not return them.
+	 * For example, if 'Categories' is unchecked.
+	 * This can be overridden by passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command.
 	 *
 	 * @param string $taxonomy The taxonomy.
 	 * @return boolean Wether the taxonomy supports AMP.
@@ -379,13 +400,13 @@ class AMP_Site_Validation {
 	 * If the user has passed an include argument to the WP-CLI command, use that to find if this template supports AMP.
 	 * For example, wp amp validate-site --include=is_tag,is_category
 	 * would return true only if is_tag() or is_category().
-	 * Then, if the user has not unchecked the template in 'AMP Settings' > 'Supported Templates', return false.
+	 * But passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command overrides this.
 	 *
 	 * @param string $template The template to check.
 	 * @return bool Whether the template is supported.
 	 */
 	public static function is_template_supported( $template ) {
-		// If the include argument is present in the WP-CLI command, this template conditional must be present in it.
+		// If the --include argument is present in the WP-CLI command, this template conditional must be present in it.
 		if ( isset( self::$include_conditionals ) && ! in_array( $template, self::$include_conditionals, true ) ) {
 			return false;
 		}
@@ -393,25 +414,22 @@ class AMP_Site_Validation {
 			return true;
 		}
 
-		/**
-		 * Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
-		 * This first conditional is for default taxonomies like categories.
-		 */
+		// Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
 		return isset( self::$supportable_templates[ $template ]['supported'] ) && self::$supportable_templates[ $template ]['supported'];
 	}
 
 	/**
-	 * Gets the permalinks of public, published posts.
+	 * Gets the IDs of public, published posts.
 	 *
-	 * @param string $post_type The post type.
-	 * @param int    $offset The offset of the query (optional).
-	 * @param int    $number The number of posts to query for (optional).
-	 * @return int[] $post_ids The post IDs in an array.
+	 * @param string   $post_type The post type.
+	 * @param int|null $offset The offset of the query (optional).
+	 * @param int|null $number The number of posts to query for (optional).
+	 * @return int[]   $post_ids The post IDs in an array.
 	 */
 	public static function get_posts_by_type( $post_type, $offset = null, $number = null ) {
 		$args = array(
 			'post_type'      => $post_type,
-			'posts_per_page' => isset( $number ) ? $number : self::$maximum_urls_to_validate_for_each_type,
+			'posts_per_page' => is_int( $number ) ? $number : self::$maximum_urls_to_validate_for_each_type,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
@@ -431,18 +449,15 @@ class AMP_Site_Validation {
 	}
 
 	/**
-	 * Gets the front-end links for public taxonomy terms, like categories and tags.
-	 *
+	 * Gets the front-end links for taxonomy terms.
 	 * For example, https://example.org/?cat=2
-	 * This includes categories and tags, and any more that are registered.
-	 * But it excludes post_format terms.
 	 *
 	 * @param string     $taxonomy The name of the taxonomy, like 'category' or 'post_tag'.
 	 * @param int|string $offset The number at which to offset the query (optional).
 	 * @param int        $number The maximum amount of links to get (optional).
-	 * @return string[]  The term links in an array.
+	 * @return string[]  The term links, as an array of strings.
 	 */
-	public static function get_taxonomy_links( $taxonomy, $offset = '', $number = 200 ) {
+	public static function get_taxonomy_links( $taxonomy, $offset = '', $number ) {
 		return array_map(
 			'get_term_link',
 			get_terms(
@@ -510,20 +525,17 @@ class AMP_Site_Validation {
 	 * Validates the URLs of the entire site.
 	 *
 	 * Includes the URLs of public, published posts, public taxonomies, and other templates.
-	 * This validates one of each type at a time.
-	 * And continues this until it reaches the maximum number of URLs for each type.
+	 * This validates one of each type at a time,
+	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
 	public static function validate_site() {
 		/**
-		 * If 'Your homepage displays' is set to 'Your latest posts',
-		 * validate the homepage.
-		 * It would not have been validated above in the page validation.
+		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
+		 * It will not be part of the page validation below.
 		 */
 		if ( 'posts' === get_option( 'show_on_front' ) && self::is_template_supported( 'is_home' ) ) {
 			self::validate_and_store_url( home_url( '/' ), 'home' );
 		}
-		self::validate_and_store_url( self::get_search_page(), 'search' );
-		self::validate_and_store_url( self::get_date_page(), 'date' );
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
@@ -532,7 +544,7 @@ class AMP_Site_Validation {
 		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
 		$i                      = 0;
 
-		// Validate one URL of each type, then another URL of each type on the next iteration.
+		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
 		while ( $i < self::$maximum_urls_to_validate_for_each_type ) {
 			// Validate all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
@@ -557,6 +569,10 @@ class AMP_Site_Validation {
 
 			$i++;
 		}
+
+		// Only validate 1 date and 1 search page.
+		self::validate_and_store_url( self::get_date_page(), 'date' );
+		self::validate_and_store_url( self::get_search_page(), 'search' );
 	}
 
 	/**
@@ -571,7 +587,10 @@ class AMP_Site_Validation {
 		}
 		$validity = AMP_Validation_Manager::validate_url( $url );
 
-		// If there is an error in the request to validate this, return true.
+		/**
+		 * If the request to validate this returns a WP_Error, return.
+		 * One cause of an error is if the validation request results in a 404 response code.
+		 */
 		if ( is_wp_error( $validity ) ) {
 			return;
 		}
