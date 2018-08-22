@@ -1,4 +1,3 @@
-import forEachRight from 'lodash'; // eslint-disable-line no-unused-vars
 
 const { __, sprintf } = wp.i18n;
 const { Component } = wp.element;
@@ -33,7 +32,7 @@ class BlockSelector extends Component {
 
 		let links = [];
 
-		_.forEachRight( rootBlock.innerBlocks, function( block, index ) {
+		lodash.forEachRight( rootBlock.innerBlocks, function( block, index ) {
 			let className = 'component-editor__selector';
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
