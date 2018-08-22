@@ -109,16 +109,18 @@ class AMP_Options_Menu {
 			)
 		);
 
-		add_settings_field(
-			'caching',
-			__( 'Caching', 'amp' ),
-			array( $this, 'render_caching' ),
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			array(
-				'class' => 'amp-caching-field',
-			)
-		);
+		if ( wp_using_ext_object_cache() ) {
+			add_settings_field(
+				'caching',
+				__( 'Caching', 'amp' ),
+				array( $this, 'render_caching' ),
+				AMP_Options_Manager::OPTION_NAME,
+				'general',
+				array(
+					'class' => 'amp-caching-field',
+				)
+			);
+		}
 
 		$submenus = array(
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),

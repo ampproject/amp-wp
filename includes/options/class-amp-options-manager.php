@@ -201,7 +201,11 @@ class AMP_Options_Manager {
 		$options['version'] = AMP__VERSION;
 
 		// Handle the caching option.
-		$options['enable_response_caching'] = ! empty( $new_options['enable_response_caching'] );
+		$options['enable_response_caching'] = (
+			wp_using_ext_object_cache()
+			&&
+			! empty( $new_options['enable_response_caching'] )
+		);
 		if ( $options['enable_response_caching'] ) {
 			AMP_Theme_Support::reset_cache_miss_url_option();
 		}
