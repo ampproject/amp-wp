@@ -36,6 +36,11 @@ class BlockSelector extends Component {
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
 			}
+
+			let title = sprintf( __( 'Layout %d ', 'amp' ), index + 1 );
+			if ( 'amp/amp-story-cta-layer' === block.name ) {
+				title = __( 'CTA Layer', 'amp' );
+			}
 			links.push(
 				<li className={ className } key={ 'selector-' + index }>
 					<Button onClick={ ( e ) => {
@@ -45,7 +50,7 @@ class BlockSelector extends Component {
 							selectBlock( block.clientId );
 						}
 					}}>
-						{ sprintf( __( 'Layout %d ', 'amp' ), index + 1 ) }
+						{ title }
 					</Button>
 				</li>
 			);

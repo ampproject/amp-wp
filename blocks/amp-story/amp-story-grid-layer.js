@@ -99,7 +99,9 @@ export default registerBlockType(
 						onChange={ value => ( setAttributes( { template: value } ) ) }
 					/>
 				</InspectorControls>,
-				<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
+				<div key='contents' className={ 'amp-grid-template amp-grid-template-' + props.attributes.template }>
+					<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
+				</div>
 			];
 		},
 
