@@ -68,9 +68,8 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$action_url = $node->getAttribute( 'action' );
 				//check if action_url is a relative path and add the host to it
-				preg_match('(^\/?[^\/].*)',$action_url,$matches);
-				if ($matches){
-					$action_url = '//' . $_SERVER['HTTP_HOST'] . $action_url;
+				if ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
+				    $action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . $action_url );
 				}
 			}
 			$xhr_action = $node->getAttribute( 'action-xhr' );
