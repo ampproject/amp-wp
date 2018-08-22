@@ -32,7 +32,7 @@ class BlockSelector extends Component {
 
 		let links = [];
 
-		lodash.forEachRight( rootBlock.innerBlocks, function( block, index ) {
+		window.lodash.forEachRight( rootBlock.innerBlocks, function( block, index ) {
 			let className = 'component-editor__selector';
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
