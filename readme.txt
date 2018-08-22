@@ -48,10 +48,11 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/Automattic/amp-wp/wiki/Implementing-Interactivity).
 
-- Add runtime CSS minification, `!important` replacement, and tree shaking. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142). Props westonruter, amedina, pbakaus, igrigorik, camelburrito.
+- Add runtime CSS minification, `!important` replacement, and tree shaking. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142), [#1320](https://github.com/Automattic/amp-wp/pull/1320), [#1073](https://github.com/Automattic/amp-wp/issues/1073). Props westonruter, hellofromtonya, amedina, pbakaus, igrigorik, camelburrito.
 - Add ability to acknowledge and suppress/ignore specific validation errors. See [#1003](https://github.com/Automattic/amp-wp/issues/1003). Props westonruter.
-- Extend admin screen options to add `amp` theme support without any coding required. Toggle between classic, paired, and native. Includes options for whether sanitization should be done by default and whether tree shaking should always be allowed. See [#1199](https://github.com/Automattic/amp-wp/pull/1199). Props westonruter.
-- Add support for three core themes (Twenty Fifteen, Twenty Sixteen, Twenty Seventeen) so that they can be used out of the box with AMP theme support added without needing to create a child theme. See [#1074](https://github.com/Automattic/amp-wp/pull/1074). Props westonruter, DavidCramer, kienstra.
+- Extend admin screen options to add `amp` theme support without any coding required. Toggle between classic, paired, and native. Includes options for whether sanitization should be done by default and whether tree shaking should always be allowed. See [#1199](https://github.com/Automattic/amp-wp/pull/1199), [#1291](https://github.com/Automattic/amp-wp/pull/1291), [#1264](https://github.com/Automattic/amp-wp/issues/1264). Props westonruter, AdelDima.
+- Add an admin pointer for updated AMP settings screen for version 1.0. See [#1271](https://github.com/Automattic/amp-wp/pull/1271), [#1254](https://github.com/Automattic/amp-wp/issues/1254). Props kienstra.
+- Add support for three core themes (Twenty Fifteen, Twenty Sixteen, Twenty Seventeen) so that they can be used out of the box with AMP theme support added without needing to create a child theme. See [#1074](https://github.com/Automattic/amp-wp/pull/1074). Props westonruter, DavidCramer, kienstra, .
 - Add support for allowing a site subset to be native AMP. See [#1235](https://github.com/Automattic/amp-wp/pull/1235). Props westonruter.
 - Add AMP menu item to admin bar on frontend with indication of AMP validation status; accessing an AMP URL that has unaccepted validation errors will redirect to the non-AMP page and cause the AMP admin bar item to indicate the failure, along with a link to access the validation results. See [#1199](https://github.com/Automattic/amp-wp/pull/1199). Props westonruter.
 - Add dynamic handling of validation errors. See [#1093](https://github.com/Automattic/amp-wp/pull/1093), [#1063](https://github.com/Automattic/amp-wp/pull/1063), [#1087](https://github.com/Automattic/amp-wp/issues/1087). Props westonruter.
@@ -65,7 +66,9 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Fix handling of font stylesheets with non-HTTPS scheme or scheme-less URLs. See [#1077](https://github.com/Automattic/amp-wp/pull/1077). Props westonruter.
 - Fix issues in displaying native blocks. See [#1022](https://github.com/Automattic/amp-wp/pull/1022). Props miina.
 - Gutenberg: Add AMP Carousel for Gallery and AMP Lightbox features for Gallery and Image. See [#1121](https://github.com/Automattic/amp-wp/pull/1121), [#1065](https://github.com/Automattic/amp-wp/issues/1065), [#1187](https://github.com/Automattic/amp-wp/pull/1187). Props miina, westonruter.
+- Add "Enable AMP" toggle in Gutenberg editor. See [#1275](https://github.com/Automattic/amp-wp/pull/1275), [#1230](https://github.com/Automattic/amp-wp/issues/1230). Props kienstra.
 - Cache post processor response. See [#1156](https://github.com/Automattic/amp-wp/pull/1156), [#959](https://github.com/Automattic/amp-wp/issues/959). Props ThierryA.
+- Add preload links & resource hints, and optimize order of elements in head. See [#1295](https://github.com/Automattic/amp-wp/pull/1295). Props westonruter.
 - Automatically redirect to `?amp` from `/amp/` URLs when `amp` theme support is present. See [#1203](https://github.com/Automattic/amp-wp/pull/1203), [#1194](https://github.com/Automattic/amp-wp/pull/1194). Props westonruter.
 - Incorporate Server Timing API. See [#990](https://github.com/Automattic/amp-wp/issues/990). Props westonruter.
 - Add information about stylesheets included and excluded in `style[amp-custom]`. See [#1135](https://github.com/Automattic/amp-wp/pull/1135). Props westonruter.
@@ -74,19 +77,24 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Transform CSS selectors according to sanitizer HTML element to AMP component conversions. See [#1175](https://github.com/Automattic/amp-wp/pull/1175). Props miina, westonruter.
 - Ensure layout attributes are only allowed on supporting elements. See [#1075](https://github.com/Automattic/amp-wp/pull/1075). Props westonruter.
 - Correct the width attribute in `col` tags to the equivalent CSS rule. See [#1064](https://github.com/Automattic/amp-wp/pull/1064). Props amedina.
+- Ensure that video `source` elements use HTTPS. See [#1274](https://github.com/Automattic/amp-wp/pull/1274), [#976](https://github.com/Automattic/amp-wp/issues/976). Props hellofromtonya.
+- Preserve whitespace when serializing the DOM as HTML. See [#1309](https://github.com/Automattic/amp-wp/pull/1309), [#1304](https://github.com/Automattic/amp-wp/issues/1304). Props westonruter.
+- Fix reporting the removal of unrecognized elements. See [#1287](https://github.com/Automattic/amp-wp/pull/1287), [#1100](https://github.com/Automattic/amp-wp/issues/1100). Props hellofromtonya.
 - Remove space from `data: url()` in stylesheets. See [#1164](https://github.com/Automattic/amp-wp/pull/1164/), [#1089](https://github.com/Automattic/amp-wp/issues/1089). Props amedina, JonHendershot, westonruter, mehigh, davisshaver, Mte90.
 - Fix inconsistency between singular and plural. See [#1114](https://github.com/Automattic/amp-wp/pull/1114). Props garrett-eclipse.
 - Disable AMP admin menu option when the AMP Customizer is not enabled or theme support is enabled. See [#1080](https://github.com/Automattic/amp-wp/pull/1080). Props oscarssanchez.
 - Allow spaces around commas in value property lists. See [#1112](https://github.com/Automattic/amp-wp/pull/1112). Props westonruter.
 - Restore admin bar on AMP pages and improve AMP menu items. See [#1219](https://github.com/Automattic/amp-wp/pull/1219). Props westonruter.
 - Display admin notice if there's no persistent object caching. See [#1050](https://github.com/Automattic/amp-wp/pull/1050). Props oscarssanchez.
-- Add workaround to preserve CSS `calc()` functions. See [#1116](https://github.com/Automattic/amp-wp/pull/1116). Props westonruter.
+- Update PHP-CSS-Parser to use new calc() support. See [#1116](https://github.com/Automattic/amp-wp/pull/1116), [#1284](https://github.com/Automattic/amp-wp/pull/1284). Props westonruter.
+- Fix parsing CSS selectors which contain commas. See [#1286](https://github.com/Automattic/amp-wp/pull/1286). Props westonruter.
 - Add sanitizer to support `amp-o2-player`. See [#1202](https://github.com/Automattic/amp-wp/pull/1202). Props juanchaur1.
 - Add `Amp_Embed_Sanitizer`. See [#1128](https://github.com/Automattic/amp-wp/pull/1128). Props juanchaur1.
 - Add `AMP_Script_Sanitizer` to replace `noscript` elements with their contents. See [#1226](https://github.com/Automattic/amp-wp/pull/1226). Props westonruter.
 - Fix header image filtering and YouTube header video detection. See [#1208](https://github.com/Automattic/amp-wp/pull/1208). Props westonruter.
 - Improve support for Hulu & Imgur embeds. See [#1218](https://github.com/Automattic/amp-wp/pull/1218). Props miina.
-- Update spec generated from amphtml to file revision 642 (commit [3953b25](https://github.com/ampproject/amphtml/tree/3953b2513ac1a6e2e7da64911354f88e5fe42cfe)). See [#1172](https://github.com/Automattic/amp-wp/pull/1172). Props westonruter.
+- Update spec generated from amphtml to file revision 675 and AMP v1531357871900. See [#1312](https://github.com/Automattic/amp-wp/pull/1312). Props westonruter.
+- Opt-in to CORS mode for external font stylesheet links. See [#1289](https://github.com/Automattic/amp-wp/pull/1289). Props westonruter.
 - PHPCS fixes, including PHP DocBlocks and strict comparisons. See [#1002](https://github.com/Automattic/amp-wp/pull/1002). Props paulschreiber.
 - Add script to create built tag. See [#1209](https://github.com/Automattic/amp-wp/pull/1209). Props westonruter.
 - Fix handling of amp-bind attributes to ensure that `“>”` can appear inside attribute values. See [#1119](https://github.com/Automattic/amp-wp/pull/1119). Props westonruter.
@@ -104,8 +112,13 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Add WP-CLI script to test support for blocks. See [#845](https://github.com/Automattic/amp-wp/issues/845). Props kienstra.
 - Ensure translatable strings in blocks can actually be translated. See [#1173](https://github.com/Automattic/amp-wp/pull/1173). Props miina, swissspidy, westonruter.
 - Prevent `is_amp_endpoint()` from triggering notice when called on login, signup, or activate screens. See [#1250](https://github.com/Automattic/amp-wp/pull/1250). Props felixarntz.
+- Support extracting dimensions for single URLs. See [#793](https://github.com/Automattic/amp-wp/pull/793). Props mjangda, mdbitz.
+- Improve validation and presentation of analytics form. See [#1299](https://github.com/Automattic/amp-wp/pull/1299), [#1133](https://github.com/Automattic/amp-wp/issues/1133), [#1296](https://github.com/Automattic/amp-wp/pull/1296). Props westonruter, AdelDima.
+- Prevent validation of auto-drafts, including when merely accessing New Post screen. See [#1301](https://github.com/Automattic/amp-wp/pull/1301). Props westonruter.
 
 For a full list of the closed issues and merged pull requests in this release, see the [1.0 milestone](https://github.com/Automattic/amp-wp/milestone/7?closed=1).
+
+Contributors in this release, including design, development, testing, and project management: Adel Tahri (AdelDima), Alberto Medina (amedina), Claudio Sossi, Daniel Walmsley (gravityrail), David Cramer (DavidCramer), Felix Arntz (felixarntz), Garrett Hyder (garrett-eclipse), Joshua Wold (jwold), Juan Chaur (juanchaur1), Kevin Coleman (kevincoleman), Leo Postovoit (postphotos), Mackenzie Hartung (MackenzieHartung), Matthew Denton (mdbitz), Miina Sikk (miina), Mohammad Jangda (mjangda), Oscar Sánchez (oscarssanchez), Paul Schreiber (paulschreiber), Ryan Kienstra (kienstra), Thierry Muller (ThierryA), Tonya Mork (hellofromtonya), Weston Ruter (westonruter).
 
 = 0.7.2 (2018-06-27) =
 

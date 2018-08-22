@@ -494,7 +494,7 @@ class AMP_Invalid_URL_Post_Type {
 			),
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
 			sprintf(
-				/* translators: %s is the post count */
+				/* translators: %s: the post count. */
 				_nx(
 					'With New Errors <span class="count">(%s)</span>',
 					'With New Errors <span class="count">(%s)</span>',
@@ -517,7 +517,7 @@ class AMP_Invalid_URL_Post_Type {
 			),
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
-				/* translators: %s is the post count */
+				/* translators: %s: the post count. */
 				_nx(
 					'With Rejected Errors <span class="count">(%s)</span>',
 					'With Rejected Errors <span class="count">(%s)</span>',
@@ -540,7 +540,7 @@ class AMP_Invalid_URL_Post_Type {
 			),
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $current_status ? 'current' : '',
 			sprintf(
-				/* translators: %s is the post count */
+				/* translators: %s: the post count. */
 				_nx(
 					'With Accepted Errors <span class="count">(%s)</span>',
 					'With Accepted Errors <span class="count">(%s)</span>',
@@ -1259,7 +1259,7 @@ class AMP_Invalid_URL_Post_Type {
 										)
 									);
 									printf(
-										/* translators: %1$s is URL to invalid URL page, and %2$s is the count */
+										/* translators: 1: the URL to the invalid URL page, 2: number of invalid URLs. */
 										wp_kses_post( _n(
 											'There is at least <a href="%1$s">%2$s other URL</a> which has this validation error. Accepting or rejecting the error here will also apply to the other URL.',
 											'There are at least <a href="%1$s">%2$s other URLs</a> which have this validation error. Accepting or rejecting the error here will also apply to the other URLs.',
