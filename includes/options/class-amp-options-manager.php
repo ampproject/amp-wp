@@ -203,7 +203,7 @@ class AMP_Options_Manager {
 		// Handle the caching option.
 		$options['enable_response_caching'] = ! empty( $new_options['enable_response_caching'] );
 		if ( $options['enable_response_caching'] ) {
-			do_action( 'amp_reenable_response_cache' );
+			AMP_Theme_Support::reset_cache_miss_url_option();
 		}
 
 		return $options;

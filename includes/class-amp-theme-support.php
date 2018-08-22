@@ -156,8 +156,6 @@ class AMP_Theme_Support {
 		 * action to template_redirect--the wp action--is used instead.
 		 */
 		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
-
-		add_action( 'amp_reenable_response_cache', array( __CLASS__, 'reset_cache_miss_url_option' ) );
 	}
 
 	/**

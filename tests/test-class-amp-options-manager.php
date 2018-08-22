@@ -204,9 +204,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// Test re-enabling response cache works.
 		add_action( 'amp_reenable_response_cache', array( 'AMP_Theme_Support', 'reset_cache_miss_url_option' ) );
 		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
-		$times_reenable_fired = did_action( 'amp_reenable_response_cache' );
 		AMP_Options_Manager::update_option( 'enable_response_caching', true );
-		$this->assertEquals( $times_reenable_fired + 1, did_action( 'amp_reenable_response_cache' ) );
 		$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 		$this->assertNull( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
 	}
