@@ -88,7 +88,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_get_and_set_options() {
 		global $wp_settings_errors;
-
+		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
@@ -202,13 +202,15 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( $id, $entries );
 
 		// Test re-enabling response cache works.
-		wp_using_ext_object_cache( true ); // turn on external object cache flag.
-		add_action( 'amp_reenable_response_cache', array( 'AMP_Theme_Support', 'reset_cache_miss_url_option' ) );
 		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
 		AMP_Options_Manager::update_option( 'enable_response_caching', true );
 		$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 		$this->assertNull( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
-		wp_using_ext_object_cache( false ); // reset external object cache.
+		wp_using_ext_object_cache( false ); // turn off external object cache.
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
+		AMP_Options_Manager::update_option( 'enable_response_caching', true );
+		$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
+		$this->assertEquals( 'http://example.org/test-post', get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
 	}
 
 	/**
@@ -320,6 +322,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_render_cache_miss_notice() {
 		set_current_screen( 'toplevel_page_amp-options' );
+		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 
 		ob_start();
 		AMP_Options_Manager::render_cache_miss_notice();
@@ -337,5 +340,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		ob_start();
 		AMP_Options_Manager::render_cache_miss_notice();
 		$this->assertEmpty( ob_get_clean() );
+
+		wp_using_ext_object_cache( false ); // turn off external object cache flag.
 	}
 }

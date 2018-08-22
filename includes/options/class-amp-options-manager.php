@@ -80,6 +80,7 @@ class AMP_Options_Manager {
 		if ( empty( $options ) ) {
 			$options = array();
 		}
+		self::$defaults['enable_response_caching'] = wp_using_ext_object_cache();
 		return array_merge( self::$defaults, $options );
 	}
 

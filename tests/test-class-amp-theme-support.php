@@ -1561,6 +1561,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_post_processor_cache_effectiveness() {
 		$original_html = $this->get_original_html();
 		$args          = array( 'enable_response_caching' => true );
+		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test the response is not cached after exceeding the cache miss threshold.
@@ -1590,6 +1591,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
 		}
+
+		// Reset.
+		wp_using_ext_object_cache( false );
 	}
 
 	/**
