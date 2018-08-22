@@ -2,24 +2,14 @@
 This script is used to generate the 'class-amp-allowed-tags-generated.php'
 file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
 
-Follow the steps below to generate a new version of the allowed tags class:
+A bash script, amphtml-update.sh, is provided to automatically run this script.  To run the bash script, type:
 
-- Download a copy of the latet AMPHTML repository from github:
+`bash amphtml-update.sh`
 
-	git clone git@github.com:ampproject/amphtml.git
+from within a Linux environment such as VVV.
 
-- Copy this file into the repo's validator subdirectory:
-
-	cp amp_wp_build.py amphtml/validator
-
-- Run the file from the validator subdirectory:
-	cd amphtml/validator;python amp_wp_build.py
-
-- The class-amp-allowed-tags-generated.php will be generated at:
-	amphtml/validator/amp_wp/class-amp-allowed-tags-generated.php
-
-- copy this file into the amp-wp plugin:
-	cp amp_wp/class-amp-allowed-tags-generated.php /path/to/wordpress/wp-content/plugins/amp-wp/includes/sanitizers/
+See the Updating Allowed Tags and Attributes section of the Contributing guide
+https://github.com/Automattic/amp-wp/blob/develop/contributing.md#updating-allowed-tags-and-attributes.
 
 Then have fun sanitizing your AMP posts!
 """
