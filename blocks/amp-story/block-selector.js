@@ -17,6 +17,8 @@ const {
 	selectBlock
 } = dispatch( 'core/editor' );
 
+import LayerInserter from './layer-inserter';
+
 class BlockSelector extends Component {
 	render() {
 		if ( ! this.props.rootClientId ) {
@@ -61,6 +63,10 @@ class BlockSelector extends Component {
 			className += ' is-selected';
 		}
 
+		const inserterProps = {
+			rootClientId: this.props.rootClientId
+		};
+
 		links.push(
 			<li className={ className } key='page-selector'>
 				<Button onClick={ ( e ) => {
@@ -76,6 +82,7 @@ class BlockSelector extends Component {
 
 		return (
 			<ul className="editor-selectors">
+				<LayerInserter { ...inserterProps }/>
 				{ links }
 			</ul>
 		);
