@@ -220,26 +220,51 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		global $wp_settings_errors;
 		$wp_settings_errors = array(); // clear any errors before starting.
 		add_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		foreach ( get_post_types() as $post_type ) {
-			remove_post_type_support( $post_type, 'amp' );
-		}
-
 		register_post_type( 'foo', array(
 			'public' => true,
 			'label'  => 'Foo',
 		) );
-		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
 		AMP_Post_Type_Support::add_post_type_support();
+
+		// Test when 'all_templates_supported' is selected.
+		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
-		// Activation error.
-		remove_post_type_support( 'foo', amp_get_slug() );
+		// Test when 'all_templates_supported' is not selected.
+		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		foreach ( get_post_types() as $post_type ) {
+			if ( 'foo' !== $post_type ) {
+				remove_post_type_support( $post_type, amp_get_slug() );
+			}
+		}
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
-		$errors = get_settings_errors();
-		$this->assertCount( 1, $errors );
-		$error = current( $errors );
+		$this->assertEmpty( get_settings_errors() );
+
+		// Test when 'all_templates_supported' is not selected, and theme support is also disabled.
+		add_post_type_support( 'post', amp_get_slug() );
+		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
+		AMP_Options_Manager::check_supported_post_type_update_errors();
+		$settings_errors    = get_settings_errors();
+		$wp_settings_errors = array();
+		$this->assertCount( 1, $settings_errors );
+		$this->assertEquals( 'foo_deactivation_error', $settings_errors[0]['code'] );
+
+		// Activation error.
+		remove_post_type_support( 'post', amp_get_slug() );
+		remove_post_type_support( 'foo', amp_get_slug() );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
+		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		AMP_Options_Manager::check_supported_post_type_update_errors();
+		$settings_errors = get_settings_errors();
+		$this->assertCount( 1, $settings_errors );
+		$error = current( $settings_errors );
 		$this->assertEquals( 'foo_activation_error', $error['code'] );
 		$wp_settings_errors = array();
 

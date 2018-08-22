@@ -445,6 +445,13 @@ abstract class AMP_Base_Sanitizer {
 			if ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) {
 				$error['text'] = $node->textContent;
 			}
+
+			// Suppress 'ver' param from enqueued scripts and styles.
+			if ( 'script' === $node->nodeName && isset( $error['node_attributes']['src'] ) && false !== strpos( $error['node_attributes']['src'], 'ver=' ) ) {
+				$error['node_attributes']['src'] = add_query_arg( 'ver', '__normalized__', $error['node_attributes']['src'] );
+			} elseif ( 'link' === $node->nodeName && isset( $error['node_attributes']['href'] ) && false !== strpos( $error['node_attributes']['href'], 'ver=' ) ) {
+				$error['node_attributes']['href'] = add_query_arg( 'ver', '__normalized__', $error['node_attributes']['href'] );
+			}
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $error['code'] ) ) {
 				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;

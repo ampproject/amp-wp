@@ -503,13 +503,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $allowed_extensions ) ) {
 			$pattern = sprintf( '/\.(%s)$/i', implode( '|', $allowed_extensions ) );
 			if ( ! preg_match( $pattern, $url ) ) {
-				/* translators: %s is the file URL */
+				/* translators: %s: the file URL. */
 				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
 			}
 		}
 
 		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
-			/* translators: %s is file URL */
+			/* translators: %s: the file URL */
 			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $url_host ) );
 		}
 
@@ -527,11 +527,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! $file_path || false !== strpos( $file_path, '../' ) || false !== strpos( $file_path, '..\\' ) ) {
-			/* translators: %s is file URL */
+			/* translators: %s: the file URL. */
 			return new WP_Error( 'file_path_not_allowed', sprintf( __( 'Disallowed URL filesystem path for %s.', 'amp' ), $url ) );
 		}
 		if ( ! file_exists( $base_path . $file_path ) ) {
-			/* translators: %s is file URL */
+			/* translators: %s: the file URL. */
 			return new WP_Error( 'file_path_not_found', sprintf( __( 'Unable to locate filesystem path for %s.', 'amp' ), $url ) );
 		}
 

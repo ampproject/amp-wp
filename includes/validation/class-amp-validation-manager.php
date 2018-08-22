@@ -1728,7 +1728,7 @@ class AMP_Validation_Manager {
 		);
 
 		$data = wp_json_encode( array(
-			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ), // @todo POT file.
+			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ),
 			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
 			'isCanonical'          => amp_is_canonical(),
 		) );
