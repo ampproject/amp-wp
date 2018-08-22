@@ -79,6 +79,7 @@ class BlockSelector extends Component {
 			</li>
 		);
 
+		// @todo Creating a custom inserter since the default inserter doesn't allow taking the root client ID dynamically. Change if that becomes available.
 		return (
 			<ul className="editor-selectors">
 				<LayerInserter { ...inserterProps }/>

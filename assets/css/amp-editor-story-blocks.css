@@ -12,6 +12,9 @@ div[data-type="amp/amp-story-page"] {
 		margin: 0;
 		padding: 0;
 	}
+	div[data-type="amp/amp-story-page"] .editor-inserter__popover:not(.is-mobile) > .components-popover__content {
+		height: 200px;
+	}
 }
 
 div[data-type="amp/amp-story-page"] * {
