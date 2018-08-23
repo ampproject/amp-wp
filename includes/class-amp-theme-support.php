@@ -2013,9 +2013,7 @@ class AMP_Theme_Support {
 	 */
 	private static function check_for_cache_misses() {
 		// If the cache miss threshold is exceeded, return true.
-		$cache_miss_url     = get_option( self::CACHE_MISS_URL_OPTION, false );
-		$exceeded_threshold = ! empty( $cache_miss_url );
-		if ( $exceeded_threshold ) {
+		if ( self::exceeded_cache_miss_threshold() ) {
 			return array( true, null );
 		}
 
@@ -2048,6 +2046,18 @@ class AMP_Theme_Support {
 		if ( get_option( self::CACHE_MISS_URL_OPTION ) ) {
 			delete_option( self::CACHE_MISS_URL_OPTION );
 		}
+	}
+
+	/**
+	 * Checks if cache miss threshold has been exceeded.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool
+	 */
+	public static function exceeded_cache_miss_threshold() {
+		$url = get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false );
+		return ! empty( $url );
 	}
 
 	/**

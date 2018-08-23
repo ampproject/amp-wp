@@ -318,25 +318,68 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	/**
 	 * Test for render_cache_miss_notice()
 	 *
+	 * @covers AMP_Options_Manager::show_response_cache_disabled_notice()
+	 */
+	public function test_show_response_cache_disabled_notice() {
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		wp_using_ext_object_cache( true ); // turn on external object cache flag.
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		AMP_Options_Manager::update_option( 'enable_response_caching', false );
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
+		$this->assertTrue( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		// Test if external object cache is now disabled.
+		wp_using_ext_object_cache( false );
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+	}
+
+	/**
+	 * Test for render_cache_miss_notice()
+	 *
 	 * @covers AMP_Options_Manager::render_cache_miss_notice()
 	 */
 	public function test_render_cache_miss_notice() {
 		set_current_screen( 'toplevel_page_amp-options' );
 		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 
+		// Test default state.
 		ob_start();
 		AMP_Options_Manager::render_cache_miss_notice();
 		$this->assertEmpty( ob_get_clean() );
 
+		// Test when disabled but not exceeded.
 		AMP_Options_Manager::update_option( 'enable_response_caching', false );
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// Test when disabled and exceeded, but external object cache is disabled.
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
+		wp_using_ext_object_cache( false ); // turn off external object cache flag.
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// Test when disabled, exceeded, and external object cache is enabled.
+		wp_using_ext_object_cache( true ); // turn off external object cache flag.
 		ob_start();
 		AMP_Options_Manager::render_cache_miss_notice();
 		$notice = ob_get_clean();
 		$this->assertContains( 'The AMP plugin&#039;s response cache disabled due to detecting randomly generated content.', $notice );
 		$this->assertContains( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache', $notice );
 
-		set_current_screen( 'edit.php' );
+		// Test when enabled but not exceeded.
+		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
 
+		// Test when on a different screen.
+		set_current_screen( 'edit.php' );
 		ob_start();
 		AMP_Options_Manager::render_cache_miss_notice();
 		$this->assertEmpty( ob_get_clean() );

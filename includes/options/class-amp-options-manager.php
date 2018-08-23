@@ -349,7 +349,7 @@ class AMP_Options_Manager {
 			return;
 		}
 
-		if ( self::get_option( 'enable_response_caching' ) ) {
+		if ( ! self::show_response_cache_disabled_notice() ) {
 			return;
 		}
 
@@ -358,6 +358,23 @@ class AMP_Options_Manager {
 			esc_html__( "The AMP plugin's response cache disabled due to detecting randomly generated content.", 'amp' ),
 			esc_url( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache' ),
 			esc_html__( 'More details', 'amp' )
+		);
+	}
+
+	/**
+	 * Show the response cache disabled notice.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool
+	 */
+	public static function show_response_cache_disabled_notice() {
+		return (
+			wp_using_ext_object_cache()
+			&&
+			! self::get_option( 'enable_response_caching' )
+			&&
+			AMP_Theme_Support::exceeded_cache_miss_threshold()
 		);
 	}
 }

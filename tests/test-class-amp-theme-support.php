@@ -1413,6 +1413,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test exceeded_cache_miss_threshold
+	 *
+	 * @covers AMP_Theme_Support::exceeded_cache_miss_threshold()
+	 */
+	public function test_exceeded_cache_miss_threshold() {
+		$this->assertFalse( AMP_Theme_Support::exceeded_cache_miss_threshold() );
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
+		$this->assertTrue( AMP_Theme_Support::exceeded_cache_miss_threshold() );
+	}
+
+	/**
 	 * Test prepare_response.
 	 *
 	 * @global WP_Widget_Factory $wp_widget_factory
