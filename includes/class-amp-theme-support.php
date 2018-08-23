@@ -45,7 +45,7 @@ class AMP_Theme_Support {
 	 *
 	 * @var int
 	 */
-	const CACHE_MISS_THRESHOLD = 3;
+	const CACHE_MISS_THRESHOLD = 20;
 
 	/**
 	 * Cache miss URL option name.
