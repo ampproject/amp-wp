@@ -763,6 +763,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-date-picker' ),
 			),
 
+			'amp_date_picker_range' => array(
+				'<amp-date-picker type="range" minimum-nights="2" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
+				null, // No change.
+				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
+			),
+
 			'amp-img-layout-allowed' => array(
 				implode( '', array(
 					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
@@ -847,6 +853,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-yotpo width="550" height="700" layout="responsive" data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5" data-widget-type="MainWidget" data-product-id="9408616206" data-name="hockey skates" data-url="https://ranabram.myshopify.com/products/hockey-skates" data-image-url="https://ichef.bbci.co.uk/news/320/media/images/83351000/jpg/_83351965_explorer273lincolnshirewoldssouthpicturebynicholassilkstone.jpg" data-descriptipn="skates" data-yotpo-element-id="1"></amp-yotpo>',
 				null,
 				array( 'amp-yotpo' ),
+			),
+
+			'amp-embedly' => array(
+				'<amp-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a" layout="nodisplay"></amp-embedly-key><amp-embedly-card data-url="https://twitter.com/AMPhtml/status/986750295077040128" layout="responsive" width="150" height="80" data-card-theme="dark" data-card-controls="0"></amp-embedly-card>',
+				null,
+				array( 'amp-embedly-card' ),
+			),
+
+			'amp-lightbox' => array(
+				'<amp-lightbox id="my-lightbox" animate-in="fly-in-top" layout="nodisplay"><div class="lightbox" on="tap:my-lightbox.close" role="button" tabindex="0"><h1>Hello World!</h1></div></amp-lightbox>',
+				null,
+				array( 'amp-lightbox' ),
+			),
+
+			'amp-fom-messages' => array(
+				'<form action-xhr="https://example.com/" method="post"><fieldset><input type="text" name="firstName"></fieldset><div verify-error=""><template type="amp-mustache">There is a mistake in the form!{{#verifyErrors}}{{message}}{{/verifyErrors}}</template></div><div submitting=""><template type="amp-mustache">Form submitting... Thank you for waiting {{name}}.</template></div><div submit-success=""><template type="amp-mustache">Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}to confirm! After that we\'ll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.</template></div><div submit-error><template type="amp-mustache">Oops! {{name}}, {{message}}.</template></div></form>',
+				null,
+				array( 'amp-form', 'amp-mustache' ),
 			),
 		);
 	}

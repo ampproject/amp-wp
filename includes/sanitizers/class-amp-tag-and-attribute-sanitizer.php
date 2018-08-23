@@ -208,7 +208,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
-		return array_fill_keys( $this->script_components, true );
+		return array_fill_keys( array_unique( $this->script_components ), true );
 	}
 
 	/**
