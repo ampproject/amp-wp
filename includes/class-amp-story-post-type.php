@@ -147,6 +147,19 @@ class AMP_Story_Post_Type {
 			AMP__VERSION
 		);
 
+		// @todo Name the script better to distinguish.
+		wp_enqueue_script(
+			'amp-story-editor-blocks',
+			amp_get_asset_url( 'js/amp-story-editor-blocks.js' ),
+			array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+			AMP__VERSION
+		);
+
+		wp_add_inline_script(
+			'amp-story-editor-blocks',
+			'ampStoryEditorBlocks.boot();'
+		);
+
 		wp_enqueue_script(
 			'amp-editor-story-blocks-build',
 			amp_get_asset_url( 'js/amp-story-blocks-compiled.js' ),

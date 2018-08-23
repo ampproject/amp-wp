@@ -58,9 +58,11 @@ export default registerBlockType(
 				source: 'attribute',
 				selector: 'amp-story-grid-layer',
 				attribute: 'template',
-				default: 'fill'
+				default: 'horizontal'
 			}
 		},
+
+		inserter: false,
 
 		/*
 		 * <amp-story-grid-layer>:
@@ -80,12 +82,12 @@ export default registerBlockType(
 						value={ props.attributes.template }
 						options={ [
 							{
-								value: 'fill',
-								label: __( 'Fill', 'amp' )
-							},
-							{
 								value: 'horizontal',
 								label: __( 'Horizontal', 'amp' )
+							},
+							{
+								value: 'fill',
+								label: __( 'Fill', 'amp' )
 							},
 							{
 								value: 'thirds',

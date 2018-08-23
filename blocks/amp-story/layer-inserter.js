@@ -67,7 +67,7 @@ class LayerInserter extends Component {
 		return (
 			<Dropdown
 				className="editor-inserter"
-				contentClassName="editor-inserter__popover"
+				contentClassName="editor-inserter__popover editor-inserter__amp"
 				onToggle={ this.onToggle }
 				expandOnMobile
 				renderToggle={ ( { onToggle, isOpen } ) => (

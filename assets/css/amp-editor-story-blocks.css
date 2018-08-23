@@ -4,7 +4,7 @@ div[data-type="amp/amp-story-page"] {
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
 	padding: 0;
-	margin: 0 auto 30px;
+	margin: 60px auto 0;
 }
 
 @media (min-width: 600px) {
@@ -12,9 +12,10 @@ div[data-type="amp/amp-story-page"] {
 		margin: 0;
 		padding: 0;
 	}
-	div[data-type="amp/amp-story-page"] .editor-inserter__popover:not(.is-mobile) > .components-popover__content {
-		height: 200px;
-	}
+}
+
+.components-popover.editor-inserter__amp .components-popover__content {
+	height: 200px;
 }
 
 div[data-type="amp/amp-story-page"] * {
@@ -52,6 +53,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	position: absolute;
 	height: 100%;
 	width: 100%;
+}
+
+.amp-grid-template .editor-block-list__block {
+	overflow: hidden;
 }
 
 .amp-grid-template .editor-block-list__layout:first-of-type {
@@ -93,6 +98,18 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 .amp-grid-template-thirds .editor-block-list__layout:first-of-type {
 	grid-template-rows: 1fr 1fr 1fr;
 	grid-template-areas: "upper-third" "middle-third" "lower-third";
+}
+
+div[data-amp-position="upper-third"] {
+	grid-area: upper-third / lower-third / lower-third / lower-third;
+}
+
+div[data-amp-position="middle-third"] {
+	grid-area: middle-third / lower-third / lower-third / lower-third;
+}
+
+div[data-amp-position="lower-third"] {
+	grid-area: lower-third / lower-third / lower-third / lower-third;
 }
 
 
