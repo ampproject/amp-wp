@@ -13,8 +13,8 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 699;
-	private static $minimum_validator_revision_required = 346;
+	private static $spec_file_revision = 712;
+	private static $minimum_validator_revision_required = 348;
 
 	private static $allowed_tags = array(
 		'a' => array(
@@ -118,6 +118,7 @@ class AMP_Allowed_Tags_Generated {
 							'true',
 						),
 					),
+					'clearcolor' => array(),
 					'enablezoom' => array(
 						'value' => array(
 							'false',
@@ -1490,6 +1491,9 @@ class AMP_Allowed_Tags_Generated {
 					'max' => array(),
 					'media' => array(),
 					'min' => array(),
+					'minimum-nights' => array(
+						'value_regex' => '[0-9]+',
+					),
 					'mode' => array(
 						'value_casei' => array(
 							'static',
@@ -1571,6 +1575,9 @@ class AMP_Allowed_Tags_Generated {
 					'max' => array(),
 					'media' => array(),
 					'min' => array(),
+					'minimum-nights' => array(
+						'value_regex' => '[0-9]+',
+					),
 					'mode' => array(
 						'mandatory' => true,
 						'value_casei' => array(
@@ -2111,6 +2118,8 @@ class AMP_Allowed_Tags_Generated {
 		'amp-google-document-embed' => array(
 			array(
 				'attr_spec_list' => array(
+					'[src]' => array(),
+					'[title]' => array(),
 					'media' => array(),
 					'noloading' => array(
 						'value' => array(
@@ -2651,6 +2660,8 @@ class AMP_Allowed_Tags_Generated {
 					'reset-on-refresh' => array(
 						'value' => array(
 							'',
+							'always',
+							'fetch',
 						),
 					),
 					'single-item' => array(),
@@ -2747,9 +2758,21 @@ class AMP_Allowed_Tags_Generated {
 		),
 		'amp-next-page' => array(
 			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-next-page',
+					),
+					'spec_name' => 'amp-next-page with inline config',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-next-page',
+					'unique' => true,
+				),
+			),
+			array(
 				'attr_spec_list' => array(
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
 						'value_url' => array(
 							'allow_relative' => false,
 							'protocol' => array(
@@ -2762,6 +2785,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-next-page',
 					),
+					'spec_name' => 'amp-next-page with src attribute',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-next-page',
 					'unique' => true,
 				),
@@ -4832,14 +4856,55 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'align' => array(),
+					'verify-error' => array(
+						'mandatory' => true,
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'form',
+					'spec_name' => 'FORM DIV [verify-error]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(),
+					'template' => array(
+						'mandatory' => true,
+					),
+					'verify-error' => array(
+						'mandatory' => true,
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'form',
+					'spec_name' => 'FORM DIV [verify-error][template]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(),
 					'submitting' => array(
-						'dispatch_key' => 1,
 						'mandatory' => true,
 					),
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'form',
 					'spec_name' => 'FORM DIV [submitting]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(),
+					'submitting' => array(
+						'mandatory' => true,
+					),
+					'template' => array(
+						'mandatory' => true,
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'form',
+					'spec_name' => 'FORM DIV [submitting][template]',
 				),
 			),
 			array(
@@ -4894,17 +4959,6 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'form',
 					'spec_name' => 'FORM DIV [submit-error][template]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'separator' => array(
-						'mandatory' => true,
-					),
-				),
-				'tag_spec' => array(
-					'mandatory_parent' => 'amp-next-page',
-					'spec_name' => 'AMP-NEXT-PAGE > DIV [separator]',
 				),
 			),
 		),
@@ -10338,11 +10392,15 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
+						'deprecated_version' => array(
+							'0.1',
+						),
 						'is_custom_template' => true,
 						'name' => 'amp-mustache',
 						'requires_usage' => 2,
 						'version' => array(
 							'0.1',
+							'0.2',
 							'latest',
 						),
 					),
@@ -12150,8 +12208,10 @@ class AMP_Allowed_Tags_Generated {
 						'template',
 						'amp-date-picker',
 						'amp-story-auto-ads',
-						'form > div [submit-success][template]',
-						'form > div [submit-error][template]',
+						'form div [submit-success][template]',
+						'form div [submit-error][template]',
+						'form div [submitting][template]',
+						'form div [verify-error][template]',
 					),
 					'requires_extension' => array(
 						'amp-mustache',
@@ -12161,6 +12221,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'type' => array(
+						'dispatch_key' => 3,
 						'mandatory' => true,
 						'value' => array(
 							'amp-mustache',
