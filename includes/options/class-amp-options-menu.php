@@ -415,18 +415,18 @@ class AMP_Options_Menu {
 		<fieldset>
 			<?php if ( AMP_Options_Manager::show_response_cache_disabled_notice() ) : ?>
 				<div class="notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'The response cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
-					<p><?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s response cache was automatically disabled.', 'amp' ); ?>
-						<a href="<?php echo esc_url( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache' ); ?>"><?php esc_html_e( 'More details are available here.', 'amp' ); ?></a></p>
+					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
+					<p><?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s post-processor cache was automatically disabled.', 'amp' ); ?>
+						<a href="<?php echo esc_url( 'https://github.com/Automattic/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
 				</div>
 			<?php endif; ?>
 			<p>
 				<label for="enable_response_caching">
 					<input id="enable_response_caching" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_response_caching]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'enable_response_caching' ) ); ?>>
-					<?php esc_html_e( 'Enable response caching.', 'amp' ); ?>
+					<?php esc_html_e( 'Enable post-processor caching.', 'amp' ); ?>
 				</label>
 			</p>
-			<p class="description"><?php esc_html_e( 'This will enable response caching to speed up processing an AMP web page.', 'amp' ); ?></p>
+			<p class="description"><?php esc_html_e( 'This will enable post-processor caching to speed up processing an AMP response after WordPress renders a template.', 'amp' ); ?></p>
 		</fieldset>
 		<?php
 	}

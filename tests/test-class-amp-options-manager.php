@@ -369,8 +369,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		ob_start();
 		AMP_Options_Manager::render_cache_miss_notice();
 		$notice = ob_get_clean();
-		$this->assertContains( 'The AMP plugin&#039;s response cache disabled due to detecting randomly generated content.', $notice );
-		$this->assertContains( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache', $notice );
+		$this->assertContains( '<div class="notice notice-warning is-dismissible">', $notice );
 
 		// Test when enabled but not exceeded.
 		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );

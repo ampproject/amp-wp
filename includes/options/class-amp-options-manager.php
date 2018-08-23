@@ -355,8 +355,8 @@ class AMP_Options_Manager {
 
 		printf(
 			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
-			esc_html__( "The AMP plugin's response cache disabled due to detecting randomly generated content.", 'amp' ),
-			esc_url( 'https://github.com/Automattic/amp-wp/wiki/Response-cache#automatically-disabling-of-the-response-cache' ),
+			esc_html__( "The AMP plugin's post-processor cache disabled due to the detection of highly-variable content.", 'amp' ),
+			esc_url( 'https://github.com/Automattic/amp-wp/wiki/Post-Processor-Cache' ),
 			esc_html__( 'More details', 'amp' )
 		);
 	}
