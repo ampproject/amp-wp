@@ -84,10 +84,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Options_Manager::get_option()
 	 * @covers AMP_Options_Manager::update_option()
 	 * @covers AMP_Options_Manager::validate_options()
+	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
 	 */
 	public function test_get_and_set_options() {
 		global $wp_settings_errors;
-
+		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
@@ -100,12 +101,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'disable_admin_bar'       => false,
 				'all_templates_supported' => true,
 				'supported_templates'     => array( 'is_singular' ),
+				'enable_response_caching' => true,
 			),
 			AMP_Options_Manager::get_options()
 		);
 		$this->assertSame( false, AMP_Options_Manager::get_option( 'foo' ) );
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
-
 		// Test supported_post_types validation.
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'page', 'attachment' ) );
 		$this->assertSame(
@@ -199,6 +200,17 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$entries = AMP_Options_Manager::get_option( 'analytics' );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
+
+		// Test re-enabling response cache works.
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
+		AMP_Options_Manager::update_option( 'enable_response_caching', true );
+		$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
+		$this->assertNull( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
+		wp_using_ext_object_cache( false ); // turn off external object cache.
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
+		AMP_Options_Manager::update_option( 'enable_response_caching', true );
+		$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
+		$this->assertEquals( 'http://example.org/test-post', get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
 	}
 
 	/**
@@ -208,6 +220,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_check_supported_post_type_update_errors() {
 		global $wp_settings_errors;
+		$wp_settings_errors = array(); // clear any errors before starting.
 		add_theme_support( 'amp' );
 		register_post_type( 'foo', array(
 			'public' => true,
@@ -300,5 +313,76 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertNotContains( $text, ob_get_clean() );
 
 		wp_using_ext_object_cache( false );
+	}
+
+	/**
+	 * Test for render_cache_miss_notice()
+	 *
+	 * @covers AMP_Options_Manager::show_response_cache_disabled_notice()
+	 */
+	public function test_show_response_cache_disabled_notice() {
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		wp_using_ext_object_cache( true ); // turn on external object cache flag.
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		AMP_Options_Manager::update_option( 'enable_response_caching', false );
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
+		$this->assertTrue( AMP_Options_Manager::show_response_cache_disabled_notice() );
+
+		// Test if external object cache is now disabled.
+		wp_using_ext_object_cache( false );
+		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
+	}
+
+	/**
+	 * Test for render_cache_miss_notice()
+	 *
+	 * @covers AMP_Options_Manager::render_cache_miss_notice()
+	 */
+	public function test_render_cache_miss_notice() {
+		set_current_screen( 'toplevel_page_amp-options' );
+		wp_using_ext_object_cache( true ); // turn on external object cache flag.
+
+		// Test default state.
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// Test when disabled but not exceeded.
+		AMP_Options_Manager::update_option( 'enable_response_caching', false );
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// Test when disabled and exceeded, but external object cache is disabled.
+		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
+		wp_using_ext_object_cache( false ); // turn off external object cache flag.
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// Test when disabled, exceeded, and external object cache is enabled.
+		wp_using_ext_object_cache( true ); // turn off external object cache flag.
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$notice = ob_get_clean();
+		$this->assertContains( '<div class="notice notice-warning is-dismissible">', $notice );
+
+		// Test when enabled but not exceeded.
+		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// Test when on a different screen.
+		set_current_screen( 'edit.php' );
+		ob_start();
+		AMP_Options_Manager::render_cache_miss_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		wp_using_ext_object_cache( false ); // turn off external object cache flag.
 	}
 }

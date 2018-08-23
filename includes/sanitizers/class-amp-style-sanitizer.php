@@ -578,7 +578,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$stylesheet = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
-			'property_whitelist' => $cdata_spec['css_spec']['allowed_declarations'],
+			'property_whitelist' => $cdata_spec['css_spec']['declaration'],
 			'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
 		) );
 
@@ -694,7 +694,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$stylesheet = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
-			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 			'stylesheet_url'     => $href,
 			'stylesheet_path'    => $css_file_path,
 		) );
@@ -1660,7 +1660,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$stylesheet = $this->process_stylesheet( $rule, array(
 			'allowed_at_rules'   => array(),
-			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['allowed_declarations'],
+			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 		) );
 
 		$element->removeAttribute( 'style' );
