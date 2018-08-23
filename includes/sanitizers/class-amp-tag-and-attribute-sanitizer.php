@@ -208,7 +208,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
-		return array_fill_keys( $this->script_components, true );
+		return array_fill_keys( array_unique( $this->script_components ), true );
 	}
 
 	/**
@@ -326,11 +326,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						AMP_Rule_Spec::MANDATORY => true,
 					);
 
+					$versions = array_unique( array_merge(
+						isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : array(),
+						isset( $extension_spec['version'] ) ? $extension_spec['version'] : array()
+					) );
+
 					$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
 						AMP_Rule_Spec::VALUE_REGEX => implode( '', array(
 							'^',
 							preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ),
-							'(' . implode( '|', $extension_spec['allowed_versions'] ) . ')',
+							'(' . implode( '|', $versions ) . ')',
 							'\.js$',
 						) ),
 					);
@@ -542,6 +547,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
 				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
+			}
+		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
+			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';
+			if ( ! preg_match( $delimiter . $cdata_spec['cdata_regex'] . $delimiter . 'u', $element->textContent ) ) {
+				return new WP_Error( 'cdata_regex' );
 			}
 		}
 		return true;
@@ -1045,33 +1055,43 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * This takes into account boolean attributes where value can match name (e.g. selected="selected").
 	 *
 	 * @since 0.7.0
+	 * @since 1.0.0 The spec value is now an array.
 	 *
-	 * @param string $attr_name  Attribute name.
-	 * @param string $attr_value Attribute value.
-	 * @param string $spec_value Attribute spec value.
+	 * @param string       $attr_name   Attribute name.
+	 * @param string       $attr_value  Attribute value.
+	 * @param string|array $spec_values Attribute spec value(s).
 	 * @return bool Is value valid.
 	 */
-	private function check_matching_attribute_value( $attr_name, $attr_value, $spec_value ) {
-		if ( $spec_value === $attr_value ) {
-			return true;
+	private function check_matching_attribute_value( $attr_name, $attr_value, $spec_values ) {
+		if ( is_string( $spec_values ) ) {
+			$spec_values = (array) $spec_values;
 		}
+		foreach ( $spec_values as $spec_value ) {
+			if ( $spec_value === $attr_value ) {
+				return true;
+			}
 
-		// Check for boolean attribute.
-		return (
-			'' === $spec_value
-			&&
-			in_array( $attr_name, AMP_Rule_Spec::$boolean_attributes, true )
-			&&
-			strtolower( $attr_value ) === strtolower( $attr_name )
-		);
+			// Check for boolean attribute.
+			$is_bool_match = (
+				'' === $spec_value
+				&&
+				in_array( $attr_name, AMP_Rule_Spec::$boolean_attributes, true )
+				&&
+				strtolower( $attr_value ) === strtolower( $attr_name )
+			);
+			if ( $is_bool_match ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * Check if attribute has a value rule determine if its value matches ignoring case.
 	 *
-	 * @param DOMElement       $node           Node.
-	 * @param string           $attr_name      Attribute name.
-	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
+	 * @param DOMElement   $node           Node.
+	 * @param string       $attr_name      Attribute name.
+	 * @param array|string $attr_spec_rule Attribute spec rule.
 	 *
 	 * @return string:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
@@ -1080,17 +1100,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) {
-		/**
-		 * Check 'value_casei' - case insensitive
-		 */
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) ) {
-			$rule_value = strtolower( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] );
+		if ( ! isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) ) {
+			return AMP_Rule_Spec::NOT_APPLICABLE;
+		}
+
+		$result      = AMP_Rule_Spec::NOT_APPLICABLE;
+		$rule_values = (array) $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ];
+		foreach ( $rule_values as $rule_value ) {
+			$rule_value = strtolower( $rule_value );
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value = strtolower( $node->getAttribute( $attr_name ) );
 				if ( $attr_value === (string) $rule_value ) {
 					return AMP_Rule_Spec::PASS;
 				} else {
-					return AMP_Rule_Spec::FAIL;
+					$result = AMP_Rule_Spec::FAIL;
 				}
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
@@ -1099,13 +1122,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						if ( $attr_value === (string) $rule_value ) {
 							return AMP_Rule_Spec::PASS;
 						} else {
-							return AMP_Rule_Spec::FAIL;
+							$result = AMP_Rule_Spec::FAIL;
 						}
 					}
 				}
 			}
 		}
-		return AMP_Rule_Spec::NOT_APPLICABLE;
+		return $result;
 	}
 
 	/**
