@@ -426,8 +426,7 @@ class AMP_Options_Menu {
 					<?php esc_html_e( 'Enable response caching.', 'amp' ); ?>
 				</label>
 			</p>
-			<p class="description">
-			</p>
+			<p class="description"><?php esc_html_e( 'This will enable response caching to speed up processing an AMP web page.', 'amp' ); ?></p>
 		</fieldset>
 		<?php
 	}
