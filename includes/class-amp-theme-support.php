@@ -2056,7 +2056,7 @@ class AMP_Theme_Support {
 	 * @return bool
 	 */
 	public static function exceeded_cache_miss_threshold() {
-		$url = get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false );
+		$url = get_option( self::CACHE_MISS_URL_OPTION, false );
 		return ! empty( $url );
 	}
 
