@@ -181,14 +181,24 @@ class AMP_CLI {
 			self::$force_crawl_urls = true;
 		}
 
-		if ( 'disabled' === AMP_Options_Manager::get_option( 'theme_support' ) && ! self::$force_crawl_urls ) {
-			WP_CLI::error(
-				sprintf(
-					/* translators: %s is the flag to force validation */
-					__( 'The current template mode is Classic, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.', 'amp' ),
-					self::FLAG_NAME_FORCE_VALIDATION
-				)
-			);
+		if ( ! current_theme_supports( 'amp' ) ) {
+			if ( self::$force_crawl_urls ) {
+				/**
+				 * There is no theme support added programatically or via options.
+				 * So the validation taxonomy and post type would not normally be registered.
+				 * Register them here in order to use them to crawl the site.
+				 */
+				AMP_Validation_Error_Taxonomy::register();
+				AMP_Invalid_URL_Post_Type::register();
+			} else {
+				WP_CLI::error(
+					sprintf(
+						/* translators: %s is the flag to force validation */
+						__( 'The current template mode is Classic, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.', 'amp' ),
+						self::FLAG_NAME_FORCE_VALIDATION
+					)
+				);
+			}
 		}
 
 		$number_urls_to_crawl = self::count_urls_to_validate();
@@ -469,7 +479,7 @@ class AMP_CLI {
 	}
 
 	/**
-	 * Gets a search page URLs, like https://example.com/?s=example.
+	 * Gets a single search page URL, like https://example.com/?s=example.
 	 *
 	 * @return string|null An example search page, or null.
 	 */
@@ -482,7 +492,7 @@ class AMP_CLI {
 	}
 
 	/**
-	 * Gets a date page URL, like https://example.com/?year=2018.
+	 * Gets a single date page URL, like https://example.com/?year=2018.
 	 *
 	 * @return string|null An example search page, or null.
 	 */

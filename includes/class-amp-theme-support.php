@@ -204,6 +204,8 @@ class AMP_Theme_Support {
 				'paired' => ( 'paired' === $theme_support_option ),
 			) );
 			self::$support_added_via_option = true;
+		} elseif ( isset( $_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ], $_GET[ AMP_CLI::FORCE_VALIDATION_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+			add_theme_support( 'amp' );
 		}
 	}
 
