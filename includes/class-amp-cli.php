@@ -16,14 +16,6 @@
 class AMP_CLI {
 
 	/**
-	 * The WP-CLI command to validate the site.
-	 * To use this, run: wp amp validate-site.
-	 *
-	 * @var string
-	 */
-	const WP_CLI_COMMAND = 'amp validate-site';
-
-	/**
 	 * The WP-CLI flag to force validation.
 	 *
 	 * By default, the WP-CLI command does not validate templates that the user has opted-out of.
@@ -32,7 +24,7 @@ class AMP_CLI {
 	 *
 	 * @var string
 	 */
-	const FLAG_NAME_FORCE_VALIDATION = 'force-validation';
+	const FLAG_NAME_FORCE_VALIDATION = 'force';
 
 	/**
 	 * The query var key to force AMP validation, regardless or whether the user has deselected support for a URL.
@@ -65,14 +57,7 @@ class AMP_CLI {
 	 *
 	 * @var string
 	 */
-	const MAXIMUM_URLS_ARGUMENT = 'n';
-
-	/**
-	 * The supportable templates, mainly based on a user's selection in 'AMP Settings' > 'Supported Templates'.
-	 *
-	 * @var array
-	 */
-	public static $supportable_templates;
+	const MAXIMUM_URLS_ARGUMENT = 'limit';
 
 	/**
 	 * The WP CLI progress bar.
@@ -127,7 +112,7 @@ class AMP_CLI {
 	 *
 	 * @var array
 	 */
-	public static $include_conditionals;
+	public static $include_conditionals = array();
 
 	/**
 	 * The maximum number of URLs to validate for each type.
@@ -153,58 +138,33 @@ class AMP_CLI {
 	public static $validity_by_type = array();
 
 	/**
-	 * Adds the WP-CLI command to validate the site.
+	 * Crawl the entire site to get AMP validation results.
 	 *
-	 * @throws Exception If adding command fails.
+	 * ## OPTIONS
+	 *
+	 * [--limit=<templates>]
+	 * : The maximum number of URLs to validate for each template and content type.
+	 *
+	 * [--include=<templates>]
+	 * : Only validates a URL if one of the conditionals is true.
+	 *
+	 * [--force]
+	 * : Force validation of URLs even if their associated templates or object types do not have AMP enabled.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp amp validate-site --include=is_author,is_tag
+	 *
+	 * @subcommand validate-site
+	 * @param array $args       Positional args.
+	 * @param array $assoc_args Associative args.
+	 * @throws Exception If an error happens.
 	 */
-	public static function init() {
-		if ( class_exists( 'WP_CLI' ) ) {
-			self::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
-
-			WP_CLI::add_command(
-				self::WP_CLI_COMMAND,
-				array( __CLASS__, 'crawl_site' ),
-				array(
-					'shortdesc' => __( 'Crawl the entire site to get AMP validation results', 'amp' ),
-					'synopsis'  => array(
-						array(
-							'type'     => 'flag',
-							'name'     => self::FLAG_NAME_FORCE_VALIDATION,
-							'optional' => true,
-						),
-						array(
-							'type'        => 'assoc',
-							'name'        => self::INCLUDE_ARGUMENT,
-							'description' => __( 'Only validates a URL if one of the conditionals is true', 'amp' ),
-							'optional'    => true,
-						),
-						array(
-							'type'        => 'assoc',
-							'name'        => self::MAXIMUM_URLS_ARGUMENT,
-							'description' => __( 'The maximum number of URLs to validate for each template and content type', 'amp' ),
-							'optional'    => true,
-						),
-					),
-					'when'      => 'after_wp_load',
-					'longdesc'  => '## EXAMPLES' . "\n\n" . 'wp ' . self::WP_CLI_COMMAND . ' --include=is_author,is_tag',
-				)
-			);
-		}
-	}
-
-	/**
-	 * Crawls the entire site to validate it, and gets the results.
-	 *
-	 * @throws Exception If WP_CLI::error() captures exit.
-	 *
-	 * @param array $args The arguments for the command.
-	 * @param array $assoc_args The associative arguments, which can also include command flags like --force-validate-all.
-	 */
-	public static function crawl_site( $args, $assoc_args ) {
+	public function validate_site( $args, $assoc_args ) {
 		unset( $args );
 
-		/**
-		 * Handle the argument and flag passed to the command: --include and --force-validation.
+		/*
+		 * Handle the argument and flag passed to the command: --include and --force.
 		 * If the self::INCLUDE_ARGUMENT is present, force crawling or URLs.
 		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
 		 */
@@ -221,7 +181,7 @@ class AMP_CLI {
 
 		$number_urls_to_crawl = self::count_urls_to_validate();
 		if ( ! $number_urls_to_crawl ) {
-			if ( self::$include_conditionals ) {
+			if ( ! empty( self::$include_conditionals ) ) {
 				WP_CLI::error(
 					sprintf(
 						/* translators: %s is the command line argument to include certain templates */
@@ -247,7 +207,7 @@ class AMP_CLI {
 			sprintf( __( 'Validating %d URLs...', 'amp' ), $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		self::validate_site();
+		self::crawl_site();
 		self::$wp_cli_progress->finish();
 
 		$url_more_details = add_query_arg(
@@ -426,15 +386,17 @@ class AMP_CLI {
 	 */
 	public static function is_template_supported( $template ) {
 		// If the --include argument is present in the WP-CLI command, this template conditional must be present in it.
-		if ( isset( self::$include_conditionals ) && ! in_array( $template, self::$include_conditionals, true ) ) {
-			return false;
+		if ( ! empty( self::$include_conditionals ) ) {
+			return in_array( $template, self::$include_conditionals, true );
 		}
 		if ( self::$force_crawl_urls ) {
 			return true;
 		}
 
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+
 		// Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
-		return isset( self::$supportable_templates[ $template ]['supported'] ) && self::$supportable_templates[ $template ]['supported'];
+		return ! empty( $supportable_templates[ $template ]['supported'] );
 	}
 
 	/**
@@ -547,7 +509,7 @@ class AMP_CLI {
 	 * This validates one of each type at a time,
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
-	public static function validate_site() {
+	public static function crawl_site() {
 		/**
 		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
 		 * It will not be part of the page validation below.

@@ -20,7 +20,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		add_filter( 'pre_http_request', array( $this, 'add_comment' ) );
-		AMP_CLI::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		AMP_CLI::$include_conditionals = array();
 	}
 
 	/**
@@ -52,7 +52,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			) );
 		}
 
-		/**
+		/*
 		 * Add the number of new posts, original URLs, and 1 for the $category that all of them have.
 		 * And ensure that the tested method finds a URL for all of them.
 		 */
@@ -124,7 +124,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		) );
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 
-		/**
+		/*
 		 * If the WP-CLI command has an include argument, and is_singular isn't in it, no posts will have AMP enabled.
 		 * For example, wp amp validate-site --include=is_tag,is_category
 		 */
@@ -137,7 +137,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		 */
 		AMP_CLI::$include_conditionals = array( 'is_singular', 'is_category' );
 		$this->assertEmpty( array_diff( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) ) );
-		AMP_CLI::$include_conditionals = null;
+		AMP_CLI::$include_conditionals = array();
 	}
 
 	/**
@@ -178,7 +178,6 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		register_taxonomy( $custom_taxonomy, 'post' );
 		$taxonomies_to_test = array( $custom_taxonomy, 'category', 'post_tag' );
 		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ) );
-		AMP_CLI::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 
 		// When these templates are not unchecked in the 'AMP Settings' UI, these should be supported.
 		foreach ( $taxonomies_to_test as $taxonomy ) {
@@ -188,7 +187,6 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
 		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		AMP_CLI::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertFalse( AMP_CLI::does_taxonomy_support_amp( $taxonomy ) );
 		}
@@ -202,13 +200,12 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 
 		// When the user has checked the 'all_templates_supported' box, this should always be true.
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
-		AMP_CLI::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( AMP_CLI::does_taxonomy_support_amp( $taxonomy ) );
 		}
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 
-		/**
+		/*
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
 		 * these should be supported taxonomies.
 		 */
@@ -217,7 +214,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$this->assertTrue( AMP_CLI::does_taxonomy_support_amp( 'tag' ) );
 		$this->assertFalse( AMP_CLI::does_taxonomy_support_amp( 'author' ) );
 		$this->assertFalse( AMP_CLI::does_taxonomy_support_amp( 'search' ) );
-		AMP_CLI::$include_conditionals = null;
+		AMP_CLI::$include_conditionals = array();
 	}
 
 	/**
@@ -231,12 +228,10 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( 'supported_templates', array( $author_conditional ) );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		AMP_CLI::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		$this->assertTrue( AMP_CLI::is_template_supported( $author_conditional ) );
 		$this->assertFalse( AMP_CLI::is_template_supported( $search_conditional ) );
 
 		AMP_Options_Manager::update_option( 'supported_templates', array( $search_conditional ) );
-		AMP_CLI::$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		$this->assertTrue( AMP_CLI::is_template_supported( $search_conditional ) );
 		$this->assertFalse( AMP_CLI::is_template_supported( $author_conditional ) );
 	}
@@ -350,7 +345,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			array( $first_author_url, $second_author_url ),
 			AMP_CLI::get_author_page_urls()
 		);
-		AMP_CLI::$include_conditionals = null;
+		AMP_CLI::$include_conditionals = array();
 	}
 
 	/**
@@ -369,7 +364,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		// If $include_conditionals has is_search, this should return a URL.
 		AMP_CLI::$include_conditionals = array( 'is_search' );
 		$this->assertTrue( is_string( AMP_CLI::get_search_page() ) );
-		AMP_CLI::$include_conditionals = null;
+		AMP_CLI::$include_conditionals = array();
 	}
 
 	/**
@@ -391,13 +386,13 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		AMP_CLI::$include_conditionals = array( 'is_date' );
 		$parsed_page_url               = wp_parse_url( AMP_CLI::get_date_page() );
 		$this->assertContains( $year, $parsed_page_url['query'] );
-		AMP_CLI::$include_conditionals = null;
+		AMP_CLI::$include_conditionals = array();
 	}
 
 	/**
-	 * Test validate_site.
+	 * Test crawl_site.
 	 *
-	 * @covers AMP_CLI::validate_site()
+	 * @covers AMP_CLI::crawl_site()
 	 */
 	public function test_validate_site() {
 		$number_of_posts = 20;
@@ -411,7 +406,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			$posts[]           = $post_id;
 			$post_permalinks[] = get_permalink( $post_id );
 		}
-		AMP_CLI::validate_site();
+		AMP_CLI::crawl_site();
 
 		// All of the posts created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
@@ -422,7 +417,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
 		wp_set_post_terms( $posts[0], $terms, 'category' );
-		AMP_CLI::validate_site();
+		AMP_CLI::crawl_site();
 		$expected_validated_urls = array_map( 'get_term_link', $terms );
 		$actual_validated_urls   = self::get_validated_urls();
 
