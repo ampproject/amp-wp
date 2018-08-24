@@ -57,7 +57,7 @@ class AMP_CLI {
 	 *
 	 * @var string
 	 */
-	const MAXIMUM_URLS_ARGUMENT = 'limit';
+	const LIMIT_URLS_ARGUMENT = 'limit';
 
 	/**
 	 * The WP CLI progress bar.
@@ -123,7 +123,7 @@ class AMP_CLI {
 	 *
 	 * @var int
 	 */
-	public static $maximum_urls_to_validate_for_each_type = 100;
+	public static $limit_type_validate_count;
 
 	/**
 	 * The validation counts by type, like template or post type.
@@ -144,6 +144,9 @@ class AMP_CLI {
 	 *
 	 * [--limit=<templates>]
 	 * : The maximum number of URLs to validate for each template and content type.
+	 * ----
+	 * default: 100
+	 * ----
 	 *
 	 * [--include=<templates>]
 	 * : Only validates a URL if one of the conditionals is true.
@@ -162,6 +165,9 @@ class AMP_CLI {
 	 */
 	public function validate_site( $args, $assoc_args ) {
 		unset( $args );
+		self::$include_conditionals      = array();
+		self::$force_crawl_urls          = false;
+		self::$limit_type_validate_count = (int) $assoc_args[ self::LIMIT_URLS_ARGUMENT ];
 
 		/*
 		 * Handle the argument and flag passed to the command: --include and --force.
@@ -173,10 +179,6 @@ class AMP_CLI {
 			self::$force_crawl_urls     = true;
 		} elseif ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATION ] ) ) {
 			self::$force_crawl_urls = true;
-		}
-
-		if ( ! empty( $assoc_args[ self::MAXIMUM_URLS_ARGUMENT ] ) ) {
-			self::$maximum_urls_to_validate_for_each_type = intval( $assoc_args[ self::MAXIMUM_URLS_ARGUMENT ] );
 		}
 
 		$number_urls_to_crawl = self::count_urls_to_validate();
@@ -216,20 +218,23 @@ class AMP_CLI {
 			admin_url( 'edit.php' )
 		);
 
-		$key_template_type        = __( 'Template or content type', 'amp' );
-		$key_valid_ratio          = __( 'Valid URLs', 'amp' );
+		$key_template_type = __( 'Template or content type', 'amp' );
+		$key_url_count     = __( 'URL Count', 'amp' );
+		$key_validity_rate = __( 'Validity Rate', 'amp' );
+
 		$table_validation_by_type = array();
 		foreach ( self::$validity_by_type as $type_name => $validity ) {
 			$table_validation_by_type[] = array(
 				$key_template_type => $type_name,
-				$key_valid_ratio   => sprintf( '%1$s/%2$d', $validity['valid'], $validity['total'] ),
+				$key_url_count     => $validity['total'],
+				$key_validity_rate => sprintf( '%d%%', 100.0 * ( $validity['valid'] / $validity['total'] ) ),
 			);
 		}
 
 		WP_CLI::success(
 			sprintf(
 				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the list of validation by type, $5%s is the link for more details */
-				__( "Of the %1\$d URLs crawled, %2\$d have AMP validation issue(s), and %3\$d have unaccepted issue(s). \n\nFor more details, please see: \n%4\$s \n", 'amp' ),
+				__( "%3\$d crawled URLs have unaccepted issue(s) out of %2\$d total which AMP validation issue(s); %1\$d URLs were crawled. \n\nFor more details, please see: \n%4\$s \n", 'amp' ),
 				self::$number_crawled,
 				self::$total_errors,
 				self::$unaccepted_errors,
@@ -241,7 +246,7 @@ class AMP_CLI {
 		WP_CLI\Utils\format_items(
 			'table',
 			$table_validation_by_type,
-			array( $key_template_type, $key_valid_ratio )
+			array( $key_template_type, $key_url_count, $key_validity_rate )
 		);
 	}
 
@@ -272,7 +277,7 @@ class AMP_CLI {
 			$term_query = new WP_Term_Query( array(
 				'taxonomy' => $taxonomy,
 				'fields'   => 'ids',
-				'number'   => self::$maximum_urls_to_validate_for_each_type,
+				'number'   => self::$limit_type_validate_count,
 			) );
 
 			// If $term_query->terms is an empty array, passing it to count() will throw an error.
@@ -331,29 +336,6 @@ class AMP_CLI {
 	}
 
 	/**
-	 * Handles the error count, based on the validation results.
-	 *
-	 * Increments the template's 'total' count,
-	 * and increments the 'valid' count if there is no error.
-	 *
-	 * @param bool   $is_error Whether the validation resulted in an error.
-	 * @param string $key The key to store the validation result.
-	 */
-	public static function handle_error_count( $is_error, $key ) {
-		if ( ! isset( self::$validity_by_type[ $key ] ) ) {
-			self::$validity_by_type[ $key ] = array(
-				'valid' => $is_error ? 0 : 1,
-				'total' => 1,
-			);
-		} else {
-			self::$validity_by_type[ $key ]['total']++;
-			if ( ! $is_error ) {
-				self::$validity_by_type[ $key ]['valid']++;
-			}
-		}
-	}
-
-	/**
 	 * Gets whether the taxonomy supports AMP.
 	 *
 	 * This only gets the term IDs if they support AMP.
@@ -362,7 +344,7 @@ class AMP_CLI {
 	 * This can be overridden by passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command.
 	 *
 	 * @param string $taxonomy The taxonomy.
-	 * @return boolean Wether the taxonomy supports AMP.
+	 * @return boolean Whether the taxonomy supports AMP.
 	 */
 	public static function does_taxonomy_support_amp( $taxonomy ) {
 		if ( 'post_tag' === $taxonomy ) {
@@ -410,7 +392,7 @@ class AMP_CLI {
 	public static function get_posts_by_type( $post_type, $offset = null, $number = null ) {
 		$args = array(
 			'post_type'      => $post_type,
-			'posts_per_page' => is_int( $number ) ? $number : self::$maximum_urls_to_validate_for_each_type,
+			'posts_per_page' => is_int( $number ) ? $number : self::$limit_type_validate_count,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
@@ -468,7 +450,7 @@ class AMP_CLI {
 			return $author_page_urls;
 		}
 
-		$number = ! empty( $number ) ? $number : self::$maximum_urls_to_validate_for_each_type;
+		$number = ! empty( $number ) ? $number : self::$limit_type_validate_count;
 		foreach ( get_users( compact( 'offset', 'number' ) ) as $author ) {
 			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 		}
@@ -510,7 +492,7 @@ class AMP_CLI {
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
 	public static function crawl_site() {
-		/**
+		/*
 		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
 		 * It will not be part of the page validation below.
 		 */
@@ -526,7 +508,7 @@ class AMP_CLI {
 		$i                      = 0;
 
 		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
-		while ( $i < self::$maximum_urls_to_validate_for_each_type ) {
+		while ( $i < self::$limit_type_validate_count ) {
 			// Validate all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type, $i, 1 ) );
@@ -568,7 +550,7 @@ class AMP_CLI {
 		}
 		$validity = AMP_Validation_Manager::validate_url( $url );
 
-		/**
+		/*
 		 * If the request to validate this returns a WP_Error, return.
 		 * One cause of an error is if the validation request results in a 404 response code.
 		 */
@@ -580,16 +562,15 @@ class AMP_CLI {
 		}
 
 		AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
-		$error_count            = count( $validity['validation_errors'] );
-		$has_error              = $error_count > 0;
 		$unaccepted_error_count = count( array_filter(
 			$validity['validation_errors'],
 			function( $error ) {
-				return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+				return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
 			}
 		) );
 
-		if ( $has_error ) {
+		if ( count( $validity['validation_errors'] ) > 0 ) {
 			self::$total_errors++;
 		}
 		if ( $unaccepted_error_count > 0 ) {
@@ -597,6 +578,16 @@ class AMP_CLI {
 		}
 
 		self::$number_crawled++;
-		self::handle_error_count( $has_error, $type );
+
+		if ( ! isset( self::$validity_by_type[ $type ] ) ) {
+			self::$validity_by_type[ $type ] = array(
+				'valid' => 0,
+				'total' => 0,
+			);
+		}
+		self::$validity_by_type[ $type ]['total']++;
+		if ( 0 === $unaccepted_error_count ) {
+			self::$validity_by_type[ $type ]['valid']++;
+		}
 	}
 }

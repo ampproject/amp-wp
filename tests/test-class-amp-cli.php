@@ -20,7 +20,8 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		add_filter( 'pre_http_request', array( $this, 'add_comment' ) );
-		AMP_CLI::$include_conditionals = array();
+		AMP_CLI::$include_conditionals      = array();
+		AMP_CLI::$limit_type_validate_count = 100;
 	}
 
 	/**
@@ -42,9 +43,10 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		// The number of original URLs present before adding these test URLs.
 		$number_original_urls = $this->get_inital_url_count();
 		$this->assertEquals( $number_original_urls, AMP_CLI::count_urls_to_validate() );
+		AMP_CLI::$limit_type_validate_count = 100;
 
 		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
-		$number_new_posts = AMP_CLI::$maximum_urls_to_validate_for_each_type / 2;
+		$number_new_posts = AMP_CLI::$limit_type_validate_count / 2;
 		$post_ids         = array();
 		for ( $i = 0; $i < $number_new_posts; $i++ ) {
 			$post_ids[] = $this->factory()->post->create( array(
@@ -138,34 +140,6 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		AMP_CLI::$include_conditionals = array( 'is_singular', 'is_category' );
 		$this->assertEmpty( array_diff( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) ) );
 		AMP_CLI::$include_conditionals = array();
-	}
-
-	/**
-	 * Test handle_error_count.
-	 *
-	 * @covers AMP_CLI::handle_error_count()
-	 */
-	public function test_handle_error_count() {
-		$custom_post_type = 'foo_custom_post';
-		$expected_errors  = array(
-			$custom_post_type => array(
-				'valid' => 0,
-				'total' => 1,
-			),
-		);
-		AMP_CLI::handle_error_count( true, $custom_post_type );
-		$this->assertEquals( $expected_errors, AMP_CLI::$validity_by_type );
-
-		// When the first argument is true, there was a validation error, and this shouldn't increment the 'valid' count.
-		AMP_CLI::handle_error_count( true, $custom_post_type );
-		$expected_errors[ $custom_post_type ]['total']++;
-		$this->assertEquals( $expected_errors, AMP_CLI::$validity_by_type );
-
-		// When the first argument is false, there was no validation error, and both counts should be incremented.
-		AMP_CLI::handle_error_count( false, $custom_post_type );
-		$expected_errors[ $custom_post_type ]['total']++;
-		$expected_errors[ $custom_post_type ]['valid']++;
-		$this->assertEquals( $expected_errors, AMP_CLI::$validity_by_type );
 	}
 
 	/**
