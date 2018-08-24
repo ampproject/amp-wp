@@ -181,6 +181,16 @@ class AMP_CLI {
 			self::$force_crawl_urls = true;
 		}
 
+		if ( 'disabled' === AMP_Options_Manager::get_option( 'theme_support' ) && ! self::$force_crawl_urls ) {
+			WP_CLI::error(
+				sprintf(
+					/* translators: %s is the flag to force validation */
+					__( 'The current template mode is Classic, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.', 'amp' ),
+					self::FLAG_NAME_FORCE_VALIDATION
+				)
+			);
+		}
+
 		$number_urls_to_crawl = self::count_urls_to_validate();
 		if ( ! $number_urls_to_crawl ) {
 			if ( ! empty( self::$include_conditionals ) ) {
