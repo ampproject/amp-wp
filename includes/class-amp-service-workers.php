@@ -34,6 +34,7 @@ class AMP_Service_Workers {
 		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
 		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
 		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_amp_runtime_caching' ) );
+		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_image_runtime_caching' ) );
 	}
 
 	/**
@@ -52,6 +53,32 @@ class AMP_Service_Workers {
 		$service_workers->register_precached_route(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
 			WP_Service_Workers::STRATEGY_STALE_WHILE_REVALIDATE
+		);
+	}
+
+	/**
+	 * Configure the front service worker for AMP.
+	 *
+	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
+	 *
+	 * @param WP_Service_Workers $service_workers Service workers.
+	 */
+	public static function add_image_runtime_caching( WP_Service_Workers $service_workers ) {
+		$service_workers->register_cached_route(
+			'\.(?:png|gif|jpe?g|svg|webp)$',
+			WP_Service_Workers::STRATEGY_CACHE_FIRST,
+			array(
+				'cacheName' => 'images',
+				'plugins'   => array(
+					'cacheableResponse' => array(
+						'statuses' => array( 0, 200 ),
+					),
+					'expiration'        => array(
+						'maxEntries'    => 60,
+						'maxAgeSeconds' => MONTH_IN_SECONDS,
+					),
+				),
+			)
 		);
 	}
 
