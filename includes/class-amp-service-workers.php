@@ -22,22 +22,89 @@ class AMP_Service_Workers {
 	 * Init.
 	 */
 	public static function init() {
-		if ( ! function_exists( 'wp_register_service_worker' ) ) {
+		if ( ! class_exists( 'WP_Service_Workers' ) ) {
 			return;
 		}
 
 		add_filter( 'query_vars', function( $vars ) {
-			$vars[] = self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR;
+			$vars[] = AMP_Service_Workers::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR;
 			return $vars;
 		} );
 
-		wp_register_service_worker(
-			'amp-asset-caching',
-			amp_get_asset_url( 'js/amp-service-worker-asset-cache.js' )
-		);
-		add_action( 'wp_default_service_workers', array( __CLASS__, 'register_script' ) );
 		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
 		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
+		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_amp_runtime_caching' ) );
+	}
+
+	/**
+	 * Configure the front service worker for AMP.
+	 *
+	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
+	 *
+	 * @param WP_Service_Workers $service_workers Service workers.
+	 */
+	public static function add_amp_runtime_caching( WP_Service_Workers $service_workers ) {
+
+		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
+		$service_workers->register( 'amp-runtime-precaching', array( __CLASS__, 'get_runtime_precache_script' ) );
+
+		// Serve the AMP Runtime from cache and check for an updated version in the background.
+		$service_workers->register_precached_route(
+			'^https:\/\/cdn\.ampproject\.org\/.*',
+			WP_Service_Workers::STRATEGY_STALE_WHILE_REVALIDATE
+		);
+	}
+
+	/**
+	 * Get runtime precache script.
+	 *
+	 * Note that the PWA plugin handles the precaching of custom logo, custom header,
+	 * and custom background. The PWA plugin also automatically adds runtime caching
+	 * for Google Fonts. The PWA plugin also handles precaching & serving of the
+	 * offline/500 error pages, enabling navigation preload,
+	 *
+	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
+	 *
+	 * @return string Runtime precache script.
+	 */
+	public static function get_runtime_precache_script() {
+
+		// List of AMP scripts that we know will be used in WordPress always.
+		$precached_handles = array(
+			'amp-runtime',
+			'amp-bind', // Used by comments.
+			'amp-form', // Used by comments.
+		);
+
+		$theme_support = AMP_Theme_Support::get_theme_support_args();
+		if ( ! empty( $theme_support['comments_live_list'] ) ) {
+			$precached_handles[] = 'amp-live-list';
+		}
+
+		if ( amp_get_analytics() ) {
+			$precached_handles[] = 'amp-analytics';
+		}
+
+		$urls = array();
+		foreach ( $precached_handles as $handle ) {
+			if ( wp_script_is( $handle, 'registered' ) ) {
+				$urls[] = wp_scripts()->registered[ $handle ]->src;
+			}
+		}
+
+		ob_start();
+		?>
+		<script>
+			self.addEventListener( 'install', event => {
+				event.waitUntil(
+					caches.open( wp.serviceWorker.core.cacheNames.runtime ).then(
+						cache => cache.addAll( <?php echo wp_json_encode( $urls, 128 | 64 /* JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES */ ); ?> )
+					)
+				);
+			});
+		</script>
+		<?php
+		return str_replace( array( '<script>', '</script>' ), '', ob_get_clean() );
 	}
 
 	/**
