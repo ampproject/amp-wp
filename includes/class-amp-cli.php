@@ -1,19 +1,19 @@
 <?php
 /**
- * Class AMP_Site_Validation
+ * Class AMP_CLI
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Site_Validation
+ * Class AMP_CLI
  *
  * Registers and implements a WP-CLI command to crawl the entire site for AMP validity.
  * To use this, run: wp amp validate-site.
  *
  * @since 1.0
  */
-class AMP_Site_Validation {
+class AMP_CLI {
 
 	/**
 	 * The WP-CLI command to validate the site.
@@ -304,7 +304,7 @@ class AMP_Site_Validation {
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
-			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
+			array( 'AMP_CLI', 'does_taxonomy_support_amp' )
 		);
 
 		// Count all public taxonomy terms.
@@ -558,7 +558,7 @@ class AMP_Site_Validation {
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
-			array( 'AMP_Site_Validation', 'does_taxonomy_support_amp' )
+			array( 'AMP_CLI', 'does_taxonomy_support_amp' )
 		);
 		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
 		$i                      = 0;

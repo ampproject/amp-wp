@@ -157,7 +157,6 @@ class AMP_Validation_Manager {
 
 		AMP_Invalid_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
-		AMP_Site_Validation::init();
 
 		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
@@ -1655,7 +1654,7 @@ class AMP_Validation_Manager {
 		}
 
 		$url = remove_query_arg(
-			array_merge( array_keys( $added_query_vars ), array( AMP_Site_Validation::FORCE_VALIDATION_QUERY_VAR ) ),
+			array_merge( array_keys( $added_query_vars ), array( AMP_CLI::FORCE_VALIDATION_QUERY_VAR ) ),
 			$validation_url
 		);
 

@@ -293,7 +293,7 @@ function is_amp_endpoint() {
 	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
 	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
 	 */
-	if ( isset( $_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ], $_GET[ AMP_Site_Validation::FORCE_VALIDATION_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+	if ( isset( $_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ], $_GET[ AMP_CLI::FORCE_VALIDATION_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
 		return true;
 	}
 
