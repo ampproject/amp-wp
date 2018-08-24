@@ -111,7 +111,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 
 		// When the second $force_count_all_urls argument is true, all of the newly-created posts should be part of the URL count.
 		AMP_Site_Validation::$force_crawl_urls = true;
-		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids, true ) );
+		$this->assertEquals( $ids, AMP_Site_Validation::get_posts_that_support_amp( $ids ) );
 		AMP_Site_Validation::$force_crawl_urls = false;
 
 		// In Native AMP, the IDs should include all of the newly-created posts.
@@ -485,7 +485,7 @@ class Test_AMP_Site_Validation extends \WP_UnitTestCase {
 	public function get_validated_urls() {
 		$query = new WP_Query( array(
 			'post_type'      => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-			'posts_per_page' => 150,
+			'posts_per_page' => 100,
 			'fields'         => 'ids',
 		) );
 

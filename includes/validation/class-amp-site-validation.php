@@ -78,7 +78,7 @@ class AMP_Site_Validation {
 	 * The WP CLI progress bar.
 	 *
 	 * @see https://make.wordpress.org/cli/handbook/internal-api/wp-cli-utils-make-progress-bar/
-	 * @var cli\progress\Bar|WP_CLI\NoOp
+	 * @var \cli\progress\Bar|\WP_CLI\NoOp
 	 */
 	public static $wp_cli_progress;
 
@@ -154,6 +154,8 @@ class AMP_Site_Validation {
 
 	/**
 	 * Adds the WP-CLI command to validate the site.
+	 *
+	 * @throws Exception If adding command fails.
 	 */
 	public static function init() {
 		if ( class_exists( 'WP_CLI' ) ) {
@@ -192,6 +194,8 @@ class AMP_Site_Validation {
 
 	/**
 	 * Crawls the entire site to validate it, and gets the results.
+	 *
+	 * @throws Exception If WP_CLI::error() captures exit.
 	 *
 	 * @param array $args The arguments for the command.
 	 * @param array $assoc_args The associative arguments, which can also include command flags like --force-validate-all.
@@ -472,7 +476,7 @@ class AMP_Site_Validation {
 	 * @param int        $number The maximum amount of links to get (optional).
 	 * @return string[]  The term links, as an array of strings.
 	 */
-	public static function get_taxonomy_links( $taxonomy, $offset = '', $number ) {
+	public static function get_taxonomy_links( $taxonomy, $offset = '', $number = 1 ) {
 		return array_map(
 			'get_term_link',
 			get_terms(
