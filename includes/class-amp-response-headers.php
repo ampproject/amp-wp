@@ -62,14 +62,19 @@ class AMP_Response_Headers {
 	/**
 	 * Send Server-Timing header.
 	 *
+	 * If WP_DEBUG is not enabled and an admin user (who can manage_options) is not logged-in, the Server-Header will not be sent.
+	 *
 	 * @since 1.0
 	 *
 	 * @param string $name        Name.
 	 * @param float  $duration    Duration. If negative, will be added to microtime( true ). Optional.
 	 * @param string $description Description. Optional.
-	 * @return bool Return value of send_header call.
+	 * @return bool Return value of send_header call. If WP_DEBUG is not enabled or admin user (who can manage_options) is not logged-in, this will always return false.
 	 */
 	public static function send_server_timing( $name, $duration = null, $description = null ) {
+		if ( ! WP_DEBUG && ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
 		$value = $name;
 		if ( isset( $description ) ) {
 			$value .= sprintf( ';desc="%s"', str_replace( array( '\\', '"' ), '', substr( $description, 0, 100 ) ) );

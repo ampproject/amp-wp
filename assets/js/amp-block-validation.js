@@ -31,6 +31,17 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		storeName: 'amp/blockValidation',
 
 		/**
+		 * Holds the last states which are used for comparisons.
+		 *
+		 * @param {Object}
+		 */
+		lastStates: {
+			noticesAreReset: false,
+			validationErrors: [],
+			blockOrder: []
+		},
+
+		/**
 		 * Boot module.
 		 *
 		 * @param {Object} data - Module data.
@@ -42,9 +53,10 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			wp.i18n.setLocaleData( module.data.i18n, 'amp' );
 
 			wp.hooks.addFilter(
-				'blocks.BlockEdit',
+				'editor.BlockEdit',
 				'amp/add-notice',
-				module.conditionallyAddNotice
+				module.conditionallyAddNotice,
+				99 // eslint-disable-line
 			);
 
 			module.store = module.registerStore();
@@ -61,32 +73,68 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			return wp.data.registerStore( module.storeName, {
 				reducer: function( _state, action ) {
 					var state = _state || {
-						blockValidationErrorsByUid: {}
+						blockValidationErrorsByClientId: {}
 					};
 
 					switch ( action.type ) {
 						case 'UPDATE_BLOCKS_VALIDATION_ERRORS':
 							return _.extend( {}, state, {
-								blockValidationErrorsByUid: action.blockValidationErrorsByUid
+								blockValidationErrorsByClientId: action.blockValidationErrorsByClientId
 							} );
 						default:
 							return state;
 					}
 				},
 				actions: {
-					updateBlocksValidationErrors: function( blockValidationErrorsByUid ) {
+					updateBlocksValidationErrors: function( blockValidationErrorsByClientId ) {
 						return {
 							type: 'UPDATE_BLOCKS_VALIDATION_ERRORS',
-							blockValidationErrorsByUid: blockValidationErrorsByUid
+							blockValidationErrorsByClientId: blockValidationErrorsByClientId
 						};
 					}
 				},
 				selectors: {
-					getBlockValidationErrors: function( state, uid ) {
-						return state.blockValidationErrorsByUid[ uid ] || [];
+					getBlockValidationErrors: function( state, clientId ) {
+						return state.blockValidationErrorsByClientId[ clientId ] || [];
 					}
 				}
 			} );
+		},
+
+		/**
+		 * Checks if AMP is enabled for this post.
+		 *
+		 * @return {boolean} Returns true when the AMP toggle is on; else, false is returned.
+		 */
+		isAMPEnabled: function isAMPEnabled() {
+			var meta = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+			if ( meta && meta.amp_status && window.wpAmpEditor.possibleStati.includes( meta.amp_status ) ) {
+				return 'enabled' === meta.amp_status;
+			}
+			return window.wpAmpEditor.defaultStatus;
+		},
+
+		/**
+		 * Checks if the validate errors state change handler should wait before processing.
+		 *
+		 * @return {boolean} Whether should wait.
+		 */
+		waitToHandleStateChange: function waitToHandleStateChange() {
+			var currentPost;
+
+			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
+			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
+			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || wp.data.select( 'core/editor' ).isCleanNewPost() ) {
+				return true;
+			}
+
+			// Wait for the current post to be set up.
+			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
+				return true;
+			}
+
+			return false;
 		},
 
 		/**
@@ -99,9 +147,17 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
 			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity, hasActuallyUnacceptedError;
 
-			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
-			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
-			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() ) {
+			if ( ! module.isAMPEnabled() ) {
+				if ( ! module.lastStates.noticesAreReset ) {
+					module.lastStates.validationErrors = [];
+					module.lastStates.noticesAreReset = true;
+					module.resetWarningNotice();
+					module.resetBlockNotices();
+				}
+				return;
+			}
+
+			if ( module.waitToHandleStateChange() ) {
 				return;
 			}
 
@@ -113,7 +169,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					if ( result.status !== 1 /* ACCEPTED */ ) {
 						hasActuallyUnacceptedError = true;
 					}
-					return result.term_status !== 1; /* ACCEPTED */
+					return result.term_status !== 1; // ACCEPTED
 				} ),
 				function( result ) {
 					return result.error;
@@ -121,22 +177,18 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			);
 
 			// Short-circuit if there was no change to the validation errors.
-			if ( ! validationErrors || _.isEqual( module.lastValidationErrors, validationErrors ) ) {
+			if ( ! module.didValidationErrorsChange( validationErrors ) ) {
+				if ( ! validationErrors.length && ! module.lastStates.noticesAreReset ) {
+					module.lastStates.noticesAreReset = true;
+					module.resetWarningNotice();
+				}
 				return;
 			}
-			module.lastValidationErrors = validationErrors;
+			module.lastStates.validationErrors = validationErrors;
+			module.lastStates.noticesAreReset = false;
 
 			// Remove any existing notice.
-			if ( module.validationWarningNoticeId ) {
-				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
-				module.validationWarningNoticeId = null;
-			}
-
-			// If there are no validation errors then just make sure the validation notices are cleared from the blocks.
-			if ( ! validationErrors.length ) {
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
-				return;
-			}
+			module.resetWarningNotice();
 
 			noticeMessage = wp.i18n.sprintf(
 				wp.i18n._n(
@@ -150,7 +202,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			try {
 				blockValidationErrors = module.getBlocksValidationErrors();
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byUid );
+				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byClientId );
 
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
 				if ( blockErrorCount > 0 ) {
@@ -176,7 +228,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} catch ( e ) {
 				// Clear out block validation errors in case the block sand errors cannot be aligned.
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+				module.resetBlockNotices();
 
 				noticeMessage += ' ' + wp.i18n._n(
 					'It may not be due to content here.',
@@ -206,6 +258,61 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		},
 
 		/**
+		 * Checks if the validation errors have changed.
+		 *
+		 * @param {Object[]} validationErrors A list of validation errors.
+		 * @return {boolean|*} Returns true when the validation errors change.
+		 */
+		didValidationErrorsChange: function didValidationErrorsChange( validationErrors ) {
+			if ( module.areBlocksOutOfSync() ) {
+				module.lastStates.validationErrors = [];
+			}
+
+			return (
+				module.lastStates.validationErrors.length !== validationErrors.length ||
+				( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
+			);
+		},
+
+		/**
+		 * Checks if the block order is out of sync.
+		 *
+		 * Block change on page load and can get out of sync during normal editing and saving processes.  This method gives a check to determine if an "out of sync" condition occurred.
+		 *
+		 * @return {boolean} Whether out of sync.
+		 */
+		areBlocksOutOfSync: function areBlocksOutOfSync() {
+			var blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
+			if ( module.lastStates.blockOrder.length !== blockOrder.length || ! _.isEqual( module.lastStates.blockOrder, blockOrder ) ) {
+				module.lastStates.blockOrder = blockOrder;
+				return true;
+			}
+
+			return false;
+		},
+
+		/**
+		 * Resets the validation warning notice.
+		 *
+		 * @return {void}
+		 */
+		resetWarningNotice: function resetWarningNotice() {
+			if ( module.validationWarningNoticeId ) {
+				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
+				module.validationWarningNoticeId = null;
+			}
+		},
+
+		/**
+		 * Resets the block level validation errors.
+		 *
+		 * @return {void}
+		 */
+		resetBlockNotices: function resetBlockNotices() {
+			wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+		},
+
+		/**
 		 * Get flattened block order.
 		 *
 		 * @param {Object[]} blocks - List of blocks which maty have nested blocks inside them.
@@ -214,7 +321,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		getFlattenedBlockOrder: function getFlattenedBlockOrder( blocks ) {
 			var blockOrder = [];
 			_.each( blocks, function( block ) {
-				blockOrder.push( block.uid );
+				blockOrder.push( block.clientId );
 				if ( block.innerBlocks.length > 0 ) {
 					Array.prototype.push.apply( blockOrder, module.getFlattenedBlockOrder( block.innerBlocks ) );
 				}
@@ -228,12 +335,12 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
-			var blockValidationErrorsByUid, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			var blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
 			validationErrors = _.map(
 				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
-					return ! result.sanitized;
+					return result.term_status !== 1; // If not accepted by the user.
 				} ),
 				function( result ) {
 					return result.error;
@@ -242,13 +349,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
 
 			otherValidationErrors = [];
-			blockValidationErrorsByUid = {};
-			_.each( blockOrder, function( uid ) {
-				blockValidationErrorsByUid[ uid ] = [];
+			blockValidationErrorsByClientId = {};
+			_.each( blockOrder, function( clientId ) {
+				blockValidationErrorsByClientId[ clientId ] = [];
 			} );
 
 			_.each( validationErrors, function( validationError ) {
-				var i, source, uid, block, matched;
+				var i, source, clientId, block, matched;
 				if ( ! validationError.sources ) {
 					otherValidationErrors.push( validationError );
 					return;
@@ -265,13 +372,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					}
 
 					// Look up the block ID by index, assuming the blocks of content in the editor are the same as blocks rendered on frontend.
-					uid = blockOrder[ source.block_content_index ];
-					if ( _.isUndefined( uid ) ) {
+					clientId = blockOrder[ source.block_content_index ];
+					if ( _.isUndefined( clientId ) ) {
 						throw new Error( 'undefined_block_index' );
 					}
 
-					// Sanity check that block exists for uid.
-					block = editorSelect.getBlock( uid );
+					// Sanity check that block exists for clientId.
+					block = editorSelect.getBlock( clientId );
 					if ( ! block ) {
 						throw new Error( 'block_lookup_failure' );
 					}
@@ -281,7 +388,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 						throw new Error( 'ordered_block_alignment_mismatch' );
 					}
 
-					blockValidationErrorsByUid[ uid ].push( validationError );
+					blockValidationErrorsByClientId[ clientId ].push( validationError );
 					matched = true;
 
 					// Stop looking for sources, since we aren't looking for parent blocks.
@@ -294,7 +401,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			} );
 
 			return {
-				byUid: blockValidationErrorsByUid,
+				byClientId: blockValidationErrorsByClientId,
 				other: otherValidationErrors
 			};
 		},
@@ -382,7 +489,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			return wp.data.withSelect( function( select, ownProps ) {
 				return _.extend( {}, ownProps, {
-					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.id )
+					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.clientId )
 				} );
 			} )( AmpNoticeBlockEdit );
 		}

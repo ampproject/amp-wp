@@ -78,6 +78,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
 			),
 			'set_twentyseventeen_quotes_icon'     => array(),
+			'add_twentyseventeen_attachment_image_attributes' => array(),
 		),
 
 		// Twenty Sixteen.
@@ -342,6 +343,29 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			return $content;
 		} );
+	}
+
+	/**
+	 * Add filter to adjust the attachment image attributes to ensure attachment pages have a consistent <amp-img> rendering.
+	 *
+	 * This is only used in Twenty Seventeen.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/ddc8f803c6e99118998191fd2ea24124feb53659/src/wp-content/themes/twentyseventeen/functions.php#L545:L554
+	 */
+	public static function add_twentyseventeen_attachment_image_attributes() {
+		add_filter( 'wp_get_attachment_image_attributes', function ( $attr, $attachment, $size ) {
+			if ( ! is_attachment() ) {
+				return $attr;
+			}
+
+			$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
+			if ( false !== $sizes ) {
+				$attr['sizes'] = $sizes;
+			}
+
+			return $attr;
+		}, 11, 3 );
 	}
 
 	/**

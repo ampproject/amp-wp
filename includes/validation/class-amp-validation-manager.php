@@ -386,7 +386,7 @@ class AMP_Validation_Manager {
 					if ( urlParser.href !== location.href ) {
 						history.replaceState( {}, '', urlParser.href );
 					}
-				})( <?php echo wp_json_encode( self::VALIDATION_ERRORS_QUERY_VAR ); ?> );
+				})( <?php echo wp_json_encode( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ); ?> );
 				</script>
 				<?php
 			} );
@@ -460,6 +460,8 @@ class AMP_Validation_Manager {
 			! wp_is_post_autosave( $post )
 			&&
 			! wp_is_post_revision( $post )
+			&&
+			'auto-draft' !== $post->post_status
 			&&
 			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
 		);
@@ -1726,7 +1728,7 @@ class AMP_Validation_Manager {
 		);
 
 		$data = wp_json_encode( array(
-			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ), // @todo POT file.
+			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ),
 			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
 			'isCanonical'          => amp_is_canonical(),
 		) );

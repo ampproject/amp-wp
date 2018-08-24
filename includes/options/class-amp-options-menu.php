@@ -109,6 +109,19 @@ class AMP_Options_Menu {
 			)
 		);
 
+		if ( wp_using_ext_object_cache() ) {
+			add_settings_field(
+				'caching',
+				__( 'Caching', 'amp' ),
+				array( $this, 'render_caching' ),
+				AMP_Options_Manager::OPTION_NAME,
+				'general',
+				array(
+					'class' => 'amp-caching-field',
+				)
+			);
+		}
+
 		$submenus = array(
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
 		);
@@ -152,13 +165,13 @@ class AMP_Options_Menu {
 				<?php endif; ?>
 				<dl>
 					<dt>
-						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
-						<label for="theme_support_disabled">
-							<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
+						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?>>
+						<label for="theme_support_native">
+							<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+						<?php echo esc_html( $native_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
@@ -170,13 +183,13 @@ class AMP_Options_Menu {
 						<?php echo esc_html( $paired_description ); ?>
 					</dd>
 					<dt>
-						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?>>
-						<label for="theme_support_native">
-							<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
+						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
+						<label for="theme_support_disabled">
+							<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php echo esc_html( $native_description ); ?>
+						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
 					</dd>
 				</dl>
 			</fieldset>
@@ -387,6 +400,34 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Render the caching settings section.
+	 *
+	 * @since 1.0
+	 *
+	 * @todo Change the messaging and description to be user-friendly and helpful.
+	 */
+	public function render_caching() {
+		?>
+		<fieldset>
+			<?php if ( AMP_Options_Manager::show_response_cache_disabled_notice() ) : ?>
+				<div class="notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
+					<p><?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s post-processor cache was automatically disabled.', 'amp' ); ?>
+						<a href="<?php echo esc_url( 'https://github.com/Automattic/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
+				</div>
+			<?php endif; ?>
+			<p>
+				<label for="enable_response_caching">
+					<input id="enable_response_caching" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_response_caching]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'enable_response_caching' ) ); ?>>
+					<?php esc_html_e( 'Enable post-processor caching.', 'amp' ); ?>
+				</label>
+			</p>
+			<p class="description"><?php esc_html_e( 'This will enable post-processor caching to speed up processing an AMP response after WordPress renders a template.', 'amp' ); ?></p>
+		</fieldset>
 		<?php
 	}
 
