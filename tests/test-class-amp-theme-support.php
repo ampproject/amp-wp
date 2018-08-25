@@ -1464,7 +1464,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<link rel="icon" href="http://example.org/favicon.png" sizes="192x192">',
 
 			'#<style amp-custom>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
-			'<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine" crossorigin="anonymous">',
+			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 			'<style amp-boilerplate>',
 			'<noscript><style amp-boilerplate>',
 			'<script type="application/ld+json">{"@context"',
@@ -1627,13 +1627,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		add_action( 'wp_enqueue_scripts', function() {
 			wp_enqueue_script( 'amp-list' );
+			wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', array(), null ); // phpcs:ignore
 		} );
 		add_action( 'wp_print_scripts', function() {
 			echo '<!-- wp_print_scripts -->';
-		} );
-
-		add_action( 'wp_print_styles', function() {
-			echo '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">';
 		} );
 
 		add_filter( 'script_loader_tag', function( $tag, $handle ) {
