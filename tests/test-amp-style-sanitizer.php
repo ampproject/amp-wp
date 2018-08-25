@@ -1246,9 +1246,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
 	 */
 	public function test_css_import() {
-		$local_css_url  = admin_url( 'css/login.css' );
-		$import_css_url = 'https://stylesheets.example.com/style.css';
-		$markup         = sprintf( '<html><head><link rel="stylesheet" href="%s"><style>@import url("%s"); body { color:red; }</style></head><body>hello</body></html>', $local_css_url, $import_css_url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$local_css_url   = admin_url( 'css/login.css' );
+		$import_font_url = 'https://fonts.googleapis.com/css?family=Merriweather:300|PT+Serif:400i|Open+Sans:800|Zilla+Slab:300,400,500|Montserrat:800|Muli:400&subset=cyrillic-ext,latin-ext,cyrillic,greek,greek-ext,vietnamese';
+		$import_css_url  = 'https://stylesheets.example.com/style.css';
+		$markup          = sprintf( '<html><head><link rel="stylesheet" href="%s"><style>@import url("%s"); body { color:red; }</style><style>@import "%s";</style></head><body>hello</body></html>', $local_css_url, $import_css_url, $import_font_url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 
 		add_filter( 'pre_http_request', function( $preempt, $request, $url ) use ( $import_css_url ) {
 			unset( $request );
@@ -1270,7 +1271,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		) );
 		$sanitizer->sanitize();
 		$stylesheets = array_values( $sanitizer->get_stylesheets() );
-		$this->assertCount( 2, $stylesheets );
+		$this->assertCount( 3, $stylesheets );
 		$this->assertRegExp(
 			'/' . implode( '.*', array(
 				preg_quote( 'input[type="checkbox"]:disabled' ),
@@ -1286,6 +1287,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			) ) . '/s',
 			$stylesheets[1]
 		);
+		$this->assertEmpty( $stylesheets[2] );
+
+		$this->assertNotContains( '@import', $dom->getElementsByTagName( 'style' )->item( 0 )->textContent );
+
+		$links = $dom->getElementsByTagName( 'link' );
+		$this->assertEquals( 1, $links->length );
+		$link = $links->item( 0 );
+		$this->assertEquals( $import_font_url, $link->getAttribute( 'href' ) );
+		$this->assertEquals( 'stylesheet', $link->getAttribute( 'rel' ) );
 	}
 
 	/**
