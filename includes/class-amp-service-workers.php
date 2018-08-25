@@ -50,7 +50,7 @@ class AMP_Service_Workers {
 		$service_workers->register( 'amp-runtime-precaching', array( __CLASS__, 'get_runtime_precache_script' ) );
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background.
-		$service_workers->register_precached_route(
+		$service_workers->register_cached_route(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
 			WP_Service_Workers::STRATEGY_STALE_WHILE_REVALIDATE
 		);
