@@ -474,7 +474,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see WP_Styles::_css_href()
 	 *
 	 * @param string   $url The file URL.
-	 * @param string[] $allowed_extensions Allowed file extensions.
+	 * @param string[] $allowed_extensions Allowed file extensions for local files.
 	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
@@ -513,7 +513,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$pattern = sprintf( '/\.(%s)$/i', implode( '|', $allowed_extensions ) );
 			if ( ! preg_match( $pattern, $url ) ) {
 				/* translators: %s: the file URL. */
-				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
+				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'File does not have an allowed file extension for filesystem access (%s).', 'amp' ), $url ) );
 			}
 		}
 
@@ -667,7 +667,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
 
-		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+		if ( is_wp_error( $css_file_path ) && ( 'disallowed_file_extension' === $css_file_path->get_error_code() || 'external_file_url' === $css_file_path->get_error_code() ) ) {
 			$contents = $this->fetch_external_stylesheet( $normalized_url );
 			if ( is_wp_error( $contents ) ) {
 				$this->remove_invalid_child( $element, array(
@@ -866,7 +866,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, array( 'css', 'less', 'scss', 'sass' ) );
 
-		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+		if ( is_wp_error( $css_file_path ) && ( 'disallowed_file_extension' === $css_file_path->get_error_code() || 'external_file_url' === $css_file_path->get_error_code() ) ) {
 			$contents = $this->fetch_external_stylesheet( $import_stylesheet_url );
 			if ( is_wp_error( $contents ) ) {
 				$error     = array(
@@ -1509,8 +1509,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				// Ensure file exists.
-				$path = $this->get_validated_url_file_path( $guessed_url );
+				// Ensure font file exists.
+				$path = $this->get_validated_url_file_path( $guessed_url, array( 'woff', 'woff2', 'ttf', 'otf', 'svg' ) );
 				if ( is_wp_error( $path ) ) {
 					continue;
 				}
