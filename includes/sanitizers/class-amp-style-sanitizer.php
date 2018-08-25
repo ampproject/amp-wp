@@ -768,7 +768,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type array    $allowed_at_rules            Allowed @-rules.
 	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
 	 * }
-	 * @return array Processed stylesheet.
+	 * @return array {
+	 *    Processed stylesheet.
+	 *
+	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
+	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type array $imported_font_urls Imported font stylesheet URLs.
+	 * }
 	 */
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
@@ -861,6 +867,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $https_import_stylesheet_url ) ) {
 			$this->imported_font_urls[] = $https_import_stylesheet_url;
 			$css_list->remove( $item );
+			_doing_it_wrong(
+				'wp_enqueue_style',
+				esc_html( sprintf(
+					/* translators: %s is URL to font CDN */
+					__( 'It is not a best practice to use @import to load font CDN stylesheets. Please use wp_enqueue_style() to enqueue %s as its own separate script.', 'amp' ),
+					$import_stylesheet_url
+				) ),
+				'1.0'
+			);
 			return array();
 		}
 

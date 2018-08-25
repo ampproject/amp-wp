@@ -1260,6 +1260,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test CSS imports.
 	 *
+	 * @expectedIncorrectUsage wp_enqueue_style
 	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
 	 */
 	public function test_css_import() {
