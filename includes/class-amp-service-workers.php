@@ -47,7 +47,7 @@ class AMP_Service_Workers {
 	public static function add_amp_runtime_caching( WP_Service_Workers $service_workers ) {
 
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
-		$service_workers->register( 'amp-runtime-precaching', array( __CLASS__, 'get_runtime_precache_script' ) );
+		$service_workers->register_script( 'amp-runtime-precaching', array( __CLASS__, 'get_runtime_precache_script' ) );
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background.
 		$service_workers->register_cached_route(
