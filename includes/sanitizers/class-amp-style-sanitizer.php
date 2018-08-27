@@ -206,6 +206,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $processed_imported_stylesheet_urls = array();
 
 	/**
+	 * List of font stylesheets that were @import'ed which should have been <link>'ed to instead.
+	 *
+	 * These font URLs will be cached with the parsed CSS and then converted into stylesheet links.
+	 *
+	 * @var array
+	 */
+	private $imported_font_urls = array();
+
+	/**
 	 * Mapping of HTML element selectors to AMP selector elements.
 	 *
 	 * @var array
@@ -465,7 +474,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see WP_Styles::_css_href()
 	 *
 	 * @param string   $url The file URL.
-	 * @param string[] $allowed_extensions Allowed file extensions.
+	 * @param string[] $allowed_extensions Allowed file extensions for local files.
 	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
@@ -504,7 +513,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$pattern = sprintf( '/\.(%s)$/i', implode( '|', $allowed_extensions ) );
 			if ( ! preg_match( $pattern, $url ) ) {
 				/* translators: %s: the file URL. */
-				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'Skipped file which does not have an allowed file extension (%s).', 'amp' ), $url ) );
+				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'File does not have an allowed file extension for filesystem access (%s).', 'amp' ), $url ) );
 			}
 		}
 
@@ -576,17 +585,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
 		}
 
-		$stylesheet = $this->process_stylesheet( $stylesheet, array(
+		$processed = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
 			'property_whitelist' => $cdata_spec['css_spec']['declaration'],
 			'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
 		) );
 
-		$this->pending_stylesheets[] = array(
-			'keyframes'  => $is_keyframes,
-			'stylesheet' => $stylesheet,
-			'node'       => $element,
-			'sources'    => $this->current_sources,
+		$this->pending_stylesheets[] = array_merge(
+			array(
+				'keyframes' => $is_keyframes,
+				'node'      => $element,
+				'sources'   => $this->current_sources,
+			),
+			wp_array_slice_assoc( $processed, array( 'stylesheet', 'imported_font_urls' ) )
 		);
 
 		if ( $element->hasAttribute( 'amp-custom' ) ) {
@@ -656,7 +667,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
 
-		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+		if ( is_wp_error( $css_file_path ) && ( 'disallowed_file_extension' === $css_file_path->get_error_code() || 'external_file_url' === $css_file_path->get_error_code() ) ) {
 			$contents = $this->fetch_external_stylesheet( $normalized_url );
 			if ( is_wp_error( $contents ) ) {
 				$this->remove_invalid_child( $element, array(
@@ -692,18 +703,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
-		$stylesheet = $this->process_stylesheet( $stylesheet, array(
+		$processed = $this->process_stylesheet( $stylesheet, array(
 			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
 			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 			'stylesheet_url'     => $href,
 			'stylesheet_path'    => $css_file_path,
 		) );
 
-		$this->pending_stylesheets[] = array(
-			'keyframes'  => false,
-			'stylesheet' => $stylesheet,
-			'node'       => $element,
-			'sources'    => $this->current_sources, // Needed because node is removed below.
+		$this->pending_stylesheets[] = array_merge(
+			array(
+				'keyframes' => false,
+				'node'      => $element,
+				'sources'   => $this->current_sources, // Needed because node is removed below.
+			),
+			wp_array_slice_assoc( $processed, array( 'stylesheet', 'imported_font_urls' ) )
 		);
 
 		// Remove now that styles have been processed.
@@ -755,12 +768,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type array    $allowed_at_rules            Allowed @-rules.
 	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
 	 * }
-	 * @return array Processed stylesheet parts.
+	 * @return array {
+	 *    Processed stylesheet.
+	 *
+	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
+	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type array $imported_font_urls Imported font stylesheet URLs.
+	 * }
 	 */
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v10'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v11'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -809,7 +828,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		return $parsed['stylesheet'];
+		return $parsed;
 	}
 
 	/**
@@ -843,9 +862,26 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] = true;
 
+		// Prevent importing font stylesheets from allowed font CDNs. These will get added to the document as links instead.
+		$https_import_stylesheet_url = preg_replace( '#^(http:)?(?=//)#', 'https:', $import_stylesheet_url );
+		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $https_import_stylesheet_url ) ) {
+			$this->imported_font_urls[] = $https_import_stylesheet_url;
+			$css_list->remove( $item );
+			_doing_it_wrong(
+				'wp_enqueue_style',
+				esc_html( sprintf(
+					/* translators: %s is URL to font CDN */
+					__( 'It is not a best practice to use @import to load font CDN stylesheets. Please use wp_enqueue_style() to enqueue %s as its own separate script.', 'amp' ),
+					$import_stylesheet_url
+				) ),
+				'1.0'
+			);
+			return array();
+		}
+
 		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, array( 'css', 'less', 'scss', 'sass' ) );
 
-		if ( is_wp_error( $css_file_path ) && 'external_file_url' === $css_file_path->get_error_code() ) {
+		if ( is_wp_error( $css_file_path ) && ( 'disallowed_file_extension' === $css_file_path->get_error_code() || 'external_file_url' === $css_file_path->get_error_code() ) ) {
 			$contents = $this->fetch_external_stylesheet( $import_stylesheet_url );
 			if ( is_wp_error( $contents ) ) {
 				$error     = array(
@@ -922,6 +958,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function parse_stylesheet( $stylesheet_string, $options ) {
 		$validation_results = array();
 		$css_document       = null;
+
+		$this->imported_font_urls = array();
 		try {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
 			$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
@@ -960,7 +998,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$validation_results[] = compact( 'error', 'sanitized' );
 		}
-		return compact( 'validation_results', 'css_document' );
+		return array_merge(
+			compact( 'validation_results', 'css_document' ),
+			array(
+				'imported_font_urls' => $this->imported_font_urls,
+			)
+		);
 	}
 
 	/**
@@ -975,6 +1018,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
 	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type array $imported_font_urls Imported font stylesheet URLs.
 	 * }
 	 */
 	private function prepare_stylesheet( $stylesheet_string, $options = array() ) {
@@ -1098,7 +1142,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->parse_css_duration += ( microtime( true ) - $start_time );
 
-		return compact( 'stylesheet', 'validation_results' );
+		return array_merge(
+			compact( 'stylesheet', 'validation_results' ),
+			array(
+				'imported_font_urls' => $parsed_stylesheet['imported_font_urls'],
+			)
+		);
 	}
 
 	/**
@@ -1475,8 +1524,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				// Ensure file exists.
-				$path = $this->get_validated_url_file_path( $guessed_url );
+				// Ensure font file exists.
+				$path = $this->get_validated_url_file_path( $guessed_url, array( 'woff', 'woff2', 'ttf', 'otf', 'svg' ) );
 				if ( is_wp_error( $path ) ) {
 					continue;
 				}
@@ -1658,16 +1707,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
-		$stylesheet = $this->process_stylesheet( $rule, array(
+		$processed = $this->process_stylesheet( $rule, array(
 			'allowed_at_rules'   => array(),
 			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 		) );
 
 		$element->removeAttribute( 'style' );
 
-		if ( $stylesheet ) {
+		if ( $processed['stylesheet'] ) {
 			$this->pending_stylesheets[] = array(
-				'stylesheet' => $stylesheet,
+				'stylesheet' => $processed['stylesheet'],
 				'node'       => $element,
 				'sources'    => $this->current_sources,
 			);
@@ -1710,6 +1759,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			),
 		);
 
+		$imported_font_urls = array();
+
 		/*
 		 * On Native AMP themes when there are new/rejected validation errors present, a parsed stylesheet may include
 		 * @import rules. These must be moved to the beginning to be honored.
@@ -1737,6 +1788,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_sets[ $set_name ]['total_size']           += $size;
 			$stylesheet_sets[ $set_name ]['imports']               = $imports;
 			$stylesheet_sets[ $set_name ]['pending_stylesheets'][] = $pending_stylesheet;
+
+			if ( ! empty( $pending_stylesheet['imported_font_urls'] ) ) {
+				$imported_font_urls = array_merge( $imported_font_urls, $pending_stylesheet['imported_font_urls'] );
+			}
 		}
 
 		// Process the pending stylesheets.
@@ -1825,6 +1880,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$this->amp_custom_style_element
 				);
 			}
+		}
+
+		/*
+		 * Add font stylesheets from CDNs which were extracted from @import rules.
+		 * We can't add crossorigin=anonymous to these since such a CORS request would not be made in the non-AMP version,
+		 * and so if the service worker cached the opaque response on the non-AMP version then it wouldn't be usable in
+		 * the AMP version if it was requested with CORS.
+		 */
+		foreach ( array_unique( $imported_font_urls ) as $imported_font_url ) {
+			$link = $this->dom->createElement( 'link' );
+			$link->setAttribute( 'rel', 'stylesheet' );
+			$link->setAttribute( 'href', $imported_font_url );
+			$this->head->appendChild( $link );
 		}
 
 		// Add style[amp-keyframes] to document.
