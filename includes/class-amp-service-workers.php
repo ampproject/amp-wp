@@ -47,7 +47,7 @@ class AMP_Service_Workers {
 	public static function add_amp_runtime_caching( WP_Service_Workers $service_workers ) {
 
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
-		$service_workers->register_script( 'amp-runtime-precaching', array( __CLASS__, 'get_runtime_precache_script' ) );
+		self::register_runtime_precaches();
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background.
 		$service_workers->register_cached_route(
@@ -83,7 +83,7 @@ class AMP_Service_Workers {
 	}
 
 	/**
-	 * Get runtime precache script.
+	 * Register URLs that will be precached in the runtime cache. (Yes, this sounds somewhat strange.)
 	 *
 	 * Note that the PWA plugin handles the precaching of custom logo, custom header,
 	 * and custom background. The PWA plugin also automatically adds runtime caching
@@ -91,10 +91,9 @@ class AMP_Service_Workers {
 	 * offline/500 error pages, enabling navigation preload,
 	 *
 	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
-	 *
-	 * @return string Runtime precache script.
+	 * @return int Number of cached assets.
 	 */
-	public static function get_runtime_precache_script() {
+	public static function register_runtime_precaches() {
 
 		// List of AMP scripts that we know will be used in WordPress always.
 		$precached_handles = array(
@@ -119,19 +118,13 @@ class AMP_Service_Workers {
 			}
 		}
 
-		ob_start();
-		?>
-		<script>
-			self.addEventListener( 'install', event => {
-				event.waitUntil(
-					caches.open( wp.serviceWorker.core.cacheNames.runtime ).then(
-						cache => cache.addAll( <?php echo wp_json_encode( $urls, 128 | 64 /* JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES */ ); ?> )
-					)
-				);
-			});
-		</script>
-		<?php
-		return str_replace( array( '<script>', '</script>' ), '', ob_get_clean() );
+		foreach ( $urls as $url ) {
+			wp_service_workers()->register_precached_route( $url, array(
+				'cache' => WP_Service_Workers::RUNTIME_CACHE_NAME,
+			) );
+		}
+
+		return count( $urls );
 	}
 
 	/**
