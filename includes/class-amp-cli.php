@@ -119,7 +119,7 @@ class AMP_CLI {
 	 *
 	 * Templates are each a separate type, like those for is_category() and is_tag().
 	 * Also, each post type is a separate type.
-	 * This value is overridden if the WP-CLI command has an --n argument, like --n=10.
+	 * This value is overridden if the WP-CLI command has an --limit argument, like --limit=10.
 	 *
 	 * @var int
 	 */
@@ -142,11 +142,11 @@ class AMP_CLI {
 	 *
 	 * ## OPTIONS
 	 *
-	 * [--limit=<templates>]
+	 * [--limit=<count>]
 	 * : The maximum number of URLs to validate for each template and content type.
-	 * ----
+	 * ---
 	 * default: 100
-	 * ----
+	 * ---
 	 *
 	 * [--include=<templates>]
 	 * : Only validates a URL if one of the conditionals is true.
@@ -183,8 +183,8 @@ class AMP_CLI {
 
 		if ( ! current_theme_supports( 'amp' ) ) {
 			if ( self::$force_crawl_urls ) {
-				/**
-				 * There is no theme support added programatically or via options.
+				/*
+				 * There is no theme support added programmatically or via options.
 				 * So the validation taxonomy and post type would not normally be registered.
 				 * Register them here in order to use them to crawl the site.
 				 */
