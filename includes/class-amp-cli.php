@@ -181,13 +181,16 @@ class AMP_CLI {
 			self::$force_crawl_urls = true;
 		}
 
-		if ( ! current_theme_supports( 'amp' ) ) {
+		$theme_support_amp = current_theme_supports( 'amp' );
+
+		if ( ! $theme_support_amp ) {
 			if ( self::$force_crawl_urls ) {
 				/*
 				 * There is no theme support added programmatically or via options.
 				 * So the validation taxonomy and post type would not normally be registered.
 				 * Register them here in order to use them to crawl the site.
 				 */
+				add_theme_support( 'amp' );
 				AMP_Validation_Error_Taxonomy::register();
 				AMP_Invalid_URL_Post_Type::register();
 			} else {
@@ -232,12 +235,6 @@ class AMP_CLI {
 		self::crawl_site();
 		self::$wp_cli_progress->finish();
 
-		$url_more_details = add_query_arg(
-			'post_type',
-			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-			admin_url( 'edit.php' )
-		);
-
 		$key_template_type = __( 'Template or content type', 'amp' );
 		$key_url_count     = __( 'URL Count', 'amp' );
 		$key_validity_rate = __( 'Validity Rate', 'amp' );
@@ -251,18 +248,34 @@ class AMP_CLI {
 			);
 		}
 
+		if ( empty( $table_validation_by_type ) ) {
+			WP_CLI::error( __( 'No validation results were obtained from the URLs.', 'amp' ) );
+			return;
+		}
+
 		WP_CLI::success(
 			sprintf(
 				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the list of validation by type, $5%s is the link for more details */
-				__( "%3\$d crawled URLs have unaccepted issue(s) out of %2\$d total which AMP validation issue(s); %1\$d URLs were crawled. \n\nFor more details, please see: \n%4\$s \n", 'amp' ),
+				__( '%3$d crawled URLs have unaccepted issue(s) out of %2$d total which AMP validation issue(s); %1$d URLs were crawled.', 'amp' ),
 				self::$number_crawled,
 				self::$total_errors,
-				self::$unaccepted_errors,
-				$url_more_details
+				self::$unaccepted_errors
 			)
 		);
 
 		// Output a table of validity by template/content type.
+		if ( $theme_support_amp ) {
+			$url_more_details = add_query_arg(
+				'post_type',
+				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				admin_url( 'edit.php' )
+			);
+			/* translators: %s is the URL to the admin */
+			WP_CLI::line( sprintf( __( 'For more details, please see: %s', 'amp' ), $url_more_details ) );
+		} else {
+			WP_CLI::warning( __( 'You cannot currently access the detailed validation results because you have not switched to native or paired AMP template modes.', 'amp' ) );
+		}
+
 		WP_CLI\Utils\format_items(
 			'table',
 			$table_validation_by_type,
