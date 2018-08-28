@@ -564,7 +564,7 @@ class AMP_CLI {
 	/**
 	 * Validates the URL, stores the results, and increments the counts.
 	 *
-	 * @param string $url The URL to validate.
+	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
 	public static function validate_and_store_url( $url, $type ) {
@@ -578,6 +578,8 @@ class AMP_CLI {
 		 * One cause of an error is if the validation request results in a 404 response code.
 		 */
 		if ( is_wp_error( $validity ) ) {
+			/* translators: %1$s is error code, %2$s is error message, and %3$s is the actual URL. */
+			WP_CLI::warning( sprintf( __( 'Validate URL error (%1$s): %2$s URL: %3$s', 'amp' ), $validity->get_error_code(), $validity->get_error_message(), $url ) );
 			return;
 		}
 		if ( self::$wp_cli_progress ) {
