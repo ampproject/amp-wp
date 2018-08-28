@@ -296,7 +296,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 								'id'     => 'bar',
 								'onload' => 'someFunc()',
 							),
-						'type'               => AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE,
+						'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 					),
 					$error
 				);
@@ -323,7 +323,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 								'id'     => 'bar',
 								'onload' => 'someFunc()',
 							),
-						'type'               => AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE,
+						'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 					),
 					$error
 				);
