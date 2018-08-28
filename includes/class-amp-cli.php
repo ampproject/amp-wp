@@ -525,10 +525,9 @@ class AMP_CLI {
 			array( 'AMP_CLI', 'does_taxonomy_support_amp' )
 		);
 		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
-		$i                      = 0;
 
 		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
-		while ( $i < self::$limit_type_validate_count ) {
+		for ( $i = 0; $i < self::$limit_type_validate_count; $i++ ) {
 			// Validate all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type, $i, 1 ) );
@@ -549,13 +548,17 @@ class AMP_CLI {
 			if ( ! empty( $author_page_urls[0] ) ) {
 				self::validate_and_store_url( $author_page_urls[0], 'author' );
 			}
-
-			$i++;
 		}
 
 		// Only validate 1 date and 1 search page.
-		self::validate_and_store_url( self::get_date_page(), 'date' );
-		self::validate_and_store_url( self::get_search_page(), 'search' );
+		$url = self::get_date_page();
+		if ( $url ) {
+			self::validate_and_store_url( $url, 'date' );
+		}
+		$url = self::get_search_page();
+		if ( $url ) {
+			self::validate_and_store_url( $url, 'search' );
+		}
 	}
 
 	/**
