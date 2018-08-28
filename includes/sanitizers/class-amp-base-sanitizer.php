@@ -462,7 +462,8 @@ abstract class AMP_Base_Sanitizer {
 				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
 			}
 			if ( ! isset( $error['type'] ) ) {
-				$error['type'] = AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE;
+				// If this is an attribute that begins with on, like onclick, it should be a js_error.
+				$error['type'] = preg_match( '/^on[a-zA-Z]/', $node->nodeName ) ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE;
 			}
 			$error['element_attributes'] = array();
 			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
