@@ -1114,7 +1114,8 @@ EOB;
 			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
 				'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
 					$expected = $expected_errors[ $error_index ];
-					$tag      = $expected['node_name'];
+					$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE;
+					$tag = $expected['node_name'];
 					$that->assertEquals( $expected, $error );
 					$that->assertInstanceOf( 'DOMElement', $context['node'] );
 					$that->assertEquals( $tag, $context['node']->tagName );

@@ -76,6 +76,31 @@ class AMP_Validation_Error_Taxonomy {
 	const INVALID_ATTRIBUTE_CODE = 'invalid_attribute';
 
 	/**
+	 * The 'type' of error that applies to most errors with the 'code' of 'invalid_element' and 'invalid_attribute'.
+	 *
+	 * Except for 'invalid_element' errors for a <script>, which have the JS_ERROR_TYPE.
+	 * This allows filtering by type in the taxonomy page, like displaying only HTML errors, or only CSS errors.
+	 *
+	 * @var string
+	 */
+	const HTML_ERROR_TYPE = 'html_error';
+
+	/**
+	 * The 'type' of error that applies to the error 'code' of 'invalid_element' when the node is a <script>.
+	 * This applies both when enqueuing a script, and when a <script> is echoed directly.
+	 *
+	 * @var string
+	 */
+	const JS_ERROR_TYPE = 'js_error';
+
+	/**
+	 * The 'type' of all CSS errors, no matter what the 'code'.
+	 *
+	 * @var string
+	 */
+	const CSS_ERROR_TYPE = 'css_error';
+
+	/**
 	 * The key for removed elements.
 	 *
 	 * @var string

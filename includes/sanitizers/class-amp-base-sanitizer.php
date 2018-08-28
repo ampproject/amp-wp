@@ -436,6 +436,11 @@ abstract class AMP_Base_Sanitizer {
 			if ( ! isset( $error['code'] ) ) {
 				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
 			}
+
+			if ( ! isset( $error['type'] ) ) {
+				$error['type'] = 'script' === $node->nodeName ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE;
+			}
+
 			$error['node_attributes'] = array();
 			foreach ( $node->attributes as $attribute ) {
 				$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
@@ -455,6 +460,9 @@ abstract class AMP_Base_Sanitizer {
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $error['code'] ) ) {
 				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+			}
+			if ( ! isset( $error['type'] ) ) {
+				$error['type'] = AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE;
 			}
 			$error['element_attributes'] = array();
 			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
