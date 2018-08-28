@@ -143,8 +143,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		remove_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = '';
-		$_GET[ AMP_CLI::FORCE_VALIDATION_QUERY_VAR ]        = '';
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
 		AMP_Theme_Support::read_theme_support();
 		$this->assertTrue( AMP_Theme_Support::is_support_added_via_option() );
 		$this->assertTrue( get_theme_support( 'amp' ) );

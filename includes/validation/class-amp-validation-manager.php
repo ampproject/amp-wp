@@ -187,6 +187,21 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Determine whether AMP theme support is forced via the amp_validate query param.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool Whether theme support forced.
+	 */
+	public static function is_theme_support_forced() {
+		return (
+			isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF OK.
+			&&
+			( self::has_cap() || self::get_amp_validate_nonce() === $_GET[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF OK.
+		);
+	}
+
+	/**
 	 * Return whether sanitization is forcibly accepted, whether because in native mode or via user option.
 	 *
 	 * @return bool Whether sanitization is forcibly accepted.
@@ -1654,7 +1669,7 @@ class AMP_Validation_Manager {
 		}
 
 		$url = remove_query_arg(
-			array_merge( array_keys( $added_query_vars ), array( AMP_CLI::FORCE_VALIDATION_QUERY_VAR ) ),
+			array_keys( $added_query_vars ),
 			$validation_url
 		);
 

@@ -27,18 +27,6 @@ class AMP_CLI {
 	const FLAG_NAME_FORCE_VALIDATION = 'force';
 
 	/**
-	 * The query var key to force AMP validation, regardless or whether the user has deselected support for a URL.
-	 *
-	 * If the WP-CLI flag above is present in the command,
-	 * this query var is added to the validation URL.
-	 * Then, this forces validation, no matter whether the user has deselected a certain template,
-	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 *
-	 * @var string
-	 */
-	const FORCE_VALIDATION_QUERY_VAR = 'amp_force_validation';
-
-	/**
 	 * The WP-CLI argument to validate based on certain conditionals
 	 *
 	 * For example, --include=is_tag,is_author
@@ -581,9 +569,6 @@ class AMP_CLI {
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
 	public static function validate_and_store_url( $url, $type ) {
-		if ( self::$force_crawl_urls ) {
-			$url = add_query_arg( self::FORCE_VALIDATION_QUERY_VAR, '', $url );
-		}
 		$validity = AMP_Validation_Manager::validate_url( $url );
 
 		/*

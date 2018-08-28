@@ -287,13 +287,13 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	/**
+	/*
 	 * If this is a URL for validation, and validation is forced for all URLs, return true.
 	 * Normally, this would be false if the user has deselected a template,
 	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
 	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
 	 */
-	if ( isset( $_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ], $_GET[ AMP_CLI::FORCE_VALIDATION_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
 		return true;
 	}
 

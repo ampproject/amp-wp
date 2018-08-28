@@ -362,8 +362,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( is_amp_endpoint() );
 
 		// When the user passes a flag to the WP-CLI command, it forces AMP validation no matter whether the user disabled AMP on any template.
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
-		$_GET[ AMP_CLI::FORCE_VALIDATION_QUERY_VAR ]        = 1;
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
 		$this->assertTrue( is_amp_endpoint() );
 	}
 
