@@ -184,6 +184,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			'data-amp-lightbox' => '',
 			'on'                => 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID,
 			'role'              => 'button',
+			'tabindex'          => 0,
 		);
 
 		for ( $j = $num_images - 1; $j >= 0; $j-- ) {

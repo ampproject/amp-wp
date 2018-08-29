@@ -40,7 +40,7 @@ abstract class AMP_Rule_Spec {
 	 */
 	const ALLOW_EMPTY             = 'allow_empty';
 	const ALLOW_RELATIVE          = 'allow_relative';
-	const ALLOWED_PROTOCOL        = 'allowed_protocol';
+	const ALLOWED_PROTOCOL        = 'protocol';
 	const ALTERNATIVE_NAMES       = 'alternative_names';
 	const BLACKLISTED_VALUE_REGEX = 'blacklisted_value_regex';
 	const DISALLOWED_DOMAIN       = 'disallowed_domain';

@@ -27,6 +27,34 @@ class AMP_Theme_Support {
 	const RESPONSE_CACHE_GROUP = 'amp-response';
 
 	/**
+	 * Post-processor cache effectiveness group name.
+	 *
+	 * @var string
+	 */
+	const POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP = 'post_processor_cache_effectiveness_group';
+
+	/**
+	 * Post-processor cache effectiveness key name.
+	 *
+	 * @var string
+	 */
+	const POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY = 'post_processor_cache_effectiveness';
+
+	/**
+	 * Cache miss threshold for determining when to disable post-processor cache.
+	 *
+	 * @var int
+	 */
+	const CACHE_MISS_THRESHOLD = 20;
+
+	/**
+	 * Cache miss URL option name.
+	 *
+	 * @var string
+	 */
+	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -109,10 +137,6 @@ class AMP_Theme_Support {
 			return;
 		}
 
-		AMP_Validation_Manager::init( array(
-			'should_locate_sources' => AMP_Validation_Manager::should_validate_response(),
-		) );
-
 		self::$init_start_time = microtime( true );
 
 		self::purge_amp_query_vars();
@@ -176,6 +200,8 @@ class AMP_Theme_Support {
 				'paired' => ( 'paired' === $theme_support_option ),
 			) );
 			self::$support_added_via_option = true;
+		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
+			add_theme_support( 'amp' );
 		}
 	}
 
@@ -1760,6 +1786,13 @@ class AMP_Theme_Support {
 		$current_url = amp_get_current_url();
 		$ampless_url = amp_remove_endpoint( $current_url );
 
+		// When response caching is enabled, determine if it should be turned off for cache misses.
+		$caches_for_url = null;
+		if ( true === $args['enable_response_caching'] ) {
+			list( $disable_response_caching, $caches_for_url ) = self::check_for_cache_misses();
+			$args['enable_response_caching']                   = ! $disable_response_caching;
+		}
+
 		// Return cache if enabled and found.
 		$cache_response = null;
 		if ( true === $args['enable_response_caching'] ) {
@@ -1802,7 +1835,15 @@ class AMP_Theme_Support {
 				return $response_cache['body'];
 			}
 
-			$cache_response = function( $body, $validation_results ) use ( $response_cache_key ) {
+			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
+				$caches_for_url[] = $response_cache_key;
+				wp_cache_set(
+					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY,
+					$caches_for_url,
+					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP,
+					600 // 10 minute cache.
+				);
+
 				return wp_cache_set(
 					$response_cache_key,
 					compact( 'body', 'validation_results' ),
@@ -1954,6 +1995,67 @@ class AMP_Theme_Support {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Check for cache misses. When found, store in an option to retain the URL.
+	 *
+	 * @since 1.0
+	 *
+	 * @return array {
+	 *     State.
+	 *
+	 *     @type bool       Flag indicating if the threshold has been exceeded.
+	 *     @type string[]   Collection of URLs.
+	 * }
+	 */
+	private static function check_for_cache_misses() {
+		// If the cache miss threshold is exceeded, return true.
+		if ( self::exceeded_cache_miss_threshold() ) {
+			return array( true, null );
+		}
+
+		// Get the cache miss URLs.
+		$cache_miss_urls = wp_cache_get( self::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, self::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
+		$cache_miss_urls = is_array( $cache_miss_urls ) ? $cache_miss_urls : array();
+
+		$exceeded_threshold = (
+			! empty( $cache_miss_urls )
+			&&
+			count( $cache_miss_urls ) >= self::CACHE_MISS_THRESHOLD
+		);
+
+		if ( ! $exceeded_threshold ) {
+			return array( $exceeded_threshold, $cache_miss_urls );
+		}
+
+		// When the threshold is exceeded, store the URL for cache miss and turn off response caching.
+		update_option( self::CACHE_MISS_URL_OPTION, amp_get_current_url() );
+		AMP_Options_Manager::update_option( 'enable_response_caching', false );
+		return array( true, null );
+	}
+
+	/**
+	 * Reset the cache miss URL option.
+	 *
+	 * @since 1.0
+	 */
+	public static function reset_cache_miss_url_option() {
+		if ( get_option( self::CACHE_MISS_URL_OPTION ) ) {
+			delete_option( self::CACHE_MISS_URL_OPTION );
+		}
+	}
+
+	/**
+	 * Checks if cache miss threshold has been exceeded.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool
+	 */
+	public static function exceeded_cache_miss_threshold() {
+		$url = get_option( self::CACHE_MISS_URL_OPTION, false );
+		return ! empty( $url );
 	}
 
 	/**

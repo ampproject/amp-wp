@@ -31,6 +31,7 @@ class AMP_Options_Manager {
 		'disable_admin_bar'       => false,
 		'all_templates_supported' => true,
 		'supported_templates'     => array( 'is_singular' ),
+		'enable_response_caching' => true,
 	);
 
 	/**
@@ -48,6 +49,7 @@ class AMP_Options_Manager {
 
 		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
 	}
 
 	/**
@@ -78,6 +80,7 @@ class AMP_Options_Manager {
 		if ( empty( $options ) ) {
 			$options = array();
 		}
+		self::$defaults['enable_response_caching'] = wp_using_ext_object_cache();
 		return array_merge( self::$defaults, $options );
 	}
 
@@ -197,6 +200,16 @@ class AMP_Options_Manager {
 
 		// Store the current version with the options so we know the format.
 		$options['version'] = AMP__VERSION;
+
+		// Handle the caching option.
+		$options['enable_response_caching'] = (
+			wp_using_ext_object_cache()
+			&&
+			! empty( $new_options['enable_response_caching'] )
+		);
+		if ( $options['enable_response_caching'] ) {
+			AMP_Theme_Support::reset_cache_miss_url_option();
+		}
 
 		return $options;
 	}
@@ -324,5 +337,44 @@ class AMP_Options_Manager {
 				esc_html__( 'More details', 'amp' )
 			);
 		}
+	}
+
+	/**
+	 * Render the cache miss admin notice.
+	 *
+	 * @return void
+	 */
+	public static function render_cache_miss_notice() {
+		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+			return;
+		}
+
+		if ( ! self::show_response_cache_disabled_notice() ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( "The AMP plugin's post-processor cache disabled due to the detection of highly-variable content.", 'amp' ),
+			esc_url( 'https://github.com/Automattic/amp-wp/wiki/Post-Processor-Cache' ),
+			esc_html__( 'More details', 'amp' )
+		);
+	}
+
+	/**
+	 * Show the response cache disabled notice.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool
+	 */
+	public static function show_response_cache_disabled_notice() {
+		return (
+			wp_using_ext_object_cache()
+			&&
+			! self::get_option( 'enable_response_caching' )
+			&&
+			AMP_Theme_Support::exceeded_cache_miss_threshold()
+		);
 	}
 }

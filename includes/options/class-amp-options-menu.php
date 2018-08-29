@@ -109,6 +109,19 @@ class AMP_Options_Menu {
 			)
 		);
 
+		if ( wp_using_ext_object_cache() ) {
+			add_settings_field(
+				'caching',
+				__( 'Caching', 'amp' ),
+				array( $this, 'render_caching' ),
+				AMP_Options_Manager::OPTION_NAME,
+				'general',
+				array(
+					'class' => 'amp-caching-field',
+				)
+			);
+		}
+
 		$submenus = array(
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
 		);
@@ -177,6 +190,39 @@ class AMP_Options_Menu {
 					</dt>
 					<dd>
 						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+
+						<?php if ( ! current_theme_supports( 'amp' ) && wp_count_posts( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
+							<div class="notice notice-info inline notice-alt">
+								<p>
+									<?php
+									echo wp_kses_post(
+										sprintf(
+											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
+											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
+											sprintf(
+												'<a href="%s">%s</a>',
+												esc_url( add_query_arg( 'post_type', AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
+												esc_html( get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
+											),
+											sprintf(
+												'<a href="%s">%s</a>',
+												esc_url(
+													add_query_arg(
+														array(
+															'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+															'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+														),
+														admin_url( 'edit-tags.php' )
+													)
+												),
+												esc_html( get_taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG )->labels->name )
+											)
+										)
+									);
+									?>
+								</p>
+							</div>
+						<?php endif; ?>
 					</dd>
 				</dl>
 			</fieldset>
@@ -387,6 +433,34 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Render the caching settings section.
+	 *
+	 * @since 1.0
+	 *
+	 * @todo Change the messaging and description to be user-friendly and helpful.
+	 */
+	public function render_caching() {
+		?>
+		<fieldset>
+			<?php if ( AMP_Options_Manager::show_response_cache_disabled_notice() ) : ?>
+				<div class="notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
+					<p><?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s post-processor cache was automatically disabled.', 'amp' ); ?>
+						<a href="<?php echo esc_url( 'https://github.com/Automattic/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
+				</div>
+			<?php endif; ?>
+			<p>
+				<label for="enable_response_caching">
+					<input id="enable_response_caching" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_response_caching]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'enable_response_caching' ) ); ?>>
+					<?php esc_html_e( 'Enable post-processor caching.', 'amp' ); ?>
+				</label>
+			</p>
+			<p class="description"><?php esc_html_e( 'This will enable post-processor caching to speed up processing an AMP response after WordPress renders a template.', 'amp' ); ?></p>
+		</fieldset>
 		<?php
 	}
 
