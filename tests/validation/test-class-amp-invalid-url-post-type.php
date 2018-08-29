@@ -400,6 +400,40 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_post_staleness method.
+	 *
+	 * @covers AMP_Invalid_URL_Post_Type::get_post_staleness()
+	 */
+	public function test_get_post_staleness() {
+		$error = array( 'code' => 'foo' );
+		switch_theme( 'twentysixteen' );
+		update_option( 'active_plugins', array( 'foo/foo.php', 'bar.php' ) );
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( array( $error ), home_url( '/' ) );
+		$this->assertInternalType( 'int', $invalid_url_post_id );
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id ) );
+
+		update_option( 'active_plugins', array( 'foo/foo.php', 'baz.php' ) );
+		$staleness = AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
+		$this->assertNotEmpty( $staleness );
+		$this->assertArrayHasKey( 'plugins', $staleness );
+		$this->assertArrayNotHasKey( 'theme', $staleness );
+
+		$this->assertEqualSets( array( 'baz.php' ), $staleness['plugins']['new'] );
+		$this->assertEqualSets( array( 'bar.php' ), $staleness['plugins']['old'] );
+
+		switch_theme( 'twentyseventeen' );
+		$next_staleness = AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
+		$this->assertArrayHasKey( 'theme', $next_staleness );
+		$this->assertEquals( 'twentysixteen', $next_staleness['theme'] );
+		$this->assertSame( $next_staleness['plugins'], $staleness['plugins'] );
+
+		// Re-storing results updates freshness.
+		AMP_Invalid_URL_Post_Type::store_validation_errors( array( $error ), home_url( '/' ), $invalid_url_post_id );
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id ) );
+	}
+
+	/**
 	 * Test filter_views_edit.
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_views_edit()
