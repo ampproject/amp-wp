@@ -172,10 +172,7 @@ class AMP_Validation_Error_Taxonomy {
 		if ( current_theme_supports( 'amp' ) ) {
 			return true;
 		}
-		if ( 'edit-tags.php' === $pagenow && ( isset( $_GET['taxonomy'] ) && self::TAXONOMY_SLUG === $_GET['taxonomy'] ) ) { // WPCS: CSRF OK.
-			return true;
-		}
-		return false;
+		return ( 'edit-tags.php' === $pagenow && ( isset( $_GET['taxonomy'] ) && self::TAXONOMY_SLUG === $_GET['taxonomy'] ) ); // WPCS: CSRF OK.
 	}
 
 	/**

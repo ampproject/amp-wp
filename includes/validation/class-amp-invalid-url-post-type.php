@@ -119,10 +119,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( current_theme_supports( 'amp' ) ) {
 			return true;
 		}
-		if ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ) { // WPCS: CSRF OK.
-			return true;
-		}
-		return false;
+		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // WPCS: CSRF OK.
 	}
 
 	/**
