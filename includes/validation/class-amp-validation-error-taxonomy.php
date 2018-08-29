@@ -487,6 +487,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filter' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
 		} );
@@ -665,6 +666,44 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			return $clauses;
 		}, 10, 2 );
+	}
+
+	/**
+	 * Outputs the taxonomy filter UI for this taxonomy type.
+	 *
+	 * Similar to what appears on /wp-admin/edit.php for posts and pages,
+	 * this outputs a <select> element to choose the error type,
+	 * and a 'Filter' submit button that allows filtering for that type.
+	 * This allows viewing one type at a time, like only JS errors.
+	 *
+	 * @param string $taxonomy_name The name of the taxonomy.
+	 */
+	public static function render_taxonomy_filter( $taxonomy_name ) {
+		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
+			return;
+		}
+
+		$error_type_filter_value = isset( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+		$div_id                  = 'amp-tax-filter';
+		?>
+		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
+			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
+			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
+				<option value="-1"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::HTML_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML Error', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>><?php esc_html_e( 'JS Error', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>><?php esc_html_e( 'CSS Error', 'amp' ); ?></option>
+			</select>
+			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Filter', 'amp' ); ?>">
+		</div>
+
+		<script>
+			( function ( $ ) {
+				// Move the filter after the 'Bulk Actions' <select>, as it looks like there's no way to do this with simply an action.
+				$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
+			} )( jQuery );
+		</script>
+		<?php
 	}
 
 	/**

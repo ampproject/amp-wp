@@ -324,6 +324,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'redirect_term_location', array( self::TESTED_CLASS, 'add_term_filter_query_var' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
+		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_taxonomy_filter' ) ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', array( self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'add_admin_notices' ) ) );
@@ -442,6 +443,35 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		// If $taxonomies does not have the AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, the filter should return the clauses unchanged.
 		$taxonomies = array( 'post_tag' );
 		$this->assertEquals( $initial_clauses, apply_filters( $tested_filter, $initial_clauses, $taxonomies ) );
+	}
+
+	/**
+	 * Test render_taxonomy_filter.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_taxonomy_filter()
+	 */
+	public function test_render_taxonomy_filter() {
+		// When passing the wrong $taxonomy_name to the method, it should not output anything.
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_taxonomy_filter( 'category' );
+		$this->assertEmpty( ob_get_clean() );
+
+		// With the correct taxonomy name, the strings below should be present.
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_taxonomy_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$markup = ob_get_clean();
+
+		$expected_to_contain = array(
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
+			AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE,
+			AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+			'<script>',
+		);
+
+		foreach ( $expected_to_contain as $expected ) {
+			$this->assertContains( $expected, $markup );
+		}
 	}
 
 	/**
