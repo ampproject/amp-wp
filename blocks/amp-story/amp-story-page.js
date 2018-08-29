@@ -113,7 +113,7 @@ export default registerBlockType(
 			return [
 				<InspectorControls key='controls'>
 					<PanelColorSettings
-						title={ __( 'Page Background Color Settings', 'amp' ) }
+						title={ __( 'Background Color Settings', 'amp' ) }
 						initialOpen={ false }
 						colorSettings={ [
 							{
