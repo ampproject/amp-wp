@@ -96,7 +96,7 @@ class AMP_Invalid_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => AMP_Options_Manager::OPTION_NAME,
+				'show_in_menu' => ( self::should_show_in_menu() || AMP_Validation_Error_Taxonomy::should_show_in_menu() ) ? AMP_Options_Manager::OPTION_NAME : false,
 				// @todo Show in rest.
 			)
 		);
@@ -107,6 +107,19 @@ class AMP_Invalid_URL_Post_Type {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
+	}
+
+	/**
+	 * Determine whether the admin menu item should be included.
+	 *
+	 * @return bool Whether to show in menu.
+	 */
+	public static function should_show_in_menu() {
+		global $pagenow;
+		if ( current_theme_supports( 'amp' ) ) {
+			return true;
+		}
+		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // WPCS: CSRF OK.
 	}
 
 	/**

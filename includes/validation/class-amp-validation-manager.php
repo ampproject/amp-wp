@@ -148,7 +148,7 @@ class AMP_Validation_Manager {
 	public static function init( $args = array() ) {
 		$args = array_merge(
 			array(
-				'should_locate_sources' => false,
+				'should_locate_sources' => self::should_validate_response(),
 			),
 			$args
 		);
@@ -157,6 +157,11 @@ class AMP_Validation_Manager {
 
 		AMP_Invalid_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
+
+		// Short-circuit if AMP is not supported as only the post types should be available.
+		if ( ! current_theme_supports( 'amp' ) ) {
+			return;
+		}
 
 		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
@@ -184,6 +189,21 @@ class AMP_Validation_Manager {
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
 		}
+	}
+
+	/**
+	 * Determine whether AMP theme support is forced via the amp_validate query param.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool Whether theme support forced.
+	 */
+	public static function is_theme_support_forced() {
+		return (
+			isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF OK.
+			&&
+			( self::has_cap() || self::get_amp_validate_nonce() === $_GET[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF OK.
+		);
 	}
 
 	/**
