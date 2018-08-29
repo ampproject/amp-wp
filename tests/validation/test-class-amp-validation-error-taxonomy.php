@@ -55,7 +55,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertFalse( $taxonomy_object->hierarchical );
 		$this->assertTrue( $taxonomy_object->show_in_menu );
 		$this->assertFalse( $taxonomy_object->meta_box_cb );
-		$this->assertEquals( 'AMP Validation Errors', $taxonomy_object->label );
+		$this->assertEquals( 'Errors by Type', $taxonomy_object->label );
 		$this->assertEquals( 'do_not_allow', $taxonomy_object->cap->assign_terms );
 		$this->assertEquals( array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ), $taxonomy_object->object_type );
 
@@ -66,7 +66,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 'All AMP Validation Errors', $labels->all_items );
 		$this->assertEquals( 'Edit AMP Validation Error', $labels->edit_item );
 		$this->assertEquals( 'Update AMP Validation Error', $labels->update_item );
-		$this->assertEquals( 'Validation Errors', $labels->menu_name );
+		$this->assertEquals( 'Errors by Type', $labels->menu_name );
 		$this->assertEquals( 'Back to AMP Validation Errors', $labels->back_to_items );
 		$this->assertEquals( 'Frequent Validation Errors', $labels->popular_items );
 		$this->assertEquals( 'View Validation Error', $labels->view_item );
@@ -610,10 +610,10 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
 		$expected_submenu = array(
-			'Validation Errors',
+			'Errors by Type',
 			'manage_categories',
 			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
-			'Validation Errors',
+			'Errors by Type',
 		);
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );

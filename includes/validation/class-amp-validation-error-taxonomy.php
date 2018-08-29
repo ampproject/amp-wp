@@ -164,13 +164,13 @@ class AMP_Validation_Error_Taxonomy {
 
 		register_taxonomy( self::TAXONOMY_SLUG, AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array(
 			'labels'             => array(
-				'name'                  => _x( 'AMP Validation Errors', 'taxonomy general name', 'amp' ),
+				'name'                  => _x( 'Errors by Type', 'taxonomy general name', 'amp' ),
 				'singular_name'         => _x( 'AMP Validation Error', 'taxonomy singular name', 'amp' ),
 				'search_items'          => __( 'Search AMP Validation Errors', 'amp' ),
 				'all_items'             => __( 'All AMP Validation Errors', 'amp' ),
 				'edit_item'             => __( 'Edit AMP Validation Error', 'amp' ),
 				'update_item'           => __( 'Update AMP Validation Error', 'amp' ),
-				'menu_name'             => __( 'Validation Errors', 'amp' ),
+				'menu_name'             => __( 'Errors by Type', 'amp' ),
 				'back_to_items'         => __( 'Back to AMP Validation Errors', 'amp' ),
 				'popular_items'         => __( 'Frequent Validation Errors', 'amp' ),
 				'view_item'             => __( 'View Validation Error', 'amp' ),
@@ -884,7 +884,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Show AMP validation errors under AMP admin menu.
 	 */
 	public static function add_admin_menu_validation_error_item() {
-		$menu_item_label = esc_html__( 'Validation Errors', 'amp' );
+		$menu_item_label = esc_html__( 'Errors by Type', 'amp' );
 		$new_error_count = self::get_validation_error_count( array(
 			'group' => self::VALIDATION_ERROR_NEW_STATUS,
 		) );
@@ -895,7 +895,7 @@ class AMP_Validation_Error_Taxonomy {
 		$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
-			esc_html__( 'Validation Errors', 'amp' ),
+			esc_html__( 'Errors by Type', 'amp' ),
 			$menu_item_label,
 			$taxonomy_caps->manage_terms,
 			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
