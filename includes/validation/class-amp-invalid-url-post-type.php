@@ -743,6 +743,9 @@ class AMP_Invalid_URL_Post_Type {
 			esc_url( self::get_recheck_url( $post ) ),
 			esc_html__( 'Re-check', 'amp' )
 		);
+		if ( self::get_post_staleness( $post ) ) {
+			$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
+		}
 
 		return $actions;
 	}
@@ -1157,7 +1160,7 @@ class AMP_Invalid_URL_Post_Type {
 								esc_html_e( 'Different theme and plugins were active when these results were obtained. Please re-check.', 'amp' );
 							} elseif ( ! empty( $staleness['theme'] ) ) {
 								esc_html_e( 'A different theme was active when these results were obtained. Please re-check.', 'amp' );
-							} elseif ( ! empty( $staleness['plugin'] ) ) {
+							} elseif ( ! empty( $staleness['plugins'] ) ) {
 								esc_html_e( 'Different plugins were active when these results were obtained. Please re-check.', 'amp' );
 							}
 							echo '</p></div>';
