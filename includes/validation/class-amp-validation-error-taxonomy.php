@@ -69,6 +69,16 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_TYPE_QUERY_VAR = 'amp_validation_error_type';
 
 	/**
+	 * The <option> value to not filter at all, like for 'All Statuses'.
+	 *
+	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
+	 * When this is present, this ensures that this isn't filtered.
+	 *
+	 * @var int
+	 */
+	const NO_FILTER_VALUE = -1;
+
+	/**
 	 * Validation code for an invalid element.
 	 *
 	 * @var string
@@ -622,7 +632,11 @@ class AMP_Validation_Error_Taxonomy {
 			if (
 				isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) // WPCS: CSRF OK.
 				&&
-				in_array( intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS ), true ) // WPCS: CSRF OK.
+				in_array(
+					intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), // WPCS: CSRF OK.
+					array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS, self::NO_FILTER_VALUE ),
+					true
+				)
 			) {
 				$url = add_query_arg(
 					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
@@ -693,7 +707,6 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-
 		// Only display <option> for each status if it actually has errors associated with it.
 		$total_term_count          = self::get_validation_error_count();
 		$rejected_term_count       = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
@@ -707,7 +720,7 @@ class AMP_Validation_Error_Taxonomy {
 		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
 			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
 			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
-				<option value="-1"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
 				<?php if ( $new_term_count ) : ?>
 					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php esc_html_e( 'New Error', 'amp' ); ?></option>
 				<?php endif; ?>
@@ -721,7 +734,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
 			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
-				<option value="-1"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
 				<option value="<?php echo esc_attr( self::HTML_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML Error', 'amp' ); ?></option>
 				<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>><?php esc_html_e( 'JS Error', 'amp' ); ?></option>
 				<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>><?php esc_html_e( 'CSS Error', 'amp' ); ?></option>
