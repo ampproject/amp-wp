@@ -60,7 +60,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ), $taxonomy_object->object_type );
 
 		$labels = $taxonomy_object->labels;
-		$this->assertEquals( 'AMP Validation Errors', $labels->name );
+		$this->assertEquals( 'Errors by Type', $labels->name );
 		$this->assertEquals( 'AMP Validation Error', $labels->singular_name );
 		$this->assertEquals( 'Search AMP Validation Errors', $labels->search_items );
 		$this->assertEquals( 'All AMP Validation Errors', $labels->all_items );

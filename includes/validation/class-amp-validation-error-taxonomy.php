@@ -895,7 +895,7 @@ class AMP_Validation_Error_Taxonomy {
 		$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
-			esc_html__( 'Errors by Type', 'amp' ),
+			$menu_item_label,
 			$menu_item_label,
 			$taxonomy_caps->manage_terms,
 			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
