@@ -137,10 +137,6 @@ class AMP_Theme_Support {
 			return;
 		}
 
-		AMP_Validation_Manager::init( array(
-			'should_locate_sources' => AMP_Validation_Manager::should_validate_response(),
-		) );
-
 		self::$init_start_time = microtime( true );
 
 		self::purge_amp_query_vars();

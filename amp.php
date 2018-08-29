@@ -145,6 +145,7 @@ function amp_init() {
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
 	AMP_Theme_Support::init();
+	AMP_Validation_Manager::init();
 	AMP_Post_Type_Support::add_post_type_support();
 
 	if ( defined( 'WP_CLI' ) ) {

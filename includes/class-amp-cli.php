@@ -169,18 +169,14 @@ class AMP_CLI {
 			self::$force_crawl_urls = true;
 		}
 
-		$theme_support_amp = current_theme_supports( 'amp' );
-
-		if ( ! $theme_support_amp ) {
+		if ( ! current_theme_supports( 'amp' ) ) {
 			if ( self::$force_crawl_urls ) {
 				/*
 				 * There is no theme support added programmatically or via options.
-				 * So the validation taxonomy and post type would not normally be registered.
-				 * Register them here in order to use them to crawl the site.
+				 * So make sure that theme support is present so that AMP_Validation_Manager::validate_url()
+				 * will use a canonical URL as the basis for obtaining validation results.
 				 */
 				add_theme_support( 'amp' );
-				AMP_Validation_Error_Taxonomy::register();
-				AMP_Invalid_URL_Post_Type::register();
 			} else {
 				WP_CLI::error(
 					sprintf(
@@ -252,23 +248,19 @@ class AMP_CLI {
 		);
 
 		// Output a table of validity by template/content type.
-		if ( $theme_support_amp ) {
-			$url_more_details = add_query_arg(
-				'post_type',
-				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-				admin_url( 'edit.php' )
-			);
-			/* translators: %s is the URL to the admin */
-			WP_CLI::line( sprintf( __( 'For more details, please see: %s', 'amp' ), $url_more_details ) );
-		} else {
-			WP_CLI::warning( __( 'You cannot currently access the detailed validation results because you have not switched to native or paired AMP template modes.', 'amp' ) );
-		}
-
 		WP_CLI\Utils\format_items(
 			'table',
 			$table_validation_by_type,
 			array( $key_template_type, $key_url_count, $key_validity_rate )
 		);
+
+		$url_more_details = add_query_arg(
+			'post_type',
+			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			admin_url( 'edit.php' )
+		);
+		/* translators: %s is the URL to the admin */
+		WP_CLI::line( sprintf( __( 'For more details, please see: %s', 'amp' ), $url_more_details ) );
 	}
 
 	/**
