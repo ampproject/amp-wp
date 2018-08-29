@@ -228,9 +228,9 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			$expected_posts = $query->posts;
 
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
-				$expected_posts[] = $this->factory()->post->create( array(
+				array_unshift( $expected_posts, $this->factory()->post->create( array(
 					'post_type' => $post_type,
-				) );
+				) ) );
 			}
 
 			$actual_posts = AMP_CLI::get_posts_by_type( $post_type );

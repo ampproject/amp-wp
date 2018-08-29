@@ -408,7 +408,7 @@ class AMP_CLI {
 			'posts_per_page' => is_int( $number ) ? $number : self::$limit_type_validate_count,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
-			'order'          => 'ASC',
+			'order'          => 'DESC',
 			'fields'         => 'ids',
 		);
 		if ( is_int( $offset ) ) {
