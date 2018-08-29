@@ -842,6 +842,35 @@ class AMP_Invalid_URL_Post_Type {
 				esc_html__( 'Dismiss this notice.', 'amp' )
 			);
 		}
+
+		if ( 'post' !== get_current_screen()->base ) {
+			// Display admin notice according to the AMP mode.
+			$theme_support     = AMP_Options_Manager::get_option( 'theme_support' );
+			$auto_sanitization = AMP_Options_Manager::get_option( 'force_sanitization' );
+
+			if ( 'native' === $theme_support ) {
+				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
+			} elseif ( 'paired' === $theme_support && $auto_sanitization ) {
+				$message = __( 'The site is using paired AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
+			} elseif ( 'paired' === $theme_support ) {
+				$message = sprintf(
+					/* translators: %s is a link to the AMP settings screen */
+					__( 'The site is using paired AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP.<br/>For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
+					esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+				);
+			} else {
+				$message = __( 'The site is using classic AMP mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
+			}
+
+			$class = 'info';
+			printf(
+				/* translators: 1. Notice classname; 2. Message text; 3. Screenreader text; */
+				'<div class="notice notice-%s is-dismissible"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+				esc_attr( $class ),
+				wp_kses_post( $message ),
+				esc_html__( 'Dismiss this notice.', 'amp' )
+			);
+		}
 	}
 
 	/**
