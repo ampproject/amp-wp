@@ -322,6 +322,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		do_action( 'load-edit-tags.php' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
+		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', array( self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'add_admin_notices' ) ) );
@@ -332,6 +333,12 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
+
+		// Assert that the 'query_vars' callback adds these query vars.
+		$this->assertEmpty( array_diff(
+			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ),
+			apply_filters( 'query_vars', array() )
+		) );
 	}
 
 	/**
@@ -357,6 +364,45 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] = 1;
 		AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter();
 		$this->assertTrue( has_filter( $tested_filter ) );
+	}
+
+	/**
+	 * Test add_error_type_clauses_filter.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter()
+	 */
+	public function test_add_error_type_clauses_filter() {
+		global $current_screen;
+
+		$initial_where   = 'foo';
+		$initial_clauses = array( 'where' => $initial_where );
+		$type            = AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE;
+		$taxonomies      = array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+
+		set_current_screen( 'front' );
+		$tested_filter = 'terms_clauses';
+		remove_all_filters( $tested_filter );
+		AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter();
+		$this->assertFalse( has_filter( $tested_filter ) );
+
+		// The VALIDATION_ERROR_TYPE_QUERY_VAR isn't present, so this should not add the filter.
+		$current_screen->taxonomy = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
+		AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter();
+		$this->assertFalse( has_filter( $tested_filter ) );
+
+		// Both parts of the conditional should be true, and this should add the filter.
+		$_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $type;
+		AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter();
+		$this->assertTrue( has_filter( $tested_filter ) );
+
+		// Assert that the filter works as expected.
+		$filtered_clauses = apply_filters( $tested_filter, $initial_clauses, $taxonomies );
+		$this->assertContains( $initial_where, $filtered_clauses['where'] );
+		$this->assertContains( 'AND tt.description LIKE', $filtered_clauses['where'] );
+
+		// If $taxonomies does not have the AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, the filter should return the clauses unchanged.
+		$taxonomies = array( 'post_tag' );
+		$this->assertEquals( $initial_clauses, apply_filters( $tested_filter, $initial_clauses, $taxonomies ) );
 	}
 
 	/**

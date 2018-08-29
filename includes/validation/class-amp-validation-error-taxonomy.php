@@ -62,6 +62,13 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_STATUS_QUERY_VAR = 'amp_validation_error_status';
 
 	/**
+	 * Query var used when filtering for the validation error type.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_TYPE_QUERY_VAR = 'amp_validation_error_type';
+
+	/**
 	 * Validation code for an invalid element.
 	 *
 	 * @var string
@@ -478,6 +485,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function add_admin_hooks() {
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
 		} );
@@ -502,6 +510,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
 		add_filter( 'query_vars', function( $query_vars ) {
 			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR;
+			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
 			return $query_vars;
 		} );
 
@@ -596,6 +605,28 @@ class AMP_Validation_Error_Taxonomy {
 			global $wpdb;
 			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] && AMP_Validation_Error_Taxonomy::$should_filter_terms_clauses_for_error_validation_status ) {
 				$clauses['where'] .= $wpdb->prepare( ' AND t.term_group = %d', $group );
+			}
+			return $clauses;
+		}, 10, 2 );
+	}
+
+	/**
+	 * Filter amp_validation_error term query by type, like in the 'AMP Validation Errors' taxonomy page.
+	 * Allows viewing only a certain type at a time, like only JS errors.
+	 */
+	public static function add_error_type_clauses_filter() {
+		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+			return;
+		}
+
+		$type = strval( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ); // WPCS: CSRF ok.
+		if ( ! in_array( $type, array( self::HTML_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ), true ) ) {
+			return;
+		}
+		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $type ) {
+			global $wpdb;
+			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] ) {
+				$clauses['where'] .= $wpdb->prepare( ' AND tt.description LIKE %s', '%"type":"' . $wpdb->esc_like( $type ) . '"%' );
 			}
 			return $clauses;
 		}, 10, 2 );
