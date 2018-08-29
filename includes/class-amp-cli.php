@@ -240,7 +240,7 @@ class AMP_CLI {
 		WP_CLI::success(
 			sprintf(
 				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the list of validation by type, $5%s is the link for more details */
-				__( '%3$d crawled URLs have unaccepted issue(s) out of %2$d total which AMP validation issue(s); %1$d URLs were crawled.', 'amp' ),
+				__( '%3$d crawled URLs have unaccepted issue(s) out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.', 'amp' ),
 				self::$number_crawled,
 				self::$total_errors,
 				self::$unaccepted_errors

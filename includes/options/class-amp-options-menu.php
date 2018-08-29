@@ -198,7 +198,7 @@ class AMP_Options_Menu {
 									echo wp_kses_post(
 										sprintf(
 											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
-											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s', 'amp' ),
+											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
 												esc_url( add_query_arg( 'post_type', AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
