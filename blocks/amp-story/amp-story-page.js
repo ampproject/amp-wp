@@ -6,7 +6,9 @@ const {
 	registerBlockType
 } = wp.blocks;
 const {
-	InnerBlocks
+	InnerBlocks,
+	PanelColorSettings,
+	InspectorControls
 } = wp.editor;
 const { select } = wp.data;
 const { getBlock } = select( 'core/editor' );
@@ -62,6 +64,10 @@ export default registerBlockType(
 				source: 'attribute',
 				selector: 'amp-story-page',
 				attribute: 'id'
+			},
+			backgroundColor: {
+				type: 'string',
+				default: '#ffffff'
 			}
 		},
 
@@ -78,10 +84,13 @@ export default registerBlockType(
 		 * */
 
 		edit( props ) {
-			const { setAttributes } = props;
+			const { setAttributes, attributes } = props;
+			const onChangeBackgroundColor = newBackgroundColor => {
+				setAttributes( { backgroundColor: newBackgroundColor } );
+			};
 
 			// If the page ID is not set, add one.
-			if ( ! props.attributes.id ) {
+			if ( ! attributes.id ) {
 				setAttributes( { id: uuid() } );
 			}
 			const block = getBlock( props.clientId );
@@ -101,15 +110,30 @@ export default registerBlockType(
 				grids = 1;
 			}
 
-			return (
+			return [
+				<InspectorControls key='controls'>
+					<PanelColorSettings
+						title={ __( 'Background Color Settings' ) }
+						initialOpen={ false }
+						colorSettings={ [
+							{
+								value: attributes.backgroundColor,
+								onChange: onChangeBackgroundColor,
+								label: __( 'AMP Page Background Color', 'amp' )
+							}
+						] }
+					/>
+				</InspectorControls>,
 				// Get the template dynamically.
-				<InnerBlocks key='contents' template={ getStoryPageTemplate( grids, hasCTALayer ) } allowedBlocks={ ALLOWED_BLOCKS } />
-			);
+				<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
+					<InnerBlocks template={ getStoryPageTemplate( grids, hasCTALayer ) } allowedBlocks={ ALLOWED_BLOCKS } />
+				</div>
+			];
 		},
 
 		save( { attributes } ) {
 			return (
-				<amp-story-page id={ attributes.id }>
+				<amp-story-page style={{ backgroundColor: attributes.backgroundColor }} id={ attributes.id }>
 					<InnerBlocks.Content />
 				</amp-story-page>
 			);

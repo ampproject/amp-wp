@@ -1,14 +1,3 @@
-
-.editor-block-list__layout {
-	background-color: #ffdddd;
-}
-.editor-block-list__layout .editor-block-list__layout {
-	background-color: white;
-}
 div[data-type="amp/amp-story-page"] {
 	background-color: #ddffdd;
 }
-div[data-type="amp/amp-story-grid-layer"] {
-	background-color: #ddddff;
-}
-
