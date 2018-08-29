@@ -387,8 +387,8 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $wrong_taxonomy ) );
 
 		// The $_POST has the VALIDATION_ERROR_TYPE_QUERY_VAR, but does not have a $taxonomy of AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG.
-		$query_var_value = AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE;
-		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $query_var_value;
+		$type_query_var_value = AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE;
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $type_query_var_value;
 		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $wrong_taxonomy ) );
 
 		// The $_POST has the taxonomy, but does not have the right 'post_type'.
@@ -400,7 +400,18 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$_POST['post_type'] = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
 		$expected_url       = add_query_arg(
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
-			$query_var_value,
+			$type_query_var_value,
+			$initial_url
+		);
+		$this->assertEquals( $expected_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $correct_taxonomy ) );
+
+		// The $_POST has a value for the accepted status, so this method should pass that to the redirect URL as a query var.
+		$status_query_var_value = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS;
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] = $status_query_var_value;
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ]   = null;
+		$expected_url = add_query_arg(
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
+			$status_query_var_value,
 			$initial_url
 		);
 		$this->assertEquals( $expected_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $correct_taxonomy ) );

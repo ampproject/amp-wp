@@ -612,14 +612,21 @@ class AMP_Validation_Error_Taxonomy {
 			self::TAXONOMY_SLUG === $tax->name
 			&&
 			isset( $_POST['post_type'] ) && AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === $_POST['post_type'] // WPCS: CSRF OK.
-			&&
-			! empty( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) // WPCS: CSRF OK.
 		) {
-			return add_query_arg(
-				self::VALIDATION_ERROR_TYPE_QUERY_VAR,
-				sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
-				$url
-			);
+			if ( isset( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+				$url = add_query_arg(
+					self::VALIDATION_ERROR_TYPE_QUERY_VAR,
+					sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+					$url
+				);
+			}
+			if ( isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+				$url = add_query_arg(
+					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+					sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+					$url
+				);
+			}
 		}
 
 		return $url;
@@ -683,10 +690,19 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		$error_type_filter_value = isset( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
-		$div_id                  = 'amp-tax-filter';
+		$error_type_filter_value   = isset( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+		$error_status_filter_value = isset( $_REQUEST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+		$div_id                    = 'amp-tax-filter';
 		?>
 		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
+			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
+			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
+				<option value="-1"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php esc_html_e( 'New Error', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php esc_html_e( 'Accepted Error', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php esc_html_e( 'Rejected Error', 'amp' ); ?></option>
+			</select>
+
 			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
 			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
 				<option value="-1"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
@@ -694,7 +710,7 @@ class AMP_Validation_Error_Taxonomy {
 				<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>><?php esc_html_e( 'JS Error', 'amp' ); ?></option>
 				<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>><?php esc_html_e( 'CSS Error', 'amp' ); ?></option>
 			</select>
-			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Filter', 'amp' ); ?>">
+			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
 		</div>
 
 		<script>
