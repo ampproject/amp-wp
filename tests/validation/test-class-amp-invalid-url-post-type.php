@@ -30,6 +30,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_register() {
+		add_theme_support( 'amp' );
 		$this->assertFalse( is_admin() );
 
 		AMP_Invalid_URL_Post_Type::register();
@@ -49,6 +50,27 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		set_current_screen( 'index.php' );
 		AMP_Invalid_URL_Post_Type::register();
 		$this->assertContains( AMP_Invalid_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+	}
+
+	/**
+	 * Test should_show_in_menu.
+	 *
+	 * @covers AMP_Invalid_URL_Post_Type::should_show_in_menu()
+	 */
+	public function test_should_show_in_menu() {
+		global $pagenow;
+		add_theme_support( 'amp' );
+		$this->assertTrue( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
+
+		remove_theme_support( 'amp' );
+		$this->assertFalse( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
+
+		$pagenow           = 'edit.php'; // WPCS: override ok.
+		$_GET['post_type'] = 'post';
+		$this->assertFalse( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
+
+		$_GET['post_type'] = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		$this->assertTrue( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
 	}
 
 	/**

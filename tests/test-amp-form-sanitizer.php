@@ -74,6 +74,10 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<form action="https://src.wordpress-develop.test/login/" method="post"><input type="password" name="password"><button type="submit">Submit</button></form>',
 				'<form method="post" action-xhr="https://src.wordpress-develop.test/login/?_wp_amp_action_xhr_converted=1" target="_top"><input type="password" name="password"><button type="submit">Submit</button><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
 			),
+			'form_with_relative_action_url' => array(
+				'<form method="post" action="/login/"></form>',
+				'<form method="post" action-xhr="//example.org/login/?_wp_amp_action_xhr_converted=1" target="_top"><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
+			),
 		);
 	}
 
