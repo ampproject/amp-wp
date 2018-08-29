@@ -1,5 +1,6 @@
 import memoize from 'memize';
 import uuid from 'uuid/v4';
+import BlockSelector from './block-selector';
 
 const { __ } = wp.i18n;
 const {
@@ -29,7 +30,6 @@ const ALLOWED_BLOCKS = [
 const getStoryPageTemplate = memoize( ( grids, hasCTA ) => {
 	let template = _.times( grids, () => [
 		'amp/amp-story-grid-layer',
-		[],
 		[
 			[
 				'core/paragraph',
@@ -124,6 +124,7 @@ export default registerBlockType(
 						] }
 					/>
 				</InspectorControls>,
+				<BlockSelector key="selectors" rootClientId={ props.clientId } />,
 				// Get the template dynamically.
 				<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
 					<InnerBlocks template={ getStoryPageTemplate( grids, hasCTALayer ) } allowedBlocks={ ALLOWED_BLOCKS } />

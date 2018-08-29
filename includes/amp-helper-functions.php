@@ -272,6 +272,11 @@ function is_amp_endpoint() {
 		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
+	// AMP Stories are always an AMP endpoint.
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		return true;
+	}
+
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // WPCS: CSRF OK.
 		||
