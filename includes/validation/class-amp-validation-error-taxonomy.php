@@ -484,6 +484,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
+		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', function() {
@@ -587,6 +588,40 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			return $primary_column;
 		} );
+	}
+
+	/**
+	 * Filter the term redirect location, to possibly add a query var to filter by term type.
+	 *
+	 * On clicking the 'Filter' button on the 'AMP Validation Errors' taxonomy page,
+	 * edit-tags.php processes the POST request that this submits.
+	 * Then, it redirects to a URL to display the page again.
+	 * This filter callback looks for a value for VALIDATION_ERROR_TYPE_QUERY_VAR in the $_POST request.
+	 * That means that the user filtered by error type, like 'js_error'.
+	 * It then passes that value to the redirect URL as a query var,
+	 * So that the taxonomy page will be filtered for that error type.
+	 *
+	 * @see AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter() for the filtering of the 'where' clause, based on that query var.
+	 * @param string      $url The $url to redirect to.
+	 * @param WP_Taxonomy $tax The WP_Taxonomy object.
+	 * @return string The filtered URL.
+	 */
+	public static function add_term_filter_query_var( $url, $tax ) {
+		if (
+			self::TAXONOMY_SLUG === $tax->name
+			&&
+			isset( $_POST['post_type'] ) && AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === $_POST['post_type'] // WPCS: CSRF OK.
+			&&
+			! empty( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) // WPCS: CSRF OK.
+		) {
+			return add_query_arg(
+				self::VALIDATION_ERROR_TYPE_QUERY_VAR,
+				sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+				$url
+			);
+		}
+
+		return $url;
 	}
 
 	/**

@@ -321,6 +321,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::add_admin_hooks();
 		do_action( 'load-edit-tags.php' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 
+		$this->assertEquals( 10, has_action( 'redirect_term_location', array( self::TESTED_CLASS, 'add_term_filter_query_var' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
@@ -364,6 +365,44 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] = 1;
 		AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter();
 		$this->assertTrue( has_filter( $tested_filter ) );
+	}
+
+	/**
+	 * Test add_term_filter_query_var.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::add_term_filter_query_var()
+	 */
+	public function test_add_term_filter_query_var() {
+		$initial_url      = admin_url( 'edit-tags.php' );
+		$correct_taxonomy = new WP_Taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		$wrong_taxonomy   = new WP_Taxonomy( 'category', 'post' );
+
+		// Because the VALIDATION_ERROR_TYPE_QUERY_VAR isn't present in the POST request, this should return the $initial_url unchanged, without adding the query var.
+		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $wrong_taxonomy ) );
+
+		// The $_POST does not have a value for VALIDATION_ERROR_TYPE_QUERY_VAR, so this should again return $initial_url unchanged.
+		$wrong_query_var           = 'amp_incorrect_var';
+		$_POST[ $wrong_query_var ] = '1';
+		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $wrong_taxonomy ) );
+
+		// The $_POST has the VALIDATION_ERROR_TYPE_QUERY_VAR, but does not have a $taxonomy of AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG.
+		$query_var_value = AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE;
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $query_var_value;
+		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $wrong_taxonomy ) );
+
+		// The $_POST has the taxonomy, but does not have the right 'post_type'.
+		$_POST['taxonomy']  = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
+		$_POST['post_type'] = 'post';
+		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $correct_taxonomy ) );
+
+		// The $_POST has correct 'post_type', so this should add the VALIDATION_ERROR_TYPE_QUERY_VAR to the $initial_url.
+		$_POST['post_type'] = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		$expected_url       = add_query_arg(
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
+			$query_var_value,
+			$initial_url
+		);
+		$this->assertEquals( $expected_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $correct_taxonomy ) );
 	}
 
 	/**
