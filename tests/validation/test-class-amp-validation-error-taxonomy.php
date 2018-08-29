@@ -331,7 +331,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'tag_row_actions', array( self::TESTED_CLASS, 'filter_tag_row_actions' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', array( self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', array( self::TESTED_CLASS, 'filter_manage_custom_columns' ) ) );
-		$this->assertEquals( 10, has_filter( 'views_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'filter_views_edit' ) ) );
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
@@ -618,29 +617,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		);
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
-	}
-
-	/**
-	 * Test filter_views_edit.
-	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::filter_views_edit()
-	 */
-	public function test_filter_views_edit() {
-		AMP_Validation_Error_Taxonomy::register();
-		$views = AMP_Validation_Error_Taxonomy::filter_views_edit( array() );
-		$this->assertContains( 'Accepted', $views['accepted'] );
-		$this->assertContains( '(0)', $views['accepted'] );
-
-		$this->assertContains( 'All', $views['all'] );
-		$this->assertContains( '(0)', $views['all'] );
-
-		$this->assertContains( 'New', $views['new'] );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $views['new'] );
-		$this->assertContains( '(0)', $views['new'] );
-
-		$this->assertContains( 'Rejected', $views['rejected'] );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $views['rejected'] );
-		$this->assertContains( '(0)', $views['rejected'] );
 	}
 
 	/**

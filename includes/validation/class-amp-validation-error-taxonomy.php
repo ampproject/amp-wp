@@ -496,7 +496,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'tag_row_actions', array( __CLASS__, 'filter_tag_row_actions' ), 10, 2 );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
-		add_filter( 'views_edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'filter_views_edit' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
@@ -620,7 +619,11 @@ class AMP_Validation_Error_Taxonomy {
 					$url
 				);
 			}
-			if ( isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+			if (
+				isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) // WPCS: CSRF OK.
+				&&
+				in_array( intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS ), true ) // WPCS: CSRF OK.
+			) {
 				$url = add_query_arg(
 					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
 					sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ), // WPCS: CSRF OK.
@@ -690,17 +693,30 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		$error_type_filter_value   = isset( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
-		$error_status_filter_value = isset( $_REQUEST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+
+		// Only display <option> for each status if it actually has errors associated with it.
+		$total_term_count          = self::get_validation_error_count();
+		$rejected_term_count       = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
+		$accepted_term_count       = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
+		$new_term_count            = $total_term_count - $rejected_term_count - $accepted_term_count;
+		$error_type_filter_value   = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+		$error_status_filter_value = isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ? intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) : ''; // WPCS: CSRF OK.
 		$div_id                    = 'amp-tax-filter';
+
 		?>
 		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
 			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
 			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
 				<option value="-1"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php esc_html_e( 'New Error', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php esc_html_e( 'Accepted Error', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php esc_html_e( 'Rejected Error', 'amp' ); ?></option>
+				<?php if ( $new_term_count ) : ?>
+					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php esc_html_e( 'New Error', 'amp' ); ?></option>
+				<?php endif; ?>
+				<?php if ( $accepted_term_count ) : ?>
+					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php esc_html_e( 'Accepted Error', 'amp' ); ?></option>
+				<?php endif; ?>
+				<?php if ( $rejected_term_count ) : ?>
+					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php esc_html_e( 'Rejected Error', 'amp' ); ?></option>
+				<?php endif; ?>
 			</select>
 
 			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
@@ -872,122 +888,6 @@ class AMP_Validation_Error_Taxonomy {
 			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
 			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )
 		);
-	}
-
-	/**
-	 * Add views for filtering validation errors by status.
-	 *
-	 * @param array $views Views.
-	 * @return array Views.
-	 */
-	public static function filter_views_edit( $views ) {
-		$total_term_count    = self::get_validation_error_count();
-		$rejected_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
-		$accepted_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
-		$new_term_count      = $total_term_count - $rejected_term_count - $accepted_term_count;
-
-		$current_url = remove_query_arg(
-			array_merge(
-				wp_removable_query_args(),
-				array( 's' ) // For some reason behavior of posts list table is to not persist the search query.
-			),
-			wp_unslash( $_SERVER['REQUEST_URI'] )
-		);
-
-		$current_status = null;
-		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
-			$value = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-			if ( in_array( $value, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS ), true ) ) {
-				$current_status = $value;
-			}
-		}
-
-		$views['all'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url( remove_query_arg( self::VALIDATION_ERROR_STATUS_QUERY_VAR, $current_url ) ),
-			null === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'All <span class="count">(%s)</span>',
-					'All <span class="count">(%s)</span>',
-					$total_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $total_term_count )
-			)
-		);
-
-		$views['new'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_NEW_STATUS,
-					$current_url
-				)
-			),
-			self::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'New <span class="count">(%s)</span>',
-					'New <span class="count">(%s)</span>',
-					$new_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $new_term_count )
-			)
-		);
-
-		$views['rejected'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_REJECTED_STATUS,
-					$current_url
-				)
-			),
-			self::VALIDATION_ERROR_REJECTED_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'Rejected <span class="count">(%s)</span>',
-					'Rejected <span class="count">(%s)</span>',
-					$rejected_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $rejected_term_count )
-			)
-		);
-
-		$views['accepted'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_ACCEPTED_STATUS,
-					$current_url
-				)
-			),
-			self::VALIDATION_ERROR_ACCEPTED_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'Accepted <span class="count">(%s)</span>',
-					'Accepted <span class="count">(%s)</span>',
-					$accepted_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $accepted_term_count )
-			)
-		);
-		return $views;
 	}
 
 	/**
