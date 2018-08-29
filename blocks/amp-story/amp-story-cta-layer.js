@@ -1,12 +1,16 @@
+import { getAmpStoryAnimationControls } from '../utils';
+
 const { __ } = wp.i18n;
 const {
 	registerBlockType
 } = wp.blocks;
 const {
+	InspectorControls,
 	InnerBlocks
 } = wp.editor;
 const {
-	Notice
+	Notice,
+	PanelBody
 } = wp.components;
 const { Component } = wp.element;
 
@@ -98,9 +102,16 @@ export default registerBlockType(
 						<Notice status="error" isDismissible={ false }>{ __( 'Multiple CTA Layers are not allowed. Please remove all but one.', 'amp' ) }</Notice>
 					);
 				}
-				return (
+				return [
+					<InspectorControls key='controls'>
+						<PanelBody key='animation' title={ __( 'CTA Layer Animation' ) }>
+							{
+								getAmpStoryAnimationControls( this.props.setAttributes, this.props.attributes )
+							}
+						</PanelBody>
+					</InspectorControls>,
 					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
-				);
+				];
 			}
 
 			hasMoreThanOneCtaBlock() {
