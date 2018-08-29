@@ -44,12 +44,17 @@ class BlockSelector extends Component {
 			}
 			links.push(
 				<li className={ className } key={ 'selector-' + index }>
-					<Button onClick={ ( e ) => {
+					<Button id={ block.clientId } onClick={ ( e ) => {
 						e.stopPropagation();
-						if ( getSelectedBlock.clientId !== block.clientId ) {
-							// @todo This selects the first inner child instead for some reason.
+
+						// @todo This selects the first inner child instead for some reason. Note that this also creates a new paragraph as the first child is it doesn't exist.
+						selectBlock( block.clientId );
+
+						// @todo This is a temporary workaround for selecting the correct block. Remove when possible.
+						let timeout = 50;
+						setTimeout( function() {
 							selectBlock( block.clientId );
-						}
+						}, timeout );
 					}}>
 						{ title }
 					</Button>

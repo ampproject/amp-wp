@@ -55,10 +55,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	width: 100%;
 }
 
-.amp-grid-template .editor-block-list__block {
-	overflow: hidden;
-}
-
 .amp-grid-template .editor-block-list__layout:first-of-type {
 	display: grid;
 	overflow: hidden;
@@ -135,9 +131,9 @@ div[data-amp-position="lower-third"] {
 	bottom: 0;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"],
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
-	border: 1px solid #ddffdd;
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected,
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected .editor-block-list__block {
+	border: 1px dotted #99c2e0;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected ~ div[data-type="amp/amp-story-grid-layer"],

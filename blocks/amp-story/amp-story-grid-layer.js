@@ -58,7 +58,7 @@ export default registerBlockType(
 				source: 'attribute',
 				selector: 'amp-story-grid-layer',
 				attribute: 'template',
-				default: 'horizontal'
+				default: 'vertical'
 			}
 		},
 
@@ -82,8 +82,8 @@ export default registerBlockType(
 						value={ props.attributes.template }
 						options={ [
 							{
-								value: 'horizontal',
-								label: __( 'Horizontal', 'amp' )
+								value: 'vertical',
+								label: __( 'Vertical', 'amp' )
 							},
 							{
 								value: 'fill',
@@ -94,8 +94,8 @@ export default registerBlockType(
 								label: __( 'Thirds', 'amp' )
 							},
 							{
-								value: 'vertical',
-								label: __( 'Vertical', 'amp' )
+								value: 'horizontal',
+								label: __( 'Horizontal', 'amp' )
 							}
 						] }
 						onChange={ value => ( setAttributes( { template: value } ) ) }
