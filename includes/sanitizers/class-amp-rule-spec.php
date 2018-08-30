@@ -71,27 +71,6 @@ abstract class AMP_Rule_Spec {
 	);
 
 	/**
-	 * If a node type listed here is invalid, it and it's subtree will be
-	 * removed if it is invalid. This is mainly  because any children will be
-	 * non-functional without this parent.
-	 *
-	 * If a tag is not listed here, it will be replaced by its children if it
-	 * is invalid.
-	 *
-	 * @todo There are other nodes that should probably be listed here as well.
-	 *
-	 * @var array
-	 */
-	public static $node_types_to_remove_if_invalid = array(
-		'form',
-		'input',
-		'link',
-		'meta',
-		'style',
-		// Include 'script' here?
-	);
-
-	/**
 	 * List of boolean attributes.
 	 *
 	 * @since 0.7
