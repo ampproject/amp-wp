@@ -63,7 +63,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$_GET['__amp_source_origin']     = 'foo';
 		AMP_Theme_Support::init();
 		$this->assertFalse( has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
-		$this->assertFalse( has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
+		$this->assertFalse( has_action( 'wp', array( self::TESTED_CLASS, 'finish_init' ) ) );
 
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();

@@ -175,14 +175,14 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		AMP_HTTP::send_cors_headers();
 		$this->assertEmpty( AMP_HTTP::$headers_sent );
 
-		// Origin header is not allowed.
+		// Try an invalid Origin header.
 		AMP_HTTP::$headers_sent          = array();
 		AMP_HTTP::$purged_amp_query_vars = array();
 		$_SERVER['HTTP_ORIGIN']          = 'https://evil.example.com';
 		AMP_HTTP::send_cors_headers();
 		$this->assertEmpty( AMP_HTTP::$headers_sent );
 
-		// The __amp_source_origin is not allowed.
+		// Try an invalid __amp_source_origin.
 		AMP_HTTP::$headers_sent          = array();
 		AMP_HTTP::$purged_amp_query_vars = array();
 		unset( $_SERVER['HTTP_ORIGIN'] );
@@ -190,7 +190,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		AMP_HTTP::send_cors_headers();
 		$this->assertEmpty( AMP_HTTP::$headers_sent );
 
-		// The origin header is allowed.
+		// Try an allowed Origin header.
 		AMP_HTTP::$headers_sent          = array();
 		AMP_HTTP::$purged_amp_query_vars = array();
 		$_SERVER['HTTP_ORIGIN']          = home_url();
