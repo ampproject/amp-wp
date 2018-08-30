@@ -14,6 +14,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		data: {
 			allowedBlocks: [
+				'core/button',
 				'core/code',
 				'core/embed',
 				'core/image',
@@ -273,7 +274,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			parentBlock = select.getBlock( parentClientId );
-			if ( 'amp/amp-story-grid-layer' !== parentBlock.name ) {
+			if ( 'amp/amp-story-grid-layer' !== parentBlock.name && 'amp/amp-story-cta-layer' !== parentBlock.name ) {
 				// Return original.
 				return [
 					el( BlockEdit, _.extend( {
