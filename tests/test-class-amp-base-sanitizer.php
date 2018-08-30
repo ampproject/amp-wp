@@ -251,7 +251,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$expected_error['node_name'] = 'link';
 		unset( $expected_error['node_attributes']['src'] );
 		$expected_error['node_attributes']['href'] = 'http://example.com/bad.css?ver=__normalized__';
-		$expected_error['type']                    = AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE;
+		$expected_error['type']                    = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 		add_filter( 'amp_validation_error_sanitized', '__return_false' );
 		AMP_Validation_Manager::reset_validation_results();
 		$parent->appendChild( $child );

@@ -505,7 +505,8 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		$expected_to_contain = array(
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
-			AMP_Validation_Error_Taxonomy::HTML_ERROR_TYPE,
+			AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+			AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
 			AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 			AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			'<script>',

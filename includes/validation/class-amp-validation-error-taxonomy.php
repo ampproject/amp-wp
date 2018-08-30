@@ -93,14 +93,26 @@ class AMP_Validation_Error_Taxonomy {
 	const INVALID_ATTRIBUTE_CODE = 'invalid_attribute';
 
 	/**
-	 * The 'type' of error that applies to most errors with the 'code' of 'invalid_element' and 'invalid_attribute'.
+	 * The 'type' of error for invalid HTML elements, like <frame>.
 	 *
+	 * These usually have the 'code' of 'invalid_element'.
 	 * Except for 'invalid_element' errors for a <script>, which have the JS_ERROR_TYPE.
-	 * This allows filtering by type in the taxonomy page, like displaying only HTML errors, or only CSS errors.
+	 * This allows filtering by type in the taxonomy page, like displaying only HTML element errors, or only CSS errors.
 	 *
 	 * @var string
 	 */
-	const HTML_ERROR_TYPE = 'html_error';
+	const HTML_ELEMENT_ERROR_TYPE = 'html_element_error';
+
+	/**
+	 * The 'type' of error for invalid HTML attributes.
+	 *
+	 * These usually have the 'code' of 'invalid_attribute'.
+	 * Banned attributes include i-amp-*.
+	 * But on* attributes, like onclick, have the JS_ERROR_TYPE.
+	 *
+	 * @var string
+	 */
+	const HTML_ATTRIBUTE_ERROR_TYPE = 'html_attribute_error';
 
 	/**
 	 * The 'type' of error that applies to the error 'code' of 'invalid_element' when the node is a <script>.
@@ -695,7 +707,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$type = strval( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ); // WPCS: CSRF ok.
-		if ( ! in_array( $type, array( self::HTML_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ), true ) ) {
+		if ( ! in_array( $type, array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ), true ) ) {
 			return;
 		}
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $type ) {
@@ -789,7 +801,8 @@ class AMP_Validation_Error_Taxonomy {
 			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
 			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
 				<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::HTML_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML Error', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Element) Error', 'amp' ); ?></option>
+				<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Attribute) Error', 'amp' ); ?></option>
 				<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>><?php esc_html_e( 'JS Error', 'amp' ); ?></option>
 				<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>><?php esc_html_e( 'CSS Error', 'amp' ); ?></option>
 			</select>
