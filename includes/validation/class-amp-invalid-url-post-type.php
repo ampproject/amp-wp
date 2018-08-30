@@ -85,13 +85,13 @@ class AMP_Invalid_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'Invalid AMP Pages (URLs)', 'post type general name', 'amp' ),
-					'menu_name'          => __( 'Invalid Pages', 'amp' ),
-					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
-					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
-					'not_found_in_trash' => __( 'No invalid AMP pages in trash', 'amp' ),
-					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
-					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
+					'name'               => _x( 'Errors by URL', 'post type general name', 'amp' ),
+					'menu_name'          => __( 'Errors by URL', 'amp' ),
+					'singular_name'      => __( 'Errors by URL', 'amp' ),
+					'not_found'          => __( 'No errors by URL found', 'amp' ),
+					'not_found_in_trash' => __( 'No errors by URL in trash', 'amp' ),
+					'search_items'       => __( 'Search errors by URL', 'amp' ),
+					'edit_item'          => __( 'Errors by URL', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -281,21 +281,21 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['new'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
-				__( '&#x2753; New: %s', 'amp' ),
+				__( '&#x2753; Identified: %s', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			) );
 		}
 		if ( $counts['accepted'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
-				__( '&#x2705; Accepted: %s', 'amp' ),
+				__( '&#x2705; Suppressed: %s', 'amp' ),
 				number_format_i18n( $counts['accepted'] )
 			) );
 		}
 		if ( $counts['rejected'] ) {
 			$result[] = esc_html( sprintf(
 				/* translators: %s is count */
-				__( '&#x274C; Rejected: %s', 'amp' ),
+				__( '&#x274C; To Fix Later: %s', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
 			) );
 		}
@@ -509,8 +509,8 @@ class AMP_Invalid_URL_Post_Type {
 			sprintf(
 				/* translators: %s: the post count. */
 				_nx(
-					'With New Errors <span class="count">(%s)</span>',
-					'With New Errors <span class="count">(%s)</span>',
+					'With Identified Errors <span class="count">(%s)</span>',
+					'With Identified Errors <span class="count">(%s)</span>',
 					$with_new_query->found_posts,
 					'posts',
 					'amp'
@@ -532,8 +532,8 @@ class AMP_Invalid_URL_Post_Type {
 			sprintf(
 				/* translators: %s: the post count. */
 				_nx(
-					'With Rejected Errors <span class="count">(%s)</span>',
-					'With Rejected Errors <span class="count">(%s)</span>',
+					'With To Fix Later Errors <span class="count">(%s)</span>',
+					'With To Fix Later Errors <span class="count">(%s)</span>',
 					$with_rejected_query->found_posts,
 					'posts',
 					'amp'
@@ -555,8 +555,8 @@ class AMP_Invalid_URL_Post_Type {
 			sprintf(
 				/* translators: %s: the post count. */
 				_nx(
-					'With Accepted Errors <span class="count">(%s)</span>',
-					'With Accepted Errors <span class="count">(%s)</span>',
+					'With Suppressed Errors <span class="count">(%s)</span>',
+					'With Suppressed Errors <span class="count">(%s)</span>',
 					$with_accepted_query->found_posts,
 					'posts',
 					'amp'
@@ -578,18 +578,20 @@ class AMP_Invalid_URL_Post_Type {
 		$columns = array_merge(
 			$columns,
 			array(
-				'error_status' => esc_html__( 'Error Status', 'amp' ),
-				AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS => esc_html__( 'Removed Elements', 'amp' ),
-				AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES => esc_html__( 'Removed Attributes', 'amp' ),
-				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Sources', 'amp' ),
+				'error_status' => esc_html__( 'Status &#x2753;', 'amp' ) . wp_kses_post( '<span class="tooltip">This is tooltip.</span>' ),
+				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Found elements and attributes', 'amp' ),
+				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Source', 'amp' ),
 			)
 		);
 
+		if ( isset( $columns['title' ] ) ) {
+		    $columns['title'] = esc_html__( 'URL', 'amp' );
+        }
+
 		// Move date to end.
 		if ( isset( $columns['date'] ) ) {
-			$date = $columns['date'];
 			unset( $columns['date'] );
-			$columns['date'] = $date;
+			$columns['date'] = esc_html__( 'Last Checked' );
 		}
 
 		return $columns;
@@ -615,9 +617,9 @@ class AMP_Invalid_URL_Post_Type {
 			case 'error_status':
 				self::display_invalid_url_validation_error_counts_summary( $post_id );
 				break;
-			case AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS:
+			case AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES:
+				$items = array();
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
-					$items = array();
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
 							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
@@ -625,14 +627,8 @@ class AMP_Invalid_URL_Post_Type {
 							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
 						}
 					}
-					echo implode( ', ', $items ); // WPCS: XSS OK.
-				} else {
-					esc_html_e( '--', 'amp' );
 				}
-				break;
-			case AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES:
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
-					$items = array();
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
 							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
@@ -640,10 +636,12 @@ class AMP_Invalid_URL_Post_Type {
 							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
 						}
 					}
-					echo implode( ', ', $items ); // WPCS: XSS OK.
-				} else {
-					esc_html_e( '--', 'amp' );
 				}
+				if ( ! empty( $items ) ) {
+					echo implode( ', ', $items ); // WPCS: XSS OK.
+                } else {
+					esc_html_e( '--', 'amp' );
+                }
 				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:
 				if ( isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {

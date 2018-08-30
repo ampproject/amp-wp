@@ -83,6 +83,13 @@ class AMP_Validation_Error_Taxonomy {
 	const REMOVED_ELEMENTS = 'removed_elements';
 
 	/**
+	 * The key for found elements and attributes.
+	 *
+	 * @var string
+	 */
+	const FOUND_ELEMENTS_AND_ATTRIBUTES = 'found_elements_and_attributes';
+
+	/**
 	 * The key for removed attributes.
 	 *
 	 * @var string
