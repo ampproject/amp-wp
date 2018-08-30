@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 712;
+	private static $spec_file_revision = 720;
 	private static $minimum_validator_revision_required = 348;
 
 	private static $allowed_tags = array(
@@ -1284,6 +1284,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'when-ended' => array(
 						'value_casei' => array(
+							'continue',
 							'stop',
 						),
 					),
@@ -2340,6 +2341,33 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-image-slider' => array(
+			array(
+				'attr_spec_list' => array(
+					'disable-hint-reappear' => array(),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							2,
+							9,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-image-slider',
+					),
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-image-slider',
+				),
+			),
+		),
 		'amp-img' => array(
 			array(
 				'attr_spec_list' => array(
@@ -2598,6 +2626,7 @@ class AMP_Allowed_Tags_Generated {
 							9,
 							1,
 							4,
+							5,
 						),
 					),
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-layout',
@@ -2607,6 +2636,7 @@ class AMP_Allowed_Tags_Generated {
 		'amp-lightbox' => array(
 			array(
 				'attr_spec_list' => array(
+					'[open]' => array(),
 					'animate-in' => array(
 						'value_casei' => array(
 							'fade-in',
@@ -2951,6 +2981,11 @@ class AMP_Allowed_Tags_Generated {
 		'amp-pan-zoom' => array(
 			array(
 				'attr_spec_list' => array(
+					'disable-double-tap' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'initial-scale' => array(
 						'value_regex' => '[0-9]+(\\.[0-9]+)?',
 					),
@@ -4097,6 +4132,40 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-viqeo-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'autoplay' => array(),
+					'data-profileid' => array(
+						'mandatory' => true,
+						'value_regex' => '[0-9a-f]*',
+					),
+					'data-videoid' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-viqeo-player',
+					),
+				),
+			),
+		),
 		'amp-vk' => array(
 			array(
 				'attr_spec_list' => array(
@@ -4959,6 +5028,30 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'form',
 					'spec_name' => 'FORM DIV [submit-error][template]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'first' => array(
+						'mandatory' => true,
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-image-slider',
+					'spec_name' => 'AMP-IMAGE-SLIDER > DIV [first]',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-image-slider',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'second' => array(
+						'mandatory' => true,
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-image-slider',
+					'spec_name' => 'AMP-IMAGE-SLIDER > DIV [second]',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-image-slider',
 				),
 			),
 		),
@@ -10099,6 +10192,31 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-image-slider',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-imgur',
 						'version' => array(
 							'0.1',
@@ -11264,6 +11382,31 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-viqeo-player',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-vk',
 						'version' => array(
 							'0.1',
@@ -11916,6 +12059,9 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
+					'style' => array(
+						'blacklisted_value_regex' => '!important',
+					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
