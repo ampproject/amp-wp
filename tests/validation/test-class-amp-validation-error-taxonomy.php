@@ -461,6 +461,14 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::render_taxonomy_filter()
 	 */
 	public function test_render_taxonomy_filter() {
+		AMP_Validation_Error_Taxonomy::register();
+		// Create one new error.
+		$this->factory()->term->create( array(
+			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			'description' => wp_json_encode( $this->get_mock_error() ),
+			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+		) );
+
 		// When passing the wrong $taxonomy_name to the method, it should not output anything.
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filter( 'category' );
@@ -482,6 +490,19 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		foreach ( $expected_to_contain as $expected ) {
 			$this->assertContains( $expected, $markup );
 		}
+
+		// When there is one new error, the <option> for this status in the filter should have (1) after the status name.
+		$this->assertContains( 'New Error <span class="count">(1)</span>', $markup );
+
+		// When there are two new errors, the <option> text should be plural, and have a count of (2).
+		$this->factory()->term->create( array(
+			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			'description' => wp_json_encode( $this->get_mock_error() ),
+			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+		) );
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_taxonomy_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$this->assertContains( 'New Errors <span class="count">(2)</span>', ob_get_clean() );
 	}
 
 	/**
