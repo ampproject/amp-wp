@@ -865,10 +865,9 @@ class AMP_Invalid_URL_Post_Type {
 			$class = 'info';
 			printf(
 				/* translators: 1. Notice classname; 2. Message text; 3. Screenreader text; */
-				'<div class="notice notice-%s is-dismissible"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+				'<div class="notice notice-%s"><p>%s</p></div>',
 				esc_attr( $class ),
-				wp_kses_post( $message ),
-				esc_html__( 'Dismiss this notice.', 'amp' )
+				wp_kses_post( $message )
 			);
 		}
 	}
