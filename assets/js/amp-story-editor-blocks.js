@@ -197,14 +197,14 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		if ( attributes.ampStoryPosition ) {
 			ampAttributes[ 'grid-area' ] = attributes.ampStoryPosition;
 		}
-		if ( attributes.animationType ) {
-			ampAttributes[ 'animate-in' ] = attributes.animationType;
+		if ( attributes.ampAnimationType ) {
+			ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 
-			if ( attributes.animationDelay ) {
-				ampAttributes[ 'animate-in-delay' ] = attributes.animationDelay + 'ms';
+			if ( attributes.ampAnimationDelay ) {
+				ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay + 'ms';
 			}
-			if ( attributes.animationDuration ) {
-				ampAttributes[ 'animate-in-duration' ] = attributes.animationDuration + 'ms';
+			if ( attributes.ampAnimationDuration ) {
+				ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration + 'ms';
 			}
 		}
 
@@ -228,14 +228,14 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				type: 'string'
 			};
 			// @todo We could map all the blocks to their tag and use attribute as source instead.
-			settings.attributes.animationType = {
+			settings.attributes.ampAnimationType = {
 				type: 'string'
 			};
-			settings.attributes.animationDelay = {
+			settings.attributes.ampAnimationDelay = {
 				type: 'number',
 				default: 0
 			};
-			settings.attributes.animationDuration = {
+			settings.attributes.ampAnimationDuration = {
 				type: 'number',
 				default: 0
 			};
@@ -260,7 +260,6 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				InspectorControls = wp.editor.InspectorControls,
 				PanelBody = wp.components.PanelBody,
 				SelectControl = wp.components.SelectControl,
-				RangeControl = wp.components.RangeControl,
 				parentClientId = select.getBlockRootClientId( props.clientId ),
 				parentBlock;
 
@@ -284,52 +283,27 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			if ( 'thirds' !== parentBlock.attributes.template ) {
-				// Return original.
-				return [
-					el( BlockEdit, _.extend( {
-						key: 'original'
-					}, props ) )
-				];
+				inspectorControls = el( InspectorControls, { key: 'inspector' },
+					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
+						component.getAnimationControls( props )
+					)
+				);
+			} else {
+				inspectorControls = el( InspectorControls, { key: 'inspector' },
+					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
+						el( SelectControl, {
+							key: 'position',
+							label: __( 'Placement', 'amp' ),
+							value: attributes.ampStoryPosition,
+							options: component.data.ampStoryPositionOptions,
+							onChange: function( value ) {
+								props.setAttributes( { ampStoryPosition: value } );
+							}
+						} ),
+						component.getAnimationControls( props )
+					)
+				);
 			}
-
-			inspectorControls = el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ) },
-					el( SelectControl, {
-						label: __( 'Placement', 'amp' ),
-						value: attributes.ampStoryPosition,
-						options: component.data.ampStoryPositionOptions,
-						onChange: function( value ) {
-							props.setAttributes( { ampStoryPosition: value } );
-						}
-					} ),
-					el( SelectControl, {
-						label: __( 'Animation type', 'amp' ),
-						value: attributes.ampAnimationType,
-						options: component.data.ampAnimationTypeOptions,
-						onChange: function( value ) {
-							props.setAttributes( { ampAnimationType: value } );
-						}
-					} ),
-					el( RangeControl, {
-						label: __( 'Animation duration (ms)', 'amp' ),
-						value: attributes.ampAnimationDuration,
-						min: 0,
-						max: 5000,
-						onChange: function( value ) {
-							props.setAttributes( { ampAnimationDuration: value } );
-						}
-					} ),
-					el( RangeControl, {
-						label: __( 'Animation delay (ms)', 'amp' ),
-						value: attributes.ampAnimationDelay,
-						min: 0,
-						max: 5000,
-						onChange: function( value ) {
-							props.setAttributes( { ampAnimationDelay: value } );
-						}
-					} )
-				)
-			);
 
 			return [
 				inspectorControls,
@@ -338,6 +312,45 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}, props ) )
 			];
 		};
+	};
+
+	component.getAnimationControls = function getAnimationControls( props ) {
+		var RangeControl = wp.components.RangeControl,
+			el = wp.element.createElement,
+			SelectControl = wp.components.SelectControl,
+			attributes = props.attributes;
+
+		return [
+			el( SelectControl, {
+				key: 'animation-type',
+				label: __( 'Animation type', 'amp' ),
+				value: attributes.ampAnimationType,
+				options: component.data.ampAnimationTypeOptions,
+				onChange: function( value ) {
+					props.setAttributes( { ampAnimationType: value } );
+				}
+			} ),
+			el( RangeControl, {
+				key: 'animation-duration',
+				label: __( 'Animation duration (ms)', 'amp' ),
+				value: attributes.ampAnimationDuration,
+				min: 0,
+				max: 5000,
+				onChange: function( value ) {
+					props.setAttributes( { ampAnimationDuration: value } );
+				}
+			} ),
+			el( RangeControl, {
+				key: 'animation-delay',
+				label: __( 'Animation delay (ms)', 'amp' ),
+				value: attributes.ampAnimationDelay,
+				min: 0,
+				max: 5000,
+				onChange: function( value ) {
+					props.setAttributes( { ampAnimationDelay: value } );
+				}
+			} )
+		];
 	};
 
 	return component;
