@@ -54,6 +54,7 @@ export default registerBlockType(
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],
+		inserter: false,
 
 		/*
 		 * <amp-story-cta-layer>:

@@ -61,7 +61,7 @@ export default registerBlockType(
 				source: 'attribute',
 				selector: 'amp-story-grid-layer',
 				attribute: 'template',
-				default: 'fill'
+				default: 'vertical'
 			},
 			animationType: {
 				type: 'string',
@@ -78,6 +78,8 @@ export default registerBlockType(
 				default: 0
 			}
 		},
+
+		inserter: false,
 
 		/*
 		 * <amp-story-grid-layer>:
@@ -97,20 +99,20 @@ export default registerBlockType(
 						value={ attributes.template }
 						options={ [
 							{
-								value: 'fill',
-								label: __( 'Fill', 'amp' )
+								value: 'vertical',
+								label: __( 'Vertical', 'amp' )
 							},
 							{
-								value: 'horizontal',
-								label: __( 'Horizontal', 'amp' )
+								value: 'fill',
+								label: __( 'Fill', 'amp' )
 							},
 							{
 								value: 'thirds',
 								label: __( 'Thirds', 'amp' )
 							},
 							{
-								value: 'vertical',
-								label: __( 'Vertical', 'amp' )
+								value: 'horizontal',
+								label: __( 'Horizontal', 'amp' )
 							}
 						] }
 						onChange={ value => ( setAttributes( { template: value } ) ) }
@@ -121,7 +123,9 @@ export default registerBlockType(
 						}
 					</PanelBody>
 				</InspectorControls>,
-				<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
+				<div key='contents' className={ 'amp-grid-template amp-grid-template-' + props.attributes.template }>
+					<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
+				</div>
 			];
 		},
 

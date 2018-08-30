@@ -1,3 +1,162 @@
 div[data-type="amp/amp-story-page"] {
-	background-color: #ddffdd;
+	border: 1px solid #ffdddd;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"] {
+	padding: 0;
+	margin: 60px auto 0;
+}
+
+@media (min-width: 600px) {
+	div[data-type="amp/amp-story-page"] .editor-block-list__block {
+		margin: 0;
+		padding: 0;
+	}
+}
+
+.components-popover.editor-inserter__amp .components-popover__content {
+	height: 200px;
+}
+
+div[data-type="amp/amp-story-page"] * {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+div[data-type="amp/amp-story-page"],
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
+	margin: auto;
+	max-height: 75vh !important;
+	max-width: 45vh !important;
+	min-width: 320px !important;
+	min-height: 533px;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
+	min-height: initial !important;
+}
+
+/* Make layer be exactly on top of each other */
+.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block:first-child .editor-block-list__block-edit {
+	margin: 0;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block .editor-block-list__block-edit, .editor-block-list__layout .editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit {
+	margin: 0;
+}
+
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout .editor-block-list__layout {
+	background-color: initial;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"] {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.amp-grid-template .editor-block-list__layout:first-of-type {
+	display: grid;
+	overflow: hidden;
+	padding: 68px 32px 32px;
+}
+
+.amp-grid-template .editor-block-list__layout:first-of-type * {
+	margin: 0;
+	box-sizing: border-box;
+}
+
+.amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
+	grid-auto-flow: column !important;
+	grid-template-rows: 100% !important;
+	-ms-flex-line-pack: stretch;
+	align-content: stretch;
+	-webkit-box-align: start;
+	-ms-flex-align: start;
+	align-items: start;
+	grid-gap: 16px;
+	-webkit-box-pack: start;
+	-ms-flex-pack: start;
+	justify-content: start;
+}
+
+.amp-grid-template-vertical .editor-block-list__layout:first-of-type {
+	grid-auto-flow: row;
+	grid-template-columns: 100%;
+	align-content: start;
+	grid-gap: 16px;
+	-webkit-box-pack: stretch;
+	-ms-flex-pack: stretch;
+	justify-content: stretch;
+	justify-items: start;
+}
+
+.amp-grid-template-thirds .editor-block-list__layout:first-of-type {
+	grid-template-rows: 1fr 1fr 1fr;
+	grid-template-areas: "upper-third" "middle-third" "lower-third";
+}
+
+div[data-amp-position="upper-third"] {
+	grid-area: upper-third / lower-third / lower-third / lower-third;
+}
+
+div[data-amp-position="middle-third"] {
+	grid-area: middle-third / lower-third / lower-third / lower-third;
+}
+
+div[data-amp-position="lower-third"] {
+	grid-area: lower-third / lower-third / lower-third / lower-third;
+}
+
+
+.amp-grid-template-fill .editor-block-list__layout > :first-child {
+	bottom: 0;
+	display: block;
+	height: auto;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: auto;
+}
+
+.amp-grid-template-fill > :not(:first-child) {
+	display: none;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
+	position: absolute;
+	height: 20%;
+	width: 100%;
+	bottom: 0;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected,
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected .editor-block-list__block {
+	border: 1px dotted #99c2e0;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected ~ div[data-type="amp/amp-story-grid-layer"],
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected-parent ~ div[data-type="amp/amp-story-grid-layer"]{
+	display: none;
+}
+
+.editor-selectors {
+	position: absolute;
+	right: -150px;
+	bottom: 0;
+	width: 100px;
+	z-index: 80;
+}
+
+.editor-selectors .component-editor__selector {
+	margin-bottom: 2px;
+}
+
+.editor-selectors .component-editor__selector button {
+	cursor: pointer;
+}
+
+.editor-selectors .is-selected.component-editor__selector button {
+	text-decoration: underline;
 }
