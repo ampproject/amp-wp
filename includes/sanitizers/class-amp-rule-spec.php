@@ -92,18 +92,6 @@ abstract class AMP_Rule_Spec {
 	);
 
 	/**
-	 *  It is mentioned in the documentation in several places that data-*
-	 *  is generally allowed, but there is no specific rule for it in the
-	 *  protoascii file, so we include it here.
-	 *
-	 * @var array
-	 */
-	public static $whitelisted_attr_regex = array(
-		'@^data-[a-zA-Z][\\w:.-]*$@uis',
-		'(update|item|pagination|option|selected|disabled)', // Allowed for live reference points.
-	);
-
-	/**
 	 * List of boolean attributes.
 	 *
 	 * @since 0.7

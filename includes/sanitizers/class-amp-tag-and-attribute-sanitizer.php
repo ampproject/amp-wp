@@ -1508,13 +1508,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Return true if attribute name is valid for this attr_spec_list, false otherwise.
 	 */
 	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		if ( isset( $attr_spec_list[ $attr_name ] ) ) {
+		if ( isset( $attr_spec_list[ $attr_name ] ) || 'data-' === substr( $attr_name, 0, 5 ) ) {
 			return true;
-		}
-		foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
-			if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
-				return true;
-			}
 		}
 
 		$is_allowed_alt_name_attr = (
