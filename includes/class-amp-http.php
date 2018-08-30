@@ -24,6 +24,7 @@ class AMP_HTTP {
 	 * AMP-specific query vars that were purged.
 	 *
 	 * @since 0.7
+	 * @since 1.0 Moved to AMP_HTTP class.
 	 * @see AMP_HTTP::purge_amp_query_vars()
 	 * @var string[]
 	 */
@@ -35,6 +36,7 @@ class AMP_HTTP {
 	 * This largely exists to facilitate unit testing but it also provides a better interface for sending headers.
 	 *
 	 * @since 0.7.0
+	 * @since 1.0 Moved to AMP_HTTP class.
 	 *
 	 * @param string $name  Header name.
 	 * @param string $value Header value.
@@ -108,6 +110,7 @@ class AMP_HTTP {
 	 * we can ensure that WordPress won't end up referencing them in any way.
 	 *
 	 * @since 0.7
+	 * @since 1.0 Moved to AMP_HTTP class.
 	 */
 	public static function purge_amp_query_vars() {
 		$query_vars = array(
@@ -159,26 +162,134 @@ class AMP_HTTP {
 	}
 
 	/**
+	 * Filter the allowed redirect hosts to include AMP caches.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $allowed_hosts Allowed hosts.
+	 * @return array Allowed redirect hosts.
+	 */
+	public static function filter_allowed_redirect_hosts( $allowed_hosts ) {
+		return array_merge( $allowed_hosts, self::get_amp_cache_hosts() );
+	}
+
+	/**
+	 * Get list of AMP cache hosts (that is, CORS origins).
+	 *
+	 * @since 1.0
+	 * @link https://www.ampproject.org/docs/fundamentals/amp-cors-requests#1)-allow-requests-for-specific-cors-origins
+	 *
+	 * @return array AMP cache hosts.
+	 */
+	public static function get_amp_cache_hosts() {
+		$hosts = array();
+
+		// Google AMP Cache (legacy).
+		$hosts[] = 'cdn.ampproject.org';
+
+		// From the publisher’s own origins.
+		$domains = array_unique( array(
+			wp_parse_url( site_url(), PHP_URL_HOST ),
+			wp_parse_url( home_url(), PHP_URL_HOST ),
+		) );
+
+		/*
+		 * From AMP docs:
+		 * "When possible, the Google AMP Cache will create a subdomain for each AMP document's domain by first converting it
+		 * from IDN (punycode) to UTF-8. The caches replaces every - (dash) with -- (2 dashes) and replace every . (dot) with
+		 * - (dash). For example, pub.com will map to pub-com.cdn.ampproject.org."
+		 */
+		foreach ( $domains as $domain ) {
+			if ( function_exists( 'idn_to_utf8' ) ) {
+				if ( version_compare( PHP_VERSION, '5.4', '>=' ) ) {
+					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.idn_to_utf8_variantFound, PHPCompatibility.PHP.NewConstants.intl_idna_variant_uts46Found
+				} else {
+					$domain = idn_to_utf8( $domain );
+				}
+			}
+			$subdomain = str_replace( '-', '--', $domain );
+			$subdomain = str_replace( '.', '-', $subdomain );
+
+			// Google AMP Cache subdomain.
+			$hosts[] = sprintf( '%s.cdn.ampproject.org', $subdomain );
+
+			// Cloudflare AMP Cache.
+			$hosts[] = sprintf( '%s.amp.cloudflare.com', $subdomain );
+		}
+
+		return $hosts;
+	}
+
+	/**
+	 * Send cors headers.
+	 *
+	 * From the AMP docs:
+	 * Restrict requests to source origins
+	 * In all fetch requests, the AMP Runtime passes the "__amp_source_origin" query parameter, which contains
+	 * the value of the source origin (for example, "https://publisher1.com").
+	 *
+	 * To restrict requests to only source origins, check that the value of the "__amp_source_origin" parameter
+	 * is within a set of the Publisher's own origins.
+	 *
+	 * Access-Control-Allow-Origin: <origin>
+	 * This header is a W3 CORS Spec requirement, where origin refers to the requesting origin that was allowed
+	 * via the CORS Origin request header (for example, "https://<publisher's subdomain>.cdn.ampproject.org").
+	 *
+	 * Although the W3 CORS spec allows the value of * to be returned in the response, for improved security, you should:
+	 *
+	 * - If the Origin header is present, validate and echo the value of the Origin header.
+	 * - If the Origin header isn't present, validate and echo the value of the "__amp_source_origin".
+	 *
+	 * (Otherwise, no Access-Control-Allow-Origin header is sent.)
+	 *
+	 * AMP-Access-Control-Allow-Source-Origin: <source-origin>
+	 * This header allows the specified source-origin to read the authorization response. The source-origin is
+	 * the value specified and verified in the "__amp_source_origin" URL parameter (for example, "https://publisher1.com").
+	 *
+	 * Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin
+	 * This header simply allows the CORS response to contain the AMP-Access-Control-Allow-Source-Origin header.
+	 *
+	 * @link https://www.ampproject.org/docs/fundamentals/amp-cors-requests
+	 * @since 1.0
+	 */
+	public static function send_cors_headers() {
+		$origin        = null;
+		$source_origin = null;
+		if ( isset( $_SERVER['HTTP_ORIGIN'] ) ) {
+			$origin = wp_validate_redirect( wp_sanitize_redirect( esc_url_raw( wp_unslash( $_SERVER['HTTP_ORIGIN'] ) ) ) );
+		}
+		if ( isset( self::$purged_amp_query_vars['__amp_source_origin'] ) ) {
+			$source_origin = wp_validate_redirect( wp_sanitize_redirect( esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] ) ) );
+		}
+		if ( ! $origin ) {
+			$origin = $source_origin;
+		}
+
+		if ( $origin ) {
+			self::send_header( 'Access-Control-Allow-Origin', $origin, array( 'replace' => false ) );
+			self::send_header( 'Access-Control-Allow-Credentials', 'true' );
+			self::send_header( 'Vary', 'Origin', array( 'replace' => false ) );
+		}
+		if ( $source_origin ) {
+			self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $source_origin );
+			self::send_header( 'Access-Control-Expose-Headers', 'AMP-Access-Control-Allow-Source-Origin', array( 'replace' => false ) );
+		}
+	}
+
+	/**
 	 * Hook into a POST form submissions, such as the comment form or some other form submission.
 	 *
 	 * @since 0.7.0
+	 * @since 1.0 Moved to AMP_HTTP class. Extracted some logic to send_cors_headers method.
 	 */
 	public static function handle_xhr_request() {
 		$is_amp_xhr = (
 			! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] )
 			&&
-			! empty( self::$purged_amp_query_vars['__amp_source_origin'] )
-			&&
 			( ! empty( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
 		);
 		if ( ! $is_amp_xhr ) {
 			return;
-		}
-
-		// Send AMP response header.
-		$origin = wp_validate_redirect( wp_sanitize_redirect( esc_url_raw( self::$purged_amp_query_vars['__amp_source_origin'] ) ) );
-		if ( $origin ) {
-			self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $origin, array( 'replace' => true ) ); // @todo Needs to be included in Access-Control-Expose-Headers.
 		}
 
 		// Intercept POST requests which redirect.
@@ -197,6 +308,7 @@ class AMP_HTTP {
 	 * Intercept the response to a POST request.
 	 *
 	 * @since 0.7.0
+	 * @since 1.0 Moved to AMP_HTTP class.
 	 * @see wp_redirect()
 	 *
 	 * @param string $location The location to redirect to.
@@ -230,7 +342,7 @@ class AMP_HTTP {
 		}
 
 		self::send_header( 'AMP-Redirect-To', $absolute_location );
-		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To' );
+		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To', array( 'replace' => false ) );
 
 		wp_send_json_success();
 	}
@@ -239,6 +351,7 @@ class AMP_HTTP {
 	 * New error handler for AMP form submission.
 	 *
 	 * @since 0.7.0
+	 * @since 1.0 Moved to AMP_HTTP class.
 	 * @see wp_die()
 	 *
 	 * @param WP_Error|string  $error The error to handle.
@@ -279,6 +392,7 @@ class AMP_HTTP {
 	 * Handle comment_post_redirect to ensure page reload is done when comments_live_list is not supported, while sending back a success message when it is.
 	 *
 	 * @since 0.7.0
+	 * @since 1.0 Moved to AMP_HTTP class.
 	 *
 	 * @param string     $url     Comment permalink to redirect to.
 	 * @param WP_Comment $comment Posted comment.

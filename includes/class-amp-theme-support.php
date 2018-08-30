@@ -130,9 +130,6 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		AMP_HTTP::purge_amp_query_vars();
-		AMP_HTTP::handle_xhr_request();
-
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );

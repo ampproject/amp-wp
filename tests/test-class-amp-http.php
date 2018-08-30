@@ -20,7 +20,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		AMP_HTTP::$headers_sent = array();
+		AMP_HTTP::$headers_sent          = array();
+		AMP_HTTP::$purged_amp_query_vars = array();
 	}
 
 	/**
@@ -163,39 +164,158 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test send_cors_headers().
+	 *
+	 * @covers AMP_HTTP::send_cors_headers()
+	 */
+	public function test_send_cors_headers() {
+
+		// Initial case case.
+		AMP_HTTP::$headers_sent = array();
+		AMP_HTTP::send_cors_headers();
+		$this->assertEmpty( AMP_HTTP::$headers_sent );
+
+		// Origin header is not allowed.
+		AMP_HTTP::$headers_sent          = array();
+		AMP_HTTP::$purged_amp_query_vars = array();
+		$_SERVER['HTTP_ORIGIN']          = 'https://evil.example.com';
+		AMP_HTTP::send_cors_headers();
+		$this->assertEmpty( AMP_HTTP::$headers_sent );
+
+		// The __amp_source_origin is not allowed.
+		AMP_HTTP::$headers_sent          = array();
+		AMP_HTTP::$purged_amp_query_vars = array();
+		unset( $_SERVER['HTTP_ORIGIN'] );
+		$_GET['__amp_source_origin'] = 'https://evil.example.com';
+		AMP_HTTP::send_cors_headers();
+		$this->assertEmpty( AMP_HTTP::$headers_sent );
+
+		// The origin header is allowed.
+		AMP_HTTP::$headers_sent          = array();
+		AMP_HTTP::$purged_amp_query_vars = array();
+		$_SERVER['HTTP_ORIGIN']          = home_url();
+		AMP_HTTP::send_cors_headers();
+		$this->assertEquals(
+			array(
+				array(
+					'name'        => 'Access-Control-Allow-Origin',
+					'value'       => home_url(),
+					'replace'     => false,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Access-Control-Allow-Credentials',
+					'value'       => 'true',
+					'replace'     => true,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Vary',
+					'value'       => 'Origin',
+					'replace'     => false,
+					'status_code' => null,
+				),
+			),
+			AMP_HTTP::$headers_sent
+		);
+
+		// The __amp_source_origin is specified but the Origin header is not.
+		AMP_HTTP::$headers_sent      = array();
+		$_GET['__amp_source_origin'] = 'https://cdn.ampproject.org';
+		$_SERVER['REQUEST_METHOD']   = 'POST';
+		unset( $_SERVER['HTTP_ORIGIN'] );
+		AMP_HTTP::purge_amp_query_vars();
+		AMP_HTTP::send_cors_headers();
+		$this->assertEquals(
+			array(
+				array(
+					'name'        => 'Access-Control-Allow-Origin',
+					'value'       => 'https://cdn.ampproject.org',
+					'replace'     => false,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Access-Control-Allow-Credentials',
+					'value'       => 'true',
+					'replace'     => true,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Vary',
+					'value'       => 'Origin',
+					'replace'     => false,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'AMP-Access-Control-Allow-Source-Origin',
+					'value'       => 'https://cdn.ampproject.org',
+					'replace'     => true,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Access-Control-Expose-Headers',
+					'value'       => 'AMP-Access-Control-Allow-Source-Origin',
+					'replace'     => false,
+					'status_code' => null,
+				),
+			),
+			AMP_HTTP::$headers_sent
+		);
+
+		// The Origin header and the __amp_source_origin are both specified.
+		AMP_HTTP::$headers_sent      = array();
+		$_GET['__amp_source_origin'] = home_url();
+		$_SERVER['REQUEST_METHOD']   = 'POST';
+		$_SERVER['HTTP_ORIGIN']      = 'https://cdn.ampproject.org';
+		AMP_HTTP::purge_amp_query_vars();
+		AMP_HTTP::send_cors_headers();
+		$this->assertEquals(
+			array(
+				array(
+					'name'        => 'Access-Control-Allow-Origin',
+					'value'       => 'https://cdn.ampproject.org',
+					'replace'     => false,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Access-Control-Allow-Credentials',
+					'value'       => 'true',
+					'replace'     => true,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Vary',
+					'value'       => 'Origin',
+					'replace'     => false,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'AMP-Access-Control-Allow-Source-Origin',
+					'value'       => home_url(),
+					'replace'     => true,
+					'status_code' => null,
+				),
+				array(
+					'name'        => 'Access-Control-Expose-Headers',
+					'value'       => 'AMP-Access-Control-Allow-Source-Origin',
+					'replace'     => false,
+					'status_code' => null,
+				),
+			),
+			AMP_HTTP::$headers_sent
+		);
+	}
+
+	/**
 	 * Test handle_xhr_request().
 	 *
 	 * @covers AMP_HTTP::handle_xhr_request()
 	 */
 	public function test_handle_xhr_request() {
+		$_GET['_wp_amp_action_xhr_converted'] = 1;
+		$_SERVER['REQUEST_METHOD']            = 'POST';
 		AMP_HTTP::purge_amp_query_vars();
 		AMP_HTTP::handle_xhr_request();
-		$this->assertEmpty( AMP_HTTP::$headers_sent );
-
-		$_GET['_wp_amp_action_xhr_converted'] = '1';
-
-		// Try bad source origin.
-		$_GET['__amp_source_origin'] = 'http://evil.example.com/';
-		$_SERVER['REQUEST_METHOD']   = 'POST';
-		AMP_HTTP::purge_amp_query_vars();
-		AMP_HTTP::handle_xhr_request();
-		$this->assertEmpty( AMP_HTTP::$headers_sent );
-
-		// Try home source origin.
-		$_GET['__amp_source_origin'] = home_url();
-		$_SERVER['REQUEST_METHOD']   = 'POST';
-		AMP_HTTP::purge_amp_query_vars();
-		AMP_HTTP::handle_xhr_request();
-		$this->assertCount( 1, AMP_HTTP::$headers_sent );
-		$this->assertEquals(
-			array(
-				'name'        => 'AMP-Access-Control-Allow-Source-Origin',
-				'value'       => home_url(),
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_HTTP::$headers_sent[0]
-		);
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', array( 'AMP_HTTP', 'intercept_post_request_redirect' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', array( 'AMP_HTTP', 'filter_comment_post_redirect' ) ) );
 		$this->assertEquals(
@@ -237,7 +357,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			array(
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
-				'replace'     => true,
+				'replace'     => false,
 				'status_code' => null,
 			),
 			AMP_HTTP::$headers_sent
@@ -262,7 +382,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			array(
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
-				'replace'     => true,
+				'replace'     => false,
 				'status_code' => null,
 			),
 			AMP_HTTP::$headers_sent
