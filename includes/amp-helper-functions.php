@@ -287,6 +287,16 @@ function is_amp_endpoint() {
 		return false;
 	}
 
+	/*
+	 * If this is a URL for validation, and validation is forced for all URLs, return true.
+	 * Normally, this would be false if the user has deselected a template,
+	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
+	 */
+	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		return true;
+	}
+
 	$availability = AMP_Theme_Support::get_template_availability();
 	return amp_is_canonical() ? $availability['supported'] : ( $has_amp_query_var && $availability['supported'] );
 }

@@ -190,6 +190,39 @@ class AMP_Options_Menu {
 					</dt>
 					<dd>
 						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+
+						<?php if ( ! current_theme_supports( 'amp' ) && wp_count_posts( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
+							<div class="notice notice-info inline notice-alt">
+								<p>
+									<?php
+									echo wp_kses_post(
+										sprintf(
+											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
+											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
+											sprintf(
+												'<a href="%s">%s</a>',
+												esc_url( add_query_arg( 'post_type', AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
+												esc_html( get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
+											),
+											sprintf(
+												'<a href="%s">%s</a>',
+												esc_url(
+													add_query_arg(
+														array(
+															'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+															'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+														),
+														admin_url( 'edit-tags.php' )
+													)
+												),
+												esc_html( get_taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG )->labels->name )
+											)
+										)
+									);
+									?>
+								</p>
+							</div>
+						<?php endif; ?>
 					</dd>
 				</dl>
 			</fieldset>
@@ -258,15 +291,33 @@ class AMP_Options_Menu {
 			<?php endif; ?>
 
 			<script>
-				jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
-					jQuery( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === this.value );
-					jQuery( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === this.value );
-					jQuery( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== this.value );
-					jQuery( '#force_sanitization' ).trigger( 'change' );
-				} ).filter( ':checked' ).trigger( 'change' );
-				jQuery( '#force_sanitization' ).change( function() {
-					jQuery( '.amp-tree-shaking' ).toggleClass( 'hidden', this.checked && 'native' !== jQuery( 'input[type=radio][name="amp-options[theme_support]"]:checked' ).val() );
-				} ).trigger( 'change' );
+			(function( $ ) {
+				var getThemeSupportMode = function() {
+					var checkedInput = $( 'input[type=radio][name="amp-options[theme_support]"]:checked' );
+					if ( 0 === checkedInput.length ) {
+						return <?php echo wp_json_encode( amp_is_canonical() ? 'native' : 'paired' ); ?>;
+					}
+					return checkedInput.val();
+				};
+
+				var updateTreeShakingHiddenClass = function() {
+					var checkbox = $( '#force_sanitization' );
+					$( '.amp-tree-shaking' ).toggleClass( 'hidden', checkbox.prop( 'checked' ) && 'native' !== getThemeSupportMode() );
+				};
+
+				var updateHiddenClasses = function() {
+					var themeSupportMode = getThemeSupportMode();
+					$( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === themeSupportMode );
+					$( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === themeSupportMode );
+					$( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== themeSupportMode );
+					updateTreeShakingHiddenClass();
+				};
+
+				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
+				$( '#force_sanitization' ).change( updateTreeShakingHiddenClass );
+
+				updateHiddenClasses();
+			})( jQuery );
 			</script>
 
 			<p>

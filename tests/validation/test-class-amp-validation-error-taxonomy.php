@@ -44,6 +44,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function test_register() {
 		global $wp_taxonomies;
+		add_theme_support( 'amp' );
 
 		AMP_Validation_Error_Taxonomy::register();
 		$taxonomy_object = $wp_taxonomies[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ];
@@ -77,6 +78,27 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 'Validation errors navigation', $labels->items_list_navigation );
 		$this->assertEquals( 'Validation errors list', $labels->items_list );
 		$this->assertEquals( 'Most Used Validation Errors', $labels->most_used );
+	}
+
+	/**
+	 * Test should_show_in_menu.
+	 *
+	 * @covers AMP_Validation_Error_Taxonomy::should_show_in_menu()
+	 */
+	public function test_should_show_in_menu() {
+		global $pagenow;
+		add_theme_support( 'amp' );
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
+
+		remove_theme_support( 'amp' );
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
+
+		$pagenow          = 'edit-tags.php'; // WPCS: override ok.
+		$_GET['taxonomy'] = 'post_tag';
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
+
+		$_GET['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
 	}
 
 	/**
@@ -315,6 +337,8 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
+		add_theme_support( 'amp' );
+		AMP_Validation_Error_Taxonomy::register();
 
 		// add_group_terms_clauses_filter() needs the screen to be set.
 		set_current_screen( 'front' );

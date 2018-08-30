@@ -188,7 +188,7 @@ class AMP_Validation_Error_Taxonomy {
 			'show_tagcloud'      => false,
 			'show_in_quick_edit' => false,
 			'hierarchical'       => false, // Or true? Code could be the parent term?
-			'show_in_menu'       => true,
+			'show_in_menu'       => ( self::should_show_in_menu() || AMP_Invalid_URL_Post_Type::should_show_in_menu() ),
 			'meta_box_cb'        => false, // See print_validation_errors_meta_box().
 			'capabilities'       => array(
 				'assign_terms' => 'do_not_allow',
@@ -202,6 +202,19 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		self::accept_validation_errors( AMP_Core_Theme_Sanitizer::get_acceptable_errors( get_template() ) );
+	}
+
+	/**
+	 * Determine whether the admin menu item should be included.
+	 *
+	 * @return bool Whether to show in menu.
+	 */
+	public static function should_show_in_menu() {
+		global $pagenow;
+		if ( current_theme_supports( 'amp' ) ) {
+			return true;
+		}
+		return ( 'edit-tags.php' === $pagenow && ( isset( $_GET['taxonomy'] ) && self::TAXONOMY_SLUG === $_GET['taxonomy'] ) ); // WPCS: CSRF OK.
 	}
 
 	/**
@@ -504,7 +517,9 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'terms_clauses', array( __CLASS__, 'filter_terms_clauses_for_description_search' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'add_admin_notices' ) );
 		add_filter( 'tag_row_actions', array( __CLASS__, 'filter_tag_row_actions' ), 10, 2 );
-		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
+		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
+			add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
+		}
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );

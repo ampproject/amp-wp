@@ -145,7 +145,13 @@ function amp_init() {
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
 	AMP_Theme_Support::init();
+	AMP_Validation_Manager::init();
 	AMP_Post_Type_Support::add_post_type_support();
+
+	if ( defined( 'WP_CLI' ) ) {
+		WP_CLI::add_command( 'amp', new AMP_CLI() );
+	}
+
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
