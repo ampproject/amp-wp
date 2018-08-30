@@ -101,9 +101,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_type'   => 'page',
 		) );
 
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_page ) );
 
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
@@ -118,9 +118,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Now check with theme support added (in paired mode).
 		add_theme_support( 'amp', array( 'template_dir' => './' ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_page ) );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
@@ -156,9 +156,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_status' => 'publish',
 			'post_type'   => 'page',
 		) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_page ) );
 
 		add_filter( 'post_link', $add_anchor_fragment );
 		$this->assertStringEndsWith( '/amp/#anchor', amp_get_permalink( $published_post ) );
@@ -177,9 +177,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Now check with theme support added (in paired mode).
 		add_theme_support( 'amp', array( 'template_dir' => './' ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_page ) );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
@@ -187,7 +187,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Make sure that if permalink has anchor that it is persists.
 		add_filter( 'post_link', $add_anchor_fragment );
-		$this->assertStringEndsWith( '/?amp#anchor', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '/?amp=1#anchor', amp_get_permalink( $published_post ) );
 	}
 
 	/**
@@ -218,8 +218,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \amp_remove_endpoint()
 	 */
 	public function test_amp_remove_endpoint() {
-		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/?amp' ) );
-		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/?amp=1' ) );
+		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp=1#bar' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
 	}

@@ -85,7 +85,7 @@ function amp_get_permalink( $post_id ) {
 	if ( current_theme_supports( 'amp' ) ) {
 		$permalink = get_permalink( $post_id );
 		if ( ! amp_is_canonical() ) {
-			$permalink = add_query_arg( 'amp', '', $permalink );
+			$permalink = add_query_arg( 'amp', '1', $permalink );
 		}
 		return $permalink;
 	}
@@ -128,7 +128,7 @@ function amp_get_permalink( $post_id ) {
 			'attachment' === get_post_type( $post_id )
 		);
 		if ( $use_query_var ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
+			$amp_url = add_query_arg( amp_get_slug(), '1', $permalink );
 		} else {
 			$amp_url = preg_replace( '/#.*/', '', $permalink );
 			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
@@ -193,13 +193,13 @@ function amp_add_amphtml_link() {
 	$amp_url = null;
 	if ( current_theme_supports( 'amp' ) ) {
 		if ( AMP_Theme_Support::is_paired_available() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+			$amp_url = add_query_arg( amp_get_slug(), '1', $current_url );
 		}
 	} else {
 		if ( is_singular() ) {
 			$amp_url = amp_get_permalink( get_queried_object_id() );
 		} else {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+			$amp_url = add_query_arg( amp_get_slug(), '1', $current_url );
 		}
 	}
 
