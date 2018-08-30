@@ -214,6 +214,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-playbuzz' ),
 			),
 
+			'amp-next-page' => array(
+				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+				null,
+				array( 'amp-next-page' ),
+			),
+
 			'amp-position-observer' => array(
 				'<amp-position-observer intersection-ratios="1"></amp-position-observer>',
 				null, // No change.
@@ -917,6 +923,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		preg_match_all( '#<.+?>#', $expected, $expected_matches );
+		preg_match_all( '#<.+?>#', $content, $content_matches );
+		$this->assertEquals(
+			$expected_matches,
+			$content_matches
+		);
 		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
@@ -1017,6 +1029,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		preg_match_all( '#<.+?>#', $expected, $expected_matches );
+		preg_match_all( '#<.+?>#', $content, $content_matches );
+		$this->assertEquals(
+			$expected_matches,
+			$content_matches
+		);
 		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
