@@ -54,6 +54,24 @@ export default registerBlockType(
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],
+
+		attributes: {
+			animationType: {
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-grid-layer',
+				attribute: 'animate-in'
+			},
+			animationDuration: {
+				type: 'number',
+				default: 0
+			},
+			animationDelay: {
+				type: 'number',
+				default: 0
+			}
+		},
+
 		inserter: false,
 
 		/*
@@ -131,8 +149,19 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
+			let layerProps = {};
+			if ( attributes.animationType ) {
+				layerProps[ 'animate-in' ] = attributes.animationType;
+
+				if ( attributes.animationDelay ) {
+					layerProps[ 'animate-in-delay' ] = attributes.animationDelay + 'ms';
+				}
+				if ( attributes.animationDuration ) {
+					layerProps[ 'animate-in-duration' ] = attributes.animationDuration + 'ms';
+				}
+			}
 			return (
-				<amp-story-cta-layer template={ attributes.template }>
+				<amp-story-cta-layer { ...layerProps }>
 					<InnerBlocks.Content />
 				</amp-story-cta-layer>
 			);

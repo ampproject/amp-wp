@@ -39,6 +39,84 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'lower-third',
 					label: __( 'Lower Third', 'amp' )
 				}
+			],
+			ampAnimationTypeOptions: [
+				{
+					value: '',
+					label: __( 'None', 'amp' )
+				},
+				{
+					value: 'drop',
+					label: __( 'Drop', 'amp' )
+				},
+				{
+					value: 'fade-in',
+					label: __( 'Fade In', 'amp' )
+				},
+				{
+					value: 'fly-in-bottom',
+					label: __( 'Fly In Bottom', 'amp' )
+				},
+				{
+					value: 'fly-in-left',
+					label: __( 'Fly In Left', 'amp' )
+				},
+				{
+					value: 'fly-in-right',
+					label: __( 'Fly In Right', 'amp' )
+				},
+				{
+					value: 'fly-in-top',
+					label: __( 'Fly In Top', 'amp' )
+				},
+				{
+					value: 'pulse',
+					label: __( 'Pulse', 'amp' )
+				},
+				{
+					value: 'rotate-in-left',
+					label: __( 'Rotate In Left', 'amp' )
+				},
+				{
+					value: 'rotate-in-right',
+					label: __( 'Rotate In Right', 'amp' )
+				},
+				{
+					value: 'twirl-in',
+					label: __( 'Twirl In', 'amp' )
+				},
+				{
+					value: 'whoosh-in-left',
+					label: __( 'Whoosh In Left', 'amp' )
+				},
+				{
+					value: 'whoosh-in-right',
+					label: __( 'Whoosh In Right', 'amp' )
+				},
+				{
+					value: 'pan-left',
+					label: __( 'Pan Left', 'amp' )
+				},
+				{
+					value: 'pan-right',
+					label: __( 'Pan Right', 'amp' )
+				},
+				{
+					value: 'pan-down',
+					label: __( 'Pan Down', 'amp' )
+				},
+				{
+					value: 'pan-up',
+					label: __( 'Pan Up', 'amp' )
+				},
+				{
+					value: 'zoom-in',
+					label: __( 'Zoom In', 'amp' )
+				},
+				{
+					value: 'zoom-out',
+					label: __( 'Zoom Out', 'amp' )
+				}
 			]
 		}
 	};
@@ -119,6 +197,16 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		if ( attributes.ampStoryPosition ) {
 			ampAttributes[ 'grid-area' ] = attributes.ampStoryPosition;
 		}
+		if ( attributes.animationType ) {
+			ampAttributes[ 'animate-in' ] = attributes.animationType;
+
+			if ( attributes.animationDelay ) {
+				ampAttributes[ 'animate-in-delay' ] = attributes.animationDelay + 'ms';
+			}
+			if ( attributes.animationDuration ) {
+				ampAttributes[ 'animate-in-duration' ] = attributes.animationDuration + 'ms';
+			}
+		}
 
 		return _.extend( ampAttributes, props );
 	};
@@ -131,13 +219,25 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
-		// Add the "thirds" template position option.
+		// Add the "thirds" template position option and animation settings.
 		if ( -1 !== component.data.allowedBlocks.indexOf( name ) ) {
 			if ( ! settings.attributes ) {
 				settings.attributes = {};
 			}
 			settings.attributes.ampStoryPosition = {
 				type: 'string'
+			};
+			// @todo We could map all the blocks to their tag and use attribute as source instead.
+			settings.attributes.animationType = {
+				type: 'string'
+			};
+			settings.attributes.animationDelay = {
+				type: 'number',
+				default: 0
+			};
+			settings.attributes.animationDuration = {
+				type: 'number',
+				default: 0
 			};
 		}
 		return settings;
@@ -160,6 +260,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				InspectorControls = wp.editor.InspectorControls,
 				PanelBody = wp.components.PanelBody,
 				SelectControl = wp.components.SelectControl,
+				RangeControl = wp.components.RangeControl,
 				parentClientId = select.getBlockRootClientId( props.clientId ),
 				parentBlock;
 
@@ -199,6 +300,32 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						options: component.data.ampStoryPositionOptions,
 						onChange: function( value ) {
 							props.setAttributes( { ampStoryPosition: value } );
+						}
+					} ),
+					el( SelectControl, {
+						label: __( 'Animation type', 'amp' ),
+						value: attributes.ampAnimationType,
+						options: component.data.ampAnimationTypeOptions,
+						onChange: function( value ) {
+							props.setAttributes( { ampAnimationType: value } );
+						}
+					} ),
+					el( RangeControl, {
+						label: __( 'Animation duration (ms)', 'amp' ),
+						value: attributes.ampAnimationDuration,
+						min: 0,
+						max: 5000,
+						onChange: function( value ) {
+							props.setAttributes( { ampAnimationDuration: value } );
+						}
+					} ),
+					el( RangeControl, {
+						label: __( 'Animation delay (ms)', 'amp' ),
+						value: attributes.ampAnimationDelay,
+						min: 0,
+						max: 5000,
+						onChange: function( value ) {
+							props.setAttributes( { ampAnimationDelay: value } );
 						}
 					} )
 				)
