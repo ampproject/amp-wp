@@ -953,7 +953,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-pan-zoom' => array(
-				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill"><svg> ... </svg></amp-pan-zoom></amp-layout>',
+				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill" disable-double-tap><svg> ... </svg></amp-pan-zoom></amp-layout>',
 				null,
 				array( 'amp-pan-zoom' ),
 			),
@@ -971,15 +971,27 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-lightbox' => array(
-				'<amp-lightbox id="my-lightbox" animate-in="fly-in-top" layout="nodisplay"><div class="lightbox" on="tap:my-lightbox.close" role="button" tabindex="0"><h1>Hello World!</h1></div></amp-lightbox>',
+				'<amp-lightbox id="my-lightbox" [open]="true" animate-in="fly-in-top" layout="nodisplay"><div class="lightbox" on="tap:my-lightbox.close" role="button" tabindex="0"><h1>Hello World!</h1></div></amp-lightbox>',
 				null,
-				array( 'amp-lightbox' ),
+				array( 'amp-lightbox', 'amp-bind' ),
 			),
 
 			'amp-fom-messages' => array(
 				'<form action-xhr="https://example.com/" method="post"><fieldset><input type="text" name="firstName"></fieldset><div verify-error=""><template type="amp-mustache">There is a mistake in the form!{{#verifyErrors}}{{message}}{{/verifyErrors}}</template></div><div submitting=""><template type="amp-mustache">Form submitting... Thank you for waiting {{name}}.</template></div><div submit-success=""><template type="amp-mustache">Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}to confirm! After that we\'ll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.</template></div><div submit-error><template type="amp-mustache">Oops! {{name}}, {{message}}.</template></div></form>',
 				null,
 				array( 'amp-form', 'amp-mustache' ),
+			),
+
+			'amp-viqeo-player' => array(
+				'<amp-viqeo-player data-profileid="184" data-videoid="b51b70cdbb06248f4438" width="640" height="360" layout="responsive"></amp-viqeo-player>',
+				null,
+				array( 'amp-viqeo-player' ),
+			),
+
+			'amp-image-slider' => array(
+				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
+				null,
+				array( 'amp-image-slider' ),
 			),
 		);
 	}
