@@ -240,7 +240,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.5
 	 */
@@ -339,6 +339,30 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 							'\.js$',
 						) ),
 					);
+				}
+
+				if ( ! empty( $node->parentNode ) && isset( $this->allowed_tags[ $node->parentNode->nodeName ] ) ) {
+					foreach ( $this->allowed_tags[ $node->parentNode->nodeName ] as $parent_rule_spec ) {
+						if ( empty( $parent_rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['reference_points'] ) ) {
+							continue;
+						}
+						foreach ( $parent_rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['reference_points'] as $reference_point_spec_name => $reference_point_spec_instance_attrs ) {
+							$reference_point = AMP_Allowed_Tags_Generated::get_reference_point_spec( $reference_point_spec_name );
+							if ( empty( $reference_point[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
+								// @todo Need to come up with a solution for 'AMP-SELECTOR child'.
+								continue;
+							}
+							foreach ( $reference_point[ AMP_Rule_Spec::ATTR_SPEC_LIST ] as $attr_name => $reference_point_spec_attr ) {
+								$reference_point_spec_attr = array_merge(
+									$reference_point_spec_attr,
+									$reference_point_spec_instance_attrs
+								);
+								unset( $reference_point_spec_attr['mandatory'] );
+
+								$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] = $reference_point_spec_attr;
+							}
+						}
+					}
 				}
 
 				$rule_spec_list_to_validate[ $id ] = $rule_spec;

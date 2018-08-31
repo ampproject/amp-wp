@@ -214,20 +214,25 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-playbuzz' ),
 			),
 
+			// AMP-NEXT-PAGE > [separator].
 			'reference-point-amp-next-page-separator' => array(
 				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
 				null,
 				array( 'amp-next-page' ),
 			),
 
-			/*
-			 * @todo This is not in the deployed validator yet.
-			 * 'reference-point-amp-carousel-lightbox-exclude' => array(
-			 * 	'<amp-carousel width="400" height="300" layout="responsive" type="slides" lightbox=""><amp-img src="/awesome.png" width="300" height="300" lightbox=""></amp-img><amp-img src="/awesome.png" width="300" height="300" lightbox-exclude=""></amp-img></amp-carousel>',
-			 * 	null,
-			 * 	array( 'amp-carousel' ),
-			 * ),
-			 */
+			// amp-next-page extension .json configuration.
+			'reference-point-amp-next-page-json-config' => array(
+				'<amp-next-page><script type="application/json">{"pages": []}</script></amp-next-page>',
+				null,
+				array( 'amp-next-page' ),
+			),
+
+			'reference-point-amp-carousel-lightbox-exclude' => array(
+				'<amp-carousel width="400" height="300" layout="responsive" type="slides" lightbox=""><amp-img src="/awesome.png" width="300" height="300" lightbox=""></amp-img><amp-img src="/awesome.png" width="300" height="300" lightbox-exclude=""></amp-img></amp-carousel>',
+				null,
+				array( 'amp-carousel', 'amp-lightbox-gallery' ),
+			),
 
 			'reference-point-lightbox-thumbnail-id' => array(
 				'<amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>',
@@ -805,7 +810,46 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			// Adapted from <https://www.ampproject.org/docs/reference/components/amp-selector>.
 			'reference-points-amp_selector_and_carousel_with_boolean_attributes' => array(
-				'<form action="/" method="get" target="_blank" id="form1"><amp-selector layout="container" name="single_image_select"><ul><li><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img></li><li><amp-img src="/img2.png" width="50" height="50" option="2" disabled></amp-img></li><li option="na" selected>None of the Above</li></ul></amp-selector><amp-selector layout="container" name="multi_image_select" multiple><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img><amp-img src="/img2.png" width="50" height="50" option="2"></amp-img><amp-img src="/img3.png" width="50" height="50" option="3"></amp-img></amp-selector><amp-selector layout="container" name="multi_image_select_1" multiple><amp-carousel id="carousel-1" width="200" height="60" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d" disabled></amp-img></amp-carousel></amp-selector></form><amp-selector layout="container" name="multi_image_select_2" multiple form="form1"><amp-carousel id="carousel-1" width="400" height="300" type="slides" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d"></amp-img></amp-carousel></amp-selector>',
+				str_replace(
+					array( "\n", "\t" ),
+					'',
+					'
+					<form action="/" method="get" target="_blank" id="form1">
+						<amp-selector layout="container" name="single_image_select">
+							<ul>
+								<li>
+									<amp-img src="/img1.png" width="50" height="50" option="1"></amp-img>
+								</li>
+								<li>
+									<amp-img src="/img2.png" width="50" height="50" option="2" disabled></amp-img>
+								</li>
+								<li option="na" selected>None of the Above</li>
+							</ul>
+						</amp-selector>
+						<amp-selector layout="container" name="multi_image_select" multiple>
+							<amp-img src="/img1.png" width="50" height="50" option="1"></amp-img>
+							<amp-img src="/img2.png" width="50" height="50" option="2"></amp-img>
+							<amp-img src="/img3.png" width="50" height="50" option="3"></amp-img>
+						</amp-selector>
+						<amp-selector layout="container" name="multi_image_select_1" multiple>
+							<amp-carousel id="carousel-1" width="200" height="60" controls>
+								<amp-img src="/img1.png" width="80" height="60" option="a"></amp-img>
+								<amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img>
+								<amp-img src="/img3.png" width="80" height="60" option="c"></amp-img>
+								<amp-img src="/img4.png" width="80" height="60" option="d" disabled></amp-img>
+							</amp-carousel>
+						</amp-selector>
+					</form>
+					<amp-selector layout="container" name="multi_image_select_2" multiple form="form1">
+						<amp-carousel id="carousel-1" width="400" height="300" type="slides" controls>
+							<amp-img src="/img1.png" width="80" height="60" option="a"></amp-img>
+							<amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img>
+							<amp-img src="/img3.png" width="80" height="60" option="c"></amp-img>
+							<amp-img src="/img4.png" width="80" height="60" option="d"></amp-img>
+						</amp-carousel>
+					</amp-selector>
+					'
+				),
 				null, // No change.
 				array( 'amp-selector', 'amp-form', 'amp-carousel' ),
 			),

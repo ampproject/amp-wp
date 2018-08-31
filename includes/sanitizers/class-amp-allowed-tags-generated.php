@@ -1133,6 +1133,16 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'reference_points' => array(
+						'AMP-CAROUSEL lightbox [child]' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+						'AMP-CAROUSEL lightbox [lightbox-exclude]' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+					),
 					'requires_extension' => array(
 						'amp-carousel',
 						'amp-lightbox-gallery',
@@ -2754,6 +2764,20 @@ class AMP_Allowed_Tags_Generated {
 							3,
 						),
 					),
+					'reference_points' => array(
+						'AMP-LIVE-LIST [items]' => array(
+							'mandatory' => true,
+							'unique' => true,
+						),
+						'AMP-LIVE-LIST [pagination]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+						'AMP-LIVE-LIST [update]' => array(
+							'mandatory' => true,
+							'unique' => true,
+						),
+					),
 					'requires_extension' => array(
 						'amp-live-list',
 					),
@@ -2790,6 +2814,16 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(),
 				'tag_spec' => array(
+					'reference_points' => array(
+						'AMP-NEXT-PAGE > [separator]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+						'amp-next-page extension .json configuration' => array(
+							'mandatory' => true,
+							'unique' => true,
+						),
+					),
 					'requires_extension' => array(
 						'amp-next-page',
 					),
@@ -2812,6 +2846,12 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'reference_points' => array(
+						'AMP-NEXT-PAGE > [separator]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+					),
 					'requires_extension' => array(
 						'amp-next-page',
 					),
@@ -3327,6 +3367,16 @@ class AMP_Allowed_Tags_Generated {
 					'disallowed_ancestor' => array(
 						'amp-selector',
 					),
+					'reference_points' => array(
+						'AMP-SELECTOR child' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+						'AMP-SELECTOR option' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+					),
 					'requires_extension' => array(
 						'amp-selector',
 					),
@@ -3696,6 +3746,12 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'amp-story-page',
+					'reference_points' => array(
+						'AMP-STORY-CTA-LAYER animate-in' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+					),
 				),
 			),
 		),
@@ -3714,6 +3770,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'amp-story-page',
+					'reference_points' => array(
+						'AMP-STORY-GRID-LAYER animate-in' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+						'AMP-STORY-GRID-LAYER default' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+					),
 				),
 			),
 		),
@@ -12376,6 +12442,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-story-auto-ads',
+					'reference_points' => array(
+						'AMP-STORY-GRID-LAYER animate-in' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+						'AMP-STORY-GRID-LAYER default' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+					),
 					'requires_extension' => array(
 						'amp-mustache',
 					),
@@ -13595,6 +13671,305 @@ class AMP_Allowed_Tags_Generated {
 	);
 
 
+	private static $reference_points = array(
+		'AMP-CAROUSEL lightbox [child]' => array(
+			'attr_spec_list' => array(
+				'lightbox-thumbnail-id' => array(
+					'value_regex_casei' => '^[a-z][a-z\\d_-]*',
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-CAROUSEL lightbox [child]',
+			),
+		),
+		'AMP-CAROUSEL lightbox [lightbox-exclude]' => array(
+			'attr_spec_list' => array(
+				'lightbox-exclude' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-CAROUSEL lightbox [lightbox-exclude]',
+			),
+		),
+		'AMP-LIVE-LIST [items]' => array(
+			'attr_spec_list' => array(
+				'items' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'reference_points' => array(
+					'AMP-LIVE-LIST [items] item' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-LIVE-LIST [items]',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-live-list#items',
+			),
+		),
+		'AMP-LIVE-LIST [items] item' => array(
+			'attr_spec_list' => array(
+				'data-sort-time' => array(
+					'mandatory' => true,
+				),
+				'data-tombstone' => array(),
+				'data-update-time' => array(),
+				'id' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-LIVE-LIST [items] item',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-live-list#items',
+			),
+		),
+		'AMP-LIVE-LIST [pagination]' => array(
+			'attr_spec_list' => array(
+				'pagination' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-LIVE-LIST [pagination]',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-live-list#pagination',
+			),
+		),
+		'AMP-LIVE-LIST [update]' => array(
+			'attr_spec_list' => array(
+				'update' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-LIVE-LIST [update]',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-live-list#update',
+			),
+		),
+		'AMP-NEXT-PAGE > [separator]' => array(
+			'attr_spec_list' => array(
+				'separator' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'mandatory_parent' => 'amp-next-page',
+				'spec_name' => 'AMP-NEXT-PAGE > [separator]',
+			),
+		),
+		'AMP-SELECTOR child' => array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(
+				'reference_points' => array(
+					'AMP-SELECTOR child' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+					'AMP-SELECTOR option' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-SELECTOR child',
+			),
+		),
+		'AMP-SELECTOR option' => array(
+			'attr_spec_list' => array(
+				'disabled' => array(
+					'value' => array(
+						'',
+					),
+				),
+				'option' => array(
+					'mandatory' => true,
+				),
+				'selected' => array(
+					'value' => array(
+						'',
+					),
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-SELECTOR option',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-selector',
+			),
+		),
+		'AMP-STORY-CTA-LAYER animate-in' => array(
+			'attr_spec_list' => array(
+				'animate-in' => array(
+					'value' => array(
+						'drop',
+						'fade-in',
+						'fly-in-bottom',
+						'fly-in-left',
+						'fly-in-right',
+						'fly-in-top',
+						'pan-down',
+						'pan-left',
+						'pan-right',
+						'pan-up',
+						'pulse',
+						'rotate-in-left',
+						'rotate-in-right',
+						'twirl-in',
+						'whoosh-in-left',
+						'whoosh-in-right',
+						'zoom-in',
+						'zoom-out',
+					),
+				),
+				'animate-in-after' => array(),
+				'animate-in-delay' => array(),
+				'animate-in-duration' => array(),
+			),
+			'tag_spec' => array(
+				'reference_points' => array(
+					'AMP-STORY-CTA-LAYER animate-in' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-STORY-CTA-LAYER animate-in',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-story',
+			),
+		),
+		'AMP-STORY-GRID-LAYER animate-in' => array(
+			'attr_spec_list' => array(
+				'animate-in' => array(
+					'value' => array(
+						'drop',
+						'fade-in',
+						'fly-in-bottom',
+						'fly-in-left',
+						'fly-in-right',
+						'fly-in-top',
+						'pan-down',
+						'pan-left',
+						'pan-right',
+						'pan-up',
+						'pulse',
+						'rotate-in-left',
+						'rotate-in-right',
+						'twirl-in',
+						'whoosh-in-left',
+						'whoosh-in-right',
+						'zoom-in',
+						'zoom-out',
+					),
+				),
+				'animate-in-after' => array(),
+				'animate-in-delay' => array(),
+				'animate-in-duration' => array(),
+			),
+			'tag_spec' => array(
+				'reference_points' => array(
+					'AMP-STORY-GRID-LAYER animate-in' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-STORY-GRID-LAYER animate-in',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-story',
+			),
+		),
+		'AMP-STORY-GRID-LAYER default' => array(
+			'attr_spec_list' => array(
+				'align-content' => array(
+					'value' => array(
+						'center',
+						'end',
+						'space-around',
+						'space-between',
+						'space-evenly',
+						'start',
+						'stretch',
+					),
+				),
+				'align-items' => array(
+					'value' => array(
+						'center',
+						'end',
+						'start',
+						'stretch',
+					),
+				),
+				'align-self' => array(
+					'value' => array(
+						'center',
+						'end',
+						'start',
+						'stretch',
+					),
+				),
+				'animate-in' => array(
+					'value' => array(
+						'drop',
+						'fade-in',
+						'fly-in-bottom',
+						'fly-in-left',
+						'fly-in-right',
+						'fly-in-top',
+						'pan-down',
+						'pan-left',
+						'pan-right',
+						'pan-up',
+						'pulse',
+						'rotate-in-left',
+						'rotate-in-right',
+						'twirl-in',
+						'whoosh-in-left',
+						'whoosh-in-right',
+						'zoom-in',
+						'zoom-out',
+					),
+				),
+				'animate-in-after' => array(),
+				'animate-in-delay' => array(),
+				'animate-in-duration' => array(),
+				'grid-area' => array(),
+				'justify-content' => array(
+					'value' => array(
+						'center',
+						'end',
+						'space-around',
+						'space-between',
+						'space-evenly',
+						'start',
+						'stretch',
+					),
+				),
+				'justify-items' => array(
+					'value' => array(
+						'center',
+						'end',
+						'start',
+						'stretch',
+					),
+				),
+				'justify-self' => array(
+					'value' => array(
+						'center',
+						'end',
+						'start',
+						'stretch',
+					),
+				),
+			),
+			'tag_spec' => array(
+				'reference_points' => array(
+					'AMP-STORY-GRID-LAYER animate-in' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-STORY-GRID-LAYER default',
+				'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-story',
+			),
+		),
+	);
+
+
 	/**
 	 * Get allowed tags.
 	 *
@@ -13617,6 +13992,20 @@ class AMP_Allowed_Tags_Generated {
 	public static function get_allowed_tag( $node_name ) {
 		if ( isset( self::$allowed_tags[ $node_name ] ) ) {
 			return self::$allowed_tags[ $node_name ];
+		}
+		return null;
+	}
+
+	/**
+	 * Get reference point spec.
+	 *
+	 * @since 1.0
+	 * @param string $tag_spec_name Tag spec name.
+	 * @return array|null Reference point spec, or null if does not exist.
+	 */
+	public static function get_reference_point_spec( $tag_spec_name ) {
+		if ( isset( self::$reference_points[ $tag_spec_name ] ) ) {
+			return self::$reference_points[ $tag_spec_name ];
 		}
 		return null;
 	}
