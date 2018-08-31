@@ -27,6 +27,19 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/verse',
 				'core/video'
 			],
+			blockTagMapping: {
+				'core/button': 'div.wp-block-button',
+				'core/code': 'pre',
+				'core/embed': 'figure',
+				'core/image': 'figure.wp-block-image',
+				'core/paragraph': 'p',
+				'core/preformatted': 'pre',
+				'core/pullquote': 'blockquote',
+				'core/quote': 'blockquote',
+				'core/table': 'table',
+				'core/verse': 'pre',
+				'core/video': 'figure'
+			},
 			ampStoryPositionOptions: [
 				{
 					value: 'upper-third',
@@ -181,6 +194,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			);
 		};
 	};
+
 	/**
 	 * Add extra attributes to save to DB.
 	 *
@@ -202,10 +216,10 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 
 			if ( attributes.ampAnimationDelay ) {
-				ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay + 'ms';
+				ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay;
 			}
 			if ( attributes.ampAnimationDuration ) {
-				ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration + 'ms';
+				ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration;
 			}
 		}
 
@@ -228,18 +242,42 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			settings.attributes.ampStoryPosition = {
 				type: 'string'
 			};
-			// @todo We could map all the blocks to their tag and use attribute as source instead.
-			settings.attributes.ampAnimationType = {
-				type: 'string'
-			};
-			settings.attributes.ampAnimationDelay = {
-				type: 'number',
-				default: 0
-			};
-			settings.attributes.ampAnimationDuration = {
-				type: 'number',
-				default: 0
-			};
+
+			// Define selector according to mappings.
+			if ( _.has( component.data.blockTagMapping, name ) ) {
+				settings.attributes.ampAnimationType = {
+					type: 'string',
+					source: 'attribute',
+					selector: component.data.blockTagMapping[ name ],
+					attribute: 'animate-in'
+				};
+				settings.attributes.ampAnimationDelay = {
+					type: 'string',
+					source: 'attribute',
+					selector: component.data.blockTagMapping[ name ],
+					attribute: 'animate-in-delay',
+					default: '0ms'
+				};
+				settings.attributes.ampAnimationDuration = {
+					type: 'string',
+					source: 'attribute',
+					selector: component.data.blockTagMapping[ name ],
+					attribute: 'animate-in-duration',
+					default: '0ms'
+				};
+			} else if ( 'core/list' === name ) {
+				settings.attributes.ampAnimationType = {
+					type: 'string'
+				};
+				settings.attributes.ampAnimationDelay = {
+					type: 'number',
+					default: 0
+				};
+				settings.attributes.ampAnimationDuration = {
+					type: 'number',
+					default: 0
+				};
+			}
 		}
 		return settings;
 	};
@@ -334,21 +372,23 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			el( RangeControl, {
 				key: 'animation-duration',
 				label: __( 'Animation duration (ms)', 'amp' ),
-				value: attributes.ampAnimationDuration,
+				value: parseInt( attributes.ampAnimationDuration ),
 				min: 0,
 				max: 5000,
 				onChange: function( value ) {
-					props.setAttributes( { ampAnimationDuration: value } );
+					var msValue = value + 'ms';
+					props.setAttributes( { ampAnimationDuration: msValue } );
 				}
 			} ),
 			el( RangeControl, {
 				key: 'animation-delay',
 				label: __( 'Animation delay (ms)', 'amp' ),
-				value: attributes.ampAnimationDelay,
+				value: parseInt( attributes.ampAnimationDelay ),
 				min: 0,
 				max: 5000,
 				onChange: function( value ) {
-					props.setAttributes( { ampAnimationDelay: value } );
+					var msValue = value + 'ms';
+					props.setAttributes( { ampAnimationDelay: msValue } );
 				}
 			} )
 		];

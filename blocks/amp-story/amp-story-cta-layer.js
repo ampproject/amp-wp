@@ -1,4 +1,4 @@
-import { getAmpStoryAnimationControls } from '../utils';
+import { getAmpStoryAnimationControls } from './helpers';
 
 const { __ } = wp.i18n;
 const {
@@ -59,16 +59,22 @@ export default registerBlockType(
 			animationType: {
 				type: 'string',
 				source: 'attribute',
-				selector: 'amp-story-grid-layer',
+				selector: 'amp-story-cta-layer',
 				attribute: 'animate-in'
 			},
 			animationDuration: {
-				type: 'number',
-				default: 0
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-cta-layer',
+				attribute: 'animate-in-duration',
+				default: '0ms'
 			},
 			animationDelay: {
-				type: 'number',
-				default: 0
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-cta-layer',
+				attribute: 'animate-in-delay',
+				default: '0ms'
 			}
 		},
 
@@ -123,7 +129,7 @@ export default registerBlockType(
 				}
 				return [
 					<InspectorControls key='controls'>
-						<PanelBody key='animation' title={ __( 'CTA Layer Animation' ) }>
+						<PanelBody key='animation' title={ __( 'CTA Layer Animation', 'amp' ) }>
 							{
 								getAmpStoryAnimationControls( this.props.setAttributes, this.props.attributes )
 							}
@@ -154,10 +160,10 @@ export default registerBlockType(
 				layerProps[ 'animate-in' ] = attributes.animationType;
 
 				if ( attributes.animationDelay ) {
-					layerProps[ 'animate-in-delay' ] = attributes.animationDelay + 'ms';
+					layerProps[ 'animate-in-delay' ] = attributes.animationDelay;
 				}
 				if ( attributes.animationDuration ) {
-					layerProps[ 'animate-in-duration' ] = attributes.animationDuration + 'ms';
+					layerProps[ 'animate-in-duration' ] = attributes.animationDuration;
 				}
 			}
 			return (

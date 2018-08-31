@@ -1,4 +1,4 @@
-import { getAmpStoryAnimationControls } from '../utils';
+import { getAmpStoryAnimationControls } from './helpers';
 
 const { __ } = wp.i18n;
 const {
@@ -70,12 +70,18 @@ export default registerBlockType(
 				attribute: 'animate-in'
 			},
 			animationDuration: {
-				type: 'number',
-				default: 0
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-grid-layer',
+				attribute: 'animate-in-duration',
+				default: '0ms'
 			},
 			animationDelay: {
-				type: 'number',
-				default: 0
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-grid-layer',
+				attribute: 'animate-in-delay',
+				default: '0ms'
 			}
 		},
 
@@ -117,7 +123,7 @@ export default registerBlockType(
 						] }
 						onChange={ value => ( setAttributes( { template: value } ) ) }
 					/>
-					<PanelBody key='animation' title={ __( 'Grid Layer Animation' ) }>
+					<PanelBody key='animation' title={ __( 'Grid Layer Animation', 'amp' ) }>
 						{
 							getAmpStoryAnimationControls( setAttributes, attributes )
 						}
@@ -137,10 +143,10 @@ export default registerBlockType(
 				layerProps[ 'animate-in' ] = attributes.animationType;
 
 				if ( attributes.animationDelay ) {
-					layerProps[ 'animate-in-delay' ] = attributes.animationDelay + 'ms';
+					layerProps[ 'animate-in-delay' ] = attributes.animationDelay;
 				}
 				if ( attributes.animationDuration ) {
-					layerProps[ 'animate-in-duration' ] = attributes.animationDuration + 'ms';
+					layerProps[ 'animate-in-duration' ] = attributes.animationDuration;
 				}
 			}
 
