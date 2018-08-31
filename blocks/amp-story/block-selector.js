@@ -31,6 +31,7 @@ class BlockSelector extends Component {
 		}
 
 		let links = [];
+		let hasCtaLayer = false;
 
 		window.lodash.forEachRight( rootBlock.innerBlocks, function( block, index ) {
 			let className = 'component-editor__selector';
@@ -38,9 +39,10 @@ class BlockSelector extends Component {
 				className += ' is-selected';
 			}
 
-			let title = sprintf( __( 'Layout %d ', 'amp' ), index + 1 );
+			let title = sprintf( __( 'Layer %d ', 'amp' ), index + 1 );
 			if ( 'amp/amp-story-cta-layer' === block.name ) {
 				title = __( 'CTA Layer', 'amp' );
+				hasCtaLayer = true;
 			}
 			links.push(
 				<li className={ className } key={ 'selector-' + index }>
@@ -68,7 +70,8 @@ class BlockSelector extends Component {
 		}
 
 		const inserterProps = {
-			rootClientId: this.props.rootClientId
+			rootClientId: this.props.rootClientId,
+			hasCtaLayer: hasCtaLayer
 		};
 
 		links.push(

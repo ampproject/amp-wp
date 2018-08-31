@@ -50,7 +50,8 @@ class LayerInserter extends Component {
 
 	render() {
 		const {
-			rootClientId
+			rootClientId,
+			hasCtaLayer
 		} = this.props;
 
 		const {
@@ -83,9 +84,10 @@ class LayerInserter extends Component {
 				) }
 				renderContent={ ( { onClose } ) => {
 					const onSelect = ( item ) => {
-						onInsertBlock( item, rootClientId );
-
-						onClose();
+						if ( ! hasCtaLayer || 'amp/amp-story-grid-layer' === item.name ) {
+							onInsertBlock( item, rootClientId );
+							onClose();
+						}
 					};
 
 					// @todo If CTA layer is already added, don't display it here.
@@ -93,6 +95,8 @@ class LayerInserter extends Component {
 						getBlockType( 'amp/amp-story-grid-layer' ),
 						getBlockType( 'amp/amp-story-cta-layer' )
 					];
+
+					const listClassName = 'editor-block-types-list' + ( hasCtaLayer ? ' amp-story-has-cta-layer' : '' );
 
 					return (
 						<div className="editor-inserter__menu">
@@ -102,7 +106,7 @@ class LayerInserter extends Component {
 								role="region"
 								aria-label={ __( 'Available block types' ) }
 							>
-								<ul role="list" className="editor-block-types-list">
+								<ul role="list" className={ listClassName }>
 									{ items.map( ( item ) => {
 										const itemIconStyle = item.icon ? {
 											backgroundColor: item.icon.background,
