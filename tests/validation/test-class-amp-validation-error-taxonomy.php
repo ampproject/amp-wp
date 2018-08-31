@@ -535,10 +535,19 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		$number_of_errors = 10;
 		for ( $i = 0; $i < $number_of_errors; $i++ ) {
-			$this->factory()->term->create( array(
+			$invalid_url_post      = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+			$validation_error_term = $this->factory()->term->create( array(
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 				'description' => wp_json_encode( $this->get_mock_error() ),
+				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
 			) );
+
+			// Associate the validation error term with a URL so that it appears in a query.
+			wp_set_post_terms(
+				$invalid_url_post,
+				$validation_error_term,
+				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
+			);
 		}
 
 		/*
