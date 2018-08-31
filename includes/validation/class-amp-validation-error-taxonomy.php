@@ -522,7 +522,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
-		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filter' ) );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
 		} );
@@ -729,83 +729,18 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @param string $taxonomy_name The name of the taxonomy.
 	 */
-	public static function render_taxonomy_filter( $taxonomy_name ) {
+	public static function render_taxonomy_filters( $taxonomy_name ) {
 		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
 			return;
 		}
 
-		// Only display <option> for each status if it actually has errors associated with it.
-		$total_term_count          = self::get_validation_error_count();
-		$rejected_term_count       = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
-		$accepted_term_count       = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
-		$new_term_count            = $total_term_count - $rejected_term_count - $accepted_term_count;
-		$error_type_filter_value   = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
-		$error_status_filter_value = isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ? intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) : ''; // WPCS: CSRF OK.
-		$div_id                    = 'amp-tax-filter';
-
+		$div_id = 'amp-tax-filter';
 		?>
 		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
-			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
-			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
-				<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
-				<?php
-				if ( $new_term_count ) :
-					$new_term_text = sprintf(
-						/* translators: %s: the new term count. */
-						_nx(
-							'New Error <span class="count">(%s)</span>',
-							'New Errors <span class="count">(%s)</span>',
-							$new_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $new_term_count )
-					);
-					?>
-					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
-				<?php endif; ?>
-				<?php
-				if ( $accepted_term_count ) :
-					$accepted_term_text = sprintf(
-						/* translators: %s: the accepted term count. */
-						_nx(
-							'Accepted Error <span class="count">(%s)</span>',
-							'Accepted Errors <span class="count">(%s)</span>',
-							$accepted_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $accepted_term_count )
-					);
-					?>
-					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
-					<?php
-				endif;
-				if ( $rejected_term_count ) :
-					$rejected_term_text = sprintf(
-						/* translators: %s: the rejected term count. */
-						_nx(
-							'Rejected Error <span class="count">(%s)</span>',
-							'Rejected Errors <span class="count">(%s)</span>',
-							$rejected_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $rejected_term_count )
-					);
-					?>
-					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
-				<?php endif; ?>
-			</select>
-
-			<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
-			<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
-				<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Element) Error', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Attribute) Error', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>><?php esc_html_e( 'JS Error', 'amp' ); ?></option>
-				<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>><?php esc_html_e( 'CSS Error', 'amp' ); ?></option>
-			</select>
+			<?php
+			self::render_error_status_filter();
+			self::render_error_type_filter();
+			?>
 			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
 		</div>
 
@@ -815,6 +750,129 @@ class AMP_Validation_Error_Taxonomy {
 				$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
 			} )( jQuery );
 		</script>
+		<?php
+	}
+
+	/**
+	 * Renders the error status filter <select> element that allows filtering by error status.
+	 *
+	 * There is a difference how the errors are counted, depending on which screen this is on.
+	 * For example: Accepted Errors (10).
+	 * This status filter <select> element is rendered on the validation error post page (Errors by URL),
+	 * and the validation error taxonomy page (Errors by Type).
+	 * On the taxonomy page, this simply needs to count the number of errors with a given type.
+	 * On the post page, this needs to count the number of posts that have at least one error of a given type.
+	 */
+	public static function render_error_status_filter() {
+		$screen_base = get_current_screen()->base;
+		if ( 'edit-tags' === $screen_base ) {
+			$total_term_count    = self::get_validation_error_count();
+			$rejected_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
+			$accepted_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
+			$new_term_count      = $total_term_count - $rejected_term_count - $accepted_term_count;
+		} elseif ( 'edit' === $screen_base ) {
+			$args = array(
+				'post_type'              => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			);
+
+			$with_new_query = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS )
+			) );
+			$new_term_count = $with_new_query->found_posts;
+
+			$with_rejected_query = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_REJECTED_STATUS )
+			) );
+			$rejected_term_count = $with_rejected_query->found_posts;
+			$with_accepted_query = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACCEPTED_STATUS )
+			) );
+			$accepted_term_count = $with_accepted_query->found_posts;
+		} else {
+			return;
+		}
+
+		$error_status_filter_value = isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ? intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) : ''; // WPCS: CSRF OK.
+
+		?>
+		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
+		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
+			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
+			<?php
+			if ( $new_term_count ) :
+				$new_term_text = sprintf(
+					/* translators: %s: the new term count. */
+					_nx(
+						'New Error <span class="count">(%s)</span>',
+						'New Errors <span class="count">(%s)</span>',
+						$new_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $new_term_count )
+				);
+				?>
+				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
+			<?php endif; ?>
+			<?php
+			if ( $accepted_term_count ) :
+				$accepted_term_text = sprintf(
+					/* translators: %s: the accepted term count. */
+					_nx(
+						'Accepted Error <span class="count">(%s)</span>',
+						'Accepted Errors <span class="count">(%s)</span>',
+						$accepted_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $accepted_term_count )
+				);
+				?>
+				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
+				<?php
+			endif;
+			if ( $rejected_term_count ) :
+				$rejected_term_text = sprintf(
+					/* translators: %s: the rejected term count. */
+					_nx(
+						'Rejected Error <span class="count">(%s)</span>',
+						'Rejected Errors <span class="count">(%s)</span>',
+						$rejected_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $rejected_term_count )
+				);
+				?>
+				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
+			<?php endif; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Renders the filter for error type.
+	 *
+	 * This type filter <select> element is rendered on the validation error post page (Errors by URL),
+	 * and the validation error taxonomy page (Errors by Type).
+	 */
+	public static function render_error_type_filter() {
+		$error_type_filter_value = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+
+		?>
+		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
+		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
+			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
+			<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Element) Error', 'amp' ); ?></option>
+			<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Attribute) Error', 'amp' ); ?></option>
+			<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>><?php esc_html_e( 'JS Error', 'amp' ); ?></option>
+			<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>><?php esc_html_e( 'CSS Error', 'amp' ); ?></option>
+		</select>
 		<?php
 	}
 

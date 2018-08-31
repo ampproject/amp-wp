@@ -348,7 +348,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'redirect_term_location', array( self::TESTED_CLASS, 'add_term_filter_query_var' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
-		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_taxonomy_filter' ) ) ) );
+		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_taxonomy_filters' ) ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', array( self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'add_admin_notices' ) ) );
@@ -480,12 +480,13 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test render_taxonomy_filter.
+	 * Test render_taxonomy_filters.
 	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::render_taxonomy_filter()
+	 * @covers \AMP_Validation_Error_Taxonomy::render_taxonomy_filters()
 	 */
-	public function test_render_taxonomy_filter() {
+	public function test_render_taxonomy_filters() {
 		AMP_Validation_Error_Taxonomy::register();
+		set_current_screen( 'edit-tags.php' );
 		// Create one new error.
 		$this->factory()->term->create( array(
 			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
@@ -495,12 +496,86 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// When passing the wrong $taxonomy_name to the method, it should not output anything.
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filter( 'category' );
+		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( 'category' );
 		$this->assertEmpty( ob_get_clean() );
 
-		// With the correct taxonomy name, the strings below should be present.
+		// When there are two new errors, the <option> text should be plural, and have a count of (2).
+		$this->factory()->term->create( array(
+			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			'description' => wp_json_encode( $this->get_mock_error() ),
+			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+		) );
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$this->assertContains( 'New Errors <span class="count">(2)</span>', ob_get_clean() );
+	}
+
+	/**
+	 * Test render_error_status_filter.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_error_status_filter()
+	 */
+	public function test_render_error_status_filter() {
+		AMP_Validation_Error_Taxonomy::register();
+		set_current_screen( 'post.php' );
+
+		// When this is not on the correct screen, this should not render anything.
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_error_status_filter();
+		$this->assertEmpty( ob_get_clean() );
+
+		/*
+		 * This is now on the correct screen, so it shouldn't be empty anymore.
+		 * When no validation error exists, there should not be an <option> for any specific error status, like 'New Error'.
+		 */
+		set_current_screen( 'edit.php' );
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_error_status_filter();
+		$this->assertNotContains( 'New Error', ob_get_clean() );
+
+		$number_of_errors = 10;
+		for ( $i = 0; $i < $number_of_errors; $i++ ) {
+			$this->factory()->term->create( array(
+				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+				'description' => wp_json_encode( $this->get_mock_error() ),
+			) );
+		}
+
+		/*
+		 * This is on another accepted screen, so this should again render markup.
+		 * When there are 10 accepted errors, the <option> element for it should end with (10).
+		 */
+		set_current_screen( 'edit-tags.php' );
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_error_status_filter();
+		$this->assertContains(
+			sprintf(
+				'New Errors <span class="count">(%d)</span>',
+				$number_of_errors
+			),
+			ob_get_clean()
+		);
+	}
+
+	/**
+	 * Test render_error_type_filter.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_error_type_filter()
+	 */
+	public function test_render_error_type_filter() {
+		set_current_screen( 'edit-tags.php' );
+		$number_of_errors = 10;
+		for ( $i = 0; $i < $number_of_errors; $i++ ) {
+			$this->factory()->term->create( array(
+				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+				'description' => wp_json_encode( $this->get_mock_error() ),
+				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			) );
+		}
+
+		// The strings below should be present.
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$markup = ob_get_clean();
 
 		$expected_to_contain = array(
@@ -516,18 +591,14 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			$this->assertContains( $expected, $markup );
 		}
 
-		// When there is one new error, the <option> for this status in the filter should have (1) after the status name.
-		$this->assertContains( 'New Error <span class="count">(1)</span>', $markup );
-
-		// When there are two new errors, the <option> text should be plural, and have a count of (2).
-		$this->factory()->term->create( array(
-			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-			'description' => wp_json_encode( $this->get_mock_error() ),
-			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-		) );
-		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		$this->assertContains( 'New Errors <span class="count">(2)</span>', ob_get_clean() );
+		// When there are 10 errors with this status, its <option> element should have (10).
+		$this->assertContains(
+			sprintf(
+				'New Errors <span class="count">(%d)</span>',
+				$number_of_errors
+			),
+			$markup
+		);
 	}
 
 	/**
