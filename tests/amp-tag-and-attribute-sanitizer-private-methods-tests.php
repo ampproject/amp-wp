@@ -560,11 +560,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			}
 		}
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
+		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
+		$attr      = $node->getAttributeNode( $data['attribute_name'] );
 
-		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $data['attribute_name'], $attr_spec_list ) );
+		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $attr, $attr_spec_list ) );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $source, wp_json_encode( $data ) ) );
 	}
