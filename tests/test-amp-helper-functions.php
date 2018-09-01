@@ -246,11 +246,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		return array(
 			'home' => array(
 				home_url( '/' ),
-				add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+				add_query_arg( amp_get_slug(), '1', home_url( '/' ) ),
 			),
 			'404'  => array(
 				home_url( '/no-existe/' ),
-				add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+				add_query_arg( amp_get_slug(), '1', home_url( '/no-existe/' ) ),
 			),
 			'post' => array(
 				get_permalink( $post_id ),
