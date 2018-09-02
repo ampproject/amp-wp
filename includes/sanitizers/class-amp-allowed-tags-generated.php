@@ -13323,9 +13323,6 @@ class AMP_Allowed_Tags_Generated {
 		'amp-fx' => array(
 			'value_regex_casei' => '(fade-in|fade-in-scroll|fly-in-bottom|fly-in-left|fly-in-right|fly-in-top|parallax)(\\s|fade-in|fade-in-scroll|fly-in-bottom|fly-in-left|fly-in-right|fly-in-top|parallax)*',
 		),
-		'animate-in' => array(),
-		'animate-in-delay' => array(),
-		'animate-in-duration' => array(),
 		'aria-activedescendant' => array(),
 		'aria-atomic' => array(),
 		'aria-autocomplete' => array(),
