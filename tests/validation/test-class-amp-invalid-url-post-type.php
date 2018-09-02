@@ -30,6 +30,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_register() {
+		add_theme_support( 'amp' );
 		$this->assertFalse( is_admin() );
 
 		AMP_Invalid_URL_Post_Type::register();
@@ -49,6 +50,27 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		set_current_screen( 'index.php' );
 		AMP_Invalid_URL_Post_Type::register();
 		$this->assertContains( AMP_Invalid_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+	}
+
+	/**
+	 * Test should_show_in_menu.
+	 *
+	 * @covers AMP_Invalid_URL_Post_Type::should_show_in_menu()
+	 */
+	public function test_should_show_in_menu() {
+		global $pagenow;
+		add_theme_support( 'amp' );
+		$this->assertTrue( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
+
+		remove_theme_support( 'amp' );
+		$this->assertFalse( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
+
+		$pagenow           = 'edit.php'; // WPCS: override ok.
+		$_GET['post_type'] = 'post';
+		$this->assertFalse( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
+
+		$_GET['post_type'] = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		$this->assertTrue( AMP_Invalid_URL_Post_Type::should_show_in_menu() );
 	}
 
 	/**
@@ -375,6 +397,40 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			$this->assertEquals( $error_groups[ $i ], $stored_error['term_status'] );
 			$this->assertEquals( $error_groups[ $i ], $term->term_group );
 		}
+	}
+
+	/**
+	 * Test get_post_staleness method.
+	 *
+	 * @covers AMP_Invalid_URL_Post_Type::get_post_staleness()
+	 */
+	public function test_get_post_staleness() {
+		$error = array( 'code' => 'foo' );
+		switch_theme( 'twentysixteen' );
+		update_option( 'active_plugins', array( 'foo/foo.php', 'bar.php' ) );
+
+		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( array( $error ), home_url( '/' ) );
+		$this->assertInternalType( 'int', $invalid_url_post_id );
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id ) );
+
+		update_option( 'active_plugins', array( 'foo/foo.php', 'baz.php' ) );
+		$staleness = AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
+		$this->assertNotEmpty( $staleness );
+		$this->assertArrayHasKey( 'plugins', $staleness );
+		$this->assertArrayNotHasKey( 'theme', $staleness );
+
+		$this->assertEqualSets( array( 'baz.php' ), $staleness['plugins']['new'] );
+		$this->assertEqualSets( array( 'bar.php' ), $staleness['plugins']['old'] );
+
+		switch_theme( 'twentyseventeen' );
+		$next_staleness = AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
+		$this->assertArrayHasKey( 'theme', $next_staleness );
+		$this->assertEquals( 'twentysixteen', $next_staleness['theme'] );
+		$this->assertSame( $next_staleness['plugins'], $staleness['plugins'] );
+
+		// Re-storing results updates freshness.
+		AMP_Invalid_URL_Post_Type::store_validation_errors( array( $error ), home_url( '/' ), $invalid_url_post_id );
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_post_staleness( $invalid_url_post_id ) );
 	}
 
 	/**

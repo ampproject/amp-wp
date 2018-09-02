@@ -124,7 +124,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
 			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
-			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || wp.data.select( 'core/editor' ).isCleanNewPost() ) {
+			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || ( ! wp.data.select( 'core/editor' ).isEditedPostDirty() && wp.data.select( 'core/editor' ).isEditedPostNew() ) ) {
 				return true;
 			}
 
