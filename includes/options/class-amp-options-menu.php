@@ -291,15 +291,33 @@ class AMP_Options_Menu {
 			<?php endif; ?>
 
 			<script>
-				jQuery( 'input[type=radio][name="amp-options[theme_support]"]' ).change( function() {
-					jQuery( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === this.value );
-					jQuery( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === this.value );
-					jQuery( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== this.value );
-					jQuery( '#force_sanitization' ).trigger( 'change' );
-				} ).filter( ':checked' ).trigger( 'change' );
-				jQuery( '#force_sanitization' ).change( function() {
-					jQuery( '.amp-tree-shaking' ).toggleClass( 'hidden', this.checked && 'native' !== jQuery( 'input[type=radio][name="amp-options[theme_support]"]:checked' ).val() );
-				} ).trigger( 'change' );
+			(function( $ ) {
+				var getThemeSupportMode = function() {
+					var checkedInput = $( 'input[type=radio][name="amp-options[theme_support]"]:checked' );
+					if ( 0 === checkedInput.length ) {
+						return <?php echo wp_json_encode( amp_is_canonical() ? 'native' : 'paired' ); ?>;
+					}
+					return checkedInput.val();
+				};
+
+				var updateTreeShakingHiddenClass = function() {
+					var checkbox = $( '#force_sanitization' );
+					$( '.amp-tree-shaking' ).toggleClass( 'hidden', checkbox.prop( 'checked' ) && 'native' !== getThemeSupportMode() );
+				};
+
+				var updateHiddenClasses = function() {
+					var themeSupportMode = getThemeSupportMode();
+					$( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === themeSupportMode );
+					$( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === themeSupportMode );
+					$( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== themeSupportMode );
+					updateTreeShakingHiddenClass();
+				};
+
+				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
+				$( '#force_sanitization' ).change( updateTreeShakingHiddenClass );
+
+				updateHiddenClasses();
+			})( jQuery );
 			</script>
 
 			<p>

@@ -126,7 +126,10 @@ class AMP_Story_Post_Type {
 
 		// @todo This perhaps should not be allowed if user does not have capability.
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['grid-area'] = true;
+			$allowed_tag['grid-area']           = true;
+			$allowed_tag['animate-in']          = true;
+			$allowed_tag['animate-in-duration'] = true;
+			$allowed_tag['animate-in-delay']    = true;
 		}
 
 		return $allowed_tags;

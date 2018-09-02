@@ -240,7 +240,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.5
 	 */
@@ -277,7 +277,83 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Process a node by sanitizing and/or validating it per.
+	 * Augment rule spec for validation.
+	 *
+	 * @since 1.0
+	 *
+	 * @param DOMElement $node      Node.
+	 * @param array      $rule_spec Rule spec.
+	 * @return array Augmented rule spec.
+	 */
+	private function get_rule_spec_list_to_validate( $node, $rule_spec ) {
+
+		// Expand extension_spec into a set of attr_spec_list.
+		if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
+			$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
+			$custom_attr    = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
+
+			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = array(
+				AMP_Rule_Spec::VALUE     => $extension_spec['name'],
+				AMP_Rule_Spec::MANDATORY => true,
+			);
+
+			$versions = array_unique( array_merge(
+				isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : array(),
+				isset( $extension_spec['version'] ) ? $extension_spec['version'] : array()
+			) );
+
+			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
+				AMP_Rule_Spec::VALUE_REGEX => implode( '', array(
+					'^',
+					preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ),
+					'(' . implode( '|', $versions ) . ')',
+					'\.js$',
+				) ),
+			);
+		}
+
+		// Augment the attribute list according to the parent's reference points, if it has them.
+		if ( ! empty( $node->parentNode ) && isset( $this->allowed_tags[ $node->parentNode->nodeName ] ) ) {
+			foreach ( $this->allowed_tags[ $node->parentNode->nodeName ] as $parent_rule_spec ) {
+				if ( empty( $parent_rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['reference_points'] ) ) {
+					continue;
+				}
+				foreach ( $parent_rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['reference_points'] as $reference_point_spec_name => $reference_point_spec_instance_attrs ) {
+					$reference_point = AMP_Allowed_Tags_Generated::get_reference_point_spec( $reference_point_spec_name );
+					if ( empty( $reference_point[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
+						/*
+						 * See special case for amp-selector in AMP_Tag_And_Attribute_Sanitizer::is_amp_allowed_attribute()
+						 * where its reference point applies to any descendant elements, not just direct children.
+						 */
+						continue;
+					}
+					foreach ( $reference_point[ AMP_Rule_Spec::ATTR_SPEC_LIST ] as $attr_name => $reference_point_spec_attr ) {
+						$reference_point_spec_attr = array_merge(
+							$reference_point_spec_attr,
+							$reference_point_spec_instance_attrs
+						);
+
+						/*
+						 * Ignore mandatory constraint for now since this would end up causing other sibling children
+						 * getting removed due to missing a mandatory attribute. To sanitize this it would require
+						 * higher-level processing to look at an element's surrounding context, similar to how the
+						 * sanitizer does not yet handle the mandatory_oneof constraint.
+						 */
+						unset( $reference_point_spec_attr['mandatory'] );
+
+						$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] = $reference_point_spec_attr;
+					}
+				}
+			}
+		}
+		return $rule_spec;
+	}
+
+	/**
+	 * Process a node by checking if an element and its attributes are valid, and removing them when invalid.
+	 *
+	 * Attributes which are not valid are removed. Elements which are not allowed are also removed,
+	 * including elements which miss mandatory attributes.
 	 *
 	 * @param DOMNode $node Node.
 	 */
@@ -315,33 +391,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
 			if ( $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ) {
-
-				// Expand extension_spec into a set of attr_spec_list.
-				if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
-					$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-					$custom_attr    = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
-
-					$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = array(
-						AMP_Rule_Spec::VALUE     => $extension_spec['name'],
-						AMP_Rule_Spec::MANDATORY => true,
-					);
-
-					$versions = array_unique( array_merge(
-						isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : array(),
-						isset( $extension_spec['version'] ) ? $extension_spec['version'] : array()
-					) );
-
-					$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
-						AMP_Rule_Spec::VALUE_REGEX => implode( '', array(
-							'^',
-							preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ),
-							'(' . implode( '|', $versions ) . ')',
-							'\.js$',
-						) ),
-					);
-				}
-
-				$rule_spec_list_to_validate[ $id ] = $rule_spec;
+				$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
 			}
 		}
 
@@ -850,7 +900,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$attrs_to_remove = array();
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
-			if ( ! $this->is_amp_allowed_attribute( $attr_name, $attr_spec_list ) ) {
+			if ( ! $this->is_amp_allowed_attribute( $attr_node, $attr_spec_list ) ) {
 				$attrs_to_remove[] = $attr_node;
 			}
 		}
@@ -1503,18 +1553,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param string           $attr_name      Attribute name.
+	 * @param DOMAttr          $attr_node      Attribute node.
 	 * @param array[]|string[] $attr_spec_list Attribute spec list.
 	 * @return bool Return true if attribute name is valid for this attr_spec_list, false otherwise.
 	 */
-	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		if ( isset( $attr_spec_list[ $attr_name ] ) ) {
+	private function is_amp_allowed_attribute( $attr_node, $attr_spec_list ) {
+		$attr_name = $attr_node->nodeName;
+		if ( isset( $attr_spec_list[ $attr_name ] ) || 'data-' === substr( $attr_name, 0, 5 ) ) {
 			return true;
-		}
-		foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
-			if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
-				return true;
-			}
 		}
 
 		$is_allowed_alt_name_attr = (
@@ -1524,6 +1570,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		if ( $is_allowed_alt_name_attr ) {
 			return true;
+		}
+
+		/*
+		 * Handle special case for amp-selector where its reference points do not have to be direct children.
+		 * This is noted as a special case in the AMP validator spec for amp-selector, so that is why it is
+		 * a special case here in this method. It is also implemented in this way for the sake of efficiency
+		 * to prevent having to waste time in process_node() merging attribute lists. For more on amp-selector's
+		 * unique reference point, see:
+		 * https://github.com/ampproject/amphtml/blob/1526498116488/extensions/amp-selector/validator-amp-selector.protoascii#L81-L91
+		 */
+		$reference_point_spec = AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' );
+		if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
+			$parent = $attr_node->parentNode;
+			while ( $parent ) {
+				if ( 'amp-selector' === $parent->nodeName ) {
+					return true;
+				}
+				$parent = $parent->parentNode;
+			}
 		}
 
 		return false;

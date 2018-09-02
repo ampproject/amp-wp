@@ -463,7 +463,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->did_convert_elements = true;
 
 		if ( $this->parse_css_duration > 0.0 ) {
-			AMP_Response_Headers::send_server_timing( 'amp_parse_css', $this->parse_css_duration, 'AMP Parse CSS' );
+			AMP_HTTP::send_server_timing( 'amp_parse_css', $this->parse_css_duration, 'AMP Parse CSS' );
 		}
 	}
 

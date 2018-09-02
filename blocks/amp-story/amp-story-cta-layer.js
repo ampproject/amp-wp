@@ -1,12 +1,16 @@
+import { getAmpStoryAnimationControls } from './helpers';
+
 const { __ } = wp.i18n;
 const {
 	registerBlockType
 } = wp.blocks;
 const {
+	InspectorControls,
 	InnerBlocks
 } = wp.editor;
 const {
-	Notice
+	Notice,
+	PanelBody
 } = wp.components;
 const { Component } = wp.element;
 
@@ -50,6 +54,30 @@ export default registerBlockType(
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],
+
+		attributes: {
+			animationType: {
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-cta-layer',
+				attribute: 'animate-in'
+			},
+			animationDuration: {
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-cta-layer',
+				attribute: 'animate-in-duration',
+				default: '0ms'
+			},
+			animationDelay: {
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-cta-layer',
+				attribute: 'animate-in-delay',
+				default: '0ms'
+			}
+		},
+
 		inserter: false,
 
 		/*
@@ -99,9 +127,16 @@ export default registerBlockType(
 						<Notice status="error" isDismissible={ false }>{ __( 'Multiple CTA Layers are not allowed. Please remove all but one.', 'amp' ) }</Notice>
 					);
 				}
-				return (
+				return [
+					<InspectorControls key='controls'>
+						<PanelBody key='animation' title={ __( 'CTA Layer Animation', 'amp' ) }>
+							{
+								getAmpStoryAnimationControls( this.props.setAttributes, this.props.attributes )
+							}
+						</PanelBody>
+					</InspectorControls>,
 					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
-				);
+				];
 			}
 
 			hasMoreThanOneCtaBlock() {
@@ -120,8 +155,19 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
+			let layerProps = {};
+			if ( attributes.animationType ) {
+				layerProps[ 'animate-in' ] = attributes.animationType;
+
+				if ( attributes.animationDelay ) {
+					layerProps[ 'animate-in-delay' ] = attributes.animationDelay;
+				}
+				if ( attributes.animationDuration ) {
+					layerProps[ 'animate-in-duration' ] = attributes.animationDuration;
+				}
+			}
 			return (
-				<amp-story-cta-layer template={ attributes.template }>
+				<amp-story-cta-layer { ...layerProps }>
 					<InnerBlocks.Content />
 				</amp-story-cta-layer>
 			);
