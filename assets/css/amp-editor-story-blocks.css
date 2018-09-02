@@ -169,3 +169,7 @@ div[data-amp-position="lower-third"] {
 .editor-selectors .is-selected.component-editor__selector button {
 	text-decoration: underline;
 }
+
+.post-type-amp_story .components-range-control__number {
+	width: 60px;
+}

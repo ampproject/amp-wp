@@ -1,3 +1,5 @@
+import { getAmpStoryAnimationControls } from './helpers';
+
 const { __ } = wp.i18n;
 const {
 	registerBlockType
@@ -7,7 +9,8 @@ const {
 	InnerBlocks
 } = wp.editor;
 const {
-	SelectControl
+	SelectControl,
+	PanelBody
 } = wp.components;
 
 const ALLOWED_BLOCKS = [
@@ -59,6 +62,26 @@ export default registerBlockType(
 				selector: 'amp-story-grid-layer',
 				attribute: 'template',
 				default: 'vertical'
+			},
+			animationType: {
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-grid-layer',
+				attribute: 'animate-in'
+			},
+			animationDuration: {
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-grid-layer',
+				attribute: 'animate-in-duration',
+				default: '0ms'
+			},
+			animationDelay: {
+				type: 'string',
+				source: 'attribute',
+				selector: 'amp-story-grid-layer',
+				attribute: 'animate-in-delay',
+				default: '0ms'
 			}
 		},
 
@@ -73,13 +96,13 @@ export default registerBlockType(
 		 */
 
 		edit( props ) {
-			const { setAttributes } = props;
+			const { setAttributes, attributes } = props;
 			return [
 				<InspectorControls key='inspector'>
 					<SelectControl
 						key="template"
 						label={ __( 'Template', 'amp' ) }
-						value={ props.attributes.template }
+						value={ attributes.template }
 						options={ [
 							{
 								value: 'vertical',
@@ -100,6 +123,11 @@ export default registerBlockType(
 						] }
 						onChange={ value => ( setAttributes( { template: value } ) ) }
 					/>
+					<PanelBody key='animation' title={ __( 'Grid Layer Animation', 'amp' ) }>
+						{
+							getAmpStoryAnimationControls( setAttributes, attributes )
+						}
+					</PanelBody>
 				</InspectorControls>,
 				<div key='contents' className={ 'amp-grid-template amp-grid-template-' + props.attributes.template }>
 					<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
@@ -108,8 +136,22 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
+			let layerProps = {
+				template: attributes.template
+			};
+			if ( attributes.animationType ) {
+				layerProps[ 'animate-in' ] = attributes.animationType;
+
+				if ( attributes.animationDelay ) {
+					layerProps[ 'animate-in-delay' ] = attributes.animationDelay;
+				}
+				if ( attributes.animationDuration ) {
+					layerProps[ 'animate-in-duration' ] = attributes.animationDuration;
+				}
+			}
+
 			return (
-				<amp-story-grid-layer template={ attributes.template }>
+				<amp-story-grid-layer { ...layerProps }>
 					<InnerBlocks.Content />
 				</amp-story-grid-layer>
 			);

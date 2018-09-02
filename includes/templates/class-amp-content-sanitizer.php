@@ -113,7 +113,7 @@ class AMP_Content_Sanitizer {
 				$stylesheets = array_merge( $stylesheets, $sanitizer->get_stylesheets() );
 			}
 
-			AMP_Response_Headers::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
+			AMP_HTTP::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
 		}
 
 		return compact( 'scripts', 'styles', 'stylesheets' );
