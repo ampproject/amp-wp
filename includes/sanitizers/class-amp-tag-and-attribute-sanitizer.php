@@ -350,7 +350,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Process a node by sanitizing and/or validating it per.
+	 * Process a node by checking if an element and its attributes are valid, and removing them when invalid.
+	 *
+	 * Attributes which are not valid are removed. Elements which are not allowed are also removed,
+	 * including elements which miss mandatory attributes.
 	 *
 	 * @param DOMNode $node Node.
 	 */
