@@ -897,3 +897,17 @@ function amp_print_schemaorg_metadata() {
 	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
 	<?php
 }
+
+/**
+ * Filters content and keeps only allowable HTML elements by amp-mustache.
+ *
+ * @see wp_kses()
+ * @since 1.0
+ *
+ * @param string $markup Markup to sanitize.
+ * @return string HTML markup with tags allowed by amp-mustache.
+ */
+function amp_wp_kses_mustache( $markup ) {
+	$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
+	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
+}

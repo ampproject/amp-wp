@@ -50,7 +50,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		if ( isset( $GLOBALS['wp_customize'] ) ) {
 			$GLOBALS['wp_customize']->stop_previewing_theme();
 		}
-		AMP_Response_Headers::$headers_sent = array();
+		AMP_HTTP::$headers_sent = array();
 	}
 
 	/**
@@ -62,16 +62,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$_REQUEST['__amp_source_origin'] = 'foo';
 		$_GET['__amp_source_origin']     = 'foo';
 		AMP_Theme_Support::init();
-		$this->assertNotEquals( 10, has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
-
-		// Ensure that purge_amp_query_vars() didn't execute.
-		$this->assertTrue( isset( $_REQUEST['__amp_source_origin'] ) ); // WPCS: CSRF ok.
+		$this->assertFalse( has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
+		$this->assertFalse( has_action( 'wp', array( self::TESTED_CLASS, 'finish_init' ) ) );
 
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::init();
 		$this->assertEquals( 10, has_action( 'widgets_init', array( self::TESTED_CLASS, 'register_widgets' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', array( self::TESTED_CLASS, 'finish_init' ) ) );
-		$this->assertFalse( isset( $_REQUEST['__amp_source_origin'] ) ); // WPCS: CSRF ok.
 	}
 
 	/**
@@ -737,284 +734,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test purge_amp_query_vars.
-	 *
-	 * @covers AMP_Theme_Support::purge_amp_query_vars()
-	 */
-	public function test_purge_amp_query_vars() {
-		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification
-		$bad_query_vars = array(
-			'amp_latest_update_time' => '1517199956',
-			'amp_last_check_time'    => '1517599126',
-			'__amp_source_origin'    => home_url(),
-		);
-		$ok_query_vars  = array(
-			'bar' => 'baz',
-		);
-		$all_query_vars = array_merge( $bad_query_vars, $ok_query_vars );
-
-		$_SERVER['QUERY_STRING'] = build_query( $all_query_vars );
-
-		remove_action( 'wp', 'amp_maybe_add_actions' );
-		$this->go_to( add_query_arg( $all_query_vars, home_url( '/foo/' ) ) );
-		$_REQUEST = $_GET;
-		foreach ( $all_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET );
-			$this->assertArrayHasKey( $key, $_REQUEST );
-			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
-		}
-
-		AMP_Theme_Support::$purged_amp_query_vars = array();
-		AMP_Theme_Support::purge_amp_query_vars();
-		$this->assertEqualSets( AMP_Theme_Support::$purged_amp_query_vars, $bad_query_vars );
-
-		foreach ( $bad_query_vars as $key => $value ) {
-			$this->assertArrayNotHasKey( $key, $_GET );
-			$this->assertArrayNotHasKey( $key, $_REQUEST );
-			$this->assertNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
-		}
-		foreach ( $ok_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET );
-			$this->assertArrayHasKey( $key, $_REQUEST );
-			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
-		}
-		// phpcs:enable WordPress.CSRF.NonceVerification.NoNonceVerification
-	}
-
-	/**
-	 * Test handle_xhr_request().
-	 *
-	 * @covers AMP_Theme_Support::handle_xhr_request()
-	 */
-	public function test_handle_xhr_request() {
-		AMP_Theme_Support::purge_amp_query_vars();
-		AMP_Theme_Support::handle_xhr_request();
-		$this->assertEmpty( AMP_Response_Headers::$headers_sent );
-
-		$_GET['_wp_amp_action_xhr_converted'] = '1';
-
-		// Try bad source origin.
-		$_GET['__amp_source_origin'] = 'http://evil.example.com/';
-		$_SERVER['REQUEST_METHOD']   = 'POST';
-		AMP_Theme_Support::purge_amp_query_vars();
-		AMP_Theme_Support::handle_xhr_request();
-		$this->assertEmpty( AMP_Response_Headers::$headers_sent );
-
-		// Try home source origin.
-		$_GET['__amp_source_origin'] = home_url();
-		$_SERVER['REQUEST_METHOD']   = 'POST';
-		AMP_Theme_Support::purge_amp_query_vars();
-		AMP_Theme_Support::handle_xhr_request();
-		$this->assertCount( 1, AMP_Response_Headers::$headers_sent );
-		$this->assertEquals(
-			array(
-				'name'        => 'AMP-Access-Control-Allow-Source-Origin',
-				'value'       => home_url(),
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent[0]
-		);
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', array( 'AMP_Theme_Support', 'intercept_post_request_redirect' ) ) );
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', array( 'AMP_Theme_Support', 'filter_comment_post_redirect' ) ) );
-		$this->assertEquals(
-			array( 'AMP_Theme_Support', 'handle_wp_die' ),
-			apply_filters( 'wp_die_handler', '__return_true' )
-		);
-	}
-
-	/**
-	 * Test filter_comment_post_redirect().
-	 *
-	 * @covers AMP_Theme_Support::filter_comment_post_redirect()
-	 */
-	public function test_filter_comment_post_redirect() {
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', function() {
-			return '__return_null';
-		} );
-
-		add_theme_support( 'amp' );
-		$post    = $this->factory()->post->create_and_get();
-		$comment = $this->factory()->comment->create_and_get( array(
-			'comment_post_ID' => $post->ID,
-		) );
-		$url     = get_comment_link( $comment );
-
-		// Test without comments_live_list.
-		$filtered_url = AMP_Theme_Support::filter_comment_post_redirect( $url, $comment );
-		$this->assertNotEquals(
-			strtok( $url, '#' ),
-			strtok( $filtered_url, '#' )
-		);
-
-		// Test with comments_live_list.
-		add_theme_support( 'amp', array(
-			'comments_live_list' => true,
-		) );
-		add_filter( 'amp_comment_posted_message', function( $message, WP_Comment $filter_comment ) {
-			return sprintf( '(comment=%d,approved=%d)', $filter_comment->comment_ID, $filter_comment->comment_approved );
-		}, 10, 2 );
-
-		// Test approved comment.
-		$comment->comment_approved = '1';
-		ob_start();
-		AMP_Theme_Support::filter_comment_post_redirect( $url, $comment );
-		$response = json_decode( ob_get_clean(), true );
-		$this->assertArrayHasKey( 'message', $response );
-		$this->assertEquals(
-			sprintf( '(comment=%d,approved=1)', $comment->comment_ID ),
-			$response['message']
-		);
-
-		// Test moderated comment.
-		$comment->comment_approved = '0';
-		ob_start();
-		AMP_Theme_Support::filter_comment_post_redirect( $url, $comment );
-		$response = json_decode( ob_get_clean(), true );
-		$this->assertArrayHasKey( 'message', $response );
-		$this->assertEquals(
-			sprintf( '(comment=%d,approved=0)', $comment->comment_ID ),
-			$response['message']
-		);
-	}
-
-	/**
-	 * Test handle_wp_die().
-	 *
-	 * @covers AMP_Theme_Support::handle_wp_die()
-	 */
-	public function test_handle_wp_die() {
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', function() {
-			return '__return_null';
-		} );
-
-		ob_start();
-		AMP_Theme_Support::handle_wp_die( 'string' );
-		$this->assertEquals( '{"error":"string"}', ob_get_clean() );
-
-		ob_start();
-		$error = new WP_Error( 'code', 'The Message' );
-		AMP_Theme_Support::handle_wp_die( $error );
-		$this->assertEquals( '{"error":"The Message"}', ob_get_clean() );
-	}
-
-	/**
-	 * Test intercept_post_request_redirect().
-	 *
-	 * @covers AMP_Theme_Support::intercept_post_request_redirect()
-	 */
-	public function test_intercept_post_request_redirect() {
-
-		add_theme_support( 'amp' );
-		$url = home_url( '', 'https' ) . ':443/?test=true#test';
-
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', function () {
-			return '__return_false';
-		} );
-
-		// Test redirecting to full URL with HTTPS protocol.
-		AMP_Response_Headers::$headers_sent = array();
-		ob_start();
-		AMP_Theme_Support::intercept_post_request_redirect( $url );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Redirect-To',
-				'value'       => $url,
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-		$this->assertContains(
-			array(
-				'name'        => 'Access-Control-Expose-Headers',
-				'value'       => 'AMP-Redirect-To',
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-
-		// Test redirecting to non-HTTPS URL.
-		AMP_Response_Headers::$headers_sent = array();
-		ob_start();
-		$url = home_url( '/', 'http' );
-		AMP_Theme_Support::intercept_post_request_redirect( $url );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Redirect-To',
-				'value'       => preg_replace( '#^\w+:#', '', $url ),
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-		$this->assertContains(
-			array(
-				'name'        => 'Access-Control-Expose-Headers',
-				'value'       => 'AMP-Redirect-To',
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-
-		// Test redirecting to host-less location.
-		AMP_Response_Headers::$headers_sent = array();
-		ob_start();
-		AMP_Theme_Support::intercept_post_request_redirect( '/new-location/' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Redirect-To',
-				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-
-		// Test redirecting to scheme-less location.
-		AMP_Response_Headers::$headers_sent = array();
-		ob_start();
-		$url = home_url( '/new-location/' );
-		AMP_Theme_Support::intercept_post_request_redirect( substr( $url, strpos( $url, ':' ) + 1 ) );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Redirect-To',
-				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-
-		// Test redirecting to empty location.
-		AMP_Response_Headers::$headers_sent = array();
-		ob_start();
-		AMP_Theme_Support::intercept_post_request_redirect( '' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
-		$this->assertContains(
-			array(
-				'name'        => 'AMP-Redirect-To',
-				'value'       => set_url_scheme( home_url(), 'https' ),
-				'replace'     => true,
-				'status_code' => null,
-			),
-			AMP_Response_Headers::$headers_sent
-		);
-	}
-
-	/**
 	 * Test register_widgets().
 	 *
 	 * @covers AMP_Theme_Support::register_widgets()
@@ -1531,7 +1250,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		$call_prepare_response = function() use ( $original_html, &$prepare_response_args ) {
-			AMP_Response_Headers::$headers_sent         = array();
+			AMP_HTTP::$headers_sent                     = array();
 			AMP_Validation_Manager::$validation_results = array();
 			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
 		};
@@ -1587,7 +1306,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			// Simulate dynamic changes in the content.
 			$original_html = str_replace( 'dynamic-id-', "dynamic-id-{$num_calls}-", $original_html );
 
-			AMP_Response_Headers::$headers_sent         = array();
+			AMP_HTTP::$headers_sent                     = array();
 			AMP_Validation_Manager::$validation_results = array();
 			AMP_Theme_Support::prepare_response( $original_html, $args );
 
@@ -1707,7 +1426,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	private function get_server_timing_header_count() {
 		return count( array_filter(
-			AMP_Response_Headers::$headers_sent,
+			AMP_HTTP::$headers_sent,
 			function( $header ) {
 				return 'Server-Timing' === $header['name'];
 			}

@@ -32,7 +32,7 @@ class AMP_Autoloader {
 		'AMP_Editor_Blocks'                           => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                           => 'includes/class-amp-theme-support',
 		'AMP_Story_Post_Type'                         => 'includes/class-amp-story-post-type',
-		'AMP_Response_Headers'                        => 'includes/class-amp-response-headers',
+		'AMP_HTTP'                                    => 'includes/class-amp-http',
 		'AMP_Comment_Walker'                          => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'                     => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                           => 'includes/admin/class-amp-post-meta-box',
