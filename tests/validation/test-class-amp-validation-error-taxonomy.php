@@ -658,6 +658,15 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			),
 			$markup
 		);
+
+		// On the edit-tags.php page, the <option> text should not have 'With', like 'With JS Errors'.
+		$this->assertNotContains( 'With', $markup );
+
+		// On the edit.php page (Errors by URL), the <option> text should have 'With', like 'With JS Errors'.
+		set_current_screen( 'edit.php' );
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$this->assertContains( 'With', ob_get_clean() );
 	}
 
 	/**

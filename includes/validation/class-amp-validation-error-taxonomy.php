@@ -843,14 +843,18 @@ class AMP_Validation_Error_Taxonomy {
 		global $wp_query;
 		$screen_base = get_current_screen()->base;
 
-		// The taxonomy page.
+
 		if ( 'edit-tags' === $screen_base ) {
+			// The taxonomy page.
+			$possible_with_text  = '';
 			$total_term_count    = self::get_validation_error_count();
 			$rejected_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
 			$accepted_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
 			$new_term_count      = $total_term_count - $rejected_term_count - $accepted_term_count;
-			// The post page.
+
 		} elseif ( 'edit' === $screen_base ) {
+			// The post page should have <option> text like 'With New Errors'.
+			$possible_with_text = esc_html__( 'With', 'amp' );
 			$args = array(
 				'post_type'              => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 				'update_post_meta_cache' => false,
@@ -891,14 +895,15 @@ class AMP_Validation_Error_Taxonomy {
 			<?php
 			if ( $new_term_count ) :
 				$new_term_text = sprintf(
-					/* translators: %s: the new term count. */
+					/* translators: %s: possibly the word With, %s: the new term count. */
 					_nx(
-						'New Error <span class="count">(%s)</span>',
-						'New Errors <span class="count">(%s)</span>',
+						'%1$s New Error <span class="count">(%2$s)</span>',
+						'%1$s New Errors <span class="count">(%2$s)</span>',
 						$new_term_count,
 						'terms',
 						'amp'
 					),
+					$possible_with_text,
 					number_format_i18n( $new_term_count )
 				);
 				?>
@@ -907,14 +912,15 @@ class AMP_Validation_Error_Taxonomy {
 			<?php
 			if ( $accepted_term_count ) :
 				$accepted_term_text = sprintf(
-					/* translators: %s: the accepted term count. */
+					/* translators: %s: possibly the word With, %s: the accepted term count. */
 					_nx(
-						'Accepted Error <span class="count">(%s)</span>',
-						'Accepted Errors <span class="count">(%s)</span>',
+						'%1$s Accepted Error <span class="count">(%2$s)</span>',
+						'%1$s Accepted Errors <span class="count">(%2$s)</span>',
 						$accepted_term_count,
 						'terms',
 						'amp'
 					),
+					$possible_with_text,
 					number_format_i18n( $accepted_term_count )
 				);
 				?>
@@ -923,14 +929,15 @@ class AMP_Validation_Error_Taxonomy {
 			endif;
 			if ( $rejected_term_count ) :
 				$rejected_term_text = sprintf(
-					/* translators: %s: the rejected term count. */
+					/* translators: %s: possibly the word With, %s: the rejected term count. */
 					_nx(
-						'Rejected Error <span class="count">(%s)</span>',
-						'Rejected Errors <span class="count">(%s)</span>',
+						'%1$s Rejected Error <span class="count">(%2$s)</span>',
+						'%1$s Rejected Errors <span class="count">(%2$s)</span>',
 						$rejected_term_count,
 						'terms',
 						'amp'
 					),
+					$possible_with_text,
 					number_format_i18n( $rejected_term_count )
 				);
 				?>
@@ -957,15 +964,44 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function render_error_type_filter() {
 		$error_type_filter_value = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+		$screen_base             = get_current_screen()->base;
+
+		/*
+		 * On the 'Errors by URL' page, the <option> text should be different.
+		 * For example, it should be 'With JS Errors' instead of 'JS Errors'.
+		 */
+		$possible_with_text = 'edit' === $screen_base ? __( 'With', 'amp' ) : '';
 
 		?>
 		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
 		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
-			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Error Types', 'amp' ); ?></option>
-			<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Element) Error', 'amp' ); ?></option>
-			<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>><?php esc_html_e( 'HTML (Attribute) Error', 'amp' ); ?></option>
-			<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>><?php esc_html_e( 'JS Error', 'amp' ); ?></option>
-			<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>><?php esc_html_e( 'CSS Error', 'amp' ); ?></option>
+			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>">
+				<?php esc_html_e( 'All Error Types', 'amp' ); ?>
+			</option>
+			<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>>
+				<?php
+				/* translators: %s: possibly the word With */
+				echo esc_html( sprintf( __( '%s HTML (Element) Errors', 'amp' ), $possible_with_text ) );
+				?>
+			</option>
+			<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>>
+				<?php
+				/* translators: %s: possibly the word With */
+				echo esc_html( sprintf( __( '%s HTML (Attribute) Errors', 'amp' ), $possible_with_text ) );
+				?>
+			</option>
+			<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>>
+				<?php
+				/* translators: %s: possibly the word With */
+				echo esc_html( sprintf( __( '%s JS Errors', 'amp' ), $possible_with_text ) );
+				?>
+			</option>
+			<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>>
+				<?php
+				/* translators: %s: possibly the word With */
+				echo esc_html( sprintf( __( '%s CSS Errors', 'amp' ), $possible_with_text ) );
+				?>
+			</option>
 		</select>
 		<?php
 	}
