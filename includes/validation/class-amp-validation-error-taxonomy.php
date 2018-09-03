@@ -843,7 +843,6 @@ class AMP_Validation_Error_Taxonomy {
 		global $wp_query;
 		$screen_base = get_current_screen()->base;
 
-
 		if ( 'edit-tags' === $screen_base ) {
 			// The taxonomy page.
 			$possible_with_text  = '';
