@@ -360,6 +360,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_taxonomy_filters' ) ) ) );
+		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_link_to_errors_by_url' ) ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', array( self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'add_admin_notices' ) ) );
@@ -519,6 +520,32 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$this->assertContains( 'New Errors <span class="count">(2)</span>', ob_get_clean() );
+	}
+
+	/**
+	 * Test render_link_to_errors_by_url.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url()
+	 */
+	public function test_render_link_to_errors_by_url() {
+		// When passing the wrong $taxomomy argument, this should not render anything.
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url( 'category' );
+		$this->assertEmpty( ob_get_clean() );
+
+		// When passing the correct taxonomy, this should render the link.
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$output = ob_get_clean();
+		$this->assertContains( 'View errors by URL', $output );
+		$this->assertContains(
+			add_query_arg(
+				'post_type',
+				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				admin_url( 'edit.php' )
+			),
+			$output
+		);
 	}
 
 	/**

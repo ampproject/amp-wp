@@ -79,6 +79,13 @@ class AMP_Validation_Error_Taxonomy {
 	const NO_FILTER_VALUE = -1;
 
 	/**
+	 * The ID for the link to the Errors by URL.
+	 *
+	 * @var string
+	 */
+	const ID_LINK_ERRORS_BY_URL = 'link-errors-url';
+
+	/**
 	 * Validation code for an invalid element.
 	 *
 	 * @var string
@@ -549,6 +556,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
 		} );
@@ -749,7 +757,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Outputs the taxonomy filter UI for this taxonomy type.
 	 *
 	 * Similar to what appears on /wp-admin/edit.php for posts and pages,
-	 * this outputs a <select> element to choose the error type,
+	 * this outputs <select> elements to choose the error status and type,
 	 * and a 'Filter' submit button that allows filtering for that type.
 	 * This allows viewing one type at a time, like only JS errors.
 	 *
@@ -772,11 +780,38 @@ class AMP_Validation_Error_Taxonomy {
 
 		<script>
 			( function ( $ ) {
-				// Move the filter after the 'Bulk Actions' <select>, as it looks like there's no way to do this with simply an action.
-				$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
+				$( function() {
+					// Move the filter after the 'Bulk Actions' <select>, as it looks like there's no way to do this with simply an action.
+					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
+
+					// Move the link to 'View errors by URL' to after the heading, as there is no hook to output it there.
+					$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
+				} );
 			} )( jQuery );
 		</script>
 		<?php
+	}
+
+	/**
+	 * On the 'Errors by Type' taxonomy page, renders a link to the 'Errors by URL' page.
+	 *
+	 * @param string $taxonomy_name The name of the taxonomy.
+	 */
+	public static function render_link_to_errors_by_url( $taxonomy_name ) {
+		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
+			return;
+		}
+
+		printf(
+			'<a href="%s" class="page-title-action" id="%s" style="margin-left: 1rem;">%s</a>',
+			esc_attr( add_query_arg(
+				'post_type',
+				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				admin_url( 'edit.php' )
+			) ),
+			esc_attr( self::ID_LINK_ERRORS_BY_URL ),
+			esc_html__( 'View errors by URL', 'amp' )
+		);
 	}
 
 	/**
