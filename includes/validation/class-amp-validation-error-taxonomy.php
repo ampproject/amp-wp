@@ -672,7 +672,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * It then passes that value to the redirect URL as a query var,
 	 * So that the taxonomy page will be filtered for that error type.
 	 *
-	 * @see AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter() for the filtering of the 'where' clause, based on that query var.
+	 * @see AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter() for the filtering of the 'where' clause, based on the query vars.
 	 * @param string      $url The $url to redirect to.
 	 * @param WP_Taxonomy $tax The WP_Taxonomy object.
 	 * @return string The filtered URL.
@@ -694,7 +694,7 @@ class AMP_Validation_Error_Taxonomy {
 			&&
 			in_array(
 				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // WPCS: CSRF OK.
-				self::get_error_types(),
+				array_merge( self::get_error_types(), array( strval( self::NO_FILTER_VALUE ) ) ),
 				true
 			)
 		) {
