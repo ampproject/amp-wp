@@ -34,7 +34,8 @@ class BlockSelector extends Component {
 		let hasCtaLayer = false;
 
 		window.lodash.forEachRight( rootBlock.innerBlocks, function( block, index ) {
-			let className = 'component-editor__selector';
+			let template = ! block.attributes.template ? 'vertical' : block.attributes.template;
+			let className = 'component-editor__selector template-' + template;
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
 			}
@@ -64,7 +65,7 @@ class BlockSelector extends Component {
 			);
 		} );
 
-		let className = 'component-editor__selector';
+		let className = 'component-editor__selector page-selector';
 		if ( isBlockSelected( this.props.rootClientId ) ) {
 			className += ' is-selected';
 		}
