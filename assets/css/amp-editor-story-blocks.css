@@ -150,24 +150,66 @@ div[data-amp-position="lower-third"] {
 	display: none;
 }
 
-.editor-selectors {
+.edit-post-visual-editor ul.editor-selectors {
 	position: absolute;
-	right: -150px;
+	right: -155px;
 	bottom: 0;
-	width: 100px;
+	width: 120px;
 	z-index: 80;
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
 }
 
 .editor-selectors .component-editor__selector {
-	margin-bottom: 2px;
+	background: no-repeat left top;
+	padding: 2px 0 0 30px;
+	height: 40px;
+	margin-left: 5px;
+}
+
+.editor-selectors .component-editor__selector.template-fill {
+	background-image: url( '../images/grid-fill-inactive.svg' );
+}
+
+.editor-selectors .component-editor__selector.template-fill.is-selected {
+	background-image: url( '../images/grid-fill-active.svg' );
+}
+
+.editor-selectors .component-editor__selector.template-horizontal {
+	background-image: url( '../images/grid-horizontal-inactive.svg' );
+}
+
+.editor-selectors .component-editor__selector.template-horizontal.is-selected {
+	background-image: url( '../images/grid-horizontal-active.svg' );
+}
+
+.editor-selectors .component-editor__selector.template-vertical {
+	background-image: url( '../images/grid-vertical-inactive.svg' );
+}
+
+.editor-selectors .component-editor__selector.template-vertical.is-selected {
+	background-image: url( '../images/grid-vertical-active.svg' );
+}
+
+.editor-selectors .component-editor__selector.template-thirds {
+	background-image: url( '../images/grid-thirds-inactive.svg' );
+}
+
+.editor-selectors .component-editor__selector.template-thirds.is-selected {
+	background-image: url( '../images/grid-thirds-active.svg' );
+}
+
+.editor-selectors .component-editor__selector.page-selector {
+	background-image: url( '../images/page-inactive.svg' );
+}
+
+.editor-selectors .component-editor__selector.page-selector.is-selected {
+	background-image: url( '../images/page-active.svg' );
 }
 
 .editor-selectors .component-editor__selector button {
 	cursor: pointer;
-}
-
-.editor-selectors .is-selected.component-editor__selector button {
-	text-decoration: underline;
 }
 
 .post-type-amp_story .components-range-control__number {
