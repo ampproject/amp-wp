@@ -524,11 +524,11 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
 			return array(
 				'cb'               => $old_columns['cb'],
-				'error'            => __( 'Error', 'amp' ),
-				'created_date_gmt' => __( 'Created Date', 'amp' ),
+				'error'            => __( 'Error Inventory', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
 				'details'          => __( 'Details', 'amp' ),
-				'posts'            => __( 'URLs', 'amp' ),
+				'created_date_gmt' => __( 'Last Seen', 'amp' ),
+				'posts'            => __( 'Found URLs', 'amp' ),
 			);
 		} );
 
@@ -549,6 +549,7 @@ class AMP_Validation_Error_Taxonomy {
 					td.column-details pre, td.column-sources pre { overflow:auto; }
 					th.column-created_date_gmt { width:15%; }
 					th.column-status { width:10%; }
+					.fixed th.column-posts { width: 10%; }
 				' );
 			}
 		} );
@@ -927,15 +928,13 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				if ( ! $created_datetime ) {
 					$time_ago = __( 'n/a', 'amp' );
-				} elseif ( time() - $created_datetime->getTimestamp() < DAY_IN_SECONDS ) {
+				} else {
 					$time_ago = sprintf(
 						'<abbr title="%s">%s</abbr>',
 						esc_attr( $created_datetime->format( __( 'Y/m/d g:i:s a', 'default' ) ) ),
 						/* translators: %s is relative time */
 						esc_html( sprintf( __( '%s ago', 'default' ), human_time_diff( $created_datetime->getTimestamp() ) ) )
 					);
-				} else {
-					$time_ago = mysql2date( __( 'Y/m/d g:i:s a', 'default' ), $created_date_gmt );
 				}
 
 				if ( $created_datetime ) {

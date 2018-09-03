@@ -356,6 +356,20 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
+
+		$cb              = '<input type="checkbox" />';
+		$initial_columns = array( 'cb' => $cb );
+		$this->assertEquals(
+			array(
+				'cb'               => $cb,
+				'error'            => 'Error Inventory',
+				'status'           => 'Status',
+				'details'          => 'Details',
+				'created_date_gmt' => 'Last Seen',
+				'posts'            => 'Found URLs',
+			),
+			apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+		);
 	}
 
 	/**
