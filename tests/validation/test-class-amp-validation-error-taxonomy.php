@@ -276,12 +276,23 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( $initial_where, AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query ) );
 
 		// The entire conditional should now be true, so this should filter the WHERE clause.
-		$wp_query->set( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, 1 );
+		$error_status = 1;
+		$wp_query->set( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $error_status );
 		$filtered_where = AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query );
 		$this->assertContains( 'SELECT 1', $filtered_where );
 		$this->assertContains( 'INNER JOIN', $filtered_where );
 		$this->assertContains( $wpdb->term_relationships, $filtered_where );
 		$this->assertContains( $wpdb->term_taxonomy, $filtered_where );
+		$this->assertContains( strval( $error_status ), $filtered_where );
+
+		// Now that there is a query var for error type, that should also appear in the filtered WHERE clause.
+		$error_type         = 'js_error';
+		$escaped_error_type = 'js\\\\_error';
+		$wp_query->set( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR, $error_type );
+		$filtered_where = AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query );
+		$this->assertContains( 'SELECT 1', $filtered_where );
+		$this->assertContains( strval( $error_status ), $filtered_where );
+		$this->assertContains( $escaped_error_type, $filtered_where );
 	}
 
 	/**

@@ -426,9 +426,10 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Add support for querying posts by amp_validation_error_status.
+	 * Add support for querying posts by amp_validation_error_status and by error type.
 	 *
 	 * Add recognition of amp_validation_error_status query var for amp_invalid_url post queries.
+	 * Also, conditionally filter for error type, like js_error or css_error.
 	 *
 	 * @see WP_Tax_Query::get_sql_for_clause()
 	 *
@@ -438,29 +439,54 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function filter_posts_where_for_validation_error_status( $where, WP_Query $query ) {
 		global $wpdb;
-		if (
-			in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, (array) $query->get( 'post_type' ), true )
-			&&
-			is_numeric( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) )
-		) {
-			$where .= $wpdb->prepare(
-				" AND (
-					SELECT 1
-					FROM $wpdb->term_relationships
-					INNER JOIN $wpdb->term_taxonomy ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
-					INNER JOIN $wpdb->terms ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id
-					WHERE
-						$wpdb->term_taxonomy.taxonomy = %s
-						AND
-						$wpdb->term_relationships.object_id = $wpdb->posts.ID
-						AND
-						$wpdb->terms.term_group = %d
-					LIMIT 1
-				)",
-				self::TAXONOMY_SLUG,
-				$query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR )
-			);
+
+		// If the post type is not correct, return the $where clause unchanged.
+		if ( ! in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, (array) $query->get( 'post_type' ), true ) ) {
+			return $where;
 		}
+
+		$error_status = $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR );
+		$error_type   = $query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR );
+
+		/*
+		 * Selecting the 'All Statuses' <option> sends a value of '-1' to indicate that this should not filter.
+		 * So ensure that the value is_numeric(), and is not '-1'.
+		 */
+		$is_error_status_present = is_numeric( $error_status ) && self::NO_FILTER_VALUE !== intval( $error_status );
+		$is_error_type_present   = in_array( $error_type, array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ), true );
+
+		// If neither the error status nor the type is present, there is no need to filter the $where clause.
+		if ( ! $is_error_status_present && ! $is_error_type_present ) {
+			return $where;
+		}
+
+		// If there is no valid error status query var, use the wildcard so that any status will match.
+		$error_status = $is_error_status_present ? $error_status : '*';
+
+		// If there is no valid error type query var, use %s so that anything will match.
+		$error_type = $is_error_type_present ? '%"type":"' . $wpdb->esc_like( $error_type ) . '"%' : '%';
+
+		$where .= $wpdb->prepare(
+			" AND (
+				SELECT 1
+				FROM $wpdb->term_relationships
+				INNER JOIN $wpdb->term_taxonomy ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
+				INNER JOIN $wpdb->terms ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id
+				WHERE
+					$wpdb->term_taxonomy.taxonomy = %s
+					AND
+					$wpdb->term_relationships.object_id = $wpdb->posts.ID
+					AND
+					$wpdb->terms.term_group = %s
+					AND
+					$wpdb->term_taxonomy.description LIKE %s
+				LIMIT 1
+			)",
+			self::TAXONOMY_SLUG,
+			$error_status,
+			$error_type
+		);
+
 		return $where;
 	}
 
@@ -545,7 +571,7 @@ class AMP_Validation_Error_Taxonomy {
 			return $query_vars;
 		} );
 
-		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
+		// Add recognition of amp_validation_error_status and type query vars (which will only apply in admin since post type is not publicly_queryable).
 		add_filter( 'query_vars', function( $query_vars ) {
 			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR;
 			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
@@ -754,22 +780,25 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Renders the error status filter <select> element that allows filtering by error status.
+	 * Renders the error status filter <select> element.
 	 *
 	 * There is a difference how the errors are counted, depending on which screen this is on.
 	 * For example: Accepted Errors (10).
 	 * This status filter <select> element is rendered on the validation error post page (Errors by URL),
 	 * and the validation error taxonomy page (Errors by Type).
-	 * On the taxonomy page, this simply needs to count the number of errors with a given type.
+	 * On the taxonomy page, this simply needs to count the number of terms with a given type.
 	 * On the post page, this needs to count the number of posts that have at least one error of a given type.
 	 */
 	public static function render_error_status_filter() {
 		$screen_base = get_current_screen()->base;
+
+		// The taxonomy page.
 		if ( 'edit-tags' === $screen_base ) {
 			$total_term_count    = self::get_validation_error_count();
 			$rejected_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
 			$accepted_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
 			$new_term_count      = $total_term_count - $rejected_term_count - $accepted_term_count;
+			// The post page.
 		} elseif ( 'edit' === $screen_base ) {
 			$args = array(
 				'post_type'              => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
