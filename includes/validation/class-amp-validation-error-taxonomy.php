@@ -662,7 +662,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Filter the term redirect location, to possibly add a query var to filter by term type.
+	 * Filter the term redirect URL, to possibly add query vars to filter by term status or type.
 	 *
 	 * On clicking the 'Filter' button on the 'AMP Validation Errors' taxonomy page,
 	 * edit-tags.php processes the POST request that this submits.
@@ -679,32 +679,47 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function add_term_filter_query_var( $url, $tax ) {
 		if (
-			self::TAXONOMY_SLUG === $tax->name
-			&&
-			isset( $_POST['post_type'] ) && AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === $_POST['post_type'] // WPCS: CSRF OK.
+			self::TAXONOMY_SLUG !== $tax->name
+			||
+			! isset( $_POST['post_type'] ) // WPCS: CSRF OK.
+			||
+			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_POST['post_type'] // WPCS: CSRF OK.
 		) {
-			if ( isset( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
-				$url = add_query_arg(
-					self::VALIDATION_ERROR_TYPE_QUERY_VAR,
-					sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
-					$url
-				);
-			}
-			if (
-				isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) // WPCS: CSRF OK.
-				&&
-				in_array(
-					intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), // WPCS: CSRF OK.
-					array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS, self::NO_FILTER_VALUE ),
-					true
-				)
-			) {
-				$url = add_query_arg(
-					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ), // WPCS: CSRF OK.
-					$url
-				);
-			}
+			return $url;
+		}
+
+		// If the error type query var is valid, pass it along in the redirect $url.
+		if (
+			isset( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) // WPCS: CSRF OK.
+			&&
+			in_array(
+				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // WPCS: CSRF OK.
+				array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ),
+				true
+			)
+		) {
+			$url = add_query_arg(
+				self::VALIDATION_ERROR_TYPE_QUERY_VAR,
+				sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+				$url
+			);
+		}
+
+		// If the error status query var is valid, pass it along in the redirect $url.
+		if (
+			isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) // WPCS: CSRF OK.
+			&&
+			in_array(
+				intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), // WPCS: CSRF OK.
+				array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS, self::NO_FILTER_VALUE ),
+				true
+			)
+		) {
+			$url = add_query_arg(
+				self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+				sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+				$url
+			);
 		}
 
 		return $url;
