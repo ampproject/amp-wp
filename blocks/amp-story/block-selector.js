@@ -40,7 +40,6 @@ class BlockSelector extends Component {
 				className += ' is-selected';
 			}
 
-
 			let title = sprintf( __( 'Layer %d ', 'amp' ), index + 1 );
 			if ( 'amp/amp-story-cta-layer' === block.name ) {
 				title = __( 'CTA Layer', 'amp' );
