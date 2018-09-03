@@ -605,6 +605,18 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_error_types.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_error_types()
+	 */
+	public function test_get_error_types() {
+		$this->assertEquals(
+			array( 'html_element_error', 'html_attribute_error', 'js_error', 'css_error' ),
+			AMP_Validation_Error_Taxonomy::get_error_types()
+		);
+	}
+
+	/**
 	 * Test render_error_type_filter.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::render_error_type_filter()

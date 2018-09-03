@@ -460,7 +460,7 @@ class AMP_Validation_Error_Taxonomy {
 		 * So ensure that the value is_numeric(), and is not '-1'.
 		 */
 		$is_error_status_present = is_numeric( $error_status ) && self::NO_FILTER_VALUE !== intval( $error_status );
-		$is_error_type_present   = in_array( $error_type, array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ), true );
+		$is_error_type_present   = in_array( $error_type, self::get_error_types(), true );
 
 		// If neither the error status nor the type is present, there is no need to filter the $where clause.
 		if ( ! $is_error_status_present && ! $is_error_type_present ) {
@@ -694,7 +694,7 @@ class AMP_Validation_Error_Taxonomy {
 			&&
 			in_array(
 				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // WPCS: CSRF OK.
-				array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ),
+				self::get_error_types(),
 				true
 			)
 		) {
@@ -756,7 +756,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$type = strval( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ); // WPCS: CSRF ok.
-		if ( ! in_array( $type, array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ), true ) ) {
+		if ( ! in_array( $type, self::get_error_types(), true ) ) {
 			return;
 		}
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $type ) {
@@ -840,6 +840,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * On the post page, this needs to count the number of posts that have at least one error of a given type.
 	 */
 	public static function render_error_status_filter() {
+		global $wp_query;
 		$screen_base = get_current_screen()->base;
 
 		// The taxonomy page.
@@ -855,6 +856,11 @@ class AMP_Validation_Error_Taxonomy {
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 			);
+
+			$error_type = $wp_query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR );
+			if ( $error_type && in_array( $error_type, self::get_error_types(), true ) ) {
+				$args[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $error_type;
+			}
 
 			$with_new_query = new WP_Query( array_merge(
 				$args,
@@ -932,6 +938,15 @@ class AMP_Validation_Error_Taxonomy {
 			<?php endif; ?>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Gets all of the possible error types.
+	 *
+	 * @return array Error types.
+	 */
+	public static function get_error_types() {
+		return array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE );
 	}
 
 	/**
