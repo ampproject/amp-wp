@@ -747,7 +747,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Filter amp_validation_error term query by type, like in the 'AMP Validation Errors' taxonomy page.
+	 * Filters amp_validation_error term query by type, like in the 'AMP Validation Errors' taxonomy page.
 	 * Allows viewing only a certain type at a time, like only JS errors.
 	 */
 	public static function add_error_type_clauses_filter() {
@@ -773,8 +773,7 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * Similar to what appears on /wp-admin/edit.php for posts and pages,
 	 * this outputs <select> elements to choose the error status and type,
-	 * and a 'Filter' submit button that allows filtering for that type.
-	 * This allows viewing one type at a time, like only JS errors.
+	 * and a 'Filter' submit button that filters for them.
 	 *
 	 * @param string $taxonomy_name The name of the taxonomy.
 	 */
@@ -796,10 +795,10 @@ class AMP_Validation_Error_Taxonomy {
 		<script>
 			( function ( $ ) {
 				$( function() {
-					// Move the filter after the 'Bulk Actions' <select>, as it looks like there's no way to do this with simply an action.
+					// Move the filter UI after the 'Bulk Actions' <select>, as it looks like there's no way to do this with only an action.
 					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
 
-					// Move the link to 'View errors by URL' to after the heading, as there is no hook to output it there.
+					// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
 					$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
 				} );
 			} )( jQuery );
@@ -854,7 +853,7 @@ class AMP_Validation_Error_Taxonomy {
 		} elseif ( 'edit' === $screen_base ) {
 			// The post page should have <option> text like 'With New Errors'.
 			$possible_with_text = esc_html__( 'With', 'amp' );
-			$args = array(
+			$args               = array(
 				'post_type'              => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
@@ -876,6 +875,7 @@ class AMP_Validation_Error_Taxonomy {
 				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_REJECTED_STATUS )
 			) );
 			$rejected_term_count = $with_rejected_query->found_posts;
+
 			$with_accepted_query = new WP_Query( array_merge(
 				$args,
 				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACCEPTED_STATUS )
