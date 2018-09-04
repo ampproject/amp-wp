@@ -11,7 +11,22 @@
  *  Much of this class is borrowed from Jetpack embeds
  */
 class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
-	const URL_PATTERN = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)#i';
+
+	/**
+	 * URL pattern for a Tweet URL.
+	 *
+	 * @since 0.2
+	 * @var string
+	 */
+	const URL_PATTERN = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})\/status(?:es)?\/(?P<tweet>\d+)#i';
+
+	/**
+	 * URL pattern for a Twitter timeline.
+	 *
+	 * @since 1.0
+	 * @var string
+	 */
+	const URL_PATTERN_TIMELINE = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists)(\/(?P<id>[a-zA-Z0-9_-]+))?)#i';
 
 	/**
 	 * Tag.
@@ -31,20 +46,24 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_shortcode( 'tweet', array( $this, 'shortcode' ) );
+		add_shortcode( 'tweet', array( $this, 'shortcode' ) ); // Note: This is a Jetpack shortcode.
 		wp_embed_register_handler( 'amp-twitter', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, array( $this, 'oembed_timeline' ), -1 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_shortcode( 'tweet' );
+		remove_shortcode( 'tweet' ); // Note: This is a Jetpack shortcode.
 		wp_embed_unregister_handler( 'amp-twitter', -1 );
+		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
 	}
 
 	/**
 	 * Gets AMP-compliant markup for the Twitter shortcode.
+	 *
+	 * Note that this shortcode is is defined in Jetpack.
 	 *
 	 * @param array $attr The Twitter attributes.
 	 * @return string Twitter shortcode markup.
@@ -63,8 +82,8 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$id = $attr['tweet'];
 		} else {
 			preg_match( self::URL_PATTERN, $attr['tweet'], $matches );
-			if ( isset( $matches[5] ) && is_numeric( $matches[5] ) ) {
-				$id = $matches[5];
+			if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
+				$id = $matches['tweet'];
 			}
 
 			if ( empty( $id ) ) {
@@ -90,17 +109,14 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @see \WP_Embed::shortcode()
 	 *
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attributes.
-	 * @param string $url     URL.
-	 * @param string $rawattr Unmodified shortcode attributes.
+	 * @param array $matches URL pattern matches.
 	 * @return string Rendered oEmbed.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
+	public function oembed( $matches ) {
 		$id = false;
 
-		if ( isset( $matches[5] ) && is_numeric( $matches[5] ) ) {
-			$id = $matches[5];
+		if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
+			$id = $matches['tweet'];
 		}
 
 		if ( ! $id ) {
@@ -108,6 +124,52 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $this->shortcode( array( 'tweet' => $id ) );
+	}
+
+	/**
+	 * Render oEmbed for a timeline.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $matches URL pattern matches.
+	 * @return string Rendered oEmbed.
+	 */
+	public function oembed_timeline( $matches ) {
+		if ( ! isset( $matches['username'] ) ) {
+			return '';
+		}
+
+		$attributes = array(
+			'data-timeline-source-type' => 'profile',
+			'data-timeline-screen-name' => $matches['username'],
+		);
+
+		if ( isset( $matches['type'] ) ) {
+			switch ( $matches['type'] ) {
+				case 'likes':
+					$attributes['data-timeline-source-type'] = 'likes';
+					break;
+				case 'lists':
+					if ( ! isset( $matches['id'] ) ) {
+						return '';
+					}
+					$attributes['data-timeline-source-type']       = 'list';
+					$attributes['data-timeline-slug']              = $matches['id'];
+					$attributes['data-timeline-owner-screen-name'] = $attributes['data-timeline-screen-name'];
+					unset( $attributes['data-timeline-screen-name'] );
+					break;
+				default:
+					return '';
+			}
+		}
+
+		$attributes['layout'] = 'responsive';
+		$attributes['width']  = $this->args['width'];
+		$attributes['height'] = $this->args['height'];
+
+		$this->did_convert_elements = true;
+
+		return AMP_HTML_Utils::build_tag( $this->amp_tag, $attributes );
 	}
 
 	/**
@@ -188,7 +250,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		/**
 		 * DOMNode
 		 *
-		 * @var DOMNode $anchors
+		 * @var DOMNodeList $anchors
 		 */
 		$anchors = $node->getElementsByTagName( 'a' );
 
@@ -200,7 +262,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		foreach ( $anchors as $anchor ) {
 			$found = preg_match( self::URL_PATTERN, $anchor->getAttribute( 'href' ), $matches );
 			if ( $found ) {
-				return $matches[5];
+				return $matches['tweet'];
 			}
 		}
 
