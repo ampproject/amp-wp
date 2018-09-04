@@ -4,6 +4,27 @@ const {
 	RangeControl
 } = wp.components;
 
+const ANIMATION_DEFAULTS = {
+	drop: 1600,
+	'fade-in': 500,
+	'fly-in-bottom': 500,
+	'fly-in-left': 500,
+	'fly-in-right': 500,
+	'fly-in-top': 500,
+	pulse: 500,
+	'rotate-in-left': 700,
+	'rotate-in-right': 700,
+	'twirl-in': 1000,
+	'whoosh-in-left': 500,
+	'whoosh-in-right': 500,
+	'pan-left': 1000,
+	'pan-right': 1000,
+	'pan-down': 1000,
+	'pan-up': 1000,
+	'zoom-in': 1000,
+	'zoom-out': 1000
+};
+
 /**
  * Animation controls for AMP Story layout blocks'.
  *
@@ -12,6 +33,7 @@ const {
  * @return {[XML,*,XML,*,XML]} Controls.
  */
 export function getAmpStoryAnimationControls( setAttributes, attributes ) {
+	let placeHolder = ANIMATION_DEFAULTS[ attributes.animationType ] || 0;
 	return [
 		<SelectControl
 			key="animation"
@@ -100,13 +122,15 @@ export function getAmpStoryAnimationControls( setAttributes, attributes ) {
 		<RangeControl
 			key='duration'
 			label={ __( 'Duration (ms)', 'amp' ) }
-			value={ parseInt( attributes.animationDuration ) }
+			value={ attributes.animationDuration ? parseInt( attributes.animationDuration ) : '' }
 			onChange={ ( value ) => {
 				value = value + 'ms';
 				setAttributes( { animationDuration: value } );
 			} }
 			min='0'
 			max='5000'
+			placeholder={ placeHolder }
+			initialPosition={ placeHolder }
 		/>,
 		<RangeControl
 			key='delay'

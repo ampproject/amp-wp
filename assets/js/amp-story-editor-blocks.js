@@ -1,6 +1,6 @@
 /* exported ampStoryEditorBlocks */
 /* global lodash */
-/* eslint no-magic-numbers: [ "error", { "ignore": [ -1 ] } ] */
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, -1 ] } ] */
 
 var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	var component, __;
@@ -131,7 +131,27 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'zoom-out',
 					label: __( 'Zoom Out', 'amp' )
 				}
-			]
+			],
+			animationDurationDefaults: {
+				drop: 1600,
+				'fade-in': 500,
+				'fly-in-bottom': 500,
+				'fly-in-left': 500,
+				'fly-in-right': 500,
+				'fly-in-top': 500,
+				pulse: 500,
+				'rotate-in-left': 700,
+				'rotate-in-right': 700,
+				'twirl-in': 1000,
+				'whoosh-in-left': 500,
+				'whoosh-in-right': 500,
+				'pan-left': 1000,
+				'pan-right': 1000,
+				'pan-down': 1000,
+				'pan-up': 1000,
+				'zoom-in': 1000,
+				'zoom-out': 1000
+			}
 		}
 	};
 
@@ -262,8 +282,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					type: 'string',
 					source: 'attribute',
 					selector: component.data.blockTagMapping[ name ],
-					attribute: 'animate-in-duration',
-					default: '0ms'
+					attribute: 'animate-in-duration'
 				};
 			} else if ( 'core/list' === name ) {
 				settings.attributes.ampAnimationType = {
@@ -312,7 +331,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			parentBlock = select.getBlock( parentClientId );
-			if ( 'amp/amp-story-grid-layer' !== parentBlock.name && 'amp/amp-story-cta-layer' !== parentBlock.name ) {
+			if ( ! parentBlock || ( 'amp/amp-story-grid-layer' !== parentBlock.name && 'amp/amp-story-cta-layer' !== parentBlock.name ) ) {
 				// Return original.
 				return [
 					el( BlockEdit, _.extend( {
@@ -357,7 +376,10 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		var RangeControl = wp.components.RangeControl,
 			el = wp.element.createElement,
 			SelectControl = wp.components.SelectControl,
-			attributes = props.attributes;
+			attributes = props.attributes,
+			placeHolder;
+
+		placeHolder = component.data.animationDurationDefaults[ attributes.ampAnimationType ] || 0;
 
 		return [
 			el( SelectControl, {
@@ -372,13 +394,15 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			el( RangeControl, {
 				key: 'animation-duration',
 				label: __( 'Animation duration (ms)', 'amp' ),
-				value: parseInt( attributes.ampAnimationDuration ),
+				value: attributes.ampAnimationDuration ? parseInt( attributes.ampAnimationDuration ) : '',
 				min: 0,
 				max: 5000,
 				onChange: function( value ) {
 					var msValue = value + 'ms';
 					props.setAttributes( { ampAnimationDuration: msValue } );
-				}
+				},
+				placeholder: placeHolder,
+				initialPosition: placeHolder
 			} ),
 			el( RangeControl, {
 				key: 'animation-delay',
