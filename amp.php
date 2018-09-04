@@ -144,6 +144,10 @@ function amp_init() {
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
+	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
+	AMP_HTTP::purge_amp_query_vars();
+	AMP_HTTP::send_cors_headers();
+	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Post_Type_Support::add_post_type_support();

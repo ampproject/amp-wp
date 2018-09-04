@@ -449,7 +449,52 @@ class AMP_Invalid_URL_Post_Type {
 		}
 		$post_id = $r;
 		wp_set_object_terms( $post_id, wp_list_pluck( $terms, 'term_id' ), AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+
+		update_post_meta( $post_id, '_amp_active_theme', get_stylesheet() );
+		update_post_meta( $post_id, '_amp_active_plugins', get_option( 'active_plugins', array() ) );
+
 		return $post_id;
+	}
+
+	/**
+	 * Get the differences between the current active themes/plugins and those which were active when the amp_invalid_url post was created.
+	 *
+	 * @param int|WP_Post $post Post of amp_invalid_url type.
+	 * @return array {
+	 *     Staleness of the validation results. An empty array if the results are fresh.
+	 *
+	 *     @type string $theme   The theme that was active but is no longer. Absent if theme is the same.
+	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Absent if the plugins were the same.
+	 * }
+	 */
+	public static function get_post_staleness( $post ) {
+		$post = get_post( $post );
+		if ( empty( $post ) || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return array();
+		}
+
+		$was_active_theme   = get_post_meta( $post->ID, '_amp_active_theme', true );
+		$was_active_plugins = get_post_meta( $post->ID, '_amp_active_plugins', true );
+
+		$staleness = array();
+		if ( $was_active_theme && get_stylesheet() !== $was_active_theme ) {
+			$staleness['theme'] = $was_active_theme;
+		}
+
+		if ( is_array( $was_active_plugins ) ) {
+			$now_active_plugins = get_option( 'active_plugins', array() );
+
+			$new_active_plugins = array_diff( $now_active_plugins, $was_active_plugins );
+			if ( ! empty( $new_active_plugins ) ) {
+				$staleness['plugins']['new'] = array_values( $new_active_plugins );
+			}
+			$old_active_plugins = array_diff( $was_active_plugins, $now_active_plugins );
+			if ( ! empty( $old_active_plugins ) ) {
+				$staleness['plugins']['old'] = array_values( $old_active_plugins );
+			}
+		}
+
+		return $staleness;
 	}
 
 	/**
@@ -613,6 +658,10 @@ class AMP_Invalid_URL_Post_Type {
 
 		switch ( $column_name ) {
 			case 'error_status':
+				$staleness = self::get_post_staleness( $post_id );
+				if ( ! empty( $staleness ) ) {
+					echo '<strong><em>' . esc_html__( 'Stale results', 'amp' ) . '</em></strong><br>';
+				}
 				self::display_invalid_url_validation_error_counts_summary( $post_id );
 				break;
 			case AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS:
@@ -694,6 +743,9 @@ class AMP_Invalid_URL_Post_Type {
 			esc_url( self::get_recheck_url( $post ) ),
 			esc_html__( 'Re-check', 'amp' )
 		);
+		if ( self::get_post_staleness( $post ) ) {
+			$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
+		}
 
 		return $actions;
 	}
@@ -1124,6 +1176,24 @@ class AMP_Invalid_URL_Post_Type {
 					</div>
 
 					<div class="misc-pub-section">
+						<?php
+						$staleness = self::get_post_staleness( $post );
+						if ( ! empty( $staleness ) ) {
+							echo '<div class="notice notice-info notice-alt inline"><p>';
+							echo '<b>';
+							esc_html_e( 'Stale results', 'amp' );
+							echo '</b>';
+							echo '<br>';
+							if ( ! empty( $staleness['theme'] ) && ! empty( $staleness['plugins'] ) ) {
+								esc_html_e( 'Different theme and plugins were active when these results were obtained. Please re-check.', 'amp' );
+							} elseif ( ! empty( $staleness['theme'] ) ) {
+								esc_html_e( 'A different theme was active when these results were obtained. Please re-check.', 'amp' );
+							} elseif ( ! empty( $staleness['plugins'] ) ) {
+								esc_html_e( 'Different plugins were active when these results were obtained. Please re-check.', 'amp' );
+							}
+							echo '</p></div>';
+						}
+						?>
 						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
 					</div>
 				</div>
