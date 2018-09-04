@@ -14,6 +14,14 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})\/status(es)*\/(\d+)#i';
 
 	/**
+	 * URL pattern for a Twitter timeline.
+	 *
+	 * @since 1.0
+	 * @var string
+	 */
+	const URL_PATTERN_TIMELINE = '#http(s|):\/\/twitter\.com(\/\#\!\/|\/)([a-zA-Z0-9_]{1,20})($|\/(likes|lists)(\/([a-zA-Z0-9_]+))?)#i';
+
+	/**
 	 * Tag.
 	 *
 	 * @var string embed HTML blockquote tag to identify and replace with AMP version.
@@ -33,6 +41,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function register_embed() {
 		add_shortcode( 'tweet', array( $this, 'shortcode' ) );
 		wp_embed_register_handler( 'amp-twitter', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, array( $this, 'oembed_timeline' ), -1 );
 	}
 
 	/**
@@ -41,6 +50,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function unregister_embed() {
 		remove_shortcode( 'tweet' );
 		wp_embed_unregister_handler( 'amp-twitter', -1 );
+		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
 	}
 
 	/**
@@ -108,6 +118,55 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $this->shortcode( array( 'tweet' => $id ) );
+	}
+
+	/**
+	 * Render oEmbed for a timeline.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array  $matches URL pattern matches.
+	 * @param array  $attr    Shortcode attributes.
+	 * @param string $url     URL.
+	 * @param string $rawattr Unmodified shortcode attributes.
+	 * @return string Rendered oEmbed.
+	 */
+	public function oembed_timeline( $matches, $attr, $url, $rawattr ) {
+		if ( ! isset( $matches[3] ) ) {
+			return '';
+		}
+
+		$attributes = array(
+			'data-timeline-source-type' => 'profile',
+			'data-timeline-screen-name' => $matches[3],
+		);
+
+		if ( isset( $matches[5] ) ) {
+			switch ( $matches[5] ) {
+				case 'likes':
+					$attributes['data-timeline-source-type'] = 'likes';
+					break;
+				case 'lists':
+					if ( ! isset( $matches[7] ) ) {
+						return '';
+					}
+					$attributes['data-timeline-source-type']       = 'list';
+					$attributes['data-timeline-slug']              = $matches[7];
+					$attributes['data-timeline-owner-screen-name'] = $attributes['data-timeline-screen-name'];
+					unset( $attributes['data-timeline-screen-name'] );
+					break;
+				default:
+					return '';
+			}
+		}
+
+		$attributes['layout'] = 'responsive';
+		$attributes['width']  = $this->args['width'];
+		$attributes['height'] = $this->args['height'];
+
+		$this->did_convert_elements = true;
+
+		return AMP_HTML_Utils::build_tag( $this->amp_tag, $attributes );
 	}
 
 	/**
