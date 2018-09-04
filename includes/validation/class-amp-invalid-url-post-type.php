@@ -126,6 +126,8 @@ class AMP_Invalid_URL_Post_Type {
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
+
 		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
@@ -160,6 +162,19 @@ class AMP_Invalid_URL_Post_Type {
 			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
 		} );
+	}
+
+	/**
+	 * Enqueue style.
+	 */
+	public static function enqueue_admin_assets() {
+		// Styles.
+		wp_enqueue_style(
+			'amp-admin-tables',
+			amp_get_asset_url( 'css/admin-tables.css' ),
+			false,
+			AMP__VERSION
+		);
 	}
 
 	/**
@@ -277,27 +292,31 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		}
 
+		// @todo Switch icons.
 		$result = array();
 		if ( $counts['new'] ) {
-			$result[] = esc_html( sprintf(
+			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '&#x2753; Identified: %s', 'amp' ),
+				__( '<span class="identified">%1$s: %2$s', 'amp' ),
+				esc_html__( 'Identified', 'amp' ),
 				number_format_i18n( $counts['new'] )
-			) );
+			);
 		}
 		if ( $counts['accepted'] ) {
-			$result[] = esc_html( sprintf(
-				/* translators: %s is count */
-				__( '&#x2705; Suppressed: %s', 'amp' ),
+			$result[] = sprintf(
+				/* translators: 1. Title, 2. %s is count */
+				__( '<span class="suppressed">%1$s: %2$s</span>', 'amp' ),
+				esc_html__( 'Suppressed', 'amp' ),
 				number_format_i18n( $counts['accepted'] )
-			) );
+			);
 		}
 		if ( $counts['rejected'] ) {
-			$result[] = esc_html( sprintf(
+			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '&#x274C; To Fix Later: %s', 'amp' ),
+				__( '<span class="rejected">%1$s: %2$s</span>', 'amp' ),
+				esc_html__( 'To Fix Later', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
-			) );
+			);
 		}
 		echo implode( '<br>', $result ); // WPCS: xss ok.
 	}
@@ -623,20 +642,20 @@ class AMP_Invalid_URL_Post_Type {
 		$columns = array_merge(
 			$columns,
 			array(
-				'error_status' => esc_html__( 'Status &#x2753;', 'amp' ) . wp_kses_post( '<span class="tooltip">This is tooltip.</span>' ),
-				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Found elements and attributes', 'amp' ),
+				'error_status' => sprintf( '%s<span class="icon-help"></span><div class="tooltip">%s</div>', esc_html( 'Status', 'amp' ), esc_html( 'This is tooltip', 'amp' ) ),  // @todo Create actual tooltip.
+				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Found', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Source', 'amp' ),
 			)
 		);
 
-		if ( isset( $columns['title' ] ) ) {
-		    $columns['title'] = esc_html__( 'URL', 'amp' );
-        }
+		if ( isset( $columns['title'] ) ) {
+			$columns['title'] = esc_html__( 'URL', 'amp' );
+		}
 
 		// Move date to end.
 		if ( isset( $columns['date'] ) ) {
 			unset( $columns['date'] );
-			$columns['date'] = esc_html__( 'Last Checked' );
+			$columns['date'] = esc_html__( 'Last Checked', 'amp' );
 		}
 
 		return $columns;
@@ -671,36 +690,55 @@ class AMP_Invalid_URL_Post_Type {
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
-							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+							$items[] = sprintf( '<span>%s</span>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<span>%s</span> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
-							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+							$items[] = sprintf( '<span>%s</span>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<span>%s</span> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
 				if ( ! empty( $items ) ) {
-					echo implode( ', ', $items ); // WPCS: XSS OK.
-                } else {
+					echo implode( ',<br/>', $items ); // WPCS: XSS OK.
+				} else {
 					esc_html_e( '--', 'amp' );
-                }
+				}
 				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:
 				if ( isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
-					$sources = array();
-					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] as $type => $names ) {
-						foreach ( array_unique( $names ) as $name ) {
-							$sources[] = sprintf( '%s: <code>%s</code>', esc_html( $type ), esc_html( $name ) );
+					$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
+					$output  = array();
+
+					// @todo Add hide/show; Add icons; Get plugin names.
+					if ( isset( $sources['plugin'] ) ) {
+						$count = count( array_unique( $sources['plugin'] ) );
+						if ( 1 === $count ) {
+							$output[] = sprintf( '<strong>%s</strong>', esc_html( 'Plug-In', 'amp' ) );
+						} else {
+							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html( 'Plug-In', 'amp' ), $count );
 						}
+						$output[] = implode( '<br/>', array_unique( $sources['plugin'] ) );
 					}
-					echo implode( ', ', $sources ); // WPCS: XSS ok.
+					if ( isset( $sources['core'] ) ) {
+						$count = count( array_unique( $sources['core'] ) );
+						if ( 1 === $count ) {
+							$output[] = sprintf( '<strong>%s</strong>', esc_html( 'Other', 'amp' ) );
+						} else {
+							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html( 'Other', 'amp' ), $count );
+						}
+						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+					}
+					if ( isset( $soures['theme'] ) ) {
+						$output[] = sprintf( '<strong>%s</strong>', esc_html( $soures['theme']['name'] ) );
+					}
+					echo implode( '<br/>', $output ); // WPCS: XSS ok.
 				}
 				break;
 		}
