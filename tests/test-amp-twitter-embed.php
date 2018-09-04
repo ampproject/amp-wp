@@ -25,8 +25,8 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'<p><amp-twitter data-timeline-source-type="likes" data-timeline-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
 			),
 			'timeline_url_with_list' => array(
-				'https://twitter.com/wordpress/lists/random-list' . PHP_EOL,
-				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="random-list" data-timeline-owner-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
+				'https://twitter.com/wordpress/lists/random_list' . PHP_EOL,
+				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="random_list" data-timeline-owner-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
 			),
 
 			'shortcode_without_id' => array(
