@@ -150,7 +150,6 @@ class AMP_Validation_Error_Taxonomy {
 			'meta_box_cb'        => false, // See print_validation_errors_meta_box().
 			'capabilities'       => array(
 				'assign_terms' => 'do_not_allow',
-				'edit_terms'   => 'do_not_allow',
 				// Note that delete_terms is needed so the checkbox (cb) table column will work.
 			),
 		) );
@@ -480,6 +479,8 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
+		add_action( 'load-term.php', array( __CLASS__, 'render_single_term_page' ) );
+		add_action( 'parse_query', array( __CLASS__, 'parse_term_php_query' ) );
 
 		// Prevent query vars from persisting after redirect.
 		add_filter( 'removable_query_args', function( $query_vars ) {
@@ -522,6 +523,10 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Override the columns displayed for the validation error terms.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
+			if ( 'term' === get_current_screen()->base ) {
+				return $old_columns;
+			}
+
 			return array(
 				'cb'               => $old_columns['cb'],
 				'error'            => __( 'Error', 'amp' ),
@@ -979,6 +984,46 @@ class AMP_Validation_Error_Taxonomy {
 			wp_safe_redirect( $redirect );
 			exit;
 		}
+	}
+
+	/**
+	 * Instead of the amp_validation_error wp-admin/term.php, requires edit.php.
+	 *
+	 * The single term admin page is similar to the validation error post edit.php page.
+	 * So use that edit.php page instead of the term.php page, which is mainly for editing a term.
+	 */
+	public static function render_single_term_page() {
+		if ( isset( $_REQUEST['post_type'] ) && post_type_exists( $_REQUEST['post_type'] ) ) {
+			$typenow = sanitize_text_field( wp_unslash( $_REQUEST['post_type'] ) ); // WPCS: CSRF OK.
+			require_once ABSPATH . 'wp-admin/edit.php';
+		}
+		exit;
+	}
+
+	/**
+	 * On the single amp_validation_error taxonomy page (term.php), this filters the query to only include URLs with this error.
+	 *
+	 * This page has a UI very similar to the validation post UI (Errors By URL).
+	 * So this filters the posts (errors) that appear, so that only with this error type show.
+	 *
+	 * @param WP_Query $wp_query The WP_Query object.
+	 */
+	public static function parse_term_php_query( $wp_query ) {
+		global $pagenow;
+
+		if ( ! is_admin() || 'term.php' !== $pagenow || ! isset( $_GET['tag_ID'] ) ) { // WPCS: CSRF OK.
+			return;
+		}
+
+		$wp_query->set(
+			'tax_query',
+			array(
+				array(
+					'taxonomy' => self::TAXONOMY_SLUG,
+					'terms'    => intval( $_GET['tag_ID'] ), // WPCS: CSRF OK.
+				),
+			)
+		);
 	}
 
 	/**
