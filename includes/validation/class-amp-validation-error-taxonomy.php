@@ -62,6 +62,30 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_STATUS_QUERY_VAR = 'amp_validation_error_status';
 
 	/**
+	 * Query var used when filtering for the validation error type.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_TYPE_QUERY_VAR = 'amp_validation_error_type';
+
+	/**
+	 * The <option> value to not filter at all, like for 'All Statuses'.
+	 *
+	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
+	 * When this is present, this ensures that this isn't filtered.
+	 *
+	 * @var int
+	 */
+	const NO_FILTER_VALUE = -1;
+
+	/**
+	 * The ID for the link to the Errors by URL.
+	 *
+	 * @var string
+	 */
+	const ID_LINK_ERRORS_BY_URL = 'link-errors-url';
+
+	/**
 	 * Validation code for an invalid element.
 	 *
 	 * @var string
@@ -74,6 +98,43 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var string
 	 */
 	const INVALID_ATTRIBUTE_CODE = 'invalid_attribute';
+
+	/**
+	 * The 'type' of error for invalid HTML elements, like <frame>.
+	 *
+	 * These usually have the 'code' of 'invalid_element'.
+	 * Except for 'invalid_element' errors for a <script>, which have the JS_ERROR_TYPE.
+	 * This allows filtering by type in the taxonomy page, like displaying only HTML element errors, or only CSS errors.
+	 *
+	 * @var string
+	 */
+	const HTML_ELEMENT_ERROR_TYPE = 'html_element_error';
+
+	/**
+	 * The 'type' of error for invalid HTML attributes.
+	 *
+	 * These usually have the 'code' of 'invalid_attribute'.
+	 * Banned attributes include i-amp-*.
+	 * But on* attributes, like onclick, have the JS_ERROR_TYPE.
+	 *
+	 * @var string
+	 */
+	const HTML_ATTRIBUTE_ERROR_TYPE = 'html_attribute_error';
+
+	/**
+	 * The 'type' of error that applies to the error 'code' of 'invalid_element' when the node is a <script>.
+	 * This applies both when enqueuing a script, and when a <script> is echoed directly.
+	 *
+	 * @var string
+	 */
+	const JS_ERROR_TYPE = 'js_error';
+
+	/**
+	 * The 'type' of all CSS errors, no matter what the 'code'.
+	 *
+	 * @var string
+	 */
+	const CSS_ERROR_TYPE = 'css_error';
 
 	/**
 	 * The key for removed elements.
@@ -122,13 +183,13 @@ class AMP_Validation_Error_Taxonomy {
 
 		register_taxonomy( self::TAXONOMY_SLUG, AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array(
 			'labels'             => array(
-				'name'                  => _x( 'AMP Validation Errors', 'taxonomy general name', 'amp' ),
+				'name'                  => _x( 'Errors by Type', 'taxonomy general name', 'amp' ),
 				'singular_name'         => _x( 'AMP Validation Error', 'taxonomy singular name', 'amp' ),
 				'search_items'          => __( 'Search AMP Validation Errors', 'amp' ),
 				'all_items'             => __( 'All AMP Validation Errors', 'amp' ),
 				'edit_item'             => __( 'Edit AMP Validation Error', 'amp' ),
 				'update_item'           => __( 'Update AMP Validation Error', 'amp' ),
-				'menu_name'             => __( 'Validation Errors', 'amp' ),
+				'menu_name'             => __( 'Errors by Type', 'amp' ),
 				'back_to_items'         => __( 'Back to AMP Validation Errors', 'amp' ),
 				'popular_items'         => __( 'Frequent Validation Errors', 'amp' ),
 				'view_item'             => __( 'View Validation Error', 'amp' ),
@@ -372,9 +433,10 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Add support for querying posts by amp_validation_error_status.
+	 * Add support for querying posts by amp_validation_error_status and by error type.
 	 *
 	 * Add recognition of amp_validation_error_status query var for amp_invalid_url post queries.
+	 * Also, conditionally filter for error type, like js_error or css_error.
 	 *
 	 * @see WP_Tax_Query::get_sql_for_clause()
 	 *
@@ -384,29 +446,59 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function filter_posts_where_for_validation_error_status( $where, WP_Query $query ) {
 		global $wpdb;
-		if (
-			in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, (array) $query->get( 'post_type' ), true )
-			&&
-			is_numeric( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) )
-		) {
-			$where .= $wpdb->prepare(
-				" AND (
-					SELECT 1
-					FROM $wpdb->term_relationships
-					INNER JOIN $wpdb->term_taxonomy ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
-					INNER JOIN $wpdb->terms ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id
-					WHERE
-						$wpdb->term_taxonomy.taxonomy = %s
-						AND
-						$wpdb->term_relationships.object_id = $wpdb->posts.ID
-						AND
-						$wpdb->terms.term_group = %d
-					LIMIT 1
-				)",
-				self::TAXONOMY_SLUG,
-				$query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR )
+
+		// If the post type is not correct, return the $where clause unchanged.
+		if ( ! in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, (array) $query->get( 'post_type' ), true ) ) {
+			return $where;
+		}
+
+		$error_status = sanitize_key( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) );
+		$error_type   = sanitize_key( $query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR ) );
+
+		/*
+		 * Selecting the 'All Statuses' <option> sends a value of '-1' to indicate that this should not filter.
+		 * So ensure that the value is_numeric(), and is not '-1'.
+		 */
+		$is_error_status_present = is_numeric( $error_status ) && self::NO_FILTER_VALUE !== intval( $error_status );
+		$is_error_type_present   = in_array( $error_type, self::get_error_types(), true );
+
+		// If neither the error status nor the type is present, there is no need to filter the $where clause.
+		if ( ! $is_error_status_present && ! $is_error_type_present ) {
+			return $where;
+		}
+
+		$sql_select = $wpdb->prepare(
+			"
+				SELECT 1
+				FROM $wpdb->term_relationships
+				INNER JOIN $wpdb->term_taxonomy ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
+				INNER JOIN $wpdb->terms ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id
+				WHERE
+					$wpdb->term_taxonomy.taxonomy = %s
+					AND
+					$wpdb->term_relationships.object_id = $wpdb->posts.ID
+			",
+			self::TAXONOMY_SLUG
+		);
+
+		if ( $is_error_status_present ) {
+			$sql_select .= $wpdb->prepare(
+				" AND $wpdb->terms.term_group = %s ",
+				$error_status
 			);
 		}
+
+		if ( $is_error_type_present ) {
+			$sql_select .= $wpdb->prepare(
+				" AND $wpdb->term_taxonomy.description LIKE %s ",
+				'%"type":"' . $wpdb->esc_like( $error_type ) . '"%'
+			);
+		}
+
+		$sql_select .= ' LIMIT 1 ';
+
+		$where .= " AND ( $sql_select ) ";
+
 		return $where;
 	}
 
@@ -465,7 +557,11 @@ class AMP_Validation_Error_Taxonomy {
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
+		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
 		} );
@@ -476,7 +572,6 @@ class AMP_Validation_Error_Taxonomy {
 			add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
 		}
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
-		add_filter( 'views_edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'filter_views_edit' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
@@ -489,9 +584,10 @@ class AMP_Validation_Error_Taxonomy {
 			return $query_vars;
 		} );
 
-		// Add recognition of amp_validation_error_status query var (which will only apply in admin since post type is not publicly_queryable).
+		// Add recognition of amp_validation_error_status and type query vars (which will only apply in admin since post type is not publicly_queryable).
 		add_filter( 'query_vars', function( $query_vars ) {
 			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR;
+			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
 			return $query_vars;
 		} );
 
@@ -572,6 +668,70 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Filter the term redirect URL, to possibly add query vars to filter by term status or type.
+	 *
+	 * On clicking the 'Filter' button on the 'AMP Validation Errors' taxonomy page,
+	 * edit-tags.php processes the POST request that this submits.
+	 * Then, it redirects to a URL to display the page again.
+	 * This filter callback looks for a value for VALIDATION_ERROR_TYPE_QUERY_VAR in the $_POST request.
+	 * That means that the user filtered by error type, like 'js_error'.
+	 * It then passes that value to the redirect URL as a query var,
+	 * So that the taxonomy page will be filtered for that error type.
+	 *
+	 * @see AMP_Validation_Error_Taxonomy::add_error_type_clauses_filter() for the filtering of the 'where' clause, based on the query vars.
+	 * @param string      $url The $url to redirect to.
+	 * @param WP_Taxonomy $tax The WP_Taxonomy object.
+	 * @return string The filtered URL.
+	 */
+	public static function add_term_filter_query_var( $url, $tax ) {
+		if (
+			self::TAXONOMY_SLUG !== $tax->name
+			||
+			! isset( $_POST['post_type'] ) // WPCS: CSRF OK.
+			||
+			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_POST['post_type'] // WPCS: CSRF OK.
+		) {
+			return $url;
+		}
+
+		// If the error type query var is valid, pass it along in the redirect $url.
+		if (
+			isset( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) // WPCS: CSRF OK.
+			&&
+			in_array(
+				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // WPCS: CSRF OK.
+				array_merge( self::get_error_types(), array( strval( self::NO_FILTER_VALUE ) ) ),
+				true
+			)
+		) {
+			$url = add_query_arg(
+				self::VALIDATION_ERROR_TYPE_QUERY_VAR,
+				sanitize_key( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+				$url
+			);
+		}
+
+		// If the error status query var is valid, pass it along in the redirect $url.
+		if (
+			isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) // WPCS: CSRF OK.
+			&&
+			in_array(
+				intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), // WPCS: CSRF OK.
+				array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS, self::NO_FILTER_VALUE ),
+				true
+			)
+		) {
+			$url = add_query_arg(
+				self::VALIDATION_ERROR_STATUS_QUERY_VAR,
+				intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), // WPCS: CSRF OK.
+				$url
+			);
+		}
+
+		return $url;
+	}
+
+	/**
 	 * Filter amp_validation_error term query by term group when requested.
 	 */
 	public static function add_group_terms_clauses_filter() {
@@ -590,6 +750,296 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			return $clauses;
 		}, 10, 2 );
+	}
+
+	/**
+	 * Adds filter for amp_validation_error term query by type, like in the 'AMP Validation Errors' taxonomy page.
+	 * Allows viewing only a certain type at a time, like only JS errors.
+	 */
+	public static function add_error_type_clauses_filter() {
+		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+			return;
+		}
+
+		$type = sanitize_key( wp_unslash( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ); // WPCS: CSRF ok.
+		if ( ! in_array( $type, self::get_error_types(), true ) ) {
+			return;
+		}
+		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $type ) {
+			global $wpdb;
+			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] ) {
+				$clauses['where'] .= $wpdb->prepare( ' AND tt.description LIKE %s', '%"type":"' . $wpdb->esc_like( $type ) . '"%' );
+			}
+			return $clauses;
+		}, 10, 2 );
+	}
+
+	/**
+	 * Outputs the taxonomy filter UI for this taxonomy type.
+	 *
+	 * Similar to what appears on /wp-admin/edit.php for posts and pages,
+	 * this outputs <select> elements to choose the error status and type,
+	 * and a 'Filter' submit button that filters for them.
+	 *
+	 * @param string $taxonomy_name The name of the taxonomy.
+	 */
+	public static function render_taxonomy_filters( $taxonomy_name ) {
+		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
+			return;
+		}
+
+		$div_id = 'amp-tax-filter';
+		?>
+		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
+			<?php
+			self::render_error_status_filter();
+			self::render_error_type_filter();
+			?>
+			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
+		</div>
+
+		<script>
+			( function ( $ ) {
+				$( function() {
+					// Move the filter UI after the 'Bulk Actions' <select>, as it looks like there's no way to do this with only an action.
+					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
+
+					// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
+					$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
+				} );
+			} )( jQuery );
+		</script>
+		<?php
+	}
+
+	/**
+	 * On the 'Errors by Type' taxonomy page, renders a link to the 'Errors by URL' page.
+	 *
+	 * @param string $taxonomy_name The name of the taxonomy.
+	 */
+	public static function render_link_to_errors_by_url( $taxonomy_name ) {
+		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
+			return;
+		}
+
+		printf(
+			'<a href="%s" class="page-title-action" id="%s" style="margin-left: 1rem;">%s</a>',
+			esc_attr( add_query_arg(
+				'post_type',
+				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				admin_url( 'edit.php' )
+			) ),
+			esc_attr( self::ID_LINK_ERRORS_BY_URL ),
+			esc_html__( 'View errors by URL', 'amp' )
+		);
+	}
+
+	/**
+	 * Renders the error status filter <select> element.
+	 *
+	 * There is a difference how the errors are counted, depending on which screen this is on.
+	 * For example: Accepted Errors (10).
+	 * This status filter <select> element is rendered on the validation error post page (Errors by URL),
+	 * and the validation error taxonomy page (Errors by Type).
+	 * On the taxonomy page, this simply needs to count the number of terms with a given type.
+	 * On the post page, this needs to count the number of posts that have at least one error of a given type.
+	 */
+	public static function render_error_status_filter() {
+		global $wp_query;
+		$screen_base = get_current_screen()->base;
+
+		if ( 'edit-tags' === $screen_base ) {
+			$total_term_count    = self::get_validation_error_count();
+			$rejected_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
+			$accepted_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
+			$new_term_count      = $total_term_count - $rejected_term_count - $accepted_term_count;
+
+		} elseif ( 'edit' === $screen_base ) {
+			$args = array(
+				'post_type'              => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			);
+
+			$error_type = sanitize_key( $wp_query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR ) );
+			if ( $error_type && in_array( $error_type, self::get_error_types(), true ) ) {
+				$args[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $error_type;
+			}
+
+			$with_new_query = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_NEW_STATUS )
+			) );
+			$new_term_count = $with_new_query->found_posts;
+
+			$with_rejected_query = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_REJECTED_STATUS )
+			) );
+			$rejected_term_count = $with_rejected_query->found_posts;
+
+			$with_accepted_query = new WP_Query( array_merge(
+				$args,
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACCEPTED_STATUS )
+			) );
+			$accepted_term_count = $with_accepted_query->found_posts;
+		} else {
+			return;
+		}
+
+		$error_status_filter_value = isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ? intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) : ''; // WPCS: CSRF OK.
+
+		?>
+		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
+		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
+			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
+			<?php
+			if ( 'edit' === $screen_base ) {
+				$new_term_text = sprintf(
+					/* translators: %s: the new term count. */
+					_nx(
+						'With New Error <span class="count">(%s)</span>',
+						'With New Errors <span class="count">(%s)</span>',
+						$new_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $new_term_count )
+				);
+			} else {
+				$new_term_text = sprintf(
+					/* translators: %s: the new term count. */
+					_nx(
+						'New Error <span class="count">(%s)</span>',
+						'New Errors <span class="count">(%s)</span>',
+						$new_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $new_term_count )
+				);
+			}
+			?>
+			<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
+			<?php
+			if ( 'edit' === $screen_base ) {
+				$accepted_term_text = sprintf(
+					/* translators: %s: the accepted term count. */
+					_nx(
+						'With Accepted Error <span class="count">(%s)</span>',
+						'With Accepted Errors <span class="count">(%s)</span>',
+						$accepted_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $accepted_term_count )
+				);
+			} else {
+				$accepted_term_text = sprintf(
+					/* translators: %s: the accepted term count. */
+					_nx(
+						'Accepted Error <span class="count">(%s)</span>',
+						'Accepted Errors <span class="count">(%s)</span>',
+						$accepted_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $accepted_term_count )
+				);
+			}
+			?>
+			<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
+			<?php
+			if ( 'edit' === $screen_base ) {
+				$rejected_term_text = sprintf(
+					/* translators: %s: the rejected term count. */
+					_nx(
+						'With Rejected Error <span class="count">(%s)</span>',
+						'With Rejected Errors <span class="count">(%s)</span>',
+						$rejected_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $rejected_term_count )
+				);
+			} else {
+				$rejected_term_text = sprintf(
+					/* translators: %s: the rejected term count. */
+					_nx(
+						'Rejected Error <span class="count">(%s)</span>',
+						'Rejected Errors <span class="count">(%s)</span>',
+						$rejected_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $rejected_term_count )
+				);
+			}
+			?>
+			<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Gets all of the possible error types.
+	 *
+	 * @return array Error types.
+	 */
+	public static function get_error_types() {
+		return array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE );
+	}
+
+	/**
+	 * Renders the filter for error type.
+	 *
+	 * This type filter <select> element is rendered on the validation error post page (Errors by URL),
+	 * and the validation error taxonomy page (Errors by Type).
+	 */
+	public static function render_error_type_filter() {
+		$error_type_filter_value = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_key( wp_unslash( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
+
+		/*
+		 * On the 'Errors by URL' page, the <option> text should be different.
+		 * For example, it should be 'With JS Errors' instead of 'JS Errors'.
+		 */
+		$screen_base = get_current_screen()->base;
+		?>
+		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
+		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
+			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>">
+				<?php esc_html_e( 'All Error Types', 'amp' ); ?>
+			</option>
+			<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>>
+				<?php if ( 'edit' === $screen_base ) : ?>
+					<?php esc_html_e( 'With HTML (Element) Errors', 'amp' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'HTML (Element) Errors', 'amp' ); ?>
+				<?php endif; ?>
+			</option>
+			<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>>
+				<?php if ( 'edit' === $screen_base ) : ?>
+					<?php esc_html_e( 'With HTML (Attribute) Errors', 'amp' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'HTML (Attribute) Errors', 'amp' ); ?>
+				<?php endif; ?>
+			</option>
+			<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>>
+				<?php if ( 'edit' === $screen_base ) : ?>
+					<?php esc_html_e( 'With JS Errors', 'amp' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'JS Errors', 'amp' ); ?>
+				<?php endif; ?>
+			</option>
+			<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>>
+				<?php if ( 'edit' === $screen_base ) : ?>
+					<?php esc_html_e( 'With CSS Errors', 'amp' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'CSS Errors', 'amp' ); ?>
+				<?php endif; ?>
+			</option>
+		</select>
+		<?php
 	}
 
 	/**
@@ -725,7 +1175,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Show AMP validation errors under AMP admin menu.
 	 */
 	public static function add_admin_menu_validation_error_item() {
-		$menu_item_label = esc_html__( 'Validation Errors', 'amp' );
+		$menu_item_label = esc_html__( 'Errors by Type', 'amp' );
 		$new_error_count = self::get_validation_error_count( array(
 			'group' => self::VALIDATION_ERROR_NEW_STATUS,
 		) );
@@ -736,128 +1186,12 @@ class AMP_Validation_Error_Taxonomy {
 		$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
-			esc_html__( 'Validation Errors', 'amp' ),
+			$menu_item_label,
 			$menu_item_label,
 			$taxonomy_caps->manage_terms,
 			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
 			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )
 		);
-	}
-
-	/**
-	 * Add views for filtering validation errors by status.
-	 *
-	 * @param array $views Views.
-	 * @return array Views.
-	 */
-	public static function filter_views_edit( $views ) {
-		$total_term_count    = self::get_validation_error_count();
-		$rejected_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_REJECTED_STATUS ) );
-		$accepted_term_count = self::get_validation_error_count( array( 'group' => self::VALIDATION_ERROR_ACCEPTED_STATUS ) );
-		$new_term_count      = $total_term_count - $rejected_term_count - $accepted_term_count;
-
-		$current_url = remove_query_arg(
-			array_merge(
-				wp_removable_query_args(),
-				array( 's' ) // For some reason behavior of posts list table is to not persist the search query.
-			),
-			wp_unslash( $_SERVER['REQUEST_URI'] )
-		);
-
-		$current_status = null;
-		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
-			$value = intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-			if ( in_array( $value, array( self::VALIDATION_ERROR_NEW_STATUS, self::VALIDATION_ERROR_ACCEPTED_STATUS, self::VALIDATION_ERROR_REJECTED_STATUS ), true ) ) {
-				$current_status = $value;
-			}
-		}
-
-		$views['all'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url( remove_query_arg( self::VALIDATION_ERROR_STATUS_QUERY_VAR, $current_url ) ),
-			null === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'All <span class="count">(%s)</span>',
-					'All <span class="count">(%s)</span>',
-					$total_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $total_term_count )
-			)
-		);
-
-		$views['new'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_NEW_STATUS,
-					$current_url
-				)
-			),
-			self::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'New <span class="count">(%s)</span>',
-					'New <span class="count">(%s)</span>',
-					$new_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $new_term_count )
-			)
-		);
-
-		$views['rejected'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_REJECTED_STATUS,
-					$current_url
-				)
-			),
-			self::VALIDATION_ERROR_REJECTED_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'Rejected <span class="count">(%s)</span>',
-					'Rejected <span class="count">(%s)</span>',
-					$rejected_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $rejected_term_count )
-			)
-		);
-
-		$views['accepted'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					self::VALIDATION_ERROR_ACCEPTED_STATUS,
-					$current_url
-				)
-			),
-			self::VALIDATION_ERROR_ACCEPTED_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the term count. */
-				_nx(
-					'Accepted <span class="count">(%s)</span>',
-					'Accepted <span class="count">(%s)</span>',
-					$accepted_term_count,
-					'terms',
-					'amp'
-				),
-				number_format_i18n( $accepted_term_count )
-			)
-		);
-		return $views;
 	}
 
 	/**

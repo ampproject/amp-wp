@@ -1742,7 +1742,7 @@ class AMP_Validation_Manager {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'underscore' ),
+			array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ),
 			AMP__VERSION,
 			true
 		);

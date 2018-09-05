@@ -131,8 +131,8 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
+		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
 
-		add_filter( 'views_edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_views_edit' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
@@ -498,122 +498,6 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Add views for filtering validation errors by status.
-	 *
-	 * @param array $views Views.
-	 * @return array Views
-	 */
-	public static function filter_views_edit( $views ) {
-		unset( $views['publish'] );
-
-		$args = array(
-			'post_type'              => self::POST_TYPE_SLUG,
-			'update_post_meta_cache' => false,
-			'update_post_term_cache' => false,
-		);
-
-		$with_new_query      = new WP_Query( array_merge(
-			$args,
-			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS )
-		) );
-		$with_rejected_query = new WP_Query( array_merge(
-			$args,
-			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS )
-		) );
-		$with_accepted_query = new WP_Query( array_merge(
-			$args,
-			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS )
-		) );
-
-		$current_url = remove_query_arg(
-			array_merge(
-				wp_removable_query_args(),
-				array( 's' ) // For some reason behavior of posts list table is to not persist the search query.
-			),
-			wp_unslash( $_SERVER['REQUEST_URI'] )
-		);
-
-		$current_status = null;
-		if ( isset( $_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
-			$value = intval( $_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] ); // WPCS: CSRF ok.
-			if ( in_array( $value, array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ), true ) ) {
-				$current_status = $value;
-			}
-		}
-
-		$views['new'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-					$current_url
-				)
-			),
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the post count. */
-				_nx(
-					'With New Errors <span class="count">(%s)</span>',
-					'With New Errors <span class="count">(%s)</span>',
-					$with_new_query->found_posts,
-					'posts',
-					'amp'
-				),
-				number_format_i18n( $with_new_query->found_posts )
-			)
-		);
-
-		$views['rejected'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
-					$current_url
-				)
-			),
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the post count. */
-				_nx(
-					'With Rejected Errors <span class="count">(%s)</span>',
-					'With Rejected Errors <span class="count">(%s)</span>',
-					$with_rejected_query->found_posts,
-					'posts',
-					'amp'
-				),
-				number_format_i18n( $with_rejected_query->found_posts )
-			)
-		);
-
-		$views['accepted'] = sprintf(
-			'<a href="%s" class="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-					$current_url
-				)
-			),
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $current_status ? 'current' : '',
-			sprintf(
-				/* translators: %s: the post count. */
-				_nx(
-					'With Accepted Errors <span class="count">(%s)</span>',
-					'With Accepted Errors <span class="count">(%s)</span>',
-					$with_accepted_query->found_posts,
-					'posts',
-					'amp'
-				),
-				number_format_i18n( $with_accepted_query->found_posts )
-			)
-		);
-
-		return $views;
-	}
-
-	/**
 	 * Adds post columns to the UI for the validation errors.
 	 *
 	 * @param array $columns The post columns.
@@ -892,6 +776,40 @@ class AMP_Invalid_URL_Post_Type {
 					number_format_i18n( $count )
 				) ),
 				esc_html__( 'Dismiss this notice.', 'amp' )
+			);
+		}
+
+		if ( 'post' !== get_current_screen()->base ) {
+			// Display admin notice according to the AMP mode.
+			if ( amp_is_canonical() ) {
+				$template_mode = 'native';
+			} elseif ( current_theme_supports( 'amp' ) ) {
+				$template_mode = 'paired';
+			} else {
+				$template_mode = 'classic';
+			}
+			$auto_sanitization = AMP_Options_Manager::get_option( 'force_sanitization' );
+
+			if ( 'native' === $template_mode ) {
+				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
+			} elseif ( 'paired' === $template_mode && $auto_sanitization ) {
+				$message = __( 'The site is using paired AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
+			} elseif ( 'paired' === $template_mode ) {
+				$message = sprintf(
+					/* translators: %s is a link to the AMP settings screen */
+					__( 'The site is using paired AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
+					esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+				);
+			} else {
+				$message = __( 'The site is using classic AMP mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
+			}
+
+			$class = 'info';
+			printf(
+				/* translators: 1. Notice classname; 2. Message text; 3. Screenreader text; */
+				'<div class="notice notice-%s"><p>%s</p></div>',
+				esc_attr( $class ),
+				wp_kses_post( $message )
 			);
 		}
 	}
@@ -1473,6 +1391,19 @@ class AMP_Invalid_URL_Post_Type {
 			$title = preg_replace( '#^(\w+:)?//[^/]+#', '', $title );
 		}
 		return $title;
+	}
+
+	/**
+	 * Renders the filters on the invalid URL post type edit.php page.
+	 *
+	 * @param string $post_type The slug of the post type.
+	 * @param string $which     The location for the markup, either 'top' or 'bottom'.
+	 */
+	public static function render_post_filters( $post_type, $which ) {
+		if ( self::POST_TYPE_SLUG === $post_type && 'top' === $which ) {
+			AMP_Validation_Error_Taxonomy::render_error_status_filter();
+			AMP_Validation_Error_Taxonomy::render_error_type_filter();
+		}
 	}
 
 	/**
