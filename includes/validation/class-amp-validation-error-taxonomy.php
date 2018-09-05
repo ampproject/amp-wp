@@ -467,14 +467,8 @@ class AMP_Validation_Error_Taxonomy {
 			return $where;
 		}
 
-		// If there is no valid error status query var, use the wildcard so that any status will match.
-		$error_status = $is_error_status_present ? $error_status : '*';
-
-		// If there is no valid error type query var, use %s so that anything will match.
-		$error_type = $is_error_type_present ? '%"type":"' . $wpdb->esc_like( $error_type ) . '"%' : '%';
-
-		$where .= $wpdb->prepare(
-			" AND (
+		$sql_select = $wpdb->prepare(
+			"
 				SELECT 1
 				FROM $wpdb->term_relationships
 				INNER JOIN $wpdb->term_taxonomy ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
@@ -483,16 +477,27 @@ class AMP_Validation_Error_Taxonomy {
 					$wpdb->term_taxonomy.taxonomy = %s
 					AND
 					$wpdb->term_relationships.object_id = $wpdb->posts.ID
-					AND
-					$wpdb->terms.term_group = %s
-					AND
-					$wpdb->term_taxonomy.description LIKE %s
-				LIMIT 1
-			)",
-			self::TAXONOMY_SLUG,
-			$error_status,
-			$error_type
+			",
+			self::TAXONOMY_SLUG
 		);
+
+		if ( $is_error_status_present ) {
+			$sql_select .= $wpdb->prepare(
+				" AND $wpdb->terms.term_group = %s ",
+				$error_status
+			);
+		}
+
+		if ( $is_error_type_present ) {
+			$sql_select .= $wpdb->prepare(
+				" AND $wpdb->term_taxonomy.description LIKE %s ",
+				'%"type":"' . $wpdb->esc_like( $error_type ) . '"%'
+			);
+		}
+
+		$sql_select .= ' LIMIT 1 ';
+
+		$where .= " AND ( $sql_select ) ";
 
 		return $where;
 	}
