@@ -74,7 +74,7 @@ class AMP_Service_Workers {
 		}
 
 		$service_worker_registry->register_cached_route(
-			'\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
+			'/wp-content/.*\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
 			WP_Service_Worker_Registry::STRATEGY_CACHE_FIRST,
 			array(
 				'cacheName' => 'images',
