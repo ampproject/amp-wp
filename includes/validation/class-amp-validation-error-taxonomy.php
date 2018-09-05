@@ -452,8 +452,8 @@ class AMP_Validation_Error_Taxonomy {
 			return $where;
 		}
 
-		$error_status = $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR );
-		$error_type   = $query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR );
+		$error_status = sanitize_key( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) );
+		$error_type   = sanitize_key( $query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR ) );
 
 		/*
 		 * Selecting the 'All Statuses' <option> sends a value of '-1' to indicate that this should not filter.
@@ -705,7 +705,7 @@ class AMP_Validation_Error_Taxonomy {
 		) {
 			$url = add_query_arg(
 				self::VALIDATION_ERROR_TYPE_QUERY_VAR,
-				sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+				sanitize_key( wp_unslash( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ), // WPCS: CSRF OK.
 				$url
 			);
 		}
@@ -722,7 +722,7 @@ class AMP_Validation_Error_Taxonomy {
 		) {
 			$url = add_query_arg(
 				self::VALIDATION_ERROR_STATUS_QUERY_VAR,
-				sanitize_text_field( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ), // WPCS: CSRF OK.
+				intval( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), // WPCS: CSRF OK.
 				$url
 			);
 		}
@@ -752,7 +752,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Filters amp_validation_error term query by type, like in the 'AMP Validation Errors' taxonomy page.
+	 * Adds filter for amp_validation_error term query by type, like in the 'AMP Validation Errors' taxonomy page.
 	 * Allows viewing only a certain type at a time, like only JS errors.
 	 */
 	public static function add_error_type_clauses_filter() {
@@ -760,7 +760,7 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		$type = strval( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ); // WPCS: CSRF ok.
+		$type = sanitize_key( wp_unslash( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ); // WPCS: CSRF ok.
 		if ( ! in_array( $type, self::get_error_types(), true ) ) {
 			return;
 		}
@@ -860,7 +860,7 @@ class AMP_Validation_Error_Taxonomy {
 				'update_post_term_cache' => false,
 			);
 
-			$error_type = $wp_query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR );
+			$error_type = sanitize_key( $wp_query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR ) );
 			if ( $error_type && in_array( $error_type, self::get_error_types(), true ) ) {
 				$args[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $error_type;
 			}
@@ -1005,8 +1005,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * and the validation error taxonomy page (Errors by Type).
 	 */
 	public static function render_error_type_filter() {
-		$error_type_filter_value = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
-		$screen_base             = get_current_screen()->base;
+		$error_type_filter_value = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_key( wp_unslash( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
 
 		/*
 		 * On the 'Errors by URL' page, the <option> text should be different.
