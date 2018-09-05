@@ -1366,16 +1366,10 @@ class AMP_Invalid_URL_Post_Type {
 	 * @param string $which     The location for the markup, either 'top' or 'bottom'.
 	 */
 	public static function render_post_filters( $post_type, $which ) {
-		if (
-			self::POST_TYPE_SLUG !== $post_type
-			||
-			'top' !== $which
-		) {
-			return;
+		if ( self::POST_TYPE_SLUG === $post_type && 'top' === $which ) {
+			AMP_Validation_Error_Taxonomy::render_error_status_filter();
+			AMP_Validation_Error_Taxonomy::render_error_type_filter();
 		}
-
-		AMP_Validation_Error_Taxonomy::render_error_status_filter();
-		AMP_Validation_Error_Taxonomy::render_error_type_filter();
 	}
 
 	/**
