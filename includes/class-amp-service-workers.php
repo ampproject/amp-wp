@@ -51,7 +51,7 @@ class AMP_Service_Workers {
 		}
 
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
-		self::register_runtime_precaches();
+		self::register_runtime_precaches( $service_worker_registry );
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background.
 		$service_worker_registry->register_cached_route(
@@ -100,9 +100,11 @@ class AMP_Service_Workers {
 	 * offline/500 error pages, enabling navigation preload,
 	 *
 	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
+	 *
+	 * @param WP_Service_Worker_Registry $service_worker_registry Service worker registry.
 	 * @return int Number of cached assets.
 	 */
-	public static function register_runtime_precaches() {
+	public static function register_runtime_precaches( $service_worker_registry ) {
 
 		// List of AMP scripts that we know will be used in WordPress always.
 		$precached_handles = array(
@@ -128,7 +130,7 @@ class AMP_Service_Workers {
 		}
 
 		foreach ( $urls as $url ) {
-			wp_service_workers()->registry->register_precached_route( $url, array(
+			$service_worker_registry->register_precached_route( $url, array(
 				'cache' => WP_Service_Worker_Registry::RUNTIME_CACHE_NAME,
 			) );
 		}
