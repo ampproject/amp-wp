@@ -897,17 +897,23 @@ class AMP_Invalid_URL_Post_Type {
 
 		if ( 'post' !== get_current_screen()->base ) {
 			// Display admin notice according to the AMP mode.
-			$theme_support     = AMP_Options_Manager::get_option( 'theme_support' );
+			if ( amp_is_canonical() ) {
+				$template_mode = 'native';
+			} elseif ( current_theme_supports( 'amp' ) ) {
+				$template_mode = 'paired';
+			} else {
+				$template_mode = 'classic';
+			}
 			$auto_sanitization = AMP_Options_Manager::get_option( 'force_sanitization' );
 
-			if ( 'native' === $theme_support ) {
+			if ( 'native' === $template_mode ) {
 				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $theme_support && $auto_sanitization ) {
+			} elseif ( 'paired' === $template_mode && $auto_sanitization ) {
 				$message = __( 'The site is using paired AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $theme_support ) {
+			} elseif ( 'paired' === $template_mode ) {
 				$message = sprintf(
 					/* translators: %s is a link to the AMP settings screen */
-					__( 'The site is using paired AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP.<br/>For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
+					__( 'The site is using paired AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
 					esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
 				);
 			} else {
