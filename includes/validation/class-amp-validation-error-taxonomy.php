@@ -888,103 +888,94 @@ class AMP_Validation_Error_Taxonomy {
 
 		$error_status_filter_value = isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ? intval( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) : ''; // WPCS: CSRF OK.
 
-		if ( 0 === $new_term_count && 0 === $accepted_term_count && 0 === $rejected_term_count ) {
-			return;
-		}
 		?>
 		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
 		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
 			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
 			<?php
-			if ( $new_term_count ) :
-				if ( 'edit' === $screen_base ) {
-					$new_term_text = sprintf(
-						/* translators: %s: the new term count. */
-						_nx(
-							'With New Error <span class="count">(%s)</span>',
-							'With New Errors <span class="count">(%s)</span>',
-							$new_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $new_term_count )
-					);
-				} else {
-					$new_term_text = sprintf(
-						/* translators: %s: the new term count. */
-						_nx(
-							'New Error <span class="count">(%s)</span>',
-							'New Errors <span class="count">(%s)</span>',
-							$new_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $new_term_count )
-					);
-				}
-				?>
-				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
-			<?php endif; ?>
+			if ( 'edit' === $screen_base ) {
+				$new_term_text = sprintf(
+					/* translators: %s: the new term count. */
+					_nx(
+						'With New Error <span class="count">(%s)</span>',
+						'With New Errors <span class="count">(%s)</span>',
+						$new_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $new_term_count )
+				);
+			} else {
+				$new_term_text = sprintf(
+					/* translators: %s: the new term count. */
+					_nx(
+						'New Error <span class="count">(%s)</span>',
+						'New Errors <span class="count">(%s)</span>',
+						$new_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $new_term_count )
+				);
+			}
+			?>
+			<option value="<?php echo esc_attr( self::VALIDATION_ERROR_NEW_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_NEW_STATUS ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
 			<?php
-			if ( $accepted_term_count ) :
-				if ( 'edit' === $screen_base ) {
-					$accepted_term_text = sprintf(
-						/* translators: %s: the accepted term count. */
-						_nx(
-							'With Accepted Error <span class="count">(%s)</span>',
-							'With Accepted Errors <span class="count">(%s)</span>',
-							$accepted_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $accepted_term_count )
-					);
-				} else {
-					$accepted_term_text = sprintf(
-						/* translators: %s: the accepted term count. */
-						_nx(
-							'Accepted Error <span class="count">(%s)</span>',
-							'Accepted Errors <span class="count">(%s)</span>',
-							$accepted_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $accepted_term_count )
-					);
-				}
-				?>
-				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
-				<?php
-			endif;
-			if ( $rejected_term_count ) :
-				if ( 'edit' === $screen_base ) {
-					$rejected_term_text = sprintf(
-						/* translators: %s: the rejected term count. */
-						_nx(
-							'With Rejected Error <span class="count">(%s)</span>',
-							'With Rejected Errors <span class="count">(%s)</span>',
-							$rejected_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $rejected_term_count )
-					);
-				} else {
-					$rejected_term_text = sprintf(
-						/* translators: %s: the rejected term count. */
-						_nx(
-							'Rejected Error <span class="count">(%s)</span>',
-							'Rejected Errors <span class="count">(%s)</span>',
-							$rejected_term_count,
-							'terms',
-							'amp'
-						),
-						number_format_i18n( $rejected_term_count )
-					);
-				}
-				?>
-				<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
-			<?php endif; ?>
+			if ( 'edit' === $screen_base ) {
+				$accepted_term_text = sprintf(
+					/* translators: %s: the accepted term count. */
+					_nx(
+						'With Accepted Error <span class="count">(%s)</span>',
+						'With Accepted Errors <span class="count">(%s)</span>',
+						$accepted_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $accepted_term_count )
+				);
+			} else {
+				$accepted_term_text = sprintf(
+					/* translators: %s: the accepted term count. */
+					_nx(
+						'Accepted Error <span class="count">(%s)</span>',
+						'Accepted Errors <span class="count">(%s)</span>',
+						$accepted_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $accepted_term_count )
+				);
+			}
+			?>
+			<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
+			<?php
+			if ( 'edit' === $screen_base ) {
+				$rejected_term_text = sprintf(
+					/* translators: %s: the rejected term count. */
+					_nx(
+						'With Rejected Error <span class="count">(%s)</span>',
+						'With Rejected Errors <span class="count">(%s)</span>',
+						$rejected_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $rejected_term_count )
+				);
+			} else {
+				$rejected_term_text = sprintf(
+					/* translators: %s: the rejected term count. */
+					_nx(
+						'Rejected Error <span class="count">(%s)</span>',
+						'Rejected Errors <span class="count">(%s)</span>',
+						$rejected_term_count,
+						'terms',
+						'amp'
+					),
+					number_format_i18n( $rejected_term_count )
+				);
+			}
+			?>
+			<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( $error_status_filter_value, self::VALIDATION_ERROR_REJECTED_STATUS ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
 		</select>
 		<?php
 	}

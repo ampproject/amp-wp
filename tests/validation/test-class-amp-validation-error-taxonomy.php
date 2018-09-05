@@ -562,15 +562,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::render_error_status_filter();
 		$this->assertEmpty( ob_get_clean() );
 
-		/*
-		 * This is now on the correct screen, so it shouldn't be empty anymore.
-		 * When no validation error exists, there should not be an <option> for any specific error status, like 'New Error'.
-		 */
 		set_current_screen( 'edit.php' );
-		ob_start();
-		AMP_Validation_Error_Taxonomy::render_error_status_filter();
-		$this->assertNotContains( 'New Error', ob_get_clean() );
-
 		$number_of_errors = 10;
 		for ( $i = 0; $i < $number_of_errors; $i++ ) {
 			$invalid_url_post      = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
