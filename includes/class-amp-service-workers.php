@@ -40,7 +40,7 @@ class AMP_Service_Workers {
 	/**
 	 * Configure the front service worker for AMP.
 	 *
-	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
+	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
 	 * @param WP_Service_Worker_Registry $service_worker_registry Service worker registry.
 	 */
@@ -63,7 +63,7 @@ class AMP_Service_Workers {
 	/**
 	 * Configure the front service worker for AMP.
 	 *
-	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
+	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
 	 * @param WP_Service_Worker_Registry $service_worker_registry Service workers.
 	 */
@@ -74,7 +74,7 @@ class AMP_Service_Workers {
 		}
 
 		$service_worker_registry->register_cached_route(
-			'\.(?:png|gif|jpe?g|svg|webp)$',
+			'\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
 			WP_Service_Worker_Registry::STRATEGY_CACHE_FIRST,
 			array(
 				'cacheName' => 'images',
@@ -99,7 +99,7 @@ class AMP_Service_Workers {
 	 * for Google Fonts. The PWA plugin also handles precaching & serving of the
 	 * offline/500 error pages, enabling navigation preload,
 	 *
-	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
+	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
 	 * @param WP_Service_Worker_Registry $service_worker_registry Service worker registry.
 	 * @return int Number of cached assets.
