@@ -269,6 +269,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
 		$test = $this; // For PHP 5.3.
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 
 		$get_amp_html_link = function() {
 			ob_start();
