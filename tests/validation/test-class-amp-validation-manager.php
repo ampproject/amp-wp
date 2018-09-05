@@ -1255,7 +1255,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$script        = wp_scripts()->registered[ $slug ];
 		$inline_script = $script->extra['after'][1];
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
-		$this->assertEquals( array( 'underscore' ), $script->deps );
+		$this->assertEqualSets( array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ), $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
