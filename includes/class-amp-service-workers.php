@@ -42,17 +42,21 @@ class AMP_Service_Workers {
 	 *
 	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
 	 *
-	 * @param WP_Service_Workers $service_workers Service workers.
+	 * @param WP_Service_Worker_Registry $service_worker_registry Service worker registry.
 	 */
-	public static function add_amp_runtime_caching( WP_Service_Workers $service_workers ) {
+	public static function add_amp_runtime_caching( $service_worker_registry ) {
+		if ( ! ( $service_worker_registry instanceof WP_Service_Worker_Registry ) ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Registry.', 'amp' ), '1.0' );
+			return;
+		}
 
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
 		self::register_runtime_precaches();
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background.
-		$service_workers->register_cached_route(
+		$service_worker_registry->register_cached_route(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
-			WP_Service_Workers::STRATEGY_STALE_WHILE_REVALIDATE
+			WP_Service_Worker_Registry::STRATEGY_STALE_WHILE_REVALIDATE
 		);
 	}
 
@@ -61,12 +65,17 @@ class AMP_Service_Workers {
 	 *
 	 * @link https://gist.github.com/sebastianbenz/1d449dee039202d8b7464f1131eae449
 	 *
-	 * @param WP_Service_Workers $service_workers Service workers.
+	 * @param WP_Service_Worker_Registry $service_worker_registry Service workers.
 	 */
-	public static function add_image_runtime_caching( WP_Service_Workers $service_workers ) {
-		$service_workers->register_cached_route(
+	public static function add_image_runtime_caching( $service_worker_registry ) {
+		if ( ! ( $service_worker_registry instanceof WP_Service_Worker_Registry ) ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Registry.', 'amp' ), '1.0' );
+			return;
+		}
+
+		$service_worker_registry->register_cached_route(
 			'\.(?:png|gif|jpe?g|svg|webp)$',
-			WP_Service_Workers::STRATEGY_CACHE_FIRST,
+			WP_Service_Worker_Registry::STRATEGY_CACHE_FIRST,
 			array(
 				'cacheName' => 'images',
 				'plugins'   => array(
@@ -119,8 +128,8 @@ class AMP_Service_Workers {
 		}
 
 		foreach ( $urls as $url ) {
-			wp_service_workers()->register_precached_route( $url, array(
-				'cache' => WP_Service_Workers::RUNTIME_CACHE_NAME,
+			wp_service_workers()->registry->register_precached_route( $url, array(
+				'cache' => WP_Service_Worker_Registry::RUNTIME_CACHE_NAME,
 			) );
 		}
 
