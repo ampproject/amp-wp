@@ -604,9 +604,9 @@ class AMP_Invalid_URL_Post_Type {
 					if ( isset( $sources['plugin'] ) ) {
 						$count = count( array_unique( $sources['plugin'] ) );
 						if ( 1 === $count ) {
-							$output[] = sprintf( '<strong>%s</strong>', esc_html( 'Plug-In', 'amp' ) );
+							$output[] = sprintf( '<strong>%s</strong>', esc_html( 'Plugin', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html( 'Plug-In', 'amp' ), $count );
+							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html( 'Plugin', 'amp' ), $count );
 						}
 						$output[] = implode( '<br/>', array_unique( $sources['plugin'] ) );
 					}
