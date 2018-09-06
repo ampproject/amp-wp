@@ -446,12 +446,10 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
-				$sources = array_shift( $validation_error['sources'] );
+				$source = array_shift( $validation_error['sources'] );
 
-				foreach ( $sources['sources'] as $source ) {
-					if ( isset( $source['type'], $source['name'] ) ) {
-						$invalid_sources[ $source['type'] ][] = $source['name'];
-					}
+				if ( isset( $source['type'], $source['name'] ) ) {
+					$invalid_sources[ $source['type'] ][] = $source['name'];
 				}
 			}
 		}
