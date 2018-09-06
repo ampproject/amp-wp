@@ -38,3 +38,9 @@
 td.column-found_elements_and_attributes {
 	color: #c06e60;
 }
+.column-error_status .dashicons-warning.identified {
+	color: #d98501;
+}
+.column-error_status .dashicons-warning.rejected {
+	color: #68c6ff;
+}
