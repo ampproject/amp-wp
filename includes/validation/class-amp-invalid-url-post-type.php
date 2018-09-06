@@ -525,7 +525,7 @@ class AMP_Invalid_URL_Post_Type {
 		$columns = array_merge(
 			$columns,
 			array(
-				'error_status' => sprintf( '%s<span class="dashicons dashicons-editor-help"></span><div class="tooltip">%s</div>', esc_html( 'Status', 'amp' ), esc_html( 'This is tooltip', 'amp' ) ),  // @todo Create actual tooltip.
+				'error_status' => sprintf( '%s<span class="dashicons dashicons-editor-help"></span><div class="tooltip">%s</div>', esc_html( 'Status', 'amp' ), esc_html__( 'This is tooltip', 'amp' ) ),  // @todo Create actual tooltip.
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Removed', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Source', 'amp' ),
 			)
@@ -603,9 +603,9 @@ class AMP_Invalid_URL_Post_Type {
 					if ( isset( $sources['plugin'] ) ) {
 						$count = count( array_unique( $sources['plugin'] ) );
 						if ( 1 === $count ) {
-							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span></span><strong>%s</strong><br/>', esc_html( 'Plugin', 'amp' ) );
+							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span></span><strong>%s</strong><br/>', esc_html__( 'Plugin', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html( 'Plugin', 'amp' ), $count );
+							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html__( 'Plugin', 'amp' ), $count );
 						}
 						$output[] = '<div class="sources-plugins">';
 						$output[] = implode( '<br/>', array_unique( $sources['plugin'] ) );
@@ -614,9 +614,9 @@ class AMP_Invalid_URL_Post_Type {
 					if ( isset( $sources['core'] ) ) {
 						$count = count( array_unique( $sources['core'] ) );
 						if ( 1 === $count ) {
-							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s</strong><br/>', esc_html( 'Other', 'amp' ) );
+							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s</strong><br/>', esc_html__( 'Other', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><br/>', esc_html( 'Other', 'amp' ), $count );
+							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><br/>', esc_html__( 'Other', 'amp' ), $count );
 						}
 						$output[] = '<div class="sources-core">';
 						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
