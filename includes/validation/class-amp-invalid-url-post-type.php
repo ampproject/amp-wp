@@ -89,7 +89,7 @@ class AMP_Invalid_URL_Post_Type {
 					'menu_name'          => __( 'Invalid Pages', 'amp' ),
 					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
 					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
-					'not_found_in_trash' => __( 'No invalid AMP pages in trash', 'amp' ),
+					'not_found_in_trash' => __( 'No forgotten AMP pages', 'amp' ),
 					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
 					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
 				),
@@ -136,7 +136,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
-		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
+		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
@@ -637,12 +637,14 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Adds a 'Recheck' bulk action to the edit.php page.
+	 * Adds a 'Recheck' bulk action to the edit.php page and modifies the 'Move to Trash' text.
 	 *
 	 * @param array $actions The bulk actions in the edit.php page.
 	 * @return array $actions The filtered bulk actions.
 	 */
-	public static function add_bulk_action( $actions ) {
+	public static function filter_bulk_actions( $actions ) {
+		$actions['trash'] = esc_html__( 'Forget', 'amp' );
+
 		unset( $actions['edit'] );
 		$actions[ self::BULK_VALIDATE_ACTION ] = esc_html__( 'Recheck', 'amp' );
 		return $actions;
@@ -1510,7 +1512,7 @@ class AMP_Invalid_URL_Post_Type {
 				get_delete_post_link( $post->ID ),
 				/* translators: %s: post title */
 				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), $post->post_title ) ),
-				__( 'Forget', 'amp' )
+				esc_html__( 'Forget', 'amp' )
 			);
 		}
 
@@ -1528,7 +1530,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( isset( $views['trash'] ) ) {
 			$status = get_post_status_object( 'trash' );
 
-			$views['trash'] = str_replace( $status->label, __( 'Forgotten', 'amp' ), $views['trash'] );
+			$views['trash'] = str_replace( $status->label, esc_html__( 'Forgotten', 'amp' ), $views['trash'] );
 		}
 		return $views;
 	}
