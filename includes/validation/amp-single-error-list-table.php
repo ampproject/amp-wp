@@ -52,4 +52,5 @@ $wp_list_table->views();
 <input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
 <input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
 <?php
+$wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' );
 $wp_list_table->display();
