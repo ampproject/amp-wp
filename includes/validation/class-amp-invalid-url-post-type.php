@@ -292,12 +292,11 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		}
 
-		// @todo Switch icons.
 		$result = array();
 		if ( $counts['new'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="dashicons dashicons-warning"></span><span class="error-status identified">%1$s: %2$s</span>', 'amp' ),
+				__( '<span class="dashicons dashicons-warning identified"></span><span class="error-status identified">%1$s: %2$s</span>', 'amp' ),
 				esc_html__( 'Identified', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			);
@@ -313,7 +312,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="dashicons dashicons-warning"></span><span class="error-status rejected">%1$s: %2$s</span>', 'amp' ),
+				__( '<span class="dashicons dashicons-warning rejected"></span><span class="error-status rejected">%1$s: %2$s</span>', 'amp' ),
 				esc_html__( 'Rejected', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
 			);
