@@ -142,6 +142,8 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, array( __CLASS__, 'handle_validation_error_status_update' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
+		add_filter( 'post_row_actions', array( __CLASS__, 'filter_post_row_actions' ), 10, 2 );
+		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
 
 		// Hide irrelevant "published" label in the invalid URL post list.
 		add_filter( 'post_date_column_status', function( $status, $post ) {
@@ -1491,6 +1493,44 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		</style>
 		<?php
+	}
+
+	/**
+	 * Filters post row actions.
+	 *
+	 * @param array    $actions Row action links.
+	 * @param \WP_Post $post Current WP post.
+	 * @return array Filtered action links.
+	 */
+	public static function filter_post_row_actions( $actions, $post ) {
+		// Replace 'Trash' text with 'Forget'.
+		if ( isset( $actions['trash'] ) ) {
+			$actions['trash'] = sprintf(
+				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), $post->post_title ) ),
+				__( 'Forget', 'amp' )
+			);
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Filters table views for the post type.
+	 *
+	 * @param array $views Array of table view links keyed by status slug.
+	 * @return array Filtered views.
+	 */
+	public static function filter_table_views( $views ) {
+		// Replace 'Trash' text with 'Forgotten'.
+		if ( isset( $views['trash'] ) ) {
+			$status = get_post_status_object( 'trash' );
+
+			$views['trash'] = str_replace( $status->label, __( 'Forgotten', 'amp' ), $views['trash'] );
+		}
+		return $views;
 	}
 
 }
