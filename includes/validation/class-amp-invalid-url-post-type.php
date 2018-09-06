@@ -89,7 +89,7 @@ class AMP_Invalid_URL_Post_Type {
 					'menu_name'          => __( 'Invalid Pages', 'amp' ),
 					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
 					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
-					'not_found_in_trash' => __( 'No forgotten AMP pages', 'amp' ),
+					'not_found_in_trash' => __( 'No forgotten invalid AMP pages', 'amp' ),
 					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
 					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
 				),
