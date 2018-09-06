@@ -4,6 +4,9 @@
 .column-error_status .dashicons-editor-help {
 	color: #767676;
 }
+.column-sources_with_invalid_output .dashicons {
+	margin-right: 5px;
+}
 .column-sources_with_invalid_output .dashicons-admin-plugins {
 	color: #64a2e9;
 }
@@ -11,3 +14,7 @@
 	color: #ebb04f;
 }
 
+.sources-plugins, .sources-core {
+	margin-left: 25px;
+	margin-bottom: 15px;
+}
