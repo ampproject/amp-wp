@@ -608,7 +608,9 @@ class AMP_Invalid_URL_Post_Type {
 						} else {
 							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html( 'Plugin', 'amp' ), $count );
 						}
+						$output[] = '<div class="sources-plugins">';
 						$output[] = implode( '<br/>', array_unique( $sources['plugin'] ) );
+						$output[] = '</div>';
 					}
 					if ( isset( $sources['core'] ) ) {
 						$count = count( array_unique( $sources['core'] ) );
@@ -617,7 +619,9 @@ class AMP_Invalid_URL_Post_Type {
 						} else {
 							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><br/>', esc_html( 'Other', 'amp' ), $count );
 						}
+						$output[] = '<div class="sources-core">';
 						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+						$output[] = '</div>';
 					}
 					if ( isset( $sources['theme'] ) ) {
 						$output[] = sprintf( '<span class="dashicons dashicons-admin-appearance"></span><strong>%s</strong>', esc_html( $sources['theme']['name'] ) );
