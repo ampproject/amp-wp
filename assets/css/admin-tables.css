@@ -13,7 +13,9 @@
 .column-sources_with_invalid_output .dashicons-admin-appearance {
 	color: #ebb04f;
 }
-
+.column-sources_with_invalid_output .dashicons-wordpress-alt {
+	color: #92b371;
+}
 .sources-plugins, .sources-core {
 	margin-left: 25px;
 	margin-bottom: 15px;
