@@ -86,11 +86,11 @@ class AMP_Invalid_URL_Post_Type {
 			array(
 				'labels'       => array(
 					'name'               => _x( 'Errors by URL', 'post type general name', 'amp' ),
-					'menu_name'          => __( 'Errors by URL', 'amp' ),
+					'menu_name'          => __( 'Validation: URLs', 'amp' ),
 					'singular_name'      => __( 'Errors by URL', 'amp' ),
-					'not_found'          => __( 'No errors by URL found', 'amp' ),
-					'not_found_in_trash' => __( 'No errors by URL in trash', 'amp' ),
-					'search_items'       => __( 'Search errors by URL', 'amp' ),
+					'not_found'          => __( 'No errors found', 'amp' ),
+					'not_found_in_trash' => __( 'No errors forgotten', 'amp' ),
+					'search_items'       => __( 'Search', 'amp' ),
 					'edit_item'          => __( 'Errors by URL', 'amp' ),
 				),
 				'supports'     => false,
@@ -305,8 +305,8 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['accepted'] ) {
 			$result[] = sprintf(
 				/* translators: 1. Title, 2. %s is count */
-				__( '<span class="suppressed">%1$s: %2$s</span>', 'amp' ),
-				esc_html__( 'Suppressed', 'amp' ),
+				__( '<span class="accepted">%1$s: %2$s</span>', 'amp' ),
+				esc_html__( 'Accepted', 'amp' ),
 				number_format_i18n( $counts['accepted'] )
 			);
 		}
@@ -314,7 +314,7 @@ class AMP_Invalid_URL_Post_Type {
 			$result[] = sprintf(
 				/* translators: %s is count */
 				__( '<span class="rejected">%1$s: %2$s</span>', 'amp' ),
-				esc_html__( 'To Fix Later', 'amp' ),
+				esc_html__( 'Rejected', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
 			);
 		}
