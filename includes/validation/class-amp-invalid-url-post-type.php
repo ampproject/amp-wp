@@ -619,8 +619,8 @@ class AMP_Invalid_URL_Post_Type {
 						}
 						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
 					}
-					if ( isset( $soures['theme'] ) ) {
-						$output[] = sprintf( '<strong>%s</strong>', esc_html( $soures['theme']['name'] ) );
+					if ( isset( $sources['theme'] ) ) {
+						$output[] = sprintf( '<strong>%s</strong>', esc_html( $sources['theme']['name'] ) );
 					}
 					echo implode( '<br/>', $output ); // WPCS: XSS ok.
 				}
