@@ -297,7 +297,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['new'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="identified">%1$s: %2$s', 'amp' ),
+				__( '<span class="dashicons dashicons-warning"></span><span class="identified">%1$s: %2$s', 'amp' ),
 				esc_html__( 'Identified', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			);
@@ -305,7 +305,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['accepted'] ) {
 			$result[] = sprintf(
 				/* translators: 1. Title, 2. %s is count */
-				__( '<span class="accepted">%1$s: %2$s</span>', 'amp' ),
+				__( '<span class="amp-logo-icon"></span><span class="accepted">%1$s: %2$s</span>', 'amp' ),
 				esc_html__( 'Accepted', 'amp' ),
 				number_format_i18n( $counts['accepted'] )
 			);
@@ -313,7 +313,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="rejected">%1$s: %2$s</span>', 'amp' ),
+				__( '<span class="dashicons dashicons-warning"></span><span class="rejected">%1$s: %2$s</span>', 'amp' ),
 				esc_html__( 'Rejected', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
 			);
