@@ -4,3 +4,6 @@
 .column-error_status .dashicons-editor-help {
 	color: #767676;
 }
+.column-sources_with_invalid_output .dashicons-admin-plugins {
+	color: #64a2e9;
+}
