@@ -35,3 +35,6 @@
 	vertical-align: top;
 	margin-left: 10px;
 }
+td.column-found_elements_and_attributes {
+	color: #c06e60;
+}
