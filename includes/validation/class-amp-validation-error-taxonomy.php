@@ -571,6 +571,7 @@ class AMP_Validation_Error_Taxonomy {
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
 			add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
 		}
+		add_action( 'parse_term_query', array( __CLASS__, 'parse_post_php_term_query' ) );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
@@ -1168,6 +1169,30 @@ class AMP_Validation_Error_Taxonomy {
 			}
 		}
 		return $actions;
+	}
+
+	/**
+	 * Parse the term query on post.php pages (single error URL).
+	 *
+	 * This post.php page for amp_invalid_url is more like an edit-tags.php page,
+	 * in that it has a WP_Terms_List_Table of terms (of type amp_validation_error).
+	 * So this needs to only show the terms (errors) associated with this amp_invalid_url post.
+	 *
+	 * @param WP_Term_Query $wp_term_query Instance of WP_Term_Query.
+	 */
+	public static function parse_post_php_term_query( $wp_term_query ) {
+		global $pagenow;
+		if ( ! is_admin() || 'post.php' !== $pagenow || ! isset( $_GET['post'] ) ) { // WPCS: CSRF OK.
+			return;
+		}
+
+		// If this isn't the invalid URL post type, there's no reason to filter the query.
+		$post_id = sanitize_key( $_GET['post'] );
+		if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$wp_term_query->query_vars['object_ids'] = $post_id;
 	}
 
 	/**

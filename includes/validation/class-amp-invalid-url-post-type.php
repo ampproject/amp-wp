@@ -129,6 +129,24 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
+		add_action( 'edit_form_after_title', array( __CLASS__, 'render_single_url_list_table' ) );
+
+		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_columns', function( $old_columns ) {
+			return array(
+				'cb'      => $old_columns['cb'],
+				'error'   => __( 'Error', 'amp' ),
+				'status'  => __( 'Status', 'amp' ),
+				'details' => __( 'Details', 'amp' ),
+				'sources' => __( 'Sources', 'amp' ),
+				'type'    => __( 'Error Type', 'amp' ),
+			);
+		} );
+
+		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', function( $per_page ) {
+			return 4;
+		} );
+		add_filter( 'get_edit_post_link', array( __CLASS__, 'add_taxonomy_to_edit_link' ), 10, 3 );
+
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
@@ -1007,7 +1025,6 @@ class AMP_Invalid_URL_Post_Type {
 	public static function add_meta_boxes() {
 		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
 		remove_meta_box( 'slugdiv', self::POST_TYPE_SLUG, 'normal' );
-		add_meta_box( self::VALIDATION_ERRORS_META_BOX, __( 'Validation Errors', 'amp' ), array( __CLASS__, 'print_validation_errors_meta_box' ), self::POST_TYPE_SLUG, 'normal' );
 		add_meta_box( self::STATUS_META_BOX, __( 'Status', 'amp' ), array( __CLASS__, 'print_status_meta_box' ), self::POST_TYPE_SLUG, 'side' );
 	}
 
@@ -1101,6 +1118,44 @@ class AMP_Invalid_URL_Post_Type {
 			</div>
 		</div><!-- /submitpost -->
 		<?php
+	}
+
+	/**
+	 * Renders the single URL list table.
+	 *
+	 * @param WP_Post $post The post for the meta box.
+	 * @return void
+	 */
+	public static function render_single_url_list_table( $post ) {
+		if ( self::POST_TYPE_SLUG === $post->post_type ) {
+			require_once __DIR__ . '/amp-single-error-list-table.php';
+		}
+	}
+
+	/**
+	 * Adds a taxonomy query var to the amp_invalid_url post edit link.
+	 *
+	 * The post.php page that this link leads to is really more like an edit-tags.php page.
+	 * It has a WP_Terms_List_Table of the validation errors (amp_validation_error terms).
+	 * For the WP_Terms_List_Table to render, its $screen->taxonomy property needs to be set.
+	 * So this adds a taxonomy query var, which is later parsed into $screen->taxonomy.
+	 *
+	 * @param string $link    The edit link to filter.
+	 * @param int    $post_id The post ID.
+	 * @param string $context The link context. If set to 'display' then ampersands
+	 *                        are encoded.
+	 * @return string $link The filtered link.
+	 */
+	public static function add_taxonomy_to_edit_link( $link, $post_id, $context ) {
+		if ( self::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
+			return $link;
+		}
+
+		return add_query_arg(
+			'taxonomy',
+			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			$link
+		);
 	}
 
 	/**
