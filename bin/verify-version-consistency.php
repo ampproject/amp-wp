@@ -14,9 +14,6 @@ if ( 'cli' !== php_sapi_name() ) {
 
 $versions = array();
 
-$versions['package.json']      = json_decode( file_get_contents( dirname( __FILE__ ) . '/../package.json' ) )->version;
-$versions['package-lock.json'] = json_decode( file_get_contents( dirname( __FILE__ ) . '/../package-lock.json' ) )->version;
-
 $readme_txt = file_get_contents( dirname( __FILE__ ) . '/../readme.txt' );
 if ( ! preg_match( '/Stable tag:\s+(?P<version>\S+)/i', $readme_txt, $matches ) ) {
 	echo "Could not find stable tag in readme\n";

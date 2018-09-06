@@ -86,8 +86,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', array( self::TESTED_CLASS, 'add_meta_boxes' ) ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', array( self::TESTED_CLASS, 'print_url_as_title' ) ) );
 		$this->assertEquals( 10, has_filter( 'the_title', array( self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ) ) );
+		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ), 10, 2 ) );
 
-		$this->assertEquals( 10, has_filter( 'views_edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_views_edit' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
@@ -165,6 +165,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_get_invalid_url_validation_errors() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create();
@@ -434,66 +435,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test filter_views_edit.
-	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::filter_views_edit()
-	 */
-	public function test_filter_views_edit() {
-		$_SERVER['REQUEST_URI'] = '/wp-admin/edit.php?post_type=amp_invalid_url&amp_validation_error_status=0';
-
-		add_theme_support( 'amp', array( 'paired' => true ) );
-		AMP_Validation_Manager::init();
-		AMP_Validation_Error_Taxonomy::add_admin_hooks();
-		$post = $this->factory()->post->create();
-		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
-
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) {
-			if ( 'accepted' === $error['code'] ) {
-				$sanitized = true;
-			} elseif ( 'rejected' === $error['code'] ) {
-				$sanitized = false;
-			}
-			return $sanitized;
-		}, 10, 2 );
-
-		$errors = array(
-			array( 'code' => 'accepted' ),
-			array( 'code' => 'rejected' ),
-			array( 'code' => 'new' ),
-		);
-
-		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
-			$errors,
-			get_permalink( $post )
-		);
-		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
-
-		$views = AMP_Invalid_URL_Post_Type::filter_views_edit( array(
-			'publish' => 'Published',
-		) );
-
-		$this->assertArrayNotHasKey( 'publish', $views );
-		$this->assertContains( '(1)', $views['new'] );
-		$this->assertContains( '(1)', $views['rejected'] );
-		$this->assertContains( '(1)', $views['accepted'] );
-
-		$terms = get_terms( array( 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
-		foreach ( $terms as $term ) {
-			wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
-				'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-			) );
-		}
-
-		$views = AMP_Invalid_URL_Post_Type::filter_views_edit( array(
-			'publish' => 'Published',
-		) );
-		$this->assertArrayNotHasKey( 'publish', $views );
-		$this->assertContains( '(0)', $views['new'] );
-		$this->assertContains( '(0)', $views['rejected'] );
-		$this->assertContains( '(1)', $views['accepted'] );
-	}
-
-	/**
 	 * Test for add_post_columns()
 	 *
 	 * @covers AMP_Invalid_URL_Post_Type::add_post_columns()
@@ -627,6 +568,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		AMP_Validation_Manager::init();
 
@@ -750,6 +692,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_validate_request()
 	 */
 	public function test_handle_validate_request() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Manager::init();
@@ -1133,6 +1076,55 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 		) );
 		$this->assertEquals( '/baz', AMP_Invalid_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post_correct_post_type ) );
+	}
+
+	/**
+	 * Test render_post_filters.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_post_filters()
+	 */
+	public function test_render_post_filters() {
+		set_current_screen( 'edit.php' );
+		$number_of_errors = 20;
+		for ( $i = 0; $i < $number_of_errors; $i++ ) {
+			$invalid_url_post      = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+			$validation_error_term = $this->factory()->term->create( array(
+				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+				'description' => wp_json_encode( $this->get_mock_errors() ),
+				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			) );
+
+			// Associate the validation error term with a URL.
+			wp_set_post_terms(
+				$invalid_url_post,
+				$validation_error_term,
+				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
+			);
+		}
+
+		$new_error_count               = sprintf(
+			'New Errors <span class="count">(%d)</span>',
+			$number_of_errors
+		);
+		$correct_post_type             = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		$wrong_post_type               = 'page';
+		$correct_which_second_argument = 'top';
+		$wrong_which_second_argument   = 'bottom';
+
+		// This has an incorrect post type as the first argument, so it should not output anything.
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_post_filters( $wrong_post_type, $correct_which_second_argument );
+		$this->assertEmpty( ob_get_clean() );
+
+		// This has an incorrect second argument, so again it should not output anything.
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_post_filters( $correct_post_type, $wrong_which_second_argument );
+		$this->assertEmpty( ob_get_clean() );
+
+		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_post_filters( $correct_post_type, $correct_which_second_argument );
+		$this->assertContains( $new_error_count, ob_get_clean() );
 	}
 
 	/**
