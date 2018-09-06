@@ -28,3 +28,10 @@
 	width: 20px;
 	display: inline-block;
 }
+.column-error_status .error-status {
+	line-height: 20px;
+	display: inline-block;
+	position: relative;
+	vertical-align: top;
+	margin-left: 10px;
+}
