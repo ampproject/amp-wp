@@ -1,3 +1,6 @@
-#error_status .tooltip {
+.column-error_status .tooltip {
 	display: none;
+}
+.column-error_status .dashicons-editor-help {
+	color: #767676;
 }
