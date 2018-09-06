@@ -135,6 +135,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::is_validation_error_sanitized()
 	 */
 	public function test_is_validation_error_sanitized() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $this->get_mock_error() ) );
 
 		// Trigger Native AMP, which makes all errors accepted.
@@ -148,6 +149,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 */
 	public function test_get_validation_error_sanitization() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		$this->assertEquals(
 			array(
 				'forced'      => false,
