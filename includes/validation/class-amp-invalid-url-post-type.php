@@ -297,7 +297,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['new'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="dashicons dashicons-warning"></span><span class="error-status identified">%1$s: %2$s', 'amp' ),
+				__( '<span class="dashicons dashicons-warning"></span><span class="error-status identified">%1$s: %2$s</span>', 'amp' ),
 				esc_html__( 'Identified', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			);
