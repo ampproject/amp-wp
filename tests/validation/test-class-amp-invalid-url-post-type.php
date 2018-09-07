@@ -555,9 +555,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_filter_bulk_actions() {
 		$initial_action = array(
-			'edit' => 'Edit',
-			'trash' => 'Trash',
-			'delete' => 'Trash permanently'
+			'edit'   => 'Edit',
+			'trash'  => 'Trash',
+			'delete' => 'Trash permanently',
 		);
 		$actions        = AMP_Invalid_URL_Post_Type::filter_bulk_actions( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
@@ -1180,11 +1180,14 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_post_row_actions( array(), null ) );
 
 		$actions = array(
-			'trash' => '',
+			'trash'  => '',
 			'delete' => '',
 		);
 
-		$post = $post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, 'title' => 'My Post' ) );
+		$post = $this->factory()->post->create_and_get( array(
+			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'title'     => 'My Post',
+		) );
 
 		$filtered_actions = AMP_Invalid_URL_Post_Type::filter_post_row_actions( $actions, $post );
 
