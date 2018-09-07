@@ -144,6 +144,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_post_row_actions' ), 10, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
+		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
 
 		// Hide irrelevant "published" label in the invalid URL post list.
 		add_filter( 'post_date_column_status', function( $status, $post ) {
@@ -627,7 +628,7 @@ class AMP_Invalid_URL_Post_Type {
 		$actions[ self::VALIDATE_ACTION ] = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( self::get_recheck_url( $post ) ),
-			esc_html__( 'Re-check', 'amp' )
+			esc_html__( 'Recheck', 'amp' )
 		);
 		if ( self::get_post_staleness( $post ) ) {
 			$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
@@ -643,7 +644,13 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return array $actions The filtered bulk actions.
 	 */
 	public static function filter_bulk_actions( $actions ) {
-		$actions['trash'] = esc_html__( 'Forget', 'amp' );
+		if ( isset( $actions['trash'] ) ) {
+			$actions['trash'] = esc_html__( 'Forget', 'amp' );
+		}
+
+		if ( isset( $actions['delete'] ) ) {
+			$actions['delete'] = esc_html__( 'Forget permanently', 'amp' );
+		}
 
 		unset( $actions['edit'] );
 		$actions[ self::BULK_VALIDATE_ACTION ] = esc_html__( 'Recheck', 'amp' );
@@ -1045,7 +1052,7 @@ class AMP_Invalid_URL_Post_Type {
 				<div id="minor-publishing-actions">
 					<div id="re-check-action">
 						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post ) ); ?>">
-							<?php esc_html_e( 'Re-check', 'amp' ); ?>
+							<?php esc_html_e( 'Recheck', 'amp' ); ?>
 						</a>
 					</div>
 					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() || $is_sanitization_forcibly_accepted_by_filter ) ) : ?>
@@ -1516,6 +1523,16 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
+		if ( isset( $actions['delete'] ) ) {
+			$actions['delete'] = sprintf(
+				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID, '', true ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221; permanently', 'amp' ), $post->post_title ) ),
+				esc_html__( 'Forget Permanently', 'amp' )
+			);
+		}
+
 		return $actions;
 	}
 
@@ -1532,7 +1549,49 @@ class AMP_Invalid_URL_Post_Type {
 
 			$views['trash'] = str_replace( $status->label, esc_html__( 'Forgotten', 'amp' ), $views['trash'] );
 		}
+
 		return $views;
+	}
+
+
+	/**
+	 * Filters messages displayed after bulk updates.
+	 *
+	 * @param array $messages    Bulk message text.
+	 * @param array $bulk_counts Post numbers for the current message.
+	 * @return array Filtered messages.
+	 */
+	public static function filter_bulk_post_updated_messages( $messages, $bulk_counts ) {
+		if ( get_current_screen()->id === sprintf( 'edit-%s', self::POST_TYPE_SLUG ) ) {
+			$messages['post'] = array_merge(
+				$messages['post'],
+				array(
+					/* translators: %s is the number of posts permanently forgotten */
+					'deleted'   => _n(
+						'%s invalid AMP page permanently forgotten.',
+						'%s invalid AMP post permanently forgotten.',
+						$bulk_counts['deleted'],
+						'amp'
+					),
+					/* translators: %s is the number of posts forgotten */
+					'trashed'   => _n(
+						'%s invalid AMP page forgotten.',
+						'%s invalid AMP pages fogotten.',
+						$bulk_counts['trashed'],
+						'amp'
+					),
+					/* translators: %s is the number of posts restored from trash. */
+					'untrashed' => _n(
+						'%s invalid AMP page unforgotten.',
+						'%s invalid AMP pages unforgotten.',
+						$bulk_counts['untrashed'],
+						'amp'
+					),
+				)
+			);
+		}
+
+		return $messages;
 	}
 
 }
