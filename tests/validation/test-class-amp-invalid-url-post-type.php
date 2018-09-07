@@ -1033,24 +1033,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for print_validation_errors_meta_box()
-	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::print_validation_errors_meta_box()
-	 */
-	public function test_print_validation_errors_meta_box() {
-		AMP_Validation_Manager::init();
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( $this->get_mock_errors(), home_url( '/' ) );
-		ob_start();
-		AMP_Invalid_URL_Post_Type::print_validation_errors_meta_box( get_post( $post_id ) );
-		$output = ob_get_clean();
-
-		$this->assertContains( '<details', $output );
-		$this->assertContains( 'script', $output );
-		$this->assertContains( 'onclick', $output );
-	}
-
-	/**
 	 * Test for print_url_as_title()
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::print_url_as_title()

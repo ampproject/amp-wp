@@ -208,7 +208,7 @@ class AMP_Validation_Error_Taxonomy {
 			'show_in_quick_edit' => false,
 			'hierarchical'       => false, // Or true? Code could be the parent term?
 			'show_in_menu'       => ( self::should_show_in_menu() || AMP_Invalid_URL_Post_Type::should_show_in_menu() ),
-			'meta_box_cb'        => false, // See print_validation_errors_meta_box().
+			'meta_box_cb'        => false,
 			'capabilities'       => array(
 				'assign_terms' => 'do_not_allow',
 				'edit_terms'   => 'do_not_allow',
