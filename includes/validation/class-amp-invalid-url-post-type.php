@@ -76,6 +76,13 @@ class AMP_Invalid_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
+	 * The number of amp_validation_error terms that should appear on a single amp_invalid_url post.php page.
+	 *
+	 * @var int
+	 */
+	const NUMBER_TERMS_ON_SINGLE_PAGE = 4;
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
@@ -130,10 +137,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'edit_form_after_title', array( __CLASS__, 'render_single_url_list_table' ) );
-
-		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', function( $per_page ) {
-			return 4;
-		} );
+		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', array( __CLASS__, 'get_terms_per_page' ) );
 		add_filter( 'get_edit_post_link', array( __CLASS__, 'add_taxonomy_to_edit_link' ), 10, 3 );
 
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
@@ -1137,6 +1141,18 @@ class AMP_Invalid_URL_Post_Type {
 		if ( self::POST_TYPE_SLUG === $post->post_type ) {
 			require_once __DIR__ . '/amp-single-error-list-table.php';
 		}
+	}
+
+	/**
+	 * Gets the number of amp_validation_error terms that should appear on the single amp_invalid_url /wp-admin/post.php page.
+	 *
+	 * @todo: consider a way to reduce the number of terms returned in the query, as the pagination is still present.
+	 * @param int $terms_per_page The number of terms on a page.
+	 * @return int The number of terms on the page.
+	 */
+	public static function get_terms_per_page( $terms_per_page ) {
+		unset( $terms_per_page );
+		return self::NUMBER_TERMS_ON_SINGLE_PAGE;
 	}
 
 	/**
