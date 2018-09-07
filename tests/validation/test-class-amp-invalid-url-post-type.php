@@ -91,7 +91,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
-		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'add_bulk_action' ) ) );
+		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_bulk_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'handle_bulk_action' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'print_admin_notice' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, array( self::TESTED_CLASS, 'handle_validate_request' ) ) );
@@ -549,17 +549,18 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for add_bulk_action()
+	 * Test for filter_bulk_actions()
 	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::add_bulk_action()
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_bulk_actions()
 	 */
-	public function test_add_bulk_action() {
+	public function test_filter_bulk_actions() {
 		$initial_action = array(
 			'edit' => 'Edit',
 		);
-		$actions        = AMP_Invalid_URL_Post_Type::add_bulk_action( $initial_action );
+		$actions        = AMP_Invalid_URL_Post_Type::filter_bulk_actions( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
 		$this->assertEquals( 'Recheck', $actions[ AMP_Invalid_URL_Post_Type::BULK_VALIDATE_ACTION ] );
+		$this->assertEquals( 'Forget', $actions['trash'] );
 	}
 
 	/**
