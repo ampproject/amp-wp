@@ -605,7 +605,7 @@ class AMP_Invalid_URL_Post_Type {
 						if ( 1 === $count ) {
 							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span></span><strong>%s</strong><br/>', esc_html__( 'Plugin', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<strong>%s (%d)</strong>', esc_html__( 'Plugin', 'amp' ), $count );
+							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span><strong>%s (%d)</strong>', esc_html__( 'Plugin', 'amp' ), $count );
 						}
 						$output[] = '<div class="sources-plugins">';
 						$output[] = implode( '<br/>', array_unique( $sources['plugin'] ) );
