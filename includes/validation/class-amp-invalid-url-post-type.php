@@ -89,7 +89,7 @@ class AMP_Invalid_URL_Post_Type {
 					'menu_name'          => __( 'Invalid Pages', 'amp' ),
 					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
 					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
-					'not_found_in_trash' => __( 'No invalid AMP pages in trash', 'amp' ),
+					'not_found_in_trash' => __( 'No forgotten invalid AMP pages', 'amp' ),
 					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
 					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
 				),
@@ -136,12 +136,15 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
-		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
+		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, array( __CLASS__, 'handle_validation_error_status_update' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
+		add_filter( 'post_row_actions', array( __CLASS__, 'filter_post_row_actions' ), 10, 2 );
+		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
+		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
 
 		// Hide irrelevant "published" label in the invalid URL post list.
 		add_filter( 'post_date_column_status', function( $status, $post ) {
@@ -625,7 +628,7 @@ class AMP_Invalid_URL_Post_Type {
 		$actions[ self::VALIDATE_ACTION ] = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( self::get_recheck_url( $post ) ),
-			esc_html__( 'Re-check', 'amp' )
+			esc_html__( 'Recheck', 'amp' )
 		);
 		if ( self::get_post_staleness( $post ) ) {
 			$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
@@ -635,12 +638,20 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Adds a 'Recheck' bulk action to the edit.php page.
+	 * Adds a 'Recheck' bulk action to the edit.php page and modifies the 'Move to Trash' text.
 	 *
 	 * @param array $actions The bulk actions in the edit.php page.
 	 * @return array $actions The filtered bulk actions.
 	 */
-	public static function add_bulk_action( $actions ) {
+	public static function filter_bulk_actions( $actions ) {
+		if ( isset( $actions['trash'] ) ) {
+			$actions['trash'] = esc_html__( 'Forget', 'amp' );
+		}
+
+		if ( isset( $actions['delete'] ) ) {
+			$actions['delete'] = esc_html__( 'Forget permanently', 'amp' );
+		}
+
 		unset( $actions['edit'] );
 		$actions[ self::BULK_VALIDATE_ACTION ] = esc_html__( 'Recheck', 'amp' );
 		return $actions;
@@ -1041,7 +1052,7 @@ class AMP_Invalid_URL_Post_Type {
 				<div id="minor-publishing-actions">
 					<div id="re-check-action">
 						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post ) ); ?>">
-							<?php esc_html_e( 'Re-check', 'amp' ); ?>
+							<?php esc_html_e( 'Recheck', 'amp' ); ?>
 						</a>
 					</div>
 					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() || $is_sanitization_forcibly_accepted_by_filter ) ) : ?>
@@ -1491,6 +1502,96 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		</style>
 		<?php
+	}
+
+	/**
+	 * Filters post row actions.
+	 *
+	 * @param array    $actions Row action links.
+	 * @param \WP_Post $post Current WP post.
+	 * @return array Filtered action links.
+	 */
+	public static function filter_post_row_actions( $actions, $post ) {
+		// Replace 'Trash' text with 'Forget'.
+		if ( isset( $actions['trash'] ) ) {
+			$actions['trash'] = sprintf(
+				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), $post->post_title ) ),
+				esc_html__( 'Forget', 'amp' )
+			);
+		}
+
+		if ( isset( $actions['delete'] ) ) {
+			$actions['delete'] = sprintf(
+				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID, '', true ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221; permanently', 'amp' ), $post->post_title ) ),
+				esc_html__( 'Forget Permanently', 'amp' )
+			);
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Filters table views for the post type.
+	 *
+	 * @param array $views Array of table view links keyed by status slug.
+	 * @return array Filtered views.
+	 */
+	public static function filter_table_views( $views ) {
+		// Replace 'Trash' text with 'Forgotten'.
+		if ( isset( $views['trash'] ) ) {
+			$status = get_post_status_object( 'trash' );
+
+			$views['trash'] = str_replace( $status->label, esc_html__( 'Forgotten', 'amp' ), $views['trash'] );
+		}
+
+		return $views;
+	}
+
+
+	/**
+	 * Filters messages displayed after bulk updates.
+	 *
+	 * @param array $messages    Bulk message text.
+	 * @param array $bulk_counts Post numbers for the current message.
+	 * @return array Filtered messages.
+	 */
+	public static function filter_bulk_post_updated_messages( $messages, $bulk_counts ) {
+		if ( get_current_screen()->id === sprintf( 'edit-%s', self::POST_TYPE_SLUG ) ) {
+			$messages['post'] = array_merge(
+				$messages['post'],
+				array(
+					/* translators: %s is the number of posts permanently forgotten */
+					'deleted'   => _n(
+						'%s invalid AMP page permanently forgotten.',
+						'%s invalid AMP post permanently forgotten.',
+						$bulk_counts['deleted'],
+						'amp'
+					),
+					/* translators: %s is the number of posts forgotten */
+					'trashed'   => _n(
+						'%s invalid AMP page forgotten.',
+						'%s invalid AMP pages forgotten.',
+						$bulk_counts['trashed'],
+						'amp'
+					),
+					/* translators: %s is the number of posts restored from trash. */
+					'untrashed' => _n(
+						'%s invalid AMP page unforgotten.',
+						'%s invalid AMP pages unforgotten.',
+						$bulk_counts['untrashed'],
+						'amp'
+					),
+				)
+			);
+		}
+
+		return $messages;
 	}
 
 }
