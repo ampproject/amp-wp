@@ -992,7 +992,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::get_terms_per_page()
 	 */
-	public function get_terms_per_page() {
+	public function test_get_terms_per_page() {
 		// This method should return the same value, no matter what argument is passed to it.
 		$initial_counts = array( 0, 22, 1000 );
 		foreach ( $initial_counts as $initial_count ) {

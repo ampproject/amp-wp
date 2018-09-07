@@ -139,7 +139,6 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'edit_form_after_title', array( __CLASS__, 'render_single_url_list_table' ) );
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', array( __CLASS__, 'get_terms_per_page' ) );
 		add_filter( 'get_edit_post_link', array( __CLASS__, 'add_taxonomy_to_edit_link' ), 10, 3 );
-
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );

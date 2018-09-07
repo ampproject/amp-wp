@@ -1186,13 +1186,11 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		// If this isn't the invalid URL post type, there's no reason to filter the query.
+		// Only set the query var if this is the invalid URL post type.
 		$post_id = sanitize_key( $_GET['post'] );
-		if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
-			return;
+		if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
+			$wp_term_query->query_vars['object_ids'] = $post_id;
 		}
-
-		$wp_term_query->query_vars['object_ids'] = $post_id;
 	}
 
 	/**

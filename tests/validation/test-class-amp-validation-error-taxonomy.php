@@ -368,6 +368,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'add_admin_notices' ) ) );
 		$this->assertEquals( 10, has_filter( 'tag_row_actions', array( self::TESTED_CLASS, 'filter_tag_row_actions' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', array( self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ) ) );
+		$this->assertEquals( 10, has_filter( 'parse_term_query', array( self::TESTED_CLASS, 'parse_post_php_term_query' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', array( self::TESTED_CLASS, 'filter_manage_custom_columns' ) ) );
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
@@ -774,6 +775,38 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertContains( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', $accept_action );
 		$this->assertContains( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', $reject_action );
 
+	}
+
+	/**
+	 * Test parse_post_php_term_query.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::parse_post_php_term_query()
+	 */
+	public function test_parse_post_php_term_query() {
+		$wp_term_query = new WP_Term_Query();
+
+		// If is_admin() is false, the conditional will be false and this won't add a query_var value.
+		set_current_screen( 'front' );
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEmpty( $wp_term_query->query_vars );
+
+		// This is now on the proper screen, but there is no post ID in $_GET['post'].
+		set_current_screen( 'post.php' );
+		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEmpty( $wp_term_query->query_vars );
+
+		// Though $_GET['post'] has a post ID, it's not for the amp_invalid_url post type.
+		$post_id_wrong_type = $this->factory()->post->create();
+		$_GET['post']       = $post_id_wrong_type;
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEmpty( $wp_term_query->query_vars );
+
+		// Now that $_GET['post'] has a post ID of the correct post type, it should be in the query var.
+		$post_id_correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$_GET['post']              = $post_id_correct_post_type;
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEquals( $post_id_correct_post_type, $wp_term_query->query_vars['object_ids'] );
 	}
 
 	/**
