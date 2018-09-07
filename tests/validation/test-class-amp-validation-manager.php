@@ -172,6 +172,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_add_admin_bar_menu_items() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 
 		// No admin bar item when user lacks capability.
 		$this->go_to( home_url( '/' ) );
@@ -349,6 +350,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_get_amp_validity_rest_field() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		AMP_Invalid_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
@@ -1255,7 +1257,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$script        = wp_scripts()->registered[ $slug ];
 		$inline_script = $script->extra['after'][1];
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
-		$this->assertEquals( array( 'underscore' ), $script->deps );
+		$this->assertEqualSets( array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ), $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );

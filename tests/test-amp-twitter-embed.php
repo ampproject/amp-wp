@@ -3,36 +3,53 @@
 class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return array(
-			'no_embed' => array(
+			'no_embed'                             => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
-			'url_simple' => array(
+			'url_simple'                           => array(
 				'https://twitter.com/wordpress/status/987437752164737025' . PHP_EOL,
 				'<p><amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
 			),
-			'url_with_big_tweet_id' => array(
+			'url_with_big_tweet_id'                => array(
 				'https://twitter.com/wordpress/status/705219971425574912' . PHP_EOL,
 				'<p><amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
 			),
 
-			'shortcode_without_id' => array(
+			'timeline_url_with_profile'            => array(
+				'https://twitter.com/wordpress' . PHP_EOL,
+				'<p><amp-twitter data-timeline-source-type="profile" data-timeline-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
+			),
+			'timeline_url_with_likes'              => array(
+				'https://twitter.com/wordpress/likes' . PHP_EOL,
+				'<p><amp-twitter data-timeline-source-type="likes" data-timeline-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
+			),
+			'timeline_url_with_list'               => array(
+				'https://twitter.com/wordpress/lists/random_list' . PHP_EOL,
+				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="random_list" data-timeline-owner-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
+			),
+			'timeline_url_with_list2'              => array(
+				'https://twitter.com/robertnyman/lists/web-gdes' . PHP_EOL,
+				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="web-gdes" data-timeline-owner-screen-name="robertnyman" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
+			),
+
+			'shortcode_without_id'                 => array(
 				'[tweet]' . PHP_EOL,
 				'' . PHP_EOL,
 			),
-			'shortcode_simple' => array(
+			'shortcode_simple'                     => array(
 				'[tweet 987437752164737025]' . PHP_EOL,
 				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
-			'shortcode_with_tweet_attribute' => array(
+			'shortcode_with_tweet_attribute'       => array(
 				'[tweet tweet=987437752164737025]' . PHP_EOL,
 				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
-			'shortcode_with_big_tweet_id' => array(
+			'shortcode_with_big_tweet_id'          => array(
 				'[tweet 705219971425574912]' . PHP_EOL,
 				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
-			'shortcode_with_url' => array(
+			'shortcode_with_url'                   => array(
 				'[tweet https://twitter.com/wordpress/status/987437752164737025]' . PHP_EOL,
 				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
@@ -40,7 +57,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'[tweet https://twitter.com/wordpress/status/705219971425574912]' . PHP_EOL,
 				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
 			),
-			'shortcode_with_non_numeric_tweet_id' => array(
+			'shortcode_with_non_numeric_tweet_id'  => array(
 				'[tweet abcd]' . PHP_EOL,
 				'' . PHP_EOL,
 			),

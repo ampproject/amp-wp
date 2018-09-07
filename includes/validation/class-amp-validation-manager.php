@@ -1478,7 +1478,12 @@ class AMP_Validation_Manager {
 			$error_count = 0;
 			foreach ( self::$validation_results as $validation_result ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'] ) {
+
+				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['status']
+					:
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
+				if ( $is_unaccepted ) {
 					$error_count++;
 				}
 			}
@@ -1742,7 +1747,7 @@ class AMP_Validation_Manager {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'underscore' ),
+			array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ),
 			AMP__VERSION,
 			true
 		);
