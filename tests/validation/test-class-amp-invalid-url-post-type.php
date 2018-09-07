@@ -556,11 +556,14 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_filter_bulk_actions() {
 		$initial_action = array(
 			'edit' => 'Edit',
+			'trash' => 'Trash',
+			'delete' => 'Trash permanently'
 		);
 		$actions        = AMP_Invalid_URL_Post_Type::filter_bulk_actions( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
 		$this->assertEquals( 'Recheck', $actions[ AMP_Invalid_URL_Post_Type::BULK_VALIDATE_ACTION ] );
 		$this->assertEquals( 'Forget', $actions['trash'] );
+		$this->assertEquals( 'Forget permanently', $actions['delete'] );
 	}
 
 	/**
@@ -1167,6 +1170,74 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $items[0] );
 		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $items[0] );
 	}
+
+	/**
+	 * Test for filter_post_row_actions()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_post_row_actions()
+	 */
+	public function test_filter_post_row_actions() {
+		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_post_row_actions( array(), null ) );
+
+		$actions = array(
+			'trash' => '',
+			'delete' => '',
+		);
+
+		$post = $post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, 'title' => 'My Post' ) );
+
+		$filtered_actions = AMP_Invalid_URL_Post_Type::filter_post_row_actions( $actions, $post );
+
+		$this->assertContains( 'Forget</a>', $filtered_actions['trash'] );
+		$this->assertContains( 'Forget Permanently</a>', $filtered_actions['delete'] );
+
+	}
+
+	/**
+	 * Test for filter_table_views()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_table_views()
+	 */
+	public function test_filter_table_views() {
+		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_table_views( array() ) );
+
+		$views = array(
+			'trash' => 'Trash',
+		);
+
+		$filtered_views = AMP_Invalid_URL_Post_Type::filter_table_views( $views );
+
+		$this->assertEquals( 'Forgotten', $filtered_views['trash'] );
+	}
+
+	/**
+	 * Test for filter_bulk_post_updated_messages()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_bulk_post_updated_messages()
+	 */
+	public function test_filter_bulk_post_updated_messages() {
+		set_current_screen( 'index.php' );
+
+		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_bulk_post_updated_messages( array(), array() ) );
+
+		set_current_screen( 'edit.php' );
+		get_current_screen()->id = sprintf( 'edit-%s', AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+
+		$messages = array(
+			'post' => array(),
+		);
+
+		$filtered_messages = AMP_Invalid_URL_Post_Type::filter_bulk_post_updated_messages( $messages, array(
+			'deleted'   => 1,
+			'trashed'   => 99,
+			'untrashed' => 99,
+		) );
+
+		$this->assertEquals( '%s invalid AMP page permanently forgotten.', $filtered_messages['post']['deleted'] );
+		$this->assertEquals( '%s invalid AMP pages forgotten.', $filtered_messages['post']['trashed'] );
+		$this->assertEquals( '%s invalid AMP pages unforgotten.', $filtered_messages['post']['untrashed'] );
+	}
+
 
 	/**
 	 * Gets mock errors for tests.

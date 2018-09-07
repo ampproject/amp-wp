@@ -1576,7 +1576,7 @@ class AMP_Invalid_URL_Post_Type {
 					/* translators: %s is the number of posts forgotten */
 					'trashed'   => _n(
 						'%s invalid AMP page forgotten.',
-						'%s invalid AMP pages fogotten.',
+						'%s invalid AMP pages forgotten.',
 						$bulk_counts['trashed'],
 						'amp'
 					),
