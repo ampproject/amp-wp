@@ -993,11 +993,22 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::get_terms_per_page()
 	 */
 	public function test_get_terms_per_page() {
-		// This method should return the same value, no matter what argument is passed to it.
 		$initial_counts = array( 0, 22, 1000 );
+
+		// If 'post.php' === $pagenow, this method should return the same value, no matter what argument is passed to it.
+		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
 		foreach ( $initial_counts as $initial_count ) {
 			$this->assertEquals(
 				AMP_Invalid_URL_Post_Type::NUMBER_TERMS_ON_SINGLE_PAGE,
+				AMP_Invalid_URL_Post_Type::get_terms_per_page( $initial_count )
+			);
+		}
+
+		// If 'post.php' !== $pagenow, this method should return the same value that is passed to it.
+		$GLOBALS['pagenow'] = 'edit-tags.php'; // WPCS: Global override OK.
+		foreach ( $initial_counts as $initial_count ) {
+			$this->assertEquals(
+				$initial_count,
 				AMP_Invalid_URL_Post_Type::get_terms_per_page( $initial_count )
 			);
 		}

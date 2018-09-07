@@ -1133,13 +1133,65 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Renders the single URL list table.
 	 *
+	 * Mainly copied from edit-tags.php.
+	 * This is output on the post.php page for amp_invalid_url,
+	 * where the editor normally would be.
+	 * But it's really more similar to /wp-admin/edit-tags.php than a post.php page,
+	 * as this outputs a WP_Terms_List_Table of amp_validation_error terms.
+	 *
+	 * @todo: complete this, as it will probably need to use more logic from edit-tags.php.
 	 * @param WP_Post $post The post for the meta box.
 	 * @return void
 	 */
 	public static function render_single_url_list_table( $post ) {
-		if ( self::POST_TYPE_SLUG === $post->post_type ) {
-			require_once __DIR__ . '/amp-single-error-list-table.php';
+		global $post_type;
+
+		if ( self::POST_TYPE_SLUG !== $post->post_type || ! isset( $_GET['taxonomy'] ) ) { // WPCS: CSRF OK.
+			return;
 		}
+
+		$taxonomy        = sanitize_key( $_GET['taxonomy'] ); // WPCS: CSRF OK.
+		$taxonomy_object = get_taxonomy( $taxonomy );
+		if ( ! $taxonomy_object ) {
+			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
+		}
+
+		if ( ! current_user_can( $taxonomy_object->cap->manage_terms ) ) {
+			wp_die(
+				'<h1>' . esc_html__( 'You need a higher level of permission.', 'default' ) . '</h1>' .
+				'<p>' . esc_html__( 'Sorry, you are not allowed to manage these validation errors.', 'amp' ) . '</p>',
+				403
+			);
+		}
+
+		$wp_list_table = _get_list_table( 'WP_Terms_List_Table' );
+
+		get_current_screen()->set_screen_reader_content( array(
+			'heading_pagination' => $taxonomy_object->labels->items_list_navigation,
+			'heading_list'       => $taxonomy_object->labels->items_list,
+		) );
+
+		if ( isset( $_REQUEST['s'] ) && strlen( $_REQUEST['s'] ) ) { // WPCS: CSRF OK.
+			/* translators: %s: search keywords */
+			printf( '<span class="subtitle">' . esc_html__( 'Search results for &#8220;%s&#8221;', 'default' ) . '</span>', esc_html( wp_unslash( $_REQUEST['s'] ) ) ); // WPCS: CSRF OK.
+		}
+
+		$wp_list_table->prepare_items();
+		$wp_list_table->views();
+		?>
+
+		<form class="search-form wp-clearfix" method="get">
+			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
+			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
+			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
+		</form>
+
+		<form id="posts-filter" method="post">
+			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
+			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
+			<?php $wp_list_table->display(); ?>
+		</form>
+		<?php
 	}
 
 	/**
@@ -1150,8 +1202,11 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return int The number of terms on the page.
 	 */
 	public static function get_terms_per_page( $terms_per_page ) {
-		unset( $terms_per_page );
-		return self::NUMBER_TERMS_ON_SINGLE_PAGE;
+		global $pagenow;
+		if ( 'post.php' === $pagenow ) {
+			return self::NUMBER_TERMS_ON_SINGLE_PAGE;
+		}
+		return $terms_per_page;
 	}
 
 	/**
