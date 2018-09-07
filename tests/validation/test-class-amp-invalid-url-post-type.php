@@ -89,6 +89,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ), 10, 2 ) );
 
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_columns', array( self::TESTED_CLASS, 'add_single_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'add_bulk_action' ) ) );
@@ -454,6 +455,35 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 				)
 			),
 			AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns )
+		);
+	}
+
+	/**
+	 * Test for add_single_post_columns()
+	 *
+	 * @covers AMP_Invalid_URL_Post_Type::add_single_post_columns()
+	 */
+	public function test_add_single_post_columns() {
+		$expected_columns = array(
+			'cb'      => '<input type="checkbox" />',
+			'error'   => 'Error',
+			'status'  => 'Status',
+			'details' => 'Details',
+			'sources' => 'Sources',
+			'type'    => 'Error Type',
+		);
+
+		// The $expected_columns are returned, regardless of what is passed to the filter.
+		$initial_columns_no_checkbox = array( 'foo' => 'bar' );
+		$this->assertEquals(
+			$expected_columns,
+			AMP_Invalid_URL_Post_Type::add_single_post_columns( $initial_columns_no_checkbox )
+		);
+
+		// The $expected_columns are returned if array() is passed to the filter.
+		$this->assertEquals(
+			$expected_columns,
+			AMP_Invalid_URL_Post_Type::add_single_post_columns( array() )
 		);
 	}
 
@@ -949,17 +979,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 				'print_status_meta_box',
 			),
 			$side_meta_box['callback']
-		);
-
-		$full_meta_box = $wp_meta_boxes[ AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ]['normal']['default'][ AMP_Invalid_URL_Post_Type::VALIDATION_ERRORS_META_BOX ];
-		$this->assertEquals( AMP_Invalid_URL_Post_Type::VALIDATION_ERRORS_META_BOX, $full_meta_box['id'] );
-		$this->assertEquals( 'Validation Errors', $full_meta_box['title'] );
-		$this->assertEquals(
-			array(
-				self::TESTED_CLASS,
-				'print_validation_errors_meta_box',
-			),
-			$full_meta_box['callback']
 		);
 
 		$contexts = $wp_meta_boxes[ AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ]['side'];

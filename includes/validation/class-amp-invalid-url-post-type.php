@@ -131,17 +131,6 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'edit_form_after_title', array( __CLASS__, 'render_single_url_list_table' ) );
 
-		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_columns', function( $old_columns ) {
-			return array(
-				'cb'      => $old_columns['cb'],
-				'error'   => __( 'Error', 'amp' ),
-				'status'  => __( 'Status', 'amp' ),
-				'details' => __( 'Details', 'amp' ),
-				'sources' => __( 'Sources', 'amp' ),
-				'type'    => __( 'Error Type', 'amp' ),
-			);
-		} );
-
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', function( $per_page ) {
 			return 4;
 		} );
@@ -152,6 +141,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
 
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
+		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_columns', array( __CLASS__, 'add_single_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
@@ -540,6 +530,23 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		return $columns;
+	}
+
+	/**
+	 * Adds post columns to the /wp-admin/post.php page for amp_invalid_url.
+	 *
+	 * @param array $old_columns The post columns to filter.
+	 * @return array $new_columns The filtered post columns.
+	 */
+	public static function add_single_post_columns( $old_columns ) {
+		return array(
+			'cb'      => '<input type="checkbox" />',
+			'error'   => __( 'Error', 'amp' ),
+			'status'  => __( 'Status', 'amp' ),
+			'details' => __( 'Details', 'amp' ),
+			'sources' => __( 'Sources', 'amp' ),
+			'type'    => __( 'Error Type', 'amp' ),
+		);
 	}
 
 	/**
