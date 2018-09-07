@@ -466,6 +466,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
 					'<a href="webcal:foo">Click me.</a>',
 					'<a href="whatsapp:foo">Click me.</a>',
+					'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
 				) ),
 			),
 
@@ -630,7 +631,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-img_with_good_protocols' => array(
-				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
+				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1 320w, https://example.com/resource2 480w"></amp-img>',
+			),
+
+			'amp-img_with_relative_urls_containing_colons' => array(
+				'<amp-img src="/winning:yes.jpg" width="100" height="200"></amp-img>',
 			),
 
 			'allowed_tag_only' => array(
