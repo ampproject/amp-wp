@@ -1478,7 +1478,12 @@ class AMP_Validation_Manager {
 			$error_count = 0;
 			foreach ( self::$validation_results as $validation_result ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'] ) {
+
+				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['status']
+					:
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
+				if ( $is_unaccepted ) {
 					$error_count++;
 				}
 			}
