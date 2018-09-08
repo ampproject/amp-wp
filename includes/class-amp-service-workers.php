@@ -8,6 +8,8 @@
 
 /**
  * Class AMP_Service_Workers.
+ *
+ * @todo Rename to AMP_Service_Worker.
  */
 class AMP_Service_Workers {
 
@@ -67,7 +69,7 @@ class AMP_Service_Workers {
 			return $js;
 		} );
 
-		// Serve the AMP Runtime from cache and check for an updated version in the background.
+		// Serve the AMP Runtime from cache and check for an updated version in the background. See <https://github.com/ampproject/amp-by-example/blob/a4d798cac6a534e0c46e78944a2718a8dab3c057/boilerplate-generator/templates/files/serviceworkerJs.js#L54-L58>.
 		$service_worker_registry->register_cached_route(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
 			WP_Service_Worker_Cache_Registry::STRATEGY_STALE_WHILE_REVALIDATE
