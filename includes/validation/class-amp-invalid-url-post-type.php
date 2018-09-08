@@ -1139,7 +1139,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * But it's really more similar to /wp-admin/edit-tags.php than a post.php page,
 	 * as this outputs a WP_Terms_List_Table of amp_validation_error terms.
 	 *
-	 * @todo: complete this, as it will probably need to use more logic from edit-tags.php.
+	 * @todo: complete this, as it may need to use more logic from edit-tags.php.
 	 * @param WP_Post $post The post for the meta box.
 	 * @return void
 	 */
@@ -1178,13 +1178,17 @@ class AMP_Invalid_URL_Post_Type {
 
 		$wp_list_table->prepare_items();
 		$wp_list_table->views();
-		?>
 
+		?>
 		<form class="search-form wp-clearfix" method="get">
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
 			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
 			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
 		</form>
+		<div id="url-post-filter" class="alignleft actions">
+			<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
+			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
+		</div>
 
 		<form id="posts-filter" method="post">
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
