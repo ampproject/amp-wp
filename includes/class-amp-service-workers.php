@@ -51,7 +51,21 @@ class AMP_Service_Workers {
 		}
 
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
-		self::register_runtime_precaches( $service_worker_registry );
+		wp_service_workers()->register_script( 'amp-cdn-runtime-cache', function() {
+			$urls = AMP_Service_Workers::get_runtime_precache_urls();
+			if ( empty( $urls ) ) {
+				return '';
+			}
+
+			$js = file_get_contents( AMP__DIR__ . '/assets/js/amp-service-worker-runtime-precaching.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+			$js = preg_replace( '#/\*\s*global.+?\*/#', '', $js );
+			$js = str_replace(
+				'URLS',
+				wp_json_encode( $urls ),
+				$js
+			);
+			return $js;
+		} );
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background.
 		$service_worker_registry->register_cached_route(
@@ -101,10 +115,9 @@ class AMP_Service_Workers {
 	 *
 	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
-	 * @param WP_Service_Worker_Cache_Registry $service_worker_registry Service worker registry.
-	 * @return int Number of cached assets.
+	 * @return array Runtime pre-cached URLs.
 	 */
-	public static function register_runtime_precaches( $service_worker_registry ) {
+	public static function get_runtime_precache_urls() {
 
 		// List of AMP scripts that we know will be used in WordPress always.
 		$precached_handles = array(
@@ -129,13 +142,7 @@ class AMP_Service_Workers {
 			}
 		}
 
-		foreach ( $urls as $url ) {
-			$service_worker_registry->register_precached_route( $url, array(
-				'cache' => WP_Service_Worker_Cache_Registry::RUNTIME_CACHE_NAME,
-			) );
-		}
-
-		return count( $urls );
+		return $urls;
 	}
 
 	/**
