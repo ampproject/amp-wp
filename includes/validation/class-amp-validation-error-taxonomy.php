@@ -643,9 +643,43 @@ class AMP_Validation_Error_Taxonomy {
 
 					/* Improve column widths */
 					td.column-details pre, td.column-sources pre { overflow:auto; }
-					th.column-created_date_gmt { width:15%; }
+					th.column-created_date_gmt, th.column-error_type { width:15%; }
 					th.column-status { width:10%; }
 					.fixed th.column-posts { width: 10%; }
+
+					/* Details column */
+					.details-attributes__summary {
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+					}
+					details[open] .details-attributes__summary {
+						font-weight: 600;
+						margin-bottom: 15px;
+					}
+					.details-attributes__summary::-webkit-details-marker {
+						transform: rotate(90deg);
+						color: #0073aa;
+						font-size: 133%;
+						order: 99;
+					}
+					details[open] .details-attributes__summary::-webkit-details-marker {
+						transform: rotate(180deg);
+					}
+					.details-attributes__title, .details-attributes__attr {
+						color: #dc3232;
+					}
+					.details-attributes__list {
+						margin-top: 0;
+						padding-left: 45px;
+						list-style-type: disc;
+					}
+					.details-attributes__list li {
+						word-break: break-all;
+					}
+					.details-attributes__value {
+						color: #00a0d2;
+					}
 				' );
 			}
 		} );
@@ -1282,9 +1316,31 @@ class AMP_Validation_Error_Taxonomy {
 
 				break;
 			case 'details':
-				unset( $validation_error['code'] );
-				unset( $validation_error['message'] );
-				$content = sprintf( '<pre>%s</pre>', esc_html( wp_json_encode( $validation_error, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ) );
+				$attributes_type = isset( $validation_error['element_attributes'] ) ? 'element_attributes' : 'node_attributes';
+
+				if ( 'element_attributes' === $attributes_type ) {
+					$attributes = $validation_error['element_attributes'];
+					$node       = $validation_error['parent_name'];
+				} else {
+					$attributes = $validation_error['node_attributes'];
+					$node       = $validation_error['node_name'];
+				}
+				
+				$content = '<details>';
+				$content .= '<summary class="details-attributes__summary"><code>' . esc_html( '<' . $node . '>' ) . '</code></summary>';
+				$content .= '<div class="details-attributes__title">' . esc_html( $attributes_type ) . '</div>';
+				$content .= '<ul class="details-attributes__list">';
+
+				foreach ( $attributes as $attr => $value ) {
+					$content .= '<li><span class="details-attributes__attr">' . esc_html( $attr ) . '</span>';
+					if ( ! empty( $value ) ) {
+						$content .= ': <span class="details-attributes__value">' . esc_html( $value ) . '</span></li>';
+					}
+				}
+				
+				$content .= '</ul>';
+				$content .= '</details>';
+				
 				break;
 		}
 		return $content;
