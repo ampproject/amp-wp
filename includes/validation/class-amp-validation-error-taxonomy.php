@@ -623,6 +623,7 @@ class AMP_Validation_Error_Taxonomy {
 				'error'            => __( 'Error Inventory', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
 				'details'          => __( 'Details', 'amp' ),
+				'error_type'       => __( 'Error Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
 				'posts'            => __( 'Found URLs', 'amp' ),
 			);
@@ -1229,6 +1230,32 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Provides a reader-friendly string for a term's error type.
+	 * 
+	 * @param string $error_type The error type from the term's validation error JSON.
+	 * @return string Reader-friendly string.
+	 */
+	public static function get_reader_friendly_error_type_text( $error_type ) {
+		switch ( $error_type ) {
+			case 'js_error':
+				return esc_html__( 'Javascript', 'amp' );
+
+			case 'html_element_error':
+				return esc_html__( 'HTML (Element)', 'amp' );
+
+			case 'html_attribute_error':
+				return esc_html__( 'HTML (Attribute)', 'amp' );
+
+			case 'css_error':
+				return esc_html( 'CSS', 'amp' );
+
+			default:
+				return $error_type;
+		}
+
+	}
+
+	/**
 	 * Supply the content for the custom columns.
 	 *
 	 * @param string $content     Column content.
@@ -1341,6 +1368,9 @@ class AMP_Validation_Error_Taxonomy {
 				$content .= '</ul>';
 				$content .= '</details>';
 				
+				break;
+			case 'error_type':
+				$content = self::get_reader_friendly_error_type_text( $validation_error['type'] );
 				break;
 		}
 		return $content;
