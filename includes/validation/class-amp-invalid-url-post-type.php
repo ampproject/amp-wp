@@ -1102,7 +1102,7 @@ class AMP_Invalid_URL_Post_Type {
 			<div id="major-publishing-actions">
 				<div id="delete-action">
 					<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>">
-						<?php esc_html_e( 'Move to Trash', 'default' ); ?>
+						<?php esc_html_e( 'Forget', 'amp' ); ?>
 					</a>
 				</div>
 				<div id="publishing-action">

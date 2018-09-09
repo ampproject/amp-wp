@@ -996,7 +996,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_storing_error->post_date ) ), $output );
 		$this->assertContains( 'Last checked:', $output );
-		$this->assertContains( 'Move to Trash', $output );
+		$this->assertContains( 'Forget', $output );
 		$this->assertContains( esc_url( get_delete_post_link( $post_storing_error->ID ) ), $output );
 		$this->assertContains( 'misc-pub-section', $output );
 	}
