@@ -128,11 +128,15 @@ class AMP_Invalid_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+
+		// Edit post screen hooks.
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_edit_post_screen_scripts' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
+
+		// Post list screen hooks.
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
-
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
@@ -1008,6 +1012,19 @@ class AMP_Invalid_URL_Post_Type {
 		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();
+	}
+
+	/**
+	 * Enqueue scripts for the edit post screen.
+	 */
+	public static function enqueue_edit_post_screen_scripts() {
+		$current_screen = get_current_screen();
+		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type ) {
+			return;
+		}
+
+		// Eliminate autosave since it is only relevant for the content editor.
+		wp_dequeue_script( 'autosave' );
 	}
 
 	/**

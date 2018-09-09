@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+// phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
+
 /**
  * Tests for AMP_Invalid_URL_Post_Type class.
  *
@@ -83,11 +85,13 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$this->assertEquals( 10, has_filter( 'dashboard_glance_items', array( self::TESTED_CLASS, 'filter_dashboard_glance_items' ) ) );
 		$this->assertEquals( 10, has_action( 'rightnow_end', array( self::TESTED_CLASS, 'print_dashboard_glance_styles' ) ) );
+
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_edit_post_screen_scripts' ) ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', array( self::TESTED_CLASS, 'add_meta_boxes' ) ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', array( self::TESTED_CLASS, 'print_url_as_title' ) ) );
-		$this->assertEquals( 10, has_filter( 'the_title', array( self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ) ) );
-		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ), 10, 2 ) );
 
+		$this->assertEquals( 10, has_filter( 'the_title', array( self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ) ) );
+		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
@@ -934,6 +938,25 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
 		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=1&amp_remaining_errors=0', $exception->getMessage() );
+	}
+
+	/**
+	 * Test for enqueue_edit_post_screen_scripts()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts()
+	 */
+	public function test_enqueue_edit_post_screen_scripts() {
+		wp_enqueue_script( 'autosave' );
+		set_current_screen( 'index.php' );
+		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
+		$this->assertTrue( wp_script_is( 'autosave', 'enqueued' ) );
+
+		global $pagenow;
+		$pagenow = 'post.php';
+		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
+		$this->assertFalse( wp_script_is( 'autosave', 'enqueued' ) );
+		$pagenow = null;
 	}
 
 	/**
