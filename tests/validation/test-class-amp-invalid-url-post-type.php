@@ -405,9 +405,37 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_validated_environment().
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_validated_environment()
+	 */
+	public function test_get_validated_environment() {
+		switch_theme( 'twentysixteen' );
+		update_option( 'active_plugins', array( 'foo/foo.php', 'bar.php' ) );
+		AMP_Options_Manager::update_option( 'accept_tree_shaking', true );
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		$old_env = AMP_Invalid_URL_Post_Type::get_validated_environment();
+		$this->assertArrayHasKey( 'theme', $old_env );
+		$this->assertArrayHasKey( 'plugins', $old_env );
+		$this->assertArrayHasKey( 'options', $old_env );
+		$this->assertArrayHasKey( 'accept_tree_shaking', $old_env['options'] );
+		$this->assertTrue( $old_env['options']['accept_tree_shaking'] );
+		$this->assertEquals( 'twentysixteen', $old_env['theme'] );
+
+		switch_theme( 'twentyseventeen' );
+		update_option( 'active_plugins', array( 'foo/foo.php', 'baz.php' ) );
+		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
+		$new_env = AMP_Invalid_URL_Post_Type::get_validated_environment();
+		$this->assertNotEquals( $old_env, $new_env );
+		$this->assertFalse( $new_env['options']['accept_tree_shaking'] );
+		$this->assertEquals( 'twentyseventeen', $new_env['theme'] );
+	}
+
+	/**
 	 * Test get_post_staleness method.
 	 *
 	 * @covers AMP_Invalid_URL_Post_Type::get_post_staleness()
+	 * @covers AMP_Invalid_URL_Post_Type::get_validated_environment()
 	 */
 	public function test_get_post_staleness() {
 		$error = array( 'code' => 'foo' );
@@ -1021,7 +1049,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_storing_error->post_date ) ), $output );
 		$this->assertContains( 'Last checked:', $output );
-		$this->assertContains( 'Move to Trash', $output );
+		$this->assertContains( 'Forget', $output );
 		$this->assertContains( esc_url( get_delete_post_link( $post_storing_error->ID ) ), $output );
 		$this->assertContains( 'misc-pub-section', $output );
 	}

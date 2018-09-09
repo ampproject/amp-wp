@@ -1338,7 +1338,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	private function get_original_html() {
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
