@@ -950,12 +950,14 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		set_current_screen( 'index.php' );
 		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
 		$this->assertTrue( wp_script_is( 'autosave', 'enqueued' ) );
+		$this->assertFalse( wp_script_is( 'amp-invalid-url-post-edit-screen', 'enqueued' ) );
 
 		global $pagenow;
 		$pagenow = 'post.php';
 		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
 		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
 		$this->assertFalse( wp_script_is( 'autosave', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'amp-invalid-url-post-edit-screen', 'enqueued' ) );
 		$pagenow = null;
 	}
 

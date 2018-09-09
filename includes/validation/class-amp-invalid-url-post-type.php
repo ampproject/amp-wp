@@ -1025,6 +1025,19 @@ class AMP_Invalid_URL_Post_Type {
 
 		// Eliminate autosave since it is only relevant for the content editor.
 		wp_dequeue_script( 'autosave' );
+
+		$handle = 'amp-invalid-url-post-edit-screen';
+		wp_enqueue_script( $handle, amp_get_asset_url( "js/$handle.js" ), array(), AMP__VERSION, true );
+		$data = array(
+			'l10n' => array(
+				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
+			),
+		);
+		wp_add_inline_script(
+			$handle,
+			sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlPostEditScreen.boot( %s ); } );', wp_json_encode( $data ) ),
+			'after'
+		);
 	}
 
 	/**
