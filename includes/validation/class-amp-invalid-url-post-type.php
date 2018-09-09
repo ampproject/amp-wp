@@ -453,14 +453,28 @@ class AMP_Invalid_URL_Post_Type {
 		$post_id = $r;
 		wp_set_object_terms( $post_id, wp_list_pluck( $terms, 'term_id' ), AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
-		update_post_meta( $post_id, '_amp_active_theme', get_stylesheet() );
-		update_post_meta( $post_id, '_amp_active_plugins', get_option( 'active_plugins', array() ) );
+		update_post_meta( $post_id, '_amp_validated_environment', self::get_validated_environment() );
 
 		return $post_id;
 	}
 
 	/**
-	 * Get the differences between the current active themes/plugins and those which were active when the amp_invalid_url post was created.
+	 * Get the environment properties which will likely effect whether validation results are stale.
+	 *
+	 * @return array Environment.
+	 */
+	public static function get_validated_environment() {
+		return array(
+			'theme'   => get_stylesheet(),
+			'plugins' => get_option( 'active_plugins', array() ),
+			'options' => array(
+				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ),
+			),
+		);
+	}
+
+	/**
+	 * Get the differences between the current themes, plugins, and relevant options when amp_invalid_url post was last updated and now.
 	 *
 	 * @param int|WP_Post $post Post of amp_invalid_url type.
 	 * @return array {
@@ -468,6 +482,7 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 *     @type string $theme   The theme that was active but is no longer. Absent if theme is the same.
 	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Absent if the plugins were the same.
+	 *     @type array  $options Options that are now different. Absent if the options were the same.
 	 * }
 	 */
 	public static function get_post_staleness( $post ) {
@@ -476,24 +491,29 @@ class AMP_Invalid_URL_Post_Type {
 			return array();
 		}
 
-		$was_active_theme   = get_post_meta( $post->ID, '_amp_active_theme', true );
-		$was_active_plugins = get_post_meta( $post->ID, '_amp_active_plugins', true );
+		$old_validated_environment = get_post_meta( $post->ID, '_amp_validated_environment', true );
+		$new_validated_environment = self::get_validated_environment();
 
 		$staleness = array();
-		if ( $was_active_theme && get_stylesheet() !== $was_active_theme ) {
-			$staleness['theme'] = $was_active_theme;
+		if ( isset( $old_validated_environment['theme'] ) && $new_validated_environment['theme'] !== $old_validated_environment['theme'] ) {
+			$staleness['theme'] = $old_validated_environment['theme'];
 		}
 
-		if ( is_array( $was_active_plugins ) ) {
-			$now_active_plugins = get_option( 'active_plugins', array() );
-
-			$new_active_plugins = array_diff( $now_active_plugins, $was_active_plugins );
+		if ( isset( $old_validated_environment['plugins'] ) ) {
+			$new_active_plugins = array_diff( $new_validated_environment['plugins'], $old_validated_environment['plugins'] );
 			if ( ! empty( $new_active_plugins ) ) {
 				$staleness['plugins']['new'] = array_values( $new_active_plugins );
 			}
-			$old_active_plugins = array_diff( $was_active_plugins, $now_active_plugins );
+			$old_active_plugins = array_diff( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
 			if ( ! empty( $old_active_plugins ) ) {
 				$staleness['plugins']['old'] = array_values( $old_active_plugins );
+			}
+		}
+
+		if ( isset( $old_validated_environment['options'] ) ) {
+			$differing_options = array_diff_assoc( $new_validated_environment['options'], $old_validated_environment['options'] );
+			if ( $differing_options ) {
+				$staleness['options'] = $differing_options;
 			}
 		}
 
@@ -1086,12 +1106,20 @@ class AMP_Invalid_URL_Post_Type {
 							echo '</b>';
 							echo '<br>';
 							if ( ! empty( $staleness['theme'] ) && ! empty( $staleness['plugins'] ) ) {
-								esc_html_e( 'Different theme and plugins were active when these results were obtained. Please re-check.', 'amp' );
+								esc_html_e( 'Different theme and plugins were active when these results were obtained.', 'amp' );
+								echo ' ';
 							} elseif ( ! empty( $staleness['theme'] ) ) {
-								esc_html_e( 'A different theme was active when these results were obtained. Please re-check.', 'amp' );
+								esc_html_e( 'A different theme was active when these results were obtained.', 'amp' );
+								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
-								esc_html_e( 'Different plugins were active when these results were obtained. Please re-check.', 'amp' );
+								esc_html_e( 'Different plugins were active when these results were obtained.', 'amp' );
+								echo ' ';
 							}
+							if ( ! empty( $staleness['options'] ) ) {
+								esc_html_e( 'Options have changed.', 'amp' );
+								echo ' ';
+							}
+							esc_html_e( 'Please recheck.', 'amp' );
 							echo '</p></div>';
 						}
 						?>
