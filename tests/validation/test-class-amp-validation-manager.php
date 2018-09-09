@@ -1292,8 +1292,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * Test process_markup.
 	 */
 	public function test_process_markup() {
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-
 		$this->set_capability();
 		$this->process_markup( $this->valid_amp_img );
 		$this->assertEquals( array(), AMP_Validation_Manager::$validation_results );

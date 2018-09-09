@@ -431,6 +431,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * Test get_post_staleness method.
 	 *
 	 * @covers AMP_Invalid_URL_Post_Type::get_post_staleness()
+	 * @covers AMP_Invalid_URL_Post_Type::get_validated_environment()
 	 */
 	public function test_get_post_staleness() {
 		$error = array( 'code' => 'foo' );
