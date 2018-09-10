@@ -85,13 +85,13 @@ class AMP_Invalid_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'Errors by URL', 'post type general name', 'amp' ),
-					'menu_name'          => __( 'Validation: URLs', 'amp' ),
-					'singular_name'      => __( 'Errors by URL', 'amp' ),
-					'not_found'          => __( 'No errors found', 'amp' ),
-					'not_found_in_trash' => __( 'No errors forgotten', 'amp' ),
-					'search_items'       => __( 'Search', 'amp' ),
-					'edit_item'          => __( 'Errors by URL', 'amp' ),
+					'name'               => _x( 'Invalid AMP Pages (URLs)', 'post type general name', 'amp' ),
+					'menu_name'          => __( 'Invalid Pages', 'amp' ),
+					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
+					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
+					'not_found_in_trash' => __( 'No forgotten invalid AMP pages', 'amp' ),
+					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
+					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -130,20 +130,27 @@ class AMP_Invalid_URL_Post_Type {
 
 		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+
+		// Edit post screen hooks.
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_edit_post_screen_scripts' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
+
+		// Post list screen hooks.
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
-
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
-		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'add_bulk_action' ), 10, 2 );
+		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, array( __CLASS__, 'handle_validation_error_status_update' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
+		add_filter( 'post_row_actions', array( __CLASS__, 'filter_post_row_actions' ), 10, 2 );
+		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
+		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
 
 		// Hide irrelevant "published" label in the invalid URL post list.
 		add_filter( 'post_date_column_status', function( $status, $post ) {
@@ -479,14 +486,28 @@ class AMP_Invalid_URL_Post_Type {
 		$post_id = $r;
 		wp_set_object_terms( $post_id, wp_list_pluck( $terms, 'term_id' ), AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
-		update_post_meta( $post_id, '_amp_active_theme', get_stylesheet() );
-		update_post_meta( $post_id, '_amp_active_plugins', get_option( 'active_plugins', array() ) );
+		update_post_meta( $post_id, '_amp_validated_environment', self::get_validated_environment() );
 
 		return $post_id;
 	}
 
 	/**
-	 * Get the differences between the current active themes/plugins and those which were active when the amp_invalid_url post was created.
+	 * Get the environment properties which will likely effect whether validation results are stale.
+	 *
+	 * @return array Environment.
+	 */
+	public static function get_validated_environment() {
+		return array(
+			'theme'   => get_stylesheet(),
+			'plugins' => get_option( 'active_plugins', array() ),
+			'options' => array(
+				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ),
+			),
+		);
+	}
+
+	/**
+	 * Get the differences between the current themes, plugins, and relevant options when amp_invalid_url post was last updated and now.
 	 *
 	 * @param int|WP_Post $post Post of amp_invalid_url type.
 	 * @return array {
@@ -494,6 +515,7 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 *     @type string $theme   The theme that was active but is no longer. Absent if theme is the same.
 	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Absent if the plugins were the same.
+	 *     @type array  $options Options that are now different. Absent if the options were the same.
 	 * }
 	 */
 	public static function get_post_staleness( $post ) {
@@ -502,24 +524,29 @@ class AMP_Invalid_URL_Post_Type {
 			return array();
 		}
 
-		$was_active_theme   = get_post_meta( $post->ID, '_amp_active_theme', true );
-		$was_active_plugins = get_post_meta( $post->ID, '_amp_active_plugins', true );
+		$old_validated_environment = get_post_meta( $post->ID, '_amp_validated_environment', true );
+		$new_validated_environment = self::get_validated_environment();
 
 		$staleness = array();
-		if ( $was_active_theme && get_stylesheet() !== $was_active_theme ) {
-			$staleness['theme'] = $was_active_theme;
+		if ( isset( $old_validated_environment['theme'] ) && $new_validated_environment['theme'] !== $old_validated_environment['theme'] ) {
+			$staleness['theme'] = $old_validated_environment['theme'];
 		}
 
-		if ( is_array( $was_active_plugins ) ) {
-			$now_active_plugins = get_option( 'active_plugins', array() );
-
-			$new_active_plugins = array_diff( $now_active_plugins, $was_active_plugins );
+		if ( isset( $old_validated_environment['plugins'] ) ) {
+			$new_active_plugins = array_diff( $new_validated_environment['plugins'], $old_validated_environment['plugins'] );
 			if ( ! empty( $new_active_plugins ) ) {
 				$staleness['plugins']['new'] = array_values( $new_active_plugins );
 			}
-			$old_active_plugins = array_diff( $was_active_plugins, $now_active_plugins );
+			$old_active_plugins = array_diff( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
 			if ( ! empty( $old_active_plugins ) ) {
 				$staleness['plugins']['old'] = array_values( $old_active_plugins );
+			}
+		}
+
+		if ( isset( $old_validated_environment['options'] ) ) {
+			$differing_options = array_diff_assoc( $new_validated_environment['options'], $old_validated_environment['options'] );
+			if ( $differing_options ) {
+				$staleness['options'] = $differing_options;
 			}
 		}
 
@@ -685,7 +712,7 @@ class AMP_Invalid_URL_Post_Type {
 		$actions[ self::VALIDATE_ACTION ] = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( self::get_recheck_url( $post ) ),
-			esc_html__( 'Re-check', 'amp' )
+			esc_html__( 'Recheck', 'amp' )
 		);
 		if ( self::get_post_staleness( $post ) ) {
 			$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
@@ -695,12 +722,20 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Adds a 'Recheck' bulk action to the edit.php page.
+	 * Adds a 'Recheck' bulk action to the edit.php page and modifies the 'Move to Trash' text.
 	 *
 	 * @param array $actions The bulk actions in the edit.php page.
 	 * @return array $actions The filtered bulk actions.
 	 */
-	public static function add_bulk_action( $actions ) {
+	public static function filter_bulk_actions( $actions ) {
+		if ( isset( $actions['trash'] ) ) {
+			$actions['trash'] = esc_html__( 'Forget', 'amp' );
+		}
+
+		if ( isset( $actions['delete'] ) ) {
+			$actions['delete'] = esc_html__( 'Forget permanently', 'amp' );
+		}
+
 		unset( $actions['edit'] );
 		$actions[ self::BULK_VALIDATE_ACTION ] = esc_html__( 'Recheck', 'amp' );
 		return $actions;
@@ -1060,6 +1095,32 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
+	 * Enqueue scripts for the edit post screen.
+	 */
+	public static function enqueue_edit_post_screen_scripts() {
+		$current_screen = get_current_screen();
+		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type ) {
+			return;
+		}
+
+		// Eliminate autosave since it is only relevant for the content editor.
+		wp_dequeue_script( 'autosave' );
+
+		$handle = 'amp-invalid-url-post-edit-screen';
+		wp_enqueue_script( $handle, amp_get_asset_url( "js/$handle.js" ), array(), AMP__VERSION, true );
+		$data = array(
+			'l10n' => array(
+				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
+			),
+		);
+		wp_add_inline_script(
+			$handle,
+			sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlPostEditScreen.boot( %s ); } );', wp_json_encode( $data ) ),
+			'after'
+		);
+	}
+
+	/**
 	 * Adds the meta boxes to the CPT post.php page.
 	 *
 	 * @return void
@@ -1101,7 +1162,7 @@ class AMP_Invalid_URL_Post_Type {
 				<div id="minor-publishing-actions">
 					<div id="re-check-action">
 						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post ) ); ?>">
-							<?php esc_html_e( 'Re-check', 'amp' ); ?>
+							<?php esc_html_e( 'Recheck', 'amp' ); ?>
 						</a>
 					</div>
 					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() || $is_sanitization_forcibly_accepted_by_filter ) ) : ?>
@@ -1135,12 +1196,20 @@ class AMP_Invalid_URL_Post_Type {
 							echo '</b>';
 							echo '<br>';
 							if ( ! empty( $staleness['theme'] ) && ! empty( $staleness['plugins'] ) ) {
-								esc_html_e( 'Different theme and plugins were active when these results were obtained. Please re-check.', 'amp' );
+								esc_html_e( 'Different theme and plugins were active when these results were obtained.', 'amp' );
+								echo ' ';
 							} elseif ( ! empty( $staleness['theme'] ) ) {
-								esc_html_e( 'A different theme was active when these results were obtained. Please re-check.', 'amp' );
+								esc_html_e( 'A different theme was active when these results were obtained.', 'amp' );
+								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
-								esc_html_e( 'Different plugins were active when these results were obtained. Please re-check.', 'amp' );
+								esc_html_e( 'Different plugins were active when these results were obtained.', 'amp' );
+								echo ' ';
 							}
+							if ( ! empty( $staleness['options'] ) ) {
+								esc_html_e( 'Options have changed.', 'amp' );
+								echo ' ';
+							}
+							esc_html_e( 'Please recheck.', 'amp' );
 							echo '</p></div>';
 						}
 						?>
@@ -1151,7 +1220,7 @@ class AMP_Invalid_URL_Post_Type {
 			<div id="major-publishing-actions">
 				<div id="delete-action">
 					<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>">
-						<?php esc_html_e( 'Move to Trash', 'default' ); ?>
+						<?php esc_html_e( 'Forget', 'amp' ); ?>
 					</a>
 				</div>
 				<div id="publishing-action">
@@ -1551,6 +1620,96 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		</style>
 		<?php
+	}
+
+	/**
+	 * Filters post row actions.
+	 *
+	 * @param array    $actions Row action links.
+	 * @param \WP_Post $post Current WP post.
+	 * @return array Filtered action links.
+	 */
+	public static function filter_post_row_actions( $actions, $post ) {
+		// Replace 'Trash' text with 'Forget'.
+		if ( isset( $actions['trash'] ) ) {
+			$actions['trash'] = sprintf(
+				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), $post->post_title ) ),
+				esc_html__( 'Forget', 'amp' )
+			);
+		}
+
+		if ( isset( $actions['delete'] ) ) {
+			$actions['delete'] = sprintf(
+				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
+				get_delete_post_link( $post->ID, '', true ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221; permanently', 'amp' ), $post->post_title ) ),
+				esc_html__( 'Forget Permanently', 'amp' )
+			);
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Filters table views for the post type.
+	 *
+	 * @param array $views Array of table view links keyed by status slug.
+	 * @return array Filtered views.
+	 */
+	public static function filter_table_views( $views ) {
+		// Replace 'Trash' text with 'Forgotten'.
+		if ( isset( $views['trash'] ) ) {
+			$status = get_post_status_object( 'trash' );
+
+			$views['trash'] = str_replace( $status->label, esc_html__( 'Forgotten', 'amp' ), $views['trash'] );
+		}
+
+		return $views;
+	}
+
+
+	/**
+	 * Filters messages displayed after bulk updates.
+	 *
+	 * @param array $messages    Bulk message text.
+	 * @param array $bulk_counts Post numbers for the current message.
+	 * @return array Filtered messages.
+	 */
+	public static function filter_bulk_post_updated_messages( $messages, $bulk_counts ) {
+		if ( get_current_screen()->id === sprintf( 'edit-%s', self::POST_TYPE_SLUG ) ) {
+			$messages['post'] = array_merge(
+				$messages['post'],
+				array(
+					/* translators: %s is the number of posts permanently forgotten */
+					'deleted'   => _n(
+						'%s invalid AMP page permanently forgotten.',
+						'%s invalid AMP post permanently forgotten.',
+						$bulk_counts['deleted'],
+						'amp'
+					),
+					/* translators: %s is the number of posts forgotten */
+					'trashed'   => _n(
+						'%s invalid AMP page forgotten.',
+						'%s invalid AMP pages forgotten.',
+						$bulk_counts['trashed'],
+						'amp'
+					),
+					/* translators: %s is the number of posts restored from trash. */
+					'untrashed' => _n(
+						'%s invalid AMP page unforgotten.',
+						'%s invalid AMP pages unforgotten.',
+						$bulk_counts['untrashed'],
+						'amp'
+					),
+				)
+			);
+		}
+
+		return $messages;
 	}
 
 }

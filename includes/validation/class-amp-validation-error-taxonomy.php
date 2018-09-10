@@ -309,14 +309,12 @@ class AMP_Validation_Error_Taxonomy {
 			$forced = 'with_preview';
 		}
 
-		$is_forced_with_option = (
+		$is_forced = (
 			amp_is_canonical()
-			||
-			AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] && AMP_Options_Manager::get_option( 'accept_tree_shaking' )
 			||
 			AMP_Options_Manager::get_option( 'force_sanitization' )
 		);
-		if ( $is_forced_with_option ) {
+		if ( $is_forced ) {
 			$forced = 'with_option';
 			$status = self::VALIDATION_ERROR_ACCEPTED_STATUS;
 		}
