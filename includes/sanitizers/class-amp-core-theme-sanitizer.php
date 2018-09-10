@@ -498,6 +498,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get the (common) navigation outer height.
+	 *
+	 * @todo If the nav menu has many items and it spans multiple rows, this will be too small.
+	 * @link https://github.com/WordPress/wordpress-develop/blob/fd5ba80c5c3d9cf62348567073945e246285fbca/src/wp-content/themes/twentyseventeen/assets/js/global.js#L50
+	 *
+	 * @return int Navigation outer height.
+	 */
+	protected static function get_twentyseventeen_navigation_outer_height() {
+		return 72;
+	}
+
+	/**
 	 * Add required styles for video and image headers.
 	 *
 	 * This is currently used exclusively for Twenty Seventeen.
@@ -567,6 +579,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					display: none;
 				}
 
+				<?php if ( $is_front_page_layout && ! has_custom_header() ) : ?>
+					/* https://github.com/WordPress/wordpress-develop/blob/fd5ba80c5c3d9cf62348567073945e246285fbca/src/wp-content/themes/twentyseventeen/assets/js/global.js#L92-L94 */
+					.site-branding {
+						margin-bottom: <?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px;
+					}
+				<?php endif; ?>
+
 				@media screen and (min-width: 48em) {
 					/* Note that adjustHeaderHeight() is irrelevant with this change */
 					<?php if ( ! $is_front_page_layout ) : ?>
@@ -578,7 +597,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					/* Initial styles that amp-animations for navigationTopShow and navigationTopHide will override */
 					.navigation-top.site-navigation-fixed {
 						opacity: 0;
-						transform: translateY( -72px );
+						transform: translateY( -<?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px );
 						display: block;
 					}
 				}
@@ -659,7 +678,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'media'     => '(min-width: 48em)',
 					'keyframes' => array(
 						'opacity'   => 0.0,
-						'transform' => 'translateY( -72px )',
+						'transform' => sprintf( 'translateY( -%dpx )', self::get_twentyseventeen_navigation_outer_height() ),
 					),
 				),
 			),
