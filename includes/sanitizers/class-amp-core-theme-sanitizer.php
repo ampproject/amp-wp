@@ -355,17 +355,39 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function add_twentyseventeen_attachment_image_attributes() {
 		add_filter( 'wp_get_attachment_image_attributes', function ( $attr, $attachment, $size ) {
-			if ( ! is_attachment() ) {
-				return $attr;
+			if ( isset( $attr['class'] ) && 'custom-logo' === $attr['class'] ) {
+				unset( $attr['sizes'] );
+			} elseif ( is_attachment() ) {
+				$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
+				if ( false !== $sizes ) {
+					$attr['sizes'] = $sizes;
+				}
 			}
-
-			$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
-			if ( false !== $sizes ) {
-				$attr['sizes'] = $sizes;
-			}
-
 			return $attr;
 		}, 11, 3 );
+
+		/*
+		 * The max-height of the `.custom-logo-link img` is defined as being 80px, unless
+		 * there is header media in which case it is 200px. Issues related to vertically-squashed
+		 * images can be avoided if we just make sure that the image has this height to begin with.
+		 */
+		add_filter( 'get_custom_logo', function( $html ) {
+			$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
+			if ( ! $src ) {
+				return $html;
+			}
+
+			if ( 'blank' === get_header_textcolor() && has_custom_header() ) {
+				$height = 200;
+			} else {
+				$height = 80;
+			}
+			$width = $height * ( $src[1] / $src[2] ); // Note that float values are allowed.
+
+			$html = preg_replace( '/(?<=width=")\d+(?=")/', $width, $html );
+			$html = preg_replace( '/(?<=height=")\d+(?=")/', $height, $html );
+			return $html;
+		} );
 	}
 
 	/**
