@@ -933,8 +933,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With New Error <span class="count">(%s)</span>',
-						'With New Errors <span class="count">(%s)</span>',
+						'With Identified Error <span class="count">(%s)</span>',
+						'With Identified Errors <span class="count">(%s)</span>',
 						$new_term_count,
 						'terms',
 						'amp'
@@ -945,8 +945,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'New Error <span class="count">(%s)</span>',
-						'New Errors <span class="count">(%s)</span>',
+						'Identified Error <span class="count">(%s)</span>',
+						'Identified Errors <span class="count">(%s)</span>',
 						$new_term_count,
 						'terms',
 						'amp'
@@ -989,8 +989,8 @@ class AMP_Validation_Error_Taxonomy {
 				$rejected_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'With Rejected Error <span class="count">(%s)</span>',
-						'With Rejected Errors <span class="count">(%s)</span>',
+						'With Error to Fix Later <span class="count">(%s)</span>',
+						'With Errors to Fix Later <span class="count">(%s)</span>',
 						$rejected_term_count,
 						'terms',
 						'amp'
@@ -1001,8 +1001,8 @@ class AMP_Validation_Error_Taxonomy {
 				$rejected_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'Rejected Error <span class="count">(%s)</span>',
-						'Rejected Errors <span class="count">(%s)</span>',
+						'Error to Fix Later <span class="count">(%s)</span>',
+						'Errors to Fix Later <span class="count">(%s)</span>',
 						$rejected_term_count,
 						'terms',
 						'amp'
@@ -1133,8 +1133,8 @@ class AMP_Validation_Error_Taxonomy {
 			$message = sprintf(
 				/* translators: %s is number of errors accepted */
 				_n(
-					'Accepted %s error. It will no longer block related URLs from being served as AMP.',
-					'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
+					'Suppressed %s error. It will no longer block related URLs from being served as AMP.',
+					'Suppressed %s errors. They will no longer block related URLs from being served as AMP.',
 					number_format_i18n( $count ),
 					'amp'
 				),
