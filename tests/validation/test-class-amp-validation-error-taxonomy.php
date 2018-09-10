@@ -863,6 +863,43 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
 		$this->assertContains( $validation_error['node_attributes']['id'], $filtered_content );
 		$this->assertContains( $validation_error['node_name'], $filtered_content );
+
+		// Test the 'type' block in the switch.
+		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'type', $term_id );
+		$this->assertContains( 'CSS', $filtered_content );
+	}
+
+	/**
+	 * Test get_translated_type_name.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_translated_type_name()
+	 */
+	public function test_get_translated_type_name() {
+		// When the error doesn't have a type, this should return null.
+		$error_without_type = array(
+			'code' => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+		);
+		$this->assertEmpty( AMP_Validation_Error_Taxonomy::get_translated_type_name( $error_without_type ) );
+
+		// When the error has a type that's not recognized, this should also return null.
+		$error_with_unrecognized_type = array(
+			'type' => 'foobar',
+		);
+		$this->assertEmpty( AMP_Validation_Error_Taxonomy::get_translated_type_name( $error_with_unrecognized_type ) );
+
+		$translated_names = array(
+			AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE => 'HTML Element',
+			AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE => 'HTML Attribute',
+			AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE  => 'JavaScript',
+			AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE => 'CSS',
+		);
+
+		foreach ( $translated_names as $slug => $name ) {
+			$validation_error = array(
+				'type' => $slug,
+			);
+			$this->assertEquals( $name, AMP_Validation_Error_Taxonomy::get_translated_type_name( $validation_error ) );
+		}
 	}
 
 	/**
@@ -908,6 +945,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			),
 			'node_name'       => 'link',
 			'parent_name'     => 'head',
+			'type'            => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 		);
 	}
 }

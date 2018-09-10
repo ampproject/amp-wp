@@ -1308,8 +1308,39 @@ class AMP_Validation_Error_Taxonomy {
 				unset( $validation_error['message'] );
 				$content = sprintf( '<pre>%s</pre>', esc_html( wp_json_encode( $validation_error, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ) );
 				break;
+			case 'type':
+				$type = self::get_translated_type_name( $validation_error );
+				if ( $type ) {
+					$content .= sprintf( '<p>%s</p>', esc_html( $type ) );
+				}
+				break;
 		}
 		return $content;
+	}
+
+	/**
+	 * Gets the translated error type name from the given the validation error.
+	 *
+	 * @param array $validation_error The validation error data.
+	 * @return string|null $slug The translated type of the error.
+	 */
+	public static function get_translated_type_name( $validation_error ) {
+		if ( ! isset( $validation_error['type'] ) ) {
+			return null;
+		}
+
+		$translated_names = array(
+			self::HTML_ELEMENT_ERROR_TYPE   => __( 'HTML Element', 'amp' ),
+			self::HTML_ATTRIBUTE_ERROR_TYPE => __( 'HTML Attribute', 'amp' ),
+			self::JS_ERROR_TYPE             => __( 'JavaScript', 'amp' ),
+			self::CSS_ERROR_TYPE            => __( 'CSS', 'amp' ),
+		);
+
+		if ( isset( $translated_names[ $validation_error['type'] ] ) ) {
+			return $translated_names[ $validation_error['type'] ];
+		}
+
+		return null;
 	}
 
 	/**
