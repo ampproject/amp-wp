@@ -608,11 +608,11 @@ class AMP_Invalid_URL_Post_Type {
 					if ( isset( $sources['plugin'] ) ) {
 						$output[] = '<div class="source">';
 						$count = count( array_unique( $sources['plugin'] ) );
-						$sources_container_classes = 'sources-plugins';
+						$sources_container_classes = 'sources-container sources-plugins';
 						if ( 1 === $count ) {
 							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span></span><strong>%s</strong><br/>', esc_html__( 'Plugin', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span><strong>%s (%d)</strong><span class="dashicons dashicons-arrow-down-alt2"></span>', esc_html__( 'Plugins', 'amp' ), $count );
+							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span><strong>%s (%d)</strong><span class="dashicons toggle-sources dashicons-arrow-down-alt2"></span>', esc_html__( 'Plugins', 'amp' ), $count );
 							$sources_container_classes .= ' collapsed';
 						}
 						$output[] = '<div class="' . $sources_container_classes . '">';
@@ -623,11 +623,11 @@ class AMP_Invalid_URL_Post_Type {
 					if ( isset( $sources['core'] ) ) {
 						$output[] = '<div class="source">';
 						$count = count( array_unique( $sources['core'] ) );
-						$sources_container_classes = 'sources-core';
+						$sources_container_classes = 'sources-container sources-core';
 						if ( 1 === $count ) {
 							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s</strong><br/>', esc_html__( 'Other', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><span class="dashicons dashicons-arrow-down-alt2"></span><br/>', esc_html__( 'Other', 'amp' ), $count );
+							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><span class="dashicons toggle-sources dashicons-arrow-down-alt2"></span>', esc_html__( 'Other', 'amp' ), $count );
 							$sources_container_classes .= ' collapsed';
 						}
 						$output[] = '<div class="' . $sources_container_classes . '">';
