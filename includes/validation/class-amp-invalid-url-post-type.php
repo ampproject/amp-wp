@@ -637,7 +637,6 @@ class AMP_Invalid_URL_Post_Type {
 					$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
 					$output  = array();
 
-					// @todo Add hide/show.
 					if ( isset( $sources['plugin'] ) ) {
 						$output[] = '<div class="source">';
 						$count = count( array_unique( $sources['plugin'] ) );
