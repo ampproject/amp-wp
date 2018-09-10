@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+// phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
+
 /**
  * Tests for AMP_Invalid_URL_Post_Type class.
  *
@@ -83,16 +85,18 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$this->assertEquals( 10, has_filter( 'dashboard_glance_items', array( self::TESTED_CLASS, 'filter_dashboard_glance_items' ) ) );
 		$this->assertEquals( 10, has_action( 'rightnow_end', array( self::TESTED_CLASS, 'print_dashboard_glance_styles' ) ) );
+
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_edit_post_screen_scripts' ) ) );
 		$this->assertEquals( 10, has_action( 'add_meta_boxes', array( self::TESTED_CLASS, 'add_meta_boxes' ) ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', array( self::TESTED_CLASS, 'print_url_as_title' ) ) );
-		$this->assertEquals( 10, has_filter( 'the_title', array( self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ) ) );
-		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ), 10, 2 ) );
 
+		$this->assertEquals( 10, has_filter( 'the_title', array( self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ) ) );
+		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_columns', array( self::TESTED_CLASS, 'add_single_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
-		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'add_bulk_action' ) ) );
+		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_bulk_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'handle_bulk_action' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'print_admin_notice' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, array( self::TESTED_CLASS, 'handle_validate_request' ) ) );
@@ -402,9 +406,37 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_validated_environment().
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_validated_environment()
+	 */
+	public function test_get_validated_environment() {
+		switch_theme( 'twentysixteen' );
+		update_option( 'active_plugins', array( 'foo/foo.php', 'bar.php' ) );
+		AMP_Options_Manager::update_option( 'accept_tree_shaking', true );
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		$old_env = AMP_Invalid_URL_Post_Type::get_validated_environment();
+		$this->assertArrayHasKey( 'theme', $old_env );
+		$this->assertArrayHasKey( 'plugins', $old_env );
+		$this->assertArrayHasKey( 'options', $old_env );
+		$this->assertArrayHasKey( 'accept_tree_shaking', $old_env['options'] );
+		$this->assertTrue( $old_env['options']['accept_tree_shaking'] );
+		$this->assertEquals( 'twentysixteen', $old_env['theme'] );
+
+		switch_theme( 'twentyseventeen' );
+		update_option( 'active_plugins', array( 'foo/foo.php', 'baz.php' ) );
+		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
+		$new_env = AMP_Invalid_URL_Post_Type::get_validated_environment();
+		$this->assertNotEquals( $old_env, $new_env );
+		$this->assertFalse( $new_env['options']['accept_tree_shaking'] );
+		$this->assertEquals( 'twentyseventeen', $new_env['theme'] );
+	}
+
+	/**
 	 * Test get_post_staleness method.
 	 *
 	 * @covers AMP_Invalid_URL_Post_Type::get_post_staleness()
+	 * @covers AMP_Invalid_URL_Post_Type::get_validated_environment()
 	 */
 	public function test_get_post_staleness() {
 		$error = array( 'code' => 'foo' );
@@ -579,17 +611,21 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for add_bulk_action()
+	 * Test for filter_bulk_actions()
 	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::add_bulk_action()
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_bulk_actions()
 	 */
-	public function test_add_bulk_action() {
+	public function test_filter_bulk_actions() {
 		$initial_action = array(
-			'edit' => 'Edit',
+			'edit'   => 'Edit',
+			'trash'  => 'Trash',
+			'delete' => 'Trash permanently',
 		);
-		$actions        = AMP_Invalid_URL_Post_Type::add_bulk_action( $initial_action );
+		$actions        = AMP_Invalid_URL_Post_Type::filter_bulk_actions( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
 		$this->assertEquals( 'Recheck', $actions[ AMP_Invalid_URL_Post_Type::BULK_VALIDATE_ACTION ] );
+		$this->assertEquals( 'Forget', $actions['trash'] );
+		$this->assertEquals( 'Forget permanently', $actions['delete'] );
 	}
 
 	/**
@@ -963,6 +999,27 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test for enqueue_edit_post_screen_scripts()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts()
+	 */
+	public function test_enqueue_edit_post_screen_scripts() {
+		wp_enqueue_script( 'autosave' );
+		set_current_screen( 'index.php' );
+		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
+		$this->assertTrue( wp_script_is( 'autosave', 'enqueued' ) );
+		$this->assertFalse( wp_script_is( 'amp-invalid-url-post-edit-screen', 'enqueued' ) );
+
+		global $pagenow;
+		$pagenow = 'post.php';
+		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
+		$this->assertFalse( wp_script_is( 'autosave', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'amp-invalid-url-post-edit-screen', 'enqueued' ) );
+		$pagenow = null;
+	}
+
+	/**
 	 * Test for add_meta_boxes()
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::add_meta_boxes()
@@ -1038,7 +1095,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_storing_error->post_date ) ), $output );
 		$this->assertContains( 'Last checked:', $output );
-		$this->assertContains( 'Move to Trash', $output );
+		$this->assertContains( 'Forget', $output );
 		$this->assertContains( esc_url( get_delete_post_link( $post_storing_error->ID ) ), $output );
 		$this->assertContains( 'misc-pub-section', $output );
 	}
@@ -1244,6 +1301,77 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $items[0] );
 		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $items[0] );
 	}
+
+	/**
+	 * Test for filter_post_row_actions()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_post_row_actions()
+	 */
+	public function test_filter_post_row_actions() {
+		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_post_row_actions( array(), null ) );
+
+		$actions = array(
+			'trash'  => '',
+			'delete' => '',
+		);
+
+		$post = $this->factory()->post->create_and_get( array(
+			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'title'     => 'My Post',
+		) );
+
+		$filtered_actions = AMP_Invalid_URL_Post_Type::filter_post_row_actions( $actions, $post );
+
+		$this->assertContains( 'Forget</a>', $filtered_actions['trash'] );
+		$this->assertContains( 'Forget Permanently</a>', $filtered_actions['delete'] );
+
+	}
+
+	/**
+	 * Test for filter_table_views()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_table_views()
+	 */
+	public function test_filter_table_views() {
+		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_table_views( array() ) );
+
+		$views = array(
+			'trash' => 'Trash',
+		);
+
+		$filtered_views = AMP_Invalid_URL_Post_Type::filter_table_views( $views );
+
+		$this->assertEquals( 'Forgotten', $filtered_views['trash'] );
+	}
+
+	/**
+	 * Test for filter_bulk_post_updated_messages()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::filter_bulk_post_updated_messages()
+	 */
+	public function test_filter_bulk_post_updated_messages() {
+		set_current_screen( 'index.php' );
+
+		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_bulk_post_updated_messages( array(), array() ) );
+
+		set_current_screen( 'edit.php' );
+		get_current_screen()->id = sprintf( 'edit-%s', AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+
+		$messages = array(
+			'post' => array(),
+		);
+
+		$filtered_messages = AMP_Invalid_URL_Post_Type::filter_bulk_post_updated_messages( $messages, array(
+			'deleted'   => 1,
+			'trashed'   => 99,
+			'untrashed' => 99,
+		) );
+
+		$this->assertEquals( '%s invalid AMP page permanently forgotten.', $filtered_messages['post']['deleted'] );
+		$this->assertEquals( '%s invalid AMP pages forgotten.', $filtered_messages['post']['trashed'] );
+		$this->assertEquals( '%s invalid AMP pages unforgotten.', $filtered_messages['post']['untrashed'] );
+	}
+
 
 	/**
 	 * Gets mock errors for tests.

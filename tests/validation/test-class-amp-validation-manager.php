@@ -131,12 +131,27 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEquals( 100, has_action( 'admin_bar_menu', array( self::TESTED_CLASS, 'add_admin_bar_menu_items' ) ) );
 
 		$this->assertFalse( has_action( 'wp', array( self::TESTED_CLASS, 'wrap_widget_callbacks' ) ) );
+		$this->assertEquals( 10, has_filter( 'amp_validation_error_sanitized', array( self::TESTED_CLASS, 'filter_tree_shaking_validation_error_as_accepted' ) ) );
 
-		// Make sure should_locate_sources arg is recognized.
+		// Make sure should_locate_sources arg is recognized, as is disabling of tree-shaking.
+		remove_all_filters( 'amp_validation_error_sanitized' );
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
 		AMP_Validation_Manager::init( array(
 			'should_locate_sources' => true,
 		) );
 		$this->assertEquals( 10, has_action( 'wp', array( self::TESTED_CLASS, 'wrap_widget_callbacks' ) ) );
+		$this->assertFalse( has_filter( 'amp_validation_error_sanitized', array( self::TESTED_CLASS, 'filter_tree_shaking_validation_error_as_accepted' ) ) );
+	}
+
+	/**
+	 * Test filter_tree_shaking_validation_error_as_accepted.
+	 *
+	 * @covers AMP_Validation_Manager::filter_tree_shaking_validation_error_as_accepted()
+	 */
+	public function test_filter_tree_shaking_validation_error_as_accepted() {
+		$this->assertNull( AMP_Validation_Manager::filter_tree_shaking_validation_error_as_accepted( null, array( 'code' => 'foo' ) ) );
+		$this->assertTrue( AMP_Validation_Manager::filter_tree_shaking_validation_error_as_accepted( null, array( 'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE ) ) );
 	}
 
 	/**
@@ -1292,8 +1307,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * Test process_markup.
 	 */
 	public function test_process_markup() {
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-
 		$this->set_capability();
 		$this->process_markup( $this->valid_amp_img );
 		$this->assertEquals( array(), AMP_Validation_Manager::$validation_results );

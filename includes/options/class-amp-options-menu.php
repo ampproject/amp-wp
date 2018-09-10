@@ -241,9 +241,10 @@ class AMP_Options_Menu {
 		?>
 		<fieldset>
 			<?php
-			$auto_sanitization         = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
+			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
 				'code' => 'non_existent',
 			) );
+			remove_filter( 'amp_validation_error_sanitized', array( 'AMP_Validation_Manager', 'filter_tree_shaking_validation_error_as_accepted' ) );
 			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
 				'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
 			) );

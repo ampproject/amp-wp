@@ -1264,18 +1264,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
-				foreach ( $urls_to_test as $url ) {
+				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 					$url = urldecode( $url );
-					// Check if the host contains invalid chars.
-					$url_host = wp_parse_url( $url, PHP_URL_HOST );
-					if ( $url_host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_host ) ) {
-						return AMP_Rule_Spec::FAIL;
+
+					// Check if the protocol contains invalid chars (protocolCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L31-L39).
+					$protocol = $this->parse_protocol( $url );
+					if ( isset( $protocol ) ) {
+						if ( ! preg_match( '/^[a-zA-Z0-9\+-]+/i', $protocol ) ) {
+							return AMP_Rule_Spec::FAIL;
+						}
+						$url = substr( $url, strlen( $protocol ) + 1 );
 					}
 
-					// Check if the protocol contains invalid chars.
-					$dots_pos = strpos( $url, ':' );
-					if ( false !== $dots_pos && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', substr( $url, 0, $dots_pos ) ) ) {
+					// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
+					$host = wp_parse_url( $url, PHP_URL_HOST );
+					if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $host ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
 				}
@@ -1285,6 +1288,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Parse protocol from URL.
+	 *
+	 * This may not be a valid protocol (scheme), but it will be where the protocol should be in the URL.
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L235-L282
+	 * @param string $url URL.
+	 * @return string|null Protocol without colon if matched. Otherwise null.
+	 */
+	private function parse_protocol( $url ) {
+		if ( preg_match( '#^[^/]+(?=:)#', $url, $matches ) ) {
+			return $matches[0];
+		}
+		return null;
 	}
 
 	/**
@@ -1303,34 +1322,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
-				foreach ( $urls_to_test as $url ) {
-					/*
-					 * This seems to be an acceptable check since the AMP validator
-					 * will allow a URL with no protocol to pass validation.
-					 */
-					$url_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
-					if ( $url_scheme ) {
-						if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
-							return AMP_Rule_Spec::FAIL;
-						}
+				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
+					$url_scheme = $this->parse_protocol( $url );
+					if ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
+						return AMP_Rule_Spec::FAIL;
 					}
 				}
 				return AMP_Rule_Spec::PASS;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
-						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
-						foreach ( $urls_to_test as $url ) {
-							/*
-							 * This seems to be an acceptable check since the AMP validator
-							 *  will allow a URL with no protocol to pass validation.
-							 */
-							$url_scheme = wp_parse_url( $url, PHP_URL_SCHEME );
-							if ( $url_scheme ) {
-								if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
-									return AMP_Rule_Spec::FAIL;
-								}
+						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
+							$url_scheme = $this->parse_protocol( $url );
+							if ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
+								return AMP_Rule_Spec::FAIL;
 							}
 						}
 						return AMP_Rule_Spec::PASS;
@@ -1342,7 +1347,34 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Check if attribute has disallowed relative value rule determine if disallowed relative value matches.
+	 * Extract URLs from attribute.
+	 *
+	 * @param DOMAttr     $attribute_node Attribute node.
+	 * @param string|null $spec_attr_name Non-alternative attribute name for the spec.
+	 * @return string[] List of URLs.
+	 */
+	private function extract_attribute_urls( $attribute_node, $spec_attr_name = null ) {
+		/*
+		 * Handle the srcset special case where the attribute value can contain multiple parts, each in the format `URL [WIDTH] [PIXEL_DENSITY]`.
+		 * So we split the srcset attribute value by commas and then return the first token of each item, omitting width descriptor and pixel density descriptor.
+		 * This splitting cannot be done for other URLs because it a comma can appear in a URL itself generally, but the syntax can break in srcset,
+		 * unless the commas are URL-encoded.
+		 */
+		if ( 'srcset' === $attribute_node->nodeName || 'srcset' === $spec_attr_name ) {
+			return array_filter( array_map(
+				function ( $srcset_part ) {
+					// Remove descriptors for width and pixel density.
+					return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
+				},
+				preg_split( '/\s*,\s*/', $attribute_node->nodeValue )
+			) );
+		} else {
+			return array( $attribute_node->nodeValue );
+		}
+	}
+
+	/**
+	 * Check if attribute has disallowed relative URL value according to rule spec.
 	 *
 	 * @param DOMElement       $node           Node.
 	 * @param string           $attr_name      Attribute name.
@@ -1357,8 +1389,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
-				foreach ( $urls_to_test as $url ) {
+				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 					$parsed_url = wp_parse_url( $url );
 
 					/*
@@ -1376,8 +1407,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
-						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
-						foreach ( $urls_to_test as $url ) {
+						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
 							$parsed_url = wp_parse_url( $url );
 							if ( empty( $parsed_url['scheme'] ) ) {
 								return AMP_Rule_Spec::FAIL;
