@@ -611,18 +611,18 @@ class AMP_Invalid_URL_Post_Type {
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
-							$items[] = sprintf( '<span>%s</span>', esc_html( $name ) );
+							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<span>%s</span> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
-							$items[] = sprintf( '<span>%s</span>', esc_html( $name ) );
+							$items[] = sprintf( '<code>[%s]</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<span>%s</span> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>[%s]</code> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
