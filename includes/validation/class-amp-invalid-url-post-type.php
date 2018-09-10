@@ -564,7 +564,7 @@ class AMP_Invalid_URL_Post_Type {
 			$columns,
 			array(
 				'error_status' => sprintf( '%s<span class="dashicons dashicons-editor-help"></span><div class="tooltip">%s</div>', esc_html( 'Status', 'amp' ), esc_html__( 'This is tooltip', 'amp' ) ),  // @todo Create actual tooltip.
-				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Removed', 'amp' ),
+				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Source', 'amp' ),
 			)
 		);
@@ -1405,7 +1405,7 @@ class AMP_Invalid_URL_Post_Type {
 							<?php if ( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE === $error['data']['code'] ) : ?>
 								<li>
 									<details open>
-										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
+										<summary><?php esc_html_e( 'Invalid:', 'amp' ); ?></summary>
 										<code class="detailed">
 											<?php
 											if ( isset( $error['data']['parent_name'] ) ) {
@@ -1434,7 +1434,7 @@ class AMP_Invalid_URL_Post_Type {
 							<?php elseif ( AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE === $error['data']['code'] ) : ?>
 								<li>
 									<details open>
-										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
+										<summary><?php esc_html_e( 'Invalid:', 'amp' ); ?></summary>
 										<code class="detailed">
 											<?php
 											if ( isset( $error['data']['parent_name'] ) ) {
