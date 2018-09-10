@@ -49,7 +49,7 @@ module.exports = function( grunt ) {
 				command: 'npm run pot-to-php'
 			},
 			makepot: {
-				command: 'wp i18n make-pot . languages/amp-js.pot --include="*.js"'
+				command: 'wp i18n make-pot . languages/amp-js.pot --include="*.js" --file-comment="*/\'\'/*"'
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
