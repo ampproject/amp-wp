@@ -548,7 +548,16 @@ class AMP_Validation_Manager {
 			} else {
 				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_invalid_url_post_id', true ) );
 
-				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'], $invalid_url_post_id );
+				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors(
+					wp_list_pluck( $validity['results'], 'error' ),
+					$validity['url'],
+					array_merge(
+						array(
+							'invalid_url_post' => $post,
+						),
+						wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+					)
+				);
 
 				// Remember the amp_invalid_url post so that when the slug changes the old amp_invalid_url post can be updated.
 				if ( ! is_wp_error( $validation_posts[ $post->ID ] ) && $invalid_url_post_id !== $validation_posts[ $post->ID ] ) {
@@ -1544,9 +1553,28 @@ class AMP_Validation_Manager {
 			}
 
 			if ( $args['append_validation_status_comment'] ) {
-				$encoded = wp_json_encode( self::$validation_results, 128 /* JSON_PRETTY_PRINT */ );
+				$data = array(
+					'results' => self::$validation_results,
+				);
+				if ( get_queried_object() ) {
+					$data['queried_object'] = array();
+					if ( get_queried_object_id() ) {
+						$data['queried_object']['id'] = get_queried_object_id();
+					}
+					if ( get_queried_object() instanceof WP_Post ) {
+						$data['queried_object']['type'] = 'post';
+					} elseif ( get_queried_object() instanceof WP_Term ) {
+						$data['queried_object']['type'] = 'term';
+					} elseif ( get_queried_object() instanceof WP_User ) {
+						$data['queried_object']['type'] = 'user';
+					} elseif ( get_queried_object() instanceof WP_Post_Type ) {
+						$data['queried_object']['type'] = 'post_type';
+					}
+				}
+
+				$encoded = wp_json_encode( $data, 128 /* JSON_PRETTY_PRINT */ );
 				$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
-				$comment = $dom->createComment( 'AMP_VALIDATION_RESULTS:' . $encoded . "\n" );
+				$comment = $dom->createComment( 'AMP_VALIDATION:' . $encoded . "\n" );
 				$dom->documentElement->appendChild( $comment );
 			}
 		}
@@ -1608,13 +1636,18 @@ class AMP_Validation_Manager {
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
 		}
-		if ( is_array( $validity ) && count( $validity['validation_errors'] ) > 0 ) {
-			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
-			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validity['validation_errors'], 60 );
+		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
+		if ( is_array( $validity ) && count( $validation_errors ) > 0 ) { // @todo This should only warn when there are unaccepted validation errors.
+			AMP_Invalid_URL_Post_Type::store_validation_errors(
+				$validation_errors,
+				$validity['url'],
+				wp_array_slice_assoc( $validity, array( 'queried_object_id', 'queried_object_type' ) )
+			);
+			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
 		} else {
 			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
 		}
-		return $validity['validation_errors'];
+		return $validation_errors;
 	}
 
 	/**
@@ -1627,8 +1660,10 @@ class AMP_Validation_Manager {
 	 * @return WP_Error|array {
 	 *     Response.
 	 *
-	 *     @type array  $validation_errors Validation errors.
-	 *     @type string $url               Final URL that was checked or redirected to.
+	 *     @type array  $results             Validation results, where each nested array contains an error key and sanitized key.
+	 *     @type string $url                 Final URL that was checked or redirected to.
+	 *     @type int    $queried_object_id   Queried object ID.
+	 *     @type string $queried_object_type Queried object type.
 	 * }
 	 */
 	public static function validate_url( $url ) {
@@ -1709,15 +1744,18 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION_RESULTS\s*:\s*(\[.*?\])\s*-->#s', $response, $matches ) ) {
+		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION\s*:\s*(\{.*?\})\s*-->#s', $response, $matches ) ) {
 			return new WP_Error( 'response_comment_absent' );
 		}
-		$validation_results = json_decode( $matches[1], true );
-		if ( ! is_array( $validation_results ) ) {
+		$validation = json_decode( $matches[1], true );
+		if ( json_last_error() || ! isset( $validation['results'] ) || ! is_array( $validation['results'] ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
-		$validation_errors = wp_list_pluck( $validation_results, 'error' );
-		return compact( 'validation_errors', 'url' );
+
+		return array_merge(
+			$validation,
+			compact( 'url' )
+		);
 	}
 
 	/**
