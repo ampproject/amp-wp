@@ -638,50 +638,11 @@ class AMP_Validation_Error_Taxonomy {
 		// Hide empty term addition form.
 		add_action( 'admin_enqueue_scripts', function() {
 			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
-				wp_add_inline_style( 'common', '
-					#col-left { display: none; }
-					#col-right { float:none; width: auto; }
-
-					/* Improve column widths */
-					td.column-details pre, td.column-sources pre { overflow:auto; }
-					th.column-created_date_gmt, th.column-error_type { width:15%; }
-					th.column-status { width:10%; }
-					.fixed th.column-posts { width: 10%; }
-
-					/* Details column */
-					.details-attributes__summary {
-						display: flex;
-						justify-content: space-between;
-						align-items: center;
-					}
-					details[open] .details-attributes__summary {
-						font-weight: 600;
-						margin-bottom: 15px;
-					}
-					.details-attributes__summary::-webkit-details-marker {
-						transform: rotate(90deg);
-						color: #0073aa;
-						font-size: 133%;
-						order: 99;
-					}
-					details[open] .details-attributes__summary::-webkit-details-marker {
-						transform: rotate(180deg);
-					}
-					.details-attributes__title, .details-attributes__attr {
-						color: #dc3232;
-					}
-					.details-attributes__list {
-						margin-top: 0;
-						padding-left: 45px;
-						list-style-type: disc;
-					}
-					.details-attributes__list li {
-						word-break: break-all;
-					}
-					.details-attributes__value {
-						color: #00a0d2;
-					}
-				' );
+				wp_enqueue_style(
+					'amp-validation-error-taxonomy',
+					amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
+					array( 'common' )
+				);
 			}
 		} );
 
