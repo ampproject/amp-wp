@@ -558,6 +558,8 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
+		add_action( 'load-post.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
+		add_filter( 'redirect_post_location', array( __CLASS__, 'add_error_type_to_redirect' ), 10, 2 );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
 		add_action( 'load-edit-tags.php', function() {
@@ -752,6 +754,10 @@ class AMP_Validation_Error_Taxonomy {
 
 	/**
 	 * Adds filter for amp_validation_error term query by type, like in the 'AMP Validation Errors' taxonomy page.
+	 *
+	 * Filters 'load-edit-tags.php' and 'load-post.php',
+	 * as the post.php page is like an edit-tags.php page,
+	 * in that it has a WP_Terms_List_Table of validation error terms.
 	 * Allows viewing only a certain type at a time, like only JS errors.
 	 */
 	public static function add_error_type_clauses_filter() {
@@ -770,6 +776,40 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			return $clauses;
 		}, 10, 2 );
+	}
+
+	/**
+	 * Allows the single error post.php page to filter by error type.
+	 *
+	 * This page is really more like an edit-tags.php page,
+	 * in that it has a WP_Terms_List_Table of the terms associated with the error.
+	 * On filtering this by error type, it sends a POST request to post.php.
+	 * It then redirects the user.
+	 * So this filters the redirect URL to include a query var for the error type,
+	 * so when the page loads, only the errors of a certain type are present.
+	 *
+	 * @param string $url The redirect URL.
+	 * @param int    $post_id The post ID.
+	 * @return int $url The filtered redirect URL.
+	 */
+	public static function add_error_type_to_redirect( $url, $post_id ) {
+		if (
+			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id )
+			&&
+			isset( $_POST['action'], $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) // WPCS: CSRF OK.
+			&&
+			'editpost' === $_POST['action'] // WPCS: CSRF OK.
+			&&
+			in_array( sanitize_key( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ), self::get_error_types(), true ) // WPCS: CSRF OK.
+		) {
+			return add_query_arg(
+				self::VALIDATION_ERROR_TYPE_QUERY_VAR,
+				sanitize_key( $_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ), // WPCS: CSRF OK.
+				$url
+			);
+		}
+
+		return $url;
 	}
 
 	/**
