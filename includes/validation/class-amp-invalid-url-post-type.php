@@ -180,6 +180,12 @@ class AMP_Invalid_URL_Post_Type {
 			false,
 			AMP__VERSION
 		);
+		wp_enqueue_script(
+			'amp-admin-tables',
+			amp_get_asset_url( 'js/amp-admin-tables.js' ),
+			[ 'jquery' ],
+			AMP__VERSION
+		);
 	}
 
 	/**
