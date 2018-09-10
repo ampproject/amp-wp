@@ -599,31 +599,41 @@ class AMP_Invalid_URL_Post_Type {
 					$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
 					$output  = array();
 
-					// @todo Add hide/show; Add icons; Get plugin names.
+					// @todo Add hide/show.
 					if ( isset( $sources['plugin'] ) ) {
+						$output[] = '<div class="source">';
 						$count = count( array_unique( $sources['plugin'] ) );
+						$sources_container_classes = 'sources-plugins';
 						if ( 1 === $count ) {
 							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span></span><strong>%s</strong><br/>', esc_html__( 'Plugin', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span><strong>%s (%d)</strong>', esc_html__( 'Plugin', 'amp' ), $count );
+							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span><strong>%s (%d)</strong><span class="dashicons dashicons-arrow-down-alt2"></span>', esc_html__( 'Plugins', 'amp' ), $count );
+							$sources_container_classes .= ' collapsed';
 						}
-						$output[] = '<div class="sources-plugins">';
+						$output[] = '<div class="' . $sources_container_classes . '">';
 						$output[] = implode( '<br/>', array_unique( $sources['plugin'] ) );
+						$output[] = '</div>';
 						$output[] = '</div>';
 					}
 					if ( isset( $sources['core'] ) ) {
+						$output[] = '<div class="source">';
 						$count = count( array_unique( $sources['core'] ) );
+						$sources_container_classes = 'sources-core';
 						if ( 1 === $count ) {
 							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s</strong><br/>', esc_html__( 'Other', 'amp' ) );
 						} else {
-							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><br/>', esc_html__( 'Other', 'amp' ), $count );
+							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><span class="dashicons dashicons-arrow-down-alt2"></span><br/>', esc_html__( 'Other', 'amp' ), $count );
+							$sources_container_classes .= ' collapsed';
 						}
-						$output[] = '<div class="sources-core">';
+						$output[] = '<div class="' . $sources_container_classes . '">';
 						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+						$output[] = '</div>';
 						$output[] = '</div>';
 					}
 					if ( isset( $sources['theme'] ) ) {
+						$output[] = '<div class="source">';
 						$output[] = sprintf( '<span class="dashicons dashicons-admin-appearance"></span><strong>%s</strong>', esc_html( $sources['theme']['name'] ) );
+						$output[] = '</div>';
 					}
 					echo implode( '', $output ); // WPCS: XSS ok.
 				}

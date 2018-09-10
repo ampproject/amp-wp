@@ -44,3 +44,10 @@ td.column-found_elements_and_attributes {
 .column-error_status .dashicons-warning.rejected {
 	color: #68c6ff;
 }
+.column-sources_with_invalid_output .sources-plugins.collapsed, .column-sources_with_invalid_output .sources-core.collapsed {
+	display: none;
+}
+.column-sources_with_invalid_output .source {
+	margin-bottom: 10px;
+	display: block;
+}
