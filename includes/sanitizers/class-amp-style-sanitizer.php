@@ -673,6 +673,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->remove_invalid_child( $element, array(
 					'code'    => $css_file_path->get_error_code(),
 					'message' => $css_file_path->get_error_message(),
+					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				) );
 				return;
 			} else {
@@ -682,6 +683,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->remove_invalid_child( $element, array(
 				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
+				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			) );
 			return;
 		} else {
@@ -691,6 +693,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( false === $stylesheet ) {
 			$this->remove_invalid_child( $element, array(
 				'code' => 'stylesheet_file_missing',
+				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			) );
 			return;
 		}
@@ -887,6 +890,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$error     = array(
 					'code'    => $contents->get_error_code(),
 					'message' => $contents->get_error_message(),
+					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				);
 				$sanitized = $this->should_sanitize_validation_error( $error );
 				if ( $sanitized ) {
@@ -901,6 +905,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$error     = array(
 				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
+				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			);
 			$sanitized = $this->should_sanitize_validation_error( $error );
 			if ( $sanitized ) {
@@ -988,6 +993,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$error = array(
 				'code'    => 'css_parse_error',
 				'message' => $exception->getMessage(),
+				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			);
 
 			/*
@@ -1239,6 +1245,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$error     = array(
 						'code'    => 'illegal_css_at_rule',
 						'at_rule' => $css_item->atRuleName(),
+						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					$results[] = compact( 'error', 'sanitized' );
@@ -1259,6 +1266,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$error     = array(
 						'code'    => 'illegal_css_at_rule',
 						'at_rule' => $css_item->atRuleName(),
+						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					$results[] = compact( 'error', 'sanitized' );
@@ -1275,6 +1283,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$error     = array(
 						'code'    => 'illegal_css_at_rule',
 						'at_rule' => $css_item->atRuleName(),
+						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					$results[] = compact( 'error', 'sanitized' );
@@ -1290,6 +1299,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$error     = array(
 					'code'    => 'illegal_css_at_rule',
 					'at_rule' => $css_item->atRuleName(),
+					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				);
 				$sanitized = $this->should_sanitize_validation_error( $error );
 				$results[] = compact( 'error', 'sanitized' );
@@ -1297,6 +1307,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$error     = array(
 					'code' => 'unrecognized_css',
 					'item' => get_class( $css_item ),
+					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				);
 				$sanitized = $this->should_sanitize_validation_error( $error );
 				$results[] = compact( 'error', 'sanitized' );
@@ -1382,6 +1393,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'code'           => 'illegal_css_property',
 						'property_name'  => $property->getRule(),
 						'property_value' => $property->getValue(),
+						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -1398,6 +1410,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'code'           => 'illegal_css_property',
 						'property_name'  => $property->getRule(),
 						'property_value' => (string) $property->getValue(),
+						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -1556,6 +1569,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$error     = array(
 						'code' => 'unrecognized_css',
 						'item' => get_class( $rules ),
+						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -1578,6 +1592,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							'code'           => 'illegal_css_property',
 							'property_name'  => $property->getRule(),
 							'property_value' => (string) $property->getValue(),
+							'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						);
 						$sanitized = $this->should_sanitize_validation_error( $error );
 						if ( $sanitized ) {
@@ -1623,6 +1638,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				} else {
 					$error     = array(
 						'code' => 'illegal_css_important',
+						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -1901,6 +1917,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $body ) {
 				$this->should_sanitize_validation_error( array(
 					'code' => 'missing_body_element',
+					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				) );
 			} else {
 				$style_element = $this->dom->createElement( 'style' );
@@ -1997,6 +2014,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $is_too_much_css && $should_tree_shake && empty( $this->args['accept_tree_shaking'] ) ) {
 			$should_tree_shake = $this->should_sanitize_validation_error( array(
 				'code' => self::TREE_SHAKING_ERROR_CODE,
+				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			) );
 		}
 
@@ -2066,6 +2084,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $final_size + $sheet_size > $stylesheet_set['cdata_spec']['max_bytes'] ) {
 				$validation_error = array(
 					'code' => 'excessive_css',
+					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				);
 				if ( isset( $pending_stylesheet['sources'] ) ) {
 					$validation_error['sources'] = $pending_stylesheet['sources'];

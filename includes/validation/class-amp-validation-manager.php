@@ -186,6 +186,11 @@ class AMP_Validation_Manager {
 
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
 
+		// Add filter to auto-accept tree shaking validation error.
+		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
+			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_accepted' ), 10, 2 );
+		}
+
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
 		}
@@ -213,6 +218,20 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_forcibly_accepted() {
 		return amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' );
+	}
+
+	/**
+	 * Filter a tree-shaking validation error as accepted for sanitization.
+	 *
+	 * @param bool  $sanitized Sanitized.
+	 * @param array $error     Error.
+	 * @return bool Sanitized.
+	 */
+	public static function filter_tree_shaking_validation_error_as_accepted( $sanitized, $error ) {
+		if ( AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] ) {
+			$sanitized = true;
+		}
+		return $sanitized;
 	}
 
 	/**
@@ -689,7 +708,13 @@ class AMP_Validation_Manager {
 		 */
 		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
-		$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+		$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+		$sanitized    = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+
+		// Ignore validation errors which are forcibly sanitized by filter or in special case if it is a tree shaking error and this is accepted by options.
+		if ( $sanitized && 'with_filter' === $sanitization['forced'] ) {
+			return true;
+		}
 
 		// Add sources back into the $error for referencing later. @todo It may be cleaner to store sources separately to avoid having to re-remove later during storage.
 		$error = array_merge( $error, compact( 'sources' ) );
@@ -1478,7 +1503,12 @@ class AMP_Validation_Manager {
 			$error_count = 0;
 			foreach ( self::$validation_results as $validation_result ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'] ) {
+
+				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['status']
+					:
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
+				if ( $is_unaccepted ) {
 					$error_count++;
 				}
 			}
@@ -1742,7 +1772,7 @@ class AMP_Validation_Manager {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'underscore' ),
+			array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ),
 			AMP__VERSION,
 			true
 		);
