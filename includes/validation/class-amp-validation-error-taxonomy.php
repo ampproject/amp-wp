@@ -1231,7 +1231,7 @@ class AMP_Validation_Error_Taxonomy {
 
 	/**
 	 * Provides a reader-friendly string for a term's error type.
-	 * 
+	 *
 	 * @param string $error_type The error type from the term's validation error JSON.
 	 * @return string Reader-friendly string.
 	 */
@@ -1274,7 +1274,14 @@ class AMP_Validation_Error_Taxonomy {
 		switch ( $column_name ) {
 			case 'error':
 				$content .= '<p>';
-				$content .= sprintf( '<code>%s</code>', esc_html( $validation_error['code'] ) );
+				$content .= sprintf(
+					'<a href="%s"><code>%s</code></a>',
+					admin_url( add_query_arg( array(
+						self::TAXONOMY_SLUG => $term->name,
+						'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+					), 'edit.php' ) ),
+					esc_html( $validation_error['code'] )
+				);
 				if ( 'invalid_element' === $validation_error['code'] || 'invalid_attribute' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
 				}
@@ -1352,22 +1359,28 @@ class AMP_Validation_Error_Taxonomy {
 					$attributes = $validation_error['node_attributes'];
 					$node       = $validation_error['node_name'];
 				}
-				
-				$content = '<details>';
-				$content .= '<summary class="details-attributes__summary"><code>' . esc_html( '<' . $node . '>' ) . '</code></summary>';
-				$content .= '<div class="details-attributes__title">' . esc_html( $attributes_type ) . '</div>';
+
+				$content  = '<details>';
+				$content .= sprintf(
+					'<summary class="details-attributes__summary"><code>%s</code></summary>',
+					esc_html( '<' . $node . '>' )
+				);
+				$content .= sprintf( '<div class="details-attributes__title">%s</div>', esc_html( $attributes_type ) );
 				$content .= '<ul class="details-attributes__list">';
 
 				foreach ( $attributes as $attr => $value ) {
-					$content .= '<li><span class="details-attributes__attr">' . esc_html( $attr ) . '</span>';
+					$content .= sprintf( '<li><span class="details-attributes__attr">%s</span>', esc_html( $attr ) );
+
 					if ( ! empty( $value ) ) {
-						$content .= ': <span class="details-attributes__value">' . esc_html( $value ) . '</span></li>';
+						$content .= sprintf( ': <span class="details-attributes__value">%s</span>', esc_html( $value ) );
 					}
+
+					$content .= '</li>';
 				}
-				
+
 				$content .= '</ul>';
 				$content .= '</details>';
-				
+
 				break;
 			case 'error_type':
 				$content = self::get_reader_friendly_error_type_text( $validation_error['type'] );
