@@ -1218,7 +1218,7 @@ class AMP_Validation_Error_Taxonomy {
 				return esc_html__( 'HTML (Attribute)', 'amp' );
 
 			case 'css_error':
-				return esc_html( 'CSS', 'amp' );
+				return esc_html__( 'CSS', 'amp' );
 
 			default:
 				return $error_type;

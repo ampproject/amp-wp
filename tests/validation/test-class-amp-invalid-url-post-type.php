@@ -1103,7 +1103,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		}
 
 		$new_error_count               = sprintf(
-			'New Errors <span class="count">(%d)</span>',
+			'With Identified Errors <span class="count">(%d)</span>',
 			$number_of_errors
 		);
 		$correct_post_type             = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;

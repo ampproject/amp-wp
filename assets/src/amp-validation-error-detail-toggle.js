@@ -22,7 +22,7 @@ function addToggleListener() {
 		} );
 		details.forEach( detail => {
 			if ( open ) {
-				detail.setAttribute( 'open', ! open );
+				detail.setAttribute( 'open', true );
 			} else {
 				detail.removeAttribute( 'open' );
 			}		
