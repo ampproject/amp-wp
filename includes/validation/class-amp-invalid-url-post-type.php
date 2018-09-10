@@ -169,6 +169,11 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function enqueue_admin_assets() {
 		// Styles.
+		$screen = get_current_screen();
+		if ( 'amp_invalid_url' !== $screen->post_type ) {
+			return;
+		}
+
 		wp_enqueue_style(
 			'amp-admin-tables',
 			amp_get_asset_url( 'css/admin-tables.css' ),
