@@ -622,7 +622,11 @@ class AMP_Validation_Error_Taxonomy {
 				'cb'               => $old_columns['cb'],
 				'error'            => __( 'Errors', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
-				'details'          => __( 'Details', 'amp' ),
+				'details'          => sprintf(
+					'<span>%s</span><button aria-label="%s" type="button" class="error-details-toggle"></button>',
+					esc_html__( 'Details', 'amp' ),
+					esc_attr__( 'Toggle all error details', 'amp' )
+				),
 				'error_type'       => __( 'Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
 				'posts'            => __( 'Found URLs', 'amp' ),
@@ -642,6 +646,12 @@ class AMP_Validation_Error_Taxonomy {
 					'amp-validation-error-taxonomy',
 					amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
 					array( 'common' )
+				);
+
+				wp_enqueue_script(
+					'amp-validation-error-detail-toggle',
+					amp_get_asset_url( 'js/amp-validation-error-detail-toggle.js' ),
+					array( 'wp-dom-ready' )
 				);
 			}
 		} );
