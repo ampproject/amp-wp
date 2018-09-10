@@ -54,3 +54,22 @@ td.column-found_elements_and_attributes {
 	margin-bottom: 10px;
 	display: block;
 }
+.column-sources_with_invalid_output .double-arrow {
+	height: 20px;
+	width: 12px;
+	display: inline-block;
+	position: relative;
+	margin-left: 110px;
+}
+.column-sources_with_invalid_output .double-arrow .dashicons.dashicons-arrow-down.top-arrow {
+	font-size: 20px;
+	line-height: 1;
+	position: absolute;
+	bottom: 0;
+}
+.column-sources_with_invalid_output .double-arrow .dashicons.dashicons-arrow-down.bottom-arrow {
+	font-size: 20px;
+	line-height: 1;
+	position: absolute;
+	bottom: -6px;
+}
