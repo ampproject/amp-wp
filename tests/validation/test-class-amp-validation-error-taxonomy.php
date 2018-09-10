@@ -378,11 +378,12 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals(
 			array(
 				'cb'               => $cb,
-				'error'            => 'Error Inventory',
+				'error'            => 'Errors',
 				'status'           => 'Status',
-				'details'          => 'Details',
+				'details'          => '<span>Details</span><button aria-label="Toggle all error details" type="button" class="error-details-toggle"></button>',
 				'created_date_gmt' => 'Last Seen',
 				'posts'            => 'Found URLs',
+				'error_type'       => 'Type',
 			),
 			apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		);
@@ -535,7 +536,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		) );
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		$this->assertContains( 'New Errors <span class="count">(2)</span>', ob_get_clean() );
+		$this->assertContains( 'Identified Errors <span class="count">(2)</span>', ob_get_clean() );
 	}
 
 	/**
@@ -605,7 +606,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::render_error_status_filter();
 		$this->assertContains(
 			sprintf(
-				'New Errors <span class="count">(%d)</span>',
+				'Identified Errors <span class="count">(%d)</span>',
 				$number_of_errors
 			),
 			ob_get_clean()
@@ -661,7 +662,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		// When there are 10 errors with this status, its <option> element should have (10).
 		$this->assertContains(
 			sprintf(
-				'New Errors <span class="count">(%d)</span>',
+				'Identified Errors <span class="count">(%d)</span>',
 				$number_of_errors
 			),
 			$markup
@@ -743,7 +744,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::add_admin_notices();
 		$message = ob_get_clean();
 		$this->assertEquals(
-			sprintf( '<div class="notice notice-success is-dismissible"><p>Accepted %s errors. They will no longer block related URLs from being served as AMP.</p></div>', $count ),
+			sprintf( '<div class="notice notice-success is-dismissible"><p>Suppressed %s errors. They will no longer block related URLs from being served as AMP.</p></div>', $count ),
 			$message
 		);
 
@@ -828,11 +829,11 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'error' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<p><code>illegal_css_at_rule</code></p>', $filtered_content );
+		$this->assertEquals( $initial_content . '<p><a href="http://example.org/wp-admin/edit.php?amp_validation_error=Term 67&post_type=amp_invalid_url"><code>illegal_css_at_rule</code></a></p>', $filtered_content );
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertEquals( '&#x2753; New', $filtered_content );
+		$this->assertEquals( '&#x2753; Identified', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );
