@@ -611,8 +611,8 @@ class AMP_Validation_Error_Taxonomy {
 		// Add bulk actions.
 		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
 			unset( $bulk_actions['delete'] );
-			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
-			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
+			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Suppress', 'amp' );
+			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Fix Later', 'amp' );
 			return $bulk_actions;
 		} );
 
@@ -620,10 +620,10 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
 			return array(
 				'cb'               => $old_columns['cb'],
-				'error'            => __( 'Error Inventory', 'amp' ),
+				'error'            => __( 'Errors', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
 				'details'          => __( 'Details', 'amp' ),
-				'error_type'       => __( 'Error Type', 'amp' ),
+				'error_type'       => __( 'Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
 				'posts'            => __( 'Found URLs', 'amp' ),
 			);
@@ -1188,7 +1188,7 @@ class AMP_Validation_Error_Taxonomy {
 						self::VALIDATION_ERROR_REJECT_ACTION
 					),
 					esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Reject', 'amp' )
+					esc_html__( 'Fix Later', 'amp' )
 				);
 			}
 			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
@@ -1199,7 +1199,7 @@ class AMP_Validation_Error_Taxonomy {
 						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
 					esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Accept', 'amp' )
+					esc_html__( 'Suppress', 'amp' )
 				);
 			}
 		}
@@ -1299,16 +1299,16 @@ class AMP_Validation_Error_Taxonomy {
 					} else {
 						$content .= '&#x2705;';
 					}
-					$content .= ' ' . esc_html__( 'Accepted', 'amp' );
+					$content .= ' ' . esc_html__( 'Suppressed', 'amp' );
 				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
 						$content .= '&#x1F6A9;';
 					} else {
 						$content .= '&#x274C;';
 					}
-					$content .= ' ' . esc_html__( 'Rejected', 'amp' );
+					$content .= ' ' . esc_html__( 'To Fix Later', 'amp' );
 				} else {
-					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
+					$content = '&#x2753; ' . esc_html__( 'Identified', 'amp' );
 				}
 				break;
 			case 'created_date_gmt':
