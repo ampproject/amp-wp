@@ -49,5 +49,8 @@ td.column-found_elements_and_attributes {
 }
 .column-sources_with_invalid_output .source {
 	margin-bottom: 10px;
+}
+.column-sources_with_invalid_output .source {
+	margin-bottom: 10px;
 	display: block;
 }
