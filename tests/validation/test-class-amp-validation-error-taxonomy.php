@@ -774,7 +774,28 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertContains( strval( $term_this_taxonomy->term_id ), $accept_action );
 		$this->assertContains( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', $accept_action );
 		$this->assertContains( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', $reject_action );
+	}
 
+	/**
+	 * Test add_admin_menu_validation_error_item.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item()
+	 */
+	public function test_add_admin_menu_validation_error_item() {
+		global $submenu;
+
+		$submenu = array(); // WPCS: global override OK.
+		AMP_Validation_Error_Taxonomy::register();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
+		$expected_submenu = array(
+			'Errors by Type',
+			'manage_categories',
+			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
+			'Errors by Type',
+		);
+		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
+		$this->assertEquals( $expected_submenu, end( $amp_options ) );
 	}
 
 	/**
@@ -807,28 +828,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$_GET['post']              = $post_id_correct_post_type;
 		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
 		$this->assertEquals( $post_id_correct_post_type, $wp_term_query->query_vars['object_ids'] );
-	}
-
-	/**
-	 * Test add_admin_menu_validation_error_item.
-	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item()
-	 */
-	public function test_add_admin_menu_validation_error_item() {
-		global $submenu;
-
-		$submenu = array(); // WPCS: global override OK.
-		AMP_Validation_Error_Taxonomy::register();
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
-		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
-		$expected_submenu = array(
-			'Errors by Type',
-			'manage_categories',
-			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
-			'Errors by Type',
-		);
-		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
-		$this->assertEquals( $expected_submenu, end( $amp_options ) );
 	}
 
 	/**

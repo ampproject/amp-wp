@@ -1285,6 +1285,10 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Adds a taxonomy query var to the amp_invalid_url post edit link.
 	 *
+	 * This changes the link from something like:
+	 * https://example.test/wp-admin/post.php?post=4416&action=edit
+	 * to:
+	 * https://example.test/wp-admin/post.php?post=4416&action=edit&taxonomy=amp_validation_error
 	 * The post.php page that this link leads to is really more like an edit-tags.php page.
 	 * It has a WP_Terms_List_Table of the validation errors (amp_validation_error terms).
 	 * For the WP_Terms_List_Table to render, its $screen->taxonomy property needs to be set.

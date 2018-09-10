@@ -1170,28 +1170,6 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Parse the term query on post.php pages (single error URL).
-	 *
-	 * This post.php page for amp_invalid_url is more like an edit-tags.php page,
-	 * in that it has a WP_Terms_List_Table of terms (of type amp_validation_error).
-	 * So this needs to only show the terms (errors) associated with this amp_invalid_url post.
-	 *
-	 * @param WP_Term_Query $wp_term_query Instance of WP_Term_Query.
-	 */
-	public static function parse_post_php_term_query( $wp_term_query ) {
-		global $pagenow;
-		if ( ! is_admin() || 'post.php' !== $pagenow || ! isset( $_GET['post'] ) ) { // WPCS: CSRF OK.
-			return;
-		}
-
-		// Only set the query var if this is the invalid URL post type.
-		$post_id = sanitize_key( $_GET['post'] );
-		if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
-			$wp_term_query->query_vars['object_ids'] = $post_id;
-		}
-	}
-
-	/**
 	 * Show AMP validation errors under AMP admin menu.
 	 */
 	public static function add_admin_menu_validation_error_item() {
@@ -1212,6 +1190,28 @@ class AMP_Validation_Error_Taxonomy {
 			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
 			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )
 		);
+	}
+
+	/**
+	 * Parses the term query on post.php pages (single error URL).
+	 *
+	 * This post.php page for amp_invalid_url is more like an edit-tags.php page,
+	 * in that it has a WP_Terms_List_Table of terms (of type amp_validation_error).
+	 * So this needs to only show the terms (errors) associated with this amp_invalid_url post.
+	 *
+	 * @param WP_Term_Query $wp_term_query Instance of WP_Term_Query.
+	 */
+	public static function parse_post_php_term_query( $wp_term_query ) {
+		global $pagenow;
+		if ( ! is_admin() || 'post.php' !== $pagenow || ! isset( $_GET['post'] ) ) { // WPCS: CSRF OK.
+			return;
+		}
+
+		// Only set the query var if this is the invalid URL post type.
+		$post_id = sanitize_key( $_GET['post'] );
+		if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
+			$wp_term_query->query_vars['object_ids'] = $post_id;
+		}
 	}
 
 	/**
