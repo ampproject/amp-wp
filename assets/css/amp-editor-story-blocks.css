@@ -161,50 +161,54 @@ div[data-amp-position="lower-third"] {
 	margin: 0;
 }
 
-.editor-selectors .component-editor__selector {
+.editor-selectors .component-editor__selector button {
 	background: no-repeat left top;
-	padding: 2px 0 0 30px;
+	padding-left: 37px;
 	height: 40px;
-	margin-left: 5px;
+	margin: 1px 0 1px 4px;
 }
 
-.editor-selectors .component-editor__selector.template-fill {
+.editor-selectors .component-editor__selector .components-button:focus {
+	box-shadow: none;
+}
+
+.editor-selectors .component-editor__selector.template-fill button {
 	background-image: url( '../images/grid-fill-inactive.svg' );
 }
 
-.editor-selectors .component-editor__selector.template-fill.is-selected {
+.editor-selectors .component-editor__selector.template-fill.is-selected button {
 	background-image: url( '../images/grid-fill-active.svg' );
 }
 
-.editor-selectors .component-editor__selector.template-horizontal {
+.editor-selectors .component-editor__selector.template-horizontal button {
 	background-image: url( '../images/grid-horizontal-inactive.svg' );
 }
 
-.editor-selectors .component-editor__selector.template-horizontal.is-selected {
+.editor-selectors .component-editor__selector.template-horizontal.is-selected button {
 	background-image: url( '../images/grid-horizontal-active.svg' );
 }
 
-.editor-selectors .component-editor__selector.template-vertical {
+.editor-selectors .component-editor__selector.template-vertical button {
 	background-image: url( '../images/grid-vertical-inactive.svg' );
 }
 
-.editor-selectors .component-editor__selector.template-vertical.is-selected {
+.editor-selectors .component-editor__selector.template-vertical.is-selected button {
 	background-image: url( '../images/grid-vertical-active.svg' );
 }
 
-.editor-selectors .component-editor__selector.template-thirds {
+.editor-selectors .component-editor__selector.template-thirds button {
 	background-image: url( '../images/grid-thirds-inactive.svg' );
 }
 
-.editor-selectors .component-editor__selector.template-thirds.is-selected {
+.editor-selectors .component-editor__selector.template-thirds.is-selected button {
 	background-image: url( '../images/grid-thirds-active.svg' );
 }
 
-.editor-selectors .component-editor__selector.page-selector {
+.editor-selectors .component-editor__selector.page-selector button {
 	background-image: url( '../images/page-inactive.svg' );
 }
 
-.editor-selectors .component-editor__selector.page-selector.is-selected {
+.editor-selectors .component-editor__selector.page-selector.is-selected button {
 	background-image: url( '../images/page-active.svg' );
 }
 

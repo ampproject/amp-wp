@@ -54,7 +54,7 @@ class BlockSelector extends Component {
 						selectBlock( block.clientId );
 
 						// @todo This is a temporary workaround for selecting the correct block. Remove when possible.
-						let timeout = 50;
+						let timeout = 1;
 						setTimeout( function() {
 							selectBlock( block.clientId );
 						}, timeout );
