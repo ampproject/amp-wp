@@ -94,7 +94,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
-		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
+		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_post_row_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_bulk_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'handle_bulk_action' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'print_admin_notice' ) ) );
@@ -548,36 +548,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Invalid_URL_Post_Type::output_custom_column( $column_name, $invalid_url_post_id );
 		$this->assertContains( $expected_value, ob_get_clean() );
-	}
-
-	/**
-	 * Test for filter_row_actions()
-	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::filter_row_actions()
-	 */
-	public function test_filter_row_actions() {
-		add_theme_support( 'amp' );
-		AMP_Validation_Manager::init();
-
-		$initial_actions = array(
-			'trash' => '<a href="https://example.com">Trash</a>',
-		);
-
-		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
-			array(
-				array( 'code' => 'foo' ),
-			),
-			home_url( '/' )
-		);
-
-		$this->assertEquals( $initial_actions, AMP_Invalid_URL_Post_Type::filter_row_actions( $initial_actions, $this->factory()->post->create_and_get() ) );
-
-		$actions = AMP_Invalid_URL_Post_Type::filter_row_actions( $initial_actions, get_post( $invalid_post_id ) );
-		$this->assertArrayNotHasKey( 'inline hide-if-no-js', $actions );
-		$this->assertArrayHasKey( 'view', $actions );
-		$this->assertArrayHasKey( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $actions );
-
-		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
 	}
 
 	/**
@@ -1230,6 +1200,29 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_post_row_actions()
 	 */
 	public function test_filter_post_row_actions() {
+		add_theme_support( 'amp' );
+		AMP_Validation_Manager::init();
+
+		$initial_actions = array(
+			'trash' => '<a href="https://example.com">Trash</a>',
+		);
+
+		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/' )
+		);
+
+		$this->assertEquals( $initial_actions, AMP_Invalid_URL_Post_Type::filter_post_row_actions( $initial_actions, $this->factory()->post->create_and_get() ) );
+
+		$actions = AMP_Invalid_URL_Post_Type::filter_post_row_actions( $initial_actions, get_post( $invalid_post_id ) );
+		$this->assertArrayNotHasKey( 'inline hide-if-no-js', $actions );
+		$this->assertArrayHasKey( 'view', $actions );
+		$this->assertArrayHasKey( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $actions );
+
+		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
+
 		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_post_row_actions( array(), null ) );
 
 		$actions = array(

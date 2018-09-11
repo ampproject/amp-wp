@@ -152,7 +152,6 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
-		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
@@ -695,48 +694,6 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				break;
 		}
-	}
-
-	/**
-	 * Adds a 'Recheck' link to the edit.php row actions.
-	 *
-	 * The logic to add the new action is mainly copied from WP_Posts_List_Table::handle_row_actions().
-	 *
-	 * @param array   $actions The actions in the edit.php page.
-	 * @param WP_Post $post    The post for the actions.
-	 * @return array $actions The filtered actions.
-	 */
-	public static function filter_row_actions( $actions, $post ) {
-		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
-			return $actions;
-		}
-
-		$actions['edit'] = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( get_edit_post_link( $post ) ),
-			esc_html__( 'Details', 'amp' )
-		);
-		unset( $actions['inline hide-if-no-js'] );
-
-		$url = self::get_url_from_post( $post );
-		if ( $url ) {
-			$actions['view'] = sprintf(
-				'<a href="%s">%s</a>',
-				esc_url( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ) ),
-				esc_html__( 'View', 'amp' )
-			);
-		}
-
-		$actions[ self::VALIDATE_ACTION ] = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( self::get_recheck_url( $post ) ),
-			esc_html__( 'Recheck', 'amp' )
-		);
-		if ( self::get_post_staleness( $post ) ) {
-			$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
-		}
-
-		return $actions;
 	}
 
 	/**
@@ -1643,11 +1600,48 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Filters post row actions.
 	 *
+	 * Manages links for details, recheck, view, forget, and forget permanently.
+	 *
 	 * @param array    $actions Row action links.
 	 * @param \WP_Post $post Current WP post.
 	 * @return array Filtered action links.
 	 */
 	public static function filter_post_row_actions( $actions, $post ) {
+		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
+			return $actions;
+		}
+
+		// Inline edits are not relevant.
+		unset( $actions['inline hide-if-no-js'] );
+
+		if ( isset( $actions['edit'] ) ) {
+			$actions['edit'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( get_edit_post_link( $post ) ),
+				esc_html__( 'Details', 'amp' )
+			);
+		}
+
+		if ( 'trash' !== $post->post_status ) {
+			$url = self::get_url_from_post( $post );
+			if ( $url ) {
+				$actions['view'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ) ),
+					esc_html__( 'View', 'amp' )
+				);
+			}
+
+			$actions[ self::VALIDATE_ACTION ] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( self::get_recheck_url( $post ) ),
+				esc_html__( 'Recheck', 'amp' )
+			);
+			if ( self::get_post_staleness( $post ) ) {
+				$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
+			}
+		}
+
 		// Replace 'Trash' text with 'Forget'.
 		if ( isset( $actions['trash'] ) ) {
 			$actions['trash'] = sprintf(
