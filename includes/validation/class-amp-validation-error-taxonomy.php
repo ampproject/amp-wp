@@ -560,6 +560,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_order_clauses_filter' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
 		add_action( 'load-edit-tags.php', function() {
@@ -620,14 +621,14 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
 			return array(
 				'cb'               => $old_columns['cb'],
-				'error'            => __( 'Errors', 'amp' ),
+				'error'            => __( 'Error Inventory', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
 				'details'          => sprintf(
 					'<span>%s</span><button aria-label="%s" type="button" class="error-details-toggle"></button>',
 					esc_html__( 'Details', 'amp' ),
 					esc_attr__( 'Toggle all error details', 'amp' )
 				),
-				'error_type'       => __( 'Type', 'amp' ),
+				'error_type'       => __( 'Error Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
 				'posts'            => __( 'Found URLs', 'amp' ),
 			);
@@ -636,6 +637,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Let the created date column sort by term ID.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
 			$sortable_columns['created_date_gmt'] = 'term_id';
+			$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
 			return $sortable_columns;
 		} );
 
@@ -771,11 +773,48 @@ class AMP_Validation_Error_Taxonomy {
 		if ( ! in_array( $type, self::get_error_types(), true ) ) {
 			return;
 		}
+
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $type ) {
 			global $wpdb;
 			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] ) {
 				$clauses['where'] .= $wpdb->prepare( ' AND tt.description LIKE %s', '%"type":"' . $wpdb->esc_like( $type ) . '"%' );
 			}
+			return $clauses;
+		}, 10, 2 );	
+	}
+
+	/**
+	 * If ordering the list by error type, locate the error type within the term description JSON (using the "type" key within the top-level
+	 * JSON object -- there's a nested "type" we need to skip) and order the list alphabetically based on the portion of the description stating
+	 * there -- e.g., `"type":"css_error"` comes before `"type":"js_error"`. 
+	 * If the structure of the JSON data stored in the term description changes, this function will need to be revisited.
+	 * 
+	 * 
+	 */
+	public static function add_error_type_order_clauses_filter() {
+		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy ) {
+			return;
+		}
+
+		if ( ! isset( $_GET['orderby'] ) || self::VALIDATION_ERROR_TYPE_QUERY_VAR !== $_GET['orderby'] ) { // WPCS: CSRF ok.
+			return;
+		}
+
+		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
+			global $wpdb;
+
+			$clauses['orderby'] = $wpdb->prepare(
+				'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description, LOCATE("%s", tt.description)))',
+				'"type":"',
+				'}' // Start after the first closing bracket to skip the "type" nested in the element_attributes object.
+			);
+
+			if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) {
+				$clauses['order'] = 'DESC';
+			} else {
+				$clauses['order'] = 'ASC';
+			}
+
 			return $clauses;
 		}, 10, 2 );
 	}

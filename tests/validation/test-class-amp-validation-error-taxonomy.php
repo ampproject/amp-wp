@@ -378,12 +378,12 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals(
 			array(
 				'cb'               => $cb,
-				'error'            => 'Errors',
+				'error'            => 'Error Inventory',
 				'status'           => 'Status',
 				'details'          => '<span>Details</span><button aria-label="Toggle all error details" type="button" class="error-details-toggle"></button>',
 				'created_date_gmt' => 'Last Seen',
 				'posts'            => 'Found URLs',
-				'error_type'       => 'Type',
+				'error_type'       => 'Error Type',
 			),
 			apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		);
