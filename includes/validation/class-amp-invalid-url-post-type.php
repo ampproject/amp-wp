@@ -48,7 +48,7 @@ class AMP_Invalid_URL_Post_Type {
 	const REMAINING_ERRORS = 'amp_remaining_errors';
 
 	/**
-	 * The handle for the script for the post edit screen.
+	 * The handle for the post edit screen script.
 	 *
 	 * @var string
 	 */
@@ -90,7 +90,7 @@ class AMP_Invalid_URL_Post_Type {
 	const MAX_TERMS_ON_SINGLE_PAGE = 4;
 
 	/**
-	 * The total number of errors associated with a URL, though only 4 will display.
+	 * The total number of errors associated with a URL, regardless of the maximum that can display.
 	 *
 	 * @var int
 	 */

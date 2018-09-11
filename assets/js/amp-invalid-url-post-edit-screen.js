@@ -59,7 +59,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	};
 
 	/**
-	 * Add the <tr> with 'Showing 4 of x validation errors' at the top of the list table.
+	 * Add the <tr> with 'Showing x of y validation errors' at the top of the list table.
 	 */
 	component.addShowingErrorsRow = function addShowingErrorsRow() {
 		var thead, tr, th,
