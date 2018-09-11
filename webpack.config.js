@@ -12,6 +12,10 @@ module.exports = {
 		path: path.resolve( __dirname ),
 		filename: '[name].js'
 	},
+	externals: {
+		'@wordpress/dom-ready': 'wp.domReady',
+		'amp-validation-i18n': 'ampValidationI18n'
+	},
 	devtool: 'cheap-eval-source-map',
 	module: {
 		rules: [

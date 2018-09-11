@@ -380,7 +380,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 				'cb'               => $cb,
 				'error'            => 'Error Inventory',
 				'status'           => 'Status',
-				'details'          => '<span>Details</span><button aria-label="Toggle all error details" type="button" class="error-details-toggle"></button>',
+				'details'          => 'Details',
 				'created_date_gmt' => 'Last Seen',
 				'posts'            => 'Found URLs',
 				'error_type'       => 'Error Type',

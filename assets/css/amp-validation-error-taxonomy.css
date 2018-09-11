@@ -85,6 +85,7 @@ details[open] .details-attributes__summary::after {
 	display: flex;
 	flex-direction: column;
 	height: 12px;
+	margin-right: 10px;
 	padding: 0;
 	background: none;
 	border: none;

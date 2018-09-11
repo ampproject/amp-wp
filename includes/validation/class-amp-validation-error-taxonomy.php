@@ -69,6 +69,13 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_TYPE_QUERY_VAR = 'amp_validation_error_type';
 
 	/**
+	 * Query var used for ordering list by node name.
+	 * 
+	 * @var string
+	 */
+	const DETAILS_NODE_NAME_QUERY_VAR = 'amp_validation_node_name';
+
+	/**
 	 * The <option> value to not filter at all, like for 'All Statuses'.
 	 *
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
@@ -560,7 +567,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_order_clauses_filter' ) );
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
 		add_action( 'load-edit-tags.php', function() {
@@ -623,11 +630,7 @@ class AMP_Validation_Error_Taxonomy {
 				'cb'               => $old_columns['cb'],
 				'error'            => __( 'Error Inventory', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
-				'details'          => sprintf(
-					'<span>%s</span><button aria-label="%s" type="button" class="error-details-toggle"></button>',
-					esc_html__( 'Details', 'amp' ),
-					esc_attr__( 'Toggle all error details', 'amp' )
-				),
+				'details'          => __( 'Details', 'amp' ),
 				'error_type'       => __( 'Error Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
 				'posts'            => __( 'Found URLs', 'amp' ),
@@ -637,7 +640,8 @@ class AMP_Validation_Error_Taxonomy {
 		// Let the created date column sort by term ID.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
 			$sortable_columns['created_date_gmt'] = 'term_id';
-			$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
+			$sortable_columns['error_type']       = self::VALIDATION_ERROR_TYPE_QUERY_VAR;
+			$sortable_columns['details']          = self::DETAILS_NODE_NAME_QUERY_VAR;
 			return $sortable_columns;
 		} );
 
@@ -651,9 +655,18 @@ class AMP_Validation_Error_Taxonomy {
 				);
 
 				wp_enqueue_script(
-					'amp-validation-error-detail-toggle-compiled',
+					'amp-validation-error-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-					array( 'wp-dom-ready' )
+					array(
+						'wp-dom-ready',
+						'wp-i18n'
+					)
+				);
+
+				wp_localize_script(
+					'amp-validation-error-detail-toggle',
+					'ampValidationI18n',
+					array( 'btnAriaLabel' => __( 'Toggle all details', 'amp' ) )
 				);
 			}
 		} );
@@ -784,39 +797,52 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * If ordering the list by error type, locate the error type within the term description JSON (using the "type" key within the top-level
-	 * JSON object -- there's a nested "type" we need to skip) and order the list alphabetically based on the portion of the description stating
-	 * there -- e.g., `"type":"css_error"` comes before `"type":"js_error"`. 
-	 * If the structure of the JSON data stored in the term description changes, this function will need to be revisited.
-	 * 
-	 * 
+	 * If ordering the list by a field in the description JSON, locate the best spot in the JSON string by which to sort
+	 * alphabetically.
 	 */
-	public static function add_error_type_order_clauses_filter() {
+	public static function add_order_clauses_from_description_json() {
 		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy ) {
 			return;
 		}
 
-		if ( ! isset( $_GET['orderby'] ) || self::VALIDATION_ERROR_TYPE_QUERY_VAR !== $_GET['orderby'] ) { // WPCS: CSRF ok.
-			return;
+		if ( isset( $_GET['orderby'] ) && self::VALIDATION_ERROR_TYPE_QUERY_VAR === $_GET['orderby'] ) { // WPCS: CSRF ok.
+			add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
+				global $wpdb;
+	
+				$clauses['orderby'] = $wpdb->prepare(
+					'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description, LOCATE("%s", tt.description)))',
+					'"type":"',
+					'}' // Start after the first closing bracket to skip the "type" nested in the element_attributes object.
+				);
+	
+				if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) { // WPCS: CSRF ok.
+					$clauses['order'] = 'DESC';
+				} else {
+					$clauses['order'] = 'ASC';
+				}
+	
+				return $clauses;
+			}, 10, 2 );
 		}
 
-		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
-			global $wpdb;
-
-			$clauses['orderby'] = $wpdb->prepare(
-				'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description, LOCATE("%s", tt.description)))',
-				'"type":"',
-				'}' // Start after the first closing bracket to skip the "type" nested in the element_attributes object.
-			);
-
-			if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) {
-				$clauses['order'] = 'DESC';
-			} else {
-				$clauses['order'] = 'ASC';
-			}
-
-			return $clauses;
-		}, 10, 2 );
+		if ( isset( $_GET['orderby'] ) && self::DETAILS_NODE_NAME_QUERY_VAR === $_GET['orderby'] ) { // WPCS: CSRF ok.
+			add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
+				global $wpdb;
+	
+				$clauses['orderby'] = $wpdb->prepare(
+					'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description))',
+					'"node_name":"'
+				);
+	
+				if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) { // WPCS: CSRF ok.
+					$clauses['order'] = 'DESC';
+				} else {
+					$clauses['order'] = 'ASC';
+				}
+	
+				return $clauses;
+			}, 10, 2 );
+		}
 	}
 
 	/**
@@ -1364,18 +1390,29 @@ class AMP_Validation_Error_Taxonomy {
 
 				if ( 'element_attributes' === $attributes_type ) {
 					$attributes = $validation_error['element_attributes'];
-					$node       = $validation_error['parent_name'];
+					$node_name  = $validation_error['node_name'];
 				} else {
 					$attributes = $validation_error['node_attributes'];
-					$node       = $validation_error['node_name'];
+					$node_name  = sprintf( '<%s>', $validation_error['node_name'] );
 				}
 
 				$content  = '<details>';
 				$content .= sprintf(
 					'<summary class="details-attributes__summary"><code>%s</code></summary>',
-					esc_html( '<' . $node . '>' )
+					esc_html( $node_name )
 				);
+
+				// Provide the parent node for invalid attributes.
+				if ( 'element_attributes' === $attributes_type && isset( $validation_error['parent_name'] ) ) {
+					$content .= sprintf(
+						'<span class="details-attributes__attr">%s</span>: <span class="details-attributes__value"><code>%s</code></span>',
+						esc_html__( 'Parent node: ', 'amp' ),
+						esc_html( sprintf( '<%s>', $validation_error['parent_name'] ) )
+					);
+				}
+
 				$content .= sprintf( '<div class="details-attributes__title">%s</div>', esc_html( $attributes_type ) );
+
 				$content .= '<ul class="details-attributes__list">';
 
 				foreach ( $attributes as $attr => $value ) {
