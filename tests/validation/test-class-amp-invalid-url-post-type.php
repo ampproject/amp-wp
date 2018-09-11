@@ -1020,6 +1020,39 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test for add_edit_post_inline_script()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::add_edit_post_inline_script()
+	 */
+	public function test_add_edit_post_inline_script() {
+		global $pagenow;
+
+		$pagenow = 'post.php';
+		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
+		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
+
+		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
+		$inline_script = end( $after_script );
+		$this->assertContains( 'document.addEventListener(', $inline_script );
+		$this->assertContains( 'You have unsaved changes. Are you sure you want to leave?', $inline_script );
+
+		// Because AMP_Invalid_URL_Post_Type::$total_errors_for_url isn't set, the translation object should not have the number of errors.
+		$this->assertNotContains( 'showing_number_errors', $inline_script );
+		unset( wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'][1] );
+
+		// Now that the total errors are set, they should appear in the inline script.
+		$total_errors                                    = 22;
+		AMP_Invalid_URL_Post_Type::$total_errors_for_url = $total_errors;
+		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
+		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
+		$inline_script = end( $after_script );
+		$this->assertContains( 'showing_number_errors', $inline_script );
+		$this->assertContains( strval( $total_errors ), $inline_script );
+		$this->assertContains( strval( AMP_Invalid_URL_Post_Type::MAX_TERMS_ON_SINGLE_PAGE ), $inline_script );
+	}
+
+	/**
 	 * Test for add_meta_boxes()
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::add_meta_boxes()
@@ -1056,7 +1089,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
 		foreach ( $initial_counts as $initial_count ) {
 			$this->assertEquals(
-				AMP_Invalid_URL_Post_Type::NUMBER_TERMS_ON_SINGLE_PAGE,
+				AMP_Invalid_URL_Post_Type::MAX_TERMS_ON_SINGLE_PAGE,
 				AMP_Invalid_URL_Post_Type::get_terms_per_page( $initial_count )
 			);
 		}

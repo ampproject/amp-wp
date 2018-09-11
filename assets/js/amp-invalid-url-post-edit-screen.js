@@ -6,7 +6,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	component = {
 		data: {
 			l10n: {
-				unsaved_changes: ''
+				unsaved_changes: '',
+				showing_number_errors: ''
 			}
 		}
 	};
@@ -19,7 +20,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.boot = function boot( data ) {
 		Object.assign( component.data, data );
-		component.addShowingErrrsRow();
+		component.addShowingErrorsRow();
 		component.watchForUnsavedChanges();
 	};
 
@@ -60,11 +61,11 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	/**
 	 * Add the <tr> with 'Showing 4 of x validation errors' at the top of the list table.
 	 */
-	component.addShowingErrrsRow = function addShowingErrrsRow() {
+	component.addShowingErrorsRow = function addShowingErrorsRow() {
 		var thead, tr, th,
 			theadQuery = document.getElementsByTagName( 'thead' );
 
-		if ( undefined === theadQuery[ 0 ] ) {
+		if ( ! theadQuery[ 0 ] ) {
 			return;
 		}
 
@@ -77,7 +78,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		th.style[ 'background-color' ] = '#d3d3d3b8';
 		th.style[ 'color' ] = '#1e8cbecc';
 		/* eslint-enable dot-notation */
-		th.innerText = 'Showing 4 of 12 validation errors';
+
+		th.innerText = component.data.l10n.showing_number_errors;
 		th.setAttribute( 'colspan', '6' );
 
 		tr.appendChild( th );

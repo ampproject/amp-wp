@@ -48,6 +48,13 @@ class AMP_Invalid_URL_Post_Type {
 	const REMAINING_ERRORS = 'amp_remaining_errors';
 
 	/**
+	 * The handle for the script for the post edit screen.
+	 *
+	 * @var string
+	 */
+	const EDIT_POST_SCRIPT_HANDLE = 'amp-invalid-url-post-edit-screen';
+
+	/**
 	 * The query arg for the number of URLs tested.
 	 *
 	 * @var string
@@ -76,11 +83,18 @@ class AMP_Invalid_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
-	 * The number of amp_validation_error terms that should appear on a single amp_invalid_url post.php page.
+	 * The maximum number of amp_validation_error terms that should appear on a single amp_invalid_url post.php page.
 	 *
 	 * @var int
 	 */
-	const NUMBER_TERMS_ON_SINGLE_PAGE = 4;
+	const MAX_TERMS_ON_SINGLE_PAGE = 4;
+
+	/**
+	 * The total number of errors associated with a URL, though only 4 will display.
+	 *
+	 * @var int
+	 */
+	public static $total_errors_for_url;
 
 	/**
 	 * Registers the post type to store URLs with validation errors.
@@ -1073,16 +1087,39 @@ class AMP_Invalid_URL_Post_Type {
 
 		// Eliminate autosave since it is only relevant for the content editor.
 		wp_dequeue_script( 'autosave' );
+		wp_enqueue_script( self::EDIT_POST_SCRIPT_HANDLE, amp_get_asset_url( 'js/' . self::EDIT_POST_SCRIPT_HANDLE . '.js' ), array(), AMP__VERSION, true );
+	}
 
-		$handle = 'amp-invalid-url-post-edit-screen';
-		wp_enqueue_script( $handle, amp_get_asset_url( "js/$handle.js" ), array(), AMP__VERSION, true );
+	/**
+	 * Enqueue scripts for the edit post screen.
+	 *
+	 * This is called in render_single_url_list_table() instead of enqueue_edit_post_screen_scripts(),
+	 * as it depends on data from the WP_Terms_List_Table in that method.
+	 * So this has to run after the 'admin_enqueue_scripts' hook.
+	 */
+	public static function add_edit_post_inline_script() {
+		$current_screen = get_current_screen();
+		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type ) {
+			return;
+		}
+
 		$data = array(
 			'l10n' => array(
 				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
 			),
 		);
+
+		if ( self::$total_errors_for_url ) {
+			$data['l10n']['showing_number_errors'] = sprintf(
+				/* translators: %1$d is the number of errors displaying, %2$d is the total number of errors found */
+				__( 'Showing %1$d of %2$d validation errors', 'amp' ),
+				min( self::$total_errors_for_url, self::MAX_TERMS_ON_SINGLE_PAGE ),
+				self::$total_errors_for_url
+			);
+		}
+
 		wp_add_inline_script(
-			$handle,
+			self::EDIT_POST_SCRIPT_HANDLE,
 			sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlPostEditScreen.boot( %s ); } );', wp_json_encode( $data ) ),
 			'after'
 		);
@@ -1248,6 +1285,10 @@ class AMP_Invalid_URL_Post_Type {
 		$wp_list_table->prepare_items();
 		$wp_list_table->views();
 
+		// The inline script depends on data from the list table.
+		self::$total_errors_for_url = $wp_list_table->get_pagination_arg( 'total_items' );
+		self::add_edit_post_inline_script();
+
 		?>
 		<form class="search-form wp-clearfix" method="get">
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
@@ -1277,7 +1318,7 @@ class AMP_Invalid_URL_Post_Type {
 	public static function get_terms_per_page( $terms_per_page ) {
 		global $pagenow;
 		if ( 'post.php' === $pagenow ) {
-			return self::NUMBER_TERMS_ON_SINGLE_PAGE;
+			return self::MAX_TERMS_ON_SINGLE_PAGE;
 		}
 		return $terms_per_page;
 	}
