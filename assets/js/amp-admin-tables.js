@@ -1,4 +1,4 @@
-/* global jQuery */
+/* global jQuery, ampAdminTables */
 ( function( $ ) {
 	'use strict';
 
@@ -8,6 +8,7 @@
 			$( document ).ready( $.proxy( function() {
 				this.sourcesHideShow();
 				this.allSourcesHideShow();
+				this.addViewErrorsByTypeLinkButton();
 			}, this ) );
 		},
 
@@ -24,6 +25,10 @@
 				$( 'span.dashicons.toggle-sources' ).toggleClass( 'dashicons-arrow-down dashicons-arrow-up' );
 				$( '.sources-container' ).toggleClass( 'collapsed' );
 			});
+		},
+
+		addViewErrorsByTypeLinkButton: function() {
+			$( '.wp-heading-inline' ).after( '<a href="' + ampAdminTables.errorsByTypeLink + '" class="page-title-action">View errors by <strong>Type</strong></a>' );
 		}
 	};
 

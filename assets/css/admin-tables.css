@@ -83,3 +83,6 @@ td.column-found_elements_and_attributes {
 	position: absolute;
 	bottom: -6px;
 }
+.wrap .wp-heading-inline + .page-title-action {
+	margin-left: 1rem;
+}

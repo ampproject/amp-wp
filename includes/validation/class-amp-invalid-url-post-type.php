@@ -176,7 +176,7 @@ class AMP_Invalid_URL_Post_Type {
 	public static function enqueue_admin_assets() {
 		// Styles.
 		$screen = get_current_screen();
-		if ( 'amp_invalid_url' !== $screen->post_type ) {
+		if ( 'edit-amp_invalid_url' !== $screen->id ) {
 			return;
 		}
 
@@ -192,6 +192,13 @@ class AMP_Invalid_URL_Post_Type {
 			[ 'jquery' ],
 			AMP__VERSION
 		);
+		wp_localize_script(
+			'amp-admin-tables',
+			'ampAdminTables',
+			[
+				'errorsByTypeLink' => get_admin_url( null,'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' )
+			]
+			);
 	}
 
 	/**
@@ -1710,5 +1717,4 @@ class AMP_Invalid_URL_Post_Type {
 
 		return $messages;
 	}
-
 }
