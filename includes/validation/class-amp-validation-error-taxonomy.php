@@ -611,7 +611,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Add bulk actions.
 		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
 			unset( $bulk_actions['delete'] );
-			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Suppress', 'amp' );
+			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
 			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
 			return $bulk_actions;
 		} );
@@ -960,8 +960,8 @@ class AMP_Validation_Error_Taxonomy {
 				$rejected_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'With Error to Fix Later <span class="count">(%s)</span>',
-						'With Errors to Fix Later <span class="count">(%s)</span>',
+						'With Rejected Error <span class="count">(%s)</span>',
+						'With Rejected Errors <span class="count">(%s)</span>',
 						$rejected_term_count,
 						'terms',
 						'amp'
@@ -972,8 +972,8 @@ class AMP_Validation_Error_Taxonomy {
 				$rejected_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'Error to Fix Later <span class="count">(%s)</span>',
-						'Errors to Fix Later <span class="count">(%s)</span>',
+						'Rejected Error <span class="count">(%s)</span>',
+						'Rejected Error <span class="count">(%s)</span>',
 						$rejected_term_count,
 						'terms',
 						'amp'
@@ -1170,7 +1170,7 @@ class AMP_Validation_Error_Taxonomy {
 						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
 					esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Suppress', 'amp' )
+					esc_html__( 'Accept', 'amp' )
 				);
 			}
 		}
