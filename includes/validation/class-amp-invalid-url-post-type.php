@@ -85,8 +85,8 @@ class AMP_Invalid_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'Invalid AMP Pages (URLs)', 'post type general name', 'amp' ),
-					'menu_name'          => __( 'Invalid Pages', 'amp' ),
+					'name'               => _x( 'Errors by URL', 'post type general name', 'amp' ),
+					'menu_name'          => __( 'Errors by URL', 'amp' ),
 					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
 					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
 					'not_found_in_trash' => __( 'No forgotten invalid AMP pages', 'amp' ),
