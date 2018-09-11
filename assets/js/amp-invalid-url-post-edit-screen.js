@@ -65,7 +65,12 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		var thead, tr, th,
 			theadQuery = document.getElementsByTagName( 'thead' );
 
-		if ( ! theadQuery[ 0 ] ) {
+		/*
+		 * If there are no validation errors, like if someone filters for 'JS Errors',
+		 * there won't be translated text in showing_number_errors.
+		 * In that case, there's no need to output this message.
+		 */
+		if ( ! theadQuery[ 0 ] || ! component.data.l10n.showing_number_errors ) {
 			return;
 		}
 

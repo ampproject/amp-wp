@@ -1305,6 +1305,12 @@ class AMP_Invalid_URL_Post_Type {
 			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
 			<?php $wp_list_table->display(); ?>
 		</form>
+		<style>
+			.tablenav.top,
+			.tablenav.bottom {
+				display: none;
+			}
+		</style>
 		<?php
 	}
 
