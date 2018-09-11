@@ -155,7 +155,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'edit_form_after_title', array( __CLASS__, 'render_single_url_list_table' ) );
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', array( __CLASS__, 'get_terms_per_page' ) );
-		add_filter( 'get_edit_post_link', array( __CLASS__, 'add_taxonomy_to_edit_link' ), 10, 3 );
+		add_action( 'admin_init', array( __CLASS__, 'add_taxonomy' ) );
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
 
 		// Post list screen hooks.
@@ -1250,13 +1250,11 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function render_single_url_list_table( $post ) {
-		global $post_type;
-
-		if ( self::POST_TYPE_SLUG !== $post->post_type || ! isset( $_GET['taxonomy'] ) ) { // WPCS: CSRF OK.
+		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
 
-		$taxonomy        = sanitize_key( $_GET['taxonomy'] ); // WPCS: CSRF OK.
+		$taxonomy        = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		$taxonomy_object = get_taxonomy( $taxonomy );
 		if ( ! $taxonomy_object ) {
 			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
@@ -1292,7 +1290,7 @@ class AMP_Invalid_URL_Post_Type {
 		?>
 		<form class="search-form wp-clearfix" method="get">
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
-			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
+			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
 			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
 		</form>
 		<div id="url-post-filter" class="alignleft actions">
@@ -1302,7 +1300,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		<form id="posts-filter" method="post">
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
-			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post_type ); ?>" />
+			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
 			<?php $wp_list_table->display(); ?>
 		</form>
 		<style>
@@ -1330,33 +1328,22 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Adds a taxonomy query var to the amp_invalid_url post edit link.
+	 * Adds the taxonomy to the $_REQUEST, so that it is available in WP_Screen and WP_Terms_List_Table.
 	 *
-	 * This changes the link from something like:
-	 * https://example.test/wp-admin/post.php?post=4416&action=edit
-	 * to:
-	 * https://example.test/wp-admin/post.php?post=4416&action=edit&taxonomy=amp_validation_error
-	 * The post.php page that this link leads to is really more like an edit-tags.php page.
-	 * It has a WP_Terms_List_Table of the validation errors (amp_validation_error terms).
-	 * For the WP_Terms_List_Table to render, its $screen->taxonomy property needs to be set.
-	 * So this adds a taxonomy query var, which is later parsed into $screen->taxonomy.
-	 *
-	 * @param string $link    The edit link to filter.
-	 * @param int    $post_id The post ID.
-	 * @param string $context The link context. If set to 'display' then ampersands
-	 *                        are encoded.
-	 * @return string $link The filtered link.
+	 * It would be ideal to do this in render_single_url_list_table(),
+	 * but set_current_screen() looks to run before that, and that needs access to the 'taxonomy'.
 	 */
-	public static function add_taxonomy_to_edit_link( $link, $post_id, $context ) {
-		if ( self::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
-			return $link;
+	public static function add_taxonomy() {
+		global $pagenow;
+
+		if ( 'post.php' !== $pagenow || ! isset( $_REQUEST['post'] ) ) { // WPCS: CSRF OK.
+			return;
 		}
 
-		return add_query_arg(
-			'taxonomy',
-			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-			$link
-		);
+		$post_id = sanitize_key( $_REQUEST['post'] );
+		if ( self::POST_TYPE_SLUG === get_post_type( $post_id ) ) { // WPCS: CSRF OK.
+			$_REQUEST['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
+		}
 	}
 
 	/**

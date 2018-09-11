@@ -1112,6 +1112,35 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test for add_taxonomy()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::add_taxonomy()
+	 */
+	public function test_add_taxonomy() {
+		// The 'pagenow' value is incorrect, so this should not add the taxonomy.
+		$GLOBALS['pagenow'] = 'edit.php';
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+
+		// Though the 'pagenow' value is correct, the $_REQUEST['post'] is not set, and this should not add the taxonomy.
+		$GLOBALS['pagenow'] = 'post.php';
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+
+		// Though the $_REQUEST['post'] is set, it is for a post of the wrong type.
+		$wrong_post_type  = $this->factory()->post->create();
+		$_REQUEST['post'] = $wrong_post_type;
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+
+		// Now that the post type is correct, this should add the taxonomy to $_REQUEST.
+		$correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$_REQUEST['post']  = $correct_post_type;
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $_REQUEST['taxonomy'] ); // WPCS: CSRF OK.
+	}
+
+	/**
 	 * Test for print_status_meta_box()
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::print_status_meta_box()
