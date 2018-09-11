@@ -17,7 +17,7 @@
 			$( 'span.dashicons.toggle-sources' ).on( 'click', function() {
 				$( this ).next( '.sources-container' ).toggleClass( 'collapsed' );
 				$( this ).toggleClass( 'dashicons-arrow-down dashicons-arrow-up' );
-			});
+			} );
 		},
 
 		allSourcesHideShow: function() {
@@ -25,7 +25,7 @@
 				$( '.double-arrow' ).find( '.dashicons' ).toggleClass( 'dashicons-arrow-down dashicons-arrow-up' );
 				$( 'span.dashicons.toggle-sources' ).toggleClass( 'dashicons-arrow-down dashicons-arrow-up' );
 				$( '.sources-container' ).toggleClass( 'collapsed' );
-			});
+			} );
 		},
 
 		addViewErrorsByTypeLinkButton: function() {
@@ -38,10 +38,9 @@
 			words = words.map( function( item ) {
 				return item === 'URL' ? '<strong>' + item + '</strong>' : item;
 			} );
-			$heading.html( words.join(' ') );
+			$heading.html( words.join( ' ' ) );
 		}
 	};
 
 	adminTables.load();
-
 }( jQuery ) );
