@@ -2070,6 +2070,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$stylesheet .= implode( ',', $selectors ) . $declaration_block;
 				}
 			}
+			$stylesheet                 = $this->remove_empty_media_queries( $stylesheet );
 			$sheet_size                 = strlen( $stylesheet );
 			$pending_stylesheet['size'] = $sheet_size;
 
@@ -2103,5 +2104,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $stylesheet_set;
+	}
+
+	/**
+	 * Remove media queries without any styles.
+	 *
+	 * @param string $css CSS styles.
+	 *
+	 * @return string Styles without empty media queries.
+	 */
+	public function remove_empty_media_queries( $css ) {
+		$new = preg_replace( '/@media[^\{]+\{\}/', '', $css );
+		if ( is_string( $new ) ) {
+			return $new;
+		}
+		return $css;
 	}
 }
