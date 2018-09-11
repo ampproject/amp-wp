@@ -1102,7 +1102,6 @@ class AMP_Invalid_URL_Post_Type {
 			),
 		);
 
-
 		// Only the %d is interpolated by PHP, as the JS file will replace %% with the errors that are displaying, based on filtering.
 		$data['l10n']['showing_number_errors'] = sprintf(
 			/* translators: %% is the errors that are displaying, %d is the total number of errors found */
