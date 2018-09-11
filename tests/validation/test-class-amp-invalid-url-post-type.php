@@ -1037,17 +1037,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( 'document.addEventListener(', $inline_script );
 		$this->assertContains( 'You have unsaved changes. Are you sure you want to leave?', $inline_script );
 
-		// Because AMP_Invalid_URL_Post_Type::$total_errors_for_url isn't set, the translation object should not have the number of errors.
-		$this->assertNotContains( 'showing_number_errors', $inline_script );
-		unset( wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'][1] );
-
-		// Though $total_errors_for_url is set, it is 0, and the showing_number_errors translation shouldn't appear.
-		AMP_Invalid_URL_Post_Type::$total_errors_for_url = 0;
-		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
-		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
-		$inline_script = end( $after_script );
-		$this->assertNotContains( 'showing_number_errors', $inline_script );
-
 		// Now that the total errors are set, they should appear in the inline script.
 		$total_errors                                    = 22;
 		AMP_Invalid_URL_Post_Type::$total_errors_for_url = $total_errors;
@@ -1056,7 +1045,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$inline_script = end( $after_script );
 		$this->assertContains( 'showing_number_errors', $inline_script );
 		$this->assertContains( strval( $total_errors ), $inline_script );
-		$this->assertContains( strval( AMP_Invalid_URL_Post_Type::MAX_TERMS_ON_SINGLE_PAGE ), $inline_script );
 	}
 
 	/**

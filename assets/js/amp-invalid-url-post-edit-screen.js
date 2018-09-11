@@ -20,7 +20,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.boot = function boot( data ) {
 		Object.assign( component.data, data );
-		component.addShowingErrorsRow();
+		component.handleFiltering();
 		component.watchForUnsavedChanges();
 	};
 
@@ -59,36 +59,78 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	};
 
 	/**
-	 * Add the <tr> with 'Showing x of y validation errors' at the top of the list table.
+	 * Updates the <tr> with 'Showing x of y validation errors' at the top of the list table with the current count.
+	 * If this does not exist yet, it creates the element.
+	 *
+	 * @param {number} numberErrorsDisplaying - The number of errors displaying.
 	 */
-	component.addShowingErrorsRow = function addShowingErrorsRow() {
+	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying = null ) {
 		var thead, tr, th,
-			theadQuery = document.getElementsByTagName( 'thead' );
+			theadQuery = document.getElementsByTagName( 'thead' ),
+			idNumberErrors = 'number-errors';
 
-		/*
-		 * If there are no validation errors, like if someone filters for 'JS Errors',
-		 * there won't be translated text in showing_number_errors.
-		 * In that case, there's no need to output this message.
-		 */
-		if ( ! theadQuery[ 0 ] || ! component.data.l10n.showing_number_errors ) {
-			return;
+		// Only create the <tr> if it does not exist yet.
+		if ( theadQuery[ 0 ] && ! document.getElementById( idNumberErrors ) ) {
+			thead = theadQuery[ 0 ];
+			tr = document.createElement( 'tr' );
+			th = document.createElement( 'th' );
+			th.setAttribute( 'id', idNumberErrors );
+
+			/* eslint-disable dot-notation */
+			th.style[ 'text-align' ] = 'center';
+			th.style[ 'background-color' ] = '#d3d3d3b8';
+			th.style[ 'color' ] = '#1e8cbecc';
+			/* eslint-enable dot-notation */
+			th.setAttribute( 'colspan', '6' );
+			tr.appendChild( th );
+			thead.appendChild( tr );
 		}
 
-		thead = theadQuery[ 0 ];
-		tr = document.createElement( 'tr' );
-		th = document.createElement( 'th' );
+		// Update the number of errors displaying.
+		if ( null !== numberErrorsDisplaying ) {
+			document.getElementById( idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
+		}
+	};
 
-		/* eslint-disable dot-notation */
-		th.style[ 'text-align' ] = 'center';
-		th.style[ 'background-color' ] = '#d3d3d3b8';
-		th.style[ 'color' ] = '#1e8cbecc';
-		/* eslint-enable dot-notation */
+	/**
+	 * Handles filtering by error type, triggered by clicking 'Apply Filter'.
+	 *
+	 * Gets the value of the error type <select> element.
+	 * And hides all <tr> elements that do not have the same type of this value.
+	 * If 'All Error Types' is selected, this displays all errors.
+	 */
+	component.handleFiltering = function handleFiltering() {
+		var onClick = function( event ) {
+			var filterValue,
+				numberErrorsDisplaying = 0;
 
-		th.innerText = component.data.l10n.showing_number_errors;
-		th.setAttribute( 'colspan', '6' );
+			if ( ! event.target.matches( 'input' ) ) {
+				return;
+			}
 
-		tr.appendChild( th );
-		thead.appendChild( tr );
+			event.preventDefault();
+			filterValue = document.getElementById( 'amp_validation_error_type' ).value;
+
+			/*
+			 * Iterate through all of the <tr> elements in the list table.
+			 * If their error type does not match the filterValue (selected error type), hide them.
+			 */
+			document.querySelectorAll( '[data-error-type]' ).forEach( function( element ) {
+				var errorType = element.getAttribute( 'data-error-type' );
+
+				// If the filterValue is '-1', 'All Error Types' was selected.
+				if ( filterValue === errorType || '-1' === filterValue ) {
+					element.parentElement.parentElement.classList.remove( 'hidden' );
+					numberErrorsDisplaying++;
+				} else {
+					element.parentElement.parentElement.classList.add( 'hidden' );
+				}
+			} );
+
+			component.updateShowingErrorsRow( numberErrorsDisplaying );
+		};
+
+		document.getElementById( 'doaction' ).addEventListener( 'click', onClick );
 	};
 
 	return component;

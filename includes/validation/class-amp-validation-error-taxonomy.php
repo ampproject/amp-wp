@@ -1316,7 +1316,10 @@ class AMP_Validation_Error_Taxonomy {
 			case 'type':
 				$type = self::get_translated_type_name( $validation_error );
 				if ( $type ) {
-					$content .= sprintf( '<p>%s</p>', esc_html( $type ) );
+					$content .= sprintf( '<p data-error-type="%s">%s</p>',
+						isset( $validation_error['type'] ) ? $validation_error['type'] : '',
+						esc_html( $type )
+					);
 				}
 				break;
 		}

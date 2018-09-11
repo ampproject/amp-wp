@@ -83,13 +83,6 @@ class AMP_Invalid_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
-	 * The maximum number of amp_validation_error terms that should display on a single amp_invalid_url post.php page.
-	 *
-	 * @var int
-	 */
-	const MAX_TERMS_ON_SINGLE_PAGE = 4;
-
-	/**
 	 * The total number of errors associated with a URL, regardless of the maximum that can display.
 	 *
 	 * @var int
@@ -1109,14 +1102,13 @@ class AMP_Invalid_URL_Post_Type {
 			),
 		);
 
-		if ( self::$total_errors_for_url ) {
-			$data['l10n']['showing_number_errors'] = sprintf(
-				/* translators: %1$d is the number of errors displaying, %2$d is the total number of errors found */
-				__( 'Showing %1$d of %2$d validation errors', 'amp' ),
-				min( self::$total_errors_for_url, self::MAX_TERMS_ON_SINGLE_PAGE ),
-				self::$total_errors_for_url
-			);
-		}
+
+		// Only the %d is interpolated by PHP, as the JS file will replace %% with the errors that are displaying, based on filtering.
+		$data['l10n']['showing_number_errors'] = sprintf(
+			/* translators: %% is the errors that are displaying, %d is the total number of errors found */
+			__( 'Showing %% of %d validation errors', 'amp' ),
+			self::$total_errors_for_url
+		);
 
 		wp_add_inline_script(
 			self::EDIT_POST_SCRIPT_HANDLE,
