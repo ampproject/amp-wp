@@ -1191,13 +1191,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_wrong_post_type );
 		$this->assertEmpty( ob_get_clean() );
 
-		// $_GET['taxonomy'] still isn't set, so the conditional should again be false, and this should not echo anything.
-		ob_start();
-		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
-		$this->assertEmpty( ob_get_clean() );
-
 		// $_GET['taxonomy'] is set, but the current user doesn't have permissions, and this should cause an exception.
-		$_GET['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		wp_set_current_user( $user_without_permissions );
 		try {
 			AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
