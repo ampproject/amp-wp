@@ -75,17 +75,6 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
-
-	/**
-	 * AMP options.
-	 *
-	 * AMP options which we'll need to use to make display decisions based on the options chosen.
-	 *
-	 * @since 1.0
-	 * @var array[]
-	 */
-	protected static $amp_options = array();
-
 	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
@@ -179,8 +168,6 @@ class AMP_Invalid_URL_Post_Type {
 			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
 		} );
-
-		self::$amp_options = \AMP_Options_Manager::get_options();
 	}
 
 	/**
@@ -324,7 +311,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		$result = array();
 		if ( $counts['new'] ) {
-			if ( true === self::$amp_options['force_sanitization'] && ( 'paired' === self::$amp_options['theme_support'] || 'native' === self::$amp_options['theme_support'] ) ) {
+			if ( current_theme_supports( 'amp' ) && AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) {
 				$icon = 'flag';
 			} else {
 				$icon = 'yes';

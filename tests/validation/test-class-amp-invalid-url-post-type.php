@@ -169,8 +169,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_get_invalid_url_validation_errors() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create();
 		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
@@ -219,7 +219,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary( $invalid_url_post_id );
 		$summary = ob_get_clean();
-		$this->assertContains( 'New: 1', $summary );
+		$this->assertContains( 'Identified: 1', $summary );
 		$this->assertContains( 'Accepted: 1', $summary );
 		$this->assertContains( 'Rejected: 1', $summary );
 	}
