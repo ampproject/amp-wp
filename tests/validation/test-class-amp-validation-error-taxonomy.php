@@ -536,7 +536,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		) );
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		$this->assertContains( 'Identified Errors <span class="count">(2)</span>', ob_get_clean() );
+		$this->assertContains( 'New Errors <span class="count">(2)</span>', ob_get_clean() );
 	}
 
 	/**
@@ -606,7 +606,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::render_error_status_filter();
 		$this->assertContains(
 			sprintf(
-				'Identified Errors <span class="count">(%d)</span>',
+				'New Errors <span class="count">(%d)</span>',
 				$number_of_errors
 			),
 			ob_get_clean()
@@ -662,7 +662,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		// When there are 10 errors with this status, its <option> element should have (10).
 		$this->assertContains(
 			sprintf(
-				'Identified Errors <span class="count">(%d)</span>',
+				'New Errors <span class="count">(%d)</span>',
 				$number_of_errors
 			),
 			$markup
@@ -744,7 +744,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::add_admin_notices();
 		$message = ob_get_clean();
 		$this->assertEquals(
-			sprintf( '<div class="notice notice-success is-dismissible"><p>Suppressed %s errors. They will no longer block related URLs from being served as AMP.</p></div>', $count ),
+			sprintf( '<div class="notice notice-success is-dismissible"><p>Accepted %s errors. They will no longer block related URLs from being served as AMP.</p></div>', $count ),
 			$message
 		);
 
@@ -833,7 +833,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertEquals( '&#x2753; Identified', $filtered_content );
+		$this->assertEquals( '&#x2753; New', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );

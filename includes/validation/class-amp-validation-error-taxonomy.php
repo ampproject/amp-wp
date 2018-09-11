@@ -612,7 +612,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, function( $bulk_actions ) {
 			unset( $bulk_actions['delete'] );
 			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Suppress', 'amp' );
-			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Fix Later', 'amp' );
+			$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
 			return $bulk_actions;
 		} );
 
@@ -904,8 +904,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With Identified Error <span class="count">(%s)</span>',
-						'With Identified Errors <span class="count">(%s)</span>',
+						'With New Error <span class="count">(%s)</span>',
+						'With New Errors <span class="count">(%s)</span>',
 						$new_term_count,
 						'terms',
 						'amp'
@@ -916,8 +916,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'Identified Error <span class="count">(%s)</span>',
-						'Identified Errors <span class="count">(%s)</span>',
+						'New Error <span class="count">(%s)</span>',
+						'New Errors <span class="count">(%s)</span>',
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1104,8 +1104,8 @@ class AMP_Validation_Error_Taxonomy {
 			$message = sprintf(
 				/* translators: %s is number of errors accepted */
 				_n(
-					'Suppressed %s error. It will no longer block related URLs from being served as AMP.',
-					'Suppressed %s errors. They will no longer block related URLs from being served as AMP.',
+					'Accepted %s error. It will no longer block related URLs from being served as AMP.',
+					'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
 					number_format_i18n( $count ),
 					'amp'
 				),
@@ -1159,7 +1159,7 @@ class AMP_Validation_Error_Taxonomy {
 						self::VALIDATION_ERROR_REJECT_ACTION
 					),
 					esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
-					esc_html__( 'Fix Later', 'amp' )
+					esc_html__( 'Reject', 'amp' )
 				);
 			}
 			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
@@ -1270,16 +1270,16 @@ class AMP_Validation_Error_Taxonomy {
 					} else {
 						$content .= '&#x2705;';
 					}
-					$content .= ' ' . esc_html__( 'Suppressed', 'amp' );
+					$content .= ' ' . esc_html__( 'Accepted', 'amp' );
 				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
 						$content .= '&#x1F6A9;';
 					} else {
 						$content .= '&#x274C;';
 					}
-					$content .= ' ' . esc_html__( 'To Fix Later', 'amp' );
+					$content .= ' ' . esc_html__( 'Rejected', 'amp' );
 				} else {
-					$content = '&#x2753; ' . esc_html__( 'Identified', 'amp' );
+					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
 				}
 				break;
 			case 'created_date_gmt':
