@@ -75,6 +75,17 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
+
+	/**
+	 * AMP options.
+	 *
+	 * AMP options which we'll need to use to make display decisions based on the options chosen.
+	 *
+	 * @since 1.0
+	 * @var array[]
+	 */
+	protected static $amp_options = array();
+
 	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
@@ -169,6 +180,8 @@ class AMP_Invalid_URL_Post_Type {
 			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
 		} );
+
+		self::$amp_options = \AMP_Options_Manager::get_options();
 	}
 
 	/**
@@ -312,9 +325,15 @@ class AMP_Invalid_URL_Post_Type {
 
 		$result = array();
 		if ( $counts['new'] ) {
+			if ( true === self::$amp_options['force_sanitization'] && ( 'paired' === self::$amp_options['theme_support'] || 'native' === self::$amp_options['theme_support'] ) ) {
+				$icon = 'flag';
+			} else {
+				$icon = 'yes';
+			}
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="dashicons dashicons-warning identified"></span><span class="error-status identified">%1$s: %2$s</span>', 'amp' ),
+				__( '<span class="dashicons dashicons-%1$s identified"></span><span class="error-status identified">%2$s: %3$s</span>', 'amp' ),
+				$icon,
 				esc_html__( 'Identified', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			);
