@@ -86,3 +86,6 @@ td.column-found_elements_and_attributes {
 .wrap .wp-heading-inline + .page-title-action {
 	margin-left: 1rem;
 }
+.page-title-action strong {
+	font-weight: 900;
+}
