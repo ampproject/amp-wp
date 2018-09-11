@@ -362,7 +362,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-post.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
-		$this->assertEquals( 10, has_filter( 'redirect_post_location', array( self::TESTED_CLASS, 'add_to_post_redirect_url' ) ) );
 		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_taxonomy_filters' ) ) ) );
 		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_link_to_errors_by_url' ) ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
@@ -494,47 +493,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		// If $taxonomies does not have the AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, the filter should return the clauses unchanged.
 		$taxonomies = array( 'post_tag' );
 		$this->assertEquals( $initial_clauses, apply_filters( $tested_filter, $initial_clauses, $taxonomies ) );
-	}
-
-	/**
-	 * Test add_to_post_redirect_url.
-	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::add_to_post_redirect_url()
-	 */
-	public function test_add_to_post_redirect_url() {
-		$initial_url = admin_url( 'post.php' );
-
-		// This is not the correct post type, so this method should return the same URL it's passed.
-		$wrong_post_type = $this->factory()->post->create();
-		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_to_post_redirect_url( $initial_url, $wrong_post_type ) );
-
-		// This has the correct post type, but $_POST['action'] does not have the correct value, so this should return the same URL.
-		$_POST['action']   = 'delete';
-		$correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_to_post_redirect_url( $initial_url, $correct_post_type ) );
-
-		// The $_POST['action'] has the proper value, but it still needs a type query var.
-		$_POST['action']   = 'editpost';
-		$correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_to_post_redirect_url( $initial_url, $correct_post_type ) );
-
-		// Now that $_POST has a type value, this should add that type as a query var.
-		$type = AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE;
-		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $type;
-		$filtered_url = AMP_Validation_Error_Taxonomy::add_to_post_redirect_url( $initial_url, $correct_post_type );
-		$parsed_url   = wp_parse_url( $filtered_url );
-		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR . '=' . $type, $parsed_url['query'] );
-
-		/*
-		 * Now the $_POST also has an 's' value, for a search.
-		 * That should also be present in the query arg.
-		 */
-		$search_value = 'onclick';
-		$_POST['s']   = $search_value;
-		$filtered_url = AMP_Validation_Error_Taxonomy::add_to_post_redirect_url( $initial_url, $correct_post_type );
-		$parsed_url   = wp_parse_url( $filtered_url );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR . '=' . $type, $parsed_url['query'] );
-		$this->assertContains( 's=' . $search_value, $parsed_url['query'] );
 	}
 
 	/**
