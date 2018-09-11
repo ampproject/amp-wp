@@ -83,7 +83,7 @@ class AMP_Invalid_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
-	 * The maximum number of amp_validation_error terms that should appear on a single amp_invalid_url post.php page.
+	 * The maximum number of amp_validation_error terms that should display on a single amp_invalid_url post.php page.
 	 *
 	 * @var int
 	 */
@@ -1275,11 +1275,6 @@ class AMP_Invalid_URL_Post_Type {
 			'heading_list'       => $taxonomy_object->labels->items_list,
 		) );
 
-		if ( isset( $_REQUEST['s'] ) && strlen( $_REQUEST['s'] ) ) { // WPCS: CSRF OK.
-			/* translators: %s: search keywords */
-			printf( '<span class="subtitle">' . esc_html__( 'Search results for &#8220;%s&#8221;', 'default' ) . '</span>', esc_html( wp_unslash( $_REQUEST['s'] ) ) ); // WPCS: CSRF OK.
-		}
-
 		$wp_list_table->prepare_items();
 		$wp_list_table->views();
 
@@ -1322,7 +1317,7 @@ class AMP_Invalid_URL_Post_Type {
 	public static function get_terms_per_page( $terms_per_page ) {
 		global $pagenow;
 		if ( 'post.php' === $pagenow ) {
-			return self::MAX_TERMS_ON_SINGLE_PAGE;
+			return PHP_INT_MAX;
 		}
 		return $terms_per_page;
 	}

@@ -1096,7 +1096,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
 		foreach ( $initial_counts as $initial_count ) {
 			$this->assertEquals(
-				AMP_Invalid_URL_Post_Type::MAX_TERMS_ON_SINGLE_PAGE,
+				PHP_INT_MAX,
 				AMP_Invalid_URL_Post_Type::get_terms_per_page( $initial_count )
 			);
 		}
