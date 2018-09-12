@@ -831,6 +831,23 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style>#nonexists { color:black; } #exists { color:white; }</style>';
 		$html .= '<style>div { color:black; } span { color:white; } </style>';
 		$html .= '<style>@media only screen and (min-width: 1280px) { .not-exists-selector { margin: 0 auto; } } .b { background: lightblue; }</style>';
+		$html .= '<style>@media screen and (max-width: 1000px) {
+  @supports (display: grid) {
+    .b::before {
+      content: "@media screen and (max-width: 1000px) {";
+    }
+    .b::after {
+      content: "}";
+    }
+  }
+}
+@media screen and (min-width: 750px) and (max-width: 999px) {
+  .b::before {
+    content: "@media screen and (max-width: 1000px) {}";
+    content: \'@media screen and (max-width: 1000px) {}\';
+  }
+}
+@media screen {}</style>';
 		$html .= '</head><body><span class="b">...</span><span id="exists"></span></body></html>';
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 
@@ -848,7 +865,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'.b{color:blue}',
 				'#exists{color:white}',
 				'span{color:white}',
-				'.b { background: lightblue; }',
+				'.b{background:lightblue}',
+				'@media screen and (max-width: 1000px){@supports (display: grid){.b::before{content:"@media screen and (max-width: 1000px) {"}.b::after{content:"}"}}}@media screen and (min-width: 750px) and (max-width: 999px){.b::before{content:"@media screen and (max-width: 1000px) {}";content:"@media screen and (max-width: 1000px) {}"}}',
 			),
 			array_values( $sanitizer->get_stylesheets() )
 		);
@@ -1395,7 +1413,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'.a{color:gray;}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
 			),
 			'two_media_queries' => array(
-				'.a{color:gray;}@media only screen and(max-width:940px){}@media only screen and(max-width:940px){.b{margin: 0 auto;}}.c{display:block;}',
+				'.a{color:gray;}@media only screen and(max-width:940px){}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
 				'.a{color:gray;}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
 			),
 		);
