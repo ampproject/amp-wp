@@ -73,7 +73,14 @@ class AMP_Validation_Error_Taxonomy {
 	 * 
 	 * @var string
 	 */
-	const DETAILS_NODE_NAME_QUERY_VAR = 'amp_validation_node_name';
+	const VALIDATION_DETAILS_NODE_NAME_QUERY_VAR = 'amp_validation_node_name';
+
+		/**
+	 * Query var used for ordering list by error code.
+	 * 
+	 * @var string
+	 */
+	const VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR = 'amp_validation_code';
 
 	/**
 	 * The <option> value to not filter at all, like for 'All Statuses'.
@@ -641,7 +648,8 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
 			$sortable_columns['created_date_gmt'] = 'term_id';
 			$sortable_columns['error_type']       = self::VALIDATION_ERROR_TYPE_QUERY_VAR;
-			$sortable_columns['details']          = self::DETAILS_NODE_NAME_QUERY_VAR;
+			$sortable_columns['details']          = self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR;
+			$sortable_columns['error']            = self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
 			return $sortable_columns;
 		} );
 
@@ -805,44 +813,51 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		if ( isset( $_GET['orderby'] ) && self::VALIDATION_ERROR_TYPE_QUERY_VAR === $_GET['orderby'] ) { // WPCS: CSRF ok.
-			add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
-				global $wpdb;
-	
-				$clauses['orderby'] = $wpdb->prepare(
-					'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description, LOCATE("%s", tt.description)))',
-					'"type":"',
-					'}' // Start after the first closing bracket to skip the "type" nested in the element_attributes object.
-				);
-	
-				if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) { // WPCS: CSRF ok.
-					$clauses['order'] = 'DESC';
-				} else {
-					$clauses['order'] = 'ASC';
-				}
-	
-				return $clauses;
-			}, 10, 2 );
-		}
+		$sortable_column_vars = array(
+			self::VALIDATION_ERROR_TYPE_QUERY_VAR,
+			self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
+			self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR
+		);
 
-		if ( isset( $_GET['orderby'] ) && self::DETAILS_NODE_NAME_QUERY_VAR === $_GET['orderby'] ) { // WPCS: CSRF ok.
-			add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
-				global $wpdb;
-	
-				$clauses['orderby'] = $wpdb->prepare(
-					'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description))',
-					'"node_name":"'
-				);
-	
-				if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) { // WPCS: CSRF ok.
-					$clauses['order'] = 'DESC';
-				} else {
-					$clauses['order'] = 'ASC';
-				}
-	
-				return $clauses;
-			}, 10, 2 );
-		}
+		if ( ! isset( $_GET['orderby'] ) || ! in_array( $_GET['orderby'], $sortable_column_vars, true ) ) {
+			return;
+		} 
+
+		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
+			global $wpdb;
+
+			if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) { // WPCS: CSRF ok.
+				$clauses['order'] = 'DESC';
+			} else {
+				$clauses['order'] = 'ASC';
+			}
+
+			switch ( $_GET['orderby'] ) { // WPCS: CSRF ok.
+				case self::VALIDATION_ERROR_TYPE_QUERY_VAR:
+					$clauses['orderby'] = $wpdb->prepare(
+						'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description, LOCATE("%s", tt.description)))',
+						'"type":"',
+						'}' // Start substr search after the first closing bracket to skip the "type" nested in the element_attributes object.
+					);
+					break;
+				
+				case self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR:
+					$clauses['orderby'] = $wpdb->prepare(
+						'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description))',
+						'"node_name":"'
+					);
+					break;
+				
+				case self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR:
+					$clauses['orderby'] = $wpdb->prepare(
+						'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description))',
+						'"code":"'
+					);
+					break;
+			}
+
+			return $clauses;
+		}, 10, 2 );
 	}
 
 	/**
