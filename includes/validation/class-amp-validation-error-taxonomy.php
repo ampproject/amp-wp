@@ -1238,9 +1238,9 @@ class AMP_Validation_Error_Taxonomy {
 		switch ( $column_name ) {
 			case 'error':
 				$content .= '<p>';
-				$content .= sprintf( '<code>%s</code>', esc_html( $validation_error['code'] ) );
+				$content .= ucfirst( str_replace( '_', ' ', esc_html( $validation_error['code'] ) ) );
 				if ( 'invalid_element' === $validation_error['code'] || 'invalid_attribute' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
+					$content .= ': ' . esc_html( $validation_error['node_name'] );
 				}
 				$content .= '</p>';
 
@@ -1311,7 +1311,9 @@ class AMP_Validation_Error_Taxonomy {
 			case 'details':
 				unset( $validation_error['code'] );
 				unset( $validation_error['message'] );
-				$content = sprintf( '<pre>%s</pre>', esc_html( wp_json_encode( $validation_error, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ) );
+				if ( isset( $validation_error['parent_name'] ) ) {
+					$content = sprintf( '&lt;%s&gt;', esc_html( $validation_error['parent_name'] ) );
+				}
 				break;
 			case 'type':
 				$type = self::get_translated_type_name( $validation_error );

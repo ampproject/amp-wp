@@ -847,7 +847,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'error' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<p><code>illegal_css_at_rule</code></p>', $filtered_content );
+		$this->assertEquals( $initial_content . '<p>Illegal css at rule</p>', $filtered_content );
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
@@ -862,8 +862,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'details' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
-		$this->assertContains( $validation_error['node_attributes']['id'], $filtered_content );
-		$this->assertContains( $validation_error['node_name'], $filtered_content );
+		$this->assertEquals( '&lt;' . $validation_error['parent_name'] . '&gt;', $filtered_content );
 
 		// Test the 'type' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'type', $term_id );
