@@ -40,7 +40,8 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	margin: 0;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block .editor-block-list__block-edit, .editor-block-list__layout .editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit {
+.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block .editor-block-list__block-edit,
+.editor-block-list__layout .editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit {
 	margin: 0;
 }
 
@@ -56,11 +57,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 .amp-grid-template .editor-block-list__layout:first-of-type {
 	display: grid;
-	overflow: hidden;
 	padding: 68px 32px 32px;
 }
 
-.amp-grid-template .editor-block-list__layout:first-of-type * {
+.amp-grid-template .editor-block-list__layout:first-of-type *:not(.editor-block-toolbar) {
 	margin: 0;
 	box-sizing: border-box;
 }
@@ -134,6 +134,10 @@ div[data-amp-position="lower-third"] {
 	bottom: 0;
 }
 
+.editor-block-list__block .editor-block-list__block .editor-block-list__block:not(.is-selected) {
+	overflow: hidden;
+}
+
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected,
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected .editor-block-list__block {
 	border: 1px dotted #99c2e0;
@@ -143,6 +147,10 @@ div[data-amp-position="lower-third"] {
 	z-index: 0;
 }
 
+.editor-block-list__layout div[data-type="amp/amp-story-grid-layer"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
+	display: none;
+}
+
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected ~ div[data-type="amp/amp-story-grid-layer"],
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected-parent ~ div[data-type="amp/amp-story-grid-layer"],
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected ~ div[data-type="amp/amp-story-cta-layer"],
@@ -150,7 +158,7 @@ div[data-amp-position="lower-third"] {
 	display: none;
 }
 
-.edit-post-visual-editor ul.editor-selectors {
+.edit-post-visual-editor .editor-block-list__block ul.editor-selectors {
 	position: absolute;
 	right: -155px;
 	bottom: 0;
