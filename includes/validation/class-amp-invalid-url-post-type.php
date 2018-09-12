@@ -575,7 +575,7 @@ class AMP_Invalid_URL_Post_Type {
 		$columns = array_merge(
 			$columns,
 			array(
-				'error_status' => sprintf( '%s<span class="dashicons dashicons-editor-help"></span><div class="tooltip">%s</div>', esc_html__( 'Status', 'amp' ), esc_html__( 'This is tooltip', 'amp' ) ),  // @todo Create actual tooltip.
+				'error_status' => sprintf( '%s<span class="dashicons dashicons-editor-help"></span>', esc_html__( 'Status', 'amp' ) ),  // @todo Create actual tooltip.
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => sprintf( '%s<div class="double-arrow"><span class="dashicons dashicons-arrow-down top-arrow"></span><span class="dashicons dashicons-arrow-down bottom-arrow"></span></div>', esc_html__( 'Sources', 'amp' ) ),
 			)

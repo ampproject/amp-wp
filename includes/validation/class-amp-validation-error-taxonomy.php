@@ -141,7 +141,7 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @var string
 	 */
-	const REMOVED_ELEMENTS = 'removed_elements';
+	const REMOVED_ELEMENTS = 'sources_with_invalid_output';
 
 	/**
 	 * The key for found elements and attributes.
@@ -170,6 +170,13 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var string
 	 */
 	const REMOVED_SOURCES = 'removed_sources';
+
+	/**
+	 * The key for the error status.
+	 *
+	 * @var string
+	 */
+	const ERROR_STATUS = 'error_status';
 
 	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
