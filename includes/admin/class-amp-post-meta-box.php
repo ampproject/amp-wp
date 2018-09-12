@@ -197,22 +197,21 @@ class AMP_Post_Meta_Box {
 		$status_and_errors = $this->get_status_and_errors( $post );
 		$enabled_status    = $status_and_errors['status'];
 		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
-		$localization      = array(
+		$script_data       = array(
 			'possibleStati' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
 			'defaultStatus' => $enabled_status,
 			'errorMessages' => $error_messages,
 		);
 
 		if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$localization['i18n'] = gutenberg_get_jed_locale_data( 'amp' );
+			$script_data['i18n'] = gutenberg_get_jed_locale_data( 'amp' );
 		}
 
-		wp_localize_script(
+		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,
-			'wpAmpEditor',
-			$localization
+			sprintf( 'var wpAmpEditor = %s;', wp_json_encode( $script_data ) ),
+			'before'
 		);
-
 	}
 
 	/**

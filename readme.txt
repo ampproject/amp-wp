@@ -6,7 +6,7 @@ Tested up to: 4.9
 Stable tag: 0.7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Requires PHP: 5.3.2
+Requires PHP: 5.3.6
 
 Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
@@ -89,7 +89,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Update PHP-CSS-Parser to use new calc() support. See [#1116](https://github.com/Automattic/amp-wp/pull/1116), [#1284](https://github.com/Automattic/amp-wp/pull/1284). Props westonruter.
 - Fix parsing CSS selectors which contain commas. See [#1286](https://github.com/Automattic/amp-wp/pull/1286). Props westonruter.
 - Add sanitizer to support `amp-o2-player`. See [#1202](https://github.com/Automattic/amp-wp/pull/1202). Props juanchaur1.
-- Add `Amp_Embed_Sanitizer`. See [#1128](https://github.com/Automattic/amp-wp/pull/1128). Props juanchaur1.
+- Add `AMP_Embed_Sanitizer`. See [#1128](https://github.com/Automattic/amp-wp/pull/1128). Props juanchaur1.
 - Add `AMP_Script_Sanitizer` to replace `noscript` elements with their contents. See [#1226](https://github.com/Automattic/amp-wp/pull/1226). Props westonruter.
 - Fix header image filtering and YouTube header video detection. See [#1208](https://github.com/Automattic/amp-wp/pull/1208). Props westonruter.
 - Improve support for Hulu & Imgur embeds. See [#1218](https://github.com/Automattic/amp-wp/pull/1218). Props miina.
@@ -115,10 +115,35 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Support extracting dimensions for single URLs. See [#793](https://github.com/Automattic/amp-wp/pull/793). Props mjangda, mdbitz.
 - Improve validation and presentation of analytics form. See [#1299](https://github.com/Automattic/amp-wp/pull/1299), [#1133](https://github.com/Automattic/amp-wp/issues/1133), [#1296](https://github.com/Automattic/amp-wp/pull/1296). Props westonruter, AdelDima.
 - Prevent validation of auto-drafts, including when merely accessing New Post screen. See [#1301](https://github.com/Automattic/amp-wp/pull/1301). Props westonruter.
+- Fix inability to move link element due to assigned parent. See [#1322](https://github.com/Automattic/amp-wp/issues/1322). Props westonruter.
+- Fix stretched images in Twenty Seventeen them and Gutenberg. See [#1321](https://github.com/Automattic/amp-wp/issues/1321), [#1281](https://github.com/Automattic/amp-wp/issues/1281), [#1237](https://github.com/Automattic/amp-wp/issues/1237). Props hellofromtonya.
+- Fix image dimension extractor so it does not disregard duplicate images. See [#1314](https://github.com/Automattic/amp-wp/issues/1314). Props lukas9393.
+- Remove redundant version from composer.json and add PHP version requirement. See [#1333](https://github.com/Automattic/amp-wp/issues/1333), [#1328](https://github.com/Automattic/amp-wp/issues/1328), [#1334](https://github.com/Automattic/amp-wp/issues/1334), [#1332](https://github.com/Automattic/amp-wp/issues/1332). Props swissspidy.
+- Store validation errors in order of occurrence in document. See [#1335](https://github.com/Automattic/amp-wp/issues/1335). Props westonruter.
+- Add .editorconfig file. See [#1336](https://github.com/Automattic/amp-wp/issues/1336), [#51](https://github.com/Automattic/amp-wp/issues/51). Props swissspidy.
+- Update i18n to make use of updated WP-CLI command. See [#1329](https://github.com/Automattic/amp-wp/issues/1329), [#1327](https://github.com/Automattic/amp-wp/issues/1327), [#1341](https://github.com/Automattic/amp-wp/issues/1341), [#1345](https://github.com/Automattic/amp-wp/issues/1345), [#1393](https://github.com/Automattic/amp-wp/issues/1393). Props swissspidy, felixarntz, westonruter.
+- Use all eligible post types when `all_templates_supported` is selected. See [#1338](https://github.com/Automattic/amp-wp/issues/1338), [#1302](https://github.com/Automattic/amp-wp/issues/1302), [#1344](https://github.com/Automattic/amp-wp/issues/1344). Props hellofromtonya, westonruter.
+- Respect default AMP enabled status when creating a new post in Gutenberg. See [#1339](https://github.com/Automattic/amp-wp/issues/1339). Props hellofromtonya.
+- Normalize 'ver' query param in script/style validation errors to prevent recurrence after accepted. See [#1346](https://github.com/Automattic/amp-wp/issues/1346). Props westonruter.
+- Add missing tabindex attribute to lightbox images. See [#1350](https://github.com/Automattic/amp-wp/issues/1350). Props amedina.
+- Detect ineffectual post-processor response cache due to high MISS rates and auto-disable. See [#1325](https://github.com/Automattic/amp-wp/issues/1325), [#1239](https://github.com/Automattic/amp-wp/issues/1239). Props hellofromtonya, westonruter.
+- Update the validator spec version to 720 and AMP v1534879991178; add support for reference points. See [#1315](https://github.com/Automattic/amp-wp/issues/1315), [#1386](https://github.com/Automattic/amp-wp/issues/1386), [#1330](https://github.com/Automattic/amp-wp/issues/1330). Props westonruter.
+- Fix form sanitizer's handling of relative actions by making them absolute. See [#1352](https://github.com/Automattic/amp-wp/issues/1352), [#1349](https://github.com/Automattic/amp-wp/issues/1349). Props ricardobrg.
+- Skip Server-Timing header if not WP_DEBUG and user cannot manage_options. See [#1354](https://github.com/Automattic/amp-wp/issues/1354). Props westonruter.
+- Fetch CSS over HTTP when URL lacks extension; convert font CDN stylesheets @imports to convert to links instead of fetching. See [#1357](https://github.com/Automattic/amp-wp/issues/1357), [#1317](https://github.com/Automattic/amp-wp/issues/1317). Props westonruter.
+- Add WP-CLI command for testing the AMP compatibility of an entire site. See [#1183](https://github.com/Automattic/amp-wp/issues/1183), [#1007](https://github.com/Automattic/amp-wp/issues/1007). Props kienstra, westonruter.
+- Display when validation results are stale due to active theme/plugin changes. See [#1375](https://github.com/Automattic/amp-wp/issues/1375). Props westonruter.
+- Fix displaying of expected notices when theme support enabled by theme. See [#1374](https://github.com/Automattic/amp-wp/issues/1374), [#1358](https://github.com/Automattic/amp-wp/issues/1358). Props westonruter.
+- Fix handling responses to form submissions from an AMP Cache. See [#1382](https://github.com/Automattic/amp-wp/issues/1382), [#1356](https://github.com/Automattic/amp-wp/issues/1356).
+- Replace Gutenberg's deprecated isCleanNewPost selector. See [#1387](https://github.com/Automattic/amp-wp/issues/1387). Props miina.
+- Updates php-css-parser to include fix for parsing calc() with negative values. See [#1392](https://github.com/Automattic/amp-wp/issues/1392). Props westonruter.
+- Add embed support for Twitter timelines via new amp-twitter attributes. See [#1396](https://github.com/Automattic/amp-wp/issues/1396). Props felixarntz.
+- Add error type filters on validation error and invalid URL screens. See [#1373](https://github.com/Automattic/amp-wp/issues/1373). Props kienstra.
+- Default to auto sanitization and tree shaking being enabled. See [#1402](https://github.com/Automattic/amp-wp/issues/1402). Props westonruter.
 
 For a full list of the closed issues and merged pull requests in this release, see the [1.0 milestone](https://github.com/Automattic/amp-wp/milestone/7?closed=1).
 
-Contributors in this release, including design, development, testing, and project management: Adel Tahri (AdelDima), Alberto Medina (amedina), Claudio Sossi, Daniel Walmsley (gravityrail), David Cramer (DavidCramer), Felix Arntz (felixarntz), Garrett Hyder (garrett-eclipse), Joshua Wold (jwold), Juan Chaur (juanchaur1), Kevin Coleman (kevincoleman), Leo Postovoit (postphotos), Mackenzie Hartung (MackenzieHartung), Matthew Denton (mdbitz), Miina Sikk (miina), Mohammad Jangda (mjangda), Oscar Sánchez (oscarssanchez), Paul Schreiber (paulschreiber), Ryan Kienstra (kienstra), Thierry Muller (ThierryA), Tonya Mork (hellofromtonya), Weston Ruter (westonruter).
+Contributors in this release, including design, development, testing, and project management: Adel Tahri (AdelDima), Alberto Medina (amedina), Claudio Sossi, Daniel Walmsley (gravityrail), David Cramer (DavidCramer), Felix Arntz (felixarntz), Garrett Hyder (garrett-eclipse), Joshua Wold (jwold), Juan Chaur (juanchaur1), Kevin Coleman (kevincoleman), Leo Postovoit (postphotos), Lukas Hettwer (lukas9393), Mackenzie Hartung (MackenzieHartung), Matthew Denton (mdbitz), Miina Sikk (miina), Mohammad Jangda (mjangda), Oscar Sánchez (oscarssanchez), Paul Schreiber (paulschreiber), Ricardo Gonçalves (ricardobrg), Ryan Kienstra (kienstra), Thierry Muller (ThierryA), Tonya Mork (hellofromtonya), Weston Ruter (westonruter).
 
 = 0.7.2 (2018-06-27) =
 
