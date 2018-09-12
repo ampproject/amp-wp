@@ -23,6 +23,11 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
+
+		if ( ! function_exists( 'register_block_type' ) ) {
+			return;
+		}
+
 		register_post_type(
 			self::POST_TYPE_SLUG,
 			array(
@@ -76,6 +81,8 @@ class AMP_Story_Post_Type {
 			)
 		);
 
+		add_filter( 'post_row_actions', array( __CLASS__, 'remove_classic_editor_link' ), 11, 2 );
+
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
 		// Forcibly sanitize all validation errors.
@@ -102,6 +109,20 @@ class AMP_Story_Post_Type {
 		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
 
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
+	}
+
+	/**
+	 * Remove classic editor action from AMP Story listing.
+	 *
+	 * @param array   $actions AMP Story row actions.
+	 * @param WP_Post $post WP_Post object.
+	 * @return array Actions.
+	 */
+	public static function remove_classic_editor_link( $actions, $post ) {
+		if ( 'amp_story' === $post->post_type ) {
+			unset( $actions['classic'] );
+		}
+		return $actions;
 	}
 
 	/**
