@@ -189,16 +189,16 @@ class AMP_Invalid_URL_Post_Type {
 		wp_enqueue_script(
 			'amp-admin-tables',
 			amp_get_asset_url( 'js/amp-admin-tables.js' ),
-			[ 'jquery' ],
+			array( 'jquery' ),
 			AMP__VERSION
 		);
 		wp_localize_script(
 			'amp-admin-tables',
 			'ampAdminTables',
-			[
-				'errorsByTypeLink' => get_admin_url( null,'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' )
-			]
-			);
+			array(
+				'errorsByTypeLink' => get_admin_url( null, 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' ),
+			)
+		);
 	}
 
 	/**
