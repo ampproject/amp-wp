@@ -827,9 +827,15 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			'description' => wp_json_encode( $validation_error ),
 		) );
 
+		$term = get_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+
+		$url = admin_url( add_query_arg( array(
+			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->name,
+			'post_type'                                  => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+		), 'edit.php' ) );
 		// Test the 'error' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<p><a href="http://example.org/wp-admin/edit.php?amp_validation_error=Term 67&post_type=amp_invalid_url"><code>illegal_css_at_rule</code></a></p>', $filtered_content );
+		$this->assertEquals( $initial_content . '<p><a href="' . $url . '"><code>illegal_css_at_rule</code></a></p>', $filtered_content );
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
