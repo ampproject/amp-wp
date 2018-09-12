@@ -830,6 +830,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style>.b[data-value="' . str_repeat( 'c', $custom_max_size ) . '"] { color:green }</style>';
 		$html .= '<style>#nonexists { color:black; } #exists { color:white; }</style>';
 		$html .= '<style>div { color:black; } span { color:white; } </style>';
+		$html .= '<style>@media only screen and (min-width: 1280px) { .not-exists-selector { margin: 0 auto; } } .b { background: lightblue; }</style>';
 		$html .= '</head><body><span class="b">...</span><span id="exists"></span></body></html>';
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 
@@ -847,6 +848,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'.b{color:blue}',
 				'#exists{color:white}',
 				'span{color:white}',
+				'.b { background: lightblue; }',
 			),
 			array_values( $sanitizer->get_stylesheets() )
 		);
@@ -1361,5 +1363,41 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
 		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
+	}
+
+	/**
+	 * Test method which remove media queries without any styles.
+	 *
+	 * @dataProvider get_styles_with_media_queries
+	 *
+	 * @covers AMP_Style_Sanitizer::remove_empty_media_queries
+	 *
+	 * @param string $css Input CSS.
+	 * @param string $expected_css CSS expected after removing media queries.
+	 */
+	public function test_remove_empty_media_queries( $css, $expected_css ) {
+		$dom             = AMP_DOM_Utils::get_dom_from_content( '' );
+		$style_sanitizer = new AMP_Style_Sanitizer( $dom );
+		$result          = $style_sanitizer->remove_empty_media_queries( $css );
+
+		$this->assertSame( $expected_css, $result );
+	}
+
+	/**
+	 * Return CSS styles with empty media queries.
+	 *
+	 * @return array CSS Styles.
+	 */
+	public function get_styles_with_media_queries() {
+		return array(
+			'not_empty_media_query' => array(
+				'.a{color:gray;}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
+				'.a{color:gray;}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
+			),
+			'two_media_queries' => array(
+				'.a{color:gray;}@media only screen and(max-width:940px){}@media only screen and(max-width:940px){.b{margin: 0 auto;}}.c{display:block;}',
+				'.a{color:gray;}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
+			),
+		);
 	}
 }
