@@ -815,15 +815,15 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 	/**
 	 * Test get_reader_friendly_error_type_text.
-	 * 
+	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text()
 	 */
 	public function test_get_reader_friendly_error_type_text() {
-		$this->assertEquals( 'JavaScript', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'js_error') );
-		$this->assertEquals( 'HTML (Element)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_element_error') );
-		$this->assertEquals( 'HTML (Attribute)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_attribute_error') );
-		$this->assertEquals( 'CSS', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'css_error') );
-		$this->assertEquals( 'some_other_error', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'some_other_error') );
+		$this->assertEquals( 'JavaScript', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'js_error' ) );
+		$this->assertEquals( 'HTML (Element)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_element_error' ) );
+		$this->assertEquals( 'HTML (Attribute)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_attribute_error' ) );
+		$this->assertEquals( 'CSS', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'css_error' ) );
+		$this->assertEquals( 'some_other_error', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'some_other_error' ) );
 	}
 
 	/**
