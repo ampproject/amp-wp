@@ -1056,7 +1056,7 @@ class AMP_Validation_Error_Taxonomy {
 					/* translators: %s: the rejected term count. */
 					_nx(
 						'Rejected Error <span class="count">(%s)</span>',
-						'Rejected Error <span class="count">(%s)</span>',
+						'Rejected Errors <span class="count">(%s)</span>',
 						$rejected_term_count,
 						'terms',
 						'amp'
