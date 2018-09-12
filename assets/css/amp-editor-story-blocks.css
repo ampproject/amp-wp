@@ -134,6 +134,10 @@ div[data-amp-position="lower-third"] {
 	bottom: 0;
 }
 
+.editor-block-list__block .editor-block-list__block .editor-block-list__block.is-selected {
+	z-index: 90;
+}
+
 .editor-block-list__block .editor-block-list__block .editor-block-list__block:not(.is-selected) {
 	overflow: hidden;
 }
