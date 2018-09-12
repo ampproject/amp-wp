@@ -70,14 +70,14 @@ class AMP_Validation_Error_Taxonomy {
 
 	/**
 	 * Query var used for ordering list by node name.
-	 * 
+	 *
 	 * @var string
 	 */
 	const VALIDATION_DETAILS_NODE_NAME_QUERY_VAR = 'amp_validation_node_name';
 
-		/**
+	/**
 	 * Query var used for ordering list by error code.
-	 * 
+	 *
 	 * @var string
 	 */
 	const VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR = 'amp_validation_code';
@@ -647,9 +647,9 @@ class AMP_Validation_Error_Taxonomy {
 		// Let the created date column sort by term ID.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
 			$sortable_columns['created_date_gmt'] = 'term_id';
-			$sortable_columns['error_type']       = self::VALIDATION_ERROR_TYPE_QUERY_VAR;
-			$sortable_columns['details']          = self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR;
-			$sortable_columns['error']            = self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
+			$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
+			$sortable_columns['details']          = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR;
+			$sortable_columns['error']            = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
 			return $sortable_columns;
 		} );
 
@@ -659,7 +659,8 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_style(
 					'amp-validation-error-taxonomy',
 					amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-					array( 'common' )
+					array( 'common' ),
+					AMP__VERSION
 				);
 
 				wp_enqueue_script(
@@ -667,8 +668,10 @@ class AMP_Validation_Error_Taxonomy {
 					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
 					array(
 						'wp-dom-ready',
-						'wp-i18n'
-					)
+						'wp-i18n',
+					),
+					AMP__VERSION,
+					true
 				);
 
 				wp_localize_script(
@@ -801,7 +804,7 @@ class AMP_Validation_Error_Taxonomy {
 				$clauses['where'] .= $wpdb->prepare( ' AND tt.description LIKE %s', '%"type":"' . $wpdb->esc_like( $type ) . '"%' );
 			}
 			return $clauses;
-		}, 10, 2 );	
+		}, 10, 2 );
 	}
 
 	/**
@@ -816,12 +819,12 @@ class AMP_Validation_Error_Taxonomy {
 		$sortable_column_vars = array(
 			self::VALIDATION_ERROR_TYPE_QUERY_VAR,
 			self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
-			self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR
+			self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
 		);
 
-		if ( ! isset( $_GET['orderby'] ) || ! in_array( $_GET['orderby'], $sortable_column_vars, true ) ) {
+		if ( ! isset( $_GET['orderby'] ) || ! in_array( $_GET['orderby'], $sortable_column_vars, true ) ) { // WPCS: CSRF ok.
 			return;
-		} 
+		}
 
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
 			global $wpdb;
@@ -833,24 +836,24 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			switch ( $_GET['orderby'] ) { // WPCS: CSRF ok.
-				case self::VALIDATION_ERROR_TYPE_QUERY_VAR:
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR:
 					$clauses['orderby'] = $wpdb->prepare(
-						'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description, LOCATE("%s", tt.description)))',
+						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description, LOCATE(%s, tt.description)))',
 						'"type":"',
 						'}' // Start substr search after the first closing bracket to skip the "type" nested in the element_attributes object.
 					);
 					break;
-				
-				case self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR:
+
+				case AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR:
 					$clauses['orderby'] = $wpdb->prepare(
-						'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description))',
+						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description))',
 						'"node_name":"'
 					);
 					break;
-				
-				case self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR:
+
+				case AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR:
 					$clauses['orderby'] = $wpdb->prepare(
-						'ORDER BY SUBSTR(tt.description, LOCATE("%s", tt.description))',
+						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description))',
 						'"code":"'
 					);
 					break;
