@@ -1349,21 +1349,23 @@ class AMP_Validation_Error_Taxonomy {
 				$sanitization = self::get_validation_error_sanitization( $validation_error );
 				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
 					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$content .= '&#x1F6A9;';
+						$class = 'sanitized';
 					} else {
-						$content .= '&#x2705;';
+						$class = 'accepted';
 					}
-					$content .= ' ' . esc_html__( 'Accepted', 'amp' );
+					$text = esc_html( 'Accepted', 'amp' );
 				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$content .= '&#x1F6A9;';
+						$class = 'sanitized';
 					} else {
-						$content .= '&#x274C;';
+						$class = 'rejected';
 					}
-					$content .= ' ' . esc_html__( 'Rejected', 'amp' );
+					$text = __( 'Rejected', 'amp' );
 				} else {
-					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
+					$class = 'new';
+					$text  = __( 'New', 'amp' );
 				}
+				$content .= sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
 				break;
 			case 'created_date_gmt':
 				$created_datetime = null;
