@@ -2114,7 +2114,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string Styles without empty media queries.
 	 */
 	public function remove_empty_media_queries( $css ) {
-		$new = preg_replace( '/(?<!["\'])[\s]*@media[^\{]+\{\}/', '', $css );
+		$new = preg_replace( '/(?<!["\'])[\s]*@media[^\{]+\{\}[\s]*/', '', $css );
 		if ( is_string( $new ) ) {
 			return $new;
 		}
