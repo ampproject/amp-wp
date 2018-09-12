@@ -1294,8 +1294,13 @@ class AMP_Invalid_URL_Post_Type {
 			.tablenav.bottom {
 				display: none;
 			}
+
 			.amp-invalid-url a {
 				text-decoration: none;
+			}
+
+			.curtime.misc-pub-section {
+				margin-top: 0.5rem;
 			}
 		</style>
 		<?php
