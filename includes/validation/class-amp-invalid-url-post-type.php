@@ -1154,6 +1154,18 @@ class AMP_Invalid_URL_Post_Type {
 		<div id="submitpost" class="submitbox">
 			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
 			<div id="minor-publishing">
+				<div class="curtime misc-pub-section">
+					<span id="timestamp">
+					<?php
+					printf(
+						/* translators: %s: The date this was published */
+						wp_kses_post( __( 'Last checked: <b>%s</b>', 'amp' ) ),
+						/* translators: Meta box date format */
+						esc_html( date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) ) )
+					);
+					?>
+					</span>
+				</div>
 				<div id="minor-publishing-actions">
 					<div id="re-check-action">
 						<a class="button button-secondary" href="<?php echo esc_url( self::get_recheck_url( $post ) ); ?>">
@@ -1168,18 +1180,6 @@ class AMP_Invalid_URL_Post_Type {
 					<div class="clear"></div>
 				</div>
 				<div id="misc-publishing-actions">
-					<div class="curtime misc-pub-section">
-						<span id="timestamp">
-						<?php
-						printf(
-							/* translators: %s: The date this was published */
-							wp_kses_post( __( 'Last checked: <b>%s</b>', 'amp' ) ),
-							/* translators: Meta box date format */
-							esc_html( date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) ) )
-						);
-						?>
-						</span>
-					</div>
 
 					<div class="misc-pub-section">
 						<?php
