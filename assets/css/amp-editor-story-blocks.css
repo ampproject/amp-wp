@@ -141,7 +141,7 @@ div[data-type="amp/amp-story-grid-layer"] .block-library-image__resizer {
 
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected,
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"].is-selected .editor-block-list__block {
-	border: 1px dotted #99c2e0;
+	outline: 1px dotted #99c2e0;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-grid-layer"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block {
