@@ -1416,6 +1416,43 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'.a{color:gray;}@media only screen and(max-width:940px){}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
 				'.a{color:gray;}@media only screen and(max-width:940px){.b{margin:0 auto;}}.c{display:block;}',
 			),
+			'media_query_in_content_property' => array(
+				'@media screen {}
+@media screen and (max-width: 1000px) {
+  @supports (display: grid) {
+    .b::before {
+      content: "@media screen and (max-width: 1000px) {";
+    }
+    .b::after {
+      content: "}";
+    }
+  }
+}
+@media screen {}
+@media screen and (min-width: 750px) and (max-width: 999px) {
+  .b::before {
+    content: "@media screen and (max-width: 1000px) {}";
+    content: \'@media screen and (max-width: 1000px) {}\';
+  }
+}
+@media screen {}',
+				'@media screen and (max-width: 1000px) {
+  @supports (display: grid) {
+    .b::before {
+      content: "@media screen and (max-width: 1000px) {";
+    }
+    .b::after {
+      content: "}";
+    }
+  }
+}
+@media screen and (min-width: 750px) and (max-width: 999px) {
+  .b::before {
+    content: "@media screen and (max-width: 1000px) {}";
+    content: \'@media screen and (max-width: 1000px) {}\';
+  }
+}',
+			),
 		);
 	}
 }
