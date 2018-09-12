@@ -1291,7 +1291,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_reader_friendly_error_type_text( $error_type ) {
 		switch ( $error_type ) {
-			case 'js_error':
+			case 'js_error': 
 				return esc_html__( 'JavaScript', 'amp' );
 
 			case 'html_element_error':
@@ -1416,37 +1416,39 @@ class AMP_Validation_Error_Taxonomy {
 					$node_name  = sprintf( '<%s>', $validation_error['node_name'] );
 				}
 
-				$content  = '<details>';
-				$content .= sprintf(
-					'<summary class="details-attributes__summary"><code>%s</code></summary>',
-					esc_html( $node_name )
-				);
-
-				// Provide the parent node for invalid attributes.
-				if ( 'element_attributes' === $attributes_type && isset( $validation_error['parent_name'] ) ) {
+				if ( 0 < count( $attributes ) ) {
+					$content  = '<details>';
 					$content .= sprintf(
-						'<span class="details-attributes__attr">%s</span>: <span class="details-attributes__value"><code>%s</code></span>',
-						esc_html__( 'Parent node: ', 'amp' ),
-						esc_html( sprintf( '<%s>', $validation_error['parent_name'] ) )
+						'<summary class="details-attributes__summary"><code>%s</code></summary>',
+						esc_html( $node_name )
 					);
-				}
 
-				$content .= sprintf( '<div class="details-attributes__title">%s</div>', esc_html( $attributes_type ) );
-
-				$content .= '<ul class="details-attributes__list">';
-
-				foreach ( $attributes as $attr => $value ) {
-					$content .= sprintf( '<li><span class="details-attributes__attr">%s</span>', esc_html( $attr ) );
-
-					if ( ! empty( $value ) ) {
-						$content .= sprintf( ': <span class="details-attributes__value">%s</span>', esc_html( $value ) );
+					// Provide the parent node for invalid attributes.
+					if ( 'element_attributes' === $attributes_type && isset( $validation_error['parent_name'] ) ) {
+						$content .= sprintf(
+							'<span class="details-attributes__attr">%s</span>: <span class="details-attributes__value"><code>%s</code></span>',
+							esc_html__( 'Parent node: ', 'amp' ),
+							esc_html( sprintf( '<%s>', $validation_error['parent_name'] ) )
+						);
 					}
 
-					$content .= '</li>';
-				}
+					$content .= sprintf( '<div class="details-attributes__title">%s</div>', esc_html( $attributes_type ) );
 
-				$content .= '</ul>';
-				$content .= '</details>';
+					$content .= '<ul class="details-attributes__list">';
+
+					foreach ( $attributes as $attr => $value ) {
+						$content .= sprintf( '<li><span class="details-attributes__attr">%s</span>', esc_html( $attr ) );
+
+						if ( ! empty( $value ) ) {
+							$content .= sprintf( ': <span class="details-attributes__value">%s</span>', esc_html( $value ) );
+						}
+
+						$content .= '</li>';
+					}
+
+					$content .= '</ul>';
+					$content .= '</details>';
+				}
 
 				break;
 			case 'error_type':

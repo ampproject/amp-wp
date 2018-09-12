@@ -814,6 +814,19 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_reader_friendly_error_type_text.
+	 * 
+	 * @covers \AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text()
+	 */
+	public function test_get_reader_friendly_error_type_text() {
+		$this->assertEquals( 'JavaScript', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'js_error') );
+		$this->assertEquals( 'HTML (Element)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_element_error') );
+		$this->assertEquals( 'HTML (Attribute)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_attribute_error') );
+		$this->assertEquals( 'CSS', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'css_error') );
+		$this->assertEquals( 'some_other_error', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'some_other_error') );
+	}
+
+	/**
 	 * Test filter_manage_custom_columns.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
@@ -839,7 +852,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertEquals( '&#x2753; New', $filtered_content );
+		$this->assertEquals( $initial_content . '<span class="status-text new">New</span>', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );
