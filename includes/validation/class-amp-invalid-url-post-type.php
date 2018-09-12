@@ -1294,6 +1294,9 @@ class AMP_Invalid_URL_Post_Type {
 			.tablenav.bottom {
 				display: none;
 			}
+			.amp-invalid-url a {
+				text-decoration: none;
+			}
 		</style>
 		<?php
 	}
@@ -1349,7 +1352,17 @@ class AMP_Invalid_URL_Post_Type {
 
 		?>
 		<h2 class="amp-invalid-url">
-			<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $url ); ?></a>
+			<a href="<?php echo esc_url( $url ); ?>">
+				<?php
+				printf(
+					/* translators: %s is a link dashicon, %s is the front-end URL, %s is an external dashicon %s  */
+					esc_html( '%s url: %s %s' ),
+					'<span class="dashicons dashicons-admin-links"></span>',
+					esc_html( $url ),
+					'<span class="dashicons dashicons-external"></span>'
+				);
+				?>
+			</a>
 		</h2>
 		<?php
 	}
