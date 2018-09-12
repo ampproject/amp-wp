@@ -141,7 +141,7 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @var string
 	 */
-	const REMOVED_ELEMENTS = 'sources_with_invalid_output';
+	const REMOVED_ELEMENTS = 'removed_elements';
 
 	/**
 	 * The key for found elements and attributes.

@@ -1601,7 +1601,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return array Filtered action links.
 	 */
 	public static function filter_post_row_actions( $actions, $post ) {
-		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
+		if ( ! is_object( $post ) || self::POST_TYPE_SLUG !== $post->post_type ) {
 			return $actions;
 		}
 

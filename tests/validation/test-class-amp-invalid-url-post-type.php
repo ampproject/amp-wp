@@ -479,7 +479,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			array_merge(
 				$initial_columns,
 				array(
-					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources<div class="double-arrow"><span class="dashicons dashicons-arrow-down top-arrow"></span><span class="dashicons dashicons-arrow-down bottom-arrow"></span></div>',
 					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status<span class="dashicons dashicons-editor-help"></span>',
 					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Incompatible Sources',
 					AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',

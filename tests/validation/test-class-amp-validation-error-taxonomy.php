@@ -336,7 +336,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS => array(
 				$element_node_name => 1,
 			),
-			'sources_with_invalid_output' => array(
+			AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => array(
 				'plugin' => array( 'foo' ),
 				'theme'  => array( 'bar' ),
 			),
