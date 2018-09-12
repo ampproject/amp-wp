@@ -293,18 +293,30 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 */
 	public function test_handle_save_post_prompting_validation_and_validate_queued_posts_on_frontend() {
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$GLOBALS['pagenow']        = 'post.php'; // WPCS: override ok.
+
 		register_post_type( 'secret', array( 'public' => false ) );
-		$secret = $this->factory()->post->create_and_get( array( 'post_type' => 'secret' ) );
+		$secret           = $this->factory()->post->create_and_get( array( 'post_type' => 'secret' ) );
+		$_POST['post_ID'] = $secret->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $secret->ID );
 		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 		$this->assertEmpty( AMP_Validation_Manager::validate_queued_posts_on_frontend() );
 
-		$auto_draft = $this->factory()->post->create_and_get( array( 'post_status' => 'auto-draft' ) );
+		$auto_draft       = $this->factory()->post->create_and_get( array( 'post_status' => 'auto-draft' ) );
+		$_POST['post_ID'] = $auto_draft->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $auto_draft->ID );
 		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 		$this->assertEmpty( AMP_Validation_Manager::validate_queued_posts_on_frontend() );
 
+		// Testing without $_POST context.
 		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'post' ) );
+		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
+		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
+
+		// Test success.
+		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'post' ) );
+		$_POST['post_ID'] = $post->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
 		$this->assertEquals( 10, has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 
@@ -314,6 +326,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$results = AMP_Validation_Manager::validate_queued_posts_on_frontend();
 		$this->assertArrayHasKey( $post->ID, $results );
 		$this->assertInstanceOf( 'WP_Error', $results[ $post->ID ] );
+
+		unset( $GLOBALS['pagenow'] );
 	}
 
 	/**
