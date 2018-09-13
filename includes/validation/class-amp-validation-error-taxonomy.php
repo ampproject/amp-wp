@@ -644,7 +644,7 @@ class AMP_Validation_Error_Taxonomy {
 					/* Improve column widths */
 					td.column-details pre, td.column-sources pre { overflow:auto; }
 					th.column-created_date_gmt { width:15%; }
-					th.column-status { width:10%; }
+					th.column-status { width:15%; }
 				' );
 			}
 		} );
@@ -1249,24 +1249,31 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'status':
-				$sanitization = self::get_validation_error_sanitization( $validation_error );
-				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$content .= '&#x1F6A9;';
-					} else {
-						$content .= '&#x2705;';
-					}
-					$content .= ' ' . esc_html__( 'Accepted', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
-					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$content .= '&#x1F6A9;';
-					} else {
-						$content .= '&#x274C;';
-					}
-					$content .= ' ' . esc_html__( 'Rejected', 'amp' );
-				} else {
-					$content = '&#x2753; ' . esc_html__( 'New', 'amp' );
-				}
+				$select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
+
+				ob_start();
+				?>
+				<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
+					<?php esc_html_e( 'Status:', 'amp' ); ?>
+				</label>
+				<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
+					<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
+						<option value="">
+							&#x1F6A9;
+							<?php esc_html_e( 'Identified', 'amp' ); ?>
+						</option>
+					<?php endif; ?>
+					<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACCEPTED_STATUS, $term->term_group ); ?>>
+						&#x2705;
+						<?php esc_html_e( 'Accepted', 'amp' ); ?>
+					</option>
+					<option style="text-decoration: line-through" value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_REJECTED_STATUS, $term->term_group ); ?>>
+							&#x274C;
+						<?php esc_html_e( 'Rejected', 'amp' ); ?>
+					</option>
+				</select>
+				<?php
+				$content .= ob_get_clean();
 				break;
 			case 'created_date_gmt':
 				$created_datetime = null;

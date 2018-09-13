@@ -851,7 +851,9 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertEquals( '&#x2753; New', $filtered_content );
+		$this->assertContains( 'Identified', $filtered_content );
+		$this->assertContains( 'Accepted', $filtered_content );
+		$this->assertContains( 'Rejected', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );
