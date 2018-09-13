@@ -789,7 +789,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v11'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v12'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1066,15 +1066,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$between_selectors                 = '/*AMP_WP_BETWEEN_SELECTORS*/';
 			$after_declaration_block_selectors = '/*AMP_WP_BEFORE_DECLARATION_SELECTORS*/';
 			$after_declaration_block           = '/*AMP_WP_AFTER_DECLARATION*/';
+			$before_at_rule                    = '/*AMP_WP_BEFORE_AT_RULE*/';
+			$after_at_rule                     = '/*AMP_WP_AFTER_AT_RULE*/';
 
 			$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
 			$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
 			$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
 			$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
+			$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
+			$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
 
 			$stylesheet_string = $css_document->render( $output_format );
 
 			$pattern  = '#';
+			$pattern .= preg_quote( $before_at_rule, '#' );
+			$pattern .= '|';
+			$pattern .= preg_quote( $after_at_rule, '#' );
+			$pattern .= '|';
 			$pattern .= '(' . preg_quote( $before_declaration_block, '#' ) . ')';
 			$pattern .= '(.+?)';
 			$pattern .= preg_quote( $after_declaration_block_selectors, '#' );
