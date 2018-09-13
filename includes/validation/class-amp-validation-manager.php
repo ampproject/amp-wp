@@ -486,14 +486,32 @@ class AMP_Validation_Manager {
 	/**
 	 * Handle save_post action to queue re-validation of the post on the frontend.
 	 *
+	 * This is intended to only apply to post edits made in the classic editor.
+	 *
+	 * @see AMP_Validation_Manager::get_amp_validity_rest_field() The method responsible for validation post changes via Gutenberg.
 	 * @see AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 *
 	 * @param int $post_id Post ID.
 	 */
 	public static function handle_save_post_prompting_validation( $post_id ) {
+		global $pagenow;
 		$post = get_post( $post_id );
 
+		$is_classic_editor_post_save = (
+			isset( $_SERVER['REQUEST_METHOD'] )
+			&&
+			'POST' === $_SERVER['REQUEST_METHOD']
+			&&
+			'post.php' === $pagenow
+			&&
+			isset( $_POST['post_ID'] ) // WPCS: csrf ok.
+			&&
+			intval( $_POST['post_ID'] ) === (int) $post_id // WPCS: csrf ok.
+		);
+
 		$should_validate_post = (
+			$is_classic_editor_post_save
+			&&
 			is_post_type_viewable( $post->post_type )
 			&&
 			! wp_is_post_autosave( $post )
@@ -531,7 +549,10 @@ class AMP_Validation_Manager {
 
 		$validation_posts = array();
 
-		// @todo Only validate the first and then queue the rest in WP Cron?
+		/*
+		 * It is unlikely that there will be more than one post in the array.
+		 * For the bulk recheck action, see AMP_Invalid_URL_Post_Type::handle_bulk_action().
+		 */
 		foreach ( $posts as $post ) {
 			$url = amp_get_permalink( $post->ID );
 			if ( ! $url ) {
