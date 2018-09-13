@@ -848,7 +848,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		), 'edit.php' ) );
 		// Test the 'error' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<p><a href="' . $url . '"><code>illegal_css_at_rule</code></a></p>', $filtered_content );
+		$this->assertEquals( $initial_content . '<p><a href="' . $url . '"><code>illegal_css_at_rule</code></a>: <code>@-ms-viewport</code></p>', $filtered_content );
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );

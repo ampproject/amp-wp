@@ -1333,8 +1333,12 @@ class AMP_Validation_Error_Taxonomy {
 					), 'edit.php' ) ),
 					esc_html( $validation_error['code'] )
 				);
-				if ( 'invalid_element' === $validation_error['code'] || 'invalid_attribute' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
+				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
+				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
+					$content .= sprintf( ': <code>[%s]</code>', esc_html( $validation_error['node_name'] ) );
+				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
+					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
 				}
 				$content .= '</p>';
 
@@ -1403,17 +1407,27 @@ class AMP_Validation_Error_Taxonomy {
 
 				break;
 			case 'details':
-				if ( in_array( $validation_error['code'], array( self::INVALID_ELEMENT_CODE, self::INVALID_ATTRIBUTE_CODE ), true ) ) {
-					$summary = '<code>' . esc_html( sprintf( '<%s>', $validation_error['parent_name'] ) ) . '</code>';
+				if ( isset( $validation_error['parent_name'] ) ) {
+					if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] || self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+						$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
+					} elseif ( isset( $validation_error['node_name'] ) ) {
+						$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
+					} elseif ( isset( $validation_error['node_name'] ) ) {
+						$summary_label = $validation_error['node_name'];
+					} else {
+						$summary_label = '&hellip;';
+					}
+
+					$summary = '<code>' . esc_html( $summary_label ) . '</code>';
 					unset( $validation_error['error_type'] );
 					unset( $validation_error['parent_name'] );
 
 					$attributes         = array();
 					$attributes_heading = '';
-					if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && ! empty( $validation_error['node_attributes'] ) ) {
+					if ( ! empty( $validation_error['node_attributes'] ) ) {
 						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Element attributes:', 'amp' ) );
 						$attributes         = $validation_error['node_attributes'];
-					} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && ! empty( $validation_error['element_attributes'] ) ) {
+					} elseif ( ! empty( $validation_error['element_attributes'] ) ) {
 						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Other attributes:', 'amp' ) );
 						$attributes         = $validation_error['element_attributes'];
 					}
