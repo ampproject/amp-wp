@@ -1403,53 +1403,52 @@ class AMP_Validation_Error_Taxonomy {
 
 				break;
 			case 'details':
-				$attributes_type = isset( $validation_error['element_attributes'] ) ? 'element_attributes' : 'node_attributes';
+				if ( in_array( $validation_error['code'], array( self::INVALID_ELEMENT_CODE, self::INVALID_ATTRIBUTE_CODE ), true ) ) {
+					$summary = '<code>' . esc_html( sprintf( '<%s>', $validation_error['parent_name'] ) ) . '</code>';
+					unset( $validation_error['error_type'] );
+					unset( $validation_error['parent_name'] );
 
-				if ( 'element_attributes' === $attributes_type ) {
-					$attributes = $validation_error['element_attributes'];
-					$node_name  = $validation_error['node_name'];
-				} else {
-					$attributes = $validation_error['node_attributes'];
-					$node_name  = sprintf( '<%s>', $validation_error['node_name'] );
-				}
-
-				if ( 0 < count( $attributes ) ) {
-					$content  = '<details>';
-					$content .= sprintf(
-						'<summary class="details-attributes__summary"><code>%s</code></summary>',
-						esc_html( $node_name )
-					);
-
-					// Provide the parent node for invalid attributes.
-					if ( 'element_attributes' === $attributes_type && isset( $validation_error['parent_name'] ) ) {
-						$content .= sprintf(
-							'<span class="details-attributes__attr">%s</span>: <span class="details-attributes__value"><code>%s</code></span>',
-							esc_html__( 'Parent node: ', 'amp' ),
-							esc_html( sprintf( '<%s>', $validation_error['parent_name'] ) )
-						);
+					$attributes         = array();
+					$attributes_heading = '';
+					if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && ! empty( $validation_error['node_attributes'] ) ) {
+						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Element attributes:', 'amp' ) );
+						$attributes         = $validation_error['node_attributes'];
+					} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && ! empty( $validation_error['element_attributes'] ) ) {
+						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Other attributes:', 'amp' ) );
+						$attributes         = $validation_error['element_attributes'];
 					}
 
-					$content .= sprintf( '<div class="details-attributes__title">%s</div>', esc_html( $attributes_type ) );
+					if ( empty( $attributes ) ) {
+						$content .= $summary;
+					} else {
+						$content  = '<details>';
+						$content .= '<summary class="details-attributes__summary">';
+						$content .= $summary;
+						$content .= '</summary>';
 
-					$content .= '<ul class="details-attributes__list">';
+						$content .= $attributes_heading;
+						$content .= '<ul class="details-attributes__list">';
 
-					foreach ( $attributes as $attr => $value ) {
-						$content .= sprintf( '<li><span class="details-attributes__attr">%s</span>', esc_html( $attr ) );
+						foreach ( $attributes as $attr => $value ) {
+							$content .= sprintf( '<li><span class="details-attributes__attr">%s</span>', esc_html( $attr ) );
 
-						if ( ! empty( $value ) ) {
-							$content .= sprintf( ': <span class="details-attributes__value">%s</span>', esc_html( $value ) );
+							if ( isset( $value ) ) {
+								$content .= sprintf( ': <span class="details-attributes__value">%s</span>', esc_html( $value ) );
+							}
+
+							$content .= '</li>';
 						}
 
-						$content .= '</li>';
+						$content .= '</ul>';
+						$content .= '</details>';
 					}
-
-					$content .= '</ul>';
-					$content .= '</details>';
 				}
 
 				break;
 			case 'error_type':
-				$content = self::get_reader_friendly_error_type_text( $validation_error['type'] );
+				if ( isset( $validation_error['type'] ) ) {
+					$content = self::get_reader_friendly_error_type_text( $validation_error['type'] );
+				}
 				break;
 		}
 		return $content;
