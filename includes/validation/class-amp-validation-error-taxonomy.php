@@ -319,7 +319,7 @@ class AMP_Validation_Error_Taxonomy {
 		$is_forced = (
 			amp_is_canonical()
 			||
-			AMP_Options_Manager::get_option( 'force_sanitization' )
+			AMP_Options_Manager::get_option( 'auto_accept_sanitization' )
 		);
 		if ( $is_forced ) {
 			$forced = 'with_option';

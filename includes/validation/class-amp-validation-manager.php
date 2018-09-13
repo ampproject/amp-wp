@@ -187,7 +187,7 @@ class AMP_Validation_Manager {
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
 
 		// Add filter to auto-accept tree shaking validation error.
-		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
+		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ) {
 			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_accepted' ), 10, 2 );
 		}
 
@@ -216,8 +216,8 @@ class AMP_Validation_Manager {
 	 *
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
-	public static function is_sanitization_forcibly_accepted() {
-		return amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' );
+	public static function is_sanitization_auto_accepted() {
+		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 	}
 
 	/**
@@ -317,7 +317,7 @@ class AMP_Validation_Manager {
 
 		if ( is_amp_endpoint() ) {
 			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
-		} elseif ( $error_count > 0 && ! self::is_sanitization_forcibly_accepted() ) {
+		} elseif ( $error_count > 0 && ! self::is_sanitization_auto_accepted() ) {
 			$icon = '&#x274C;'; // CROSS MARK.
 		} else {
 			$icon = '&#x1F517;'; // LINK SYMBOL.
@@ -357,7 +357,7 @@ class AMP_Validation_Manager {
 		$first_item_is_validate = (
 			amp_is_canonical()
 			||
-			( ! is_amp_endpoint() && $error_count > 0 && ! self::is_sanitization_forcibly_accepted() )
+			( ! is_amp_endpoint() && $error_count > 0 && ! self::is_sanitization_auto_accepted() )
 		);
 		if ( $first_item_is_validate ) {
 			$title          = __( 'Validate AMP', 'amp' );

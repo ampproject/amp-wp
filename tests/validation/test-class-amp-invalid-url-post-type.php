@@ -169,7 +169,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_get_invalid_url_validation_errors() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create();
@@ -433,7 +433,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		switch_theme( 'twentysixteen' );
 		update_option( 'active_plugins', array( 'foo/foo.php', 'bar.php' ) );
 		AMP_Options_Manager::update_option( 'accept_tree_shaking', true );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$old_env = AMP_Invalid_URL_Post_Type::get_validated_environment();
 		$this->assertArrayHasKey( 'theme', $old_env );
 		$this->assertArrayHasKey( 'plugins', $old_env );
@@ -624,7 +624,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		AMP_Validation_Manager::init();
 
@@ -750,7 +750,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_validate_request()
 	 */
 	public function test_handle_validate_request() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Manager::init();

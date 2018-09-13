@@ -257,15 +257,15 @@ class AMP_Options_Menu {
 				<div class="notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'Your install is configured via a theme or plugin to automatically sanitize any AMP validation error that is encountered.', 'amp' ); ?></p>
 				</div>
-				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[force_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'force_sanitization' ) ? 'on' : ''; ?>">
+				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ? 'on' : ''; ?>">
 			<?php else : ?>
 				<div class="amp-force-sanitize-canonical notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'All validation errors are forcibly accepted when in native mode.', 'amp' ); ?></p>
 				</div>
 				<div class="amp-force-sanitize">
 					<p>
-						<label for="force_sanitization">
-							<input id="force_sanitization" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[force_sanitization]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'force_sanitization' ) ); ?>>
+						<label for="auto_accept_sanitization">
+							<input id="auto_accept_sanitization" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ); ?>>
 							<?php esc_html_e( 'Automatically accept sanitization for any AMP validation error that is encountered.', 'amp' ); ?>
 						</label>
 					</p>
@@ -302,7 +302,7 @@ class AMP_Options_Menu {
 				};
 
 				var updateTreeShakingHiddenClass = function() {
-					var checkbox = $( '#force_sanitization' );
+					var checkbox = $( '#auto_accept_sanitization' );
 					$( '.amp-tree-shaking' ).toggleClass( 'hidden', checkbox.prop( 'checked' ) && 'native' !== getThemeSupportMode() );
 				};
 
@@ -315,7 +315,7 @@ class AMP_Options_Menu {
 				};
 
 				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
-				$( '#force_sanitization' ).change( updateTreeShakingHiddenClass );
+				$( '#auto_accept_sanitization' ).change( updateTreeShakingHiddenClass );
 
 				updateHiddenClasses();
 			})( jQuery );

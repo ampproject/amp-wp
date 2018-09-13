@@ -482,7 +482,7 @@ class AMP_Invalid_URL_Post_Type {
 			'theme'   => get_stylesheet(),
 			'plugins' => get_option( 'active_plugins', array() ),
 			'options' => array(
-				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ),
+				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ),
 			),
 		);
 	}
@@ -838,7 +838,7 @@ class AMP_Invalid_URL_Post_Type {
 			} else {
 				$template_mode = 'classic';
 			}
-			$auto_sanitization = AMP_Options_Manager::get_option( 'force_sanitization' );
+			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 
 			if ( 'native' === $template_mode ) {
 				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
@@ -1117,7 +1117,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_status_meta_box( $post ) {
-		$is_sanitization_forcibly_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
+		$is_sanitization_auto_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
 			'code' => 'does_not_exist',
 		) );
 
@@ -1140,7 +1140,7 @@ class AMP_Invalid_URL_Post_Type {
 							<?php esc_html_e( 'Recheck', 'amp' ); ?>
 						</a>
 					</div>
-					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() || $is_sanitization_forcibly_accepted_by_filter ) ) : ?>
+					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_auto_accepted() || $is_sanitization_auto_accepted_by_filter ) ) : ?>
 						<div id="preview-action">
 							<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
 						</div>
@@ -1260,7 +1260,7 @@ class AMP_Invalid_URL_Post_Type {
 			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['term_status'];
 		} ) );
 
-		$is_sanitization_forcibly_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
+		$is_sanitization_auto_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
 			'code' => 'does_not_exist',
 		) );
 
@@ -1276,7 +1276,7 @@ class AMP_Invalid_URL_Post_Type {
 		</style>
 
 		<?php if ( $has_unaccepted_errors ) : ?>
-			<?php if ( $is_sanitization_forcibly_accepted_by_filter || AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) : ?>
+			<?php if ( $is_sanitization_auto_accepted_by_filter || AMP_Validation_Manager::is_sanitization_auto_accepted() ) : ?>
 				<div class="notice notice-warning notice-alt inline">
 					<p>
 						<?php esc_html_e( 'This URL will be served served as valid AMP but some of the markup will be stripped from the response since it is not valid.', 'amp' ); ?>

@@ -135,7 +135,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Make sure should_locate_sources arg is recognized, as is disabling of tree-shaking.
 		remove_all_filters( 'amp_validation_error_sanitized' );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
 		AMP_Validation_Manager::init( array(
 			'should_locate_sources' => true,
@@ -157,28 +157,28 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	/**
 	 * Test add_validation_hooks.
 	 *
-	 * @covers AMP_Validation_Manager::is_sanitization_forcibly_accepted()
+	 * @covers AMP_Validation_Manager::is_sanitization_auto_accepted()
 	 */
-	public function test_is_sanitization_forcibly_accepted() {
+	public function test_is_sanitization_auto_accepted() {
 		remove_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		$this->assertFalse( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
 		remove_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'force_sanitization', true );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
 		add_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
 		add_theme_support( 'amp', array( 'paired' => true ) );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		$this->assertFalse( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
 		add_theme_support( 'amp', array( 'paired' => true ) );
-		AMP_Options_Manager::update_option( 'force_sanitization', true );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 	}
 
 	/**
@@ -187,7 +187,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_add_admin_bar_menu_items() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		// No admin bar item when user lacks capability.
 		$this->go_to( home_url( '/' ) );
@@ -379,7 +379,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_get_amp_validity_rest_field() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		AMP_Invalid_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
