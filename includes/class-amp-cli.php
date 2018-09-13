@@ -576,16 +576,21 @@ class AMP_CLI {
 			self::$wp_cli_progress->tick();
 		}
 
-		AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
+		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
+		AMP_Invalid_URL_Post_Type::store_validation_errors(
+			$validation_errors,
+			$validity['url'],
+			wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+		);
 		$unaccepted_error_count = count( array_filter(
-			$validity['validation_errors'],
+			$validation_errors,
 			function( $error ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
 				return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
 			}
 		) );
 
-		if ( count( $validity['validation_errors'] ) > 0 ) {
+		if ( count( $validation_errors ) > 0 ) {
 			self::$total_errors++;
 		}
 		if ( $unaccepted_error_count > 0 ) {

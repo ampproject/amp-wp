@@ -423,7 +423,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		// PUT request.
 		add_filter( 'pre_http_request', function() {
 			return array(
-				'body'     => '<html><body></body><!--AMP_VALIDATION_RESULTS:[]--></html>',
+				'body'     => '<html><body></body><!--AMP_VALIDATION:{"results":[]}--></html>',
 				'response' => array(
 					'code'    => 200,
 					'message' => 'ok',
@@ -1085,17 +1085,18 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 		AMP_Validation_Manager::$validation_results = $validation_results;
 
-		// should_validate_response() will be false, so finalize_validation() won't append the AMP_VALIDATION_RESULTS comment.
+		// should_validate_response() will be false, so finalize_validation() won't append the _RESULTS comment.
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertNotContains( 'AMP_VALIDATION_RESULTS:[', $dom->documentElement->lastChild->nodeValue );
+		$this->assertNotContains( 'AMP_VALIDATION:{', $dom->documentElement->lastChild->nodeValue );
 
-		// Ensure that should_validate_response() is true, so finalize_validation() will append the AMP_VALIDATION_RESULTS comment.
+		// Ensure that should_validate_response() is true, so finalize_validation() will append the AMP_VALIDATION comment.
 		$post = $this->factory()->post->create(); // WPCS: global override ok.
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
 		$this->set_capability();
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertContains( 'AMP_VALIDATION_RESULTS:[', $dom->documentElement->lastChild->nodeValue );
-		$this->assertContains( wp_json_encode( $validation_results, 128 ), $dom->documentElement->lastChild->nodeValue );
+		$this->assertTrue( (bool) preg_match( '#AMP_VALIDATION:({.+})#s', $dom->documentElement->lastChild->nodeValue, $matches ) );
+		$returned_valudation = json_decode( $matches[1], true );
+		$this->assertEquals( $validation_results, $returned_valudation['results'] );
 	}
 
 	/**
@@ -1132,22 +1133,25 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEquals( 'no_published_post_url_available', $r->get_error_code() );
 		remove_filter( 'amp_pre_get_permalink', '__return_empty_string' );
 
-		$validation_error   = array(
+		$validation_error = array(
 			'code' => 'example',
 		);
-		$validation_results = array(
-			array(
-				'error'     => $validation_error,
-				'sanitized' => false,
+
+		$validation = array(
+			'results' => array(
+				array(
+					'error'     => $validation_error,
+					'sanitized' => false,
+				),
 			),
 		);
 
 		$this->factory()->post->create();
-		$filter = function() use ( $validation_results ) {
+		$filter = function() use ( $validation ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_RESULTS:' . wp_json_encode( $validation_results )
+					'AMP_VALIDATION:' . wp_json_encode( $validation )
 				),
 			);
 		};
@@ -1199,23 +1203,24 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				),
 				$url
 			);
-			$validation_results = array();
+			$validation = array( 'results' => array() );
 			foreach ( $validation_errors as $error ) {
 				$sanitized            = false;
-				$validation_results[] = compact( 'error', 'sanitized' );
+				$validation['results'][] = compact( 'error', 'sanitized' );
 			}
 
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_RESULTS:' . wp_json_encode( $validation_results )
+					'AMP_VALIDATION:' . wp_json_encode( $validation )
 				),
 			);
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 		$r = AMP_Validation_Manager::validate_url( $validated_url );
 		$this->assertInternalType( 'array', $r );
-		$this->assertEquals( $validation_errors, $r['validation_errors'] );
+		$this->assertEquals( $validated_url, $r['url'] );
+		$this->assertEquals( $validation_errors, wp_list_pluck( $r['results'], 'error' ) );
 		remove_filter( 'pre_http_request', $filter );
 	}
 
