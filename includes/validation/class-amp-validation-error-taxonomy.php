@@ -823,7 +823,7 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) {
+		add_filter( 'terms_clauses', function( $clauses ) {
 			global $wpdb;
 
 			if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) { // WPCS: CSRF ok.
@@ -1363,7 +1363,7 @@ class AMP_Validation_Error_Taxonomy {
 					} else {
 						$class = 'accepted';
 					}
-					$text = esc_html( 'Accepted', 'amp' );
+					$text = __( 'Accepted', 'amp' );
 				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
 						$class = 'sanitized';
