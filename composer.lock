@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "33d4c9d9bf48285e6557d79a6b4b7601",
+    "content-hash": "539e80946c38e5b05a8aef89a8c50a09",
     "packages": [
         {
             "name": "sabberworm/php-css-parser",
-            "version": "dev-master",
+            "version": "dev-add/at-rule-before-after",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "bd0c481ba28ccd54bbbb1846a69ead237cd26cd8"
+                "reference": "53b0c2ba0895bd7c54e0e80b69d74a8237bad8a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/bd0c481ba28ccd54bbbb1846a69ead237cd26cd8",
-                "reference": "bd0c481ba28ccd54bbbb1846a69ead237cd26cd8",
+                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/53b0c2ba0895bd7c54e0e80b69d74a8237bad8a5",
+                "reference": "53b0c2ba0895bd7c54e0e80b69d74a8237bad8a5",
                 "shasum": ""
             },
             "require": {
@@ -48,9 +48,9 @@
                 "stylesheet"
             ],
             "support": {
-                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/master"
+                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/add/at-rule-before-after"
             },
-            "time": "2018-09-06 16:11:27"
+            "time": "2018-09-13 21:49:15"
         }
     ],
     "packages-dev": [
