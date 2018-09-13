@@ -658,8 +658,18 @@ class AMP_Invalid_URL_Post_Type {
 					$output  = array();
 
 					if ( isset( $sources['plugin'] ) ) {
-						$output[]                  = '<div class="source">';
-						$count                     = count( array_unique( $sources['plugin'] ) );
+						$output[]     = '<div class="source">';
+						$plugin_names = array();
+						$plugin_slugs = array_unique( $sources['plugin'] );
+						foreach ( $plugin_slugs as $plugin_slug ) {
+							$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_slug . '/' . $plugin_slug . '.php' );
+							if ( ! empty( $plugin_data ) && ! empty( $plugin_data['Name'] ) ) {
+								$plugin_names[] = $plugin_data['Name'];
+							} else {
+								$plugin_names[] = $plugin_slug;
+							}
+						}
+						$count                     = count( $plugin_slugs );
 						$sources_container_classes = 'sources-container sources-plugins';
 						if ( 1 === $count ) {
 							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span></span><strong>%s</strong><br/>', esc_html__( 'Plugin', 'amp' ) );
@@ -668,7 +678,7 @@ class AMP_Invalid_URL_Post_Type {
 							$sources_container_classes .= ' collapsed';
 						}
 						$output[] = '<div class="' . $sources_container_classes . '">';
-						$output[] = implode( '<br/>', array_unique( $sources['plugin'] ) );
+						$output[] = implode( '<br/>', array_unique( $plugin_names ) );
 						$output[] = '</div>';
 						$output[] = '</div>';
 					}
@@ -689,7 +699,11 @@ class AMP_Invalid_URL_Post_Type {
 					}
 					if ( isset( $sources['theme'] ) ) {
 						$output[] = '<div class="source">';
-						$output[] = sprintf( '<span class="dashicons dashicons-admin-appearance"></span><strong>%s</strong>', esc_html( $sources['theme']['name'] ) );
+						$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
+						$themes   = array_unique( $sources['theme'] );
+						foreach ( $themes as $theme_slug ) {
+							$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_slug ) );
+						}
 						$output[] = '</div>';
 					}
 					echo implode( '', $output ); // WPCS: XSS ok.
