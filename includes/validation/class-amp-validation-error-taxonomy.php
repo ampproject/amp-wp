@@ -197,13 +197,13 @@ class AMP_Validation_Error_Taxonomy {
 
 		register_taxonomy( self::TAXONOMY_SLUG, AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array(
 			'labels'             => array(
-				'name'                  => _x( 'Errors by Type', 'taxonomy general name', 'amp' ),
+				'name'                  => _x( 'AMP Validation Error Index', 'taxonomy general name', 'amp' ),
 				'singular_name'         => _x( 'AMP Validation Error', 'taxonomy singular name', 'amp' ),
 				'search_items'          => __( 'Search AMP Validation Errors', 'amp' ),
 				'all_items'             => __( 'All AMP Validation Errors', 'amp' ),
 				'edit_item'             => __( 'Edit AMP Validation Error', 'amp' ),
 				'update_item'           => __( 'Update AMP Validation Error', 'amp' ),
-				'menu_name'             => __( 'Errors by Type', 'amp' ),
+				'menu_name'             => __( 'Error Index', 'amp' ),
 				'back_to_items'         => __( 'Back to AMP Validation Errors', 'amp' ),
 				'popular_items'         => __( 'Frequent Validation Errors', 'amp' ),
 				'view_item'             => __( 'View Validation Error', 'amp' ),
@@ -899,7 +899,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the 'Errors by Type' taxonomy page, renders a link to the 'Errors by URL' page.
+	 * On the 'Error Index' taxonomy page, renders a link to the 'Errors by URL' page.
 	 *
 	 * @param string $taxonomy_name The name of the taxonomy.
 	 */
@@ -926,7 +926,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * There is a difference how the errors are counted, depending on which screen this is on.
 	 * For example: Accepted Errors (10).
 	 * This status filter <select> element is rendered on the validation error post page (Errors by URL),
-	 * and the validation error taxonomy page (Errors by Type).
+	 * and the validation error taxonomy page (Error Index).
 	 * On the taxonomy page, this simply needs to count the number of terms with a given type.
 	 * On the post page, this needs to count the number of posts that have at least one error of a given type.
 	 */
@@ -1080,7 +1080,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Renders the filter for error type.
 	 *
 	 * This type filter <select> element is rendered on the validation error post page (Errors by URL),
-	 * and the validation error taxonomy page (Errors by Type).
+	 * and the validation error taxonomy page (Error Index).
 	 */
 	public static function render_error_type_filter() {
 		$error_type_filter_value = isset( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ? sanitize_key( wp_unslash( $_GET[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] ) ) : ''; // WPCS: CSRF OK.
@@ -1270,7 +1270,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Show AMP validation errors under AMP admin menu.
 	 */
 	public static function add_admin_menu_validation_error_item() {
-		$menu_item_label = esc_html__( 'Errors by Type', 'amp' );
+		$menu_item_label = esc_html__( 'Error Index', 'amp' );
 		$new_error_count = self::get_validation_error_count( array(
 			'group' => self::VALIDATION_ERROR_NEW_STATUS,
 		) );

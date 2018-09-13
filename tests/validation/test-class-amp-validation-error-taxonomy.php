@@ -56,18 +56,18 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertFalse( $taxonomy_object->hierarchical );
 		$this->assertTrue( $taxonomy_object->show_in_menu );
 		$this->assertFalse( $taxonomy_object->meta_box_cb );
-		$this->assertEquals( 'Errors by Type', $taxonomy_object->label );
+		$this->assertEquals( 'AMP Validation Error Index', $taxonomy_object->label );
 		$this->assertEquals( 'do_not_allow', $taxonomy_object->cap->assign_terms );
 		$this->assertEquals( array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ), $taxonomy_object->object_type );
 
 		$labels = $taxonomy_object->labels;
-		$this->assertEquals( 'Errors by Type', $labels->name );
+		$this->assertEquals( 'AMP Validation Error Index', $labels->name );
 		$this->assertEquals( 'AMP Validation Error', $labels->singular_name );
 		$this->assertEquals( 'Search AMP Validation Errors', $labels->search_items );
 		$this->assertEquals( 'All AMP Validation Errors', $labels->all_items );
 		$this->assertEquals( 'Edit AMP Validation Error', $labels->edit_item );
 		$this->assertEquals( 'Update AMP Validation Error', $labels->update_item );
-		$this->assertEquals( 'Errors by Type', $labels->menu_name );
+		$this->assertEquals( 'Error Index', $labels->menu_name );
 		$this->assertEquals( 'Back to AMP Validation Errors', $labels->back_to_items );
 		$this->assertEquals( 'Frequent Validation Errors', $labels->popular_items );
 		$this->assertEquals( 'View Validation Error', $labels->view_item );
@@ -804,10 +804,10 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
 		$expected_submenu = array(
-			'Errors by Type',
+			'Error Index',
 			'manage_categories',
 			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
-			'Errors by Type',
+			'Error Index',
 		);
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
