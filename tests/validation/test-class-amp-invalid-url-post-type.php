@@ -219,7 +219,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary( $invalid_url_post_id );
 		$summary = ob_get_clean();
-		$this->assertContains( 'Identified: 1', $summary );
+		$this->assertContains( 'New: 1', $summary );
 		$this->assertContains( 'Accepted: 1', $summary );
 		$this->assertContains( 'Rejected: 1', $summary );
 	}

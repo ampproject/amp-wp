@@ -85,13 +85,13 @@ class AMP_Invalid_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'Errors by URL', 'post type general name', 'amp' ),
-					'menu_name'          => __( 'Errors by URL', 'amp' ),
-					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
-					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
-					'not_found_in_trash' => __( 'No forgotten invalid AMP pages', 'amp' ),
-					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
-					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
+					'name'               => _x( 'Invalid URLs', 'post type general name', 'amp' ),
+					'menu_name'          => __( 'Invalid URLs', 'amp' ),
+					'singular_name'      => __( 'Invalid URL', 'amp' ),
+					'not_found'          => __( 'No invalid URLs found', 'amp' ),
+					'not_found_in_trash' => __( 'No forgotten invalid URLs', 'amp' ),
+					'search_items'       => __( 'Search invalid URLs', 'amp' ),
+					'edit_item'          => __( 'Invalid URL', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -126,7 +126,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_post_list_screen_scripts' ) );
 
 		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
@@ -173,7 +173,7 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Enqueue style.
 	 */
-	public static function enqueue_admin_assets() {
+	public static function enqueue_post_list_screen_scripts() {
 		// Styles.
 		$screen = get_current_screen();
 		if ( 'edit-amp_invalid_url' !== $screen->id ) {
@@ -196,7 +196,8 @@ class AMP_Invalid_URL_Post_Type {
 			'amp-admin-tables',
 			'ampAdminTables',
 			array(
-				'errorsByTypeLink' => get_admin_url( null, 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' ),
+				'errorIndexLink'   => get_admin_url( null, 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' ),
+				'errorIndexAnchor' => esc_html__( 'View Error Index', 'amp' ),
 			)
 		);
 	}
@@ -318,23 +319,23 @@ class AMP_Invalid_URL_Post_Type {
 
 		$result = array();
 		if ( $counts['new'] ) {
-			if ( current_theme_supports( 'amp' ) && AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) {
+			if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) {
 				$icon = 'flag';
 			} else {
 				$icon = 'yes';
 			}
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="dashicons dashicons-%1$s identified"></span><span class="error-status identified">%2$s: %3$s</span>', 'amp' ),
-				$icon,
-				esc_html__( 'Identified', 'amp' ),
+				'<span class="dashicons dashicons-%1$s new"></span><span class="error-status new">%2$s: %3$s</span>',
+				esc_attr( $icon ),
+				esc_html__( 'New', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			);
 		}
 		if ( $counts['accepted'] ) {
 			$result[] = sprintf(
 				/* translators: 1. Title, 2. %s is count */
-				__( '<span class="amp-logo-icon"></span><span class="error-status accepted">%1$s: %2$s</span>', 'amp' ),
+				'<span class="amp-logo-icon"></span><span class="error-status accepted">%1$s: %2$s</span>',
 				esc_html__( 'Accepted', 'amp' ),
 				number_format_i18n( $counts['accepted'] )
 			);
@@ -342,7 +343,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '<span class="dashicons dashicons-warning rejected"></span><span class="error-status rejected">%1$s: %2$s</span>', 'amp' ),
+				'<span class="dashicons dashicons-warning rejected"></span><span class="error-status rejected">%1$s: %2$s</span>',
 				esc_html__( 'Rejected', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
 			);
@@ -583,7 +584,7 @@ class AMP_Invalid_URL_Post_Type {
 		$columns = array_merge(
 			$columns,
 			array(
-				'error_status' => sprintf( '%s<span class="dashicons dashicons-editor-help"></span>', esc_html__( 'Status', 'amp' ) ),  // @todo Create actual tooltip.
+				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf( '%s<span class="dashicons dashicons-editor-help"></span>', esc_html__( 'Status', 'amp' ) ),  // @todo Create actual tooltip.
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => sprintf( '%s<div class="double-arrow"><span class="dashicons dashicons-arrow-down top-arrow"></span><span class="dashicons dashicons-arrow-down bottom-arrow"></span></div>', esc_html__( 'Sources', 'amp' ) ),
 			)

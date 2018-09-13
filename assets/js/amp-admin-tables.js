@@ -9,7 +9,6 @@
 				this.sourcesHideShow();
 				this.allSourcesHideShow();
 				this.addViewErrorsByTypeLinkButton();
-				this.boldURLInPageTitle();
 			}, this ) );
 		},
 
@@ -29,16 +28,11 @@
 		},
 
 		addViewErrorsByTypeLinkButton: function() {
-			$( '.wp-heading-inline' ).after( '<a href="' + ampAdminTables.errorsByTypeLink + '" class="page-title-action">View errors by <strong>Type</strong></a>' );
-		},
-
-		boldURLInPageTitle: function() {
-			var $heading = $( 'h1.wp-heading-inline' ),
-				words = $heading.text().split( ' ' );
-			words = words.map( function( item ) {
-				return item === 'URL' ? '<strong>' + item + '</strong>' : item;
-			} );
-			$heading.html( words.join( ' ' ) );
+			var link = $( '<a></a>' );
+			link.prop( 'text', ampAdminTables.errorIndexAnchor );
+			link.prop( 'href', ampAdminTables.errorIndexLink );
+			link.prop( 'class', 'page-title-action' );
+			$( '.wp-heading-inline' ).after( link );
 		}
 	};
 

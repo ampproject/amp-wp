@@ -38,10 +38,10 @@
 td.column-found_elements_and_attributes {
 	color: #c06e60;
 }
-.column-error_status .dashicons-flag.identified {
+.column-error_status .dashicons-flag.new {
 	color: #d98501;
 }
-.column-error_status .dashicons-yes.identified {
+.column-error_status .dashicons-yes.new {
 	color: #ff0000;
 }
 .column-error_status .dashicons-warning.rejected {
