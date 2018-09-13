@@ -585,12 +585,12 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function add_single_post_columns( $old_columns ) {
 		return array(
-			'cb'      => '<input type="checkbox" />',
-			'error'   => __( 'Error', 'amp' ),
-			'status'  => __( 'Status', 'amp' ),
-			'details' => __( 'Details', 'amp' ),
-			'sources' => __( 'Sources', 'amp' ),
-			'type'    => __( 'Error Type', 'amp' ),
+			'cb'         => '<input type="checkbox" />',
+			'error'      => __( 'Error', 'amp' ),
+			'status'     => __( 'Status', 'amp' ),
+			'details'    => __( 'Details', 'amp' ),
+			'sources'    => __( 'Sources', 'amp' ),
+			'error_type' => __( 'Error Type', 'amp' ),
 		);
 	}
 
@@ -1360,6 +1360,10 @@ class AMP_Invalid_URL_Post_Type {
 
 			.curtime.misc-pub-section {
 				margin-top: 0.5rem;
+			}
+
+			.wp-list-table th.column-status {
+				width: 15%;
 			}
 		</style>
 		<?php

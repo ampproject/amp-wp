@@ -1,0 +1,138 @@
+#col-left {
+	display: none;
+}
+#col-right {
+	float: none;
+	width: auto;
+}
+
+/* Improve column widths */
+td.column-details pre,
+td.column-sources pre {
+	overflow: auto;
+}
+
+th.column-created_date_gmt,
+th.column-error_type {
+	width: 15%;
+}
+
+th.column-status {
+	width: 10%;
+}
+
+.fixed th.column-posts {
+	width: 10%;
+}
+
+/* Details column */
+.details-attributes__summary {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+details[open] .details-attributes__summary {
+	font-weight: 600;
+	margin-bottom: 15px;
+}
+
+.details-attributes__summary::-webkit-details-marker {
+	display: none;
+}
+
+.details-attributes__summary::after {
+	order: 99;
+	width: 12px;
+	height: 12px;
+	background-image: url("../images/down-triangle.svg");
+	background-size: cover;
+	background-position: center;
+	content: "";
+}
+
+details[open] .details-attributes__summary::after {
+	transform: rotate(180deg);
+}
+
+.details-attributes__title,
+.details-attributes__attr {
+	color: #dc3232;
+}
+
+.details-attributes__list {
+	margin-top: 0;
+	padding-left: 45px;
+	list-style-type: disc;
+}
+
+.details-attributes__list li {
+	word-break: break-all;
+}
+
+.details-attributes__value {
+	color: #00a0d2;
+}
+
+/* Error details toggle button */
+.manage-column.column-details {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.error-details-toggle {
+	display: flex;
+	flex-direction: column;
+	height: 12px;
+	margin-right: 10px;
+	padding: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+}
+
+.error-details-toggle.is-open {
+	transform: rotate(180deg);
+}
+
+.error-details-toggle::before,
+.error-details-toggle::after {
+	width: 12px;
+	height: 12px;
+	background-image: url("../images/down-triangle.svg");
+	background-size: cover;
+	background-position: center;
+	content: "";
+}
+
+/* Status text icons */
+.status-text {
+	display: flex;
+	align-items: center;
+}
+
+.status-text::before {
+	margin-right: 10px;
+	background-size: 20px 20px;
+	height: 20px;
+	width: 20px;
+	content: "";
+}
+
+.status-text.sanitized::before {
+	background-image: url( '../images/amp-logo-icon.svg' );
+}
+
+.status-text.new::before {
+	background-image: url( '../images/baseline-error.svg' );
+}
+
+.status-text.accepted::before {
+	background-image: url( '../images/baseline-check-circle-green.svg' );
+}
+
+.status-text.rejected::before {
+	background-image: url( '../images/baseline-error-blue.svg' );
+}
+

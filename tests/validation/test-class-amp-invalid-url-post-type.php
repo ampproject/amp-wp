@@ -512,12 +512,12 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_add_single_post_columns() {
 		$expected_columns = array(
-			'cb'      => '<input type="checkbox" />',
-			'error'   => 'Error',
-			'status'  => 'Status',
-			'details' => 'Details',
-			'sources' => 'Sources',
-			'type'    => 'Error Type',
+			'cb'         => '<input type="checkbox" />',
+			'error'      => 'Error',
+			'status'     => 'Status',
+			'details'    => 'Details',
+			'sources'    => 'Sources',
+			'error_type' => 'Error Type',
 		);
 
 		// The $expected_columns are returned, regardless of what is passed to the filter.
@@ -1308,7 +1308,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		}
 
 		$new_error_count               = sprintf(
-			'New Errors <span class="count">(%d)</span>',
+			'With New Errors <span class="count">(%d)</span>',
 			$number_of_errors
 		);
 		$correct_post_type             = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
