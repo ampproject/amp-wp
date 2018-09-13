@@ -480,7 +480,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 				$initial_columns,
 				array(
 					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status<span class="dashicons dashicons-editor-help"></span>',
-					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Incompatible Sources',
+					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources<div class="double-arrow"><span class="dashicons dashicons-arrow-down top-arrow"></span><span class="dashicons dashicons-arrow-down bottom-arrow"></span></div>',
 					AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
 				)
 			),
@@ -514,11 +514,11 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		return array(
 			'invalid_element'       => array(
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT,
-				'script',
+				'<div class="source"><span class="dashicons dashicons-admin-plugins"></span></span><strong>Plugin</strong><br/><div class="sources-container sources-plugins">amp</div></div>',
 				$errors,
 			),
 			'removed_attributes'    => array(
-				AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES,
+				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES,
 				'onclick',
 				$errors,
 			),
