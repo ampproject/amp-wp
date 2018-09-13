@@ -1404,7 +1404,7 @@ class AMP_Validation_Error_Taxonomy {
 						<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
 							<option value="">
 								&#x1F6A9;
-								<?php esc_html_e( 'Identified', 'amp' ); ?>
+								<?php esc_html_e( 'New', 'amp' ); ?>
 							</option>
 						<?php endif; ?>
 						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACCEPTED_STATUS, $term->term_group ); ?>>

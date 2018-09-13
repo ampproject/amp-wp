@@ -884,9 +884,15 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
 		$this->assertEquals( $initial_content . '<p><a href="' . $url . '"><code>illegal_css_at_rule</code></a>: <code>@-ms-viewport</code></p>', $filtered_content );
 
-		// Test the 'status' block in the switch.
-		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
+		// Test the 'status' block in the switch for the error taxonomy page.
+		$GLOBALS['pagenow'] = 'edit-tags.php'; // WPCS: Global override OK.
+		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
 		$this->assertContains( $initial_content . '<span class="status-text new">New</span>', $filtered_content );
+
+		// Test the 'status' block switch for the single error page.
+		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
+		$this->assertContains( '<select class="amp-validation-error-status" id="amp_validation_error_term_status', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );
