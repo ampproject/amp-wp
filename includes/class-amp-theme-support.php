@@ -494,7 +494,7 @@ class AMP_Theme_Support {
 				$is_match = call_user_func( $callback, $query );
 			} else {
 				/* translators: %s: the supportable template ID. */
-				_doing_it_wrong( __FUNCTION__, esc_html__( 'Supportable template "%s" does not have a callable callback.', 'amp' ), '1.0' );
+				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Supportable template "%s" does not have a callable callback.', 'amp' ), $id ) ), '1.0' );
 				$is_match = false;
 			}
 

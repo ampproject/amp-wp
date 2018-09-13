@@ -186,6 +186,11 @@ class AMP_Validation_Manager {
 
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
 
+		// Add filter to auto-accept tree shaking validation error.
+		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
+			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_accepted' ), 10, 2 );
+		}
+
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
 		}
@@ -213,6 +218,20 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_forcibly_accepted() {
 		return amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' );
+	}
+
+	/**
+	 * Filter a tree-shaking validation error as accepted for sanitization.
+	 *
+	 * @param bool  $sanitized Sanitized.
+	 * @param array $error     Error.
+	 * @return bool Sanitized.
+	 */
+	public static function filter_tree_shaking_validation_error_as_accepted( $sanitized, $error ) {
+		if ( AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] ) {
+			$sanitized = true;
+		}
+		return $sanitized;
 	}
 
 	/**
@@ -467,14 +486,32 @@ class AMP_Validation_Manager {
 	/**
 	 * Handle save_post action to queue re-validation of the post on the frontend.
 	 *
+	 * This is intended to only apply to post edits made in the classic editor.
+	 *
+	 * @see AMP_Validation_Manager::get_amp_validity_rest_field() The method responsible for validation post changes via Gutenberg.
 	 * @see AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 *
 	 * @param int $post_id Post ID.
 	 */
 	public static function handle_save_post_prompting_validation( $post_id ) {
+		global $pagenow;
 		$post = get_post( $post_id );
 
+		$is_classic_editor_post_save = (
+			isset( $_SERVER['REQUEST_METHOD'] )
+			&&
+			'POST' === $_SERVER['REQUEST_METHOD']
+			&&
+			'post.php' === $pagenow
+			&&
+			isset( $_POST['post_ID'] ) // WPCS: csrf ok.
+			&&
+			intval( $_POST['post_ID'] ) === (int) $post_id // WPCS: csrf ok.
+		);
+
 		$should_validate_post = (
+			$is_classic_editor_post_save
+			&&
 			is_post_type_viewable( $post->post_type )
 			&&
 			! wp_is_post_autosave( $post )
@@ -512,7 +549,10 @@ class AMP_Validation_Manager {
 
 		$validation_posts = array();
 
-		// @todo Only validate the first and then queue the rest in WP Cron?
+		/*
+		 * It is unlikely that there will be more than one post in the array.
+		 * For the bulk recheck action, see AMP_Invalid_URL_Post_Type::handle_bulk_action().
+		 */
 		foreach ( $posts as $post ) {
 			$url = amp_get_permalink( $post->ID );
 			if ( ! $url ) {
@@ -529,7 +569,16 @@ class AMP_Validation_Manager {
 			} else {
 				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_invalid_url_post_id', true ) );
 
-				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'], $invalid_url_post_id );
+				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors(
+					wp_list_pluck( $validity['results'], 'error' ),
+					$validity['url'],
+					array_merge(
+						array(
+							'invalid_url_post' => $post,
+						),
+						wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+					)
+				);
 
 				// Remember the amp_invalid_url post so that when the slug changes the old amp_invalid_url post can be updated.
 				if ( ! is_wp_error( $validation_posts[ $post->ID ] ) && $invalid_url_post_id !== $validation_posts[ $post->ID ] ) {
@@ -689,7 +738,13 @@ class AMP_Validation_Manager {
 		 */
 		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
-		$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+		$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+		$sanitized    = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+
+		// Ignore validation errors which are forcibly sanitized by filter or in special case if it is a tree shaking error and this is accepted by options.
+		if ( $sanitized && 'with_filter' === $sanitization['forced'] ) {
+			return true;
+		}
 
 		// Add sources back into the $error for referencing later. @todo It may be cleaner to store sources separately to avoid having to re-remove later during storage.
 		$error = array_merge( $error, compact( 'sources' ) );
@@ -1478,7 +1533,12 @@ class AMP_Validation_Manager {
 			$error_count = 0;
 			foreach ( self::$validation_results as $validation_result ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'] ) {
+
+				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['status']
+					:
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
+				if ( $is_unaccepted ) {
 					$error_count++;
 				}
 			}
@@ -1514,9 +1574,28 @@ class AMP_Validation_Manager {
 			}
 
 			if ( $args['append_validation_status_comment'] ) {
-				$encoded = wp_json_encode( self::$validation_results, 128 /* JSON_PRETTY_PRINT */ );
+				$data = array(
+					'results' => self::$validation_results,
+				);
+				if ( get_queried_object() ) {
+					$data['queried_object'] = array();
+					if ( get_queried_object_id() ) {
+						$data['queried_object']['id'] = get_queried_object_id();
+					}
+					if ( get_queried_object() instanceof WP_Post ) {
+						$data['queried_object']['type'] = 'post';
+					} elseif ( get_queried_object() instanceof WP_Term ) {
+						$data['queried_object']['type'] = 'term';
+					} elseif ( get_queried_object() instanceof WP_User ) {
+						$data['queried_object']['type'] = 'user';
+					} elseif ( get_queried_object() instanceof WP_Post_Type ) {
+						$data['queried_object']['type'] = 'post_type';
+					}
+				}
+
+				$encoded = wp_json_encode( $data, 128 /* JSON_PRETTY_PRINT */ );
 				$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
-				$comment = $dom->createComment( 'AMP_VALIDATION_RESULTS:' . $encoded . "\n" );
+				$comment = $dom->createComment( 'AMP_VALIDATION:' . $encoded . "\n" );
 				$dom->documentElement->appendChild( $comment );
 			}
 		}
@@ -1578,13 +1657,18 @@ class AMP_Validation_Manager {
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
 		}
-		if ( is_array( $validity ) && count( $validity['validation_errors'] ) > 0 ) {
-			AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
-			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validity['validation_errors'], 60 );
+		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
+		if ( is_array( $validity ) && count( $validation_errors ) > 0 ) { // @todo This should only warn when there are unaccepted validation errors.
+			AMP_Invalid_URL_Post_Type::store_validation_errors(
+				$validation_errors,
+				$validity['url'],
+				wp_array_slice_assoc( $validity, array( 'queried_object_id', 'queried_object_type' ) )
+			);
+			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
 		} else {
 			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
 		}
-		return $validity['validation_errors'];
+		return $validation_errors;
 	}
 
 	/**
@@ -1597,8 +1681,10 @@ class AMP_Validation_Manager {
 	 * @return WP_Error|array {
 	 *     Response.
 	 *
-	 *     @type array  $validation_errors Validation errors.
-	 *     @type string $url               Final URL that was checked or redirected to.
+	 *     @type array  $results             Validation results, where each nested array contains an error key and sanitized key.
+	 *     @type string $url                 Final URL that was checked or redirected to.
+	 *     @type int    $queried_object_id   Queried object ID.
+	 *     @type string $queried_object_type Queried object type.
 	 * }
 	 */
 	public static function validate_url( $url ) {
@@ -1679,15 +1765,18 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION_RESULTS\s*:\s*(\[.*?\])\s*-->#s', $response, $matches ) ) {
+		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION\s*:\s*(\{.*?\})\s*-->#s', $response, $matches ) ) {
 			return new WP_Error( 'response_comment_absent' );
 		}
-		$validation_results = json_decode( $matches[1], true );
-		if ( ! is_array( $validation_results ) ) {
+		$validation = json_decode( $matches[1], true );
+		if ( json_last_error() || ! isset( $validation['results'] ) || ! is_array( $validation['results'] ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
-		$validation_errors = wp_list_pluck( $validation_results, 'error' );
-		return compact( 'validation_errors', 'url' );
+
+		return array_merge(
+			$validation,
+			compact( 'url' )
+		);
 	}
 
 	/**
@@ -1742,7 +1831,7 @@ class AMP_Validation_Manager {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'underscore' ),
+			array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ),
 			AMP__VERSION,
 			true
 		);

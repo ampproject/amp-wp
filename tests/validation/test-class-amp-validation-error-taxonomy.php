@@ -56,18 +56,18 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertFalse( $taxonomy_object->hierarchical );
 		$this->assertTrue( $taxonomy_object->show_in_menu );
 		$this->assertFalse( $taxonomy_object->meta_box_cb );
-		$this->assertEquals( 'Errors by Type', $taxonomy_object->label );
+		$this->assertEquals( 'AMP Validation Error Index', $taxonomy_object->label );
 		$this->assertEquals( 'do_not_allow', $taxonomy_object->cap->assign_terms );
 		$this->assertEquals( array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ), $taxonomy_object->object_type );
 
 		$labels = $taxonomy_object->labels;
-		$this->assertEquals( 'Errors by Type', $labels->name );
+		$this->assertEquals( 'AMP Validation Error Index', $labels->name );
 		$this->assertEquals( 'AMP Validation Error', $labels->singular_name );
 		$this->assertEquals( 'Search AMP Validation Errors', $labels->search_items );
 		$this->assertEquals( 'All AMP Validation Errors', $labels->all_items );
 		$this->assertEquals( 'Edit AMP Validation Error', $labels->edit_item );
 		$this->assertEquals( 'Update AMP Validation Error', $labels->update_item );
-		$this->assertEquals( 'Errors by Type', $labels->menu_name );
+		$this->assertEquals( 'Error Index', $labels->menu_name );
 		$this->assertEquals( 'Back to AMP Validation Errors', $labels->back_to_items );
 		$this->assertEquals( 'Frequent Validation Errors', $labels->popular_items );
 		$this->assertEquals( 'View Validation Error', $labels->view_item );
@@ -135,6 +135,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::is_validation_error_sanitized()
 	 */
 	public function test_is_validation_error_sanitized() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $this->get_mock_error() ) );
 
 		// Trigger Native AMP, which makes all errors accepted.
@@ -148,6 +149,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 */
 	public function test_get_validation_error_sanitization() {
+		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		$this->assertEquals(
 			array(
 				'forced'      => false,
@@ -370,6 +372,21 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
+
+		$cb              = '<input type="checkbox" />';
+		$initial_columns = array( 'cb' => $cb );
+		$this->assertEquals(
+			array(
+				'cb'               => $cb,
+				'error'            => 'Error',
+				'status'           => 'Status',
+				'details'          => 'Details',
+				'created_date_gmt' => 'Last Seen',
+				'posts'            => 'Found URLs',
+				'error_type'       => 'Type',
+			),
+			apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+		);
 
 		// Assert that the 'query_vars' callback adds these query vars.
 		$this->assertEmpty( array_diff(
@@ -787,13 +804,26 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
 		$expected_submenu = array(
-			'Errors by Type',
+			'Error Index',
 			'manage_categories',
 			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
-			'Errors by Type',
+			'Error Index',
 		);
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
+	}
+
+	/**
+	 * Test get_reader_friendly_error_type_text.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text()
+	 */
+	public function test_get_reader_friendly_error_type_text() {
+		$this->assertEquals( 'JavaScript', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'js_error' ) );
+		$this->assertEquals( 'HTML (Element)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_element_error' ) );
+		$this->assertEquals( 'HTML (Attribute)', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'html_attribute_error' ) );
+		$this->assertEquals( 'CSS', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'css_error' ) );
+		$this->assertEquals( 'some_other_error', AMP_Validation_Error_Taxonomy::get_reader_friendly_error_type_text( 'some_other_error' ) );
 	}
 
 	/**
@@ -810,13 +840,19 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			'description' => wp_json_encode( $validation_error ),
 		) );
 
+		$term = get_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+
+		$url = admin_url( add_query_arg( array(
+			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->name,
+			'post_type'                                  => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+		), 'edit.php' ) );
 		// Test the 'error' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<p><code>illegal_css_at_rule</code></p>', $filtered_content );
+		$this->assertEquals( $initial_content . '<p><a href="' . $url . '"><code>illegal_css_at_rule</code></a>: <code>@-ms-viewport</code></p>', $filtered_content );
 
 		// Test the 'status' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertEquals( '&#x2753; New', $filtered_content );
+		$this->assertEquals( $initial_content . '<span class="status-text new">New</span>', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );

@@ -6,7 +6,6 @@
   "type": "git",
   "url": "https://github.com/Automattic/amp-wp.git"
  },
- "version": "1.0.0",
  "license": "GPL-2.0+",
  "private": true,
  "devDependencies": {
@@ -33,7 +32,7 @@
  "main": "blocks/index.js",
  "scripts": {
   "pot-to-php": "pot-to-php languages/amp-js.pot languages/amp-translations.php amp",
-  "build": "grunt build; grunt create-build-zip",
+  "build": "grunt build && grunt create-build-zip",
   "deploy": "grunt deploy",
   "dev": "cross-env BABEL_ENV=default webpack --watch"
  }
