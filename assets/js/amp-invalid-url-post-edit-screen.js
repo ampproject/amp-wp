@@ -100,26 +100,24 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * If 'All Error Types' is selected, this displays all errors.
 	 */
 	component.handleFiltering = function handleFiltering() {
-		var onClick = function( event ) {
-			var filterValue,
-				numberErrorsDisplaying = 0;
+		var onChange = function( event ) {
+			var numberErrorsDisplaying = 0;
 
-			if ( ! event.target.matches( 'input' ) ) {
+			if ( ! event.target.matches( 'select' ) ) {
 				return;
 			}
 
 			event.preventDefault();
-			filterValue = document.getElementById( 'amp_validation_error_type' ).value;
 
 			/*
 			 * Iterate through all of the <tr> elements in the list table.
-			 * If their error type does not match the filterValue (selected error type), hide them.
+			 * If the error type does not match the value (selected error type), hide them.
 			 */
 			document.querySelectorAll( '[data-error-type]' ).forEach( function( element ) {
 				var errorType = element.getAttribute( 'data-error-type' );
 
-				// If the filterValue is '-1', 'All Error Types' was selected.
-				if ( filterValue === errorType || '-1' === filterValue ) {
+				// If the value is '-1', 'All Error Types' was selected, and this should display all errors.
+				if ( event.target.value === errorType || '-1' === event.target.value ) {
 					element.parentElement.parentElement.classList.remove( 'hidden' );
 					numberErrorsDisplaying++;
 				} else {
@@ -130,7 +128,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			component.updateShowingErrorsRow( numberErrorsDisplaying );
 		};
 
-		document.getElementById( 'doaction' ).addEventListener( 'click', onClick );
+		document.getElementById( 'amp_validation_error_type' ).addEventListener( 'change', onChange );
 	};
 
 	return component;

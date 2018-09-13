@@ -1340,7 +1340,6 @@ class AMP_Invalid_URL_Post_Type {
 		</form>
 		<div id="url-post-filter" class="alignleft actions">
 			<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
-			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
 		</div>
 
 		<form id="posts-filter" method="post">
