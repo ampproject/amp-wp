@@ -635,10 +635,10 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
 			return array(
 				'cb'               => $old_columns['cb'],
-				'error'            => __( 'Error Inventory', 'amp' ),
+				'error'            => __( 'Error', 'amp' ),
 				'status'           => __( 'Status', 'amp' ),
 				'details'          => __( 'Details', 'amp' ),
-				'error_type'       => __( 'Error Type', 'amp' ),
+				'error_type'       => __( 'Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
 				'posts'            => __( 'Found URLs', 'amp' ),
 			);
@@ -1229,6 +1229,15 @@ class AMP_Validation_Error_Taxonomy {
 			 * list table. A cron job could periodically delete terms that have no counts.
 			 */
 			unset( $actions['delete'] );
+
+			$actions['details'] = sprintf(
+				'<a href="%s">%s</a>',
+				admin_url( add_query_arg( array(
+					self::TAXONOMY_SLUG => $term->name,
+					'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				), 'edit.php' ) ),
+				esc_html__( 'Details', 'amp' )
+			);
 
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
 			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['term_status'] ) {
