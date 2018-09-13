@@ -346,10 +346,23 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			$invalid_url_post_id,
 			AMP_Invalid_URL_Post_Type::store_validation_errors(
 				$errors,
-				get_permalink( $post )
+				get_permalink( $post ),
+				array(
+					'queried_object' => array(
+						'type' => 'post',
+						'id'   => $post->ID,
+					),
+				)
 			)
 		);
 		$this->assertEquals( 'publish', get_post_status( $invalid_url_post_id ) );
+		$this->assertEquals(
+			array(
+				'type' => 'post',
+				'id'   => $post->ID,
+			),
+			get_post_meta( $invalid_url_post_id, '_amp_queried_object', true )
+		);
 
 		// Test passing specific post to override the URL.
 		$this->assertEquals(
@@ -357,7 +370,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			AMP_Invalid_URL_Post_Type::store_validation_errors(
 				$errors,
 				home_url( '/something/else/' ),
-				$invalid_url_post_id
+				array(
+					'invalid_url_post' => $invalid_url_post_id,
+				)
 			)
 		);
 
@@ -659,14 +674,16 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_RESULTS:' . wp_json_encode( array_map(
-						function( $error ) {
-							return array_merge(
-								compact( 'error' ),
-								array( 'sanitized' => false )
-							);
-						},
-						$that->get_mock_errors()
+					'AMP_VALIDATION:' . wp_json_encode( array(
+						'results' => array_map(
+							function( $error ) {
+								return array_merge(
+									compact( 'error' ),
+									array( 'sanitized' => false )
+								);
+							},
+							$that->get_mock_errors()
+						),
 					) )
 				),
 			);
@@ -782,14 +799,16 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_RESULTS:' . wp_json_encode( array_map(
-						function( $error ) {
-							return array_merge(
-								compact( 'error' ),
-								array( 'sanitized' => false )
-							);
-						},
-						$that->get_mock_errors()
+					'AMP_VALIDATION:' . wp_json_encode( array(
+						'results' => array_map(
+							function( $error ) {
+								return array_merge(
+									compact( 'error' ),
+									array( 'sanitized' => false )
+								);
+							},
+							$that->get_mock_errors()
+						),
 					) )
 				),
 			);
@@ -905,8 +924,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_RESULTS:' . wp_json_encode(
-						array(
+					'AMP_VALIDATION:' . wp_json_encode( array(
+						'results' => array(
 							array(
 								'sanitized' => false,
 								'error'     => array(
@@ -919,8 +938,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 									'code' => 'baz',
 								),
 							),
-						)
-					)
+						),
+					) )
 				),
 			);
 		} );
@@ -964,14 +983,14 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION_RESULTS:' . wp_json_encode(
-						array(
+					'AMP_VALIDATION:' . wp_json_encode( array(
+						'results' => array(
 							array(
 								'sanitized' => false,
 								'error'     => $error,
 							),
-						)
-					)
+						),
+					) )
 				),
 			);
 		} );
