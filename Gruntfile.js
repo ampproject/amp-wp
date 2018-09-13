@@ -46,7 +46,7 @@ module.exports = function( grunt ) {
 				command: 'cross-env BABEL_ENV=production webpack'
 			},
 			pot_to_php: {
-				command: 'npm run pot-to-php'
+				command: 'npm run pot-to-php && php -l languages/amp-translations.php'
 			},
 			makepot: {
 				command: 'wp i18n make-pot . languages/amp-js.pot --include="*.js" --file-comment="*/\\\'\\\'/*"'
