@@ -180,7 +180,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		$query = new WP_Query( array(
 			'post_type'              => self::POST_TYPE_SLUG,
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		) );
@@ -243,7 +243,7 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $stored_validation_error['data'] );
-			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
+			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'] ) {
 				continue;
 			}
 
@@ -272,13 +272,13 @@ class AMP_Invalid_URL_Post_Type {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		foreach ( $validation_errors as $error ) {
 			switch ( $error['term']->term_group ) {
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS:
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
 					$counts['new']++;
 					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS:
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
 					$counts['accepted']++;
 					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS:
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
 					$counts['rejected']++;
 					break;
 			}
@@ -394,6 +394,10 @@ class AMP_Invalid_URL_Post_Type {
 				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
 				$term = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 				if ( ! ( $term instanceof WP_Term ) ) {
+					/*
+					 * The default term_group is 0 so that is AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS.
+					 * If sanitization auto-acceptance is enabled, then the term_group will be updated below.
+					 */
 					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
 					if ( is_wp_error( $r ) ) {
 						continue;
@@ -407,10 +411,15 @@ class AMP_Invalid_URL_Post_Type {
 					 */
 					$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $data );
 					if ( 'with_filter' === $sanitization['forced'] ) {
+						$term_data['term_group'] = $sanitization['status'];
 						wp_update_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
 							'term_group' => $sanitization['status'],
 						) );
-						$term_data['term_group'] = $sanitization['status'];
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() ) {
+						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
+						wp_update_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
+							'term_group' => $term_data['term_group'],
+						) );
 					}
 
 					$term = get_term( $term_id );
@@ -1257,7 +1266,7 @@ class AMP_Invalid_URL_Post_Type {
 		$url = self::get_url_from_post( $post );
 
 		$has_unaccepted_errors = 0 !== count( array_filter( $validation_errors, function( $validation_error ) {
-			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_error['term_status'];
+			return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_error['term_status'];
 		} ) );
 
 		$is_sanitization_auto_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
@@ -1346,28 +1355,28 @@ class AMP_Invalid_URL_Post_Type {
 					$select_name       = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 					?>
 					<li>
-						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) ? 'open' : ''; ?>>
+						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term']->term_group ) ? 'open' : ''; ?>>
 							<summary>
 								<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 									<?php esc_html_e( 'Status:', 'amp' ); ?>
 								</label>
 								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
-									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS === $error['term']->term_group ) : ?>
+									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term']->term_group ) : ?>
 										<option value="">
 											&#x2753;
 											<?php esc_html_e( 'New', 'amp' ); ?>
 										</option>
 									<?php endif; ?>
-									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS, $error['term']->term_group ); ?>>
-										<?php if ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $error['status'] ) : ?>
+									<option value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, $error['term']->term_group ); ?>>
+										<?php if ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] ) : ?>
 											&#x1F6A9;
 										<?php else : ?>
 											&#x2705;
 										<?php endif; ?>
 										<?php esc_html_e( 'Accepted', 'amp' ); ?>
 									</option>
-									<option style="text-decoration: line-through" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS, $error['term']->term_group ); ?>>
-										<?php if ( amp_is_canonical() || ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $error['status'] ) ) : ?>
+									<option style="text-decoration: line-through" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, $error['term']->term_group ); ?>>
+										<?php if ( amp_is_canonical() || ( $error['forced'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $error['status'] ) ) : ?>
 											&#x1F6A9;
 										<?php else : ?>
 											&#x274C;
@@ -1571,7 +1580,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		$query = new WP_Query( array(
 			'post_type'              => self::POST_TYPE_SLUG,
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		) );
@@ -1583,7 +1592,7 @@ class AMP_Invalid_URL_Post_Type {
 					add_query_arg(
 						array(
 							'post_type' => self::POST_TYPE_SLUG,
-							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 						),
 						'edit.php'
 					)

@@ -260,8 +260,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$validation_error_term_2 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( array( 'test' => 2 ) );
 		$_REQUEST[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
 		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = array(
-			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 		);
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$this->assertCount( 2, AMP_Validation_Manager::$validation_error_status_overrides );
@@ -425,8 +425,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 					return array(
 						'sanitized'   => false,
 						'error'       => $error,
-						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 						'forced'      => false,
 					);
 				},

@@ -304,7 +304,7 @@ class AMP_Validation_Manager {
 				if ( $amp_invalid_url_post ) {
 					$error_count = 0;
 					foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post ) as $error ) {
-						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['term_status'] ) {
+						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $error['term_status'] ) {
 							$error_count++;
 						}
 					}
@@ -662,7 +662,7 @@ class AMP_Validation_Manager {
 			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
 			foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = array(
-					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['status'],
+					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
 					'error'       => $result['data'],
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
@@ -739,7 +739,7 @@ class AMP_Validation_Manager {
 		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
 		$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-		$sanitized    = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+		$sanitized    = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'];
 
 		// Ignore validation errors which are forcibly sanitized by filter or in special case if it is a tree shaking error and this is accepted by options.
 		if ( $sanitized && 'with_filter' === $sanitization['forced'] ) {
@@ -796,9 +796,9 @@ class AMP_Validation_Manager {
 		$has_actually_unaccepted_error = false;
 		$validation_errors             = array();
 		foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
-			if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['term_status'] ) {
+			if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $error['term_status'] ) {
 				$validation_errors[] = $error['data'];
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['status'] ) {
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $error['status'] ) {
 					$has_actually_unaccepted_error = true;
 				}
 			}
@@ -1535,9 +1535,9 @@ class AMP_Validation_Manager {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
 
 				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['status']
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['status']
 					:
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
 				if ( $is_unaccepted ) {
 					$error_count++;
 				}
