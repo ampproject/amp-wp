@@ -259,18 +259,19 @@ class AMP_Options_Menu {
 				</div>
 				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ? 'on' : ''; ?>">
 			<?php else : ?>
-				<div class="amp-force-sanitize-canonical notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'All validation errors are forcibly accepted when in native mode.', 'amp' ); ?></p>
+				<div class="amp-auto-accept-sanitize-canonical notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'All new validation errors are automatically accepted when in native mode.', 'amp' ); ?></p>
 				</div>
-				<div class="amp-force-sanitize">
+				<div class="amp-auto-accept-sanitize">
 					<p>
 						<label for="auto_accept_sanitization">
 							<input id="auto_accept_sanitization" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ); ?>>
-							<?php esc_html_e( 'Automatically accept sanitization for any AMP validation error that is encountered.', 'amp' ); ?>
+							<?php esc_html_e( 'Automatically accept sanitization for any newly encountered AMP validation errors.', 'amp' ); ?>
 						</label>
 					</p>
 					<p class="description">
 						<?php esc_html_e( 'This will ensure your responses are always valid AMP but some important content may get stripped out (e.g. scripts).', 'amp' ); ?>
+						<?php esc_html_e( 'Existing validation errors which you have already rejected will not be modified. You may want to consider bulk-accepting them.', 'amp' ); ?>
 					</p>
 				</div>
 			<?php endif; ?>
@@ -308,9 +309,9 @@ class AMP_Options_Menu {
 
 				var updateHiddenClasses = function() {
 					var themeSupportMode = getThemeSupportMode();
-					$( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === themeSupportMode );
+					$( '.amp-auto-accept-sanitize' ).toggleClass( 'hidden', 'native' === themeSupportMode );
 					$( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === themeSupportMode );
-					$( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== themeSupportMode );
+					$( '.amp-auto-accept-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== themeSupportMode );
 					updateTreeShakingHiddenClass();
 				};
 
