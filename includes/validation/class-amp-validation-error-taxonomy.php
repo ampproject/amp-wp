@@ -574,6 +574,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( 'load-post.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
+		add_action( 'load-post.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
 		add_action( 'load-edit-tags.php', function() {
@@ -820,8 +821,10 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * If ordering the list by a field in the description JSON, locate the best spot in the JSON string by which to sort
-	 * alphabetically.
+	 * If ordering the list by a field in the description JSON, locate the best spot in the JSON string by which to sort alphabetically.
+	 *
+	 * This is used both on the taxonomy edit-tags.php page
+	 * and the single URL post.php page, as that page also has a list table of terms.
 	 */
 	public static function add_order_clauses_from_description_json() {
 		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy ) {
