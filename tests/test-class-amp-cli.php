@@ -467,24 +467,27 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Adds the AMP_VALIDATION_RESULTS: comment to the <html> body.
+	 * Adds the AMP_VALIDATION: comment to the <html> body.
 	 *
 	 * @return array The response, with a comment in the body.
 	 */
 	public function add_comment() {
-		$mock_validation_results = array(
-			array(
-				'error'     => array(
-					'code' => 'foo',
+		$mock_validation = array(
+			'results' => array(
+				array(
+					'error'     => array(
+						'code' => 'foo',
+					),
+					'sanitized' => false,
 				),
-				'sanitized' => false,
 			),
+			'url'     => home_url( '/' ),
 		);
 
 		return array(
 			'body'     => sprintf(
 				'<html amp><head></head><body></body><!--%s--></html>',
-				'AMP_VALIDATION_RESULTS:' . wp_json_encode( $mock_validation_results )
+				'AMP_VALIDATION:' . wp_json_encode( $mock_validation )
 			),
 			'response' => array(
 				'code'    => 200,

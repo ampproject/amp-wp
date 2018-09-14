@@ -346,18 +346,25 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * If there are no validation errors provided, then any existing amp_invalid_url post is deleted.
 	 *
-	 * @param array       $validation_errors Validation errors.
-	 * @param string      $url               URL on which the validation errors occurred. Will be normalized to non-AMP version.
-	 * @param int|WP_Post $post              Post to update. Optional. If empty, then post is looked up by URL.
+	 * @param array  $validation_errors Validation errors.
+	 * @param string $url               URL on which the validation errors occurred. Will be normalized to non-AMP version.
+	 * @param array  $args {
+	 *     Args.
+	 *
+	 *     @type int|WP_Post $invalid_url_post Post to update. Optional. If empty, then post is looked up by URL.
+	 *     @type array       $queried_object   Queried object, including keys for type and id. May be empty.
+	 * }
 	 * @return int|WP_Error $post_id The post ID of the custom post type used, or WP_Error on failure.
 	 * @global WP $wp
 	 */
-	public static function store_validation_errors( $validation_errors, $url, $post = null ) {
+	public static function store_validation_errors( $validation_errors, $url, $args = array() ) {
 		$url  = remove_query_arg( amp_get_slug(), $url ); // Only ever store the canonical version.
 		$slug = md5( $url );
-		if ( $post ) {
-			$post = get_post( $post );
-		} else {
+		$post = null;
+		if ( ! empty( $args['invalid_url_post'] ) ) {
+			$post = get_post( $args['invalid_url_post'] );
+		}
+		if ( ! $post ) {
 			$post = get_page_by_path( $slug, OBJECT, self::POST_TYPE_SLUG );
 			if ( ! $post ) {
 				$post = get_page_by_path( $slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
@@ -458,6 +465,9 @@ class AMP_Invalid_URL_Post_Type {
 		wp_set_object_terms( $post_id, wp_list_pluck( $terms, 'term_id' ), AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
 		update_post_meta( $post_id, '_amp_validated_environment', self::get_validated_environment() );
+		if ( isset( $args['queried_object'] ) ) {
+			update_post_meta( $post_id, '_amp_queried_object', $args['queried_object'] );
+		}
 
 		return $post_id;
 	}
@@ -714,9 +724,14 @@ class AMP_Invalid_URL_Post_Type {
 				continue;
 			}
 
-			self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post );
+			$validation_errors = wp_list_pluck( $validity['results'], 'error' );
+			self::store_validation_errors(
+				$validation_errors,
+				$validity['url'],
+				wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+			);
 			$unaccepted_error_count = count( array_filter(
-				$validity['validation_errors'],
+				$validation_errors,
 				function( $error ) {
 					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
 				}
@@ -890,14 +905,24 @@ class AMP_Invalid_URL_Post_Type {
 				throw new Exception( esc_html( $validity->get_error_code() ) );
 			}
 
-			$stored = self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post );
+			$errors = wp_list_pluck( $validity['results'], 'error' );
+			$stored = self::store_validation_errors(
+				$errors,
+				$validity['url'],
+				array_merge(
+					array(
+						'invalid_url_post' => $post,
+					),
+					wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+				)
+			);
 			if ( is_wp_error( $stored ) ) {
 				throw new Exception( esc_html( $stored->get_error_code() ) );
 			}
 			$redirect = get_edit_post_link( $stored, 'raw' );
 
 			$error_count = count( array_filter(
-				$validity['validation_errors'],
+				$errors,
 				function ( $error ) {
 					return ! AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
 				}
@@ -949,10 +974,20 @@ class AMP_Invalid_URL_Post_Type {
 			return $validity;
 		}
 
+		$validation_errors  = wp_list_pluck( $validity['results'], 'error' );
 		$validation_results = array();
-		self::store_validation_errors( $validity['validation_errors'], $validity['url'], $post->ID );
-		foreach ( $validity['validation_errors'] as $error ) {
-			$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+		self::store_validation_errors(
+			$validation_errors,
+			$validity['url'],
+			array_merge(
+				array(
+					'invalid_url_post' => $post,
+				),
+				wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+			)
+		);
+		foreach ( $validation_errors  as $error ) {
+			$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error ); // @todo Consider re-using $validity['results'][x]['sanitized'], unless auto-sanitize is causing problem.
 
 			$validation_results[] = compact( 'error', 'sanitized' );
 		}
@@ -1154,6 +1189,32 @@ class AMP_Invalid_URL_Post_Type {
 						}
 						?>
 						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
+					</div>
+
+					<div class="misc-pub-section">
+						<?php
+						$view_label     = __( 'View URL', 'amp' );
+						$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
+						if ( isset( $queried_object['id'] ) && isset( $queried_object['type'] ) ) {
+							$after = ' | ';
+							if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) && post_type_exists( get_post( $queried_object['id'] )->post_type ) ) {
+								$post_type_object = get_post_type_object( get_post( $queried_object['id'] )->post_type );
+								edit_post_link( $post_type_object->labels->edit_item, '', $after, $queried_object['id'] );
+								$view_label = $post_type_object->labels->view_item;
+							} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) && taxonomy_exists( get_term( $queried_object['id'] )->taxonomy ) ) {
+								$taxonomy_object = get_taxonomy( get_term( $queried_object['id'] )->taxonomy );
+								edit_term_link( $taxonomy_object->labels->edit_item, '', $after, get_term( $queried_object['id'] ) );
+								$view_label = $taxonomy_object->labels->view_item;
+							} elseif ( 'user' === $queried_object['type'] ) {
+								$link = get_edit_user_link( $queried_object['id'] );
+								if ( $link ) {
+									printf( '<a href="%s">%s</a>%s', esc_url( $link ), esc_html__( 'Edit User', 'amp' ), esc_html( $after ) );
+								}
+								$view_label = __( 'View User', 'amp' );
+							}
+						}
+						printf( '<a href="%s">%s</a>', esc_url( self::get_url_from_post( $post ) ), esc_html( $view_label ) );
+						?>
 					</div>
 				</div>
 			</div>
