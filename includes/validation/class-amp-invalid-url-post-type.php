@@ -360,9 +360,11 @@ class AMP_Invalid_URL_Post_Type {
 	public static function store_validation_errors( $validation_errors, $url, $args = array() ) {
 		$url  = remove_query_arg( amp_get_slug(), $url ); // Only ever store the canonical version.
 		$slug = md5( $url );
-		if ( isset( $args['invalid_url_post'] ) ) {
+		$post = null;
+		if ( ! empty( $args['invalid_url_post'] ) ) {
 			$post = get_post( $args['invalid_url_post'] );
-		} else {
+		}
+		if ( ! $post ) {
 			$post = get_page_by_path( $slug, OBJECT, self::POST_TYPE_SLUG );
 			if ( ! $post ) {
 				$post = get_page_by_path( $slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
