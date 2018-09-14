@@ -1,3 +1,5 @@
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 1, 100 ] } ] */
+
 import { getAmpStoryAnimationControls } from './helpers';
 
 const { __ } = wp.i18n;
@@ -90,7 +92,7 @@ export default registerBlockType(
 			opacity: {
 				type: 'number',
 				default: 1
-			},
+			}
 		},
 
 		inserter: false,
@@ -173,8 +175,8 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			let layerProps = {
-				template: attributes.template
-			},
+					template: attributes.template
+				},
 				style = {};
 			if ( attributes.animationType ) {
 				layerProps[ 'animate-in' ] = attributes.animationType;
@@ -190,7 +192,7 @@ export default registerBlockType(
 			if ( 1 !== attributes.opacity ) {
 				style.opacity = attributes.opacity;
 			}
-			if ( attributes.backgroundColor ){
+			if ( attributes.backgroundColor ) {
 				style.backgroundColor = attributes.backgroundColor;
 			}
 			if ( ! _.isEmpty( style ) ) {
