@@ -288,6 +288,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_store_validation_errors() {
+		global $post;
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create_and_get();
@@ -335,9 +336,13 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
 			$errors,
-			get_permalink( $post )
+			get_permalink( $post ),
+			array(
+				'invalid_url_post' => 0,
+			)
 		);
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+		$this->assertNotEquals( $invalid_url_post_id, $post->ID, 'Passing an empty invalid_url_post should not re-use the global $post ever.' );
 
 		// Test resurrection from trash.
 		wp_trash_post( $invalid_url_post_id );
