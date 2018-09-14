@@ -574,7 +574,7 @@ class AMP_Validation_Manager {
 					$validity['url'],
 					array_merge(
 						array(
-							'invalid_url_post' => $post,
+							'invalid_url_post' => $invalid_url_post_id,
 						),
 						wp_array_slice_assoc( $validity, array( 'queried_object' ) )
 					)
