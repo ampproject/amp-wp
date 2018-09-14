@@ -678,7 +678,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-error-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-					array( 'wp-dom-ready' ),
+					array(),
 					AMP__VERSION,
 					true
 				);
