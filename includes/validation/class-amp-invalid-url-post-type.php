@@ -1352,6 +1352,20 @@ class AMP_Invalid_URL_Post_Type {
 			<?php $wp_list_table->display(); ?>
 		</form>
 		<style>
+			button[value=amp_validation_error_accept] {
+				position: absolute;
+				left: 0;
+			}
+
+			button[value=amp_validation_error_reject] {
+				position: absolute;
+				left: 5rem;
+			}
+
+			#url-post-filter {
+				margin-left: 10rem;
+			}
+
 			.tablenav.top,
 			.tablenav.bottom {
 				display: none;
