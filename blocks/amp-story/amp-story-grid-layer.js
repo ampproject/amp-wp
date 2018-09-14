@@ -6,11 +6,13 @@ const {
 } = wp.blocks;
 const {
 	InspectorControls,
-	InnerBlocks
+	InnerBlocks,
+	PanelColorSettings
 } = wp.editor;
 const {
 	SelectControl,
-	PanelBody
+	PanelBody,
+	RangeControl
 } = wp.components;
 
 const ALLOWED_BLOCKS = [
@@ -81,7 +83,14 @@ export default registerBlockType(
 				selector: 'amp-story-grid-layer',
 				attribute: 'animate-in-delay',
 				default: '0ms'
-			}
+			},
+			backgroundColor: {
+				type: 'string'
+			},
+			opacity: {
+				type: 'number',
+				default: 1
+			},
 		},
 
 		inserter: false,
@@ -96,6 +105,10 @@ export default registerBlockType(
 
 		edit( props ) {
 			const { setAttributes, attributes } = props;
+			const onChangeBackgroundColor = newBackgroundColor => {
+				setAttributes( { backgroundColor: newBackgroundColor } );
+			};
+
 			return [
 				<InspectorControls key='inspector'>
 					<SelectControl
@@ -122,13 +135,37 @@ export default registerBlockType(
 						] }
 						onChange={ value => ( setAttributes( { template: value } ) ) }
 					/>
+					<PanelColorSettings
+						title={ __( 'Background Color Settings', 'amp' ) }
+						initialOpen={ false }
+						colorSettings={ [
+							{
+								value: attributes.backgroundColor,
+								onChange: onChangeBackgroundColor,
+								label: __( 'Background Color', 'amp' )
+							}
+						] }
+					/>
+					<RangeControl
+						key='opacity'
+						label={ __( 'Opacity (%)', 'amp' ) }
+						value={ parseInt( attributes.opacity * 100 ) }
+						onChange={ ( value ) => {
+							value = value / 100;
+							setAttributes( { opacity: value } );
+						} }
+						min='0'
+						max='100'
+						placeholder='100'
+						initialPosition='100'
+					/>
 					<PanelBody key='animation' title={ __( 'Grid Layer Animation', 'amp' ) }>
 						{
 							getAmpStoryAnimationControls( setAttributes, attributes )
 						}
 					</PanelBody>
 				</InspectorControls>,
-				<div key='contents' className={ 'amp-grid-template amp-grid-template-' + props.attributes.template }>
+				<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + props.attributes.template }>
 					<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
 				</div>
 			];
@@ -137,7 +174,8 @@ export default registerBlockType(
 		save( { attributes } ) {
 			let layerProps = {
 				template: attributes.template
-			};
+			},
+				style = {};
 			if ( attributes.animationType ) {
 				layerProps[ 'animate-in' ] = attributes.animationType;
 
@@ -147,6 +185,16 @@ export default registerBlockType(
 				if ( attributes.animationDuration ) {
 					layerProps[ 'animate-in-duration' ] = attributes.animationDuration;
 				}
+			}
+
+			if ( 1 !== attributes.opacity ) {
+				style.opacity = attributes.opacity;
+			}
+			if ( attributes.backgroundColor ){
+				style.backgroundColor = attributes.backgroundColor;
+			}
+			if ( ! _.isEmpty( style ) ) {
+				layerProps.style = style;
 			}
 
 			return (
