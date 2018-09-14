@@ -186,16 +186,24 @@ class AMP_Invalid_URL_Post_Type {
 			false,
 			AMP__VERSION
 		);
-		wp_enqueue_script(
-			'amp-admin-tables',
-			amp_get_asset_url( 'js/amp-admin-tables.js' ),
-			array( 'jquery' ),
+		wp_enqueue_style(
+			'amp-validation-error-taxonomy',
+			amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
+			array( 'common' ),
 			AMP__VERSION
 		);
+		wp_enqueue_script(
+			'amp-validation-error-detail-toggle',
+			amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
+			array(),
+			AMP__VERSION,
+			true
+		);
 		wp_localize_script(
-			'amp-admin-tables',
-			'ampAdminTables',
+			'amp-validation-error-detail-toggle',
+			'ampValidationI18n',
 			array(
+				'btnAriaLabel'     => esc_attr__( 'Toggle all sources', 'amp' ),
 				'errorIndexLink'   => get_admin_url( null, 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' ),
 				'errorIndexAnchor' => esc_html__( 'View Error Index', 'amp' ),
 			)
@@ -586,7 +594,7 @@ class AMP_Invalid_URL_Post_Type {
 			array(
 				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf( '%s<span class="dashicons dashicons-editor-help"></span>', esc_html__( 'Status', 'amp' ) ),  // @todo Create actual tooltip.
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
-				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => sprintf( '%s<div class="double-arrow"><span class="dashicons dashicons-arrow-down top-arrow"></span><span class="dashicons dashicons-arrow-down bottom-arrow"></span></div>', esc_html__( 'Sources', 'amp' ) ),
+				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
 			)
 		);
 
@@ -659,7 +667,7 @@ class AMP_Invalid_URL_Post_Type {
 					$output  = array();
 
 					if ( isset( $sources['plugin'] ) ) {
-						$output[]     = '<div class="source">';
+						$output[]     = '<details class="source">';
 						$plugin_names = array();
 						$plugin_slugs = array_unique( $sources['plugin'] );
 						foreach ( $plugin_slugs as $plugin_slug ) {
@@ -670,33 +678,29 @@ class AMP_Invalid_URL_Post_Type {
 								$plugin_names[] = $plugin_slug;
 							}
 						}
-						$count                     = count( $plugin_slugs );
-						$sources_container_classes = 'sources-container sources-plugins';
+						$count = count( $plugin_slugs );
 						if ( 1 === $count ) {
-							$output[] = sprintf( '<span class="dashicons dashicons-admin-plugins"></span></span><strong>%s</strong><br/>', esc_html__( 'Plugin', 'amp' ) );
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></summary>', esc_html__( 'Plugin', 'amp' ) );
 						} else {
-							$output[]                   = sprintf( '<span class="dashicons dashicons-admin-plugins"></span><strong>%s (%d)</strong><span class="dashicons toggle-sources dashicons-arrow-down"></span>', esc_html__( 'Plugins', 'amp' ), $count );
-							$sources_container_classes .= ' collapsed';
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
 						}
-						$output[] = '<div class="' . $sources_container_classes . '">';
+						$output[] = '<div>';
 						$output[] = implode( '<br/>', array_unique( $plugin_names ) );
 						$output[] = '</div>';
-						$output[] = '</div>';
+						$output[] = '</details>';
 					}
 					if ( isset( $sources['core'] ) ) {
-						$output[]                  = '<div class="source">';
-						$count                     = count( array_unique( $sources['core'] ) );
-						$sources_container_classes = 'sources-container sources-core';
+						$output[] = '<details class="source">';
+						$count    = count( array_unique( $sources['core'] ) );
 						if ( 1 === $count ) {
-							$output[] = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s</strong><br/>', esc_html__( 'Other', 'amp' ) );
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></summary>', esc_html__( 'Other', 'amp' ) );
 						} else {
-							$output[]                   = sprintf( '<span class="dashicons dashicons-wordpress-alt"></span><strong>%s (%d)</strong><span class="dashicons toggle-sources dashicons-arrow-down"></span>', esc_html__( 'Other', 'amp' ), $count );
-							$sources_container_classes .= ' collapsed';
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
 						}
-						$output[] = '<div class="' . $sources_container_classes . '">';
+						$output[] = '<div>';
 						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
 						$output[] = '</div>';
-						$output[] = '</div>';
+						$output[] = '</details>';
 					}
 					if ( isset( $sources['theme'] ) ) {
 						$output[] = '<div class="source">';

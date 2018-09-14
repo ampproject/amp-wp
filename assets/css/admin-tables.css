@@ -1,6 +1,3 @@
-.column-error_status .tooltip {
-	display: none;
-}
 .column-error_status .dashicons-editor-help {
 	color: #767676;
 }
@@ -15,10 +12,6 @@
 }
 .column-sources_with_invalid_output .dashicons-wordpress-alt {
 	color: #92b371;
-}
-.sources-plugins, .sources-core {
-	margin-left: 25px;
-	margin-bottom: 15px;
 }
 .amp-logo-icon {
 	background-image: url( '../images/amp-logo-icon.svg' );
@@ -47,9 +40,6 @@ td.column-found_elements_and_attributes {
 .column-error_status .dashicons-warning.rejected {
 	color: #68c6ff;
 }
-.column-sources_with_invalid_output .sources-plugins.collapsed, .column-sources_with_invalid_output .sources-core.collapsed {
-	display: none;
-}
 .column-sources_with_invalid_output .source {
 	margin-bottom: 10px;
 }
@@ -57,35 +47,6 @@ td.column-found_elements_and_attributes {
 	margin-bottom: 10px;
 	display: block;
 }
-.dashicons.toggle-sources {
-	cursor: pointer;
-	float: right;
-	margin-right: 20%;
-}
-.column-sources_with_invalid_output .double-arrow {
-	height: 20px;
-	width: 12px;
-	display: inline-block;
-	position: relative;
-	float: right;
-	margin-right: 23%;
-	cursor: pointer;
-}
-.column-sources_with_invalid_output .double-arrow .dashicons.top-arrow {
-	font-size: 20px;
-	line-height: 1;
-	position: absolute;
-	bottom: 0;
-}
-.column-sources_with_invalid_output .double-arrow .dashicons.bottom-arrow {
-	font-size: 20px;
-	line-height: 1;
-	position: absolute;
-	bottom: -6px;
-}
 .wrap .wp-heading-inline + .page-title-action {
 	margin-left: 1rem;
-}
-.page-title-action strong {
-	font-weight: 900;
 }
