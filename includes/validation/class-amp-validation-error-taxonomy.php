@@ -588,6 +588,8 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'parse_term_query', array( __CLASS__, 'parse_post_php_term_query' ) );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
+		add_filter( 'post_action_' . self::VALIDATION_ERROR_REJECT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_actions' ) );
+		add_filter( 'post_action_' . self::VALIDATION_ERROR_ACCEPT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_actions' ) );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
 
@@ -1596,6 +1598,42 @@ class AMP_Validation_Error_Taxonomy {
 			wp_safe_redirect( $redirect );
 			exit;
 		}
+	}
+
+	/**
+	 * On the single URL page, handles the bulk actions of 'Accept' and 'Reject'
+	 *
+	 * On /wp-admin/post.php, this handles these bulk actions.
+	 * This page is more like an edit-tags.php page, in that it has a WP_Terms_List_Table of amp_validation_error terms.
+	 * So this reuses handle_validation_error_update(), which the edit-tags.php page uses.
+	 *
+	 * @param int $post_id The ID of the post for which to apply the bulk action.
+	 */
+	public static function handle_single_url_page_bulk_actions( $post_id ) {
+		if ( ! isset( $_POST['action'] ) || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {  // WPCS: CSRF OK.
+			return;
+		}
+
+		$action              = sanitize_key( $_POST['action'] ); // WPCS: CSRF OK.
+		$term_ids            = isset( $_POST['delete_tags'] ) ? array_map( 'sanitize_key', $_POST['delete_tags'] ) : null; // WPCS: CSRF OK.
+		$redirect_query_args = array(
+			'action'       => 'edit',
+			'amp_actioned' => $action,
+		);
+
+		if ( $term_ids ) {
+			self::handle_validation_error_update( null, $action, $term_ids );
+			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
+		}
+
+		// Even if the user didn't select any errors to bulk edit, redirect back to the same page.
+		wp_safe_redirect(
+			add_query_arg(
+				$redirect_query_args,
+				get_edit_post_link( $post_id, 'raw' )
+			)
+		);
+		exit();
 	}
 
 	/**

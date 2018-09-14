@@ -159,6 +159,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
+		add_filter( 'bulk_actions-' . self::POST_TYPE_SLUG, '__return_false' );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
@@ -1094,7 +1095,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		$redirect = wp_get_referer();
 		if ( ! $redirect ) {
-			$redirect = get_edit_post_link( $post->ID );
+			$redirect = get_edit_post_link( $post->ID, 'raw' );
 		}
 
 		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
@@ -1278,7 +1279,7 @@ class AMP_Invalid_URL_Post_Type {
 					</a>
 				</div>
 				<div id="publishing-action">
-					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
+					<button type="submit" form="posts-filter" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
 				</div>
 				<div class="clear"></div>
 			</div>
@@ -1343,6 +1344,9 @@ class AMP_Invalid_URL_Post_Type {
 		</div>
 
 		<form id="posts-filter" method="post">
+			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
+			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ); ?>" class="button action"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
+			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ); ?>" class="button action"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
 			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
 			<?php $wp_list_table->display(); ?>

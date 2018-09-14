@@ -97,6 +97,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_bulk_actions' ) ) );
+		$this->assertEquals( 10, has_filter( 'bulk_actions-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, '__return_false' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'handle_bulk_action' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'print_admin_notice' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, array( self::TESTED_CLASS, 'handle_validate_request' ) ) );
@@ -1210,7 +1211,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			$exception->getMessage()
 		);
 
-		// Now that the current user has permissions, this should output the correnct markup.
+		// Now that the current user has permissions, this should output the correct markup.
 		wp_set_current_user( $user_with_permissions );
 		ob_start();
 		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
@@ -1218,6 +1219,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( '<form class="search-form wp-clearfix" method="get">', $output );
 		$this->assertContains( '<form id="posts-filter" method="post">', $output );
 		$this->assertContains( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $output );
+		$this->assertContains( '<button type="submit" name="action" value="', $output );
+		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION, $output );
+		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, $output );
 	}
 
 	/**

@@ -372,6 +372,8 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'parse_term_query', array( self::TESTED_CLASS, 'parse_post_php_term_query' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', array( self::TESTED_CLASS, 'filter_manage_custom_columns' ) ) );
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
+		$this->assertEquals( 10, has_filter( 'post_action_' . AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, array( self::TESTED_CLASS, 'handle_single_url_page_bulk_actions' ) ) );
+		$this->assertEquals( 10, has_filter( 'post_action_' . AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, array( self::TESTED_CLASS, 'handle_single_url_page_bulk_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
 
@@ -941,6 +943,57 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			);
 			$this->assertEquals( $name, AMP_Validation_Error_Taxonomy::get_translated_type_name( $validation_error ) );
 		}
+	}
+
+	/**
+	 * Test handle_single_url_page_bulk_actions.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_actions()
+	 */
+	public function test_handle_single_url_page_bulk_actions() {
+		// Create a new error term.
+		$initial_accepted_status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS;
+		$error_term              = $this->factory()->term->create_and_get( array(
+			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			'description' => wp_json_encode( $this->get_mock_error() ),
+			'term_group'  => $initial_accepted_status,
+		) );
+
+		// Because the action is incorrect, the tested method should exit and not update the validation error term.
+		$_POST['action']      = 'incorrect-action';
+		$_POST['delete_tags'] = array( $error_term->term_id );
+		$correct_post_type    = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, $initial_accepted_status );
+
+		// Because the post type is wrong, the tested method should again return without updating the term.
+		$_POST['action']     = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION;
+		$incorrect_post_type = $this->factory()->post->create();
+		AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_actions( $incorrect_post_type );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, $initial_accepted_status );
+
+		/*
+		 * Now that the post type is correct, this should update the post accepted status to be 'accepted'.
+		 * There should be a warning because wp_safe_redirect() should be called at the end of the tested method.
+		 */
+		try {
+			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_actions( $correct_post_type );
+		} catch ( PHPUnit\Framework\Error\Warning $warning ) {
+			$w = $warning;
+		}
+
+		$this->assertContains( 'Cannot modify header information', $w->getMessage() );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS );
+
+		// When the action is to 'reject' the error, this should update the status of the error to 'rejected'.
+		$_POST['action'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
+		try {
+			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_actions( $correct_post_type );
+		} catch ( PHPUnit\Framework\Error\Warning $warning ) {
+			$w = $warning;
+		}
+
+		$this->assertContains( 'Cannot modify header information', $w->getMessage() );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS );
 	}
 
 	/**
