@@ -312,11 +312,14 @@ class AMP_Invalid_URL_Post_Type {
 			) );
 		}
 		if ( $counts['accepted'] ) {
-			$result[] = esc_html( sprintf(
-				/* translators: %s is count */
-				__( '&#x2705; Accepted: %s', 'amp' ),
-				number_format_i18n( $counts['accepted'] )
-			) );
+			$result[] = sprintf(
+				'<span class="status-text accepted">%s</span>',
+				sprintf(
+					/* translators: %s is count */
+					__( 'Accepted: %s', 'amp' ),
+					number_format_i18n( $counts['accepted'] )
+				)
+			);
 		}
 		if ( $counts['rejected'] ) {
 			$result[] = esc_html( sprintf(
