@@ -94,6 +94,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_columns', array( self::TESTED_CLASS, 'add_single_post_columns' ) ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( self::TESTED_CLASS, 'add_single_post_sortable_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_bulk_actions' ) ) );
@@ -517,26 +518,46 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers AMP_Invalid_URL_Post_Type::add_single_post_columns()
 	 */
 	public function test_add_single_post_columns() {
-		$expected_columns = array(
-			'cb'         => '<input type="checkbox" />',
-			'error'      => 'Error',
-			'status'     => 'Status',
-			'details'    => 'Details',
-			'sources'    => 'Sources',
-			'error_type' => 'Error Type',
+		$this->assertEquals(
+			array(
+				'cb'         => '<input type="checkbox" />',
+				'error'      => 'Error',
+				'status'     => 'Status',
+				'details'    => 'Details',
+				'sources'    => 'Sources',
+				'error_type' => 'Error Type',
+			),
+			AMP_Invalid_URL_Post_Type::add_single_post_columns()
+		);
+	}
+
+	/**
+	 * Test for add_single_post_sortable_columns()
+	 *
+	 * @covers AMP_Invalid_URL_Post_Type::add_single_post_sortable_columns()
+	 */
+	public function test_add_single_post_sortable_columns() {
+		$initial_columns              = array(
+			'description' => 'description',
+			'links'       => 'count',
+		);
+		$columns_expected_to_be_added = array(
+			'error'      => AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
+			'details'    => AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
+			'error_type' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
+		);
+		$this->assertEquals(
+			array_merge( $initial_columns, $columns_expected_to_be_added ),
+			AMP_Invalid_URL_Post_Type::add_single_post_sortable_columns( $initial_columns )
 		);
 
-		// The $expected_columns are returned, regardless of what is passed to the filter.
-		$initial_columns_no_checkbox = array( 'foo' => 'bar' );
-		$this->assertEquals(
-			$expected_columns,
-			AMP_Invalid_URL_Post_Type::add_single_post_columns( $initial_columns_no_checkbox )
+		// In the unlikely case that the initial columns has a 'details' value, this method should overwrite it.
+		$initial_columns_with_details = array(
+			'details' => 'foobar',
 		);
-
-		// The $expected_columns are returned if array() is passed to the filter.
 		$this->assertEquals(
-			$expected_columns,
-			AMP_Invalid_URL_Post_Type::add_single_post_columns( array() )
+			$columns_expected_to_be_added,
+			AMP_Invalid_URL_Post_Type::add_single_post_sortable_columns( $initial_columns_with_details )
 		);
 	}
 
