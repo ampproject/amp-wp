@@ -977,22 +977,22 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		 */
 		try {
 			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_actions( $correct_post_type );
-		} catch ( PHPUnit\Framework\Error\Warning $warning ) {
-			$w = $warning;
+		} catch ( Exception $exception ) {
+			$e = $exception;
 		}
 
-		$this->assertContains( 'Cannot modify header information', $w->getMessage() );
+		$this->assertContains( 'Cannot modify header information', $e->getMessage() );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS );
 
 		// When the action is to 'reject' the error, this should update the status of the error to 'rejected'.
 		$_POST['action'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
 		try {
 			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_actions( $correct_post_type );
-		} catch ( PHPUnit\Framework\Error\Warning $warning ) {
-			$w = $warning;
+		} catch ( Exception $exception ) {
+			$e = $exception;
 		}
 
-		$this->assertContains( 'Cannot modify header information', $w->getMessage() );
+		$this->assertContains( 'Cannot modify header information', $e->getMessage() );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS );
 	}
 
