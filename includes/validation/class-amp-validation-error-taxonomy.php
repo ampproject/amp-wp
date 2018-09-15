@@ -1378,22 +1378,17 @@ class AMP_Validation_Error_Taxonomy {
 			case 'status':
 				$sanitization = self::get_validation_error_sanitization( $validation_error );
 				if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$class = 'sanitized';
-					} else {
-						$class = 'accepted';
-					}
-					$text = __( 'Accepted', 'amp' );
+					$class = 'ack accepted';
+					$text  = __( 'Accepted', 'amp' );
 				} elseif ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
-					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$class = 'sanitized';
-					} else {
-						$class = 'rejected';
-					}
-					$text = __( 'Rejected', 'amp' );
+					$class = 'ack rejected';
+					$text  = __( 'Rejected', 'amp' );
+				} elseif ( self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ) {
+					$class = 'new rejected';
+					$text  = __( 'New Rejected', 'amp' );
 				} else {
-					$class = 'new';
-					$text  = __( 'New', 'amp' );
+					$class = 'new accepted';
+					$text  = __( 'New Accepted', 'amp' );
 				}
 				$content .= sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
 				break;

@@ -136,3 +136,23 @@ details[open] .details-attributes__summary::after {
 	background-image: url( '../images/baseline-error-blue.svg' );
 }
 
+body.taxonomy-amp_validation_error .wp-list-table .new th,
+body.taxonomy-amp_validation_error .wp-list-table .new td {
+	background-color: #fef7f1;
+}
+
+body.taxonomy-amp_validation_error .wp-list-table .new th.check-column {
+	border-left: 4px solid #d54e21;
+}
+
+body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
+	margin-left: 4px;
+}
+
+.row-actions .amp_validation_error_accept > a {
+	color: #006505;
+}
+
+.row-actions .amp_validation_error_reject > a {
+	color: #a00;
+}
