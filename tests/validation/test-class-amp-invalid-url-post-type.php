@@ -41,7 +41,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, get_post_types(), true ) );
 		$this->assertEquals( array(), get_all_post_type_supports( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $amp_post_type->name );
-		$this->assertEquals( 'Errors by URL', $amp_post_type->label );
+		$this->assertEquals( 'Invalid URLs', $amp_post_type->label );
 		$this->assertEquals( false, $amp_post_type->public );
 		$this->assertTrue( $amp_post_type->show_ui );
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
@@ -495,7 +495,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 				$initial_columns,
 				array(
 					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status<span class="dashicons dashicons-editor-help"></span>',
-					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources<div class="double-arrow"><span class="dashicons dashicons-arrow-down top-arrow"></span><span class="dashicons dashicons-arrow-down bottom-arrow"></span></div>',
+					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
 					AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
 				)
 			),
@@ -529,7 +529,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		return array(
 			'invalid_element'       => array(
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT,
-				'<div class="source"><span class="dashicons dashicons-admin-plugins"></span></span><strong>Plugin</strong><br/><div class="sources-container sources-plugins">amp</div></div>',
+				'<details class="source"><summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>Plugin</strong></summary><div>AMP</div></details>',
 				$errors,
 			),
 			'removed_attributes'    => array(
