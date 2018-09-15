@@ -738,13 +738,7 @@ class AMP_Validation_Manager {
 		 */
 		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
-		$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-		$sanitized    = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'];
-
-		// Ignore validation errors which are forcibly sanitized by filter or in special case if it is a tree shaking error and this is accepted by options.
-		if ( $sanitized && 'with_filter' === $sanitization['forced'] ) {
-			return true;
-		}
+		$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
 
 		// Add sources back into the $error for referencing later. @todo It may be cleaner to store sources separately to avoid having to re-remove later during storage.
 		$error = array_merge( $error, compact( 'sources' ) );

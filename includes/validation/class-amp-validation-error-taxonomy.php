@@ -298,7 +298,11 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function is_validation_error_sanitized( $error ) {
 		$sanitization = self::get_validation_error_sanitization( $error );
-		return self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'];
+		return (
+			self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status']
+			||
+			self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status']
+		);
 	}
 
 	/**
@@ -326,7 +330,7 @@ class AMP_Validation_Error_Taxonomy {
 		if ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
 			$term_status = $term->term_group;
 		} else {
-			$term_status = self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
+			$term_status = AMP_Validation_Manager::is_sanitization_auto_accepted() ? self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS : self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
 		}
 
 		$forced = false;
@@ -336,16 +340,6 @@ class AMP_Validation_Error_Taxonomy {
 		if ( isset( AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
 			$status = AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ];
 			$forced = 'with_preview';
-		}
-
-		$is_forced = (
-			amp_is_canonical()
-			||
-			AMP_Options_Manager::get_option( 'auto_accept_sanitization' )
-		);
-		if ( $is_forced ) {
-			$forced = 'with_option';
-			$status = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
 		}
 
 		/**
@@ -1259,26 +1253,25 @@ class AMP_Validation_Error_Taxonomy {
 				esc_html__( 'Details', 'amp' )
 			);
 
+			// @todo We should consider reversing the order.
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
 			if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-					'<a href="%s" aria-label="%s">%s</a>',
+					'<a href="%s">%s</a>',
 					wp_nonce_url(
 						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_REJECT_ACTION
 					),
-					esc_attr__( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', 'amp' ),
 					esc_html__( 'Reject', 'amp' )
 				);
 			}
 			if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-					'<a href="%s" aria-label="%s">%s</a>',
+					'<a href="%s">%s</a>',
 					wp_nonce_url(
 						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
-					esc_attr__( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', 'amp' ),
 					esc_html__( 'Accept', 'amp' )
 				);
 			}

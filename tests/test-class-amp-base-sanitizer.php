@@ -224,7 +224,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 		);
 
-		// Test forcibly sanitized with filter, resulting in no validation error being surfaced.
+		// Test forcibly sanitized with filter.
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(
@@ -234,7 +234,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$sanitizer->remove_invalid_child( $child, array( 'foo' => 'bar' ) );
 		$this->assertEquals( null, $parent->firstChild );
-		$this->assertCount( 0, AMP_Validation_Manager::$validation_results );
+		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
+		$this->assertEquals(
+			array(
+				'error'     => $expected_error,
+				'sanitized' => true,
+			),
+			AMP_Validation_Manager::$validation_results[0]
+		);
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 
 		// Test unsanitized.
