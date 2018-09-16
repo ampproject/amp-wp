@@ -179,6 +179,13 @@ class AMP_Validation_Error_Taxonomy {
 	const REMOVED_ELEMENTS = 'removed_elements';
 
 	/**
+	 * The key for found elements and attributes.
+	 *
+	 * @var string
+	 */
+	const FOUND_ELEMENTS_AND_ATTRIBUTES = 'found_elements_and_attributes';
+
+	/**
 	 * The key for removed attributes.
 	 *
 	 * @var string
@@ -198,6 +205,13 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var string
 	 */
 	const REMOVED_SOURCES = 'removed_sources';
+
+	/**
+	 * The key for the error status.
+	 *
+	 * @var string
+	 */
+	const ERROR_STATUS = 'error_status';
 
 	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
@@ -693,7 +707,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-error-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-					array( 'wp-dom-ready' ),
+					array(),
 					AMP__VERSION,
 					true
 				);
@@ -919,9 +933,6 @@ class AMP_Validation_Error_Taxonomy {
 				$( function() {
 					// Move the filter UI after the 'Bulk Actions' <select>, as it looks like there's no way to do this with only an action.
 					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
-
-					// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
-					$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
 				} );
 			} )( jQuery );
 		</script>
@@ -946,8 +957,17 @@ class AMP_Validation_Error_Taxonomy {
 				admin_url( 'edit.php' )
 			) ),
 			esc_attr( self::ID_LINK_ERRORS_BY_URL ),
-			esc_html__( 'View errors by URL', 'amp' )
+			esc_html__( 'View Invalid URLs', 'amp' )
 		);
+
+		?>
+		<script>
+			jQuery( function( $ ) {
+				// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
+				$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
+			} );
+		</script>
+		<?php
 	}
 
 	/**

@@ -85,13 +85,13 @@ class AMP_Invalid_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'Invalid AMP Pages (URLs)', 'post type general name', 'amp' ),
-					'menu_name'          => __( 'Invalid Pages', 'amp' ),
-					'singular_name'      => __( 'Invalid AMP Page (URL)', 'amp' ),
-					'not_found'          => __( 'No invalid AMP pages found', 'amp' ),
-					'not_found_in_trash' => __( 'No forgotten invalid AMP pages', 'amp' ),
-					'search_items'       => __( 'Search invalid AMP pages', 'amp' ),
-					'edit_item'          => __( 'Invalid AMP Page (URL)', 'amp' ),
+					'name'               => _x( 'Invalid URLs', 'post type general name', 'amp' ),
+					'menu_name'          => __( 'Invalid URLs', 'amp' ),
+					'singular_name'      => __( 'Invalid URL', 'amp' ),
+					'not_found'          => __( 'No invalid URLs found', 'amp' ),
+					'not_found_in_trash' => __( 'No forgotten invalid URLs', 'amp' ),
+					'search_items'       => __( 'Search invalid URLs', 'amp' ),
+					'edit_item'          => __( 'Invalid URL', 'amp' ),
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -126,6 +126,8 @@ class AMP_Invalid_URL_Post_Type {
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_post_list_screen_scripts' ) );
+
 		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
 		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
 
@@ -139,7 +141,6 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
-		add_filter( 'post_row_actions', array( __CLASS__, 'filter_row_actions' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
@@ -167,6 +168,46 @@ class AMP_Invalid_URL_Post_Type {
 			$query_vars[] = 'amp_validate_error';
 			return $query_vars;
 		} );
+	}
+
+	/**
+	 * Enqueue style.
+	 */
+	public static function enqueue_post_list_screen_scripts() {
+		// Styles.
+		$screen = get_current_screen();
+		if ( 'edit-amp_invalid_url' !== $screen->id ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'amp-admin-tables',
+			amp_get_asset_url( 'css/admin-tables.css' ),
+			false,
+			AMP__VERSION
+		);
+		wp_enqueue_style(
+			'amp-validation-error-taxonomy',
+			amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
+			array( 'common' ),
+			AMP__VERSION
+		);
+		wp_enqueue_script(
+			'amp-validation-error-detail-toggle',
+			amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
+			array(),
+			AMP__VERSION,
+			true
+		);
+		wp_localize_script(
+			'amp-validation-error-detail-toggle',
+			'ampValidationI18n',
+			array(
+				'btnAriaLabel'     => esc_attr__( 'Toggle all sources', 'amp' ),
+				'errorIndexLink'   => get_admin_url( null, 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' ),
+				'errorIndexAnchor' => esc_html__( 'View Error Index', 'amp' ),
+			)
+		);
 	}
 
 	/**
@@ -268,7 +309,7 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function display_invalid_url_validation_error_counts_summary( $post ) {
 		$counts = array_fill_keys(
-			array( 'new', 'accepted', 'rejected' ),
+			array( 'new_accepted', 'ack_accepted', 'new_rejected', 'ack_rejected' ),
 			0
 		);
 
@@ -276,39 +317,52 @@ class AMP_Invalid_URL_Post_Type {
 		foreach ( $validation_errors as $error ) {
 			switch ( $error['term']->term_group ) {
 				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+					$counts['new_rejected']++;
+					break;
 				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
-					$counts['new']++;
+					$counts['new_accepted']++;
 					break;
 				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
-					$counts['accepted']++;
+					$counts['ack_accepted']++;
 					break;
 				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
-					$counts['rejected']++;
+					$counts['ack_rejected']++;
 					break;
 			}
 		}
 
 		$result = array();
-		if ( $counts['new'] ) {
-			$result[] = esc_html( sprintf(
+		if ( $counts['new_rejected'] ) {
+			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '&#x2753; New: %s', 'amp' ),
-				number_format_i18n( $counts['new'] )
-			) );
+				'<span class="dashicons dashicons-warning new"></span><span class="error-status new">%1$s: %2$s</span>',
+				esc_html__( 'New Rejected', 'amp' ),
+				number_format_i18n( $counts['new_rejected'] )
+			);
 		}
-		if ( $counts['accepted'] ) {
-			$result[] = esc_html( sprintf(
+		if ( $counts['new_accepted'] ) {
+			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '&#x2705; Accepted: %s', 'amp' ),
-				number_format_i18n( $counts['accepted'] )
-			) );
+				'<span class="dashicons dashicons-warning new"></span><span class="error-status new">%1$s: %2$s</span>',
+				esc_html__( 'New Accepted', 'amp' ),
+				number_format_i18n( $counts['new_accepted'] )
+			);
 		}
-		if ( $counts['rejected'] ) {
-			$result[] = esc_html( sprintf(
+		if ( $counts['ack_accepted'] ) {
+			$result[] = sprintf(
+				/* translators: 1. Title, 2. %s is count */
+				'<span class="amp-logo-icon"></span><span class="error-status accepted">%1$s: %2$s</span>',
+				esc_html__( 'Accepted', 'amp' ),
+				number_format_i18n( $counts['ack_accepted'] )
+			);
+		}
+		if ( $counts['ack_rejected'] ) {
+			$result[] = sprintf(
 				/* translators: %s is count */
-				__( '&#x274C; Rejected: %s', 'amp' ),
-				number_format_i18n( $counts['rejected'] )
-			) );
+				'<span class="dashicons dashicons-warning rejected"></span><span class="error-status rejected">%1$s: %2$s</span>',
+				esc_html__( 'Rejected', 'amp' ),
+				number_format_i18n( $counts['ack_rejected'] )
+			);
 		}
 		echo implode( '<br>', $result ); // WPCS: xss ok.
 	}
@@ -557,18 +611,20 @@ class AMP_Invalid_URL_Post_Type {
 		$columns = array_merge(
 			$columns,
 			array(
-				'error_status' => esc_html__( 'Error Status', 'amp' ),
-				AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS => esc_html__( 'Removed Elements', 'amp' ),
-				AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES => esc_html__( 'Removed Attributes', 'amp' ),
-				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Incompatible Sources', 'amp' ),
+				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf( '%s<span class="dashicons dashicons-editor-help"></span>', esc_html__( 'Status', 'amp' ) ),  // @todo Create actual tooltip.
+				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
+				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
 			)
 		);
 
+		if ( isset( $columns['title'] ) ) {
+			$columns['title'] = esc_html__( 'URL', 'amp' );
+		}
+
 		// Move date to end.
 		if ( isset( $columns['date'] ) ) {
-			$date = $columns['date'];
 			unset( $columns['date'] );
-			$columns['date'] = $date;
+			$columns['date'] = esc_html__( 'Last Checked', 'amp' );
 		}
 
 		return $columns;
@@ -598,9 +654,9 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				self::display_invalid_url_validation_error_counts_summary( $post_id );
 				break;
-			case AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS:
+			case AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES:
+				$items = array();
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
-					$items = array();
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
 							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
@@ -608,80 +664,85 @@ class AMP_Invalid_URL_Post_Type {
 							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
 						}
 					}
-					echo implode( ', ', $items ); // WPCS: XSS OK.
-				} else {
-					esc_html_e( '--', 'amp' );
 				}
-				break;
-			case AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES:
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
-					$items = array();
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] as $name => $count ) {
 						if ( 1 === intval( $count ) ) {
-							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+							$items[] = sprintf( '<code>[%s]</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>[%s]</code> (%d)', esc_html( $name ), $count );
 						}
 					}
-					echo implode( ', ', $items ); // WPCS: XSS OK.
+				}
+				if ( ! empty( $items ) ) {
+					echo implode( ',<br/>', $items ); // WPCS: XSS OK.
 				} else {
 					esc_html_e( '--', 'amp' );
 				}
 				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:
 				if ( isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
-					$sources = array();
-					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] as $type => $names ) {
-						foreach ( array_unique( $names ) as $name ) {
-							$sources[] = sprintf( '%s: <code>%s</code>', esc_html( $type ), esc_html( $name ) );
+					$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
+					$output  = array();
+
+					if ( isset( $sources['plugin'] ) ) {
+						$output[]     = '<details class="source">';
+						$plugin_names = array();
+						$plugin_slugs = array_unique( $sources['plugin'] );
+						$plugins      = get_plugins();
+						foreach ( $plugin_slugs as $plugin_slug ) {
+							$name = $plugin_slug;
+							foreach ( $plugins as $plugin_file => $plugin_data ) {
+								if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+									$name = $plugin_data['Name'];
+									break;
+								}
+							}
+							$plugin_names[] = $name;
 						}
+						$count = count( $plugin_slugs );
+						if ( 1 === $count ) {
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></summary>', esc_html__( 'Plugin', 'amp' ) );
+						} else {
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
+						}
+						$output[] = '<div>';
+						$output[] = implode( '<br/>', array_unique( $plugin_names ) );
+						$output[] = '</div>';
+						$output[] = '</details>';
 					}
-					echo implode( ', ', $sources ); // WPCS: XSS ok.
+					if ( isset( $sources['core'] ) ) {
+						$output[] = '<details class="source">';
+						$count    = count( array_unique( $sources['core'] ) );
+						if ( 1 === $count ) {
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></summary>', esc_html__( 'Other', 'amp' ) );
+						} else {
+							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+						}
+						$output[] = '<div>';
+						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+						$output[] = '</div>';
+						$output[] = '</details>';
+					}
+					if ( isset( $sources['theme'] ) ) {
+						$output[] = '<div class="source">';
+						$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
+						$themes   = array_unique( $sources['theme'] );
+						foreach ( $themes as $theme_slug ) {
+							$theme_obj = wp_get_theme( $theme_slug );
+							if ( ! $theme_obj->errors() ) {
+								$theme_name = $theme_obj->get( 'Name' );
+							} else {
+								$theme_name = $theme_slug;
+							}
+							$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_name ) );
+						}
+						$output[] = '</div>';
+					}
+					echo implode( '', $output ); // WPCS: XSS ok.
 				}
 				break;
 		}
-	}
-
-	/**
-	 * Adds a 'Recheck' link to the edit.php row actions.
-	 *
-	 * The logic to add the new action is mainly copied from WP_Posts_List_Table::handle_row_actions().
-	 *
-	 * @param array   $actions The actions in the edit.php page.
-	 * @param WP_Post $post    The post for the actions.
-	 * @return array $actions The filtered actions.
-	 */
-	public static function filter_row_actions( $actions, $post ) {
-		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
-			return $actions;
-		}
-
-		$actions['edit'] = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( get_edit_post_link( $post ) ),
-			esc_html__( 'Details', 'amp' )
-		);
-		unset( $actions['inline hide-if-no-js'] );
-
-		$url = self::get_url_from_post( $post );
-		if ( $url ) {
-			$actions['view'] = sprintf(
-				'<a href="%s">%s</a>',
-				esc_url( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ) ),
-				esc_html__( 'View', 'amp' )
-			);
-		}
-
-		$actions[ self::VALIDATE_ACTION ] = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( self::get_recheck_url( $post ) ),
-			esc_html__( 'Recheck', 'amp' )
-		);
-		if ( self::get_post_staleness( $post ) ) {
-			$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
-		}
-
-		return $actions;
 	}
 
 	/**
@@ -1425,7 +1486,7 @@ class AMP_Invalid_URL_Post_Type {
 							<?php if ( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE === $error['data']['code'] ) : ?>
 								<li>
 									<details open>
-										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
+										<summary><?php esc_html_e( 'Invalid:', 'amp' ); ?></summary>
 										<code class="detailed">
 											<?php
 											if ( isset( $error['data']['parent_name'] ) ) {
@@ -1454,7 +1515,7 @@ class AMP_Invalid_URL_Post_Type {
 							<?php elseif ( AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE === $error['data']['code'] ) : ?>
 								<li>
 									<details open>
-										<summary><?php esc_html_e( 'Removed:', 'amp' ); ?></summary>
+										<summary><?php esc_html_e( 'Invalid:', 'amp' ); ?></summary>
 										<code class="detailed">
 											<?php
 											if ( isset( $error['data']['parent_name'] ) ) {
@@ -1650,11 +1711,48 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Filters post row actions.
 	 *
+	 * Manages links for details, recheck, view, forget, and forget permanently.
+	 *
 	 * @param array    $actions Row action links.
 	 * @param \WP_Post $post Current WP post.
 	 * @return array Filtered action links.
 	 */
 	public static function filter_post_row_actions( $actions, $post ) {
+		if ( ! is_object( $post ) || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return $actions;
+		}
+
+		// Inline edits are not relevant.
+		unset( $actions['inline hide-if-no-js'] );
+
+		if ( isset( $actions['edit'] ) ) {
+			$actions['edit'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( get_edit_post_link( $post ) ),
+				esc_html__( 'Details', 'amp' )
+			);
+		}
+
+		if ( 'trash' !== $post->post_status ) {
+			$url = self::get_url_from_post( $post );
+			if ( $url ) {
+				$actions['view'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ) ),
+					esc_html__( 'View', 'amp' )
+				);
+			}
+
+			$actions[ self::VALIDATE_ACTION ] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( self::get_recheck_url( $post ) ),
+				esc_html__( 'Recheck', 'amp' )
+			);
+			if ( self::get_post_staleness( $post ) ) {
+				$actions[ self::VALIDATE_ACTION ] = sprintf( '<em>%s</em>', $actions[ self::VALIDATE_ACTION ] );
+			}
+		}
+
 		// Replace 'Trash' text with 'Forget'.
 		if ( isset( $actions['trash'] ) ) {
 			$actions['trash'] = sprintf(
@@ -1736,5 +1834,4 @@ class AMP_Invalid_URL_Post_Type {
 
 		return $messages;
 	}
-
 }

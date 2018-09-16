@@ -41,7 +41,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, get_post_types(), true ) );
 		$this->assertEquals( array(), get_all_post_type_supports( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $amp_post_type->name );
-		$this->assertEquals( 'Invalid AMP Pages (URLs)', $amp_post_type->label );
+		$this->assertEquals( 'Invalid URLs', $amp_post_type->label );
 		$this->assertEquals( false, $amp_post_type->public );
 		$this->assertTrue( $amp_post_type->show_ui );
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
@@ -94,7 +94,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
-		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_row_actions' ) ) );
+		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_post_row_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_bulk_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'handle_bulk_action' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'print_admin_notice' ) ) );
@@ -219,7 +219,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Invalid_URL_Post_Type::display_invalid_url_validation_error_counts_summary( $invalid_url_post_id );
 		$summary = ob_get_clean();
-		$this->assertContains( 'New: 1', $summary );
+		$this->assertContains( 'New Rejected: 1', $summary );
 		$this->assertContains( 'Accepted: 1', $summary );
 		$this->assertContains( 'Rejected: 1', $summary );
 	}
@@ -499,10 +499,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			array_merge(
 				$initial_columns,
 				array(
-					AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS => 'Removed Elements',
-					AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES => 'Removed Attributes',
-					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Incompatible Sources',
-					'error_status' => 'Error Status',
+					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status<span class="dashicons dashicons-editor-help"></span>',
+					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
+					AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
 				)
 			),
 			AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns )
@@ -534,18 +533,18 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		return array(
 			'invalid_element'       => array(
-				AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS,
-				'script',
+				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT,
+				'<details class="source"><summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>Plugin</strong></summary><div>AMP</div></details>',
 				$errors,
 			),
 			'removed_attributes'    => array(
-				AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES,
+				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES,
 				'onclick',
 				$errors,
 			),
 			'sources_invalid_input' => array(
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT,
-				'amp',
+				'AMP',
 				$errors,
 			),
 		);
@@ -568,36 +567,6 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Invalid_URL_Post_Type::output_custom_column( $column_name, $invalid_url_post_id );
 		$this->assertContains( $expected_value, ob_get_clean() );
-	}
-
-	/**
-	 * Test for filter_row_actions()
-	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::filter_row_actions()
-	 */
-	public function test_filter_row_actions() {
-		add_theme_support( 'amp' );
-		AMP_Validation_Manager::init();
-
-		$initial_actions = array(
-			'trash' => '<a href="https://example.com">Trash</a>',
-		);
-
-		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
-			array(
-				array( 'code' => 'foo' ),
-			),
-			home_url( '/' )
-		);
-
-		$this->assertEquals( $initial_actions, AMP_Invalid_URL_Post_Type::filter_row_actions( $initial_actions, $this->factory()->post->create_and_get() ) );
-
-		$actions = AMP_Invalid_URL_Post_Type::filter_row_actions( $initial_actions, get_post( $invalid_post_id ) );
-		$this->assertArrayNotHasKey( 'inline hide-if-no-js', $actions );
-		$this->assertArrayHasKey( 'view', $actions );
-		$this->assertArrayHasKey( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $actions );
-
-		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
 	}
 
 	/**
@@ -1280,6 +1249,29 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_post_row_actions()
 	 */
 	public function test_filter_post_row_actions() {
+		add_theme_support( 'amp' );
+		AMP_Validation_Manager::init();
+
+		$initial_actions = array(
+			'trash' => '<a href="" class="submitdelete" aria-label="Forget &#8220;http://example.org/&#8221;">Forget</a>',
+		);
+
+		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/' )
+		);
+
+		$this->assertEquals( $initial_actions, AMP_Invalid_URL_Post_Type::filter_post_row_actions( $initial_actions, $this->factory()->post->create_and_get() ) );
+
+		$actions = AMP_Invalid_URL_Post_Type::filter_post_row_actions( $initial_actions, get_post( $invalid_post_id ) );
+		$this->assertArrayNotHasKey( 'inline hide-if-no-js', $actions );
+		$this->assertArrayHasKey( 'view', $actions );
+		$this->assertArrayHasKey( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $actions );
+
+		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
+
 		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_post_row_actions( array(), null ) );
 
 		$actions = array(

@@ -6,7 +6,7 @@ import domReady from '@wordpress/dom-ready';
 /**
  * Localized data
  */
-import { btnAriaLabel } from 'amp-validation-i18n';
+import { btnAriaLabel, errorIndexLink, errorIndexAnchor } from 'amp-validation-i18n';
 
 const OPEN_CLASS = 'is-open';
 
@@ -16,12 +16,19 @@ const OPEN_CLASS = 'is-open';
  * table column via backend code.
  */
 function addToggleButtons() {
-	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( th => {
+	const addButtons = ( th ) => {
 		const button = document.createElement( 'button' );
 		button.setAttribute( 'aria-label', btnAriaLabel );
 		button.setAttribute( 'type', 'button' );
 		button.setAttribute( 'class', 'error-details-toggle' );
 		th.appendChild( button );
+	};
+
+	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( th => {
+		addButtons( th );
+	} );
+	[ ...document.querySelectorAll( 'th.manage-column.column-sources_with_invalid_output' ) ].forEach( th => {
+		addButtons( th );
 	} );
 }
 
@@ -31,7 +38,7 @@ function addToggleButtons() {
 function addToggleListener() {
 	let open = false;
 
-	const details = [ ...document.querySelectorAll( '.column-details details' ) ];
+	const details = [ ...document.querySelectorAll( '.column-details details, .column-sources_with_invalid_output details' ) ];
 	const toggleButtons = [ ...document.querySelectorAll( 'button.error-details-toggle' ) ];
 	const onButtonClick = () => {
 		open = ! open;
@@ -72,8 +79,22 @@ function addTermListTableRowClasses() {
 	} );
 }
 
+// @todo This should be harmonized with the approach in PHP via AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url().
+function addViewErrorsByTypeLinkButton() {
+	if ( 'undefined' === typeof errorIndexAnchor || 'undefined' === typeof errorIndexLink ) {
+		return;
+	}
+	const heading = document.querySelector( '.wp-heading-inline' );
+	const link = document.createElement( 'a' );
+	link.innerText = errorIndexAnchor;
+	link.setAttribute( 'href', errorIndexLink );
+	link.setAttribute( 'class', 'page-title-action' );
+	heading.after( link );
+}
+
 domReady( () => {
 	addToggleButtons();
 	addToggleListener();
 	addTermListTableRowClasses();
+	addViewErrorsByTypeLinkButton();
 } );
