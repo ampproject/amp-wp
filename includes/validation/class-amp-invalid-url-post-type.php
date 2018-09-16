@@ -1155,6 +1155,7 @@ class AMP_Invalid_URL_Post_Type {
 		$data = array(
 			'l10n' => array(
 				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
+				'page_heading'    => self::get_single_url_page_heading(),
 			),
 		);
 
@@ -1587,6 +1588,43 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		</style>
 		<?php
+	}
+
+	/**
+	 * Gets the heading for the single URL page at /wp-admin/post.php.
+	 * This will be in the format of 'Errors For <page title>'.
+	 *
+	 * @return string|null The page heading, or null.
+	 */
+	public static function get_single_url_page_heading() {
+		global $pagenow;
+
+		if (
+			'post.php' !== $pagenow
+			||
+			! isset( $_GET['post'], $_GET['action'] ) // WPCS: CSRF OK.
+			||
+			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // WPCS: CSRF OK.
+		) {
+			return null;
+		}
+
+		// Mainly uses the same conditionals as print_status_meta_box().
+		$post           = get_post( sanitize_key( $_GET['post'] ) ); // WPCS: CSRF OK.
+		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
+		if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
+			$name = get_the_title( $queried_object['id'] );
+		} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
+			$name = get_term( $queried_object['id'] )->name;
+		} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {
+			$name = get_user_by( 'ID', $queried_object['id'] )->display_name;
+		} else {
+			// If there is no name available in the $queried_object, simply use 'Single URL' in the page heading.
+			$name = __( 'Single URL', 'amp' );
+		}
+
+		/* translators: %s is the name of the page with the the validation error(s) */
+		return sprintf( __( 'Errors For %s', 'amp' ), esc_html( $name ) );
 	}
 
 	/**

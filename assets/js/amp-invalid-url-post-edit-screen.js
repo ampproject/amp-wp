@@ -7,7 +7,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		data: {
 			l10n: {
 				unsaved_changes: '',
-				showing_number_errors: ''
+				showing_number_errors: '',
+				page_heading: ''
 			}
 		}
 	};
@@ -21,6 +22,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	component.boot = function boot( data ) {
 		Object.assign( component.data, data );
 		component.handleFiltering();
+		component.changeHeading();
 		component.watchForUnsavedChanges();
 	};
 
@@ -129,6 +131,16 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		};
 
 		document.getElementById( 'amp_validation_error_type' ).addEventListener( 'change', onChange );
+	};
+
+	/**
+	 * Changes the page heading, as this doesn't look to be possible with a PHP filter.
+	 */
+	component.changeHeading = function changeHeading() {
+		var headingQuery = document.getElementsByClassName( 'wp-heading-inline' );
+		if ( headingQuery[ 0 ] && component.data.l10n.page_heading ) {
+			headingQuery[ 0 ].innerText = component.data.l10n.page_heading;
+		}
 	};
 
 	return component;
