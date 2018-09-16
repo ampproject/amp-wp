@@ -672,13 +672,16 @@ class AMP_Invalid_URL_Post_Type {
 						$output[]     = '<details class="source">';
 						$plugin_names = array();
 						$plugin_slugs = array_unique( $sources['plugin'] );
+						$plugins      = get_plugins();
 						foreach ( $plugin_slugs as $plugin_slug ) {
-							$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_slug . '/' . $plugin_slug . '.php' );
-							if ( ! empty( $plugin_data ) && ! empty( $plugin_data['Name'] ) ) {
-								$plugin_names[] = $plugin_data['Name'];
-							} else {
-								$plugin_names[] = $plugin_slug;
+							$name = $plugin_slug;
+							foreach ( $plugins as $plugin_file => $plugin_data ) {
+								if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+									$name = $plugin_data['Name'];
+									break;
+								}
 							}
+							$plugin_names[] = $name;
 						}
 						$count = count( $plugin_slugs );
 						if ( 1 === $count ) {
@@ -709,7 +712,13 @@ class AMP_Invalid_URL_Post_Type {
 						$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
 						$themes   = array_unique( $sources['theme'] );
 						foreach ( $themes as $theme_slug ) {
-							$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_slug ) );
+							$theme_obj = wp_get_theme( $theme_slug );
+							if ( ! $theme_obj->errors() ) {
+								$theme_name = $theme_obj->get( 'Name' );
+							} else {
+								$theme_name = $theme_slug;
+							}
+							$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_name ) );
 						}
 						$output[] = '</div>';
 					}

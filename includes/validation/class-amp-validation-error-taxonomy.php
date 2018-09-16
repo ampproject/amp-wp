@@ -901,9 +901,6 @@ class AMP_Validation_Error_Taxonomy {
 				$( function() {
 					// Move the filter UI after the 'Bulk Actions' <select>, as it looks like there's no way to do this with only an action.
 					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
-
-					// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
-					$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
 				} );
 			} )( jQuery );
 		</script>
@@ -928,8 +925,17 @@ class AMP_Validation_Error_Taxonomy {
 				admin_url( 'edit.php' )
 			) ),
 			esc_attr( self::ID_LINK_ERRORS_BY_URL ),
-			esc_html__( 'View errors by URL', 'amp' )
+			esc_html__( 'View Invalid URLs', 'amp' )
 		);
+
+		?>
+		<script>
+			jQuery( function( $ ) {
+				// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
+				$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
+			} );
+		</script>
+		<?php
 	}
 
 	/**
