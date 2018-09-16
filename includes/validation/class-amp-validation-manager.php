@@ -787,14 +787,16 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$has_actually_unaccepted_error = false;
-		$validation_errors             = array();
+		// Show all validation errors which have not been explicitly acknowledged as accepted.
+		$validation_errors = array();
 		foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
-			if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $error['term_status'] ) {
+			$needs_moderation = (
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] || // @todo Show differently since moderated?
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status'] ||
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $error['status']
+			);
+			if ( $needs_moderation ) {
 				$validation_errors[] = $error['data'];
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $error['status'] ) {
-					$has_actually_unaccepted_error = true;
-				}
 			}
 		}
 
@@ -805,12 +807,13 @@ class AMP_Validation_Manager {
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
+		// @todo Check if the error actually occurs in the_content, and if not, consider omitting the warning if the user does not have privileges to manage_options.
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
-		if ( $has_actually_unaccepted_error && ! amp_is_canonical() ) {
-			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+		if ( amp_is_canonical() ) {
+			esc_html_e( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
 		} else {
-			esc_html_e( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
+			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 		}
 		echo sprintf(
 			' <a href="%s" target="_blank">%s</a>',
