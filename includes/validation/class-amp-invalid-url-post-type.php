@@ -180,7 +180,10 @@ class AMP_Invalid_URL_Post_Type {
 
 		$query = new WP_Query( array(
 			'post_type'              => self::POST_TYPE_SLUG,
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			),
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		) );
@@ -273,6 +276,7 @@ class AMP_Invalid_URL_Post_Type {
 		foreach ( $validation_errors as $error ) {
 			switch ( $error['term']->term_group ) {
 				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
 					$counts['new']++;
 					break;
 				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
@@ -1353,15 +1357,20 @@ class AMP_Invalid_URL_Post_Type {
 					$collapsed_details = array();
 					$term              = $error['term'];
 					$select_name       = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
+					$is_new_error      = (
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term']->term_group
+						||
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $error['term']->term_group
+					);
 					?>
 					<li>
-						<details <?php echo ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term']->term_group ) ? 'open' : ''; ?>>
+						<details <?php echo $is_new_error ? 'open' : ''; ?>>
 							<summary>
 								<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 									<?php esc_html_e( 'Status:', 'amp' ); ?>
 								</label>
 								<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
-									<?php if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term']->term_group ) : ?>
+									<?php if ( $is_new_error ) : ?>
 										<option value="">
 											&#x2753;
 											<?php esc_html_e( 'New', 'amp' ); ?>
@@ -1580,7 +1589,10 @@ class AMP_Invalid_URL_Post_Type {
 
 		$query = new WP_Query( array(
 			'post_type'              => self::POST_TYPE_SLUG,
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			),
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		) );
@@ -1592,7 +1604,10 @@ class AMP_Invalid_URL_Post_Type {
 					add_query_arg(
 						array(
 							'post_type' => self::POST_TYPE_SLUG,
-							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
+								AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+								AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+							),
 						),
 						'edit.php'
 					)

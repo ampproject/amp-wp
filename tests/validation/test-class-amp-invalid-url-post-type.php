@@ -1166,27 +1166,41 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_render_post_filters() {
 		set_current_screen( 'edit.php' );
-		$number_of_errors = 20;
-		for ( $i = 0; $i < $number_of_errors; $i++ ) {
+		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validation_Error_Taxonomy::register();
+
+		$number_of_new_errors = 20;
+		$number_of_rejected   = 15;
+		$number_of_accepted   = 5;
+
+		for ( $i = 0; $i < 40; $i++ ) {
 			$invalid_url_post      = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 			$validation_error_term = $this->factory()->term->create( array(
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-				'description' => wp_json_encode( $this->get_mock_errors() ),
-				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				'description' => wp_json_encode( array( 'code' => 'test' ), compact( 'i' ) ),
+			) );
+			if ( $i < 9 ) {
+				$status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS;
+			} elseif ( $i < 20 ) {
+				$status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
+			} elseif ( $i < 35 ) {
+				$status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+			} else {
+				$status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
+			}
+			wp_update_term( $validation_error_term, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
+				'term_group' => $status,
 			) );
 
 			// Associate the validation error term with a URL.
 			wp_set_post_terms(
 				$invalid_url_post,
-				$validation_error_term,
+				array( $validation_error_term ),
 				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
 			);
+
 		}
 
-		$new_error_count               = sprintf(
-			'With New Errors <span class="count">(%d)</span>',
-			$number_of_errors
-		);
 		$correct_post_type             = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
 		$wrong_post_type               = 'page';
 		$correct_which_second_argument = 'top';
@@ -1205,7 +1219,19 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
 		ob_start();
 		AMP_Invalid_URL_Post_Type::render_post_filters( $correct_post_type, $correct_which_second_argument );
-		$this->assertContains( $new_error_count, ob_get_clean() );
+		$output = ob_get_clean();
+		$this->assertContains(
+			sprintf( 'With New Errors <span class="count">(%d)</span>', $number_of_new_errors ),
+			$output
+		);
+		$this->assertContains(
+			sprintf( 'With Rejected Errors <span class="count">(%d)</span>', $number_of_rejected ),
+			$output
+		);
+		$this->assertContains(
+			sprintf( 'With Accepted Errors <span class="count">(%d)</span>', $number_of_accepted ),
+			$output
+		);
 	}
 
 	/**
