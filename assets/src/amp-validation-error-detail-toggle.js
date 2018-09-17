@@ -6,7 +6,7 @@ import domReady from '@wordpress/dom-ready';
 /**
  * Localized data
  */
-import { btnAriaLabel, errorIndexLink, errorIndexAnchor } from 'amp-validation-i18n';
+import { btnAriaLabel } from 'amp-validation-i18n';
 
 const OPEN_CLASS = 'is-open';
 
@@ -79,22 +79,8 @@ function addTermListTableRowClasses() {
 	} );
 }
 
-// @todo This should be harmonized with the approach in PHP via AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url().
-function addViewErrorsByTypeLinkButton() {
-	if ( 'undefined' === typeof errorIndexAnchor || 'undefined' === typeof errorIndexLink ) {
-		return;
-	}
-	const heading = document.querySelector( '.wp-heading-inline' );
-	const link = document.createElement( 'a' );
-	link.innerText = errorIndexAnchor;
-	link.setAttribute( 'href', errorIndexLink );
-	link.setAttribute( 'class', 'page-title-action' );
-	heading.after( link );
-}
-
 domReady( () => {
 	addToggleButtons();
 	addToggleListener();
 	addTermListTableRowClasses();
-	addViewErrorsByTypeLinkButton();
 } );
