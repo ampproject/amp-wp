@@ -81,6 +81,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 			$this->amp_tag,
 			array(
 				'data-shortcode' => $args['instagram_id'],
+				'data-captioned' => '',
 				'layout'         => 'responsive',
 				'width'          => $this->args['width'],
 				'height'         => $this->args['height'],
