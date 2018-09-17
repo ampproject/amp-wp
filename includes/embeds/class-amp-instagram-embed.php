@@ -146,6 +146,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
 			'data-shortcode' => $instagram_id,
+			'data-captioned' => '',
 			'layout'         => 'responsive',
 			'width'          => $this->DEFAULT_WIDTH,
 			'height'         => $this->DEFAULT_HEIGHT,
