@@ -1011,6 +1011,26 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test render_link_to_error_index_screen.
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen()
+	 */
+	public function test_render_link_to_error_index_screen() {
+		global $current_screen;
+		set_current_screen( 'index.php' );
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen();
+		$this->assertEmpty( ob_get_clean() );
+
+		set_current_screen( 'edit.php' );
+		$current_screen->post_type = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen();
+		$output = ob_get_clean();
+		$this->assertContains( 'View Error Index', $output );
+	}
+
+	/**
 	 * Test for add_meta_boxes()
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::add_meta_boxes()

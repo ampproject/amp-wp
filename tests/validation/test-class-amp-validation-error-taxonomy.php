@@ -540,19 +540,19 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test render_link_to_errors_by_url.
+	 * Test render_link_to_invalid_urls_screen.
 	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url()
+	 * @covers \AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen()
 	 */
-	public function test_render_link_to_errors_by_url() {
-		// When passing the wrong $taxomomy argument, this should not render anything.
+	public function test_render_link_to_invalid_urls_screen() {
+		// When passing the wrong $taxonomy argument, this should not render anything.
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url( 'category' );
+		AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen( 'category' );
 		$this->assertEmpty( ob_get_clean() );
 
 		// When passing the correct taxonomy, this should render the link.
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$output = ob_get_clean();
 		$this->assertContains( 'View Invalid URLs', $output );
 		$this->assertContains(

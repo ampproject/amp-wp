@@ -137,6 +137,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
 
 		// Post list screen hooks.
+		add_action( 'admin_notices', array( __CLASS__, 'render_link_to_error_index_screen' ) );
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
@@ -203,11 +204,39 @@ class AMP_Invalid_URL_Post_Type {
 			'amp-validation-error-detail-toggle',
 			'ampValidationI18n',
 			array(
-				'btnAriaLabel'     => esc_attr__( 'Toggle all sources', 'amp' ),
-				'errorIndexLink'   => get_admin_url( null, 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_invalid_url' ),
-				'errorIndexAnchor' => esc_html__( 'View Error Index', 'amp' ),
+				'btnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
 			)
 		);
+	}
+
+	/**
+	 * On the 'Invalid URLs' screen, renders a link to the 'Error Index' page.
+	 *
+	 * @see AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen()
+	 * @todo Do cap check for the post type.
+	 */
+	public static function render_link_to_error_index_screen() {
+		if ( ! ( get_current_screen() && 'edit' === get_current_screen()->base && self::POST_TYPE_SLUG === get_current_screen()->post_type ) ) {
+			return;
+		}
+
+		$id = 'link-errors-index';
+
+		printf(
+			'<a href="%s" hidden class="page-title-action" id="%s" style="margin-left: 1rem;">%s</a>',
+			esc_url( get_admin_url( null, 'edit-tags.php?taxonomy=' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '&post_type=' . self::POST_TYPE_SLUG ) ),
+			esc_attr( $id ),
+			esc_html__( 'View Error Index', 'amp' )
+		);
+
+		?>
+		<script>
+			jQuery( function( $ ) {
+				// Move the link to after the heading, as it also looks like there's no action for this.
+				$( <?php echo wp_json_encode( '#' . $id ); ?> ).removeAttr( 'hidden' ).insertAfter( $( '.wp-heading-inline' ) );
+			} );
+		</script>
+		<?php
 	}
 
 	/**
