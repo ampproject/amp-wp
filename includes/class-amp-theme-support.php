@@ -767,6 +767,11 @@ class AMP_Theme_Support {
 			return 'amp';
 		} );
 
+		// Don't show loading indicator on custom logo since it makes most sense for larger images.
+		add_filter( 'get_custom_logo', function( $html ) {
+			return preg_replace( '/(?<=<img\s)/', ' noloading ', $html );
+		}, 1 );
+
 		/*
 		 * "AMP HTML documents MUST contain the AMP boilerplate code (head > style[amp-boilerplate] and noscript > style[amp-boilerplate])
 		 * in their head tag." {@link https://www.ampproject.org/docs/fundamentals/spec#required-markup AMP Required markup}
