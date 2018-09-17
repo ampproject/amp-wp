@@ -144,13 +144,18 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function create_amp_instagram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
 
-		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
+		$node_args = array(
 			'data-shortcode' => $instagram_id,
-			'data-captioned' => '',
 			'layout'         => 'responsive',
 			'width'          => $this->DEFAULT_WIDTH,
 			'height'         => $this->DEFAULT_HEIGHT,
-		) );
+		);
+
+		if ( true === $node->hasAttribute( 'data-instgrm-captioned' ) ) {
+			$node_args['data-captioned'] = '';
+		}
+
+		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, $node_args );
 
 		$this->sanitize_embed_script( $node );
 
