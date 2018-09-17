@@ -8,6 +8,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		AMP_Options_Manager::register_settings();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 	}
 
 	private $vendor = 'googleanalytics';

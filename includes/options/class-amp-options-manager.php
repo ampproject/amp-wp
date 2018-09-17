@@ -111,6 +111,10 @@ class AMP_Options_Manager {
 	public static function validate_options( $new_options ) {
 		$options = self::get_options();
 
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return $options;
+		}
+
 		// Theme support.
 		$recognized_theme_supports = array(
 			'disabled',
