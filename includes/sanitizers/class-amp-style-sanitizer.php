@@ -2041,7 +2041,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = '';
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
-					$stylesheet .= $stylesheet_part;
+					if ( '}' === $stylesheet_part && ! empty( $query ) ) {
+						if ( count( $query ) >= 2 ) {
+							$query[]     = $stylesheet_part;
+							$stylesheet .= implode( '', $query );
+						}
+						unset( $query );
+					} elseif ( strpos( $stylesheet_part, '@media' ) !== false ) {
+						$query = array( $stylesheet_part );
+					} else {
+						$stylesheet .= $stylesheet_part;
+					}
 					continue;
 				}
 				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
@@ -2082,10 +2092,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors = array_keys( $selectors_parsed );
 				}
 				if ( ! empty( $selectors ) ) {
-					$stylesheet .= implode( ',', $selectors ) . $declaration_block;
+					if ( ! empty( $query ) ) {
+						$query[] = implode( ',', $selectors ) . $declaration_block;
+					} else {
+						$stylesheet .= implode( ',', $selectors ) . $declaration_block;
+					}
 				}
 			}
-			$stylesheet                 = $this->remove_empty_media_queries( $stylesheet );
 			$sheet_size                 = strlen( $stylesheet );
 			$pending_stylesheet['size'] = $sheet_size;
 
