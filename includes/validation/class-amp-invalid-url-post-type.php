@@ -213,10 +213,14 @@ class AMP_Invalid_URL_Post_Type {
 	 * On the 'Invalid URLs' screen, renders a link to the 'Error Index' page.
 	 *
 	 * @see AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen()
-	 * @todo Do cap check for the post type.
 	 */
 	public static function render_link_to_error_index_screen() {
 		if ( ! ( get_current_screen() && 'edit' === get_current_screen()->base && self::POST_TYPE_SLUG === get_current_screen()->post_type ) ) {
+			return;
+		}
+
+		$taxonomy_object = get_taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		if ( ! current_user_can( $taxonomy_object->cap->manage_terms ) ) {
 			return;
 		}
 
@@ -869,7 +873,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		foreach ( $items as $item ) {
 			$post = get_post( $item );
-			if ( empty( $post ) ) {
+			if ( empty( $post ) || ! current_user_can( 'edit_post', $post->ID ) ) {
 				continue;
 			}
 
@@ -1048,11 +1052,18 @@ class AMP_Invalid_URL_Post_Type {
 				if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
 					throw new Exception( 'invalid_post' );
 				}
+				if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+					throw new Exception( 'unauthorized' );
+				}
 				$url = self::get_url_from_post( $post );
 			} elseif ( isset( $_GET['url'] ) ) {
 				$url = wp_validate_redirect( esc_url_raw( wp_unslash( $_GET['url'] ) ), null );
 				if ( ! $url ) {
 					throw new Exception( 'illegal_url' );
+				}
+				// Don't let non-admins create new amp_invalid_url posts.
+				if ( ! current_user_can( 'manage_options' ) ) {
+					throw new Exception( 'unauthorized' );
 				}
 			}
 
@@ -1162,9 +1173,6 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function handle_validation_error_status_update() {
 		check_admin_referer( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' );
-		if ( ! AMP_Validation_Manager::has_cap() ) {
-			wp_die( esc_html__( 'You do not have permissions to validate an AMP URL. Did you get logged out?', 'amp' ) );
-		}
 
 		if ( empty( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) || ! is_array( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
 			return;
@@ -1173,6 +1181,11 @@ class AMP_Invalid_URL_Post_Type {
 		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
+
+		if ( ! AMP_Validation_Manager::has_cap() || ! current_user_can( 'edit_post', $post->ID ) ) {
+			wp_die( esc_html__( 'You do not have permissions to validate an AMP URL. Did you get logged out?', 'amp' ) );
+		}
+
 		$updated_count = 0;
 
 		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
@@ -1808,7 +1821,7 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-		if ( 'trash' !== $post->post_status ) {
+		if ( 'trash' !== $post->post_status && current_user_can( 'edit_post', $post->ID ) ) {
 			$url = self::get_url_from_post( $post );
 			if ( $url ) {
 				$actions['view'] = sprintf(

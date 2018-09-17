@@ -904,12 +904,16 @@ class AMP_Validation_Error_Taxonomy {
 	 * On the 'Error Index' screen, renders a link to the 'Invalid URLs' page.
 	 *
 	 * @see AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen()
-	 * @todo Do cap check for the taxonomy.
 	 *
 	 * @param string $taxonomy_name The name of the taxonomy.
 	 */
 	public static function render_link_to_invalid_urls_screen( $taxonomy_name ) {
 		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
+			return;
+		}
+
+		$post_type_object = get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		if ( ! current_user_can( $post_type_object->cap->edit_posts ) ) {
 			return;
 		}
 

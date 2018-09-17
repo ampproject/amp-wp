@@ -545,6 +545,8 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen()
 	 */
 	public function test_render_link_to_invalid_urls_screen() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
 		// When passing the wrong $taxonomy argument, this should not render anything.
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen( 'category' );
