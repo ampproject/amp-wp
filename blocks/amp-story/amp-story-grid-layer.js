@@ -150,7 +150,7 @@ export default registerBlockType(
 					/>
 					<RangeControl
 						key='opacity'
-						label={ __( 'Opacity (%)', 'amp' ) }
+						label={ __( 'Layer Opacity (%)', 'amp' ) }
 						value={ parseInt( attributes.opacity * 100 ) }
 						onChange={ ( value ) => {
 							value = value / 100;
