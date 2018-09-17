@@ -142,34 +142,41 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
-		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'handle_bulk_action' ), 10, 3 );
+		add_filter( 'handle_bulk_actions-edit-' . self::POST_TYPE_SLUG, array(
+			__CLASS__,
+			'handle_bulk_action',
+		), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'print_admin_notice' ) );
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, array( __CLASS__, 'handle_validate_request' ) );
-		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, array( __CLASS__, 'handle_validation_error_status_update' ) );
+		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, array(
+			__CLASS__,
+			'handle_validation_error_status_update',
+		) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_new_invalid_url_count' ) );
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_post_row_actions' ), 10, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
 		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
 
 		// Hide irrelevant "published" label in the invalid URL post list.
-		add_filter( 'post_date_column_status', function( $status, $post ) {
+		add_filter( 'post_date_column_status', function ( $status, $post ) {
 			if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post ) ) {
 				$status = '';
 			}
+
 			return $status;
 		}, 10, 2 );
 
 		// Prevent query vars from persisting after redirect.
-		add_filter( 'removable_query_args', function( $query_vars ) {
+		add_filter( 'removable_query_args', function ( $query_vars ) {
 			$query_vars[] = 'amp_actioned';
 			$query_vars[] = 'amp_taxonomy_terms_updated';
 			$query_vars[] = AMP_Invalid_URL_Post_Type::REMAINING_ERRORS;
 			$query_vars[] = 'amp_urls_tested';
 			$query_vars[] = 'amp_validate_error';
+
 			return $query_vars;
 		} );
 	}
-
 	/**
 	 * Enqueue style.
 	 */
@@ -684,6 +691,13 @@ class AMP_Invalid_URL_Post_Type {
 			$columns['date'] = esc_html__( 'Last Checked', 'amp' );
 		}
 
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ) { // WPCS: CSRF OK.
+			unset( $columns['error_status'], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] );
+			$columns[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] = esc_html__( 'Sources', 'amp' );
+			$columns['date']  = esc_html__( 'Last Checked', 'amp' );
+			$columns['title'] = esc_html__( 'URL', 'amp' );
+		}
+
 		return $columns;
 	}
 
@@ -991,6 +1005,28 @@ class AMP_Invalid_URL_Post_Type {
 				'<div class="notice notice-%s"><p>%s</p></div>',
 				esc_attr( $class ),
 				wp_kses_post( $message )
+			);
+		}
+
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // WPCS: CSRF OK.
+			$error       = get_term_by( 'slug', wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ), \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ); // WPCS: CSRF OK.
+			$description = json_decode( $error->description );
+			$output      = '';
+			foreach ( $description as $desc_name => $desc_info ) {
+				if ( ! is_object( $desc_info ) ) {
+					$output .= sprintf( '<li><span class="details-attributes__title">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $desc_name, $desc_info );
+				} else {
+					$output .= sprintf( '<ul class="secondary-details-array"><span class="details-attributes__title">%s:</span><br/>', $desc_name );
+					foreach ( $desc_info as $sec_desc_info_name => $sec_desc_info ) {
+						$output .= sprintf( '<li><span class="details-attributes__attr">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $sec_desc_info_name, $sec_desc_info );
+					}
+					$output .= '</ul>';
+				}
+			}
+			printf(
+				'<div class="notice"><details class="single-error-detail"><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
+				esc_html__( 'Removed Element', 'amp' ),
+				wp_kses_post( $output )
 			);
 		}
 	}
