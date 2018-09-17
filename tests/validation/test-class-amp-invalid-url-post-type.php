@@ -247,6 +247,28 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			$invalid_post_id,
 			AMP_Invalid_URL_Post_Type::get_invalid_url_post( get_permalink( $post ) )->ID
 		);
+
+		// Test trashed.
+		wp_trash_post( $invalid_post_id );
+		$this->assertNull( AMP_Invalid_URL_Post_Type::get_invalid_url_post( get_permalink( $post ) ) );
+		$args = array( 'include_trashed' => true );
+		$this->assertEquals(
+			$invalid_post_id,
+			AMP_Invalid_URL_Post_Type::get_invalid_url_post( get_permalink( $post ), $args )->ID
+		);
+		wp_untrash_post( $invalid_post_id );
+
+		// Test normalized.
+		$args = array( 'normalize' => false );
+		$url  = add_query_arg( 'utm_foo', 'bar', get_permalink( $post ) . '#baz' );
+		$url  = set_url_scheme( $url, 'http' );
+		$this->assertNull( AMP_Invalid_URL_Post_Type::get_invalid_url_post( $url, $args ) );
+		$args = array( 'normalize' => true );
+		$this->assertEquals( $invalid_post_id, AMP_Invalid_URL_Post_Type::get_invalid_url_post( $url, $args )->ID );
+		$this->assertEquals( $invalid_post_id, AMP_Invalid_URL_Post_Type::get_invalid_url_post( $url )->ID );
+		$url = set_url_scheme( get_permalink( $post ), 'http' );
+		$this->assertNull( AMP_Invalid_URL_Post_Type::get_invalid_url_post( $url, array( 'normalize' => false ) ) );
+		$this->assertEquals( $invalid_post_id, AMP_Invalid_URL_Post_Type::get_invalid_url_post( $url, array( 'normalize' => true ) )->ID );
 	}
 
 	/**
@@ -280,6 +302,12 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			get_permalink( $post ),
 			AMP_Invalid_URL_Post_Type::get_url_from_post( $invalid_post_id )
 		);
+
+		// Check URL scheme.
+		update_option( 'home', home_url( '/', 'http' ) );
+		$this->assertEquals( 'http', wp_parse_url( AMP_Invalid_URL_Post_Type::get_url_from_post( $invalid_post_id ), PHP_URL_SCHEME ) );
+		update_option( 'home', home_url( '/', 'https' ) );
+		$this->assertEquals( 'https', wp_parse_url( AMP_Invalid_URL_Post_Type::get_url_from_post( $invalid_post_id ), PHP_URL_SCHEME ) );
 	}
 
 	/**
@@ -381,7 +409,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			home_url( '/something/else/' ),
+			home_url( '/something/else/', 'https' ),
 			get_post( $invalid_url_post_id )->post_title
 		);
 
@@ -1087,16 +1115,15 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEmpty( ob_get_clean() );
 
 		// The post has the correct type and a validation URL in the title, so this should output markup.
-		$url                    = 'https://example.com';
 		$post_correct_post_type = $this->factory()->post->create_and_get( array(
 			'post_type'  => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-			'post_title' => $url,
+			'post_title' => home_url(),
 		) );
 		ob_start();
 		AMP_Invalid_URL_Post_Type::print_url_as_title( $post_correct_post_type );
 		$output = ob_get_clean();
 		$this->assertContains( '<h2 class="amp-invalid-url">', $output );
-		$this->assertContains( $url, $output );
+		$this->assertContains( home_url(), $output );
 	}
 
 	/**
@@ -1252,15 +1279,16 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		add_theme_support( 'amp' );
 		AMP_Validation_Manager::init();
 
+		$validated_url   = home_url( '/' );
 		$initial_actions = array(
-			'trash' => '<a href="" class="submitdelete" aria-label="Forget &#8220;http://example.org/&#8221;">Forget</a>',
+			'trash' => '<a href="" class="submitdelete" aria-label="Forget &#8220;' . $validated_url . '&#8221;">Forget</a>',
 		);
 
 		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
 			array(
 				array( 'code' => 'foo' ),
 			),
-			home_url( '/' )
+			$validated_url
 		);
 
 		$this->assertEquals( $initial_actions, AMP_Invalid_URL_Post_Type::filter_post_row_actions( $initial_actions, $this->factory()->post->create_and_get() ) );

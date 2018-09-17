@@ -370,12 +370,40 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Gets the existing custom post that stores errors for the $url, if it exists.
 	 *
-	 * @param string $url The (in)valid URL.
+	 * @param string $url     The (in)valid URL.
+	 * @param array  $options {
+	 *     Options.
+	 *
+	 *     @type bool $normalize       Whether to normalize the URL.
+	 *     @type bool $include_trashed Include trashed.
+	 * }
 	 * @return WP_Post|null The post of the existing custom post, or null.
 	 */
-	public static function get_invalid_url_post( $url ) {
-		$url = remove_query_arg( amp_get_slug(), $url );
-		return get_page_by_path( md5( $url ), OBJECT, self::POST_TYPE_SLUG );
+	public static function get_invalid_url_post( $url, $options = array() ) {
+		$default = array(
+			'normalize'       => true,
+			'include_trashed' => false,
+		);
+		$options = wp_parse_args( $options, $default );
+
+		if ( $options['normalize'] ) {
+			$url = self::normalize_url_for_storage( $url );
+		}
+		$slug = md5( $url );
+
+		$post = get_page_by_path( $slug, OBJECT, self::POST_TYPE_SLUG );
+		if ( $post ) {
+			return $post;
+		}
+
+		if ( $options['include_trashed'] ) {
+			$post = get_page_by_path( $slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
+			if ( $post ) {
+				return $post;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -393,9 +421,55 @@ class AMP_Invalid_URL_Post_Type {
 			return null;
 		}
 		$url = $post->post_title;
+
+		// Add AMP query var if in paired mode.
 		if ( ! amp_is_canonical() ) {
 			$url = add_query_arg( amp_get_slug(), '', $url );
 		}
+
+		// Set URL scheme based on whether HTTPS is current.
+		$url = set_url_scheme( $url, ( 'http' === wp_parse_url( home_url(), PHP_URL_SCHEME ) ) ? 'http' : 'https' );
+
+		return $url;
+	}
+
+	/**
+	 * Normalize a URL for storage.
+	 *
+	 * This ensures that query vars like utm_* and the like will not cause duplicates.
+	 * The AMP query param is removed to facilitate switching between native and paired.
+	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
+	 *
+	 * @param string $url URL.
+	 * @return string Normalized URL.
+	 * @global WP $wp
+	 */
+	protected static function normalize_url_for_storage( $url ) {
+		global $wp;
+
+		// Only ever store the canonical version.
+		$url = amp_remove_endpoint( $url );
+
+		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
+		$url = strtok( $url, '#' );
+
+		// Normalize query args, removing all that are not recognized or which are removable.
+		$url_parts = explode( '?', $url, 2 );
+		if ( 2 === count( $url_parts ) ) {
+			parse_str( $url_parts[1], $args );
+			foreach ( wp_removable_query_args() as $removable_query_arg ) {
+				unset( $args[ $removable_query_arg ] );
+			}
+			$args = wp_array_slice_assoc( $args, $wp->public_query_vars );
+			$url  = $url_parts[0];
+			if ( ! empty( $args ) ) {
+				$url = $url_parts[0] . '?' . build_query( $args );
+			}
+		}
+
+		// Normalize the scheme as HTTPS.
+		$url = set_url_scheme( $url, 'https' );
+
 		return $url;
 	}
 
@@ -416,17 +490,17 @@ class AMP_Invalid_URL_Post_Type {
 	 * @global WP $wp
 	 */
 	public static function store_validation_errors( $validation_errors, $url, $args = array() ) {
-		$url  = remove_query_arg( amp_get_slug(), $url ); // Only ever store the canonical version.
+		$url  = self::normalize_url_for_storage( $url );
 		$slug = md5( $url );
 		$post = null;
 		if ( ! empty( $args['invalid_url_post'] ) ) {
 			$post = get_post( $args['invalid_url_post'] );
 		}
 		if ( ! $post ) {
-			$post = get_page_by_path( $slug, OBJECT, self::POST_TYPE_SLUG );
-			if ( ! $post ) {
-				$post = get_page_by_path( $slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
-			}
+			$post = self::get_invalid_url_post( $url, array(
+				'include_trashed' => true,
+				'normalize'       => false, // Since already normalized.
+			) );
 		}
 
 		/*
@@ -1759,7 +1833,7 @@ class AMP_Invalid_URL_Post_Type {
 				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
 				get_delete_post_link( $post->ID ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), $post->post_title ) ),
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), self::get_url_from_post( $post ) ) ),
 				esc_html__( 'Forget', 'amp' )
 			);
 		}
@@ -1769,7 +1843,7 @@ class AMP_Invalid_URL_Post_Type {
 				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
 				get_delete_post_link( $post->ID, '', true ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221; permanently', 'amp' ), $post->post_title ) ),
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221; permanently', 'amp' ), self::get_url_from_post( $post ) ) ),
 				esc_html__( 'Forget Permanently', 'amp' )
 			);
 		}

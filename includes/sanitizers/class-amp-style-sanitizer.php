@@ -830,6 +830,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
 			$parsed = $this->prepare_stylesheet( $stylesheet, $options );
 
+			/*
+			 * When an object cache is not available, we cache with an expiration to prevent the options table from
+			 * getting filled infinitely. On the other hand, if an external object cache is available then we don't
+			 * set an expiration because it should implement LRU cache expulsion policy.
+			 */
 			if ( wp_using_ext_object_cache() ) {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
 			} else {
