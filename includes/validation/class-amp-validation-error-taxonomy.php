@@ -279,6 +279,21 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Sanitize term status(es).
+	 *
+	 * @param int|int[]|string $status One or more statuses.
+	 * @param array $options {
+	 *     Options.
+	 *
+	 *     @type bool $multiple Multiple, whether to extract more than one. Default false.
+	 * }
+	 * @return int|int[] Returns an integer unless the multiple option is passed.
+	 */
+	public static function sanitize_term_status( $status, $options = array() ) {
+		$multiple = ! empty( $options['multiple'] );
+	}
+
+	/**
 	 * Prepare a validation error for lookup or insertion as taxonomy term.
 	 *
 	 * @param array $error Validation error.
