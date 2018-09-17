@@ -87,6 +87,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
 	 */
 	public function test_get_and_set_options() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
 		global $wp_settings_errors;
 		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
