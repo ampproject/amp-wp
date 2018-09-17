@@ -234,14 +234,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$sanitizer->remove_invalid_child( $child, array( 'foo' => 'bar' ) );
 		$this->assertEquals( null, $parent->firstChild );
-		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
-		$this->assertEquals(
-			array(
-				'error'     => $expected_error,
-				'sanitized' => true,
-			),
-			AMP_Validation_Manager::$validation_results[0]
-		);
+		$this->assertCount( 0, AMP_Validation_Manager::$validation_results );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 
 		// Test unsanitized.

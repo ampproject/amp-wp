@@ -167,10 +167,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			// Show all validation errors which have not been explicitly acknowledged as accepted.
 			validationErrors = _.map(
 				_.filter( ampValidity.results, function( result ) {
+					// @todo Show VALIDATION_ERROR_ACK_REJECTED_STATUS differently since moderated?
 					return (
 						0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
 						1 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS */ === result.status ||
-						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers  // @todo Show differently since moderated?
+						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
 					);
 				} ),
 				function( result ) {
