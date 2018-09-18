@@ -387,4 +387,32 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		wp_using_ext_object_cache( false ); // turn off external object cache flag.
 	}
+
+	/**
+	 * Test for render_welcome_notice()
+	 *
+	 * @covers AMP_Options_Manager::render_welcome_notice()
+	 */
+	public function test_render_welcome_notice() {
+		// If this is not the main 'AMP Settings' page, this should not render the notice.
+		wp_set_current_user( $this->factory()->user->create() );
+		set_current_screen( 'edit.php' );
+		ob_start();
+		AMP_Options_Manager::render_welcome_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// This is the correct page, but the notice was dismissed, so it should not display.
+		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
+		$id                            = 'welcome-notice-1';
+		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
+		ob_start();
+		AMP_Options_Manager::render_welcome_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// This is the correct page, and the notice has not been dismissed, so it should display.
+		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
+		ob_start();
+		AMP_Options_Manager::render_welcome_notice();
+		$this->assertContains( 'Welcome to AMP for WordPress', ob_get_clean() );
+	}
 }

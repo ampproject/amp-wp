@@ -50,6 +50,7 @@ class AMP_Options_Manager {
 		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'render_welcome_notice' ) );
 	}
 
 	/**
@@ -380,5 +381,44 @@ class AMP_Options_Manager {
 			&&
 			AMP_Theme_Support::exceeded_cache_miss_threshold()
 		);
+	}
+
+	/**
+	 * Renders the welcome notice on the 'AMP Settings' page.
+	 *
+	 * Uses the user meta values for the dismissed WP pointers.
+	 * So once the user dismisses this notice, it will never appear again.
+	 *
+	 * @todo: Add the full copy for this notice when it is decided.
+	 */
+	public static function render_welcome_notice() {
+		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+			return;
+		}
+
+		$notice_id = 'welcome-notice-1';
+		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
+		if ( in_array( $notice_id, explode( ',', strval( $dismissed ) ), true ) ) {
+			return;
+		}
+
+		?>
+		<div class="notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>"><p><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></p></div>
+
+		<script>
+		( function( $ ) {
+			$( function() {
+				// On dismissing the notice, make a POST request to store this notice with the dismissed WP pointers so it doesn't display again.
+				$( document ).on( 'click', '#<?php echo $notice_id; // WPCS: XSS OK. ?> .notice-dismiss', function() {
+					console.log( 'clicked' );
+					$.post( ajaxurl, {
+						pointer: '<?php echo $notice_id; // WPCS: XSS OK. ?>',
+						action: 'dismiss-wp-pointer'
+					} );
+				} );
+			} );
+		}( jQuery ) );
+		</script>
+		<?php
 	}
 }
