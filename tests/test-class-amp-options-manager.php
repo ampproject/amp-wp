@@ -298,7 +298,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// This is the correct page, but the notice was dismissed, so it should not display.
 		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
-		$id                            = 'welcome-notice-1';
+		$id                            = 'amp-welcome-notice-1';
 		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
 		ob_start();
 		AMP_Options_Manager::render_welcome_notice();

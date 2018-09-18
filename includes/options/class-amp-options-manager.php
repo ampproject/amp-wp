@@ -341,7 +341,7 @@ class AMP_Options_Manager {
 			return;
 		}
 
-		$notice_id = 'welcome-notice-1';
+		$notice_id = 'amp-welcome-notice-1';
 		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
 		if ( in_array( $notice_id, explode( ',', strval( $dismissed ) ), true ) ) {
 			return;
@@ -354,10 +354,10 @@ class AMP_Options_Manager {
 		( function( $ ) {
 			$( function() {
 				// On dismissing the notice, make a POST request to store this notice with the dismissed WP pointers so it doesn't display again.
-				$( document ).on( 'click', '#<?php echo $notice_id; // WPCS: XSS OK. ?> .notice-dismiss', function() {
+				$( document ).on( 'click', <?php echo wp_json_encode( "#$notice_id .notice-dismiss" ); ?>, function() {
 					console.log( 'clicked' );
 					$.post( ajaxurl, {
-						pointer: '<?php echo $notice_id; // WPCS: XSS OK. ?>',
+						pointer: <?php echo wp_json_encode( $notice_id ); ?>,
 						action: 'dismiss-wp-pointer'
 					} );
 				} );
