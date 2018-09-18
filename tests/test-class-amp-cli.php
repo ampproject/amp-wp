@@ -368,7 +368,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 *
 	 * @covers AMP_CLI::crawl_site()
 	 */
-	public function test_validate_site() {
+	public function test_crawl_site() {
 		$number_of_posts = 20;
 		$number_of_terms = 30;
 		$posts           = array();

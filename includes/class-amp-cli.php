@@ -264,6 +264,69 @@ class AMP_CLI {
 	}
 
 	/**
+	 * Reset all validation data on a site.
+	 *
+	 * This deletes all amp_invalid_url posts and all amp_validation_error terms.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--yes]
+	 * : Proceed to empty the site validation data without a confirmation prompt.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp amp reset-site-validation --yes
+	 *
+	 * @subcommand reset-site-validation
+	 * @param array $args       Positional args. Unused.
+	 * @param array $assoc_args Associative args.
+	 * @throws Exception If an error happens.
+	 */
+	public function reset_site_validation( $args, $assoc_args ) {
+		unset( $args );
+		global $wpdb;
+		WP_CLI::confirm( 'Are you sure you want to empty all amp_invalid_url posts and amp_validation_error taxonomy terms?', $assoc_args );
+
+		// Delete all posts.
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
+
+		$progress = WP_CLI\Utils\make_progress_bar(
+			/* translators: %d is the number of posts */
+			sprintf( __( 'Deleting %d amp_invalid_url posts...', 'amp' ), $count ),
+			$count
+		);
+		while ( $posts->valid() ) {
+			$post_id = $posts->current()->ID;
+			$posts->next();
+			wp_delete_post( $post_id, true );
+			$progress->tick();
+		}
+		$progress->finish();
+
+		// Delete all terms. Note that many terms should get deleted when their post counts go to zero above.
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
+
+		$progress = WP_CLI\Utils\make_progress_bar(
+			/* translators: %d is the number of terms */
+			sprintf( __( 'Deleting %d amp_taxonomy_error terms...', 'amp' ), $count ),
+			$count
+		);
+		while ( $terms->valid() ) {
+			$term_id = $terms->current()->term_id;
+			$terms->next();
+			wp_delete_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$progress->tick();
+		}
+		$progress->finish();
+
+		WP_CLI::success( 'All AMP validation data has been removed.' );
+	}
+
+	/**
 	 * Gets the total number of URLs to validate.
 	 *
 	 * By default, this only counts AMP-enabled posts and terms.
