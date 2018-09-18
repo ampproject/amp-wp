@@ -102,9 +102,6 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 	 */
 	public function test_possibly_replace_settings_saved_notice() {
 		$GLOBALS['wp_settings_errors'] = array(); // WPCS: Global override OK.
-		$meta_key                      = 'amp_view_your_site_notice';
-		$user_id                       = $this->factory()->user->create();
-		wp_set_current_user( $user_id );
 
 		/**
 		 * There should now only be one error in $wp_settings_errors, which is taken from privacy.php.
@@ -121,19 +118,8 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 		$this->instance->possibly_replace_settings_saved_notice();
 		$this->assertEquals( $inital_wp_settings_errors, get_settings_errors() );
 
-		/*
-		 * The 'Settings saved' error is now present, but 'View your site as AMP...' has already shown
-		 * as the meta value is true.
-		 * So this should not change the message.
-		 */
+		// The 'Settings saved' error is now present, so this should change its message.
 		add_settings_error( 'general', 'settings_updated', 'Settings saved.', 'updated' );
-		update_user_meta( $user_id, $meta_key, true );
-		$inital_wp_settings_errors = get_settings_errors();
-		$this->instance->possibly_replace_settings_saved_notice();
-		$this->assertEquals( $inital_wp_settings_errors, get_settings_errors() );
-
-		// Now that the the meta value indicates that this notice hasn't shown yet, this should change the message.
-		update_user_meta( $user_id, $meta_key, false );
 		$template_mode_messages = array(
 			'native'  => 'Native Mode activated! View your site as AMP now or Review Errors',
 			'paired'  => 'Paired Mode activated! View your site as AMP now or Review Errors',
@@ -141,7 +127,6 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 		);
 		foreach ( $template_mode_messages as $mode => $message ) {
 			$this->assert_template_mode_message( $mode, $message );
-			update_user_meta( $user_id, $meta_key, false );
 		}
 	}
 

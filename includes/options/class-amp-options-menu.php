@@ -585,13 +585,6 @@ class AMP_Options_Menu {
 	 */
 	public function possibly_replace_settings_saved_notice() {
 		global $wp_settings_errors;
-		$meta_key = 'amp_view_your_site_notice';
-		$user_id  = get_current_user_id();
-
-		// Exit if this setting isn't present, or if this notice has already displayed.
-		if ( ! get_settings_errors( 'general' ) || get_user_meta( $user_id, $meta_key, true ) ) {
-			return;
-		}
 
 		foreach ( $wp_settings_errors as $key => $setting ) {
 			if ( 'general' === $setting['setting'] && 'settings_updated' === $setting['code'] ) {
@@ -609,8 +602,6 @@ class AMP_Options_Menu {
 
 				if ( isset( $message ) ) {
 					$wp_settings_errors[ $key ]['message'] = $message; // WPCS: Global override OK.
-					// Ensure that this notice does not display again.
-					update_user_meta( get_current_user_id(), $meta_key, true );
 				}
 
 				break;
