@@ -322,7 +322,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @param int[] $groups Term groups.
 	 * @return string SQL.
 	 */
-	protected static function prepare_term_group_in_sql( $groups ) {
+	public static function prepare_term_group_in_sql( $groups ) {
 		global $wpdb;
 		return $wpdb->prepare(
 			'IN ( ' . implode( ', ', array_fill( 0, count( $groups ), '%d' ) ) . ' )',
