@@ -150,7 +150,7 @@ function amp_init() {
 	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
-	AMP_Post_Type_Support::add_post_type_support();
+	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
 	if ( defined( 'WP_CLI' ) ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
