@@ -281,16 +281,39 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Sanitize term status(es).
 	 *
-	 * @param int|int[]|string $status One or more statuses.
-	 * @param array $options {
+	 * @param int|int[]|string $status One or more statuses (including comma-delimited string).
+	 * @param array            $options {
 	 *     Options.
 	 *
 	 *     @type bool $multiple Multiple, whether to extract more than one. Default false.
 	 * }
-	 * @return int|int[] Returns an integer unless the multiple option is passed.
+	 * @return int|int[]|null Returns an integer unless the multiple option is passed. Null if invalid.
 	 */
 	public static function sanitize_term_status( $status, $options = array() ) {
 		$multiple = ! empty( $options['multiple'] );
+
+		if ( is_string( $status ) ) {
+			$statuses = wp_parse_id_list( $status );
+		} else {
+			$statuses = array_map( 'absint', (array) $status );
+		}
+
+		$statuses = array_intersect(
+			array(
+				self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+				self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			),
+			$statuses
+		);
+		$statuses = array_values( array_unique( $statuses ) );
+
+		if ( ! $multiple ) {
+			return array_shift( $statuses );
+		} else {
+			return $statuses;
+		}
 	}
 
 	/**
@@ -467,7 +490,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		$groups = null;
 		if ( isset( $args['group'] ) ) {
-			$groups = wp_parse_id_list( $args['group'] ); // Includes 0.
+			$groups = self::sanitize_term_status( $args['group'], array( 'multiple' => true ) );
 		}
 
 		$filter = function( $clauses ) use ( $groups ) {
@@ -510,19 +533,16 @@ class AMP_Validation_Error_Taxonomy {
 			return $where;
 		}
 
-		$error_status = array();
-		if ( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) || '0' === $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) ) { // @todo Not great.
-			$error_status = array_intersect(
-				array( self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, self::VALIDATION_ERROR_ACK_REJECTED_STATUS ),
-				wp_parse_id_list( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ) ) // Includes 0.
-			);
+		$error_statuses = array();
+		if ( false !== $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR, false ) ) {
+			$error_statuses = self::sanitize_term_status( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ), array( 'multiple' => true ) );
 		}
 		$error_type = sanitize_key( $query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR ) );
 
 		/*
 		 * Selecting the 'All Statuses' <option> sends a value of '' to indicate that this should not filter.
 		 */
-		$is_error_status_present = ! empty( $error_status );
+		$is_error_status_present = ! empty( $error_statuses );
 		$is_error_type_present   = in_array( $error_type, self::get_error_types(), true );
 
 		// If neither the error status nor the type is present, there is no need to filter the $where clause.
@@ -546,8 +566,8 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( $is_error_status_present ) {
 			$sql_select .= $wpdb->prepare(
-				" AND $wpdb->terms.term_group IN ( " . implode( ', ', array_fill( 0, count( $error_status ), '%d' ) ) . ' )',
-				$error_status
+				" AND $wpdb->terms.term_group IN ( " . implode( ', ', array_fill( 0, count( $error_statuses ), '%d' ) ) . ' )',
+				$error_statuses
 			);
 		}
 
@@ -790,16 +810,13 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// If the error status query var is valid, pass it along in the redirect $url.
-		$group = array();
+		$groups = array();
 		if ( isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
-			$group = array_values( array_intersect(
-				array( self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, self::VALIDATION_ERROR_ACK_REJECTED_STATUS, self::NO_FILTER_VALUE ),
-				wp_parse_id_list( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) // WPCS: CSRF OK.
-			) );
+			$groups = self::sanitize_term_status( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), array( 'multiple' => true ) ); // WPCS: CSRF OK.
 		}
-		if ( ! empty( $group ) ) {
+		if ( ! empty( $groups ) ) {
 			$url = add_query_arg(
-				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => $group ),
+				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => $groups ),
 				$url
 			);
 		}
@@ -815,19 +832,15 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 		self::$should_filter_terms_clauses_for_error_validation_status = true;
-		// @todo The following validation logic should be moved into a method and reused.
-		$group = array_intersect(
-			array( self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, self::VALIDATION_ERROR_ACK_REJECTED_STATUS ),
-			wp_parse_id_list( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) // WPCS: CSRF ok.
-		);
-		if ( empty( $group ) ) {
+		$groups = self::sanitize_term_status( wp_unslash( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), array( 'multiple' => true ) ); // WPCS: CSRF OK.
+		if ( empty( $groups ) ) {
 			return;
 		}
-		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $group ) {
+		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $groups ) {
 			global $wpdb;
 			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] && AMP_Validation_Error_Taxonomy::$should_filter_terms_clauses_for_error_validation_status ) {
 				// @todo The following SQL preparation logic should be moved into a method and reused.
-				$clauses['where'] .= $wpdb->prepare( ' AND t.term_group IN ( ' . implode( ',', array_fill( 0, count( $group ), '%d' ) ) . ' )', $group );
+				$clauses['where'] .= $wpdb->prepare( ' AND t.term_group IN ( ' . implode( ',', array_fill( 0, count( $groups ), '%d' ) ) . ' )', $groups );
 			}
 			return $clauses;
 		}, 10, 2 );
@@ -1045,8 +1058,13 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) && strlen( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) > 0 ) { // WPCS: csrf ok.
-			$error_status_filter_value = implode( ',', wp_parse_id_list( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ); // WPCS: csrf ok.
+		$selected_groups = array();
+		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // WPCS: csrf ok.
+			$selected_groups = self::sanitize_term_status( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ], array( 'multiple' => true ) ); // WPCS: csrf ok.
+		}
+		if ( ! empty( $selected_groups ) ) {
+			sort( $selected_groups );
+			$error_status_filter_value = implode( ',', $selected_groups );
 		} else {
 			$error_status_filter_value = self::NO_FILTER_VALUE;
 		}
@@ -1081,7 +1099,7 @@ class AMP_Validation_Error_Taxonomy {
 					number_format_i18n( $new_term_count )
 				);
 			}
-			$value = self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS . ',' . self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
+			$value = self::VALIDATION_ERROR_NEW_REJECTED_STATUS . ',' . self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 			?>
 			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
 			<?php
