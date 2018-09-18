@@ -317,6 +317,20 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Prepare term_group IN condition for SQL WHERE clause.
+	 *
+	 * @param int[] $groups Term groups.
+	 * @return string SQL.
+	 */
+	protected static function prepare_term_group_in_sql( $groups ) {
+		global $wpdb;
+		return $wpdb->prepare(
+			'IN ( ' . implode( ', ', array_fill( 0, count( $groups ), '%d' ) ) . ' )',
+			$groups
+		);
+	}
+
+	/**
 	 * Prepare a validation error for lookup or insertion as taxonomy term.
 	 *
 	 * @param array $error Validation error.
@@ -494,11 +508,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$filter = function( $clauses ) use ( $groups ) {
-			global $wpdb;
-			$clauses['where'] .= $wpdb->prepare(
-				' AND t.term_group IN ( ' . implode( ', ', array_fill( 0, count( $groups ), '%d' ) ) . ' )',
-				$groups
-			);
+			$clauses['where'] .= ' AND t.term_group ' . AMP_Validation_Error_Taxonomy::prepare_term_group_in_sql( $groups );
 			return $clauses;
 		};
 		if ( isset( $args['group'] ) ) {
@@ -565,10 +575,7 @@ class AMP_Validation_Error_Taxonomy {
 		);
 
 		if ( $is_error_status_present ) {
-			$sql_select .= $wpdb->prepare(
-				" AND $wpdb->terms.term_group IN ( " . implode( ', ', array_fill( 0, count( $error_statuses ), '%d' ) ) . ' )',
-				$error_statuses
-			);
+			$sql_select .= " AND $wpdb->terms.term_group " . self::prepare_term_group_in_sql( $error_statuses );
 		}
 
 		if ( $is_error_type_present ) {
@@ -839,8 +846,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'terms_clauses', function( $clauses, $taxonomies ) use ( $groups ) {
 			global $wpdb;
 			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $taxonomies[0] && AMP_Validation_Error_Taxonomy::$should_filter_terms_clauses_for_error_validation_status ) {
-				// @todo The following SQL preparation logic should be moved into a method and reused.
-				$clauses['where'] .= $wpdb->prepare( ' AND t.term_group IN ( ' . implode( ',', array_fill( 0, count( $groups ), '%d' ) ) . ' )', $groups );
+				$clauses['where'] .= ' AND t.term_group ' . AMP_Validation_Error_Taxonomy::prepare_term_group_in_sql( $groups );
 			}
 			return $clauses;
 		}, 10, 2 );
