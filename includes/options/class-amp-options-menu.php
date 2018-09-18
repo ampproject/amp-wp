@@ -271,7 +271,23 @@ class AMP_Options_Menu {
 					</p>
 					<p class="description">
 						<?php esc_html_e( 'This will ensure your responses are always valid AMP but some important content may get stripped out (e.g. scripts).', 'amp' ); ?>
-						<?php esc_html_e( 'Existing validation errors which you have already rejected will not be modified. You may want to consider bulk-accepting them.', 'amp' ); ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: %s is URL to validation errors screen */
+								__( 'Existing validation errors which you have already rejected will not be modified (you may want to consider <a href="%s">bulk-accepting them</a>).', 'amp' ),
+								esc_url(
+									add_query_arg(
+										array(
+											'taxonomy'  => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+											'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+										),
+										admin_url( 'edit-tags.php' )
+									)
+								)
+							)
+						)
+						?>
 					</p>
 				</div>
 			<?php endif; ?>
