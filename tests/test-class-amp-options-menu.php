@@ -94,4 +94,68 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 		$this->instance->render_screen();
 		$this->assertContains( '<div class="wrap">', ob_get_clean() );
 	}
+
+	/**
+	 * Test possibly_replace_settings_saved_notice.
+	 *
+	 * @covers AMP_Options_Menu::possibly_replace_settings_saved_notice()
+	 */
+	public function test_possibly_replace_settings_saved_notice() {
+		$GLOBALS['wp_settings_errors'] = array(); // WPCS: Global override OK.
+		$meta_key                      = 'amp_view_your_site_notice';
+		$user_id                       = $this->factory()->user->create();
+		wp_set_current_user( $user_id );
+
+		/**
+		 * There should now only be one error in $wp_settings_errors, which is taken from privacy.php.
+		 * This isn't the 'Settings saved' error, so it should not be overwritten.
+		 */
+		add_settings_error(
+			'page_for_privacy_policy',
+			'page_for_privacy_policy',
+			'Example message',
+			'error'
+		);
+
+		$inital_wp_settings_errors = get_settings_errors();
+		$this->instance->possibly_replace_settings_saved_notice();
+		$this->assertEquals( $inital_wp_settings_errors, get_settings_errors() );
+
+		/*
+		 * The 'Settings saved' error is now present, but 'View your site as AMP...' has already shown
+		 * as the meta value is true.
+		 * So this should not change the message.
+		 */
+		add_settings_error( 'general', 'settings_updated', 'Settings saved.', 'updated' );
+		update_user_meta( $user_id, $meta_key, true );
+		$inital_wp_settings_errors = get_settings_errors();
+		$this->instance->possibly_replace_settings_saved_notice();
+		$this->assertEquals( $inital_wp_settings_errors, get_settings_errors() );
+
+		// Now that the the meta value indicates that this notice hasn't shown yet, this should change the message.
+		update_user_meta( $user_id, $meta_key, false );
+		$template_mode_messages = array(
+			'native'  => 'Native Mode activated! View your site as AMP now or Review Errors',
+			'paired'  => 'Paired Mode activated! View your site as AMP now or Review Errors',
+			'classic' => 'Classic Mode activated! View your site as AMP now. We recommend upgrading to Native or Paired mode.',
+		);
+		foreach ( $template_mode_messages as $mode => $message ) {
+			$this->assert_template_mode_message( $mode, $message );
+			update_user_meta( $user_id, $meta_key, false );
+		}
+	}
+
+	/**
+	 * Assert that the error for a given template mode has the right message.
+	 *
+	 * @param string $template_mode The template mode.
+	 * @param string $message The message that should display for this mode.
+	 */
+	public function assert_template_mode_message( $template_mode, $message ) {
+		AMP_Options_Manager::update_option( 'theme_support', $template_mode );
+		$this->instance->possibly_replace_settings_saved_notice();
+		$general_errors = get_settings_errors( 'general' );
+		$new_error      = reset( $general_errors );
+		$this->assertEquals( $message, $new_error['message'] );
+	}
 }
