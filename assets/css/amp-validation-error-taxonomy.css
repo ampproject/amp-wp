@@ -163,3 +163,13 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 .single-error-detail .details-attributes__value {
 	margin-left: 10px;
 }
+.notice.accept-reject-error p {
+	display: inline-block;
+	font-size: 14px;
+}
+.notice.accept-reject-error .button {
+	display: inline-block;
+	float: right;
+	margin: 5px 5px 0 5px;
+	padding: 0 26px 2px;
+}

@@ -76,6 +76,13 @@ class AMP_Invalid_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
+	 * The name of the action which allows bulk accepting or rejecting of an error across multiple URLs.
+	 *
+	 * @var string
+	 */
+	const BULK_ACCEPT_REJECT_ACTION = 'amp_bulk_accept_reject';
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
@@ -176,6 +183,8 @@ class AMP_Invalid_URL_Post_Type {
 
 			return $query_vars;
 		} );
+
+		add_action( 'admin_init', array( __CLASS__, 'bulk_accept_reject_single_error' ) );
 	}
 	/**
 	 * Enqueue style.
@@ -1027,6 +1036,38 @@ class AMP_Invalid_URL_Post_Type {
 				'<div class="notice"><details class="single-error-detail"><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
 				esc_html__( 'Removed Element', 'amp' ),
 				wp_kses_post( $output )
+			);
+
+			$error_id       = sanitize_text_field( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // WPCS: CSRF OK.
+			$base_url       = admin_url(
+				add_query_arg(
+					array(
+						'post_type' => self::POST_TYPE_SLUG,
+						\AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $error_id,
+					),
+					'edit.php'
+				)
+			);
+			$accept_all_url = add_query_arg(
+				array(
+					self::BULK_ACCEPT_REJECT_ACTION => \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
+				),
+				$base_url
+			);
+			$reject_all_url = add_query_arg(
+				array(
+					self::BULK_ACCEPT_REJECT_ACTION => \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,
+				),
+				$base_url
+			);
+
+			printf(
+				'<div class="notice accept-reject-error"><p>%s</p><a class="button" href="%s">%s</a><a class="button button-primary" href="%s">%s</a></div>',
+				esc_html__( 'Accept this error for all known use cases', 'amp' ),
+				esc_url( $reject_all_url ),
+				esc_html__( 'Reject', 'amp' ),
+				esc_url( $accept_all_url ),
+				esc_html__( 'Accept', 'amp' )
 			);
 		}
 	}
@@ -1915,5 +1956,38 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		return $messages;
+	}
+
+	/**
+	 * Bulk Accept Reject Single Error
+	 * This adds functionality to the single error page where there are two buttons which allow accepting or rejecting an error.
+	 */
+	public static function bulk_accept_reject_single_error() {
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] && isset( $_GET[ self::BULK_ACCEPT_REJECT_ACTION ] ) ) { // WPCS: CSRF OK.
+
+			$type = sanitize_text_field( wp_unslash( $_GET[ self::BULK_ACCEPT_REJECT_ACTION ] ) ); // WPCS: CSRF OK.
+			if ( \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION !== $type && \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION !== $type ) {
+				return;
+			}
+
+			$error_id = sanitize_text_field( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // WPCS: CSRF OK.
+			$term     = get_term_by( 'slug', $error_id, \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			if ( ! $term ) {
+				return;
+			}
+
+			$redirect_to  = add_query_arg(
+				array(
+					'amp_validation_error' => $error_id,
+					'post_type'            => self::POST_TYPE_SLUG,
+				),
+				admin_url( 'edit.php' )
+			);
+			$redirect_url = \AMP_Validation_Error_Taxonomy::handle_validation_error_update( $redirect_to, $type, array( $term->term_id ) );
+			if ( $redirect_url !== $redirect_to ) {
+				wp_safe_redirect( $redirect_url );
+				exit;
+			}
+		}
 	}
 }
