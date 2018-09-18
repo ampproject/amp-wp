@@ -606,13 +606,13 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$initial_action = array(
 			'edit'   => 'Edit',
 			'trash'  => 'Trash',
-			'delete' => 'Trash permanently',
+			'delete' => 'Delete',
 		);
 		$actions        = AMP_Invalid_URL_Post_Type::filter_bulk_actions( $initial_action );
 		$this->assertFalse( isset( $action['edit'] ) );
 		$this->assertEquals( 'Recheck', $actions[ AMP_Invalid_URL_Post_Type::BULK_VALIDATE_ACTION ] );
-		$this->assertEquals( 'Forget', $actions['trash'] );
-		$this->assertEquals( 'Forget permanently', $actions['delete'] );
+		$this->assertArrayNotHasKey( 'trash', $actions );
+		$this->assertEquals( 'Forget', $actions['delete'] );
 	}
 
 	/**
@@ -1093,7 +1093,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_storing_error->post_date ) ), $output );
 		$this->assertContains( 'Last checked:', $output );
 		$this->assertContains( 'Forget', $output );
-		$this->assertContains( esc_url( get_delete_post_link( $post_storing_error->ID ) ), $output );
+		$this->assertContains( esc_url( get_delete_post_link( $post_storing_error->ID, '', true ) ), $output );
 		$this->assertContains( 'misc-pub-section', $output );
 	}
 
@@ -1320,9 +1320,10 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'inline hide-if-no-js', $actions );
 		$this->assertArrayHasKey( 'view', $actions );
 		$this->assertArrayHasKey( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $actions );
-		$this->assertArrayHasKey( 'trash', $actions );
-		$this->assertNotContains( 'Trash', $actions['trash'] );
-		$this->assertContains( 'Forget', $actions['trash'] );
+		$this->assertArrayNotHasKey( 'trash', $actions );
+		$this->assertArrayHasKey( 'delete', $actions );
+		$this->assertNotContains( 'Trash', $actions['delete'] );
+		$this->assertContains( 'Forget', $actions['delete'] );
 
 		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_post_row_actions( array(), null ) );
 
@@ -1338,8 +1339,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$filtered_actions = AMP_Invalid_URL_Post_Type::filter_post_row_actions( $actions, $post );
 
-		$this->assertContains( 'Forget</a>', $filtered_actions['trash'] );
-		$this->assertContains( 'Forget Permanently</a>', $filtered_actions['delete'] );
+		$this->assertArrayNotHasKey( 'trash', $filtered_actions );
+		$this->assertArrayHasKey( 'delete', $filtered_actions );
+		$this->assertContains( 'Forget</a>', $filtered_actions['delete'] );
 
 	}
 
@@ -1383,9 +1385,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			'untrashed' => 99,
 		) );
 
-		$this->assertEquals( '%s invalid AMP page permanently forgotten.', $filtered_messages['post']['deleted'] );
-		$this->assertEquals( '%s invalid AMP pages forgotten.', $filtered_messages['post']['trashed'] );
-		$this->assertEquals( '%s invalid AMP pages unforgotten.', $filtered_messages['post']['untrashed'] );
+		$this->assertEquals( '%s invalid URL forgotten.', $filtered_messages['post']['deleted'] );
+		$this->assertEquals( '%s invalid URLs forgotten.', $filtered_messages['post']['trashed'] );
+		$this->assertEquals( '%s invalid URLs unforgotten.', $filtered_messages['post']['untrashed'] );
 	}
 
 

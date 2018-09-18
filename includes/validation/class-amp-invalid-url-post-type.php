@@ -855,16 +855,16 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Adds a 'Recheck' bulk action to the edit.php page and modifies the 'Move to Trash' text.
 	 *
+	 * Ensure only delete action is present, not trash.
+	 *
 	 * @param array $actions The bulk actions in the edit.php page.
 	 * @return array $actions The filtered bulk actions.
 	 */
 	public static function filter_bulk_actions( $actions ) {
-		if ( isset( $actions['trash'] ) ) {
-			$actions['trash'] = esc_html__( 'Forget', 'amp' );
-		}
-
-		if ( isset( $actions['delete'] ) ) {
-			$actions['delete'] = esc_html__( 'Forget permanently', 'amp' );
+		$has_delete = ( isset( $actions['trash'] ) || isset( $actions['delete'] ) );
+		unset( $actions['trash'], $actions['delete'] );
+		if ( $has_delete ) {
+			$actions['delete'] = esc_html__( 'Forget', 'amp' );
 		}
 
 		unset( $actions['edit'] );
@@ -1404,7 +1404,7 @@ class AMP_Invalid_URL_Post_Type {
 			</div>
 			<div id="major-publishing-actions">
 				<div id="delete-action">
-					<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>">
+					<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID, '', true ) ); ?>">
 						<?php esc_html_e( 'Forget', 'amp' ); ?>
 					</a>
 				</div>
@@ -1863,24 +1863,16 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		}
 
-		// Replace 'Trash' text with 'Forget'.
-		if ( isset( $actions['trash'] ) ) {
-			$actions['trash'] = sprintf(
-				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
-				get_delete_post_link( $post->ID ),
-				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), self::get_url_from_post( $post ) ) ),
-				esc_html__( 'Forget', 'amp' )
-			);
-		}
-
-		if ( isset( $actions['delete'] ) ) {
+		// Replace 'Trash' with 'Forget' (which permanently deletes).
+		$has_delete = ( isset( $actions['trash'] ) || isset( $actions['delete'] ) );
+		unset( $actions['trash'], $actions['delete'] );
+		if ( $has_delete ) {
 			$actions['delete'] = sprintf(
 				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
 				get_delete_post_link( $post->ID, '', true ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221; permanently', 'amp' ), self::get_url_from_post( $post ) ) ),
-				esc_html__( 'Forget Permanently', 'amp' )
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), self::get_url_from_post( $post ) ) ),
+				esc_html__( 'Forget', 'amp' )
 			);
 		}
 
@@ -1908,6 +1900,8 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Filters messages displayed after bulk updates.
 	 *
+	 * Note that trashing is replaced with deletion whenever possible, so the trashed and untrashed messages will not be used in practice.
+	 *
 	 * @param array $messages    Bulk message text.
 	 * @param array $bulk_counts Post numbers for the current message.
 	 * @return array Filtered messages.
@@ -1919,22 +1913,22 @@ class AMP_Invalid_URL_Post_Type {
 				array(
 					/* translators: %s is the number of posts permanently forgotten */
 					'deleted'   => _n(
-						'%s invalid AMP page permanently forgotten.',
-						'%s invalid AMP post permanently forgotten.',
+						'%s invalid URL forgotten.',
+						'%s invalid URLs forgotten.',
 						$bulk_counts['deleted'],
 						'amp'
 					),
 					/* translators: %s is the number of posts forgotten */
 					'trashed'   => _n(
-						'%s invalid AMP page forgotten.',
-						'%s invalid AMP pages forgotten.',
+						'%s invalid URL forgotten.',
+						'%s invalid URLs forgotten.',
 						$bulk_counts['trashed'],
 						'amp'
 					),
 					/* translators: %s is the number of posts restored from trash. */
 					'untrashed' => _n(
-						'%s invalid AMP page unforgotten.',
-						'%s invalid AMP pages unforgotten.',
+						'%s invalid URL unforgotten.',
+						'%s invalid URLs unforgotten.',
 						$bulk_counts['untrashed'],
 						'amp'
 					),
