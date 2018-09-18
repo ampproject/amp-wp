@@ -551,7 +551,6 @@ class AMP_Options_Menu {
 	public function render_screen() {
 		if ( ! empty( $_GET['settings-updated'] ) ) { // WPCS: CSRF ok.
 			AMP_Options_Manager::check_supported_post_type_update_errors();
-			$this->possibly_replace_settings_saved_notice();
 		}
 		?>
 		<?php if ( ! current_user_can( 'manage_options' ) ) : ?>
@@ -573,39 +572,5 @@ class AMP_Options_Menu {
 			</form>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Possibly replace the message of the 'Settings saved' notice.
-	 *
-	 * If this is the first time a user has changed a setting here,
-	 * display 'View your site as AMP...' instead of 'Settings saved'.
-	 * Altering a setting in the global $wp_settings_errors is not ideal.
-	 * But it looks like there is no filter for this.
-	 */
-	public function possibly_replace_settings_saved_notice() {
-		global $wp_settings_errors;
-
-		foreach ( $wp_settings_errors as $key => $setting ) {
-			if ( 'general' === $setting['setting'] && 'settings_updated' === $setting['code'] ) {
-				switch ( AMP_Options_Manager::get_option( 'theme_support' ) ) {
-					case 'native':
-						$message = esc_html__( 'Native Mode activated! View your site as AMP now or Review Errors', 'amp' );
-						break;
-					case 'paired':
-						$message = esc_html__( 'Paired Mode activated! View your site as AMP now or Review Errors', 'amp' );
-						break;
-					case 'classic':
-						$message = esc_html__( 'Classic Mode activated! View your site as AMP now. We recommend upgrading to Native or Paired mode.', 'amp' );
-						break;
-				}
-
-				if ( isset( $message ) ) {
-					$wp_settings_errors[ $key ]['message'] = $message; // WPCS: Global override OK.
-				}
-
-				break;
-			}
-		}
 	}
 }

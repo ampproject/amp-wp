@@ -123,6 +123,11 @@ class AMP_Options_Manager {
 		);
 		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
 			$options['theme_support'] = $new_options['theme_support'];
+
+			// If this option was changed, display a notice with the new template mode.
+			if ( self::get_option( 'theme_support' ) !== $new_options['theme_support'] ) {
+				self::add_updated_theme_support_message( $new_options['theme_support'] );
+			}
 		}
 
 		$options['force_sanitization']  = ! empty( $new_options['force_sanitization'] );
@@ -380,5 +385,28 @@ class AMP_Options_Manager {
 			&&
 			AMP_Theme_Support::exceeded_cache_miss_threshold()
 		);
+	}
+
+	/**
+	 * Adds a message for an update of the theme support setting.
+	 *
+	 * @param string $template_mode The template mode.
+	 */
+	public static function add_updated_theme_support_message( $template_mode ) {
+		switch ( $template_mode ) {
+			case 'native':
+				$message = esc_html__( 'Native Mode activated! View your site as AMP now or Review Errors', 'amp' );
+				break;
+			case 'paired':
+				$message = esc_html__( 'Paired Mode activated! View your site as AMP now or Review Errors', 'amp' );
+				break;
+			case 'disabled':
+				$message = esc_html__( 'Classic Mode activated! View your site as AMP now. We recommend upgrading to Native or Paired mode.', 'amp' );
+				break;
+		}
+
+		if ( isset( $message ) ) {
+			add_settings_error( self::OPTION_NAME, 'template_mode_updated', $message, 'updated' );
+		}
 	}
 }

@@ -387,4 +387,45 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		wp_using_ext_object_cache( false ); // turn off external object cache flag.
 	}
+
+	/**
+	 * Data for test_add_updated_theme_support_message.
+	 *
+	 * @return array
+	 */
+	public function get_template_mode_message() {
+		return array(
+			'Invalid template mode'   => array(
+				'foo_invalid_mode',
+				'',
+			),
+			'Native Mode'             => array(
+				'native',
+				'Native Mode activated! View your site as AMP now or Review Errors',
+			),
+			'Paired Mode'             => array(
+				'paired',
+				'Paired Mode activated! View your site as AMP now or Review Errors',
+			),
+			'Classic Mode (Disabled)' => array(
+				'disabled',
+				'Classic Mode activated! View your site as AMP now. We recommend upgrading to Native or Paired mode.',
+			),
+		);
+	}
+
+	/**
+	 * Test add_updated_theme_support_message.
+	 *
+	 * @dataProvider get_template_mode_message
+	 * @param string $template_mode    The template mode.
+	 * @param string $expected_message The expected message for the template mode.
+	 * @covers AMP_Options_Manager::add_updated_theme_support_message()
+	 */
+	public function test_add_updated_theme_support_message( $template_mode, $expected_message ) {
+		AMP_Options_Manager::add_updated_theme_support_message( $template_mode );
+		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
+		$new_error           = end( $amp_settings_errors );
+		$this->assertEquals( $expected_message, $new_error['message'] );
+	}
 }
