@@ -1063,7 +1063,7 @@ class AMP_Invalid_URL_Post_Type {
 
 			printf(
 				'<div class="notice accept-reject-error"><p>%s</p><a class="button" href="%s">%s</a><a class="button button-primary" href="%s">%s</a></div>',
-				esc_html__( 'Accept this error for all known use cases', 'amp' ),
+				esc_html__( 'Accept this error for all shown use cases', 'amp' ),
 				esc_url( $reject_all_url ),
 				esc_html__( 'Reject', 'amp' ),
 				esc_url( $accept_all_url ),
