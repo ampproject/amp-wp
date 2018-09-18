@@ -1307,10 +1307,6 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_status_meta_box( $post ) {
-		$is_sanitization_auto_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
-			'code' => 'does_not_exist',
-		) );
-
 		?>
 		<style>
 			#amp_validation_status .inside {
@@ -1330,11 +1326,9 @@ class AMP_Invalid_URL_Post_Type {
 							<?php esc_html_e( 'Recheck', 'amp' ); ?>
 						</a>
 					</div>
-					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_auto_accepted() || $is_sanitization_auto_accepted_by_filter ) ) : ?>
-						<div id="preview-action">
-							<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
-						</div>
-					<?php endif; ?>
+					<div id="preview-action">
+						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+					</div>
 					<div class="clear"></div>
 				</div>
 				<div id="misc-publishing-actions">
