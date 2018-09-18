@@ -308,8 +308,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
 		ob_start();
 		AMP_Options_Manager::render_welcome_notice();
-		$this->assertContains( 'Welcome to AMP for WordPress', ob_get_clean() );
-		$this->assertContains( $id, ob_get_clean() );
+		$output = ob_get_clean();
+		$this->assertContains( 'Welcome to AMP for WordPress', $output );
+		$this->assertContains( $id, $output );
 	}
 
 	/**
