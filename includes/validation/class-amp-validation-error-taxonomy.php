@@ -1473,23 +1473,23 @@ class AMP_Validation_Error_Taxonomy {
 
 					switch ( $term->term_group ) {
 						case self::VALIDATION_ERROR_NEW_STATUS:
-							$status_classes = 'status-text new';
+							$img_src = 'baseline-error';
 							break;
 						case self::VALIDATION_ERROR_ACCEPTED_STATUS:
-							$status_classes = 'amp-logo-icon';
+							$img_src = 'amp-logo-icon';
 							break;
 						case self::VALIDATION_ERROR_REJECTED_STATUS:
-							$status_classes = 'status-text rejected';
+							$img_src = 'baseline-error-blue';
 							break;
 					}
 
-					if ( ! isset( $status_classes ) ) {
+					if ( ! isset( $img_src ) ) {
 						break;
 					}
 
 					ob_start();
 					?>
-					<span class="<?php echo esc_attr( $status_classes ); ?>" style="float:left;"></span>
+					<img src="<?php echo esc_url( amp_get_asset_url( 'images/' . $img_src . '.svg' ) ); ?>">
 					<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 						<?php esc_html_e( 'Status:', 'amp' ); ?>
 					</label>

@@ -569,9 +569,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			'links'       => 'count',
 		);
 		$columns_expected_to_be_added = array(
-			'error'      => AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
-			'details'    => AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
-			'error_type' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
+			'error'      => 'amp_validation_code',
+			'details'    => 'amp_validation_node_name',
+			'error_type' => 'amp_validation_error_type',
 		);
 		$this->assertEquals(
 			array_merge( $initial_columns, $columns_expected_to_be_added ),
