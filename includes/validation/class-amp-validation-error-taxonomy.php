@@ -590,8 +590,8 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
 		add_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( __CLASS__, 'add_single_post_sortable_columns' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
-		add_filter( 'post_action_' . self::VALIDATION_ERROR_REJECT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_actions' ) );
-		add_filter( 'post_action_' . self::VALIDATION_ERROR_ACCEPT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_actions' ) );
+		add_filter( 'post_action_' . self::VALIDATION_ERROR_REJECT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ) );
+		add_filter( 'post_action_' . self::VALIDATION_ERROR_ACCEPT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ) );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
 
@@ -1764,21 +1764,27 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @param int $post_id The ID of the post for which to apply the bulk action.
 	 */
-	public static function handle_single_url_page_bulk_actions( $post_id ) {
-		if ( ! isset( $_POST['action'] ) || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {  // WPCS: CSRF OK.
+	public static function handle_single_url_page_bulk_and_inline_actions( $post_id ) {
+		if ( ! isset( $_REQUEST['action'] ) || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {  // WPCS: CSRF OK.
 			return;
 		}
 
-		$action              = sanitize_key( $_POST['action'] ); // WPCS: CSRF OK.
+		$action              = sanitize_key( $_REQUEST['action'] ); // WPCS: CSRF OK.
 		$term_ids            = isset( $_POST['delete_tags'] ) ? array_map( 'sanitize_key', $_POST['delete_tags'] ) : null; // WPCS: CSRF OK.
+		$single_term_id      = isset( $_GET['term_id'] ) ? sanitize_key( $_GET['term_id'] ) : null; // WPCS: CSRF OK.
 		$redirect_query_args = array(
 			'action'       => 'edit',
 			'amp_actioned' => $action,
 		);
 
 		if ( $term_ids ) {
+			// If this is a bulk action.
 			self::handle_validation_error_update( null, $action, $term_ids );
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
+		} elseif ( $single_term_id ) {
+			// If this is an inline action, like 'Reject' or 'Accept'.
+			self::handle_validation_error_update( null, $action, $single_term_id );
+			$redirect_query_args['amp_actioned_count'] = 1;
 		}
 
 		// Even if the user didn't select any errors to bulk edit, redirect back to the same page.
