@@ -601,7 +601,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
-		add_action( 'load-term.php', array( __CLASS__, 'render_single_term_page' ) );
 		add_action( 'parse_query', array( __CLASS__, 'parse_term_php_query' ) );
 
 		// Prevent query vars from persisting after redirect.
@@ -1380,25 +1379,7 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'status':
 				$sanitization = self::get_validation_error_sanitization( $validation_error );
-				if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$class = 'sanitized';
-					} else {
-						$class = 'accepted';
-					}
-					$text = __( 'Accepted', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
-					if ( $sanitization['forced'] && $sanitization['term_status'] !== $sanitization['status'] ) {
-						$class = 'sanitized';
-					} else {
-						$class = 'rejected';
-					}
-					$text = __( 'Rejected', 'amp' );
-				} else {
-					$class = 'new';
-					$text  = __( 'New', 'amp' );
-				}
-				$content .= sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
+				$content     .= self::get_status_text_with_icon( $sanitization['term_status'], $sanitization['forced'] );
 				break;
 			case 'created_date_gmt':
 				$created_datetime = null;
@@ -1525,20 +1506,6 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Instead of the amp_validation_error wp-admin/term.php, requires edit.php.
-	 *
-	 * The single term admin page is similar to the validation error post edit.php page.
-	 * So use that edit.php page instead of the term.php page, which is mainly for editing a term.
-	 */
-	public static function render_single_term_page() {
-		if ( isset( $_REQUEST['post_type'] ) && post_type_exists( $_REQUEST['post_type'] ) ) {
-			$typenow = sanitize_text_field( wp_unslash( $_REQUEST['post_type'] ) ); // WPCS: CSRF OK.
-			require_once ABSPATH . 'wp-admin/edit.php';
-		}
-		exit;
-	}
-
-	/**
 	 * On the single amp_validation_error taxonomy page (term.php), this filters the query to only include URLs with this error.
 	 *
 	 * This page has a UI very similar to the validation post UI (Errors By URL).
@@ -1602,5 +1569,64 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		return $redirect_to;
+	}
+
+	/**
+	 * Get Error Title from Code
+	 *
+	 * @param string $error_code Error code.
+	 *
+	 * @return string
+	 */
+	public static function get_error_title_from_code( $error_code ) {
+		$error_title = 'Error';
+		if ( self::INVALID_ELEMENT_CODE === $error_code ) {
+			$error_title = __( 'Invalid element', 'amp' );
+		} elseif ( self::INVALID_ATTRIBUTE_CODE === $error_code ) {
+			$error_title = __( 'Invalid attribute', 'amp' );
+		} elseif ( 'file_path_not_allowed' === $error_code ) {
+			$error_title = __( 'File path not allowed', 'amp' );
+		} elseif ( 'excessive_css' === $error_code ) {
+			$error_title = __( 'Excessive CSS', 'amp' );
+		} elseif ( 'illegal_css_at_rule' === $error_code ) {
+			$error_title = __( 'Illegal CSS @ rule', 'amp' );
+		} elseif ( 'disallowed_file_extension' === $error_code ) {
+			$error_title = __( 'Disallowed file extension', 'amp' );
+		} elseif ( 'file_path_not_allowed' === $error_code ) {
+			$error_title = __( 'File path not allowed', 'amp' );
+		} elseif ( 'removed_unused_css_rules' === $error_code ) {
+			$error_title = __( 'Remove unused CSS rules', 'amp' );
+		}
+		return $error_title;
+	}
+
+	/**
+	 * Get Status Text with Icon
+	 *
+	 * @param string $status              Status.
+	 * @param string $sanitization_forced Sanitization forced.
+	 *
+	 * @return string
+	 */
+	public static function get_status_text_with_icon( $status, $sanitization_forced ) {
+		if ( self::VALIDATION_ERROR_ACCEPTED_STATUS === $status ) {
+			if ( $sanitization_forced && $sanitization_forced !== $status ) {
+				$class = 'sanitized';
+			} else {
+				$class = 'accepted';
+			}
+			$text = __( 'Accepted', 'amp' );
+		} elseif ( self::VALIDATION_ERROR_REJECTED_STATUS === $status ) {
+			if ( $sanitization_forced && $sanitization_forced !== $status ) {
+				$class = 'sanitized';
+			} else {
+				$class = 'rejected';
+			}
+			$text = __( 'Rejected', 'amp' );
+		} else {
+			$class = 'new';
+			$text  = __( 'New', 'amp' );
+		}
+		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
 	}
 }
