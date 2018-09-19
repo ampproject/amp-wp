@@ -67,8 +67,9 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * If this does not exist yet, it creates the element.
 	 *
 	 * @param {number} numberErrorsDisplaying - The number of errors displaying.
+	 * @param {number} totalErrors - The total number of errors, displaying or not.
 	 */
-	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying ) {
+	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying, totalErrors ) {
 		var thead, tr, th,
 			theadQuery = document.getElementsByTagName( 'thead' ),
 			idNumberErrors = 'number-errors';
@@ -84,9 +85,14 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			thead.appendChild( tr );
 		}
 
-		// Update the number of errors displaying.
-		if ( null !== numberErrorsDisplaying ) {
+
+		if ( numberErrorsDisplaying === totalErrors ) {
+			// If all of the errors are displaying, hide this message, as it won't be helpful to see something like 'Showing 9 of 9 validation errors'.
+			document.getElementById( idNumberErrors ).classList.add( 'hidden' );
+		} else if ( null !== numberErrorsDisplaying ) {
+			// Update the number of errors displaying.
 			document.getElementById( idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
+			document.getElementById( idNumberErrors ).classList.remove( 'hidden' );
 		}
 	};
 
@@ -99,7 +105,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.handleFiltering = function handleFiltering() {
 		var onChange = function( event ) {
-			var numberErrorsDisplaying = 0;
+			var errorTypeQuery,
+				numberErrorsDisplaying = 0;
 
 			if ( ! event.target.matches( 'select' ) ) {
 				return;
@@ -107,11 +114,12 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 
 			event.preventDefault();
 
+			errorTypeQuery = document.querySelectorAll( '[data-error-type]' );
 			/*
 			 * Iterate through all of the <tr> elements in the list table.
 			 * If the error type does not match the value (selected error type), hide them.
 			 */
-			document.querySelectorAll( '[data-error-type]' ).forEach( function( element ) {
+			errorTypeQuery.forEach( function( element ) {
 				var errorType = element.getAttribute( 'data-error-type' );
 
 				// If the value is '-1', 'All Error Types' was selected, and this should display all errors.
@@ -123,7 +131,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 				}
 			} );
 
-			component.updateShowingErrorsRow( numberErrorsDisplaying );
+			component.updateShowingErrorsRow( numberErrorsDisplaying, errorTypeQuery.length );
 		};
 
 		document.getElementById( 'amp_validation_error_type' ).addEventListener( 'change', onChange );
@@ -134,21 +142,24 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.handleSearching = function handleSearching() {
 		var onClick = function( event ) {
-			var searchQuery,
+			var searchQuery, detailsQuery,
 				numberErrorsDisplaying = 0;
 
 			event.preventDefault();
 			if ( ! event.target.matches( 'input' ) ) {
 				return;
 			}
+
 			searchQuery = document.getElementById( 'invalid-url-search-search-input' ).value;
+			detailsQuery = document.querySelectorAll( 'tbody .column-details' );
 
 			/*
 			 * Iterate through the 'Details' column of each row.
 			 * If the search query is not present, hide the row.
 			 */
-			document.querySelectorAll( 'tbody .column-details' ).forEach( function( element ) {
+			detailsQuery.forEach( function( element ) {
 				var isSearchQueryPresent = false;
+
 				element.querySelectorAll( '.detailed' ).forEach( function( detailed ) {
 					if ( -1 !== detailed.innerText.indexOf( searchQuery ) ) {
 						isSearchQueryPresent = true;
@@ -163,7 +174,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 				}
 			} );
 
-			component.updateShowingErrorsRow( numberErrorsDisplaying );
+			component.updateShowingErrorsRow( numberErrorsDisplaying, detailsQuery.length );
 		};
 
 		document.getElementById( 'search-submit' ).addEventListener( 'click', onClick );
