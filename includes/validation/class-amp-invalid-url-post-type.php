@@ -1614,7 +1614,6 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Gets the number of amp_validation_error terms that should appear on the single amp_invalid_url /wp-admin/post.php page.
 	 *
-	 * @todo: consider a way to reduce the number of terms returned in the query, as the pagination is still present.
 	 * @param int $terms_per_page The number of terms on a page.
 	 * @return int The number of terms on the page.
 	 */
@@ -1639,8 +1638,8 @@ class AMP_Invalid_URL_Post_Type {
 			return;
 		}
 
-		$post_id = sanitize_key( $_REQUEST['post'] );
-		if ( self::POST_TYPE_SLUG === get_post_type( $post_id ) ) { // WPCS: CSRF OK.
+		$post_id = intval( $_REQUEST['post'] );
+		if ( ! empty( $post_id ) && self::POST_TYPE_SLUG === get_post_type( $post_id ) ) { // WPCS: CSRF OK.
 			$_REQUEST['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		}
 	}
