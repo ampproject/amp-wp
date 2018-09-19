@@ -1494,16 +1494,16 @@ class AMP_Validation_Error_Taxonomy {
 					<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 						<?php esc_html_e( 'Status:', 'amp' ); ?>
 					</label>
-					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
+					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error.svg' ) ); ?>">
 						<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
 							<option value="">
 								<?php esc_html_e( 'New', 'amp' ); ?>
 							</option>
 						<?php endif; ?>
-						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACCEPTED_STATUS, $term->term_group ); ?>>
+						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACCEPTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>">
 							<?php esc_html_e( 'Accepted', 'amp' ); ?>
 						</option>
-						<option style="text-decoration: line-through" value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_REJECTED_STATUS, $term->term_group ); ?>>
+						<option style="text-decoration: line-through" value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-blue.svg' ) ); ?>">
 							<?php esc_html_e( 'Rejected', 'amp' ); ?>
 						</option>
 					</select>

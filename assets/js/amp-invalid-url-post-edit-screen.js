@@ -22,6 +22,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	component.boot = function boot( data ) {
 		Object.assign( component.data, data );
 		component.handleFiltering();
+		component.handleStatusChange();
 		component.changeHeading();
 		component.watchForUnsavedChanges();
 	};
@@ -131,6 +132,31 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		};
 
 		document.getElementById( 'amp_validation_error_type' ).addEventListener( 'change', onChange );
+	};
+
+	/**
+	 * Handles a change in the error status, like from 'New' to 'Accepted'.
+	 *
+	 * Gets the data-status-icon value from the newly-selected <option>.
+	 * And sets this as the src of the status icon <img>.
+	 */
+	component.handleStatusChange = function handleStatusChange() {
+		var onChange = function( event ) {
+			var newOption, iconSrc;
+			if ( ! event.target.matches( 'select' ) ) {
+				return;
+			}
+
+			newOption = event.target.options[ event.target.selectedIndex ];
+			if ( newOption ) {
+				iconSrc = newOption.getAttribute( 'data-status-icon' );
+				event.target.parentNode.querySelector( 'img' ).setAttribute( 'src', iconSrc );
+			}
+		};
+
+		document.querySelectorAll( '.amp-validation-error-status' ).forEach( function( element ) {
+			element.addEventListener( 'change', onChange );
+		} );
 	};
 
 	/**
