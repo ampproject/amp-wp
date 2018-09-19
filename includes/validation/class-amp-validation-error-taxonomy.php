@@ -1468,7 +1468,18 @@ class AMP_Validation_Error_Taxonomy {
 	 * Handle inline edit links.
 	 */
 	public static function handle_inline_edit_request() {
-		if ( ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy && ( ! isset( $_GET['post_type'] ) && \AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) ) || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
+		// Check for necessary arguments.
+		if ( ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) {  // WPCS: CSRF ok.
+			return;
+		}
+
+		// Check if we are on either the taxonomy page or a single error page (which has the post_type argument).
+		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy && ! isset( $_GET['post_type'] ) ) { // WPCS: CSRF ok.
+			return;
+		}
+
+		// If we have a post_type check that it is the correct one.
+		if ( isset( $_GET['post_type'] ) && \AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) { // WPCS: CSRF ok.
 			return;
 		}
 		$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
