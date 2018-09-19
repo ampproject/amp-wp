@@ -824,68 +824,79 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:
-				if ( isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
-					$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
-					$output  = array();
-
-					if ( isset( $sources['plugin'] ) ) {
-						$output[]     = '<details class="source">';
-						$plugin_names = array();
-						$plugin_slugs = array_unique( $sources['plugin'] );
-						$plugins      = get_plugins();
-						foreach ( $plugin_slugs as $plugin_slug ) {
-							$name = $plugin_slug;
-							foreach ( $plugins as $plugin_file => $plugin_data ) {
-								if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
-									$name = $plugin_data['Name'];
-									break;
-								}
-							}
-							$plugin_names[] = $name;
-						}
-						$count = count( $plugin_slugs );
-						if ( 1 === $count ) {
-							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></summary>', esc_html__( 'Plugin', 'amp' ) );
-						} else {
-							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
-						}
-						$output[] = '<div>';
-						$output[] = implode( '<br/>', array_unique( $plugin_names ) );
-						$output[] = '</div>';
-						$output[] = '</details>';
-					}
-					if ( isset( $sources['core'] ) ) {
-						$output[] = '<details class="source">';
-						$count    = count( array_unique( $sources['core'] ) );
-						if ( 1 === $count ) {
-							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></summary>', esc_html__( 'Other', 'amp' ) );
-						} else {
-							$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
-						}
-						$output[] = '<div>';
-						$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
-						$output[] = '</div>';
-						$output[] = '</details>';
-					}
-					if ( isset( $sources['theme'] ) ) {
-						$output[] = '<div class="source">';
-						$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
-						$themes   = array_unique( $sources['theme'] );
-						foreach ( $themes as $theme_slug ) {
-							$theme_obj = wp_get_theme( $theme_slug );
-							if ( ! $theme_obj->errors() ) {
-								$theme_name = $theme_obj->get( 'Name' );
-							} else {
-								$theme_name = $theme_slug;
-							}
-							$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_name ) );
-						}
-						$output[] = '</div>';
-					}
-					echo implode( '', $output ); // WPCS: XSS ok.
-				}
+				self::render_sources_column( $error_summary );
 				break;
 		}
+	}
+
+	/**
+	 * Renders the sources column on the the single error URL page and the 'Invalid URLs' page.
+	 *
+	 * @param array $error_summary The summary of errors.
+	 */
+	public static function render_sources_column( $error_summary ) {
+		if ( ! isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
+			return;
+		}
+
+		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
+		$output  = array();
+
+		if ( isset( $sources['plugin'] ) ) {
+			$output[]     = '<details class="source">';
+			$plugin_names = array();
+			$plugin_slugs = array_unique( $sources['plugin'] );
+			$plugins      = get_plugins();
+			foreach ( $plugin_slugs as $plugin_slug ) {
+				$name = $plugin_slug;
+				foreach ( $plugins as $plugin_file => $plugin_data ) {
+					if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+						$name = $plugin_data['Name'];
+						break;
+					}
+				}
+				$plugin_names[] = $name;
+			}
+			$count = count( $plugin_slugs );
+			if ( 1 === $count ) {
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></summary>', esc_html__( 'Plugin', 'amp' ) );
+			} else {
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
+			}
+			$output[] = '<div>';
+			$output[] = implode( '<br/>', array_unique( $plugin_names ) );
+			$output[] = '</div>';
+			$output[] = '</details>';
+		}
+		if ( isset( $sources['core'] ) ) {
+			$output[] = '<details class="source">';
+			$count    = count( array_unique( $sources['core'] ) );
+			if ( 1 === $count ) {
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></summary>', esc_html__( 'Other', 'amp' ) );
+			} else {
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+			}
+			$output[] = '<div>';
+			$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+			$output[] = '</div>';
+			$output[] = '</details>';
+		}
+		if ( isset( $sources['theme'] ) ) {
+			$output[] = '<div class="source">';
+			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
+			$themes   = array_unique( $sources['theme'] );
+			foreach ( $themes as $theme_slug ) {
+				$theme_obj = wp_get_theme( $theme_slug );
+				if ( ! $theme_obj->errors() ) {
+					$theme_name = $theme_obj->get( 'Name' );
+				} else {
+					$theme_name = $theme_slug;
+				}
+				$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_name ) );
+			}
+			$output[] = '</div>';
+		}
+		echo implode( '', $output ); // WPCS: XSS ok.
 	}
 
 	/**
