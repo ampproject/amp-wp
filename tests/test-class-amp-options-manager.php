@@ -309,7 +309,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		ob_start();
 		AMP_Options_Manager::render_welcome_notice();
 		$output = ob_get_clean();
-		$this->assertContains( 'Welcome to AMP for WordPress', $output );
+		$this->assertContains( 'elcome to the AMP for WordPress plugin v1.0', $output );
+		$this->assertContains( 'Thank you for installing! Bring the speed and features of the open source AMP project to your site, the WordPress way', $output );
 		$this->assertContains( $id, $output );
 	}
 
