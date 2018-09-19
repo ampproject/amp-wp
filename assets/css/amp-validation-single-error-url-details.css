@@ -90,3 +90,9 @@ table.striped > tbody > tr.even {
 #amp_validation_status #amp-enabled-icon {
 	margin-bottom: 1.2rem;
 }
+
+#number-errors {
+	text-align: center;
+	background-color: #d3d3d3b8;
+	color: #1e8cbecc;
+}

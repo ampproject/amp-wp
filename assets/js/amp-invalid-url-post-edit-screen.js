@@ -79,12 +79,6 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			tr = document.createElement( 'tr' );
 			th = document.createElement( 'th' );
 			th.setAttribute( 'id', idNumberErrors );
-
-			/* eslint-disable dot-notation */
-			th.style[ 'text-align' ] = 'center';
-			th.style[ 'background-color' ] = '#d3d3d3b8';
-			th.style[ 'color' ] = '#1e8cbecc';
-			/* eslint-enable dot-notation */
 			th.setAttribute( 'colspan', '6' );
 			tr.appendChild( th );
 			thead.appendChild( tr );
