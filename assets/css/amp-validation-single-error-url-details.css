@@ -86,3 +86,7 @@ table.striped > tbody > tr.even {
 	width: 1.5rem;
 	margin-top: 0.2rem;
 }
+
+#amp_validation_status #amp-enabled-icon {
+	margin-bottom: 1.2rem;
+}

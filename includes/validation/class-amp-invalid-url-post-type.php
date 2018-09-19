@@ -418,7 +418,7 @@ class AMP_Invalid_URL_Post_Type {
 			);
 			$class                       = $is_amp_enabled ? 'sanitized' : 'new';
 			?>
-			<span class="status-text <?php echo esc_attr( $class ); ?>">
+			<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
 				<?php
 				$is_amp_enabled ? esc_html_e( 'AMP: Enabled', 'amp' ) : esc_html_e( 'AMP: Disabled', 'amp' );
 				if ( $are_there_unaccepted_errors && $is_forcibly_accepted ) {
