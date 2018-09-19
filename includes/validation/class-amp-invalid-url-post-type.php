@@ -1490,6 +1490,25 @@ class AMP_Invalid_URL_Post_Type {
 				<div class="clear"></div>
 			</div>
 		</div><!-- /submitpost -->
+
+		<script>
+		jQuery( function( $ ) {
+			var validateUrl, postId;
+			validateUrl = <?php echo wp_json_encode( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_amp_validate_nonce(), self::get_url_from_post( $post ) ) ); ?>;
+			postId = <?php echo wp_json_encode( $post->ID ); ?>;
+			$( '#preview_validation_errors' ).on( 'click', function() {
+				var params = {}, validatePreviewUrl = validateUrl;
+				$( '.amp-validation-error-status' ).each( function() {
+					if ( this.value && ! this.options[ this.selectedIndex ].defaultSelected ) {
+						params[ this.name ] = this.value;
+					}
+				} );
+				validatePreviewUrl += '&' + $.param( params );
+				validatePreviewUrl += '#development=1';
+				window.open( validatePreviewUrl, 'amp-validation-error-term-status-preview-' + String( postId ) );
+			} );
+		} );
+		</script>
 		<?php
 	}
 
