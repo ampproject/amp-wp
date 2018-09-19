@@ -376,6 +376,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'post_action_' . AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, array( self::TESTED_CLASS, 'handle_single_url_page_bulk_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts' ) );
 
 		$cb              = '<input type="checkbox" />';
 		$initial_columns = array( 'cb' => $cb );
@@ -817,7 +818,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Test parse_post_php_term_query.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::parse_post_php_term_query()
@@ -863,6 +863,22 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_details_summary_label.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_details_summary_label()
+	 */
+	public function test_get_details_summary_label() {
+		$validation_error = $this->get_mock_error();
+		$this->assertEquals( '<code>&lt;link&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+		unset( $validation_error['node_name'] );
+		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+		$validation_error['code'] = 'some_other_code';
+		$this->assertEquals( '<code>&hellip;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+	}
+
+	/**
 	 * Test filter_manage_custom_columns.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
@@ -884,7 +900,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		), 'edit.php' ) );
 		// Test the 'error' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<p><a href="' . $url . '"><code>illegal_css_at_rule</code></a>: <code>@-ms-viewport</code></p>', $filtered_content );
+		$this->assertEquals( $initial_content . '<button type="button" aria-label="Toggle error details" class="single-url-detail-toggle"><code>illegal_css_at_rule</code>: <code>@-ms-viewport</code></button>', $filtered_content );
 
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php'; // WPCS: Global override OK.
@@ -905,11 +921,24 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'details' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
-		$this->assertContains( '<details><summary class="details-attributes__summary"', $filtered_content );
+		$this->assertContains( '<details class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
 
 		// Test the 'error_type' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_type', $term_id );
 		$this->assertContains( 'CSS', $filtered_content );
+	}
+
+	/**
+	 * Test render_single_url_error_details.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_single_url_error_details()
+	 */
+	public function test_render_single_url_error_details() {
+		$validation_error         = self::get_mock_error();
+		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error );
+		$this->assertContains( '<details open>', $html );
+		$this->assertContains( '<details>', $html );
 	}
 
 	/**

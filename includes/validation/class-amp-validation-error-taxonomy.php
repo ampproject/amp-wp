@@ -658,6 +658,8 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Hide empty term addition form.
 		add_action( 'admin_enqueue_scripts', function() {
+			global $pagenow;
+
 			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
 				wp_add_inline_style( 'common', '
 					#col-left { display: none; }
@@ -687,6 +689,23 @@ class AMP_Validation_Error_Taxonomy {
 					'amp-validation-error-detail-toggle',
 					'ampValidationI18n',
 					array( 'btnAriaLabel' => esc_attr__( 'Toggle all details', 'amp' ) )
+				);
+			}
+
+			if ( 'post.php' === $pagenow ) {
+				wp_enqueue_style(
+					'amp-validation-single-error-url-details',
+					amp_get_asset_url( 'css/amp-validation-single-error-url-details.css' ),
+					array( 'common' ),
+					AMP__VERSION
+				);
+
+				wp_enqueue_script(
+					'amp-validation-single-error-url-details',
+					amp_get_asset_url( 'js/amp-validation-single-error-url-details-compiled.js' ),
+					array( 'wp-dom-ready' ),
+					AMP__VERSION,
+					true
 				);
 			}
 		} );
@@ -1249,11 +1268,8 @@ class AMP_Validation_Error_Taxonomy {
 			unset( $actions['delete'] );
 
 			$actions['details'] = sprintf(
-				'<a href="%s">%s</a>',
-				admin_url( add_query_arg( array(
-					self::TAXONOMY_SLUG => $term->name,
-					'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-				), 'edit.php' ) ),
+				'<button type="button" aria-label="%s" class="single-url-detail-toggle">%s</button>',
+				esc_attr__( 'Toggle error details', 'amp' ),
 				esc_html__( 'Details', 'amp' )
 			);
 
@@ -1355,6 +1371,24 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Provides the label for the details summary element.
+	 *
+	 * @param array $validation_error Validation error data.
+	 * @return string The label.
+	 */
+	public static function get_details_summary_label( $validation_error ) {
+		if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] || self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
+		} elseif ( isset( $validation_error['node_name'] ) ) {
+			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
+		} else {
+			$summary_label = '&hellip;';
+		}
+
+		return sprintf( '<code>%s</code>', esc_html( $summary_label ) );
+	}
+
+	/**
 	 * Supply the content for the custom columns.
 	 *
 	 * @param string $content     Column content.
@@ -1374,15 +1408,24 @@ class AMP_Validation_Error_Taxonomy {
 
 		switch ( $column_name ) {
 			case 'error':
-				$content .= '<p>';
-				$content .= sprintf(
-					'<a href="%s"><code>%s</code></a>',
-					admin_url( add_query_arg( array(
-						self::TAXONOMY_SLUG => $term->name,
-						'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
-					), 'edit.php' ) ),
-					esc_html( $validation_error['code'] )
-				);
+				if ( 'post.php' === $pagenow ) {
+					$content .= sprintf(
+						'<button type="button" aria-label="%s" class="single-url-detail-toggle">',
+						esc_attr__( 'Toggle error details', 'amp' )
+					);
+					$content .= sprintf( '<code>%s</code>', esc_html( $validation_error['code'] ) );
+				} else {
+					$content .= '<p>';
+					$content .= sprintf(
+						'<a href="%s"><code>%s</code></a>',
+						admin_url( add_query_arg( array(
+							self::TAXONOMY_SLUG => $term->name,
+							'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+						), 'edit.php' ) ),
+						esc_html( $validation_error['code'] )
+					);
+				}
+
 				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
@@ -1390,11 +1433,17 @@ class AMP_Validation_Error_Taxonomy {
 				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
 				}
-				$content .= '</p>';
+
+				if ( 'post.php' === $pagenow ) {
+					$content .= '</button>';
+				} else {
+					$content .= '</p>';
+				}
 
 				if ( isset( $validation_error['message'] ) ) {
 					$content .= sprintf( '<p>%s</p>', esc_html( $validation_error['message'] ) );
 				}
+
 				break;
 			case 'status':
 				if ( 'post.php' === $pagenow ) {
@@ -1485,18 +1534,13 @@ class AMP_Validation_Error_Taxonomy {
 
 				break;
 			case 'details':
-				if ( isset( $validation_error['parent_name'] ) ) {
-					if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] || self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
-						$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
-					} elseif ( isset( $validation_error['node_name'] ) ) {
-						$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
-					} elseif ( isset( $validation_error['node_name'] ) ) {
-						$summary_label = $validation_error['node_name'];
-					} else {
-						$summary_label = '&hellip;';
-					}
+				if ( 'post.php' === $pagenow ) {
+					return self::render_single_url_error_details( $validation_error );
+				}
 
-					$summary = '<code>' . esc_html( $summary_label ) . '</code>';
+				if ( isset( $validation_error['parent_name'] ) ) {
+					$summary = self::get_details_summary_label( $validation_error );
+
 					unset( $validation_error['error_type'] );
 					unset( $validation_error['parent_name'] );
 
@@ -1552,6 +1596,70 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 		}
 		return $content;
+	}
+
+	/**
+	 * Renders error details when viewing a single URL page.
+	 *
+	 * @param array $validation_error Validation error data.
+	 * @return string HTML for the details section.
+	 */
+	public static function render_single_url_error_details( $validation_error ) {
+		ob_start();
+		?>
+
+		<ul class="detailed">
+			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) : ?>
+				<li>
+					<details open>
+						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
+						<div class="detailed">
+							<?php
+							if ( isset( $validation_error['node_attributes'] ) ) {
+								foreach ( $validation_error['node_attributes'] as $key => $value ) {
+									printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+								}
+							}
+							?>
+						<div>
+					</details>
+				</li>
+			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) : ?>
+				<li>
+					<details open>
+						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
+							<div class="detailed">
+							<?php
+							foreach ( $validation_error['element_attributes'] as $key => $value ) {
+								printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+							}
+							?>
+					</details>
+				</li>
+			<?php endif; ?>
+			<?php foreach ( $validation_error as $key => $value ) : ?>
+				<li>
+					<details>
+						<summary><code><?php echo esc_html( $key ); ?></code></summary>
+						<div class="detailed">
+							<?php if ( is_string( $value ) ) : ?>
+								<?php echo esc_html( $value ); ?>
+							<?php else : ?>
+								<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+							<?php endif; ?>
+						</div>
+					</details>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+
+		<?php
+
+		return sprintf(
+			'<details class="details-attributes"><summary class="details-attributes__summary">%s</summary>%s</details>',
+			self::get_details_summary_label( $validation_error ),
+			ob_get_clean()
+		);
 	}
 
 	/**
