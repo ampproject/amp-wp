@@ -187,6 +187,9 @@ class AMP_HTTP {
 		// Google AMP Cache (legacy).
 		$hosts[] = 'cdn.ampproject.org';
 
+		// Bing AMP Cache.
+		$hosts[] = 'bing-amp.com';
+
 		// From the publisher’s own origins.
 		$domains = array_unique( array(
 			wp_parse_url( site_url(), PHP_URL_HOST ),
