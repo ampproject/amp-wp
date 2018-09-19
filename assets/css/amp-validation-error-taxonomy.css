@@ -145,3 +145,4 @@ details[open] .details-attributes__summary::after {
 .status-text.rejected::before {
 	background-image: url( '../images/baseline-error-blue.svg' );
 }
+

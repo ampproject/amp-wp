@@ -196,7 +196,7 @@ class AMP_Invalid_URL_Post_Type {
 	public static function enqueue_post_list_screen_scripts() {
 		$screen = get_current_screen();
 
-		// Enqueue this on both the 'Invalid URLs' apge and the single URL error page.
+		// Enqueue this on both the 'Invalid URLs' page and the single URL page.
 		if ( 'edit-amp_invalid_url' === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
 			wp_enqueue_style(
 				'amp-admin-tables',
@@ -385,7 +385,7 @@ class AMP_Invalid_URL_Post_Type {
 		$result = array();
 		if ( $counts['new'] ) {
 			$result[] = sprintf(
-				/* translators: %s is count */
+				/* translators: %1$s is the status, %2$s is the count */
 				'<span class="status-text new">%1$s: %2$s</span>',
 				esc_html__( 'New', 'amp' ),
 				number_format_i18n( $counts['new'] )
@@ -1323,7 +1323,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Enqueue scripts for the edit post screen.
+	 * Enqueues scripts for the edit post screen.
 	 *
 	 * This is called in render_single_url_list_table() instead of enqueue_edit_post_screen_scripts(),
 	 * as it depends on data from the WP_Terms_List_Table in that method.
