@@ -349,39 +349,24 @@ class AMP_Options_Manager {
 
 		?>
 		<div class="notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
-			<span class="amp-logo-icon"></span>
+			<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>" alt="AMP" width="40" height="40" style="float: left; margin: 5px;">
 			<h1><?php esc_html_e( 'Welcome to the AMP for WordPress plugin v1.0', 'amp' ); ?></h1>
 			<p><?php esc_html_e( 'Thank you for installing! Bring the speed and features of the open source AMP project to your site, the WordPress way, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
-			<h2><?php esc_html_e( 'What&#39;s New', 'amp' ); ?></h2>
+			<h2><?php esc_html_e( 'What&#8217;s New', 'amp' ); ?></h2>
 			<p><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this v1.0 release makes it easier than ever to bring a rich, performant experience to your WordPress site via AMP HTML.', 'amp' ); ?></p>
 		</div>
 
 		<script>
-		( function( $ ) {
-			$( function() {
-				// On dismissing the notice, make a POST request to store this notice with the dismissed WP pointers so it doesn't display again.
-				$( document ).on( 'click', <?php echo wp_json_encode( "#$notice_id .notice-dismiss" ); ?>, function() {
-					console.log( 'clicked' );
-					$.post( ajaxurl, {
-						pointer: <?php echo wp_json_encode( $notice_id ); ?>,
-						action: 'dismiss-wp-pointer'
-					} );
+		jQuery( function( $ ) {
+			// On dismissing the notice, make a POST request to store this notice with the dismissed WP pointers so it doesn't display again.
+			$( <?php echo wp_json_encode( "#$notice_id" ); ?> ).on( 'click', '.notice-dismiss', function() {
+				$.post( ajaxurl, {
+					pointer: <?php echo wp_json_encode( $notice_id ); ?>,
+					action: 'dismiss-wp-pointer'
 				} );
 			} );
-		}( jQuery ) );
+		} );
 		</script>
-
-		<style>
-			.amp-logo-icon {
-				background-image: url( "<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>" );
-				background-color: transparent;
-				background-size: 40px 40px;
-				height: 40px;
-				width: 40px;
-				float: left;
-				margin: 5px;
-			}
-		</style>
 		<?php
 	}
 
