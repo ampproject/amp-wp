@@ -103,6 +103,25 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_term.
+	 *
+	 * @covers AMP_Validation_Error_Taxonomy::get_term()
+	 */
+	public function test_get_term() {
+		$foo_error = array( 'code' => 'foo' );
+		$bar_error = array( 'code' => 'bar' );
+		AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array( $foo_error, $bar_error ),
+			home_url( '/' )
+		);
+		$foo_term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $foo_error );
+
+		$term = AMP_Validation_Error_Taxonomy::get_term( $foo_error );
+		$this->assertEquals( $term, AMP_Validation_Error_Taxonomy::get_term( $foo_term_data['slug'] ) );
+		$this->assertEquals( $foo_error, json_decode( $term->description, true ) );
+	}
+
+	/**
 	 * Test sanitize_term_status.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::sanitize_term_status()

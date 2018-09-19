@@ -314,7 +314,7 @@ class AMP_Invalid_URL_Post_Type {
 				continue;
 			}
 
-			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$term = AMP_Validation_Error_Taxonomy::get_term( $stored_validation_error['term_slug'] );
 			if ( ! $term ) {
 				continue;
 			}
@@ -557,7 +557,7 @@ class AMP_Invalid_URL_Post_Type {
 			if ( ! isset( $terms[ $term_slug ] ) ) {
 
 				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
-				$term = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+				$term = AMP_Validation_Error_Taxonomy::get_term( $term_slug );
 				if ( ! ( $term instanceof WP_Term ) ) {
 					/*
 					 * The default term_group is 0 so that is AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS.
@@ -1212,7 +1212,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		foreach ( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $term_slug => $status ) {
 			$term_slug = sanitize_key( $term_slug );
-			$term      = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$term      = AMP_Validation_Error_Taxonomy::get_term( $term_slug );
 			if ( ! $term ) {
 				continue;
 			}

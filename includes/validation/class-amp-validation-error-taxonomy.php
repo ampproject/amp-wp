@@ -279,6 +279,31 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Get amp_validation_error taxonomy term by slug or error properties.
+	 *
+	 * @since 1.0
+	 * @see get_term_by()
+	 *
+	 * @param string|array $error Slug for term or array of term data.
+	 * @return WP_Term|false Queried term or false if no match.
+	 */
+	public static function get_term( $error ) {
+		$slug = null;
+		if ( is_string( $error ) ) {
+			$slug = $error;
+		} elseif ( is_array( $error ) ) {
+			$term_data = self::prepare_validation_error_taxonomy_term( $error );
+			$slug      = $term_data['slug'];
+		}
+		if ( ! $slug ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Method must be passed a term slug (string) or error attributes (array).', 'amp' ), '1.0' );
+			return false;
+		}
+
+		return get_term_by( 'slug', $slug, self::TAXONOMY_SLUG );
+	}
+
+	/**
 	 * Sanitize term status(es).
 	 *
 	 * @param int|int[]|string $status One or more statuses (including comma-delimited string).
@@ -379,7 +404,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_validation_error_sanitization( $error ) {
 		$term_data = self::prepare_validation_error_taxonomy_term( $error );
-		$term      = get_term_by( 'slug', $term_data['slug'], self::TAXONOMY_SLUG );
+		$term      = self::get_term( $term_data['slug'] );
 		$statuses  = array(
 			self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,

@@ -1635,7 +1635,7 @@ class AMP_Validation_Manager {
 
 			$css_validation_errors = array();
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
-				$term = get_term_by( 'slug', $slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+				$term = AMP_Validation_Error_Taxonomy::get_term( $slug );
 				if ( ! $term ) {
 					continue;
 				}
