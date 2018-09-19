@@ -159,7 +159,6 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_posts_columns', array( __CLASS__, 'add_post_columns' ) );
 		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_columns', array( __CLASS__, 'add_single_post_columns' ) );
-		add_filter( 'manage_' . self::POST_TYPE_SLUG . '_sortable_columns', array( __CLASS__, 'add_single_post_sortable_columns' ) );
 		add_action( 'manage_posts_custom_column', array( __CLASS__, 'output_custom_column' ), 10, 2 );
 		add_filter( 'bulk_actions-edit-' . self::POST_TYPE_SLUG, array( __CLASS__, 'filter_bulk_actions' ), 10, 2 );
 		add_filter( 'bulk_actions-' . self::POST_TYPE_SLUG, '__return_false' );
@@ -757,23 +756,6 @@ class AMP_Invalid_URL_Post_Type {
 			'details'    => __( 'Details', 'amp' ),
 			'sources'    => __( 'Sources', 'amp' ),
 			'error_type' => __( 'Error Type', 'amp' ),
-		);
-	}
-
-	/**
-	 * Adds post columns to the /wp-admin/post.php page for amp_invalid_url.
-	 *
-	 * @param array $sortable_columns The sortable columns.
-	 * @return array $sortable_columns The filtered sortable columns.
-	 */
-	public static function add_single_post_sortable_columns( $sortable_columns ) {
-		return array_merge(
-			$sortable_columns,
-			array(
-				'error'      => AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
-				'details'    => AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
-				'error_type' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
-			)
 		);
 	}
 
@@ -1450,6 +1432,7 @@ class AMP_Invalid_URL_Post_Type {
 							echo '</p></div>';
 						}
 						?>
+						<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>">
 						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
 					</div>
 

@@ -595,6 +595,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 		add_action( 'parse_term_query', array( __CLASS__, 'parse_post_php_term_query' ) );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
+		add_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( __CLASS__, 'add_single_post_sortable_columns' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'post_action_' . self::VALIDATION_ERROR_REJECT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_actions' ) );
 		add_filter( 'post_action_' . self::VALIDATION_ERROR_ACCEPT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_actions' ) );
@@ -1641,6 +1642,23 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 		}
 		return $content;
+	}
+
+	/**
+	 * Adds post columns to the /wp-admin/post.php page for amp_invalid_url.
+	 *
+	 * @param array $sortable_columns The sortable columns.
+	 * @return array $sortable_columns The filtered sortable columns.
+	 */
+	public static function add_single_post_sortable_columns( $sortable_columns ) {
+		return array_merge(
+			$sortable_columns,
+			array(
+				'error'      => self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
+				'details'    => self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
+				'error_type' => self::VALIDATION_ERROR_TYPE_QUERY_VAR,
+			)
+		);
 	}
 
 	/**

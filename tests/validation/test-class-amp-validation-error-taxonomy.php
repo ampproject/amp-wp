@@ -371,6 +371,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_menu', array( self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ) ) );
 		$this->assertEquals( 10, has_filter( 'parse_term_query', array( self::TESTED_CLASS, 'parse_post_php_term_query' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', array( self::TESTED_CLASS, 'filter_manage_custom_columns' ) ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( self::TESTED_CLASS, 'add_single_post_sortable_columns' ) ) );
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_action_' . AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, array( self::TESTED_CLASS, 'handle_single_url_page_bulk_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_action_' . AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, array( self::TESTED_CLASS, 'handle_single_url_page_bulk_actions' ) ) );
@@ -928,6 +929,36 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		// Test the 'error_type' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_type', $term_id );
 		$this->assertContains( 'CSS', $filtered_content );
+	}
+
+	/**
+	 * Test for add_single_post_sortable_columns()
+	 *
+	 * @covers AMP_Validation_Error_Taxonomy::add_single_post_sortable_columns()
+	 */
+	public function test_add_single_post_sortable_columns() {
+		$initial_columns              = array(
+			'description' => 'description',
+			'links'       => 'count',
+		);
+		$columns_expected_to_be_added = array(
+			'error'      => 'amp_validation_code',
+			'details'    => 'amp_validation_node_name',
+			'error_type' => 'amp_validation_error_type',
+		);
+		$this->assertEquals(
+			array_merge( $initial_columns, $columns_expected_to_be_added ),
+			AMP_Validation_Error_Taxonomy::add_single_post_sortable_columns( $initial_columns )
+		);
+
+		// In the unlikely case that the initial columns has a 'details' value, this method should overwrite it.
+		$initial_columns_with_details = array(
+			'details' => 'foobar',
+		);
+		$this->assertEquals(
+			$columns_expected_to_be_added,
+			AMP_Validation_Error_Taxonomy::add_single_post_sortable_columns( $initial_columns_with_details )
+		);
 	}
 
 	/**
