@@ -737,7 +737,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			// Associate the validation error term with a URL so that it appears in a query.
 			wp_set_post_terms(
 				$invalid_url_post,
-				$validation_error_term,
+				array( $validation_error_term ),
 				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
 			);
 		}

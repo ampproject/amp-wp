@@ -707,14 +707,6 @@ class AMP_Validation_Error_Taxonomy {
 			return $query_vars;
 		} );
 
-		// Always exclude taxonomy terms when they have empty counts.
-		add_filter( 'get_terms_args', function( $args, $taxonomies ) {
-			if ( array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) === $taxonomies ) {
-				$args['hide_empty'] = true;
-			}
-			return $args;
-		}, 10, 2 );
-
 		// Default ordering terms by ID descending so that new terms appear at the top.
 		add_filter( 'get_terms_defaults', function( $args, $taxonomies ) {
 			if ( array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) === $taxonomies ) {
