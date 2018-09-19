@@ -173,3 +173,8 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 	margin: 5px 5px 0 5px;
 	padding: 0 26px 2px;
 }
+.wp-heading-inline .status-text {
+	display: inline-flex;
+	margin-left: 10px;
+	vertical-align: middle;
+}

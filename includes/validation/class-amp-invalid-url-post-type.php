@@ -1017,12 +1017,26 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
+
+		/**
+		 * Adds notices to the single error page.
+		 * 1. Notice with detailed error information in an expanding box.
+		 * 2. Notice with accept and reject buttons.
+		 */
 		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // WPCS: CSRF OK.
 			$error       = get_term_by( 'slug', wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ), \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ); // WPCS: CSRF OK.
-			$description = json_decode( $error->description );
-			$output      = '';
+			if ( ! $error ) {
+				return;
+			}
+
+			$description  = json_decode( $error->description, true );
+			$sanitization = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
+			$status_text  = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization['term_status'], $sanitization['forced'] );
+			$error_title  = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $description['code'] );
+
+			$output = '';
 			foreach ( $description as $desc_name => $desc_info ) {
-				if ( ! is_object( $desc_info ) ) {
+				if ( ! is_array( $desc_info ) ) {
 					$output .= sprintf( '<li><span class="details-attributes__title">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $desc_name, $desc_info );
 				} else {
 					$output .= sprintf( '<ul class="secondary-details-array"><span class="details-attributes__title">%s:</span><br/>', $desc_name );
@@ -1032,9 +1046,10 @@ class AMP_Invalid_URL_Post_Type {
 					$output .= '</ul>';
 				}
 			}
+
 			printf(
 				'<div class="notice"><details class="single-error-detail"><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
-				esc_html__( 'Removed Element', 'amp' ),
+				esc_html( $error_title ),
 				wp_kses_post( $output )
 			);
 
@@ -1063,12 +1078,26 @@ class AMP_Invalid_URL_Post_Type {
 
 			printf(
 				'<div class="notice accept-reject-error"><p>%s</p><a class="button" href="%s">%s</a><a class="button button-primary" href="%s">%s</a></div>',
-				esc_html__( 'Accept this error for all shown use cases', 'amp' ),
+				esc_html__( 'Accept or Reject this error for all shown use cases', 'amp' ),
 				esc_url( $reject_all_url ),
 				esc_html__( 'Reject', 'amp' ),
 				esc_url( $accept_all_url ),
 				esc_html__( 'Accept', 'amp' )
 			);
+
+			$heading = sprintf(
+				'%s: <code>%s</code>%s',
+				esc_html( $error_title ),
+				esc_html( $description['node_name'] ),
+				wp_kses_post( $status_text )
+			);
+			?>
+			<script type="text/javascript">
+				jQuery( document ).ready(function() {
+					jQuery( 'h1.wp-heading-inline' ).html( '<?php echo wp_kses_post( $heading ); ?>' );
+				});
+			</script>
+			<?php
 		}
 	}
 
