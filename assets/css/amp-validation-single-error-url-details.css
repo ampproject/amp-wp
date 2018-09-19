@@ -60,6 +60,7 @@ table.striped > tbody > tr.even {
 /** Details row styles. */
 .details ul.detailed {
     padding: 0 32px;
+    margin-top: 0;
 }
 
 .details div.detailed {

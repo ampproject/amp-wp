@@ -687,7 +687,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-error-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-					array(),
+					array( 'wp-dom-ready' ),
 					AMP__VERSION,
 					true
 				);
@@ -1631,22 +1631,20 @@ class AMP_Validation_Error_Taxonomy {
 		?>
 
 		<ul class="detailed">
-			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) : ?>
+			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<li>
 					<details open>
 						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
 						<div class="detailed">
 							<?php
-							if ( isset( $validation_error['node_attributes'] ) ) {
-								foreach ( $validation_error['node_attributes'] as $key => $value ) {
-									printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
-								}
+							foreach ( $validation_error['node_attributes'] as $key => $value ) {
+								printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
 							}
 							?>
 						<div>
 					</details>
 				</li>
-			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) : ?>
+			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
 				<li>
 					<details open>
 						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
