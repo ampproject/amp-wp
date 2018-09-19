@@ -68,7 +68,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 *
 	 * @param {number} numberErrorsDisplaying - The number of errors displaying.
 	 */
-	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying = null ) {
+	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying ) {
 		var thead, tr, th,
 			theadQuery = document.getElementsByTagName( 'thead' ),
 			idNumberErrors = 'number-errors';
@@ -121,7 +121,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 				var errorType = element.getAttribute( 'data-error-type' );
 
 				// If the value is '-1', 'All Error Types' was selected, and this should display all errors.
-				if ( event.target.value === errorType || '-1' === event.target.value ) {
+				if ( event.target.value === errorType || ! event.target.value || '-1' === event.target.value ) {
 					element.parentElement.parentElement.classList.remove( 'hidden' );
 					numberErrorsDisplaying++;
 				} else {
