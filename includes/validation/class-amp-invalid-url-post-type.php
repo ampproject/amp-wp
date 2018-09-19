@@ -1050,14 +1050,14 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-
 		/**
 		 * Adds notices to the single error page.
 		 * 1. Notice with detailed error information in an expanding box.
 		 * 2. Notice with accept and reject buttons.
 		 */
 		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // WPCS: CSRF OK.
-			$error       = get_term_by( 'slug', wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ), \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ); // WPCS: CSRF OK.
+			$error_id = sanitize_text_field( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // WPCS: CSRF OK.
+			$error    = get_term_by( 'slug', $error_id, \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 			if ( ! $error ) {
 				return;
 			}
@@ -1065,7 +1065,8 @@ class AMP_Invalid_URL_Post_Type {
 			$description  = json_decode( $error->description, true );
 			$sanitization = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
 			$status_text  = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization['term_status'], $sanitization['forced'] );
-			$error_title  = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $description['code'] );
+			$error_code   = isset( $description['code'] ) ? $description['code'] : 'error';
+			$error_title  = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
 
 			$output = '';
 			foreach ( $description as $desc_name => $desc_info ) {
@@ -1086,7 +1087,6 @@ class AMP_Invalid_URL_Post_Type {
 				wp_kses_post( $output )
 			);
 
-			$error_id       = sanitize_text_field( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // WPCS: CSRF OK.
 			$base_url       = admin_url(
 				add_query_arg(
 					array(
