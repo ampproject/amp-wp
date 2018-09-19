@@ -22,6 +22,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	component.boot = function boot( data ) {
 		Object.assign( component.data, data );
 		component.handleFiltering();
+		component.handleSearching();
 		component.handleStatusChange();
 		component.changeHeading();
 		component.watchForUnsavedChanges();
@@ -132,6 +133,46 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		};
 
 		document.getElementById( 'amp_validation_error_type' ).addEventListener( 'change', onChange );
+	};
+
+	/**
+	 * Handles searching for errors via the <input> and the 'Search Errors' <button>.
+	 */
+	component.handleSearching = function handleSearching() {
+		var onClick = function( event ) {
+			var searchQuery,
+				numberErrorsDisplaying = 0;
+
+			event.preventDefault();
+			if ( ! event.target.matches( 'input' ) ) {
+				return;
+			}
+			searchQuery = document.getElementById( 'invalid-url-search-search-input' ).value;
+
+			/*
+			 * Iterate through the 'Details' column of each row.
+			 * If the search query is not present, hide the row.
+			 */
+			document.querySelectorAll( 'tbody .column-details' ).forEach( function( element ) {
+				var isSearchQueryPresent = false;
+				element.querySelectorAll( '.detailed' ).forEach( function( detailed ) {
+					if ( -1 !== detailed.innerText.indexOf( searchQuery ) ) {
+						isSearchQueryPresent = true;
+					}
+				} );
+
+				if ( isSearchQueryPresent ) {
+					element.parentElement.classList.remove( 'hidden' );
+					numberErrorsDisplaying++;
+				} else {
+					element.parentElement.classList.add( 'hidden' );
+				}
+			} );
+
+			component.updateShowingErrorsRow( numberErrorsDisplaying );
+		};
+
+		document.getElementById( 'search-submit' ).addEventListener( 'click', onClick );
 	};
 
 	/**
