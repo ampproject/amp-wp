@@ -1639,7 +1639,6 @@ class AMP_Validation_Error_Taxonomy {
 			$sortable_columns,
 			array(
 				'error'      => self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
-				'details'    => self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
 				'error_type' => self::VALIDATION_ERROR_TYPE_QUERY_VAR,
 			)
 		);
