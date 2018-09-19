@@ -1111,8 +1111,8 @@ class AMP_Invalid_URL_Post_Type {
 			);
 			?>
 			<script type="text/javascript">
-				jQuery( document ).ready(function() {
-					jQuery( 'h1.wp-heading-inline' ).html( <?php echo wp_json_encode( $heading ); ?> );
+				jQuery( function( $ ) {
+					$( 'h1.wp-heading-inline' ).html( <?php echo wp_json_encode( $heading ); ?> );
 				});
 			</script>
 			<?php
