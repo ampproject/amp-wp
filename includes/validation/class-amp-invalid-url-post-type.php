@@ -359,9 +359,19 @@ class AMP_Invalid_URL_Post_Type {
 	 * Display summary of the validation error counts for a given post.
 	 *
 	 * @param int|WP_Post $post Post of amp_invalid_url type.
-	 * @param bool        $display_enabled_status Whether to display the icon for the enabled status.
+	 * @param array       $args {
+	 *     Arguments.
+	 *
+	 *     @type bool $display_enabled_status Whether to display the status of whether AMP is enabled on the URL.
+	 * }
 	 */
-	public static function display_invalid_url_validation_error_counts_summary( $post, $display_enabled_status = false ) {
+	public static function display_invalid_url_validation_error_counts_summary( $post, $args = array() ) {
+		$args   = array_merge(
+			array(
+				'display_enabled_status' => false,
+			),
+			$args
+		);
 		$counts = array_fill_keys(
 			array( 'new', 'accepted', 'rejected' ),
 			0
@@ -408,7 +418,7 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-		if ( $display_enabled_status ) {
+		if ( $args['display_enabled_status'] ) {
 			$is_forcibly_accepted        = AMP_Validation_Manager::is_sanitization_forcibly_accepted();
 			$are_there_unaccepted_errors = ( $counts['new'] || $counts['rejected'] );
 			$is_amp_enabled              = (
@@ -1448,7 +1458,7 @@ class AMP_Invalid_URL_Post_Type {
 							echo '</p></div>';
 						}
 						?>
-						<?php self::display_invalid_url_validation_error_counts_summary( $post, true ); ?>
+						<?php self::display_invalid_url_validation_error_counts_summary( $post, array( 'display_enabled_status' => true ) ); ?>
 					</div>
 
 					<div class="misc-pub-section">
@@ -1536,16 +1546,7 @@ class AMP_Invalid_URL_Post_Type {
 			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
 		}
 
-		if ( ! current_user_can( $taxonomy_object->cap->manage_terms ) ) {
-			wp_die(
-				'<h1>' . esc_html__( 'You need a higher level of permission.', 'default' ) . '</h1>' .
-				'<p>' . esc_html__( 'Sorry, you are not allowed to manage these validation errors.', 'amp' ) . '</p>',
-				403
-			);
-		}
-
 		$wp_list_table = _get_list_table( 'WP_Terms_List_Table' );
-
 		get_current_screen()->set_screen_reader_content( array(
 			'heading_pagination' => $taxonomy_object->labels->items_list_navigation,
 			'heading_list'       => $taxonomy_object->labels->items_list,

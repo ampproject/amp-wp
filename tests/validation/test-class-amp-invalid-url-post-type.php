@@ -1219,35 +1219,19 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_render_single_url_list_table() {
 		AMP_Validation_Error_Taxonomy::register();
-		$post_correct_post_type   = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$post_wrong_post_type     = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
-		$user_without_permissions = $this->factory()->user->create( array( 'role' => 'subscriber' ) );
-		$user_with_permissions    = $this->factory()->user->create( array( 'role' => 'administrator' ) );
-		$GLOBALS['hook_suffix']   = 'post.php'; // WPCS: Global override OK.
+		$post_correct_post_type = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$post_wrong_post_type   = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
+		$GLOBALS['hook_suffix'] = 'post.php'; // WPCS: Global override OK.
 		$this->go_to( admin_url( 'post.php' ) );
 		set_current_screen( 'post.php' );
 		$GLOBALS['current_screen']->taxonomy = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
-		wp_set_current_user( $user_with_permissions );
 
 		// If the post type is wrong, so the conditional should be false, and this should not echo anything.
 		ob_start();
 		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_wrong_post_type );
 		$this->assertEmpty( ob_get_clean() );
 
-		// $_GET['taxonomy'] is set, but the current user doesn't have permissions, and this should cause an exception.
-		wp_set_current_user( $user_without_permissions );
-		try {
-			AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
-		} catch ( WPDieException $e ) {
-			$exception = $e;
-		}
-		$this->assertContains(
-			'<h1>You need a higher level of permission.</h1><p>Sorry, you are not allowed to manage these validation errors.</p>',
-			$exception->getMessage()
-		);
-
 		// Now that the current user has permissions, this should output the correct markup.
-		wp_set_current_user( $user_with_permissions );
 		ob_start();
 		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
 		$output = ob_get_clean();
