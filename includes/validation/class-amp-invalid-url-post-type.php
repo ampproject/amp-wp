@@ -195,18 +195,22 @@ class AMP_Invalid_URL_Post_Type {
 	 * Enqueue style.
 	 */
 	public static function enqueue_post_list_screen_scripts() {
-		// Styles.
 		$screen = get_current_screen();
+
+		// Enqueue this on both the 'Invalid URLs' apge and the single URL error page.
+		if ( 'edit-amp_invalid_url' === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
+			wp_enqueue_style(
+				'amp-admin-tables',
+				amp_get_asset_url( 'css/admin-tables.css' ),
+				false,
+				AMP__VERSION
+			);
+		}
+
 		if ( 'edit-amp_invalid_url' !== $screen->id ) {
 			return;
 		}
 
-		wp_enqueue_style(
-			'amp-admin-tables',
-			amp_get_asset_url( 'css/admin-tables.css' ),
-			false,
-			AMP__VERSION
-		);
 		wp_enqueue_style(
 			'amp-validation-error-taxonomy',
 			amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
@@ -387,7 +391,7 @@ class AMP_Invalid_URL_Post_Type {
 			}
 			$result[] = sprintf(
 				/* translators: %s is count */
-				'<span class="dashicons dashicons-%1$s new"></span><span class="error-status new">%2$s: %3$s</span>',
+				'<span class="status-text new">%2$s: %3$s</span>',
 				esc_attr( $icon ),
 				esc_html__( 'New', 'amp' ),
 				number_format_i18n( $counts['new'] )
@@ -396,7 +400,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['accepted'] ) {
 			$result[] = sprintf(
 				/* translators: 1. Title, 2. %s is count */
-				'<span class="amp-logo-icon"></span><span class="error-status accepted">%1$s: %2$s</span>',
+				'<span class="status-text accepted">%1$s: %2$s</span>',
 				esc_html__( 'Accepted', 'amp' ),
 				number_format_i18n( $counts['accepted'] )
 			);
@@ -404,7 +408,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
-				'<span class="dashicons dashicons-warning rejected"></span><span class="error-status rejected">%1$s: %2$s</span>',
+				'<span class="status-text rejected">%1$s: %2$s</span>',
 				esc_html__( 'Rejected', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
 			);

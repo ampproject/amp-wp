@@ -1471,24 +1471,38 @@ class AMP_Validation_Error_Taxonomy {
 				if ( 'post.php' === $pagenow ) {
 					$select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
+					switch ( $term->term_group ) {
+						case self::VALIDATION_ERROR_NEW_STATUS:
+							$status_classes = 'status-text new';
+							break;
+						case self::VALIDATION_ERROR_ACCEPTED_STATUS:
+							$status_classes = 'amp-logo-icon';
+							break;
+						case self::VALIDATION_ERROR_REJECTED_STATUS:
+							$status_classes = 'status-text rejected';
+							break;
+					}
+
+					if ( ! isset( $status_classes ) ) {
+						break;
+					}
+
 					ob_start();
 					?>
+					<span class="<?php echo esc_attr( $status_classes ); ?>" style="float:left;"></span>
 					<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 						<?php esc_html_e( 'Status:', 'amp' ); ?>
 					</label>
 					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 						<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
 							<option value="">
-								&#x1F6A9;
 								<?php esc_html_e( 'New', 'amp' ); ?>
 							</option>
 						<?php endif; ?>
 						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACCEPTED_STATUS, $term->term_group ); ?>>
-							&#x2705;
 							<?php esc_html_e( 'Accepted', 'amp' ); ?>
 						</option>
 						<option style="text-decoration: line-through" value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_REJECTED_STATUS, $term->term_group ); ?>>
-								&#x274C;
 							<?php esc_html_e( 'Rejected', 'amp' ); ?>
 						</option>
 					</select>
