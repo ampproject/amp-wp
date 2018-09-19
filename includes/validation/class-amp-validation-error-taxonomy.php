@@ -1468,7 +1468,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Handle inline edit links.
 	 */
 	public static function handle_inline_edit_request() {
-		if ( ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy && ! isset( $_GET['post_type'] ) && \AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
+		if ( ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy && ( ! isset( $_GET['post_type'] ) && \AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) ) || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
 			return;
 		}
 		$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
