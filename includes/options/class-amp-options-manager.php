@@ -48,6 +48,7 @@ class AMP_Options_Manager {
 		);
 
 		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
+		add_action( 'admin_notices', array( __CLASS__, 'render_welcome_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
 	}
@@ -325,6 +326,48 @@ class AMP_Options_Manager {
 	public static function update_analytics_options( $data ) {
 		_deprecated_function( __METHOD__, '0.6', __CLASS__ . '::update_option' );
 		return self::update_option( 'analytics', wp_unslash( $data ) );
+	}
+
+	/**
+	 * Renders the welcome notice on the 'AMP Settings' page.
+	 *
+	 * Uses the user meta values for the dismissed WP pointers.
+	 * So once the user dismisses this notice, it will never appear again.
+	 *
+	 * @todo: Add the full copy for this notice when it is decided.
+	 */
+	public static function render_welcome_notice() {
+		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+			return;
+		}
+
+		$notice_id = 'amp-welcome-notice-1';
+		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
+		if ( in_array( $notice_id, explode( ',', strval( $dismissed ) ), true ) ) {
+			return;
+		}
+
+		?>
+		<div class="notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
+			<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>" alt="AMP" width="40" height="40" style="float: left; margin: 5px;">
+			<h1><?php esc_html_e( 'Welcome to the AMP for WordPress plugin v1.0', 'amp' ); ?></h1>
+			<p><?php esc_html_e( 'Thank you for installing! Bring the speed and features of the open source AMP project to your site, the WordPress way, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
+			<h2><?php esc_html_e( 'What&#8217;s New', 'amp' ); ?></h2>
+			<p><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this v1.0 release makes it easier than ever to bring a rich, performant experience to your WordPress site via AMP HTML.', 'amp' ); ?></p>
+		</div>
+
+		<script>
+		jQuery( function( $ ) {
+			// On dismissing the notice, make a POST request to store this notice with the dismissed WP pointers so it doesn't display again.
+			$( <?php echo wp_json_encode( "#$notice_id" ); ?> ).on( 'click', '.notice-dismiss', function() {
+				$.post( ajaxurl, {
+					pointer: <?php echo wp_json_encode( $notice_id ); ?>,
+					action: 'dismiss-wp-pointer'
+				} );
+			} );
+		} );
+		</script>
+		<?php
 	}
 
 	/**
