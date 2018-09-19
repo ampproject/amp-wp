@@ -1665,7 +1665,7 @@ class AMP_Invalid_URL_Post_Type {
 				<?php
 				printf(
 					/* translators: %s is a link dashicon, %s is the front-end URL, %s is an external dashicon %s  */
-					esc_html( '%s url: %s %s' ),
+					'%s url: %s %s',
 					'<span class="dashicons dashicons-admin-links"></span>',
 					esc_html( $url ),
 					'<span class="dashicons dashicons-external"></span>'
@@ -1811,7 +1811,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		// Mainly uses the same conditionals as print_status_meta_box().
-		$post           = get_post( sanitize_key( $_GET['post'] ) ); // WPCS: CSRF OK.
+		$post           = get_post( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
 		if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
 			$name = get_the_title( $queried_object['id'] );
@@ -1825,7 +1825,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		/* translators: %s is the name of the page with the the validation error(s) */
-		return sprintf( __( 'Errors For %s', 'amp' ), esc_html( $name ) );
+		return esc_html( sprintf( __( 'Errors For %s', 'amp' ), $name ) );
 	}
 
 	/**
