@@ -16,12 +16,19 @@ const OPEN_CLASS = 'is-open';
  * table column via backend code.
  */
 function addToggleButtons() {
-	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( th => {
+	const addButtons = ( th ) => {
 		const button = document.createElement( 'button' );
 		button.setAttribute( 'aria-label', btnAriaLabel );
 		button.setAttribute( 'type', 'button' );
 		button.setAttribute( 'class', 'error-details-toggle' );
 		th.appendChild( button );
+	};
+
+	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( th => {
+		addButtons( th );
+	} );
+	[ ...document.querySelectorAll( 'th.manage-column.column-sources_with_invalid_output' ) ].forEach( th => {
+		addButtons( th );
 	} );
 }
 
@@ -31,7 +38,7 @@ function addToggleButtons() {
 function addToggleListener() {
 	let open = false;
 
-	const details = [ ...document.querySelectorAll( '.column-details details' ) ];
+	const details = [ ...document.querySelectorAll( '.column-details details, .column-sources_with_invalid_output details' ) ];
 	const toggleButtons = [ ...document.querySelectorAll( 'button.error-details-toggle' ) ];
 	const onButtonClick = () => {
 		open = ! open;

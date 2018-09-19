@@ -93,13 +93,6 @@ class AMP_Validation_Error_Taxonomy {
 	const NO_FILTER_VALUE = -1;
 
 	/**
-	 * The ID for the link to the Errors by URL.
-	 *
-	 * @var string
-	 */
-	const ID_LINK_ERRORS_BY_URL = 'link-errors-url';
-
-	/**
 	 * Validation code for an invalid element.
 	 *
 	 * @var string
@@ -158,6 +151,13 @@ class AMP_Validation_Error_Taxonomy {
 	const REMOVED_ELEMENTS = 'removed_elements';
 
 	/**
+	 * The key for found elements and attributes.
+	 *
+	 * @var string
+	 */
+	const FOUND_ELEMENTS_AND_ATTRIBUTES = 'found_elements_and_attributes';
+
+	/**
 	 * The key for removed attributes.
 	 *
 	 * @var string
@@ -177,6 +177,13 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var string
 	 */
 	const REMOVED_SOURCES = 'removed_sources';
+
+	/**
+	 * The key for the error status.
+	 *
+	 * @var string
+	 */
+	const ERROR_STATUS = 'error_status';
 
 	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
@@ -576,7 +583,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
 		add_action( 'load-post.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
-		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_invalid_urls_screen' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
 		} );
@@ -680,7 +687,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-error-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-					array( 'wp-dom-ready' ),
+					array(),
 					AMP__VERSION,
 					true
 				);
@@ -926,9 +933,6 @@ class AMP_Validation_Error_Taxonomy {
 				$( function() {
 					// Move the filter UI after the 'Bulk Actions' <select>, as it looks like there's no way to do this with only an action.
 					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
-
-					// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
-					$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
 				} );
 			} )( jQuery );
 		</script>
@@ -936,25 +940,43 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the 'Error Index' taxonomy page, renders a link to the 'Errors by URL' page.
+	 * On the 'Error Index' screen, renders a link to the 'Invalid URLs' page.
+	 *
+	 * @see AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen()
 	 *
 	 * @param string $taxonomy_name The name of the taxonomy.
 	 */
-	public static function render_link_to_errors_by_url( $taxonomy_name ) {
+	public static function render_link_to_invalid_urls_screen( $taxonomy_name ) {
 		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
 			return;
 		}
 
+		$post_type_object = get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		if ( ! current_user_can( $post_type_object->cap->edit_posts ) ) {
+			return;
+		}
+
+		$id = 'link-errors-url';
+
 		printf(
-			'<a href="%s" class="page-title-action" id="%s" style="margin-left: 1rem;">%s</a>',
-			esc_attr( add_query_arg(
+			'<a href="%s" class="page-title-action" id="%s" hidden style="margin-left: 1rem;">%s</a>',
+			esc_url( add_query_arg(
 				'post_type',
 				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 				admin_url( 'edit.php' )
 			) ),
-			esc_attr( self::ID_LINK_ERRORS_BY_URL ),
-			esc_html__( 'View errors by URL', 'amp' )
+			esc_attr( $id ),
+			esc_html__( 'View Invalid URLs', 'amp' )
 		);
+
+		?>
+		<script>
+			jQuery( function( $ ) {
+				// Move the link to after the heading, as it also looks like there's no action for this.
+				$( <?php echo wp_json_encode( '#' . $id ); ?> ).removeAttr( 'hidden' ).insertAfter( $( '.wp-heading-inline' ) );
+			} );
+		</script>
+		<?php
 	}
 
 	/**

@@ -55,7 +55,7 @@ class AMP_Options_Menu {
 		add_menu_page(
 			__( 'AMP Options', 'amp' ),
 			__( 'AMP', 'amp' ),
-			'manage_options',
+			'edit_posts',
 			AMP_Options_Manager::OPTION_NAME,
 			array( $this, 'render_screen' ),
 			self::ICON_BASE64_SVG
@@ -65,7 +65,7 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::OPTION_NAME,
 			__( 'AMP Settings', 'amp' ),
 			__( 'General', 'amp' ),
-			'manage_options',
+			'edit_posts',
 			AMP_Options_Manager::OPTION_NAME
 		);
 
@@ -157,7 +157,7 @@ class AMP_Options_Menu {
 				<?php endif; ?>
 			</p>
 		<?php else : ?>
-			<fieldset>
+			<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( $builtin_support ) : ?>
 					<div class="notice notice-success notice-alt inline">
 						<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
@@ -239,7 +239,7 @@ class AMP_Options_Menu {
 	 */
 	public function render_validation_handling() {
 		?>
-		<fieldset>
+		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php
 			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
 				'code' => 'non_existent',
@@ -344,7 +344,7 @@ class AMP_Options_Menu {
 		?>
 
 		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="all_templates_supported_fieldset">
+			<fieldset id="all_templates_supported_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
 					<div class="notice notice-info notice-alt inline">
 						<p>
@@ -371,7 +371,7 @@ class AMP_Options_Menu {
 			</div>
 		<?php endif; ?>
 
-		<fieldset id="supported_post_types_fieldset">
+		<fieldset id="supported_post_types_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
@@ -397,7 +397,7 @@ class AMP_Options_Menu {
 		</fieldset>
 
 		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="supported_templates_fieldset">
+			<fieldset id="supported_templates_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<style>
 					#supported_templates_fieldset ul ul {
 						margin-left: 40px;
@@ -464,7 +464,7 @@ class AMP_Options_Menu {
 	 */
 	public function render_caching() {
 		?>
-		<fieldset>
+		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php if ( AMP_Options_Manager::show_response_cache_disabled_notice() ) : ?>
 				<div class="notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
@@ -553,14 +553,21 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>
+		<?php if ( ! current_user_can( 'manage_options' ) ) : ?>
+			<div class="notice notice-info">
+				<p><?php esc_html_e( 'You do not have permission to modify these settings. They are shown here for your reference. Please contact your administrator to make changes.', 'amp' ); ?></p>
+			</div>
+		<?php endif; ?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php settings_errors(); ?>
-			<form action="options.php" method="post">
+			<form id="amp-settings" action="options.php" method="post">
 				<?php
 				settings_fields( AMP_Options_Manager::OPTION_NAME );
 				do_settings_sections( AMP_Options_Manager::OPTION_NAME );
-				submit_button();
+				if ( current_user_can( 'manage_options' ) ) {
+					submit_button();
+				}
 				?>
 			</form>
 		</div>

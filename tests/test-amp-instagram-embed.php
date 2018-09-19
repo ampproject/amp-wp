@@ -9,27 +9,27 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 			),
 			'simple_url'               => array(
 				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
-				'<p><amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
+				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
 			),
 
 			'short_url'                => array(
 				'https://instagr.am/p/7-l0z_p4A4' . PHP_EOL,
-				'<p><amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
+				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
 			),
 
 			'shortcode_simple'         => array(
 				'[instagram url=https://www.instagram.com/p/BIyO4vXjE6b]' . PHP_EOL,
-				'<amp-instagram data-shortcode="BIyO4vXjE6b" layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
+				'<amp-instagram data-shortcode="BIyO4vXjE6b" data-captioned layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
 			),
 
 			'shortcode_url_with_query' => array(
 				'[instagram url=https://www.instagram.com/p/BIyO4vXjE6b/?taken-by=natgeo]' . PHP_EOL,
-				'<amp-instagram data-shortcode="BIyO4vXjE6b" layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
+				'<amp-instagram data-shortcode="BIyO4vXjE6b" data-captioned layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
 			),
 
 			'shortcode_with_short_url' => array(
 				'[instagram url=https://instagr.am/p/7-l0z_p4A4]' . PHP_EOL,
-				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
+				'<amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
 			),
 		);
 	}
@@ -97,23 +97,33 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 	 */
 	public function get_raw_embed_dataset() {
 		return array(
-			'no_embed'                           => array(
+			'no_embed'                               => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>',
 			),
-			'embed_blockquote_without_instagram' => array(
+			'embed_blockquote_without_instagram'     => array(
 				'<blockquote><p>lorem ipsum</p></blockquote>',
 				'<blockquote><p>lorem ipsum</p></blockquote>',
 			),
 
-			'blockquote_embed'                   => array(
+			'blockquote_embed'                       => array(
 				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
 				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>' . "\n\n",
 			),
 
-			'blockquote_embed_notautop'          => array(
+			'blockquote_embed_notautop'              => array(
 				'<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
 				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram> ',
+			),
+
+			'blockquote_embed_with_caption'          => array(
+				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/" data-instgrm-captioned><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>' . "\n\n",
+			),
+
+			'blockquote_embed_with_caption_notautop' => array(
+				'<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/" data-instgrm-captioned><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram> ',
 			),
 		);
 	}

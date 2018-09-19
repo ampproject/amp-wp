@@ -74,17 +74,27 @@ details[open] .details-attributes__summary::after {
 	color: #00a0d2;
 }
 
+.column-sources_with_invalid_output details[open] .details-attributes__summary {
+	margin-bottom: 5px;
+}
+.column-sources_with_invalid_output details > div {
+	padding-left: 25px;
+}
+
 /* Error details toggle button */
-.manage-column.column-details {
+.manage-column.column-details, .manage-column.column-sources_with_invalid_output {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+}
+.manage-column.column-sources_with_invalid_output .error-details-toggle {
+	margin: 0;
 }
 
 .error-details-toggle {
 	display: flex;
 	flex-direction: column;
-	height: 12px;
+	height: 14px;
 	margin-right: 10px;
 	padding: 0;
 	background: none;
