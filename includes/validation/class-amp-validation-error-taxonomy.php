@@ -1783,7 +1783,7 @@ class AMP_Validation_Error_Taxonomy {
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
 		} elseif ( $single_term_id ) {
 			// If this is an inline action, like 'Reject' or 'Accept'.
-			self::handle_validation_error_update( null, $action, $single_term_id );
+			self::handle_validation_error_update( null, $action, array( $single_term_id ) );
 			$redirect_query_args['amp_actioned_count'] = 1;
 		}
 
