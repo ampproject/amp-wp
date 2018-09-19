@@ -1494,9 +1494,9 @@ class AMP_Validation_Error_Taxonomy {
 					<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
 						<?php esc_html_e( 'Status:', 'amp' ); ?>
 					</label>
-					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error.svg' ) ); ?>">
+					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 						<?php if ( self::VALIDATION_ERROR_NEW_STATUS === $term->term_group ) : ?>
-							<option value="">
+							<option value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error.svg' ) ); ?>">
 								<?php esc_html_e( 'New', 'amp' ); ?>
 							</option>
 						<?php endif; ?>
