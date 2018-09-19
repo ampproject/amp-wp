@@ -359,8 +359,9 @@ class AMP_Invalid_URL_Post_Type {
 	 * Display summary of the validation error counts for a given post.
 	 *
 	 * @param int|WP_Post $post Post of amp_invalid_url type.
+	 * @param bool        $display_enabled_status Whether to display the icon for the enabled status.
 	 */
-	public static function display_invalid_url_validation_error_counts_summary( $post ) {
+	public static function display_invalid_url_validation_error_counts_summary( $post, $display_enabled_status = false ) {
 		$counts = array_fill_keys(
 			array( 'new', 'accepted', 'rejected' ),
 			0
@@ -383,15 +384,9 @@ class AMP_Invalid_URL_Post_Type {
 
 		$result = array();
 		if ( $counts['new'] ) {
-			if ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() ) {
-				$icon = 'flag';
-			} else {
-				$icon = 'yes';
-			}
 			$result[] = sprintf(
 				/* translators: %s is count */
-				'<span class="status-text new">%2$s: %3$s</span>',
-				esc_attr( $icon ),
+				'<span class="status-text new">%1$s: %2$s</span>',
 				esc_html__( 'New', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			);
@@ -411,6 +406,27 @@ class AMP_Invalid_URL_Post_Type {
 				esc_html__( 'Rejected', 'amp' ),
 				number_format_i18n( $counts['rejected'] )
 			);
+		}
+
+		if ( $display_enabled_status ) {
+			$is_forcibly_accepted        = AMP_Validation_Manager::is_sanitization_forcibly_accepted();
+			$are_there_unaccepted_errors = ( $counts['new'] || $counts['rejected'] );
+			$is_amp_enabled              = (
+				$is_forcibly_accepted
+				||
+				! $are_there_unaccepted_errors
+			);
+			$class                       = $is_amp_enabled ? 'sanitized' : 'new';
+			?>
+			<span class="status-text <?php echo esc_attr( $class ); ?>">
+				<?php
+				$is_amp_enabled ? esc_html_e( 'AMP: Enabled', 'amp' ) : esc_html_e( 'AMP: Disabled', 'amp' );
+				if ( $are_there_unaccepted_errors && $is_forcibly_accepted ) {
+					esc_html_e( ' (Auto)', 'amp' );
+				}
+				?>
+			</span>
+			<?php
 		}
 		echo implode( '<br>', $result ); // WPCS: xss ok.
 	}
@@ -1432,8 +1448,7 @@ class AMP_Invalid_URL_Post_Type {
 							echo '</p></div>';
 						}
 						?>
-						<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>">
-						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
+						<?php self::display_invalid_url_validation_error_counts_summary( $post, true ); ?>
 					</div>
 
 					<div class="misc-pub-section">
