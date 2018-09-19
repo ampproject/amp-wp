@@ -69,13 +69,6 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_TYPE_QUERY_VAR = 'amp_validation_error_type';
 
 	/**
-	 * Query var used for ordering list by node name.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_DETAILS_NODE_NAME_QUERY_VAR = 'amp_validation_node_name';
-
-	/**
 	 * Query var used for ordering list by error code.
 	 *
 	 * @var string
@@ -653,7 +646,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
 			$sortable_columns['created_date_gmt'] = 'term_id';
 			$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
-			$sortable_columns['details']          = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR;
 			$sortable_columns['error']            = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
 			return $sortable_columns;
 		} );
@@ -820,7 +812,6 @@ class AMP_Validation_Error_Taxonomy {
 
 		$sortable_column_vars = array(
 			self::VALIDATION_ERROR_TYPE_QUERY_VAR,
-			self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
 			self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
 		);
 
@@ -843,13 +834,6 @@ class AMP_Validation_Error_Taxonomy {
 						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description, LOCATE(%s, tt.description)))',
 						'"type":"',
 						'}' // Start substr search after the first closing bracket to skip the "type" nested in the element_attributes object.
-					);
-					break;
-
-				case AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR:
-					$clauses['orderby'] = $wpdb->prepare(
-						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description))',
-						'"node_name":"'
 					);
 					break;
 
