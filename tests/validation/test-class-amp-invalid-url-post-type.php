@@ -621,6 +621,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Options_Manager::update_option( 'force_sanitization', false );
 		add_theme_support( 'amp', array( 'paired' => true ) );
 		AMP_Validation_Manager::init();
@@ -1011,6 +1012,27 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test render_link_to_error_index_screen.
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen()
+	 */
+	public function test_render_link_to_error_index_screen() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		global $current_screen;
+		set_current_screen( 'index.php' );
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen();
+		$this->assertEmpty( ob_get_clean() );
+
+		set_current_screen( 'edit.php' );
+		$current_screen->post_type = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen();
+		$output = ob_get_clean();
+		$this->assertContains( 'View Error Index', $output );
+	}
+
+	/**
 	 * Test for add_meta_boxes()
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::add_meta_boxes()
@@ -1250,19 +1272,20 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::filter_post_row_actions()
 	 */
 	public function test_filter_post_row_actions() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		add_theme_support( 'amp' );
 		AMP_Validation_Manager::init();
 
 		$validated_url   = home_url( '/' );
-		$initial_actions = array(
-			'trash' => '<a href="" class="submitdelete" aria-label="Forget &#8220;' . $validated_url . '&#8221;">Forget</a>',
-		);
-
 		$invalid_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
 			array(
 				array( 'code' => 'foo' ),
 			),
 			$validated_url
+		);
+
+		$initial_actions = array(
+			'trash' => sprintf( '<a href="%s" class="submitdelete" aria-label="Trash &#8220;%s&#8221;">Trash</a>', get_delete_post_link( $invalid_post_id ), $validated_url ),
 		);
 
 		$this->assertEquals( $initial_actions, AMP_Invalid_URL_Post_Type::filter_post_row_actions( $initial_actions, $this->factory()->post->create_and_get() ) );
@@ -1271,8 +1294,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'inline hide-if-no-js', $actions );
 		$this->assertArrayHasKey( 'view', $actions );
 		$this->assertArrayHasKey( AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, $actions );
-
-		$this->assertEquals( $initial_actions['trash'], $actions['trash'] );
+		$this->assertArrayHasKey( 'trash', $actions );
+		$this->assertNotContains( 'Trash', $actions['trash'] );
+		$this->assertContains( 'Forget', $actions['trash'] );
 
 		$this->assertEquals( array(), AMP_Invalid_URL_Post_Type::filter_post_row_actions( array(), null ) );
 

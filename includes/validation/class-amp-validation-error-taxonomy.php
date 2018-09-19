@@ -69,13 +69,6 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_TYPE_QUERY_VAR = 'amp_validation_error_type';
 
 	/**
-	 * Query var used for ordering list by node name.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_DETAILS_NODE_NAME_QUERY_VAR = 'amp_validation_node_name';
-
-	/**
 	 * Query var used for ordering list by error code.
 	 *
 	 * @var string
@@ -91,13 +84,6 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var int
 	 */
 	const NO_FILTER_VALUE = -1;
-
-	/**
-	 * The ID for the link to the Errors by URL.
-	 *
-	 * @var string
-	 */
-	const ID_LINK_ERRORS_BY_URL = 'link-errors-url';
 
 	/**
 	 * Validation code for an invalid element.
@@ -587,7 +573,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
-		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_errors_by_url' ) );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_invalid_urls_screen' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
 		} );
@@ -664,7 +650,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
 			$sortable_columns['created_date_gmt'] = 'term_id';
 			$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
-			$sortable_columns['details']          = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR;
 			$sortable_columns['error']            = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
 			return $sortable_columns;
 		} );
@@ -831,7 +816,6 @@ class AMP_Validation_Error_Taxonomy {
 
 		$sortable_column_vars = array(
 			self::VALIDATION_ERROR_TYPE_QUERY_VAR,
-			self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
 			self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
 		);
 
@@ -854,13 +838,6 @@ class AMP_Validation_Error_Taxonomy {
 						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description, LOCATE(%s, tt.description)))',
 						'"type":"',
 						'}' // Start substr search after the first closing bracket to skip the "type" nested in the element_attributes object.
-					);
-					break;
-
-				case AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR:
-					$clauses['orderby'] = $wpdb->prepare(
-						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description))',
-						'"node_name":"'
 					);
 					break;
 
@@ -912,31 +889,40 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the 'Error Index' taxonomy page, renders a link to the 'Errors by URL' page.
+	 * On the 'Error Index' screen, renders a link to the 'Invalid URLs' page.
+	 *
+	 * @see AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen()
 	 *
 	 * @param string $taxonomy_name The name of the taxonomy.
 	 */
-	public static function render_link_to_errors_by_url( $taxonomy_name ) {
+	public static function render_link_to_invalid_urls_screen( $taxonomy_name ) {
 		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
 			return;
 		}
 
+		$post_type_object = get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		if ( ! current_user_can( $post_type_object->cap->edit_posts ) ) {
+			return;
+		}
+
+		$id = 'link-errors-url';
+
 		printf(
-			'<a href="%s" class="page-title-action" id="%s" style="margin-left: 1rem;">%s</a>',
-			esc_attr( add_query_arg(
+			'<a href="%s" class="page-title-action" id="%s" hidden style="margin-left: 1rem;">%s</a>',
+			esc_url( add_query_arg(
 				'post_type',
 				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
 				admin_url( 'edit.php' )
 			) ),
-			esc_attr( self::ID_LINK_ERRORS_BY_URL ),
+			esc_attr( $id ),
 			esc_html__( 'View Invalid URLs', 'amp' )
 		);
 
 		?>
 		<script>
 			jQuery( function( $ ) {
-				// Move the link to 'View errors by URL' to after the heading, as it also looks like there's no action for this.
-				$( '#<?php echo self::ID_LINK_ERRORS_BY_URL; // WPCS: XSS OK. ?>' ).insertAfter( $( '.wp-heading-inline' ) );
+				// Move the link to after the heading, as it also looks like there's no action for this.
+				$( <?php echo wp_json_encode( '#' . $id ); ?> ).removeAttr( 'hidden' ).insertAfter( $( '.wp-heading-inline' ) );
 			} );
 		</script>
 		<?php

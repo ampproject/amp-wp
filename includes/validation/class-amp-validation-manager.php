@@ -312,6 +312,11 @@ class AMP_Validation_Manager {
 			}
 		}
 
+		$user_can_revalidate = $amp_invalid_url_post ? current_user_can( 'edit_post', $amp_invalid_url_post->ID ) : current_user_can( 'manage_options' );
+		if ( ! $user_can_revalidate ) {
+			return;
+		}
+
 		// @todo The amp_invalid_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
 		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_invalid_url_post ? $amp_invalid_url_post : $amp_url );
 

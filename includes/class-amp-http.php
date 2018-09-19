@@ -201,7 +201,7 @@ class AMP_HTTP {
 		 */
 		foreach ( $domains as $domain ) {
 			if ( function_exists( 'idn_to_utf8' ) ) {
-				if ( version_compare( PHP_VERSION, '5.4', '>=' ) ) {
+				if ( version_compare( PHP_VERSION, '5.4', '>=' ) && defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
 					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.idn_to_utf8_variantFound, PHPCompatibility.PHP.NewConstants.intl_idna_variant_uts46Found
 				} else {
 					$domain = idn_to_utf8( $domain );
