@@ -694,8 +694,8 @@ class AMP_Validation_Error_Taxonomy {
 
 			if ( 'post.php' === $pagenow ) {
 				wp_enqueue_style(
-					'amp-validation-single-error-url-details',
-					amp_get_asset_url( 'css/amp-validation-single-error-url-details.css' ),
+					'amp-validation-single-error-url',
+					amp_get_asset_url( 'css/amp-validation-single-error-url.css' ),
 					array( 'common' ),
 					AMP__VERSION
 				);
