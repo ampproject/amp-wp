@@ -85,7 +85,6 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			thead.appendChild( tr );
 		}
 
-
 		if ( numberErrorsDisplaying === totalErrors ) {
 			// If all of the errors are displaying, hide this message, as it won't be helpful to see something like 'Showing 9 of 9 validation errors'.
 			document.getElementById( idNumberErrors ).classList.add( 'hidden' );

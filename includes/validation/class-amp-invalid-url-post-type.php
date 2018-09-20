@@ -172,24 +172,25 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
 
 		// Hide irrelevant "published" label in the invalid URL post list.
-		add_filter( 'post_date_column_status', function( $status, $post ) {
+		add_filter( 'post_date_column_status', function ( $status, $post ) {
 			if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post ) ) {
 				$status = '';
 			}
+
 			return $status;
 		}, 10, 2 );
 
 		// Prevent query vars from persisting after redirect.
-		add_filter( 'removable_query_args', function( $query_vars ) {
+		add_filter( 'removable_query_args', function ( $query_vars ) {
 			$query_vars[] = 'amp_actioned';
 			$query_vars[] = 'amp_taxonomy_terms_updated';
 			$query_vars[] = AMP_Invalid_URL_Post_Type::REMAINING_ERRORS;
 			$query_vars[] = 'amp_urls_tested';
 			$query_vars[] = 'amp_validate_error';
+
 			return $query_vars;
 		} );
 	}
-
 	/**
 	 * Enqueue style.
 	 */
@@ -766,6 +767,13 @@ class AMP_Invalid_URL_Post_Type {
 			$columns['date'] = esc_html__( 'Last Checked', 'amp' );
 		}
 
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ) { // WPCS: CSRF OK.
+			unset( $columns['error_status'], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] );
+			$columns[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] = esc_html__( 'Sources', 'amp' );
+			$columns['date']  = esc_html__( 'Last Checked', 'amp' );
+			$columns['title'] = esc_html__( 'URL', 'amp' );
+		}
+
 		return $columns;
 	}
 
@@ -1101,6 +1109,126 @@ class AMP_Invalid_URL_Post_Type {
 				esc_attr( $class ),
 				wp_kses_post( $message )
 			);
+		}
+
+		/**
+		 * Adds notices to the single error page.
+		 * 1. Notice with detailed error information in an expanding box.
+		 * 2. Notice with accept and reject buttons.
+		 */
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // WPCS: CSRF OK.
+			$error_id = sanitize_key( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // WPCS: CSRF OK.
+
+			// @todo When PR #1429 is merged switch this to use AMP_Validation_Error_Taxonomy::get_term()
+			$error = get_term_by( 'slug', $error_id, \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			if ( ! $error ) {
+				return;
+			}
+
+			// @todo Update this to use the method which will be developed in PR #1429 AMP_Validation_Error_Taxonomy::get_term_error() .
+			$description  = json_decode( $error->description, true );
+			$sanitization = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
+			$status_text  = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization['term_status'], $sanitization['forced'] );
+			$error_code   = isset( $description['code'] ) ? $description['code'] : 'error';
+			$error_title  = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
+
+			$output = '';
+			foreach ( $description as $desc_name => $desc_info ) {
+				if ( ! is_array( $desc_info ) ) {
+					$output .= sprintf( '<li><span class="details-attributes__title">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $desc_name, $desc_info );
+				} else {
+					$output .= sprintf( '<ul class="secondary-details-array"><span class="details-attributes__title">%s:</span><br/>', $desc_name );
+					foreach ( $desc_info as $sec_desc_info_name => $sec_desc_info ) {
+						$output .= sprintf( '<li><span class="details-attributes__attr">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $sec_desc_info_name, $sec_desc_info );
+					}
+					$output .= '</ul>';
+				}
+			}
+
+			printf(
+				'<div class="notice"><details class="single-error-detail"><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
+				esc_html( $error_title ),
+				wp_kses_post( $output )
+			);
+
+			$accept_all_url = wp_nonce_url(
+				add_query_arg(
+					array(
+						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
+						'term_id' => $error->term_id,
+					)
+				),
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
+			);
+			$reject_all_url = wp_nonce_url(
+				add_query_arg(
+					array(
+						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,
+						'term_id' => $error->term_id,
+					)
+				),
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION
+			);
+
+			if ( ! $sanitization['forced'] ) {
+				echo '<div class="notice accept-reject-error">';
+
+				// @todo Update once https://github.com/Automattic/amp-wp/pull/1429 is merged.
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+					if ( amp_is_canonical() ) {
+						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
+					} else {
+						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
+					}
+					printf(
+						'<p>%s</p><a class="button button-primary reject" href="%s">%s</a>',
+						esc_html__( 'Reject this validation error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						esc_url( $reject_all_url ),
+						esc_html__( 'Reject', 'amp' )
+					);
+				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
+					if ( amp_is_canonical() ) {
+						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
+					} else {
+						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
+					}
+					printf(
+						'<p>%s</p><a class="button button-primary accept" href="%s">%s</a>',
+						esc_html__( 'Accept this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						esc_url( $accept_all_url ),
+						esc_html__( 'Accept', 'amp' )
+					);
+				} else {
+					if ( amp_is_canonical() ) {
+						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP. If all errors occurring on a URL are accepted, then it will be served as AMP.', 'amp' );
+					} else {
+						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version. If all errors occurring on a URL are accepted, then it will not redirect.', 'amp' );
+					}
+					printf(
+						'<p>%s</p><a class="button reject" href="%s">%s</a><a class="button button-primary accept" href="%s">%s</a>',
+						esc_html__( 'Accept or Reject this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						esc_url( $reject_all_url ),
+						esc_html__( 'Reject', 'amp' ),
+						esc_url( $accept_all_url ),
+						esc_html__( 'Accept', 'amp' )
+					);
+				}
+				echo '</div>';
+			}
+
+			$heading = sprintf(
+				'%s: <code>%s</code>%s',
+				esc_html( $error_title ),
+				esc_html( $description['node_name'] ),
+				wp_kses_post( $status_text )
+			);
+			?>
+			<script type="text/javascript">
+				jQuery( function( $ ) {
+					$( 'h1.wp-heading-inline' ).html( <?php echo wp_json_encode( $heading ); ?> );
+				});
+			</script>
+			<?php
 		}
 	}
 
