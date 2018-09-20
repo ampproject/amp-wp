@@ -99,11 +99,12 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying, totalErrors ) {
 		const showAllButton = document.getElementById( component.showAllId );
-		let thead, tr, th;
+		let thead, th,
+			tr = document.getElementById( component.idNumberErrors );
 		const theadQuery = document.getElementsByTagName( 'thead' );
 
 		// Only create the <tr> if it does not exist yet.
-		if ( theadQuery[ 0 ] && ! document.getElementById( component.idNumberErrors ) ) {
+		if ( theadQuery[ 0 ] && ! tr ) {
 			thead = theadQuery[ 0 ];
 			tr = document.createElement( 'tr' );
 			th = document.createElement( 'th' );
@@ -113,18 +114,18 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			thead.appendChild( tr );
 		}
 
-		// If all of the errors are displaying, hide the 'Show all' button, but the count notice will still display.
+		// If all of the errors are displaying, hide the 'Show all' button and the count notice.
 		if ( showAllButton && numberErrorsDisplaying === totalErrors ) {
 			showAllButton.classList.add( 'hidden' );
-		} else if ( showAllButton ) {
-			showAllButton.classList.remove( 'hidden' );
-		}
-
-		if ( null !== numberErrorsDisplaying ) {
+			tr.classList.add( 'hidden' );
+		} else if ( null !== numberErrorsDisplaying ) {
 			// Update the number of errors displaying and create a 'Show all' button if it does not exist yet.
 			document.getElementById( component.idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
 			document.getElementById( component.idNumberErrors ).classList.remove( 'hidden' );
 			component.conditionallyCreateShowAllButton();
+			if ( showAllButton ) {
+				showAllButton.classList.remove( 'hidden' );
+			}
 		}
 	};
 
