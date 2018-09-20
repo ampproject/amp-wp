@@ -228,7 +228,7 @@ class AMP_Invalid_URL_Post_Type {
 			'amp-validation-error-detail-toggle',
 			'ampValidationI18n',
 			array(
-				'btnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
+				'btnAriaLabel' => __( 'Toggle all', 'amp' ),
 			)
 		);
 	}

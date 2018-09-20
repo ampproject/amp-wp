@@ -3,6 +3,7 @@
  */
 import domReady from '@wordpress/dom-ready';
 
+
 /**
  * Localized data
  */
@@ -17,19 +18,22 @@ const OPEN_CLASS = 'is-open';
  */
 function addToggleButtons() {
 	const addButtons = ( th ) => {
+		const span = document.createElement( 'span' );
+		span.classList.add( 'toggle-button-flex-container' );
+		while ( th.firstChild ) {
+			span.appendChild( th.removeChild( th.firstChild ) );
+		}
+
 		const button = document.createElement( 'button' );
 		button.setAttribute( 'aria-label', btnAriaLabel );
 		button.setAttribute( 'type', 'button' );
 		button.setAttribute( 'class', 'error-details-toggle' );
-		th.appendChild( button );
+		span.appendChild( button );
+		th.appendChild( span );
 	};
 
-	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( th => {
-		addButtons( th );
-	} );
-	[ ...document.querySelectorAll( 'th.manage-column.column-sources_with_invalid_output' ) ].forEach( th => {
-		addButtons( th );
-	} );
+	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( addButtons );
+	[ ...document.querySelectorAll( 'th.manage-column.column-sources_with_invalid_output' ) ].forEach( addButtons );
 }
 
 /**

@@ -688,7 +688,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_localize_script(
 					'amp-validation-error-detail-toggle',
 					'ampValidationI18n',
-					array( 'btnAriaLabel' => esc_attr__( 'Toggle all details', 'amp' ) )
+					array( 'btnAriaLabel' => __( 'Toggle all', 'amp' ) )
 				);
 			}
 
