@@ -8,10 +8,25 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			l10n: {
 				unsaved_changes: '',
 				showing_number_errors: '',
-				page_heading: ''
+				page_heading: '',
+				show_all: ''
 			}
 		}
 	};
+
+	/**
+	 * The id for the 'Showing x of y errors' notice.
+	 *
+	 * @var {string}
+	 */
+	component.idNumberErrors = 'number-errors';
+
+	/**
+	 * The id for the 'Show all' button.
+	 *
+	 * @var {string}
+	 */
+	component.showAllId = 'show-all-errors';
 
 	/**
 	 * Boot.
@@ -21,6 +36,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.boot = function boot( data ) {
 		Object.assign( component.data, data );
+		component.handleShowAll();
 		component.handleFiltering();
 		component.handleSearching();
 		component.handleStatusChange();
@@ -71,28 +87,73 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying, totalErrors ) {
 		var thead, tr, th,
-			theadQuery = document.getElementsByTagName( 'thead' ),
-			idNumberErrors = 'number-errors';
+			theadQuery = document.getElementsByTagName( 'thead' );
 
 		// Only create the <tr> if it does not exist yet.
-		if ( theadQuery[ 0 ] && ! document.getElementById( idNumberErrors ) ) {
+		if ( theadQuery[ 0 ] && ! document.getElementById( component.idNumberErrors ) ) {
 			thead = theadQuery[ 0 ];
 			tr = document.createElement( 'tr' );
 			th = document.createElement( 'th' );
-			th.setAttribute( 'id', idNumberErrors );
+			th.setAttribute( 'id', component.idNumberErrors );
 			th.setAttribute( 'colspan', '6' );
 			tr.appendChild( th );
 			thead.appendChild( tr );
 		}
 
 		if ( numberErrorsDisplaying === totalErrors ) {
-			// If all of the errors are displaying, hide this message, as it won't be helpful to see something like 'Showing 9 of 9 validation errors'.
-			document.getElementById( idNumberErrors ).classList.add( 'hidden' );
+			// If all of the errors are displaying, hide this message and the 'Show all' button.
+			document.getElementById( component.idNumberErrors ).classList.add( 'hidden' );
+			document.getElementById( component.showAllId ).classList.add( 'hidden' );
 		} else if ( null !== numberErrorsDisplaying ) {
-			// Update the number of errors displaying.
-			document.getElementById( idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
-			document.getElementById( idNumberErrors ).classList.remove( 'hidden' );
+			// Update the number of errors displaying and create a 'Show all' button if it does not exist yet.
+			document.getElementById( component.idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
+			document.getElementById( component.idNumberErrors ).classList.remove( 'hidden' );
+			component.conditionallyCreateShowAllButton();
+			document.getElementById( component.showAllId ).classList.remove( 'hidden' );
 		}
+	};
+
+	/**
+	 * Conditionally creates and appends a 'Show all' button.
+	 */
+	component.conditionallyCreateShowAllButton = function conditionallyCreateShowAllButton() {
+		var buttonContainer = document.getElementById( 'url-post-filter' ),
+			showAllButton = document.getElementById( component.showAllId );
+
+		// There is no 'Show all' <button> yet, but there is a container element for it, create the <button>
+		if ( ! showAllButton && buttonContainer ) {
+			showAllButton = document.createElement( 'button' );
+			showAllButton.id = component.showAllId;
+			showAllButton.classList.add( 'button' );
+			showAllButton.innerText = component.data.l10n.show_all;
+			buttonContainer.appendChild( showAllButton );
+		}
+	};
+
+	/**
+	 * On clicking the 'Show all' <button>, this displays all of the validation errors.
+	 * Then, it hides this 'Show all' <button> and the notice for the number of errors showing.
+	 */
+	component.handleShowAll = function handleShowAll() {
+		var onClick = function( event ) {
+			if ( ! event.target.matches( '#' + component.showAllId ) ) {
+				return;
+			}
+			event.preventDefault();
+
+			// Iterate through all of the errors, and remove the 'hidden' class.
+			document.querySelectorAll( '[data-error-type]' ).forEach( function( element ) {
+				element.parentElement.parentElement.classList.remove( 'hidden' );
+			} );
+
+			// Hide this 'Show all' button.
+			event.target.classList.add( 'hidden' );
+
+			// Hide the 'Showing x of y errors' notice.
+			document.getElementById( component.idNumberErrors ).classList.add( 'hidden' );
+		};
+
+		document.getElementById( 'url-post-filter' ).addEventListener( 'click', onClick );
 	};
 
 	/**
@@ -114,6 +175,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			event.preventDefault();
 
 			errorTypeQuery = document.querySelectorAll( '[data-error-type]' );
+
 			/*
 			 * Iterate through all of the <tr> elements in the list table.
 			 * If the error type does not match the value (selected error type), hide them.

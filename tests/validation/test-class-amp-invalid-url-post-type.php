@@ -1100,6 +1100,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			sprintf( 'Errors For %s', $post->post_title ),
 			$inline_script
 		);
+		$this->assertContains( 'Show all', $inline_script );
 	}
 
 	/**

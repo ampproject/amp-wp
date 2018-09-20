@@ -1477,6 +1477,7 @@ class AMP_Invalid_URL_Post_Type {
 			'l10n' => array(
 				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
 				'page_heading'    => self::get_single_url_page_heading(),
+				'show_all'        => __( 'Show all', 'amp' ),
 			),
 		);
 
