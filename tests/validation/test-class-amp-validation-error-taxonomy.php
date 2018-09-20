@@ -968,7 +968,8 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	public function test_render_single_url_error_details() {
 		$validation_error         = self::get_mock_error();
 		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
-		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error );
+		$term                     = $this->factory()->term->create_and_get( array( 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
 		$this->assertContains( '<details open>', $html );
 		$this->assertContains( '<details>', $html );
 	}

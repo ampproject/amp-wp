@@ -1539,7 +1539,7 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'details':
 				if ( 'post.php' === $pagenow ) {
-					return self::render_single_url_error_details( $validation_error );
+					return self::render_single_url_error_details( $validation_error, $term );
 				}
 
 				if ( isset( $validation_error['parent_name'] ) ) {
@@ -1631,12 +1631,23 @@ class AMP_Validation_Error_Taxonomy {
 	 * Renders error details when viewing a single URL page.
 	 *
 	 * @param array $validation_error Validation error data.
+	 * @param WP_Term $term The validation error term.
 	 * @return string HTML for the details section.
 	 */
-	public static function render_single_url_error_details( $validation_error ) {
+	public static function render_single_url_error_details( $validation_error, $term ) {
+		// Get the sources, if they exist.
+		if ( isset( $_GET['post'] ) ) {
+			$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
+			foreach ( $validation_errors as $error ) {
+				if ( isset( $error['data']['sources'], $error['term']->term_id ) && $error['term']->term_id === $term->term_id ) {
+					$validation_error['sources'] = $error['data']['sources'];
+					break;
+				}
+			}
+		}
+
 		ob_start();
 		?>
-
 		<ul class="detailed">
 			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<li>
