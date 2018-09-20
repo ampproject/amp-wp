@@ -646,7 +646,6 @@ class AMP_Validation_Error_Taxonomy {
 					__( 'Details', 'amp' ),
 					__( 'Details tooltip title', 'amp' ),
 					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
-
 				),
 				'error_type'       => __( 'Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
