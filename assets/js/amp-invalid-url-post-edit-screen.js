@@ -154,7 +154,6 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 
 			// Change the value of the error type <select> element to 'All Error Types'.
 			document.getElementById( 'amp_validation_error_type' ).value = '-1';
-
 		};
 
 		document.getElementById( 'url-post-filter' ).addEventListener( 'click', onClick );
