@@ -105,7 +105,7 @@ class AMP_Invalid_URL_Post_Type {
 					'not_found'          => __( 'No invalid URLs found', 'amp' ),
 					'not_found_in_trash' => __( 'No forgotten invalid URLs', 'amp' ),
 					'search_items'       => __( 'Search invalid URLs', 'amp' ),
-					'edit_item'          => __( 'Invalid URL', 'amp' ),
+					'edit_item'          => '', // Overwritten in JS, so this prevents the page header from appearing and changing.
 				),
 				'supports'     => false,
 				'public'       => false,
