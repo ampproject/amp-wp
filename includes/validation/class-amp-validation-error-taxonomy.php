@@ -440,7 +440,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array {
 	 *     Validation error sanitization.
 	 *
-	 *     @type int          $status      Validation status (0=VALIDATION_ERROR_NEW_STATUS, 1=VALIDATION_ERROR_ACCEPTED_STATUS, 2=VALIDATION_ERROR_REJECTED_STATUS).
+	 *     @type int          $status      Validation status.
 	 *     @type int          $term_status The initial validation status prior to being overridden by previewing, option, or filter.
 	 *     @type false|string $forced      If and how the status is overridden from its initial term status.
 	 * }

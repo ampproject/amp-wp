@@ -1060,8 +1060,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // WPCS: CSRF OK.
 			$error_id = sanitize_key( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // WPCS: CSRF OK.
 
-			// @todo When PR #1429 is merged switch this to use AMP_Validation_Error_Taxonomy::get_term()
-			$error = get_term_by( 'slug', $error_id, \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$error = AMP_Validation_Error_Taxonomy::get_term( $error_id );
 			if ( ! $error ) {
 				return;
 			}
@@ -1114,8 +1113,7 @@ class AMP_Invalid_URL_Post_Type {
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				// @todo Update once https://github.com/Automattic/amp-wp/pull/1429 is merged.
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
@@ -1127,7 +1125,7 @@ class AMP_Invalid_URL_Post_Type {
 						esc_url( $reject_all_url ),
 						esc_html__( 'Reject', 'amp' )
 					);
-				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
+				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					} else {
