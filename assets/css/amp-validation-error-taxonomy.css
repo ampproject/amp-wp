@@ -163,16 +163,31 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 .single-error-detail .details-attributes__value {
 	margin-left: 10px;
 }
-.notice.accept-reject-error p {
+
+.notice.accept-reject-error {
+	display: flex;
+}
+
+.notice.accept-reject-error > p {
 	display: inline-block;
 	font-size: 14px;
+	flex-grow: 10;
+	margin-right: 20px;
 }
-.notice.accept-reject-error .button {
+.notice.accept-reject-error > .button {
 	display: inline-block;
-	float: right;
 	margin: 5px 5px 0 5px;
 	padding: 0 26px 2px;
+	flex-grow: 1;
+	text-align: center;
 }
+.notice.accept-reject-error > .button.accept {
+	/* @todo Add green colors */
+}
+.notice.accept-reject-error > .button.reject {
+	/* @todo Add red colors */
+}
+
 .wp-heading-inline .status-text {
 	display: inline-flex;
 	margin-left: 10px;
