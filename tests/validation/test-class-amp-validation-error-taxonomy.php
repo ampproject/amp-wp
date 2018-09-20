@@ -30,6 +30,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * Resets the state after each test method.
 	 */
 	public function tearDown() {
+		$_REQUEST = array();
 		remove_theme_support( 'amp' );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		remove_all_filters( 'amp_validation_error_sanitized' );
@@ -119,6 +120,54 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$term = AMP_Validation_Error_Taxonomy::get_term( $foo_error );
 		$this->assertEquals( $term, AMP_Validation_Error_Taxonomy::get_term( $foo_term_data['slug'] ) );
 		$this->assertEquals( $foo_error, json_decode( $term->description, true ) );
+	}
+
+	/**
+	 * Test delete_empty_terms.
+	 *
+	 * @covers AMP_Validation_Error_Taxonomy::delete_empty_terms()
+	 */
+	public function test_delete_empty_terms() {
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+
+		$post_id_1 = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+				array( 'code' => 'bar' ),
+				array( 'code' => 'baz' ),
+			),
+			home_url( '/1' )
+		);
+		$post_id_2 = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/2' )
+		);
+		$post_id_3 = AMP_Invalid_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'quux' ),
+			),
+			home_url( '/3' )
+		);
+
+		$this->assertEquals( 4, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		wp_delete_post( $post_id_3, true );
+
+		$this->assertEquals( 4, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+		$this->assertEquals( 3, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		wp_delete_post( $post_id_1, true );
+		$this->assertEquals( 3, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 2, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+
+		wp_delete_post( $post_id_2, true );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
 	}
 
 	/**
@@ -824,6 +873,25 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test render_clear_empty_button.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_clear_empty_button()
+	 */
+	public function test_render_clear_empty_button() {
+
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_clear_empty_button();
+		$this->assertEmpty( ob_get_clean() );
+
+		ob_start();
+		$post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( array( $this->get_mock_error() ), home_url( '/' ) );
+		wp_delete_post( $post_id, true );
+		AMP_Validation_Error_Taxonomy::render_clear_empty_button();
+		$output = ob_get_clean();
+		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, $output );
+	}
+
+	/**
 	 * Test filter_user_has_cap_for_hiding_term_list_table_checkbox.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox()
@@ -1035,6 +1103,52 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			AMP_Validation_Error_Taxonomy::handle_validation_error_update( $initial_redirect_to, $action, array() )
 		);
 		$this->assertNotFalse( has_filter( 'pre_term_description', 'wp_filter_kses' ) );
+	}
+
+	/**
+	 * Test handle_clear_empty_terms_request.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request()
+	 */
+	public function test_handle_clear_empty_terms_request() {
+		add_filter( 'wp_redirect', function() {
+			throw new Exception( 'redirected' );
+		} );
+		$post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( array( $this->get_mock_error() ), home_url( '/' ) );
+		wp_delete_post( $post_id, true );
+		$_REQUEST = &$_POST; // WPCS: csrf ok.
+
+		// No-op.
+		AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		// Bad nonce.
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION ]            = 1;
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = 'bad';
+		try {
+			$exception = null;
+			AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( 'WPDieException', $exception );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		// Good nonce, but no permissions.
+		$_REQUEST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION );
+		try {
+			$exception = null;
+			AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( 'WPDieException', $exception );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$_REQUEST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION );
+		AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
 	}
 
 	/**

@@ -76,6 +76,13 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_REJECT_ACTION = 'amp_validation_error_reject';
 
 	/**
+	 * Action name for clearing empty validation error terms.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_CLEAR_EMPTY_ACTION = 'amp_validation_error_terms_clear_empty';
+
+	/**
 	 * Query var used when filtering by validation error status or passing updates.
 	 *
 	 * @var string
@@ -102,6 +109,13 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var string
 	 */
 	const VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR = 'amp_validation_code';
+
+	/**
+	 * Query var used to indicate how many terms were deleted.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERRORS_CLEARED_QUERY_VAR = 'amp_validation_errors_cleared';
 
 	/**
 	 * The <option> value to not filter at all, like for 'All Statuses'.
@@ -301,6 +315,42 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		return get_term_by( 'slug', $slug, self::TAXONOMY_SLUG );
+	}
+
+	/**
+	 * Delete all amp_validation_error terms that have zero counts (no amp_invalid_url posts associated with them).
+	 *
+	 * @since 1.0
+	 *
+	 * @return int Count of terms that were deleted.
+	 */
+	public static function delete_empty_terms() {
+		global $wpdb;
+		$empty_term_ids = $wpdb->get_col(
+			$wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s AND count = 0", self::TAXONOMY_SLUG )
+		);
+
+		if ( empty( $empty_term_ids ) ) {
+			return 0;
+		}
+
+		// Make sure the term counts are still accurate.
+		wp_update_term_count_now( $empty_term_ids, self::TAXONOMY_SLUG );
+
+		$deleted_count = 0;
+		foreach ( $empty_term_ids as $term_id ) {
+			$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
+
+			// Skip if the term count was not actually 0.
+			if ( ! $term || 0 !== $term->count ) {
+				continue;
+			}
+
+			if ( true === wp_delete_term( $term->term_id, self::TAXONOMY_SLUG ) ) {
+				$deleted_count++;
+			}
+		}
+		return $deleted_count;
 	}
 
 	/**
@@ -545,7 +595,7 @@ class AMP_Validation_Error_Taxonomy {
 		if ( isset( $args['group'] ) ) {
 			remove_filter( 'terms_clauses', $filter );
 		}
-		return $term_count;
+		return (int) $term_count;
 	}
 
 	/**
@@ -691,12 +741,14 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
+		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_clear_empty_terms_request' ) );
 
 		// Prevent query vars from persisting after redirect.
 		add_filter( 'removable_query_args', function( $query_vars ) {
 			$query_vars[] = 'amp_actioned';
 			$query_vars[] = 'amp_actioned_count';
 			$query_vars[] = 'amp_validation_errors_not_deleted';
+			$query_vars[] = AMP_Validation_Error_Taxonomy::VALIDATION_ERRORS_CLEARED_QUERY_VAR;
 			return $query_vars;
 		} );
 
@@ -968,8 +1020,9 @@ class AMP_Validation_Error_Taxonomy {
 			<?php
 			self::render_error_status_filter();
 			self::render_error_type_filter();
+			submit_button( __( 'Apply Filter', 'amp' ), '', 'filter_action', false, array( 'id' => 'doaction' ) );
+			self::render_clear_empty_button();
 			?>
-			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
 		</div>
 
 		<script>
@@ -1249,6 +1302,20 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Render the button for clearing empty taxonomy terms.
+	 *
+	 * If there are no terms with a 0 count then this outputs nothing.
+	 */
+	public static function render_clear_empty_button() {
+		global $wpdb;
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_taxonomy WHERE taxonomy = %s AND count = 0", self::TAXONOMY_SLUG ) );
+		if ( $count > 0 ) {
+			wp_nonce_field( self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce', false );
+			submit_button( __( 'Clear Empty', 'amp' ), '', self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, false );
+		}
+	}
+
+	/**
 	 * Prevent user from being able to delete validation errors in order to disable the checkbox on the post list table.
 	 *
 	 * Yes, this is not ideal.
@@ -1294,38 +1361,62 @@ class AMP_Validation_Error_Taxonomy {
 	 * Show notices for changes to amp_validation_error terms.
 	 */
 	public static function add_admin_notices() {
-		if ( ! ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_current_screen()->post_type ) || empty( $_GET['amp_actioned'] ) || empty( $_GET['amp_actioned_count'] ) ) { // WPCS: CSRF ok.
+		if ( ! ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_current_screen()->post_type ) ) { // WPCS: CSRF ok.
 			return;
 		}
-		$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
-		$count    = intval( $_GET['amp_actioned_count'] ); // WPCS: CSRF ok.
-		$message  = null;
-		if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $actioned ) {
-			$message = sprintf(
-				/* translators: %s is number of errors accepted */
-				_n(
-					'Accepted %s error. It will no longer block related URLs from being served as AMP.',
-					'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
-					number_format_i18n( $count ),
-					'amp'
-				),
-				$count
-			);
-		} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $actioned ) {
-			$message = sprintf(
-				/* translators: %s is number of errors rejected */
-				_n(
-					'Rejected %s error. It will continue to block related URLs from being served as AMP.',
-					'Rejected %s errors. They will continue to block related URLs from being served as AMP.',
-					number_format_i18n( $count ),
-					'amp'
-				),
-				$count
-			);
+
+		// Show success messages for accepting/rejecting validation errors.
+		if ( ! empty( $_GET['amp_actioned'] ) && ! empty( $_GET['amp_actioned_count'] ) ) {
+			$actioned = sanitize_key( $_GET['amp_actioned'] ); // WPCS: CSRF ok.
+			$count    = intval( $_GET['amp_actioned_count'] ); // WPCS: CSRF ok.
+			$message  = null;
+			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $actioned ) {
+				$message = sprintf(
+					/* translators: %s is number of errors accepted */
+					_n(
+						'Accepted %s error. It will no longer block related URLs from being served as AMP.',
+						'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
+						number_format_i18n( $count ),
+						'amp'
+					),
+					$count
+				);
+			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $actioned ) {
+				$message = sprintf(
+					/* translators: %s is number of errors rejected */
+					_n(
+						'Rejected %s error. It will continue to block related URLs from being served as AMP.',
+						'Rejected %s errors. They will continue to block related URLs from being served as AMP.',
+						number_format_i18n( $count ),
+						'amp'
+					),
+					$count
+				);
+			}
+
+			if ( $message ) {
+				printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $message ) );
+			}
 		}
 
-		if ( $message ) {
-			printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $message ) );
+		// Show success message for clearing empty terms.
+		if ( isset( $_GET[ self::VALIDATION_ERRORS_CLEARED_QUERY_VAR ] ) ) { // WPCS: csrf ok.
+			$cleared_count = intval( $_GET[ self::VALIDATION_ERRORS_CLEARED_QUERY_VAR ] );
+			printf(
+				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+				esc_html(
+					sprintf(
+						/* translators: %s is the number of validation errors cleared */
+						_n(
+							'Cleared %s validation error that no longer occurs on the site.',
+							'Cleared %s validation errors that no longer occur on the site.',
+							$cleared_count,
+							'amp'
+						),
+						number_format_i18n( $cleared_count )
+					)
+				)
+			);
 		}
 	}
 
@@ -1653,5 +1744,34 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		return $redirect_to;
+	}
+
+	/**
+	 * Handle request to delete empty terms.
+	 */
+	public static function handle_clear_empty_terms_request() {
+		if ( ! isset( $_POST[ self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION ] ) || ! isset( $_POST[ self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] ) ) {
+			return;
+		}
+		if ( ! check_ajax_referer( self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce', false ) ) {
+			wp_die( esc_html__( 'The link you followed has expired.', 'amp' ) );
+		}
+
+		$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
+		if ( ! current_user_can( $taxonomy_caps->manage_terms ) ) {
+			wp_die( esc_html__( 'You do not have authorization.', 'amp' ) );
+		}
+
+		$deleted_terms = self::delete_empty_terms();
+
+		$referer = wp_validate_redirect( wp_get_raw_referer() );
+		if ( ! $referer ) {
+			return;
+		}
+
+		$redirect = add_query_arg( self::VALIDATION_ERRORS_CLEARED_QUERY_VAR, $deleted_terms, $referer );
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 }
