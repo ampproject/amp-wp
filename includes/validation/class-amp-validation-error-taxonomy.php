@@ -97,13 +97,6 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERROR_TYPE_QUERY_VAR = 'amp_validation_error_type';
 
 	/**
-	 * Query var used for ordering list by node name.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_DETAILS_NODE_NAME_QUERY_VAR = 'amp_validation_node_name';
-
-	/**
 	 * Query var used for ordering list by error code.
 	 *
 	 * @var string
@@ -742,6 +735,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_clear_empty_terms_request' ) );
+		add_action( 'load-edit.php', array( __CLASS__, 'handle_inline_edit_request' ) );
 
 		// Prevent query vars from persisting after redirect.
 		add_filter( 'removable_query_args', function( $query_vars ) {
@@ -793,7 +787,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_sortable_columns', function( $sortable_columns ) {
 			$sortable_columns['created_date_gmt'] = 'term_id';
 			$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
-			$sortable_columns['details']          = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR;
 			$sortable_columns['error']            = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
 			return $sortable_columns;
 		} );
@@ -955,7 +948,6 @@ class AMP_Validation_Error_Taxonomy {
 
 		$sortable_column_vars = array(
 			self::VALIDATION_ERROR_TYPE_QUERY_VAR,
-			self::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR,
 			self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
 		);
 
@@ -978,13 +970,6 @@ class AMP_Validation_Error_Taxonomy {
 						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description, LOCATE(%s, tt.description)))',
 						'"type":"',
 						'}' // Start substr search after the first closing bracket to skip the "type" nested in the element_attributes object.
-					);
-					break;
-
-				case AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_NODE_NAME_QUERY_VAR:
-					$clauses['orderby'] = $wpdb->prepare(
-						'ORDER BY SUBSTR(tt.description, LOCATE(%s, tt.description))',
-						'"node_name":"'
 					);
 					break;
 
@@ -1567,20 +1552,7 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'status':
 				$sanitization = self::get_validation_error_sanitization( $validation_error );
-				if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-					$class = 'ack accepted';
-					$text  = __( 'Accepted', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
-					$class = 'ack rejected';
-					$text  = __( 'Rejected', 'amp' );
-				} elseif ( self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ) {
-					$class = 'new rejected';
-					$text  = __( 'New Rejected', 'amp' );
-				} else {
-					$class = 'new accepted';
-					$text  = __( 'New Accepted', 'amp' );
-				}
-				$content .= sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
+				$content     .= self::get_status_text_with_icon( $sanitization );
 				break;
 			case 'created_date_gmt':
 				$created_datetime = null;
@@ -1686,7 +1658,18 @@ class AMP_Validation_Error_Taxonomy {
 	 * Handle inline edit links.
 	 */
 	public static function handle_inline_edit_request() {
-		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy || ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) { // WPCS: CSRF ok.
+		// Check for necessary arguments.
+		if ( ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) {  // WPCS: CSRF ok.
+			return;
+		}
+
+		// Check if we are on either the taxonomy page or a single error page (which has the post_type argument).
+		if ( self::TAXONOMY_SLUG !== get_current_screen()->taxonomy && ! isset( $_GET['post_type'] ) ) { // WPCS: CSRF ok.
+			return;
+		}
+
+		// If we have a post_type check that it is the correct one.
+		if ( isset( $_GET['post_type'] ) && \AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) { // WPCS: CSRF ok.
 			return;
 		}
 		$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
@@ -1773,5 +1756,59 @@ class AMP_Validation_Error_Taxonomy {
 
 		wp_safe_redirect( $redirect );
 		exit;
+	}
+
+	/**
+	 * Get Error Title from Code
+	 *
+	 * @param string $error_code Error code.
+	 *
+	 * @return string
+	 */
+	public static function get_error_title_from_code( $error_code ) {
+		$error_title = 'Error';
+		if ( self::INVALID_ELEMENT_CODE === $error_code ) {
+			$error_title = __( 'Invalid element', 'amp' );
+		} elseif ( self::INVALID_ATTRIBUTE_CODE === $error_code ) {
+			$error_title = __( 'Invalid attribute', 'amp' );
+		} elseif ( 'file_path_not_allowed' === $error_code ) {
+			$error_title = __( 'File path not allowed', 'amp' );
+		} elseif ( 'excessive_css' === $error_code ) {
+			$error_title = __( 'Excessive CSS', 'amp' );
+		} elseif ( 'illegal_css_at_rule' === $error_code ) {
+			$error_title = __( 'Illegal CSS @ rule', 'amp' );
+		} elseif ( 'disallowed_file_extension' === $error_code ) {
+			$error_title = __( 'Disallowed file extension', 'amp' );
+		} elseif ( 'file_path_not_allowed' === $error_code ) {
+			$error_title = __( 'File path not allowed', 'amp' );
+		} elseif ( 'removed_unused_css_rules' === $error_code ) {
+			$error_title = __( 'Remove unused CSS rules', 'amp' );
+		}
+		return $error_title;
+	}
+
+	/**
+	 * Get Status Text with Icon
+	 *
+	 * @see \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
+	 *
+	 * @param array $sanitization Sanitization.
+	 * @return string Status text.
+	 */
+	public static function get_status_text_with_icon( $sanitization ) {
+		if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+			$class = 'ack accepted';
+			$text  = __( 'Accepted', 'amp' );
+		} elseif ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
+			$class = 'ack rejected';
+			$text  = __( 'Rejected', 'amp' );
+		} elseif ( self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ) {
+			$class = 'new rejected';
+			$text  = __( 'New Rejected', 'amp' );
+		} else {
+			$class = 'new accepted';
+			$text  = __( 'New Accepted', 'amp' );
+		}
+		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
 	}
 }
