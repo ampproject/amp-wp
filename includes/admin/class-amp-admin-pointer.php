@@ -31,12 +31,20 @@ class AMP_Admin_Pointer {
 	const SCRIPT_SLUG = 'amp-admin-pointer';
 
 	/**
+	 * The slug of the tooltip script.
+	 * 
+	 * @var string
+	 */
+	const TOOLTIP_SLUG = 'amp-validation-tooltips';
+
+	/**
 	 * Initializes the class.
 	 *
 	 * @since 1.0
 	 */
 	public function init() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_pointer' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_tooltips' ) );
 	}
 
 	/**
@@ -65,6 +73,28 @@ class AMP_Admin_Pointer {
 		wp_add_inline_script(
 			self::SCRIPT_SLUG,
 			sprintf( 'ampAdminPointer.load( %s );', wp_json_encode( $this->get_pointer_data() ) )
+		);
+	}
+
+	/**
+	 * Registers style and script for tooltips.
+	 * 
+	 * @since 1.0
+	 */
+	public function register_tooltips() {
+		wp_register_style(
+			self::TOOLTIP_SLUG,
+			amp_get_asset_url( 'css/' . self::TOOLTIP_SLUG . '.css' ),
+			array(),
+			AMP__VERSION
+		);
+
+		wp_register_script(
+			self::TOOLTIP_SLUG,
+			amp_get_asset_url( 'js/' . self::TOOLTIP_SLUG . '-compiled.js' ),
+			array( 'jquery', 'wp-pointer' ),
+			AMP__VERSION,
+			true
 		);
 	}
 

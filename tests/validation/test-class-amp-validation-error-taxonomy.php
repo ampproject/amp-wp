@@ -379,7 +379,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			array(
 				'cb'               => $cb,
 				'error'            => 'Error',
-				'status'           => 'Status',
+				'status'           => 'Status<div class="tooltip dashicons dashicons-editor-help"><h3>Statuses tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
 				'details'          => 'Details',
 				'created_date_gmt' => 'Last Seen',
 				'posts'            => 'Found URLs',

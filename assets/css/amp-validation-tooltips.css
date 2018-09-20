@@ -1,0 +1,11 @@
+.tooltip {
+    margin: 0 6px;
+}
+
+.tooltip * {
+    display: none;
+}
+
+.wp-pointer--tooltip {
+    transform: translateX(-52px);
+}

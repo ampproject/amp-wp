@@ -635,7 +635,12 @@ class AMP_Validation_Error_Taxonomy {
 			return array(
 				'cb'               => $old_columns['cb'],
 				'error'            => __( 'Error', 'amp' ),
-				'status'           => __( 'Status', 'amp' ),
+				'status'           => sprintf(
+					'%s<div class="tooltip dashicons dashicons-editor-help"><h3>%s</h3><p>%s</p></div>',
+					__( 'Status', 'amp' ),
+					__( 'Statuses tooltip title', 'amp' ),
+					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				),
 				'details'          => __( 'Details', 'amp' ),
 				'error_type'       => __( 'Type', 'amp' ),
 				'created_date_gmt' => __( 'Last Seen', 'amp' ),
@@ -657,14 +662,14 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_style(
 					'amp-validation-error-taxonomy',
 					amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-					array( 'common' ),
+					array( 'common', 'amp-validation-tooltips' ),
 					AMP__VERSION
 				);
 
 				wp_enqueue_script(
 					'amp-validation-error-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-					array(),
+					array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 					AMP__VERSION,
 					true
 				);

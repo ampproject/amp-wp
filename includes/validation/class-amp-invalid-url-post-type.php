@@ -191,22 +191,20 @@ class AMP_Invalid_URL_Post_Type {
 		wp_enqueue_style(
 			'amp-validation-error-taxonomy',
 			amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-			array( 'common' ),
+			array( 'common', 'amp-validation-tooltips' ),
 			AMP__VERSION
 		);
 		wp_enqueue_script(
 			'amp-validation-error-detail-toggle',
 			amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-			array(),
+			array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 			AMP__VERSION,
 			true
 		);
 		wp_localize_script(
 			'amp-validation-error-detail-toggle',
 			'ampValidationI18n',
-			array(
-				'btnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
-			)
+			array( 'btnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ) )
 		);
 	}
 
@@ -702,7 +700,12 @@ class AMP_Invalid_URL_Post_Type {
 		$columns = array_merge(
 			$columns,
 			array(
-				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf( '%s<span class="dashicons dashicons-editor-help"></span>', esc_html__( 'Status', 'amp' ) ),  // @todo Create actual tooltip.
+				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf(
+					'%s<div class="tooltip dashicons dashicons-editor-help"><h3>%s</h3><p>%s</p></div>',
+					esc_html__( 'Status', 'amp' ),
+					__( 'Statuses tooltip title', 'amp' ),
+					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				),
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
 			)
