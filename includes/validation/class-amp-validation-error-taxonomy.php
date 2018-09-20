@@ -575,7 +575,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'load-post.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
 		add_action( 'load-post.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
-		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_invalid_urls_screen' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
@@ -888,41 +887,6 @@ class AMP_Validation_Error_Taxonomy {
 
 			return $clauses;
 		}, 10, 2 );
-	}
-
-	/**
-	 * Outputs the taxonomy filter UI for this taxonomy type.
-	 *
-	 * Similar to what appears on /wp-admin/edit.php for posts and pages,
-	 * this outputs <select> elements to choose the error status and type,
-	 * and a 'Filter' submit button that filters for them.
-	 *
-	 * @param string $taxonomy_name The name of the taxonomy.
-	 */
-	public static function render_taxonomy_filters( $taxonomy_name ) {
-		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
-			return;
-		}
-
-		$div_id = 'amp-tax-filter';
-		?>
-		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
-			<?php
-			self::render_error_status_filter();
-			self::render_error_type_filter();
-			?>
-			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
-		</div>
-
-		<script>
-			( function ( $ ) {
-				$( function() {
-					// Move the filter UI after the 'Bulk Actions' <select>, as it looks like there's no way to do this with only an action.
-					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
-				} );
-			} )( jQuery );
-		</script>
-		<?php
 	}
 
 	/**

@@ -1694,9 +1694,6 @@ class AMP_Invalid_URL_Post_Type {
 			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
 			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
 		</form>
-		<div id="url-post-filter" class="alignleft actions">
-			<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
-		</div>
 
 		<form id="posts-filter" method="post">
 			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
@@ -1704,40 +1701,12 @@ class AMP_Invalid_URL_Post_Type {
 			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ); ?>" class="hidden button action"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
 			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
+			<div id="url-post-filter" class="alignleft actions">
+				<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
+			</div>
 			<?php $wp_list_table->display(); ?>
 		</form>
-		<style>
-			button[value=amp_validation_error_accept] {
-				position: absolute;
-				left: 0;
-			}
 
-			button[value=amp_validation_error_reject] {
-				position: absolute;
-				left: 5rem;
-			}
-
-			#url-post-filter {
-				margin-left: 10rem;
-			}
-
-			.tablenav.top,
-			.tablenav.bottom {
-				display: none;
-			}
-
-			.amp-invalid-url a {
-				text-decoration: none;
-			}
-
-			.curtime.misc-pub-section {
-				margin-top: 0.5rem;
-			}
-
-			.wp-list-table th.column-status {
-				width: 15%;
-			}
-		</style>
 		<?php
 	}
 

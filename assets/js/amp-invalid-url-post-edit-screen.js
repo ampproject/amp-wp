@@ -288,7 +288,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 
 			if ( event.target.checked ) {
 				// This checkbox was checked, so ensure the buttons display.
-				rejectButton.classList.remove( 'hidden' );
+				acceptButton.classList.remove( 'hidden' );
 				rejectButton.classList.remove( 'hidden' );
 			} else {
 				/*
