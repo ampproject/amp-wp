@@ -32,7 +32,7 @@ class AMP_Admin_Pointer {
 
 	/**
 	 * The slug of the tooltip script.
-	 * 
+	 *
 	 * @var string
 	 */
 	const TOOLTIP_SLUG = 'amp-validation-tooltips';
@@ -78,7 +78,7 @@ class AMP_Admin_Pointer {
 
 	/**
 	 * Registers style and script for tooltips.
-	 * 
+	 *
 	 * @since 1.0
 	 */
 	public function register_tooltips() {
