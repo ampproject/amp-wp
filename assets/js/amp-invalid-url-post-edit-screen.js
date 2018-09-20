@@ -123,8 +123,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			document.getElementById( component.idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
 			document.getElementById( component.idNumberErrors ).classList.remove( 'hidden' );
 			component.conditionallyCreateShowAllButton();
-			if ( showAllButton ) {
-				showAllButton.classList.remove( 'hidden' );
+			if ( document.getElementById( component.showAllId ) ) {
+				document.getElementById( component.showAllId ).classList.remove( 'hidden' );
 			}
 		}
 	};
