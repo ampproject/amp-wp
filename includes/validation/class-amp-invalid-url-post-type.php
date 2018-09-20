@@ -1624,7 +1624,7 @@ class AMP_Invalid_URL_Post_Type {
 					</a>
 				</div>
 				<div id="publishing-action">
-					<button type="submit" form="posts-filter" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
+					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
 				</div>
 				<div class="clear"></div>
 			</div>
@@ -1695,17 +1695,12 @@ class AMP_Invalid_URL_Post_Type {
 			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
 		</form>
 
-		<form id="posts-filter" method="post">
-			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
-			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ); ?>" class="hidden button action"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
-			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ); ?>" class="hidden button action"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
-			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
-			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
-			<div id="url-post-filter" class="alignleft actions">
-				<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
-			</div>
-			<?php $wp_list_table->display(); ?>
-		</form>
+		<button type="button" class="hidden button action accept"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
+		<button type="button" class="hidden button action reject"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
+		<div id="url-post-filter" class="alignleft actions">
+			<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
+		</div>
+		<?php $wp_list_table->display(); ?>
 
 		<?php
 	}

@@ -1237,11 +1237,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
 		$output = ob_get_clean();
 		$this->assertContains( '<form class="search-form wp-clearfix" method="get">', $output );
-		$this->assertContains( '<form id="posts-filter" method="post">', $output );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $output );
-		$this->assertContains( '<button type="submit" name="action" value="', $output );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION, $output );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, $output );
+		$this->assertContains( '<button type="button" class="hidden button action accept">', $output );
+		$this->assertContains( '<button type="button" class="hidden button action reject">', $output );
 	}
 
 	/**

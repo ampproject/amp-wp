@@ -40,9 +40,26 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		component.handleFiltering();
 		component.handleSearching();
 		component.handleStatusChange();
-		component.handleBulkActionCheckboxes();
+		component.handleBulkActions();
 		component.changeHeading();
 		component.watchForUnsavedChanges();
+	};
+
+	/**
+	 * Add prompt when leaving page due to unsaved changes.
+	 */
+	component.addBeforeUnloadPrompt = function addBeforeUnloadPrompt() {
+		if ( component.beforeUnloadPromptAdded ) {
+			return;
+		}
+		window.addEventListener( 'beforeunload', component.onBeforeUnload );
+
+		// Remove prompt when clicking trash or update.
+		document.querySelector( '#major-publishing-actions' ).addEventListener( 'click', function() {
+			window.removeEventListener( 'beforeunload', component.onBeforeUnload );
+		} );
+
+		component.beforeUnloadPromptAdded = true;
 	};
 
 	/**
@@ -52,19 +69,13 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * unless the user is pressing the trash link or update button.
 	 */
 	component.watchForUnsavedChanges = function watchForUnsavedChanges() {
-		var onChange = function( event ) {
+		const onChange = function( event ) {
 			if ( event.target.matches( 'select' ) ) {
-				document.getElementById( 'amp_validation_errors' ).removeEventListener( 'change', onChange );
-
-				window.addEventListener( 'beforeunload', component.onBeforeUnload );
-
-				// Remove prompt when clicking trash or update.
-				document.querySelector( '#major-publishing-actions' ).addEventListener( 'click', function() {
-					window.removeEventListener( 'beforeunload', component.onBeforeUnload );
-				} );
+				document.getElementById( 'post' ).removeEventListener( 'change', onChange );
+				component.addBeforeUnloadPrompt();
 			}
 		};
-		document.getElementById( 'amp_validation_errors' ).addEventListener( 'change', onChange );
+		document.getElementById( 'post' ).addEventListener( 'change', onChange );
 	};
 
 	/**
@@ -87,9 +98,9 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * @param {number} totalErrors - The total number of errors, displaying or not.
 	 */
 	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying, totalErrors ) {
-		var thead, tr, th,
-			showAllButton = document.getElementById( component.showAllId ),
-			theadQuery = document.getElementsByTagName( 'thead' );
+		const showAllButton = document.getElementById( component.showAllId );
+		let thead, tr, th;
+		const theadQuery = document.getElementsByTagName( 'thead' );
 
 		// Only create the <tr> if it does not exist yet.
 		if ( theadQuery[ 0 ] && ! document.getElementById( component.idNumberErrors ) ) {
@@ -121,8 +132,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * Conditionally creates and appends a 'Show all' button.
 	 */
 	component.conditionallyCreateShowAllButton = function conditionallyCreateShowAllButton() {
-		var buttonContainer = document.getElementById( 'url-post-filter' ),
-			showAllButton = document.getElementById( component.showAllId );
+		const buttonContainer = document.getElementById( 'url-post-filter' );
+		let showAllButton = document.getElementById( component.showAllId );
 
 		// There is no 'Show all' <button> yet, but there is a container element for it, create the <button>
 		if ( ! showAllButton && buttonContainer ) {
@@ -139,9 +150,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * Then, it hides this 'Show all' <button> and the notice for the number of errors showing.
 	 */
 	component.handleShowAll = function handleShowAll() {
-		var onClick = function( event ) {
-			var validationErrors = document.querySelectorAll( '[data-error-type]' );
-
+		const onClick = function( event ) {
+			const validationErrors = document.querySelectorAll( '[data-error-type]' );
 			if ( ! event.target.matches( '#' + component.showAllId ) ) {
 				return;
 			}
@@ -176,18 +186,16 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * If 'All Error Types' is selected, this displays all errors.
 	 */
 	component.handleFiltering = function handleFiltering() {
-		var onChange = function( event ) {
-			var errorTypeQuery, isAllErrorTypesSelected,
-				showAllButton = document.getElementById( component.showAllId ),
-				numberErrorsDisplaying = 0;
-
+		const onChange = function( event ) {
+			const showAllButton = document.getElementById( component.showAllId );
 			if ( ! event.target.matches( 'select' ) ) {
 				return;
 			}
 
 			event.preventDefault();
-			isAllErrorTypesSelected = ( '-1' === event.target.value );
-			errorTypeQuery = document.querySelectorAll( '[data-error-type]' );
+
+			const isAllErrorTypesSelected = ( '-1' === event.target.value );
+			const errorTypeQuery = document.querySelectorAll( '[data-error-type]' );
 
 			// If the user has chosen 'All Error Types' from the <select>, hide the 'Show all' button.
 			if ( isAllErrorTypesSelected && showAllButton ) {
@@ -198,8 +206,9 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			 * Iterate through all of the <tr> elements in the list table.
 			 * If the error type does not match the value (selected error type), hide them.
 			 */
+			let numberErrorsDisplaying = 0;
 			errorTypeQuery.forEach( function( element ) {
-				var errorType = element.getAttribute( 'data-error-type' );
+				const errorType = element.getAttribute( 'data-error-type' );
 
 				// If 'All Error Types' was selected, this should display all errors.
 				if ( isAllErrorTypesSelected || ! event.target.value || event.target.value === errorType ) {
@@ -220,24 +229,22 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * Handles searching for errors via the <input> and the 'Search Errors' <button>.
 	 */
 	component.handleSearching = function handleSearching() {
-		var onClick = function( event ) {
-			var searchQuery, detailsQuery,
-				numberErrorsDisplaying = 0;
-
+		const onClick = function( event ) {
 			event.preventDefault();
 			if ( ! event.target.matches( 'input' ) ) {
 				return;
 			}
 
-			searchQuery = document.getElementById( 'invalid-url-search-search-input' ).value;
-			detailsQuery = document.querySelectorAll( 'tbody .column-details' );
+			const searchQuery = document.getElementById( 'invalid-url-search-search-input' ).value;
+			const detailsQuery = document.querySelectorAll( 'tbody .column-details' );
 
 			/*
 			 * Iterate through the 'Details' column of each row.
 			 * If the search query is not present, hide the row.
 			 */
+			let numberErrorsDisplaying = 0;
 			detailsQuery.forEach( function( element ) {
-				var isSearchQueryPresent = false;
+				let isSearchQueryPresent = false;
 
 				element.querySelectorAll( '.detailed' ).forEach( function( detailed ) {
 					if ( -1 !== detailed.innerText.indexOf( searchQuery ) ) {
@@ -260,22 +267,28 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	};
 
 	/**
+	 * Update icon for select element.
+	 *
+	 * @param {HTMLSelectElement} select Select element.
+	 */
+	component.updateSelectIcon = function updateSelectIcon( select ) {
+		const newOption = select.options[ select.selectedIndex ];
+		if ( newOption ) {
+			const iconSrc = newOption.getAttribute( 'data-status-icon' );
+			select.parentNode.querySelector( 'img' ).setAttribute( 'src', iconSrc );
+		}
+	};
+
+	/**
 	 * Handles a change in the error status, like from 'New' to 'Accepted'.
 	 *
 	 * Gets the data-status-icon value from the newly-selected <option>.
 	 * And sets this as the src of the status icon <img>.
 	 */
 	component.handleStatusChange = function handleStatusChange() {
-		var onChange = function( event ) {
-			var newOption, iconSrc;
-			if ( ! event.target.matches( 'select' ) ) {
-				return;
-			}
-
-			newOption = event.target.options[ event.target.selectedIndex ];
-			if ( newOption ) {
-				iconSrc = newOption.getAttribute( 'data-status-icon' );
-				event.target.parentNode.querySelector( 'img' ).setAttribute( 'src', iconSrc );
+		const onChange = function( event ) {
+			if ( event.target.matches( 'select' ) ) {
+				component.updateSelectIcon( event.target );
 			}
 		};
 
@@ -285,16 +298,17 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	};
 
 	/**
-	 * On checking a bulk action checkbox, this ensures that the 'Accept' and 'Reject' buttons are present.
+	 * On checking a bulk action checkbox, this ensures that the 'Accept' and 'Reject' buttons are present. Handle clicking on buttons.
 	 *
 	 * They're hidden until one of these boxes is checked.
 	 * Also, on unchecking the last checked box, this hides these buttons.
 	 */
-	component.handleBulkActionCheckboxes = function handleStatusChange() {
-		var onChange = function( event ) {
-			var areThereCheckedBoxes,
-				acceptButton = document.querySelector( '[value=amp_validation_error_accept' ),
-				rejectButton = document.querySelector( '[value=amp_validation_error_reject' );
+	component.handleBulkActions = function handleBulkActions() {
+		const acceptButton = document.querySelector( 'button.action.accept' );
+		const rejectButton = document.querySelector( 'button.action.reject' );
+
+		const onChange = function( event ) {
+			let areThereCheckedBoxes;
 
 			if ( ! event.target.matches( '[type=checkbox]' ) ) {
 				return;
@@ -326,13 +340,35 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		document.querySelectorAll( '.check-column [type=checkbox]' ).forEach( function( element ) {
 			element.addEventListener( 'change', onChange );
 		} );
+
+		// Handle click on accept button.
+		acceptButton.addEventListener( 'click', function() {
+			Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), function( select ) {
+				if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
+					select.value = 1;
+					component.updateSelectIcon( select );
+					component.addBeforeUnloadPrompt();
+				}
+			} );
+		} );
+
+		// Handle click on reject button.
+		rejectButton.addEventListener( 'click', function() {
+			Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), function( select ) {
+				if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
+					select.value = 2; // @todo Update to 3 when merging with <https://github.com/Automattic/amp-wp/pull/1429>.
+					component.updateSelectIcon( select );
+					component.addBeforeUnloadPrompt();
+				}
+			} );
+		} );
 	};
 
 	/**
 	 * Changes the page heading, as this doesn't look to be possible with a PHP filter.
 	 */
 	component.changeHeading = function changeHeading() {
-		var headingQuery = document.getElementsByClassName( 'wp-heading-inline' );
+		const headingQuery = document.getElementsByClassName( 'wp-heading-inline' );
 		if ( headingQuery[ 0 ] && component.data.l10n.page_heading ) {
 			headingQuery[ 0 ].innerText = component.data.l10n.page_heading;
 		}
