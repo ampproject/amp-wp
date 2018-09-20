@@ -88,6 +88,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.updateShowingErrorsRow = function updateShowingErrorsRow( numberErrorsDisplaying, totalErrors ) {
 		var thead, tr, th,
+			showAllButton = document.getElementById( component.showAllId ),
 			theadQuery = document.getElementsByTagName( 'thead' );
 
 		// Only create the <tr> if it does not exist yet.
@@ -101,16 +102,18 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			thead.appendChild( tr );
 		}
 
-		if ( numberErrorsDisplaying === totalErrors ) {
-			// If all of the errors are displaying, hide this message and the 'Show all' button.
-			document.getElementById( component.idNumberErrors ).classList.add( 'hidden' );
-			document.getElementById( component.showAllId ).classList.add( 'hidden' );
-		} else if ( null !== numberErrorsDisplaying ) {
+		// If all of the errors are displaying, hide the 'Show all' button, but the count notice will still display.
+		if ( showAllButton && numberErrorsDisplaying === totalErrors ) {
+			showAllButton.classList.add( 'hidden' );
+		} else if ( showAllButton ) {
+			showAllButton.classList.remove( 'hidden' );
+		}
+
+		if ( null !== numberErrorsDisplaying ) {
 			// Update the number of errors displaying and create a 'Show all' button if it does not exist yet.
 			document.getElementById( component.idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
 			document.getElementById( component.idNumberErrors ).classList.remove( 'hidden' );
 			component.conditionallyCreateShowAllButton();
-			document.getElementById( component.showAllId ).classList.remove( 'hidden' );
 		}
 	};
 
@@ -137,21 +140,26 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.handleShowAll = function handleShowAll() {
 		var onClick = function( event ) {
+			var validationErrors = document.querySelectorAll( '[data-error-type]' );
+
 			if ( ! event.target.matches( '#' + component.showAllId ) ) {
 				return;
 			}
 			event.preventDefault();
 
 			// Iterate through all of the errors, and remove the 'hidden' class.
-			document.querySelectorAll( '[data-error-type]' ).forEach( function( element ) {
+			validationErrors.forEach( function( element ) {
 				element.parentElement.parentElement.classList.remove( 'hidden' );
 			} );
 
+			/*
+			 * Update the notice to indicate that all of the errors are displaying.
+			 * Like 'Showing 5 of 5 validation errors'.
+ 			 */
+			component.updateShowingErrorsRow( validationErrors.length, validationErrors.length );
+
 			// Hide this 'Show all' button.
 			event.target.classList.add( 'hidden' );
-
-			// Hide the 'Showing x of y errors' notice.
-			document.getElementById( component.idNumberErrors ).classList.add( 'hidden' );
 
 			// Change the value of the error type <select> element to 'All Error Types'.
 			document.getElementById( 'amp_validation_error_type' ).value = '-1';
@@ -169,7 +177,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.handleFiltering = function handleFiltering() {
 		var onChange = function( event ) {
-			var errorTypeQuery,
+			var errorTypeQuery, isAllErrorTypesSelected,
+				showAllButton = document.getElementById( component.showAllId ),
 				numberErrorsDisplaying = 0;
 
 			if ( ! event.target.matches( 'select' ) ) {
@@ -177,8 +186,13 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			}
 
 			event.preventDefault();
-
+			isAllErrorTypesSelected = ( '-1' === event.target.value );
 			errorTypeQuery = document.querySelectorAll( '[data-error-type]' );
+
+			// If the user has chosen 'All Error Types' from the <select>, hide the 'Show all' button.
+			if ( isAllErrorTypesSelected && showAllButton ) {
+				showAllButton.classList.add( 'hidden' );
+			}
 
 			/*
 			 * Iterate through all of the <tr> elements in the list table.
@@ -187,8 +201,8 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 			errorTypeQuery.forEach( function( element ) {
 				var errorType = element.getAttribute( 'data-error-type' );
 
-				// If the value is '-1', 'All Error Types' was selected, and this should display all errors.
-				if ( event.target.value === errorType || ! event.target.value || '-1' === event.target.value ) {
+				// If 'All Error Types' was selected, this should display all errors.
+				if ( isAllErrorTypesSelected || ! event.target.value || event.target.value === errorType ) {
 					element.parentElement.parentElement.classList.remove( 'hidden' );
 					numberErrorsDisplaying++;
 				} else {
