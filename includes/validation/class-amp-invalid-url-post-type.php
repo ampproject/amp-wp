@@ -1912,15 +1912,15 @@ class AMP_Invalid_URL_Post_Type {
 		// Mainly uses the same conditionals as print_status_meta_box().
 		$post           = get_post( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
-		if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
-			$name = get_the_title( $queried_object['id'] );
-		} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
-			$name = get_term( $queried_object['id'] )->name;
-		} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {
-			$name = get_user_by( 'ID', $queried_object['id'] )->display_name;
-		} else {
-			// If there is no name available in the $queried_object, simply use 'Single URL' in the page heading.
-			$name = __( 'Single URL', 'amp' );
+		$name           = __( 'Single URL', 'amp' ); // Default.
+		if ( isset( $queried_object['type'] ) && isset( $queried_object['id'] ) ) {
+			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
+				$name = get_the_title( $queried_object['id'] );
+			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
+				$name = get_term( $queried_object['id'] )->name;
+			} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {
+				$name = get_user_by( 'ID', $queried_object['id'] )->display_name;
+			}
 		}
 
 		/* translators: %s is the name of the page with the the validation error(s) */
