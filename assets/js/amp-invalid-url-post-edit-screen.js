@@ -40,6 +40,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		component.handleFiltering();
 		component.handleSearching();
 		component.handleStatusChange();
+		component.handleBulkActionCheckboxes();
 		component.changeHeading();
 		component.watchForUnsavedChanges();
 	};
@@ -265,6 +266,50 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		};
 
 		document.querySelectorAll( '.amp-validation-error-status' ).forEach( function( element ) {
+			element.addEventListener( 'change', onChange );
+		} );
+	};
+
+	/**
+	 * On checking a bulk action checkbox, this ensures that the 'Accept' and 'Reject' buttons are present.
+	 *
+	 * They're hidden until one of these boxes is checked.
+	 * Also, on unchecking the last checked box, this hides these buttons.
+	 */
+	component.handleBulkActionCheckboxes = function handleStatusChange() {
+		var onChange = function( event ) {
+			var areThereCheckedBoxes,
+				acceptButton = document.querySelector( '[value=amp_validation_error_accept' ),
+				rejectButton = document.querySelector( '[value=amp_validation_error_reject' );
+
+			if ( ! event.target.matches( '[type=checkbox]' ) ) {
+				return;
+			}
+
+			if ( event.target.checked ) {
+				// This checkbox was checked, so ensure the buttons display.
+				rejectButton.classList.remove( 'hidden' );
+				rejectButton.classList.remove( 'hidden' );
+			} else {
+				/*
+				 * This checkbox was unchecked.
+				 * So find if there are any other checkboxes that are checked.
+				 * If not, hide the 'Accept' and 'Reject' buttons.
+				 */
+				areThereCheckedBoxes = false;
+				document.querySelectorAll( '.check-column [type=checkbox]' ).forEach( function( element ) {
+					if ( element.checked ) {
+						areThereCheckedBoxes = true;
+					}
+				} );
+				if ( ! areThereCheckedBoxes ) {
+					acceptButton.classList.add( 'hidden' );
+					rejectButton.classList.add( 'hidden' );
+				}
+			}
+		};
+
+		document.querySelectorAll( '.check-column [type=checkbox]' ).forEach( function( element ) {
 			element.addEventListener( 'change', onChange );
 		} );
 	};

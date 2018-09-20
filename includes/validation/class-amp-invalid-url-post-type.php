@@ -1700,8 +1700,8 @@ class AMP_Invalid_URL_Post_Type {
 
 		<form id="posts-filter" method="post">
 			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
-			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ); ?>" class="button action"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
-			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ); ?>" class="button action"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
+			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ); ?>" class="hidden button action"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
+			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ); ?>" class="hidden button action"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
 			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
 			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
 			<?php $wp_list_table->display(); ?>
