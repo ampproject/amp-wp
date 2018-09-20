@@ -1630,7 +1630,7 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Renders error details when viewing a single URL page.
 	 *
-	 * @param array $validation_error Validation error data.
+	 * @param array   $validation_error Validation error data.
 	 * @param WP_Term $term The validation error term.
 	 * @return string HTML for the details section.
 	 */
