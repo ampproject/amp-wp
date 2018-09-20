@@ -1086,7 +1086,7 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			printf(
-				'<div class="notice"><details class="single-error-detail"><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
+				'<div class="notice"><details class="single-error-detail" open><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
 				esc_html( $error_title ),
 				wp_kses_post( $output )
 			);
