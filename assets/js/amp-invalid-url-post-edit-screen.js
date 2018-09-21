@@ -366,12 +366,13 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	};
 
 	/**
-	 * Changes the page heading, as this doesn't look to be possible with a PHP filter.
+	 * Changes the page heading and document title, as this doesn't look to be possible with a PHP filter.
 	 */
 	component.changeHeading = function changeHeading() {
 		const headingQuery = document.getElementsByClassName( 'wp-heading-inline' );
 		if ( headingQuery[ 0 ] && component.data.l10n.page_heading ) {
 			headingQuery[ 0 ].innerText = component.data.l10n.page_heading;
+			document.title = component.data.l10n.page_heading + document.title;
 		}
 	};
 
