@@ -77,24 +77,19 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 	margin-bottom: 5px;
 }
 .column-sources_with_invalid_output details > div {
-	padding-left: 25px;
+	padding-left: 25px;	
 }
 
 /* Error details toggle button */
-.manage-column.column-details, .manage-column.column-sources_with_invalid_output {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
 .manage-column.column-sources_with_invalid_output .error-details-toggle {
 	margin: 0;
 }
 
 .error-details-toggle {
+	float: right;
 	display: flex;
 	flex-direction: column;
 	height: 14px;
-	margin-right: 10px;
 	padding: 0;
 	background: none;
 	border: none;
@@ -213,4 +208,16 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	display: inline-flex;
 	margin-left: 10px;
 	vertical-align: middle;
+}
+
+/** Details post action. */
+.details button {
+	display: inline-block;
+	background: none;
+	border: none;
+	padding: 0;
+	text-align: left;
+	color: #0073aa;
+	cursor: pointer;
+	text-decoration: underline;
 }
