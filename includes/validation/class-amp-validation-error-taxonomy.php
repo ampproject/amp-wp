@@ -1271,8 +1271,9 @@ class AMP_Validation_Error_Taxonomy {
 				);
 			}
 
+			// Only add the 'Reject' and 'Accept' links to the index page, not the individual URL page.
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['term_status'] ) {
+			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 					'<a href="%s" aria-label="%s">%s</a>',
 					wp_nonce_url(
@@ -1283,7 +1284,7 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html__( 'Reject', 'amp' )
 				);
 			}
-			if ( self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
+			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s" aria-label="%s">%s</a>',
 					wp_nonce_url(
