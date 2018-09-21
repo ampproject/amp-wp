@@ -64,7 +64,26 @@ function addToggleListener() {
 	} );
 }
 
+/**
+ * Adds classes to the rows for the amp_validation_error term list table.
+ *
+ * This is needed because \WP_Terms_List_Table::single_row() does not allow for additional
+ * attributes to be added to the <tr> element.
+ */
+function addTermListTableRowClasses() {
+	const rows = [ ...document.querySelectorAll( '#the-list > tr' ) ];
+	rows.forEach( ( row ) => {
+		const statusText = row.querySelector( '.column-status > .status-text' );
+		if ( statusText ) {
+			row.classList.toggle( 'new', statusText.classList.contains( 'new' ) );
+			row.classList.toggle( 'accepted', statusText.classList.contains( 'accepted' ) );
+			row.classList.toggle( 'rejected', statusText.classList.contains( 'rejected' ) );
+		}
+	} );
+}
+
 domReady( () => {
 	addToggleButtons();
 	addToggleListener();
+	addTermListTableRowClasses();
 } );

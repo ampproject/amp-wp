@@ -1167,6 +1167,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 
 		$ordered_contains = array(
+			'<html amp="">',
 			'<meta charset="' . get_bloginfo( 'charset' ) . '">',
 			'<meta name="viewport" content="width=device-width,minimum-scale=1">',
 			'<meta name="generator" content="AMP Plugin',
@@ -1258,7 +1259,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test that first response isn't cached.
 		$first_response = $call_prepare_response();
 		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
-		$this->assertContains( '<html amp>', $first_response ); // Note: AMP because sanitized validation errors.
+		$this->assertContains( '<html amp="">', $first_response ); // Note: AMP because sanitized validation errors.
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that response cache is return upon second call.
@@ -1290,6 +1291,22 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertSame( 0, $this->get_server_timing_header_count() );
 
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	}
+
+	/**
+	 * Test prepare_response for native mode when some validation errors aren't auto-sanitized.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_native_mode_non_amp() {
+		$original_html = $this->get_original_html();
+		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.
+
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+
+		$this->assertContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
+		$this->assertContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
+		$this->assertContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
 	}
 
 	/**
@@ -1382,7 +1399,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		ob_start();
 		?>
 		<!DOCTYPE html>
-		<html amp>
+		<html>
 		<head>
 			<?php wp_head(); ?>
 			<script data-head>document.write('Illegal');</script>

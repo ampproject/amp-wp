@@ -187,7 +187,7 @@ class AMP_Validation_Manager {
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
 
 		// Add filter to auto-accept tree shaking validation error.
-		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ) {
+		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ) {
 			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_accepted' ), 10, 2 );
 		}
 
@@ -216,8 +216,8 @@ class AMP_Validation_Manager {
 	 *
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
-	public static function is_sanitization_forcibly_accepted() {
-		return amp_is_canonical() || AMP_Options_Manager::get_option( 'force_sanitization' );
+	public static function is_sanitization_auto_accepted() {
+		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 	}
 
 	/**
@@ -304,7 +304,7 @@ class AMP_Validation_Manager {
 				if ( $amp_invalid_url_post ) {
 					$error_count = 0;
 					foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post ) as $error ) {
-						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['term_status'] ) {
+						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $error['term_status'] ) {
 							$error_count++;
 						}
 					}
@@ -322,7 +322,7 @@ class AMP_Validation_Manager {
 
 		if ( is_amp_endpoint() ) {
 			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
-		} elseif ( $error_count > 0 && ! self::is_sanitization_forcibly_accepted() ) {
+		} elseif ( $error_count > 0 && ! self::is_sanitization_auto_accepted() ) {
 			$icon = '&#x274C;'; // CROSS MARK.
 		} else {
 			$icon = '&#x1F517;'; // LINK SYMBOL.
@@ -362,7 +362,7 @@ class AMP_Validation_Manager {
 		$first_item_is_validate = (
 			amp_is_canonical()
 			||
-			( ! is_amp_endpoint() && $error_count > 0 && ! self::is_sanitization_forcibly_accepted() )
+			( ! is_amp_endpoint() && $error_count > 0 && ! self::is_sanitization_auto_accepted() )
 		);
 		if ( $first_item_is_validate ) {
 			$title          = __( 'Validate AMP', 'amp' );
@@ -667,7 +667,7 @@ class AMP_Validation_Manager {
 			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
 			foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = array(
-					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $result['status'],
+					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
 					'error'       => $result['data'],
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
@@ -744,9 +744,19 @@ class AMP_Validation_Manager {
 		$error = apply_filters( 'amp_validation_error', $error, compact( 'node' ) );
 
 		$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-		$sanitized    = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'];
+		$sanitized    = (
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status']
+			||
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status']
+		);
 
-		// Ignore validation errors which are forcibly sanitized by filter or in special case if it is a tree shaking error and this is accepted by options.
+		/*
+		 * Ignore validation errors which are forcibly sanitized by filter. This includes tree shaking error
+		 * accepted by options and via AMP_Validation_Error_Taxonomy::accept_validation_errors()).
+		 * This was introduced in <https://github.com/Automattic/amp-wp/pull/1413> to prevent forcibly-sanitized
+		 * validation errors from being reported, to avoid noise and wasted storage. It was inadvertently
+		 * reverted in de7b04b but then restored as part of <https://github.com/Automattic/amp-wp/pull/1413>.
+		 */
 		if ( $sanitized && 'with_filter' === $sanitization['forced'] ) {
 			return true;
 		}
@@ -798,14 +808,16 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$has_actually_unaccepted_error = false;
-		$validation_errors             = array();
+		// Show all validation errors which have not been explicitly acknowledged as accepted.
+		$validation_errors = array();
 		foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
-			if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['term_status'] ) {
+			$needs_moderation = (
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] || // @todo Show differently since moderated?
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status'] ||
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $error['status']
+			);
+			if ( $needs_moderation ) {
 				$validation_errors[] = $error['data'];
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $error['status'] ) {
-					$has_actually_unaccepted_error = true;
-				}
 			}
 		}
 
@@ -816,12 +828,13 @@ class AMP_Validation_Manager {
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
+		// @todo Check if the error actually occurs in the_content, and if not, consider omitting the warning if the user does not have privileges to manage_options.
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
-		if ( $has_actually_unaccepted_error && ! amp_is_canonical() ) {
-			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+		if ( amp_is_canonical() ) {
+			esc_html_e( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
 		} else {
-			esc_html_e( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
+			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 		}
 		echo sprintf(
 			' <a href="%s" target="_blank">%s</a>',
@@ -1540,9 +1553,9 @@ class AMP_Validation_Manager {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
 
 				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['status']
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['status']
 					:
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
 				if ( $is_unaccepted ) {
 					$error_count++;
 				}
@@ -1622,7 +1635,7 @@ class AMP_Validation_Manager {
 
 			$css_validation_errors = array();
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
-				$term = get_term_by( 'slug', $slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+				$term = AMP_Validation_Error_Taxonomy::get_term( $slug );
 				if ( ! $term ) {
 					continue;
 				}

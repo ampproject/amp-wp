@@ -1697,11 +1697,15 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		if ( ! AMP_Validation_Manager::should_validate_response() && $blocking_error_count > 0 && ! self::is_customize_preview_iframe() ) {
-
-			// Note the canonical check will not currently ever be met because dirty AMP is not yet supported; all validation errors will forcibly be sanitized.
+		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
+			/*
+			 * In native AMP, strip html@amp attribute to prevent GSC from complaining about a validation error
+			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
+			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
+			 */
 			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
+				$dom->documentElement->removeAttribute( '⚡️' );
 
 				/*
 				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
@@ -1712,7 +1716,7 @@ class AMP_Theme_Support {
 					$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
 					$head->appendChild( $script );
 				}
-			} else {
+			} elseif ( ! self::is_customize_preview_iframe() ) {
 				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 
 				if ( $cache_response ) {

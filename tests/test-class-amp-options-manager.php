@@ -95,15 +95,15 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			array(
-				'theme_support'           => 'disabled',
-				'supported_post_types'    => array( 'post' ),
-				'analytics'               => array(),
-				'force_sanitization'      => true,
-				'accept_tree_shaking'     => true,
-				'disable_admin_bar'       => false,
-				'all_templates_supported' => true,
-				'supported_templates'     => array( 'is_singular' ),
-				'enable_response_caching' => true,
+				'theme_support'            => 'disabled',
+				'supported_post_types'     => array( 'post' ),
+				'analytics'                => array(),
+				'auto_accept_sanitization' => true,
+				'accept_tree_shaking'      => true,
+				'disable_admin_bar'        => false,
+				'all_templates_supported'  => true,
+				'supported_templates'      => array( 'is_singular' ),
+				'enable_response_caching'  => true,
 			),
 			AMP_Options_Manager::get_options()
 		);

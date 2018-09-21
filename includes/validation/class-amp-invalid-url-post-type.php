@@ -277,7 +277,10 @@ class AMP_Invalid_URL_Post_Type {
 
 		$query = new WP_Query( array(
 			'post_type'              => self::POST_TYPE_SLUG,
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			),
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		) );
@@ -334,13 +337,13 @@ class AMP_Invalid_URL_Post_Type {
 				continue;
 			}
 
-			$term = get_term_by( 'slug', $stored_validation_error['term_slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$term = AMP_Validation_Error_Taxonomy::get_term( $stored_validation_error['term_slug'] );
 			if ( ! $term ) {
 				continue;
 			}
 
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $stored_validation_error['data'] );
-			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['status'] ) {
+			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'] ) {
 				continue;
 			}
 
@@ -373,66 +376,73 @@ class AMP_Invalid_URL_Post_Type {
 			$args
 		);
 		$counts = array_fill_keys(
-			array( 'new', 'accepted', 'rejected' ),
+			array( 'new_accepted', 'ack_accepted', 'new_rejected', 'ack_rejected' ),
 			0
 		);
 
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		foreach ( $validation_errors as $error ) {
 			switch ( $error['term']->term_group ) {
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS:
-					$counts['new']++;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+					$counts['new_rejected']++;
 					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS:
-					$counts['accepted']++;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
+					$counts['new_accepted']++;
 					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS:
-					$counts['rejected']++;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
+					$counts['ack_accepted']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
+					$counts['ack_rejected']++;
 					break;
 			}
 		}
 
 		$result = array();
-		if ( $counts['new'] ) {
+		if ( $counts['new_rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %1$s is the status, %2$s is the count */
 				'<span class="status-text new">%1$s: %2$s</span>',
-				esc_html__( 'New', 'amp' ),
-				number_format_i18n( $counts['new'] )
+				esc_html__( 'New Rejected', 'amp' ),
+				number_format_i18n( $counts['new_rejected'] )
 			);
 		}
-		if ( $counts['accepted'] ) {
+		if ( $counts['new_accepted'] ) {
+			$result[] = sprintf(
+				/* translators: %1$s is the status, %2$s is the count */
+				'<span class="status-text new">%1$s: %2$s</span>',
+				esc_html__( 'New Accepted', 'amp' ),
+				number_format_i18n( $counts['new_accepted'] )
+			);
+		}
+		if ( $counts['ack_accepted'] ) {
 			$result[] = sprintf(
 				/* translators: 1. Title, 2. %s is count */
 				'<span class="status-text accepted">%1$s: %2$s</span>',
 				esc_html__( 'Accepted', 'amp' ),
-				number_format_i18n( $counts['accepted'] )
+				number_format_i18n( $counts['ack_accepted'] )
 			);
 		}
-		if ( $counts['rejected'] ) {
+		if ( $counts['ack_rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
 				'<span class="status-text rejected">%1$s: %2$s</span>',
 				esc_html__( 'Rejected', 'amp' ),
-				number_format_i18n( $counts['rejected'] )
+				number_format_i18n( $counts['ack_rejected'] )
 			);
 		}
 
 		if ( $args['display_enabled_status'] ) {
-			$is_forcibly_accepted        = AMP_Validation_Manager::is_sanitization_forcibly_accepted();
-			$are_there_unaccepted_errors = ( $counts['new'] || $counts['rejected'] );
-			$is_amp_enabled              = (
-				$is_forcibly_accepted
-				||
-				! $are_there_unaccepted_errors
-			);
+			$are_there_unaccepted_errors = ( $counts['new_rejected'] || $counts['ack_rejected'] );
+			$is_amp_enabled              = ! $are_there_unaccepted_errors;
 			$class                       = $is_amp_enabled ? 'sanitized' : 'new';
 			?>
 			<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
 				<?php
-				$is_amp_enabled ? esc_html_e( 'AMP: Enabled', 'amp' ) : esc_html_e( 'AMP: Disabled', 'amp' );
-				if ( $are_there_unaccepted_errors && $is_forcibly_accepted ) {
-					esc_html_e( ' (Auto)', 'amp' );
+				if ( $is_amp_enabled ) {
+					esc_html_e( 'AMP: Enabled', 'amp' );
+				} else {
+					esc_html_e( 'AMP: Disabled', 'amp' );
 				}
 				?>
 			</span>
@@ -598,8 +608,12 @@ class AMP_Invalid_URL_Post_Type {
 			if ( ! isset( $terms[ $term_slug ] ) ) {
 
 				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
-				$term = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+				$term = AMP_Validation_Error_Taxonomy::get_term( $term_slug );
 				if ( ! ( $term instanceof WP_Term ) ) {
+					/*
+					 * The default term_group is 0 so that is AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS.
+					 * If sanitization auto-acceptance is enabled, then the term_group will be updated below.
+					 */
 					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
 					if ( is_wp_error( $r ) ) {
 						continue;
@@ -613,10 +627,15 @@ class AMP_Invalid_URL_Post_Type {
 					 */
 					$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $data );
 					if ( 'with_filter' === $sanitization['forced'] ) {
+						$term_data['term_group'] = $sanitization['status'];
 						wp_update_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
 							'term_group' => $sanitization['status'],
 						) );
-						$term_data['term_group'] = $sanitization['status'];
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() ) {
+						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
+						wp_update_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
+							'term_group' => $term_data['term_group'],
+						) );
 					}
 
 					$term = get_term( $term_id );
@@ -688,7 +707,7 @@ class AMP_Invalid_URL_Post_Type {
 			'theme'   => get_stylesheet(),
 			'plugins' => get_option( 'active_plugins', array() ),
 			'options' => array(
-				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'force_sanitization' ) ),
+				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ),
 			),
 		);
 	}
@@ -936,16 +955,16 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Adds a 'Recheck' bulk action to the edit.php page and modifies the 'Move to Trash' text.
 	 *
+	 * Ensure only delete action is present, not trash.
+	 *
 	 * @param array $actions The bulk actions in the edit.php page.
 	 * @return array $actions The filtered bulk actions.
 	 */
 	public static function filter_bulk_actions( $actions ) {
-		if ( isset( $actions['trash'] ) ) {
-			$actions['trash'] = esc_html__( 'Forget', 'amp' );
-		}
-
-		if ( isset( $actions['delete'] ) ) {
-			$actions['delete'] = esc_html__( 'Forget permanently', 'amp' );
+		$has_delete = ( isset( $actions['trash'] ) || isset( $actions['delete'] ) );
+		unset( $actions['trash'], $actions['delete'] );
+		if ( $has_delete ) {
+			$actions['delete'] = esc_html__( 'Forget', 'amp' );
 		}
 
 		unset( $actions['edit'] );
@@ -1100,7 +1119,7 @@ class AMP_Invalid_URL_Post_Type {
 			} else {
 				$template_mode = 'classic';
 			}
-			$auto_sanitization = AMP_Options_Manager::get_option( 'force_sanitization' );
+			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 
 			if ( 'native' === $template_mode ) {
 				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
@@ -1133,8 +1152,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // WPCS: CSRF OK.
 			$error_id = sanitize_key( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // WPCS: CSRF OK.
 
-			// @todo When PR #1429 is merged switch this to use AMP_Validation_Error_Taxonomy::get_term()
-			$error = get_term_by( 'slug', $error_id, \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$error = AMP_Validation_Error_Taxonomy::get_term( $error_id );
 			if ( ! $error ) {
 				return;
 			}
@@ -1142,7 +1160,7 @@ class AMP_Invalid_URL_Post_Type {
 			// @todo Update this to use the method which will be developed in PR #1429 AMP_Validation_Error_Taxonomy::get_term_error() .
 			$description  = json_decode( $error->description, true );
 			$sanitization = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
-			$status_text  = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization['term_status'], $sanitization['forced'] );
+			$status_text  = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
 			$error_code   = isset( $description['code'] ) ? $description['code'] : 'error';
 			$error_title  = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
 
@@ -1160,7 +1178,7 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			printf(
-				'<div class="notice"><details class="single-error-detail"><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
+				'<div class="notice"><details class="single-error-detail" open><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
 				esc_html( $error_title ),
 				wp_kses_post( $output )
 			);
@@ -1187,8 +1205,7 @@ class AMP_Invalid_URL_Post_Type {
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				// @todo Update once https://github.com/Automattic/amp-wp/pull/1429 is merged.
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
@@ -1200,7 +1217,7 @@ class AMP_Invalid_URL_Post_Type {
 						esc_url( $reject_all_url ),
 						esc_html__( 'Reject', 'amp' )
 					);
-				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS === $sanitization['term_status'] ) {
+				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					} else {
@@ -1412,13 +1429,16 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		foreach ( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $term_slug => $status ) {
+			if ( ! is_numeric( $status ) ) {
+				continue;
+			}
 			$term_slug = sanitize_key( $term_slug );
-			$term      = get_term_by( 'slug', $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$term      = AMP_Validation_Error_Taxonomy::get_term( $term_slug );
 			if ( ! $term ) {
 				continue;
 			}
-			$term_group = intval( $status );
-			if ( $term_group !== $term->term_group ) {
+			$term_group = AMP_Validation_Error_Taxonomy::sanitize_term_status( $status );
+			if ( null !== $term_group && $term_group !== $term->term_group ) {
 				$updated_count++;
 				wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, compact( 'term_group' ) );
 			}
@@ -1530,10 +1550,6 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_status_meta_box( $post ) {
-		$is_sanitization_forcibly_accepted_by_filter = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( array(
-			'code' => 'does_not_exist',
-		) );
-
 		?>
 		<style>
 			#amp_validation_status .inside {
@@ -1565,11 +1581,9 @@ class AMP_Invalid_URL_Post_Type {
 							<?php esc_html_e( 'Recheck', 'amp' ); ?>
 						</a>
 					</div>
-					<?php if ( ! ( AMP_Validation_Manager::is_sanitization_forcibly_accepted() || $is_sanitization_forcibly_accepted_by_filter ) ) : ?>
-						<div id="preview-action">
-							<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
-						</div>
-					<?php endif; ?>
+					<div id="preview-action">
+						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+					</div>
 					<div class="clear"></div>
 				</div>
 				<div id="misc-publishing-actions">
@@ -1633,7 +1647,7 @@ class AMP_Invalid_URL_Post_Type {
 			</div>
 			<div id="major-publishing-actions">
 				<div id="delete-action">
-					<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>">
+					<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID, '', true ) ); ?>">
 						<?php esc_html_e( 'Forget', 'amp' ); ?>
 					</a>
 				</div>
@@ -1847,7 +1861,10 @@ class AMP_Invalid_URL_Post_Type {
 
 		$query = new WP_Query( array(
 			'post_type'              => self::POST_TYPE_SLUG,
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			),
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 		) );
@@ -1859,7 +1876,10 @@ class AMP_Invalid_URL_Post_Type {
 					add_query_arg(
 						array(
 							'post_type' => self::POST_TYPE_SLUG,
-							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
+								AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+								AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+							),
 						),
 						'edit.php'
 					)
@@ -1981,24 +2001,16 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		}
 
-		// Replace 'Trash' text with 'Forget'.
-		if ( isset( $actions['trash'] ) ) {
-			$actions['trash'] = sprintf(
-				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
-				get_delete_post_link( $post->ID ),
-				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), self::get_url_from_post( $post ) ) ),
-				esc_html__( 'Forget', 'amp' )
-			);
-		}
-
-		if ( isset( $actions['delete'] ) ) {
+		// Replace 'Trash' with 'Forget' (which permanently deletes).
+		$has_delete = ( isset( $actions['trash'] ) || isset( $actions['delete'] ) );
+		unset( $actions['trash'], $actions['delete'] );
+		if ( $has_delete ) {
 			$actions['delete'] = sprintf(
 				'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
 				get_delete_post_link( $post->ID, '', true ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221; permanently', 'amp' ), self::get_url_from_post( $post ) ) ),
-				esc_html__( 'Forget Permanently', 'amp' )
+				esc_attr( sprintf( __( 'Forget &#8220;%s&#8221;', 'amp' ), self::get_url_from_post( $post ) ) ),
+				esc_html__( 'Forget', 'amp' )
 			);
 		}
 
@@ -2026,6 +2038,8 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Filters messages displayed after bulk updates.
 	 *
+	 * Note that trashing is replaced with deletion whenever possible, so the trashed and untrashed messages will not be used in practice.
+	 *
 	 * @param array $messages    Bulk message text.
 	 * @param array $bulk_counts Post numbers for the current message.
 	 * @return array Filtered messages.
@@ -2037,22 +2051,22 @@ class AMP_Invalid_URL_Post_Type {
 				array(
 					/* translators: %s is the number of posts permanently forgotten */
 					'deleted'   => _n(
-						'%s invalid AMP page permanently forgotten.',
-						'%s invalid AMP post permanently forgotten.',
+						'%s invalid URL forgotten.',
+						'%s invalid URLs forgotten.',
 						$bulk_counts['deleted'],
 						'amp'
 					),
 					/* translators: %s is the number of posts forgotten */
 					'trashed'   => _n(
-						'%s invalid AMP page forgotten.',
-						'%s invalid AMP pages forgotten.',
+						'%s invalid URL forgotten.',
+						'%s invalid URLs forgotten.',
 						$bulk_counts['trashed'],
 						'amp'
 					),
 					/* translators: %s is the number of posts restored from trash. */
 					'untrashed' => _n(
-						'%s invalid AMP page unforgotten.',
-						'%s invalid AMP pages unforgotten.',
+						'%s invalid URL unforgotten.',
+						'%s invalid URLs unforgotten.',
 						$bulk_counts['untrashed'],
 						'amp'
 					),

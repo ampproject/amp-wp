@@ -346,7 +346,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		acceptButton.addEventListener( 'click', function() {
 			Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), function( select ) {
 				if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-					select.value = 1;
+					select.value = '3';
 					component.updateSelectIcon( select );
 					component.addBeforeUnloadPrompt();
 				}
@@ -357,7 +357,7 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 		rejectButton.addEventListener( 'click', function() {
 			Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), function( select ) {
 				if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-					select.value = 2; // @todo Update to 3 when merging with <https://github.com/Automattic/amp-wp/pull/1429>.
+					select.value = '2';
 					component.updateSelectIcon( select );
 					component.addBeforeUnloadPrompt();
 				}
