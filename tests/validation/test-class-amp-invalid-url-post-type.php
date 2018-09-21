@@ -526,15 +526,15 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			'cb' => '<input type="checkbox">',
 		);
 		$this->assertEquals(
-			array_merge(
+			array_keys( array_merge(
 				$initial_columns,
 				array(
-					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status<span class="dashicons dashicons-editor-help"></span>',
-					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
+					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status',
 					AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
+					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
 				)
-			),
-			AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns )
+			) ),
+			array_keys( AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns ) )
 		);
 	}
 

@@ -639,12 +639,22 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
 			return array(
 				'cb'               => $old_columns['cb'],
-				'error'            => __( 'Error', 'amp' ),
-				'status'           => __( 'Status', 'amp' ),
-				'details'          => __( 'Details', 'amp' ),
-				'error_type'       => __( 'Type', 'amp' ),
-				'created_date_gmt' => __( 'Last Seen', 'amp' ),
-				'posts'            => __( 'Found URLs', 'amp' ),
+				'error'            => esc_html__( 'Error', 'amp' ),
+				'status'           => sprintf(
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				),
+				'details'          => sprintf(
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					esc_html__( 'Details', 'amp' ),
+					esc_html__( 'Details', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				),
+				'error_type'       => esc_html__( 'Type', 'amp' ),
+				'created_date_gmt' => esc_html__( 'Last Seen', 'amp' ),
+				'posts'            => esc_html__( 'Found URLs', 'amp' ),
 			);
 		} );
 
@@ -673,14 +683,14 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_style(
 					'amp-validation-error-taxonomy',
 					amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-					array( 'common' ),
+					array( 'common', 'amp-validation-tooltips' ),
 					AMP__VERSION
 				);
 
 				wp_enqueue_script(
 					'amp-validation-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-					array( 'wp-dom-ready' ),
+					array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 					AMP__VERSION,
 					true
 				);
@@ -1230,7 +1240,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
 		global $pagenow;
-		
+
 		if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
 			$term_id = $tag->term_id;
 			$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
