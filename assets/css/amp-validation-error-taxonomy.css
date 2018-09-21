@@ -81,20 +81,15 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 }
 
 /* Error details toggle button */
-.manage-column.column-details, .manage-column.column-sources_with_invalid_output {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
 .manage-column.column-sources_with_invalid_output .error-details-toggle {
 	margin: 0;
 }
 
 .error-details-toggle {
+	float: right;
 	display: flex;
 	flex-direction: column;
 	height: 14px;
-	margin-right: 10px;
 	padding: 0;
 	background: none;
 	border: none;

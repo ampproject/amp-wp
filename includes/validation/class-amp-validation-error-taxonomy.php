@@ -679,17 +679,20 @@ class AMP_Validation_Error_Taxonomy {
 				);
 
 				wp_enqueue_script(
-					'amp-validation-error-detail-toggle',
-					amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-					array(),
+					'amp-validation-detail-toggle',
+					amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
+					array( 'wp-dom-ready' ) ,
 					AMP__VERSION,
 					true
 				);
 
 				wp_localize_script(
-					'amp-validation-error-detail-toggle',
+					'amp-validation-detail-toggle',
 					'ampValidationI18n',
-					array( 'btnAriaLabel' => esc_attr__( 'Toggle all details', 'amp' ) )
+					array(
+						'detailToggleBtnAriaLabel'  => esc_attr__( 'Toggle all details', 'amp' ),
+						'sourcesToggleBtnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
+					)
 				);
 			}
 
@@ -704,7 +707,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-single-error-url-details',
 					amp_get_asset_url( 'js/amp-validation-single-error-url-details-compiled.js' ),
-					array(),
+					array( 'wp-dom-ready' ),
 					AMP__VERSION,
 					true
 				);
@@ -1585,7 +1588,7 @@ class AMP_Validation_Error_Taxonomy {
 				}
 
 				break;
-			case 'sources':
+			case 'sources_with_invalid_output':
 				if ( ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) { // WPCS: CSRF OK.
 					break;
 				}

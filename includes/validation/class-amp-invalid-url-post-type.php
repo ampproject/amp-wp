@@ -218,14 +218,14 @@ class AMP_Invalid_URL_Post_Type {
 			AMP__VERSION
 		);
 		wp_enqueue_script(
-			'amp-validation-error-detail-toggle',
-			amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
+			'amp-validation-detail-toggle',
+			amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
 			array(),
 			AMP__VERSION,
 			true
 		);
 		wp_localize_script(
-			'amp-validation-error-detail-toggle',
+			'amp-validation-detail-toggle',
 			'ampValidationI18n',
 			array(
 				'btnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
@@ -784,12 +784,12 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function add_single_post_columns() {
 		return array(
-			'cb'         => '<input type="checkbox" />',
-			'error'      => __( 'Error', 'amp' ),
-			'status'     => __( 'Status', 'amp' ),
-			'details'    => __( 'Details', 'amp' ),
-			'sources'    => __( 'Sources', 'amp' ),
-			'error_type' => __( 'Error Type', 'amp' ),
+			'cb'                          => '<input type="checkbox" />',
+			'error'                       => __( 'Error', 'amp' ),
+			'status'                      => __( 'Status', 'amp' ),
+			'details'                     => __( 'Details', 'amp' ),
+			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
+			'error_type'                  => __( 'Error Type', 'amp' ),
 		);
 	}
 

@@ -115,7 +115,7 @@ class RowToggler {
  */
 class ErrorRows {
 	constructor() {
-		this.rows = [ ...document.querySelectorAll( '.wp-list-table tr' ) ]
+		this.rows = [ ...document.querySelectorAll( '.wp-list-table tr[id^="tag-"]' ) ]
 			.map( ( tr, index ) => {
 				const rowHandler = new RowToggler( tr, index );
 				rowHandler.init();

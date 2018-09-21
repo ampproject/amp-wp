@@ -13,6 +13,10 @@ module.exports = {
 		filename: '[name].js'
 	},
 	externals: {
+		// Make core assets importable as ES6 modules.
+		'@wordpress/dom-ready': 'wp.domReady',
+
+		// Make localized data importable.
 		'amp-validation-i18n': 'ampValidationI18n'
 	},
 	devtool: 'cheap-eval-source-map',
