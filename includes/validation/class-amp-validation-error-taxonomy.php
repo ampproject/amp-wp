@@ -1905,14 +1905,10 @@ class AMP_Validation_Error_Taxonomy {
 								<?php echo esc_html( $value ); ?>
 							<?php elseif ( is_array( $value ) ) : ?>
 								<?php foreach ( $value as $key => $attr ) : ?>
-									<?php echo esc_html( $key ); ?>
-
-									<?php if ( ! empty( $attr ) ) : ?>
-
-										<?php printf( ': %s', esc_html( $attr ) ); ?>
-
-									<?php endif; ?>
-
+									<?php printf( '<strong>%s</strong>', esc_html( $key ) );
+									if ( ! empty( $attr ) ) :
+										printf( ': %s', esc_html( $attr ) );
+									endif; ?>
 								<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
