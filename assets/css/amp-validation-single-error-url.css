@@ -96,3 +96,25 @@ table.striped > tbody > tr.even {
 	background-color: #d3d3d3b8;
 	color: #1e8cbecc;
 }
+
+#url-post-filter {
+	float: none;
+	display: inline;
+}
+
+.tablenav.top,
+.tablenav.bottom {
+	display: none;
+}
+
+.amp-invalid-url a {
+	text-decoration: none;
+}
+
+.curtime.misc-pub-section {
+	margin-top: 0.5rem;
+}
+
+.wp-list-table th.column-status {
+	width: 15%;
+}

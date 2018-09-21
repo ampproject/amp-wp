@@ -575,7 +575,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'load-post.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
 		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
 		add_action( 'load-post.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
-		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_invalid_urls_screen' ) );
 		add_action( 'load-edit-tags.php', function() {
 			add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
@@ -681,7 +680,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-					array( 'wp-dom-ready' ) ,
+					array( 'wp-dom-ready' ),
 					AMP__VERSION,
 					true
 				);
@@ -698,8 +697,8 @@ class AMP_Validation_Error_Taxonomy {
 
 			if ( 'post.php' === $pagenow ) {
 				wp_enqueue_style(
-					'amp-validation-single-error-url-details',
-					amp_get_asset_url( 'css/amp-validation-single-error-url-details.css' ),
+					'amp-validation-single-error-url',
+					amp_get_asset_url( 'css/amp-validation-single-error-url.css' ),
 					array( 'common' ),
 					AMP__VERSION
 				);
@@ -891,41 +890,6 @@ class AMP_Validation_Error_Taxonomy {
 
 			return $clauses;
 		}, 10, 2 );
-	}
-
-	/**
-	 * Outputs the taxonomy filter UI for this taxonomy type.
-	 *
-	 * Similar to what appears on /wp-admin/edit.php for posts and pages,
-	 * this outputs <select> elements to choose the error status and type,
-	 * and a 'Filter' submit button that filters for them.
-	 *
-	 * @param string $taxonomy_name The name of the taxonomy.
-	 */
-	public static function render_taxonomy_filters( $taxonomy_name ) {
-		if ( self::TAXONOMY_SLUG !== $taxonomy_name ) {
-			return;
-		}
-
-		$div_id = 'amp-tax-filter';
-		?>
-		<div id="<?php echo esc_attr( $div_id ); ?>" class="alignleft actions">
-			<?php
-			self::render_error_status_filter();
-			self::render_error_type_filter();
-			?>
-			<input name="filter_action" type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply Filter', 'amp' ); ?>">
-		</div>
-
-		<script>
-			( function ( $ ) {
-				$( function() {
-					// Move the filter UI after the 'Bulk Actions' <select>, as it looks like there's no way to do this with only an action.
-					$( '#<?php echo $div_id; // WPCS: XSS OK. ?>' ).insertAfter( $( '.tablenav.top .bulkactions' ) );
-				} );
-			} )( jQuery );
-		</script>
-		<?php
 	}
 
 	/**
@@ -1265,6 +1229,8 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array Actions.
 	 */
 	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
+		global $pagenow;
+		
 		if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
 			$term_id = $tag->term_id;
 			$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
@@ -1278,11 +1244,22 @@ class AMP_Validation_Error_Taxonomy {
 			 */
 			unset( $actions['delete'] );
 
-			$actions['details'] = sprintf(
-				'<button type="button" aria-label="%s" class="single-url-detail-toggle">%s</button>',
-				esc_attr__( 'Toggle error details', 'amp' ),
-				esc_html__( 'Details', 'amp' )
-			);
+			if ( 'post.php' === $pagenow ) {
+				$actions['details'] = sprintf(
+					'<button type="button" aria-label="%s" class="single-url-detail-toggle">%s</button>',
+					esc_attr__( 'Toggle error details', 'amp' ),
+					esc_html__( 'Details', 'amp' )
+				);
+			} else {
+				$actions['details'] = sprintf(
+					'<a href="%s">%s</a>',
+					admin_url( add_query_arg( array(
+						self::TAXONOMY_SLUG => $term->name,
+						'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+					), 'edit.php' ) ),
+					esc_html__( 'Details', 'amp' )
+				);
+			}
 
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
 			if ( self::VALIDATION_ERROR_REJECTED_STATUS !== $sanitization['term_status'] ) {
@@ -1491,7 +1468,7 @@ class AMP_Validation_Error_Taxonomy {
 						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACCEPTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>">
 							<?php esc_html_e( 'Accepted', 'amp' ); ?>
 						</option>
-						<option style="text-decoration: line-through" value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-blue.svg' ) ); ?>">
+						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-blue.svg' ) ); ?>">
 							<?php esc_html_e( 'Rejected', 'amp' ); ?>
 						</option>
 					</select>

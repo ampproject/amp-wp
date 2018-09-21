@@ -362,7 +362,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-post.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
-		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_taxonomy_filters' ) ) ) );
 		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_link_to_errors_by_url' ) ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', array( self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ) ) );
@@ -515,37 +514,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test render_taxonomy_filters.
-	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::render_taxonomy_filters()
-	 */
-	public function test_render_taxonomy_filters() {
-		AMP_Validation_Error_Taxonomy::register();
-		set_current_screen( 'edit-tags.php' );
-		// Create one new error.
-		$this->factory()->term->create( array(
-			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-			'description' => wp_json_encode( $this->get_mock_error() ),
-			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-		) );
-
-		// When passing the wrong $taxonomy_name to the method, it should not output anything.
-		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( 'category' );
-		$this->assertEmpty( ob_get_clean() );
-
-		// When there are two new errors, the <option> text should be plural, and have a count of (2).
-		$this->factory()->term->create( array(
-			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-			'description' => wp_json_encode( $this->get_mock_error() ),
-			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-		) );
-		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		$this->assertContains( 'New Errors <span class="count">(2)</span>', ob_get_clean() );
-	}
-
-	/**
 	 * Test render_link_to_invalid_urls_screen.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen()
@@ -605,11 +573,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			);
 		}
 
-		/*
-		 * This is on another accepted screen, so this should again render markup.
-		 * When there are 10 accepted errors, the <option> element for it should end with (10).
-		 */
-		set_current_screen( 'edit-tags.php' );
+		// When there are 10 accepted errors, the <option> element for it should end with (10).
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_error_status_filter();
 		$this->assertContains(
@@ -651,7 +615,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// The strings below should be present.
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		AMP_Validation_Error_Taxonomy::render_error_type_filter();
 		$markup = ob_get_clean();
 
 		$expected_to_contain = array(
@@ -660,21 +624,11 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
 			AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 			AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-			'<script>',
 		);
 
 		foreach ( $expected_to_contain as $expected ) {
 			$this->assertContains( $expected, $markup );
 		}
-
-		// When there are 10 errors with this status, its <option> element should have (10).
-		$this->assertContains(
-			sprintf(
-				'New Errors <span class="count">(%d)</span>',
-				$number_of_errors
-			),
-			$markup
-		);
 
 		// On the edit-tags.php page, the <option> text should not have 'With', like 'With JS Errors'.
 		$this->assertNotContains( 'With', $markup );
@@ -682,7 +636,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		// On the edit.php page (Errors by URL), the <option> text should have 'With', like 'With JS Errors'.
 		set_current_screen( 'edit.php' );
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		AMP_Validation_Error_Taxonomy::render_error_type_filter();
 		$this->assertContains( 'With', ob_get_clean() );
 	}
 

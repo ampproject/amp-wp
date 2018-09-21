@@ -546,12 +546,12 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_add_single_post_columns() {
 		$this->assertEquals(
 			array(
-				'cb'         => '<input type="checkbox" />',
-				'error'      => 'Error',
-				'status'     => 'Status',
-				'details'    => 'Details',
-				'sources'    => 'Sources',
-				'error_type' => 'Error Type',
+				'cb'                          => '<input type="checkbox" />',
+				'error'                       => 'Error',
+				'status'                      => 'Status',
+				'details'                     => 'Details',
+				'sources_with_invalid_output' => 'Sources',
+				'error_type'                  => 'Error Type',
 			),
 			AMP_Invalid_URL_Post_Type::add_single_post_columns()
 		);
@@ -565,7 +565,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	public function get_custom_columns() {
 		$source = array(
 			'type' => 'plugin',
-			'name' => 'amp',
+			'name' => 'AMP',
 		);
 		$errors = array(
 			array(
@@ -1223,7 +1223,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$post_correct_post_type = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 		$post_wrong_post_type   = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
 		$GLOBALS['hook_suffix'] = 'post.php'; // WPCS: Global override OK.
-		$this->go_to( admin_url( 'post.php' ) );
+		
 		set_current_screen( 'post.php' );
 		$GLOBALS['current_screen']->taxonomy = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 
@@ -1237,11 +1237,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
 		$output = ob_get_clean();
 		$this->assertContains( '<form class="search-form wp-clearfix" method="get">', $output );
-		$this->assertContains( '<form id="posts-filter" method="post">', $output );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $output );
-		$this->assertContains( '<button type="submit" name="action" value="', $output );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION, $output );
-		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, $output );
+		$this->assertContains( '<button type="button" class="hidden button action accept">', $output );
+		$this->assertContains( '<button type="button" class="hidden button action reject">', $output );
 	}
 
 	/**

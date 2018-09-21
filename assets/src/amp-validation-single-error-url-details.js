@@ -16,19 +16,19 @@ class RowToggler {
 
 		this.toggle = this.toggle.bind( this );
 	}
-	
+
 	/**
 	 * Sets up the new tr and adds an event listener to toggle details.
 	 */
 	init() {
-		this.details = this.tr.querySelector( 'details' );	
+		this.details = this.tr.querySelector( '.column-details details' );
 		if ( this.details ) {
 			this.createNewTr();
 			const togglers = [
 				...this.tr.querySelectorAll( '.single-url-detail-toggle' ),
 				this.details.querySelector( 'summary' )
 			];
-			
+
 			togglers.forEach( el => {
 				el.addEventListener( 'click', () => {
 					this.toggle( el );
@@ -40,14 +40,14 @@ class RowToggler {
 	/**
 	 * Creates the details table row from the original row's <details> element content, minus the summary.
 	 */
-	createNewTr() {	
+	createNewTr() {
 		this.newTr = document.createElement( 'tr' );
 		this.newTr.classList.add( 'details' );
 		this.newTr.classList.add( this.index % 2 ? 'odd' : 'even' ); // eslint-disable-line no-magic-numbers
 
 		const newCell = document.createElement( 'td' );
 		newCell.setAttribute( 'colspan', this.getRowColspan() );
-		
+
 		for ( const childNode of this.details.childNodes ) {
 			if ( 'SUMMARY' !== childNode.tagName ) {
 				newCell.appendChild( childNode.cloneNode( true ) );
@@ -70,7 +70,7 @@ class RowToggler {
 
 	/**
 	 * Toggles the additional row.
-	 * 
+	 *
 	 * @param {Object} target The click event target.
 	 */
 	toggle( target ) {
@@ -83,9 +83,9 @@ class RowToggler {
 
 	/**
 	 * Adds the additional row.
-	 * 
+	 *
 	 * @param {Object} target The click event target.
-	 */ 
+	 */
 	onOpen( target ) {
 		this.tr.parentNode.insertBefore( this.newTr, this.tr.nextSibling );
 		this.tr.classList.add( 'expanded' );
@@ -97,7 +97,7 @@ class RowToggler {
 
 	/**
 	 * Removes the additional row.
-	 * 
+	 *
 	 * @param {Object} target The click event target.
 	 */
 	onClose( target ) {
@@ -133,8 +133,8 @@ class ErrorRows {
 	 */
 	addToggleAllListener() {
 		let open = false;
-		const toggleButtons = [ ...document.querySelectorAll( 'button.error-details-toggle' ) ];
-		
+		const toggleButtons = [ ...document.querySelectorAll( '.column-details button.error-details-toggle' ) ];
+
 		const onButtonClick = ( target ) => {
 			open = ! open;
 			this.rows.forEach( row => {

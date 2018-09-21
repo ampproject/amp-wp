@@ -105,7 +105,7 @@ class AMP_Invalid_URL_Post_Type {
 					'not_found'          => __( 'No invalid URLs found', 'amp' ),
 					'not_found_in_trash' => __( 'No forgotten invalid URLs', 'amp' ),
 					'search_items'       => __( 'Search invalid URLs', 'amp' ),
-					'edit_item'          => __( 'Invalid URL', 'amp' ),
+					'edit_item'          => '', // Overwritten in JS, so this prevents the page header from appearing and changing.
 				),
 				'supports'     => false,
 				'public'       => false,
@@ -228,7 +228,7 @@ class AMP_Invalid_URL_Post_Type {
 			'amp-validation-detail-toggle',
 			'ampValidationI18n',
 			array(
-				'btnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
+				'btnAriaLabel' => __( 'Toggle all', 'amp' ),
 			)
 		);
 	}
@@ -1624,7 +1624,7 @@ class AMP_Invalid_URL_Post_Type {
 					</a>
 				</div>
 				<div id="publishing-action">
-					<button type="submit" form="posts-filter" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
+					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
 				</div>
 				<div class="clear"></div>
 			</div>
@@ -1694,50 +1694,14 @@ class AMP_Invalid_URL_Post_Type {
 			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
 			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
 		</form>
+
+		<button type="button" class="hidden button action accept"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
+		<button type="button" class="hidden button action reject"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
 		<div id="url-post-filter" class="alignleft actions">
 			<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
 		</div>
+		<?php $wp_list_table->display(); ?>
 
-		<form id="posts-filter" method="post">
-			<?php wp_nonce_field( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce', false ); ?>
-			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ); ?>" class="button action"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
-			<button type="submit" name="action" value="<?php echo esc_attr( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ); ?>" class="button action"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
-			<input type="hidden" name="taxonomy" value="<?php echo esc_attr( $taxonomy ); ?>" />
-			<input type="hidden" name="post_type" value="<?php echo esc_attr( $post->post_type ); ?>" />
-			<?php $wp_list_table->display(); ?>
-		</form>
-		<style>
-			button[value=amp_validation_error_accept] {
-				position: absolute;
-				left: 0;
-			}
-
-			button[value=amp_validation_error_reject] {
-				position: absolute;
-				left: 5rem;
-			}
-
-			#url-post-filter {
-				margin-left: 10rem;
-			}
-
-			.tablenav.top,
-			.tablenav.bottom {
-				display: none;
-			}
-
-			.amp-invalid-url a {
-				text-decoration: none;
-			}
-
-			.curtime.misc-pub-section {
-				margin-top: 0.5rem;
-			}
-
-			.wp-list-table th.column-status {
-				width: 15%;
-			}
-		</style>
 		<?php
 	}
 
@@ -1943,15 +1907,15 @@ class AMP_Invalid_URL_Post_Type {
 		// Mainly uses the same conditionals as print_status_meta_box().
 		$post           = get_post( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
-		if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
-			$name = get_the_title( $queried_object['id'] );
-		} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
-			$name = get_term( $queried_object['id'] )->name;
-		} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {
-			$name = get_user_by( 'ID', $queried_object['id'] )->display_name;
-		} else {
-			// If there is no name available in the $queried_object, simply use 'Single URL' in the page heading.
-			$name = __( 'Single URL', 'amp' );
+		$name           = __( 'Single URL', 'amp' ); // Default.
+		if ( isset( $queried_object['type'] ) && isset( $queried_object['id'] ) ) {
+			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
+				$name = get_the_title( $queried_object['id'] );
+			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
+				$name = get_term( $queried_object['id'] )->name;
+			} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {
+				$name = get_user_by( 'ID', $queried_object['id'] )->display_name;
+			}
 		}
 
 		/* translators: %s is the name of the page with the the validation error(s) */
