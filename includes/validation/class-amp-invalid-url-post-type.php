@@ -197,7 +197,7 @@ class AMP_Invalid_URL_Post_Type {
 		wp_enqueue_script(
 			'amp-validation-error-detail-toggle',
 			amp_get_asset_url( 'js/amp-validation-error-detail-toggle-compiled.js' ),
-			array( 'wp-dom-ready', 'amp-validation-tooltips' ),
+			array( 'amp-validation-tooltips' ),
 			AMP__VERSION,
 			true
 		);
@@ -701,9 +701,9 @@ class AMP_Invalid_URL_Post_Type {
 			$columns,
 			array(
 				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf(
-					'%s<div class="tooltip dashicons dashicons-editor-help"><h3>%s</h3><p>%s</p></div>',
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
 					esc_html__( 'Status', 'amp' ),
-					__( 'Statuses tooltip title', 'amp' ),
+					__( 'Status', 'amp' ),
 					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
 				),
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),

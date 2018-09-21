@@ -634,22 +634,22 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
 			return array(
 				'cb'               => $old_columns['cb'],
-				'error'            => __( 'Error', 'amp' ),
+				'error'            => esc_html__( 'Error', 'amp' ),
 				'status'           => sprintf(
-					'%s<div class="tooltip dashicons dashicons-editor-help"><h3>%s</h3><p>%s</p></div>',
-					__( 'Status', 'amp' ),
-					__( 'Statuses tooltip title', 'amp' ),
-					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
 				),
 				'details'          => sprintf(
-					'%s<div class="tooltip dashicons dashicons-editor-help"><h3>%s</h3><p>%s</p></div>',
-					__( 'Details', 'amp' ),
-					__( 'Details tooltip title', 'amp' ),
-					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					esc_html__( 'Details', 'amp' ),
+					esc_html__( 'Details', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
 				),
-				'error_type'       => __( 'Type', 'amp' ),
-				'created_date_gmt' => __( 'Last Seen', 'amp' ),
-				'posts'            => __( 'Found URLs', 'amp' ),
+				'error_type'       => esc_html__( 'Type', 'amp' ),
+				'created_date_gmt' => esc_html__( 'Last Seen', 'amp' ),
+				'posts'            => esc_html__( 'Found URLs', 'amp' ),
 			);
 		} );
 

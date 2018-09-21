@@ -376,16 +376,16 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$cb              = '<input type="checkbox" />';
 		$initial_columns = array( 'cb' => $cb );
 		$this->assertEquals(
-			array(
+			array_keys( array(
 				'cb'               => $cb,
 				'error'            => 'Error',
 				'status'           => 'Status<div class="tooltip dashicons dashicons-editor-help"><h3>Statuses tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
 				'details'          => 'Details<div class="tooltip dashicons dashicons-editor-help"><h3>Details tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
+				'error_type'       => 'Type',
 				'created_date_gmt' => 'Last Seen',
 				'posts'            => 'Found URLs',
-				'error_type'       => 'Type',
-			),
-			apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+			) ),
+			array_keys( apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		);
 
 		// Assert that the 'query_vars' callback adds these query vars.

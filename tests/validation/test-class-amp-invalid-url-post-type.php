@@ -524,15 +524,15 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			'cb' => '<input type="checkbox">',
 		);
 		$this->assertEquals(
-			array_merge(
+			array_keys( array_merge(
 				$initial_columns,
 				array(
-					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status<div class="tooltip dashicons dashicons-editor-help"><h3>Statuses tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
-					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
+					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status',
 					AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
+					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
 				)
-			),
-			AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns )
+			) ),
+			array_keys( AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns ) )
 		);
 	}
 

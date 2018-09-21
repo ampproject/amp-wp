@@ -5,9 +5,9 @@ import domReady from '@wordpress/dom-ready';
 
 // WIP Pointer function
 function sourcesPointer() {
-	jQuery( '.tooltip' ).on( 'hover', function() {
+	jQuery( document ).on( 'click', '.tooltip-button', function() {
 		jQuery( this ).pointer( {
-			content: this.innerHTML,
+			content: jQuery( this ).next( '.tooltip' ).html(),
 			position: {
 				edge: 'top',
 				align: 'left'
