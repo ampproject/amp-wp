@@ -1698,8 +1698,12 @@ class AMP_Validation_Error_Taxonomy {
 					</label>
 					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 						<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group || self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $term->term_group ) : ?>
-							<option value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error.svg' ) ); ?>">
-								<?php esc_html_e( 'New', 'amp' ); ?>
+							<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error.svg' ) ); ?>">
+								<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group ) : ?>
+									<?php esc_html_e( 'New Accepted', 'amp' ); ?>
+								<?php else : ?>
+									<?php esc_html_e( 'New Rejected', 'amp' ); ?>
+								<?php endif; ?>
 							</option>
 						<?php endif; ?>
 						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>">
