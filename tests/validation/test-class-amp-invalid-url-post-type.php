@@ -93,9 +93,11 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'the_title', array( self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ) ) );
 		$this->assertEquals( 10, has_filter( 'restrict_manage_posts', array( self::TESTED_CLASS, 'render_post_filters' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', array( self::TESTED_CLASS, 'add_post_columns' ) ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_columns', array( self::TESTED_CLASS, 'add_single_post_columns' ) ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', array( self::TESTED_CLASS, 'output_custom_column' ) ) );
 		$this->assertEquals( 10, has_filter( 'post_row_actions', array( self::TESTED_CLASS, 'filter_post_row_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'filter_bulk_actions' ) ) );
+		$this->assertEquals( 10, has_filter( 'bulk_actions-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, '__return_false' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array( self::TESTED_CLASS, 'handle_bulk_action' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'print_admin_notice' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Invalid_URL_Post_Type::VALIDATE_ACTION, array( self::TESTED_CLASS, 'handle_validate_request' ) ) );
@@ -533,6 +535,25 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 				)
 			) ),
 			array_keys( AMP_Invalid_URL_Post_Type::add_post_columns( $initial_columns ) )
+		);
+	}
+
+	/**
+	 * Test for add_single_post_columns()
+	 *
+	 * @covers AMP_Invalid_URL_Post_Type::add_single_post_columns()
+	 */
+	public function test_add_single_post_columns() {
+		$this->assertEquals(
+			array(
+				'cb'                          => '<input type="checkbox" />',
+				'error'                       => 'Error',
+				'status'                      => 'Status<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>Status</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
+				'details'                     => 'Details<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>Details</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
+				'sources_with_invalid_output' => 'Sources',
+				'error_type'                  => 'Error Type',
+			),
+			AMP_Invalid_URL_Post_Type::add_single_post_columns()
 		);
 	}
 
@@ -1033,6 +1054,56 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test for add_edit_post_inline_script()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::add_edit_post_inline_script()
+	 */
+	public function test_add_edit_post_inline_script() {
+		global $pagenow;
+
+		$pagenow = 'post.php';
+		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
+		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
+
+		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
+		$inline_script = end( $after_script );
+		$this->assertContains( 'document.addEventListener(', $inline_script );
+		$this->assertContains( 'You have unsaved changes. Are you sure you want to leave?', $inline_script );
+
+		// Now that the total errors are set, they should appear in the inline script.
+		$total_errors                                    = 22;
+		AMP_Invalid_URL_Post_Type::$total_errors_for_url = $total_errors;
+		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
+		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
+		$inline_script = end( $after_script );
+		$this->assertContains( 'showing_number_errors', $inline_script );
+		$this->assertContains( strval( $total_errors ), $inline_script );
+
+		// The 'page_heading' value should be present in the inline script.
+		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$post                 = $this->factory()->post->create_and_get();
+		$_GET['post']         = $amp_invalid_url_post->ID;
+		$_GET['action']       = 'edit';
+		update_post_meta(
+			$amp_invalid_url_post->ID,
+			'_amp_queried_object',
+			array(
+				'type' => 'post',
+				'id'   => $post->ID,
+			)
+		);
+		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
+		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
+		$inline_script = end( $after_script );
+		$this->assertContains(
+			sprintf( 'Errors For %s', $post->post_title ),
+			$inline_script
+		);
+		$this->assertContains( 'Show all', $inline_script );
+	}
+
+	/**
 	 * Test for add_meta_boxes()
 	 *
 	 * @covers \AMP_Invalid_URL_Post_Type::add_meta_boxes()
@@ -1051,21 +1122,66 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			$side_meta_box['callback']
 		);
 
-		$full_meta_box = $wp_meta_boxes[ AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ]['normal']['default'][ AMP_Invalid_URL_Post_Type::VALIDATION_ERRORS_META_BOX ];
-		$this->assertEquals( AMP_Invalid_URL_Post_Type::VALIDATION_ERRORS_META_BOX, $full_meta_box['id'] );
-		$this->assertEquals( 'Validation Errors', $full_meta_box['title'] );
-		$this->assertEquals(
-			array(
-				self::TESTED_CLASS,
-				'print_validation_errors_meta_box',
-			),
-			$full_meta_box['callback']
-		);
-
 		$contexts = $wp_meta_boxes[ AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ]['side'];
 		foreach ( $contexts as $context ) {
 			$this->assertFalse( $context['submitdiv'] );
 		}
+	}
+
+	/**
+	 * Test for get_terms_per_page()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_terms_per_page()
+	 */
+	public function test_get_terms_per_page() {
+		$initial_counts = array( 0, 22, 1000 );
+
+		// If 'post.php' === $pagenow, this method should return the same value, no matter what argument is passed to it.
+		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		foreach ( $initial_counts as $initial_count ) {
+			$this->assertEquals(
+				PHP_INT_MAX,
+				AMP_Invalid_URL_Post_Type::get_terms_per_page( $initial_count )
+			);
+		}
+
+		// If 'post.php' !== $pagenow, this method should return the same value that is passed to it.
+		$GLOBALS['pagenow'] = 'edit-tags.php'; // WPCS: Global override OK.
+		foreach ( $initial_counts as $initial_count ) {
+			$this->assertEquals(
+				$initial_count,
+				AMP_Invalid_URL_Post_Type::get_terms_per_page( $initial_count )
+			);
+		}
+	}
+
+	/**
+	 * Test for add_taxonomy()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::add_taxonomy()
+	 */
+	public function test_add_taxonomy() {
+		// The 'pagenow' value is incorrect, so this should not add the taxonomy.
+		$GLOBALS['pagenow'] = 'edit.php';
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+
+		// Though the 'pagenow' value is correct, the $_REQUEST['post'] is not set, and this should not add the taxonomy.
+		$GLOBALS['pagenow'] = 'post.php';
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+
+		// Though the $_REQUEST['post'] is set, it is for a post of the wrong type.
+		$wrong_post_type  = $this->factory()->post->create();
+		$_REQUEST['post'] = $wrong_post_type;
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+
+		// Now that the post type is correct, this should add the taxonomy to $_REQUEST.
+		$correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$_REQUEST['post']  = $correct_post_type;
+		AMP_Invalid_URL_Post_Type::add_taxonomy();
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $_REQUEST['taxonomy'] ); // WPCS: CSRF OK.
 	}
 
 	/**
@@ -1098,21 +1214,31 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for print_validation_errors_meta_box()
+	 * Test for render_single_url_list_table()
 	 *
-	 * @covers \AMP_Invalid_URL_Post_Type::print_validation_errors_meta_box()
+	 * @covers \AMP_Invalid_URL_Post_Type::render_single_url_list_table()
 	 */
-	public function test_print_validation_errors_meta_box() {
-		AMP_Validation_Manager::init();
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$post_id = AMP_Invalid_URL_Post_Type::store_validation_errors( $this->get_mock_errors(), home_url( '/' ) );
-		ob_start();
-		AMP_Invalid_URL_Post_Type::print_validation_errors_meta_box( get_post( $post_id ) );
-		$output = ob_get_clean();
+	public function test_render_single_url_list_table() {
+		AMP_Validation_Error_Taxonomy::register();
+		$post_correct_post_type = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$post_wrong_post_type   = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
+		$GLOBALS['hook_suffix'] = 'post.php'; // WPCS: Global override OK.
+		$this->go_to( admin_url( 'post.php' ) );
+		set_current_screen( 'post.php' );
+		$GLOBALS['current_screen']->taxonomy = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 
-		$this->assertContains( '<details', $output );
-		$this->assertContains( 'script', $output );
-		$this->assertContains( 'onclick', $output );
+		// If the post type is wrong, so the conditional should be false, and this should not echo anything.
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_wrong_post_type );
+		$this->assertEmpty( ob_get_clean() );
+
+		// Now that the current user has permissions, this should output the correct markup.
+		ob_start();
+		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
+		$output = ob_get_clean();
+		$this->assertContains( '<form class="search-form wp-clearfix" method="get">', $output );
+		$this->assertContains( '<button type="button" class="hidden button action accept">', $output );
+		$this->assertContains( '<button type="button" class="hidden button action reject">', $output );
 	}
 
 	/**
@@ -1264,6 +1390,74 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( '1 URL w/ new AMP errors', $items[0] );
 		$this->assertContains( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $items[0] );
 		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $items[0] );
+	}
+
+	/**
+	 * Test for get_single_url_page_heading()
+	 *
+	 * @covers \AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
+	 */
+	public function test_get_single_url_page_heading() {
+		$meta_key             = '_amp_queried_object';
+		$post                 = $this->factory()->post->create_and_get();
+		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+
+		// If $pagenow is not post.php, this should not filter the labels.
+		$GLOBALS['pagenow'] = 'edit.php'; // WPCS: Global override OK.
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_single_url_page_heading() );
+
+		// If $pagenow is correct, but $_GET['post'] and $_GET['action'] are not set, so this should not filter the labels.
+		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_single_url_page_heading() );
+
+		// Though $_GET['post'] and $_GET['action'] are now set, but the post type is 'post', so this should not filter the labels.
+		$_GET['post']   = $post->ID;
+		$_GET['action'] = 'edit';
+		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_single_url_page_heading() );
+
+		$_GET['post'] = $amp_invalid_url_post->ID;
+		update_post_meta(
+			$amp_invalid_url_post->ID,
+			$meta_key,
+			array(
+				'type' => 'post',
+				'id'   => $post->ID,
+			)
+		);
+		$this->assertEquals(
+			sprintf( 'Errors For %s', $post->post_title ),
+			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
+		);
+
+		// If the URL with validation error(s) is a term, this should return the term name.
+		$term = $this->factory()->term->create_and_get();
+		update_post_meta(
+			$amp_invalid_url_post->ID,
+			$meta_key,
+			array(
+				'type' => 'term',
+				'id'   => $term->term_id,
+			)
+		);
+		$this->assertEquals(
+			sprintf( 'Errors For %s', $term->name ),
+			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
+		);
+
+		// If the URL with validation error(s) is for a user (author), this should return the author's name.
+		$user = $this->factory()->user->create_and_get();
+		update_post_meta(
+			$amp_invalid_url_post->ID,
+			$meta_key,
+			array(
+				'type' => 'user',
+				'id'   => $user->ID,
+			)
+		);
+		$this->assertEquals(
+			sprintf( 'Errors For %s', $user->display_name ),
+			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
+		);
 	}
 
 	/**

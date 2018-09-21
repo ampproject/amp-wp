@@ -1,0 +1,120 @@
+/** Arrow icon on title in error column. */
+.column-error > .single-url-detail-toggle {
+	position: relative;
+	width: 100%;
+	padding: 5px 36px 5px 0;
+	background: none;
+	border: none;
+	text-align: left;
+	line-height: 1.682;
+	color: #0073aa;
+	cursor: pointer;
+}
+
+.column-error > .single-url-detail-toggle::after {
+	position: absolute;
+	top: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 12px;
+	height: 18px;
+	background-image: url("../images/down-triangle.svg");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	content: "";
+}
+
+tr.expanded .single-url-detail-toggle::after {
+	transform: rotate(180deg);
+}
+
+/** Striped table overrides. */
+table.striped > tbody > tr.odd {
+	background: #f9f9f9;
+}
+
+table.striped > tbody > tr.even {
+	background: #fff;
+}
+
+/** Hide original details content. */
+.details-attributes > .detailed {
+	display: none;
+}
+
+/** Details post action. */
+.details button {
+	display: inline-block;
+	background: none;
+	border: none;
+	padding: 0;
+	text-align: left;
+	color: #0073aa;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+/** Details row styles. */
+.details ul.detailed {
+	padding: 0 32px;
+	margin-top: 0;
+}
+
+.details div.detailed {
+	padding-left: 30px;
+}
+
+.details .detailed details {
+	padding-bottom: 16px;
+}
+
+.details .detailed summary code {
+	display: inline-block;
+	min-width: 240px;
+	margin-left: 12px;
+	font-weight: 600;
+}
+
+.column-status select {
+	vertical-align: top;
+}
+
+.column-status img {
+	width: 1.5rem;
+	margin-top: 0.2rem;
+}
+
+#amp_validation_status #amp-enabled-icon {
+	margin-bottom: 1.2rem;
+}
+
+#number-errors {
+	text-align: center;
+	background-color: #d3d3d3b8;
+	color: #1e8cbecc;
+}
+
+#url-post-filter {
+	float: none;
+	display: inline;
+}
+
+.tablenav.top,
+.tablenav.bottom {
+	display: none;
+}
+
+.amp-invalid-url a {
+	text-decoration: none;
+}
+
+.curtime.misc-pub-section {
+	margin-top: 0.5rem;
+}
+
+.wp-list-table th.column-status {
+	width: 15%;
+}
