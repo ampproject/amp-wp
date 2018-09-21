@@ -1158,31 +1158,20 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			// @todo Update this to use the method which will be developed in PR #1429 AMP_Validation_Error_Taxonomy::get_term_error() .
-			$description  = json_decode( $error->description, true );
-			$sanitization = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
-			$status_text  = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
-			$error_code   = isset( $description['code'] ) ? $description['code'] : 'error';
-			$error_title  = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
+			$description      = json_decode( $error->description, true );
+			$sanitization     = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
+			$status_text      = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$error_code       = isset( $description['code'] ) ? $description['code'] : 'error';
+			$error_title      = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
+			$validation_error = json_decode( $error->description, true );
+			?>
+			<div class="notice">
+				<ul>
+					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error ); // WPCS : XSS OK. ?>
+				</ul>
+			</div>
 
-			$output = '';
-			foreach ( $description as $desc_name => $desc_info ) {
-				if ( ! is_array( $desc_info ) ) {
-					$output .= sprintf( '<li><span class="details-attributes__title">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $desc_name, $desc_info );
-				} else {
-					$output .= sprintf( '<ul class="secondary-details-array"><span class="details-attributes__title">%s:</span><br/>', $desc_name );
-					foreach ( $desc_info as $sec_desc_info_name => $sec_desc_info ) {
-						$output .= sprintf( '<li><span class="details-attributes__attr">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $sec_desc_info_name, $sec_desc_info );
-					}
-					$output .= '</ul>';
-				}
-			}
-
-			printf(
-				'<div class="notice"><details class="single-error-detail" open><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
-				esc_html( $error_title ),
-				wp_kses_post( $output )
-			);
-
+			<?php
 			$accept_all_url = wp_nonce_url(
 				add_query_arg(
 					array(
