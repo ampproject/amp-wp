@@ -85,7 +85,7 @@ class AMP_Admin_Pointer {
 		wp_register_style(
 			self::TOOLTIP_SLUG,
 			amp_get_asset_url( 'css/' . self::TOOLTIP_SLUG . '.css' ),
-			array(),
+			array( 'wp-pointer' ),
 			AMP__VERSION
 		);
 
