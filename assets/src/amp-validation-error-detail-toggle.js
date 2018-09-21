@@ -17,19 +17,22 @@ const OPEN_CLASS = 'is-open';
  */
 function addToggleButtons() {
 	const addButtons = ( th ) => {
+		const span = document.createElement( 'span' );
+		span.classList.add( 'toggle-button-flex-container' );
+		while ( th.firstChild ) {
+			span.appendChild( th.removeChild( th.firstChild ) );
+		}
+
 		const button = document.createElement( 'button' );
 		button.setAttribute( 'aria-label', btnAriaLabel );
 		button.setAttribute( 'type', 'button' );
 		button.setAttribute( 'class', 'error-details-toggle' );
-		th.appendChild( button );
+		span.appendChild( button );
+		th.appendChild( span );
 	};
 
-	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( th => {
-		addButtons( th );
-	} );
-	[ ...document.querySelectorAll( 'th.manage-column.column-sources_with_invalid_output' ) ].forEach( th => {
-		addButtons( th );
-	} );
+	[ ...document.querySelectorAll( 'th.column-details.manage-column' ) ].forEach( addButtons );
+	[ ...document.querySelectorAll( 'th.manage-column.column-sources_with_invalid_output' ) ].forEach( addButtons );
 }
 
 /**
@@ -61,7 +64,26 @@ function addToggleListener() {
 	} );
 }
 
+/**
+ * Adds classes to the rows for the amp_validation_error term list table.
+ *
+ * This is needed because \WP_Terms_List_Table::single_row() does not allow for additional
+ * attributes to be added to the <tr> element.
+ */
+function addTermListTableRowClasses() {
+	const rows = [ ...document.querySelectorAll( '#the-list > tr' ) ];
+	rows.forEach( ( row ) => {
+		const statusText = row.querySelector( '.column-status > .status-text' );
+		if ( statusText ) {
+			row.classList.toggle( 'new', statusText.classList.contains( 'new' ) );
+			row.classList.toggle( 'accepted', statusText.classList.contains( 'accepted' ) );
+			row.classList.toggle( 'rejected', statusText.classList.contains( 'rejected' ) );
+		}
+	} );
+}
+
 domReady( () => {
 	addToggleButtons();
 	addToggleListener();
+	addTermListTableRowClasses();
 } );

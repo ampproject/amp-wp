@@ -37,11 +37,10 @@ details[open] .details-attributes__summary {
 	margin-bottom: 15px;
 }
 
-.details-attributes__summary::-webkit-details-marker {
+.details-attributes__summary::-webkit-details-marker, .notice details > summary::-webkit-details-marker {
 	display: none;
 }
-
-.details-attributes__summary::after {
+.details-attributes__summary::after, .single-error-detail-summary::after {
 	order: 99;
 	width: 12px;
 	height: 12px;
@@ -51,7 +50,7 @@ details[open] .details-attributes__summary {
 	content: "";
 }
 
-details[open] .details-attributes__summary::after {
+details[open] .details-attributes__summary::after, details.single-error-detail[open] .single-error-detail-summary::after {
 	transform: rotate(180deg);
 }
 
@@ -78,24 +77,19 @@ details[open] .details-attributes__summary::after {
 	margin-bottom: 5px;
 }
 .column-sources_with_invalid_output details > div {
-	padding-left: 25px;
+	padding-left: 25px;	
 }
 
 /* Error details toggle button */
-.manage-column.column-details, .manage-column.column-sources_with_invalid_output {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
 .manage-column.column-sources_with_invalid_output .error-details-toggle {
 	margin: 0;
 }
 
 .error-details-toggle {
+	float: right;
 	display: flex;
 	flex-direction: column;
 	height: 14px;
-	margin-right: 10px;
 	padding: 0;
 	background: none;
 	border: none;
@@ -145,4 +139,85 @@ details[open] .details-attributes__summary::after {
 .status-text.rejected::before {
 	background-image: url( '../images/baseline-error-blue.svg' );
 }
+.single-error-detail {
+	margin: 5px 0 5px 0;
+}
+.single-error-detail-summary:after {
+	display: inline-block;
+}
+.single-error-detail-summary strong {
+	margin-right: 10px;
+	font-size: 15px;
+}
+.single-error-detail ul.secondary-details-array .details-attributes__attr {
+	margin-left: 20px;
+}
+.single-error-detail ul.secondary-details-array .details-attributes__value {
+	margin-left: 30px;
+}
+.single-error-detail .details-attributes__value {
+	margin-left: 10px;
+}
 
+body.taxonomy-amp_validation_error .wp-list-table .new th,
+body.taxonomy-amp_validation_error .wp-list-table .new td {
+	background-color: #fef7f1;
+}
+
+body.taxonomy-amp_validation_error .wp-list-table .new th.check-column {
+	border-left: 4px solid #d54e21;
+}
+
+body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
+	margin-left: 4px;
+}
+
+.row-actions .amp_validation_error_accept > a {
+	color: #006505;
+}
+
+.row-actions .amp_validation_error_reject > a {
+	color: #a00;
+}
+
+.notice.accept-reject-error {
+	display: flex;
+}
+
+.notice.accept-reject-error > p {
+	display: inline-block;
+	font-size: 14px;
+	flex-grow: 10;
+	margin-right: 20px;
+}
+.notice.accept-reject-error > .button {
+	display: inline-block;
+	margin: 5px 5px 0 5px;
+	padding: 0 26px 2px;
+	flex-grow: 1;
+	text-align: center;
+}
+.notice.accept-reject-error > .button.accept {
+	/* @todo Add green colors */
+}
+.notice.accept-reject-error > .button.reject {
+	/* @todo Add red colors */
+}
+
+.wp-heading-inline .status-text {
+	display: inline-flex;
+	margin-left: 10px;
+	vertical-align: middle;
+}
+
+/** Details post action. */
+.details button {
+	display: inline-block;
+	background: none;
+	border: none;
+	padding: 0;
+	text-align: left;
+	color: #0073aa;
+	cursor: pointer;
+	text-decoration: underline;
+}

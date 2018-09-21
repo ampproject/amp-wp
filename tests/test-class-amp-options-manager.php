@@ -95,15 +95,15 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			array(
-				'theme_support'           => 'disabled',
-				'supported_post_types'    => array( 'post' ),
-				'analytics'               => array(),
-				'force_sanitization'      => true,
-				'accept_tree_shaking'     => true,
-				'disable_admin_bar'       => false,
-				'all_templates_supported' => true,
-				'supported_templates'     => array( 'is_singular' ),
-				'enable_response_caching' => true,
+				'theme_support'            => 'disabled',
+				'supported_post_types'     => array( 'post' ),
+				'analytics'                => array(),
+				'auto_accept_sanitization' => true,
+				'accept_tree_shaking'      => true,
+				'disable_admin_bar'        => false,
+				'all_templates_supported'  => true,
+				'supported_templates'      => array( 'is_singular' ),
+				'enable_response_caching'  => true,
 			),
 			AMP_Options_Manager::get_options()
 		);
@@ -281,6 +281,37 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$error = current( $errors );
 		$this->assertEquals( 'foo_deactivation_error', $error['code'] );
 		$wp_settings_errors = array();
+	}
+
+	/**
+	 * Test for render_welcome_notice()
+	 *
+	 * @covers AMP_Options_Manager::render_welcome_notice()
+	 */
+	public function test_render_welcome_notice() {
+		// If this is not the main 'AMP Settings' page, this should not render the notice.
+		wp_set_current_user( $this->factory()->user->create() );
+		set_current_screen( 'edit.php' );
+		ob_start();
+		AMP_Options_Manager::render_welcome_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// This is the correct page, but the notice was dismissed, so it should not display.
+		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
+		$id                            = 'amp-welcome-notice-1';
+		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
+		ob_start();
+		AMP_Options_Manager::render_welcome_notice();
+		$this->assertEmpty( ob_get_clean() );
+
+		// This is the correct page, and the notice has not been dismissed, so it should display.
+		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
+		ob_start();
+		AMP_Options_Manager::render_welcome_notice();
+		$output = ob_get_clean();
+		$this->assertContains( 'elcome to the AMP for WordPress plugin v1.0', $output );
+		$this->assertContains( 'Thank you for installing! Bring the speed and features of the open source AMP project to your site, the WordPress way', $output );
+		$this->assertContains( $id, $output );
 	}
 
 	/**

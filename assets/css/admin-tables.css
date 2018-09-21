@@ -1,15 +1,19 @@
 .column-error_status .dashicons-editor-help {
 	color: #767676;
 }
+.column-sources .dashicons,
 .column-sources_with_invalid_output .dashicons {
 	margin-right: 5px;
 }
+.column-source .dashicons-admin-plugins,
 .column-sources_with_invalid_output .dashicons-admin-plugins {
 	color: #64a2e9;
 }
+.column-source .dashicons-admin-appearance,
 .column-sources_with_invalid_output .dashicons-admin-appearance {
 	color: #ebb04f;
 }
+.column-source, .dashicons-wordpress-alt,
 .column-sources_with_invalid_output .dashicons-wordpress-alt {
 	color: #92b371;
 }
@@ -40,9 +44,7 @@ td.column-found_elements_and_attributes {
 .column-error_status .dashicons-warning.rejected {
 	color: #68c6ff;
 }
-.column-sources_with_invalid_output .source {
-	margin-bottom: 10px;
-}
+.column-sources .source,
 .column-sources_with_invalid_output .source {
 	margin-bottom: 10px;
 	display: block;
