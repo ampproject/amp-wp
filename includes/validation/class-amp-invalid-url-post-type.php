@@ -1921,7 +1921,7 @@ class AMP_Invalid_URL_Post_Type {
 
 	/**
 	 * Gets the heading for the single URL page at /wp-admin/post.php.
-	 * This will be in the format of 'Errors For <page title>'.
+	 * This will be in the format of 'Errors for: <page title>'.
 	 *
 	 * @return string|null The page heading, or null.
 	 */
@@ -1953,7 +1953,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		/* translators: %s is the name of the page with the the validation error(s) */
-		return esc_html( sprintf( __( 'Errors For %s', 'amp' ), $name ) );
+		return esc_html( sprintf( __( 'Errors for: %s', 'amp' ), $name ) );
 	}
 
 	/**
