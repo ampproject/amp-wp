@@ -3,7 +3,6 @@
  */
 import domReady from '@wordpress/dom-ready';
 
-
 /**
  * Localized data
  */

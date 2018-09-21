@@ -83,7 +83,7 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 /* Error details toggle button */
 .manage-column > .toggle-button-flex-container {
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-start;
 	align-items: center;
 }
 
@@ -91,7 +91,7 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 	display: flex;
 	flex-direction: column;
 	height: 14px;
-	margin-right: 10px;
+	margin-left: auto;
 	padding: 0;
 	background: none;
 	border: none;
