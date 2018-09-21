@@ -548,8 +548,8 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			array(
 				'cb'                          => '<input type="checkbox" />',
 				'error'                       => 'Error',
-				'status'                      => 'Status',
-				'details'                     => 'Details',
+				'status'                      => 'Status<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>Status</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
+				'details'                     => 'Details<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>Details</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
 				'sources_with_invalid_output' => 'Sources',
 				'error_type'                  => 'Error Type',
 			),
