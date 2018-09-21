@@ -18,6 +18,5 @@ function sourcesPointer() {
 }
 
 domReady( () => {
-	console.log('hiuhihi')
 	sourcesPointer();
 } );
