@@ -217,7 +217,7 @@ class AMP_Invalid_URL_Post_Type {
 			array( 'common', 'amp-validation-tooltips' ),
 			AMP__VERSION
 		);
-		
+
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',
 			amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
@@ -790,13 +790,13 @@ class AMP_Invalid_URL_Post_Type {
 		return array(
 			'cb'                          => '<input type="checkbox" />',
 			'error'                       => __( 'Error', 'amp' ),
-			'status'           => sprintf(
+			'status'                      => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
 				esc_html__( 'Status', 'amp' ),
 				esc_html__( 'Status', 'amp' ),
 				esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
 			),
-			'details'          => sprintf(
+			'details'                     => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
 				esc_html__( 'Details', 'amp' ),
 				esc_html__( 'Details', 'amp' ),
