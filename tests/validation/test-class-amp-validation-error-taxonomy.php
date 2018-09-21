@@ -706,7 +706,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Test render_taxonomy_filters.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::render_taxonomy_filters()
