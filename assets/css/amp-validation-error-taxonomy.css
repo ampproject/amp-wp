@@ -26,7 +26,7 @@ th.column-status {
 }
 
 /* Details column */
-.details-attributes__summary {
+.column-details .details-attributes__summary {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -37,10 +37,12 @@ details[open] .details-attributes__summary {
 	margin-bottom: 15px;
 }
 
-.details-attributes__summary::-webkit-details-marker, .notice details > summary::-webkit-details-marker {
+.column-details .details-attributes__summary::-webkit-details-marker,
+.column-details .notice details > summary::-webkit-details-marker {
 	display: none;
 }
-.details-attributes__summary::after, .single-error-detail-summary::after {
+.details-attributes__summary::after,
+.single-error-detail-summary::after {
 	order: 99;
 	width: 12px;
 	height: 12px;
@@ -50,8 +52,29 @@ details[open] .details-attributes__summary {
 	content: "";
 }
 
-details[open] .details-attributes__summary::after, details.single-error-detail[open] .single-error-detail-summary::after {
+details[open] .details-attributes__summary::after,
+details.single-error-detail[open] .single-error-detail-summary::after {
 	transform: rotate(180deg);
+}
+
+.notice .detailed {
+	padding-left: 15px;
+}
+
+.notice .detailed details {
+	padding-bottom: 16px;
+}
+
+.notice .detailed details .detailed {
+	padding-left: 32px;
+	font-family: Consolas, Monaco, monospace;
+}
+
+.notice .detailed summary code {
+	display: inline-block;
+	min-width: 240px;
+	margin-left: 18px;
+	font-weight: 600;
 }
 
 .details-attributes__title,
@@ -77,7 +100,7 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 	margin-bottom: 5px;
 }
 .column-sources_with_invalid_output details > div {
-	padding-left: 25px;	
+	padding-left: 25px;
 }
 
 /* Error details toggle button */
@@ -100,8 +123,8 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 	transform: rotate(180deg);
 }
 
-.error-details-toggle::before,
-.error-details-toggle::after {
+.column-details .error-details-toggle::before,
+.column-details .error-details-toggle::after {
 	width: 12px;
 	height: 12px;
 	background-image: url("../images/down-triangle.svg");
@@ -125,19 +148,19 @@ details[open] .details-attributes__summary::after, details.single-error-detail[o
 }
 
 .status-text.sanitized::before {
-	background-image: url( '../images/amp-logo-icon.svg' );
+	background-image: url("../images/amp-logo-icon.svg");
 }
 
 .status-text.new::before {
-	background-image: url( '../images/baseline-error.svg' );
+	background-image: url("../images/baseline-error.svg");
 }
 
 .status-text.accepted::before {
-	background-image: url( '../images/baseline-check-circle-green.svg' );
+	background-image: url("../images/baseline-check-circle-green.svg");
 }
 
 .status-text.rejected::before {
-	background-image: url( '../images/baseline-error-blue.svg' );
+	background-image: url("../images/baseline-error-blue.svg");
 }
 .single-error-detail {
 	margin: 5px 0 5px 0;
