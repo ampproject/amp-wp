@@ -1387,7 +1387,13 @@ class AMP_Validation_Manager {
 		}
 		$backtrace = debug_backtrace( $arg ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
 		foreach ( $backtrace as $call_stack ) {
-			$called_functions[] = '{closure}' === $call_stack['function'] ? 'Closure::__invoke' : $call_stack['function'];
+			if ( '{closure}' === $call_stack['function'] ) {
+				$called_functions[] = 'Closure::__invoke';
+			} elseif ( isset( $call_stack['class'] ) ) {
+				$called_functions[] = sprintf( '%s::%s', $call_stack['class'], $call_stack['function'] );
+			} else {
+				$called_functions[] = $call_stack['function'];
+			}
 		}
 		return 0 === count( array_intersect( ob_list_handlers(), $called_functions ) );
 	}
