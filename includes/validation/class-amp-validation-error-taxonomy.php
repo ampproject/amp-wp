@@ -1882,25 +1882,37 @@ class AMP_Validation_Error_Taxonomy {
 			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<li>
 					<details open>
-						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
+						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
 						<div class="detailed">
+							<mark>
 							<?php
-							foreach ( $validation_error['node_attributes'] as $key => $value ) {
-								printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+							echo '&lt;' . esc_html( $validation_error['node_name'] );
+							if ( count( $validation_error['node_attributes'] ) > 0 ) {
+								echo ' &hellip; ';
 							}
+							echo '&gt;';
 							?>
+							</mark>
 						<div>
 					</details>
 				</li>
 			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
 				<li>
 					<details open>
-						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
+						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
 							<div class="detailed">
 							<?php
-							foreach ( $validation_error['element_attributes'] as $key => $value ) {
-								printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+							echo '&lt;' . esc_html( $validation_error['parent_name'] );
+							if ( count( $validation_error['element_attributes'] ) > 1 ) {
+								echo ' &hellip;';
 							}
+							echo '<mark>';
+							printf( ' %s="%s"', esc_html( $validation_error['node_name'] ), esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) );
+							echo '</mark>';
+							if ( count( $validation_error['element_attributes'] ) > 1 ) {
+								echo ' &hellip;';
+							}
+							echo '&gt;';
 							?>
 					</details>
 				</li>
