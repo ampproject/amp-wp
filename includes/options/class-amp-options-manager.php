@@ -124,6 +124,11 @@ class AMP_Options_Manager {
 		);
 		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
 			$options['theme_support'] = $new_options['theme_support'];
+
+			// If this option was changed, display a notice with the new template mode.
+			if ( self::get_option( 'theme_support' ) !== $new_options['theme_support'] ) {
+				add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'handle_updated_theme_support_option' ) );
+			}
 		}
 
 		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
@@ -423,5 +428,155 @@ class AMP_Options_Manager {
 			&&
 			AMP_Theme_Support::exceeded_cache_miss_threshold()
 		);
+	}
+
+	/**
+	 * Adds a message for an update of the theme support setting.
+	 */
+	public static function handle_updated_theme_support_option() {
+		$template_mode = self::get_option( 'theme_support' );
+
+		// Make sure post type support has been added for sake of amp_admin_get_preview_permalink().
+		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
+			remove_post_type_support( $post_type, amp_get_slug() );
+		}
+		AMP_Post_Type_Support::add_post_type_support();
+
+		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
+		$has_theme_support = ( 'native' === $template_mode || 'paired' === $template_mode );
+		if ( $has_theme_support ) {
+			$theme_support = current_theme_supports( 'amp' );
+			if ( ! is_array( $theme_support ) ) {
+				$theme_support = array();
+			}
+			$theme_support['paired'] = 'paired' === $template_mode;
+			add_theme_support( 'amp', $theme_support );
+		}
+
+		$url = amp_admin_get_preview_permalink();
+
+		$notice_type     = 'updated';
+		$review_messages = array();
+		if ( $url && $has_theme_support ) {
+			$validation = AMP_Validation_Manager::validate_url( $url );
+
+			if ( is_wp_error( $validation ) ) {
+				$review_messages[] = esc_html( sprintf(
+					/* translators: %1$s is the error message, %2$s is the error code */
+					__( 'However, there was an error when checking the AMP validity for your site: %1$s (code: %2$s) ', 'amp' ),
+					$validation->get_error_message(),
+					$validation->get_error_code()
+				) );
+
+				$notice_type = 'error';
+			} elseif ( is_array( $validation ) ) {
+				$new_errors      = 0;
+				$rejected_errors = 0;
+
+				$errors = wp_list_pluck( $validation['results'], 'error' );
+				foreach ( $errors as $error ) {
+					$sanitization    = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+					$is_new_rejected = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['status'];
+					if ( $is_new_rejected || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status'] ) {
+						$new_errors++;
+					}
+					if ( $is_new_rejected || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['status'] ) {
+						$rejected_errors++;
+					}
+				}
+
+				$invalid_url_post_id    = AMP_Invalid_URL_Post_Type::store_validation_errors( $errors, $url );
+				$invalid_url_screen_url = ! is_wp_error( $invalid_url_post_id ) ? get_edit_post_link( $invalid_url_post_id, 'raw' ) : null;
+
+				if ( $rejected_errors > 0 ) {
+					$notice_type = 'error';
+
+					$message = wp_kses_post(
+						sprintf(
+							/* translators: %s is count of rejected errors */
+							_n(
+								'However, AMP is not yet available due to %s validation error (for one URL at least).',
+								'However, AMP is not yet available due to %s validation errors (for one URL at least).',
+								number_format_i18n( $rejected_errors ),
+								'amp'
+							),
+							$rejected_errors,
+							esc_url( $invalid_url_screen_url )
+						)
+					);
+
+					if ( $invalid_url_screen_url ) {
+						$message .= ' ' . wp_kses_post(
+							sprintf(
+								/* translators: %s is URL to review issues */
+								_n(
+									'<a href="%s">Review Issue</a>.',
+									'<a href="%s">Review Issues</a>.',
+									$rejected_errors,
+									'amp'
+								),
+								esc_url( $invalid_url_screen_url )
+							)
+						);
+					}
+
+					$review_messages[] = $message;
+				} else {
+					$message = wp_kses_post(
+						sprintf(
+							/* translators: %s is an AMP URL */
+							__( 'View an <a href="%s">AMP version of your site</a>.', 'amp' ),
+							esc_url( $url )
+						)
+					);
+
+					if ( $new_errors > 0 && $invalid_url_screen_url ) {
+						$message .= ' ' . wp_kses_post(
+							sprintf(
+								/* translators: %1$s is URL to review issues, %2$s is count of new errors */
+								_n(
+									'Please also <a href="%1$s">review %2$s issue</a> which may need to be fixed (for one URL at least).',
+									'Please also <a href="%1$s">review %2$s issues</a> which may need to be fixed (for one URL at least).',
+									$new_errors,
+									'amp'
+								),
+								esc_url( $invalid_url_screen_url ),
+								number_format_i18n( $new_errors )
+							)
+						);
+					}
+
+					$review_messages[] = $message;
+				}
+			}
+		}
+
+		switch ( $template_mode ) {
+			case 'native':
+				$message = esc_html__( 'Native mode activated!', 'amp' );
+				if ( $review_messages ) {
+					$message .= ' ' . join( ' ', $review_messages );
+				}
+				break;
+			case 'paired':
+				$message = esc_html__( 'Paired mode activated!', 'amp' );
+				if ( $review_messages ) {
+					$message .= ' ' . join( ' ', $review_messages );
+				}
+				break;
+			case 'disabled':
+				$message = wp_kses_post(
+					sprintf(
+						/* translators: %s is an AMP URL */
+						__( 'Classic mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Native or Paired mode.', 'amp' ),
+						esc_url( $url )
+					)
+				);
+				break;
+		}
+
+		if ( isset( $message ) ) {
+			add_settings_error( self::OPTION_NAME, 'template_mode_updated', $message, $notice_type );
+		}
 	}
 }
